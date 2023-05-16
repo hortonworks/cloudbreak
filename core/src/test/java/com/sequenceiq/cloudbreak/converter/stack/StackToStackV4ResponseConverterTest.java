@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.converter.v4.recipes.RecipeToRecipeV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.CloudbreakDetailsToCloudbreakDetailsV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.ImageToStackImageV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.ResourceToResourceV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackTagsToTagsV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToPlacementSettingsV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
@@ -83,6 +84,7 @@ import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class StackToStackV4ResponseConverterTest extends AbstractEntityConverterTest<Stack> {
@@ -155,6 +157,11 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
 
     @Mock
     private HostGroupService hostGroupService;
+
+    @Mock
+    private ResourceToResourceV4ResponseConverter resourceToResourceV4ResponseConverter;
+
+    private CredentialResponse credentialResponse;
 
     @BeforeEach
     public void setUp() throws CloudbreakImageNotFoundException {

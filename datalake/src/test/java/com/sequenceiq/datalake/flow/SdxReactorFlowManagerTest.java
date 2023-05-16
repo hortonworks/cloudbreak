@@ -11,7 +11,9 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyMap;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,6 +28,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
@@ -44,6 +47,7 @@ import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.modifyproxy.ModifyProxyConfigTrackerEvent;
+import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -263,5 +267,17 @@ class SdxReactorFlowManagerTest {
         verify(eventFactory).createEventWithErrHandler(anyMap(), argumentCaptor.capture());
         DatalakeResizeFlowChainStartEvent resizeEvent = (DatalakeResizeFlowChainStartEvent) argumentCaptor.getValue();
         assertEquals("CORRECT_LOCATION", resizeEvent.getBackupLocation());
+    }
+
+    @Test
+    public void testTriggerDatalakeDiskUpdate() {
+        ArgumentCaptor<DatalakeDiskUpdateEvent> captor = ArgumentCaptor.forClass(DatalakeDiskUpdateEvent.class);
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        doReturn("TEST").when(sdxCluster).getClusterName();
+        DiskUpdateRequest updateRequest = mock(DiskUpdateRequest.class);
+
+        underTest.triggerDatalakeDiskUpdate(sdxCluster, updateRequest, USER_CRN);
+        verify(eventFactory).createEventWithErrHandler(anyMap(), captor.capture());
+        assertEquals("TEST", captor.getValue().getClusterName());
     }
 }

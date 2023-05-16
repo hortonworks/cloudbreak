@@ -29,6 +29,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GENERATE_IMAGE_CATALOG;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GET_BY_CRN_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GET_BY_NAME_IN_WORKSPACE;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GET_BY_NAME_WITH_RESOURCES_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GET_STACK_REQUEST_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GET_STATUS_BY_NAME;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GET_USED_SUBNETS_BY_ENVIRONMENT_CRN;
@@ -169,6 +170,14 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = GET_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "getStackInWorkspaceV4")
     StackV4Response get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @QueryParam("entries") Set<String> entries,
+            @AccountId @QueryParam("accountId") String accountId);
+
+    @GET
+    @Path("{name}/withResources")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = GET_BY_NAME_WITH_RESOURCES_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "getStackInWorkspaceV4WithResources")
+    StackV4Response getWithResources(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @QueryParam("entries") Set<String> entries,
             @AccountId @QueryParam("accountId") String accountId);
 
     @GET

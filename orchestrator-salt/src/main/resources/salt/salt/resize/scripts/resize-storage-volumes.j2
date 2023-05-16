@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+set -ex
+
+source /opt/salt/scripts/format-and-mount-common.sh
+
+LOG_FILE="/var/log/resize-storage-volumes.log"
+
+extend_partition() {
+  device=$1
+  LOG_FILE=$2
+  STR=$(cat /etc/os-release)
+  SUB="VERSION_ID=\"2\""
+  # Expand the size of the file system.
+  # Check if we're on AL2
+  if [[ "$STR" == *"$SUB"* ]]
+  then
+    log $LOG_FILE "resizing disk for filesystem: xfs_growfs"
+    xfs_growfs -d / || log $LOG_FILE xfs_growfs indicates that there is no need for growing disk on $device
+  else
+    log $LOG_FILE "resizing disk for filesystem: resize2fs"
+    resize2fs $device || log $LOG_FILE resize2fs indicates that there is no need for growing disk on $device
+  fi
+}
+
+grow_disk() {
+  device=$1
+  LOG_FILE=$2
+  if [[ -e "$device" && $(readlink -f /dev/xvda) = "$device" ]]
+    then
+      # Rewrite the partition table so that the partition takes up all the space that it can.
+      log $LOG_FILE "resizing disk for non-NVMe filesystem"
+      extend_partition $device $LOG_FILE
+    else
+      # Rewrite the partition table so that the partition takes up all the space that it can.
+      log $LOG_FILE "resizing disk for NVMe filesystem"
+      extend_partition $device $LOG_FILE
+    fi
+}
+
+main() {
+  device_names=$(blkid | grep -i /dev | cut -d ':' -f 1)
+  root_disk=$(get_root_disk)
+
+  for device in $device_names; do
+    # Check if growpart is required
+    if [[ $device =~ $root_disk ]]; then
+      device=$root_disk
+      if growpart -N $device 1 ; then
+        # Check if we're on an NVMe filesystem
+        grow_disk $device $LOG_FILE
+      else
+        log $LOG_FILE Growpart indicates that there is no need for growing root partition
+      fi
+    else
+      grow_disk $device $LOG_FILE
+    fi
+
+  done
+}
+
+[[ "$0" == "$BASH_SOURCE" ]] && main "$@"

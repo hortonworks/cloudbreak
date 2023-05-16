@@ -44,6 +44,8 @@ public class PlatformParametersConsts {
 
     public static final String DELETE_VOLUMES_SUPPORTED = "deleteVolumesSupported";
 
+    public static final String DISK_TYPE_CHANGE_SUPPORTED = "diskTypeChangeSupported";
+
     private PlatformParametersConsts() {
 
     }

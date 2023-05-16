@@ -30,6 +30,7 @@ import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
@@ -509,6 +510,22 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DATALAKE_HORIZONTAL_SCALING)
     public FlowIdentifier horizontalScaleByName(@ResourceName String name, @Valid DatalakeHorizontalScaleRequest scaleRequest) {
         return sdxHorizontalScalingService.horizontalScaleDatalake(name, scaleRequest);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DATALAKE_VERTICAL_SCALING)
+    public FlowIdentifier diskUpdateByName(@ResourceName String name, DiskUpdateRequest updateRequest) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = getSdxClusterByName(name);
+        return verticalScaleService.updateDisksDatalake(sdxCluster, updateRequest, userCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATALAKE_VERTICAL_SCALING)
+    public FlowIdentifier diskUpdateByCrn(@ResourceCrn @TenantAwareParam String crn, DiskUpdateRequest updateRequest) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = getSdxClusterByCrn(crn);
+        return verticalScaleService.updateDisksDatalake(sdxCluster, updateRequest, userCrn);
     }
 
     private SdxCluster getSdxClusterByName(String name) {

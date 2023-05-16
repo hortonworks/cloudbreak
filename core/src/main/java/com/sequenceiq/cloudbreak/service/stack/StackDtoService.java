@@ -99,11 +99,11 @@ public class StackDtoService {
     private StackParametersRepository stackParametersRepository;
 
     public StackDto getByNameOrCrn(NameOrCrn nameOrCrn, String accountId, StackType stackType,
-            ShowTerminatedClusterConfigService.ShowTerminatedClustersAfterConfig config) {
+            ShowTerminatedClusterConfigService.ShowTerminatedClustersAfterConfig config, boolean withResources) {
         StackView stackView = nameOrCrn.hasName() ?
                 getByName(accountId, nameOrCrn.getName(), stackType, config) :
                 getByCrn(nameOrCrn.getCrn(), stackType, config);
-        return getStackProxy(stackView, false);
+        return getStackProxy(stackView, withResources);
     }
 
     public StackDto getByNameOrCrn(NameOrCrn nameOrCrn, String accountId) {

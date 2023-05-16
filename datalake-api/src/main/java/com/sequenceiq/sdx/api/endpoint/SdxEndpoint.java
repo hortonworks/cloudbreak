@@ -26,6 +26,7 @@ import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
@@ -382,4 +383,20 @@ public interface SdxEndpoint {
     @ApiOperation(value = "Initiates the horizontal scaling on Data Lake", produces = MediaType.APPLICATION_JSON,
             nickname = "horizontalScaleByName")
     FlowIdentifier horizontalScaleByName(@PathParam("name") String name, @Valid DatalakeHorizontalScaleRequest scaleRequest);
+
+    @POST
+    @Path("/name/{name}/disk_update")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Updates disk type and/ resizes DL", produces = MediaType.APPLICATION_JSON,
+            nickname = "diskUpdateByName")
+    FlowIdentifier diskUpdateByName(@PathParam("name") String name, @Valid DiskUpdateRequest updateRequest);
+
+    @POST
+    @Path("/crn/{crn}/disk_update")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Updates disk type and/ resizes DL", produces = MediaType.APPLICATION_JSON,
+            nickname = "diskUpdateByCrn")
+    FlowIdentifier diskUpdateByCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.DATALAKE) @PathParam("crn") String crn, @Valid DiskUpdateRequest updateRequest);
+
 }

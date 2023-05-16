@@ -89,4 +89,6 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
     boolean deleteByResourceReferenceAndType(@Param("resourceReference") String resourceReference, @Param("type") ResourceType type);
 
     List<Resource> findAllByStackIdAndResourceTypeIn(Long stackId, Collection<ResourceType> resourceTypes);
+
+    List<Resource> findAllByStackIdAndInstanceGroupAndResourceTypeIn(Long stackId, String instanceGroup, Collection<ResourceType> resourceTypes);
 }

@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
@@ -40,9 +41,11 @@ import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
@@ -75,6 +78,8 @@ import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmStackEvent;
 import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerEvent;
+import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateEvent;
+import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateStateSelectors;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.settings.SdxRepairSettings;
@@ -356,5 +361,24 @@ public class SdxReactorFlowManager {
         String selector = EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class);
         return notify(selector, new SecretRotationFlowChainTriggerEvent(selector, sdxCluster.getId(), sdxCluster.getResourceCrn(), secretTypes, executionType),
                 sdxCluster.getClusterName(), ThreadBasedUserCrnProvider.getUserCrn());
+    }
+
+    public FlowIdentifier triggerDatalakeDiskUpdate(SdxCluster sdxCluster, DiskUpdateRequest updateRequest, String userCrn) {
+        MDCBuilder.buildMdcContext(sdxCluster);
+        LOGGER.info("Vertical Scale flow triggered for datalake {}", sdxCluster.getName());
+        DatalakeDiskUpdateEvent datalakeDiskUpdateTriggerEvent = DatalakeDiskUpdateEvent.builder()
+                .withAccepted(new Promise<>())
+                .withResourceCrn(sdxCluster.getResourceCrn())
+                .withResourceId(sdxCluster.getId())
+                .withResourceName(sdxCluster.getName())
+                .withDatalakeDiskUpdateRequest(updateRequest)
+                .withStackCrn(sdxCluster.getStackCrn())
+                .withClusterName(sdxCluster.getClusterName())
+                .withAccountId(sdxCluster.getAccountId())
+                .withSelector(DatalakeDiskUpdateStateSelectors.DATALAKE_DISK_UPDATE_VALIDATION_EVENT.selector())
+                .build();
+        LOGGER.debug("Disk Update flow trigger event sent for datalake {}", sdxCluster.getName());
+        return notify(DatalakeDiskUpdateStateSelectors.DATALAKE_DISK_UPDATE_VALIDATION_EVENT.selector(), datalakeDiskUpdateTriggerEvent,
+                sdxCluster.getClusterName(), userCrn);
     }
 }

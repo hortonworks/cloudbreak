@@ -618,7 +618,6 @@ public enum ResourceEvent {
     DATALAKE_HORIZONTAL_SCALE_IN_PROGRESS("datalake.horizontalscale.in.progress"),
     DATALAKE_HORIZONTAL_SCALE_FINISHED("datalake.horizontalscale.finished"),
     DATALAKE_HORIZONTAL_SCALE_FAILED("datalake.horizontalscale.failed"),
-
     SECRET_ROTATION_IN_PROGRESS("secret.rotation.in.progress"),
     SECRET_ROTATION_FINISHED("secret.rotation.finished"),
     SECRET_ROTATION_FAILED("secret.rotation.failed"),
@@ -629,6 +628,16 @@ public enum ResourceEvent {
     SECRET_ROTATION_FINALIZE_FINISHED("secret.rotation.finalize.finished"),
     SECRET_ROTATION_FINALIZE_FAILED("secret.rotation.finalize.failed"),
     SECRET_ROTATION_STEP("secret.rotation.step"),
+    DATALAKE_DISK_UPDATE_VALIDATION_IN_PROGRESS("datalake.disk.update.validation.in.progress"),
+    DATALAKE_DISK_UPDATE_VALIDATION_FAILED("datalake.disk.update.validation.failed"),
+    DATALAKE_DISK_UPDATE_IN_PROGRESS("datalake.disk.update.datalake.in.progress"),
+    DATALAKE_DISK_UPDATE_FAILED("datalake.disk.update.failed"),
+    DATALAKE_SECRET_ROTATION_IN_PROGRESS("secret.rotation.in.progress"),
+    DATALAKE_SECRET_ROTATION_FINISHED("secret.rotation.finished"),
+    DATALAKE_SECRET_ROTATION_FAILED("secret.rotation.failed"),
+    DISK_RESIZE_FAILED("cluster.disk.resize.failed"),
+    DISK_RESIZE_STARTED("cluster.disk.resize.started"),
+    DISK_RESIZE_COMPLETE("cluster.disk.resize.complete"),
 
     // deprecated
     STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.skipped"),

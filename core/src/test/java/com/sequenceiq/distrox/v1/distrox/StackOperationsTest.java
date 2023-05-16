@@ -148,27 +148,27 @@ public class StackOperationsTest {
     void testGetWhenNameOrCrnNameFilledThenProperGetCalled() {
         StackV4Response expected = stackResponse();
         NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
-        when(stackCommonService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE))
+        when(stackCommonService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE, false))
                 .thenReturn(expected);
 
-        StackV4Response result = underTest.get(nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE);
+        StackV4Response result = underTest.get(nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE, false);
 
         assertEquals(expected, result);
-        verify(stackCommonService, times(1)).findStackByNameOrCrnAndWorkspaceId(nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE);
+        verify(stackCommonService, times(1)).findStackByNameOrCrnAndWorkspaceId(nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE, false);
     }
 
     @Test
     void testGetWhenNameOrCrnCrnFilledThenProperGetCalled() {
         StackV4Response expected = stackResponse();
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(stack.getResourceCrn());
-        when(stackCommonService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE))
+        when(stackCommonService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE, false))
                 .thenReturn(expected);
 
-        StackV4Response result = underTest.get(nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE);
+        StackV4Response result = underTest.get(nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE, false);
 
         assertEquals(expected, result);
         verify(stackCommonService, times(1)).findStackByNameOrCrnAndWorkspaceId(
-                nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE);
+                nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE, false);
     }
 
     @Test

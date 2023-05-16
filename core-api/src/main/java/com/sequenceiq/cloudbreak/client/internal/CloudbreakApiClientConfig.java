@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.progress.ProgressV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DiskUpdateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoint;
 import com.sequenceiq.cloudbreak.client.ApiClientRequestFilter;
@@ -127,6 +128,12 @@ public class CloudbreakApiClientConfig {
     @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
     DatalakeV4Endpoint datalakeV4Endpoint(WebTarget cloudbreakApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, DatalakeV4Endpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
+    DiskUpdateEndpoint diskUpdateEndpoint(WebTarget cloudbreakApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, DiskUpdateEndpoint.class);
     }
 
     @Bean

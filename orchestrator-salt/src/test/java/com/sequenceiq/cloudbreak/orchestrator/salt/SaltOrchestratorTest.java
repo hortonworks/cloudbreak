@@ -995,4 +995,23 @@ class SaltOrchestratorTest {
 
         verify(saltStateService).ping(any(), any());
     }
+
+    @Test
+    void testResizeDisksOnNodes() throws Exception {
+        when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class)))
+                .thenReturn(callable);
+        saltOrchestrator.resizeDisksOnNodes(Collections.singletonList(gatewayConfig), targets, targets, exitCriteriaModel);
+        verify(callable, times(1)).call();
+    }
+
+    @Test
+    void testResizeDisksOnNodesShouldThrowException() throws Exception {
+        when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class)))
+                .thenReturn(callable);
+        when(callable.call()).thenThrow(new CloudbreakOrchestratorFailedException("TEST SALT RUNNER EXCEPTION"));
+        CloudbreakOrchestratorFailedException ex = assertThrows(CloudbreakOrchestratorFailedException.class, () ->
+                saltOrchestrator.resizeDisksOnNodes(Collections.singletonList(gatewayConfig), targets, targets, exitCriteriaModel));
+
+        assertEquals("TEST SALT RUNNER EXCEPTION", ex.getMessage());
+    }
 }

@@ -3,6 +3,7 @@ tests:
   - name: "aws_longrunning_e2e_tests"
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXDeleteVolumesTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpdateDiskTypeTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeRecoveryTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.EnvironmentStopStartTests

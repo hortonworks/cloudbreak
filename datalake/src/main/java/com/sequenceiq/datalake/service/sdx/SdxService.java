@@ -242,6 +242,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     @Inject
     private SdxDatabaseRepository sdxDatabaseRepository;
 
+    @Inject
+    private CloudbreakPoller cloudbreakPoller;
+
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
 
