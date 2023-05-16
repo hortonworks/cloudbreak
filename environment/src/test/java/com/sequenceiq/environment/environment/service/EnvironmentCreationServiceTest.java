@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.service;
 
-
 import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
 import static com.sequenceiq.cloudbreak.util.TestConstants.CRN;
 import static com.sequenceiq.cloudbreak.util.TestConstants.USER;
@@ -34,10 +33,8 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -68,7 +65,6 @@ import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = "environment.tunnel.ccm.validate.entitlement=true")
 class EnvironmentCreationServiceTest {
 
     private static final int FREE_IPA_INSTANCE_COUNT_BY_GROUP = 2;
@@ -93,9 +89,6 @@ class EnvironmentCreationServiceTest {
 
     @MockBean
     private ParametersService parametersService;
-
-    @MockBean
-    private EntitlementService entitlementService;
 
     @MockBean
     private NetworkService networkService;
@@ -144,60 +137,30 @@ class EnvironmentCreationServiceTest {
     // CHECKSTYLE:OFF
     static Object[][] tunnelingScenarios() {
         return new Object[][] {
-                // tunnel                 override  CCMv2Enabled CCMv2JumpgateEnabled  valid  expectedTunnel  expectedThrowable  errorMessage
-                { Tunnel.DIRECT,          false,    false,       false,                true,  Tunnel.DIRECT,          null,              null },
-                { Tunnel.DIRECT,          false,    false,       true,                 true,  Tunnel.DIRECT,          null,              null },
-                { Tunnel.DIRECT,          false,    true,        false,                true,  Tunnel.DIRECT,          null,              null },
-                { Tunnel.DIRECT,          false,    true,        true,                 true,  Tunnel.DIRECT,          null,              null },
-                { Tunnel.DIRECT,          true,     false,       false,                true,  Tunnel.DIRECT,          null,              null },
-                { Tunnel.DIRECT,          true,     false,       true,                 true,  Tunnel.DIRECT,          null,              null },
-                { Tunnel.DIRECT,          true,     true,        false,                true,  Tunnel.DIRECT,          null,              null },
-                { Tunnel.DIRECT,          true,     true,        true,                 true,  Tunnel.DIRECT,          null,              null },
+                // tunnel                 override  valid  expectedTunnel  expectedThrowable  errorMessage
+                { Tunnel.DIRECT,          false,    true,  Tunnel.DIRECT,          null,              null },
+                { Tunnel.DIRECT,          true,     true,  Tunnel.DIRECT,          null,              null },
 
-                { Tunnel.CLUSTER_PROXY,   false,    false,       false,                true,  Tunnel.CLUSTER_PROXY,   null,              null },
-                { Tunnel.CLUSTER_PROXY,   false,    false,       true,                 true,  Tunnel.CLUSTER_PROXY,   null,              null },
-                { Tunnel.CLUSTER_PROXY,   false,    true,        false,                true,  Tunnel.CLUSTER_PROXY,   null,              null },
-                { Tunnel.CLUSTER_PROXY,   false,    true,        true,                 true,  Tunnel.CLUSTER_PROXY,   null,              null },
-                { Tunnel.CLUSTER_PROXY,   true,     false,       false,                true,  Tunnel.CLUSTER_PROXY,   null,              null },
-                { Tunnel.CLUSTER_PROXY,   true,     false,       true,                 true,  Tunnel.CLUSTER_PROXY,   null,              null },
-                { Tunnel.CLUSTER_PROXY,   true,     true,        false,                true,  Tunnel.CLUSTER_PROXY,   null,              null },
-                { Tunnel.CLUSTER_PROXY,   true,     true,        true,                 true,  Tunnel.CLUSTER_PROXY,   null,              null },
+                { Tunnel.CLUSTER_PROXY,   false,    true,  Tunnel.CLUSTER_PROXY,   null,              null },
+                { Tunnel.CLUSTER_PROXY,   true,     true,  Tunnel.CLUSTER_PROXY,   null,              null },
 
-                { Tunnel.CCM,             false,    false,       false,                true,  Tunnel.CCM,             null,              null },
-                { Tunnel.CCM,             false,    false,       true,                 true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
-                { Tunnel.CCM,             false,    true,        false,                true,  Tunnel.CCMV2,           null,              null },
-                { Tunnel.CCM,             false,    true,        true,                 true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
-                { Tunnel.CCM,             true,     false,       false,                true,  Tunnel.CCM,             null,              null },
-                { Tunnel.CCM,             true,     false,       true,                 true,  Tunnel.CCM,             null,              null },
-                { Tunnel.CCM,             true,     true,        false,                true,  Tunnel.CCM,             null,              null },
-                { Tunnel.CCM,             true,     true,        true,                 true,  Tunnel.CCM,             null,              null },
+                { Tunnel.CCM,             false,    true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
+                { Tunnel.CCM,             true,     true,  Tunnel.CCM,             null,              null },
 
-                { Tunnel.CCMV2,           false,    false,       false,                false, null,                   BadRequestException.class, "CCMV2 not enabled for account." },
-                { Tunnel.CCMV2,           false,    false,       true,                 false, null,                   BadRequestException.class, "CCMV2 not enabled for account." },
-                { Tunnel.CCMV2,           false,    true,        false,                true,  Tunnel.CCMV2,           null,              null },
-                { Tunnel.CCMV2,           false,    true,        true,                 true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
-                { Tunnel.CCMV2,           true,     false,       false,                false, null,                   BadRequestException.class, "CCMV2 not enabled for account." },
-                { Tunnel.CCMV2,           true,     false,       true,                 false, null,                   BadRequestException.class, "CCMV2 not enabled for account." },
-                { Tunnel.CCMV2,           true,     true,        false,                true,  Tunnel.CCMV2,           null,              null },
-                { Tunnel.CCMV2,           true,     true,        true,                 true,  Tunnel.CCMV2,           null,              null },
+                { Tunnel.CCMV2,           false,    true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
+                { Tunnel.CCMV2,           true,     true,  Tunnel.CCMV2,           null,              null },
 
-                { Tunnel.CCMV2_JUMPGATE,  false,    false,       false,                false, null,                   BadRequestException.class, "CCMV2 Jumpgate not enabled for account." },
-                { Tunnel.CCMV2_JUMPGATE,  false,    false,       true,                 true , Tunnel.CCMV2_JUMPGATE,  null,              null },
-                { Tunnel.CCMV2_JUMPGATE,  false,    true,        false,                false, null,                   BadRequestException.class, "CCMV2 Jumpgate not enabled for account." },
-                { Tunnel.CCMV2_JUMPGATE,  false,    true,        true,                 true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
-                { Tunnel.CCMV2_JUMPGATE,  true,     false,       false,                false, null,                   BadRequestException.class, "CCMV2 Jumpgate not enabled for account." },
-                { Tunnel.CCMV2_JUMPGATE,  true,     false,       true,                 true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
-                { Tunnel.CCMV2_JUMPGATE,  true,     true,        false,                false, null,                   BadRequestException.class, "CCMV2 Jumpgate not enabled for account." },
-                { Tunnel.CCMV2_JUMPGATE,  true,     true,        true,                 true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
+                { Tunnel.CCMV2_JUMPGATE,  false,    true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
+                { Tunnel.CCMV2_JUMPGATE,  true,     true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
         };
     }
     // CHECKSTYLE:ON
     // @formatter:on
 
-    @ParameterizedTest(name = "Tunnel = {0}, Override = {1}, CCMv2Entitled = {2}, CMv2JumpgateEntitled = {3}, Valid = {4}")
+    @ParameterizedTest(name = "Tunnel = {0}, Override = {1}, Valid = {2}")
     @MethodSource("tunnelingScenarios")
-    void testCreateForCcmV2TunnelInitialization(Tunnel tunnel, boolean override, boolean ccmV2Entitled, boolean ccmv2JumpgateEntitled,
-            boolean valid, Tunnel expectedTunnel, Class<? extends Throwable> expectedThrowable, String errorMessage) {
+    void testCreateForCcmV2TunnelInitialization(Tunnel tunnel, boolean override, boolean valid, Tunnel expectedTunnel,
+            Class<? extends Throwable> expectedThrowable, String errorMessage) {
         EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME).withAccountId(ACCOUNT_ID).withAuthentication(AuthenticationDto.builder().build())
                 .build();
@@ -217,8 +180,6 @@ class EnvironmentCreationServiceTest {
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(any())).thenReturn(getCloudRegions());
         when(environmentService.save(any(Environment.class))).thenReturn(environment);
-        when(entitlementService.ccmV2Enabled(ACCOUNT_ID)).thenReturn(ccmV2Entitled);
-        when(entitlementService.ccmV2JumpgateEnabled(ACCOUNT_ID)).thenReturn(ccmv2JumpgateEntitled);
 
         if (valid) {
             environmentCreationServiceUnderTest.create(environmentCreationDto);

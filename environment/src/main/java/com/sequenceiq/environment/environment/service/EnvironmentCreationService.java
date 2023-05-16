@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -60,8 +59,6 @@ public class EnvironmentCreationService {
 
     private final ParametersService parametersService;
 
-    private final EntitlementService entitlementService;
-
     private final LoadBalancerEntitlementService loadBalancerEntitlementService;
 
     private final EnvironmentRecipeService recipeService;
@@ -77,7 +74,6 @@ public class EnvironmentCreationService {
             EnvironmentReactorFlowManager reactorFlowManager,
             AuthenticationDtoConverter authenticationDtoConverter,
             ParametersService parametersService,
-            EntitlementService entitlementService,
             LoadBalancerEntitlementService loadBalancerEntitlementService,
             EnvironmentRecipeService recipeService) {
         this.environmentService = environmentService;
@@ -87,7 +83,6 @@ public class EnvironmentCreationService {
         this.reactorFlowManager = reactorFlowManager;
         this.authenticationDtoConverter = authenticationDtoConverter;
         this.parametersService = parametersService;
-        this.entitlementService = entitlementService;
         this.loadBalancerEntitlementService = loadBalancerEntitlementService;
         this.recipeService = recipeService;
     }
@@ -163,30 +158,14 @@ public class EnvironmentCreationService {
         ExperimentalFeatures experimentalFeatures = environment.getExperimentalFeaturesJson();
         Tunnel tunnel = experimentalFeatures.getTunnel();
         boolean overrideTunnel = experimentalFeatures.isOverrideTunnel();
-        boolean ccmV2Enabled = entitlementService.ccmV2Enabled(environment.getAccountId());
-        boolean ccmV2JumpgateEnabled = entitlementService.ccmV2JumpgateEnabled(environment.getAccountId());
-        checkCcmEntitlements(tunnel, ccmV2Enabled, ccmV2JumpgateEnabled);
         if (!overrideTunnel) {
             if (Tunnel.CCM == tunnel || Tunnel.CCMV2 == tunnel) {
-                if (ccmV2JumpgateEnabled) {
-                    tunnel = Tunnel.CCMV2_JUMPGATE;
-                } else if (ccmV2Enabled) {
-                    tunnel = Tunnel.CCMV2;
-                }
+                tunnel = Tunnel.CCMV2_JUMPGATE;
                 experimentalFeatures.setTunnel(tunnel);
                 environment.setExperimentalFeaturesJson(experimentalFeatures);
             }
         }
         LOGGER.info("Environment is initialized with [{}] tunnel.", tunnel);
-    }
-
-    private void checkCcmEntitlements(Tunnel tunnel, boolean ccmV2Enabled, boolean ccmV2JumpgateEnabled) {
-        if (Tunnel.CCMV2_JUMPGATE == tunnel && !ccmV2JumpgateEnabled) {
-            throw new BadRequestException("CCMV2 Jumpgate not enabled for account.");
-        }
-        if (Tunnel.CCMV2 == tunnel && !ccmV2Enabled) {
-            throw new BadRequestException("CCMV2 not enabled for account.");
-        }
     }
 
     private void createAndSetParameters(Environment environment, ParametersDto parameters) {

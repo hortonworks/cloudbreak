@@ -67,21 +67,6 @@ class EntitlementServiceTest {
                 {"LOCAL_DEV", (EntitlementCheckFunction) EntitlementService::localDevelopment, false},
                 {"LOCAL_DEV", (EntitlementCheckFunction) EntitlementService::localDevelopment, true},
 
-                {"CDP_CCM_V2", (EntitlementCheckFunction) EntitlementService::ccmV2Enabled, false},
-                {"CDP_CCM_V2", (EntitlementCheckFunction) EntitlementService::ccmV2Enabled, true},
-
-                {"CDP_CCM_V2_JUMPGATE", (EntitlementCheckFunction) EntitlementService::ccmV2JumpgateEnabled, false},
-                {"CDP_CCM_V2_JUMPGATE", (EntitlementCheckFunction) EntitlementService::ccmV2JumpgateEnabled, true},
-
-                {"CDP_CCM_V2_USE_ONE_WAY_TLS", (EntitlementCheckFunction) EntitlementService::ccmV2UseOneWayTls, false},
-                {"CDP_CCM_V2_USE_ONE_WAY_TLS", (EntitlementCheckFunction) EntitlementService::ccmV2UseOneWayTls, true},
-
-                {"CDP_CCM_V1_TO_V2_JUMPGATE_UPGRADE", (EntitlementCheckFunction) EntitlementService::ccmV1ToV2JumpgateUpgradeEnabled, false},
-                {"CDP_CCM_V1_TO_V2_JUMPGATE_UPGRADE", (EntitlementCheckFunction) EntitlementService::ccmV1ToV2JumpgateUpgradeEnabled, true},
-
-                {"CDP_CCM_V2_TO_V2_JUMPGATE_UPGRADE", (EntitlementCheckFunction) EntitlementService::ccmV2ToV2JumpgateUpgradeEnabled, false},
-                {"CDP_CCM_V2_TO_V2_JUMPGATE_UPGRADE", (EntitlementCheckFunction) EntitlementService::ccmV2ToV2JumpgateUpgradeEnabled, true},
-
                 {"CDP_CLOUD_IDENTITY_MAPPING", (EntitlementCheckFunction) EntitlementService::cloudIdentityMappingEnabled, false},
                 {"CDP_CLOUD_IDENTITY_MAPPING", (EntitlementCheckFunction) EntitlementService::cloudIdentityMappingEnabled, true},
 

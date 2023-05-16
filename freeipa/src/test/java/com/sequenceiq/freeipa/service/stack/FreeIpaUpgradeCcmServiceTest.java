@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -25,7 +24,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -54,9 +52,6 @@ class FreeIpaUpgradeCcmServiceTest {
     private static final long STACK_ID = 12L;
 
     @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
     private FreeIpaFlowManager flowManager;
 
     @Mock
@@ -79,8 +74,6 @@ class FreeIpaUpgradeCcmServiceTest {
     @BeforeEach
     void setUp() {
         operationStatus = new OperationStatus();
-        lenient().when(entitlementService.ccmV1ToV2JumpgateUpgradeEnabled(any())).thenReturn(true);
-        lenient().when(entitlementService.ccmV2ToV2JumpgateUpgradeEnabled(any())).thenReturn(true);
     }
 
     @Test
@@ -120,28 +113,6 @@ class FreeIpaUpgradeCcmServiceTest {
 
         OperationStatus operationStatus = underTest.upgradeCcm(ENVIRONMENT_CRN, ACCOUNT_ID);
         assertThat(operationStatus.getStatus()).isEqualTo(OperationState.COMPLETED);
-    }
-
-    @Test
-    void upgradeCcmTestWhenNotEntitledFromCCMv1() {
-        Stack stack = createStack(Status.AVAILABLE);
-        stack.setTunnel(Tunnel.CCM);
-        lenient().when(entitlementService.ccmV1ToV2JumpgateUpgradeEnabled(any())).thenReturn(false);
-
-        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
-
-        assertThatThrownBy(() -> underTest.upgradeCcm(ENVIRONMENT_CRN, ACCOUNT_ID)).isInstanceOf(BadRequestException.class);
-    }
-
-    @Test
-    void upgradeCcmTestWhenNotEntitledFromCCMv2() {
-        Stack stack = createStack(Status.AVAILABLE);
-        stack.setTunnel(Tunnel.CCMV2);
-        lenient().when(entitlementService.ccmV2ToV2JumpgateUpgradeEnabled(any())).thenReturn(false);
-
-        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
-
-        assertThatThrownBy(() -> underTest.upgradeCcm(ENVIRONMENT_CRN, ACCOUNT_ID)).isInstanceOf(BadRequestException.class);
     }
 
     @Test
