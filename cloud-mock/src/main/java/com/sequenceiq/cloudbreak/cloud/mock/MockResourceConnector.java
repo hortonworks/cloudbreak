@@ -296,6 +296,11 @@ public class MockResourceConnector implements ResourceConnector {
     }
 
     @Override
+    public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+
+    @Override
     public void startDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
         mockUrlFactory.get(authenticatedContext, "/db").put(Entity.entity(Boolean.TRUE, MediaType.APPLICATION_JSON_TYPE));
     }

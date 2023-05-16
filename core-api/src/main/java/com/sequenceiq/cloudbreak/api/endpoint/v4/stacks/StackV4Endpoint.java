@@ -172,6 +172,14 @@ public interface StackV4Endpoint {
             @AccountId @QueryParam("accountId") String accountId);
 
     @GET
+    @Path("{name}/withResources")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = GET_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "getStackInWorkspaceV4WithResources")
+    StackV4Response getWithResources(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @QueryParam("entries") Set<String> entries,
+            @AccountId @QueryParam("accountId") String accountId);
+
+    @GET
     @Path("crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = GET_BY_CRN_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "getStackByCrnInWorkspaceV4")

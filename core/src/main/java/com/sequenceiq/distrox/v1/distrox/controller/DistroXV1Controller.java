@@ -201,7 +201,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
                 NameOrCrn.ofName(name),
                 restRequestThreadLocalService.getAccountId(),
                 entries,
-                StackType.WORKLOAD);
+                StackType.WORKLOAD, false);
     }
 
     @Override
@@ -211,7 +211,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
                 NameOrCrn.ofCrn(crn),
                 restRequestThreadLocalService.getAccountId(),
                 entries,
-                StackType.WORKLOAD);
+                StackType.WORKLOAD, false);
     }
 
     @Override

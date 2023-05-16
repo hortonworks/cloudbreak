@@ -460,9 +460,9 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return stackRepository.findByEnvironmentCrnAndStackType(environmentCrn, stackType);
     }
 
-    public StackV4Response getByNameInWorkspaceWithEntries(String name, String accountId, Set<String> entries, StackType stackType) {
+    public StackV4Response getByNameInWorkspaceWithEntries(String name, String accountId, Set<String> entries, StackType stackType, boolean withResources) {
         ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
-        Optional<StackDto> stack = findByNameAndWorkspaceId(name, accountId, stackType, showTerminatedClustersAfterConfig);
+        Optional<StackDto> stack = findByNameAndWorkspaceId(name, accountId, stackType, showTerminatedClustersAfterConfig, withResources);
         if (stack.isEmpty()) {
             throw new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name));
         }
@@ -471,9 +471,9 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return stackResponse;
     }
 
-    public StackV4Response getByCrnInWorkspaceWithEntries(String crn, Set<String> entries, StackType stackType) {
+    public StackV4Response getByCrnInWorkspaceWithEntries(String crn, Set<String> entries, StackType stackType, boolean withResources) {
         ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
-        Optional<StackDto> stack = findByCrnAndWorkspaceId(crn, stackType, showTerminatedClustersAfterConfig);
+        Optional<StackDto> stack = findByCrnAndWorkspaceId(crn, stackType, showTerminatedClustersAfterConfig, withResources);
         if (stack.isEmpty()) {
             throw new NotFoundException(format("Stack not found by crn '%s'", crn));
         }
@@ -730,7 +730,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     public void checkLiveStackExistenceByName(String name, String accountId, StackType stackType) {
         ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.getHideTerminated();
-        Optional<StackDto> stack = findByNameAndWorkspaceId(name, accountId, stackType, showTerminatedClustersAfterConfig);
+        Optional<StackDto> stack = findByNameAndWorkspaceId(name, accountId, stackType, showTerminatedClustersAfterConfig, false);
         if (stack.isEmpty()) {
             throw new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name));
         }
@@ -795,13 +795,14 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return findStackAsPayloadContext(resourceId).orElse(null);
     }
 
-    private Optional<StackDto> findByNameAndWorkspaceId(String name, String accountId, StackType stackType, ShowTerminatedClustersAfterConfig config) {
-        StackDto stackDto = stackDtoService.getByNameOrCrn(NameOrCrn.ofName(name), accountId, stackType, config);
+    private Optional<StackDto> findByNameAndWorkspaceId(String name, String accountId, StackType stackType, ShowTerminatedClustersAfterConfig config,
+            boolean withResources) {
+        StackDto stackDto = stackDtoService.getByNameOrCrn(NameOrCrn.ofName(name), accountId, stackType, config, withResources);
         return Optional.ofNullable(stackDto);
     }
 
-    private Optional<StackDto> findByCrnAndWorkspaceId(String crn, StackType stackType, ShowTerminatedClustersAfterConfig config) {
-        StackDto stackDto = stackDtoService.getByNameOrCrn(NameOrCrn.ofCrn(crn), null, stackType, config);
+    private Optional<StackDto> findByCrnAndWorkspaceId(String crn, StackType stackType, ShowTerminatedClustersAfterConfig config, boolean withResources) {
+        StackDto stackDto = stackDtoService.getByNameOrCrn(NameOrCrn.ofCrn(crn), null, stackType, config, withResources);
         return Optional.ofNullable(stackDto);
     }
 

@@ -1788,4 +1788,50 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
         saltJobRunBootstrapRunner.call();
     }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public Map<String, Map<String, String>> resizeDisksOnNodes(List<GatewayConfig> allGateway, Set<Node> nodesWithDiskData, Set<Node> allNodes,
+            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
+        Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGateway);
+        Target<String> allHosts = new HostList(nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toSet()));
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            Set<String> hostnames = nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toSet());
+            saltCommandRunner.runModifyGrainCommand(sc,
+                    new GrainAddRunner(saltStateService, hostnames, allNodes, "resize_disks"), exitModel, exitCriteria);
+            StateAllRunner stateAllRunner = new StateAllRunner(saltStateService, gatewayTargetIpAddresses, allNodes, "resize.init");
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateAllRunner);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel);
+            saltJobRunBootstrapRunner.call();
+            Map<String, Map<String, String>> fsTabInfo = getFstabInformation(sc, allHosts, nodesWithDiskData);
+            saltCommandRunner.runModifyGrainCommand(sc,
+                    new GrainRemoveRunner(saltStateService, hostnames, allNodes, "resize_disks"), exitModel, exitCriteria);
+            return fsTabInfo;
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during the salt resize operation", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    private void executeSaltStateWithConfiguredErrorCount(List<String> states, Set<String> targets, SaltConnector sc, ExitCriteriaModel exitModel)
+            throws Exception {
+        for (String state: states) {
+            StateRunner stateRunner = new StateRunner(saltStateService, targets, state);
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runnerWithConfiguredErrorCount(saltJobIdTracker, exitCriteria, exitModel);
+            saltJobRunBootstrapRunner.call();
+        }
+    }
+
+    private Map<String, Map<String, String>> getFstabInformation(SaltConnector sc, Target<String> allHosts, Set<Node> nodesWithDiskData) {
+        Map<String, String> uuidResponse = saltStateService.getUuidList(sc);
+        Map<String, String> fstabResponse = saltStateService.runCommandOnHosts(retry, sc, allHosts, "cat /etc/fstab");
+        return nodesWithDiskData.stream()
+            .map(node -> {
+                String fstab = fstabResponse.getOrDefault(node.getHostname(), "");
+                String uuidList = uuidResponse.getOrDefault(node.getHostname(), "");
+                return new SimpleImmutableEntry<>(node.getHostname(), Map.of("uuids", uuidList, "fstab", fstab));
+            })
+            .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+    }
 }

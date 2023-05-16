@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+
+source /opt/salt/scripts/format-and-mount-common.sh
+
+LOG_FILE="/var/log/resize-storage-volumes.log"
+
+device_names=$(blkid | grep -i /dev | cut -d ':' -f 1)
+root_disk=$(get_root_disk)
+
+for device in $device_names; do
+  # Check if growpart is required
+  if [[ $device =~ $root_disk ]]; then
+    device=$root_disk
+    if sudo growpart -N $device 1 ; then
+      # Check if we're on an NVMe filesystem
+      if [[ -e "$device" && $(readlink -f /dev/xvda) = "$device" ]]
+      then
+        # Rewrite the partition table so that the partition takes up all the space that it can.
+        log $LOG_FILE "resizing disk for non-NVMe filesystem"
+        # Expand the size of the file system.
+        # Check if we're on AL2
+        STR=$(cat /etc/os-release)
+        SUB="VERSION_ID=\"2\""
+        if [[ "$STR" == *"$SUB"* ]]
+        then
+          log $LOG_FILE "resizing disk for non-NVMe filesystem: xfs_growfs"
+          sudo xfs_growfs -d /
+        else
+          log $LOG_FILE "resizing disk for non-NVMe filesystem: resize2fs"
+          sudo resize2fs $device
+        fi
+
+      else
+        # Rewrite the partition table so that the partition takes up all the space that it can.
+        log $LOG_FILE "resizing disk for NVMe filesystem"
+        # Expand the size of the file system.
+        # Check if we're on AL2
+        STR=$(cat /etc/os-release)
+        SUB="VERSION_ID=\"2\""
+        if [[ "$STR" == *"$SUB"* ]]
+        then
+          log $LOG_FILE "resizing disk for NVMe filesystem: xfs_growfs"
+          sudo xfs_growfs -d /
+        else
+          log $LOG_FILE "resizing disk for NVMe filesystem: resize2fs"
+          sudo resize2fs $device
+        fi
+      fi
+    else
+      log $LOG_FILE Growpart indicates that there is no need for growing root partition
+    fi
+  else
+    if [[ -e "$device" && $(readlink -f /dev/xvda) = "$device" ]]
+      then
+        # Rewrite the partition table so that the partition takes up all the space that it can.
+        log $LOG_FILE "resizing disk for non-NVMe filesystem"
+        # Expand the size of the file system.
+        # Check if we're on AL2
+        STR=$(cat /etc/os-release)
+        SUB="VERSION_ID=\"2\""
+        if [[ "$STR" == *"$SUB"* ]]
+        then
+          log $LOG_FILE "resizing disk for non-NVMe filesystem: xfs_growfs"
+          sudo xfs_growfs -d / || log $LOG_FILE xfs_growfs indicates that there is no need for growing disk on $device
+        else
+          log $LOG_FILE "resizing disk for non-NVMe filesystem: resize2fs"
+          sudo resize2fs $device || log $LOG_FILE resize2fs indicates that there is no need for growing disk on $device
+        fi
+
+    else
+      # Rewrite the partition table so that the partition takes up all the space that it can.
+      log $LOG_FILE "resizing disk for NVMe filesystem"
+      # Expand the size of the file system.
+      # Check if we're on AL2
+      STR=$(cat /etc/os-release)
+      SUB="VERSION_ID=\"2\""
+      if [[ "$STR" == *"$SUB"* ]]
+      then
+        log $LOG_FILE "resizing disk for NVMe filesystem: xfs_growfs"
+        sudo xfs_growfs -d / || log $LOG_FILE xfs_growfs indicates that there is no need for growing disk on $device
+      else
+        log $LOG_FILE "resizing disk for NVMe filesystem: resize2fs"
+        sudo resize2fs $device || log $LOG_FILE resize2fs indicates that there is no need for growing disk on $device
+      fi
+    fi
+  fi
+
+done
+

@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -23,6 +24,8 @@ import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateEvent;
+import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateStateSelectors;
 import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleEvent;
 import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleStateSelectors;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -112,4 +115,22 @@ public class VerticalScaleService {
                 () -> stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
     }
 
+    public FlowIdentifier updateDisksDatalake(SdxCluster sdxCluster, DiskUpdateRequest updateRequest, String userCrn) {
+        MDCBuilder.buildMdcContext(sdxCluster);
+        LOGGER.info("Environment Vertical Scale flow triggered for environment {}", sdxCluster.getName());
+        DatalakeDiskUpdateEvent datalakeDiskUpdateTriggerEvent = DatalakeDiskUpdateEvent.builder()
+                .withAccepted(new Promise<>())
+                .withResourceCrn(sdxCluster.getResourceCrn())
+                .withResourceId(sdxCluster.getId())
+                .withResourceName(sdxCluster.getName())
+                .withDatalakeDiskUpdateRequest(updateRequest)
+                .withStackCrn(sdxCluster.getStackCrn())
+                .withClusterName(sdxCluster.getClusterName())
+                .withAccountId(sdxCluster.getAccountId())
+                .withSelector(DatalakeDiskUpdateStateSelectors.DATALAKE_DISK_UPDATE_VALIDATION_EVENT.selector())
+                .build();
+        FlowIdentifier flowIdentifier = eventSender.sendEvent(datalakeDiskUpdateTriggerEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        LOGGER.debug("Environment Disk Update flow trigger event sent for environment {}", sdxCluster.getName());
+        return flowIdentifier;
+    }
 }

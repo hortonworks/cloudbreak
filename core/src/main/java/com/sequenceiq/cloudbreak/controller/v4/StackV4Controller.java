@@ -136,13 +136,19 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public StackV4Response get(Long workspaceId, String name, Set<String> entries, @AccountId String accountId) {
-        return stackOperations.get(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), entries, null);
+        return stackOperations.get(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), entries, null, false);
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    public StackV4Response getWithResources(Long workspaceId, String name, Set<String> entries, @AccountId String accountId) {
+        return stackOperations.get(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), entries, null, true);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public StackV4Response getByCrn(Long workspaceId, @TenantAwareParam String crn, Set<String> entries) {
-        return stackOperations.get(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(), entries, null);
+        return stackOperations.get(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(), entries, null, false);
     }
 
     @Override

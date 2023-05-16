@@ -123,6 +123,7 @@ public interface PlatformParameters {
         specialParameters.put(PlatformParametersConsts.VOLUME_ATTACHMENT_SUPPORTED, Boolean.TRUE);
         specialParameters.put(PlatformParametersConsts.VERTICAL_SCALING_SUPPORTED, Boolean.TRUE);
         specialParameters.put(PlatformParametersConsts.DB_SUBNETS_UPDATE_ENABLED, Boolean.FALSE);
+        specialParameters.put(PlatformParametersConsts.DISK_TYPE_CHANGE_SUPPORTED, Boolean.TRUE);
         return new SpecialParameters(specialParameters);
     }
 

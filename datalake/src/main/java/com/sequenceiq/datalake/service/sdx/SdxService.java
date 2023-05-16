@@ -241,6 +241,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     @Inject
     private SdxDatabaseRepository sdxDatabaseRepository;
 
+    @Inject
+    private CloudbreakPoller cloudbreakPoller;
+
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
 
@@ -372,6 +375,14 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         Optional<SdxCluster> sdxCluster = measure(() ->
                         sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, name), LOGGER,
+                "Fetching SDX cluster took {}ms from DB. Name: [{}]", name);
+        return sdxCluster.orElseThrow(notFound("SDX cluster", name));
+    }
+
+    public SdxCluster getByNameAndStackId(Long stackId, String name) {
+        LOGGER.info("Searching for SDX cluster by name {}", name);
+        Optional<SdxCluster> sdxCluster = measure(() ->
+                        sdxClusterRepository.findByStackIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(stackId, name), LOGGER,
                 "Fetching SDX cluster took {}ms from DB. Name: [{}]", name);
         return sdxCluster.orElseThrow(notFound("SDX cluster", name));
     }
@@ -1447,5 +1458,12 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         } else {
             return sdxReactorFlowManager.triggerSaltUpdate(sdxCluster);
         }
+    }
+
+    public void waitCloudbreakClusterResize(Long id, PollingConfig pollingConfig) {
+        sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster ->
+                cloudbreakPoller.pollUpdateUntilStackAvailable("Resize", sdxCluster, pollingConfig), () -> {
+            throw notFound("SDX cluster", id).get();
+        });
     }
 }

@@ -78,4 +78,13 @@ public class CloudParameterCache {
         }
         return platformParameters.specialParameters().getSpecialParameters();
     }
+
+    public boolean isDiskTypeChangeSupported(String platform) {
+        return isDiskTypeChangeSupported(Platform.platform(platform));
+    }
+
+    public boolean isDiskTypeChangeSupported(Platform platform) {
+        Boolean result = getSpecialParameters(platform).get(PlatformParametersConsts.DISK_TYPE_CHANGE_SUPPORTED);
+        return result == null || result;
+    }
 }

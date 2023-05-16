@@ -22,6 +22,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -38,6 +39,7 @@ import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.SdxImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.StorageValidationService;
+import com.sequenceiq.datalake.service.sdx.VerticalScaleService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -88,6 +90,9 @@ class SdxControllerTest {
 
     @Mock
     private StorageValidationService storageValidationService;
+
+    @Mock
+    private VerticalScaleService verticalScaleService;
 
     @InjectMocks
     private SdxController sdxController;
@@ -248,6 +253,46 @@ class SdxControllerTest {
 
         verify(sdxService, times(1)).getByCrn(USER_CRN, sdxCluster.getCrn());
         verify(sdxService, times(1)).updateSalt(sdxCluster);
+        assertEquals(FlowType.FLOW, flowIdentifier.getType());
+        assertEquals("FLOW_ID", flowIdentifier.getPollableId());
+    }
+
+    @Test
+    void testDiskUpdateByName() {
+        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
+        diskUpdateRequest.setGroup("compute");
+        diskUpdateRequest.setSize(100);
+        diskUpdateRequest.setVolumeType("gp2");
+
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(sdxService.getByNameInAccount(USER_CRN, "TEST")).thenReturn(sdxCluster);
+        when(verticalScaleService.updateDisksDatalake(sdxCluster, diskUpdateRequest, USER_CRN))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.diskUpdateByName("TEST", diskUpdateRequest));
+
+        verify(sdxService, times(1)).getByNameInAccount(USER_CRN, "TEST");
+        verify(verticalScaleService, times(1)).updateDisksDatalake(sdxCluster, diskUpdateRequest, USER_CRN);
+        assertEquals(FlowType.FLOW, flowIdentifier.getType());
+        assertEquals("FLOW_ID", flowIdentifier.getPollableId());
+    }
+
+    @Test
+    void testDiskUpdateByCrn() {
+        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
+        diskUpdateRequest.setGroup("compute");
+        diskUpdateRequest.setSize(100);
+        diskUpdateRequest.setVolumeType("gp2");
+
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(sdxService.getByCrn(USER_CRN, sdxCluster.getCrn())).thenReturn(sdxCluster);
+        when(verticalScaleService.updateDisksDatalake(sdxCluster, diskUpdateRequest, USER_CRN))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.diskUpdateByCrn(sdxCluster.getCrn(), diskUpdateRequest));
+
+        verify(sdxService, times(1)).getByCrn(USER_CRN, sdxCluster.getCrn());
+        verify(verticalScaleService, times(1)).updateDisksDatalake(sdxCluster, diskUpdateRequest, USER_CRN);
         assertEquals(FlowType.FLOW, flowIdentifier.getType());
         assertEquals("FLOW_ID", flowIdentifier.getPollableId());
     }

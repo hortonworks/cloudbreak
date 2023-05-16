@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsCommonDiskUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer.AwsNativeLoadBalancerLaunchService;
@@ -60,6 +61,9 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
     @Inject
     private ResourceRetriever resourceRetriever;
 
+    @Inject
+    private AwsCommonDiskUpdateService awsCommonDiskUpdateService;
+
     @Override
     public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
             throws Exception {
@@ -94,6 +98,11 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
     @Override
     public String getDBStackTemplate(DatabaseStack databaseStack) throws TemplatingNotSupportedException {
         throw new TemplatingNotSupportedException();
+    }
+
+    @Override
+    public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
+        awsCommonDiskUpdateService.modifyVolumes(authenticatedContext, volumeIds, diskType, size);
     }
 
     @Override

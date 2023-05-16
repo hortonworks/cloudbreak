@@ -223,9 +223,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return stackV4Response;
     }
 
-    public StackV4Response get(NameOrCrn nameOrCrn, String accountId, Set<String> entries, StackType stackType) {
+    public StackV4Response get(NameOrCrn nameOrCrn, String accountId, Set<String> entries, StackType stackType, boolean withResources) {
         LOGGER.info("Validate stack in account {}.", accountId);
-        StackV4Response stackResponse = stackCommonService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, accountId, entries, stackType);
+        StackV4Response stackResponse = stackCommonService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, accountId, entries, stackType, withResources);
         LOGGER.info("Adding environment name and credential to the response.");
         environmentServiceDecorator.prepareEnvironmentAndCredentialName(stackResponse);
         LOGGER.info("Adding SDX CRN and name to the response.");

@@ -83,7 +83,8 @@ public class RestUrlParserTest {
             "cluster_templates", "/v4/events", "/v4/diagnostics", "/v4/progress", "/v4/operation",
             "/v4/custom_configurations"};
 
-    private static final String[] EXCLUDEPATHS = {"/stacks/internal/crn", "/govCloud", "stacks/internal/used_subnets", "stacks/internal/rotate_secret"};
+    private static final String[] EXCLUDEPATHS = {"/stacks/internal/crn", "/govCloud", "stacks/internal/used_subnets", "stacks/internal/rotate_secret",
+            "/resizeDisks"};
 
     @Mock
     private ContainerRequestContext containerRequestContext;

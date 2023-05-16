@@ -179,4 +179,30 @@ public class CloudbreakPoller extends AbstractFlowPoller {
     protected FlowEndpoint flowEndpoint() {
         return flowEndpoint;
     }
+
+    public void pollUpdateUntilStackAvailable(String process, SdxCluster sdxCluster, PollingConfig pollingConfig) {
+        waitForStackState(process, sdxCluster, pollingConfig,
+                Status.getAvailableStatuses(), Sets.immutableEnumSet(Status.UPDATE_FAILED));
+    }
+
+    private void waitForStackState(
+            String process,
+            SdxCluster sdxCluster,
+            PollingConfig pollingConfig,
+            Set<Status> targetStatuses,
+            Set<Status> failedStatuses) {
+        Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
+            .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
+            .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
+            .run(() -> {
+                StackStatusV4Response stackStatusV4Response = getStackAndClusterStatusWithInternalActor(sdxCluster);
+                LOGGER.debug("Result of checking all resize flow available - {}", stackStatusV4Response);
+                if (oneOf(stackStatusV4Response.getStatus(), targetStatuses)) {
+                    return AttemptResults.finishWith(stackStatusV4Response);
+                } else if (oneOf(stackStatusV4Response.getStatus(), failedStatuses)) {
+                    return failedPolling(process, sdxCluster, stackStatusV4Response.getClusterStatusReason());
+                }
+                return AttemptResults.justContinue();
+            });
+    }
 }
