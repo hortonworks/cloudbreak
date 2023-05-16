@@ -95,7 +95,7 @@ integrationtest:
     distroXUpgradeCurrentVersion: 7.2.15
     distroXUpgradeTargetVersion: 7.2.16
     distroXUpgrade3rdPartyCurrentVersion: 7.2.15
-    distroXUpgrade3rdPartyTargetVersion: 7.2.16
+    distroXUpgrade3rdPartyTargetVersion: 7.2.12
     imageCatalogUrl3rdParty: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-prod-cb-image-catalog.json
   upgradeDatabaseServer:
     originalDatabaseMajorVersion: 10
