@@ -89,7 +89,7 @@ public class DistroxEnabledInstanceTypes {
         "Standard_E48ds_v4," +
         "Standard_E48s_v4";
 
-    public static final List<String> AZURE_ENABLED_TYPES_LIST = new ArrayList<String>(Arrays.asList(ENABLED_TYPES.trim().split("," + ")));
+    public static final List<String> AZURE_ENABLED_TYPES_LIST = new ArrayList<String>(Arrays.asList(ENABLED_TYPES.trim().split(",")));
 
     private DistroxEnabledInstanceTypes() {
     }
