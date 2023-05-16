@@ -203,6 +203,13 @@ dependencies {
     exclude group: 'org.yaml'
   }
 
+  implementation (group: 'com.nimbusds',                      name: 'nimbus-jose-jwt') {
+     version {
+      strictly '9.31'
+    }
+    because 'nimbus-jose-jwt 9.10.1 includes json-smart which is vulnerable so we forcing everywhere'
+  }
+
   implementation group: 'com.dyngr',                          name: 'polling',                          version: dyngrPollingVersion
   implementation group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',                 version: jacksonDatabindVersion
   implementation group: 'com.google.http-client',             name: 'google-http-client-jackson2',      version: '1.43.0'

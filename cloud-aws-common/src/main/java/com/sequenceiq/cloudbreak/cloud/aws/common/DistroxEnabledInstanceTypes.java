@@ -1,8 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class DistroxEnabledInstanceTypes {
 
-    public static final String ENABLED_TYPES = "m5.xlarge,m5.2xlarge,m5.4xlarge,m5.8xlarge,m5.12xlarge,m5.16xlarge,m5.24xlarge," +
+    private static final String ENABLED_TYPES = "m5.xlarge,m5.2xlarge,m5.4xlarge,m5.8xlarge,m5.12xlarge,m5.16xlarge,m5.24xlarge," +
             "m5a.xlarge,m5a.2xlarge,m5a.4xlarge,m5a.8xlarge,m5a.12xlarge,m5a.16xlarge,m5a.24xlarge," +
             "m5ad.xlarge,m5ad.2xlarge,m5ad.4xlarge,m5ad.8xlarge,m5ad.12xlarge,m5ad.16xlarge,m5ad.24xlarge," +
             "m6i.xlarge,m6i.2xlarge,m6i.4xlarge,m6i.8xlarge,m6i.12xlarge,m6i.16xlarge,m6i.24xlarge,m6i.32xlarge," +
@@ -26,6 +30,8 @@ public class DistroxEnabledInstanceTypes {
             "r5n.2xlarge,r5n.4xlarge,r5n.8xlarge,r5n.16xlarge," +
             "r5dn.xlarge,r5dn.2xlarge,r5dn.4xlarge,r5dn.8xlarge,r5dn.16xlarge," +
             "x1e.2xlarge";
+
+    public static final List<String> AWS_ENABLED_TYPES_LIST = new ArrayList<String>(Arrays.asList(ENABLED_TYPES.trim().split(",")));
 
     private DistroxEnabledInstanceTypes() {
     }

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.azure.DistroxEnabledInstanceTypes.AZURE_ENABLED_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.EPHEMERAL;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.SSD;
@@ -87,13 +88,10 @@ public class AzurePlatformResources implements PlatformResources {
     @Value("${cb.azure.default.vmtype:Standard_D16_v3}")
     private String armVmDefault;
 
-    @Value("${cb.azure.distrox.enabled.instance.types:}")
-    private List<String> enabledDistroxInstanceTypes;
-
     @Value("${distrox.restrict.instance.types:true}")
     private boolean restrictInstanceTypes;
 
-    private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> enabledDistroxInstanceTypes.stream()
+    private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> AZURE_ENABLED_TYPES_LIST.stream()
             .filter(it -> !it.isEmpty())
             .anyMatch(di -> vmt.value().equals(di));
 

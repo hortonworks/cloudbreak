@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.ENABLED_TYPES;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_TYPES_LIST;
+import static com.sequenceiq.cloudbreak.cloud.azure.DistroxEnabledInstanceTypes.AZURE_ENABLED_TYPES_LIST;
+import static com.sequenceiq.cloudbreak.cloud.gcp.DistroxEnabledInstanceTypes.GCP_ENABLED_TYPES_LIST;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
@@ -12,7 +14,6 @@ import javax.inject.Inject;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
@@ -41,12 +42,6 @@ import com.sequenceiq.distrox.v1.distrox.service.InternalClusterTemplateValidato
 @SpringBootTest(classes = AllowedInstanceTypeTest.TestAppContext.class)
 public class AllowedInstanceTypeTest {
 
-    @Value("${cb.aws.distrox.enabled.instance.types:" + ENABLED_TYPES + "}")
-    private List<String> awsSupportedTypes;
-
-    @Value("${cb.azure.distrox.enabled.instance.types:}")
-    private List<String> azureSupportedTypes;
-
     @Inject
     private DefaultClusterTemplateCache templateCache;
 
@@ -57,8 +52,8 @@ public class AllowedInstanceTypeTest {
                 .stream()
                 .map(ct -> templateCache.getDefaultClusterTemplate(new String(Base64.getDecoder().decode(ct.getValue()))))
                 .filter(ct -> CloudPlatform.AWS.name().equalsIgnoreCase(ct.getCloudPlatform()))
-                .forEach(ctr -> validateClusterTemplate(ctr, awsSupportedTypes));
-        assertNotNull(awsSupportedTypes);
+                .forEach(ctr -> validateClusterTemplate(ctr, AWS_ENABLED_TYPES_LIST));
+        assertNotNull(AWS_ENABLED_TYPES_LIST);
     }
 
     @Test
@@ -68,8 +63,19 @@ public class AllowedInstanceTypeTest {
                 .stream()
                 .map(ct -> templateCache.getDefaultClusterTemplate(new String(Base64.getDecoder().decode(ct.getValue()))))
                 .filter(ct -> CloudPlatform.AZURE.name().equalsIgnoreCase(ct.getCloudPlatform()))
-                .forEach(ctr -> validateClusterTemplate(ctr, azureSupportedTypes));
-        assertNotNull(azureSupportedTypes);
+                .forEach(ctr -> validateClusterTemplate(ctr, AZURE_ENABLED_TYPES_LIST));
+        assertNotNull(AZURE_ENABLED_TYPES_LIST);
+    }
+
+    @Test
+    public void validateGcpClusterTemplatesByInstanceType() {
+        Map<String, String> stringClusterTemplateMap = templateCache.defaultClusterTemplateRequests();
+        stringClusterTemplateMap.entrySet()
+                .stream()
+                .map(ct -> templateCache.getDefaultClusterTemplate(new String(Base64.getDecoder().decode(ct.getValue()))))
+                .filter(ct -> CloudPlatform.GCP.name().equalsIgnoreCase(ct.getCloudPlatform()))
+                .forEach(ctr -> validateClusterTemplate(ctr, GCP_ENABLED_TYPES_LIST));
+        assertNotNull(GCP_ENABLED_TYPES_LIST);
     }
 
     private void validateClusterTemplate(DefaultClusterTemplateV4Request clusterTemplate, List<String> supportedTypes) {

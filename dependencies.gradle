@@ -32,7 +32,7 @@ ext {
   awsSdkVersion = '2.20.35'
   azureSdkOkHttpVersion = '1.11.4'
   azureSdkCoreVersion = '1.34.0'
-  azureSdkIdentityVersion = '1.7.2'
+  azureSdkIdentityVersion = '1.9.0'
   azureSdkStorageBlobVersion = '12.20.1'
   azureSdkResourceManagerVersion = '2.22.0'
   azureSdkResourceManagerMarketplaceVersion = '1.0.0-beta.2'

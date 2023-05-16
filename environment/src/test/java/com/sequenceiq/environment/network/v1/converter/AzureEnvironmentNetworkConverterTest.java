@@ -197,7 +197,7 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(RESOURCE_GROUP_NAME, actual.getResourceGroupName());
         assertTrue(SUBNET_IDS.containsAll(actual.getSubnetMetas().keySet()));
         assertThat(actual.getSubnetMetas().get(SUBNET_1).getDeploymentRestrictions())
-                .containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
+                .containsAll(DeploymentRestriction.ALL);
 
         assertEquals(SUBNET_1, actual.getSubnetMetas().get(SUBNET_1).getId());
         assertEquals(SUBNET_1, actual.getSubnetMetas().get(SUBNET_1).getName());
@@ -211,7 +211,7 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(SUBNET_CIDR_2, actual.getSubnetMetas().get(SUBNET_2).getCidr());
         assertTrue(actual.getSubnetMetas().get(SUBNET_2).isPrivateSubnet());
         assertThat(actual.getSubnetMetas().get(SUBNET_2).getDeploymentRestrictions())
-                .containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
+                .containsAll(DeploymentRestriction.ALL);
 
         assertEquals(SUBNET_3, actual.getSubnetMetas().get(SUBNET_3).getId());
         assertEquals(SUBNET_3, actual.getSubnetMetas().get(SUBNET_3).getName());
@@ -219,7 +219,7 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(SUBNET_CIDR_3, actual.getSubnetMetas().get(SUBNET_3).getCidr());
         assertTrue(actual.getSubnetMetas().get(SUBNET_3).isPrivateSubnet());
         assertThat(actual.getSubnetMetas().get(SUBNET_3).getDeploymentRestrictions())
-                .containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
+                .containsAll(DeploymentRestriction.ALL);
     }
 
     @Test
