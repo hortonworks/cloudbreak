@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -482,5 +483,10 @@ public class StackOperationService {
     public FlowIdentifier triggerServicesRollingRestart(String crn) {
         StackView stack = stackDtoService.getStackViewByCrn(crn);
         return flowManager.triggerServicesRollingRestart(stack.getId());
+    }
+
+    public FlowIdentifier stackUpdateDisks(NameOrCrn nameOrCrn, DiskUpdateRequest updateRequest, String accountId) {
+        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        return flowManager.triggerStackUpdateDisks(stack, updateRequest);
     }
 }

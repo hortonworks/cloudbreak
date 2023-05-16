@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
@@ -66,6 +67,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
@@ -755,5 +757,17 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public FlowIdentifier deleteVolumesByStackCrn(@ResourceCrn String crn, StackDeleteVolumesRequest deleteRequest) {
         deleteRequest.setStackId(stackOperations.getResourceIdByResourceCrn(crn));
         return stackOperations.putDeleteVolumes(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(), deleteRequest);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING)
+    public FlowIdentifier diskUpdateByName(@ResourceName String name, DiskUpdateRequest updateRequest) {
+        return stackOperationService.stackUpdateDisks(NameOrCrn.ofName(name), updateRequest, ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING)
+    public FlowIdentifier diskUpdateByCrn(@ResourceCrn @TenantAwareParam String crn, DiskUpdateRequest updateRequest) {
+        return stackOperationService.stackUpdateDisks(NameOrCrn.ofCrn(crn), updateRequest, ThreadBasedUserCrnProvider.getAccountId());
     }
 }

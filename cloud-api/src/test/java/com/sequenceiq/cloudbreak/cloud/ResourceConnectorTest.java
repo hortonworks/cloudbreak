@@ -97,6 +97,10 @@ class ResourceConnectorTest {
         }
 
         @Override
+        public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
+        }
+
+        @Override
         public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack,
                 PersistenceNotifier persistenceNotifier) {
             return null;

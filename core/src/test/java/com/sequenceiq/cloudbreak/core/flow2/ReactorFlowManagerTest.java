@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,6 +34,7 @@ import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
@@ -43,6 +46,8 @@ import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DeleteVolumesTriggerEvent;
@@ -53,12 +58,14 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.core.flow2.service.TerminationTriggerService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.service.FlowCancelService;
@@ -119,6 +126,9 @@ public class ReactorFlowManagerTest {
         Map<String, Set<Long>> instanceIdsByHostgroup = new HashMap<>();
         instanceIdsByHostgroup.put("hostgroup", Collections.singleton(1L));
         ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, "imageid");
+        StackDto stackDto = mock(StackDto.class);
+        ClusterView clusterView = mock(ClusterView.class);
+        doReturn(clusterView).when(stackDto).getCluster();
 
         when(stackService.getPlatformVariantByStackId(STACK_ID)).thenReturn(cloudPlatformVariant);
         when(cloudPlatformVariant.getVariant()).thenReturn(Variant.variant("AWS"));
@@ -178,6 +188,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerOsUpgradeByUpgradeSetsFlow(STACK_ID, "AWS", new ImageChangeDto(STACK_ID, null), List.of());
         underTest.triggerDetermineDatalakeDataSizes(STACK_ID, "asdf");
         underTest.triggerDeleteVolumes(STACK_ID, new StackDeleteVolumesRequest());
+        underTest.triggerStackUpdateDisks(stackDto, new DiskUpdateRequest());
         underTest.triggerSecretRotation(STACK_ID, "CRN", Lists.newArrayList(), RotationFlowExecutionType.ROTATE);
 
         int count = 0;
@@ -329,6 +340,19 @@ public class ReactorFlowManagerTest {
         assertEquals(stack.getId(), event.getResourceId());
         assertEquals(stackDeleteVolumesRequest, event.getStackDeleteVolumesRequest());
         assertEquals(stackId, event.getResourceId().longValue());
+    }
+
+    @Test
+    public void testTriggerStackUpdateDisks() {
+        StackDto stackDto = mock(StackDto.class);
+        doReturn(1L).when(stackDto).getId();
+        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
+        ClusterView clusterView = mock(ClusterView.class);
+        doReturn(clusterView).when(stackDto).getCluster();
+        underTest.triggerStackUpdateDisks(stackDto, diskUpdateRequest);
+        ArgumentCaptor<DistroXDiskUpdateEvent> eventCaptor = ArgumentCaptor.forClass(DistroXDiskUpdateEvent.class);
+        verify(reactorNotifier).notify(eq(1L), eq(DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_VALIDATION_EVENT.event()), eventCaptor.capture());
+        assertEquals(stackDto.getId(), eventCaptor.getValue().getStackId());
     }
 
     private static class TestAcceptable implements Acceptable {

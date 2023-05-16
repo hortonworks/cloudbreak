@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,16 +17,17 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
@@ -47,6 +49,8 @@ class DistroXV1ControllerTest {
     private static final String ACCOUNT_ID = "accountId";
 
     private static final String IMAGE_CATALOG = "image catalog";
+
+    private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:accid:user:mockuser@cloudera.com";
 
     private static final Long WORKSPACE_ID = 1L;
 
@@ -100,7 +104,7 @@ class DistroXV1ControllerTest {
 
     @Test
     void testGenerateImageCatalog() {
-        CloudbreakImageCatalogV3 imageCatalog = Mockito.mock(CloudbreakImageCatalogV3.class);
+        CloudbreakImageCatalogV3 imageCatalog = mock(CloudbreakImageCatalogV3.class);
 
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
         when(workspace.getId()).thenReturn(WORKSPACE_ID);
@@ -114,8 +118,8 @@ class DistroXV1ControllerTest {
 
     @Test
     void testRenewInternalCertificate() {
-        FlowIdentifier flowIdentifier = Mockito.mock(FlowIdentifier.class);
-        Stack stack = Mockito.mock(Stack.class);
+        FlowIdentifier flowIdentifier = mock(FlowIdentifier.class);
+        Stack stack = mock(Stack.class);
 
         when(stackOperations.getStackByCrn(anyString())).thenReturn(stack);
         when(stackOperationService.renewCertificate(anyLong())).thenReturn(flowIdentifier);
@@ -197,4 +201,23 @@ class DistroXV1ControllerTest {
         verify(stackOperations).sync(NameOrCrn.ofCrn(CRN), ACCOUNT_ID, EnumSet.of(StackType.WORKLOAD));
     }
 
+    @Test
+    void testDiskUpdateByName() {
+        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
+            distroXV1Controller.diskUpdateByName(TEST_USER_CRN, diskUpdateRequest);
+        });
+
+        verify(stackOperationService).stackUpdateDisks(NameOrCrn.ofName(TEST_USER_CRN), diskUpdateRequest, "accid");
+    }
+
+    @Test
+    void testDiskUpdateByCrn() {
+        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
+            distroXV1Controller.diskUpdateByCrn(TEST_USER_CRN, diskUpdateRequest);
+        });
+
+        verify(stackOperationService).stackUpdateDisks(NameOrCrn.ofCrn(TEST_USER_CRN), diskUpdateRequest, "accid");
+    }
 }

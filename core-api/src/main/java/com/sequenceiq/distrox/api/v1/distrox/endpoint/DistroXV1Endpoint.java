@@ -74,6 +74,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
@@ -606,4 +607,19 @@ public interface DistroXV1Endpoint {
     FlowIdentifier deleteVolumesByStackCrn(
             @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @Valid StackDeleteVolumesRequest deleteRequest);
+
+    @PUT
+    @Path("/name/{name}/disk_update")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Updates disk type and resizes DH", produces = MediaType.APPLICATION_JSON,
+            nickname = "diskUpdateByName")
+    FlowIdentifier diskUpdateByName(@PathParam("name") String name, @Valid DiskUpdateRequest updateRequest);
+
+    @PUT
+    @Path("/crn/{crn}/disk_update")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Updates disk type and resizes DH", produces = MediaType.APPLICATION_JSON,
+            nickname = "diskUpdateByCrn")
+    FlowIdentifier diskUpdateByCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn, @Valid DiskUpdateRequest updateRequest);
 }

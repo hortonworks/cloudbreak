@@ -2,8 +2,8 @@ package com.sequenceiq.datalake.flow.verticalscale.diskupdate.handler;
 
 import static com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateStateSelectors.DATALAKE_DISK_UPDATE_VALIDATION_HANDLER_EVENT;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,14 +59,16 @@ public class DatalakeDiskUpdateValidationHandler extends EventSenderAwareHandler
         try {
             StackV4Response stackV4Response = stackV4Endpoint.getWithResources(WORKSPACE_ID, payload.getClusterName(), Set.of(), payload.getAccountId());
             DiskUpdateRequest diskUpdateRequest = payload.getDatalakeDiskUpdateRequest();
-            Optional<ResourceV4Response> optionalResource = stackV4Response.getResources().stream()
+            List<ResourceV4Response> resources = stackV4Response.getResources().stream()
                     .filter(res -> null != res.getInstanceId() && res.getInstanceGroup().equals(diskUpdateRequest.getGroup())
-                            && res.getResourceType().toString().contains("VOLUMESET")).findFirst();
-            ResourceV4Response resource = optionalResource.orElseThrow();
-            VolumeSetAttributes volumeSetAttributes = new Json(resource.getAttributes()).get(VolumeSetAttributes.class);
-            LOGGER.debug("Checking if the attached volumes have size less than the requested volumes.");
-            List<VolumeSetAttributes.Volume> attachedVolumes = volumeSetAttributes.getVolumes().stream()
-                    .filter(volume -> volume.getSize() < diskUpdateRequest.getSize()).collect(Collectors.toList());
+                            && res.getResourceType().toString().contains("VOLUMESET")).toList();
+            List<VolumeSetAttributes.Volume> attachedVolumes = new ArrayList<>();
+            for (ResourceV4Response resource : resources) {
+                LOGGER.debug("Checking if the attached volumes have size less than the requested volumes.");
+                VolumeSetAttributes volumeSetAttributes = new Json(resource.getAttributes()).get(VolumeSetAttributes.class);
+                attachedVolumes.addAll(volumeSetAttributes.getVolumes().stream()
+                        .filter(volume -> volume.getSize() < diskUpdateRequest.getSize()).toList());
+            }
             boolean requestedSizeGreaterThanAvailable = attachedVolumes.size() > 0;
             boolean diskTypeChangeSupported = verticalScaleService.getDiskTypeChangeSupported(stackV4Response.getCloudPlatform().toString());
             if (!requestedSizeGreaterThanAvailable || !diskTypeChangeSupported) {

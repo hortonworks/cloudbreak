@@ -79,6 +79,10 @@ public class AbstractResourceConnectorTest {
             }
 
             @Override
+            public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
+            }
+
+            @Override
             protected ResourceType getDiskResourceType() {
                 return ResourceType.AWS_VOLUMESET;
             }

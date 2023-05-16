@@ -406,6 +406,11 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
+    public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+
+    @Override
     public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion, List<CloudResource> resources) {
         azureDatabaseResourceService.upgradeDatabaseServer(authenticatedContext, stack, persistenceNotifier, targetMajorVersion, resources);

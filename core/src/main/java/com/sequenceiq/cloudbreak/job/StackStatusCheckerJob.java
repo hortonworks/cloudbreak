@@ -103,7 +103,10 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             Status.RECOVERY_FAILED,
             Status.UPGRADE_CCM_FAILED,
             Status.UPGRADE_CCM_FINISHED,
-            Status.UPGRADE_CCM_IN_PROGRESS
+            Status.UPGRADE_CCM_IN_PROGRESS,
+            Status.DATAHUB_DISK_UPDATE_VALIDATION_FAILED,
+            Status.DATAHUB_DISK_UPDATE_FAILED,
+            Status.DATAHUB_DISK_UPDATE_RESIZE_FAILED
     );
 
     public static final EnumSet<Status> IGNORED_STATES = EnumSet.of(
@@ -124,7 +127,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             Status.LOAD_BALANCER_UPDATE_IN_PROGRESS,
             Status.RECOVERY_IN_PROGRESS,
             Status.RECOVERY_REQUESTED,
-            Status.DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS
+            Status.DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS,
+            Status.DATAHUB_DISK_UPDATE_VALIDATION_IN_PROGRESS
     );
 
     public static final EnumSet<Status> LONG_SYNCABLE_STATES = EnumSet.of(Status.DELETED_ON_PROVIDER_SIDE);
@@ -136,7 +140,10 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             Status.START_FAILED,
             Status.STOP_FAILED,
             Status.UPDATE_FAILED,
-            Status.ENABLE_SECURITY_FAILED);
+            Status.ENABLE_SECURITY_FAILED,
+            Status.DATAHUB_DISK_UPDATE_VALIDATION_FAILED,
+            Status.DATAHUB_DISK_UPDATE_FAILED,
+            Status.DATAHUB_DISK_UPDATE_RESIZE_FAILED);
 
     private static final EnumSet<InstanceStatus> STATES_FROM_HEALTHY_ALLOWED = EnumSet.of(
             SERVICES_UNHEALTHY,

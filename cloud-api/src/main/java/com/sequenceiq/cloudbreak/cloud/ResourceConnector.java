@@ -335,4 +335,15 @@ public interface ResourceConnector {
      * @param newPassword new password for the database root user
      */
     void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword);
+
+    /**
+     * Modifies attached volumes on an instance.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param volumeIds       contains the list of cloud volumes being modified
+     * @param diskType       type to which the volume are being modified
+     * @param size       size to which the volumes are modified
+     * @throws Exception in case of any error
+     */
+    void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception;
 }

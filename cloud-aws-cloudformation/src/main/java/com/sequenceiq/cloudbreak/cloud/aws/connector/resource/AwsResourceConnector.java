@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.UpdateType;
+import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsCommonDiskUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.AwsRdsUpgradeService;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsUpgradeValidatorService;
@@ -110,6 +111,9 @@ public class AwsResourceConnector implements ResourceConnector {
 
     @Inject
     private AwsLoadBalancerLaunchService awsLoadBalancerLaunchService;
+
+    @Inject
+    private AwsCommonDiskUpdateService awsCommonDiskUpdateService;
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
@@ -250,5 +254,10 @@ public class AwsResourceConnector implements ResourceConnector {
     @Override
     public void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword) {
         awsRdsModifyService.updateMasterUserPassword(authenticatedContext, databaseStack, newPassword);
+    }
+
+    @Override
+    public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
+        awsCommonDiskUpdateService.modifyVolumes(authenticatedContext, volumeIds, diskType, size);
     }
 }

@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
@@ -50,6 +51,8 @@ import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.scale.ServicesRollingRestartEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.rotatepassword.RotateSaltPasswordEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.event.ClusterServicesRestartTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCertificatesRotationTriggerEvent;
@@ -76,6 +79,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.UpgradePreparationChainTrigger
 import com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -489,5 +493,23 @@ public class ReactorFlowManager {
         String selector = DELETE_VOLUMES_VALIDATION_EVENT.event();
         DeleteVolumesTriggerEvent event = new DeleteVolumesTriggerEvent(selector, stackId, deleteRequest);
         return reactorNotifier.notify(stackId, selector, event);
+    }
+
+    public FlowIdentifier triggerStackUpdateDisks(StackDto stack, DiskUpdateRequest updateRequest) {
+        MDCBuilder.buildMdcContext(stack);
+        Long stackId = stack.getId();
+        String selector = DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_VALIDATION_EVENT.selector();
+        LOGGER.info("Datahub Vertical Scale flow triggered for datahub {}", stack.getName());
+        DistroXDiskUpdateEvent datahubDiskUpdateTriggerEvent = DistroXDiskUpdateEvent.builder()
+                .withResourceCrn(stack.getResourceCrn())
+                .withResourceId(stackId)
+                .withStackId(stackId)
+                .withDiskUpdateRequest(updateRequest)
+                .withClusterName(stack.getCluster().getResourceName())
+                .withAccountId(stack.getAccountId())
+                .withSelector(selector)
+                .build();
+        LOGGER.debug("Disk Update flow trigger event sent for datahub {}", stack.getName());
+        return reactorNotifier.notify(stackId, selector, datahubDiskUpdateTriggerEvent);
     }
 }

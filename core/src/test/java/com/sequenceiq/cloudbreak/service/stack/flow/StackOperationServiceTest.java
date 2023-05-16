@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -536,4 +537,14 @@ public class StackOperationServiceTest {
         return instanceMetaData;
     }
 
+    @Test
+    public void testStackUpdateDisks() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        DiskUpdateRequest updateRequest = new DiskUpdateRequest();
+        underTest.stackUpdateDisks(nameOrCrn, updateRequest, "TEST");
+
+        verify(flowManager).triggerStackUpdateDisks(stack, updateRequest);
+    }
 }

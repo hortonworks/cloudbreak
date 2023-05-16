@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -14,6 +16,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -30,16 +33,25 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
+import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.request.DiskResizeRequest;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
@@ -49,9 +61,10 @@ import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
-public class DiskUpdateServiceTest {
+class DiskUpdateServiceTest {
 
     private static final long STACK_ID = 1L;
 
@@ -84,6 +97,15 @@ public class DiskUpdateServiceTest {
 
     @Mock
     private InstanceGroupService instanceGroupService;
+
+    @Mock
+    private GatewayConfigService gatewayConfigService;
+
+    @Mock
+    private ResourceAttributeUtil resourceAttributeUtil;
+
+    @Mock
+    private HostOrchestrator hostOrchestrator;
 
     @InjectMocks
     private DiskUpdateService underTest;
@@ -208,5 +230,63 @@ public class DiskUpdateServiceTest {
         VolumeTemplate resultVolumeTemplate = template.getVolumeTemplates().stream().findFirst().get();
         assertEquals(200, resultVolumeTemplate.getVolumeSize());
         assertEquals("test", resultVolumeTemplate.getVolumeType());
+    }
+
+    @Test
+    void testResizeDisksAndUpdateFstab() throws CloudbreakOrchestratorFailedException {
+        Stack stack = mock(Stack.class);
+        doReturn(ResourceType.AWS_VOLUMESET).when(stack).getDiskResourceType();
+        doReturn(STACK_ID).when(stack).getId();
+        Resource resource = mock(Resource.class);
+        doReturn("test-instance-1").when(resource).getInstanceId();
+        List<Resource> resourceList = List.of(resource);
+        doReturn(resourceList).when(resourceService).findAllByStackIdAndInstanceGroupAndResourceTypeIn(eq(STACK_ID), eq("compute"), anyList());
+        doReturn(resourceList).when(stack).getDiskResources();
+        Set<Node> allNodes = Set.of(mock(Node.class));
+        doReturn(allNodes).when(stackUtil).collectNodes(stack);
+        doReturn(allNodes).when(stackUtil).collectNodesWithDiskData(stack);
+        Cluster cluster = mock(Cluster.class);
+        doReturn(cluster).when(stack).getCluster();
+        InstanceMetaData instanceMetaData = mock(InstanceMetaData.class);
+        doReturn("test-instance-fqdn").when(instanceMetaData).getDiscoveryFQDN();
+        doReturn("test-instance-1").when(instanceMetaData).getInstanceId();
+        List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
+        doReturn(instanceMetaDataList).when(stack).getInstanceMetaDataAsList();
+        Map<String, Map<String, String>> fstabInformation = Map.of("test-instance-fqdn", Map.of("uuids", "test-uuid", "fstab", "test-fstab"));
+        doReturn(fstabInformation).when(hostOrchestrator).resizeDisksOnNodes(anyList(), anySet(), anySet(), any());
+        VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
+        doReturn("test-instance-fqdn").when(volumeSetAttributes).getDiscoveryFQDN();
+        doReturn(Optional.of(volumeSetAttributes)).when(resourceAttributeUtil).getTypedAttributes(any(), eq(VolumeSetAttributes.class));
+
+        underTest.resizeDisksAndUpdateFstab(stack, "compute");
+        verify(resourceService).findAllByStackIdAndInstanceGroupAndResourceTypeIn(STACK_ID, "compute", List.of(ResourceType.AWS_VOLUMESET));
+        verify(gatewayConfigService).getAllGatewayConfigs(stack);
+        verify(hostOrchestrator).resizeDisksOnNodes(anyList(), anySet(), anySet(), any());
+        verify(resourceService).saveAll(resourceList);
+    }
+
+    @Test
+    void testResizeDisksAndUpdateFstabException() throws CloudbreakOrchestratorFailedException {
+        Stack stack = mock(Stack.class);
+        doReturn(ResourceType.AWS_VOLUMESET).when(stack).getDiskResourceType();
+        doReturn(STACK_ID).when(stack).getId();
+        Resource resource = mock(Resource.class);
+        doReturn("test-instance-1").when(resource).getInstanceId();
+        List<Resource> resourceList = List.of(resource);
+        doReturn(resourceList).when(resourceService).findAllByStackIdAndInstanceGroupAndResourceTypeIn(eq(STACK_ID), eq("compute"), anyList());
+        Set<Node> allNodes = Set.of(mock(Node.class));
+        doReturn(allNodes).when(stackUtil).collectNodes(stack);
+        doReturn(allNodes).when(stackUtil).collectNodesWithDiskData(stack);
+        Cluster cluster = mock(Cluster.class);
+        doReturn(cluster).when(stack).getCluster();
+
+        doThrow(new CloudbreakOrchestratorFailedException("Test Exception")).when(hostOrchestrator).resizeDisksOnNodes(anyList(), anySet(), anySet(), any());
+
+        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class,
+                () -> underTest.resizeDisksAndUpdateFstab(stack, "compute"));
+        verify(resourceService).findAllByStackIdAndInstanceGroupAndResourceTypeIn(STACK_ID, "compute", List.of(ResourceType.AWS_VOLUMESET));
+        verify(gatewayConfigService).getAllGatewayConfigs(stack);
+        verify(hostOrchestrator).resizeDisksOnNodes(anyList(), anySet(), anySet(), any());
+        assertEquals("Test Exception", exception.getMessage());
     }
 }

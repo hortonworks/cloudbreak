@@ -303,4 +303,9 @@ public class YarnResourceConnector implements ResourceConnector {
     public void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword) {
         LOGGER.info("Update database root password is not implemented on YARN!");
     }
+
+    @Override
+    public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
 }

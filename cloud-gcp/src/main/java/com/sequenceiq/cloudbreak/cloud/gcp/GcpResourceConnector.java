@@ -61,6 +61,11 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
+    public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+
+    @Override
     public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext auth, CloudStack stack, PersistenceNotifier persistenceNotifier)
             throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
