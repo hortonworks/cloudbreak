@@ -53,6 +53,7 @@ net.ipv6.conf.lo.disable_ipv6:
     - group: root
     - mode: 700
     - source: salt://freeipa/scripts/update_cnames.sh
+    - template: jinja
 
 /opt/salt/scripts/repair.sh:
   file.managed:
