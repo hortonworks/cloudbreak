@@ -5,7 +5,9 @@ tests:
       host_group: compute,
       scale_up_target: 5,
       scale_down_target: 3,
-      times: 3
+      times: 3,
+      aws_scaling_time: 6,
+      azure_scaling_time: 8
     }
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXStopStartScaleTest

@@ -56,6 +56,13 @@ public class DistroXStopStartScaleTest extends AbstractE2ETest {
         AtomicReference<List<String>> instancesToStop = new AtomicReference<>();
         DistroXScaleTestParameters params = new DistroXScaleTestParameters(iTestContext.getCurrentXmlTest().getAllParameters());
 
+        long expectedNumber;
+        if (testContext.commonCloudProperties().getCloudProvider().equalsIgnoreCase("AZURE")) {
+            expectedNumber = params.getAzureScalingTime();
+        } else {
+            expectedNumber = params.getAwsScalingTime();
+        }
+
         if (params.getTimes() < 1) {
             throw new TestFailException("Test should execute at least 1 round of scaling");
         }
@@ -71,22 +78,22 @@ public class DistroXStopStartScaleTest extends AbstractE2ETest {
                 })
                 .when(distroXTestClient.scaleStopInstances())
                 .awaitForFlow()
-                .then(new DistroxStopStartScaleDurationAssertions(6, false))
+                .then(new DistroxStopStartScaleDurationAssertions(expectedNumber, false))
                 .when(distroXTestClient.scaleStartInstances(params.getHostGroup(), params.getScaleUpTarget()))
                 .awaitForFlow()
                 .when(distroXTestClient.get())
-                .then(new DistroxStopStartScaleDurationAssertions(6, true));
+                .then(new DistroxStopStartScaleDurationAssertions(expectedNumber, true));
         IntStream.range(1, params.getTimes())
                 .forEach(i -> {
                             testContext
                                     .given(DistroXTestDto.class)
                                     .when(distroXTestClient.scaleStopInstances())
                                     .awaitForFlow()
-                                    .then(new DistroxStopStartScaleDurationAssertions(6, false))
+                                    .then(new DistroxStopStartScaleDurationAssertions(expectedNumber, false))
                                     .when(distroXTestClient.scaleStartInstances(params.getHostGroup(), params.getScaleUpTarget()))
                                     .awaitForFlow()
                                     .when(distroXTestClient.get())
-                                    .then(new DistroxStopStartScaleDurationAssertions(6, true));
+                                    .then(new DistroxStopStartScaleDurationAssertions(expectedNumber, true));
                         }
                 );
         testContext.given(DistroXTestDto.class).validate();
