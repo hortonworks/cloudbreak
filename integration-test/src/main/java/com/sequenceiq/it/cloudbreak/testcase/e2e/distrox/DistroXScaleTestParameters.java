@@ -15,6 +15,10 @@ public class DistroXScaleTestParameters {
 
     private static final String SCALE_UP_TARGET = "scale_up_target";
 
+    private static final String AWS_SCALING_TIME = "aws_scaling_time";
+
+    private static final String AZURE_SCALING_TIME = "azure_scaling_time";
+
     private static final String SCALE_DOWN_TARGET = "scale_down_target";
 
     private static final String IRRELEVANT_HOST_GROUP = "irrelevant_host_group";
@@ -24,6 +28,8 @@ public class DistroXScaleTestParameters {
     private static final String THRESHOLD = "threshold";
 
     private static final String DEFAULT_TIMES = "2";
+
+    private static final String DEFAULT_SCALING_TIME = "6";
 
     private static final String DEFAULT_SCALE_UP_TARGET = "6";
 
@@ -38,6 +44,10 @@ public class DistroXScaleTestParameters {
     private static final String DEFAULT_THRESHOLD = "0";
 
     private int times;
+
+    private long awsScalingTime;
+
+    private long azureScalingTime;
 
     private int scaleUpTarget;
 
@@ -59,14 +69,32 @@ public class DistroXScaleTestParameters {
         setIrrelevantHostGroup(allParameters.getOrDefault(IRRELEVANT_HOST_GROUP, DEFAULT_IRRELEVANT_HOST_GROUP));
         setAdjustmentType(allParameters.getOrDefault(ADJUSTMENT_TYPE, DEFAULT_ADJUSTMENT_TYPE));
         setThreshold(Long.parseLong(allParameters.getOrDefault(THRESHOLD, DEFAULT_THRESHOLD)));
+        setAwsScalingTime(Long.parseLong(allParameters.getOrDefault(AWS_SCALING_TIME, DEFAULT_SCALING_TIME)));
+        setAzureScalingTime(Long.parseLong(allParameters.getOrDefault(AZURE_SCALING_TIME, DEFAULT_SCALING_TIME)));
     }
 
     public int getScaleUpTarget() {
         return scaleUpTarget;
     }
 
+    public long getAwsScalingTime() {
+        return awsScalingTime;
+    }
+
+    public long getAzureScalingTime() {
+        return azureScalingTime;
+    }
+
     public void setScaleUpTarget(int scaleUpTarget) {
         this.scaleUpTarget = scaleUpTarget;
+    }
+
+    public void setAwsScalingTime(long awsScalingTime) {
+        this.awsScalingTime = awsScalingTime;
+    }
+
+    public void setAzureScalingTime(long azureScalingTime) {
+        this.azureScalingTime = azureScalingTime;
     }
 
     public int getScaleDownTarget() {
