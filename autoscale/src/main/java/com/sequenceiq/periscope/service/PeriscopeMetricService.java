@@ -1,10 +1,11 @@
 package com.sequenceiq.periscope.service;
 
 import static com.sequenceiq.periscope.domain.MetricType.CLUSTER_MANAGER_API_INVOCATION;
+import static com.sequenceiq.periscope.domain.MetricType.SCALING_ACTIVITY_DURATION;
 import static com.sequenceiq.periscope.domain.MetricType.YARN_API_INVOCATION;
+import static java.time.Instant.now;
 import static java.util.Objects.isNull;
 
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
@@ -61,12 +62,17 @@ public class PeriscopeMetricService extends AbstractMetricService {
     }
 
     public void recordClusterManagerInvocation(Cluster cluster, long startMillis) {
-        long duration = Instant.now().toEpochMilli() - startMillis;
+        long duration = now().toEpochMilli() - startMillis;
         recordTimer(duration, CLUSTER_MANAGER_API_INVOCATION, createTags(cluster));
     }
 
     public void recordYarnInvocation(Cluster cluster, long startMillis) {
-        long duration = Instant.now().toEpochMilli() - startMillis;
+        long duration = now().toEpochMilli() - startMillis;
         recordTimer(duration, YARN_API_INVOCATION, createTags(cluster));
+    }
+
+    public void recordScalingAtivityDuration(Cluster cluster, long startMillis) {
+        long duration = now().toEpochMilli() - startMillis;
+        recordTimer(duration, SCALING_ACTIVITY_DURATION, createTags(cluster));
     }
 }

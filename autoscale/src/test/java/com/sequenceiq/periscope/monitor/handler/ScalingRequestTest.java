@@ -11,7 +11,6 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -53,6 +52,7 @@ import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.MetricType;
+import com.sequenceiq.periscope.domain.ScalingActivity;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.model.ScalingAdjustmentType;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
@@ -285,12 +285,15 @@ public class ScalingRequestTest {
 
         lenient().doNothing().when(metricService).incrementMetricCounter(MetricType.CLUSTER_UPSCALE_TRIGGERED);
         lenient().doNothing().when(metricService).incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_TRIGGERED);
+        lenient().doNothing().when(metricService).recordScalingAtivityDuration(any(Cluster.class), anyLong());
         CloudbreakServiceCrnEndpoints cloudbreakServiceCrnEndpoints = mock(CloudbreakServiceCrnEndpoints.class);
         when(cloudbreakServiceCrnEndpoints.autoscaleEndpoint()).thenReturn(autoscaleV4Endpoint);
         when(cloudbreakCrnClient.withInternalCrn()).thenReturn(cloudbreakServiceCrnEndpoints);
         when(cloudbreakMessagesService.getMessage(anyString(), any(List.class))).thenReturn(TEST_MESSAGE);
         when(cloudbreakMessagesService.getMessageWithArgs(anyString(), any())).thenReturn(TEST_MESSAGE);
-        doNothing().when(scalingActivityService).update(anyLong(), any(FlowIdentifier.class), any(ActivityStatus.class), anyString());
+
+        ScalingActivity scalingActivity = mock(ScalingActivity.class);
+        when(scalingActivityService.update(anyLong(), any(FlowIdentifier.class), any(ActivityStatus.class), anyString())).thenReturn(scalingActivity);
 
         lenient().doCallRealMethod().when(requestLogging).logResponseTime(any(), anyString());
         lenient().doCallRealMethod().when(cloudbreakCommunicator).putStackForCluster(any(Cluster.class), any(UpdateStackV4Request.class));

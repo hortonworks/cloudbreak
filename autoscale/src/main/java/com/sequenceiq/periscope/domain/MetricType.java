@@ -23,6 +23,8 @@ public enum MetricType implements Metric {
     TOTAL_SCALING_ACTIVITIES("total.scaling.activities"),
     STALE_SCALING_ACTIVITY("stale.scaling.activity"),
     SCALING_ACTIVITY_CLEANUP_CANDIDATES("scaling.activity.cleanup.candidates"),
+    SCALING_ACTIVITY_LAST_CLEANUP_INVOCATION("scaling.activity.last.cleanup.invocation"),
+    SCALING_ACTIVITY_DURATION("scaling.activity.duration"),
 
     IPA_USER_SYNC_INVOCATION("ipa.user.sync.invocation"),
     IPA_USER_SYNC_FAILED("ipa.user.sync.failed"),

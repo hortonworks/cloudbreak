@@ -45,6 +45,7 @@ import com.sequenceiq.periscope.common.MessageCode;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.MetricType;
+import com.sequenceiq.periscope.domain.ScalingActivity;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.model.ScalingAdjustmentType;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
@@ -163,6 +164,7 @@ public class ScalingRequest implements Runnable {
         String hostGroup = policy.getHostGroup();
         String statusReason = null;
         ScalingStatus scalingStatus = null;
+        ScalingActivity scalingActivity = null;
         String stackCrn = cluster.getStackCrn();
         String userCrn = cluster.getClusterPertain().getUserCrn();
         FlowIdentifier flowIdentifier = notTriggered();
@@ -176,19 +178,21 @@ public class ScalingRequest implements Runnable {
                 flowIdentifier = cloudbreakCommunicator.putStackStartInstancesForCluster(cluster, populateUpdateStackJson(scalingAdjustment, hostGroup));
             }
             String upscaleTriggerSuccessMsg = messagesService.getMessageWithArgs(AUTOSCALE_UPSCALE_TRIGGER_SUCCESS, scalingAdjustment, scalingAdjustmentType);
-            scalingActivityService.update(scalingActivityId, flowIdentifier, UPSCALE_TRIGGER_SUCCESS, upscaleTriggerSuccessMsg);
+            scalingActivity = scalingActivityService.update(scalingActivityId, flowIdentifier, UPSCALE_TRIGGER_SUCCESS, upscaleTriggerSuccessMsg);
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = getMessageForCBSuccess();
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL);
+            metricService.recordScalingAtivityDuration(scalingActivity.getCluster(), scalingActivity.getStartTime().getTime());
         } catch (RuntimeException e) {
             scalingStatus = ScalingStatus.FAILED;
             statusReason = getMessageForCBException(e);
             String upscaleTriggerFailedMsg = messagesService.getMessageWithArgs(AUTOSCALE_UPSCALE_TRIGGER_FAILURE, e, statusReason);
-            scalingActivityService.update(scalingActivityId, flowIdentifier, UPSCALE_TRIGGER_FAILED, upscaleTriggerFailedMsg);
+            scalingActivity = scalingActivityService.update(scalingActivityId, flowIdentifier, UPSCALE_TRIGGER_FAILED, upscaleTriggerFailedMsg);
             scalingActivityService.setEndTime(scalingActivityId, Instant.now().toEpochMilli());
             LOGGER.error("Couldn't trigger upscaling for host group '{}', cluster '{}', desiredNodeCount '{}', error '{}' ",
                     hostGroup, cluster.getStackCrn(), desiredHostGroupNodeCount, statusReason, e);
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED);
+            metricService.recordScalingAtivityDuration(scalingActivity.getCluster(), scalingActivity.getStartTime().getTime());
         } finally {
             processAutoscalingTriggered(scalingAdjustment, hostGroupNodeCount, statusReason, scalingStatus, scalingAdjustmentType);
         }
@@ -199,6 +203,7 @@ public class ScalingRequest implements Runnable {
         String hostGroup = policy.getHostGroup();
         String statusReason = null;
         ScalingStatus scalingStatus = null;
+        ScalingActivity scalingActivity = null;
         String stackCrn = cluster.getStackCrn();
         String userCrn = cluster.getClusterPertain().getUserCrn();
         try {
@@ -215,18 +220,20 @@ public class ScalingRequest implements Runnable {
                     .putCluster(stackCrn, cluster.getClusterPertain().getUserId(), updateClusterJson);
             scalingStatus = ScalingStatus.SUCCESS;
             String downscaleTriggerSuccessMsg = messagesService.getMessageWithArgs(AUTOSCALE_DOWNSCALE_TRIGGER_SUCCESS, scalingAdjustment);
-            scalingActivityService.update(scalingActivityId, flowIdentifier, DOWNSCALE_TRIGGER_SUCCESS, downscaleTriggerSuccessMsg);
+            scalingActivity = scalingActivityService.update(scalingActivityId, flowIdentifier, DOWNSCALE_TRIGGER_SUCCESS, downscaleTriggerSuccessMsg);
             statusReason = getMessageForCBSuccess();
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_SUCCESSFUL);
+            metricService.recordScalingAtivityDuration(scalingActivity.getCluster(), scalingActivity.getStartTime().getTime());
         } catch (Exception e) {
             scalingStatus = ScalingStatus.FAILED;
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_FAILED);
             statusReason = getMessageForCBException(e);
             String downscaleTriggerFailedMsg = messagesService.getMessageWithArgs(AUTOSCALE_DOWNSCALE_TRIGGER_FAILURE, e, statusReason);
-            scalingActivityService.update(scalingActivityId, notTriggered(), DOWNSCALE_TRIGGER_FAILED, downscaleTriggerFailedMsg);
+            scalingActivity = scalingActivityService.update(scalingActivityId, notTriggered(), DOWNSCALE_TRIGGER_FAILED, downscaleTriggerFailedMsg);
             scalingActivityService.setEndTime(scalingActivityId, Instant.now().toEpochMilli());
             LOGGER.error("Couldn't trigger downscaling for host group '{}', cluster '{}', desiredNodeCount '{}', error '{}' ",
                     hostGroup, cluster.getStackCrn(), desiredHostGroupNodeCount, statusReason, e);
+            metricService.recordScalingAtivityDuration(scalingActivity.getCluster(), scalingActivity.getStartTime().getTime());
         } finally {
             processAutoscalingTriggered(scalingAdjustment, totalNodes, statusReason, scalingStatus, scalingAdjustmentType);
         }
@@ -237,6 +244,7 @@ public class ScalingRequest implements Runnable {
         String hostGroup = policy.getHostGroup();
         String statusReason = null;
         ScalingStatus scalingStatus = null;
+        ScalingActivity scalingActivity = null;
         FlowIdentifier flowIdentifier = notTriggered();
         try {
             LOGGER.info("Sending request to remove  nodeIdCount '{}', nodeId(s) '{}' from host group '{}', cluster '{}', user '{}'",
@@ -249,20 +257,22 @@ public class ScalingRequest implements Runnable {
             }
             String downscaleTriggerSuccessMsg = messagesService.getMessageWithArgs(AUTOSCALE_DOWNSCALE_TRIGGER_SUCCESS_NODE_LIST, decommissionNodeIds,
                     scalingAdjustmentType);
-            scalingActivityService.update(scalingActivityId, flowIdentifier, DOWNSCALE_TRIGGER_SUCCESS, downscaleTriggerSuccessMsg);
+            scalingActivity = scalingActivityService.update(scalingActivityId, flowIdentifier, DOWNSCALE_TRIGGER_SUCCESS, downscaleTriggerSuccessMsg);
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = getMessageForCBSuccess();
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_SUCCESSFUL);
+            metricService.recordScalingAtivityDuration(scalingActivity.getCluster(), scalingActivity.getStartTime().getTime());
         } catch (Exception e) {
             scalingStatus = ScalingStatus.FAILED;
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_FAILED);
             statusReason = getMessageForCBException(e);
             String downscaleTriggerFailureMsg = messagesService.getMessageWithArgs(AUTOSCALE_DOWNSCALE_TRIGGER_FAILURE, e, statusReason);
-            scalingActivityService.update(scalingActivityId, flowIdentifier, DOWNSCALE_TRIGGER_FAILED, downscaleTriggerFailureMsg);
+            scalingActivity = scalingActivityService.update(scalingActivityId, flowIdentifier, DOWNSCALE_TRIGGER_FAILED, downscaleTriggerFailureMsg);
             scalingActivityService.setEndTime(scalingActivityId, Instant.now().toEpochMilli());
             LOGGER.error("Couldn't trigger decommissioning for host group '{}', cluster '{}', decommissionNodeCount '{}', " +
                             "decommissionNodeIds '{}', error '{}' ", hostGroup, cluster.getStackCrn(), decommissionNodeIds.size(),
                     decommissionNodeIds, statusReason, e);
+            metricService.recordScalingAtivityDuration(scalingActivity.getCluster(), scalingActivity.getStartTime().getTime());
         } finally {
             processAutoscalingTriggered(-decommissionNodeIds.size(), existingHostGroupNodeCount, statusReason, scalingStatus, scalingAdjustmentType);
         }

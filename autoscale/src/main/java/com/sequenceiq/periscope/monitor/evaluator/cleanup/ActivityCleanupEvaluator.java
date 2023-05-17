@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.monitor.evaluator.cleanup;
 
 import static com.sequenceiq.periscope.domain.MetricType.SCALING_ACTIVITY_CLEANUP_CANDIDATES;
+import static com.sequenceiq.periscope.domain.MetricType.SCALING_ACTIVITY_LAST_CLEANUP_INVOCATION;
 import static com.sequenceiq.periscope.domain.MetricType.STALE_SCALING_ACTIVITY;
 import static com.sequenceiq.periscope.domain.MetricType.TOTAL_SCALING_ACTIVITIES;
 
@@ -73,11 +74,17 @@ public class ActivityCleanupEvaluator extends EvaluatorExecutor {
                 scalingActivityService.deleteScalingActivityByIds(scalingActivities.getActivityIds());
             }
             calculateUnprocessedScalingActivityMetrics(scalingActivities.getActivityIds().size());
+            caclulateLastCleanupInvocation(scalingActivities);
         } catch (Exception e) {
             LOGGER.error("Exception occurred when executing ScalingActivityCleanupEvaluator: {}", scalingActivities.getId(), e);
         } finally {
             LOGGER.info("Finished executing ScalingActivityCleanupEvaluator: {}", scalingActivities.getId());
         }
+    }
+
+    private void caclulateLastCleanupInvocation(ScalingActivities activties) {
+        LOGGER.info("Submitting last invocation of activity cleanup for activity count: {}", activties.getActivityIds().size());
+        metricService.gauge(SCALING_ACTIVITY_LAST_CLEANUP_INVOCATION, scalingActivities.getLastEvaluated());
     }
 
     private void calculateUnprocessedScalingActivityMetrics(long totalCleanupCandidates) {

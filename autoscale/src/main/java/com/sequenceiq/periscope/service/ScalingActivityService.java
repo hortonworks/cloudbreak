@@ -96,14 +96,14 @@ public class ScalingActivityService implements AuthorizationResourceCrnProvider,
         return save(scalingActivity);
     }
 
-    public void update(Long activityId, FlowIdentifier flowIdentifier, ActivityStatus activityStatus, String reason) {
+    public ScalingActivity update(Long activityId, FlowIdentifier flowIdentifier, ActivityStatus activityStatus, String reason) {
         ScalingActivity scalingActivity = scalingActivityRepository.findById(activityId)
                 .orElseThrow(NotFoundException.notFound("ScalingActivity", activityId));
         scalingActivity.setFlowId(flowIdentifier.getPollableId());
         scalingActivity.setActivityStatus(activityStatus);
         scalingActivity.setScalingActivityReason(reason);
         LOGGER.info("Updating ScalingActivity: {} with FlowInformation and ActivityStatus: {}", activityId, activityStatus);
-        save(scalingActivity);
+        return save(scalingActivity);
     }
 
     public ScalingActivity findByOperationIdAndClusterCrn(String operationId, String clusterCrn) {
