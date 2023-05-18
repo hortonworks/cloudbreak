@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.service.secret.vault;
 
-import static com.sequenceiq.cloudbreak.service.secret.service.SecretService.BACKUP;
-import static com.sequenceiq.cloudbreak.service.secret.service.SecretService.SECRET;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +20,7 @@ import org.springframework.vault.support.Versioned;
 import com.sequenceiq.cloudbreak.service.secret.conf.VaultConfig;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.vault.VaultConstants;
 
 @Component("VaultKvV2Engine")
 @ConditionalOnBean(VaultConfig.class)
@@ -47,11 +45,13 @@ public class VaultKvV2Engine extends AbstractVaultEngine<VaultKvV2Engine> {
     }
 
     @Override
+    @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, allEntries = true)
     public String put(String path, String value) {
-        return put(path, Collections.singletonMap(SECRET, value));
+        return put(path, Collections.singletonMap(VaultConstants.FIELD_SECRET, value));
     }
 
     @Override
+    @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, allEntries = true)
     public String put(String path, Map<String, String> value) {
         LOGGER.info("Storing secret to {}", path);
         VaultSecret secret = convertToVaultSecret(enginePath, appPath + path);
@@ -68,11 +68,12 @@ public class VaultKvV2Engine extends AbstractVaultEngine<VaultKvV2Engine> {
     }
 
     @Override
-    @Cacheable(cacheNames = "vaultCache")
-    public String get(@NotNull String secret) {
+    @Cacheable(cacheNames = VaultConstants.CACHE_NAME)
+    public String get(@NotNull String secret, @NotNull String field) {
         return Optional.ofNullable(convertToVaultSecret(secret)).map(s -> {
             Versioned<Map<String, Object>> response = template.opsForVersionedKeyValue(s.getEnginePath()).get(s.getPath());
-            return response != null && response.getData() != null ? String.valueOf(response.getData().get(SECRET)) : null;
+            return response != null && response.getData() != null && response.getData().containsKey(field) ?
+                    String.valueOf(response.getData().get(field)) : null;
         }).orElse(null);
     }
 
@@ -82,18 +83,18 @@ public class VaultKvV2Engine extends AbstractVaultEngine<VaultKvV2Engine> {
             Versioned<Map<String, Object>> response = template.opsForVersionedKeyValue(s.getEnginePath()).get(s.getPath());
             logRotationMeta(response);
             return response != null && response.getData() != null ?
-                    new RotationSecret(String.valueOf(response.getData().get(SECRET)),
-                            String.valueOf(response.getData().get(BACKUP))) : null;
+                    new RotationSecret(String.valueOf(response.getData().get(VaultConstants.FIELD_SECRET)),
+                            String.valueOf(response.getData().get(VaultConstants.FIELD_BACKUP))) : null;
         }).orElse(null);
     }
 
     private void logRotationMeta(Versioned<Map<String, Object>> response) {
-        boolean ongoingRotation = response.getData().get(BACKUP) != null;
+        boolean ongoingRotation = response.getData().get(VaultConstants.FIELD_BACKUP) != null;
         LOGGER.info("Backup value is set: {}. Rotation secret metadata: {}", ongoingRotation, response.getMetadata());
     }
 
     @Override
-    @CacheEvict(cacheNames = "vaultCache", allEntries = true)
+    @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, allEntries = true)
     public void delete(String secret) {
         Optional.ofNullable(convertToVaultSecret(secret)).ifPresent(s -> deleteAllVersionsOfSecret(s.getEnginePath(), s.getPath()));
     }
@@ -115,7 +116,7 @@ public class VaultKvV2Engine extends AbstractVaultEngine<VaultKvV2Engine> {
     }
 
     @Override
-    @CacheEvict(cacheNames = "vaultCache", allEntries = true)
+    @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, allEntries = true)
     public void cleanup(String path) {
         deleteAllVersionsOfSecret(enginePath, appPath + path);
     }

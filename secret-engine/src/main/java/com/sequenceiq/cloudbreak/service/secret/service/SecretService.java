@@ -26,14 +26,12 @@ import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV1Engine;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
+import com.sequenceiq.cloudbreak.vault.ThreadBasedVaultReadFieldProvider;
+import com.sequenceiq.cloudbreak.vault.VaultConstants;
 
 @Service
 @ConditionalOnBean({VaultKvV2Engine.class, VaultKvV1Engine.class, VaultConfig.class})
 public class SecretService {
-
-    public static final String SECRET = "secret";
-
-    public static final String BACKUP = "backup";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretService.class);
 
@@ -104,7 +102,7 @@ public class SecretService {
     public String updateRotation(String secret, String oldValue, String newValue) throws Exception {
         String fullPath = convertToExternal(secret).getSecretPath();
         String result = put(fullPath.split(persistentEngine.appPath(), 2)[1],
-                Map.of(SECRET, newValue, BACKUP, oldValue));
+                Map.of(VaultConstants.FIELD_SECRET, newValue, VaultConstants.FIELD_BACKUP, oldValue));
         LOGGER.info("Secret on path {} have been updated.", fullPath);
         return result;
     }
@@ -144,7 +142,7 @@ public class SecretService {
 
         String response = vaultRetryService.tryReadingVault(() -> {
             return getFirstEngineStream(secret)
-                    .map(e -> e.get(secret))
+                    .map(e -> e.get(secret, ThreadBasedVaultReadFieldProvider.getFieldName(secret)))
                     .filter(Objects::nonNull)
                     .orElse(null);
         });

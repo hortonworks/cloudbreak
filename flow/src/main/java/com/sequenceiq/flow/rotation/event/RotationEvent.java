@@ -4,6 +4,8 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
@@ -14,6 +16,8 @@ import com.sequenceiq.flow.rotation.RotationFlowContext;
 
 public class RotationEvent extends BaseFlowEvent {
 
+    @JsonSerialize(using = SecretTypeSerializer.class)
+    @JsonDeserialize(using = SecretTypeDeserializer.class)
     private final SecretType secretType;
 
     private final RotationFlowExecutionType executionType;
