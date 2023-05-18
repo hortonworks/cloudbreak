@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.type.CloudbreakSecretType;
+import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 
 @ExtendWith(MockitoExtension.class)
 public class SecretRotationServiceTest {
@@ -68,7 +69,7 @@ public class SecretRotationServiceTest {
     @Test
     public void testRotate() {
         when(rotationContextProvider.getContexts(anyString())).thenReturn(Map.of(
-                SecretRotationStep.VAULT, new TestRotationContext("resource"),
+                SecretRotationStep.VAULT, VaultRotationContext.builder().withResourceCrn("resource").withSecretGenerators(Map.of()).build(),
                 SecretRotationStep.CM_USER, new TestRotationContext("resource")));
         doNothing().when(rotationExecutor).rotate(any());
 
@@ -81,7 +82,7 @@ public class SecretRotationServiceTest {
     @Test
     public void testFinalize() {
         when(rotationContextProvider.getContexts(anyString())).thenReturn(Map.of(
-                SecretRotationStep.VAULT, new TestRotationContext("resource"),
+                SecretRotationStep.VAULT, VaultRotationContext.builder().withResourceCrn("resource").withSecretGenerators(Map.of()).build(),
                 SecretRotationStep.CM_USER, new TestRotationContext("resource")));
         doNothing().when(rotationExecutor).finalize(any());
 
@@ -94,7 +95,7 @@ public class SecretRotationServiceTest {
     @Test
     public void testRollback() {
         when(rotationContextProvider.getContexts(anyString())).thenReturn(Map.of(
-                SecretRotationStep.VAULT, new TestRotationContext("resource"),
+                SecretRotationStep.VAULT, VaultRotationContext.builder().withResourceCrn("resource").withSecretGenerators(Map.of()).build(),
                 SecretRotationStep.CM_USER, new TestRotationContext("resource")));
         doNothing().when(rotationExecutor).rollback(any());
 

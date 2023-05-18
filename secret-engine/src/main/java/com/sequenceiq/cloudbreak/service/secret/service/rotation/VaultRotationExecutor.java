@@ -16,9 +16,9 @@ import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretGenerator;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
-import com.sequenceiq.cloudbreak.service.secret.service.rotation.context.VaultRotationContext;
 
 @Component
 public class VaultRotationExecutor implements RotationExecutor<VaultRotationContext> {
@@ -41,10 +41,15 @@ public class VaultRotationExecutor implements RotationExecutor<VaultRotationCont
 
     @Override
     public void rotate(VaultRotationContext rotationContext) {
-        rotationContext.getSecretUpdateSupplierMap().forEach((vaultSecret, generator) -> {
+        rotationContext.getSecretGenerators().forEach((vaultSecret, secretGeneratorClass) -> {
             try {
                 if (!secretService.getRotation(vaultSecret).isRotation()) {
-                    secretService.putRotation(vaultSecret, secretGeneratorMap.get(generator).generate());
+                    SecretGenerator secretGenerator = secretGeneratorMap.get(secretGeneratorClass);
+                    Map<String, Object> secretGeneratorArguments = Map.of();
+                    if (rotationContext.getSecretGeneratorArguments().containsKey(secretGeneratorClass)) {
+                        secretGeneratorArguments = rotationContext.getSecretGeneratorArguments().get(secretGeneratorClass);
+                    }
+                    secretService.putRotation(vaultSecret, secretGenerator.generate(secretGeneratorArguments));
                 }
             } catch (Exception e) {
                 LOGGER.error("Error during {} secret rotation.", vaultSecret, e);
@@ -55,7 +60,7 @@ public class VaultRotationExecutor implements RotationExecutor<VaultRotationCont
 
     @Override
     public void rollback(VaultRotationContext rotationContext) {
-        rotationContext.getSecretUpdateSupplierMap().forEach((vaultSecret, generator) -> {
+        rotationContext.getSecretGenerators().forEach((vaultSecret, generator) -> {
             try {
                 RotationSecret rotationSecret = secretService.getRotation(vaultSecret);
                 if (rotationSecret.isRotation()) {
@@ -70,7 +75,7 @@ public class VaultRotationExecutor implements RotationExecutor<VaultRotationCont
 
     @Override
     public void finalize(VaultRotationContext rotationContext) {
-        rotationContext.getSecretUpdateSupplierMap().forEach((vaultSecret, generator) -> {
+        rotationContext.getSecretGenerators().forEach((vaultSecret, generator) -> {
             try {
                 RotationSecret rotationSecret = secretService.getRotation(vaultSecret);
                 if (rotationSecret.isRotation()) {

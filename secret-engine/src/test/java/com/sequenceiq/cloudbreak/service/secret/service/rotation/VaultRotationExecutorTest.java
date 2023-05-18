@@ -19,9 +19,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.rotation.secret.SecretGenerator;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
-import com.sequenceiq.cloudbreak.service.secret.service.rotation.context.VaultRotationContext;
 
 @ExtendWith(MockitoExtension.class)
 public class VaultRotationExecutorTest {
@@ -42,7 +42,7 @@ public class VaultRotationExecutorTest {
         when(secretService.putRotation(anyString(), anyString())).thenReturn("anything");
         when(secretService.getRotation(anyString())).thenReturn(new RotationSecret("new", null));
         VaultRotationContext rotationContext = VaultRotationContext.builder()
-                .withSecretUpdateSupplierMap(Map.of("secret", TestGenerator.class))
+                .withSecretGenerators(Map.of("secret", TestGenerator.class))
                 .build();
         underTest.rotate(rotationContext);
 
@@ -54,7 +54,7 @@ public class VaultRotationExecutorTest {
         when(secretService.update(anyString(), anyString())).thenReturn("anything");
         when(secretService.getRotation(anyString())).thenReturn(new RotationSecret("new", "old"));
         VaultRotationContext rotationContext = VaultRotationContext.builder()
-                .withSecretUpdateSupplierMap(Map.of("secret", TestGenerator.class))
+                .withSecretGenerators(Map.of("secret", TestGenerator.class))
                 .build();
         underTest.finalize(rotationContext);
 
@@ -66,7 +66,7 @@ public class VaultRotationExecutorTest {
         when(secretService.update(anyString(), anyString())).thenReturn("anything");
         when(secretService.getRotation(anyString())).thenReturn(new RotationSecret("new", "old"));
         VaultRotationContext rotationContext = VaultRotationContext.builder()
-                .withSecretUpdateSupplierMap(Map.of("secret", TestGenerator.class))
+                .withSecretGenerators(Map.of("secret", TestGenerator.class))
                 .build();
         underTest.rollback(rotationContext);
 
@@ -78,7 +78,7 @@ public class VaultRotationExecutorTest {
         when(secretService.putRotation(anyString(), anyString())).thenThrow(new Exception("anything"));
         when(secretService.getRotation(anyString())).thenReturn(new RotationSecret("new", null));
         VaultRotationContext rotationContext = VaultRotationContext.builder()
-                .withSecretUpdateSupplierMap(Map.of("secret", TestGenerator.class))
+                .withSecretGenerators(Map.of("secret", TestGenerator.class))
                 .build();
         assertThrows(SecretRotationException.class, () -> underTest.rotate(rotationContext));
     }
@@ -86,7 +86,7 @@ public class VaultRotationExecutorTest {
     public static class TestGenerator implements SecretGenerator {
 
         @Override
-        public String generate() {
+        public String generate(Map<String, Object> arguments) {
             return "secretvalue";
         }
     }

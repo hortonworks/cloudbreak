@@ -1,7 +1,10 @@
 package com.sequenceiq.flow.rotation.service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -16,6 +19,8 @@ import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
+import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
+import com.sequenceiq.cloudbreak.vault.ThreadBasedVaultReadFieldProvider;
 
 @Service
 public class SecretRotationService {
@@ -38,6 +43,12 @@ public class SecretRotationService {
     public void rollbackRotation(SecretType secretType, String resourceId, RotationFlowExecutionType executionType, SecretRotationStep failedStep) {
         if (executionNeeded(executionType, RotationFlowExecutionType.ROLLBACK, resourceId, secretType)) {
             Map<SecretRotationStep, RotationContext> contexts = getContexts(secretType, resourceId);
+            Set<String> affectedSecrets = contexts.entrySet().stream()
+                    .filter(entry -> SecretRotationStep.VAULT.equals(entry.getKey()))
+                    .map(Map.Entry::getValue)
+                    .map(context -> ((VaultRotationContext) context).getSecretGenerators().keySet())
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet());
             List<SecretRotationStep> steps = secretType.getSteps();
             List<SecretRotationStep> reversedSteps;
             if (failedStep != null) {
@@ -46,7 +57,10 @@ public class SecretRotationService {
                 reversedSteps = Lists.reverse(steps);
             }
 
-            reversedSteps.forEach(step -> rotationExecutorMap.get(step).rollback(contexts.get(step)));
+            reversedSteps.forEach(step -> {
+                RotationContext rotationContext = contexts.get(step);
+                ThreadBasedVaultReadFieldProvider.doRollback(affectedSecrets, () -> rotationExecutorMap.get(step).rollback(rotationContext));
+            });
         }
     }
 

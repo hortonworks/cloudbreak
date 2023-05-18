@@ -16,7 +16,7 @@ public interface SecretEngine {
 
     boolean exists(String secret);
 
-    String get(String secret);
+    String get(String secret, String field);
 
     RotationSecret getRotation(String secret);
 
