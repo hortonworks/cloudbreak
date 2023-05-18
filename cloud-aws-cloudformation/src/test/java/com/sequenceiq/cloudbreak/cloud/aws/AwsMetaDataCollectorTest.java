@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -625,5 +626,33 @@ public class AwsMetaDataCollectorTest {
 
         assertThat(result).hasMessage("Serious problem");
         assertThat(result).hasCause(exception);
+    }
+
+    @Test
+    public void testCollectWhenAutoscalingGroupEmptyForAGroupThatHasMetadataOnOurSide() {
+        List<CloudInstance> vms = new ArrayList<>();
+        List<Volume> volumes = new ArrayList<>();
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+        vms.add(new CloudInstance("i-1",
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L,
+                        "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L),
+                instanceAuthentication,
+                "subnet-1",
+                "az1"));
+        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
+        when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
+        when(cloudFormationStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationClient.class), eq("cbgateway")))
+                .thenReturn("cbgateway-AAA");
+        when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingClient.class), eq("cbgateway-AAA")))
+                .thenReturn(List.of());
+        initSubnetsQuery(Map.ofEntries(entry(SUBNET_ID_1, AVAILABILITY_ZONE_1)));
+        AuthenticatedContext ac = authenticatedContext();
+
+        List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, Collections.emptyList(), vms, vms);
+
+        assertEquals(0L, statuses.size());
+        assertTrue(statuses.stream().allMatch(predicate -> CLOUD_INSTANCE_LIFE_CYCLE.equals(predicate.getMetaData().getLifeCycle())));
+        verify(cloudFormationStackUtil, times(0)).createDescribeInstancesRequest(any());
+        verify(amazonEC2Client, times(0)).retryableDescribeInstances(any());
     }
 }
