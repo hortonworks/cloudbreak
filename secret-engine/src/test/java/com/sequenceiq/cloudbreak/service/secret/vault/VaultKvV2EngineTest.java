@@ -20,6 +20,7 @@ import org.springframework.vault.support.Versioned;
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.vault.VaultConstants;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VaultKvV2EngineTest {
@@ -71,14 +72,14 @@ public class VaultKvV2EngineTest {
 
     @Test
     public void testGetNotSecret() {
-        Assert.assertNull(underTest.get("secret"));
+        Assert.assertNull(underTest.get("secret", VaultConstants.FIELD_SECRET));
     }
 
     @Test
     public void testGetNull() {
         when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(null);
 
-        Assert.assertNull(underTest.get(gson.toJson(secret)));
+        Assert.assertNull(underTest.get(gson.toJson(secret), VaultConstants.FIELD_SECRET));
     }
 
     @Test
@@ -86,7 +87,7 @@ public class VaultKvV2EngineTest {
         when(vaultResponse.getData()).thenReturn(null);
         when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(vaultResponse);
 
-        Assert.assertNull(underTest.get(gson.toJson(secret)));
+        Assert.assertNull(underTest.get(gson.toJson(secret), VaultConstants.FIELD_SECRET));
     }
 
     @Test
@@ -94,7 +95,7 @@ public class VaultKvV2EngineTest {
         when(vaultResponse.getData()).thenReturn(Collections.emptyMap());
         when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(vaultResponse);
 
-        Assert.assertEquals("null", underTest.get(gson.toJson(secret)));
+        Assert.assertNull(underTest.get(gson.toJson(secret), VaultConstants.FIELD_SECRET));
     }
 
     @Test
@@ -102,7 +103,8 @@ public class VaultKvV2EngineTest {
         when(vaultResponse.getData()).thenReturn(Collections.singletonMap("secret", "secret/path"));
         when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(vaultResponse);
 
-        Assert.assertEquals("secret/path", underTest.get(gson.toJson(secret)));
+        Assert.assertEquals("secret/path", underTest.get(gson.toJson(secret), VaultConstants.FIELD_SECRET));
+        Assert.assertNull(underTest.get(gson.toJson(secret), VaultConstants.FIELD_BACKUP));
     }
 
     @Test

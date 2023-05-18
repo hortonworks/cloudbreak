@@ -77,7 +77,7 @@ public class SecretServiceTest {
 
     @Test
     public void testGetSecretStringNull() {
-        when(persistentEngine.get(anyString())).thenReturn("null");
+        when(persistentEngine.get(anyString(), anyString())).thenReturn("null");
 
         String result = underTest.get("secret");
 
@@ -90,7 +90,7 @@ public class SecretServiceTest {
 
     @Test
     public void testGetSecretOk() {
-        when(persistentEngine.get(anyString())).thenReturn("value");
+        when(persistentEngine.get(anyString(), anyString())).thenReturn("value");
 
         String result = underTest.get("secret");
 

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.secret.cache;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cache.common.AbstractCacheDefinition;
+import com.sequenceiq.cloudbreak.vault.VaultConstants;
 
 @Service
 public class VaultCache extends AbstractCacheDefinition {
@@ -13,7 +14,7 @@ public class VaultCache extends AbstractCacheDefinition {
 
     @Override
     protected String getName() {
-        return "vaultCache";
+        return VaultConstants.CACHE_NAME;
     }
 
     @Override

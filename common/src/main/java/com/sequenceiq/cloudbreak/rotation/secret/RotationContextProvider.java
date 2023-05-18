@@ -4,7 +4,7 @@ import java.util.Map;
 
 public interface RotationContextProvider {
 
-    Map<SecretRotationStep, RotationContext> getContexts(String resourceId);
+    <C extends RotationContext> Map<SecretRotationStep, C> getContexts(String resourceId);
 
     SecretType getSecret();
 }

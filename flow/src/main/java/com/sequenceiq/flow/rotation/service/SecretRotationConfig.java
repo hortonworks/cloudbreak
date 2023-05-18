@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
@@ -30,7 +31,7 @@ public class SecretRotationConfig {
     private Optional<List<RotationContextProvider>> rotationContextProviders;
 
     @Inject
-    private Optional<List<RotationExecutor>> rotationExecutors;
+    private Optional<List<RotationExecutor<? extends RotationContext>>> rotationExecutors;
 
     @Bean
     public Map<SecretType, RotationContextProvider> rotationContextProviderMap() {
@@ -49,7 +50,7 @@ public class SecretRotationConfig {
     }
 
     @Bean
-    public Map<SecretRotationStep, RotationExecutor> rotationExecutorMap() {
+    public Map<SecretRotationStep, RotationExecutor<? extends RotationContext>> rotationExecutorMap() {
         if (applicationSecretRotationInformation.isPresent() && rotationExecutors.isPresent()) {
             Set<SecretRotationStep> supportedSteps = applicationSecretRotationInformation.get()
                     .supportedSecretTypes()
@@ -57,8 +58,8 @@ public class SecretRotationConfig {
                     .flatMap(enumClass -> Arrays.stream(enumClass.getEnumConstants()))
                     .flatMap(secretType -> secretType.getSteps().stream())
                     .collect(Collectors.toSet());
-            Map<SecretRotationStep, RotationExecutor> bean = new EnumMap<>(SecretRotationStep.class);
-            for (RotationExecutor rotationExecutor : rotationExecutors.get()) {
+            Map<SecretRotationStep, RotationExecutor<? extends RotationContext>> bean = new EnumMap<>(SecretRotationStep.class);
+            for (RotationExecutor<? extends RotationContext> rotationExecutor : rotationExecutors.get()) {
                 if (supportedSteps.contains(rotationExecutor.getType())) {
                     bean.put(rotationExecutor.getType(), rotationExecutor);
                 }

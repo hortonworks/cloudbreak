@@ -16,6 +16,7 @@ import org.springframework.vault.support.VaultResponse;
 
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.vault.VaultConstants;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VaultKvV1EngineTest {
@@ -59,14 +60,14 @@ public class VaultKvV1EngineTest {
 
     @Test
     public void testGetNotSecret() {
-        Assert.assertNull(underTest.get("secret"));
+        Assert.assertNull(underTest.get("secret", VaultConstants.FIELD_SECRET));
     }
 
     @Test
     public void testGetNull() {
         when(template.read(anyString())).thenReturn(null);
 
-        Assert.assertNull(underTest.get(gson.toJson(secret)));
+        Assert.assertNull(underTest.get(gson.toJson(secret), VaultConstants.FIELD_SECRET));
     }
 
     @Test
@@ -74,7 +75,7 @@ public class VaultKvV1EngineTest {
         when(vaultResponse.getData()).thenReturn(null);
         when(template.read(anyString())).thenReturn(vaultResponse);
 
-        Assert.assertNull(underTest.get(gson.toJson(secret)));
+        Assert.assertNull(underTest.get(gson.toJson(secret), VaultConstants.FIELD_SECRET));
     }
 
     @Test
@@ -82,7 +83,7 @@ public class VaultKvV1EngineTest {
         when(vaultResponse.getData()).thenReturn(Collections.emptyMap());
         when(template.read(anyString())).thenReturn(vaultResponse);
 
-        Assert.assertEquals("null", underTest.get(gson.toJson(secret)));
+        Assert.assertNull(underTest.get(gson.toJson(secret), VaultConstants.FIELD_SECRET));
     }
 
     @Test
@@ -90,7 +91,8 @@ public class VaultKvV1EngineTest {
         when(vaultResponse.getData()).thenReturn(Collections.singletonMap("secret", "secret/path"));
         when(template.read(anyString())).thenReturn(vaultResponse);
 
-        Assert.assertEquals("secret/path", underTest.get(gson.toJson(secret)));
+        Assert.assertEquals("secret/path", underTest.get(gson.toJson(secret), VaultConstants.FIELD_SECRET));
+        Assert.assertNull(underTest.get(gson.toJson(secret), VaultConstants.FIELD_BACKUP));
     }
 
     @Test

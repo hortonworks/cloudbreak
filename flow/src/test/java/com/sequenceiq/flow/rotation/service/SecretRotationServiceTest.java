@@ -25,12 +25,13 @@ import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.type.CloudbreakSecretType;
+import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 
 @ExtendWith(MockitoExtension.class)
 public class SecretRotationServiceTest {
 
     @Mock
-    private RotationExecutor rotationExecutor;
+    private RotationExecutor<? extends RotationContext> rotationExecutor;
 
     @Mock
     private RotationContextProvider rotationContextProvider;
@@ -67,41 +68,42 @@ public class SecretRotationServiceTest {
 
     @Test
     public void testRotate() {
-        when(rotationContextProvider.getContexts(anyString())).thenReturn(Map.of(
-                SecretRotationStep.VAULT, new TestRotationContext("resource"),
-                SecretRotationStep.CM_USER, new TestRotationContext("resource")));
-        doNothing().when(rotationExecutor).rotate(any());
+        generateTestContexts();
+        doNothing().when(rotationExecutor).executeRotate(any());
 
         underTest.executeRotation(CloudbreakSecretType.CLOUDBREAK_CM_ADMIN_PASSWORD, "resource", null);
 
         verify(rotationContextProvider).getContexts(anyString());
-        verify(rotationExecutor, times(2)).rotate(any());
+        verify(rotationExecutor, times(2)).executeRotate(any());
     }
 
     @Test
     public void testFinalize() {
-        when(rotationContextProvider.getContexts(anyString())).thenReturn(Map.of(
-                SecretRotationStep.VAULT, new TestRotationContext("resource"),
-                SecretRotationStep.CM_USER, new TestRotationContext("resource")));
-        doNothing().when(rotationExecutor).finalize(any());
+        generateTestContexts();
+        doNothing().when(rotationExecutor).executeFinalize(any());
 
         underTest.finalizeRotation(CloudbreakSecretType.CLOUDBREAK_CM_ADMIN_PASSWORD, "resource", null);
 
         verify(rotationContextProvider).getContexts(anyString());
-        verify(rotationExecutor, times(2)).finalize(any());
+        verify(rotationExecutor, times(2)).executeFinalize(any());
     }
 
     @Test
     public void testRollback() {
-        when(rotationContextProvider.getContexts(anyString())).thenReturn(Map.of(
-                SecretRotationStep.VAULT, new TestRotationContext("resource"),
-                SecretRotationStep.CM_USER, new TestRotationContext("resource")));
-        doNothing().when(rotationExecutor).rollback(any());
+        generateTestContexts();
+        doNothing().when(rotationExecutor).executeRollback(any());
 
         underTest.rollbackRotation(CloudbreakSecretType.CLOUDBREAK_CM_ADMIN_PASSWORD, "resource", null, SecretRotationStep.VAULT);
 
         verify(rotationContextProvider).getContexts(anyString());
-        verify(rotationExecutor).rollback(any());
+        verify(rotationExecutor).executeRollback(any());
+    }
+
+    private void generateTestContexts() {
+        Map<SecretRotationStep, RotationContext> contextMap = Map.of(
+                SecretRotationStep.VAULT, VaultRotationContext.builder().withResourceCrn("resource").withVaultPathSecretMap(Map.of()).build(),
+                SecretRotationStep.CM_USER, new TestRotationContext("resource"));
+        when(rotationContextProvider.getContexts(anyString())).thenReturn(contextMap);
     }
 
     public static class TestRotationContext extends RotationContext {
