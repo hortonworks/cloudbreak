@@ -23,7 +23,7 @@ public class ClouderaManagementServiceReportsManagerRdsConfigProvider extends Ab
     private String db;
 
     @Override
-    protected String getDbUser() {
+    public String getDbUser() {
         return userName;
     }
 
@@ -43,7 +43,7 @@ public class ClouderaManagementServiceReportsManagerRdsConfigProvider extends Ab
     }
 
     @Override
-    protected DatabaseType getRdsType() {
+    public DatabaseType getRdsType() {
         return DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_REPORTS_MANAGER;
     }
 

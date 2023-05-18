@@ -38,6 +38,16 @@ public class SchemaRegistryServiceConfigProvider extends AbstractRdsRoleConfigPr
     static final String RANGER_PLUGIN_SR_SERVICE_NAME = "ranger.plugin.schema-registry.service.name";
 
     @Override
+    public String dbUserKey() {
+        return DATABASE_USER;
+    }
+
+    @Override
+    public String dbPasswordKey() {
+        return DATABASE_PASSWORD;
+    }
+
+    @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
                 "" : source.getBlueprintView().getProcessor().getStackVersion();
@@ -86,7 +96,7 @@ public class SchemaRegistryServiceConfigProvider extends AbstractRdsRoleConfigPr
     }
 
     @Override
-    protected DatabaseType dbType() {
+    public DatabaseType dbType() {
         return DatabaseType.REGISTRY;
     }
 }

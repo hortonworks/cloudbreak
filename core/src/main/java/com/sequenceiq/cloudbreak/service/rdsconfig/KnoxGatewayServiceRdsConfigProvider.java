@@ -21,7 +21,7 @@ public class KnoxGatewayServiceRdsConfigProvider extends AbstractRdsConfigProvid
     private String db;
 
     @Override
-    protected String getDbUser() {
+    public String getDbUser() {
         return userName;
     }
 
@@ -41,7 +41,7 @@ public class KnoxGatewayServiceRdsConfigProvider extends AbstractRdsConfigProvid
     }
 
     @Override
-    protected DatabaseType getRdsType() {
+    public DatabaseType getRdsType() {
         return DatabaseType.KNOX_GATEWAY;
     }
 

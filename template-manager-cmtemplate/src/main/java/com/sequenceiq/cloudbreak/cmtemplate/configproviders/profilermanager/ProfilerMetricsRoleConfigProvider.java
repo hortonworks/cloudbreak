@@ -30,6 +30,16 @@ public class ProfilerMetricsRoleConfigProvider extends AbstractRdsRoleConfigProv
     public static final String PROFILER_METRICS_DATABASE_JDBC_URL_OVERRIDE = "profiler_metrics_database_jdbc_url_override";
 
     @Override
+    public String dbUserKey() {
+        return PROFILER_METRICS_DATABASE_USER;
+    }
+
+    @Override
+    public String dbPasswordKey() {
+        return PROFILER_METRICS_DATABASE_PASSWORD;
+    }
+
+    @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         if (ProfilerManagerRoles.PROFILER_METRICS_AGENT.equals(roleType)) {
@@ -59,7 +69,7 @@ public class ProfilerMetricsRoleConfigProvider extends AbstractRdsRoleConfigProv
     }
 
     @Override
-    protected DatabaseType dbType() {
+    public DatabaseType dbType() {
         return DatabaseType.PROFILER_METRIC;
     }
 }

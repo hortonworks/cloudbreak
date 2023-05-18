@@ -43,6 +43,16 @@ public class KnoxServiceConfigProvider extends AbstractRdsRoleConfigProvider imp
     private static final String GATEWAY_DATABASE_SSL_TRUSTSTORE_FILE = "gateway_database_ssl_truststore_file";
 
     @Override
+    public String dbUserKey() {
+        return DATABASE_USER;
+    }
+
+    @Override
+    public String dbPasswordKey() {
+        return DATABASE_PASSWORD;
+    }
+
+    @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> configList = new ArrayList<>();
         LOGGER.info("The productDetailsView is: {} ", source.getProductDetailsView());
@@ -70,7 +80,7 @@ public class KnoxServiceConfigProvider extends AbstractRdsRoleConfigProvider imp
     }
 
     @Override
-    protected DatabaseType dbType() {
+    public DatabaseType dbType() {
         return DatabaseType.KNOX_GATEWAY;
     }
 

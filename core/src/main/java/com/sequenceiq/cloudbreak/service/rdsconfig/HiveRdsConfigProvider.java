@@ -60,7 +60,7 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected String getDbUser() {
+    public String getDbUser() {
         return hiveDbUser;
     }
 
@@ -80,7 +80,7 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected DatabaseType getRdsType() {
+    public DatabaseType getRdsType() {
         return DatabaseType.HIVE;
     }
 

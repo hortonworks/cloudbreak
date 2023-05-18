@@ -35,6 +35,16 @@ public class NifiRegistryRoleConfigProvider extends AbstractRdsRoleConfigProvide
     static final String DRIVER_DIRECTORY = "nifi.registry.db.driver.directory";
 
     @Override
+    public String dbUserKey() {
+        return DATABASE_USER;
+    }
+
+    @Override
+    public String dbPasswordKey() {
+        return DATABASE_PASSWORD;
+    }
+
+    @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
                 "" : source.getBlueprintView().getProcessor().getStackVersion();
@@ -79,7 +89,7 @@ public class NifiRegistryRoleConfigProvider extends AbstractRdsRoleConfigProvide
     }
 
     @Override
-    protected DatabaseType dbType() {
+    public DatabaseType dbType() {
         return DatabaseType.NIFIREGISTRY;
     }
 

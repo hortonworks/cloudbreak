@@ -33,7 +33,7 @@ public class ProfilerAdminRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected String getDbUser() {
+    public String getDbUser() {
         return profilerAdminDbUser;
     }
 
@@ -53,7 +53,7 @@ public class ProfilerAdminRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected DatabaseType getRdsType() {
+    public DatabaseType getRdsType() {
         return DatabaseType.PROFILER_AGENT;
     }
 

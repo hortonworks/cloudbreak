@@ -34,7 +34,7 @@ public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected String getDbUser() {
+    public String getDbUser() {
         return rangerDbUser;
     }
 
@@ -54,7 +54,7 @@ public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected DatabaseType getRdsType() {
+    public DatabaseType getRdsType() {
         return DatabaseType.RANGER;
     }
 

@@ -25,6 +25,16 @@ public class EfmRoleConfigProvider extends AbstractRdsRoleConfigProvider {
     static final String DRIVER_CLASS = "efm.db.driverClass";
 
     @Override
+    public String dbUserKey() {
+        return DATABASE_USER;
+    }
+
+    @Override
+    public String dbPasswordKey() {
+        return DATABASE_PASSWORD;
+    }
+
+    @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         RdsView efmRdsView = getRdsView(source);
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
@@ -50,7 +60,7 @@ public class EfmRoleConfigProvider extends AbstractRdsRoleConfigProvider {
     }
 
     @Override
-    protected DatabaseType dbType() {
+    public DatabaseType dbType() {
         return DatabaseType.EFM;
     }
 }

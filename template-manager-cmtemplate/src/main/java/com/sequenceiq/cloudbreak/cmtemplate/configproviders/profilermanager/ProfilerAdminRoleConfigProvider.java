@@ -32,6 +32,16 @@ public class ProfilerAdminRoleConfigProvider extends AbstractRdsRoleConfigProvid
     public static final String PROFILER_ADMIN_DATABASE_JDBC_URL_OVERRIDE = "profiler_admin_database_jdbc_url_override";
 
     @Override
+    public String dbUserKey() {
+        return PROFILER_ADMIN_DATABASE_USER;
+    }
+
+    @Override
+    public String dbPasswordKey() {
+        return PROFILER_ADMIN_DATABASE_PASSWORD;
+    }
+
+    @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         if (ProfilerManagerRoles.PROFILER_ADMIN_AGENT.equals(roleType)) {
@@ -63,7 +73,7 @@ public class ProfilerAdminRoleConfigProvider extends AbstractRdsRoleConfigProvid
     }
 
     @Override
-    protected DatabaseType dbType() {
+    public DatabaseType dbType() {
         return DatabaseType.PROFILER_AGENT;
     }
 }

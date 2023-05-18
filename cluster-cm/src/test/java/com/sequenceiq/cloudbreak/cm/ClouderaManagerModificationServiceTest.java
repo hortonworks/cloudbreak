@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -70,6 +71,8 @@ import com.cloudera.api.swagger.model.ApiBatchResponse;
 import com.cloudera.api.swagger.model.ApiBatchResponseElement;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
+import com.cloudera.api.swagger.model.ApiConfig;
+import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
 import com.cloudera.api.swagger.model.ApiEntityTag;
 import com.cloudera.api.swagger.model.ApiHost;
@@ -77,10 +80,15 @@ import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostNameList;
 import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
+import com.cloudera.api.swagger.model.ApiRoleConfigGroup;
+import com.cloudera.api.swagger.model.ApiRoleConfigGroupList;
 import com.cloudera.api.swagger.model.ApiService;
+import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiServiceState;
 import com.cloudera.api.swagger.model.HTTPMethod;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -1432,6 +1440,57 @@ class ClouderaManagerModificationServiceTest {
         verify(eventService, times(1)).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPING);
     }
 
+    @Test
+    void testUpdateConfig() throws Exception {
+        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
+        setUpDeployClientConfigPolling(success);
+
+        when(configService.readServices(any(), any())).thenReturn(new ApiServiceList()
+                .addItemsItem(apiService("service1", "serviceType1"))
+                .addItemsItem(apiService("service2", "serviceType2"))
+                .addItemsItem(apiService("service3", "serviceType3")));
+        when(configService.readServiceConfig(any(), any(), eq("service1"))).thenReturn(new ApiServiceConfig()
+                .addItemsItem(apiConfig("serviceConfig1", "old")));
+        when(configService.readServiceConfig(any(), any(), eq("service2"))).thenReturn(new ApiServiceConfig()
+                .addItemsItem(apiConfig("serviceConfig2", "old")));
+        when(configService.readServiceConfig(any(), any(), eq("service3"))).thenReturn(new ApiServiceConfig()
+                .addItemsItem(apiConfig("serviceConfig3", "old")));
+        when(configService.readRoleConfigGroupConfigs(any(), any(), eq("service2"))).thenReturn(new ApiRoleConfigGroupList().addItemsItem(
+                new ApiRoleConfigGroup().config(new ApiConfigList().addItemsItem(apiConfig("roleConfigGroupConfig2", "old")))));
+        when(configService.readRoleConfigGroupConfigs(any(), any(), eq("service3"))).thenReturn(new ApiRoleConfigGroupList().addItemsItem(
+                new ApiRoleConfigGroup().config(new ApiConfigList().addItemsItem(apiConfig("roleConfigGroupConfig3", "old")))));
+        doNothing().when(configService).modifyServiceConfigs(any(), any(), any(Map.class), any());
+        doNothing().when(configService).modifyRoleConfigGroups(any(), any(), any(), any(), any());
+
+        Table<String, String, String> configTable = HashBasedTable.create();
+        configTable.put("serviceType1", "serviceConfig1", "newValue1");
+        configTable.put("serviceType2", "serviceConfig2", "newValue2");
+        configTable.put("serviceType2", "roleConfigGroupConfig2", "newValue3");
+        configTable.put("serviceType3", "roleConfigGroupConfig3", "newValue4");
+        underTest.updateConfig(configTable);
+
+        verify(configService, times(3)).readServiceConfig(any(), any(), any());
+        verify(configService, times(2)).readRoleConfigGroupConfigs(any(), any(), any());
+
+        ArgumentCaptor<Map<String, String>> modifiedServiceConfigsCaptor = ArgumentCaptor.forClass(Map.class);
+        ArgumentCaptor<Map<String, String>> modifiedRoleConfigGroupConfigsCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(configService, times(2)).modifyServiceConfigs(any(), any(), modifiedServiceConfigsCaptor.capture(), any());
+        verify(configService, times(2))
+                .modifyRoleConfigGroups(any(), any(), any(), any(), modifiedRoleConfigGroupConfigsCaptor.capture());
+        assertTrue(modifiedServiceConfigsCaptor.getAllValues().stream().map(Map::keySet).flatMap(Set::stream).allMatch(config ->
+                Set.of("serviceConfig1", "serviceConfig2").contains(config)));
+        assertTrue(modifiedRoleConfigGroupConfigsCaptor.getAllValues().stream().map(Map::keySet).flatMap(Set::stream).allMatch(config ->
+                Set.of("roleConfigGroupConfig2", "roleConfigGroupConfig3").contains(config)));
+    }
+
+    private ApiService apiService(String name, String type) {
+        return new ApiService().name(name).type(type);
+    }
+
+    private ApiConfig apiConfig(String key, String value) {
+        return new ApiConfig().name(key).value(value);
+    }
+
     private ClusterComponentView createClusterComponent(ClouderaManagerProduct clouderaManagerProduct) {
         ClusterComponentView component = new ClusterComponentView();
         Json attribute = mock(Json.class);
@@ -1465,7 +1524,7 @@ class ClouderaManagerModificationServiceTest {
 
     private void setUpDeployClientConfigPolling(ExtendedPollingResult success) throws ApiException, CloudbreakException {
         BigDecimal deployClientCommandId = new BigDecimal(100);
-        when(clustersResourceApi.listActiveCommands(STACK_NAME, "SUMMARY", null)).thenReturn(new ApiCommandList().addItemsItem(
+        when(clustersResourceApi.listActiveCommands(eq(STACK_NAME), eq("SUMMARY"), eq(null))).thenReturn(new ApiCommandList().addItemsItem(
                 new ApiCommand().id(BigDecimal.ONE).name("notDeployClientConfig")));
         when(clouderaManagerCommonCommandService.getDeployClientConfigCommandId(any(), any(), any())).thenReturn(deployClientCommandId);
         when(clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(eq(stack), eq(v31Client), eq(deployClientCommandId)))

@@ -28,7 +28,7 @@ public class DasRdsConfigProvider extends AbstractRdsConfigProvider {
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Override
-    protected String getDbUser() {
+    public String getDbUser() {
         return dasDbUser;
     }
 
@@ -48,7 +48,7 @@ public class DasRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected DatabaseType getRdsType() {
+    public DatabaseType getRdsType() {
         return DatabaseType.HIVE_DAS;
     }
 

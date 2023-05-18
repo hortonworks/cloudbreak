@@ -9,7 +9,11 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 public abstract class AbstractRdsRoleConfigProvider extends AbstractRoleConfigProvider {
 
-    protected abstract DatabaseType dbType();
+    public abstract DatabaseType dbType();
+
+    public abstract String dbUserKey();
+
+    public abstract String dbPasswordKey();
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {

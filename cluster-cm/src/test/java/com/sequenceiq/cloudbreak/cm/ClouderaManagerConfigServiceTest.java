@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cm;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
@@ -323,6 +326,127 @@ public class ClouderaManagerConfigServiceTest {
         verify(servicesResourceApi).readServices(eq(TEST_CLUSTER_NAME), any());
         verify(roleConfigGroupsResourceApi).readRoleConfigGroups(TEST_CLUSTER_NAME, NIFI_SERVICE);
         verify(roleConfigGroupsResourceApi).readConfig(TEST_CLUSTER_NAME, NIFI_CONFIG_GROUP, NIFI_SERVICE, CONFIG_VIEW);
+    }
+
+    @Test
+    public void testReadServices() throws ApiException {
+        ServicesResourceApi servicesApi = mock(ServicesResourceApi.class);
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesApi);
+        when(servicesApi.readServices(any(), any())).thenReturn(new ApiServiceList());
+
+        underTest.readServices(new ApiClient(), "cluster");
+
+        verify(servicesApi).readServices(any(), any());
+    }
+
+    @Test
+    public void testReadServicesFailure() throws ApiException {
+        ServicesResourceApi servicesApi = mock(ServicesResourceApi.class);
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesApi);
+        when(servicesApi.readServices(any(), any())).thenThrow(new ApiException("something"));
+
+        assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.readServices(new ApiClient(), "cluster"));
+
+        verify(servicesApi).readServices(any(), any());
+    }
+
+    @Test
+    public void testReadServiceConfig() throws ApiException {
+        ServicesResourceApi servicesApi = mock(ServicesResourceApi.class);
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesApi);
+        when(servicesApi.readServiceConfig(any(), any(), any())).thenReturn(new ApiServiceConfig());
+
+        underTest.readServiceConfig(new ApiClient(), "cluster", "service");
+
+        verify(servicesApi).readServiceConfig(any(), any(), any());
+    }
+
+    @Test
+    public void testReadServiceConfigFailure() throws ApiException {
+        ServicesResourceApi servicesApi = mock(ServicesResourceApi.class);
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesApi);
+        when(servicesApi.readServiceConfig(any(), any(), any())).thenThrow(new ApiException("something"));
+
+        assertThrows(ClouderaManagerOperationFailedException.class, () ->
+                underTest.readServiceConfig(new ApiClient(), "cluster", "service"));
+
+        verify(servicesApi).readServiceConfig(any(), any(), any());
+    }
+
+    @Test
+    public void testReadRoleConfig() throws ApiException {
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = mock(RoleConfigGroupsResourceApi.class);
+        when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(any())).thenReturn(roleConfigGroupsResourceApi);
+        when(roleConfigGroupsResourceApi.readRoleConfigGroups(any(), any())).thenReturn(new ApiRoleConfigGroupList());
+
+        underTest.readRoleConfigGroupConfigs(new ApiClient(), "cluster", "service");
+
+        verify(roleConfigGroupsResourceApi).readRoleConfigGroups(any(), any());
+    }
+
+    @Test
+    public void testReadRoleConfigFailure() throws ApiException {
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = mock(RoleConfigGroupsResourceApi.class);
+        when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(any())).thenReturn(roleConfigGroupsResourceApi);
+        when(roleConfigGroupsResourceApi.readRoleConfigGroups(any(), any())).thenThrow(new ApiException("something"));
+
+        assertThrows(ClouderaManagerOperationFailedException.class, () ->
+                underTest.readRoleConfigGroupConfigs(new ApiClient(), "cluster", "service"));
+
+        verify(roleConfigGroupsResourceApi).readRoleConfigGroups(any(), any());
+    }
+
+    @Test
+    public void testModifyServiceConfig() throws ApiException {
+        ServicesResourceApi servicesApi = mock(ServicesResourceApi.class);
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesApi);
+        when(servicesApi.updateServiceConfig(any(), any(), any(), any())).thenReturn(new ApiServiceConfig());
+
+        underTest.modifyServiceConfigs(new ApiClient(), "cluster", Map.of("config", "newvalue"), "service");
+
+        ArgumentCaptor<ApiServiceConfig> bodyCaptor = ArgumentCaptor.forClass(ApiServiceConfig.class);
+        verify(servicesApi).updateServiceConfig(any(), any(), any(), bodyCaptor.capture());
+        assertTrue(bodyCaptor.getValue().getItems().stream().anyMatch(apiConfig -> StringUtils.equals(apiConfig.getName(), "config")));
+        assertTrue(bodyCaptor.getValue().getItems().stream().anyMatch(apiConfig -> StringUtils.equals(apiConfig.getValue(), "newvalue")));
+    }
+
+    @Test
+    public void testModifyServiceConfigFailure() throws ApiException {
+        ServicesResourceApi servicesApi = mock(ServicesResourceApi.class);
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesApi);
+        when(servicesApi.updateServiceConfig(any(), any(), any(), any())).thenThrow(new ApiException("something"));
+
+        assertThrows(ClouderaManagerOperationFailedException.class, () ->
+                underTest.modifyServiceConfigs(new ApiClient(), "cluster", Map.of("config", "newvalue"), "service"));
+
+        verify(servicesApi).updateServiceConfig(any(), any(), any(), any());
+    }
+
+    @Test
+    public void testModifyRoleConfig() throws ApiException {
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = mock(RoleConfigGroupsResourceApi.class);
+        when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(any())).thenReturn(roleConfigGroupsResourceApi);
+        when(roleConfigGroupsResourceApi.updateRoleConfigGroup(any(), any(), any(), any(), any())).thenReturn(new ApiRoleConfigGroup());
+
+        underTest.modifyRoleConfigGroups(new ApiClient(), "cluster", "service", "roleConfigGroup",
+                Map.of("config", "newvalue"));
+
+        ArgumentCaptor<ApiRoleConfigGroup> bodyCaptor = ArgumentCaptor.forClass(ApiRoleConfigGroup.class);
+        verify(roleConfigGroupsResourceApi).updateRoleConfigGroup(any(), any(), any(), any(), bodyCaptor.capture());
+        assertTrue(bodyCaptor.getValue().getConfig().getItems().stream().anyMatch(apiConfig -> StringUtils.equals(apiConfig.getName(), "config")));
+        assertTrue(bodyCaptor.getValue().getConfig().getItems().stream().anyMatch(apiConfig -> StringUtils.equals(apiConfig.getValue(), "newvalue")));
+    }
+
+    @Test
+    public void testModifyRoleConfigFailure() throws ApiException {
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = mock(RoleConfigGroupsResourceApi.class);
+        when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(any())).thenReturn(roleConfigGroupsResourceApi);
+        when(roleConfigGroupsResourceApi.updateRoleConfigGroup(any(), any(), any(), any(), any())).thenThrow(new ApiException("something"));
+
+        assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.modifyRoleConfigGroups(new ApiClient(), "cluster",
+                "service", "roleConfigGroup", Map.of("config", "newvalue")));
+
+        verify(roleConfigGroupsResourceApi).updateRoleConfigGroup(any(), any(), any(), any(), any());
     }
 
     private ApiConfigList createApiConfigList(List<ApiConfig> apiConfigs) {

@@ -162,6 +162,10 @@ public class RDSConfig implements ProvisionEntity, WorkspaceAwareResource, Archi
         return connectionPassword.getSecret();
     }
 
+    public Secret getConnectionPasswordSecretObject() {
+        return connectionPassword;
+    }
+
     public void setConnectionPassword(String connectionPassword) {
         this.connectionPassword = new Secret(connectionPassword);
     }
