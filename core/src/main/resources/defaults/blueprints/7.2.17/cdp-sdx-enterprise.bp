@@ -186,7 +186,7 @@
                 "value":"2"
               },
               {
-                "name":"ranger.audit.solr.config.ttl",
+                "name":"ranger_audit_solr_config_ttl",
                 "value":"30"
               }
             ]

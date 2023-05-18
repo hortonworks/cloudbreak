@@ -33,6 +33,8 @@ public class AtlasKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
 
     public static final String MIN_VERSION_FOR_DIFFERENCIAL_BACKUP = "7.2.7";
 
+    public static final String MAX_VERSION_FOR_DIFFERENCIAL_BACKUP = "7.2.16";
+
     private static final String ATLAS_KNOX_CONFIG = "atlas_authentication_method_trustedproxy";
 
     private static final String ATLAS_DIFFERENTIAL_AUDIT_CONFIG = "atlas.entity.audit.differential";
@@ -108,7 +110,9 @@ public class AtlasKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private boolean isShapeVersionSupportedByRuntime(String runtime) {
         Comparator<Versioned> versionComparator = new VersionComparator();
-        return versionComparator.compare(() -> runtime, () -> MIN_VERSION_FOR_DIFFERENCIAL_BACKUP) > -1;
+        int maxVersionCheck = versionComparator.compare(() -> runtime, () -> MAX_VERSION_FOR_DIFFERENCIAL_BACKUP);
+        return versionComparator.compare(() -> runtime, () -> MIN_VERSION_FOR_DIFFERENCIAL_BACKUP) > -1
+                && maxVersionCheck < 1;
     }
 
     @VisibleForTesting

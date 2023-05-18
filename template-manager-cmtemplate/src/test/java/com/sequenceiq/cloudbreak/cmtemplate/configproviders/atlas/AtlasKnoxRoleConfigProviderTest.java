@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.atlas;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -84,6 +85,58 @@ class AtlasKnoxRoleConfigProviderTest {
             List<ApiClusterTemplateConfig> atlasConfig = roleConfigs.get("atlas-ATLAS_SERVER-BASE");
             Map<String, ApiClusterTemplateConfig> configMap = cmTemplateProcessor.mapByName(atlasConfig);
             assertEquals("true", configMap.get("atlas.entity.audit.differential").getValue());
+        });
+    }
+
+    @Test
+    void atlasKnoxSdxOptimalizationEnabledWithNewerVersion() {
+        sdxEntitlementEnable();
+        String inputJson = FileReaderUtils.readFileFromClasspathQuietly("input/sdx-md.bp");
+        inputJson = inputJson.replace("\"cdhVersion\": \"7.2.10\",", "\"cdhVersion\": \"7.2.18\",");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
+        HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
+        HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
+        HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, 3);
+        BlueprintView blueprintView = new BlueprintView(inputJson, "7.2.17", "1.0", cmTemplateProcessor);
+        TemplatePreparationObject source = new Builder()
+                .withHostgroupViews(Set.of(gateway, master, quorum, worker))
+                .withBlueprintView(blueprintView)
+                .withStackType(StackType.DATALAKE)
+                .build();
+
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
+            Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, source);
+            List<ApiClusterTemplateConfig> atlasConfig = roleConfigs.get("atlas-ATLAS_SERVER-BASE");
+            Map<String, ApiClusterTemplateConfig> configMap = cmTemplateProcessor.mapByName(atlasConfig);
+            assertNull(configMap.get("atlas.entity.audit.differential"));
+            assertEquals(0, configMap.size());
+        });
+    }
+
+    @Test
+    void atlasKnoxSdxOptimalizationEnabledWithRequiredVersion() {
+        sdxEntitlementEnable();
+        String inputJson = FileReaderUtils.readFileFromClasspathQuietly("input/sdx-md.bp");
+        inputJson = inputJson.replace("\"cdhVersion\": \"7.2.10\",", "\"cdhVersion\": \"7.2.15\",");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
+        HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
+        HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
+        HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, 3);
+        BlueprintView blueprintView = new BlueprintView(inputJson, "7.2.15", "1.0", cmTemplateProcessor);
+        TemplatePreparationObject source = new Builder()
+                .withHostgroupViews(Set.of(gateway, master, quorum, worker))
+                .withBlueprintView(blueprintView)
+                .withStackType(StackType.DATALAKE)
+                .build();
+
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
+            Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, source);
+            List<ApiClusterTemplateConfig> atlasConfig = roleConfigs.get("atlas-ATLAS_SERVER-BASE");
+            Map<String, ApiClusterTemplateConfig> configMap = cmTemplateProcessor.mapByName(atlasConfig);
+            assertEquals("true", configMap.get("atlas.entity.audit.differential").getValue());
+            assertEquals(1, configMap.size());
         });
     }
 
