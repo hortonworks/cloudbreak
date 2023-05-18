@@ -21,6 +21,16 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 public class QueryProcessorConfigProvider extends AbstractRdsRoleConfigProvider {
 
     @Override
+    public String dbUserKey() {
+        return "query_processor_database_username";
+    }
+
+    @Override
+    public String dbPasswordKey() {
+        return "query_processor_database_password";
+    }
+
+    @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         RdsView queryProcessorView = getRdsView(source);
         List<ApiClusterTemplateConfig> configList = new ArrayList<>();
@@ -33,8 +43,8 @@ public class QueryProcessorConfigProvider extends AbstractRdsRoleConfigProvider 
         configList.add(config("query_processor_database_host", queryProcessorView.getHost()));
         configList.add(config("query_processor_database_port", queryProcessorView.getPort()));
         configList.add(config("query_processor_database_name", queryProcessorView.getDatabaseName()));
-        configList.add(config("query_processor_database_username", queryProcessorView.getConnectionUserName()));
-        configList.add(config("query_processor_database_password", queryProcessorView.getConnectionPassword()));
+        configList.add(config(dbUserKey(), queryProcessorView.getConnectionUserName()));
+        configList.add(config(dbPasswordKey(), queryProcessorView.getConnectionPassword()));
     }
 
     private void addDbSslConfigsIfNeeded(RdsView queryProcessorView, List<ApiClusterTemplateConfig> configList, String cmVersion) {
@@ -64,7 +74,7 @@ public class QueryProcessorConfigProvider extends AbstractRdsRoleConfigProvider 
     }
 
     @Override
-    protected DatabaseType dbType() {
+    public DatabaseType dbType() {
         return DatabaseType.QUERY_PROCESSOR;
     }
 

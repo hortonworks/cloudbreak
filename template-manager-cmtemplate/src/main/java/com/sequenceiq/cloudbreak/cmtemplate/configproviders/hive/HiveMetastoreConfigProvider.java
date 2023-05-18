@@ -78,6 +78,16 @@ public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(HiveMetastoreConfigProvider.class);
 
     @Override
+    public String dbUserKey() {
+        return HIVE_METASTORE_DATABASE_USER;
+    }
+
+    @Override
+    public String dbPasswordKey() {
+        return HIVE_METASTORE_DATABASE_PASSWORD;
+    }
+
+    @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         RdsView hiveRdsView = getRdsView(source);
 
@@ -131,7 +141,7 @@ public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
     }
 
     @Override
-    protected DatabaseType dbType() {
+    public DatabaseType dbType() {
         return DatabaseType.HIVE;
     }
 

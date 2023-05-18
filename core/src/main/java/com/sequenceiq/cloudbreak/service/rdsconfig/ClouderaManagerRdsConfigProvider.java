@@ -21,7 +21,7 @@ public class ClouderaManagerRdsConfigProvider extends AbstractRdsConfigProvider 
     private String db;
 
     @Override
-    protected String getDbUser() {
+    public String getDbUser() {
         return userName;
     }
 
@@ -41,7 +41,7 @@ public class ClouderaManagerRdsConfigProvider extends AbstractRdsConfigProvider 
     }
 
     @Override
-    protected DatabaseType getRdsType() {
+    public DatabaseType getRdsType() {
         return DatabaseType.CLOUDERA_MANAGER;
     }
 

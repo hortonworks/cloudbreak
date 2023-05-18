@@ -64,6 +64,16 @@ public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
     private VirtualGroupService virtualGroupService;
 
     @Override
+    public String dbUserKey() {
+        return RANGER_DATABASE_USER;
+    }
+
+    @Override
+    public String dbPasswordKey() {
+        return RANGER_DATABASE_PASSWORD;
+    }
+
+    @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         String cmVersion = getCmVersion(source);
         List<ApiClusterTemplateConfig> configList = new ArrayList<>();
@@ -120,7 +130,7 @@ public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
     }
 
     @Override
-    protected DatabaseType dbType() {
+    public DatabaseType dbType() {
         return DatabaseType.RANGER;
     }
 

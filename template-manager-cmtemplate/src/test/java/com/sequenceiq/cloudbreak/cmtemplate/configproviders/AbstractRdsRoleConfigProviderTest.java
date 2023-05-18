@@ -37,8 +37,19 @@ class AbstractRdsRoleConfigProviderTest {
     @BeforeEach
     void setup() {
         subject = new AbstractRdsRoleConfigProvider() {
+
             @Override
-            protected DatabaseType dbType() {
+            public String dbUserKey() {
+                return "user";
+            }
+
+            @Override
+            public String dbPasswordKey() {
+                return "pass";
+            }
+
+            @Override
+            public DatabaseType dbType() {
                 return DatabaseType.RANGER;
             }
 

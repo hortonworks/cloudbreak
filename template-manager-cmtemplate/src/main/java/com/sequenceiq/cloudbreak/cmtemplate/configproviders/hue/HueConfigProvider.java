@@ -50,6 +50,16 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
     private IniFileFactory iniFileFactory;
 
     @Override
+    public String dbUserKey() {
+        return "database_user";
+    }
+
+    @Override
+    public String dbPasswordKey() {
+        return "database_password";
+    }
+
+    @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> result = new ArrayList<>();
         RdsView hueRdsView = getRdsView(source);
@@ -57,8 +67,8 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
         result.add(config("database_port", hueRdsView.getPort()));
         result.add(config("database_name", hueRdsView.getDatabaseName()));
         result.add(config("database_type", hueRdsView.getSubprotocol()));
-        result.add(config("database_user", hueRdsView.getConnectionUserName()));
-        result.add(config("database_password", hueRdsView.getConnectionPassword()));
+        result.add(config(dbUserKey(), hueRdsView.getConnectionUserName()));
+        result.add(config(dbPasswordKey(), hueRdsView.getConnectionPassword()));
 
         IniFile safetyValve = iniFileFactory.create();
         configureKnoxProxyHostsServiceConfig(source, result, safetyValve);
@@ -86,7 +96,7 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
     }
 
     @Override
-    protected DatabaseType dbType() {
+    public DatabaseType dbType() {
         return DatabaseType.HUE;
     }
 

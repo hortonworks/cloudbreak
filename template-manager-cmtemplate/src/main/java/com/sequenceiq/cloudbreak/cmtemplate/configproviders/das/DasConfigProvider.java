@@ -21,6 +21,16 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 public class DasConfigProvider extends AbstractRdsRoleConfigProvider {
 
     @Override
+    public String dbUserKey() {
+        return "data_analytics_studio_database_username";
+    }
+
+    @Override
+    public String dbPasswordKey() {
+        return "data_analytics_studio_database_password";
+    }
+
+    @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         RdsView dasView = getRdsView(source);
         List<ApiClusterTemplateConfig> configList = new ArrayList<>();
@@ -33,8 +43,8 @@ public class DasConfigProvider extends AbstractRdsRoleConfigProvider {
         configList.add(config("data_analytics_studio_database_host", dasView.getHost()));
         configList.add(config("data_analytics_studio_database_port", dasView.getPort()));
         configList.add(config("data_analytics_studio_database_name", dasView.getDatabaseName()));
-        configList.add(config("data_analytics_studio_database_username", dasView.getConnectionUserName()));
-        configList.add(config("data_analytics_studio_database_password", dasView.getConnectionPassword()));
+        configList.add(config(dbUserKey(), dasView.getConnectionUserName()));
+        configList.add(config(dbPasswordKey(), dasView.getConnectionPassword()));
     }
 
     private void addDbSslConfigsIfNeeded(RdsView dasView, List<ApiClusterTemplateConfig> configList, String cmVersion) {
@@ -54,7 +64,7 @@ public class DasConfigProvider extends AbstractRdsRoleConfigProvider {
     }
 
     @Override
-    protected DatabaseType dbType() {
+    public DatabaseType dbType() {
         return DatabaseType.HIVE_DAS;
     }
 

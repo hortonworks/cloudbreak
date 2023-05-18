@@ -29,7 +29,7 @@ public class SqlStreamBuilderAdminRdsConfigProvider extends AbstractRdsConfigPro
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Override
-    protected String getDbUser() {
+    public String getDbUser() {
         return userName;
     }
 
@@ -49,7 +49,7 @@ public class SqlStreamBuilderAdminRdsConfigProvider extends AbstractRdsConfigPro
     }
 
     @Override
-    protected DatabaseType getRdsType() {
+    public DatabaseType getRdsType() {
         return DatabaseType.SQL_STREAM_BUILDER_ADMIN;
     }
 

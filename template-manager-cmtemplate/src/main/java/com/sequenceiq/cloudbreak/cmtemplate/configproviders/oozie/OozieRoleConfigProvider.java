@@ -38,6 +38,16 @@ public class OozieRoleConfigProvider extends AbstractRdsRoleConfigProvider {
     private static final String OOZIE_CONFIG_SAFETY_VALVE = "oozie_config_safety_valve";
 
     @Override
+    public String dbUserKey() {
+        return OOZIE_DATABASE_USER;
+    }
+
+    @Override
+    public String dbPasswordKey() {
+        return OOZIE_DATABASE_PASSWORD;
+    }
+
+    @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
             case OozieRoles.OOZIE_SERVER:
@@ -76,7 +86,7 @@ public class OozieRoleConfigProvider extends AbstractRdsRoleConfigProvider {
     }
 
     @Override
-    protected DatabaseType dbType() {
+    public DatabaseType dbType() {
         return DatabaseType.OOZIE;
     }
 

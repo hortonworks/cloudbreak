@@ -22,6 +22,16 @@ public class SqlStreamBuilderMveDatabaseConfigProvider extends SqlStreamBuilderC
     static final String DATABASE_PASSWORD = "ssb.mve.datasource.password";
 
     @Override
+    public String dbUserKey() {
+        return DATABASE_USER;
+    }
+
+    @Override
+    public String dbPasswordKey() {
+        return DATABASE_PASSWORD;
+    }
+
+    @Override
     public String getServiceType() {
         return SqlStreamBuilderRoles.SQL_STREAM_BUILDER;
     }
@@ -47,7 +57,7 @@ public class SqlStreamBuilderMveDatabaseConfigProvider extends SqlStreamBuilderC
     }
 
     @Override
-    protected DatabaseType dbType() {
+    public DatabaseType dbType() {
         return DatabaseType.SQL_STREAM_BUILDER_SNAPPER;
     }
 }

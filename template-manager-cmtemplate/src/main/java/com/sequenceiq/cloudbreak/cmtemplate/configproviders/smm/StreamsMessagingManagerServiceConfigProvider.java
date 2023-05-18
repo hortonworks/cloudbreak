@@ -40,6 +40,16 @@ public class StreamsMessagingManagerServiceConfigProvider extends AbstractRdsRol
     public static final String DATABASE_JDBC_URL_OVERRIDE = "database_jdbc_url_override";
 
     @Override
+    public String dbUserKey() {
+        return DATABASE_USER;
+    }
+
+    @Override
+    public String dbPasswordKey() {
+        return DATABASE_PASSWORD;
+    }
+
+    @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> config = new ArrayList<>();
         String cmVersion = ConfigUtils.getCmVersion(source);
@@ -106,7 +116,7 @@ public class StreamsMessagingManagerServiceConfigProvider extends AbstractRdsRol
     }
 
     @Override
-    protected DatabaseType dbType() {
+    public DatabaseType dbType() {
         return DatabaseType.STREAMS_MESSAGING_MANAGER;
     }
 }

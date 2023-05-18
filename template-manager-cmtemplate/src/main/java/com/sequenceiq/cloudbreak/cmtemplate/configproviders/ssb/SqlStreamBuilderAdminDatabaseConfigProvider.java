@@ -43,6 +43,16 @@ public class SqlStreamBuilderAdminDatabaseConfigProvider extends SqlStreamBuilde
     private static final String FLINK_PRODUCT = "FLINK";
 
     @Override
+    public String dbUserKey() {
+        return DATABASE_USER;
+    }
+
+    @Override
+    public String dbPasswordKey() {
+        return DATABASE_PASSWORD;
+    }
+
+    @Override
     public String getServiceType() {
         return SqlStreamBuilderRoles.SQL_STREAM_BUILDER;
     }
@@ -101,7 +111,7 @@ public class SqlStreamBuilderAdminDatabaseConfigProvider extends SqlStreamBuilde
     }
 
     @Override
-    protected DatabaseType dbType() {
+    public DatabaseType dbType() {
         return DatabaseType.SQL_STREAM_BUILDER_ADMIN;
     }
 

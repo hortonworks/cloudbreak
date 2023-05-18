@@ -35,7 +35,7 @@ public class HueRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected String getDbUser() {
+    public String getDbUser() {
         return hueDbUser;
     }
 
@@ -55,7 +55,7 @@ public class HueRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected DatabaseType getRdsType() {
+    public DatabaseType getRdsType() {
         return DatabaseType.HUE;
     }
 

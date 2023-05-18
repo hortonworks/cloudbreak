@@ -21,11 +21,13 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
+import com.cloudera.api.swagger.model.ApiRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiRoleConfigGroupList;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiVersionInfo;
+import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
@@ -122,8 +124,7 @@ public class ClouderaManagerConfigService {
                         });
     }
 
-    private Consumer<String> modifyServiceConfig(String clusterName, ServicesResourceApi servicesResourceApi, Map<String, String> config)
-            throws CloudbreakException  {
+    private Consumer<String> modifyServiceConfig(String clusterName, ServicesResourceApi servicesResourceApi, Map<String, String> config) {
         ApiServiceConfig apiServiceConfig = new ApiServiceConfig();
         return serviceName -> {
             config.forEach((key, value) -> {
@@ -202,5 +203,69 @@ public class ClouderaManagerConfigService {
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException(String.format("No role found with %s role type", roleType)))
                 .getName();
+    }
+
+    public ApiServiceList readServices(ApiClient client, String clusterName) {
+        try {
+            LOGGER.debug("Reading services of Cloudera Manager for cluster {}.", clusterName);
+            ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
+            return servicesResourceApi.readServices(clusterName, DataView.SUMMARY.name());
+        } catch (ApiException e) {
+            LOGGER.error("Failed to get services from Cloudera Manager.", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    public ApiServiceConfig readServiceConfig(ApiClient client, String clusterName, String serviceName) {
+        try {
+            LOGGER.debug("Reading {} service config from Cloudera Manager for cluster {}.", serviceName, clusterName);
+            ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
+            return servicesResourceApi.readServiceConfig(clusterName, serviceName, DataView.SUMMARY.name());
+        } catch (ApiException e) {
+            LOGGER.error("Failed to get service config for service {} from Cloudera Manager.", serviceName, e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    public ApiRoleConfigGroupList readRoleConfigGroupConfigs(ApiClient client, String clusterName, String serviceName) {
+        try {
+            LOGGER.debug("Reading config groups of {} service in Cloudera Manager for cluster {}.", serviceName, clusterName);
+            RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(client);
+            return roleConfigGroupsResourceApi.readRoleConfigGroups(clusterName, serviceName);
+        } catch (ApiException e) {
+            LOGGER.error("Failed to get role config groups for service {} from Cloudera Manager.", serviceName, e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    public void modifyServiceConfigs(ApiClient client, String clusterName, Map<String, String> config, String serviceName) {
+        try {
+            LOGGER.debug("Modifying {} service configs [{}] of Cloudera Manager for cluster {}.",
+                    serviceName, Joiner.on(",").join(config.keySet()), clusterName);
+            ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
+            ApiServiceConfig apiServiceConfig = new ApiServiceConfig();
+            config.forEach((key, value) -> apiServiceConfig.addItemsItem(new ApiConfig().name(key).value(value)));
+            servicesResourceApi.updateServiceConfig(clusterName, serviceName, "", apiServiceConfig);
+        } catch (ApiException e) {
+            LOGGER.error("Failed to set configs [{}] for service {}.", Joiner.on(",").withKeyValueSeparator("=").join(config), serviceName, e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    public void modifyRoleConfigGroups(ApiClient client, String clusterName, String serviceName, String roleConfigGroupName, Map<String, String> config) {
+        try {
+            LOGGER.debug("Modifying {} config group of {} service regarding configs [{}] in Cloudera Manager for cluster {}.",
+                    roleConfigGroupName, serviceName, Joiner.on(",").join(config.keySet()), clusterName);
+            RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(client);
+            ApiRoleConfigGroup apiRoleConfigGroup = new ApiRoleConfigGroup();
+            ApiConfigList apiConfigList = new ApiConfigList();
+            config.forEach((key, value) -> apiConfigList.addItemsItem(new ApiConfig().name(key).value(value)));
+            apiRoleConfigGroup.setConfig(apiConfigList);
+            roleConfigGroupsResourceApi.updateRoleConfigGroup(clusterName, roleConfigGroupName, serviceName, "", apiRoleConfigGroup);
+        } catch (ApiException e) {
+            LOGGER.error("Failed to update role group config [{}] for role group {} of service {}",
+                    Joiner.on(",").withKeyValueSeparator("=").join(config), roleConfigGroupName, serviceName, e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
     }
 }

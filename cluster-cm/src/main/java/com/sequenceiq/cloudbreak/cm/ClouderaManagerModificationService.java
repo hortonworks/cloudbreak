@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -62,11 +63,15 @@ import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostNameList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
+import com.cloudera.api.swagger.model.ApiRoleConfigGroup;
+import com.cloudera.api.swagger.model.ApiRoleConfigGroupList;
 import com.cloudera.api.swagger.model.ApiService;
+import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceState;
 import com.cloudera.api.swagger.model.HTTPMethod;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Table;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
@@ -1131,5 +1136,77 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     public void refreshCluster() throws Exception {
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(v31Client);
         deployConfigAndRefreshCMStaleServices(clustersResourceApi, false);
+    }
+
+    @Override
+    public void updateConfig(Table<String, String, String> configTable) throws Exception {
+        Map<String, String> serviceMap = configService.readServices(v31Client, stack.getName()).getItems()
+                .stream()
+                .collect(Collectors.toMap(ApiService::getType, ApiService::getName));
+        Map<String, ApiServiceConfig> serviceConfigs = collectServiceConfigs(configTable, serviceMap);
+        Map<String, ApiRoleConfigGroupList> roleConfigGroupLists = collectRoleConfigGroupConfigsIfNeeded(configTable, serviceMap, serviceConfigs);
+        for (Table.Cell<String, String, String> cell : configTable.cellSet()) {
+            String serviceType = cell.getRowKey();
+            String configKey = cell.getColumnKey();
+            String newValue = cell.getValue();
+            Map<String, String> configMap = Map.of(configKey, newValue);
+            String serviceName = serviceMap.get(serviceType);
+            updateRelevantConfig(serviceConfigs, roleConfigGroupLists, serviceType, configKey, configMap, serviceName);
+        }
+        LOGGER.info("Updating relevant configs finished for cluster {} in CM, deploying client configs and restarting services.", stack.getName());
+        deployClientConfig(clouderaManagerApiFactory.getClustersResourceApi(v31Client), stack);
+        clouderaManagerRoleRefreshService.refreshClusterRoles(v31Client, stack);
+        restartServices(false);
+    }
+
+    private void updateRelevantConfig(Map<String, ApiServiceConfig> serviceConfigs, Map<String, ApiRoleConfigGroupList> roleConfigGroupLists,
+            String serviceType, String configKey, Map<String, String> configMap, String serviceName) {
+        if (roleConfigGroupLists.containsKey(serviceType)) {
+            Optional<ApiRoleConfigGroup> roleConfigGroup = roleConfigGroupLists.get(serviceType).getItems().stream()
+                    .filter(apiRoleConfigGroup -> configExistInConfigList(apiRoleConfigGroup.getConfig().getItems(), configKey))
+                    .findFirst();
+            if (roleConfigGroup.isPresent()) {
+                configService.modifyRoleConfigGroups(v31Client, stack.getName(), serviceName, roleConfigGroup.get().getName(), configMap);
+            }
+        }
+        if (configExistInConfigList(serviceConfigs.get(serviceType).getItems(), configKey)) {
+            configService.modifyServiceConfigs(v31Client, stack.getName(), configMap, serviceName);
+        }
+    }
+
+    private Map<String, ApiRoleConfigGroupList> collectRoleConfigGroupConfigsIfNeeded(Table<String, String, String> configTable, Map<String, String> serviceMap,
+            Map<String, ApiServiceConfig> serviceConfigs) {
+        return serviceMap.entrySet().stream()
+                .filter(serviceEntry -> configTable.rowKeySet().contains(serviceEntry.getKey()))
+                .filter(serviceEntry -> {
+                    String serviceType = serviceEntry.getKey();
+                    Set<String> affectedConfigByService = configTable.row(serviceType).keySet();
+                    return !affectedConfigByService.stream().allMatch(config -> configPresentAsServiceConfig(serviceConfigs, serviceType, config));
+                })
+                .collect(Collectors.toMap(Entry::getKey, this::readRoleConfigs));
+    }
+
+    private boolean configPresentAsServiceConfig(Map<String, ApiServiceConfig> serviceConfigs, String serviceType, String config) {
+        return serviceConfigs.get(serviceType).getItems().stream()
+                .anyMatch(apiConfig -> org.apache.commons.lang3.StringUtils.equals(apiConfig.getName(), config));
+    }
+
+    private Map<String, ApiServiceConfig> collectServiceConfigs(Table<String, String, String> configTable, Map<String, String> serviceMap) {
+        return serviceMap.entrySet().stream()
+                .filter(serviceEntry -> configTable.rowKeySet().contains(serviceEntry.getKey()))
+                .collect(Collectors.toMap(Entry::getKey, this::readServiceConfig));
+    }
+
+    private ApiServiceConfig readServiceConfig(Entry<String, String> serviceEntry) {
+        return configService.readServiceConfig(v31Client, stack.getName(), serviceEntry.getValue());
+    }
+
+    private ApiRoleConfigGroupList readRoleConfigs(Entry<String, String> serviceEntry) {
+        return configService.readRoleConfigGroupConfigs(v31Client, stack.getName(), serviceEntry.getValue());
+    }
+
+    private boolean configExistInConfigList(List<ApiConfig> apiConfigList, String configKey) {
+        Predicate<ApiConfig> apiConfigPredicate = apiConfig -> org.apache.commons.lang3.StringUtils.equals(apiConfig.getName(), configKey);
+        return apiConfigList.stream().anyMatch(apiConfigPredicate);
     }
 }

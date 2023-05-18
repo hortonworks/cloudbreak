@@ -226,15 +226,15 @@ public abstract class AbstractRdsConfigProvider {
         return pathList;
     }
 
-    protected abstract String getDbUser();
+    public abstract DatabaseType getRdsType();
+
+    public abstract String getDbUser();
 
     protected abstract String getDb();
 
     protected abstract String getDbPort();
 
     protected abstract String getPillarKey();
-
-    protected abstract DatabaseType getRdsType();
 
     protected abstract boolean isRdsConfigNeeded(Blueprint blueprint, boolean knoxGateway);
 

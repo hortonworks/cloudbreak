@@ -28,7 +28,7 @@ public class SchemaRegistryServerRdsConfigProvider extends AbstractRdsConfigProv
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Override
-    protected String getDbUser() {
+    public String getDbUser() {
         return userName;
     }
 
@@ -48,7 +48,7 @@ public class SchemaRegistryServerRdsConfigProvider extends AbstractRdsConfigProv
     }
 
     @Override
-    protected DatabaseType getRdsType() {
+    public DatabaseType getRdsType() {
         return DatabaseType.REGISTRY;
     }
 

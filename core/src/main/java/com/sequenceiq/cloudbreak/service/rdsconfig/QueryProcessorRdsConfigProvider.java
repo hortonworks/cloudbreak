@@ -28,7 +28,7 @@ public class QueryProcessorRdsConfigProvider extends AbstractRdsConfigProvider {
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Override
-    protected String getDbUser() {
+    public String getDbUser() {
         return qpDbUser;
     }
 
@@ -48,7 +48,7 @@ public class QueryProcessorRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected DatabaseType getRdsType() {
+    public DatabaseType getRdsType() {
         return DatabaseType.QUERY_PROCESSOR;
     }
 

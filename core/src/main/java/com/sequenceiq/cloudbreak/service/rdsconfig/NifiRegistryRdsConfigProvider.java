@@ -33,7 +33,7 @@ public class NifiRegistryRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected String getDbUser() {
+    public String getDbUser() {
         return nifiRegistryDbUser;
     }
 
@@ -53,7 +53,7 @@ public class NifiRegistryRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected DatabaseType getRdsType() {
+    public DatabaseType getRdsType() {
         return DatabaseType.NIFIREGISTRY;
     }
 

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.google.common.collect.Table;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
@@ -97,4 +98,6 @@ public interface ClusterModificationService {
     }
 
     void refreshCluster() throws Exception;
+
+    void updateConfig(Table<String, String, String> configTable) throws Exception;
 }
