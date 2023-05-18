@@ -40,11 +40,13 @@ import com.sequenceiq.cloudbreak.view.StackView;
 @Service
 public class PostgresConfigService {
 
+    public static final String POSTGRESQL_SERVER = "postgresql-server";
+
+    public static final String POSTGRES_ROTATION = "postgres-rotation";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresConfigService.class);
 
     private static final String POSTGRES_COMMON = "postgres-common";
-
-    private static final String POSTGRESQL_SERVER = "postgresql-server";
 
     private static final String POSTGRES_VERSION = "postgres_version";
 
@@ -83,8 +85,21 @@ public class PostgresConfigService {
 
         if (!postgresConfig.isEmpty()) {
             servicePillar.put(POSTGRESQL_SERVER, new SaltPillarProperties("/postgresql/postgre.sls", singletonMap("postgres", postgresConfig)));
+            servicePillar.put("postgres-rotation", getPillarPropertiesForRotation(stackDto));
         }
         servicePillar.putAll(upgradeRdsBackupRestoreStateParamsProvider.createParamsForRdsBackupRestore(stackDto, ""));
+    }
+
+    public SaltPillarProperties getPillarPropertiesForRotation(StackDto stackDto) {
+        Map<String, Object> postgresConfig = new HashMap<>();
+        rdsConfigProviderFactory.getAllSupportedRdsConfigProviders().forEach(provider ->
+                postgresConfig.putAll(provider.createServicePillarConfigMapForRotation(stackDto)));
+        return new SaltPillarProperties("/postgresql/rotation.sls", singletonMap("postgres-rotation", postgresConfig));
+    }
+
+    public SaltPillarProperties getPostgreSQLServerPropertiesForRotation(StackDto stackDto) {
+        Map<String, Object> postgresConfig = initPostgresConfig(stackDto);
+        return new SaltPillarProperties("/postgresql/postgre.sls", singletonMap("postgres", postgresConfig));
     }
 
     private SSLSaltConfig getSslSaltConfigWhenRootCertAlreadyInitialized(StackDto stackDto) {

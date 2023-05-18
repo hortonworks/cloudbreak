@@ -939,4 +939,40 @@ class SaltOrchestratorTest {
         verify(saltStateService).applyStateSync(eq(saltConnector), eq(state), targetCaptor.capture());
         assertEquals("hostname", targetCaptor.getValue().getTarget());
     }
+
+    @Test
+    void testExecuteSaltState() throws Exception {
+        when(saltService.createSaltConnector(any(GatewayConfig.class))).thenReturn(saltConnector);
+        when(saltRunner.runnerWithConfiguredErrorCount(any(), any(), any())).thenReturn(callable);
+        when(callable.call()).thenReturn(true);
+
+        saltOrchestrator.executeSaltState(gatewayConfig, null, List.of("state"), null,
+                Optional.empty(), Optional.empty());
+
+        verify(saltRunner).runnerWithConfiguredErrorCount(any(), any(), any());
+    }
+
+    @Test
+    void testExecuteSaltStateWithRetry() throws Exception {
+        when(saltService.createSaltConnector(any(GatewayConfig.class))).thenReturn(saltConnector);
+        when(saltRunner.runnerWithCalculatedErrorCount(any(), any(), any(), anyInt())).thenReturn(callable);
+        when(callable.call()).thenReturn(true);
+
+        saltOrchestrator.executeSaltState(gatewayConfig, null, List.of("state"), null,
+                Optional.of(3), Optional.empty());
+
+        verify(saltRunner).runnerWithCalculatedErrorCount(any(), any(), any(), anyInt());
+    }
+
+    @Test
+    void testExecuteSaltStateWithBothRetry() throws Exception {
+        when(saltService.createSaltConnector(any(GatewayConfig.class))).thenReturn(saltConnector);
+        when(saltRunner.runner(any(), any(), any(), anyInt(), anyInt())).thenReturn(callable);
+        when(callable.call()).thenReturn(true);
+
+        saltOrchestrator.executeSaltState(gatewayConfig, null, List.of("state"), null,
+                Optional.of(3), Optional.of(3));
+
+        verify(saltRunner).runner(any(), any(), any(), anyInt(), anyInt());
+    }
 }

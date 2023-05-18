@@ -141,6 +141,8 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 @Component
 public class ClusterHostServiceRunner {
 
+    public static final String CM_DATABASE_PILLAR_KEY = "cloudera-manager-database";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterHostServiceRunner.class);
 
     private static final int CM_HTTP_PORT = 7180;
@@ -612,16 +614,22 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private void decoratePillarWithClouderaManagerDatabase(ClusterView cluster, Map<String, SaltPillarProperties> servicePillar)
+    public void decoratePillarWithClouderaManagerDatabase(ClusterView cluster, Map<String, SaltPillarProperties> servicePillar)
             throws CloudbreakOrchestratorFailedException {
+        SaltPillarProperties saltPillarProperties = getClouderaManagerDatabasePillarProperties(cluster);
+        servicePillar.put(CM_DATABASE_PILLAR_KEY, saltPillarProperties);
+    }
+
+    public SaltPillarProperties getClouderaManagerDatabasePillarProperties(ClusterView cluster) throws CloudbreakOrchestratorFailedException {
         RdsConfigWithoutCluster clouderaManagerRdsConfig =
                 rdsConfigWithoutClusterService.findByClusterIdAndType(cluster.getId(), DatabaseType.CLOUDERA_MANAGER);
         if (clouderaManagerRdsConfig == null) {
             throw new CloudbreakOrchestratorFailedException("Cloudera Manager RDSConfig is missing for stackDto");
         }
         RdsView rdsView = rdsViewProvider.getRdsView(clouderaManagerRdsConfig);
-        servicePillar.put("cloudera-manager-database",
-                new SaltPillarProperties("/cloudera-manager/database.sls", singletonMap("cloudera-manager", singletonMap("database", rdsView))));
+        SaltPillarProperties saltPillarProperties = new SaltPillarProperties("/cloudera-manager/database.sls",
+                singletonMap("cloudera-manager", singletonMap("database", rdsView)));
+        return saltPillarProperties;
     }
 
     private void decoratePillarWithClouderaManagerCommunicationSettings(StackDto stackDto, Map<String, SaltPillarProperties> servicePillar) {

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
+import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -72,27 +73,55 @@ public abstract class AbstractRdsConfigProvider {
      */
     public Map<String, Object> createServicePillarConfigMapIfNeeded(StackDto stackDto) {
         if (isRdsConfigNeeded(stackDto.getBlueprint(), stackDto.hasGateway())) {
-            Set<RdsConfigWithoutCluster> rdsConfigs = createPostgresRdsConfigIfNeeded(stackDto);
-            RdsConfigWithoutCluster rdsConfig = rdsConfigs.stream().filter(c -> c.getType().equalsIgnoreCase(getRdsType().name())).findFirst().get();
+            RdsConfigWithoutCluster rdsConfig = getRdsConfig(stackDto);
             if (rdsConfig.getStatus() == ResourceStatus.DEFAULT && rdsConfig.getDatabaseEngine() != DatabaseVendor.EMBEDDED) {
                 Map<String, Object> postgres = new HashMap<>();
-                String databaseServerCrn = stackDto.getCluster().getDatabaseServerCrn();
-                if (dbServerConfigurer.isRemoteDatabaseRequested(databaseServerCrn)) {
-                    DatabaseServerV4Response dbServerResponse = dbServerConfigurer.getDatabaseServer(databaseServerCrn);
-                    postgres.put("remote_db_url", dbServerResponse.getHost());
-                    postgres.put("remote_db_port", dbServerResponse.getPort());
-                    postgres.put("remote_admin", secretService.getByResponse(dbServerResponse.getConnectionUserName()));
-                    postgres.put("remote_admin_pw", secretService.getByResponse(dbServerResponse.getConnectionPassword()));
-                }
-                String dbName = getDb();
-                postgres.put("database", dbName);
+                addRemoteDbToConfigIfNeeded(stackDto, postgres);
+                postgres.put("database", getDb());
                 postgres.put("user", dbUsernameConverterService.toDatabaseUsername(rdsConfig.getConnectionUserName()));
                 postgres.put("password", rdsConfig.getConnectionPassword());
-                LOGGER.debug("RDS config added to pillar for name: {} databaseEngine: {}", dbName, rdsConfig.getDatabaseEngine());
+                LOGGER.debug("RDS config added to pillar for name: {} databaseEngine: {}", getDb(), rdsConfig.getDatabaseEngine());
                 return Collections.singletonMap(getPillarKey(), postgres);
             }
         }
         return Collections.emptyMap();
+    }
+
+    public Map<String, Object> createServicePillarConfigMapForRotation(StackDto stackDto) {
+        if (isRdsConfigNeeded(stackDto.getBlueprint(), stackDto.hasGateway())) {
+            RdsConfigWithoutCluster rdsConfig = getRdsConfig(stackDto);
+            RotationSecret databaseUser = secretService.getRotation(rdsConfig.getConnectionUserNamePath());
+            RotationSecret databasePassword = secretService.getRotation(rdsConfig.getConnectionPasswordPath());
+            if (rdsConfig.getStatus() == ResourceStatus.DEFAULT && rdsConfig.getDatabaseEngine() != DatabaseVendor.EMBEDDED &&
+                    databaseUser.isRotation() && databasePassword.isRotation()) {
+                Map<String, Object> postgres = new HashMap<>();
+                addRemoteDbToConfigIfNeeded(stackDto, postgres);
+                postgres.put("database", getDb());
+                postgres.put("oldUser", dbUsernameConverterService.toDatabaseUsername(databaseUser.getBackupSecret()));
+                postgres.put("oldPassword", databasePassword.getBackupSecret());
+                postgres.put("newUser", dbUsernameConverterService.toDatabaseUsername(databaseUser.getSecret()));
+                postgres.put("newPassword", databasePassword.getSecret());
+                LOGGER.debug("RDS config added to pillar for secret rotation for name: {} databaseEngine: {}", getDb(), rdsConfig.getDatabaseEngine());
+                return Collections.singletonMap(getPillarKey(), postgres);
+            }
+        }
+        return Collections.emptyMap();
+    }
+
+    private RdsConfigWithoutCluster getRdsConfig(StackDto stackDto) {
+        Set<RdsConfigWithoutCluster> rdsConfigs = createPostgresRdsConfigIfNeeded(stackDto);
+        return rdsConfigs.stream().filter(c -> c.getType().equalsIgnoreCase(getRdsType().name())).findFirst().get();
+    }
+
+    private void addRemoteDbToConfigIfNeeded(StackDto stackDto, Map<String, Object> postgres) {
+        String databaseServerCrn = stackDto.getCluster().getDatabaseServerCrn();
+        if (dbServerConfigurer.isRemoteDatabaseRequested(databaseServerCrn)) {
+            DatabaseServerV4Response dbServerResponse = dbServerConfigurer.getDatabaseServer(databaseServerCrn);
+            postgres.put("remote_db_url", dbServerResponse.getHost());
+            postgres.put("remote_db_port", dbServerResponse.getPort());
+            postgres.put("remote_admin", secretService.getByResponse(dbServerResponse.getConnectionUserName()));
+            postgres.put("remote_admin_pw", secretService.getByResponse(dbServerResponse.getConnectionPassword()));
+        }
     }
 
     /**

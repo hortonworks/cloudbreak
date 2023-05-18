@@ -23,8 +23,13 @@ public class SaltStateApplyRotationContext extends RotationContext {
 
     private final ExitCriteriaModel exitCriteriaModel;
 
+    private final Optional<Integer> maxRetry;
+
+    private final Optional<Integer> maxRetryOnError;
+
     public SaltStateApplyRotationContext(String resourceCrn, GatewayConfig gatewayConfig, Set<String> targets, List<String> states,
-            Optional<List<String>> rollBackStates, Optional<List<String>> cleanupStates, ExitCriteriaModel exitCriteriaModel) {
+            Optional<List<String>> rollBackStates, Optional<List<String>> cleanupStates, ExitCriteriaModel exitCriteriaModel,
+            Optional<Integer> maxRetry, Optional<Integer> maxRetryOnError) {
         super(resourceCrn);
         this.gatewayConfig = gatewayConfig;
         this.targets = targets;
@@ -32,6 +37,8 @@ public class SaltStateApplyRotationContext extends RotationContext {
         this.rollBackStates = rollBackStates;
         this.cleanupStates = cleanupStates;
         this.exitCriteriaModel = exitCriteriaModel;
+        this.maxRetry = maxRetry;
+        this.maxRetryOnError = maxRetryOnError;
     }
 
     public GatewayConfig getGatewayConfig() {
@@ -58,6 +65,14 @@ public class SaltStateApplyRotationContext extends RotationContext {
         return cleanupStates;
     }
 
+    public Optional<Integer> getMaxRetry() {
+        return maxRetry;
+    }
+
+    public Optional<Integer> getMaxRetryOnError() {
+        return maxRetryOnError;
+    }
+
     public static SaltStateApplyRotationContextBuilder builder() {
         return new SaltStateApplyRotationContextBuilder();
     }
@@ -72,11 +87,15 @@ public class SaltStateApplyRotationContext extends RotationContext {
 
         private List<String> states;
 
-        private Optional<List<String>> rollBackStates;
+        private Optional<List<String>> rollBackStates = Optional.empty();
 
-        private Optional<List<String>> cleanupStates;
+        private Optional<List<String>> cleanupStates = Optional.empty();
 
         private ExitCriteriaModel exitCriteriaModel;
+
+        private Optional<Integer> maxRetry = Optional.empty();
+
+        private Optional<Integer> maxRetryOnError = Optional.empty();
 
         public SaltStateApplyRotationContextBuilder withResourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
@@ -98,13 +117,13 @@ public class SaltStateApplyRotationContext extends RotationContext {
             return this;
         }
 
-        public SaltStateApplyRotationContextBuilder withRollbackStates(Optional<List<String>> rollBackStates) {
-            this.rollBackStates = rollBackStates;
+        public SaltStateApplyRotationContextBuilder withRollbackStates(List<String> rollBackStates) {
+            this.rollBackStates = Optional.of(rollBackStates);
             return this;
         }
 
-        public SaltStateApplyRotationContextBuilder withCleanupStates(Optional<List<String>> cleanupStates) {
-            this.cleanupStates = cleanupStates;
+        public SaltStateApplyRotationContextBuilder withCleanupStates(List<String> cleanupStates) {
+            this.cleanupStates = Optional.of(cleanupStates);
             return this;
         }
 
@@ -113,8 +132,19 @@ public class SaltStateApplyRotationContext extends RotationContext {
             return this;
         }
 
+        public SaltStateApplyRotationContextBuilder withMaxRetry(Integer maxRetry) {
+            this.maxRetry = Optional.of(maxRetry);
+            return this;
+        }
+
+        public SaltStateApplyRotationContextBuilder withMaxRetryOnError(Integer maxRetryOnError) {
+            this.maxRetryOnError = Optional.of(maxRetryOnError);
+            return this;
+        }
+
         public SaltStateApplyRotationContext build() {
-            return new SaltStateApplyRotationContext(resourceCrn, gatewayConfig, targets, states, rollBackStates, cleanupStates, exitCriteriaModel);
+            return new SaltStateApplyRotationContext(resourceCrn, gatewayConfig, targets, states, rollBackStates, cleanupStates,
+                    exitCriteriaModel, maxRetry, maxRetryOnError);
         }
 
     }
