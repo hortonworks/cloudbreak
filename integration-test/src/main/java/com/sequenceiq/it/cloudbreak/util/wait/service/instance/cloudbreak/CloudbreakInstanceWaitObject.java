@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -55,16 +56,24 @@ public class CloudbreakInstanceWaitObject implements InstanceWaitObject {
 
     @Override
     public void fetchData() {
+        StackV4Response stackResponse = null;
         try {
-            instanceGroups = testContext.getMicroserviceClient(CloudbreakClient.class)
-                    .getDefaultClient().distroXV1Endpoint().getByName(name, Set.of()).getInstanceGroups();
+            stackResponse = testContext.getMicroserviceClient(CloudbreakClient.class)
+                    .getDefaultClient().distroXV1Endpoint().getByName(name, Set.of());
+            instanceGroups = stackResponse.getInstanceGroups();
             instanceResourceType = "Data Hub";
         } catch (NotFoundException e) {
             LOGGER.info("SDX '{}' instance groups are present for validation.", name);
-            instanceGroups = testContext.getSdxClient().getDefaultClient().sdxEndpoint().getDetail(name, Set.of()).getStackV4Response().getInstanceGroups();
+            stackResponse = testContext.getSdxClient().getDefaultClient().sdxEndpoint().getDetail(name, Set.of()).getStackV4Response();
+            instanceGroups = stackResponse.getInstanceGroups();
         } catch (Exception e) {
-            LOGGER.error("Instance groups cannot be determined, because of: {}", e.getMessage(), e);
-            throw new TestFailException("Instance groups cannot be determined", e);
+            String errorMsg = "Instance groups cannot be determined.";
+            if (stackResponse != null) {
+                errorMsg += " Stack status: " + stackResponse.getStatus().name() +
+                        " Stack status reason: " + stackResponse.getStatusReason();
+            }
+            LOGGER.error(errorMsg, e);
+            throw new TestFailException(errorMsg, e);
         }
     }
 
