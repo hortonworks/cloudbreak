@@ -21,7 +21,8 @@ public class SaltStateApplyRotationExecutor implements RotationExecutor<SaltStat
 
     @Override
     public void rotate(SaltStateApplyRotationContext context) throws Exception {
-        hostOrchestrator.executeSaltState(context.getGatewayConfig(), context.getTargets(), context.getStates(), context.getExitCriteriaModel());
+        hostOrchestrator.executeSaltState(context.getGatewayConfig(), context.getTargets(), context.getStates(), context.getExitCriteriaModel(),
+                context.getMaxRetry(), context.getMaxRetryOnError());
     }
 
     @Override
@@ -30,14 +31,15 @@ public class SaltStateApplyRotationExecutor implements RotationExecutor<SaltStat
         if (context.getRollBackStates().isPresent()) {
             rollbackStates = context.getRollBackStates().get();
         }
-        hostOrchestrator.executeSaltState(context.getGatewayConfig(), context.getTargets(), rollbackStates, context.getExitCriteriaModel());
+        hostOrchestrator.executeSaltState(context.getGatewayConfig(), context.getTargets(), rollbackStates, context.getExitCriteriaModel(),
+                context.getMaxRetry(), context.getMaxRetryOnError());
     }
 
     @Override
     public void finalize(SaltStateApplyRotationContext context) throws Exception {
         if (context.getCleanupStates().isPresent()) {
-            hostOrchestrator.executeSaltState(context.getGatewayConfig(), context.getTargets(),
-                    context.getCleanupStates().get(), context.getExitCriteriaModel());
+            hostOrchestrator.executeSaltState(context.getGatewayConfig(), context.getTargets(), context.getCleanupStates().get(),
+                    context.getExitCriteriaModel(), context.getMaxRetry(), context.getMaxRetryOnError());
         }
     }
 
