@@ -155,7 +155,7 @@ public class AwsMetadataCollector implements MetadataCollector {
         for (String group : instancesOnAWSForGroup.keySet()) {
             Collection<Instance> instances = instancesOnAWSForGroup.get(group);
             List<Instance> unknownInstances = instances.stream().filter(instance ->
-                    !knownInstanceIdList.contains(instance.instanceId()))
+                            !knownInstanceIdList.contains(instance.instanceId()))
                     .collect(toList());
             unknownInstancesForGroup.putAll(group, unknownInstances);
         }
@@ -241,13 +241,13 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     private Optional<Instance> findInstanceByVolumes(Collection<Instance> unknownInstancesForGroup, List<String> volumes) {
         return unknownInstancesForGroup.stream().filter(instance -> instance.blockDeviceMappings().stream()
-                .anyMatch(instanceBlockDeviceMapping -> volumes.contains(instanceBlockDeviceMapping.ebs().volumeId())))
+                        .anyMatch(instanceBlockDeviceMapping -> volumes.contains(instanceBlockDeviceMapping.ebs().volumeId())))
                 .findFirst();
     }
 
     private Optional<Instance> getInstancesWithoutKnownVolumes(Collection<Instance> unknownInstancesForGroup, List<String> allKnownVolumes) {
         return unknownInstancesForGroup.stream().filter(instance -> instance.blockDeviceMappings().stream()
-                .noneMatch(instanceBlockDeviceMapping -> allKnownVolumes.contains(instanceBlockDeviceMapping.ebs().volumeId())))
+                        .noneMatch(instanceBlockDeviceMapping -> allKnownVolumes.contains(instanceBlockDeviceMapping.ebs().volumeId())))
                 .findFirst();
     }
 
@@ -319,20 +319,25 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     public List<Instance> collectInstancesForGroup(AuthenticatedContext ac, AmazonAutoScalingClient amazonASClient,
             AmazonEc2Client amazonEC2Client, AmazonCloudFormationClient amazonCFClient, String group) {
-
+        List<Instance> describedInstances = new ArrayList<>();
         LOGGER.debug("Collect aws instances for group: {}", group);
 
         String asGroupName = cloudFormationStackUtil.getAutoscalingGroupName(ac, amazonCFClient, group);
         List<String> instanceIds = cloudFormationStackUtil.getInstanceIds(amazonASClient, asGroupName);
 
-        LOGGER.debug("Collected instanceID(s) for group ({}): {}", String.join(",", instanceIds), group);
+        if (instanceIds.isEmpty()) {
+            LOGGER.warn("No instanceID was collected for group '{}', within auto scaling group: '{}', but metadata collection has been triggered on it", group,
+                    asGroupName);
+        } else {
+            LOGGER.debug("Collected instanceID(s) for group ({}): {}", String.join(",", instanceIds), group);
+            DescribeInstancesRequest instancesRequest = cloudFormationStackUtil.createDescribeInstancesRequest(instanceIds);
+            DescribeInstancesResponse instancesResponse = amazonEC2Client.retryableDescribeInstances(instancesRequest);
 
-        DescribeInstancesRequest instancesRequest = cloudFormationStackUtil.createDescribeInstancesRequest(instanceIds);
-        DescribeInstancesResponse instancesResponse = amazonEC2Client.retryableDescribeInstances(instancesRequest);
-
-        return instancesResponse.reservations().stream()
-                .flatMap(reservation -> reservation.instances().stream())
-                .collect(toList());
+            describedInstances.addAll(instancesResponse.reservations().stream()
+                    .flatMap(reservation -> reservation.instances().stream())
+                    .collect(toList()));
+        }
+        return describedInstances;
     }
 
     @Override
@@ -351,15 +356,15 @@ public class AwsMetadataCollector implements MetadataCollector {
                 Map<String, Object> parameters = awsLoadBalancerMetadataCollector.getParameters(ac, loadBalancer, scheme);
 
                 CloudLoadBalancerMetadata loadBalancerMetadata = CloudLoadBalancerMetadata.builder()
-                    .withType(type)
-                    .withCloudDns(loadBalancer.dnsName())
-                    .withHostedZoneId(loadBalancer.canonicalHostedZoneId())
-                    .withName(loadBalancerName)
-                    .withParameters(parameters)
-                    .build();
+                        .withType(type)
+                        .withCloudDns(loadBalancer.dnsName())
+                        .withHostedZoneId(loadBalancer.canonicalHostedZoneId())
+                        .withName(loadBalancerName)
+                        .withParameters(parameters)
+                        .build();
                 cloudLoadBalancerMetadata.add(loadBalancerMetadata);
                 LOGGER.debug("Saved metadata for load balancer {}: DNS {}, zone id {}", loadBalancerName, loadBalancer.dnsName(),
-                    loadBalancer.canonicalHostedZoneId());
+                        loadBalancer.canonicalHostedZoneId());
             } catch (RuntimeException e) {
                 LOGGER.debug("Unable to find metadata for load balancer " + loadBalancerName, e);
             }
