@@ -155,7 +155,10 @@ public class AzureImageFormatValidator implements Validator {
     }
 
     public boolean isMarketplaceImageFormat(Image image) {
-        String imageUri = image.getImageName();
+        return isMarketplaceImageFormat(image.getImageName());
+    }
+
+    public boolean isMarketplaceImageFormat(String imageUri) {
         Matcher matcher = MARKETPLACE_PATTERN.matcher(imageUri);
         if (matcher.matches()) {
             LOGGER.debug("Image with name {} is a valid marketplace image", imageUri);
@@ -167,7 +170,10 @@ public class AzureImageFormatValidator implements Validator {
     }
 
     public boolean isVhdImageFormat(Image image) {
-        String imageUri = image.getImageName();
+        return isVhdImageFormat(image.getImageName());
+    }
+
+    private boolean isVhdImageFormat(String imageUri) {
         Matcher matcher = VHD_PATTERN.matcher(imageUri);
         if (matcher.matches()) {
             LOGGER.debug("Image with name {} is a valid VHD based image", imageUri);

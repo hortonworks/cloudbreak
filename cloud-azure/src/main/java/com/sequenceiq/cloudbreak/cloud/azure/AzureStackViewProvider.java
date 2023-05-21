@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.service.Retry;
 
@@ -69,20 +68,21 @@ class AzureStackViewProvider {
     }
 
     private Map<String, String> getCustomImageNamePerInstance(AuthenticatedContext ac, CloudStack cloudStack) {
-        Image stackImage = cloudStack.getImage();
         Map<String, String> customImageNamePerInstance = new HashMap<>();
 
-        if (!azureImageFormatValidator.isMarketplaceImageFormat(stackImage)) {
-            AzureClient client = ac.getParameter(AzureClient.class);
-            Map<String, String> imageNameMap = new HashMap<>();
-            for (Group group : cloudStack.getGroups()) {
-                for (CloudInstance instance : group.getInstances()) {
-                    String imageId = instance.getTemplate().getImageId();
-                    if (StringUtils.isNotBlank(imageId)) {
-                        String imageCustomName = imageNameMap.computeIfAbsent(
-                                imageId, s -> azureStorage.getCustomImage(client, ac, cloudStack, imageId).getId());
-                        customImageNamePerInstance.put(instance.getInstanceId(), imageCustomName);
-                    }
+        AzureClient client = ac.getParameter(AzureClient.class);
+        Map<String, String> imageNameMap = new HashMap<>();
+        for (Group group : cloudStack.getGroups()) {
+            for (CloudInstance instance : group.getInstances()) {
+                String imageId = instance.getTemplate().getImageId();
+                if (StringUtils.isNotBlank(imageId) && !azureImageFormatValidator.isMarketplaceImageFormat(imageId)) {
+                    String imageCustomName = imageNameMap.computeIfAbsent(
+                            imageId, s -> azureStorage.getCustomImage(client, ac, cloudStack, imageId).getId());
+                    customImageNamePerInstance.put(instance.getInstanceId(), imageCustomName);
+                    LOGGER.debug("Collect customImageName {} for instance {}", imageCustomName, instance.getInstanceId());
+                } else {
+                    LOGGER.debug("ImageId {} is empty or is a marketplace image identifier for instance {}, custom image name collection is not needed.",
+                            imageId, instance.getInstanceId());
                 }
             }
         }

@@ -5,6 +5,8 @@ import static com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImage
 import static com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImageTermStatus.NON_READABLE;
 import static com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImageTermStatus.NOT_ACCEPTED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -248,6 +250,50 @@ public class AzureImageFormatValidatorTest {
         String expected = "Your image name cldrwestus2.blob.core.windows.net/images/cb-cdh-726-210326090153.vhd\" is invalid. " +
                 "Please check the desired format in the documentation!";
         assertEquals(expected, exception.getMessage());
+    }
+
+    @Test
+    void testMarketplaceImageUri() {
+        boolean actualResult = underTest.isMarketplaceImageFormat(MARKETPLACE_IMAGE_NAME);
+        assertTrue(actualResult);
+    }
+
+    @Test
+    void testWrongMarketplaceImageUri() {
+        boolean actualResult = underTest.isMarketplaceImageFormat(INVALID_IMAGE_NAME);
+        assertFalse(actualResult);
+    }
+
+    @Test
+    void testMarketplaceImage() {
+        Image image = new Image(MARKETPLACE_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
+                "default-id", new HashMap<>());
+        boolean actualResult = underTest.isMarketplaceImageFormat(image);
+        assertTrue(actualResult);
+    }
+
+    @Test
+    void testWrongMarketplaceImage() {
+        Image image = new Image(INVALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
+                "default-id", new HashMap<>());
+        boolean actualResult = underTest.isMarketplaceImageFormat(image);
+        assertFalse(actualResult);
+    }
+
+    @Test
+    void testVhdImage() {
+        Image image = new Image(VALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
+                "default-id", new HashMap<>());
+        boolean actualResult = underTest.isVhdImageFormat(image);
+        assertTrue(actualResult);
+    }
+
+    @Test
+    void testWrongVhdImage() {
+        Image image = new Image(INVALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
+                "default-id", new HashMap<>());
+        boolean actualResult = underTest.isVhdImageFormat(image);
+        assertFalse(actualResult);
     }
 
     private void setupAuthenticatedContext() {
