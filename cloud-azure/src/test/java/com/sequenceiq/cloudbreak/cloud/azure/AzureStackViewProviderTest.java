@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -106,15 +107,19 @@ public class AzureStackViewProviderTest {
         when(cloudStack.getGroups()).thenReturn(groups);
         when(cloudStack.getParameters()).thenReturn(Collections.emptyMap());
         when(cloudStack.getNetwork()).thenReturn(network);
-        when(cloudStack.getImage()).thenReturn(imageModel);
         when(network.getStringParameter("resourceGroupName")).thenReturn(RESOURCE_GROUP);
         when(network.getStringParameter("networkId")).thenReturn(NETWORK_ID);
         when(azureUtils.getCustomSubnetIds(network)).thenReturn(Collections.emptyList());
-        when(azureImageFormatValidator.isMarketplaceImageFormat(imageModel)).thenReturn(marketplaceImage);
+        when(azureImageFormatValidator.isMarketplaceImageFormat(IMAGE_ID)).thenReturn(marketplaceImage);
 
         AzureStackView actual = underTest.getAzureStack(azureCredentialView, cloudStack, client, ac);
 
         assertEquals("i1-c4ca4238", actual.getInstancesByGroupType().get(InstanceGroupType.CORE.name()).get(0).getInstanceId());
+        if (marketplaceImage) {
+            assertNull(actual.getInstancesByGroupType().get(InstanceGroupType.CORE.name()).get(0).getCustomImageId());
+        } else {
+            assertEquals("id", actual.getInstancesByGroupType().get(InstanceGroupType.CORE.name()).get(0).getCustomImageId());
+        }
         assertEquals(GROUP_NAME, actual.getInstanceGroups().get(0).getName());
         assertEquals(imageId, actual.getInstancesByGroupType().get(InstanceGroupType.CORE.name()).get(0).getCustomImageId());
 

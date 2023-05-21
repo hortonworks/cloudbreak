@@ -164,7 +164,7 @@ public class AzureResourceConnectorTest {
     public void testWhenTemplateDeploymentDoesNotExistThenComputeResourceServiceBuildsTheResources() {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
         when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
-        when(azureImageFormatValidator.isMarketplaceImageFormat(any())).thenReturn(false);
+        when(azureImageFormatValidator.isMarketplaceImageFormat(any(Image.class))).thenReturn(false);
 
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(ADJUSTMENT_TYPE, THRESHOLD);
         underTest.launch(ac, stack, notifier, adjustmentTypeWithThreshold);
@@ -219,7 +219,7 @@ public class AzureResourceConnectorTest {
     public void testWhenMarketplaceImageThenTemplateBuilderUsesMarketplaceImage() {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
         when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
-        when(azureImageFormatValidator.isMarketplaceImageFormat(any())).thenReturn(true);
+        when(azureImageFormatValidator.isMarketplaceImageFormat(any(Image.class))).thenReturn(true);
         when(stack.getParameters()).thenReturn(Map.of(ACCEPTANCE_POLICY_PARAMETER, Boolean.TRUE.toString()));
         ReflectionTestUtils.setField(underTest, "enableAzureImageTermsAutomaticSigner", true);
 
@@ -234,7 +234,7 @@ public class AzureResourceConnectorTest {
     public void testWhenMarketplaceImageThenTemplateBuilderUsesMarketplaceImageGlobalSettingOff() {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
         when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
-        when(azureImageFormatValidator.isMarketplaceImageFormat(any())).thenReturn(true);
+        when(azureImageFormatValidator.isMarketplaceImageFormat(any(Image.class))).thenReturn(true);
         when(stack.getParameters()).thenReturn(Map.of(ACCEPTANCE_POLICY_PARAMETER, Boolean.FALSE.toString()));
         ReflectionTestUtils.setField(underTest, "enableAzureImageTermsAutomaticSigner", true);
 

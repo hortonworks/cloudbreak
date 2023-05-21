@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.RetryService;
 
@@ -72,7 +74,7 @@ class AzureTemplateDeploymentServiceTest {
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, new CloudCredential());
         AzureStackView stackView = mock(AzureStackView.class);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), any(CloudStack.class))).thenReturn("rg1");
-        when(azureImageFormatValidator.isMarketplaceImageFormat(any())).thenReturn(false);
+        when(azureImageFormatValidator.isMarketplaceImageFormat(isNull(Image.class))).thenReturn(false);
         when(azureStorage.getCustomImage(any(), any(), any())).thenReturn(new AzureImage("1", "image1", true));
         when(azureTemplateBuilder.build(eq("stack1"), eq("1"), any(), any(), any(), any(), any(), any())).thenReturn("template");
         when(retry.testWith1SecDelayMax5Times(any(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
