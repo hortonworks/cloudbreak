@@ -217,7 +217,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    // CB-21906 Disabled due to blueprint error ("Enable TLS/SSL for Kafka Broker does not have same value for the 4 Kafka Brokers")
+//    @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a Scalable SDX cluster in available state",
             when = "IDBroker and Gateway instances are going to be deleted on the provider side",
