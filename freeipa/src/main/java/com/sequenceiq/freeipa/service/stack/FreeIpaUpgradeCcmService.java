@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -30,8 +29,6 @@ public class FreeIpaUpgradeCcmService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaUpgradeCcmService.class);
 
-    private final EntitlementService entitlementService;
-
     private final FreeIpaFlowManager flowManager;
 
     private final StackService stackService;
@@ -42,10 +39,8 @@ public class FreeIpaUpgradeCcmService {
 
     private final OperationToOperationStatusConverter operationConverter;
 
-    public FreeIpaUpgradeCcmService(EntitlementService entitlementService, FreeIpaFlowManager flowManager, StackService stackService, StackUpdater stackUpdater,
+    public FreeIpaUpgradeCcmService(FreeIpaFlowManager flowManager, StackService stackService, StackUpdater stackUpdater,
             OperationService operationService, OperationToOperationStatusConverter operationConverter) {
-
-        this.entitlementService = entitlementService;
         this.flowManager = flowManager;
         this.stackService = stackService;
         this.stackUpdater = stackUpdater;
@@ -62,7 +57,6 @@ public class FreeIpaUpgradeCcmService {
             return alreadyFinishedOperationStatus(environmentCrn);
         } else {
             validateCcmUpgrade(stack);
-            validateEntitlements(stack, accountId);
             return startUpgradeOperation(accountId, stack);
         }
     }
@@ -88,16 +82,6 @@ public class FreeIpaUpgradeCcmService {
             throw new BadRequestException(
                     String.format("FreeIPA stack '%s' has a tunnel type '%s' and thus Cluster Connectivity Manager upgrade is not possible.%n" +
                                     "Allowed original tunnel types are: %s", stack.getName(), stack.getTunnel(), Tunnel.getUpgradables()));
-        }
-    }
-
-    private void validateEntitlements(Stack stack, String accountId) {
-        if (stack.getTunnel().useCcmV1() && !entitlementService.ccmV1ToV2JumpgateUpgradeEnabled(accountId) ||
-                stack.getTunnel().useCcmV2() && !entitlementService.ccmV2ToV2JumpgateUpgradeEnabled(accountId)) {
-
-            throw new BadRequestException(
-                    String.format("FreeIPA stack '%s' has a tunnel type '%s' but the account is not entitled for Cluster Connectivity Manager upgrade.",
-                            stack.getName(), stack.getTunnel()));
         }
     }
 
