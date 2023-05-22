@@ -29,8 +29,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ROTATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V1_TO_V2_JUMPGATE_UPGRADE;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_JUMPGATE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_TO_V2_JUMPGATE_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_USE_ONE_WAY_TLS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
@@ -338,12 +336,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datahub.runtime.upgrade.enable}")
     private boolean datahubRuntimeUpgradeEnabled;
-
-    @Value("${auth.mock.ccmv2.enable}")
-    private boolean ccmV2Enabled;
-
-    @Value("${auth.mock.ccmv2jumpgate.enable}")
-    private boolean ccmV2JumpgateEnabled;
 
     @Value("${auth.mock.ccmv2.useOneWayTls}")
     private boolean ccmV2UseOneWayTls;
@@ -826,12 +818,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (datahubRuntimeUpgradeEnabled) {
             builder.addEntitlements(createEntitlement(CDP_RUNTIME_UPGRADE_DATAHUB));
-        }
-        if (ccmV2Enabled) {
-            builder.addEntitlements(createEntitlement(CDP_CCM_V2));
-        }
-        if (ccmV2JumpgateEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_CCM_V2_JUMPGATE));
         }
         if (verticalScaleEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_AZURE_VERTICAL_SCALE));

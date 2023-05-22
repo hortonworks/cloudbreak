@@ -51,8 +51,6 @@ auth:
     datahub:
       runtime.upgrade.enable: true
       instancetypes.enable: true
-    ccmv2.enable: false
-    ccmv2jumpgate.enable: false
     ccmv2.useOneWayTls: false
     ccmv1.upgradeToV2Jumpgate.enable: true
     ccmv2.upgradeToV2Jumpgate.enable: true
