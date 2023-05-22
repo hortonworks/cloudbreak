@@ -27,8 +27,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ROTATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V1_TO_V2_JUMPGATE_UPGRADE;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_JUMPGATE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_TO_V2_JUMPGATE_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_USE_ONE_WAY_TLS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
@@ -320,14 +318,6 @@ public class EntitlementService {
 
     public boolean gcpStopStartScalingEnabled(String accountId) {
         return isEntitlementRegistered(accountId, DATAHUB_GCP_STOP_START_SCALING);
-    }
-
-    public boolean ccmV2Enabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_CCM_V2);
-    }
-
-    public boolean ccmV2JumpgateEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_CCM_V2_JUMPGATE);
     }
 
     public boolean azureVerticalScaleEnabled(String accountId) {
