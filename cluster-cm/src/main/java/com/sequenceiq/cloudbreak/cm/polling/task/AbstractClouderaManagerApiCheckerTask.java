@@ -62,7 +62,8 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
         } else if (isToleratedError(e)) {
             return handleToleratedError(pollerObject, e);
         } else {
-            throw new ClouderaManagerOperationFailedException(String.format("Cloudera Manager [%s] operation failed. %s", getPollingName(), e.getMessage()), e);
+            throw new ClouderaManagerOperationFailedException(String.format("Cloudera Manager [%s] operation failed. Reason: %s",
+                    getPollingName(), e.getMessage()), e);
         }
     }
 
