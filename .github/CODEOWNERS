@@ -9,9 +9,9 @@ authorization-common/                                                           
 authorization-common-api/                                                       @hortonworks/cloudbreak-raven
 grpc-common/                                                                    @hortonworks/cloudbreak-raven
 
-# Raven team should review datalake and datalake-api modules
-datalake/                                                                       @hortonworks/cloudbreak-raven
-datalake-api/                                                                   @hortonworks/cloudbreak-raven
+# Raven and Armadillo teams should review datalake and datalake-api modules
+datalake/                                                                       @hortonworks/cloudbreak-raven @hortonworks/cloudbreak-armadillo
+datalake-api/                                                                   @hortonworks/cloudbreak-raven @hortonworks/cloudbreak-armadillo
 
 # Raven team should review datalake blueprint changes
 core/src/main/resources/defaults/blueprints/*/cdp-sdx*.bp                       @hortonworks/cloudbreak-raven
