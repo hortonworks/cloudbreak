@@ -81,7 +81,8 @@ public class ClusterProxyReRegistrationConfig
     @Override
     public ClusterProxyReRegistrationEvent[] getInitEvents() {
         return new ClusterProxyReRegistrationEvent[]{
-                CLUSTER_PROXY_RE_REGISTRATION_EVENT
+                CLUSTER_PROXY_RE_REGISTRATION_EVENT,
+                CLUSTER_PROXY_CCMV1_REMAP_EVENT
         };
     }
 
