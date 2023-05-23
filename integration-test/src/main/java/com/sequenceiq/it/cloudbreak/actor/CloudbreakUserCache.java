@@ -1,8 +1,12 @@
 package com.sequenceiq.it.cloudbreak.actor;
 
+import static java.lang.String.format;
+
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -86,7 +90,7 @@ public class CloudbreakUserCache {
                 throw new TestFailException("Cannot gather account Ids from the initialized real UMS user CRNs.");
             } else {
                 LOGGER.info(" Gathered account Ids based on the initialized real UMS user CRNs:: {}", accountIds);
-                accountId = accountIds.stream().findFirst().orElseThrow(() -> new TestFailException(String.format("Account Id Not Found in:: %s",
+                accountId = accountIds.stream().findFirst().orElseThrow(() -> new TestFailException(format("Account Id Not Found in:: %s",
                         accountIds)));
                 setUsersByAccount(Map.of(accountId, cloudbreakUsers));
             }
@@ -114,9 +118,8 @@ public class CloudbreakUserCache {
             String credentialsFile = StringUtils.substringAfterLast(umsUserStoreConfig.getFetchedFilePath(), "/");
             String credentialsFolder = credentialsFilePathElements[credentialsFilePathElements.length - 2];
             umsUserStoreConfig.setClassFilePath(StringUtils.join(List.of(credentialsFolder, credentialsFile), "/"));
-            try {
-                Stream<Path> foundFiles = Files.find(Paths.get(umsUserStoreConfig.getWorkspace()), Integer.MAX_VALUE,
-                        (filePath, fileAttr) -> filePath.toString().endsWith(credentialsFile));
+            try (Stream<Path> foundFiles = Files.find(Paths.get(umsUserStoreConfig.getWorkspace()), Integer.MAX_VALUE,
+                        (filePath, fileAttr) -> filePath.toString().endsWith(credentialsFile))) {
                 umsUserStoreConfig.setCustomFilePath(foundFiles
                         .filter(path -> path.getFileName().toString().equalsIgnoreCase(credentialsFile))
                         .findFirst().get());
@@ -125,7 +128,7 @@ public class CloudbreakUserCache {
                     umsUserStoreConfig.setAtCustomPath(true);
                     umsUserStoreConfig.setFilePresent(true);
                 }
-            } catch (NoSuchElementException e) {
+            } catch (NoSuchElementException | IOException e) {
                 if (new ClassPathResource(umsUserStoreConfig.getClassFilePath()).exists()) {
                     LOGGER.info("Found UMS user store file at classpath: '{}'", umsUserStoreConfig.getClassFilePath());
                     umsUserStoreConfig.setFilePresent(true);
@@ -142,7 +145,17 @@ public class CloudbreakUserCache {
     }
 
     private void setUsersByAccount(Map<String, List<CloudbreakUser>> users) {
-        this.usersByAccount = users;
+        usersByAccount = users;
+    }
+
+    private void formatEcdsaSecretKey(CloudbreakUser user) {
+        try {
+            Base64.getDecoder().decode(user.getSecretKey());
+            LOGGER.debug("Real UMS user has v2 key format (SHA-512) for singing the request header.");
+        } catch (IllegalArgumentException e) {
+            LOGGER.info("Real UMS user has v3 key format (SHA512withECDSA) for singing the request header. So the key is needed to be formatted!");
+            user.setSecretKey(format(user.getSecretKey().replace("\\n", "%n")));
+        }
     }
 
     public CloudbreakUser getUserByDisplayName(String name) {
@@ -152,10 +165,13 @@ public class CloudbreakUserCache {
         if (isInitialized()) {
             CloudbreakUser user = usersByAccount.values().stream().flatMap(Collection::stream)
                     .filter(u -> u.getDisplayName().equals(name)).findFirst()
-                    .orElseThrow(() -> new TestFailException(String.format("There is no real UMS user with::%n name: %s%n deployment: %s%n account: %s%n",
+                    .orElseThrow(() -> new TestFailException(format("There is no real UMS user with::%n name: %s%n deployment: %s%n account: %s%n",
                             name, realUmsUserDeployment, realUmsUserAccount)));
-            LOGGER.info(" Real UMS user has been found:: \nDisplay name: {} \nCrn: {} \nAccess key: {} \nSecret key: {} \nAdmin: {} ",
-                    user.getDisplayName(), user.getCrn(), user.getAccessKey(), user.getSecretKey(), user.getAdmin());
+
+            formatEcdsaSecretKey(user);
+
+            LOGGER.info(format(" Real UMS user has been found:: %nDisplay name: %s %nCrn: %s %nAccess key: %s %nSecret key: %s %nAdmin: %s ",
+                    user.getDisplayName(), user.getCrn(), user.getAccessKey(), user.getSecretKey(), user.getAdmin()));
             return user;
         } else {
             throw new TestFailException("Cannot get real UMS user by name, because of 'ums-users/api-credentials.json' is not available.");
@@ -171,12 +187,15 @@ public class CloudbreakUserCache {
             try {
                 CloudbreakUser adminUser = usersByAccount.values().stream().flatMap(Collection::stream)
                         .filter(CloudbreakUser::getAdmin).findFirst()
-                        .orElseThrow(() -> new TestFailException(String.format("There is no real UMS admin in account: %s", accountId)));
-                LOGGER.info(" Real UMS account admin has been found:: \nDisplay name: {} \nCrn: {} \nAccess key: {} \nSecret key: {} \nAdmin: {} ",
-                        adminUser.getDisplayName(), adminUser.getCrn(), adminUser.getAccessKey(), adminUser.getSecretKey(), adminUser.getAdmin());
+                        .orElseThrow(() -> new TestFailException(format("There is no real UMS admin in account: %s", accountId)));
+
+                formatEcdsaSecretKey(adminUser);
+
+                LOGGER.info(format(" Real UMS account admin has been found:: %nDisplay name: %s %nCrn: %s %nAccess key: %s %nSecret key: %s %nAdmin: %s ",
+                        adminUser.getDisplayName(), adminUser.getCrn(), adminUser.getAccessKey(), adminUser.getSecretKey(), adminUser.getAdmin()));
                 return adminUser;
             } catch (Exception e) {
-                throw new TestFailException(String.format("Cannot get the real UMS admin in account: %s, because of: %s", accountId, e.getMessage()), e);
+                throw new TestFailException(format("Cannot get the real UMS admin in account: %s, because of: %s", accountId, e.getMessage()), e);
             }
         }
     }
