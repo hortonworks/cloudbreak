@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.upgrade.sync;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM;
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM_BUILD_NUMBER;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED;
@@ -20,15 +19,11 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @Service
 public class TargetImageAwareMixedPackageVersionService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TargetImageAwareMixedPackageVersionService.class);
-
-    @Inject
-    private CloudbreakEventService eventService;
 
     @Inject
     private MixedPackageMessageProvider mixedPackageMessageProvider;
@@ -38,6 +33,9 @@ public class TargetImageAwareMixedPackageVersionService {
 
     @Inject
     private ClouderaManagerProductTransformer clouderaManagerProductTransformer;
+
+    @Inject
+    private MixedPackageNotificationService mixedPackageNotificationService;
 
     public void examinePackageVersionsWithTargetImage(Long stackId, Image targetImage, String activeCmVersion, Set<ParcelInfo> activeParcels) {
         LOGGER.debug("Comparing active package versions {} and active CM version {} with target image {}", activeParcels, activeCmVersion, targetImage);
@@ -97,6 +95,6 @@ public class TargetImageAwareMixedPackageVersionService {
     }
 
     private void sendNotification(Long stackId, ResourceEvent resourceEvent, List<String> args) {
-        eventService.fireCloudbreakEvent(stackId, UPDATE_IN_PROGRESS.name(), resourceEvent, args);
+        mixedPackageNotificationService.sendNotification(stackId, resourceEvent, args);
     }
 }

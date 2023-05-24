@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.upgrade.sync;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED_MULTIPLE;
@@ -28,7 +27,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @ExtendWith(MockitoExtension.class)
 public class CandidateImageAwareMixedPackageVersionServiceTest {
@@ -51,9 +49,6 @@ public class CandidateImageAwareMixedPackageVersionServiceTest {
     private CandidateImageAwareMixedPackageVersionService underTest;
 
     @Mock
-    private CloudbreakEventService eventService;
-
-    @Mock
     private MixedPackageMessageProvider mixedPackageMessageProvider;
 
     @Mock
@@ -61,6 +56,9 @@ public class CandidateImageAwareMixedPackageVersionServiceTest {
 
     @Mock
     private ClouderaManagerProductTransformer clouderaManagerProductTransformer;
+
+    @Mock
+    private MixedPackageNotificationService mixedPackageNotificationService;
 
     @Test
     void testExaminePackageVersionsWithAllCandidateImagesShouldNotSendNotificationWhenTheVersionsAreValid() {
@@ -98,7 +96,7 @@ public class CandidateImageAwareMixedPackageVersionServiceTest {
         verify(clouderaManagerProductTransformer).transformToMap(properImage, true, true);
         verify(mixedPackageVersionComparator).matchParcelVersions(activeParcels, activeProducts);
         verifyNoInteractions(mixedPackageMessageProvider);
-        verifyNoInteractions(eventService);
+        verifyNoInteractions(mixedPackageNotificationService);
     }
 
     @Test
@@ -141,7 +139,7 @@ public class CandidateImageAwareMixedPackageVersionServiceTest {
         verify(mixedPackageVersionComparator).matchParcelVersions(activeParcels, products3);
         verify(clouderaManagerProductTransformer).transformToMap(otherImage4, true, true);
         verify(mixedPackageVersionComparator).matchParcelVersions(activeParcels, activeProducts);
-        verify(eventService).fireCloudbreakEvent(STACK_ID, UPDATE_IN_PROGRESS.name(), STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED_MULTIPLE,
+        verify(mixedPackageNotificationService).sendNotification(STACK_ID, STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED_MULTIPLE,
                 List.of(activeCmVersion, "CDH 7.2.2", "Cloudera Manager 7.4.0-1000, CDH 7.2.7", "http://imagecatalog"));
     }
 
@@ -177,7 +175,7 @@ public class CandidateImageAwareMixedPackageVersionServiceTest {
         verify(mixedPackageVersionComparator).matchParcelVersions(activeParcels, products3);
         verify(mixedPackageMessageProvider).createActiveParcelsMessage(activeParcels);
         verify(mixedPackageMessageProvider).createSuggestedVersionsMessage(products3, activeParcels, activeCmVersion);
-        verify(eventService).fireCloudbreakEvent(STACK_ID, UPDATE_IN_PROGRESS.name(), STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED,
+        verify(mixedPackageNotificationService).sendNotification(STACK_ID, STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED,
                 List.of("7.4.0-1000", "CDH 7.2.2", "Cloudera Manager 7.4.0-1000, CDH 7.2.8"));
     }
 
@@ -203,7 +201,7 @@ public class CandidateImageAwareMixedPackageVersionServiceTest {
         underTest.examinePackageVersionsWithAllCandidateImages(STACK_ID, candidateImages, activeCmVersion, activeParcels, IMAGE_CATALOG_URL);
 
         verify(mixedPackageMessageProvider).createActiveParcelsMessage(activeParcels);
-        verify(eventService).fireCloudbreakEvent(STACK_ID, UPDATE_IN_PROGRESS.name(), STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED_NO_CANDIDATE,
+        verify(mixedPackageNotificationService).sendNotification(STACK_ID, STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED_NO_CANDIDATE,
                 List.of("7.4.0-1000", "CDH 7.2.2"));
     }
 
@@ -216,5 +214,4 @@ public class CandidateImageAwareMixedPackageVersionServiceTest {
                 Map.of(CM.getKey(), cmVersion, ImagePackageVersion.CM_BUILD_NUMBER.getKey(), CM_BUILD_NUMBER),
                 null, Collections.emptyList(), CM_BUILD_NUMBER, false, null, null);
     }
-
 }
