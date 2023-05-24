@@ -63,6 +63,9 @@ public class AutoscaleStackV4Response {
     @ApiModelProperty(ClusterModelDescription.VARIANT)
     private String clusterManagerVariant;
 
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
+    private String bluePrintText;
+
     @ApiModelProperty(StackModelDescription.CRN)
     private String stackCrn;
 
@@ -87,6 +90,14 @@ public class AutoscaleStackV4Response {
 
     public void setStackCrn(String stackCrn) {
         this.stackCrn = stackCrn;
+    }
+
+    public String getBluePrintText() {
+        return bluePrintText;
+    }
+
+    public void setBluePrintText(String bluePrintText) {
+        this.bluePrintText = bluePrintText;
     }
 
     public String getTenant() {

@@ -90,6 +90,17 @@ public class StackResponseUtilsTest {
     }
 
     @Test
+    public void testGetRoleTypesOnHostGroup() throws Exception {
+        validateGetRoleTypesOnHostGroup("compute",
+                Set.of("NODEMANAGER", "GATEWAY"));
+
+        validateGetRoleTypesOnHostGroup("worker",
+                Set.of("NODEMANAGER", "GATEWAY", "DATANODE"));
+
+        validateGetRoleTypesOnHostGroup("compute1", Set.of());
+    }
+
+    @Test
     public void testGetRoleConfigNameForHostGroupWhenInvalidHostGroup() {
         Exception exception = assertThrows(Exception.class, () ->
                 validateGetRoleConfigNameForHostGroup("YARN", "NODEMANAGER",
@@ -155,6 +166,15 @@ public class StackResponseUtilsTest {
         when(mockBluePrint.getBlueprint()).thenReturn(getTestBP());
         String hostGroupRolename = underTest.getRoleConfigNameForHostGroup(mockStackResponse, testHostGroup, testService, testRole);
         assertEquals(expectedRoleConfigName, hostGroupRolename, "RoleConfigName in template should match for HostGroup");
+    }
+
+    private void validateGetRoleTypesOnHostGroup(String testHostGroup, Set<String> expectedServices) throws Exception {
+        StackV4Response mockStackResponse = mock(StackV4Response.class);
+        ClusterV4Response mockCluster = mock(ClusterV4Response.class);
+        BlueprintV4Response mockBluePrint = mock(BlueprintV4Response.class);
+
+        Set<String> servicesOnHostGroup = underTest.getRoleTypesOnHostGroup(getTestBP(), testHostGroup);
+        assertEquals(expectedServices, servicesOnHostGroup, "RoleConfigName in template should match for HostGroup");
     }
 
     private StackV4Response getMockStackV4Response(String hostGroup, int unhealthyInstancesCount) {

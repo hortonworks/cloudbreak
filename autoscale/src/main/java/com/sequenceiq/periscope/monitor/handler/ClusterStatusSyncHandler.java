@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
@@ -67,6 +68,12 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
         LoggingUtils.buildMdcContext(cluster);
 
         StackV4Response stackResponse = cloudbreakCommunicator.getByCrn(cluster.getStackCrn());
+        if (stackResponse.getCluster() != null && stackResponse.getCluster().getBlueprint() != null
+                && (StringUtils.isEmpty(cluster.getBluePrintText())
+                || !Objects.equals(cluster.getBluePrintText(), stackResponse.getCluster().getBlueprint().getBlueprint()))) {
+            cluster.setBluePrintText(stackResponse.getCluster().getBlueprint().getBlueprint());
+            clusterService.save(cluster);
+        }
 
         boolean clusterAvailable = determineClusterAvailability(cluster, stackResponse) && determineCmAvailability(cluster, stackResponse);
 

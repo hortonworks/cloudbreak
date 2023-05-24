@@ -84,6 +84,14 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CmTemplateProcessor.class);
 
+    private static final String ROLE_CONFIG_VALUE = "COORDINATOR_ONLY";
+
+    private static final String ROLE_CONFIG_NAME = "impalad_specialization";
+
+    private static final String ROLE_IMPALAD = "IMPALAD";
+
+    private static final String SERVICE_TYPE = "IMPALA";
+
     private static final Set<String> INI_FILE_SAFETY_VALVE_CONFIGS = Set.of(HueConfigProvider.HUE_SERVICE_SAFETY_VALVE,
             HueConfigProvider.HUE_SERVER_HUE_SAFETY_VALVE);
 
@@ -377,16 +385,68 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 .orElse(Integer.MIN_VALUE);
     }
 
+    private Set<String> getRecommendationForTimeBasedScaling(Set<String> timeBasedScalingRecommendationByBlacklist,
+            Map<String, Set<String>> componentsByHostGroup, List<String> entitlements) {
+        Set<String> recommendedHostGroups = new HashSet<>();
+        if (entitlements.contains(Entitlement.DATAHUB_IMPALA_SCHEDULE_BASED_SCALING.name())) {
+            Map<String, List<String>> roleConfigGroupsByHostGroup = getRoleConfigGroupsByHostGroup();
+            for (String hostGroup : timeBasedScalingRecommendationByBlacklist) {
+                List<String> hostGroupRoleConfigNames = roleConfigGroupsByHostGroup.get(hostGroup);
+                if (!(isImpalaCoordinatorRole(ROLE_CONFIG_VALUE, ROLE_CONFIG_NAME, SERVICE_TYPE, hostGroupRoleConfigNames))) {
+                    recommendedHostGroups.add(hostGroup);
+                }
+            }
+        } else {
+            for (String hostGroup : timeBasedScalingRecommendationByBlacklist) {
+                if (!componentsByHostGroup.get(hostGroup).contains(ROLE_IMPALAD)) {
+                    recommendedHostGroups.add(hostGroup);
+                }
+            }
+        }
+        return recommendedHostGroups;
+    }
+
+    private Map<String, List<String>> getRoleConfigGroupsByHostGroup() {
+        Map<String, List<String>> roleConfigGroupsByHostGroup = new HashMap<>();
+        for (ApiClusterTemplateHostTemplate hostTemplate : getHostTemplates()) {
+            roleConfigGroupsByHostGroup.put(hostTemplate.getRefName(), hostTemplate.getRoleConfigGroupsRefNames());
+        }
+        return roleConfigGroupsByHostGroup;
+    }
+
+    private boolean isImpalaCoordinatorRole(String roleConfigValue, String roleConfigName, String serviceType, List<String> roleConfigGroups) {
+        for (ApiClusterTemplateService apiClusterTemplateService : cmTemplate.getServices()) {
+            if (apiClusterTemplateService.getServiceType().equalsIgnoreCase(serviceType)) {
+                for (ApiClusterTemplateRoleConfigGroup apiClusterTemplateRoleConfigGroup : apiClusterTemplateService.getRoleConfigGroups()) {
+                    if (roleConfigGroups.contains(apiClusterTemplateRoleConfigGroup.getRefName()) || CollectionUtils.isEmpty(roleConfigGroups)) {
+                        for (ApiClusterTemplateConfig apiClusterTemplateConfig : apiClusterTemplateRoleConfigGroup.getConfigs()) {
+                            if (apiClusterTemplateConfig.getValue().equals(roleConfigValue)
+                                    && apiClusterTemplateConfig.getName().equals(roleConfigName)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
-    public AutoscaleRecommendation recommendAutoscale(Versioned version) {
-        Set<String> time = getRecommendationByBlacklist(BlackListedTimeBasedAutoscaleRole.class, true, version, List.of());
-        Set<String> load = getRecommendationByBlacklist(BlackListedLoadBasedAutoscaleRole.class, true, version, List.of());
+    public AutoscaleRecommendation recommendAutoscale(Versioned version, List<String> entitlements) {
+        Map<String, Set<String>> componentsByHostGroup = getNonGatewayComponentsByHostGroup();
+        Set<String> time = getRecommendationByBlacklist(BlackListedTimeBasedAutoscaleRole.class, true,
+                version, List.of(), componentsByHostGroup);
+        Set<String> load = getRecommendationByBlacklist(BlackListedLoadBasedAutoscaleRole.class, true,
+                version, List.of(), componentsByHostGroup);
+        if (!time.isEmpty()) {
+            time = getRecommendationForTimeBasedScaling(time, componentsByHostGroup, entitlements);
+        }
         return new AutoscaleRecommendation(time, load);
     }
 
     private <T extends Enum<T>> Set<String> getRecommendationByBlacklist(Class<T> enumClass, boolean emptyServiceListBlacklisted,
-        Versioned version, List<String> entitlements) {
-        Map<String, Set<String>> componentsByHostGroup = getNonGatewayComponentsByHostGroup();
+        Versioned version, List<String> entitlements, Map<String, Set<String>> componentsByHostGroup) {
         return getRecommendationByBlacklist(enumClass, emptyServiceListBlacklisted, componentsByHostGroup, version, entitlements);
     }
 
@@ -430,8 +490,11 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
 
     @Override
     public ResizeRecommendation recommendResize(List<String> entitlements, Versioned version) {
-        Set<String> upRecos = getRecommendationByBlacklist(BlackListedUpScaleRole.class, false, version, entitlements);
-        Set<String> downRecos = getRecommendationByBlacklist(BlackListedDownScaleRole.class, false, version, entitlements);
+        Map<String, Set<String>> componentsByHostGroup = getNonGatewayComponentsByHostGroup();
+        Set<String> upRecos = getRecommendationByBlacklist(BlackListedUpScaleRole.class, false,
+                version, entitlements, componentsByHostGroup);
+        Set<String> downRecos = getRecommendationByBlacklist(BlackListedDownScaleRole.class, false,
+                version, entitlements, componentsByHostGroup);
         return new ResizeRecommendation(upRecos, downRecos);
     }
 

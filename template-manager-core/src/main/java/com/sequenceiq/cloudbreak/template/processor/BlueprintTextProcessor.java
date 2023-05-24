@@ -59,7 +59,7 @@ public interface BlueprintTextProcessor {
 
     GatewayRecommendation recommendGateway();
 
-    AutoscaleRecommendation recommendAutoscale(Versioned version);
+    AutoscaleRecommendation recommendAutoscale(Versioned version, List<String> entitlements);
 
     ResizeRecommendation recommendResize(List<String> entitlements, Versioned version);
 

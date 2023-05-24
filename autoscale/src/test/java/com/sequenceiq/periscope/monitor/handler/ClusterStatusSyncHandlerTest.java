@@ -13,6 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,9 +24,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.DependentHostGroupsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -409,6 +412,13 @@ class ClusterStatusSyncHandlerTest {
     }
 
     private Cluster getACluster(ClusterState clusterState) {
+        BlueprintV4Response blueprintV4Response = new BlueprintV4Response();
+        try {
+            blueprintV4Response.setBlueprint(getTestBP());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         Cluster cluster = new Cluster();
         cluster.setId(AUTOSCALE_CLUSTER_ID);
         cluster.setStackCrn(CLOUDBREAK_STACK_CRN);
@@ -416,6 +426,7 @@ class ClusterStatusSyncHandlerTest {
         cluster.setEnvironmentCrn(TEST_ENVIRONMENT_CRN);
         cluster.setMachineUserCrn("testMachineUser");
         cluster.setStopStartScalingEnabled(Boolean.FALSE);
+        cluster.setBluePrintText(blueprintV4Response.getBlueprint());
 
         ScalingPolicy scalingPolicy = new ScalingPolicy();
         scalingPolicy.setAdjustmentType(AdjustmentType.LOAD_BASED);
@@ -435,5 +446,9 @@ class ClusterStatusSyncHandlerTest {
         clusterPertain.setTenant(TEST_TENANT);
         cluster.setClusterPertain(clusterPertain);
         return cluster;
+    }
+
+    private static String getTestBP() throws IOException {
+        return FileReaderUtils.readFileFromClasspath("/dataengineering-test.json");
     }
 }

@@ -65,8 +65,8 @@ public class CloudResourceAdvisorTest {
     @Test
     public void testRecommendAutoscaleWhenCloudManagerVersionLessThanEqualTo720() {
         when(blueprintTextProcessor.getVersion()).thenReturn(java.util.Optional.of(VERSION_7_2_0));
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText("{\"Blueprints\":{123:2}}");
+        Blueprint blueprint = createBlueprint();
+        when(entitlementService.getEntitlements(anyString())).thenReturn(Collections.emptyList());
         when(blueprintTextProcessorFactory.createBlueprintTextProcessor("{\"Blueprints\":{123:2}}")).thenReturn(blueprintTextProcessor);
         when(blueprintService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(blueprint);
         assertEquals(new AutoscaleRecommendation(Set.of(), Set.of()),
@@ -76,10 +76,10 @@ public class CloudResourceAdvisorTest {
     @Test
     public void testRecommendAutoscaleWhenCloudManagerVersionGreaterThanEqualTo721() {
         when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of(VERSION_7_2_1));
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText("{\"Blueprints\":{123:2}}");
+        when(entitlementService.getEntitlements(anyString())).thenReturn(Collections.emptyList());
+        Blueprint blueprint = createBlueprint();
         when(blueprintTextProcessorFactory.createBlueprintTextProcessor("{\"Blueprints\":{123:2}}")).thenReturn(blueprintTextProcessor);
-        when(blueprintTextProcessor.recommendAutoscale(any())).thenReturn(new AutoscaleRecommendation(Set.of("compute"), Set.of("compute")));
+        when(blueprintTextProcessor.recommendAutoscale(any(), any())).thenReturn(new AutoscaleRecommendation(Set.of("compute"), Set.of("compute")));
         when(blueprintService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(blueprint);
         assertEquals(new AutoscaleRecommendation(Set.of("compute"), Set.of("compute")),
                 underTest.getAutoscaleRecommendation(workspace.getId(), TEST_BLUEPRINT_NAME));
@@ -103,7 +103,7 @@ public class CloudResourceAdvisorTest {
         when(entitlementService.getEntitlements(anyString())).thenReturn(Collections.emptyList());
         Blueprint blueprint = createBlueprint();
         when(blueprintTextProcessorFactory.createBlueprintTextProcessor("{\"Blueprints\":{123:2}}")).thenReturn(blueprintTextProcessor);
-        when(blueprintTextProcessor.recommendAutoscale(any())).thenReturn(new AutoscaleRecommendation(Set.of("compute"), Set.of("compute")));
+        when(blueprintTextProcessor.recommendAutoscale(any(), any())).thenReturn(new AutoscaleRecommendation(Set.of("compute"), Set.of("compute")));
         when(blueprintTextProcessor.recommendResize(anyList(), any())).thenReturn(new ResizeRecommendation(Set.of("compute"), Set.of("compute")));
         ScaleRecommendation scaleRecommendation = underTest.createForBlueprint(this.workspace.getId(), blueprint);
         assertEquals(new AutoscaleRecommendation(Set.of("compute"), Set.of("compute")), scaleRecommendation.getAutoscaleRecommendation());

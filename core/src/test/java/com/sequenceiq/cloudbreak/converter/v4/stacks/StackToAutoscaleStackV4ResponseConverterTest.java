@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -32,6 +33,8 @@ class StackToAutoscaleStackV4ResponseConverterTest {
     private static final String TEST_SALT_CB_VERSION = "2.70.0-b42";
 
     private static final String TEST_ENV_CRN = "testEnvCrn";
+
+    private static final String TEST_BLUE_PRINT_TEXT = "bluePrintText";
 
     private static final String TEST_DH_CRN = "testDatahubCrn";
 
@@ -64,6 +67,7 @@ class StackToAutoscaleStackV4ResponseConverterTest {
 
         makeBasicAssertions(result, created);
         assertThat(result.getSaltCbVersion()).isEqualTo(TEST_SALT_CB_VERSION);
+        assertThat(result.getBluePrintText()).isEqualTo(TEST_BLUE_PRINT_TEXT);
         assertThat(result.getClusterStatus()).isEqualTo(AVAILABLE);
         assertThat(result.getClusterManagerIp()).isEqualTo("testIP");
         assertThat(result.getUserNamePath()).isEqualTo("user");
@@ -119,6 +123,9 @@ class StackToAutoscaleStackV4ResponseConverterTest {
         doReturn("user").when(cluster).getCloudbreakAmbariUserSecretPath();
         doReturn("passwd").when(cluster).getCloudbreakAmbariPasswordSecretPath();
 
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(TEST_BLUE_PRINT_TEXT);
+        doReturn(blueprint).when(cluster).getBlueprint();
         return cluster;
     }
 

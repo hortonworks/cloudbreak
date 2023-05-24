@@ -11,10 +11,12 @@ import static com.sequenceiq.periscope.monitor.evaluator.ScalingConstants.DEFAUL
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -63,6 +65,8 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
     private static final String EVALUATOR_NAME = CronTimeEvaluator.class.getName();
 
     private static final Long UPDATE_FAILED_INTERVAL_MINUTES = 60L;
+
+    private static final String YARN_NODEMANAGER = "NODEMANAGER";
 
     @Inject
     private TimeAlertRepository alertRepository;
@@ -182,6 +186,7 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
         event.setExistingClusterNodeCount(stackV4Response.getNodeCount());
         event.setScalingAdjustmentType(REGULAR);
         scalingActivityMsg = messagesService.getMessageWithArgs(AUTOSCALE_SCHEDULE_BASED_UPSCALE, targetIncrementNodeCount);
+
         if (targetIncrementNodeCount < 0) {
             populateDecommissionCandidates(event, stackV4Response, alert.getCluster(), alert.getScalingPolicy(), -targetIncrementNodeCount);
             status = SCHEDULE_BASED_DOWNSCALE;
@@ -196,14 +201,22 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
     private void populateDecommissionCandidates(ScalingEvent event, StackV4Response stackV4Response, Cluster cluster,
         ScalingPolicy policy, int mandatoryDownScaleCount) {
         try {
-            String pollingUserCrn = Optional.ofNullable(getMachineUserCrnIfApplicable(cluster)).orElse(cluster.getClusterPertain().getUserCrn());
-            YarnScalingServiceV1Response yarnResponse = yarnMetricsClient.getYarnMetricsForCluster(cluster,
-                    stackV4Response, policy.getHostGroup(), pollingUserCrn, Optional.of(mandatoryDownScaleCount));
-            Map<String, String> hostFqdnsToInstanceId = stackResponseUtils.getCloudInstanceIdsForHostGroup(stackV4Response, policy.getHostGroup());
+            List<String> decommissionNodes = Collections.emptyList();
 
-            int allowedDownscale = Math.min(mandatoryDownScaleCount, DEFAULT_MAX_SCALE_DOWN_STEP_SIZE);
-            List<String> decommissionNodes = yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(yarnResponse,
-                    hostFqdnsToInstanceId).stream().limit(allowedDownscale).collect(Collectors.toList());
+            Set<String> roleTypesOnHostGroup = stackResponseUtils.getRoleTypesOnHostGroup(cluster.getBluePrintText(),
+                    policy.getHostGroup());
+            if (roleTypesOnHostGroup.contains(YARN_NODEMANAGER)) {
+                String pollingUserCrn = Optional.ofNullable(getMachineUserCrnIfApplicable(cluster)).orElse(cluster.getClusterPertain().getUserCrn());
+                YarnScalingServiceV1Response yarnResponse = yarnMetricsClient.getYarnMetricsForCluster(cluster,
+                        stackV4Response, policy.getHostGroup(), pollingUserCrn, Optional.of(mandatoryDownScaleCount));
+                Map<String, String> hostFqdnsToInstanceId = stackResponseUtils.getCloudInstanceIdsForHostGroup(stackV4Response, policy.getHostGroup());
+
+                int allowedDownscale = Math.min(mandatoryDownScaleCount, DEFAULT_MAX_SCALE_DOWN_STEP_SIZE);
+                decommissionNodes = yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(yarnResponse,
+                        hostFqdnsToInstanceId).stream().limit(allowedDownscale).collect(Collectors.toList());
+            } else {
+                LOGGER.debug("Since YARN is not running so downscaling triggered with Random Nodes.");
+            }
             event.setDecommissionNodeIds(decommissionNodes);
         } catch (Exception ex) {
             LOGGER.error("Error retrieving decommission candidates for  policy '{}', adjustment type '{}', cluster '{}'",

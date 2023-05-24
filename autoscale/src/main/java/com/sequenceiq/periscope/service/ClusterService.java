@@ -80,6 +80,7 @@ public class ClusterService {
     public Cluster create(AutoscaleStackV4Response stack) {
         Cluster cluster = new Cluster();
         cluster.setStackName(stack.getName());
+        cluster.setBluePrintText(stack.getBluePrintText());
         cluster.setStackCrn(stack.getStackCrn());
         cluster.setStackId(stack.getStackId());
         cluster.setStackType(stack.getStackType());

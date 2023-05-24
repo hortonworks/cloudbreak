@@ -191,7 +191,7 @@ public class CloudResourceAdvisor {
         Map<String, InstanceCount> instanceCounts = recommendInstanceCounts(blueprintTextProcessor);
         GatewayRecommendation gateway = recommendGateway(blueprintTextProcessor, definitionName, workspaceId);
 
-        AutoscaleRecommendation autoscale = recommendAutoscale(blueprintTextProcessor);
+        AutoscaleRecommendation autoscale = recommendAutoscale(blueprintTextProcessor, entitlements);
 
         ResizeRecommendation resize = recommendResize(blueprintTextProcessor, entitlements);
 
@@ -206,8 +206,8 @@ public class CloudResourceAdvisor {
     public ScaleRecommendation createForBlueprint(Long workspaceId, Blueprint blueprint) {
         LOGGER.debug("Scale advice for blueprintName: {}.", blueprint.getName());
         BlueprintTextProcessor blueprintTextProcessor = getBlueprintTextProcessor(blueprint);
-        AutoscaleRecommendation autoscale = recommendAutoscale(blueprintTextProcessor);
         List<String> entitlements = entitlementService.getEntitlements(blueprint.getWorkspace().getTenant().getName());
+        AutoscaleRecommendation autoscale = recommendAutoscale(blueprintTextProcessor, entitlements);
         ResizeRecommendation resize = recommendResize(blueprintTextProcessor, entitlements);
 
         return new ScaleRecommendation(autoscale, resize);
@@ -216,7 +216,9 @@ public class CloudResourceAdvisor {
     public AutoscaleRecommendation getAutoscaleRecommendation(Long workspaceId, String blueprintName) {
         LOGGER.debug("Autoscale advice for blueprintName: {}.", blueprintName);
         BlueprintTextProcessor blueprintTextProcessor = getBlueprintTextProcessor(workspaceId, blueprintName);
-        return recommendAutoscale(blueprintTextProcessor);
+        Blueprint blueprint = getBlueprint(blueprintName, workspaceId);
+        List<String> entitlements = entitlementService.getEntitlements(blueprint.getWorkspace().getTenant().getName());
+        return recommendAutoscale(blueprintTextProcessor, entitlements);
     }
 
     private Optional<String> getGroupNameFromClusterTemplate(String definitionName, Long workspaceId) {
@@ -347,7 +349,7 @@ public class CloudResourceAdvisor {
                 && !lowerCaseName.contains("manager");
     }
 
-    private AutoscaleRecommendation recommendAutoscale(BlueprintTextProcessor blueprintTextProcessor) {
+    private AutoscaleRecommendation recommendAutoscale(BlueprintTextProcessor blueprintTextProcessor, List<String> entitlements) {
         String version = blueprintTextProcessor.getVersion().orElse("");
         Versioned blueprintVersion = () -> blueprintTextProcessor.getVersion().get();
         if (!isVersionNewerOrEqualThanLimited(version, CLOUDERAMANAGER_VERSION_7_2_1)) {
@@ -355,7 +357,7 @@ public class CloudResourceAdvisor {
             return new AutoscaleRecommendation(Set.of(), Set.of());
         }
 
-        AutoscaleRecommendation autoscaleRecommendation = blueprintTextProcessor.recommendAutoscale(blueprintVersion);
+        AutoscaleRecommendation autoscaleRecommendation = blueprintTextProcessor.recommendAutoscale(blueprintVersion, entitlements);
 
         if (autoscaleRecommendation.getTimeBasedHostGroups().isEmpty()) {
             Set<String> autoscaleGroups = filterHostGroupByPredicate(blueprintTextProcessor, this::fallbackTimeBasedAutoscaleFilter);

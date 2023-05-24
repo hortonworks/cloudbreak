@@ -108,6 +108,9 @@ public class Cluster implements Monitored, Clustered {
     @Convert(converter = UpdateFailedDetailsConverter.class)
     private UpdateFailedDetails updateFailedDetails;
 
+    @Column(name = "blueprinttext")
+    private String bluePrintText;
+
     public Cluster() {
     }
 
@@ -138,6 +141,14 @@ public class Cluster implements Monitored, Clustered {
 
     public void setStackId(long stackId) {
         this.stackId = stackId;
+    }
+
+    public String getBluePrintText() {
+        return bluePrintText;
+    }
+
+    public void setBluePrintText(String bluePrintText) {
+        this.bluePrintText = bluePrintText;
     }
 
     public void setStackCrn(String stackCrn) {

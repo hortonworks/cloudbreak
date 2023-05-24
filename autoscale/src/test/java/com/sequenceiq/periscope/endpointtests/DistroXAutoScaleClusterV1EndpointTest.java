@@ -156,7 +156,8 @@ public class DistroXAutoScaleClusterV1EndpointTest {
 
     @BeforeEach
     public void setup() {
-        createTestCluster(TEST_CLUSTER_CRN, TEST_CLUSTER_NAME, TEST_ACCOUNT_ID, TEST_WORKSPACE_ID, TEST_USER_ID.toString(), TEST_USER_CRN);
+        Cluster cluster1 = createTestCluster(TEST_CLUSTER_CRN, TEST_CLUSTER_NAME, TEST_ACCOUNT_ID, TEST_WORKSPACE_ID,
+                TEST_USER_ID.toString(), TEST_USER_CRN, "cluster1");
 
         UserManagementProto.User user = UserManagementProto.User.newBuilder()
                 .setCrn(TEST_USER_CRN).setEmail("dummyuser@cloudera.com").setUserId(TEST_USER_ID.toString()).build();
@@ -174,10 +175,13 @@ public class DistroXAutoScaleClusterV1EndpointTest {
         doNothing().when(resourceAuthorizationService).authorize(eq("crn:cdp:iam:us-west-1:accid:cluster:mockuser@cloudera.com"), any(), any());
         distroXAutoScaleClusterV1Endpoint = new AutoscaleUserCrnClientBuilder(String.format(SERVICE_ADDRESS, port))
                 .build().withCrn(TEST_USER_CRN).distroXAutoScaleClusterV1Endpoint();
-
-        createTestCluster(TEST_CLUSTER_CRN_2, TEST_CLUSTER_NAME_2, TEST_ACCOUNT_ID_2, TEST_WORKSPACE_ID_2, TEST_USER_ID_2.toString(), TEST_USER_CRN_2);
         UserManagementProto.User user2 = UserManagementProto.User.newBuilder()
                 .setCrn(TEST_USER_CRN_2).setEmail("dummyuser@cloudera.com").setUserId(TEST_USER_ID_2.toString()).build();
+
+
+        Cluster cluster2 = createTestCluster(TEST_CLUSTER_CRN_2, TEST_CLUSTER_NAME_2, TEST_ACCOUNT_ID_2, TEST_WORKSPACE_ID_2,
+                TEST_USER_ID_2.toString(), TEST_USER_CRN_2, "cluster2");
+
         UserManagementProto.Account account2 = UserManagementProto.Account.newBuilder()
                 .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_AWS_AUTOSCALING").build())
                 .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_AZURE_AUTOSCALING").build())
@@ -185,6 +189,7 @@ public class DistroXAutoScaleClusterV1EndpointTest {
                 .build();
         when(grpcUmsClient.getUserDetails(eq(TEST_USER_CRN_2), any())).thenReturn(user2);
         when(grpcUmsClient.getAccountDetails(eq(TEST_ACCOUNT_ID_2), any())).thenReturn(account2);
+        doNothing().when(resourceAuthorizationService).authorize(eq("crn:cdp:iam:us-west-1:accid3:cluster:mockuser3@cloudera.com"), any(), any());
         doNothing().when(resourceAuthorizationService).authorize(eq("crn:cdp:iam:us-west-1:accid2:cluster:mockuser2@cloudera.com"), any(), any());
         distroXAutoScaleClusterV1Endpoint2 = new AutoscaleUserCrnClientBuilder(String.format(SERVICE_ADDRESS, port))
                 .build().withCrn(TEST_USER_CRN_2).distroXAutoScaleClusterV1Endpoint();
@@ -196,11 +201,13 @@ public class DistroXAutoScaleClusterV1EndpointTest {
         doNothing().when(nodeDeletionService).deleteStoppedNodesIfPresent(any(), anyString());
     }
 
-    private Cluster createTestCluster(String clusterCrn, String clusterName, String accountId, long workspaceId, String userId, String userCrn) {
+    private Cluster createTestCluster(String clusterCrn, String clusterName, String accountId, long workspaceId,
+            String userId, String userCrn, String bluePrintText) {
         Cluster testCluster = new Cluster();
         testCluster.setStackCrn(clusterCrn);
         testCluster.setStackName(clusterName);
         testCluster.setCloudPlatform("AWS");
+        testCluster.setBluePrintText(bluePrintText);
 
         ClusterPertain clusterPertain = new ClusterPertain();
         clusterPertain.setTenant(accountId);
@@ -674,7 +681,6 @@ public class DistroXAutoScaleClusterV1EndpointTest {
         // Schedule policy. stop start set to false. Entitlement disabled.
         DistroXAutoscaleClusterRequest autoscaleRequest = new DistroXAutoscaleClusterRequest();
         autoscaleRequest.setEnableAutoscaling(true);
-        autoscaleRequest.setUseStopStartMechanism(false);
         List<TimeAlertRequest> timeAlertRequests = getTimeAlertRequests(1, List.of("compute"));
         autoscaleRequest.setTimeAlertRequests(timeAlertRequests);
         DistroXAutoscaleClusterResponse xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint2
