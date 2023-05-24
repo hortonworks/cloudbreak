@@ -26,6 +26,8 @@ public class MessageCode {
 
     public static final String AUTOSCALING_STOP_START_ENTITLEMENT_NOT_ENABLED = "autoscale.stopstart.entitlement.not.enabled";
 
+    public static final String IMPALA_SCHEDULE_BASED_SCALING_ENTITLEMENT_NOT_ENABLED = "impala.schedule.based.scaling.entitlement.not.enabled";
+
     public static final String AUTOSCALING_ACTIVITY_NOT_REQUIRED = "autoscale.activity.not.required";
 
     public static final String AUTOSCALING_ACTIVITY_SUCCESS = "autoscale.activity.success";

@@ -11,10 +11,12 @@ import static com.sequenceiq.periscope.monitor.evaluator.ScalingConstants.DEFAUL
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -27,11 +29,13 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ActivityStatus;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.common.MessageCode;
+import com.sequenceiq.periscope.controller.validation.AlertValidator;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingActivity;
@@ -63,6 +67,12 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
     private static final String EVALUATOR_NAME = CronTimeEvaluator.class.getName();
 
     private static final Long UPDATE_FAILED_INTERVAL_MINUTES = 60L;
+
+    private static final String YARN = "yarn";
+
+    private static final String HOSTGROUP_COORDINATOR = "coordinator";
+
+    private static final String IMPALA = "impala";
 
     @Inject
     private TimeAlertRepository alertRepository;
@@ -99,6 +109,9 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
 
     @Inject
     private CloudbreakMessagesService messagesService;
+
+    @Inject
+    private AlertValidator alertValidator;
 
     @Inject
     private Clock clock;
@@ -182,8 +195,19 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
         event.setExistingClusterNodeCount(stackV4Response.getNodeCount());
         event.setScalingAdjustmentType(REGULAR);
         scalingActivityMsg = messagesService.getMessageWithArgs(AUTOSCALE_SCHEDULE_BASED_UPSCALE, targetIncrementNodeCount);
+
+        Set<String> servicesRunningOnHostgroup = stackResponseUtils.getServicesOnHostGroup(stackV4Response, alert.getScalingPolicy().getHostGroup());
+        if (servicesRunningOnHostgroup.contains(IMPALA) && !servicesRunningOnHostgroup.contains(YARN)) {
+            if (alert.getScalingPolicy().getHostGroup().equalsIgnoreCase(HOSTGROUP_COORDINATOR)) {
+                throw new BadRequestException("Schedule based Scaling in IMPALA is not allowed on coordinator node.");
+            }
+            alertValidator.validateImpalaScheduleBasedScalingEntitlement(alert.getCluster().getStackCrn(),
+                    stackV4Response.getCloudPlatform(), stackV4Response.getName());
+        }
+
         if (targetIncrementNodeCount < 0) {
-            populateDecommissionCandidates(event, stackV4Response, alert.getCluster(), alert.getScalingPolicy(), -targetIncrementNodeCount);
+            populateDecommissionCandidates(event, stackV4Response, alert.getCluster(),
+                    alert.getScalingPolicy(), -targetIncrementNodeCount, servicesRunningOnHostgroup);
             status = SCHEDULE_BASED_DOWNSCALE;
             scalingActivityMsg = messagesService.getMessageWithArgs(AUTOSCALE_SCHEDULE_BASED_DOWNSCALE, event.getDecommissionNodeIds());
         }
@@ -194,16 +218,20 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
     }
 
     private void populateDecommissionCandidates(ScalingEvent event, StackV4Response stackV4Response, Cluster cluster,
-        ScalingPolicy policy, int mandatoryDownScaleCount) {
+        ScalingPolicy policy, int mandatoryDownScaleCount, Set<String> servicesRunningOnHostgroup) {
         try {
-            String pollingUserCrn = Optional.ofNullable(getMachineUserCrnIfApplicable(cluster)).orElse(cluster.getClusterPertain().getUserCrn());
-            YarnScalingServiceV1Response yarnResponse = yarnMetricsClient.getYarnMetricsForCluster(cluster,
-                    stackV4Response, policy.getHostGroup(), pollingUserCrn, Optional.of(mandatoryDownScaleCount));
-            Map<String, String> hostFqdnsToInstanceId = stackResponseUtils.getCloudInstanceIdsForHostGroup(stackV4Response, policy.getHostGroup());
+            List<String> decommissionNodes = Collections.emptyList();
 
-            int allowedDownscale = Math.min(mandatoryDownScaleCount, DEFAULT_MAX_SCALE_DOWN_STEP_SIZE);
-            List<String> decommissionNodes = yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(yarnResponse,
-                    hostFqdnsToInstanceId).stream().limit(allowedDownscale).collect(Collectors.toList());
+            if (servicesRunningOnHostgroup.contains(YARN)) {
+                String pollingUserCrn = Optional.ofNullable(getMachineUserCrnIfApplicable(cluster)).orElse(cluster.getClusterPertain().getUserCrn());
+                YarnScalingServiceV1Response yarnResponse = yarnMetricsClient.getYarnMetricsForCluster(cluster,
+                        stackV4Response, policy.getHostGroup(), pollingUserCrn, Optional.of(mandatoryDownScaleCount));
+                Map<String, String> hostFqdnsToInstanceId = stackResponseUtils.getCloudInstanceIdsForHostGroup(stackV4Response, policy.getHostGroup());
+
+                int allowedDownscale = Math.min(mandatoryDownScaleCount, DEFAULT_MAX_SCALE_DOWN_STEP_SIZE);
+                decommissionNodes = yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(yarnResponse,
+                        hostFqdnsToInstanceId).stream().limit(allowedDownscale).collect(Collectors.toList());
+            }
             event.setDecommissionNodeIds(decommissionNodes);
         } catch (Exception ex) {
             LOGGER.error("Error retrieving decommission candidates for  policy '{}', adjustment type '{}', cluster '{}'",

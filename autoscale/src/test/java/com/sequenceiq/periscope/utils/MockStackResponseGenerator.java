@@ -1,8 +1,10 @@
 package com.sequenceiq.periscope.utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -58,6 +60,8 @@ public class MockStackResponseGenerator {
             metadata1.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
             fqdnToInstanceIds.add(metadata1);
         }
+        Map<String, Set<String>> servicesOnHostGroups = new HashMap<String, Set<String>>();
+        servicesOnHostGroups.put("compute", Set.of("YARN", "IMPALA"));
 
         instanceGroupV4Responses.add(instanceGroup(hostGroup, awsTemplate(), fqdnToInstanceIds));
 

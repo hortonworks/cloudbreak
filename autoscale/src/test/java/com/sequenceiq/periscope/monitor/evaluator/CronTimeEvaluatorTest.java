@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ActivityStatus;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
+import com.sequenceiq.periscope.controller.validation.AlertValidator;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.ScalingActivity;
@@ -62,7 +64,9 @@ class CronTimeEvaluatorTest {
 
     private static final String TEST_FQDN_BASE = "testFqdn";
 
-    private static final String TEST_HOSTGROUP = "compute";
+    private static final String TEST_HOSTGROUP_COMPUTE = "compute";
+
+    private static final String TEST_HOSTGROUP_EXECUTOR = "executor";
 
     private static final String TEST_CLUSTERCRN = "testCrn";
 
@@ -109,6 +113,9 @@ class CronTimeEvaluatorTest {
     @InjectMocks
     private CronTimeEvaluator underTest;
 
+    @Mock
+    private AlertValidator alertValidator;
+
     @Test
     void testRunCallsFinished() {
         underTest.setContext(new ClusterIdEvaluatorContext(CLUSTER_ID));
@@ -146,6 +153,17 @@ class CronTimeEvaluatorTest {
                 "Scheduled-Based Autoscaling Expeced Node Count should match.");
     }
 
+    @ParameterizedTest(name = "{0}: With currentHostGroupCount={1}, desiredNodeCount ={2}, expectedNodeCount={3} ")
+    @MethodSource("scheduleBasedUpScaling")
+    void testPublishIfNeededForUpscalingWithImpalaOnly(String testType, Integer currentHostGroupCount,
+            Integer desiredNodeCount, Integer expectedScalingCount) throws Exception {
+
+        ScalingEvent scalingEvent = validateScheduleBasedScalingWithImpalaOnly("SCALE_UP_MODE", currentHostGroupCount, desiredNodeCount, Optional.empty());
+
+        assertEquals(expectedScalingCount.intValue(), scalingEvent.getDesiredAbsoluteHostGroupNodeCount().intValue(),
+                "Scheduled-Based Autoscaling Expeced Node Count should match.");
+    }
+
     static Stream<Arguments> scheduleBasedDownScaling() {
         return Stream.of(
                 //TestCase, CurrentHostGroupCount,DesiredNodeCount,YarnGivenDecommissionCount,ExpectedNodeCount
@@ -171,8 +189,23 @@ class CronTimeEvaluatorTest {
         assertEquals(targetNodeCount, scalingEvent.getDecommissionNodeIds().size(),
                 "Decommission Node Count Based on Yarn Response should match targetNodeCount.");
         scalingEvent.getDecommissionNodeIds().forEach(
-                nodeId -> assertTrue(nodeId.contains(TEST_HOSTGROUP), "Node Id hostGroup should match")
+                nodeId -> assertTrue(nodeId.contains(TEST_HOSTGROUP_COMPUTE), "Node Id hostGroup should match")
         );
+    }
+
+    @ParameterizedTest(name = "{0}: With currentHostGroupCount={1}, desiredNodeCount ={2}, yarnGivenDecommissionCount={3}, expectedNodeCount={4} ")
+    @MethodSource("scheduleBasedDownScaling")
+    void testPublishIfNeededForDownScalingWithImpalaOnly(String testType, Integer currentHostGroupCount,
+            Integer desiredNodeCount, Integer yarnGivenDecommissionCount, Integer expectedScalingCount) throws Exception {
+
+        ScalingEvent scalingEvent = validateScheduleBasedScalingWithImpalaOnly("SCALE_DOWN_MODE", currentHostGroupCount,
+                desiredNodeCount, Optional.of(yarnGivenDecommissionCount));
+
+        int targetNodeCount = currentHostGroupCount - desiredNodeCount;
+        assertEquals(expectedScalingCount.intValue(), scalingEvent.getDesiredAbsoluteHostGroupNodeCount().intValue(),
+                "Scheduled-Based Autoscaling Expeced Node Count should match.");
+        assertEquals(0, scalingEvent.getDecommissionNodeIds().size(),
+                "Yarn Service Not Present. So recommodations from Yarn:.");
     }
 
     private ScalingEvent validateScheduleBasedScaling(String testMode, Integer currentHostGroupCount,
@@ -182,14 +215,15 @@ class CronTimeEvaluatorTest {
         TimeAlert alert = getAAlert(cluster, desiredNodeCount);
         ScalingActivity activity = getActivity(cluster);
         StackV4Response stackV4Response = MockStackResponseGenerator
-                .getMockStackV4Response(TEST_CLUSTERCRN, TEST_HOSTGROUP, "testFqdn" + TEST_HOSTGROUP, currentHostGroupCount, 0);
+                .getMockStackV4Response(TEST_CLUSTERCRN, TEST_HOSTGROUP_COMPUTE, "testFqdn" + TEST_HOSTGROUP_COMPUTE, currentHostGroupCount, 0);
 
         when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(stackV4Response);
         when(scalingActivityService.create(any(Cluster.class), any(ActivityStatus.class), anyString(), anyLong())).thenReturn(activity);
         when(messagesService.getMessageWithArgs(anyString(), any())).thenReturn("test-message");
-        when(stackResponseUtils.getNodeCountForHostGroup(stackV4Response, TEST_HOSTGROUP)).thenCallRealMethod();
+        when(stackResponseUtils.getNodeCountForHostGroup(stackV4Response, TEST_HOSTGROUP_COMPUTE)).thenCallRealMethod();
         when(scalingPolicyTargetCalculator.getDesiredAbsoluteNodeCount(any(ScalingEvent.class), anyInt())).thenCallRealMethod();
         when(dateService.isTrigger(any(TimeAlert.class), anyLong())).thenReturn(true);
+        when(stackResponseUtils.getServicesOnHostGroup(stackV4Response, TEST_HOSTGROUP_COMPUTE)).thenReturn(Set.of("impala", "yarn"));
 
         if (!"SCALE_UP_MODE".equals(testMode)) {
             YarnScalingServiceV1Response yarnScalingServiceV1Response = getMockYarnScalingResponse("test", yarnGivenDecommissionCount.get());
@@ -214,13 +248,39 @@ class CronTimeEvaluatorTest {
         return captor.getValue();
     }
 
+    private ScalingEvent validateScheduleBasedScalingWithImpalaOnly(String testMode, Integer currentHostGroupCount,
+            Integer desiredNodeCount, Optional<Integer> yarnGivenDecommissionCount) throws Exception {
+
+        Cluster cluster = getACluster();
+        TimeAlert alert = getAAlert(cluster, desiredNodeCount);
+        ScalingActivity activity = getActivity(cluster);
+        StackV4Response stackV4Response = MockStackResponseGenerator
+                .getMockStackV4Response(TEST_CLUSTERCRN, TEST_HOSTGROUP_COMPUTE,
+                        "testFqdn" + TEST_HOSTGROUP_COMPUTE, currentHostGroupCount, 0);
+
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(stackV4Response);
+        when(scalingActivityService.create(any(Cluster.class), any(ActivityStatus.class), anyString(), anyLong())).thenReturn(activity);
+        when(messagesService.getMessageWithArgs(anyString(), any())).thenReturn("test-message");
+        when(stackResponseUtils.getServicesOnHostGroup(stackV4Response, TEST_HOSTGROUP_COMPUTE)).thenReturn(Set.of("impala"));
+        when(stackResponseUtils.getNodeCountForHostGroup(stackV4Response, TEST_HOSTGROUP_COMPUTE)).thenCallRealMethod();
+        when(scalingPolicyTargetCalculator.getDesiredAbsoluteNodeCount(any(ScalingEvent.class), anyInt())).thenCallRealMethod();
+        when(dateService.isTrigger(any(TimeAlert.class), anyLong())).thenReturn(true);
+
+        underTest.publishIfNeeded(List.of(alert));
+
+        ArgumentCaptor<ScalingEvent> captor = ArgumentCaptor.forClass(ScalingEvent.class);
+        verify(eventPublisher).publishEvent(captor.capture());
+
+        return captor.getValue();
+    }
+
     private YarnScalingServiceV1Response getMockYarnScalingResponse(String instanceType, int yarnGivenDecommissionCount) {
         YarnScalingServiceV1Response yarnScalingReponse = new YarnScalingServiceV1Response();
         List decommissionCandidates = new ArrayList();
         for (int i = 1; i <= yarnGivenDecommissionCount; i++) {
             YarnScalingServiceV1Response.DecommissionCandidate decommissionCandidate = new YarnScalingServiceV1Response.DecommissionCandidate();
             decommissionCandidate.setAmCount(2);
-            decommissionCandidate.setNodeId(TEST_FQDN_BASE + TEST_HOSTGROUP + i + ":8042");
+            decommissionCandidate.setNodeId(TEST_FQDN_BASE + TEST_HOSTGROUP_COMPUTE + i + ":8042");
             decommissionCandidates.add(decommissionCandidate);
         }
         yarnScalingReponse.setDecommissionCandidates(Map.of("candidates", decommissionCandidates));
@@ -251,7 +311,7 @@ class CronTimeEvaluatorTest {
         cluster.setClusterPertain(clusterPertain);
 
         ScalingPolicy scalingPolicy = new ScalingPolicy();
-        scalingPolicy.setHostGroup(TEST_HOSTGROUP);
+        scalingPolicy.setHostGroup(TEST_HOSTGROUP_COMPUTE);
         scalingPolicy.setAdjustmentType(AdjustmentType.EXACT);
         scalingPolicy.setScalingAdjustment(desiredNodeCount);
         alert.setScalingPolicy(scalingPolicy);

@@ -1,5 +1,9 @@
 package com.sequenceiq.periscope.service;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -7,6 +11,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 
 @Service
@@ -17,6 +22,9 @@ public class EntitlementValidationService {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private ImpalaValidator impalaValidator;
 
     @Cacheable(cacheNames = "accountEntitlementCache", key = "{#accountId,#cloudPlatform}")
     public boolean autoscalingEntitlementEnabled(String accountId, String cloudPlatform) {
@@ -47,5 +55,14 @@ public class EntitlementValidationService {
             entitled = entitlementService.gcpStopStartScalingEnabled(accountId);
         }
         return entitled;
+    }
+
+    public List<String> impalaScheduleBasedScalingMissingEntitlements(String accountId, CloudPlatform cloudPlatform) {
+        List<String> entitlements = entitlementService.getEntitlements(accountId);
+        Set<Entitlement> requiredEntitlements = impalaValidator.getImpalaScheduleScalingEntitlements(cloudPlatform);
+        return requiredEntitlements.stream()
+                .map(Enum::name)
+                .filter(name -> !entitlements.contains(name))
+                .collect(Collectors.toList());
     }
 }

@@ -183,6 +183,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
 
         Stack source = getSource();
         // GIVEN
+
         when(imageService.getImage(source.getId())).thenReturn(mock(Image.class));
         when(imageToStackImageV4ResponseConverter.convert(any(Image.class))).thenReturn(new StackImageV4Response());
         when(stackAuthenticationToStackAuthenticationV4ResponseConverter

@@ -2,8 +2,12 @@ package com.sequenceiq.periscope.service;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 
 @ExtendWith(MockitoExtension.class)
 class EntitlementValidationServiceTest {
@@ -25,6 +31,9 @@ class EntitlementValidationServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private ImpalaValidator impalaValidator;
 
     @BeforeEach
     void setUp() {
@@ -52,6 +61,36 @@ class EntitlementValidationServiceTest {
 
         boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
         assertFalse(entitled, "isEntitled should be false when entitlement is not found");
+    }
+
+    @Test
+    void testWhenAWSImpalaScheduleBasedEnabled() {
+        when(entitlementService.getEntitlements(anyString())).thenReturn(List.of("DATAHUB_AWS_AUTOSCALING", "DATAHUB_AWS_IMPALA_SCHEDULE_BASED_SCALING"));
+        when(impalaValidator.getImpalaScheduleScalingEntitlements(any()))
+                .thenReturn(Set.of(Entitlement.DATAHUB_AWS_AUTOSCALING, Entitlement.DATAHUB_AWS_IMPALA_SCHEDULE_BASED_SCALING));
+
+        List<String> missingEntitlement = underTest.impalaScheduleBasedScalingMissingEntitlements(TEST_ACCOUNT_ID, CloudPlatform.AWS);
+        assertTrue(missingEntitlement.isEmpty(), "missingEntitlements are the entitlements which are missing.");
+    }
+
+    @Test
+    void testWhenAWSAutoScalingNotEntitled() {
+        when(entitlementService.getEntitlements(anyString())).thenReturn(List.of());
+        when(impalaValidator.getImpalaScheduleScalingEntitlements(any()))
+                .thenReturn(Set.of(Entitlement.DATAHUB_AWS_AUTOSCALING, Entitlement.DATAHUB_AWS_IMPALA_SCHEDULE_BASED_SCALING));
+
+        List<String> missingEntitlement = underTest.impalaScheduleBasedScalingMissingEntitlements(TEST_ACCOUNT_ID, CloudPlatform.AWS);
+        assertFalse(missingEntitlement.isEmpty(), "missingEntitlements are the entitlements which are missing.");
+    }
+
+    @Test
+    void testWhenAWSImpalaScheduleScalingNotEntitled() {
+        when(entitlementService.getEntitlements(anyString())).thenReturn(List.of("DATAHUB_AWS_AUTOSCALING"));
+        when(impalaValidator.getImpalaScheduleScalingEntitlements(any()))
+                .thenReturn(Set.of(Entitlement.DATAHUB_AWS_AUTOSCALING, Entitlement.DATAHUB_AWS_IMPALA_SCHEDULE_BASED_SCALING));
+
+        List<String> missingEntitlement = underTest.impalaScheduleBasedScalingMissingEntitlements(TEST_ACCOUNT_ID, CloudPlatform.AWS);
+        assertFalse(missingEntitlement.isEmpty(), "missingEntitlements are the entitlements which are missing.");
     }
 
     @Test

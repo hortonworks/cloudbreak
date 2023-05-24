@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMeta
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY;
 import static java.util.stream.Collectors.toSet;
 
+import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -100,6 +102,32 @@ public class StackResponseUtils {
                                 " HostGroup '%s', Cluster '%s'", serviceType, roleType, hostGroupName, stackResponse.getCrn())));
 
         return roleReferenceName;
+    }
+
+    public Set<String> getServicesOnHostGroup(StackV4Response stackResponse, String hostGroupName) {
+        String template = stackResponse.getCluster().getBlueprint().getBlueprint();
+        ApiClusterTemplate cmTemplate;
+        try {
+            cmTemplate = JsonUtil.readValue(template, ApiClusterTemplate.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        Set<String> hostGroupRoleConfigNames = cmTemplate.getHostTemplates().stream()
+                .filter(clusterTemplate -> clusterTemplate.getRefName().equalsIgnoreCase(hostGroupName))
+                .findFirst().map(ApiClusterTemplateHostTemplate::getRoleConfigGroupsRefNames).orElse(List.of())
+                .stream()
+                .collect(Collectors.toSet());
+
+        Set<String> servicesOnHostGroup = new HashSet<>();
+        for (ApiClusterTemplateService apiClusterTemplateService : cmTemplate.getServices()) {
+            for (ApiClusterTemplateRoleConfigGroup apiClusterTemplateRoleConfigGroup : apiClusterTemplateService.getRoleConfigGroups()) {
+                if (hostGroupRoleConfigNames.contains(apiClusterTemplateRoleConfigGroup.getRefName())) {
+                    servicesOnHostGroup.add(apiClusterTemplateService.getRefName());
+                }
+            }
+        }
+
+        return servicesOnHostGroup;
     }
 
     public Set<String> getUnhealthyDependentHosts(StackV4Response stackResponse, DependentHostGroupsV4Response dependentHostGroupsResponse,

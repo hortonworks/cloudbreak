@@ -134,7 +134,6 @@ public class StackToStackV4ResponseConverter {
         StackV4Response response = new StackV4Response();
         try {
             restRequestThreadLocalService.setWorkspaceId(source.getWorkspaceId());
-
             Image image = imageService.getImage(source.getId());
             response.setImage(imageToStackImageV4ResponseConverter.convert(image));
         } catch (CloudbreakImageNotFoundException exc) {

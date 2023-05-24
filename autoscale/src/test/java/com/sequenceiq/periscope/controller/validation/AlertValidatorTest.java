@@ -3,6 +3,7 @@ package com.sequenceiq.periscope.controller.validation;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_CLUSTER_LIMIT_EXCEEDED;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ENTITLEMENT_NOT_ENABLED;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_STOP_START_ENTITLEMENT_NOT_ENABLED;
+import static com.sequenceiq.periscope.common.MessageCode.IMPALA_SCHEDULE_BASED_SCALING_ENTITLEMENT_NOT_ENABLED;
 import static com.sequenceiq.periscope.common.MessageCode.UNSUPPORTED_AUTOSCALING_HOSTGROUP;
 import static com.sequenceiq.periscope.common.MessageCode.VALIDATION_TIME_STOP_START_UNSUPPORTED;
 import static java.util.Collections.emptyList;
@@ -31,6 +32,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
@@ -130,6 +132,31 @@ public class AlertValidatorTest {
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateEntitlementAndDisableIfNotEntitled(aCluster));
         verify(asClusterCommonService, never()).setAutoscaleState(aCluster.getId(), false);
+    }
+
+    @Test
+    public void testValidateImpalaScheduleBasedScalingEntitledForAccount() {
+        aCluster.setCloudPlatform("AWS");
+
+        when(entitlementValidationService.impalaScheduleBasedScalingMissingEntitlements(TEST_ACCOUNT_ID, CloudPlatform.AWS)).thenReturn(List.of());
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
+                underTest.validateImpalaScheduleBasedScalingEntitlement(aCluster.getStackCrn(), CloudPlatform.AWS, aCluster.getStackName()));
+    }
+
+    @Test
+    public void testValidateImpalaScheduleBasedScalingNotEntitled() {
+        aCluster.setCloudPlatform("AWS");
+
+        when(entitlementValidationService.impalaScheduleBasedScalingMissingEntitlements(TEST_ACCOUNT_ID, CloudPlatform.AWS))
+                .thenReturn(List.of("DATAHUB_AWS_IMPALA_SCHEDULE_BASED_SCALING"));
+        when(messagesService.getMessage(IMPALA_SCHEDULE_BASED_SCALING_ENTITLEMENT_NOT_ENABLED,
+                List.of(aCluster.getCloudPlatform(), TEST_ACCOUNT_ID))).thenReturn("account.not.entitled");
+
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage("account.not.entitled");
+
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
+                underTest.validateImpalaScheduleBasedScalingEntitlement(aCluster.getStackCrn(), CloudPlatform.AWS, aCluster.getStackName()));
     }
 
     @Test
