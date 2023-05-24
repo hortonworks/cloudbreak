@@ -9,6 +9,7 @@ import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.common.api.util.ValidatorUtil;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.validation.volume.RootVolumeSizeProvider;
@@ -35,10 +36,9 @@ public class RootVolumeSizeValidator implements ConstraintValidator<ValidRootVol
         context.disableDefaultConstraintViolation();
         int rootVolumeSize = rootVolumeSizeProvider.get().getForPlatform(cloudPlatform);
         if (template.getRootVolume().getSize() < rootVolumeSize) {
-            context
-                    .buildConstraintViolationWithTemplate(StringUtils.capitalize(value.getName()) + " root volume (" + template.getRootVolume().getSize()
-                            + "GB) couldn't be less than " + rootVolumeSize + "GB")
-                    .addConstraintViolation();
+            String messageTemplate = StringUtils.capitalize(value.getName()) + " root volume (" + template.getRootVolume().getSize()
+                    + "GB) couldn't be less than " + rootVolumeSize + "GB";
+            ValidatorUtil.addConstraintViolation(context, messageTemplate);
             return false;
         }
         return true;
