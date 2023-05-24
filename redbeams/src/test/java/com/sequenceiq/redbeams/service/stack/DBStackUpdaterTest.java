@@ -1,7 +1,9 @@
 package com.sequenceiq.redbeams.service.stack;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.security.cert.X509Certificate;
@@ -23,6 +25,7 @@ import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
 import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
+import com.sequenceiq.redbeams.service.sslcertificate.SslConfigService;
 
 @ExtendWith(MockitoExtension.class)
 public class DBStackUpdaterTest {
@@ -42,6 +45,9 @@ public class DBStackUpdaterTest {
 
     @Mock
     private DBStack dbStack;
+
+    @Mock
+    private SslConfigService sslConfigService;
 
     @Test
     public void testUpdateSslConfigWhenDBStackExistsEnabledAndActiveCertFound() {
@@ -64,7 +70,8 @@ public class DBStackUpdaterTest {
         certPems.add("certPem0");
         certPems.add("certPem1");
         when(dbStackService.findById(STACK_ID)).thenReturn(Optional.of(dbStack));
-        when(dbStack.getSslConfig()).thenReturn(sslConfig);
+        when(dbStack.getSslConfig()).thenReturn(1L);
+        when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(sslConfig));
         when(dbStack.getCloudPlatform()).thenReturn("cloudPlatform");
         when(dbStack.getRegion()).thenReturn("region");
         when(databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegion("cloudPlatform", "region")).thenReturn(certificateEntries);
@@ -76,7 +83,7 @@ public class DBStackUpdaterTest {
         Assertions.assertEquals("cloudPlatform", sslConfig.getSslCertificateActiveCloudProviderIdentifier());
         Assertions.assertEquals(SslCertificateType.CLOUD_PROVIDER_OWNED, sslConfig.getSslCertificateType());
 
-        verify(dbStackService).save(dbStack);
+        verify(sslConfigService).save(sslConfig);
     }
 
     @Test
@@ -91,7 +98,8 @@ public class DBStackUpdaterTest {
                 "certPem0",
                 X_509_CERT));
         when(dbStackService.findById(STACK_ID)).thenReturn(Optional.of(dbStack));
-        when(dbStack.getSslConfig()).thenReturn(sslConfig);
+        when(dbStack.getSslConfig()).thenReturn(1L);
+        when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(sslConfig));
         when(dbStack.getCloudPlatform()).thenReturn("cloudPlatform");
         when(dbStack.getRegion()).thenReturn("region");
         when(dbStack.getName()).thenReturn("name");
@@ -101,22 +109,23 @@ public class DBStackUpdaterTest {
         NotFoundException actual = Assertions.assertThrows(NotFoundException.class, () -> underTest.updateSslConfig(STACK_ID));
         Assertions.assertEquals("Active SSL cert cannot be found for name", actual.getMessage());
 
-        verify(dbStackService, never()).save(dbStack);
+        verify(sslConfigService, never()).save(any(SslConfig.class));
     }
 
     @Test
     public void testUpdateSslConfigWhenDBStackNotExists() {
         when(dbStackService.findById(STACK_ID)).thenReturn(Optional.empty());
         underTest.updateSslConfig(STACK_ID);
-        verify(dbStackService, never()).save(dbStack);
+        verifyNoInteractions(sslConfigService);
     }
 
     @Test
     public void testUpdateSslConfigWhenSslConfigIsNull() {
         when(dbStackService.findById(STACK_ID)).thenReturn(Optional.of(dbStack));
         when(dbStack.getSslConfig()).thenReturn(null);
+        when(sslConfigService.fetchById(any())).thenReturn(Optional.empty());
         underTest.updateSslConfig(STACK_ID);
-        verify(dbStackService, never()).save(dbStack);
+        verify(sslConfigService, never()).save(any(SslConfig.class));
     }
 
     @Test
@@ -124,8 +133,9 @@ public class DBStackUpdaterTest {
         SslConfig sslConfig = new SslConfig();
         sslConfig.setSslCertificateType(SslCertificateType.NONE);
         when(dbStackService.findById(STACK_ID)).thenReturn(Optional.of(dbStack));
-        when(dbStack.getSslConfig()).thenReturn(sslConfig);
+        when(dbStack.getSslConfig()).thenReturn(1L);
+        when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(sslConfig));
         underTest.updateSslConfig(STACK_ID);
-        verify(dbStackService, never()).save(dbStack);
+        verify(sslConfigService, never()).save(any(SslConfig.class));
     }
 }

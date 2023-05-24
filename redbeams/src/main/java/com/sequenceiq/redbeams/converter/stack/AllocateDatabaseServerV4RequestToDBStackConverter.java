@@ -4,13 +4,11 @@ import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityG
 import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request.RDS_NAME_MAX_LENGTH;
 
 import java.time.Instant;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -20,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -37,18 +34,13 @@ import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4StackRequest;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
-import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
-import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
-import com.sequenceiq.redbeams.domain.stack.SslConfig;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.service.AccountTagService;
 import com.sequenceiq.redbeams.service.EnvironmentService;
@@ -57,6 +49,7 @@ import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.UuidGeneratorService;
 import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
+import com.sequenceiq.redbeams.service.sslcertificate.SslConfigService;
 
 @Component
 public class AllocateDatabaseServerV4RequestToDBStackConverter {
@@ -67,9 +60,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     @Value("${cb.enabledplatforms:}")
     private Set<String> dbServiceSupportedPlatforms;
-
-    @Value("${redbeams.ssl.enabled:}")
-    private boolean sslEnabled;
 
     @Value("${redbeams.db.postgres.major.version:}")
     private String redbeamsDbMajorVersion;
@@ -108,10 +98,10 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     private AccountTagService accountTagService;
 
     @Inject
-    private DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
+    private NetworkBuilderService networkBuilderService;
 
     @Inject
-    private NetworkBuilderService networkBuilderService;
+    private SslConfigService sslConfigService;
 
     @PostConstruct
     public void initSupportedPlatforms() {
@@ -150,101 +140,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.PROVISION_REQUESTED, now.toEpochMilli()));
         dbStack.setResourceCrn(crnService.createCrn(dbStack).toString());
         dbStack.setTags(getTags(dbStack, source, environment));
-        dbStack.setSslConfig(getSslConfig(source, dbStack));
+        dbStack.setSslConfig(sslConfigService.createSslConfig(source, dbStack).getId());
         return dbStack;
-    }
-
-    // FIXME Potentially extract this whole logic into a service as it might be needed later for cert rotation
-    private SslConfig getSslConfig(AllocateDatabaseServerV4Request source, DBStack dbStack) {
-        SslConfig sslConfig = new SslConfig();
-        if (sslEnabled && source.getSslConfig() != null && SslMode.isEnabled(source.getSslConfig().getSslMode())) {
-            LOGGER.info("SSL is enabled and has been requested. Setting up SslConfig for DBStack.");
-            String cloudPlatform = dbStack.getCloudPlatform();
-            String region = dbStack.getRegion();
-            // TODO Determine the highest available SSL cert version for GCP; update sslCertificateActiveVersion during provisioning
-            int maxVersion = databaseServerSslCertificateConfig.getMaxVersionByCloudPlatformAndRegion(cloudPlatform, region);
-            sslConfig.setSslCertificateActiveVersion(maxVersion);
-            // TODO Add SslConfig.sslCertificateMaxVersion and keep it up-to-date (mostly for GCP)
-
-            Set<String> certs;
-            String cloudProviderIdentifier;
-            int numberOfCerts = databaseServerSslCertificateConfig.getNumberOfCertsByCloudPlatformAndRegion(cloudPlatform, region);
-            if (numberOfCerts == 0) {
-                // TODO Initialize SSL cert & CloudProviderIdentifier for GCP
-                // This is possible for cloud platforms where SSL is supported, but the certs are not pre-registered in CB; see e.g. GCP
-                certs = Collections.emptySet();
-                cloudProviderIdentifier = null;
-            } else {
-                // For >= 1 certs, always include all of them
-                Set<SslCertificateEntry> certsTemp =
-                        databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegion(cloudPlatform, region)
-                                .stream()
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toSet());
-                validateNonNullCertsCount(cloudPlatform, region, numberOfCerts, certsTemp);
-                for (int i = maxVersion - numberOfCerts + 1; i < maxVersion; i++) {
-                    findAndValidateCertByVersion(cloudPlatform, region, i, certsTemp);
-                }
-                cloudProviderIdentifier = findAndValidateCertByVersion(cloudPlatform, region, maxVersion, certsTemp).getCloudProviderIdentifier();
-                certs = certsTemp
-                        .stream()
-                        .map(SslCertificateEntry::getCertPem)
-                        .collect(Collectors.toSet());
-                validateUniqueCertsCount(cloudPlatform, region, numberOfCerts, certs);
-            }
-            sslConfig.setSslCertificates(certs);
-            sslConfig.setSslCertificateActiveCloudProviderIdentifier(cloudProviderIdentifier);
-
-            sslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
-            LOGGER.info("Finished setting up SslConfig: {}", sslConfig);
-        } else {
-            LOGGER.info("SSL is not enabled or has not been requested. Skipping SslConfig setup for DBStack.");
-        }
-        return sslConfig;
-    }
-
-    private void validateCert(String cloudPlatform, String region, int versionExpected, SslCertificateEntry cert) {
-        if (cert == null) {
-            throw new IllegalStateException(
-                    String.format("Could not find SSL certificate version %d for cloud platform \"%s\" and region \"%s\"", versionExpected, cloudPlatform,
-                            region));
-        }
-
-        if (Strings.isNullOrEmpty(cert.getCloudProviderIdentifier())) {
-            throw new IllegalStateException(
-                    String.format("Blank CloudProviderIdentifier in SSL certificate version %d for cloud platform \"%s\" and region \"%s\"", versionExpected,
-                            cloudPlatform, region));
-        }
-
-        if (Strings.isNullOrEmpty(cert.getCertPem())) {
-            throw new IllegalStateException(String.format("Blank PEM in SSL certificate version %d for cloud platform \"%s\" and region \"%s\"", versionExpected,
-                    cloudPlatform, region));
-        }
-    }
-
-    private void validateNonNullCertsCount(String cloudPlatform, String region, int numberOfCertsExpected, Set<SslCertificateEntry> certs) {
-        validateCountInternal(cloudPlatform, region, numberOfCertsExpected, certs.size(),
-                "SSL certificate count mismatch for cloud platform \"%s\" and region \"%s\": expected=%d, actual=%d");
-    }
-
-    private void validateCountInternal(String cloudPlatform, String region, int countExpected, int countActual, String errorMsg) {
-        if (countActual != countExpected) {
-            throw new IllegalStateException(String.format(errorMsg, cloudPlatform, region, countExpected, countActual));
-        }
-    }
-
-    private SslCertificateEntry findAndValidateCertByVersion(String cloudPlatform, String region, int version, Set<SslCertificateEntry> certs) {
-        SslCertificateEntry result = certs.stream()
-                .filter(c -> c.getVersion() == version)
-                .findFirst()
-                .orElse(null);
-        validateCert(cloudPlatform, region, version, result);
-        return result;
-    }
-
-    private void validateUniqueCertsCount(String cloudPlatform, String region, int numberOfCertsExpected, Set<String> certs) {
-        validateCountInternal(cloudPlatform, region, numberOfCertsExpected, certs.size(),
-                "Duplicated SSL certificate PEM for cloud platform \"%s\" and region \"%s\". Unique count: expected=%d, actual=%d");
     }
 
     private Json getTags(DBStack dbStack, AllocateDatabaseServerV4Request dbRequest, DetailedEnvironmentResponse environment) {

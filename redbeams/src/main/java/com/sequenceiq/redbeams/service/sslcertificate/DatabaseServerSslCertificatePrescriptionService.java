@@ -1,7 +1,10 @@
 package com.sequenceiq.redbeams.service.sslcertificate;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,18 +28,19 @@ public class DatabaseServerSslCertificatePrescriptionService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseServerSslCertificatePrescriptionService.class);
 
-    private final CloudPlatformConnectors cloudPlatformConnectors;
+    @Inject
+    private CloudPlatformConnectors cloudPlatformConnectors;
 
-    public DatabaseServerSslCertificatePrescriptionService(CloudPlatformConnectors cloudPlatformConnectors) {
-        this.cloudPlatformConnectors = cloudPlatformConnectors;
-    }
+    @Inject
+    private SslConfigService sslConfigService;
 
     public void prescribeSslCertificateIfNeeded(CloudContext cloudContext, CloudCredential cloudCredential, DBStack dbStack, DatabaseStack databaseStack) {
-        SslConfig sslConfig = dbStack.getSslConfig();
+        Optional<SslConfig> sslConfig = sslConfigService.fetchById(dbStack.getSslConfig());
         String cloudPlatform = dbStack.getCloudPlatform();
-        if (sslConfig != null && SslCertificateType.CLOUD_PROVIDER_OWNED.equals(sslConfig.getSslCertificateType())
+        if (sslConfig.isPresent() && SslCertificateType.CLOUD_PROVIDER_OWNED.equals(sslConfig.get().getSslCertificateType())
                 && CloudPlatform.AWS.name().equals(cloudPlatform)) {
-            prescribeSslCertificateIfNeededAws(cloudContext, cloudCredential, dbStack, databaseStack.getDatabaseServer());
+            prescribeSslCertificateIfNeededAws(cloudContext, cloudCredential, dbStack.getCloudPlatform(),
+                    sslConfig.get().getSslCertificateActiveCloudProviderIdentifier(), databaseStack.getDatabaseServer());
         } else {
             LOGGER.info(
                     "SSL not enabled or unsupported cloud platform \"{}\": SslConfig={}. " +
@@ -45,10 +49,8 @@ public class DatabaseServerSslCertificatePrescriptionService {
         }
     }
 
-    private void prescribeSslCertificateIfNeededAws(CloudContext cloudContext, CloudCredential cloudCredential, DBStack dbStack,
-            DatabaseServer databaseServer) {
-        String cloudPlatform = dbStack.getCloudPlatform();
-        String desiredSslCertificateIdentifier = dbStack.getSslConfig().getSslCertificateActiveCloudProviderIdentifier();
+    private void prescribeSslCertificateIfNeededAws(CloudContext cloudContext, CloudCredential cloudCredential, String cloudPlatform,
+            String desiredSslCertificateIdentifier, DatabaseServer databaseServer) {
         if (desiredSslCertificateIdentifier != null) {
             prescribeSslCertificateAws(cloudContext, cloudCredential, cloudPlatform, desiredSslCertificateIdentifier, databaseServer);
         } else {

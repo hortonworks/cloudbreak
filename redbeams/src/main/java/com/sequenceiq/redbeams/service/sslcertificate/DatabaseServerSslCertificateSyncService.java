@@ -1,6 +1,9 @@
 package com.sequenceiq.redbeams.service.sslcertificate;
 
 import java.util.Collections;
+import java.util.Optional;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,31 +23,26 @@ import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
 import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
-import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 @Service
 public class DatabaseServerSslCertificateSyncService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseServerSslCertificateSyncService.class);
 
-    private final DBStackService dbStackService;
+    @Inject
+    private CloudPlatformConnectors cloudPlatformConnectors;
 
-    private final CloudPlatformConnectors cloudPlatformConnectors;
+    @Inject
+    private DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
 
-    private final DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
-
-    public DatabaseServerSslCertificateSyncService(DBStackService dbStackService, CloudPlatformConnectors cloudPlatformConnectors,
-            DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig) {
-        this.dbStackService = dbStackService;
-        this.cloudPlatformConnectors = cloudPlatformConnectors;
-        this.databaseServerSslCertificateConfig = databaseServerSslCertificateConfig;
-    }
+    @Inject
+    private SslConfigService sslConfigService;
 
     public void syncSslCertificateIfNeeded(CloudContext cloudContext, CloudCredential cloudCredential, DBStack dbStack, DatabaseStack databaseStack)
             throws Exception {
-        SslConfig sslConfig = dbStack.getSslConfig();
+        Optional<SslConfig> sslConfig = sslConfigService.fetchById(dbStack.getSslConfig());
         String cloudPlatform = dbStack.getCloudPlatform();
-        if (sslConfig != null && SslCertificateType.CLOUD_PROVIDER_OWNED.equals(sslConfig.getSslCertificateType())
+        if (sslConfig.isPresent() && SslCertificateType.CLOUD_PROVIDER_OWNED.equals(sslConfig.get().getSslCertificateType())
                 && CloudPlatform.AWS.name().equals(cloudPlatform)) {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
@@ -53,7 +51,7 @@ public class DatabaseServerSslCertificateSyncService {
                 LOGGER.warn("Database server or its SSL certificate does not exist in cloud platform \"{}\" for {}. Skipping synchronization.", cloudPlatform,
                         cloudContext);
             } else {
-                syncSslCertificateAws(cloudContext, dbStack, activeSslRootCertificate);
+                syncSslCertificateAws(cloudContext, dbStack, activeSslRootCertificate, sslConfig.get());
             }
         } else {
             LOGGER.info("SSL not enabled or unsupported cloud platform \"{}\": SslConfig={}. Skipping SSL certificate synchronization for database stack {}",
@@ -61,8 +59,8 @@ public class DatabaseServerSslCertificateSyncService {
         }
     }
 
-    private void syncSslCertificateAws(CloudContext cloudContext, DBStack dbStack, CloudDatabaseServerSslCertificate activeSslRootCertificate) {
-        SslConfig sslConfig = dbStack.getSslConfig();
+    private void syncSslCertificateAws(CloudContext cloudContext, DBStack dbStack, CloudDatabaseServerSslCertificate activeSslRootCertificate,
+            SslConfig sslConfig) {
         String cloudPlatform = dbStack.getCloudPlatform();
         String desiredSslCertificateIdentifier = sslConfig.getSslCertificateActiveCloudProviderIdentifier();
         String activeSslCertificateIdentifier = activeSslRootCertificate.getCertificateIdentifier();
@@ -95,7 +93,7 @@ public class DatabaseServerSslCertificateSyncService {
                 sslConfig.setSslCertificateActiveVersion(activeSslCertificateEntry.getVersion());
                 sslConfig.setSslCertificates(Collections.singleton(activeSslCertificateEntry.getCertPem()));
             }
-            dbStackService.save(dbStack);
+            sslConfigService.save(sslConfig);
         }
     }
 

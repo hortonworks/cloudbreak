@@ -26,6 +26,7 @@ import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
+import com.sequenceiq.redbeams.service.sslcertificate.SslConfigService;
 
 @Component
 public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
@@ -35,6 +36,9 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
 
     @Inject
     private StringToSecretResponseConverter stringToSecretResponseConverter;
+
+    @Inject
+    private SslConfigService sslConfigService;
 
     public DatabaseServerV4Response convert(DatabaseServerConfig source) {
         DatabaseServerV4Response response = new DatabaseServerV4Response();
@@ -62,7 +66,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
             response.setStatusReason(dbStack.getStatusReason());
             response.setMajorVersion(dbStack.getMajorVersion());
             if (dbStack.getSslConfig() != null) {
-                SslConfig sslConfig = dbStack.getSslConfig();
+                SslConfig sslConfig = sslConfigService.fetchById(dbStack.getSslConfig()).get();
                 SslConfigV4Response sslConfigV4Response = new SslConfigV4Response();
                 sslConfigV4Response.setSslCertificates(sslConfig.getSslCertificates());
                 sslConfigV4Response.setSslCertificateType(sslConfig.getSslCertificateType());
