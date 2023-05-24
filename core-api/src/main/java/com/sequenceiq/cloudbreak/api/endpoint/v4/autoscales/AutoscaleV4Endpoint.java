@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleSt
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.DependentHostGroupsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.HostGroupServicesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.LimitsConfigurationResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
@@ -117,6 +118,14 @@ public interface AutoscaleV4Endpoint {
             nickname = "getDependentHostGroupsForMultipleAutoscaleHostGroups")
     DependentHostGroupsV4Response getDependentHostGroupsForMultipleHostGroups(@PathParam("crn") String crn,
             @QueryParam("hostGroups") @NotEmpty Set<String> hostGroups);
+
+    @GET
+    @Path("/stack/crn/{crn}/host_group_services")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.GET_SERVICES_RUNNING_ON_HOSTGROUP_BY_CRN, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "getServicesRunningOnHostGroup")
+    HostGroupServicesV4Response getServicesRunningOnHostGroup(@PathParam("crn") String crn,
+            @QueryParam("hostGroup") @NotEmpty String hostGroup);
 
     @GET
     @Path("/stack/crn/{crn}/status")

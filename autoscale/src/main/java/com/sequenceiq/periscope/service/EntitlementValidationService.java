@@ -48,4 +48,20 @@ public class EntitlementValidationService {
         }
         return entitled;
     }
+
+    @Cacheable(cacheNames = "accountEntitlementCacheImpalaSchedule", key = "{#accountId,#cloudPlatform}")
+    public boolean impalaScheduleBasedScalingEntitlementEnabled(String accountId, String cloudPlatform) {
+        boolean entitled = autoscalingEntitlementEnabled(accountId, cloudPlatform);
+        if (!entitled) {
+            return false;
+        }
+        if (CloudPlatform.AWS.equalsIgnoreCase(cloudPlatform)) {
+            entitled = entitlementService.awsImpalaScheduleScalingEnabled(accountId);
+        } else if (CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform)) {
+            entitled = entitlementService.azureImpalaScheduleScalingEnabled(accountId);
+        } else if (CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform)) {
+            entitled = entitlementService.gcpImpalaScheduleScalingEnabled(accountId);
+        }
+        return entitled;
+    }
 }

@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleSt
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.DependentHostGroupsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.HostGroupServicesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.LimitsConfigurationResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -47,6 +48,7 @@ import com.sequenceiq.cloudbreak.conf.LimitConfiguration;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.AutoscaleRecommendationToAutoscaleRecommendationV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToAutoscaleStackV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToDependentHostGroupV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToHostGroupServicesV4ResponseConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -94,6 +96,9 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Inject
     private StackToDependentHostGroupV4ResponseConverter stackToDependentHostGroupV4ResponseConverter;
+
+    @Inject
+    private StackToHostGroupServicesV4ResponseConverter stackToHostGroupServicesV4ResponseConverter;
 
     @Inject
     private AutoscaleRecommendationToAutoscaleRecommendationV4ResponseConverter autoscaleRecommendationToAutoscaleRecommendationV4ResponseConverter;
@@ -203,6 +208,13 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     public DependentHostGroupsV4Response getDependentHostGroupsForMultipleHostGroups(@TenantAwareParam String crn, Set<String> hostGroups) {
         StackDto stack = stackDtoService.getByCrn(crn);
         return stackToDependentHostGroupV4ResponseConverter.convert(stack, hostGroups);
+    }
+
+    @Override
+    @InternalOnly
+    public HostGroupServicesV4Response getServicesRunningOnHostGroup(@TenantAwareParam String crn, String hostGroup) {
+        StackDto stack = stackDtoService.getByCrn(crn);
+        return stackToHostGroupServicesV4ResponseConverter.convert(stack, hostGroup);
     }
 
     @Override

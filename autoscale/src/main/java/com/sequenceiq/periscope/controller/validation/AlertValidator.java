@@ -12,6 +12,7 @@ import javax.ws.rs.BadRequestException;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -65,6 +66,14 @@ public class AlertValidator {
         if (!entitlementValidationService.stopStartAutoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getAccountId(), cluster.getCloudPlatform())) {
             throw new BadRequestException(messagesService.getMessage(MessageCode.AUTOSCALING_STOP_START_ENTITLEMENT_NOT_ENABLED,
                     List.of(cluster.getCloudPlatform(), cluster.getStackName())));
+        }
+    }
+
+    public void validateImpalaScheduleBasedScalingEntitlement(StackV4Response stackV4Response, String clusterCrn) {
+        String accountId = Crn.safeFromString(clusterCrn).getAccountId();
+        if (!entitlementValidationService.impalaScheduleBasedScalingEntitlementEnabled(accountId, stackV4Response.getCloudPlatform().name())) {
+            throw new BadRequestException(messagesService.getMessage(MessageCode.IMPALA_SCHEDULE_BASED_SCALING_ENTITLEMENT_NOT_ENABLED,
+                    List.of(stackV4Response.getCloudPlatform().getDislayName(), stackV4Response.getName())));
         }
     }
 

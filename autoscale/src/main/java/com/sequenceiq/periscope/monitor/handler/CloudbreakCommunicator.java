@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.DependentHostGroupsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.HostGroupServicesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.LimitsConfigurationResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
@@ -61,6 +62,10 @@ public class CloudbreakCommunicator {
 
     public DependentHostGroupsV4Response getDependentHostGroupsForMultipleHostGroups(String stackCrn, Set<String> hostGroups) {
         return cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getDependentHostGroupsForMultipleHostGroups(stackCrn, hostGroups);
+    }
+
+    public HostGroupServicesV4Response getServicesRunningOnHostGroup(String stackCrn, String hostGroup) {
+        return cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getServicesRunningOnHostGroup(stackCrn, hostGroup);
     }
 
     public AutoscaleRecommendationV4Response getRecommendationForCluster(String stackCrn) {

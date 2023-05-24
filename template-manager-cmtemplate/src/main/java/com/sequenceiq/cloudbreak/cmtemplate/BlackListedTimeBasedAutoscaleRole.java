@@ -10,7 +10,6 @@ public enum BlackListedTimeBasedAutoscaleRole {
     SERVER,
     NIFI_NODE,
     NAMENODE,
-    IMPALAD,
     STATESTORE,
     CATALOGSERVER,
     KUDU_MASTER,

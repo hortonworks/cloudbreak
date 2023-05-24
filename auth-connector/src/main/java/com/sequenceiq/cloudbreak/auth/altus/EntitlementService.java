@@ -89,10 +89,13 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_DAT
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_VM_DIAGNOSTICS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_AUTOSCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_IMPALA_SCHEDULE_BASED_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_AUTOSCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_IMPALA_SCHEDULE_BASED_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_AUTOSCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_IMPALA_SCHEDULE_BASED_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STOP_START_SCALING_FAILURE_RECOVERY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
@@ -295,6 +298,18 @@ public class EntitlementService {
 
     public boolean awsAutoScalingEnabled(String accountId) {
         return isEntitlementRegistered(accountId, DATAHUB_AWS_AUTOSCALING);
+    }
+
+    public boolean awsImpalaScheduleScalingEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, DATAHUB_AWS_IMPALA_SCHEDULE_BASED_SCALING);
+    }
+
+    public boolean azureImpalaScheduleScalingEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, DATAHUB_AZURE_IMPALA_SCHEDULE_BASED_SCALING);
+    }
+
+    public boolean gcpImpalaScheduleScalingEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, DATAHUB_GCP_IMPALA_SCHEDULE_BASED_SCALING);
     }
 
     public boolean awsStopStartScalingEnabled(String accountId) {

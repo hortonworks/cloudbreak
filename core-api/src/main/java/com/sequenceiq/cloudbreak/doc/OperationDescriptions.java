@@ -18,6 +18,7 @@ public class OperationDescriptions {
     public static class StackOpDescription {
         public static final String GET_BY_CRN = "retrieve stack by crn";
         public static final String GET_DEPENDENT_HOSTGROUPS_BY_CRN = "retrieve dependent hostgroups for autoscale policy by crn";
+        public static final String GET_SERVICES_RUNNING_ON_HOSTGROUP_BY_CRN = "retrieve all the services running on that hostgroup by crn";
         public static final String GET_STATUS_BY_NAME = "retrieve stack status by stack name";
         public static final String PUT_BY_ID = "update stack by id";
         public static final String PUT_START_INSTANCES_BY_ID = "update stack to start instances by id";
