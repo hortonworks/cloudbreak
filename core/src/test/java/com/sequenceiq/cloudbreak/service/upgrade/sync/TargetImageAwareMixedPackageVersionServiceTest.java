@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.upgrade.sync;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_CM_MIXED_PACKAGE_VERSIONS_NEWER_FAILED;
@@ -25,7 +24,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @ExtendWith(MockitoExtension.class)
 public class TargetImageAwareMixedPackageVersionServiceTest {
@@ -46,9 +44,6 @@ public class TargetImageAwareMixedPackageVersionServiceTest {
     private TargetImageAwareMixedPackageVersionService underTest;
 
     @Mock
-    private CloudbreakEventService eventService;
-
-    @Mock
     private MixedPackageMessageProvider mixedPackageMessageProvider;
 
     @Mock
@@ -56,6 +51,9 @@ public class TargetImageAwareMixedPackageVersionServiceTest {
 
     @Mock
     private ClouderaManagerProductTransformer clouderaManagerProductTransformer;
+
+    @Mock
+    private MixedPackageNotificationService mixedPackageNotificationService;
 
     @Test
     void testExaminePackageVersionsWithTargetImageShouldNotSendNotificationWhenThePackageVersionsAreValidAndEqualsWithTheTargetImage() {
@@ -72,7 +70,7 @@ public class TargetImageAwareMixedPackageVersionServiceTest {
         verify(clouderaManagerProductTransformer).transformToMap(targetImage, true, true);
         verify(mixedPackageVersionComparator).areAllComponentVersionsMatchingWithImage(CM_VERSION_AND_BUILD, targetProducts, CM_VERSION, activeParcels);
         verifyNoInteractions(mixedPackageMessageProvider);
-        verifyNoInteractions(eventService);
+        verifyNoInteractions(mixedPackageNotificationService);
     }
 
     @Test
@@ -101,7 +99,7 @@ public class TargetImageAwareMixedPackageVersionServiceTest {
         verify(mixedPackageMessageProvider).createActiveParcelsMessage(activeParcels);
         verify(mixedPackageMessageProvider).createMessageFromMap(activeProducts);
         verify(mixedPackageMessageProvider).createMessageFromMap(targetProducts);
-        verify(eventService).fireCloudbreakEvent(STACK_ID, UPDATE_IN_PROGRESS.name(), STACK_CM_MIXED_PACKAGE_VERSIONS_NEWER_FAILED,
+        verify(mixedPackageNotificationService).sendNotification(STACK_ID, STACK_CM_MIXED_PACKAGE_VERSIONS_NEWER_FAILED,
                 List.of(CM_VERSION, "CDH 7.2.9", "CDH 7.2.9", "CDH 7.2.2"));
     }
 
@@ -134,7 +132,7 @@ public class TargetImageAwareMixedPackageVersionServiceTest {
         verify(mixedPackageMessageProvider).createMessageFromMap(activeProducts);
         verify(mixedPackageMessageProvider).createMessageFromMap(targetProducts);
         verify(mixedPackageVersionComparator).filterTargetPackageVersionsByNewerPackageVersions(targetProducts, CM_VERSION_AND_BUILD, newerComponents);
-        verify(eventService).fireCloudbreakEvent(STACK_ID, UPDATE_IN_PROGRESS.name(), STACK_CM_MIXED_PACKAGE_VERSIONS_NEWER_FAILED,
+        verify(mixedPackageNotificationService).sendNotification(STACK_ID, STACK_CM_MIXED_PACKAGE_VERSIONS_NEWER_FAILED,
                 List.of(activeCmVersion, "CDH 7.2.2", "Cloudera Manager 7.4.0", "Cloudera Manager 7.2.2"));
     }
 
@@ -160,7 +158,7 @@ public class TargetImageAwareMixedPackageVersionServiceTest {
         verify(mixedPackageVersionComparator).areAllComponentVersionsMatchingWithImage(CM_VERSION_AND_BUILD, targetProducts, CM_VERSION, activeParcels);
         verify(mixedPackageVersionComparator).getComponentsWithNewerVersionThanTheTarget(targetProducts, CM_VERSION_AND_BUILD, activeParcels, CM_VERSION);
         verify(mixedPackageMessageProvider).createActiveParcelsMessage(activeParcels);
-        verify(eventService).fireCloudbreakEvent(STACK_ID, UPDATE_IN_PROGRESS.name(), STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED,
+        verify(mixedPackageNotificationService).sendNotification(STACK_ID, STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED,
                 List.of(CM_VERSION, "CDH 7.2.2", "Cloudera Manager 7.2.0, CDH 7.2.9"));
     }
 
