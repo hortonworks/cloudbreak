@@ -17,6 +17,7 @@ import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
 import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
+import com.sequenceiq.redbeams.service.sslcertificate.SslConfigService;
 
 @Service
 public class DBStackUpdater {
@@ -29,29 +30,33 @@ public class DBStackUpdater {
     @Inject
     private DBStackService dbStackService;
 
+    @Inject
+    private SslConfigService sslConfigService;
+
     public void updateSslConfig(long id) {
         Optional<DBStack> dbStackOpt = dbStackService.findById(id);
         dbStackOpt.ifPresent(dbStack -> {
-            SslConfig sslConfig = dbStack.getSslConfig();
-            if (sslConfig != null && sslConfig.getSslCertificateType() == SslCertificateType.CLOUD_PROVIDER_OWNED) {
+            Optional<SslConfig> sslConfig = sslConfigService.fetchById(dbStack.getSslConfig());
+            if (sslConfig.isPresent() && sslConfig.get().getSslCertificateType() == SslCertificateType.CLOUD_PROVIDER_OWNED) {
                 String cloudPlatform = dbStack.getCloudPlatform();
                 String region = dbStack.getRegion();
+                SslConfig sslConf = sslConfig.get();
                 Set<SslCertificateEntry> allCertificates = databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegion(cloudPlatform, region);
-                sslConfig.setSslCertificates(allCertificates.stream().map(SslCertificateEntry::getCertPem).collect(Collectors.toSet()));
+                sslConf.setSslCertificates(allCertificates.stream().map(SslCertificateEntry::getCertPem).collect(Collectors.toSet()));
                 int activeVersion = databaseServerSslCertificateConfig.getMaxVersionByCloudPlatformAndRegion(cloudPlatform, region);
                 SslCertificateEntry activeSslCert = allCertificates.stream()
                         .filter(sslCert -> sslCert.getVersion() == activeVersion)
                         .findFirst()
                         .orElseThrow(NotFoundException.notFound(String.format("Active SSL cert cannot be found for %s", dbStack.getName())));
-                sslConfig.setSslCertificateActiveVersion(activeVersion);
-                sslConfig.setSslCertificateActiveCloudProviderIdentifier(activeSslCert.getCloudProviderIdentifier());
-                dbStackService.save(dbStack);
+                sslConf.setSslCertificateActiveVersion(activeVersion);
+                sslConf.setSslCertificateActiveCloudProviderIdentifier(activeSslCert.getCloudProviderIdentifier());
+                sslConfigService.save(sslConf);
             } else {
                 String sslNullPrefix = "";
                 String sslTypeString = "null";
-                if (sslConfig != null) {
+                if (sslConfig.isPresent()) {
                     sslNullPrefix = "not ";
-                    sslTypeString = sslConfig.getSslCertificateType().name();
+                    sslTypeString = sslConfig.get().getSslCertificateType().name();
                 }
                 LOGGER.debug("SSL config will be untouched, SSL is {}null and cert type is {}", sslNullPrefix, sslTypeString);
             }

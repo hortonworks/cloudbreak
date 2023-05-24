@@ -46,6 +46,7 @@ import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.network.NetworkService;
+import com.sequenceiq.redbeams.service.sslcertificate.SslConfigService;
 
 @Component
 public class DBStackToDatabaseStackConverter {
@@ -57,6 +58,9 @@ public class DBStackToDatabaseStackConverter {
 
     @Inject
     private NetworkService networkService;
+
+    @Inject
+    private SslConfigService sslConfigService;
 
     public DatabaseStack convert(DBStack dbStack) {
         Network network = buildNetwork(dbStack);
@@ -115,8 +119,8 @@ public class DBStackToDatabaseStackConverter {
     }
 
     private boolean determineSslEnforcement(DBStack dbStack) {
-        SslConfig sslConfig = dbStack.getSslConfig();
-        return sslConfig != null && !NONE.equals(sslConfig.getSslCertificateType());
+        Optional<SslConfig> sslConfig = sslConfigService.fetchById(dbStack.getSslConfig());
+        return sslConfig.isPresent() && !NONE.equals(sslConfig.get().getSslCertificateType());
     }
 
     private Map<String, String> getUserDefinedTags(DBStack dbStack) {

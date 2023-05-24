@@ -41,6 +41,7 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
+import com.sequenceiq.redbeams.service.sslcertificate.SslConfigService;
 
 @ExtendWith(MockitoExtension.class)
 public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
@@ -84,6 +85,9 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
 
     @Mock
     private StringToSecretResponseConverter stringToSecretResponseConverter;
+
+    @Mock
+    private SslConfigService sslConfigService;
 
     @InjectMocks
     private DatabaseServerConfigToDatabaseServerV4ResponseConverter converter;
@@ -244,7 +248,8 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         server.setDatabaseVendor(DatabaseVendor.POSTGRES);
 
         DBStack dbStack = new DBStack();
-        dbStack.setSslConfig(new SslConfig());
+        dbStack.setSslConfig(1L);
+        when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(new SslConfig()));
         initDBStackStatus(dbStack);
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
         setDatabaseServer(dbStack, null);
@@ -269,7 +274,8 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         DBStack dbStack = new DBStack();
         SslConfig sslConfig = new SslConfig();
         sslConfig.setSslCertificateType(SslCertificateType.BRING_YOUR_OWN);
-        dbStack.setSslConfig(sslConfig);
+        dbStack.setSslConfig(1L);
+        when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(sslConfig));
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
         setDatabaseServer(dbStack, null);
         server.setDbStack(dbStack);
@@ -313,9 +319,10 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         sslConfig.setSslCertificates(CERTS);
         sslConfig.setSslCertificateActiveVersion(certActiveVersionInput);
         sslConfig.setSslCertificateActiveCloudProviderIdentifier(certActiveCloudProviderIdentifierInput);
-        dbStack.setSslConfig(sslConfig);
+        dbStack.setSslConfig(1L);
         server.setDbStack(dbStack);
 
+        when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(sslConfig));
         when(databaseServerSslCertificateConfig.getMaxVersionByCloudPlatformAndRegion(CLOUD_PLATFORM, REGION)).thenReturn(CERT_MAX_VERSION);
         when(databaseServerSslCertificateConfig.getLegacyMaxVersionByCloudPlatformAndRegion(CLOUD_PLATFORM, REGION)).thenReturn(CERT_LEGACY_MAX_VERSION);
         when(databaseServerSslCertificateConfig.getLegacyCloudProviderIdentifierByCloudPlatformAndRegion(CLOUD_PLATFORM, REGION))

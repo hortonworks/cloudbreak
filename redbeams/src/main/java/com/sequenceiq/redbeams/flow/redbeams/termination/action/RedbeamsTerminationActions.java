@@ -36,6 +36,7 @@ import com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate.Termina
 import com.sequenceiq.redbeams.metrics.MetricType;
 import com.sequenceiq.redbeams.metrics.RedbeamsMetricService;
 import com.sequenceiq.redbeams.service.network.NetworkService;
+import com.sequenceiq.redbeams.service.sslcertificate.SslConfigService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
 import com.sequenceiq.redbeams.sync.DBStackJobService;
@@ -112,6 +113,9 @@ public class RedbeamsTerminationActions {
             private NetworkService networkService;
 
             @Inject
+            private SslConfigService sslConfigService;
+
+            @Inject
             private TransactionService transactionService;
 
             @Override
@@ -129,8 +133,10 @@ public class RedbeamsTerminationActions {
                     try {
                         transactionService.required(() -> {
                             Long networkId = db.getNetwork();
+                            Long sslConfigId = db.getSslConfig();
                             dbStackService.delete(db.getId());
                             networkService.delete(networkId);
+                            sslConfigService.delete(sslConfigId);
                         });
                     } catch (TransactionService.TransactionExecutionException e) {
                         LOGGER.error("Couldn't delete DB stack", e);

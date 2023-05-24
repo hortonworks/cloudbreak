@@ -13,7 +13,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -96,9 +95,8 @@ public class DBStack {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "dbStack")
     private DBStackStatus dbStackStatus;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "sslconfig_id", referencedColumnName = "id")
-    private SslConfig sslConfig;
+    @Column(name = "sslconfig_id")
+    private Long sslConfig;
 
     public Long getId() {
         return id;
@@ -310,11 +308,11 @@ public class DBStack {
         return dbStackStatus != null ? dbStackStatus.getStatusReason() : null;
     }
 
-    public SslConfig getSslConfig() {
+    public Long getSslConfig() {
         return sslConfig;
     }
 
-    public void setSslConfig(SslConfig sslConfig) {
+    public void setSslConfig(Long sslConfig) {
         this.sslConfig = sslConfig;
     }
 

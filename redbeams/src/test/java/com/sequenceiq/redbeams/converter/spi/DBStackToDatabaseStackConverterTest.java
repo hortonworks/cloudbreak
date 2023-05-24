@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -20,6 +21,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -45,6 +47,7 @@ import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.network.NetworkService;
+import com.sequenceiq.redbeams.service.sslcertificate.SslConfigService;
 
 @ExtendWith(MockitoExtension.class)
 public class DBStackToDatabaseStackConverterTest {
@@ -75,6 +78,9 @@ public class DBStackToDatabaseStackConverterTest {
     @Mock
     private NetworkService networkService;
 
+    @Mock
+    private SslConfigService sslConfigService;
+
     @BeforeEach
     public void setUp() {
         dbStack = new DBStack();
@@ -84,6 +90,7 @@ public class DBStackToDatabaseStackConverterTest {
         dbStack.setDescription("my stack");
         dbStack.setEnvironmentId("myenv");
         dbStack.setNetwork(NETWORK_ID);
+        lenient().when(sslConfigService.fetchById(ArgumentMatchers.isNull())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -367,7 +374,8 @@ public class DBStackToDatabaseStackConverterTest {
         DatabaseServer server = new DatabaseServer();
         server.setDatabaseVendor(DatabaseVendor.POSTGRES);
         dbStack.setDatabaseServer(server);
-        dbStack.setSslConfig(new SslConfig());
+        dbStack.setSslConfig(1L);
+        when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(new SslConfig()));
 
         DatabaseStack convertedStack = underTest.convert(dbStack);
 
@@ -381,7 +389,8 @@ public class DBStackToDatabaseStackConverterTest {
         dbStack.setDatabaseServer(server);
         SslConfig sslConfig = new SslConfig();
         sslConfig.setSslCertificateType(SslCertificateType.BRING_YOUR_OWN);
-        dbStack.setSslConfig(sslConfig);
+        dbStack.setSslConfig(1L);
+        when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(sslConfig));
 
         DatabaseStack convertedStack = underTest.convert(dbStack);
 
@@ -395,8 +404,8 @@ public class DBStackToDatabaseStackConverterTest {
         dbStack.setDatabaseServer(server);
         SslConfig sslConfig = new SslConfig();
         sslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
-        dbStack.setSslConfig(sslConfig);
-
+        dbStack.setSslConfig(1L);
+        when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(sslConfig));
         DatabaseStack convertedStack = underTest.convert(dbStack);
 
         assertThat(convertedStack.getDatabaseServer().isUseSslEnforcement()).isTrue();

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -45,8 +46,13 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
 
     private static final String CERT_ID_3 = "certID-3";
 
+    private static final Long SSL_CONF_ID = 16L;
+
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Mock
+    private SslConfigService sslConfigService;
 
     @InjectMocks
     private DatabaseServerSslCertificatePrescriptionService underTest;
@@ -213,13 +219,15 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
 
     private void initDBStack(String cloudPlatform, SslConfig sslConfig) {
         dbStack.setCloudPlatform(cloudPlatform);
-        dbStack.setSslConfig(sslConfig);
+        dbStack.setSslConfig(Optional.ofNullable(sslConfig).map(SslConfig::getId).orElse(null));
     }
 
     private SslConfig createSslConfig(SslCertificateType sslCertificateType, String sslCertificateActiveCloudProviderIdentifier) {
         SslConfig sslConfig = new SslConfig();
+        sslConfig.setId(SSL_CONF_ID);
         sslConfig.setSslCertificateType(sslCertificateType);
         sslConfig.setSslCertificateActiveCloudProviderIdentifier(sslCertificateActiveCloudProviderIdentifier);
+        when(sslConfigService.fetchById(SSL_CONF_ID)).thenReturn(Optional.of(sslConfig));
         return sslConfig;
     }
 
