@@ -9,6 +9,7 @@ import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
+import com.sequenceiq.common.api.util.ValidatorUtil;
 import com.sequenceiq.common.model.FileSystemType;
 
 public class LoggingRequestValidator implements ConstraintValidator<ValidLoggingRequest, LoggingRequest> {
@@ -22,17 +23,17 @@ public class LoggingRequestValidator implements ConstraintValidator<ValidLogging
         if (value != null) {
             if (StringUtils.isEmpty(value.getStorageLocation())) {
                 String msg = "Storage location parameter is empty in logging request";
-                context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
+                ValidatorUtil.addConstraintViolation(context, msg);
                 return false;
             }
             if (isProviderSpecificDataProvided(value) && !isValidPath(value)) {
                 String msg = "Storage location path is invalid in logging request";
-                context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
+                ValidatorUtil.addConstraintViolation(context, msg);
                 return false;
             }
             if (value.getS3() == null && value.getAdlsGen2() == null && value.getGcs() == null) {
                 String msg = "Provide at least 1 cloud storage detail in logging request";
-                context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
+                ValidatorUtil.addConstraintViolation(context, msg);
                 return false;
             }
         }
