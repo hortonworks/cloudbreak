@@ -129,7 +129,7 @@ public class AbstractResourceConnectorTest {
         when(cloudInstance.getStringParameter(CloudInstance.FQDN)).thenReturn("any-fqdn");
         when(group.getName()).thenReturn("groupName");
         when(group.getInstances()).thenReturn(List.of(cloudInstance));
-        when(cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class)).thenReturn(volumeSetAttributes);
+        when(cloudResource.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class)).thenReturn(volumeSetAttributes);
         when(volumeSetAttributes.getDiscoveryFQDN()).thenReturn("fqdn");
 
         underTest.diskReattachment(List.of(cloudResource), group, context);
@@ -151,7 +151,7 @@ public class AbstractResourceConnectorTest {
         when(instanceTemplate.getPrivateId()).thenReturn(1L);
         when(group.getName()).thenReturn("groupName");
         when(group.getInstances()).thenReturn(List.of(cloudInstance));
-        when(cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class)).thenReturn(volumeSetAttributes);
+        when(cloudResource.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class)).thenReturn(volumeSetAttributes);
         when(volumeSetAttributes.getDiscoveryFQDN()).thenReturn("fqdn");
 
         underTest.diskReattachment(List.of(cloudResource), group, context);
