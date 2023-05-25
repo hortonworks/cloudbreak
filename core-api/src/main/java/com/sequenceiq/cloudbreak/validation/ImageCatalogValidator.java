@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.helper.HttpHelper;
+import com.sequenceiq.common.api.util.ValidatorUtil;
 
 @Component
 public class ImageCatalogValidator implements ConstraintValidator<ValidImageCatalog, String> {
@@ -56,9 +57,9 @@ public class ImageCatalogValidator implements ConstraintValidator<ValidImageCata
                 return imageCatalogParsable(context, content.getValue());
             }
             String msg = String.format(FAILED_TO_GET_BY_FAMILY_TYPE, value, content.getKey().getReasonPhrase());
-            context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
+            ValidatorUtil.addConstraintViolation(context, msg);
         } catch (Throwable throwable) {
-            context.buildConstraintViolationWithTemplate(String.format(FAILED_TO_GET_WITH_EXCEPTION, value)).addConstraintViolation();
+            ValidatorUtil.addConstraintViolation(context, String.format(FAILED_TO_GET_WITH_EXCEPTION, value));
             LOGGER.debug("Failed to validate the specified image catalog URL: " + value, throwable);
         }
         return false;
@@ -69,10 +70,9 @@ public class ImageCatalogValidator implements ConstraintValidator<ValidImageCata
             OBJECT_MAPPER.readValue(responseContent, CloudbreakImageCatalog.class);
             return true;
         } catch (JsonParseException jPE) {
-            context.buildConstraintViolationWithTemplate(INVALID_JSON_IN_RESPONSE).addConstraintViolation();
+            ValidatorUtil.addConstraintViolation(context, INVALID_JSON_IN_RESPONSE);
         } catch (JsonMappingException jME) {
-            context.buildConstraintViolationWithTemplate(INVALID_JSON_STRUCTURE_IN_RESPONSE)
-                    .addConstraintViolation();
+            ValidatorUtil.addConstraintViolation(context, INVALID_JSON_STRUCTURE_IN_RESPONSE);
         }
         return false;
     }
