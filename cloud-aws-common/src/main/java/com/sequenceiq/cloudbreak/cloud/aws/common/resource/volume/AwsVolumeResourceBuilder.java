@@ -274,7 +274,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         for (CloudResource resource : requestedResources) {
             volumeSetMap.put(resource.getName(), Collections.synchronizedList(new ArrayList<>()));
 
-            VolumeSetAttributes volumeSet = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+            VolumeSetAttributes volumeSet = resource.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
             DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, ephemeralCount.intValue());
             futures.addAll(volumeSet.getVolumes().stream()
                     .map(createVolumeRequest(encryptedVolume, volumeEncryptionKey, tagSpecification, volumeSet))
@@ -362,7 +362,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     @Override
     public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource) throws PreserveResourceException {
         LOGGER.debug("Set delete on termination to true, on instances");
-        VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+        VolumeSetAttributes volumeSetAttributes = resource.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
         List<CloudResourceStatus> cloudResourceStatuses = checkResources(ResourceType.AWS_VOLUMESET, context, auth, List.of(resource));
 
         boolean anyDeleted = cloudResourceStatuses.stream().map(CloudResourceStatus::getStatus).anyMatch(DELETED::equals);
@@ -549,7 +549,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     }
 
     private Function<CloudResource, VolumeSetAttributes> volumeSetAttributes() {
-        return volumeSet -> volumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+        return volumeSet -> volumeSet.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
     }
 
     private AmazonEc2Client getAmazonEC2Client(AuthenticatedContext auth) {
