@@ -42,6 +42,7 @@ dependencies {
   api group: 'software.amazon.awssdk', name: 'networkfirewall', version: awsSdkVersion
   api group: 'software.amazon.awssdk', name: 'pricing', version: awsSdkVersion
   api group: 'software.amazon.awssdk', name: 'test-utils', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 'apache-client', version: awsSdkVersion
 
   // legacy
   api group: 'software.amazon.awssdk', name: 'autoscaling', version: awsSdkVersion
