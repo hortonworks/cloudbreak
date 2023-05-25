@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.sequenceiq.cloudbreak.cloud.aws.common.cache.AwsCachingConfig;
 import com.sequenceiq.cloudbreak.cloud.aws.common.cache.AwsStsAssumeRoleCredentialsProviderCacheConfig;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AwsApacheClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -57,6 +58,9 @@ public class AwsSessionCredentialClient {
 
     @Inject
     private AwsEnvironmentVariableChecker awsEnvironmentVariableChecker;
+
+    @Inject
+    private AwsApacheClient awsApacheClient;
 
     @Cacheable(value = AwsCachingConfig.TEMPORARY_AWS_CREDENTIAL_CACHE, unless = "#awsCredential.getId() == null")
     public AwsSessionCredentials retrieveCachedSessionCredentials(AwsCredentialView awsCredential) {
@@ -128,6 +132,7 @@ public class AwsSessionCredentialClient {
     public StsClient awsSecurityTokenServiceClient(AwsCredentialView awsCredential) {
         String defaultZone = awsDefaultZoneProvider.getDefaultZone(awsCredential);
         StsClientBuilder stsClientBuilder = StsClient.builder()
+                .httpClient(awsApacheClient.getApacheHttpClient())
                 .region(Region.of(defaultZone))
                 .credentialsProvider(getCredential(awsCredential))
                 .overrideConfiguration(getDefaultClientConfiguration());

@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsSessionCredentialClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AwsApacheClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.config.AwsConfig;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsRegionEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsServiceEndpointProvider;
@@ -102,6 +103,9 @@ class AwsValidatorsTest {
 
     @SpyBean
     private AwsCloudFormationClient awsClient;
+
+    @SpyBean
+    private AwsApacheClient awsApacheClient;
 
     @MockBean
     private AwsEncodedAuthorizationFailureMessageDecoder awsEncodedAuthorizationFailureMessageDecoder;
