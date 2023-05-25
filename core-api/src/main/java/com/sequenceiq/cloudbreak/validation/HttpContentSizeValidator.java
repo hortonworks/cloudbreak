@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.helper.HttpHelper;
+import com.sequenceiq.common.api.util.ValidatorUtil;
 
 @Component
 public class HttpContentSizeValidator implements ConstraintValidator<ValidHttpContentSize, String> {
@@ -40,14 +41,14 @@ public class HttpContentSizeValidator implements ConstraintValidator<ValidHttpCo
         if (value == null) {
             return true;
         } else if (!value.startsWith("http")) {
-            context.buildConstraintViolationWithTemplate(INVALID_URL_MSG).addConstraintViolation();
+            ValidatorUtil.addConstraintViolation(context, INVALID_URL_MSG);
             return false;
         }
         try {
             Pair<StatusType, Integer> contentLength = httpHelper.getContentLength(value);
             if (!contentLength.getKey().getFamily().equals(Family.SUCCESSFUL)) {
                 String msg = String.format(FAILED_TO_GET_BY_FAMILY_TYPE, value, contentLength.getKey().getReasonPhrase());
-                context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
+                ValidatorUtil.addConstraintViolation(context, msg);
                 return false;
             }
             int maxSizeInBytes = contentSizeProvider.getMaxSizeInBytes();
@@ -60,7 +61,7 @@ public class HttpContentSizeValidator implements ConstraintValidator<ValidHttpCo
             return valid;
         } catch (Throwable throwable) {
             LOGGER.info("content size validation failed.", throwable);
-            context.buildConstraintViolationWithTemplate(FAILED_TO_GET_WITH_EXCEPTION).addConstraintViolation();
+            ValidatorUtil.addConstraintViolation(context, FAILED_TO_GET_WITH_EXCEPTION);
         }
         return false;
     }
