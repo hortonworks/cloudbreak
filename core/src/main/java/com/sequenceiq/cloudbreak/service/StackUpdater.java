@@ -71,9 +71,13 @@ public class StackUpdater {
 
     private Stack doUpdateStackStatus(Long stackId, Status newStatus, DetailedStackStatus newDetailedStatus, String statusReason) {
         Stack stack = stackService.getByIdWithTransaction(stackId);
+        return doUpdateStackStatus(stack, newStatus, newDetailedStatus, statusReason);
+    }
+
+    private Stack doUpdateStackStatus(Stack stack, Status newStatus, DetailedStackStatus newDetailedStatus, String statusReason) {
         StackStatus actualStackStatus = stack.getStackStatus();
         LOGGER.info("Update stack status from: {}/{} to: {}/{} stack: {} reason: {}", actualStackStatus.getStatus(), actualStackStatus.getDetailedStackStatus(),
-                newStatus, newDetailedStatus, stackId, statusReason);
+                newStatus, newDetailedStatus, stack.getId(), statusReason);
         if (actualStackStatus.getStatus().equals(newStatus) && actualStackStatus.getDetailedStackStatus().equals(newDetailedStatus)) {
             LOGGER.debug("New status is the same as previous status {}/{}, skip status update.",
                     actualStackStatus.getStatus(), actualStackStatus.getDetailedStackStatus());
@@ -82,12 +86,12 @@ public class StackUpdater {
             stack.setStackStatus(new StackStatus(stack, newStatus, statusReason, newDetailedStatus));
             Cluster cluster = stack.getCluster();
             if (newStatus.isRemovableStatus()) {
-                InMemoryStateStore.deleteStack(stackId);
+                InMemoryStateStore.deleteStack(stack.getId());
                 if (cluster != null) {
                     InMemoryStateStore.deleteCluster(cluster.getId());
                 }
             } else {
-                InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(newStatus));
+                InMemoryStateStore.putStack(stack.getId(), statusToPollGroupConverter.convert(newStatus));
                 if (cluster != null) {
                     InMemoryStateStore.putCluster(cluster.getId(), statusToPollGroupConverter.convert(newStatus));
                 }
@@ -123,4 +127,8 @@ public class StackUpdater {
         }
     }
 
+    public void updateStackStatus(String resourceCrn, DetailedStackStatus detailedStackStatus, String statusReason) {
+        Stack stack = stackService.getByCrn(resourceCrn);
+        doUpdateStackStatus(stack, detailedStackStatus.getStatus(), detailedStackStatus, statusReason);
+    }
 }
