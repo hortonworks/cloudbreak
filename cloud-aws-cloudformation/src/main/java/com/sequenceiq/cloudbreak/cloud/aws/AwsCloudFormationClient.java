@@ -8,6 +8,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AwsApacheClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.service.Retry;
 
@@ -23,6 +24,9 @@ public class AwsCloudFormationClient extends AwsClient {
     @Inject
     private Retry retry;
 
+    @Inject
+    private AwsApacheClient awsApacheClient;
+
     public AmazonCloudFormationClient createCloudFormationClient(AwsCredentialView awsCredential, String regionName) {
         CloudFormationClient cloudFormationClient = createCloudFormation(awsCredential, regionName);
         return new AmazonCloudFormationClient(proxy(cloudFormationClient, awsCredential, regionName), retry);
@@ -31,6 +35,7 @@ public class AwsCloudFormationClient extends AwsClient {
     @VisibleForTesting
     CloudFormationClient createCloudFormation(AwsCredentialView awsCredential, String regionName) {
         CloudFormationClientBuilder cloudFormationClientBuilder = CloudFormationClient.builder()
+                .httpClient(awsApacheClient.getApacheHttpClient())
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .region(Region.of(regionName))
                 .overrideConfiguration(getDefaultClientConfiguration());
@@ -39,6 +44,7 @@ public class AwsCloudFormationClient extends AwsClient {
 
     public AmazonAutoScalingClient createAutoScalingClient(AwsCredentialView awsCredential, String regionName) {
         AutoScalingClientBuilder autoScalingClientBuilder = AutoScalingClient.builder()
+                .httpClient(awsApacheClient.getApacheHttpClient())
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .region(Region.of(regionName))
                 .overrideConfiguration(getDefaultClientConfiguration());
