@@ -14,6 +14,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AwsApacheClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 
 import software.amazon.awssdk.regions.Region;
@@ -34,6 +35,9 @@ class AwsSessionCredentialClientTest {
     @InjectMocks
     @Spy
     private AwsSessionCredentialClient underTest;
+
+    @Mock
+    private AwsApacheClient awsApacheClient;
 
     @Test
     void testAwsSecurityTokenServiceClientWhenFipsEnabledAndGovCloudCredential() {
