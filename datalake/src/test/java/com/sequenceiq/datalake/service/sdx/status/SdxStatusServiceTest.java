@@ -80,8 +80,8 @@ class SdxStatusServiceTest {
         sdxCluster = new SdxCluster();
         sdxCluster.setRuntime("7.0.2");
         sdxCluster.setClusterName("datalake-cluster");
+        sdxCluster.setCrn("crn");
         sdxCluster.setId(2L);
-        when(sdxClusterRepository.findById(eq(2L))).thenReturn(Optional.of(sdxCluster));
 
         oldStatus = new SdxStatusEntity();
         oldStatus.setCreated(1L);
@@ -97,6 +97,7 @@ class SdxStatusServiceTest {
 
     @Test
     void setStatusForDatalakeAndNotify() throws Exception {
+        when(sdxClusterRepository.findById(eq(2L))).thenReturn(Optional.of(sdxCluster));
         oldStatus.setStatus(DatalakeStatusEnum.STACK_DELETED);
         DatalakeStatusEnum status = DatalakeStatusEnum.DELETED;
         ResourceEvent resourceEvent = ResourceEvent.SDX_RDS_DELETION_FINISHED;
@@ -114,6 +115,7 @@ class SdxStatusServiceTest {
 
     @Test
     void setStatusForDatalakeAndNotifyWithArgs() throws Exception {
+        when(sdxClusterRepository.findById(eq(2L))).thenReturn(Optional.of(sdxCluster));
         oldStatus.setStatus(DatalakeStatusEnum.RUNNING);
         DatalakeStatusEnum status = DatalakeStatusEnum.SALT_PASSWORD_ROTATION_FAILED;
         Set<String> messageArgs = Collections.singleton("exception-message");
@@ -126,5 +128,22 @@ class SdxStatusServiceTest {
         assertEquals(status, statusEntityCaptor.getValue().getStatus());
         verify(transactionService).required(any(Runnable.class));
         verify(eventSenderService).sendEventAndNotification(sdxCluster, status.getDefaultResourceEvent(), messageArgs);
+    }
+
+    @Test
+    void setStatusForDatalakeAndNotifyWithDatalakeCrn() throws Exception {
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(any())).thenReturn(Optional.of(sdxCluster));
+        oldStatus.setStatus(DatalakeStatusEnum.RUNNING);
+        DatalakeStatusEnum status = DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_IN_PROGRESS;
+        doNothing().when(sdxNotificationService).send(any(), any());
+        doNothing().when(eventSenderService).sendEventAndNotificationWithMessage(any(), any(), any());
+        String statusReason = "statusReason";
+
+        sdxStatusService.setStatusForDatalakeAndNotify(status, statusReason, sdxCluster.getCrn());
+
+        verify(sdxStatusRepository).save(any(SdxStatusEntity.class));
+        assertEquals(status, statusEntityCaptor.getValue().getStatus());
+        verify(transactionService).required(any(Runnable.class));
+        verify(eventSenderService).sendEventAndNotificationWithMessage(sdxCluster, status.getDefaultResourceEvent(), statusReason);
     }
 }

@@ -609,6 +609,10 @@ public enum ResourceEvent {
     DATALAKE_VERTICAL_SCALE_ON_DATALAKE_FAILED("datalake.verticalscale.datalake.failed"),
     DATALAKE_VERTICAL_SCALE_FAILED("datalake.verticalscale.failed"),
 
+    DATALAKE_SECRET_ROTATION_IN_PROGRESS("datalake.secret.rotation.in.progress"),
+    DATALAKE_SECRET_ROTATION_FINISHED("datalake.secret.rotation.finished"),
+    DATALAKE_SECRET_ROTATION_FAILED("datalake.secret.rotation.failed"),
+
     // deprecated
     STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.skipped");
 

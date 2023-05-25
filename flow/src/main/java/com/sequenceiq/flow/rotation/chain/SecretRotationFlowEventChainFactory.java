@@ -10,6 +10,7 @@ import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.rotation.event.SecretRotationTriggerEvent;
+import com.sequenceiq.flow.rotation.status.event.RotationStatusChangeTriggerEvent;
 
 @Component
 public class SecretRotationFlowEventChainFactory implements FlowEventChainFactory<SecretRotationFlowChainTriggerEvent> {
@@ -22,9 +23,11 @@ public class SecretRotationFlowEventChainFactory implements FlowEventChainFactor
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(SecretRotationFlowChainTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
+        flowEventChain.add(RotationStatusChangeTriggerEvent.fromChainTrigger(event, true));
         event.getSecretTypes().forEach(secretType -> {
             flowEventChain.add(SecretRotationTriggerEvent.fromChainTrigger(event, secretType));
         });
+        flowEventChain.add(RotationStatusChangeTriggerEvent.fromChainTrigger(event, false));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

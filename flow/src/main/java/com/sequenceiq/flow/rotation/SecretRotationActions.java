@@ -3,6 +3,8 @@ package com.sequenceiq.flow.rotation;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -23,11 +25,15 @@ import com.sequenceiq.flow.rotation.event.RollbackRotationTriggerEvent;
 import com.sequenceiq.flow.rotation.event.RotationEvent;
 import com.sequenceiq.flow.rotation.event.RotationFailedEvent;
 import com.sequenceiq.flow.rotation.event.SecretRotationTriggerEvent;
+import com.sequenceiq.flow.rotation.status.service.SecretRotationStatusService;
 
 @Configuration
 public class SecretRotationActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretRotationActions.class);
+
+    @Inject
+    private SecretRotationStatusService secretRotationStatusService;
 
     @Bean(name = "EXECUTE_ROTATION_STATE")
     public Action<?, ?> executeRotationAction() {
@@ -115,6 +121,9 @@ public class SecretRotationActions {
             protected void doExecute(RotationFlowContext context, RotationFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 Flow flow = getFlow(context.getFlowId());
                 flow.setFlowFailed(payload.getException());
+                LOGGER.debug("Secret rotation failed, change resource status for {}", context.getResourceCrn());
+                secretRotationStatusService.rotationFailed(context.getResourceCrn(), payload.getException().getMessage());
+                LOGGER.debug("Secret rotation failed, resource status changed for {}", context.getResourceCrn());
                 sendEvent(context, RotationEvent.fromContext(SecretRotationEvent.ROTATION_FAILURE_HANDLED_EVENT.event(), context));
             }
 
