@@ -18,12 +18,12 @@ public enum HostGroupType {
     ZOOKEEPER("ZooKeeper", InstanceGroupType.CORE, InstanceCountParameter.ZOOKEEPER_INSTANCE_COUNT.getName()),
     AUXILIARY("auxiliary", InstanceGroupType.CORE, InstanceCountParameter.AUXILIARY_INSTANCE_COUNT.getName(), 1),
     CORE("core", InstanceGroupType.CORE, InstanceCountParameter.CORE_INSTANCE_COUNT.getName(), 3),
-    SOLRHG("solrhg", InstanceGroupType.CORE, InstanceCountParameter.SOLRHG_INSTANCE_COUNT.getName()),
-    STORAGEHG("storagehg", InstanceGroupType.CORE, InstanceCountParameter.STORAGEHG_INSTANCE_COUNT.getName()),
-    KAFKAHG("kafkahg", InstanceGroupType.CORE, InstanceCountParameter.KAFKAHG_INSTANCE_COUNT.getName()),
+    SOLRHG("solrhg", InstanceGroupType.CORE, InstanceCountParameter.SOLRHG_INSTANCE_COUNT.getName(), 0),
+    STORAGEHG("storagehg", InstanceGroupType.CORE, InstanceCountParameter.STORAGEHG_INSTANCE_COUNT.getName(), 0),
+    KAFKAHG("kafkahg", InstanceGroupType.CORE, InstanceCountParameter.KAFKAHG_INSTANCE_COUNT.getName(), 0),
     RAZHG("razhg", InstanceGroupType.CORE, InstanceCountParameter.RAZHG_INSTANCE_COUNT.getName(), 0),
-    ATLASHG("atlashg", InstanceGroupType.CORE, InstanceCountParameter.ATLASHG_INSTANCE_COUNT.getName()),
-    HMSHG("hmshg", InstanceGroupType.CORE, InstanceCountParameter.HMSHG_INSTANCE_COUNT.getName());
+    ATLASHG("atlashg", InstanceGroupType.CORE, InstanceCountParameter.ATLASHG_INSTANCE_COUNT.getName(), 0),
+    HMSHG("hmshg", InstanceGroupType.CORE, InstanceCountParameter.HMSHG_INSTANCE_COUNT.getName(), 0);
 
     private final String name;
 
