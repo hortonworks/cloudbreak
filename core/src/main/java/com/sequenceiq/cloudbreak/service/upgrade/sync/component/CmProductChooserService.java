@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.upgrade.sync.component;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 
 @Service
 public class CmProductChooserService {
@@ -23,11 +23,11 @@ public class CmProductChooserService {
      * A product is matching if the name and version both match.
      * @param activeParcels parcels installed on the CM server
      * @param candidateProducts A list of ClouderaManagerProducts extracted from image catalog
-     * @return List of ClouderaManagerProducts installed on the DL / DH
+     * @return Set of ClouderaManagerProducts installed on the DL / DH
      */
     Set<ClouderaManagerProduct> chooseParcelProduct(Set<ParcelInfo> activeParcels, Set<ClouderaManagerProduct> candidateProducts) {
         Set<ClouderaManagerProduct> foundProducts = activeParcels.stream()
-                .map(ip -> findMatchingClouderaManagerProduct(candidateProducts, ip))
+                .map(activeParcel -> findMatchingClouderaManagerProduct(candidateProducts, activeParcel))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toSet());
@@ -55,12 +55,11 @@ public class CmProductChooserService {
         }
     }
 
-    private Optional<ClouderaManagerProduct> findMatchingClouderaManagerProduct(Set<ClouderaManagerProduct> candidateProducts, ParcelInfo ip) {
-        List<ClouderaManagerProduct> matchingProducts = candidateProducts.stream()
-                .filter(cp -> ip.getName().equals(cp.getName()))
-                .filter(cp -> ip.getVersion().equals(cp.getVersion()))
-                .collect(Collectors.toList());
-        return matchingProducts.stream().findFirst();
+    private Optional<ClouderaManagerProduct> findMatchingClouderaManagerProduct(Set<ClouderaManagerProduct> candidateProducts, ParcelInfo activeParcel) {
+        return candidateProducts.stream()
+                .filter(cp -> activeParcel.getName().equals(cp.getName()) &&
+                        CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(cp.getVersion(), activeParcel::getVersion))
+                .findFirst();
     }
 
 }
