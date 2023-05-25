@@ -348,7 +348,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
     }
 
     private VolumeSetAttributes getVolumeSetAttributes(CloudResource volumeSet) {
-        return volumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+        return volumeSet.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
     }
 
     @Override

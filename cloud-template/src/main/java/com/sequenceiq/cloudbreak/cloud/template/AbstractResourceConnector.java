@@ -225,7 +225,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
                 .filter(cloudResource -> StringUtils.isEmpty(cloudResource.getInstanceId()) || CommonStatus.DETACHED.equals(cloudResource.getStatus()))
                 .collect(Collectors.toList());
         for (CloudResource cloudResource : diskSets) {
-            VolumeSetAttributes volumeSetAttributes = cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+            VolumeSetAttributes volumeSetAttributes = cloudResource.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
             if (volumeSetAttributes != null) {
                 String discoveryFQDN = volumeSetAttributes.getDiscoveryFQDN();
                 scalingGroup.getInstances().stream()
