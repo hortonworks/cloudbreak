@@ -5,6 +5,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.common.api.util.ValidatorUtil;
 
 public class EnvironmentCrnValidator implements ConstraintValidator<ValidEnvironmentCrn, String> {
 
@@ -13,14 +14,10 @@ public class EnvironmentCrnValidator implements ConstraintValidator<ValidEnviron
         constraintValidatorContext.disableDefaultConstraintViolation();
 
         if (Strings.isNullOrEmpty(req)) {
-            constraintValidatorContext
-                    .buildConstraintViolationWithTemplate("Environment CRN cannot be null or empty.")
-                    .addConstraintViolation();
+            ValidatorUtil.addConstraintViolation(constraintValidatorContext, "Environment CRN cannot be null or empty.");
             return false;
         } else if (!Crn.isCrn(req)) {
-            constraintValidatorContext
-                    .buildConstraintViolationWithTemplate("Invalid crn provided")
-                    .addConstraintViolation();
+            ValidatorUtil.addConstraintViolation(constraintValidatorContext, "Invalid crn provided");
             return false;
         }
         return true;

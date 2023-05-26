@@ -4,8 +4,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 /**
  * Generic model to hold dynamic data. Any data stored in the DynamicModel must be thread safe in the sense that multiple threads might be
@@ -15,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DynamicModel {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DynamicModel.class);
 
     private final Map<String, Object> parameters;
 
@@ -47,6 +53,17 @@ public class DynamicModel {
      */
     public <T> T getParameter(String key, Class<T> clazz) {
         return clazz.cast(parameters.get(key));
+    }
+
+    public <T> T getParameterWithFallback(String key, Class<T> clazz) {
+        try {
+            return getParameter(key, clazz);
+        } catch (ClassCastException e) {
+            LOGGER.error("Can't cast to {}, trying to read it as an Object, then write it to json and try to read it to {}", clazz, clazz);
+            Object object = getParameter(key, Object.class);
+            String objectAsJson = JsonUtil.writeValueAsStringSilent(object);
+            return JsonUtil.readValueUnchecked(objectAsJson, clazz);
+        }
     }
 
     /**

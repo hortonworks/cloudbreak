@@ -7,6 +7,8 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.sequenceiq.common.api.util.ValidatorUtil;
+
 public class DistroXUpgradeRequestValidator implements ConstraintValidator<ValidUpgradeRequest, DistroXUpgradeV1Request> {
 
     @Override
@@ -23,7 +25,7 @@ public class DistroXUpgradeRequestValidator implements ConstraintValidator<Valid
     private boolean validateEmptyRequest(DistroXUpgradeV1Request value, ConstraintValidatorContext context) {
         if (Objects.isNull(value)) {
             String msg = "Invalid upgrade request: empty content";
-            context.buildConstraintViolationWithTemplate(msg).addConstraintViolation().disableDefaultConstraintViolation();
+            ValidatorUtil.addConstraintViolation(context, msg).disableDefaultConstraintViolation();
             return false;
         }
         return true;
@@ -33,7 +35,7 @@ public class DistroXUpgradeRequestValidator implements ConstraintValidator<Valid
         if (request.isDryRun()  && request.isShowAvailableImagesSet()) {
             String msg = "Invalid upgrade request: 'dry-run' cannot be used in parallel with  'show-available-images' or "
                     + "'show-latest-available-image-per-runtime' in the request";
-            context.buildConstraintViolationWithTemplate(msg).addConstraintViolation().disableDefaultConstraintViolation();
+            ValidatorUtil.addConstraintViolation(context, msg).disableDefaultConstraintViolation();
             return false;
         }
         return true;
