@@ -19,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -53,7 +52,6 @@ import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.exception.CustomConfigurationsRuntimeVersionException;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -342,10 +340,6 @@ public class StackToTemplatePreparationObjectConverter {
         if (StackType.WORKLOAD.equals(source.getType()) && cluster.getCustomConfigurations() != null) {
             CustomConfigurations customConfigurationsWithConfigurations = customConfigurationsService.getByCrn(cluster.getCustomConfigurations().getCrn());
             customConfigurationsView = customConfigurationsViewProvider.getCustomConfigurationsView(customConfigurationsWithConfigurations);
-            if (!Strings.isNullOrEmpty(customConfigurationsView.getRuntimeVersion()) &&
-                    !source.getStackVersion().equals(customConfigurationsView.getRuntimeVersion())) {
-                throw new CustomConfigurationsRuntimeVersionException("Custom Configurations runtime version mismatch!");
-            }
         }
         return customConfigurationsView;
     }
