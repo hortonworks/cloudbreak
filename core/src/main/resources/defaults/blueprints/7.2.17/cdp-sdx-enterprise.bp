@@ -613,6 +613,10 @@
               {
                 "name":"hive_metastore_java_heapsize",
                 "value":12348030976
+              },
+              {
+                "name": "hive_metastore_server_max_message_size",
+                "value": 1234803097
               }
             ]
           }
