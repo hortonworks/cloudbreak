@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
+import com.sequenceiq.common.api.util.ValidatorUtil;
 
 public class AccountIdValidator implements ConstraintValidator<AccountId, String> {
 
@@ -17,9 +18,7 @@ public class AccountIdValidator implements ConstraintValidator<AccountId, String
         if (!RegionAwareInternalCrnGeneratorUtil.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
             return true;
         } else if (StringUtils.isBlank(req)) {
-            constraintValidatorContext
-                    .buildConstraintViolationWithTemplate("In case of internal actor API call you need to specify account id.")
-                    .addConstraintViolation();
+            ValidatorUtil.addConstraintViolation(constraintValidatorContext, "In case of internal actor API call you need to specify account id.");
             return false;
         }
         return true;

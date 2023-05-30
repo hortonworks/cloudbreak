@@ -178,7 +178,7 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
     }
 
     private Function<CloudResource, VolumeSetAttributes> volumeSetAttributes() {
-        return volumeSet -> volumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+        return volumeSet -> volumeSet.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
     }
 
     private AmazonEc2Client getAmazonEc2Client(AuthenticatedContext auth) {
