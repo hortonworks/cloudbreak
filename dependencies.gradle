@@ -47,7 +47,7 @@ ext {
   apacheCommonsValidatorVersion = '1.6'
   commonsCodecVersion = '1.15'
   commonsCollections4Version = '4.4'
-  guavaVersion = '31.1-jre'
+  guavaVersion = '32.0.0-jre'
   byteBuddyVersion = '1.14.4'
 
   // Logging
