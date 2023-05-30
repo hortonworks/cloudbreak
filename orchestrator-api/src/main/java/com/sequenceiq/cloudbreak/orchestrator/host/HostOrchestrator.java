@@ -169,4 +169,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     Optional<Memory> getClusterManagerMemory(GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException;
 
     void setClusterManagerMemory(GatewayConfig gatewayConfig, Memory memory) throws CloudbreakOrchestratorFailedException;
+
+    void executeSaltState(GatewayConfig gatewayConfig, Set<String> target, List<String> states, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorFailedException;
 }
