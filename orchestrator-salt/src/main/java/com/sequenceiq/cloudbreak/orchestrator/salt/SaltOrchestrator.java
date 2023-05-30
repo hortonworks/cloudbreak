@@ -876,10 +876,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     public void restartClusterManagerOnMaster(GatewayConfig gatewayConfig, Set<String> target, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
-            StateRunner stateRunner = new StateRunner(saltStateService, target, CM_SERVER_RESTART);
-            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner);
-            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runnerWithConfiguredErrorCount(saltJobIdTracker, exitCriteria, exitCriteriaModel);
-            saltJobRunBootstrapRunner.call();
+            executeSaltStateWithConfiguredErrorCount(List.of(CM_SERVER_RESTART), target, sc, exitCriteriaModel);
         } catch (Exception e) {
             LOGGER.error("Error occurred during CM Server restart", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
@@ -927,10 +924,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     public void updateAgentCertDirectoryPermission(GatewayConfig gatewayConfig, Set<String> target, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
-            StateRunner stateRunner = new StateRunner(saltStateService, target, CM_AGENT_CERTDIR_PERMISSION);
-            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner);
-            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runnerWithConfiguredErrorCount(saltJobIdTracker, exitCriteria, exitCriteriaModel);
-            saltJobRunBootstrapRunner.call();
+            executeSaltStateWithConfiguredErrorCount(List.of(CM_AGENT_CERTDIR_PERMISSION), target, sc, exitCriteriaModel);
         } catch (Exception e) {
             LOGGER.error("Error occurred during CM Agent certdir permission update", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
@@ -1718,10 +1712,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             boolean createUserHomeCronStateExists = saltStateService.stateSlsExists(sc, new HostList(targets), CREATE_USER_HOME_CRON);
             if (createUserHomeCronStateExists) {
-                StateRunner stateRunner = new StateRunner(saltStateService, targets, CREATE_USER_HOME_CRON);
-                OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner);
-                Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runnerWithConfiguredErrorCount(saltJobIdTracker, exitCriteria, exitModel);
-                saltJobRunBootstrapRunner.call();
+                executeSaltStateWithConfiguredErrorCount(List.of(CREATE_USER_HOME_CRON), targets, sc, exitModel);
             } else {
                 LOGGER.debug("{} state not exists, the related cron will be created during post cluster install recipe execution.", CREATE_USER_HOME_CRON);
             }
@@ -1741,6 +1732,27 @@ public class SaltOrchestrator implements HostOrchestrator {
         } catch (Exception e) {
             LOGGER.info("Error occurred during the salt bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void executeSaltState(GatewayConfig gatewayConfig, Set<String> target, List<String> states, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
+            executeSaltStateWithConfiguredErrorCount(states, target, sc, exitCriteriaModel);
+        } catch (Exception e) {
+            LOGGER.error(String.format("Error occurred during execute state %s", Joiner.on(",").join(states)), e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    private void executeSaltStateWithConfiguredErrorCount(List<String> states, Set<String> targets, SaltConnector sc, ExitCriteriaModel exitModel)
+            throws Exception {
+        for (String state: states) {
+            StateRunner stateRunner = new StateRunner(saltStateService, targets, state);
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runnerWithConfiguredErrorCount(saltJobIdTracker, exitCriteria, exitModel);
+            saltJobRunBootstrapRunner.call();
         }
     }
 }
