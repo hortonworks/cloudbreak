@@ -94,7 +94,7 @@ public class CredentialToCredentialV1ResponseConverter {
             CredentialAttributes credentialAttributes = json.get(CredentialAttributes.class);
             doIfNotNull(credentialAttributes.getAws(), param -> response.setAws(awsConverter.convert(param)));
             doIfNotNull(credentialAttributes.getAzure(), param -> response.setAzure(azureConverter.convert(param)));
-            doIfNotNull(credentialAttributes.getGcp(), param -> response.setGcp(gcpConverter.convert(param)));
+            doIfNotNull(credentialAttributes.getGcp(), param -> response.setGcp(gcpConverter.convert(param, json)));
             doIfNotNull(credentialAttributes.getMock(), param -> response.setMock(mockConverter.convert(param)));
             doIfNotNull(credentialAttributes.getYarn(), param -> response.setYarn(yarnConverter.convert(param)));
         } catch (IOException e) {

@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.credential.v1.converter.gcp;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.PROJECT_ID;
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
 import org.apache.commons.codec.binary.Base64;
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.GcpCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.JsonParameters;
@@ -28,10 +30,18 @@ public class GcpCredentialV1ParametersToGcpCredentialAttributesConverter {
         return response;
     }
 
-    public GcpCredentialParameters convert(GcpCredentialAttributes source) {
+    public GcpCredentialParameters convert(GcpCredentialAttributes source, Json rawJson) {
         GcpCredentialParameters response = new GcpCredentialParameters();
-        doIfNotNull(source.getJson(), param -> response.setJson(getJson(param)));
-        doIfNotNull(source.getP12(), param -> response.setP12(getP12(param)));
+        doIfNotNull(source.getJson(), param -> {
+            JsonParameters jsonParameters = getJson(param);
+            jsonParameters.setProjectId(rawJson.getValue(PROJECT_ID));
+            response.setJson(jsonParameters);
+        });
+        doIfNotNull(source.getP12(), param -> {
+            P12Parameters p12Parameters = getP12(param);
+            p12Parameters.setProjectId(rawJson.getValue(PROJECT_ID));
+            response.setP12(p12Parameters);
+        });
         return response;
     }
 
