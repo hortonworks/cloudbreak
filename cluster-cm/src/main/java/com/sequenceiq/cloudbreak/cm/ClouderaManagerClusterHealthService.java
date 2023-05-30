@@ -1,31 +1,47 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static com.cloudera.api.swagger.model.ApiHealthSummary.BAD;
+import static com.cloudera.api.swagger.model.ApiHealthSummary.CONCERNING;
+import static com.cloudera.api.swagger.model.ApiHealthSummary.DISABLED;
+import static com.cloudera.api.swagger.model.ApiHealthSummary.GOOD;
+import static com.cloudera.api.swagger.model.ApiHealthSummary.HISTORY_NOT_AVAILABLE;
+import static com.cloudera.api.swagger.model.ApiHealthSummary.NOT_AVAILABLE;
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
+import static com.sequenceiq.cloudbreak.common.type.HealthCheckResult.HEALTHY;
+import static com.sequenceiq.cloudbreak.common.type.HealthCheckResult.UNHEALTHY;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.HostsResourceApi;
+import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
+import com.cloudera.api.swagger.model.ApiClusterTemplateService;
+import com.cloudera.api.swagger.model.ApiHealthCheck;
 import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
+import com.cloudera.api.swagger.model.ApiRole;
+import com.cloudera.api.swagger.model.ApiRoleList;
 import com.cloudera.api.swagger.model.ApiRoleRef;
 import com.cloudera.api.swagger.model.ApiRoleState;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
@@ -40,6 +56,9 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnRoles;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -54,12 +73,14 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
 
     static final String HOST_AGENT_CERTIFICATE_EXPIRY = "HOST_AGENT_CERTIFICATE_EXPIRY";
 
+    static final String NODE_MANAGER_CONNECTIVITY = "NODE_MANAGER_CONNECTIVITY";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClusterHealthService.class);
 
     private static final Set<ApiHealthSummary> IGNORED_HEALTH_SUMMARIES = Sets.immutableEnumSet(
-            ApiHealthSummary.DISABLED,
-            ApiHealthSummary.NOT_AVAILABLE,
-            ApiHealthSummary.HISTORY_NOT_AVAILABLE
+            DISABLED,
+            NOT_AVAILABLE,
+            HISTORY_NOT_AVAILABLE
     );
 
     @Inject
@@ -67,6 +88,9 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
 
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
+
+    @Inject
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     private StackDtoDelegate stack;
 
@@ -124,6 +148,12 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
         return detailedHostStatuses;
     }
 
+    @Override
+    public Set<String> getDisconnectedNodeManagers() {
+        List<ApiRole> apiNodeManagerRoles = getNodemanagerRolesFromCM(stack);
+        return collectDisconnectedNodeManagers(apiNodeManagerRoles);
+    }
+
     private List<ApiHost> getHostsFromCM() {
         HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(apiClient);
         try {
@@ -131,8 +161,21 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
             LOGGER.info("Retrieved HostsList from CM HostsResourceApi readHosts call: {}", apiHostList);
             return apiHostList.getItems();
         } catch (ApiException e) {
-            LOGGER.error("Error when reading hosts from CM: {}", e);
+            LOGGER.error("Error when reading hosts from CM", e);
             throw new RuntimeException(e);
+        }
+    }
+
+    private List<ApiRole> getNodemanagerRolesFromCM(StackDtoDelegate stack) {
+        RolesResourceApi rolesResourceApi = clouderaManagerApiFactory.getRolesResourceApi(apiClient);
+        try {
+            String yarnServiceName = extractYarnServiceNameFromBlueprint(stack);
+            ApiRoleList roles = rolesResourceApi.readRoles(stack.getName(), yarnServiceName, null, FULL_WITH_HEALTH_CHECK_EXPLANATION);
+            LOGGER.info("Fetched ApiRoleList from CM RolesResourceAPI readRoles call: {}", roles);
+            return emptyIfNull(roles.getItems()).stream().filter(role -> YarnRoles.NODEMANAGER.equalsIgnoreCase(role.getType())).toList();
+        } catch (ApiException e) {
+            LOGGER.error("Error when trying to read roles from CM", e);
+            throw new RuntimeException("Error when trying to read roles from CM", e);
         }
     }
 
@@ -149,13 +192,13 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
     private static Optional<DetailedServicesHealthCheck> getDetailedServicesHealthCheck(ApiHost apiHost, Optional<String> runtimeVersion) {
         if (CMRepositoryVersionUtil.isCmServicesHealthCheckAllowed(runtimeVersion)) {
             Set<String> servicesWithBadHealth = emptyIfNull(apiHost.getRoleRefs()).stream()
-                    .filter(roleRef -> Objects.nonNull(roleRef.getHealthSummary()))
-                    .filter(roleRef -> HealthCheckResult.UNHEALTHY.equals(healthSummaryToHealthCheckResult(roleRef.getHealthSummary())))
+                    .filter(roleRef -> nonNull(roleRef.getHealthSummary()))
+                    .filter(roleRef -> UNHEALTHY.equals(healthSummaryToHealthCheckResult(roleRef.getHealthSummary())))
                     .map(ApiRoleRef::getServiceName)
                     .collect(Collectors.toSet());
 
             Set<String> servicesNotRunning = emptyIfNull(apiHost.getRoleRefs()).stream()
-                    .filter(roleRef -> Objects.nonNull(roleRef.getRoleStatus()))
+                    .filter(roleRef -> nonNull(roleRef.getRoleStatus()))
                     .filter(roleRef -> isRoleStopped(roleRef.getRoleStatus()))
                     .map(ApiRoleRef::getServiceName)
                     .collect(Collectors.toSet());
@@ -163,6 +206,25 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
             return Optional.of(new DetailedServicesHealthCheck(servicesWithBadHealth, servicesNotRunning));
         }
         return Optional.empty();
+    }
+
+    private Set<String> collectDisconnectedNodeManagers(List<ApiRole> allNMRoles) {
+        return allNMRoles.stream()
+                .filter(this::isNodeManagerDisconnected)
+                .filter(nm -> nonNull(nm.getHostRef()))
+                .map(nm -> nm.getHostRef().getHostname())
+                .map(StringUtils::lowerCase)
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
+    private boolean isNodeManagerDisconnected(ApiRole role) {
+        Predicate<ApiHealthCheck> disconnectedNMCheck = hc -> {
+            ApiHealthSummary summary = hc.getSummary();
+            String healthCheckName = hc.getName();
+            // The connectivty health check is disabled if the nodes are decommissioned
+            return NODE_MANAGER_CONNECTIVITY.equals(healthCheckName) && (BAD.equals(summary) || CONCERNING.equals(summary));
+        };
+        return emptyIfNull(role.getHealthChecks()).stream().anyMatch(disconnectedNMCheck);
     }
 
     private static Optional<DetailedCertHealthCheck> getDetailedCertificateCheck(ApiHost apiHost) {
@@ -174,19 +236,22 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
     }
 
     private static HealthCheckResult healthSummaryToHealthCheckResult(ApiHealthSummary apiHealthSummary) {
-        if (ApiHealthSummary.GOOD.equals(apiHealthSummary)) {
-            return HealthCheckResult.HEALTHY;
+        if (GOOD.equals(apiHealthSummary)) {
+            return HEALTHY;
         }
-        return HealthCheckResult.UNHEALTHY;
+        return UNHEALTHY;
     }
 
     private static boolean isRoleStopped(ApiRoleState apiRoleState) {
-        switch (apiRoleState) {
-            case STOPPED:
-            case STOPPING:
-                return true;
-            default:
-                return false;
-        }
+        return switch (apiRoleState) {
+            case STOPPED, STOPPING -> true;
+            default -> false;
+        };
+    }
+
+    @VisibleForTesting
+    protected String extractYarnServiceNameFromBlueprint(StackDtoDelegate stack) {
+        CmTemplateProcessor templateProcessor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintText());
+        return templateProcessor.getServiceByType(YarnRoles.YARN).map(ApiClusterTemplateService::getRefName).orElse(null);
     }
 }
