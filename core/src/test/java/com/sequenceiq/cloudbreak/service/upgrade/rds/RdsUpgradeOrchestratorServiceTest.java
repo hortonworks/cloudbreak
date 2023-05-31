@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -25,7 +27,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import org.springframework.util.ReflectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -45,6 +49,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -104,6 +109,9 @@ class RdsUpgradeOrchestratorServiceTest {
     @Mock
     private GatewayConfig gatewayConfig;
 
+    @Mock
+    private SaltStateParamsService saltStateParamsService;
+
     @BeforeEach
     void setUp() {
         Node node1 = new Node("privateIP1", "publicIP1", "instance1", "instanceType1",
@@ -120,6 +128,7 @@ class RdsUpgradeOrchestratorServiceTest {
 
     @Test
     void testBackupRdsData() throws CloudbreakOrchestratorException {
+        mockCreateStateParams();
         underTest.backupRdsData(STACK_ID, BACKUP_LOCATION, BACKUP_INSTANCE_PROFILE);
         verify(hostOrchestrator).runOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
@@ -130,6 +139,7 @@ class RdsUpgradeOrchestratorServiceTest {
 
     @Test
     void testRestoreRdsData() throws CloudbreakOrchestratorException {
+        mockCreateStateParams();
         underTest.restoreRdsData(STACK_ID);
         verify(hostOrchestrator).runOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
@@ -140,6 +150,7 @@ class RdsUpgradeOrchestratorServiceTest {
 
     @Test
     void testValidateDbDirectorySpace() throws CloudbreakOrchestratorException {
+        mockCreateStateParams();
         when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k /dbfs | tail -1 | awk '{print $4}'"))).thenReturn(Map.of("fqdn1", "100000"));
         when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("du -sk /dbfs/pgsql | awk '{print $1}'"))).thenReturn(Map.of("fqdn1", "10000"));
         when(gatewayConfig.getHostname()).thenReturn("fqdn1");
@@ -150,6 +161,7 @@ class RdsUpgradeOrchestratorServiceTest {
 
     @Test
     void testValidateDbDirectorySpaceWhenNotEnoughSpace() throws CloudbreakOrchestratorException {
+        mockCreateStateParams();
         when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k /dbfs | tail -1 | awk '{print $4}'"))).thenReturn(Map.of("fqdn1", "10000"));
         when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("du -sk /dbfs/pgsql | awk '{print $1}'"))).thenReturn(Map.of("fqdn1", "100000"));
         when(gatewayConfig.getHostname()).thenReturn("fqdn1");
@@ -160,6 +172,7 @@ class RdsUpgradeOrchestratorServiceTest {
 
     @Test
     void testValidateDbDirectorySpaceWhenNoPGWResult() throws CloudbreakOrchestratorException {
+        mockCreateStateParams();
         when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k /dbfs | tail -1 | awk '{print $4}'"))).thenReturn(Map.of("fqdn2", "10000"));
         when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("du -sk /dbfs/pgsql | awk '{print $1}'"))).thenReturn(Map.of("fqdn1", "100000"));
         when(gatewayConfig.getHostname()).thenReturn("fqdn1");
@@ -171,6 +184,7 @@ class RdsUpgradeOrchestratorServiceTest {
     @Test
     void testValidateDbBackupSpace() throws CloudbreakOrchestratorException, JsonProcessingException {
         initGlobalPrivateFields();
+        mockCreateStateParams();
         when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(),
                 eq("ls -d /hadoopfs/fs* /var /dbfs | xargs -I % rm -rf %/tmp/postgres_upgrade_backup")))
                 .thenReturn(Map.of());
@@ -200,6 +214,7 @@ class RdsUpgradeOrchestratorServiceTest {
     @Test
     void testValidateDbBackupSpaceNotEnoughSpace() throws CloudbreakOrchestratorException, JsonProcessingException {
         initGlobalPrivateFields();
+        mockCreateStateParams();
         when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(),
                 eq("ls -d /hadoopfs/fs* /var /dbfs | xargs -I % rm -rf %/tmp/postgres_upgrade_backup")))
                 .thenReturn(Map.of());
@@ -226,6 +241,7 @@ class RdsUpgradeOrchestratorServiceTest {
 
     @Test
     void testValidateDbBackupSpaceCouldNotGetRootVolumeFreeSpaceNoOutput() throws CloudbreakOrchestratorException {
+        mockCreateStateParams();
         when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(),
                 eq("ls -d /hadoopfs/fs* /var /dbfs | xargs -I % rm -rf %/tmp/postgres_upgrade_backup")))
                 .thenReturn(Map.of());
@@ -245,6 +261,7 @@ class RdsUpgradeOrchestratorServiceTest {
 
     @Test
     void testValidateDbBackupSpaceCheckingDbSizeNoResult() throws CloudbreakOrchestratorException {
+        mockCreateStateParams();
         when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(),
                 eq("ls -d /hadoopfs/fs* /var /dbfs | xargs -I % rm -rf %/tmp/postgres_upgrade_backup")))
                 .thenReturn(Map.of());
@@ -270,6 +287,7 @@ class RdsUpgradeOrchestratorServiceTest {
 
     @Test
     void testValidateDbBackupSpaceCheckingDbSizeScriptErrorOutput() throws CloudbreakOrchestratorException, JsonProcessingException {
+        mockCreateStateParams();
         when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(),
                 eq("ls -d /hadoopfs/fs* /var /dbfs | xargs -I % rm -rf %/tmp/postgres_upgrade_backup")))
                 .thenReturn(Map.of());
@@ -297,6 +315,7 @@ class RdsUpgradeOrchestratorServiceTest {
 
     @Test
     void testValidateDbBackupSpaceCheckingDbSizeScriptNoOutput() throws CloudbreakOrchestratorException, JsonProcessingException {
+        mockCreateStateParams();
         when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(),
                 eq("ls -d /hadoopfs/fs* /var /dbfs | xargs -I % rm -rf %/tmp/postgres_upgrade_backup")))
                 .thenReturn(Map.of());
@@ -352,5 +371,19 @@ class RdsUpgradeOrchestratorServiceTest {
         Field backupValidationRatio = ReflectionUtils.findField(RdsUpgradeOrchestratorService.class, "backupValidationRatio");
         ReflectionUtils.makeAccessible(backupValidationRatio);
         ReflectionUtils.setField(backupValidationRatio, underTest, 0.1);
+    }
+
+    private void mockCreateStateParams() {
+        when(saltStateParamsService.createStateParams(any(), any(), anyBoolean(), anyInt(), anyInt())).thenAnswer(new Answer<OrchestratorStateParams>() {
+            @Override
+            public OrchestratorStateParams answer(InvocationOnMock invocation) throws Throwable {
+                OrchestratorStateParams orchestratorStateParams = new OrchestratorStateParams();
+                orchestratorStateParams.setPrimaryGatewayConfig(gatewayConfig);
+                orchestratorStateParams.setTargetHostNames(Set.of("fqdn1"));
+                orchestratorStateParams.setState(invocation.getArgument(1, String.class));
+                orchestratorStateParams.setExitCriteriaModel(new ClusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
+                return orchestratorStateParams;
+            }
+        });
     }
 }
