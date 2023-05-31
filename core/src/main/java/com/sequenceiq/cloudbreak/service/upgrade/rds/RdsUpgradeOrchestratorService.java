@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
@@ -19,7 +17,6 @@ import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -27,11 +24,10 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
-import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateRetryParams;
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -91,6 +87,9 @@ public class RdsUpgradeOrchestratorService {
 
     @Inject
     private PostgresConfigService postgresConfigService;
+
+    @Inject
+    private SaltStateParamsService saltStateParamsService;
 
     @Value("${cb.db.env.upgrade.rds.backuprestore.validationratio}")
     private double backupValidationRatio;
@@ -269,29 +268,13 @@ public class RdsUpgradeOrchestratorService {
         hostOrchestrator.runCommandOnHosts(List.of(stateParams.getPrimaryGatewayConfig()), stateParams.getTargetHostNames(), command);
     }
 
-    private OrchestratorStateParams createStateParams(Long stackId, String saltState, boolean onlyOnPrimary) {
-        StackDto stack = stackDtoService.getById(stackId);
-        return createStateParams(stack, saltState, onlyOnPrimary);
+    private OrchestratorStateParams createStateParams(StackDto stackDto, String saltState, boolean onlyOnPrimary) {
+        return saltStateParamsService.createStateParams(stackDto, saltState, onlyOnPrimary, MAX_RETRY, MAX_RETRY_ON_ERROR);
     }
 
-    private OrchestratorStateParams createStateParams(StackDto stack, String saltState, boolean onlyOnPrimary) {
-        Set<Node> gatewayNodes = stackUtil.collectGatewayNodes(stack);
-        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        if (onlyOnPrimary) {
-            gatewayNodes = gatewayNodes.stream()
-                    .filter(node -> node.getHostname().equals(primaryGatewayConfig.getHostname()))
-                    .collect(Collectors.toSet());
-        }
-        OrchestratorStateParams stateParams = new OrchestratorStateParams();
-        stateParams.setState(saltState);
-        stateParams.setPrimaryGatewayConfig(primaryGatewayConfig);
-        stateParams.setTargetHostNames(gatewayNodes.stream().map(Node::getHostname).collect(Collectors.toSet()));
-        OrchestratorStateRetryParams retryParams = new OrchestratorStateRetryParams();
-        retryParams.setMaxRetryOnError(MAX_RETRY_ON_ERROR);
-        retryParams.setMaxRetry(MAX_RETRY);
-        stateParams.setStateRetryParams(retryParams);
-        stateParams.setExitCriteriaModel(new ClusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
-        return stateParams;
+    private OrchestratorStateParams createStateParams(Long stackId, String saltState, boolean onlyOnPrimary) {
+        StackDto stack = stackDtoService.getById(stackId);
+        return saltStateParamsService.createStateParams(stack, saltState, onlyOnPrimary, MAX_RETRY, MAX_RETRY_ON_ERROR);
     }
 
     private void logErrorAndThrow(String errorMessage) throws CloudbreakOrchestratorFailedException {
