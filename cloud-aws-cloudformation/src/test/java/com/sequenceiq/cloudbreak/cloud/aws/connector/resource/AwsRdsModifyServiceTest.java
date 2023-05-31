@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +35,7 @@ import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.waiters.Waiter;
 import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
 import software.amazon.awssdk.services.rds.model.ModifyDbInstanceRequest;
+import software.amazon.awssdk.services.rds.model.ModifyDbInstanceResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsRdsModifyServiceTest {
@@ -41,6 +43,8 @@ public class AwsRdsModifyServiceTest {
     private static final String REGION = "region";
 
     private static final String DB_INSTANCE_IDENTIFIER = "dbInstance";
+
+    private static final String NEW_PASSWORD = "newPassword";
 
     @Mock
     private AwsCloudFormationClient awsClient;
@@ -79,7 +83,7 @@ public class AwsRdsModifyServiceTest {
     private AwsRdsModifyService victim;
 
     @BeforeEach
-    public void initTests() {
+    void initTests() {
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
@@ -91,7 +95,7 @@ public class AwsRdsModifyServiceTest {
     }
 
     @Test
-    public void shouldStopAndScheduleTask() {
+    void disableDeleteProtectionShouldStopAndScheduleTask() {
         ArgumentCaptor<ModifyDbInstanceRequest> modifyDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(ModifyDbInstanceRequest.class);
         when(amazonRDS.modifyDBInstance(modifyDBInstanceRequestArgumentCaptor.capture())).thenReturn(null);
         when(provider.getDbInstanceModifyWaiter()).thenReturn(rdsWaiter);
@@ -103,7 +107,7 @@ public class AwsRdsModifyServiceTest {
     }
 
     @Test
-    public void shouldThrowCloudConnectorExceptionInCaseOfRdsClientException() {
+    void disableDeleteProtectionShouldThrowCloudConnectorExceptionInCaseOfRdsClientException() {
         ArgumentCaptor<ModifyDbInstanceRequest> modifyDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(ModifyDbInstanceRequest.class);
 
         when(amazonRDS.modifyDBInstance(modifyDBInstanceRequestArgumentCaptor.capture())).thenThrow(new RuntimeException());
@@ -112,12 +116,33 @@ public class AwsRdsModifyServiceTest {
     }
 
     @Test
-    public void shouldThrowCloudConnectorExceptionInCaseOfSchedulerException() {
+    void disableDeleteProtectionShouldThrowCloudConnectorExceptionInCaseOfSchedulerException() {
         ArgumentCaptor<ModifyDbInstanceRequest> modifyDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(ModifyDbInstanceRequest.class);
         when(amazonRDS.modifyDBInstance(modifyDBInstanceRequestArgumentCaptor.capture())).thenReturn(null);
         when(provider.getDbInstanceModifyWaiter()).thenReturn(rdsWaiter);
         doThrow(SdkException.class).when(rdsWaiter).run(any());
 
         assertThrows(CloudConnectorException.class, () -> victim.disableDeleteProtection(authenticatedContext, dbStack));
+    }
+
+    @Test
+    void updateMasterUserPasswordShouldThrowCloudConnectorExceptionInCaseOfRdsClientException() {
+        ArgumentCaptor<ModifyDbInstanceRequest> modifyDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(ModifyDbInstanceRequest.class);
+        when(amazonRDS.modifyDBInstance(modifyDBInstanceRequestArgumentCaptor.capture())).thenThrow(new RuntimeException());
+
+        assertThrows(CloudConnectorException.class, () -> victim.updateMasterUserPassword(authenticatedContext, dbStack, NEW_PASSWORD));
+        verify(rdsWaiter, never()).run(any());
+    }
+
+    @Test
+    void updateMasterUserPasswordShouldSucceed() {
+        ArgumentCaptor<ModifyDbInstanceRequest> modifyDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(ModifyDbInstanceRequest.class);
+        when(amazonRDS.modifyDBInstance(modifyDBInstanceRequestArgumentCaptor.capture())).thenReturn(ModifyDbInstanceResponse.builder().build());
+        when(provider.getDbInstanceModifyWaiter()).thenReturn(rdsWaiter);
+
+        victim.updateMasterUserPassword(authenticatedContext, dbStack, NEW_PASSWORD);
+
+        assertEquals(DB_INSTANCE_IDENTIFIER, modifyDBInstanceRequestArgumentCaptor.getValue().dbInstanceIdentifier());
+        verify(rdsWaiter, times(1)).run(any());
     }
 }

@@ -33,10 +33,7 @@ public class AwsRdsModifyService {
     private CustomAmazonWaiterProvider customAmazonWaiterProvider;
 
     public void disableDeleteProtection(AuthenticatedContext ac, DatabaseStack dbStack) {
-        AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
-        String regionName = ac.getCloudContext().getLocation().getRegion().value();
-        AmazonRdsClient rdsClient = awsClient.createRdsClient(credentialView, regionName);
-
+        AmazonRdsClient rdsClient = getAmazonRdsClient(ac);
         String dbInstanceIdentifier = dbStack.getDatabaseServer().getServerId();
 
         ModifyDbInstanceRequest modifyDBInstanceRequest = ModifyDbInstanceRequest.builder()
@@ -51,10 +48,38 @@ public class AwsRdsModifyService {
             throw new CloudConnectorException(ex.getMessage(), ex);
         }
 
+        waitUntilModifyFinishes(dbInstanceIdentifier, rdsClient, "Failed to disable deletion protection");
+        LOGGER.debug("RDS delete protection is disabled for DB Instance ID: {}", dbInstanceIdentifier);
+    }
+
+    public void updateMasterUserPassword(AuthenticatedContext ac, DatabaseStack databaseStack, String newPassword) {
+        AmazonRdsClient rdsClient = getAmazonRdsClient(ac);
+        String dbInstanceIdentifier = databaseStack.getDatabaseServer().getServerId();
+        ModifyDbInstanceRequest modifyDBInstanceRequest = ModifyDbInstanceRequest.builder()
+                .dbInstanceIdentifier(dbInstanceIdentifier)
+                .masterUserPassword(newPassword)
+                .build();
+        LOGGER.info("Modify master user password for database: {}", dbInstanceIdentifier);
+        try {
+            rdsClient.modifyDBInstance(modifyDBInstanceRequest);
+            waitUntilModifyFinishes(dbInstanceIdentifier, rdsClient, "Failed to change master user password");
+            LOGGER.info("Master user password modified for database: {}", dbInstanceIdentifier);
+        } catch (RuntimeException e) {
+            LOGGER.warn("Master user password modification failed for database: {}, reason: {}", dbInstanceIdentifier, e.getMessage());
+            throw new CloudConnectorException(e.getMessage(), e);
+        }
+    }
+
+    private void waitUntilModifyFinishes(String dbInstanceIdentifier, AmazonRdsClient rdsClient, String exceptionMessage) {
         Waiter<DescribeDbInstancesResponse> rdsWaiter = customAmazonWaiterProvider.getDbInstanceModifyWaiter();
         DescribeDbInstancesRequest describeDBInstancesRequest = DescribeDbInstancesRequest.builder().dbInstanceIdentifier(dbInstanceIdentifier).build();
-        run(() -> rdsClient.describeDBInstances(describeDBInstancesRequest), rdsWaiter, "Failed to disable deletion protection");
-        LOGGER.debug("RDS delete protection is disabled for DB Instance ID: {}", dbInstanceIdentifier);
+        run(() -> rdsClient.describeDBInstances(describeDBInstancesRequest), rdsWaiter, exceptionMessage);
+    }
+
+    private AmazonRdsClient getAmazonRdsClient(AuthenticatedContext ac) {
+        AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
+        String regionName = ac.getCloudContext().getLocation().getRegion().value();
+        return awsClient.createRdsClient(credentialView, regionName);
     }
 }
 

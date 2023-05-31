@@ -23,6 +23,7 @@ import com.azure.identity.implementation.IdentityClientOptions;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.ComputeManager;
 import com.azure.resourcemanager.marketplaceordering.MarketplaceOrderingManager;
+import com.azure.resourcemanager.postgresql.PostgreSqlManager;
 import com.azure.resourcemanager.privatedns.PrivateDnsZoneManager;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -98,6 +99,10 @@ public class AzureClientFactory {
 
     public MarketplaceOrderingManager getMarketplaceOrderingManager() {
         return azureHttpClientConfigurer.configureDefault(MarketplaceOrderingManager.configure()).authenticate(azureCredential, azureProfile);
+    }
+
+    public PostgreSqlManager getPostgreSqlManager() {
+        return azureHttpClientConfigurer.configureDefault(PostgreSqlManager.configure()).authenticate(azureCredential, azureProfile);
     }
 
     public Optional<String> getAccessToken() {

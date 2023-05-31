@@ -30,6 +30,7 @@ public final class OperationDescriptions {
         public static final String CREATE = "create and register a database server in a cloud provider";
 
         public static final String UPGRADE = "upgrade a database server in a cloud provider to a higher major version";
+        public static final String ROTATE = "rotate database server secrets";
         public static final String VALIDATE_UPGRADE = "validate if upgrade is possible on the database server in a cloud provider to a higher major version";
         public static final String CREATE_INTERNAL = "create and register a database server in a cloud provider with internal actor";
         public static final String UPDATE_CLUSTER_CRN = "Update the cluster crn associated with the database";

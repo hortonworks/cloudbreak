@@ -70,6 +70,7 @@ import com.azure.resourcemanager.network.models.NetworkInterfaces;
 import com.azure.resourcemanager.network.models.NetworkSecurityGroups;
 import com.azure.resourcemanager.network.models.PublicIpAddress;
 import com.azure.resourcemanager.network.models.Subnet;
+import com.azure.resourcemanager.postgresql.PostgreSqlManager;
 import com.azure.resourcemanager.privatedns.PrivateDnsZoneManager;
 import com.azure.resourcemanager.privatedns.fluent.models.VirtualNetworkLinkInner;
 import com.azure.resourcemanager.privatedns.models.PrivateDnsZone;
@@ -130,6 +131,8 @@ public class AzureClient {
 
     private final MarketplaceOrderingManager marketplaceOrderingManager;
 
+    private final PostgreSqlManager postgreSqlManager;
+
     private final AzureClientFactory azureClientFactory;
 
     private final AzureExceptionHandler azureExceptionHandler;
@@ -143,6 +146,7 @@ public class AzureClient {
         azure = azureClientCredentials.getAzureResourceManager();
         privateDnsZoneManager = azureClientCredentials.getPrivateDnsManager();
         marketplaceOrderingManager = azureClientCredentials.getMarketplaceOrderingManager();
+        postgreSqlManager = azureClientCredentials.getPostgreSqlManager();
         computeManager = azureClientCredentials.getComputeManager();
         this.azureExceptionHandler = azureExceptionHandler;
         this.azureListResultFactory = azureListResultFactory;
@@ -169,7 +173,7 @@ public class AzureClient {
             return getResourceGroups().contain(name);
         } catch (ManagementException e) {
             if (azureExceptionHandler.isForbidden(e)) {
-                LOGGER.info("Resource group {} does not exist or insufficient permission to access it, exception: {}", name, e);
+                LOGGER.info("Resource group {} does not exist or insufficient permission to access it", name, e);
                 return false;
             }
             throw e;
@@ -972,4 +976,13 @@ public class AzureClient {
         return null;
     }
 
+    public void updateAdministratorLoginPassword(String resourceGroupName, String serverName, String newPassword) {
+        handleException(() -> {
+            postgreSqlManager.servers()
+                    .getByResourceGroup(resourceGroupName, serverName)
+                    .update()
+                    .withAdministratorLoginPassword(newPassword)
+                    .apply();
+        });
+    }
 }

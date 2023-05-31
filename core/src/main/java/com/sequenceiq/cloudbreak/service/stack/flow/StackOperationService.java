@@ -9,9 +9,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_REQUESTED
 import static java.lang.Math.abs;
 import static java.lang.String.format;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -77,6 +75,7 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.rotation.service.SecretRotationValidator;
 
 @Service
 public class StackOperationService {
@@ -136,6 +135,9 @@ public class StackOperationService {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private SecretRotationValidator secretRotationValidator;
 
     public FlowIdentifier removeInstance(StackDto stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
@@ -494,18 +496,8 @@ public class StackOperationService {
         if (entitlementService.isSecretRotationEnabled(Crn.fromString(crn).getAccountId())) {
             StackView viewByCrn = stackDtoService.getStackViewByCrn(crn);
             Long stackId = viewByCrn.getId();
-            if (!secrets.stream().anyMatch(secret -> Collections.frequency(secrets, secret) > 1)) {
-                List<SecretType> secretTypes = secrets.stream()
-                        .filter(secret -> Arrays.stream(CloudbreakSecretType.values())
-                                .map(Enum::name)
-                                .toList()
-                                .contains(secret))
-                        .map(CloudbreakSecretType::valueOf)
-                        .collect(Collectors.toList());
-                return flowManager.triggerSecretRotation(stackId, crn, secretTypes, executionType);
-            } else {
-                throw new CloudbreakServiceException("There is at least one duplication in the request!");
-            }
+            List<SecretType> secretTypes = secretRotationValidator.mapSecretTypes(secrets, CloudbreakSecretType.class);
+            return flowManager.triggerSecretRotation(stackId, crn, secretTypes, executionType);
         } else {
             throw new CloudbreakServiceException("Account is not entitled to execute any secret rotation!");
         }

@@ -150,6 +150,10 @@ class ResourceConnectorTest {
             return null;
         }
 
+        @Override
+        public void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword) {
+
+        }
     }
 
 }

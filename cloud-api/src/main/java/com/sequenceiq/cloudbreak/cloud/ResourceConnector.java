@@ -31,7 +31,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
  * <br>
  * Cloud providers which support template based deployments (like AWS Cloudformation, Azure ARM) usually use only one {@link
  * CloudResource} which is  CLOUDFORMATION_STACK, HEAT_STACK or ARM_TEMPLATE and all the infrastructure related changes are done through that resource.
- * In other words when a new VM is removed from stack (cluster) then the CLoudbreak is not addressing that VM resource to be removed from stack, but uses
+ * In other words when a new VM is removed from stack (cluster) then the Cloudbreak is not addressing that VM resource to be removed from stack, but uses
  * the template resource reference e.g HEAT_STACK to inform the Cloud provider to remove the VM instance from stack.
  */
 public interface ResourceConnector {
@@ -324,4 +324,13 @@ public interface ResourceConnector {
      * @throws TemplatingNotSupportedException if templating is not supported by provider
      */
     String getDBStackTemplate(DatabaseStack databaseStack) throws TemplatingNotSupportedException;
+
+    /**
+     * Updates the database root password
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param databaseStack contains the full description of infrastructure
+     * @param newPassword new password for the database root user
+     */
+    void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword);
 }

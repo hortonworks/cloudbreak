@@ -43,6 +43,11 @@ public abstract class GcpDatabaseServerBaseService extends AbstractGcpDatabaseBa
     }
 
     protected void verifyOperation(Operation operation, List<CloudResource> buildableResource) {
+        String resourceName = buildableResource.isEmpty() ? "unknown" : buildableResource.get(0).getName();
+        verifyOperation(operation, resourceName);
+    }
+
+    protected void verifyOperation(Operation operation, String resourceName) {
         if (operation.getError() != null
                 && !operation.getError().isEmpty()
                 && !operation.getError().getErrors().isEmpty()) {
@@ -50,7 +55,7 @@ public abstract class GcpDatabaseServerBaseService extends AbstractGcpDatabaseBa
             for (OperationError error : operation.getError().getErrors()) {
                 sb.append(error.getMessage() + ",");
             }
-            throw new GcpResourceException("Failed to create Database: " + sb.toString(), resourceType(), buildableResource.get(0).getName());
+            throw new GcpResourceException("Failed to execute database operation: " + sb.toString(), resourceType(), resourceName);
         }
     }
 

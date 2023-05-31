@@ -135,4 +135,9 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
         loadBalancerService.removeLoadBalancerTargets(auth, targetGroupArns, resourcesToRemove);
         return downscale;
     }
+
+    @Override
+    public void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword) {
+        LOGGER.info("Update master user password is not implemented on AWS Native!");
+    }
 }

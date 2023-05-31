@@ -15,6 +15,7 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
+import com.sequenceiq.cloudbreak.cloud.gcp.sql.GcpDatabaseServerUpdateService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -37,6 +38,9 @@ public class GcpResourceConnector extends AbstractResourceConnector {
 
     @Inject
     private LoadBalancerResourceService loadBalancerResourceService;
+
+    @Inject
+    private GcpDatabaseServerUpdateService gcpDatabaseServerUpdateService;
 
     @Inject
     private ContextBuilders contextBuilders;
@@ -119,5 +123,10 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
             Map<InstanceGroupType, String> userData) {
         LOGGER.info("Update userdata is not implemented on GCP!");
+    }
+
+    @Override
+    public void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword) {
+        gcpDatabaseServerUpdateService.updateRootUserPassword(authenticatedContext, databaseStack, newPassword);
     }
 }

@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import com.azure.core.http.policy.ExponentialBackoffOptions;
 import com.azure.core.http.policy.RetryOptions;
+import com.azure.core.http.policy.RetryPolicy;
 
 public class AzureQuartzRetryUtils {
 
@@ -22,11 +23,22 @@ public class AzureQuartzRetryUtils {
         }
     }
 
-    public static void reconfigureHttpClientIfNeeded(Function<RetryOptions, Object> httpClientFunction) {
+    public static void reconfigureHttpClientRetryOptionsIfNeeded(Function<RetryOptions, Object> httpClientFunction) {
         String threadName = Thread.currentThread().getName();
         if (threadName.contains(QUARTZ_EXECUTOR_THREAD_NAME_PREFIX)) {
             httpClientFunction.apply(getQuartzRetryOptions());
         }
+    }
+
+    public static void reconfigureHttpClientRetryPolicyIfNeeded(Function<RetryPolicy, Object> httpClientFunction) {
+        String threadName = Thread.currentThread().getName();
+        if (threadName.contains(QUARTZ_EXECUTOR_THREAD_NAME_PREFIX)) {
+            httpClientFunction.apply(getQuartzRetryPolicy());
+        }
+    }
+
+    private static RetryPolicy getQuartzRetryPolicy() {
+        return new RetryPolicy(getQuartzRetryOptions());
     }
 
     private static RetryOptions getQuartzRetryOptions() {

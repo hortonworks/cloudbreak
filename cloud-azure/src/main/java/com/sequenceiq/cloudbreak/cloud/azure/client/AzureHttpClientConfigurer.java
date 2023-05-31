@@ -14,6 +14,7 @@ import com.azure.core.http.okhttp.OkHttpAsyncHttpClientBuilder;
 import com.azure.core.http.policy.HttpLogDetailLevel;
 import com.azure.core.http.policy.HttpLogOptions;
 import com.azure.resourcemanager.marketplaceordering.MarketplaceOrderingManager;
+import com.azure.resourcemanager.postgresql.PostgreSqlManager;
 import com.azure.resourcemanager.resources.fluentcore.arm.AzureConfigurable;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -49,19 +50,25 @@ public class AzureHttpClientConfigurer {
 
     public <T extends HttpTrait<T>> T configureDefault(T configurable) {
         T client = configurable.httpLogOptions(getHttpLogOptions()).httpClient(newHttpClient());
-        AzureQuartzRetryUtils.reconfigureHttpClientIfNeeded(client::retryOptions);
+        AzureQuartzRetryUtils.reconfigureHttpClientRetryOptionsIfNeeded(client::retryOptions);
         return client;
     }
 
     public <T extends AzureConfigurable<T>> T configureDefault(T configurable) {
         T client = configurable.withLogOptions(getHttpLogOptions()).withHttpClient(newHttpClient());
-        AzureQuartzRetryUtils.reconfigureHttpClientIfNeeded(client::withRetryOptions);
+        AzureQuartzRetryUtils.reconfigureHttpClientRetryOptionsIfNeeded(client::withRetryOptions);
         return client;
     }
 
     public MarketplaceOrderingManager.Configurable configureDefault(MarketplaceOrderingManager.Configurable configurable) {
         MarketplaceOrderingManager.Configurable client = configurable.withLogOptions(getHttpLogOptions()).withHttpClient(newHttpClient());
-        AzureQuartzRetryUtils.reconfigureHttpClientIfNeeded(client::withRetryOptions);
+        AzureQuartzRetryUtils.reconfigureHttpClientRetryOptionsIfNeeded(client::withRetryOptions);
+        return client;
+    }
+
+    public PostgreSqlManager.Configurable configureDefault(PostgreSqlManager.Configurable configurable) {
+        PostgreSqlManager.Configurable client = configurable.withLogOptions(getHttpLogOptions()).withHttpClient(newHttpClient());
+        AzureQuartzRetryUtils.reconfigureHttpClientRetryPolicyIfNeeded(client::withRetryPolicy);
         return client;
     }
 

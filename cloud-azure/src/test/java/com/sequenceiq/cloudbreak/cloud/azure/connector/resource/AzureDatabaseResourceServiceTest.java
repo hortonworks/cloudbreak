@@ -77,6 +77,10 @@ class AzureDatabaseResourceServiceTest {
 
     private static final String TEMPLATE = "template is gonna do some templating";
 
+    private static final String SERVER_NAME = "serverName";
+
+    private static final String NEW_PASSWORD = "newPassword";
+
     @Mock
     private AzureDatabaseTemplateBuilder azureTemplateBuilder;
 
@@ -465,6 +469,31 @@ class AzureDatabaseResourceServiceTest {
         verify(azureUtils, never()).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_ENDPOINT);
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         verify(azureTemplateBuilder, never()).build(eq(cloudContext), any(DatabaseStack.class));
+    }
+
+    @Test
+    void updateAdministratorLoginPasswordShouldSucceed() {
+        when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId(SERVER_NAME).build());
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(eq(cloudContext), eq(databaseStack))).thenReturn(RESOURCE_GROUP_NAME);
+
+        victim.updateAdministratorLoginPassword(ac, databaseStack, NEW_PASSWORD);
+
+        verify(azureResourceGroupMetadataProvider, times(1)).getResourceGroupName(eq(cloudContext), eq(databaseStack));
+        verify(client, times(1)).updateAdministratorLoginPassword(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME), eq(NEW_PASSWORD));
+    }
+
+    @Test
+    void updateAdministratorLoginPasswordShouldFailWhenClientThrowsException() {
+        when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId(SERVER_NAME).build());
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(eq(cloudContext), eq(databaseStack))).thenReturn(RESOURCE_GROUP_NAME);
+        doThrow(new RuntimeException("error")).when(client).updateAdministratorLoginPassword(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME), eq(NEW_PASSWORD));
+
+        CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
+                () -> victim.updateAdministratorLoginPassword(ac, databaseStack, NEW_PASSWORD));
+
+        assertEquals("error", cloudConnectorException.getMessage());
+        verify(azureResourceGroupMetadataProvider, times(1)).getResourceGroupName(eq(cloudContext), eq(databaseStack));
+        verify(client, times(1)).updateAdministratorLoginPassword(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME), eq(NEW_PASSWORD));
     }
 
     private CloudResource buildResource(ResourceType resourceType) {

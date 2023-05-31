@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -85,6 +86,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.flow.rotation.service.SecretRotationValidator;
 
 @ExtendWith(MockitoExtension.class)
 public class StackOperationServiceTest {
@@ -156,6 +158,9 @@ public class StackOperationServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private SecretRotationValidator secretRotationValidator;
 
     @Test
     public void testStartWhenStackAvailable() {
@@ -535,6 +540,7 @@ public class StackOperationServiceTest {
     public void testRotateSecrets() {
         Stack stack = new Stack();
         stack.setId(1L);
+        when(secretRotationValidator.mapSecretTypes(anyList(), any())).thenReturn(List.of(CLOUDBREAK_CM_ADMIN_PASSWORD));
         when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
         when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stack);
         when(flowManager.triggerSecretRotation(anyLong(), anyString(), any(), any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, "flowchain"));
@@ -548,6 +554,7 @@ public class StackOperationServiceTest {
     public void testRotateSecretsWhenSecretsDuplicated() {
         Stack stack = new Stack();
         stack.setId(1L);
+        when(secretRotationValidator.mapSecretTypes(anyList(), any())).thenThrow(new CloudbreakServiceException("validation failed"));
         when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
         when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stack);
 

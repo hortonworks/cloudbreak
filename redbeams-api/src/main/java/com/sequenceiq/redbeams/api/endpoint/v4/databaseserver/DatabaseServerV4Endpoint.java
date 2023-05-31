@@ -25,12 +25,14 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.redbeams.api.RedbeamsApi;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
@@ -230,4 +232,12 @@ public interface DatabaseServerV4Endpoint {
     UpgradeDatabaseServerV4Response validateUpgrade(
             @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotEmpty @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn,
             @Valid @NotNull @ApiParam(DatabaseServerParamDescriptions.VALIDATE_UPGRADE_DATABASE_SERVER_REQUEST) UpgradeDatabaseServerV4Request request);
+
+    @PUT
+    @Path("internal/rotate_secret")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DatabaseServerOpDescription.ROTATE, notes = DatabaseServerNotes.ROTATE,
+            consumes = MediaType.APPLICATION_JSON, nickname = "rotateSecrets", hidden = true)
+    FlowIdentifier rotateSecret(@Valid @NotNull @ApiParam(value = DatabaseServerParamDescriptions.ROTATE_DATABASE_SERVER_SECRETS_REQUEST, hidden = true)
+            RotateDatabaseServerSecretV4Request request, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

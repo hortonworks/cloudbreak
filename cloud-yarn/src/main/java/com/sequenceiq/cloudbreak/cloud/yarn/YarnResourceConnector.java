@@ -296,4 +296,9 @@ public class YarnResourceConnector implements ResourceConnector {
     public String getDBStackTemplate(DatabaseStack databaseStack) throws TemplatingNotSupportedException {
         throw new TemplatingNotSupportedException();
     }
+
+    @Override
+    public void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword) {
+        LOGGER.info("Update database root password is not implemented on YARN!");
+    }
 }

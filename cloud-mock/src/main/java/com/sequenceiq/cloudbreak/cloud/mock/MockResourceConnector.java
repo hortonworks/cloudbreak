@@ -315,4 +315,8 @@ public class MockResourceConnector implements ResourceConnector {
                 .get(String.class);
         return new CloudDatabaseServerSslCertificate(ROOT, certificate);
     }
+
+    @Override
+    public void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword) {
+    }
 }

@@ -316,6 +316,20 @@ public class AzureDatabaseResourceService {
         }
     }
 
+    public void updateAdministratorLoginPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword) {
+        AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+        String serverName = databaseStack.getDatabaseServer().getServerId();
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(authenticatedContext.getCloudContext(), databaseStack);
+        try {
+            LOGGER.info("Update default admin user password for database: {}", serverName);
+            client.updateAdministratorLoginPassword(resourceGroupName, serverName, newPassword);
+            LOGGER.info("Default admin user password updated for database: {}", serverName);
+        } catch (Exception e) {
+            LOGGER.warn("Update default admin user password failed for database: {}, reason: {}", serverName, e.getMessage());
+            throw new CloudConnectorException(e.getMessage(), e);
+        }
+    }
+
     private void deleteDatabaseServer(PersistenceNotifier persistenceNotifier, CloudContext cloudContext, List<CloudResource> resources, AzureClient client) {
         Optional<CloudResource> databaseServer = getResources(resources, AZURE_DATABASE).stream().findFirst();
         databaseServer.ifPresentOrElse(

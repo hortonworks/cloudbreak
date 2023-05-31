@@ -4,7 +4,7 @@ public class RotationContext {
 
     private final String resourceCrn;
 
-    protected RotationContext(String resourceCrn) {
+    public RotationContext(String resourceCrn) {
         this.resourceCrn = resourceCrn;
     }
 
