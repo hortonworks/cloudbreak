@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak;
 import static java.lang.System.lineSeparator;
 
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class DefaultEnumConverterCompatibilityTest {
         Map<String, Set<String>> incompatibleFields = new HashMap<>();
         reflections.getFieldsAnnotatedWith(Convert.class).forEach(field -> {
             try {
-                var defaultEnumConverterType = Optional.of((field.getAnnotation(Convert.class).converter()).getGenericSuperclass())
+                Optional<Type> defaultEnumConverterType = Optional.of((field.getAnnotation(Convert.class).converter()).getGenericSuperclass())
                         .filter(t -> ((ParameterizedType) t).getRawType().getTypeName().equals(DefaultEnumConverter.class.getTypeName()));
 
                 if (defaultEnumConverterType.isPresent()) {

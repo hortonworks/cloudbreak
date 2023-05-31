@@ -110,8 +110,8 @@ class EnvironmentServiceExperienceFetchTest {
 
     @Test
     void testWithNameWhenOneExperienceReturnsThenMoreEntryHasToBePresentInResultMap() {
-        var liftieClusters = createClusters(LIFTIE_XP_PUBLIC_NAME, 3);
-        var nonLiftieClusters = createClusters(NON_LIFTIE_XP_PUBLIC_NAME, 2);
+        Set<ExperienceCluster> liftieClusters = createClusters(LIFTIE_XP_PUBLIC_NAME, 3);
+        Set<ExperienceCluster> nonLiftieClusters = createClusters(NON_LIFTIE_XP_PUBLIC_NAME, 2);
         Set<ExperienceCluster> attachedClusters = new HashSet<>(2);
         attachedClusters.addAll(liftieClusters);
         attachedClusters.addAll(nonLiftieClusters);
@@ -174,8 +174,8 @@ class EnvironmentServiceExperienceFetchTest {
 
     @Test
     void testWithCrnWhenOneExperienceReturnsThenMoreEntryHasToBePresentInResultMap() {
-        var liftieClusters = createClusters(LIFTIE_XP_PUBLIC_NAME, 3);
-        var nonLiftieClusters = createClusters(NON_LIFTIE_XP_PUBLIC_NAME, 2);
+        Set<ExperienceCluster> liftieClusters = createClusters(LIFTIE_XP_PUBLIC_NAME, 3);
+        Set<ExperienceCluster> nonLiftieClusters = createClusters(NON_LIFTIE_XP_PUBLIC_NAME, 2);
         Set<ExperienceCluster> attachedClusters = new HashSet<>(2);
         attachedClusters.addAll(liftieClusters);
         attachedClusters.addAll(nonLiftieClusters);

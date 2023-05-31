@@ -192,7 +192,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     public MockNetworkV4Parameters networkParameters() {
-        var parameters = new MockNetworkV4Parameters();
+        MockNetworkV4Parameters parameters = new MockNetworkV4Parameters();
         parameters.setInternetGatewayId(getInternetGatewayId());
         parameters.setVpcId(getVpcId());
         parameters.setSubnetId(getSubnetId());
@@ -200,14 +200,14 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     public Object subnetProperties() {
-        var parameters = new MockNetworkV4Parameters();
+        MockNetworkV4Parameters parameters = new MockNetworkV4Parameters();
         parameters.setSubnetId(getSubnetId());
         parameters.setVpcId(getVpcId());
         return parameters;
     }
 
     public NetworkV4TestDto existingSubnet(TestContext testContext) {
-        var network = testContext.given(NetworkV4TestDto.class);
+        NetworkV4TestDto network = testContext.given(NetworkV4TestDto.class);
         network.getRequest().setMock((MockNetworkV4Parameters) subnetProperties());
         return network;
     }

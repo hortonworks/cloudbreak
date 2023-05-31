@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -36,8 +37,8 @@ class StreamsReplicationManagerConfigProviderTest {
 
     @Test
     void getServiceConfigsPlain() {
-        var source = source(false, "broker-1", "broker-2");
-        var expected = List.of(
+        TemplatePreparationObject source = source(false, "broker-1", "broker-2");
+        List<ApiClusterTemplateConfig> expected = List.of(
                 config("streams.replication.manager.config", "bootstrap.servers=broker-1:9092,broker-2:9092" + "|" + "security.protocol=SASL_SSL"),
                 config("clusters", "primary,secondary"));
         assertThat(underTest.getServiceConfigs(null, source)).hasSameElementsAs(expected);
@@ -45,8 +46,8 @@ class StreamsReplicationManagerConfigProviderTest {
 
     @Test
     void getServiceConfigsSsl() {
-        var source = source(true, "broker-1", "broker-2");
-        var expected = List.of(
+        TemplatePreparationObject source = source(true, "broker-1", "broker-2");
+        List<ApiClusterTemplateConfig> expected = List.of(
                 config("streams.replication.manager.config", "bootstrap.servers=broker-1:9093,broker-2:9093" + "|" + "security.protocol=SASL_SSL"),
                 config("clusters", "primary,secondary"));
         assertThat(underTest.getServiceConfigs(null, source)).hasSameElementsAs(expected);
@@ -54,7 +55,7 @@ class StreamsReplicationManagerConfigProviderTest {
 
     @Test
     void getServiceConfigsNoBrokers() {
-        var source = source(true);
+        TemplatePreparationObject source = source(true);
         assertThat(underTest.getServiceConfigs(null, source)).isEmpty();
     }
 
@@ -68,9 +69,9 @@ class StreamsReplicationManagerConfigProviderTest {
 
     @Test
     void getServiceConfigsWithCoreBroker7212() {
-        var source = sourceForCoreBroker(true);
+        TemplatePreparationObject source = sourceForCoreBroker(true);
         cdhMainVersionIs("7.2.12");
-        var expected = List.of(
+        List<ApiClusterTemplateConfig> expected = List.of(
                 config("streams.replication.manager.config", "bootstrap.servers=corebroker-1:9093,corebroker-2:9093" + "|" + "security.protocol=SASL_SSL"),
                 config("clusters", "primary,secondary")
         );
@@ -79,9 +80,9 @@ class StreamsReplicationManagerConfigProviderTest {
 
     @Test
     void getServiceConfigsWithCoreBroker7211() {
-        var source = sourceForCoreBroker(true);
+        TemplatePreparationObject source = sourceForCoreBroker(true);
         cdhMainVersionIs("7.2.11");
-        var expected = List.of(
+        List<ApiClusterTemplateConfig> expected = List.of(
                 config("streams.replication.manager.config", "bootstrap.servers=broker-1:9093,broker-2:9093,corebroker-1:9093,corebroker-2:9093"),
                 config("clusters", "primary,secondary")
         );
@@ -89,14 +90,14 @@ class StreamsReplicationManagerConfigProviderTest {
     }
 
     private TemplatePreparationObject source(boolean sslEnabled, String... brokerHosts) {
-        var generalClusterConfig = mock(GeneralClusterConfigs.class);
+        GeneralClusterConfigs generalClusterConfig = mock(GeneralClusterConfigs.class);
         when(generalClusterConfig.getAutoTlsEnabled()).thenReturn(sslEnabled);
 
-        var hostGroup = mock(HostgroupView.class);
+        HostgroupView hostGroup = mock(HostgroupView.class);
         when(hostGroup.getHosts()).thenReturn(Sets.newTreeSet(Arrays.asList(brokerHosts)));
         when(hostGroup.getName()).thenReturn("broker");
 
-        var source = mock(TemplatePreparationObject.class);
+        TemplatePreparationObject source = mock(TemplatePreparationObject.class);
         when(source.getGeneralClusterConfigs()).thenReturn(generalClusterConfig);
         when(source.getHostGroupsWithComponent(KAFKA_BROKER)).thenReturn(Stream.of(hostGroup));
         when(source.getBlueprintView()).thenReturn(blueprintView);
@@ -107,18 +108,18 @@ class StreamsReplicationManagerConfigProviderTest {
     }
 
     private TemplatePreparationObject sourceForCoreBroker(boolean sslEnabled) {
-        var generalClusterConfig = mock(GeneralClusterConfigs.class);
+        GeneralClusterConfigs generalClusterConfig = mock(GeneralClusterConfigs.class);
         when(generalClusterConfig.getAutoTlsEnabled()).thenReturn(sslEnabled);
 
-        var hostGroupBroker = mock(HostgroupView.class);
+        HostgroupView hostGroupBroker = mock(HostgroupView.class);
         Mockito.lenient().when(hostGroupBroker.getHosts()).thenReturn(Sets.newTreeSet(Arrays.asList("broker-1", "broker-2")));
         when(hostGroupBroker.getName()).thenReturn("broker");
 
-        var hostGroupCoreBroker = mock(HostgroupView.class);
+        HostgroupView hostGroupCoreBroker = mock(HostgroupView.class);
         when(hostGroupCoreBroker.getHosts()).thenReturn(Sets.newTreeSet(Arrays.asList("corebroker-1", "corebroker-2")));
         when(hostGroupCoreBroker.getName()).thenReturn("core_broker");
 
-        var source = mock(TemplatePreparationObject.class);
+        TemplatePreparationObject source = mock(TemplatePreparationObject.class);
         when(source.getGeneralClusterConfigs()).thenReturn(generalClusterConfig);
         when(source.getHostGroupsWithComponent(KAFKA_BROKER)).thenReturn(Stream.of(hostGroupBroker, hostGroupCoreBroker));
         when(source.getBlueprintView()).thenReturn(blueprintView);

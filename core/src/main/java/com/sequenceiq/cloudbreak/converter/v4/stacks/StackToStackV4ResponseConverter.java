@@ -235,7 +235,7 @@ public class StackToStackV4ResponseConverter {
     }
 
     private List<InstanceGroupV4Response> getInstanceGroups(StackDtoDelegate stack) {
-        var instanceGroups = new LinkedList<InstanceGroupV4Response>();
+        List<InstanceGroupV4Response> instanceGroups = new LinkedList<>();
         for (InstanceGroupDto instanceGroupDto : stack.getInstanceGroupDtos()) {
             InstanceGroupView instanceGroup = instanceGroupDto.getInstanceGroup();
             InstanceGroupV4Response instanceGroupResponse = instanceGroupToInstanceGroupV4ResponseConverter

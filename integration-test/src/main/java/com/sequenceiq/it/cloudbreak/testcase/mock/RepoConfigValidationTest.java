@@ -42,10 +42,10 @@ public class RepoConfigValidationTest extends AbstractMockTest {
 
     @DataProvider(name = DATA_PROVIDER_FOR_REPO_CONFIG_TEST)
     public Object[][] dataProvider() {
-        var testDataValues = RepoConfigValidationTestAssertion.values();
-        var data = new Object[testDataValues.length][3];
+        RepoConfigValidationTestAssertion[] testDataValues = RepoConfigValidationTestAssertion.values();
+        Object[][] data = new Object[testDataValues.length][3];
         for (int i = 0; i < testDataValues.length; i++) {
-            var testContext = getBean(MockedTestContext.class);
+            MockedTestContext testContext = getBean(MockedTestContext.class);
             createDefaultUser(testContext);
             data[i][0] = testContext;
             data[i][1] = testDataValues[i];
