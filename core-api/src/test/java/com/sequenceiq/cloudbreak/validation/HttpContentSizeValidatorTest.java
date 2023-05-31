@@ -14,7 +14,6 @@ import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.Response.StatusType;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,9 +43,6 @@ public class HttpContentSizeValidatorTest {
 
     @Mock
     private ConstraintViolationBuilder constraintViolationBuilder;
-
-    @Mock
-    private HibernateConstraintValidatorContext hibernateConstraintValidatorContext;
 
     @Mock
     private ContentSizeProvider contentSizeProvider;
@@ -104,44 +100,45 @@ public class HttpContentSizeValidatorTest {
     public void testUrlFailsWithMinusOne() {
         when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
         when(httpHelper.getContentLength(anyString())).thenReturn(new ImmutablePair<>(statusType, MAX_SIZE));
-        when(constraintValidatorContext.unwrap(HibernateConstraintValidatorContext.class)).thenReturn(hibernateConstraintValidatorContext);
         when(contentSizeProvider.getMaxSizeInBytes()).thenReturn(MAX_SIZE);
+        when(constraintValidatorContext.buildConstraintViolationWithTemplate(anyString())).thenReturn(constraintViolationBuilder);
 
         when(httpHelper.getContentLength(anyString())).thenReturn(new ImmutablePair<>(statusType, -1));
 
         assertFalse(underTest.isValid("http://unknown.error.com", constraintValidatorContext));
 
-        verify(constraintValidatorContext, times(0)).buildConstraintViolationWithTemplate(anyString());
+        verify(constraintValidatorContext, times(1)).buildConstraintViolationWithTemplate(anyString());
+        verify(constraintViolationBuilder, times(1)).addConstraintViolation();
     }
 
     @Test
     public void testUrlFailsWithZero() {
         when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
         when(httpHelper.getContentLength(anyString())).thenReturn(new ImmutablePair<>(statusType, MAX_SIZE));
-        when(constraintValidatorContext.unwrap(HibernateConstraintValidatorContext.class)).thenReturn(hibernateConstraintValidatorContext);
         when(contentSizeProvider.getMaxSizeInBytes()).thenReturn(MAX_SIZE);
+        when(constraintValidatorContext.buildConstraintViolationWithTemplate(anyString())).thenReturn(constraintViolationBuilder);
 
         when(httpHelper.getContentLength(anyString())).thenReturn(new ImmutablePair<>(statusType, 0));
 
         assertFalse(underTest.isValid("http://empty.content.com", constraintValidatorContext));
 
-        verify(constraintValidatorContext, times(0)).buildConstraintViolationWithTemplate(anyString());
+        verify(constraintValidatorContext, times(1)).buildConstraintViolationWithTemplate(anyString());
+        verify(constraintViolationBuilder, times(1)).addConstraintViolation();
     }
 
     @Test
     public void testUrlFailsWithMoreThanMax() {
         when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
         when(httpHelper.getContentLength(anyString())).thenReturn(new ImmutablePair<>(statusType, MAX_SIZE));
-        when(constraintValidatorContext.unwrap(HibernateConstraintValidatorContext.class)).thenReturn(hibernateConstraintValidatorContext);
         when(contentSizeProvider.getMaxSizeInBytes()).thenReturn(MAX_SIZE);
+        when(constraintValidatorContext.buildConstraintViolationWithTemplate(anyString())).thenReturn(constraintViolationBuilder);
 
         when(httpHelper.getContentLength(anyString())).thenReturn(new ImmutablePair<>(statusType, MAX_SIZE + 1));
 
         assertFalse(underTest.isValid("http://big.content.com", constraintValidatorContext));
 
-        verify(constraintValidatorContext, times(0)).buildConstraintViolationWithTemplate(anyString());
-        verify(hibernateConstraintValidatorContext, times(1))
-                .addMessageParameter(HttpContentSizeValidator.MESSAGE_VARIABLE, "6 MB");
+        verify(constraintValidatorContext, times(1)).buildConstraintViolationWithTemplate(anyString());
+        verify(constraintViolationBuilder, times(1)).addConstraintViolation();
     }
 
     @Test

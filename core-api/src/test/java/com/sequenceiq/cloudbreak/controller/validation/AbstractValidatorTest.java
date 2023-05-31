@@ -15,6 +15,7 @@ import javax.validation.metadata.ValidateUnwrappedValue;
 
 import org.hibernate.validator.internal.engine.constraintvalidation.ConstraintValidatorContextImpl;
 import org.hibernate.validator.internal.engine.path.PathImpl;
+import org.hibernate.validator.messageinterpolation.ExpressionLanguageFeatureLevel;
 
 abstract class AbstractValidatorTest {
 
@@ -22,7 +23,9 @@ abstract class AbstractValidatorTest {
         return new ConstraintValidatorContextImpl(null,
                 PathImpl.createRootPath(),
                 new DummyConstraintDescriptor(),
-                null
+                null,
+                ExpressionLanguageFeatureLevel.NONE,
+                ExpressionLanguageFeatureLevel.NONE
         ).buildConstraintViolationWithTemplate("dummytemplate");
     }
 
