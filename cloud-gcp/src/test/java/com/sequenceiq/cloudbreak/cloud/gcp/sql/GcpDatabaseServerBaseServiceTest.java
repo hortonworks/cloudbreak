@@ -67,7 +67,7 @@ public class GcpDatabaseServerBaseServiceTest {
 
         GcpResourceException gcpResourceException = assertThrows(GcpResourceException.class,
                 () -> underTest.verifyOperation(operation, List.of(cloudResource)));
-        Assert.assertEquals("Failed to create Database: error1,: [ resourceType: GCP_DATABASE,  resourceName: google-resource ]",
+        Assert.assertEquals("Failed to execute database operation: error1,: [ resourceType: GCP_DATABASE,  resourceName: google-resource ]",
                 gcpResourceException.getMessage());
     }
 

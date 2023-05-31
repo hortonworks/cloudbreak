@@ -416,4 +416,9 @@ public class AzureResourceConnector extends AbstractResourceConnector {
             PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion, List<CloudResource> resources) {
         azureDatabaseResourceService.upgradeDatabaseServer(authenticatedContext, stack, persistenceNotifier, targetMajorVersion, resources);
     }
+
+    @Override
+    public void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword) {
+        azureDatabaseResourceService.updateAdministratorLoginPassword(authenticatedContext, databaseStack, newPassword);
+    }
 }

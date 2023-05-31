@@ -56,6 +56,8 @@ public final class Notes {
             "Creates a new database server. The database server starts out with only default databases.";
         public static final String UPGRADE =
                 "Upgrades a database server to a higher major version.";
+        public static final String ROTATE =
+                "Rotates database server secrets";
         public static final String VALIDATE_UPGRADE =
                 "Validates if upgrade is possible on the database server to a higher major version.";
 

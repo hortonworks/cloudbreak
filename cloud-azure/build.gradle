@@ -35,6 +35,7 @@ dependencies {
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-storage',              version: azureSdkResourceManagerVersion
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-privatedns',           version: azureSdkResourceManagerVersion
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-sql',                  version: azureSdkResourceManagerVersion
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-postgresql',           version: azureSdkResourceManagerPostgresqlVersion
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-marketplaceordering',  version: azureSdkResourceManagerMarketplaceVersion
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-datalakestore',        version: azureSdkResourceManagerDataLakeStoreVersion
 

@@ -244,4 +244,9 @@ public class AwsResourceConnector implements ResourceConnector {
             throw new CloudConnectorException("can't get freemarker template", e);
         }
     }
+
+    @Override
+    public void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword) {
+        awsRdsModifyService.updateMasterUserPassword(authenticatedContext, databaseStack, newPassword);
+    }
 }

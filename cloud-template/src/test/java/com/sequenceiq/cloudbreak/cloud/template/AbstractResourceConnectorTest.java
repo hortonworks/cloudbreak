@@ -82,6 +82,11 @@ public class AbstractResourceConnectorTest {
             protected ResourceType getDiskResourceType() {
                 return ResourceType.AWS_VOLUMESET;
             }
+
+            @Override
+            public void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword) {
+
+            }
         };
     }
 

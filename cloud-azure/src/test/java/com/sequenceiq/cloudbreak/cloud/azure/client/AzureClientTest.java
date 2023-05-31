@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -46,6 +47,10 @@ import com.azure.resourcemanager.network.fluent.models.FrontendIpConfigurationIn
 import com.azure.resourcemanager.network.models.LoadBalancer;
 import com.azure.resourcemanager.network.models.LoadBalancerFrontend;
 import com.azure.resourcemanager.network.models.LoadBalancers;
+import com.azure.resourcemanager.postgresql.PostgreSqlManager;
+import com.azure.resourcemanager.postgresql.models.Server;
+import com.azure.resourcemanager.postgresql.models.Server.Update;
+import com.azure.resourcemanager.postgresql.models.Servers;
 import com.azure.resourcemanager.resources.fluentcore.model.implementation.IndexableRefreshableWrapperImpl;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureLoadBalancerFrontend;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
@@ -57,6 +62,10 @@ class AzureClientTest {
     private static final String DISK_ENCRYPTION_SET_ID = "diskEncryptionSetId";
 
     private static final String RESOURCE_GROUP_NAME = "rg";
+
+    private static final String SERVER_NAME = "serverName";
+
+    private static final String NEW_PASSWORD = "newPassword";
 
     private static final String PRIVATE_LB_NAME = "privateLb";
 
@@ -83,6 +92,9 @@ class AzureClientTest {
     @Mock
     private LoadBalancer privateLoadBalancer;
 
+    @Mock
+    private PostgreSqlManager postgreSqlManager;
+
     private AzureClient underTest;
 
     @Mock(extraInterfaces = Disk.DefinitionStages.WithCreate.class)
@@ -100,7 +112,9 @@ class AzureClientTest {
     @BeforeEach
     void setUp() {
         lenient().when(azureClientCredentials.getAzureResourceManager()).thenReturn(azureResourceManager);
+        lenient().when(azureClientCredentials.getPostgreSqlManager()).thenReturn(postgreSqlManager);
         lenient().when(azureExceptionHandler.handleException(any(Supplier.class))).thenCallRealMethod();
+        lenient().doCallRealMethod().when(azureExceptionHandler).handleException(any(Runnable.class));
 
         underTest = new AzureClient(azureClientCredentials, azureExceptionHandler, azureListResultFactory);
     }
@@ -313,4 +327,21 @@ class AzureClientTest {
                 && GATEWAY_PRIVATE_IP_ADDRESS1.equals(fe.getIp()) && FRONTEND_2_NAME.equals(fe.getName()));
     }
 
+    @Test
+    void testUpdateAdministratorLoginPassword() {
+        Servers servers = mock(Servers.class);
+        when(postgreSqlManager.servers()).thenReturn(servers);
+        Server server = mock(Server.class);
+        when(servers.getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME))).thenReturn(server);
+        Update update = mock(Update.class);
+        when(server.update()).thenReturn(update);
+        when(update.withAdministratorLoginPassword(eq(NEW_PASSWORD))).thenReturn(update);
+        when(update.apply()).thenReturn(server);
+        underTest.updateAdministratorLoginPassword(RESOURCE_GROUP_NAME, SERVER_NAME, NEW_PASSWORD);
+        verify(postgreSqlManager, times(1)).servers();
+        verify(servers, times(1)).getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME));
+        verify(server, times(1)).update();
+        verify(update, times(1)).withAdministratorLoginPassword(eq(NEW_PASSWORD));
+        verify(update, times(1)).apply();
+    }
 }

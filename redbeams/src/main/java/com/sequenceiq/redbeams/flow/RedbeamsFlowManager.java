@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.flow;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -15,11 +16,15 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
+import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
+import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.flow.rotation.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.flow.service.FlowNameFormatService;
 
 @Component
@@ -40,6 +45,11 @@ public class RedbeamsFlowManager {
         Map<String, Object> headerWithUserCrn = getHeaderWithUserCrn(null);
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(headerWithUserCrn, acceptable);
         return notify(selector, event);
+    }
+
+    public FlowIdentifier triggerSecretRotation(Long resourceId, String resourceCrn, List<SecretType> secretTypes, RotationFlowExecutionType executionType) {
+        String selector = EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class);
+        return notify(selector, new SecretRotationFlowChainTriggerEvent(selector, resourceId, resourceCrn, secretTypes, executionType));
     }
 
     private FlowIdentifier notify(String selector, Event<Acceptable> event) {
