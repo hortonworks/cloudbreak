@@ -14,7 +14,7 @@ public enum RepoConfigValidationTestAssertion {
     AMBARI_BASE_URL {
         @Override
         public RepoConfigValidationV4Request request() {
-            var request = new RepoConfigValidationV4Request();
+            RepoConfigValidationV4Request request = new RepoConfigValidationV4Request();
             request.setAmbariBaseUrl(DEFAULT_URL_VALUE);
             return request;
         }
@@ -36,7 +36,7 @@ public enum RepoConfigValidationTestAssertion {
     AMBARI_REPO_GPG_KEY {
         @Override
         public RepoConfigValidationV4Request request() {
-            var request = new RepoConfigValidationV4Request();
+            RepoConfigValidationV4Request request = new RepoConfigValidationV4Request();
             request.setAmbariGpgKeyUrl(DEFAULT_URL_VALUE);
             return request;
         }
@@ -58,7 +58,7 @@ public enum RepoConfigValidationTestAssertion {
     STACK_BASE_URL {
         @Override
         public RepoConfigValidationV4Request request() {
-            var request = new RepoConfigValidationV4Request();
+            RepoConfigValidationV4Request request = new RepoConfigValidationV4Request();
             request.setStackBaseURL(DEFAULT_URL_VALUE);
             return request;
         }
@@ -80,7 +80,7 @@ public enum RepoConfigValidationTestAssertion {
     UTILS_BASE_URL {
         @Override
         public RepoConfigValidationV4Request request() {
-            var request = new RepoConfigValidationV4Request();
+            RepoConfigValidationV4Request request = new RepoConfigValidationV4Request();
             request.setUtilsBaseURL(DEFAULT_URL_VALUE);
             return request;
         }
@@ -102,7 +102,7 @@ public enum RepoConfigValidationTestAssertion {
     VDF_URL {
         @Override
         public RepoConfigValidationV4Request request() {
-            var request = new RepoConfigValidationV4Request();
+            RepoConfigValidationV4Request request = new RepoConfigValidationV4Request();
             request.setVersionDefinitionFileUrl(DEFAULT_URL_VALUE);
             return request;
         }
@@ -124,7 +124,7 @@ public enum RepoConfigValidationTestAssertion {
     MPACK_URL {
         @Override
         public RepoConfigValidationV4Request request() {
-            var request = new RepoConfigValidationV4Request();
+            RepoConfigValidationV4Request request = new RepoConfigValidationV4Request();
             request.setMpackUrl(DEFAULT_URL_VALUE);
             return request;
         }

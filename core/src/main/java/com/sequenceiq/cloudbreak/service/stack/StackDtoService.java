@@ -154,7 +154,7 @@ public class StackDtoService {
                 .collect(Collectors.toList());
         LOGGER.debug("Fetched instance metadata: {} by stack: {}", Joiner.on(",").join(instanceMetadataString), stackView.getId());
         imDto.forEach(im -> {
-            var imByIg = group.computeIfAbsent(im.getInstanceGroupId(), key -> new HashMap<>());
+            Map<InstanceGroupView, List<InstanceMetadataView>> imByIg = group.computeIfAbsent(im.getInstanceGroupId(), key -> new HashMap<>());
             if (imByIg.isEmpty()) {
                 imByIg.put(instanceGroups.stream().filter(ig -> ig.getId().equals(im.getInstanceGroupId())).findFirst().get(), new ArrayList<>());
             }
@@ -213,7 +213,7 @@ public class StackDtoService {
         List<InstanceGroupView> instanceGroups = instanceGroupService.getInstanceGroupViewByStackId(stackId);
         instanceGroups.forEach(it -> group.put(it.getId(), new HashMap<>()));
         imDto.forEach(im -> {
-            var imByIg = group.computeIfAbsent(im.getInstanceGroupId(), key -> new HashMap<>());
+            Map<InstanceGroupView, List<InstanceMetadataView>> imByIg = group.computeIfAbsent(im.getInstanceGroupId(), key -> new HashMap<>());
             if (imByIg.isEmpty()) {
                 imByIg.put(instanceGroups.stream().filter(ig -> ig.getId().equals(im.getInstanceGroupId())).findFirst().get(), new ArrayList<>());
             }

@@ -34,7 +34,7 @@ public class MetricUtilsTest {
     public void testSubmitThreadPoolExecutorParameters() {
         ThreadPoolExecutor threadPoolExecutor = mock(MDCCleanerScheduledExecutor.class);
         when(threadPoolExecutor.getCorePoolSize()).thenReturn(5);
-        var blockingQueue = mock(BlockingQueue.class);
+        BlockingQueue blockingQueue = mock(BlockingQueue.class);
         when(blockingQueue.size()).thenReturn(6);
         when(threadPoolExecutor.getQueue()).thenReturn(blockingQueue);
         when(threadPoolExecutor.getCompletedTaskCount()).thenReturn(7L);

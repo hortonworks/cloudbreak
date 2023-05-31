@@ -243,21 +243,21 @@ class RecipeModulTestModelProvider {
     }
 
     private static S3FileSystemConfigurationsView getS3ConfigView(Collection<StorageLocationView> locationViews) {
-        var fs = new S3FileSystem();
+        S3FileSystem fs = new S3FileSystem();
         fs.setInstanceProfile("InstanceProfileValue");
         fs.setStorageContainer("someContainer");
         return new S3FileSystemConfigurationsView(fs, locationViews, false);
     }
 
     private static GcsFileSystemConfigurationsView getGcsConfigView(Collection<StorageLocationView> locationViews) {
-        var fs = new GcsFileSystem();
+        GcsFileSystem fs = new GcsFileSystem();
         fs.setServiceAccountEmail("some.account@email.address.com");
         fs.setStorageContainer("someContainer");
         return new GcsFileSystemConfigurationsView(fs, locationViews, false);
     }
 
     private static AdlsGen2FileSystemConfigurationsView getAdlsGen2ConfigView(Collection<StorageLocationView> locationViews) {
-        var fs = new AdlsGen2FileSystem();
+        AdlsGen2FileSystem fs = new AdlsGen2FileSystem();
         fs.setAccountKey("someKeyValue");
         fs.setAccountName("nameOfAccount");
         fs.setStorageContainerName("ContainerName");
@@ -267,7 +267,7 @@ class RecipeModulTestModelProvider {
     }
 
     private static AdlsFileSystemConfigurationsView getAdlsConfigView(Collection<StorageLocationView> locationViews) {
-        var fs = new AdlsFileSystem();
+        AdlsFileSystem fs = new AdlsFileSystem();
         fs.setAccountName("nameOfAccount");
         fs.setClientId("123456789");
         fs.setCredential("credentialName");
@@ -277,7 +277,7 @@ class RecipeModulTestModelProvider {
     }
 
     private static WasbFileSystemConfigurationsView getWasbConfigView(Collection<StorageLocationView> locationViews) {
-        var fs = new WasbFileSystem();
+        WasbFileSystem fs = new WasbFileSystem();
         fs.setAccountKey("SomeAccountKey");
         fs.setAccountName("NameOfAccount");
         fs.setSecure(true);
@@ -287,7 +287,7 @@ class RecipeModulTestModelProvider {
     }
 
     private static Collection<StorageLocationView> getStorageLocationViews(int quantity) {
-        var views = new LinkedHashSet<StorageLocationView>(quantity);
+        Set<StorageLocationView> views = new LinkedHashSet<>(quantity);
         for (int i = 1; i <= quantity; i++) {
             views.add(new StorageLocationView(storageLocation(i)));
         }

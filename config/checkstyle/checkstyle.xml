@@ -194,7 +194,7 @@
         <module name="IllegalType">
             <property name="id" value="IllegalTypeImpl"/>
             <property name="illegalAbstractClassNameFormat" value="^(Abstract.*|.*Impl)$" />
-            <property name="illegalClassNames" value="" />
+            <property name="illegalClassNames" value="var" />
         </module>
         <module name="IllegalImport">
             <!-- no sun dependency, use java.lang -->

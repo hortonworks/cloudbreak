@@ -1063,7 +1063,7 @@ public class ClouderaManagerSetupServiceTest {
     void getCMHosFromMGMTWithEnterpiseDH() throws ApiException {
         ClouderaManagerSetupService spy = spy(underTest);
 
-        var apiHostList = getApiHostList();
+        ApiHostList apiHostList = getApiHostList();
 
         TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
         GeneralClusterConfigs generalClusterConfigs = mock(GeneralClusterConfigs.class);
@@ -1108,7 +1108,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     private ApiHostList getApiHostList() {
-        var apiHostList = new ApiHostList();
+        ApiHostList apiHostList = new ApiHostList();
         apiHostList.addItemsItem(apiHost("auxiliary"));
         apiHostList.addItemsItem(apiHost("fqdn"));
         return apiHostList;

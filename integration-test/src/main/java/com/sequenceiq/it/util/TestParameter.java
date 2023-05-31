@@ -50,7 +50,7 @@ public class TestParameter {
     }
 
     public String getRequired(String key) {
-        var value = Optional.ofNullable(parameters.get(key));
+        Optional<String> value = Optional.ofNullable(parameters.get(key));
         return value.orElseThrow(() -> new MissingExpectedParameterException(key));
     }
 
