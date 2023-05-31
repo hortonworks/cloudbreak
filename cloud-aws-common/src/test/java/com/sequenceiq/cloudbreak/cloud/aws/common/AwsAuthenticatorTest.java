@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AwsApacheClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsRegionEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsServiceEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
@@ -49,6 +50,9 @@ class AwsAuthenticatorTest {
 
     @Inject
     private AwsAuthenticator underTest;
+
+    @SpyBean
+    private AwsApacheClient awsApacheClient;
 
     @SpyBean
     private CommonAwsClient awsClient;

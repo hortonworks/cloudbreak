@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonPricingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonS3Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecurityTokenServiceClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AwsApacheClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.metrics.AwsMetricPublisher;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
@@ -94,6 +95,9 @@ public abstract class AwsClient {
     @Inject
     private AwsMetricPublisher awsMetricPublisher;
 
+    @Inject
+    private AwsApacheClient awsApacheClient;
+
     public AuthenticatedContext createAuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
         try {
@@ -134,6 +138,7 @@ public abstract class AwsClient {
 
     private Ec2Client createAccessWithClientConfiguration(AwsCredentialView awsCredential, String regionName, ClientOverrideConfiguration clientConfiguration) {
         Ec2ClientBuilder ec2ClientBuilder = Ec2Client.builder()
+                .httpClient(awsApacheClient.getApacheHttpClient())
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .overrideConfiguration(clientConfiguration)
                 .endpointProvider(new DefaultEc2EndpointProvider())
@@ -143,6 +148,7 @@ public abstract class AwsClient {
 
     public AmazonCloudWatchClient createCloudWatchClient(AwsCredentialView awsCredential, String regionName) {
         CloudWatchClientBuilder cloudWatchClientBuilder = CloudWatchClient.builder()
+                .httpClient(awsApacheClient.getApacheHttpClient())
                 .overrideConfiguration(getDefaultClientConfiguration())
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .region(Region.of(regionName));
@@ -156,6 +162,7 @@ public abstract class AwsClient {
 
     public AmazonSecurityTokenServiceClient createSecurityTokenService(AwsCredentialView awsCredential, String regionName) {
         StsClientBuilder stsClientBuilder = StsClient.builder()
+                .httpClient(awsApacheClient.getApacheHttpClient())
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .overrideConfiguration(getDefaultClientConfiguration())
                 .region(Region.of(regionName));
@@ -165,6 +172,7 @@ public abstract class AwsClient {
     public AmazonIdentityManagementClient createAmazonIdentityManagement(AwsCredentialView awsCredential) {
         String regionName = awsDefaultZoneProvider.getDefaultZone(awsCredential);
         IamClientBuilder iamClientBuilder = IamClient.builder()
+                .httpClient(awsApacheClient.getApacheHttpClient())
                 .region(Region.of(regionName))
                 .overrideConfiguration(getDefaultClientConfiguration())
                 .credentialsProvider(getCredentialProvider(awsCredential));
@@ -173,6 +181,7 @@ public abstract class AwsClient {
 
     public AmazonKmsClient createAWSKMS(AwsCredentialView awsCredential, String regionName) {
         KmsClientBuilder kmsClientBuilder = KmsClient.builder()
+                .httpClient(awsApacheClient.getApacheHttpClient())
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .region(Region.of(regionName));
         return new AmazonKmsClient(proxy(kmsClientBuilder.build(), awsCredential, regionName));
@@ -180,6 +189,7 @@ public abstract class AwsClient {
 
     public AmazonElasticLoadBalancingClient createElasticLoadBalancingClient(AwsCredentialView awsCredential, String regionName) {
         ElasticLoadBalancingV2ClientBuilder loadBalancingClientBuilder = ElasticLoadBalancingV2Client.builder()
+                .httpClient(awsApacheClient.getApacheHttpClient())
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .region(Region.of(regionName))
                 .overrideConfiguration(getDefaultClientConfiguration());
@@ -188,6 +198,7 @@ public abstract class AwsClient {
 
     public AmazonEfsClient createElasticFileSystemClient(AwsCredentialView awsCredential, String regionName) {
         EfsClientBuilder efsClientBuilder = EfsClient.builder()
+                .httpClient(awsApacheClient.getApacheHttpClient())
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .region(Region.of(regionName));
         return new AmazonEfsClient(proxy(efsClientBuilder.build(), awsCredential, regionName), retry);
@@ -195,6 +206,7 @@ public abstract class AwsClient {
 
     public AmazonS3Client createS3Client(AwsCredentialView awsCredential, String regionName) {
         S3ClientBuilder s3ClientBuilder = S3Client.builder()
+                .httpClient(awsApacheClient.getApacheHttpClient())
                 .region(Region.of(regionName))
                 .credentialsProvider(getCredentialProvider(awsCredential));
         return new AmazonS3Client(proxy(s3ClientBuilder.build(), awsCredential, regionName));
@@ -202,6 +214,7 @@ public abstract class AwsClient {
 
     public AmazonDynamoDBClient createDynamoDbClient(AwsCredentialView awsCredential, String regionName) {
         DynamoDbClientBuilder dynamoDbClientBuilder = DynamoDbClient.builder()
+                .httpClient(awsApacheClient.getApacheHttpClient())
                 .overrideConfiguration(getDefaultClientConfiguration())
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .region(Region.of(regionName));
@@ -210,6 +223,7 @@ public abstract class AwsClient {
 
     public AmazonRdsClient createRdsClient(AwsCredentialView awsCredential, String regionName) {
         RdsClientBuilder rdsClientBuilder = RdsClient.builder()
+                .httpClient(awsApacheClient.getApacheHttpClient())
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .overrideConfiguration(getDefaultClientConfiguration())
                 .region(Region.of(regionName));
@@ -218,6 +232,7 @@ public abstract class AwsClient {
 
     public AmazonPricingClient createPricingClient(AwsCredentialView awsCredential, String regionName) {
         PricingClientBuilder clientBuilder = PricingClient.builder()
+                .httpClient(awsApacheClient.getApacheHttpClient())
                 .credentialsProvider(getCredentialProvider(awsCredential))
                 .overrideConfiguration(getDefaultClientConfiguration())
                 .region(Region.of(regionName));
