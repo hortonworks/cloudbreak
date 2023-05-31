@@ -12,6 +12,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
+import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -48,7 +50,11 @@ public class SecretRotationActions {
 
             @Override
             protected void doExecute(RotationFlowContext context, SecretRotationTriggerEvent payload, Map<Object, Object> variables) throws Exception {
-                sendEvent(context, ExecuteRotationTriggerEvent.fromPayload(payload));
+                if (RotationFlowExecutionType.ROLLBACK.equals(payload.getExecutionType())) {
+                    sendEvent(context, ExecuteRotationFailedEvent.fromPayload(payload, new SecretRotationException("Explicit rollback execution.", null)));
+                } else {
+                    sendEvent(context, ExecuteRotationTriggerEvent.fromPayload(payload));
+                }
             }
 
             @Override
