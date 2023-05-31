@@ -18,6 +18,7 @@ import javax.validation.metadata.ValidateUnwrappedValue;
 
 import org.hibernate.validator.internal.engine.constraintvalidation.ConstraintValidatorContextImpl;
 import org.hibernate.validator.internal.engine.path.PathImpl;
+import org.hibernate.validator.messageinterpolation.ExpressionLanguageFeatureLevel;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,7 +40,9 @@ public class UpdateStackRequestValidatorTest {
                 null,
                 PathImpl.createPathFromString("status"),
                 new DummyConstraintDescriptor(),
-                null
+                null,
+                ExpressionLanguageFeatureLevel.NONE,
+                ExpressionLanguageFeatureLevel.NONE
         );
     }
 

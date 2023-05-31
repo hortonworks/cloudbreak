@@ -2,32 +2,25 @@ package com.sequenceiq.common.api.util;
 
 import javax.validation.ConstraintValidatorContext;
 
-import org.apache.commons.lang3.StringUtils;
-
 public class ValidatorUtil {
 
     private ValidatorUtil() {
     }
 
     public static ConstraintValidatorContext addConstraintViolation(ConstraintValidatorContext context, String message, String propertyModel) {
-        message = avoidExpressionLanguageResolutionOnMessage(message);
-        return context.buildConstraintViolationWithTemplate(message)
-                .addPropertyNode(propertyModel)
-                .addConstraintViolation();
+        ConstraintValidatorContext constraintValidatorContext;
+        ConstraintValidatorContext.ConstraintViolationBuilder validationBuilder = context.buildConstraintViolationWithTemplate(message);
+        if (propertyModel != null) {
+            constraintValidatorContext = validationBuilder
+                    .addPropertyNode(propertyModel)
+                    .addConstraintViolation();
+        } else {
+            constraintValidatorContext = validationBuilder.addConstraintViolation();
+        }
+        return constraintValidatorContext;
     }
 
     public static ConstraintValidatorContext addConstraintViolation(ConstraintValidatorContext context, String message) {
-        message = avoidExpressionLanguageResolutionOnMessage(message);
-        return context.buildConstraintViolationWithTemplate(message)
-                .addConstraintViolation();
+        return addConstraintViolation(context, message, null);
     }
-
-    private static String avoidExpressionLanguageResolutionOnMessage(String message) {
-        String result = message;
-        if (StringUtils.isNotEmpty(message)) {
-            result = message.replace("$", "");
-        }
-        return result;
-    }
-
 }

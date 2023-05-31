@@ -8,7 +8,6 @@ import javax.ws.rs.core.Response.StatusType;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -24,8 +23,6 @@ public class HttpContentSizeValidator implements ConstraintValidator<ValidHttpCo
     public static final String INVALID_URL_MSG = "The value should be a valid URL and start with 'http(s)'!";
 
     public static final String FAILED_TO_GET_WITH_EXCEPTION = "Failed to get response by the specified URL!";
-
-    public static final String MESSAGE_VARIABLE = "contentLimit";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpContentSizeValidator.class);
 
@@ -54,8 +51,8 @@ public class HttpContentSizeValidator implements ConstraintValidator<ValidHttpCo
             int maxSizeInBytes = contentSizeProvider.getMaxSizeInBytes();
             boolean valid = contentLength.getValue() > 0 && contentLength.getValue() <= maxSizeInBytes;
             if (!valid) {
-                context.unwrap(HibernateConstraintValidatorContext.class)
-                        .addMessageParameter(MESSAGE_VARIABLE, FileUtils.byteCountToDisplaySize(maxSizeInBytes));
+                String message = String.format("The content of the given URL must be less than {%s}", FileUtils.byteCountToDisplaySize(maxSizeInBytes));
+                ValidatorUtil.addConstraintViolation(context, message);
             }
 
             return valid;
