@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType.HDD;
+import static com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType.LOCAL_SSD;
+
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -48,6 +51,29 @@ public class InstanceGroupEphemeralVolumeCheckerTest {
         ig = createGroup(List.of(Pair.of(AwsDiskType.Ephemeral.value(), VolumeUsageType.GENERAL),
                         Pair.of(AwsDiskType.Gp2.value(), VolumeUsageType.DATABASE),
                         Pair.of(AwsDiskType.Gp2.value(), VolumeUsageType.GENERAL)),
+                InstanceGroupType.GATEWAY, "gateway");
+        Assertions.assertFalse(underTest.instanceGroupContainsOnlyDatabaseAndEphemeralVolumes(ig));
+    }
+
+    @Test
+    public void testIsInstanceGroupLocalSSDVolumesOnly() {
+        InstanceGroup ig = createGroup(List.of(Pair.of(LOCAL_SSD.value(), VolumeUsageType.GENERAL),
+                        Pair.of(HDD.value(), VolumeUsageType.GENERAL)),
+                InstanceGroupType.CORE, "worker");
+        Assertions.assertFalse(underTest.instanceGroupContainsOnlyDatabaseAndEphemeralVolumes(ig));
+
+        ig = createGroup(List.of(Pair.of(LOCAL_SSD.value(), VolumeUsageType.GENERAL)),
+                InstanceGroupType.CORE, "worker");
+        Assertions.assertTrue(underTest.instanceGroupContainsOnlyDatabaseAndEphemeralVolumes(ig));
+
+        ig = createGroup(List.of(Pair.of(LOCAL_SSD.value(), VolumeUsageType.GENERAL),
+                        Pair.of(HDD.value(), VolumeUsageType.DATABASE)),
+                InstanceGroupType.GATEWAY, "gateway");
+        Assertions.assertTrue(underTest.instanceGroupContainsOnlyDatabaseAndEphemeralVolumes(ig));
+
+        ig = createGroup(List.of(Pair.of(LOCAL_SSD.value(), VolumeUsageType.GENERAL),
+                        Pair.of(HDD.value(), VolumeUsageType.DATABASE),
+                        Pair.of(HDD.value(), VolumeUsageType.GENERAL)),
                 InstanceGroupType.GATEWAY, "gateway");
         Assertions.assertFalse(underTest.instanceGroupContainsOnlyDatabaseAndEphemeralVolumes(ig));
     }

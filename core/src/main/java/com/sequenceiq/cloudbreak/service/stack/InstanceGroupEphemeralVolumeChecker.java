@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil.volumeIsEphemeral;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
-import com.sequenceiq.common.model.AwsDiskType;
 
 @Component
 public class InstanceGroupEphemeralVolumeChecker {
@@ -28,17 +29,17 @@ public class InstanceGroupEphemeralVolumeChecker {
 
     public boolean instanceGroupContainsEphemeralVolumes(InstanceGroupView ig) {
         return ig.getTemplate().getVolumeTemplates().stream()
-                .anyMatch(volumeTemplate -> AwsDiskType.Ephemeral.value().equalsIgnoreCase(volumeTemplate.getVolumeType()));
+                .anyMatch(volumeTemplate -> volumeIsEphemeral(volumeTemplate));
     }
 
     private boolean instanceGroupContainsOnlyEphemeralVolumes(InstanceGroupView ig) {
         return ig.getTemplate().getVolumeTemplates().stream()
-                .allMatch(volumeTemplate -> AwsDiskType.Ephemeral.value().equalsIgnoreCase(volumeTemplate.getVolumeType()));
+                .allMatch(volumeTemplate -> volumeIsEphemeral(volumeTemplate));
     }
 
     private boolean nonEphemeralVolumesAreDatabases(InstanceGroupView ig) {
         return ig.getTemplate().getVolumeTemplates().stream()
-                .filter(volumeTemplate -> !AwsDiskType.Ephemeral.value().equalsIgnoreCase(volumeTemplate.getVolumeType()))
+                .filter(volumeTemplate -> !volumeIsEphemeral(volumeTemplate))
                 .allMatch(volumeTemplate -> VolumeUsageType.DATABASE.equals(volumeTemplate.getUsageType()));
     }
 }

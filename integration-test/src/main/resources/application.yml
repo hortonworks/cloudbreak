@@ -279,6 +279,12 @@ integrationtest:
       volumeSize: 100
       volumeCount: 1
       volumeType: pd-standard
+    storageOptimizedInstance:
+      type: n2-highmem-8
+      rootVolumeSize: 100
+      volumeSize: 375
+      volumeCount: 2
+      volumeType: local-ssd
     securityAccess:
       knoxSecurityGroup:
       defaultSecurityGroup:

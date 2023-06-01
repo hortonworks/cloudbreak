@@ -11,6 +11,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_ROLLBACK_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_TIME;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_PROVISIONING;
+import static com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned;
 import static com.sequenceiq.common.api.type.ImageStatus.CREATE_FAILED;
 import static com.sequenceiq.common.api.type.ImageStatus.CREATE_FINISHED;
 import static java.lang.String.format;
@@ -295,7 +296,8 @@ public class StackCreationService {
                                     "Group name: {}, Template id: {}, instance type: {}",
                             TemporaryStorage.EPHEMERAL_VOLUMES_ONLY.name(), instanceGroup.getGroupName(), template.getId(), template.getInstanceType());
                     template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES_ONLY);
-                } else if (instanceStorageCount > 0 && stack.getType().equals(StackType.WORKLOAD)) {
+                } else if ((hasDiskWhichIsEphemeralAndProvisionedByCloudbreak(template) || instanceStorageCount > 0)
+                        && stack.getType().equals(StackType.WORKLOAD)) {
                     LOGGER.debug("The host group's instance type has ephemeral volumes. Setting temporary storage in template to: {}. " +
                                     "Group name: {}, Template id: {}, instance type: {}",
                             TemporaryStorage.EPHEMERAL_VOLUMES.name(), instanceGroup.getGroupName(), template.getId(), template.getInstanceType());
@@ -308,6 +310,13 @@ public class StackCreationService {
                 templateService.savePure(template);
             }
         }
+    }
+
+    private boolean hasDiskWhichIsEphemeralAndProvisionedByCloudbreak(Template template) {
+        // AWS ephemeral storages are not provisioned by CB this is why google is different
+        return template.getVolumeTemplates()
+                .stream()
+                .anyMatch(e -> volumeIsEphemeralWhichMustBeProvisioned(e));
     }
 
     private void sendNotificationIfNecessary(CheckImageResult result, StackDtoDelegate stack) {

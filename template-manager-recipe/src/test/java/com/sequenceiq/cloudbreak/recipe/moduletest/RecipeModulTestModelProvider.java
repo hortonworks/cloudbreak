@@ -239,7 +239,8 @@ class RecipeModulTestModelProvider {
                                 .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
                                 .collect(Collectors.toSet())
                 )
-                .withHostgroups(hostNames.length == 0 ? getHostGroups("master", "worker", "compute") : getHostGroups(hostNames));
+                .withHostgroups(hostNames.length == 0 ? getHostGroups("master", "worker", "compute") : getHostGroups(hostNames),
+                        Set.of("local-ssd"));
     }
 
     private static S3FileSystemConfigurationsView getS3ConfigView(Collection<StorageLocationView> locationViews) {

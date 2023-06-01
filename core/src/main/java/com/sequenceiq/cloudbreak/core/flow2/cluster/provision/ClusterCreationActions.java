@@ -532,7 +532,6 @@ public class ClusterCreationActions {
         return new AbstractClusterCreationAction<>(ClusterManagerRefreshParcelSuccess.class) {
             @Override
             protected void doExecute(ClusterCreationViewContext context, ClusterManagerRefreshParcelSuccess payload, Map<Object, Object> variables) {
-                clusterCreationService.configurePolicy(context.getStackId());
                 sendEvent(context);
             }
 

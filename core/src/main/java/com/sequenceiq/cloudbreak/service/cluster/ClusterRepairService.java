@@ -67,7 +67,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.common.model.AwsDiskType;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -76,8 +75,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 public class ClusterRepairService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterRepairService.class);
-
-    private static final List<String> REATTACH_NOT_SUPPORTED_VOLUME_TYPES = List.of(AwsDiskType.Ephemeral.value());
 
     private static final String RECOVERY = "RECOVERY";
 

@@ -56,8 +56,6 @@ public class TemplateValidatorAndUpdater {
 
     public static final String GROUP_NAME_COMPUTE = "compute";
 
-    public static final String SERVICE_IMPALA = "IMPALA";
-
     public static final String ROLE_IMPALAD = "IMPALAD";
 
     private static final Set<String> SDX_COMPUTE_INSTANCES = Set.of("hmshg", "razhg", "atlashg");
@@ -234,18 +232,27 @@ public class TemplateValidatorAndUpdater {
         if (vmType != null && needToCheckVolume(volumeParameterType, value.getVolumeCount())) {
             VolumeParameterConfig config = vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
             if (config != null) {
-                // IDBroker does not use data volume, so its volume count should be zero
-                // To be backward-compatible, we only check max limit and allow the min limit to be zero for IDBroker
-                if (value.getVolumeCount() > config.maximumNumber()) {
-                    validationBuilder.error(String.format("Max allowed volume count for '%s': %s", vmType.value(), config.maximumNumber()));
-                } else if (!(isIDBrokerInstanceGroup(instanceGroup) || isComputeInstanceGroup(instanceGroup)
-                        || isSdxComputeInstanceHostGroup(instanceGroup) || isCoordinatorAndExecutorInstanceGroup(bluePrintText)) &&
-                        value.getVolumeCount() < config.minimumNumber()) {
-                    validationBuilder.error(String.format("Min allowed volume count for '%s': %s", vmType.value(), config.minimumNumber()));
-                }
+                validateVolumeCountInParameterConfig(config, value, vmType, validationBuilder, instanceGroup, bluePrintText);
             } else {
                 validationBuilder.error(String.format("The '%s' instance type does not support 'Ephemeral' volume type", vmType.value()));
             }
+        }
+    }
+
+    private void validateVolumeCountInParameterConfig(VolumeParameterConfig config, VolumeTemplate value, VmType vmType,
+            ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, String bluePrintText) {
+        // IDBroker does not use data volume, so its volume count should be zero
+        // To be backward-compatible, we only check max limit and allow the min limit to be zero for IDBroker
+        if (!config.possibleNumberValues().isEmpty()) {
+            if (!config.possibleNumberValues().contains(value.getVolumeCount())) {
+                validationBuilder.error(String.format("Allowed volume count(s) for '%s': %s", vmType.value(), config.possibleNumberValues()));
+            }
+        } else if (value.getVolumeCount() > config.maximumNumber()) {
+            validationBuilder.error(String.format("Max allowed volume count for '%s': %s", vmType.value(), config.maximumNumber()));
+        } else if (!(isIDBrokerInstanceGroup(instanceGroup) || isComputeInstanceGroup(instanceGroup)
+                || isSdxComputeInstanceHostGroup(instanceGroup) || isCoordinatorAndExecutorInstanceGroup(bluePrintText)) &&
+                value.getVolumeCount() < config.minimumNumber()) {
+            validationBuilder.error(String.format("Min allowed volume count for '%s': %s", vmType.value(), config.minimumNumber()));
         }
     }
 
@@ -258,18 +265,27 @@ public class TemplateValidatorAndUpdater {
         if (vmType != null && needToCheckVolume(volumeParameterType, value.getVolumeCount())) {
             VolumeParameterConfig config = vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
             if (config != null) {
-                // IDBroker does not use data volume, so its volume size should be zero
-                // To be backward-compatible, we only check max limit and allow the min limit to be zero for IDBroker
-                if (value.getVolumeSize() > config.maximumSize()) {
-                    validationBuilder.error(String.format("Max allowed volume size for '%s': %s", vmType.value(), config.maximumSize()));
-                } else if (!(isIDBrokerInstanceGroup(instanceGroup) || isComputeInstanceGroup(instanceGroup)
-                        || isSdxComputeInstanceHostGroup(instanceGroup) || isCoordinatorAndExecutorInstanceGroup(bluePrintText)) &&
-                        value.getVolumeSize() < config.minimumSize()) {
-                    validationBuilder.error(String.format("Min allowed volume size for '%s': %s", vmType.value(), config.minimumSize()));
-                }
+                validateVolumeSizeInParameterConfig(config, value, vmType, validationBuilder, instanceGroup, bluePrintText);
             } else {
                 validationBuilder.error(String.format("The '%s' instance type does not support 'Ephemeral' volume type", vmType.value()));
             }
+        }
+    }
+
+    private void validateVolumeSizeInParameterConfig(VolumeParameterConfig config, VolumeTemplate value, VmType vmType,
+            ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, String bluePrintText) {
+        // IDBroker does not use data volume, so its volume size should be zero
+        // To be backward-compatible, we only check max limit and allow the min limit to be zero for IDBroker
+        if (!config.possibleSizeValues().isEmpty()) {
+            if (!config.possibleSizeValues().contains(value.getVolumeSize())) {
+                validationBuilder.error(String.format("Allowed volume size(s) for '%s': %s", vmType.value(), config.possibleSizeValues()));
+            }
+        } else if (value.getVolumeSize() > config.maximumSize()) {
+            validationBuilder.error(String.format("Max allowed volume size for '%s': %s", vmType.value(), config.maximumSize()));
+        } else if (!(isIDBrokerInstanceGroup(instanceGroup) || isComputeInstanceGroup(instanceGroup)
+                || isSdxComputeInstanceHostGroup(instanceGroup) || isCoordinatorAndExecutorInstanceGroup(bluePrintText)) &&
+                value.getVolumeSize() < config.minimumSize()) {
+            validationBuilder.error(String.format("Min allowed volume size for '%s': %s", vmType.value(), config.minimumSize()));
         }
     }
 

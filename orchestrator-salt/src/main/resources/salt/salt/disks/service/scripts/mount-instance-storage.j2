@@ -12,9 +12,14 @@ format_disks_if_unformatted() {
     local device_name_list=("$@")
     log $LOG_FILE "format disk arguments: ${device_name_list[@]}"
     local return_value=0
+    local iter=0
     for devicename in ${device_name_list[@]}; do
         log $LOG_FILE device: $devicename
         if [ -z "$(blkid $devicename)" ]; then
+            if [[ "$CLOUD_PLATFORM" == "GCP" ]]; then
+              devicename=/dev/disk/by-id/google-local-nvme-ssd-$iter
+              iter=$(expr $iter + 1)
+            fi
             log $LOG_FILE "formatting: $devicename"
             $(mkfs -E lazy_itable_init=1 -O uninit_bg -F -t $FS_TYPE $devicename >> $LOG_FILE 2>&1)
             if [ ! $? -eq 0 ]; then
@@ -178,7 +183,7 @@ get_root_disk() {
     fi
 }
 
-find_format_and_mount_ephemeral_storage_aws() {
+find_format_and_mount_ephemeral_storage_aws_or_gcp() {
     declare -a devices_arr
     declare -a inst_storage_devices_arr
     declare -a devices_log_arr
@@ -187,7 +192,7 @@ find_format_and_mount_ephemeral_storage_aws() {
     clean_up_fstab
 
     log $LOG_FILE "collecting NVMe instance storage devices"
-    readarray -t inst_storage_devices_arr < <(sudo nvme list -o json | jq -r  '.Devices[] | select(.ModelNumber == "Amazon EC2 NVMe Instance Storage") | .DevicePath')
+    readarray -t inst_storage_devices_arr < <(sudo nvme list -o json | jq -r $1)
 
     if [ ${{ '{#' }}inst_storage_devices_arr[@]} -eq 0 ]; then
         log $LOG_FILE "no NVMe instance storage found. Checking for other unmounted storage."
@@ -262,10 +267,17 @@ main () {
     elif [[ "$CLOUD_PLATFORM" == "AWS" ]]; then
         log $LOG_FILE "Starting to remount AWS ephemeral devices"
         is_there_a_volume_to_mount
-        find_format_and_mount_ephemeral_storage_aws
+        find_format_and_mount_ephemeral_storage_aws_or_gcp \''.Devices[] | select(.ModelNumber == "Amazon EC2 NVMe Instance Storage") | .DevicePath'\'
         return_code=$?
         log $LOG_FILE result of remounting AWS ephemeral devices: $return_code
         [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error remounting AWS ephemeral devices"
+    elif [[ "$CLOUD_PLATFORM" == "GCP" ]]; then
+        log $LOG_FILE "Starting to remount GCP local SSD devices"
+        is_there_a_volume_to_mount
+        find_format_and_mount_ephemeral_storage_aws_or_gcp \''.Devices[] | select(.ModelNumber == "nvme_card") | .DevicePath'\'
+        return_code=$?
+        log $LOG_FILE result of remounting GCP ephemeral devices: $return_code
+        [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error remounting GCP local SSD devices"
     fi
 
     exit_with_code $LOG_FILE 0 "script 'mount-instance-storage' ended"
