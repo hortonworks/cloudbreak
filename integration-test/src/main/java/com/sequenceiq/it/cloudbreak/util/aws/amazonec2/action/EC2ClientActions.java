@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -234,16 +235,22 @@ public class EC2ClientActions extends EC2Client {
 
     public List<String> getRootVolumesKmsKeys(List<String> instanceIds) {
         List<String> volumeIds = getInstanceVolumeIds(instanceIds, true);
-        DescribeVolumesResponse describeVolumesResponse;
-        try (Ec2Client ec2Client = buildEC2Client()) {
-            describeVolumesResponse = ec2Client.describeVolumes(DescribeVolumesRequest.builder().volumeIds(volumeIds).build());
+        if (volumeIds.isEmpty()) {
+            LOGGER.info("Unable to get KMS keys because there are no volume found for instances {}", instanceIds);
+            return Collections.emptyList();
+        } else {
+            DescribeVolumesResponse describeVolumesResponse;
+            try (Ec2Client ec2Client = buildEC2Client()) {
+                LOGGER.info("Describing volumes {}", volumeIds);
+                describeVolumesResponse = ec2Client.describeVolumes(DescribeVolumesRequest.builder().volumeIds(volumeIds).build());
+            }
+            Map<String, String> volumeIdKmsIdMap = describeVolumesResponse.volumes()
+                    .stream()
+                    .collect(Collectors.toMap(Volume::volumeId, Volume::kmsKeyId));
+            volumeIdKmsIdMap.forEach((volumeId, kmsKeyId) -> Log.log(LOGGER, format(" Following KMS Key IDs are available: [%s] for '%s' EC2 volume. ",
+                    kmsKeyId, volumeId)));
+            return new ArrayList<>(volumeIdKmsIdMap.values());
         }
-        Map<String, String> volumeIdKmsIdMap = describeVolumesResponse.volumes()
-                .stream()
-                .collect(Collectors.toMap(Volume::volumeId, Volume::kmsKeyId));
-        volumeIdKmsIdMap.forEach((volumeId, kmsKeyId) -> Log.log(LOGGER, format(" Following KMS Key IDs are available: [%s] for '%s' EC2 volume. ",
-                kmsKeyId, volumeId)));
-        return new ArrayList<>(volumeIdKmsIdMap.values());
     }
 
     public Map<String, String> listLaunchTemplatesUserData(String stack) {
