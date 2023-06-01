@@ -78,7 +78,6 @@ auth:
     cm.ha.enable: false
     conclusion.checker.send.user.event.enable: true
     ha.repair.enable: true
-    ephemeral.disks.for.temp.data.enable: true
     ui:
       edp.progress.bar.enable: true
     unbound.elimination.enable: true

@@ -97,7 +97,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STOP_START_SCALING_FAILURE_RECOVERY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.EPHEMERAL_DISKS_FOR_TEMP_DATA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
@@ -427,10 +426,6 @@ public class EntitlementService {
 
     public boolean conclusionCheckerSendUserEventEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CONCLUSION_CHECKER_SEND_USER_EVENT);
-    }
-
-    public boolean ephemeralDisksForTempDataEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, EPHEMERAL_DISKS_FOR_TEMP_DATA);
     }
 
     public boolean isDatalakeMediumDutyWithProfilerEnabled(String accountId) {

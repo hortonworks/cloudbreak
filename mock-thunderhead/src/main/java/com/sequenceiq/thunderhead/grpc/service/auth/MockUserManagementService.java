@@ -96,7 +96,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STREAMING_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.EPHEMERAL_DISKS_FOR_TEMP_DATA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
@@ -427,9 +426,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.nodestatus.salt.ping.enable}")
     private boolean nodestatusSaltPingEnabled;
-
-    @Value("${auth.mock.ephemeral.disks.for.temp.data.enable}")
-    private boolean ephemeralDisksForTempDataEnabled;
 
     @Value("${auth.mock.datalake.multiaz.enable}")
     private boolean enableMultiAzDataLake;
@@ -910,9 +906,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (nodestatusSaltPingEnabled) {
             builder.addEntitlements(createEntitlement(CDP_NODESTATUS_ENABLE_SALT_PING));
-        }
-        if (ephemeralDisksForTempDataEnabled) {
-            builder.addEntitlements(createEntitlement(EPHEMERAL_DISKS_FOR_TEMP_DATA));
         }
         if (enableAzureEncryptionAtHost) {
             builder.addEntitlements(createEntitlement(CDP_CB_AZURE_ENCRYPTION_AT_HOST));
