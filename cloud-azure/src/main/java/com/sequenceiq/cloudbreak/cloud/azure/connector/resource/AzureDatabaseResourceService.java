@@ -139,10 +139,7 @@ public class AzureDatabaseResourceService {
     }
 
     private List<CloudResource> createCloudResources(String fqdn) {
-        List<CloudResource> databaseResources = Lists.newArrayList();
-        databaseResources.add(createCloudResource(RDS_HOSTNAME, fqdn));
-        databaseResources.add(createCloudResource(ResourceType.RDS_PORT, Integer.toString(POSTGRESQL_SERVER_PORT)));
-        return databaseResources;
+        return List.of(createCloudResource(RDS_HOSTNAME, fqdn), createCloudResource(ResourceType.RDS_PORT, Integer.toString(POSTGRESQL_SERVER_PORT)));
     }
 
     private CloudResource createCloudResource(ResourceType type, String name) {
@@ -370,12 +367,16 @@ public class AzureDatabaseResourceService {
     }
 
     private void deployDatabaseServer(String stackName, String resourceGroupName, String template, AzureClient client) {
-        LOGGER.debug("Re-deploying database server {} in resource group {}", stackName, resourceGroupName);
-        String parametersMapAsString = new Json(Map.of()).getValue();
-        try {
-            createTemplateDeploymentWithRetryInCaseOfConflict(stackName, resourceGroupName, template, client, parametersMapAsString);
-        } catch (Retry.ActionFailedException e) {
-            throw (ManagementException) e.getCause();
+        if (client.getTemplateDeploymentStatus(resourceGroupName, stackName).isPermanent()) {
+            LOGGER.debug("Re-deploying database server {} in resource group {}", stackName, resourceGroupName);
+            String parametersMapAsString = new Json(Map.of()).getValue();
+            try {
+                createTemplateDeploymentWithRetryInCaseOfConflict(stackName, resourceGroupName, template, client, parametersMapAsString);
+            } catch (Retry.ActionFailedException e) {
+                throw (ManagementException) e.getCause();
+            }
+        } else {
+            LOGGER.debug("The database server template deployment is in progress with name {}", stackName);
         }
     }
 
