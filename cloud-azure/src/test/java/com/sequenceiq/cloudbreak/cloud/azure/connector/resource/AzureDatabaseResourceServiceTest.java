@@ -39,6 +39,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.azure.core.exception.AzureException;
 import com.azure.core.http.HttpResponse;
 import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
@@ -60,6 +61,8 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.service.Retry;
@@ -82,7 +85,7 @@ class AzureDatabaseResourceServiceTest {
     private static final String NEW_PASSWORD = "newPassword";
 
     @Mock
-    private AzureDatabaseTemplateBuilder azureTemplateBuilder;
+    private AzureDatabaseTemplateBuilder azureDatabaseTemplateBuilder;
 
     @Mock
     private AzureUtils azureUtils;
@@ -117,8 +120,11 @@ class AzureDatabaseResourceServiceTest {
     @Mock
     private Retry retryService;
 
+    @Mock
+    private PersistenceNotifier persistenceNotifier;
+
     @InjectMocks
-    private AzureDatabaseResourceService victim;
+    private AzureDatabaseResourceService underTest;
 
     @BeforeEach
     void initTests() {
@@ -131,7 +137,7 @@ class AzureDatabaseResourceServiceTest {
         when(client.getResourceGroup(RESOURCE_GROUP_NAME)).thenReturn(null);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
 
-        ExternalDatabaseStatus actual = victim.getDatabaseServerStatus(ac, databaseStack);
+        ExternalDatabaseStatus actual = underTest.getDatabaseServerStatus(ac, databaseStack);
 
         assertEquals(ExternalDatabaseStatus.DELETED, actual);
     }
@@ -141,20 +147,18 @@ class AzureDatabaseResourceServiceTest {
         when(client.getResourceGroup(RESOURCE_GROUP_NAME)).thenReturn(resourceGroup);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
 
-        ExternalDatabaseStatus actual = victim.getDatabaseServerStatus(ac, databaseStack);
+        ExternalDatabaseStatus actual = underTest.getDatabaseServerStatus(ac, databaseStack);
 
         assertEquals(ExternalDatabaseStatus.STARTED, actual);
     }
 
     @Test
     void shouldReturnDeletedDbServerWhenTerminateDatabaseServerAndSingleResourceGroup() {
-        PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
-        DatabaseStack databaseStack = mock(DatabaseStack.class);
         when(azureResourceGroupMetadataProvider.getResourceGroupUsage(any(DatabaseStack.class))).thenReturn(ResourceGroupUsage.SINGLE);
         when(azureUtils.deleteDatabaseServer(any(), anyString(), anyBoolean())).thenReturn(Optional.empty());
         List<CloudResource> cloudResources = List.of(buildResource(AZURE_DATABASE));
 
-        List<CloudResourceStatus> resourceStatuses = victim.terminateDatabaseServer(ac, databaseStack, cloudResources, false, persistenceNotifier);
+        List<CloudResourceStatus> resourceStatuses = underTest.terminateDatabaseServer(ac, databaseStack, cloudResources, false, persistenceNotifier);
 
         assertEquals(1, resourceStatuses.size());
         assertEquals(AZURE_DATABASE, resourceStatuses.get(0).getCloudResource().getType());
@@ -166,14 +170,12 @@ class AzureDatabaseResourceServiceTest {
 
     @Test
     void shouldReturnDeletedResourceGroupWhenTerminateDatabaseServerAndMultipleResourceGroups() {
-        PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
-        DatabaseStack databaseStack = mock(DatabaseStack.class);
         when(azureResourceGroupMetadataProvider.getResourceGroupUsage(any(DatabaseStack.class))).thenReturn(ResourceGroupUsage.MULTIPLE);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureUtils.deleteResourceGroup(any(), anyString(), anyBoolean())).thenReturn(Optional.empty());
         List<CloudResource> cloudResources = List.of(buildResource(AZURE_DATABASE));
 
-        List<CloudResourceStatus> resourceStatuses = victim.terminateDatabaseServer(ac, databaseStack, cloudResources, false, persistenceNotifier);
+        List<CloudResourceStatus> resourceStatuses = underTest.terminateDatabaseServer(ac, databaseStack, cloudResources, false, persistenceNotifier);
 
         assertEquals(1, resourceStatuses.size());
         assertEquals(AZURE_RESOURCE_GROUP, resourceStatuses.get(0).getCloudResource().getType());
@@ -185,8 +187,6 @@ class AzureDatabaseResourceServiceTest {
 
     @Test
     void shouldReturnDeletedDbServerAndDeleteAccessPolicyWhenTerminateDatabaseServerAndSingleResourceGroup() {
-        PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
-        DatabaseStack databaseStack = mock(DatabaseStack.class);
         Map<String, Object> params = new HashMap<>();
         params.put("keyVaultUrl", "dummyKeyVaultUrl");
         params.put("keyVaultResourceGroupName", "dummyKeyVaultResourceGroupName");
@@ -199,7 +199,7 @@ class AzureDatabaseResourceServiceTest {
         List<CloudResource> cloudResources = List.of(buildResource(AZURE_DATABASE));
         initRetry();
 
-        List<CloudResourceStatus> resourceStatuses = victim.terminateDatabaseServer(ac, databaseStack, cloudResources, false, persistenceNotifier);
+        List<CloudResourceStatus> resourceStatuses = underTest.terminateDatabaseServer(ac, databaseStack, cloudResources, false, persistenceNotifier);
 
         assertEquals(1, resourceStatuses.size());
         assertEquals(AZURE_DATABASE, resourceStatuses.get(0).getCloudResource().getType());
@@ -213,8 +213,6 @@ class AzureDatabaseResourceServiceTest {
 
     @Test
     void shouldUpgradeDatabaseWhenUpgradeDatabaseServerAndPrivateEndpoint() {
-        PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
-        DatabaseStack databaseStack = mock(DatabaseStack.class);
         DatabaseServer databaseServer = buildDatabaseServer();
 
         CloudResource dbResource = buildResource(AZURE_DATABASE);
@@ -233,9 +231,9 @@ class AzureDatabaseResourceServiceTest {
             return null;
         }).when(retryService).testWith2SecDelayMax5Times(any(Runnable.class));
         ArgumentCaptor<DatabaseStack> databaseStackArgumentCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
-        when(azureTemplateBuilder.build(eq(cloudContext), databaseStackArgumentCaptor.capture())).thenReturn(TEMPLATE);
+        when(azureDatabaseTemplateBuilder.build(eq(cloudContext), databaseStackArgumentCaptor.capture())).thenReturn(TEMPLATE);
 
-        victim.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList);
+        underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList);
 
         verify(azureUtils).getStackName(eq(cloudContext));
 
@@ -257,8 +255,6 @@ class AzureDatabaseResourceServiceTest {
 
     @Test
     void testUpgradeThrowsMgmtExWithConflict() {
-        PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
-        DatabaseStack databaseStack = mock(DatabaseStack.class);
         DatabaseServer databaseServer = buildDatabaseServer();
 
         CloudResource dbResource = buildResource(AZURE_DATABASE);
@@ -277,14 +273,14 @@ class AzureDatabaseResourceServiceTest {
             return null;
         }).when(retryService).testWith2SecDelayMax5Times(any(Runnable.class));
         ArgumentCaptor<DatabaseStack> databaseStackArgumentCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
-        when(azureTemplateBuilder.build(eq(cloudContext), databaseStackArgumentCaptor.capture())).thenReturn(TEMPLATE);
+        when(azureDatabaseTemplateBuilder.build(eq(cloudContext), databaseStackArgumentCaptor.capture())).thenReturn(TEMPLATE);
         ManagementException managementException = new ManagementException("asdf", mock(HttpResponse.class), new ManagementError("conflict", "asdf"));
         doThrow(managementException).when(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         when(azureExceptionHandler.isExceptionCodeConflict(managementException)).thenReturn(Boolean.TRUE);
         when(azureUtils.convertToCloudConnectorException(managementException, "Database stack upgrade")).thenReturn(new CloudConnectorException("fda"));
 
         assertThrows(CloudConnectorException.class,
-                () -> victim.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList));
+                () -> underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList));
 
         verify(azureUtils).getStackName(eq(cloudContext));
 
@@ -305,8 +301,6 @@ class AzureDatabaseResourceServiceTest {
 
     @Test
     void testUpgradeThrowsMgmtExWithNonConflict() {
-        PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
-        DatabaseStack databaseStack = mock(DatabaseStack.class);
         DatabaseServer databaseServer = buildDatabaseServer();
 
         CloudResource dbResource = buildResource(AZURE_DATABASE);
@@ -325,14 +319,14 @@ class AzureDatabaseResourceServiceTest {
             return null;
         }).when(retryService).testWith2SecDelayMax5Times(any(Runnable.class));
         ArgumentCaptor<DatabaseStack> databaseStackArgumentCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
-        when(azureTemplateBuilder.build(eq(cloudContext), databaseStackArgumentCaptor.capture())).thenReturn(TEMPLATE);
+        when(azureDatabaseTemplateBuilder.build(eq(cloudContext), databaseStackArgumentCaptor.capture())).thenReturn(TEMPLATE);
         ManagementException managementException = new ManagementException("asdf", mock(HttpResponse.class), new ManagementError("not_conflict", "asdf"));
         doThrow(managementException).when(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         when(azureExceptionHandler.isExceptionCodeConflict(managementException)).thenReturn(Boolean.FALSE);
         when(azureUtils.convertToCloudConnectorException(managementException, "Database stack upgrade")).thenReturn(new CloudConnectorException("fda"));
 
         assertThrows(CloudConnectorException.class,
-                () -> victim.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList));
+                () -> underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList));
 
         verify(azureUtils).getStackName(eq(cloudContext));
 
@@ -354,8 +348,6 @@ class AzureDatabaseResourceServiceTest {
 
     @Test
     void shouldUpgradeDatabaseAndDeleteAllResourcesWhenUpgradeDatabaseServerAndMultiplePrivateEndpointResourcesExist() {
-        PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
-        DatabaseStack databaseStack = mock(DatabaseStack.class);
         DatabaseServer databaseServer = buildDatabaseServer();
 
         CloudResource dbResource = buildResource(AZURE_DATABASE);
@@ -373,7 +365,7 @@ class AzureDatabaseResourceServiceTest {
         when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes()).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT, AZURE_DNS_ZONE_GROUP));
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
 
-        victim.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList);
+        underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList);
 
         verify(azureUtils).getStackName(eq(cloudContext));
 
@@ -391,15 +383,13 @@ class AzureDatabaseResourceServiceTest {
 
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         ArgumentCaptor<DatabaseStack> databaseStackArgumentCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
-        verify(azureTemplateBuilder).build(eq(cloudContext), databaseStackArgumentCaptor.capture());
+        verify(azureDatabaseTemplateBuilder).build(eq(cloudContext), databaseStackArgumentCaptor.capture());
         assertEquals("11", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
         verify(persistenceNotifier).notifyAllocations(expectedCloudResourceList, cloudContext);
     }
 
     @Test
     void shouldUpgradeDatabaseWhenUpgradeDatabaseServerAndNoPrivateEndpoint() {
-        PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
-        DatabaseStack databaseStack = mock(DatabaseStack.class);
         CloudResource dbResource = buildResource(AZURE_DATABASE);
         List<CloudResource> cloudResourceList = List.of(dbResource);
         DatabaseServer databaseServer = buildDatabaseServer();
@@ -410,7 +400,7 @@ class AzureDatabaseResourceServiceTest {
         when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(List.of(dbResource));
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
 
-        victim.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList);
+        underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList);
 
         verify(azureUtils).getStackName(eq(cloudContext));
         verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
@@ -419,15 +409,13 @@ class AzureDatabaseResourceServiceTest {
         verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         ArgumentCaptor<DatabaseStack> databaseStackArgumentCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
-        verify(azureTemplateBuilder).build(eq(cloudContext), databaseStackArgumentCaptor.capture());
+        verify(azureDatabaseTemplateBuilder).build(eq(cloudContext), databaseStackArgumentCaptor.capture());
         assertEquals("11", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
         verify(persistenceNotifier).notifyAllocations(List.of(dbResource), cloudContext);
     }
 
     @Test
     void shouldReturnExceptionWhenUpgradeDatabaseServerThrowsCloudException() {
-        PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
-        DatabaseStack databaseStack = mock(DatabaseStack.class);
         CloudResource dbResource = buildResource(AZURE_DATABASE);
         CloudResource peResource = buildResource(AZURE_PRIVATE_ENDPOINT);
         CloudResource dzgResource = buildResource(AZURE_DNS_ZONE_GROUP);
@@ -441,34 +429,200 @@ class AzureDatabaseResourceServiceTest {
         doThrow(new RuntimeException("delete failed")).when(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
 
         CloudConnectorException exception = assertThrows(CloudConnectorException.class,
-                () -> victim.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList));
+                () -> underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList));
 
         assertEquals("Error in upgrading database stack aStack: delete failed", exception.getMessage());
         verify(azureUtils).getStackName(eq(cloudContext));
         verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
-        verify(azureTemplateBuilder, never()).build(eq(cloudContext), any(DatabaseStack.class));
+        verify(azureDatabaseTemplateBuilder, never()).build(eq(cloudContext), any(DatabaseStack.class));
         verify(persistenceNotifier, times(1)).notifyAllocations(List.of(dbResource), cloudContext);
     }
 
     @Test
     void shouldReturnExceptionWhenUpgradeDatabaseServerDbResourceIsNotFound() {
-        PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
-        DatabaseStack databaseStack = mock(DatabaseStack.class);
-
         CloudResource peResource = buildResource(AZURE_PRIVATE_ENDPOINT);
         CloudResource dzgResource = buildResource(AZURE_DNS_ZONE_GROUP);
         List<CloudResource> cloudResourceList = List.of(peResource, dzgResource);
 
         CloudConnectorException exception = assertThrows(CloudConnectorException.class,
-                () -> victim.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList));
+                () -> underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList));
 
         assertEquals("Azure database server cloud resource does not exist for stack, please contact Cloudera support!", exception.getMessage());
         verify(azureUtils).getStackName(eq(cloudContext));
         verify(azureUtils, never()).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
         verify(azureUtils, never()).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_ENDPOINT);
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
-        verify(azureTemplateBuilder, never()).build(eq(cloudContext), any(DatabaseStack.class));
+        verify(azureDatabaseTemplateBuilder, never()).build(eq(cloudContext), any(DatabaseStack.class));
+    }
+
+    @Test
+    void testBuildDatabaseResourcesForLaunch() {
+        when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(azureResourceGroupMetadataProvider.getResourceGroupUsage(databaseStack)).thenReturn(ResourceGroupUsage.SINGLE);
+        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
+        when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
+        when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
+        doAnswer(invocation -> {
+            invocation.getArgument(0, Runnable.class).run();
+            return null;
+        }).when(retryService).testWith2SecDelayMax5Times(any(Runnable.class));
+
+        List<CloudResourceStatus> actual =  underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier);
+
+        assertEquals(2, actual.size());
+        verify(azureUtils).getStackName(cloudContext);
+        verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
+        verify(azureResourceGroupMetadataProvider).getResourceGroupUsage(databaseStack);
+        verify(azureDatabaseTemplateBuilder).build(cloudContext, databaseStack);
+        verify(client).resourceGroupExists(RESOURCE_GROUP_NAME);
+        verify(persistenceNotifier, times(4)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
+        verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
+        verify(client).getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME);
+    }
+
+    @Test
+    void testBuildDatabaseResourcesForLaunchShouldThrowExceptionWhenTheRGIsExistsAndTheTypeIsSingle() {
+        when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(azureResourceGroupMetadataProvider.getResourceGroupUsage(databaseStack)).thenReturn(ResourceGroupUsage.SINGLE);
+        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
+        when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(false);
+
+        Exception exception =  assertThrows(CloudConnectorException.class,
+                () -> underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier));
+
+        assertEquals("Resource group with name resource group name does not exist!", exception.getMessage());
+        verify(azureUtils).getStackName(cloudContext);
+        verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
+        verify(azureResourceGroupMetadataProvider).getResourceGroupUsage(databaseStack);
+        verify(azureDatabaseTemplateBuilder).build(cloudContext, databaseStack);
+    }
+
+    @Test
+    void testBuildDatabaseResourcesForLaunchShouldCreateRGWhenTheExistingRGTypeIsMultiple() {
+        when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(azureResourceGroupMetadataProvider.getResourceGroupUsage(databaseStack)).thenReturn(ResourceGroupUsage.MULTIPLE);
+        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
+        when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(false);
+        when(cloudContext.getLocation()).thenReturn(Location.location(Region.region("region")));
+        when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
+        doAnswer(invocation -> {
+            invocation.getArgument(0, Runnable.class).run();
+            return null;
+        }).when(retryService).testWith2SecDelayMax5Times(any(Runnable.class));
+
+        List<CloudResourceStatus> actual =  underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier);
+
+        assertEquals(2, actual.size());
+        verify(azureUtils).getStackName(cloudContext);
+        verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
+        verify(azureResourceGroupMetadataProvider).getResourceGroupUsage(databaseStack);
+        verify(azureDatabaseTemplateBuilder).build(cloudContext, databaseStack);
+        verify(client).resourceGroupExists(RESOURCE_GROUP_NAME);
+        verify(client).createResourceGroup(eq(RESOURCE_GROUP_NAME), any(), any());
+        verify(persistenceNotifier, times(4)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
+        verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
+        verify(client).getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME);
+    }
+
+    @Test
+    void testBuildDatabaseResourcesForLaunchWhenTheTemplateDeploymentIsAlreadyExists() {
+        when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(azureResourceGroupMetadataProvider.getResourceGroupUsage(databaseStack)).thenReturn(ResourceGroupUsage.SINGLE);
+        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
+        when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
+        when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(true);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
+
+        List<CloudResourceStatus> actual =  underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier);
+
+        assertEquals(2, actual.size());
+        verify(azureUtils).getStackName(cloudContext);
+        verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
+        verify(azureResourceGroupMetadataProvider).getResourceGroupUsage(databaseStack);
+        verify(azureDatabaseTemplateBuilder).build(cloudContext, databaseStack);
+        verify(client).resourceGroupExists(RESOURCE_GROUP_NAME);
+        verify(persistenceNotifier, times(4)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
+        verify(client).getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME);
+    }
+
+    @Test
+    void testBuildDatabaseResourcesForLaunchShouldThrowExceptionWhenTheTemplateDeploymentThrowsManagementException() {
+        when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(azureResourceGroupMetadataProvider.getResourceGroupUsage(databaseStack)).thenReturn(ResourceGroupUsage.SINGLE);
+        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
+        when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
+        when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        doAnswer(invocation -> {
+            invocation.getArgument(0, Runnable.class).run();
+            return null;
+        }).when(retryService).testWith2SecDelayMax5Times(any(Runnable.class));
+        ManagementException managementException = new ManagementException("Error", mock(HttpResponse.class));
+        doThrow(managementException).when(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
+        String exceptionMessage = "Database stack provisioning";
+        when(azureUtils.convertToCloudConnectorException(managementException, exceptionMessage))
+                .thenReturn(new CloudConnectorException(exceptionMessage, managementException));
+        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(List.of(mock(CloudResource.class)));
+
+        Exception exception =  assertThrows(CloudConnectorException.class,
+                () -> underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier));
+
+        assertEquals(exceptionMessage, exception.getMessage());
+        assertEquals(managementException, exception.getCause());
+        verify(azureUtils).getStackName(cloudContext);
+        verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
+        verify(azureResourceGroupMetadataProvider).getResourceGroupUsage(databaseStack);
+        verify(azureDatabaseTemplateBuilder).build(cloudContext, databaseStack);
+        verify(client).resourceGroupExists(RESOURCE_GROUP_NAME);
+        verify(persistenceNotifier, times(3)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
+        verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
+        verify(client).getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME);
+        verify(azureUtils).convertToCloudConnectorException(managementException, exceptionMessage);
+        verify(azureCloudResourceService).getDeploymentCloudResources(deployment);
+    }
+
+    @Test
+    void testBuildDatabaseResourcesForLaunchShouldThrowExceptionWhenTheTemplateDeploymentThrowsException() {
+        when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(azureResourceGroupMetadataProvider.getResourceGroupUsage(databaseStack)).thenReturn(ResourceGroupUsage.SINGLE);
+        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
+        when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
+        when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        doAnswer(invocation -> {
+            invocation.getArgument(0, Runnable.class).run();
+            return null;
+        }).when(retryService).testWith2SecDelayMax5Times(any(Runnable.class));
+        AzureException azureException = new AzureException("Error");
+        doThrow(azureException).when(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
+        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(List.of(mock(CloudResource.class)));
+
+        Exception exception =  assertThrows(CloudConnectorException.class,
+                () -> underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier));
+
+        assertEquals("Error in provisioning database stack aStack: Error", exception.getMessage());
+        assertEquals(azureException, exception.getCause());
+        verify(azureUtils).getStackName(cloudContext);
+        verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
+        verify(azureResourceGroupMetadataProvider).getResourceGroupUsage(databaseStack);
+        verify(azureDatabaseTemplateBuilder).build(cloudContext, databaseStack);
+        verify(client).resourceGroupExists(RESOURCE_GROUP_NAME);
+        verify(persistenceNotifier, times(3)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
+        verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
+        verify(client).getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME);
+        verify(azureCloudResourceService).getDeploymentCloudResources(deployment);
     }
 
     @Test
@@ -476,7 +630,7 @@ class AzureDatabaseResourceServiceTest {
         when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId(SERVER_NAME).build());
         when(azureResourceGroupMetadataProvider.getResourceGroupName(eq(cloudContext), eq(databaseStack))).thenReturn(RESOURCE_GROUP_NAME);
 
-        victim.updateAdministratorLoginPassword(ac, databaseStack, NEW_PASSWORD);
+        underTest.updateAdministratorLoginPassword(ac, databaseStack, NEW_PASSWORD);
 
         verify(azureResourceGroupMetadataProvider, times(1)).getResourceGroupName(eq(cloudContext), eq(databaseStack));
         verify(client, times(1)).updateAdministratorLoginPassword(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME), eq(NEW_PASSWORD));
@@ -489,7 +643,7 @@ class AzureDatabaseResourceServiceTest {
         doThrow(new RuntimeException("error")).when(client).updateAdministratorLoginPassword(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME), eq(NEW_PASSWORD));
 
         CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
-                () -> victim.updateAdministratorLoginPassword(ac, databaseStack, NEW_PASSWORD));
+                () -> underTest.updateAdministratorLoginPassword(ac, databaseStack, NEW_PASSWORD));
 
         assertEquals("error", cloudConnectorException.getMessage());
         verify(azureResourceGroupMetadataProvider, times(1)).getResourceGroupName(eq(cloudContext), eq(databaseStack));
