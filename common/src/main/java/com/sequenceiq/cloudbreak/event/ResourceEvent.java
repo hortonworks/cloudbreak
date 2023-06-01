@@ -286,6 +286,7 @@ public enum ResourceEvent {
     STACK_LB_CREATE_CLOUD_RESOURCE("stack.lb.update.create.cloud.resource"),
     STACK_LB_COLLECT_METADATA("stack.lb.update.collect.metadata"),
     STACK_LB_REGISTER_PUBLIC_DNS("stack.lb.update.register.public.dns"),
+    STACK_LB_REGISTER_PUBLIC_DNS_FAILED("stack.lb.update.register.public.dns.failed"),
     STACK_LB_REGISTER_FREEIPA_DNS("stack.lb.update.register.freeipa.dns"),
     STACK_LB_UPDATE_CM_CONFIG("stack.lb.update.update.cm.config"),
     STACK_LB_RESTART_CM("stack.lb.update.restart.cm"),

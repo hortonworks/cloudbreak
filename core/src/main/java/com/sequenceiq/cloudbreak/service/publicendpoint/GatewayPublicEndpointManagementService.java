@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.publicendpoint;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_LB_REGISTER_PUBLIC_DNS_FAILED;
+
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +28,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
@@ -55,6 +59,9 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
 
     @Inject
     private LoadBalancerConfigService loadBalancerConfigService;
+
+    @Inject
+    private FlowMessageService flowMessageService;
 
     public boolean isCertRenewalTriggerable(StackView stack) {
         return manageCertificateAndDnsInPem()
@@ -120,7 +127,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
             if (loadBalancerOptional.isEmpty()) {
                 LOGGER.error("Unable find appropriate load balancer in stack. Load balancer public domain name will not be registered.");
             } else {
-                success = registerLoadBalancersDnsEntries(loadBalancerOptional.get(), stack.getEnvironmentCrn(), getHueHostGroups(stack));
+                success = registerLoadBalancersDnsEntries(loadBalancerOptional.get(), stack.getEnvironmentCrn(), getHueHostGroups(stack), stack.getId());
             }
         } else {
             LOGGER.debug("DNS registration in PEM service not enabled for load balancer.");
@@ -130,7 +137,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         return success;
     }
 
-    private boolean registerLoadBalancersDnsEntries(LoadBalancer loadBalancer, String environmentCrn, Set<String> hueHostGroups) {
+    private boolean registerLoadBalancersDnsEntries(LoadBalancer loadBalancer, String environmentCrn, Set<String> hueHostGroups, Long stackId) {
         boolean success = false;
         LOGGER.info("Updating load balancer DNS entries");
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -148,12 +155,14 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
             success = getDnsManagementService().createOrUpdateDnsEntryWithIp(accountId, endpoint,
                 environment.getName(), false, List.of(loadBalancer.getIp()));
         } else {
-            LOGGER.warn("Could not find IP or cloud DNS info for load balancer with endpoint {} ." +
-                "DNS registration will be skipped.", loadBalancer.getEndpoint());
+            LOGGER.warn("Could not find IP or cloud DNS info for load balancer with endpoint {}" +
+                " and environment name: '{}'. DNS registration will be skipped.", loadBalancer.getEndpoint(), environment.getName());
         }
 
         if (success) {
             setLoadBalancerFqdn(hueHostGroups, loadBalancer, endpoint, environment, accountId);
+        } else {
+            flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), STACK_LB_REGISTER_PUBLIC_DNS_FAILED);
         }
 
         return success;
