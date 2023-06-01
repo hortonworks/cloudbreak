@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CONFIGURE_POLICY;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
@@ -25,11 +29,13 @@ import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
+import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.saas.sdx.PaasRemoteDataContextSupplier;
 import com.sequenceiq.cloudbreak.saas.sdx.PaasSdxService;
 import com.sequenceiq.cloudbreak.saas.sdx.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.FinalizeClusterInstallHandlerService;
@@ -92,6 +98,12 @@ public class ClusterBuilderService implements PaasRemoteDataContextSupplier {
 
     @Inject
     private PaasSdxService sdxService;
+
+    @Inject
+    private StackUpdater stackUpdater;
+
+    @Inject
+    private FlowMessageService flowMessageService;
 
     public void startCluster(Long stackId) throws CloudbreakException, ClusterClientInitException {
         StackDto stackDto = stackDtoService.getById(stackId);
@@ -166,9 +178,12 @@ public class ClusterBuilderService implements PaasRemoteDataContextSupplier {
 
     public void configurePolicy(Long stackId) {
         StackDto stackDto = stackDtoService.getById(stackId);
-        getClusterSetupService(stackDto).publishPolicy(
-                stackDto.getCluster().getExtendedBlueprintText(),
-                stackDto.getPlatformVariant().equals(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value()));
+        boolean govCloud = stackDto.getPlatformVariant().equals(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
+        if (govCloud) {
+            flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CONFIGURE_POLICY);
+            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CONFIGURE_POLICY, "Configure FISMA Policies for Cloudera Manager");
+        }
+        getClusterSetupService(stackDto).publishPolicy(stackDto.getCluster().getExtendedBlueprintText(), govCloud);
     }
 
     public void autoConfigureCluster(Long stackId) throws CloudbreakException, ClusterClientInitException {

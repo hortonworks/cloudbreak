@@ -79,7 +79,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
-import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.dns.CloudPrivateDnsZones;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
@@ -98,6 +97,12 @@ public class GcpPlatformResources implements PlatformResources {
     private static final int TEN = 10;
 
     private static final int DEFAULT_PAGE_SIZE = 50;
+
+    private static final int GCP_LOCAL_SSD_ALLOWED_VALUES = 375;
+
+    private static final Set<Integer> GCP_LOCAL_SSD_POSSIBLE_NUMBER_VALUES = Set.of(1, 2, 3, 4, 5, 6, 7, 8, 16, 24);
+
+    private static final Set<String> MACHINE_TYPES_WITH_LOCAL_SSD = Set.of("n1", "n2", "n2d");
 
     @Value("${cb.gcp.default.vmtype:n2-highcpu-8}")
     private String gcpVmDefault;
@@ -245,7 +250,7 @@ public class GcpPlatformResources implements PlatformResources {
     }
 
     private SubnetworkList getSubnetworkList(Region region, Compute compute, String projectId, List<String> subnetIds,
-        String sharedProjectId) throws IOException {
+            String sharedProjectId) throws IOException {
         SubnetworkList subnetworkList;
         if (subnetIds.isEmpty() && Strings.isNullOrEmpty(sharedProjectId)) {
             subnetworkList = compute.subnetworks().list(projectId, region.value()).execute();
@@ -338,7 +343,7 @@ public class GcpPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
     public CloudRegions regions(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
-        boolean availabilityZonesNeeded) throws Exception {
+            boolean availabilityZonesNeeded) throws Exception {
         Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
         String projectId = gcpStackUtil.getProjectId(cloudCredential);
 
@@ -442,7 +447,7 @@ public class GcpPlatformResources implements PlatformResources {
             for (AvailabilityZone availabilityZone : regions.getCloudRegions().get(region)) {
                 MachineTypeList machineTypeList = compute.machineTypes().list(projectId, availabilityZone.value()).execute();
                 for (MachineType machineType : machineTypeList.getItems()) {
-                    VmTypeMeta vmTypeMeta = VmTypeMetaBuilder.builder()
+                    VmTypeMetaBuilder vmTypeMetaBuilder = VmTypeMetaBuilder.builder()
                             .withCpuAndMemory(machineType.getGuestCpus(),
                                     machineType.getMemoryMb().floatValue() / THOUSAND)
 
@@ -453,9 +458,15 @@ public class GcpPlatformResources implements PlatformResources {
                                     1, machineType.getMaximumPersistentDisks())
 
                             .withMaximumPersistentDisksSizeGb(machineType.getMaximumPersistentDisksSizeGb())
-                            .withVolumeEncryptionSupport(true)
-                            .create();
-                    VmType vmType = VmType.vmTypeWithMeta(machineType.getName(), vmTypeMeta, true);
+                            .withVolumeEncryptionSupport(true);
+                    if (isLocalSsdSupportedForInstanceType(machineType)) {
+                        LOGGER.debug("Adding the local disk configurations to the instance %s.", machineType);
+                        vmTypeMetaBuilder.withLocalSsdConfig(
+                                Set.of(GCP_LOCAL_SSD_ALLOWED_VALUES),
+                                GCP_LOCAL_SSD_POSSIBLE_NUMBER_VALUES
+                        );
+                    }
+                    VmType vmType = VmType.vmTypeWithMeta(machineType.getName(), vmTypeMetaBuilder.create(), true);
                     types.add(vmType);
                     if (machineType.getName().equals(gcpVmDefault)) {
                         defaultVmType = vmType;
@@ -468,6 +479,10 @@ public class GcpPlatformResources implements PlatformResources {
         } catch (Exception e) {
             return new CloudVmTypes(new HashMap<>(), new HashMap<>());
         }
+    }
+
+    private static boolean isLocalSsdSupportedForInstanceType(MachineType machineType) {
+        return MACHINE_TYPES_WITH_LOCAL_SSD.contains(machineType.getName().split("-")[0]);
     }
 
     @Override
@@ -554,7 +569,7 @@ public class GcpPlatformResources implements PlatformResources {
             return Optional.ofNullable(response.getKeyRings()).orElse(List.of());
         } catch (TokenResponseException e) {
             throw gcpStackUtil.getMissingServiceAccountKeyError(e, projectId);
-        }  catch (IOException e) {
+        } catch (IOException e) {
             LOGGER.info("Failed to get list of keyrings on keyring path: [{}].", keyRingPath, e);
             return List.of();
         }

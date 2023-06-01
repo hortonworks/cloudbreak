@@ -316,8 +316,12 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             Map<String, String> dataVolumeMap = nodesWithDiskData.stream()
                     .collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getDataVolumes()));
+            Map<String, String> dataVolumesWithDataLossMap = nodesWithDiskData.stream()
+                    .collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getDataVolumesWithDataLoss()));
             Map<String, String> serialIdMap = nodesWithDiskData.stream()
                     .collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getSerialIds()));
+            Map<String, String> serialIdWithDataLossMap = nodesWithDiskData.stream()
+                    .collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getSerialIdsWithDataLoss()));
             Map<String, String> fstabMap = nodesWithDiskData.stream()
                     .collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getFstab()));
             Map<String, String> temporaryStorageMap = nodesWithDiskData.stream()
@@ -327,7 +331,9 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             Map<String, Object> hostnameDiskMountMap = nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toMap(hn -> hn, hn -> Map.of(
                     "attached_volume_name_list", dataVolumeMap.getOrDefault(hn, ""),
+                    "attached_volume_name_with_dataloss_list", dataVolumesWithDataLossMap.getOrDefault(hn, ""),
                     "attached_volume_serial_list", serialIdMap.getOrDefault(hn, ""),
+                    "attached_volume_serial_with_dataloss_list", serialIdWithDataLossMap.getOrDefault(hn, ""),
                     "cloud_platform", platformVariant,
                     "previous_fstab", fstabMap.getOrDefault(hn, ""),
                     "database_volume_index", dataBaseVolumeIndexMap.getOrDefault(hn, -1),

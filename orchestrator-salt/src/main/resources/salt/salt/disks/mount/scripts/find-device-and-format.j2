@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 ATTACHED_VOLUME_NAME_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_name_list'] }}"
+ATTACHED_VOLUME_NAME_WITH_DATALOSS_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_name_with_dataloss_list'] }}"
 ATTACHED_VOLUME_SERIAL_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_serial_list'] }}"
+ATTACHED_VOLUME_SERIAL_WITH_DATALOSS_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_serial_with_dataloss_list'] }}"
 CLOUD_PLATFORM={{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['cloud_platform'] }}
 
 source /opt/salt/scripts/format-and-mount-common.sh
@@ -87,8 +89,6 @@ not_in_list() {
 get_ephemeral_device_names() {
     attached_volumes=$1
 
-    lsblk_out=$(lsblk -I 8 -dn  | cut -f1 -d' ')
-
     root_disk=$(get_root_disk)
     used_disks="$attached_volumes $root_disk"
     all_disk_names=$(lsblk_command  | cut -f1 -d' ')
@@ -108,7 +108,9 @@ get_ephemeral_device_names() {
 save_env_vars_to_log_file() {
     log $LOG_FILE environment variables:
     log $LOG_FILE ATTACHED_VOLUME_NAME_LIST=$ATTACHED_VOLUME_NAME_LIST
+    log $LOG_FILE ATTACHED_VOLUME_NAME_WITH_DATALOSS_LIST=$ATTACHED_VOLUME_NAME_WITH_DATALOSS_LIST
     log $LOG_FILE ATTACHED_VOLUME_SERIAL_LIST=$ATTACHED_VOLUME_SERIAL_LIST
+    log $LOG_FILE ATTACHED_VOLUME_SERIAL_WITH_DATALOSS_LIST=$ATTACHED_VOLUME_SERIAL_WITH_DATALOSS_LIST
     log $LOG_FILE CLOUD_PLATFORM=$CLOUD_PLATFORM
 }
 

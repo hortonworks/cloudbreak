@@ -2,7 +2,9 @@
 
 DATABASE_VOLUME_INDEX="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['database_volume_index'] }}"
 ATTACHED_VOLUME_NAME_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_name_list'] }}"
+ATTACHED_VOLUME_NAME_WITH_DATALOSS_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_name_with_dataloss_list'] }}"
 ATTACHED_VOLUME_SERIAL_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_serial_list'] }}"
+ATTACHED_VOLUME_SERIAL_WITH_DATALOSS_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_serial_with_dataloss_list'] }}"
 TEMPORARY_STORAGE="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['temporary_storage'] }}"
 CLOUD_PLATFORM="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['cloud_platform'] }}"
 PREVIOUS_FSTAB="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['previous_fstab'] }}"
@@ -207,8 +209,12 @@ save_env_vars_to_log_file() {
 
 main() {
     log $LOG_FILE "started, version: $VERSION"
+    log $LOG_FILE We will calculate the device names and not using the ATTACHED_VOLUME_UUID_LIST which is $ATTACHED_VOLUME_UUID_LIST
     device_name_list=$(get_device_names $LOG_FILE)
+    log $LOG_FILE The calculate device name list is $device_name_list
     export ATTACHED_VOLUME_UUID_LIST=$(get_uuid_list $LOG_FILE "$device_name_list") # ephemeral devices' uuid should not be returned
+    log $LOG_FILE The calculated ATTACHED_VOLUME_UUID_LIST is $ATTACHED_VOLUME_UUID_LIST
+
     local attached_volume_uuid_array=($ATTACHED_VOLUME_UUID_LIST)
     if [[ $DATABASE_VOLUME_INDEX != -1 ]]; then
         export DATABASE_VOLUME_UUID=${attached_volume_uuid_array[DATABASE_VOLUME_INDEX]}

@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUES
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+import static com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
 
@@ -249,10 +250,20 @@ public class StackToCloudStackConverter {
         fields.putAll(secretAttributes);
 
         List<Volume> volumes = new ArrayList<>();
-        template.getVolumeTemplates().forEach(volumeModel -> {
+        template.getVolumeTemplates().stream().filter(e -> !volumeIsEphemeralWhichMustBeProvisioned(e)).forEach(volumeModel -> {
             for (int i = 0; i < volumeModel.getVolumeCount(); i++) {
                 String mount = volumeModel.getUsageType() == VolumeUsageType.GENERAL ? VolumeUtils.VOLUME_PREFIX + (i + 1) : VolumeUtils.DATABASE_VOLUME;
                 Volume volume = new Volume(mount, volumeModel.getVolumeType(), volumeModel.getVolumeSize(), getVolumeUsageType(volumeModel.getUsageType()));
+                volumes.add(volume);
+            }
+        });
+        int localSsdStart = volumes.size();
+        template.getVolumeTemplates().stream().filter(e -> volumeIsEphemeralWhichMustBeProvisioned(e)).forEach(volumeModel -> {
+            for (int i = 0; i < volumeModel.getVolumeCount(); i++) {
+                String mount = volumeModel.getUsageType() == VolumeUsageType.GENERAL ?
+                        VolumeUtils.VOLUME_PREFIX + (localSsdStart + i + 1) : VolumeUtils.DATABASE_VOLUME;
+                Volume volume = new Volume(mount, volumeModel.getVolumeType(), volumeModel.getVolumeSize(), getVolumeUsageType(volumeModel.getUsageType()));
+                LOGGER.debug("The volume config is %s.", volume);
                 volumes.add(volume);
             }
         });

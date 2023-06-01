@@ -144,6 +144,7 @@ public class GcpPlatformParameters implements PlatformParameters {
         map.put(GcpDiskType.HDD.name(), VolumeParameterType.MAGNETIC);
         map.put(GcpDiskType.HDD.value(), VolumeParameterType.MAGNETIC);
         map.put(GcpDiskType.SSD.value(), VolumeParameterType.SSD);
+        map.put(GcpDiskType.LOCAL_SSD.value(), VolumeParameterType.LOCAL_SSD);
 
         return map;
     }
@@ -170,7 +171,8 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     public enum GcpDiskType {
         SSD("pd-ssd", "Solid-state persistent disks (SSD)"),
-        HDD("pd-standard", "Standard persistent disks (HDD)");
+        HDD("pd-standard", "Standard persistent disks (HDD)"),
+        LOCAL_SSD("local-ssd", "Local scratch disk (SSD)");
 
         private final String value;
 

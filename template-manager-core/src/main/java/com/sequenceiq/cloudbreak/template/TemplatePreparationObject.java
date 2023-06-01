@@ -314,27 +314,28 @@ public class TemplatePreparationObject {
             return this;
         }
 
-        public Builder withHostgroups(Set<HostGroup> hostGroups) {
+        public Builder withHostgroups(Set<HostGroup> hostGroups, Set<String> ephemeralVolumeWhichMustBeProvisioned) {
             for (HostGroup hostGroup : hostGroups) {
                 InstanceGroup instanceGroup = hostGroup.getInstanceGroup();
                 if (instanceGroup != null) {
                     Template template = instanceGroup.getTemplate();
-                    int volumeCount = template == null ? 1 : template.getVolumeTemplates().stream().
-                            filter(volumeTemplate -> volumeTemplate.getUsageType() == VolumeUsageType.GENERAL)
-                            .mapToInt(volume -> volume.getVolumeCount())
-                            .sum();
-                    Set<VolumeTemplate> volumeTemplates = template == null ? Collections.EMPTY_SET
-                            : template.getVolumeTemplates();
-                    Set<String> fqdns = instanceGroup.getAllInstanceMetaData().stream()
-                            .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
-                            .map(InstanceMetaData::getDiscoveryFQDN)
-                            .collect(Collectors.toSet());
+                    int localSsdCount = getLocalSsdCount(template, ephemeralVolumeWhichMustBeProvisioned);
+                    int localSsdSize = getLocalSsdSize(template, ephemeralVolumeWhichMustBeProvisioned);
                     TemporaryStorage temporaryStorage = template == null ? null : template.getTemporaryStorage();
-                    Integer temporaryStorageVolumeCount = template == null ? null : template.getInstanceStorageCount();
-                    Integer temporaryStorageVolumeSize = template == null ? null : template.getInstanceStorageSize();
-                    hostgroupViews.add(new HostgroupView(hostGroup.getName(), volumeCount,
-                            instanceGroup.getInstanceGroupType(), fqdns, volumeTemplates,
-                            temporaryStorage, temporaryStorageVolumeCount, temporaryStorageVolumeSize));
+                    int instanceStorageCount = template.getInstanceStorageCount() == null ? 0 : template.getInstanceStorageCount();
+                    int instanceStorageSize = template.getInstanceStorageSize() == null ? 0 : template.getInstanceStorageSize();
+                    Integer temporaryStorageVolumeCount = template == null ? null : Math.max(instanceStorageCount, localSsdCount);
+                    Integer temporaryStorageVolumeSize = template == null ? null : Math.max(instanceStorageSize, localSsdSize);
+                    hostgroupViews.add(new HostgroupView(
+                            hostGroup.getName(),
+                            getVolumeCount(template, ephemeralVolumeWhichMustBeProvisioned),
+                            instanceGroup.getInstanceGroupType(),
+                            getFqdns(instanceGroup),
+                            getVolumeTemplates(template),
+                            temporaryStorage,
+                            temporaryStorageVolumeCount,
+                            temporaryStorageVolumeSize)
+                    );
                 } else {
                     hostgroupViews.add(new HostgroupView(hostGroup.getName()));
                 }
@@ -342,6 +343,41 @@ public class TemplatePreparationObject {
             }
 
             return this;
+        }
+
+        private  Set<VolumeTemplate> getVolumeTemplates(Template template) {
+            return template == null ? Collections.emptySet() : template.getVolumeTemplates();
+        }
+
+        private int getVolumeCount(Template template, Set<String> ephemeralVolumeWhichMustBeProvisioned) {
+            return template == null ? 1 : template.getVolumeTemplates().stream().
+                    filter(volumeTemplate -> volumeTemplate.getUsageType() == VolumeUsageType.GENERAL
+                            &&  !ephemeralVolumeWhichMustBeProvisioned.stream().anyMatch(e -> e.equalsIgnoreCase(volumeTemplate.getVolumeType())))
+                    .mapToInt(VolumeTemplate::getVolumeCount)
+                    .sum();
+        }
+
+        private Set<String> getFqdns(InstanceGroup instanceGroup) {
+            return instanceGroup.getAllInstanceMetaData().stream()
+                    .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                    .map(InstanceMetaData::getDiscoveryFQDN)
+                    .collect(Collectors.toSet());
+        }
+
+        private int getLocalSsdCount(Template template, Set<String> ephemeralVolumeWhichMustBeProvisioned) {
+            return template.getVolumeTemplates().stream()
+                    .filter(t -> ephemeralVolumeWhichMustBeProvisioned.stream().anyMatch(e -> e.equalsIgnoreCase(t.getVolumeType())))
+                    .findFirst()
+                    .map(VolumeTemplate::getVolumeCount)
+                    .orElse(0);
+        }
+
+        private int getLocalSsdSize(Template template, Set<String> ephemeralVolumeWhichMustBeProvisioned) {
+            return template.getVolumeTemplates().stream()
+                    .filter(t -> ephemeralVolumeWhichMustBeProvisioned.stream().anyMatch(e -> e.equalsIgnoreCase(t.getVolumeType())))
+                    .findFirst()
+                    .map(VolumeTemplate::getVolumeSize)
+                    .orElse(0);
         }
 
         public Builder withHostgroupViews(Set<HostgroupView> hostgroupViews) {

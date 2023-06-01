@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.util;
 
+import static com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned;
 import static java.util.Collections.emptySet;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -181,13 +182,22 @@ public class StackUtil {
                         String instanceId = im.getInstanceId();
                         String instanceType = instanceGroup.getTemplate().getInstanceType();
                         String dataVolumes = getOrDefault(instanceToVolumeInfoMap, instanceId, "dataVolumes", "");
+                        String dataVolumesWithDataLoss = getOrDefault(instanceToVolumeInfoMap, instanceId, "dataVolumesWithDataLoss", "");
                         String serialIds = getOrDefault(instanceToVolumeInfoMap, instanceId, "serialIds", "");
+                        String serialIdsWithDataLoss = getOrDefault(instanceToVolumeInfoMap, instanceId, "serialIdsWithDataLoss", "");
                         String fstab = getOrDefault(instanceToVolumeInfoMap, instanceId, "fstab", "");
                         String uuids = getOrDefault(instanceToVolumeInfoMap, instanceId, "uuids", "");
                         Integer databaseVolumeIndex = getOrDefault(instanceToVolumeInfoMap, instanceId, "dataBaseVolumeIndex", -1);
                         TemporaryStorage temporaryStorage =
                                 Optional.ofNullable(instanceGroup.getTemplate().getTemporaryStorage()).orElse(TemporaryStorage.ATTACHED_VOLUMES);
-                        NodeVolumes nodeVolumes = new NodeVolumes(databaseVolumeIndex, dataVolumes, serialIds, fstab, uuids);
+                        NodeVolumes nodeVolumes = new NodeVolumes(
+                                databaseVolumeIndex,
+                                dataVolumes,
+                                dataVolumesWithDataLoss,
+                                serialIds,
+                                serialIdsWithDataLoss,
+                                fstab,
+                                uuids);
                         agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), instanceId, instanceType, im.getDiscoveryFQDN(), im.getInstanceGroupName(),
                                 nodeVolumes, temporaryStorage));
                     }
@@ -204,16 +214,33 @@ public class StackUtil {
                 .map(volumeSet -> Map.entry(volumeSet.getInstanceId(),
                         resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class)))
                 .map(entry -> {
-                    List<Volume> volumes = entry.getValue().map(VolumeSetAttributes::getVolumes).orElse(List.of());
+                    List<Volume> volumes = entry.getValue()
+                            .map(VolumeSetAttributes::getVolumes)
+                            .orElse(List.of())
+                            .stream()
+                            .filter(e -> !volumeIsEphemeralWhichMustBeProvisioned(e))
+                            .collect(Collectors.toList());
+                    List<Volume> volumesWithDataLoss = entry.getValue()
+                            .map(VolumeSetAttributes::getVolumes)
+                            .orElse(List.of())
+                            .stream()
+                            .filter(e -> volumeIsEphemeralWhichMustBeProvisioned(e))
+                            .collect(Collectors.toList());
                     List<String> dataVolumes = volumes.stream().map(Volume::getDevice).collect(Collectors.toList());
+                    List<String> dataVolumesWithDataLoss = volumesWithDataLoss.stream().map(Volume::getDevice).collect(Collectors.toList());
                     List<String> serialIds = volumes.stream().map(Volume::getId).collect(Collectors.toList());
+                    List<String> serialIdsWithDataLoss = volumesWithDataLoss.stream().map(Volume::getId).collect(Collectors.toList());
+                    LOGGER.debug("Datavolumes are %s, dataVolumesWithDataLoss are %s, serialIds are %s, serialIdsWithDataLoss are %s",
+                            dataVolumes, dataVolumesWithDataLoss, serialIds, serialIdsWithDataLoss);
                     int dataBaseVolumeIndex = IntStream.range(0, volumes.size())
                             .filter(index -> volumes.get(index).getCloudVolumeUsageType() == CloudVolumeUsageType.DATABASE)
                             .findFirst()
                             .orElse(-1);
                     return Map.<String, Map<String, Object>>entry(entry.getKey(), Map.of(
                             "dataVolumes", String.join(" ", dataVolumes),
+                            "dataVolumesWithDataLoss", String.join(" ", dataVolumesWithDataLoss),
                             "serialIds", String.join(" ", serialIds),
+                            "serialIdsWithDataLoss", String.join(" ", serialIdsWithDataLoss),
                             "dataBaseVolumeIndex", dataBaseVolumeIndex,
                             "fstab", entry.getValue().map(VolumeSetAttributes::getFstab).orElse(""),
                             "uuids", entry.getValue().map(VolumeSetAttributes::getUuids).orElse("")));

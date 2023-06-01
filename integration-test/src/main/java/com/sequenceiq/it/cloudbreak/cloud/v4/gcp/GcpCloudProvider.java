@@ -338,7 +338,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getStorageOptimizedInstanceType() {
-        return null;
+        return gcpProperties.getStorageOptimizedInstance().getType();
     }
 
     @Override

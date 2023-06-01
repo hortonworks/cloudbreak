@@ -97,17 +97,17 @@ get_root_disk_type() {
 }
 
 not_elastic_block_store() {
-    local device_name=$1 # input is evpected without '/dev/'
+    local device_name=$1 # input is expected without '/dev/'
     local log_file=$2
     nvme list | grep $device_name | sed 's/ \+/ /g' | tr '[:upper:]' '[:lower:]' | grep "amazon elastic block store" >> $log_file 2>&1
     [[ $? -eq 0 ]] && return 1 || return 0
 }
 
 lsblk_command() {
-    if [[ -z $(lsblk -I 8 -dn) ]]; then
+    if [[ -z $(lsblk -I 8,259 -dn) ]]; then
         lsblk -dn
     else
-        lsblk -I 8 -dn
+        lsblk -I 8,259 -dn
     fi
 }
 

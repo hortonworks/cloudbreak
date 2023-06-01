@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+import static com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil.getEphemeralVolumeWhichMustBeProvisioned;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -262,7 +263,7 @@ public class StackToTemplatePreparationObjectConverter {
                     .withVirtualGroupView(virtualGroupRequest);
 
             transactionService.required(() -> {
-                builder.withHostgroups(hostGroupService.getByCluster(cluster.getId()));
+                builder.withHostgroups(hostGroupService.getByCluster(cluster.getId()), getEphemeralVolumeWhichMustBeProvisioned());
             });
 
             decorateBuilderWithPlacement(source.getStack(), builder);

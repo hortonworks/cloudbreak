@@ -135,6 +135,10 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
             VolumeSetAttributes volumeSetAttributes = volumeSetResource.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
 
             for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
+                if (GcpDiskType.LOCAL_SSD.value().equals(volume.getType())) {
+                    LOGGER.debug("The volume request is Local ssd so skipping it.");
+                    continue;
+                }
                 Map<String, String> labels = gcpLabelUtil.createLabelsFromTags(cloudStack);
                 Disk disk = createDisk(projectId, volume, labels, volumeSetAttributes);
 

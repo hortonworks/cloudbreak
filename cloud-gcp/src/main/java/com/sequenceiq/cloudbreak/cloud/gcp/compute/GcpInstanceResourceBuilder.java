@@ -30,6 +30,7 @@ import com.google.api.services.compute.Compute.Instances.Get;
 import com.google.api.services.compute.Compute.Instances.Insert;
 import com.google.api.services.compute.model.AccessConfig;
 import com.google.api.services.compute.model.AttachedDisk;
+import com.google.api.services.compute.model.AttachedDiskInitializeParams;
 import com.google.api.services.compute.model.CustomerEncryptionKey;
 import com.google.api.services.compute.model.CustomerEncryptionKeyProtectedDisk;
 import com.google.api.services.compute.model.Instance;
@@ -48,6 +49,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionCreatorService;
@@ -81,6 +83,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private static final String GCP_DISK_TYPE = "PERSISTENT";
 
+    private static final String GCP_SCRATCH_DISK = "SCRATCH";
+
     private static final String GCP_DISK_MODE = "READ_WRITE";
 
     private static final String PREEMPTIBLE = "preemptible";
@@ -92,6 +96,10 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     private static final String INSTANCE_REFERENCE_URI = "https://www.googleapis.com/compute/v1/projects/%s/zones/%s/instances/%s";
 
     private static final String MACHINETYPE_URL = "https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s";
+
+    private static final String ZONES_DISK_TYPES_LOCAL_SSD = "zones/%s/diskTypes/local-ssd";
+
+    private static final String DISK_URL = "https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s";
 
     @Inject
     private CustomGcpDiskEncryptionCreatorService customGcpDiskEncryptionCreatorService;
@@ -131,6 +139,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
         listOfDisks.addAll(getBootDiskList(computeResources, projectId, cloudInstance.getAvailabilityZone()));
         listOfDisks.addAll(getAttachedDisks(computeResources, projectId));
+        listOfDisks.addAll(getLocalSsds(computeResources, projectId));
 
         listOfDisks.forEach(disk -> customGcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk));
 
@@ -409,7 +418,14 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     private Collection<AttachedDisk> getBootDiskList(List<CloudResource> resources, String projectId, String zone) {
         Collection<AttachedDisk> listOfDisks = new ArrayList<>();
         for (CloudResource resource : filterResourcesByType(resources, ResourceType.GCP_DISK)) {
-            listOfDisks.add(createDisk(projectId, true, resource.getName(), zone, true));
+            listOfDisks.add(createDisk(
+                    projectId,
+                    true,
+                    resource.getName(),
+                    zone,
+                    GCP_DISK_TYPE,
+                    true,
+                    Optional.empty()));
         }
         return listOfDisks;
     }
@@ -419,21 +435,59 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         for (CloudResource resource : filterResourcesByType(resources, ResourceType.GCP_ATTACHED_DISKSET)) {
             VolumeSetAttributes volumeSetAttributes = resource.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
             for (Volume volume : volumeSetAttributes.getVolumes()) {
-                listOfDisks.add(createDisk(projectId, false, volume.getId(), volumeSetAttributes.getAvailabilityZone(), Boolean.FALSE));
+                if (!GcpDiskType.LOCAL_SSD.value().equals(volume.getType())) {
+                    listOfDisks.add(createDisk(
+                            projectId,
+                            false,
+                            volume.getId(),
+                            volumeSetAttributes.getAvailabilityZone(),
+                            GCP_DISK_TYPE,
+                            false,
+                            Optional.of(volume)));
+                }
             }
         }
         return listOfDisks;
     }
 
-    private AttachedDisk createDisk(String projectId, boolean boot, String resourceName, String zone, boolean autoDelete) {
+    private Collection<AttachedDisk> getLocalSsds(List<CloudResource> resources, String projectId) {
+        Collection<AttachedDisk> listOfDisks = new ArrayList<>();
+        for (CloudResource resource : filterResourcesByType(resources, ResourceType.GCP_ATTACHED_DISKSET)) {
+            VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+            for (Volume volume : volumeSetAttributes.getVolumes()) {
+                if (GcpDiskType.LOCAL_SSD.value().equals(volume.getType())) {
+                    listOfDisks.add(createDisk(
+                            projectId,
+                            false,
+                            volume.getId(),
+                            volumeSetAttributes.getAvailabilityZone(),
+                            GCP_SCRATCH_DISK,
+                            true,
+                            Optional.of(volume)));
+                }
+            }
+        }
+        return listOfDisks;
+    }
+
+    private AttachedDisk createDisk(String projectId, boolean boot, String resourceName,
+        String zone, String diskType, boolean autoDelete, Optional<Volume> volume) {
         AttachedDisk attachedDisk = new AttachedDisk();
         attachedDisk.setBoot(boot);
         attachedDisk.setAutoDelete(autoDelete);
-        attachedDisk.setType(GCP_DISK_TYPE);
+        attachedDisk.setType(diskType);
         attachedDisk.setMode(GCP_DISK_MODE);
         attachedDisk.setDeviceName(resourceName);
-        attachedDisk.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s",
-                projectId, zone, resourceName));
+        if (!GCP_SCRATCH_DISK.equals(diskType)) {
+            attachedDisk.setSource(String.format(DISK_URL, projectId, zone, resourceName));
+        } else {
+            attachedDisk.setInterface("NVME");
+            AttachedDiskInitializeParams attachedDiskInitializeParams =
+                    new AttachedDiskInitializeParams()
+                            .setDiskSizeGb((long) volume.get().getSize())
+                            .setDiskType(String.format(ZONES_DISK_TYPES_LOCAL_SSD, zone));
+            attachedDisk.setInitializeParams(attachedDiskInitializeParams);
+        }
         return attachedDisk;
     }
 
@@ -500,7 +554,10 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             Operation operation;
             if (stopRequest) {
                 LOGGER.info("Stop operation executed");
-                operation = compute.instances().stop(projectId, availabilityZone, instanceId).setPrettyPrint(true).execute();
+                operation = compute.instances().stop(projectId, availabilityZone, instanceId)
+                        .setPrettyPrint(true)
+                        .setDiscardLocalSsd(true)
+                        .execute();
             } else {
                 LOGGER.info("Start operation executed");
                 operation = executeStartOperation(projectId, availabilityZone, compute, instanceId, instance.getTemplate(), instanceResponse.getDisks());

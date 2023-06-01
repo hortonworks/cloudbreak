@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class VmTypeMeta {
 
@@ -26,6 +27,8 @@ public class VmTypeMeta {
     private VolumeParameterConfig ephemeralConfig;
 
     private VolumeParameterConfig st1Config;
+
+    private VolumeParameterConfig localSsdConfig;
 
     private Map<String, Object> properties = new HashMap<>();
 
@@ -67,6 +70,14 @@ public class VmTypeMeta {
 
     public void setSt1Config(VolumeParameterConfig st1Config) {
         this.st1Config = st1Config;
+    }
+
+    public void setLocalSsdConfig(VolumeParameterConfig localSsdConfig) {
+        this.localSsdConfig = localSsdConfig;
+    }
+
+    public VolumeParameterConfig getLocalSsdConfig() {
+        return localSsdConfig;
     }
 
     public Map<String, Object> getProperties() {
@@ -116,6 +127,8 @@ public class VmTypeMeta {
 
         private VolumeParameterConfig st1Config;
 
+        private VolumeParameterConfig localSsdConfig;
+
         private final Map<String, Object> properties = new HashMap<>();
 
         private VmTypeMetaBuilder() {
@@ -150,7 +163,17 @@ public class VmTypeMeta {
             return this;
         }
 
+        public VmTypeMetaBuilder withLocalSsdConfig(Set<Integer> possibleSizeValues, Set<Integer> possibleNumberValues) {
+            localSsdConfig = new VolumeParameterConfig(VolumeParameterType.LOCAL_SSD, possibleSizeValues, possibleNumberValues);
+            return this;
+        }
+
         public VmTypeMetaBuilder withSsdConfig(VolumeParameterConfig volumeParameterConfig) {
+            ssdConfig = volumeParameterConfig;
+            return this;
+        }
+
+        public VmTypeMetaBuilder withLocalSsdConfig(VolumeParameterConfig volumeParameterConfig) {
             ssdConfig = volumeParameterConfig;
             return this;
         }
@@ -224,6 +247,7 @@ public class VmTypeMeta {
             vmTypeMeta.setMagneticConfig(magneticConfig);
             vmTypeMeta.setSsdConfig(ssdConfig);
             vmTypeMeta.setSt1Config(st1Config);
+            vmTypeMeta.setLocalSsdConfig(localSsdConfig);
             vmTypeMeta.setProperties(properties);
             return vmTypeMeta;
         }

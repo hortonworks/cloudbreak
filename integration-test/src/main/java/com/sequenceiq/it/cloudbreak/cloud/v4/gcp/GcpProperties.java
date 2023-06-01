@@ -26,6 +26,8 @@ public class GcpProperties {
 
     private final Instance instance = new Instance();
 
+    private final GcpProperties.Instance storageOptimizedInstance = new GcpProperties.Instance();
+
     private final SecurityAccess securityAccess = new SecurityAccess();
 
     private final Baseimage baseimage = new Baseimage();
@@ -125,6 +127,10 @@ public class GcpProperties {
 
     public DiskEncryption getDiskEncryption() {
         return diskEncryption;
+    }
+
+    public GcpProperties.Instance getStorageOptimizedInstance() {
+        return storageOptimizedInstance;
     }
 
     public static class Baseimage {

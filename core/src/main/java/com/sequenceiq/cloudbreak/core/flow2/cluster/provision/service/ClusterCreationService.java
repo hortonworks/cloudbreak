@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_BUILDING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_BUILT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RUN_SERVICES;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CONFIGURE_POLICY;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.RECOVERY_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_GATEWAY_CERTIFICATE_CREATE_SKIPPED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_BOOTSTRAP;
@@ -81,11 +80,6 @@ public class ClusterCreationService {
     public void startingClusterServices(Long stackId) {
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.STARTING_CLUSTER_SERVICES, "Running cluster services.");
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_RUN_SERVICES);
-    }
-
-    public void configurePolicy(Long stackId) {
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CONFIGURE_POLICY, "Configure Policy for cluster");
-        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CONFIGURE_POLICY);
     }
 
     public void installingCluster(Long stackId) {
