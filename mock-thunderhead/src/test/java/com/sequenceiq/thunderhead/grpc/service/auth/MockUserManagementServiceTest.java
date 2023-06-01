@@ -251,9 +251,6 @@ public class MockUserManagementServiceTest {
                 {"nodestatusSaltPingEnabled false", "nodestatusSaltPingEnabled", false, "CDP_NODESTATUS_ENABLE_SALT_PING", false},
                 {"nodestatusSaltPingEnabled true", "nodestatusSaltPingEnabled", true, "CDP_NODESTATUS_ENABLE_SALT_PING", true},
 
-                {"ephemeralDisksForTempDataEnabled false", "ephemeralDisksForTempDataEnabled", false, "EPHEMERAL_DISKS_FOR_TEMP_DATA", false},
-                {"ephemeralDisksForTempDataEnabled true", "ephemeralDisksForTempDataEnabled", true, "EPHEMERAL_DISKS_FOR_TEMP_DATA", true},
-
                 {"enableDatalakeZduOSUpgrade false", "enableDatalakeZduOSUpgrade", false, "CDP_DATALAKE_ZDU_OS_UPGRADE", false},
                 {"enableDatalakeZduOSUpgrade true", "enableDatalakeZduOSUpgrade", true, "CDP_DATALAKE_ZDU_OS_UPGRADE", true},
 
