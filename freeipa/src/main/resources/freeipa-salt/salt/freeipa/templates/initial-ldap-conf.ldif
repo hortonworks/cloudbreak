@@ -13,7 +13,7 @@ nsslapd-db-deadlock-policy: 6
 dn: cn=config
 changetype: modify
 replace: nsslapd-sizelimit
-nsslapd-sizelimit: 11000
+nsslapd-sizelimit: 30000
 
 
 dn: cn=config
