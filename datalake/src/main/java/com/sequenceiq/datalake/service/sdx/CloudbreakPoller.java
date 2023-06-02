@@ -3,7 +3,6 @@ package com.sequenceiq.datalake.service.sdx;
 import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.FAILED;
 import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.FINISHED;
 import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.RUNNING;
-import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.UNKNOWN;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -30,9 +29,10 @@ import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.FlowState;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.flow.api.FlowEndpoint;
 
 @Component
-public class CloudbreakPoller {
+public class CloudbreakPoller extends AbstractFlowPoller {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakPoller.class);
 
@@ -47,6 +47,9 @@ public class CloudbreakPoller {
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
+    private FlowEndpoint flowEndpoint;
 
     public void pollCreateUntilAvailable(SdxCluster sdxCluster, PollingConfig pollingConfig) {
         waitForState("Data Lake creation", sdxCluster, pollingConfig,
@@ -85,10 +88,6 @@ public class CloudbreakPoller {
     public void pollDatabaseServerUpgradeUntilAvailable(SdxCluster sdxCluster, PollingConfig pollingConfig) {
         waitForState("Database server upgrade", sdxCluster, pollingConfig,
                 Status.getAvailableStatuses(), Sets.immutableEnumSet(Status.UPDATE_FAILED));
-    }
-
-    public void pollFlowStateByFlowIdUntilComplete(String process, String flowId, Long sdxId, PollingConfig pollingConfig) {
-        waitForFlowStateByFlowId(process, flowId, sdxId, pollingConfig, Sets.immutableEnumSet(FINISHED), Sets.immutableEnumSet(FAILED, UNKNOWN));
     }
 
     private void waitForState(
@@ -172,37 +171,8 @@ public class CloudbreakPoller {
         return AttemptResults.breakFor(processDescription + " failed on '" + sdxCluster.getClusterName() + "' cluster. Reason: " + statusReason);
     }
 
-    private void waitForFlowStateByFlowId(
-            String process,
-            String flowId,
-            Long sdxId,
-            PollingConfig pollingConfig,
-            Set<FlowState> targetStates,
-            Set<FlowState> failedStates) {
-        Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
-                .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
-                .run(() -> checkFlowStateByFlowId(process, flowId, sdxId, targetStates, failedStates));
-    }
-
-    private AttemptResult<FlowState> checkFlowStateByFlowId(
-            String process,
-            String flowId,
-            Long sdxId,
-            Set<FlowState> targetStates,
-            Set<FlowState> failedStates) {
-        LOGGER.info("Polling CB for flow state of process '{}' with flow ID '{}'.", process, flowId);
-        if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxId))) {
-            LOGGER.info("{} polling cancelled in inmemory store, id: {}", process, sdxId);
-            return AttemptResults.breakFor(process + " polling cancelled for flowId '" + flowId + "'.");
-        }
-        FlowState flowState = cloudbreakFlowService.getLastKnownFlowStateByFlowId(flowId);
-        if (failedStates.contains(flowState)) {
-            return AttemptResults.breakFor(process + " had flow with ID '" + flowId + "' fail with flow state: " + flowState.toString());
-        } else if (targetStates.contains(flowState)) {
-            return AttemptResults.finishWith(flowState);
-        } else {
-            return AttemptResults.justContinue();
-        }
+    @Override
+    protected FlowEndpoint flowEndpoint() {
+        return flowEndpoint;
     }
 }

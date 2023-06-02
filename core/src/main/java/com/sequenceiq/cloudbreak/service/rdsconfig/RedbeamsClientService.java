@@ -14,9 +14,11 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.redbeams.api.endpoint.v1.RedBeamsFlowEndpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -133,6 +135,20 @@ public class RedbeamsClientService {
         }
     }
 
+    public FlowIdentifier rotateSecret(RotateDatabaseServerSecretV4Request request) {
+        try {
+            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> redbeamsServerEndpoint.rotateSecret(request, initiatorUserCrn));
+        } catch (WebApplicationException | ProcessingException e) {
+            String message = String.format("Failed to rotate DatabaseServer secret %s with CRN %s due to error: %s",
+                    request.getSecret(), request.getCrn(), e.getMessage());
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
     private void validateForGetByClusterCrn(String environmentCrn, String clusterCrn) {
         if (StringUtils.isBlank(environmentCrn)) {
             throw new CloudbreakServiceException("Environment CRN is empty");
@@ -146,5 +162,11 @@ public class RedbeamsClientService {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> redBeamsFlowEndpoint.hasFlowRunningByFlowId(flowId));
+    }
+
+    public FlowCheckResponse hasFlowChainRunningByFlowChainId(String flowChainId) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> redBeamsFlowEndpoint.hasFlowRunningByChainId(flowChainId));
     }
 }

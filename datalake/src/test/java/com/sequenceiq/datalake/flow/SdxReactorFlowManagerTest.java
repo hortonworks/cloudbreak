@@ -16,6 +16,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +35,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
+import com.sequenceiq.cloudbreak.rotation.secret.type.DatalakeSecretType;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -43,8 +46,10 @@ import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
+import com.sequenceiq.flow.rotation.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 
@@ -194,6 +199,14 @@ class SdxReactorFlowManagerTest {
         SdxCluster sdxCluster = getValidSdxCluster();
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerModifyProxyConfigTracker(sdxCluster));
         verify(reactor, times(1)).notify(eq(ModifyProxyConfigTrackerEvent.MODIFY_PROXY_CONFIG_EVENT.event()), any(Event.class));
+    }
+
+    @Test
+    void testTriggerSecretRotation() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerSecretRotation(sdxCluster,
+                List.of(DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD), null));
+        verify(reactor, times(1)).notify(eq(EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class)), any(Event.class));
     }
 
     private SdxCluster getValidSdxCluster() {

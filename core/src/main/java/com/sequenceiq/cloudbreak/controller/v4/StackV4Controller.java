@@ -641,6 +641,6 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @InternalOnly
     public FlowIdentifier rotateSecrets(Long workspaceId, StackV4SecretRotationRequest request, @InitiatorUserCrn String initiatorUserCrn) {
-        return null;
+        return stackOperationService.rotateSecrets(request.getCrn(), List.of(request.getSecret()), request.getExecutionType());
     }
 }
