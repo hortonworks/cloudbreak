@@ -215,9 +215,9 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
                 .findAny();
         if (instanceGroup.isPresent()) {
             List<String> instanceIds = instanceGroup.get().getMetadata().stream()
-                    .filter(instanceMetaDataV4Response -> Objects.nonNull(instanceMetaDataV4Response.getInstanceId()))
                     .map(InstanceMetaDataV4Response::getInstanceId)
-                    .collect(Collectors.toList());
+                    .filter(Objects::nonNull)
+                    .toList();
             return awaitForInstance(Map.of(instanceIds, instanceStatus));
         } else {
             throw new IllegalStateException("Can't find valid instance group with this name: " + hostGroup);
