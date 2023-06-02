@@ -130,7 +130,6 @@ dependencies {
   implementation group: 'org.kohsuke', name: 'wordnet-random-name', version: '1.5'
   implementation group: 'com.google.code.gson',          name: 'gson',                           version: gsonVersion
   implementation (group: 'com.google.apis',              name: 'google-api-services-compute',    version: 'v1-rev20230516-2.0.0'){
-  implementation (group: 'com.microsoft.azure',          name: 'azure',                          version: azureSdkVersion) { exclude group: 'org.slf4j' }
     exclude group: 'com.google.guava',  module: 'guava'
   }
   implementation group: 'com.google.apis',               name: 'google-api-services-storage',    version: 'v1-rev20230301-2.0.0'
@@ -139,8 +138,10 @@ dependencies {
   implementation (group: 'com.google.cloud',              name: 'google-cloud-storage',           version: '2.22.3') {
     exclude group: "io.grpc"
   }
-  implementation group: 'com.microsoft.azure',           name: 'azure-storage',                  version: azureStorageSdkVersion
-  implementation group: 'com.microsoft.azure',           name: 'azure-data-lake-store-sdk',      version: '2.3.10'
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager',                      version: azureSdkResourceManagerVersion
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-storage',              version: azureSdkResourceManagerVersion
+  implementation group: 'com.azure',                    name: 'azure-identity',                             version: azureSdkIdentityVersion
+  implementation group: 'com.azure',                    name: 'azure-storage-file-datalake',                version: azureSdkStorageDatalakeVersion
 
   implementation group:  'org.springframework.boot',     name: 'spring-boot-starter',            version: springBootVersion
   implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-test',       version: springBootVersion

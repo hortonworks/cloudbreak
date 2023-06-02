@@ -213,7 +213,7 @@ public class AzureCredentialIntegrationTest {
         when(resourceDefinitionRequest.await()).thenReturn(new ResourceDefinitionResult(1L, DEFINITION_AZURE));
 
         CredentialResponse response = client.credentialV1Endpoint().create(credentialRequest);
-        assertTrue(response.getName().equals(credentialRequest.getName()), " not saved, or response is different");
+        assertEquals(response.getName(), credentialRequest.getName(), " not saved, or response is different");
         assertTrue(credentialRepository.findByNameAndAccountId(credentialRequest.getName(), TEST_ACCOUNT_ID, List.of("AZURE"), ENVIRONMENT).isPresent());
 
         assertEquals("testcredential", response.getName());
