@@ -34,6 +34,8 @@ public class SecretRotationActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretRotationActions.class);
 
+    private static final String EXPLICIT_ROLLBACK_EXECUTION = "Explicit rollback execution.";
+
     @Inject
     private SecretRotationStatusService secretRotationStatusService;
 
@@ -51,7 +53,7 @@ public class SecretRotationActions {
             @Override
             protected void doExecute(RotationFlowContext context, SecretRotationTriggerEvent payload, Map<Object, Object> variables) throws Exception {
                 if (RotationFlowExecutionType.ROLLBACK.equals(payload.getExecutionType())) {
-                    sendEvent(context, ExecuteRotationFailedEvent.fromPayload(payload, new SecretRotationException("Explicit rollback execution.", null)));
+                    sendEvent(context, ExecuteRotationFailedEvent.fromPayload(payload, new SecretRotationException(EXPLICIT_ROLLBACK_EXECUTION, null)));
                 } else {
                     sendEvent(context, ExecuteRotationTriggerEvent.fromPayload(payload));
                 }
@@ -101,7 +103,10 @@ public class SecretRotationActions {
             @Override
             protected void doExecute(RotationFlowContext context, ExecuteRotationFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 Flow flow = getFlow(context.getFlowId());
-                flow.setFlowFailed(payload.getException());
+                if (RotationFlowExecutionType.ROLLBACK != payload.getExecutionType()) {
+                    LOGGER.debug("Execution type is not set or not explicit ROLLBACK, set flow failed for: {}", context.getResourceCrn());
+                    flow.setFlowFailed(payload.getException());
+                }
                 sendEvent(context, RollbackRotationTriggerEvent.fromPayload(payload, payload.getException()));
             }
 
@@ -126,7 +131,11 @@ public class SecretRotationActions {
             @Override
             protected void doExecute(RotationFlowContext context, RotationFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 Flow flow = getFlow(context.getFlowId());
-                flow.setFlowFailed(payload.getException());
+                if (RotationFlowExecutionType.ROLLBACK != payload.getExecutionType()
+                        || !EXPLICIT_ROLLBACK_EXECUTION.equals(payload.getException().getMessage())) {
+                    LOGGER.debug("Execution type is not set or not explicit ROLLBACK, set flow failed for: {}", context.getResourceCrn());
+                    flow.setFlowFailed(payload.getException());
+                }
                 LOGGER.debug("Secret rotation failed, change resource status for {}", context.getResourceCrn());
                 secretRotationStatusService.rotationFailed(context.getResourceCrn(), payload.getException().getMessage());
                 LOGGER.debug("Secret rotation failed, resource status changed for {}", context.getResourceCrn());

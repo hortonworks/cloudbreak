@@ -54,6 +54,7 @@ public class DistroXOpDescription {
     public static final String GET_DATAHUB_AUDIT_EVENTS = "Get Data Hub audit events";
     public static final String DETERMINE_DATALAKE_DATA_SIZES = "Determines the sizes of the different local data on the datalake";
     public static final String MODIFY_PROXY_CONFIG_INTERNAL = "Modify proxy config of stack";
+    public static final String ROTATE_STACK_SECRETS = "Rotate stack secrets";
 
     public static final String COST = "Get cost calculation for Distrox clusters";
     public static final String CO2 = "Get CO2 cost calculation for Distro clusters";

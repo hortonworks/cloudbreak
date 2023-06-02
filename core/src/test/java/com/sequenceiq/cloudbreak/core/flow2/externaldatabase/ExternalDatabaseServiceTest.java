@@ -1,8 +1,12 @@
 package com.sequenceiq.cloudbreak.core.flow2.externaldatabase;
 
+import static com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType.ROTATE;
+import static com.sequenceiq.cloudbreak.rotation.secret.type.RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -21,7 +25,6 @@ import java.util.Map;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,6 +62,7 @@ import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
@@ -458,7 +462,7 @@ class ExternalDatabaseServiceTest {
 
         ArgumentCaptor<UpgradeDatabaseServerV4Request> argumentCaptor = ArgumentCaptor.forClass(UpgradeDatabaseServerV4Request.class);
         verify(redbeamsClient).upgradeByCrn(eq(RDBMS_CRN), argumentCaptor.capture());
-        Assertions.assertEquals(targetMajorVersion, argumentCaptor.getValue().getUpgradeTargetMajorVersion());
+        assertEquals(targetMajorVersion, argumentCaptor.getValue().getUpgradeTargetMajorVersion());
         verify(redbeamsClient, times(2)).hasFlowRunningByFlowId(RDBMS_FLOW_ID);
     }
 
@@ -475,7 +479,7 @@ class ExternalDatabaseServiceTest {
 
         ArgumentCaptor<UpgradeDatabaseServerV4Request> argumentCaptor = ArgumentCaptor.forClass(UpgradeDatabaseServerV4Request.class);
         verify(redbeamsClient).upgradeByCrn(eq(RDBMS_CRN), argumentCaptor.capture());
-        Assertions.assertEquals(targetMajorVersion, argumentCaptor.getValue().getUpgradeTargetMajorVersion());
+        assertEquals(targetMajorVersion, argumentCaptor.getValue().getUpgradeTargetMajorVersion());
         verify(redbeamsClient, never()).hasFlowRunningByFlowId(any());
     }
 
@@ -490,20 +494,18 @@ class ExternalDatabaseServiceTest {
         response.setFlowIdentifier(new FlowIdentifier(FlowType.FLOW, RDBMS_FLOW_ID));
         when(redbeamsClient.upgradeByCrn(eq(RDBMS_CRN), any())).thenReturn(response);
 
-        when(redbeamsClient.hasFlowRunningByFlowId(RDBMS_FLOW_ID)).thenReturn(
-                createFlowCheckResponse(Boolean.TRUE, Boolean.FALSE),
-                createFlowCheckResponse(Boolean.FALSE, Boolean.TRUE));
+        when(redbeamsClient.hasFlowRunningByFlowId(RDBMS_FLOW_ID)).thenReturn(createFlowCheckResponse(Boolean.FALSE, Boolean.TRUE));
 
-        CloudbreakServiceException cloudbreakServiceException = Assertions.assertThrows(CloudbreakServiceException.class,
+        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.upgradeDatabase(cluster, targetMajorVersion));
-        String expected = String.format("Upgrade database flow failed in RedBeams. Database crn: %s, upgrade flow: FlowIdentifier{type=FLOW, pollableId='%s'}",
+        String expected = String.format("Database flow failed in Redbeams. Database crn: %s, flow: FlowIdentifier{type=FLOW, pollableId='%s'}",
                 RDBMS_CRN, RDBMS_FLOW_ID);
-        Assertions.assertEquals(expected, cloudbreakServiceException.getMessage());
+        assertEquals(expected, cloudbreakServiceException.getMessage());
 
         ArgumentCaptor<UpgradeDatabaseServerV4Request> argumentCaptor = ArgumentCaptor.forClass(UpgradeDatabaseServerV4Request.class);
         verify(redbeamsClient).upgradeByCrn(eq(RDBMS_CRN), argumentCaptor.capture());
-        Assertions.assertEquals(targetMajorVersion, argumentCaptor.getValue().getUpgradeTargetMajorVersion());
-        verify(redbeamsClient, times(2)).hasFlowRunningByFlowId(RDBMS_FLOW_ID);
+        assertEquals(targetMajorVersion, argumentCaptor.getValue().getUpgradeTargetMajorVersion());
+        verify(redbeamsClient, times(1)).hasFlowRunningByFlowId(RDBMS_FLOW_ID);
     }
 
     @Test
@@ -522,7 +524,50 @@ class ExternalDatabaseServiceTest {
         ArgumentCaptor<UpgradeDatabaseServerV4Request> argumentCaptor = ArgumentCaptor.forClass(UpgradeDatabaseServerV4Request.class);
         verify(redbeamsClient).upgradeByCrn(eq(RDBMS_CRN), argumentCaptor.capture());
         verify(redbeamsClient, never()).hasFlowRunningByFlowId(any());
-        Assertions.assertEquals(targetMajorVersion, argumentCaptor.getValue().getUpgradeTargetMajorVersion());
+        assertEquals(targetMajorVersion, argumentCaptor.getValue().getUpgradeTargetMajorVersion());
+    }
+
+    @Test
+    void rotateDatabaseSecretsShouldFailIfRedbeamsFlowChainIsNotTriggered() {
+        when(redbeamsClient.rotateSecret(any())).thenReturn(new FlowIdentifier(FlowType.NOT_TRIGGERED, null));
+        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD.name(), ROTATE));
+        String expected = String.format("Database flow failed in Redbeams. Database crn: %s, flow: FlowIdentifier{type=%s, pollableId='%s'}",
+                RDBMS_CRN, FlowType.NOT_TRIGGERED, null);
+        assertEquals(expected, cloudbreakServiceException.getMessage());
+    }
+
+    @Test
+    void rotateDatabaseSecretsShouldFailIfReturnedFlowInformationIsNull() {
+        when(redbeamsClient.rotateSecret(any())).thenReturn(null);
+        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD.name(), ROTATE));
+        String expected = String.format("Database flow failed in Redbeams. Database crn: %s, flow: null", RDBMS_CRN);
+        assertEquals(expected, cloudbreakServiceException.getMessage());
+    }
+
+    @Test
+    void rotateDatabaseSecretsShouldFailIfRedbeamsFlowChainFailed() {
+        when(redbeamsClient.rotateSecret(any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, RDBMS_FLOW_ID));
+        when(redbeamsClient.hasFlowChainRunningByFlowChainId(RDBMS_FLOW_ID)).thenReturn(createFlowCheckResponse(Boolean.FALSE, Boolean.TRUE));
+        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD.name(), ROTATE));
+        String expected = String.format("Database flow failed in Redbeams. Database crn: %s, flow: FlowIdentifier{type=%s, pollableId='%s'}",
+                RDBMS_CRN, FlowType.FLOW_CHAIN, RDBMS_FLOW_ID);
+        assertEquals(expected, cloudbreakServiceException.getMessage());
+    }
+
+    @Test
+    void rotateDatabaseSecretsShouldSucceed() {
+        when(redbeamsClient.rotateSecret(any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, RDBMS_FLOW_ID));
+        when(redbeamsClient.hasFlowChainRunningByFlowChainId(RDBMS_FLOW_ID)).thenReturn(createFlowCheckResponse(Boolean.FALSE, Boolean.FALSE));
+        underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD.name(), ROTATE);
+        ArgumentCaptor<RotateDatabaseServerSecretV4Request> requestCaptor = ArgumentCaptor.forClass(RotateDatabaseServerSecretV4Request.class);
+        verify(redbeamsClient, times(1)).rotateSecret(requestCaptor.capture());
+        RotateDatabaseServerSecretV4Request request = requestCaptor.getValue();
+        assertEquals(RDBMS_CRN, request.getCrn());
+        assertEquals(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD.name(), request.getSecret());
+        assertEquals(ROTATE, request.getExecutionType());
     }
 
     private static FlowCheckResponse createFlowCheckResponse(Boolean hasActiveFlow, Boolean failed) {

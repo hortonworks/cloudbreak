@@ -20,6 +20,7 @@ import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.ccm.UpgradeCcmStateSelectors.UPGRADE_CCM_UPGRADE_STACK_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +42,8 @@ import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
+import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
+import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.cert.renew.event.SdxStartCertRenewalEvent;
@@ -76,7 +79,9 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.flow.rotation.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.flow.service.FlowNameFormatService;
 import com.sequenceiq.sdx.api.model.SdxRecoveryType;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
@@ -273,10 +278,19 @@ public class SdxReactorFlowManager {
         return notify(event.selector(), event, cluster.getClusterName());
     }
 
+    private FlowIdentifier notify(String selector, Acceptable acceptable, String identifier, String userId) {
+        Map<String, Object> flowTriggerUserCrnHeader = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userId);
+        Event<Acceptable> event = eventFactory.createEventWithErrHandler(flowTriggerUserCrnHeader, acceptable);
+        return notify(selector, identifier, event);
+    }
+
     private FlowIdentifier notify(String selector, SdxEvent acceptable, String identifier) {
         Map<String, Object> flowTriggerUserCrnHeader = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, acceptable.getUserId());
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(flowTriggerUserCrnHeader, acceptable);
+        return notify(selector, identifier, event);
+    }
 
+    private FlowIdentifier notify(String selector, String identifier, Event<Acceptable> event) {
         reactor.notify(selector, event);
         try {
             FlowAcceptResult accepted = (FlowAcceptResult) event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
@@ -324,4 +338,9 @@ public class SdxReactorFlowManager {
         return notify(selector, new SaltUpdateTriggerEvent(cluster.getId(), userId), cluster.getClusterName());
     }
 
+    public FlowIdentifier triggerSecretRotation(SdxCluster sdxCluster, List<SecretType> secretTypes, RotationFlowExecutionType executionType) {
+        String selector = EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class);
+        return notify(selector, new SecretRotationFlowChainTriggerEvent(selector, sdxCluster.getId(), sdxCluster.getResourceCrn(), secretTypes, executionType),
+                sdxCluster.getClusterName(), ThreadBasedUserCrnProvider.getUserCrn());
+    }
 }

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
+import com.dyngr.exception.UserBreakException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
+import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseOperation;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseServerParameterDecorator;
 import com.sequenceiq.cloudbreak.service.externaldatabase.PollingConfig;
@@ -44,7 +46,9 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
@@ -183,7 +187,7 @@ public class ExternalDatabaseService {
                     if (null == response.getFlowIdentifier()) {
                         LOGGER.info(response.getReason());
                     } else {
-                        pollUntilUpgradeFlowFinished(databaseCrn, response.getFlowIdentifier());
+                        pollUntilFlowFinished(databaseCrn, response.getFlowIdentifier());
                     }
                 } catch (NotFoundException notFoundException) {
                     LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
@@ -193,22 +197,56 @@ public class ExternalDatabaseService {
             }
     }
 
-    private void pollUntilUpgradeFlowFinished(String databaseCrn, FlowIdentifier flowIdentifier) {
-        Boolean success = Polling.waitPeriodly(DB_POLLING_CONFIG.getSleepTime(), DB_POLLING_CONFIG.getSleepTimeUnit())
-                .stopIfException(DB_POLLING_CONFIG.getStopPollingIfExceptionOccured())
-                .stopAfterDelay(DB_POLLING_CONFIG.getTimeout(), DB_POLLING_CONFIG.getTimeoutTimeUnit())
-                .run(() -> pollFlowState(flowIdentifier));
-        if (!success) {
-            String message = String.format("Upgrade database flow failed in RedBeams. Database crn: %s, upgrade flow: %s",
-                    databaseCrn, flowIdentifier);
-            LOGGER.warn(message);
-            throw new CloudbreakServiceException(message);
+    public void rotateDatabaseSecret(String databaseServerCrn, String secret, RotationFlowExecutionType executionType) {
+        LOGGER.info("Rotating external database server secret: {} for database server {}", secret, databaseServerCrn);
+        RotateDatabaseServerSecretV4Request request = new RotateDatabaseServerSecretV4Request();
+        request.setCrn(databaseServerCrn);
+        request.setSecret(secret);
+        request.setExecutionType(executionType);
+        FlowIdentifier flowIdentifier = redbeamsClient.rotateSecret(request);
+        if (flowIdentifier == null) {
+            handleUnsuccessfulFlow(databaseServerCrn, flowIdentifier, null);
+        } else {
+            pollUntilFlowFinished(databaseServerCrn, flowIdentifier);
         }
     }
 
+    private void pollUntilFlowFinished(String databaseCrn, FlowIdentifier flowIdentifier) {
+        try {
+            Boolean success = Polling.waitPeriodly(DB_POLLING_CONFIG.getSleepTime(), DB_POLLING_CONFIG.getSleepTimeUnit())
+                    .stopIfException(DB_POLLING_CONFIG.getStopPollingIfExceptionOccured())
+                    .stopAfterDelay(DB_POLLING_CONFIG.getTimeout(), DB_POLLING_CONFIG.getTimeoutTimeUnit())
+                    .run(() -> pollFlowState(flowIdentifier));
+            if (success == null || !success) {
+                handleUnsuccessfulFlow(databaseCrn, flowIdentifier, null);
+            }
+        } catch (UserBreakException e) {
+            handleUnsuccessfulFlow(databaseCrn, flowIdentifier, e);
+        }
+    }
+
+    private static void handleUnsuccessfulFlow(String databaseCrn, FlowIdentifier flowIdentifier, UserBreakException e) {
+        String message = String.format("Database flow failed in Redbeams. Database crn: %s, flow: %s",
+                databaseCrn, flowIdentifier);
+        LOGGER.warn(message);
+        throw new CloudbreakServiceException(message, e);
+    }
+
     private AttemptResult<Boolean> pollFlowState(FlowIdentifier flowIdentifier) {
-        FlowCheckResponse flowState = redbeamsClient.hasFlowRunningByFlowId(flowIdentifier.getPollableId());
-        LOGGER.debug("Database upgrade polling has active flow: {}, with latest fail: {}",
+        FlowCheckResponse flowState;
+        if (flowIdentifier.getType() == FlowType.NOT_TRIGGERED) {
+            return AttemptResults.breakFor(String.format("Flow %s not triggered", flowIdentifier.getPollableId()));
+        } else if (flowIdentifier.getType() == FlowType.FLOW) {
+            flowState = redbeamsClient.hasFlowRunningByFlowId(flowIdentifier.getPollableId());
+        } else if (flowIdentifier.getType() == FlowType.FLOW_CHAIN) {
+            flowState = redbeamsClient.hasFlowChainRunningByFlowChainId(flowIdentifier.getPollableId());
+        } else {
+            String message = String.format("Unknown flow identifier type %s for flow: %s", flowIdentifier.getType(), flowIdentifier);
+            LOGGER.error(message);
+            throw new CloudbreakServiceException(message);
+        }
+
+        LOGGER.debug("Database polling has active flow: {}, with latest fail: {}",
                 flowState.getHasActiveFlow(), flowState.getLatestFlowFinalizedAndFailed());
         return flowState.getHasActiveFlow()
                 ? AttemptResults.justContinue()

@@ -62,6 +62,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPGRADE_CLUSTER_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPGRADE_OS_IN_WORKSPACE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DETERMINE_DATALAKE_DATA_SIZES;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.ROTATE_STACK_SECRETS;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.VERTICAL_SCALE_BY_NAME;
 
 import java.util.List;
@@ -717,7 +718,8 @@ public interface StackV4Endpoint {
 
     @PUT
     @Path("internal/rotate_secret")
-    @ApiOperation(value = "Rotate Stack secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateStackSecrets", hidden = true)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ROTATE_STACK_SECRETS, produces = MediaType.APPLICATION_JSON, nickname = "rotateStackSecrets", hidden = true)
     FlowIdentifier rotateSecrets(@PathParam("workspaceId") Long workspaceId, @Valid @NotNull StackV4SecretRotationRequest request,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

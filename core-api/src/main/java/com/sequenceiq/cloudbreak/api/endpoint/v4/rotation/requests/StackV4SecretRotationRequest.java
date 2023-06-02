@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests;
 
-import java.util.List;
-
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
@@ -18,9 +16,10 @@ public class StackV4SecretRotationRequest {
     @ValidCrn(resource = { CrnResourceDescriptor.DATALAKE, CrnResourceDescriptor.DATAHUB })
     private String crn;
 
-    @NotEmpty
-    private List<String> secrets;
+    @NotNull
+    private String secret;
 
+    @NotNull
     private RotationFlowExecutionType executionType;
 
     public String getCrn() {
@@ -31,12 +30,12 @@ public class StackV4SecretRotationRequest {
         this.crn = crn;
     }
 
-    public List<String> getSecrets() {
-        return secrets;
+    public String getSecret() {
+        return secret;
     }
 
-    public void setSecrets(List<String> secrets) {
-        this.secrets = secrets;
+    public void setSecret(String secret) {
+        this.secret = secret;
     }
 
     public RotationFlowExecutionType getExecutionType() {

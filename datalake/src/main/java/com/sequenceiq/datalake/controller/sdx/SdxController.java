@@ -54,6 +54,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.SdxDeleteService;
+import com.sequenceiq.datalake.service.rotation.SdxRotationService;
 import com.sequenceiq.datalake.service.sdx.SdxImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.SdxRecommendationService;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
@@ -146,6 +147,9 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private SdxBackupRestoreService sdxBackupRestoreService;
+
+    @Inject
+    private SdxRotationService sdxRotationService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
@@ -507,7 +511,7 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = UPGRADE_DATALAKE)
     public FlowIdentifier rotateSecrets(@RequestObject SdxSecretRotationRequest request) {
-        return null;
+        return sdxRotationService.triggerSecretRotation(request.getCrn(), request.getSecrets(), request.getExecutionType());
     }
 
     private SdxCluster getSdxClusterByName(String name) {
