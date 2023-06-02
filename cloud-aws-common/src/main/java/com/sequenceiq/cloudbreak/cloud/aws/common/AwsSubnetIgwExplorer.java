@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -25,14 +26,18 @@ public class AwsSubnetIgwExplorer {
 
     private static final String IGW_PREFIX = "igw-";
 
-    public boolean hasInternetGatewayOfSubnet(List<RouteTable> routeTables, String subnetId, String vpcId) {
+    private static final String VPCE_PREFIX = "vpce-";
+
+    private static final String TRIAL_DESTINATION_PREFIX = "pl-";
+
+    public boolean hasInternetGatewayOrVpceOfSubnet(List<RouteTable> routeTables, String subnetId, String vpcId) {
         Optional<RouteTable> routeTable = getRouteTableForSubnet(routeTables, subnetId, vpcId);
         LOGGER.debug("Route table for subnet '{}' (VPC is '{}'): '{}'", subnetId, vpcId, routeTable);
 
-        Optional<Route> routeWithInternetGateway = getRouteWithInternetGateway(routeTable);
-        LOGGER.debug("Route with IGW for subnet '{}' (VPC is '{}'): '{}'", subnetId, vpcId, routeWithInternetGateway);
+        Optional<Route> routeWithInternetGatewayOrVpce = getRouteWithInternetGatewayOrVPCE(routeTable);
+        LOGGER.debug("Route with IGW or trial setup for subnet '{}' (VPC is '{}'): '{}'", subnetId, vpcId, routeWithInternetGatewayOrVpce);
 
-        return routeWithInternetGateway.isPresent();
+        return routeWithInternetGatewayOrVpce.isPresent();
     }
 
     private Optional<RouteTable> getRouteTableForSubnet(List<RouteTable> tableList, String subnetId, String vpcId) {
@@ -64,12 +69,42 @@ public class AwsSubnetIgwExplorer {
                 .findFirst();
     }
 
-    private Optional<Route> getRouteWithInternetGateway(Optional<RouteTable> routeTable) {
-        return routeTable.stream()
+    private Optional<Route> getRouteWithInternetGatewayOrVPCE(Optional<RouteTable> routeTable) {
+        Optional<Route> returnRoute = routeTable.stream()
                 .flatMap(rt -> rt.routes().stream())
-                .filter(route -> StringUtils.isNotEmpty(route.gatewayId()) &&
-                        route.gatewayId().startsWith(IGW_PREFIX) &&
-                        OPEN_CIDR_BLOCK.equals(route.destinationCidrBlock()))
+                .filter(route -> isInternetGatewayConfigured(route))
                 .findFirst();
+        if (returnRoute.isEmpty()) {
+            // Trial setup
+            Set<Route> collectVpces = routeTable.stream()
+                    .flatMap(rt -> rt.routes().stream())
+                    .filter(route -> isVpceConfigured(route))
+                    .filter(route -> isVpceOpenConfigured(route) || isVpceHasDestinationRuleConfigured(route))
+                    .collect(Collectors.toSet());
+            if (collectVpces.size() == 2) {
+                returnRoute = collectVpces.stream().findFirst();
+            }
+        }
+        return returnRoute;
+    }
+
+    private boolean isInternetGatewayConfigured(Route route) {
+        return StringUtils.isNotEmpty(route.gatewayId())
+                && route.gatewayId().startsWith(IGW_PREFIX)
+                && OPEN_CIDR_BLOCK.equals(route.destinationCidrBlock());
+    }
+
+    private boolean isVpceConfigured(Route route) {
+        return StringUtils.isNotEmpty(route.gatewayId())
+                && route.gatewayId().startsWith(VPCE_PREFIX);
+    }
+
+    private boolean isVpceOpenConfigured(Route route) {
+        return OPEN_CIDR_BLOCK.equals(route.destinationCidrBlock());
+    }
+
+    private boolean isVpceHasDestinationRuleConfigured(Route route) {
+        return StringUtils.isNotEmpty(route.destinationPrefixListId())
+                && route.destinationPrefixListId().startsWith(TRIAL_DESTINATION_PREFIX);
     }
 }

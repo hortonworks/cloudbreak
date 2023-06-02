@@ -350,6 +350,7 @@ public class AwsPlatformResources implements PlatformResources {
         try {
             LOGGER.debug("Describing route tables in region {}", region.getRegionName());
             List<RouteTable> allRouteTables = awsPageCollector.getAllRouteTables(ec2Client, DescribeRouteTablesRequest.builder().build());
+
             DescribeVpcsRequest describeVpcsRequest = getDescribeVpcsRequestWithFilters(filters);
             Set<CloudNetwork> cloudNetworks = new HashSet<>();
 
@@ -383,7 +384,8 @@ public class AwsPlatformResources implements PlatformResources {
         return describeVpcsRequestBuilder.build();
     }
 
-    private Set<CloudNetwork> getCloudNetworks(AmazonEc2Client ec2Client, List<RouteTable> describeRouteTablesResponse,
+    private Set<CloudNetwork> getCloudNetworks(AmazonEc2Client ec2Client,
+            List<RouteTable> describeRouteTablesResponse,
             DescribeVpcsResponse describeVpcsResponse) {
 
         Set<CloudNetwork> cloudNetworks = new HashSet<>();
@@ -419,11 +421,16 @@ public class AwsPlatformResources implements PlatformResources {
         return awsSubnets;
     }
 
-    private Set<CloudSubnet> convertAwsSubnetsToCloudSubnets(List<RouteTable> describeRouteTablesResponse, List<Subnet> awsSubnets) {
+    private Set<CloudSubnet> convertAwsSubnetsToCloudSubnets(List<RouteTable> describeRouteTablesResponse,
+        List<Subnet> awsSubnets) {
         Set<CloudSubnet> subnets = new HashSet<>();
         for (Subnet subnet : awsSubnets) {
-            boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(describeRouteTablesResponse, subnet.subnetId(), subnet.vpcId());
+            boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(
+                    describeRouteTablesResponse,
+                    subnet.subnetId(),
+                    subnet.vpcId());
             LOGGER.info("The subnet {} has internetGateway value is '{}'", subnet, hasInternetGateway);
+
             Optional<String> subnetName = getName(subnet.tags());
             subnets.add(
                     new CloudSubnet(
