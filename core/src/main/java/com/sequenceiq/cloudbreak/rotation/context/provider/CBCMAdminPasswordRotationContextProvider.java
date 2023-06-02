@@ -51,6 +51,6 @@ public class CBCMAdminPasswordRotationContextProvider extends CMUserRotationCont
 
     @Override
     public SecretType getSecret() {
-        return CloudbreakSecretType.CLOUDBREAK_CM_ADMIN_PASSWORD;
+        return CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD;
     }
 }

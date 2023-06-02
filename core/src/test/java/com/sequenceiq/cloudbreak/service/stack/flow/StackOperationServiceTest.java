@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOP_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
-import static com.sequenceiq.cloudbreak.rotation.secret.type.CloudbreakSecretType.CLOUDBREAK_CM_ADMIN_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.secret.type.CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD;
 import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -540,12 +540,12 @@ public class StackOperationServiceTest {
     public void testRotateSecrets() {
         Stack stack = new Stack();
         stack.setId(1L);
-        when(secretRotationValidator.mapSecretTypes(anyList(), any())).thenReturn(List.of(CLOUDBREAK_CM_ADMIN_PASSWORD));
+        when(secretRotationValidator.mapSecretTypes(anyList(), any())).thenReturn(List.of(CLUSTER_CB_CM_ADMIN_PASSWORD));
         when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
         when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stack);
         when(flowManager.triggerSecretRotation(anyLong(), anyString(), any(), any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, "flowchain"));
 
-        underTest.rotateSecrets(CRN, List.of(CLOUDBREAK_CM_ADMIN_PASSWORD.name()), null);
+        underTest.rotateSecrets(CRN, List.of(CLUSTER_CB_CM_ADMIN_PASSWORD.name()), null);
 
         verify(flowManager).triggerSecretRotation(anyLong(), anyString(), any(), any());
     }
@@ -559,7 +559,7 @@ public class StackOperationServiceTest {
         when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stack);
 
         assertThrows(CloudbreakServiceException.class, () -> underTest.rotateSecrets(CRN,
-                List.of(CLOUDBREAK_CM_ADMIN_PASSWORD.name(), CLOUDBREAK_CM_ADMIN_PASSWORD.name()), null));
+                List.of(CLUSTER_CB_CM_ADMIN_PASSWORD.name(), CLUSTER_CB_CM_ADMIN_PASSWORD.name()), null));
 
         verifyNoInteractions(flowManager);
     }
@@ -569,7 +569,7 @@ public class StackOperationServiceTest {
         when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.FALSE);
 
         assertThrows(CloudbreakServiceException.class, () -> underTest.rotateSecrets(CRN,
-                List.of(CLOUDBREAK_CM_ADMIN_PASSWORD.name()), null));
+                List.of(CLUSTER_CB_CM_ADMIN_PASSWORD.name()), null));
 
         verifyNoInteractions(flowManager, stackDtoService);
     }

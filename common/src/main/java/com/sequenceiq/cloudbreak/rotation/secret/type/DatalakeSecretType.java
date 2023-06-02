@@ -10,8 +10,8 @@ import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
 
 public enum DatalakeSecretType implements SecretType {
 
-    CLOUDBREAK_CM_ADMIN_PASSWORD(List.of()),
-    MGMT_CM_ADMIN_PASSWORD(List.of()),
+    DATALAKE_CB_CM_ADMIN_PASSWORD(List.of(CLOUDBREAK_ROTATE_POLLING)),
+    DATALAKE_MGMT_CM_ADMIN_PASSWORD(List.of(CLOUDBREAK_ROTATE_POLLING)),
     DATALAKE_DATABASE_ROOT_PASSWORD(List.of(REDBEAMS_ROTATE_POLLING, CLOUDBREAK_ROTATE_POLLING));
 
     private final List<SecretRotationStep> steps;

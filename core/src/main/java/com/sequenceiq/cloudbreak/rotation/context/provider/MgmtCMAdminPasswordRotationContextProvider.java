@@ -51,6 +51,6 @@ public class MgmtCMAdminPasswordRotationContextProvider extends CMUserRotationCo
 
     @Override
     public SecretType getSecret() {
-        return CloudbreakSecretType.MGMT_CM_ADMIN_PASSWORD;
+        return CloudbreakSecretType.CLUSTER_MGMT_CM_ADMIN_PASSWORD;
     }
 }

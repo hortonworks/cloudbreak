@@ -1,7 +1,10 @@
 package com.sequenceiq.it.cloudbreak.client;
 
+import java.util.Set;
+
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.rotation.secret.type.DatalakeSecretType;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxAutotlsCertRotationAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxBackupAction;
@@ -37,6 +40,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxResizeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRestoreAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRestoreInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRotateSaltPasswordAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxRotateSecretAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStartAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStatusAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStopAction;
@@ -239,6 +243,10 @@ public class SdxTestClient {
 
     public Action<SdxInternalTestDto, SdxClient> verticalScale(String verticalScaleKey) {
         return new SdxVerticalScaleAction(verticalScaleKey);
+    }
+
+    public Action<SdxInternalTestDto, SdxClient> rotateSecret(Set<DatalakeSecretType> secretTypes) {
+        return new SdxRotateSecretAction(secretTypes);
     }
 
 }

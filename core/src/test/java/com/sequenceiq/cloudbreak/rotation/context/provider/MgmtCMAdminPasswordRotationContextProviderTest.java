@@ -24,6 +24,6 @@ public class MgmtCMAdminPasswordRotationContextProviderTest {
 
     @Test
     public void testGetContext() throws IllegalAccessException {
-        CMUserRotationContextProviderTestUtils.testGetContext(stackService, CloudbreakSecretType.MGMT_CM_ADMIN_PASSWORD, underTest);
+        CMUserRotationContextProviderTestUtils.testGetContext(stackService, CloudbreakSecretType.CLUSTER_MGMT_CM_ADMIN_PASSWORD, underTest);
     }
 }
