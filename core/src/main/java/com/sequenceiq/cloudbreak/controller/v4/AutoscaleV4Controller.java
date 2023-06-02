@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.InternalOnly;
@@ -186,7 +185,8 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    @InternalOnly
+    @AccountIdNotNeeded
     public AutoscaleStackV4Responses getAllForAutoscale() {
         Set<AutoscaleStackV4Response> allForAutoscale = stackCommonService.getAllForAutoscale();
         return new AutoscaleStackV4Responses(new ArrayList<>(allForAutoscale));
