@@ -138,6 +138,20 @@
         "availabilityZone": "[parameters('availabilityZone')]"
       }
     },
+    <#if !useSslEnforcement>
+    {
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+      "apiVersion": "2022-12-01",
+      "name": "[concat(parameters('dbServerName'), '/require_secure_transport')]",
+      "dependsOn": [
+        "[concat('Microsoft.DBforPostgreSQL/flexibleServers/',parameters('dbServerName'))]"
+      ],
+      "properties": {
+        "value": "off",
+        "source": "user-override"
+      }
+    },
+    </#if>
     {
       "name": "[concat(parameters('dbServerName'), '/publicaccess')]",
       "type": "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules",
