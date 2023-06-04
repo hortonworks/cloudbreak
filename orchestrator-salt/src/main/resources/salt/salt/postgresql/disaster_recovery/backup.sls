@@ -2,7 +2,7 @@
 {% set object_storage_url = salt['pillar.get']('disaster_recovery:object_storage_url') %}
 {% set remote_db_url = salt['pillar.get']('postgres:clouderamanager:remote_db_url') %}
 {% set remote_db_port = salt['pillar.get']('postgres:clouderamanager:remote_db_port') %}
-{% set pg_username = salt['pillar.get']('postgres:clouderamanager:remote_admin') %}
+{% set remote_admin = salt['pillar.get']('postgres:clouderamanager:remote_admin') %}
 {% set ranger_admin_group = salt['pillar.get']('disaster_recovery:ranger_admin_group') %}
 {% set close_connections = salt['pillar.get']('disaster_recovery:close_connections') %}
 {% set compression_level = salt['pillar.get']('disaster_recovery:compression_level', '0') %}
