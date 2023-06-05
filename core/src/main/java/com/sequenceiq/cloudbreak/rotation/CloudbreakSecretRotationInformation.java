@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.rotation;
 
-import java.util.Set;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
@@ -12,7 +10,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.type.CloudbreakSecretType;
 public class CloudbreakSecretRotationInformation implements ApplicationSecretRotationInformation {
 
     @Override
-    public Set<Class<? extends SecretType>> supportedSecretTypes() {
-        return Set.of(CloudbreakSecretType.class);
+    public Class<? extends SecretType> supportedSecretType() {
+        return CloudbreakSecretType.class;
     }
 }
