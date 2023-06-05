@@ -1,5 +1,11 @@
 package com.sequenceiq.freeipa.entity;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.StringJoiner;
 
 import javax.persistence.Column;
@@ -11,8 +17,11 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.springframework.util.CollectionUtils;
+
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.constant.AzureConstants;
 
 @Entity
 @Table
@@ -55,6 +64,25 @@ public class InstanceGroupNetwork {
 
     public String getCloudPlatform() {
         return cloudPlatform;
+    }
+
+    public Set<String> getAvailabilityZones() {
+        Set<String> zoneList = new HashSet<>();
+        if (attributes != null) {
+            zoneList.addAll((List<String>) attributes
+                    .getMap()
+                    .getOrDefault(AzureConstants.ZONES, new ArrayList<>()));
+        }
+        return zoneList;
+    }
+
+    public void setAvailabilityZones(Set<String> zones) {
+        if (CollectionUtils.isEmpty(zones)) {
+            return;
+        }
+        Map<String, Object> existingAttributes = (attributes != null) ? attributes.getMap() : new HashMap<>();
+        existingAttributes.put(AzureConstants.ZONES, zones);
+        attributes = new Json(existingAttributes);
     }
 
     @Override

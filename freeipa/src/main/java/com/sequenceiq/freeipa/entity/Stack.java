@@ -158,6 +158,8 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
     @SecretValue
     private Secret ccmParameters = Secret.EMPTY;
 
+    private boolean multiAz;
+
     public Long getId() {
         return id;
     }
@@ -514,6 +516,14 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
      */
     private void setCcmParameters(String rawCcmParameters) {
         this.ccmParameters = new Secret(rawCcmParameters);
+    }
+
+    public boolean getMultiAz() {
+        return multiAz;
+    }
+
+    public void setMultiAz(boolean multiAz) {
+        this.multiAz = multiAz;
     }
 
     @Override

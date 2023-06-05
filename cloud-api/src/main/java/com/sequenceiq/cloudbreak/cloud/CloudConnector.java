@@ -161,4 +161,14 @@ public interface CloudConnector extends CloudPlatformAware {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 
+    /**
+     * Access to the {@link AvailabilityZoneConnector} object.
+     *
+     * @return the {@link AvailabilityZoneConnector} object
+     */
+
+    default AvailabilityZoneConnector availabilityZoneConnector() {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
 }

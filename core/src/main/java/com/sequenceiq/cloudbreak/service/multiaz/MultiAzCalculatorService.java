@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +28,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.constant.AzureConstants;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -106,17 +108,31 @@ public class MultiAzCalculatorService {
         initializeSubnetUsage(subnetAzPairs, subnetIds, subnetUsage);
         List<InstanceMetadataView> instanceMetadataViews = new ArrayList<>(instanceMetaDataSet);
         collectCurrentSubnetUsage(instanceMetadataViews, subnetUsage);
+        Set<String> availabilityZones = new HashSet<>();
+        if (instanceGroupNetwork != null && instanceGroupNetwork.getAttributes() != null) {
+            availabilityZones.addAll((List<String>) instanceGroupNetwork.getAttributes()
+                    .getMap()
+                    .getOrDefault(AzureConstants.ZONES, new ArrayList<>()));
+            LOGGER.debug("Fetched instance group zones as {}", availabilityZones);
+        }
 
         if (!subnetIds.isEmpty() && multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroupNetwork)) {
+            Iterator<String> iter = availabilityZones.iterator();
             checkSubnetUsageCount(subnetUsage, subnetIds);
             for (InstanceMetaData instanceMetaData : instanceMetaDataSet) {
                 if (isNullOrEmpty(instanceMetaData.getSubnetId())) {
+                    if (!iter.hasNext()) {
+                        iter = availabilityZones.iterator();
+                    }
                     Integer numberOfInstanceInASubnet = searchTheSmallestInstanceCountForUsage(subnetUsage);
                     String leastUsedSubnetId = searchTheSmallestUsedID(subnetUsage, numberOfInstanceInASubnet);
 
                     instanceMetaData.setSubnetId(leastUsedSubnetId);
-                    instanceMetaData.setAvailabilityZone(subnetAzPairs.get(leastUsedSubnetId));
-
+                    if (subnetAzPairs.get(leastUsedSubnetId) != null) {
+                        instanceMetaData.setAvailabilityZone(subnetAzPairs.get(leastUsedSubnetId));
+                    } else {
+                        instanceMetaData.setAvailabilityZone(iter.hasNext() ? String.valueOf(iter.next()) : "");
+                    }
                     subnetUsage.put(leastUsedSubnetId, numberOfInstanceInASubnet + 1);
                 }
             }

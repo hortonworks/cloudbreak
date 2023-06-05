@@ -63,6 +63,7 @@ public class NetworkDtoToResponseConverter {
                         .withDatabasePrivateDnsZoneId(p.getDatabasePrivateDnsZoneId())
                         .withAksPrivateDnsZoneId(p.getAksPrivateDnsZoneId())
                         .withNoOutboundLoadBalancer(p.isNoOutboundLoadBalancer())
+                        .withAvailabilityZones(network.getAzure().getAvailabilityZones())
                         .build()))
                 .withGcp(getIfNotNull(network.getGcp(), p -> EnvironmentNetworkGcpParams.EnvironmentNetworkGcpParamsBuilder
                         .anEnvironmentNetworkGcpParamsBuilder()

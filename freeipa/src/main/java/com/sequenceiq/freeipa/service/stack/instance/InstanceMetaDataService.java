@@ -157,9 +157,10 @@ public class InstanceMetaDataService {
                     } else {
                         LOGGER.debug("Subnet and AZ calculation skipped, because the subnetAzMap is empty");
                     }
+                    instanceGroup.getInstanceMetaDataSet().add(instanceMetaData);
+                    multiAzCalculatorService.populateAvailabilityZonesForInstances(stack, instanceGroup);
                     instanceMetaDataRepository.save(instanceMetaData);
                     LOGGER.debug("Saved InstanceMetaData: {}", instanceMetaData);
-                    instanceGroup.getInstanceMetaDataSet().add(instanceMetaData);
                 }
             }
         }

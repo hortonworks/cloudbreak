@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class VmTypeMeta {
@@ -26,6 +27,8 @@ public class VmTypeMeta {
     private VolumeParameterConfig ephemeralConfig;
 
     private VolumeParameterConfig st1Config;
+
+    private List<String> availabilityZones;
 
     private Map<String, Object> properties = new HashMap<>();
 
@@ -69,6 +72,14 @@ public class VmTypeMeta {
         this.st1Config = st1Config;
     }
 
+    public List<String> getAvailabilityZones() {
+        return availabilityZones;
+    }
+
+    public void setAvailabilityZones(List<String> availabilityZones) {
+        this.availabilityZones = availabilityZones;
+    }
+
     public Map<String, Object> getProperties() {
         return properties;
     }
@@ -100,6 +111,7 @@ public class VmTypeMeta {
                 + ", ssdConfig=" + ssdConfig
                 + ", ephemeralConfig=" + ephemeralConfig
                 + ", st1Config=" + st1Config
+                + ", availabilityZones=" + availabilityZones
                 + ", properties=" + properties
                 + '}';
     }
@@ -115,6 +127,8 @@ public class VmTypeMeta {
         private VolumeParameterConfig ephemeralConfig;
 
         private VolumeParameterConfig st1Config;
+
+        private List<String> availabilityZones;
 
         private final Map<String, Object> properties = new HashMap<>();
 
@@ -175,6 +189,11 @@ public class VmTypeMeta {
             return this;
         }
 
+        public VmTypeMetaBuilder withAvailabilityZones(List<String> azs) {
+            availabilityZones = azs;
+            return this;
+        }
+
         public VmTypeMetaBuilder withProperty(String name, String value) {
             properties.put(name, value);
             return this;
@@ -224,6 +243,7 @@ public class VmTypeMeta {
             vmTypeMeta.setMagneticConfig(magneticConfig);
             vmTypeMeta.setSsdConfig(ssdConfig);
             vmTypeMeta.setSt1Config(st1Config);
+            vmTypeMeta.setAvailabilityZones(availabilityZones);
             vmTypeMeta.setProperties(properties);
             return vmTypeMeta;
         }

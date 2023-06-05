@@ -141,6 +141,7 @@ public class InstanceMetaDataServiceTest {
         assertEquals("ipa3.dom", instanceMetaData.getDiscoveryFQDN());
         verify(multiAzCalculatorService).filterSubnetByLeastUsedAz(actualInstanceGroup, subnetAzMap);
         verify(multiAzCalculatorService).updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, subnetUsage, instanceMetaData, actualInstanceGroup);
+        verify(multiAzCalculatorService).populateAvailabilityZonesForInstances(stack, instanceGroup);
     }
 
     @Test

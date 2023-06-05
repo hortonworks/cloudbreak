@@ -58,7 +58,7 @@
       "vnetID": "[resourceId(parameters('resourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('existingVNETName'))]",
       <#list igs as group>
       "${group.compressedName}secGroupName": "${group.compressedName}${stackname}sg",
-          <#if group.availabilitySetName?? && group.availabilitySetName?has_content>
+          <#if !multiAz && group.availabilitySetName?? && group.availabilitySetName?has_content>
           "${group.compressedName}AsName": "${group.availabilitySetName}",
           "${group.compressedName}AsFaultDomainCount": ${group.platformFaultDomainCount},
           "${group.compressedName}AsUpdateDomainCount": ${group.platformUpdateDomainCount},
@@ -68,7 +68,7 @@
   	},
     "resources": [
             <#list igs as group>
-                <#if group.availabilitySetName?? && group.availabilitySetName?has_content>
+                <#if !multiAz && group.availabilitySetName?? && group.availabilitySetName?has_content>
             {
                 "type": "Microsoft.Compute/availabilitySets",
                 "name": "[variables('${group.compressedName}AsName')]",
@@ -97,7 +97,7 @@
              <#list igs as group>
              <#if ! securityGroups[group.name]?? || ! securityGroups[group.name]?has_content>
              {
-               "apiVersion": "2015-05-01-preview",
+               "apiVersion": "2016-11-01",
                "type": "Microsoft.Network/networkSecurityGroups",
                "name": "[variables('${group.compressedName}secGroupName')]",
                "location": "[parameters('region')]",
@@ -140,16 +140,16 @@
                    }
                    </#list>
                    ]
-               }
-             },
-             </#if>
-             </#list>
-             </#if>
-             <#list groups?keys as instanceGroup>
-             <#list groups[instanceGroup] as instance>
+              }
+            },
+            </#if>
+            </#list>
+            </#if>
+            <#list groups?keys as instanceGroup>
+            <#list groups[instanceGroup] as instance>
                  <#if !noPublicIp>
                  {
-                   "apiVersion": "2015-05-01-preview",
+                   "apiVersion": "2017-08-01",
                    "type": "Microsoft.Network/publicIPAddresses",
                    "name": "[concat(parameters('publicIPNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
@@ -160,6 +160,15 @@
                         </#list>
                      </#if>
                      },
+                   <#if instance.instance.availabilityZone?? && instance.instance.availabilityZone?has_content>
+                   "zones": [
+                     "${instance.instance.availabilityZone}"
+                   ],
+                   "sku": {
+                     "name": "Standard",
+                     "tier": "Regional"
+                   },
+                   </#if>
                    "properties": {
                        "publicIPAllocationMethod": "Static"
                    }
@@ -245,7 +254,7 @@
                      },
                     </#if>
                    "dependsOn": [
-                    <#if instance.availabilitySetName?? && instance.availabilitySetName?has_content>
+                    <#if !multiAz && instance.availabilitySetName?? && instance.availabilitySetName?has_content>
                        "[concat('Microsoft.Compute/availabilitySets/', '${instance.availabilitySetName}')]",
                     </#if>
                        "[concat('Microsoft.Network/networkInterfaces/', parameters('nicNamePrefix'), '${instance.instanceId}')]"
@@ -258,8 +267,13 @@
                         </#list>
                     </#if>
                     },
+                   <#if instance.instance.availabilityZone?? && instance.instance.availabilityZone?has_content>
+                   "zones": [
+                        "${instance.instance.availabilityZone}"
+                   ],
+                   </#if>
                    "properties": {
-                        <#if instance.availabilitySetName?? && instance.availabilitySetName?has_content>
+                        <#if !multiAz && instance.availabilitySetName?? && instance.availabilitySetName?has_content>
                         "availabilitySet": {
                             "id": "[resourceId('Microsoft.Compute/availabilitySets', '${instance.availabilitySetName}')]"
                         },

@@ -5,9 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
@@ -25,6 +23,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaRespo
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
+import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.MultiAzValidator;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaInstanceCountByGroupProvider;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,6 +42,9 @@ public class FreeIpaConverterTest {
 
     @Mock
     private FreeIpaInstanceCountByGroupProvider ipaInstanceCountByGroupProvider;
+
+    @Mock
+    private MultiAzValidator multiAzValidator;
 
     @InjectMocks
     private FreeIpaConverter underTest;
@@ -136,9 +138,7 @@ public class FreeIpaConverterTest {
         AttachedFreeIpaRequest request = new AttachedFreeIpaRequest();
         request.setCreate(true);
         request.setImage(aFreeIpaImage(IMAGE_CATALOG, IMAGE_ID));
-        request.setEnableMultiAz(true);
         // WHEN
-        when(entitlementService.awsNativeFreeIpaEnabled(anyString())).thenReturn(true);
         FreeIpaCreationDto result = underTest.convert(request, "id", CloudConstants.AWS);
         // THEN
         verify(ipaInstanceCountByGroupProvider).getInstanceCount(any());

@@ -226,7 +226,7 @@ public class AzureTemplateBuilderTest {
         params.put(NetworkConstants.SUBNET_ID, "existingSubnet");
         params.put(CloudInstance.ID, 1L);
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
-        instance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication, "existingSubnet", "az1", params);
+        instance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication, "existingSubnet", null, params);
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         security = new Security(rules, emptyList());

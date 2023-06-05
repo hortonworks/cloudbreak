@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
+import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
@@ -92,6 +93,9 @@ public class AzureConnector implements CloudConnector {
 
     @Inject
     private AzureEncryptionResources azureEncryptionResources;
+
+    @Inject
+    private AzureAvailabilityZoneConnector azureAvailabilityZoneConnector;
 
     @Override
     public Authenticator authentication() {
@@ -189,6 +193,11 @@ public class AzureConnector implements CloudConnector {
     @Override
     public EncryptionResources encryptionResources() {
         return azureEncryptionResources;
+    }
+
+    @Override
+    public AvailabilityZoneConnector availabilityZoneConnector() {
+        return azureAvailabilityZoneConnector;
     }
 
 }

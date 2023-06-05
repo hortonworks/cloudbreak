@@ -201,6 +201,7 @@ public class FreeIpaCreationService {
                 instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);
             }
             multiAzCalculatorService.calculateByRoundRobin(multiAzCalculatorService.prepareSubnetAzMap(environment), instanceGroup);
+            multiAzCalculatorService.populateAvailabilityZonesForInstances(stack, instanceGroup);
         }
     }
 }

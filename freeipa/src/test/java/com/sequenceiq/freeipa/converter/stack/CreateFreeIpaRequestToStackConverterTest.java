@@ -27,6 +27,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -38,6 +39,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureRe
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
@@ -46,6 +48,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAu
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.converter.authentication.StackAuthenticationRequestToStackAuthenticationConverter;
 import com.sequenceiq.freeipa.converter.backup.BackupConverter;
+import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.instance.InstanceGroupRequestToInstanceGroupConverter;
 import com.sequenceiq.freeipa.converter.network.NetworkRequestToNetworkConverter;
 import com.sequenceiq.freeipa.converter.telemetry.TelemetryConverter;
@@ -53,6 +56,7 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.Network;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
+import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.tag.AccountTagService;
 import com.sequenceiq.freeipa.util.CloudArgsForIgConverter;
@@ -98,6 +102,15 @@ public class CreateFreeIpaRequestToStackConverterTest {
     @Mock
     private CrnService crnService;
 
+    @Mock
+    private CloudParameterService cloudParameterService;
+
+    @Mock
+    private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
+
+    @Mock
+    private CredentialService credentialService;
+
     @Captor
     private ArgumentCaptor<EnumMap> mapCaptorForEncryption;
 
@@ -117,6 +130,9 @@ public class CreateFreeIpaRequestToStackConverterTest {
                         .withDiskEncryptionSetId("dummyDiskEncryptionSetId")
                         .build())
                 .build());
+        environmentResponse.setLocation(LocationResponse.LocationResponseBuilder.aLocationResponse()
+                        .withName("west2")
+                                .build());
 
         when(crnService.createCrn(ACCOUNT_ID, CrnResourceDescriptor.FREEIPA)).thenReturn("resourceCrn");
         when(stackAuthenticationConverter.convert(source.getAuthentication())).thenReturn(new StackAuthentication());

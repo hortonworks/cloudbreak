@@ -14,6 +14,8 @@ public class AzureConstants {
 
     public static final String NO_OUTBOUND_LOAD_BALANCER = "noOutboundLoadBalancer";
 
+    public static final String ZONES = "zones";
+
     private AzureConstants() {
     }
 

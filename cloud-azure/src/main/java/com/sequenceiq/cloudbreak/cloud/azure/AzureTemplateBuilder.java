@@ -94,6 +94,15 @@ public class AzureTemplateBuilder {
 
             AzureLoadBalancerModelBuilder loadBalancerModelBuilder = new AzureLoadBalancerModelBuilder(cloudStack, stackName);
 
+            armStack.getInstancesByGroupType().values().stream()
+                    .flatMap(listAzureInstanceView -> listAzureInstanceView.stream())
+                    .forEach(azureInstanceView -> {
+                        LOGGER.debug("Availability zone for {} is {}",azureInstanceView.getInstance().getInstanceId(),
+                                azureInstanceView.getInstance().getAvailabilityZone());
+                    });
+
+            LOGGER.debug("MultiAz is {}",cloudStack.isMultiAz());
+
             // needed for pre 1.16.5 templates and Load balancer setup on Medium duty datalakes.
             model.put("existingSubnetName", azureUtils.getCustomSubnetIds(network).stream().findFirst().orElse(""));
             model.put("endpointGwSubnet", azureUtils.getCustomEndpointGatewaySubnetIds(network).stream().findFirst().orElse(""));
@@ -123,6 +132,7 @@ public class AzureTemplateBuilder {
             model.put("acceleratedNetworkEnabled", azureAcceleratedNetworkValidator.validate(armStack));
             model.put("isUpscale", UPSCALE.equals(azureInstanceTemplateOperation));
             model.putAll(loadBalancerModelBuilder.buildModel());
+            model.put("multiAz", cloudStack.isMultiAz());
             String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(cloudStack), model);
             LOGGER.info("Generated Arm template: {}", generatedTemplate);
             return generatedTemplate;

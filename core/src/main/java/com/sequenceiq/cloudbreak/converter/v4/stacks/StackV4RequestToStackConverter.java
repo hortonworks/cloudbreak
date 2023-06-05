@@ -9,6 +9,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -45,12 +46,15 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureConstants;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.metering.MeteringServiceFieldResolver;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -60,6 +64,7 @@ import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.authentication.StackAuthenticationV4RequestToStackAuthenticationConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterV4RequestToClusterConverter;
@@ -77,6 +82,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.GatewaySecurityGroupDecorator;
@@ -170,6 +176,15 @@ public class StackV4RequestToStackConverter {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private CloudParameterService cloudParameterService;
+
+    @Inject
+    private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
+
+    @Inject
+    private CredentialConverter credentialConverter;
 
     public Stack convert(StackV4Request source) {
         Workspace workspace = workspaceService.getForCurrentUser();
@@ -448,6 +463,42 @@ public class StackV4RequestToStackConverter {
             if (instanceGroup.getNetwork() == null) {
                 InstanceGroupNetworkV4Request instanceGroupNetworkV4Request = new InstanceGroupNetworkV4Request();
                 setNetworkByProvider(source, instanceGroup, instanceGroupNetworkV4Request, subnetId);
+            }
+            if (CloudPlatform.valueOf(stack.getCloudPlatform()) == CloudPlatform.AZURE
+                    && !CollectionUtils.isEmpty(environment.getNetwork().getAzure().getAvailabilityZones())) {
+                LOGGER.debug("Set Availability Zones {}", environment.getNetwork().getAzure().getAvailabilityZones());
+                CloudVmTypes vmTypesV2 = cloudParameterService.getVmTypesV2(
+                        extendedCloudCredentialConverter.convert(credentialConverter.convert(environment.getCredential())),
+                        environment.getLocation().getName(),
+                        AzureConstants.VARIANT.value(),
+                        null,
+                        new HashMap<>());
+                final List<String> availabilityZonesForInstanceType;
+                if (vmTypesV2.getCloudVmResponses() != null && vmTypesV2.getCloudVmResponses().get(environment.getLocation().getName()) != null) {
+                    availabilityZonesForInstanceType = vmTypesV2.getCloudVmResponses().get(environment.getLocation().getName()).stream()
+                            .filter(vmType -> vmType.value().equals(instanceGroup.getTemplate().getInstanceType()))
+                            .map(vmType -> vmType.getMetaData().getAvailabilityZones())
+                            .findFirst().orElse(new ArrayList<>());
+                    LOGGER.debug("Availability Zones for Instance Type {} are {} ", instanceGroup.getTemplate().getInstanceType(),
+                            availabilityZonesForInstanceType);
+                } else {
+                    availabilityZonesForInstanceType = new ArrayList<>();
+                }
+                Set<String> environmentZones = environment.getNetwork().getAzure().getAvailabilityZones();
+                environmentZones.removeIf(zone -> !availabilityZonesForInstanceType.contains(zone));
+                LOGGER.debug("Availability Zones for Instance Type {} which are also at environment are {} ",
+                        instanceGroup.getTemplate().getInstanceType(), environmentZones);
+                if (instanceGroup.getNetwork() == null) {
+                    instanceGroup.setNetwork(new InstanceGroupNetworkV4Request());
+                }
+                if (instanceGroup.getNetwork().getAzure() == null) {
+                    instanceGroup.getNetwork().setAzure(new InstanceGroupAzureNetworkV4Parameters());
+                }
+                if (CollectionUtils.isEmpty(instanceGroup.getNetwork().getAzure().getAvailabilityZones())) {
+                    instanceGroup.getNetwork().getAzure().setAvailabilityZones(environmentZones);
+                }
+            } else {
+                LOGGER.debug("Availability Zones are not available");
             }
             setupEndpointGatewayNetwork(instanceGroup.getNetwork(), stack, instanceGroup.getName(), environment);
         }

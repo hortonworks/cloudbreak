@@ -132,7 +132,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         return new CloudStack(instanceGroups, network, image, parameters,
                 getUserDefinedTags(stack), stack.getTemplate(), instanceAuthentication, instanceAuthentication.getLoginUserName(),
                 instanceAuthentication.getPublicKey(), null,
-                imageEntity.getUserdataWrapper(), null);
+                imageEntity.getUserdataWrapper(), null, stack.getMultiAz());
     }
 
     public CloudInstance buildInstance(Stack stack, InstanceMetaData instanceMetaData, InstanceGroup instanceGroup,

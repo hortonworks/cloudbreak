@@ -128,6 +128,7 @@ public class CreateFreeIpaRequestToStackConverter {
         stack.setGatewayport(source.getGatewayPort() == null ? nginxPort : source.getGatewayPort());
         stack.setStackStatus(new StackStatus(stack, "Stack provision requested.", DetailedStackStatus.PROVISION_REQUESTED));
         stack.setAvailabilityZone(Optional.ofNullable(source.getPlacement()).map(PlacementBase::getAvailabilityZone).orElse(null));
+        stack.setMultiAz(true);
         updateCloudPlatformAndRelatedFields(source, stack, cloudPlatform);
         stack.setStackAuthentication(stackAuthenticationConverter.convert(source.getAuthentication()));
         if (source.getNetwork() != null) {
@@ -298,7 +299,6 @@ public class CreateFreeIpaRequestToStackConverter {
         cloudArgsForIgConverterMap.put(DISK_ENCRYPTION_SET_ID, diskEncryptionSetId);
         cloudArgsForIgConverterMap.put(GCP_KMS_ENCRYPTION_KEY, gcpKmsEncryptionKey);
         cloudArgsForIgConverterMap.put(AWS_KMS_ENCRYPTION_KEY, awsKmsEncryptionKey);
-
         source.getInstanceGroups().stream()
                 .map(ig -> {
                     FreeIpaServerRequest ipaServerRequest = source.getFreeIpa();
