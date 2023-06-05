@@ -30,6 +30,8 @@ public class AzureTerminationHelperService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureTerminationHelperService.class);
 
+    private static final String LOAD_BALANCER_IP_NAME = "loadbalancer";
+
     private enum TerminationOperations {
         DOWNSCALE,
         TERMINATE;
@@ -100,7 +102,7 @@ public class AzureTerminationHelperService {
         if (operation == TerminationOperations.TERMINATE) {
             deleteLoadBalancers(ac, resourcesToRemove, client, resourceGroupName);
         }
-        deletePublicIpAddresses(ac, resourcesToRemove, client, resourceGroupName);
+        deletePublicIpAddresses(ac, resourcesToRemove, client, resourceGroupName, operation);
 
         deleteManagedDisks(ac, resourcesToRemove, client, resourceGroupName);
         deleteVolumeSets(ac, stack, resourcesToRemove, networkResources, resourceGroupName);
@@ -140,8 +142,10 @@ public class AzureTerminationHelperService {
         deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_DISK);
     }
 
-    private void deletePublicIpAddresses(AuthenticatedContext ac, List<CloudResource> resourcesToRemove, AzureClient client, String resourceGroupName) {
+    private void deletePublicIpAddresses(AuthenticatedContext ac, List<CloudResource> resourcesToRemove, AzureClient client, String resourceGroupName,
+            TerminationOperations operation) {
         List<String> publicAddressNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_PUBLIC_IP);
+        publicAddressNames.removeIf(name -> name.toLowerCase().startsWith(LOAD_BALANCER_IP_NAME) && operation == TerminationOperations.DOWNSCALE);
         azureUtils.deletePublicIps(client, resourceGroupName, publicAddressNames);
         deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_PUBLIC_IP);
     }

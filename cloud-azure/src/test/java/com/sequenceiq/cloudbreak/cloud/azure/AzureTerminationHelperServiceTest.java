@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -22,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
@@ -146,6 +150,24 @@ class AzureTerminationHelperServiceTest {
         InOrder inOrder = inOrder(azureUtils);
         inOrder.verify(azureUtils).deleteLoadBalancers(any(), any(), any());
         inOrder.verify(azureUtils).deletePublicIps(any(), any(), any());
+    }
+
+    @Test
+    void testWhenDownscaleThenLoadBalancerPublicIpShouldBePreserved() {
+        List<CloudInstance> vms = mock();
+        List<CloudResource> allResources = mock();
+        List<CloudResource> resourcesToRemove = List.of(
+                createCloudResource(ResourceType.AZURE_INSTANCE, INSTANCE_NAME),
+                createCloudResource(ResourceType.AZURE_PUBLIC_IP, "LoadBalancerdh-name0OUTBOUND-publicIp"),
+                createCloudResource(ResourceType.AZURE_LOAD_BALANCER, "LoadBalancerdh-name0OUTBOUND"));
+
+        underTest.downscale(ac, cloudStack, vms, allResources, resourcesToRemove);
+
+        ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
+        InOrder inOrder = inOrder(azureUtils);
+        inOrder.verify(azureUtils, never()).deleteLoadBalancers(any(), any(), any());
+        inOrder.verify(azureUtils).deletePublicIps(any(), any(), captor.capture());
+        assertTrue(captor.getValue().isEmpty());
     }
 
     private List<CloudResource> setupCloudResources() {
