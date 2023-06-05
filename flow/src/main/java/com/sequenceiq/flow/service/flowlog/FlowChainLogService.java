@@ -52,6 +52,10 @@ public class FlowChainLogService {
         return repository.findByFlowChainIdOrderByCreatedDesc(flowChainId);
     }
 
+    public List<FlowChainLog> findByFlowChainIdOrderByCreatedDescIdDesc(String flowChainId) {
+        return repository.findByFlowChainIdOrderByCreatedDescIdDesc(flowChainId);
+    }
+
     public List<FlowChainLog> getRelatedFlowChainLogs(List<FlowChainLog> sourceFlowChains) {
         Optional<FlowChainLog> flowChainWithParent = sourceFlowChains.stream()
                 .filter(flowChainLog -> StringUtils.isNotBlank(flowChainLog.getParentFlowChainId())).findFirst();
@@ -116,7 +120,7 @@ public class FlowChainLogService {
                     .sorted(comparing(FlowChainLog::getCreated).reversed())
                     .findFirst()
                     .get();
-            LOGGER.debug("Checking if chain with id {} has any event in it's queue", latestFlowChain.getFlowChainId());
+            LOGGER.debug("Checking if chain with id {} has any event in its queue", latestFlowChain.getFlowChainId());
             LOGGER.debug("Chain string in db: {}", latestFlowChain.getChainJackson());
             Queue<Selectable> chain = latestFlowChain.getChainAsQueue();
             return !chain.isEmpty();

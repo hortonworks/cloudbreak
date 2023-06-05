@@ -130,7 +130,7 @@ public class FlowService {
     public FlowCheckResponse getFlowChainState(String chainId) {
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
         flowCheckResponse.setFlowChainId(chainId);
-        List<FlowChainLog> flowChains = flowChainLogService.findByFlowChainIdOrderByCreatedDesc(chainId);
+        List<FlowChainLog> flowChains = flowChainLogService.findByFlowChainIdOrderByCreatedDescIdDesc(chainId);
         if (!flowChains.isEmpty()) {
             LOGGER.info("Checking if there is an active flow based on flow chain id {}", chainId);
             List<FlowChainLog> relatedChains = flowChainLogService.getRelatedFlowChainLogs(flowChains);
@@ -165,7 +165,7 @@ public class FlowService {
     public FlowCheckResponse getFlowChainStateSafe(List<Long> resourceIdList, String chainId) {
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
         flowCheckResponse.setFlowChainId(chainId);
-        List<FlowChainLog> flowChains = flowChainLogService.findByFlowChainIdOrderByCreatedDesc(chainId);
+        List<FlowChainLog> flowChains = flowChainLogService.findByFlowChainIdOrderByCreatedDescIdDesc(chainId);
         if (!flowChains.isEmpty()) {
             LOGGER.info("Checking if there is an active flow based on flow chain id {}", chainId);
             List<FlowChainLog> relatedChains = flowChainLogService.getRelatedFlowChainLogs(flowChains);

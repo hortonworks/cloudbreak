@@ -31,6 +31,8 @@ public interface FlowChainLogRepository extends CrudRepository<FlowChainLog, Lon
 
     List<FlowChainLog> findByFlowChainIdOrderByCreatedDesc(String flowChainId);
 
+    List<FlowChainLog> findByFlowChainIdOrderByCreatedDescIdDesc(String flowChainId);
+
     Optional<FlowChainLog> findFirstByFlowChainIdOrderByCreatedDesc(String flowChainId);
 
     Optional<FlowChainLog> findFirstByFlowChainIdOrderByCreatedAsc(String flowChainId);
