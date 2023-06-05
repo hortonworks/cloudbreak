@@ -38,8 +38,8 @@ public class SecretRotationConfig {
         if (applicationSecretRotationInformation.isPresent() && rotationContextProviders.isPresent()) {
             Map<SecretType, RotationContextProvider> beans = Maps.newHashMap();
             for (RotationContextProvider rotationContextProvider : rotationContextProviders.get()) {
-                if (applicationSecretRotationInformation.get().supportedSecretTypes().stream().anyMatch(secretTypeClass ->
-                        rotationContextProvider.getSecret().getClass().isAssignableFrom(secretTypeClass))) {
+                Class<? extends SecretType> supportedSecretType = applicationSecretRotationInformation.get().supportedSecretType();
+                if (rotationContextProvider.getSecret().getClass().isAssignableFrom(supportedSecretType)) {
                     beans.put(rotationContextProvider.getSecret(), rotationContextProvider);
                 }
             }
@@ -52,10 +52,8 @@ public class SecretRotationConfig {
     @Bean
     public Map<SecretRotationStep, RotationExecutor<? extends RotationContext>> rotationExecutorMap() {
         if (applicationSecretRotationInformation.isPresent() && rotationExecutors.isPresent()) {
-            Set<SecretRotationStep> supportedSteps = applicationSecretRotationInformation.get()
-                    .supportedSecretTypes()
-                    .stream()
-                    .flatMap(enumClass -> Arrays.stream(enumClass.getEnumConstants()))
+            Class<? extends SecretType> supportedSecretType = applicationSecretRotationInformation.get().supportedSecretType();
+            Set<SecretRotationStep> supportedSteps = Arrays.stream(supportedSecretType.getEnumConstants())
                     .flatMap(secretType -> secretType.getSteps().stream())
                     .collect(Collectors.toSet());
             Map<SecretRotationStep, RotationExecutor<? extends RotationContext>> bean = new EnumMap<>(SecretRotationStep.class);

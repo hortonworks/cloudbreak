@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.rotation;
 
-import java.util.Set;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
@@ -12,7 +10,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.type.DatalakeSecretType;
 public class DatalakeSecretRotationInformation implements ApplicationSecretRotationInformation {
 
     @Override
-    public Set<Class<? extends SecretType>> supportedSecretTypes() {
-        return Set.of(DatalakeSecretType.class);
+    public Class<? extends SecretType> supportedSecretType() {
+        return DatalakeSecretType.class;
     }
 }
