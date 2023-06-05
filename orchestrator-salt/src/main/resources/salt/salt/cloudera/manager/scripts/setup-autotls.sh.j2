@@ -41,9 +41,7 @@ rm -f ${CACERTS_DIR}/cacerts.bcfks
 
 keytool -importkeystore \
   -srckeystore ${JAVA_HOME}/jre/lib/security/cacerts \
-  -srcstorepass changeit \
-  -providerclass sun.security.pkcs11.SunPKCS11 \
-  -providerarg ${JAVA_HOME}/jre/lib/security/nss.cfg \
+  -srcstorepass changeit {% if gov_cloud == True %} -providerclass sun.security.pkcs11.SunPKCS11 -providerarg ${JAVA_HOME}/jre/lib/security/nss.cfg {% endif %} \
   -destkeystore ${CACERTS_DIR}/cacerts.p12 \
   -deststorepass changeit \
   -deststoretype PKCS12
