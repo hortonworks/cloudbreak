@@ -18,8 +18,6 @@ public final class PublicKeyReaderUtil {
 
     private static final String END_PUB_KEY = "---- END SSH2 PUBLIC KEY ----";
 
-    private static final String SSH2_DSA_KEY = "ssh-dsa";
-
     private static final String SSH2_RSA_KEY = "ssh-rsa";
 
     private PublicKeyReaderUtil() {
@@ -41,9 +39,7 @@ public final class PublicKeyReaderUtil {
         SSH2DataBuffer buf = new SSH2DataBuffer(Base64.decodeBase64(base64.getBytes()));
         String type = buf.readString();
         PublicKey ret;
-        if (SSH2_DSA_KEY.equals(type)) {
-            ret = decodeDSAPublicKey(buf);
-        } else if (SSH2_RSA_KEY.equals(type)) {
+        if (SSH2_RSA_KEY.equals(type)) {
             ret = decodePublicKey(buf);
         } else {
             throw new PublicKeyParseException(ErrorCode.UNKNOWN_PUBLIC_KEY_CERTIFICATE_FORMAT);
