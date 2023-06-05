@@ -13,8 +13,8 @@ grpc-common/                                                                    
 datalake/                                                                       @hortonworks/cloudbreak-raven @hortonworks/cloudbreak-armadillo
 datalake-api/                                                                   @hortonworks/cloudbreak-raven @hortonworks/cloudbreak-armadillo
 
-# Raven team should review datalake blueprint changes
-core/src/main/resources/defaults/blueprints/*/cdp-sdx*.bp                       @hortonworks/cloudbreak-raven
+# Raven and Armadillo team should review datalake blueprint changes
+core/src/main/resources/defaults/blueprints/*/cdp-sdx*.bp                       @hortonworks/cloudbreak-raven @hortonworks/cloudbreak-armadillo
 
 # Raven team should review quartz and sync job related PRs
 common/src/java/com/sequenceiq/cloudbreak/quartz/*StatusCheckerJob.java         @hortonworks/cloudbreak-raven
@@ -75,3 +75,7 @@ freeipa-client/                                                                 
 # Duck team should review redbeams related changes
 redbeams/                                                                       @hortonworks/cloudbreak-duck
 redbeams-api/                                                                   @hortonworks/cloudbreak-duck
+
+# Armadillo team should review changes to datalake related scripts
+orchestrator-salt/src/main/resources/salt/salt/postgresql/disaster_recovery     @hortonworks/cloudbreak-armadillo
+orchestrator-salt/src/main/resources/salt/salt/datalake_metrics                 @hortonworks/cloudbreak-armadillo
