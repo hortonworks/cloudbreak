@@ -55,10 +55,8 @@ public class ClusterDBValidationServiceTest {
         Cluster cluster = new Cluster();
         cluster.setId(0L);
         cluster.setEmbeddedDatabaseOnAttachedDisk(false);
-//        Set<RdsConfigWithoutCluster> rdsConfigs = Set.of(createRdsConfig(0L, ResourceStatus.USER_MANAGED, DatabaseType.CLOUDERA_MANAGER),
-//                createRdsConfig(1L, ResourceStatus.USER_MANAGED, DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_REPORTS_MANAGER));
         when(rdsConfigWithoutClusterService.countByClusterIdAndStatusInAndTypeIn(0L, Set.of(ResourceStatus.USER_MANAGED),
-                Set.of(DatabaseType.CLOUDERA_MANAGER, DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_REPORTS_MANAGER))).thenReturn(2L);
+                Set.of(DatabaseType.CLOUDERA_MANAGER))).thenReturn(1L);
         // WHEN
         Boolean actualResult = underTest.isGatewayRepairEnabled(cluster);
         // THEN
@@ -72,7 +70,7 @@ public class ClusterDBValidationServiceTest {
         cluster.setId(0L);
         cluster.setEmbeddedDatabaseOnAttachedDisk(false);
         when(rdsConfigWithoutClusterService.countByClusterIdAndStatusInAndTypeIn(0L, Set.of(ResourceStatus.USER_MANAGED),
-                Set.of(DatabaseType.CLOUDERA_MANAGER, DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_REPORTS_MANAGER))).thenReturn(1L);
+                Set.of(DatabaseType.CLOUDERA_MANAGER))).thenReturn(0L);
         // WHEN
         Boolean actualResult = underTest.isGatewayRepairEnabled(cluster);
         // THEN

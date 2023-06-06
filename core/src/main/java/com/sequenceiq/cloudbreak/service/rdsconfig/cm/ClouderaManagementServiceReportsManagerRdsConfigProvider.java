@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.rdsconfig.AbstractRdsConfigProvider;
 
+@Deprecated
 @Component
 public class ClouderaManagementServiceReportsManagerRdsConfigProvider extends AbstractRdsConfigProvider {
 
@@ -48,7 +49,7 @@ public class ClouderaManagementServiceReportsManagerRdsConfigProvider extends Ab
 
     @Override
     protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
-        return true;
+        return false;
     }
 
 }
