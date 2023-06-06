@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @Component
 public class ClusterDBValidationService {
-    private static final long REQUIRED_CM_DATABASE_COUNT = 2L;
+    private static final long REQUIRED_CM_DATABASE_COUNT = 1L;
 
     @Inject
     private RdsConfigWithoutClusterService rdsConfigWithoutClusterService;
@@ -27,7 +27,7 @@ public class ClusterDBValidationService {
             return true;
         }
         long cmRdsCount = rdsConfigWithoutClusterService.countByClusterIdAndStatusInAndTypeIn(cluster.getId(), Set.of(ResourceStatus.USER_MANAGED),
-                Set.of(DatabaseType.CLOUDERA_MANAGER, DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_REPORTS_MANAGER));
+                Set.of(DatabaseType.CLOUDERA_MANAGER));
         return cmRdsCount == REQUIRED_CM_DATABASE_COUNT;
     }
 }
