@@ -111,7 +111,7 @@ public class DistroXClusterFaultTolerantUpscaleTest extends AbstractClouderaMana
         currentContext
                 .mockCm().hosts().get().thenReturn(apiHostList, null, 200, 0, null)
                 .when(distroXClient.scale(UPSCALED_INSTANCE_GROUP_NAME, SUCCESSFUL_UPSCALE_NODE_COUNT))
-                .awaitForFlow(RunningParameter.waitForFlowFail())
+                .awaitForFlow(RunningParameter.waitForFlowSuccess())
                 .await(STACK_AVAILABLE, key(stack).withPollingInterval(POLLING_INTERVAL))
                 .then((tc, testDto, client) -> verifyHealthyNodeCountAfterUpscale(testDto));
 
