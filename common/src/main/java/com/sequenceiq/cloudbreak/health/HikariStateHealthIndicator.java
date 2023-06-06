@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.health;
 
-import java.lang.management.ThreadInfo;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,7 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.util.ThreadUtil;
+import com.sequenceiq.cloudbreak.util.thread.ThreadDumpUtil;
 import com.zaxxer.hikari.HikariDataSource;
 
 @Component
@@ -49,7 +48,7 @@ public class HikariStateHealthIndicator implements HealthIndicator {
                     }
                 }
             }
-            LOGGER.debug("HikariPool details: {}", details);
+            LOGGER.debug("HikariPool details: {}, setReadinessProbeDownIfPoolIsFull: {}", details, setReadinessProbeDownIfPoolIsFull);
             threadDumpIfNeeded(poolIsFull);
         } catch (RuntimeException exception) {
             LOGGER.info("Failed while checking the health of hikari pool!", exception);
@@ -60,6 +59,7 @@ public class HikariStateHealthIndicator implements HealthIndicator {
     private Health buildHealthResponse(boolean poolIsFull, Map<String, Object> details) {
         Health health;
         if (poolIsFull && setReadinessProbeDownIfPoolIsFull) {
+            LOGGER.info("Application readiness was set to DOWN");
             health = Health.down().withDetails(details).build();
         } else {
             health = Health.up().withDetails(details).build();
@@ -70,9 +70,7 @@ public class HikariStateHealthIndicator implements HealthIndicator {
     private void threadDumpIfNeeded(boolean poolIsFull) {
         if (poolIsFull) {
             LOGGER.info("Application has run out of open db connections");
-            for (ThreadInfo threadInfo : ThreadUtil.dump()) {
-                LOGGER.debug("ThreadInfo: {}", threadInfo);
-            }
+            ThreadDumpUtil.logThreadDumpOfEveryThread();
         }
     }
 }
