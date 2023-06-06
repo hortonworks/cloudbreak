@@ -226,6 +226,12 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
         return stackParameters.stream().collect(Collectors.toMap(StackParameters::getKey, StackParameters::getValue));
     }
 
+    public List<InstanceMetadataView> getAllNotTerminatedInstanceMetaData() {
+        return instanceGroups.values().stream()
+                .flatMap(ig -> ig.getInstanceMetadataViews().stream())
+                .collect(Collectors.toList());
+    }
+
     public List<InstanceMetadataView> getAllAvailableInstances() {
         return instanceGroups.values().stream()
                 .flatMap(ig -> ig.getNotDeletedAndNotZombieInstanceMetaData().stream())
@@ -352,7 +358,7 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
     }
 
     public Optional<InstanceMetadataView> getInstanceMetadata(Long privateId) {
-        return getAllAvailableInstances().stream()
+        return getAllNotTerminatedInstanceMetaData().stream()
                 .filter(instanceMetaData -> privateId.equals(instanceMetaData.getPrivateId()))
                 .findFirst();
     }
