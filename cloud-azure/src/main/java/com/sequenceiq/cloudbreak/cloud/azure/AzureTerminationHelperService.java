@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
+import com.sequenceiq.cloudbreak.cloud.azure.loadbalancer.AzureLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTransientDeploymentService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -100,7 +101,7 @@ public class AzureTerminationHelperService {
         if (operation == TerminationOperations.TERMINATE) {
             deleteLoadBalancers(ac, resourcesToRemove, client, resourceGroupName);
         }
-        deletePublicIpAddresses(ac, resourcesToRemove, client, resourceGroupName);
+        deletePublicIpAddresses(ac, resourcesToRemove, client, resourceGroupName, operation);
 
         deleteManagedDisks(ac, resourcesToRemove, client, resourceGroupName);
         deleteVolumeSets(ac, stack, resourcesToRemove, networkResources, resourceGroupName);
@@ -140,8 +141,11 @@ public class AzureTerminationHelperService {
         deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_DISK);
     }
 
-    private void deletePublicIpAddresses(AuthenticatedContext ac, List<CloudResource> resourcesToRemove, AzureClient client, String resourceGroupName) {
+    private void deletePublicIpAddresses(AuthenticatedContext ac, List<CloudResource> resourcesToRemove, AzureClient client, String resourceGroupName,
+            TerminationOperations operation) {
         List<String> publicAddressNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_PUBLIC_IP);
+        publicAddressNames.removeIf(name -> name.startsWith(AzureLoadBalancer.LOAD_BALANCER_NAME_PREFIX)
+                && operation == TerminationOperations.DOWNSCALE);
         azureUtils.deletePublicIps(client, resourceGroupName, publicAddressNames);
         deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_PUBLIC_IP);
     }
