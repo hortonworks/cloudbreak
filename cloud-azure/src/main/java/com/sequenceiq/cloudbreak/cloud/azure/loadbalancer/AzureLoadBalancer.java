@@ -10,7 +10,7 @@ import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 public class AzureLoadBalancer {
-    private static final String LOAD_BALANCER_NAME_PREFIX = "LoadBalancer";
+    public static final String LOAD_BALANCER_NAME_PREFIX = "LoadBalancer";
 
     private final List<AzureLoadBalancingRule> rules;
 
