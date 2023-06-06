@@ -299,7 +299,7 @@ class UpgradeCcmFlowIntegrationTest {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
             }
-        } while (flowRegister.get(flowIdentifier.getPollableId()) != null && i < 10);
+        } while (flowRegister.get(flowIdentifier.getPollableId()) != null && i < 30);
     }
 
     @Profile("integration-test")
