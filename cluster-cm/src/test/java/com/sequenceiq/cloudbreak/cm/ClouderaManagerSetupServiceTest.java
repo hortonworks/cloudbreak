@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.error.mapper.ClouderaManagerStorageErrorMapper;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
+import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -144,6 +145,9 @@ public class ClouderaManagerSetupServiceTest {
     @Mock
     private ClouderaManagerFedRAMPService clouderaManagerFedRAMPService;
 
+    @Mock
+    private BlueprintUtils blueprintUtils;
+
     @InjectMocks
     private ClouderaManagerSetupService underTest;
 
@@ -166,6 +170,7 @@ public class ClouderaManagerSetupServiceTest {
         ReflectionTestUtils.setField(underTest, "clusterCommandRepository", clusterCommandRepository);
         ReflectionTestUtils.setField(underTest, "clouderaManagerFedRAMPService", clouderaManagerFedRAMPService);
         ReflectionTestUtils.setField(underTest, "apiClient", mock(ApiClient.class));
+        ReflectionTestUtils.setField(underTest, "blueprintUtils", blueprintUtils);
     }
 
     @Test
@@ -1026,7 +1031,8 @@ public class ClouderaManagerSetupServiceTest {
 
         when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
-        when(blueprintView.getBlueprintText()).thenReturn(template);
+        when(blueprintView.getVersion()).thenReturn("7.2.17");
+        when(blueprintUtils.isEnterpriseDatalake(any(TemplatePreparationObject.class))).thenReturn(true);
         when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
         when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(apiHostList);
         doNothing().when(mgmtSetupService).setupMgmtServices(any(), any(), any(), any(), any(), any(), any());
@@ -1049,9 +1055,10 @@ public class ClouderaManagerSetupServiceTest {
 
         when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
-        when(blueprintView.getBlueprintText()).thenReturn(template);
+        when(blueprintView.getVersion()).thenReturn("7.2.17");
         when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
         when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(apiHostList);
+        when(blueprintUtils.isEnterpriseDatalake(any(TemplatePreparationObject.class))).thenReturn(true);
 
         spy.configureManagementServices(templatePreparationObject, null, null, null, null);
 
@@ -1098,10 +1105,11 @@ public class ClouderaManagerSetupServiceTest {
         when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
         when(generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN()).thenReturn(Optional.of("fqdn"));
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
+        when(blueprintView.getVersion()).thenReturn("7.2.17");
         when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
         when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(apiHostList);
         doNothing().when(mgmtSetupService).setupMgmtServices(any(), any(), any(), any(), any(), any(), any());
-
+        when(blueprintUtils.isEnterpriseDatalake(any(TemplatePreparationObject.class))).thenReturn(false);
         spy.configureManagementServices(templatePreparationObject, null, null, null, null);
 
         verify(spy, times(0)).getAuxiliaryHost(any(), any());
