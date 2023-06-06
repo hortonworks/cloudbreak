@@ -9,13 +9,19 @@ class ThreadUtilTest {
 
     @Test
     void testDump() {
-        ThreadInfo[] dump = ThreadUtil.dump();
+        ThreadInfo[] dump = ThreadDumpUtil.dump();
 
         String currentThreadName = Thread.currentThread().getName();
         StringBuffer threadDump = new StringBuffer(System.lineSeparator());
-        for (ThreadInfo threadInfo : ThreadUtil.dump()) {
+        for (ThreadInfo threadInfo : ThreadDumpUtil.dump()) {
             threadDump.append(threadInfo.toString());
         }
         Assertions.assertThat(threadDump).contains(currentThreadName);
+    }
+
+    @Test
+    void testLogDump() {
+        ThreadDumpUtil.logThreadDumpOfEveryThread();
+
     }
 }
