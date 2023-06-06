@@ -55,7 +55,8 @@ public class FlowChainLogService {
     public List<FlowChainLog> getRelatedFlowChainLogs(List<FlowChainLog> sourceFlowChains) {
         Optional<FlowChainLog> flowChainWithParent = sourceFlowChains.stream()
                 .filter(flowChainLog -> StringUtils.isNotBlank(flowChainLog.getParentFlowChainId())).findFirst();
-        FlowChainLog lastFlowChain = sourceFlowChains.stream().max(Comparator.comparing(FlowChainLog::getCreated)).get();
+        FlowChainLog lastFlowChain = sourceFlowChains.stream().max(Comparator.comparing(FlowChainLog::getCreated)
+                .thenComparing(FlowChainLog::getId)).get();
         FlowChainLog inputFlowChain = flowChainWithParent.orElse(lastFlowChain);
         return collectRelatedFlowChains(inputFlowChain);
     }
@@ -116,7 +117,7 @@ public class FlowChainLogService {
                     .sorted(comparing(FlowChainLog::getCreated).reversed())
                     .findFirst()
                     .get();
-            LOGGER.debug("Checking if chain with id {} has any event in it's queue", latestFlowChain.getFlowChainId());
+            LOGGER.debug("Checking if chain with id {} has any event in its queue", latestFlowChain.getFlowChainId());
             LOGGER.debug("Chain string in db: {}", latestFlowChain.getChainJackson());
             Queue<Selectable> chain = latestFlowChain.getChainAsQueue();
             return !chain.isEmpty();
