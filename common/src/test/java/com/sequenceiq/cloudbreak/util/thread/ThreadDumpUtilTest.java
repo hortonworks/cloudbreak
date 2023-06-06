@@ -1,21 +1,22 @@
-package com.sequenceiq.cloudbreak.util;
+package com.sequenceiq.cloudbreak.util.thread;
 
 import java.lang.management.ThreadInfo;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class ThreadUtilTest {
+class ThreadDumpUtilTest {
 
     @Test
     void testDump() {
-        ThreadInfo[] dump = ThreadUtil.dump();
+        ThreadInfo[] dump = ThreadDumpUtil.dump();
 
         String currentThreadName = Thread.currentThread().getName();
         StringBuffer threadDump = new StringBuffer(System.lineSeparator());
-        for (ThreadInfo threadInfo : ThreadUtil.dump()) {
+        for (ThreadInfo threadInfo : ThreadDumpUtil.dump()) {
             threadDump.append(threadInfo.toString());
         }
         Assertions.assertThat(threadDump).contains(currentThreadName);
     }
+
 }
