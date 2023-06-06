@@ -283,7 +283,7 @@
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;enableStickySession=false;noFallback=false;enableLoadBalancing=true</value>
              </param>
              {%- endif %}
-             {% if 'RANGER' in exposed and 'RANGER_ADMIN' in salt['pillar.get']('gateway:location') -%}
+             {% if 'RANGER_ADMIN' in salt['pillar.get']('gateway:location') or 'RANGER_ADMIN' in salt['pillar.get']('master:location') -%}
              <param>
                  <name>RANGER</name>
                  <value>enableStickySession=true;noFallback=false;enableLoadBalancing=true</value>
@@ -496,6 +496,31 @@
     <service>
         <role>RANGERUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['RANGER_ADMIN'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['RANGER'] }}</url>
+        {%- endfor %}
+        <param>
+             <name>replayBufferSize</name>
+             <value>128</value>
+        </param>
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'RANGER_ADMIN' in salt['pillar.get']('master:location') -%}
+    {% if 'RANGER' in exposed -%}
+    <service>
+        <role>RANGER</role>
+        {% for hostloc in salt['pillar.get']('master:location')['RANGER_ADMIN'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['RANGER'] }}</url>
+        {%- endfor %}
+        <param>
+            <name>replayBufferSize</name>
+            <value>128</value>
+        </param>
+    </service>
+    <service>
+        <role>RANGERUI</role>
+        {% for hostloc in salt['pillar.get']('master:location')['RANGER_ADMIN'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['RANGER'] }}</url>
         {%- endfor %}
         <param>
