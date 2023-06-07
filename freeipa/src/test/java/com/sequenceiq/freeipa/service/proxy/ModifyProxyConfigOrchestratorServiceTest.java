@@ -28,7 +28,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.orchestrator.OrchestratorStateParamsProvider;
+import com.sequenceiq.freeipa.service.orchestrator.OrchestratorParamsProvider;
 import com.sequenceiq.freeipa.service.stack.FreeIpaSafeInstanceHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -47,7 +47,7 @@ class ModifyProxyConfigOrchestratorServiceTest {
     private StackService stackService;
 
     @Mock
-    private OrchestratorStateParamsProvider orchestratorStateParamsProvider;
+    private OrchestratorParamsProvider orchestratorParamsProvider;
 
     @Mock
     private HostOrchestrator hostOrchestrator;
@@ -74,9 +74,9 @@ class ModifyProxyConfigOrchestratorServiceTest {
     void setUp() throws Exception {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         lenient().when(stack.getNotDeletedInstanceMetaDataList()).thenReturn(List.of(I_2, I_1, I_3));
-        lenient().when(orchestratorStateParamsProvider.createStateParamsForSingleTarget(eq(stack), eq(I_1.getDiscoveryFQDN()), any())).thenReturn(stateParams1);
-        lenient().when(orchestratorStateParamsProvider.createStateParamsForSingleTarget(eq(stack), eq(I_2.getDiscoveryFQDN()), any())).thenReturn(stateParams2);
-        lenient().when(orchestratorStateParamsProvider.createStateParamsForSingleTarget(eq(stack), eq(I_3.getDiscoveryFQDN()), any())).thenReturn(stateParams3);
+        lenient().when(orchestratorParamsProvider.createStateParamsForSingleTarget(eq(stack), eq(I_1.getDiscoveryFQDN()), any())).thenReturn(stateParams1);
+        lenient().when(orchestratorParamsProvider.createStateParamsForSingleTarget(eq(stack), eq(I_2.getDiscoveryFQDN()), any())).thenReturn(stateParams2);
+        lenient().when(orchestratorParamsProvider.createStateParamsForSingleTarget(eq(stack), eq(I_3.getDiscoveryFQDN()), any())).thenReturn(stateParams3);
         NodeHealthDetails nodeHealthDetails = new NodeHealthDetails();
         nodeHealthDetails.setStatus(InstanceStatus.CREATED);
         lenient().when(healthDetailsService.getInstanceHealthDetails(eq(stack), any())).thenReturn(nodeHealthDetails);
@@ -95,16 +95,16 @@ class ModifyProxyConfigOrchestratorServiceTest {
     void applyModifyProxyState() throws Exception {
         underTest.applyModifyProxyState(STACK_ID);
 
-        InOrder inOrder = inOrder(orchestratorStateParamsProvider, hostOrchestrator, healthDetailsService);
-        inOrder.verify(orchestratorStateParamsProvider)
+        InOrder inOrder = inOrder(orchestratorParamsProvider, hostOrchestrator, healthDetailsService);
+        inOrder.verify(orchestratorParamsProvider)
                 .createStateParamsForSingleTarget(stack, I_2.getDiscoveryFQDN(), ModifyProxyConfigOrchestratorService.MODIFY_PROXY_STATE);
         inOrder.verify(hostOrchestrator).runOrchestratorState(stateParams2);
         inOrder.verify(healthDetailsService).getInstanceHealthDetails(stack, I_2);
-        inOrder.verify(orchestratorStateParamsProvider)
+        inOrder.verify(orchestratorParamsProvider)
                 .createStateParamsForSingleTarget(stack, I_3.getDiscoveryFQDN(), ModifyProxyConfigOrchestratorService.MODIFY_PROXY_STATE);
         inOrder.verify(hostOrchestrator).runOrchestratorState(stateParams3);
         inOrder.verify(healthDetailsService).getInstanceHealthDetails(stack, I_3);
-        inOrder.verify(orchestratorStateParamsProvider)
+        inOrder.verify(orchestratorParamsProvider)
                 .createStateParamsForSingleTarget(stack, I_1.getDiscoveryFQDN(), ModifyProxyConfigOrchestratorService.MODIFY_PROXY_STATE);
         inOrder.verify(hostOrchestrator).runOrchestratorState(stateParams1);
         inOrder.verify(healthDetailsService).getInstanceHealthDetails(stack, I_1);
@@ -124,16 +124,16 @@ class ModifyProxyConfigOrchestratorServiceTest {
                                 "Please either fix your proxy configuration settings and try the operation again, or repair the failed instance. Details: %s",
                         I_2.getInstanceId(), issue);
 
-        verify(orchestratorStateParamsProvider)
+        verify(orchestratorParamsProvider)
                 .createStateParamsForSingleTarget(stack, I_2.getDiscoveryFQDN(), ModifyProxyConfigOrchestratorService.MODIFY_PROXY_STATE);
         verify(hostOrchestrator).runOrchestratorState(stateParams2);
         verify(healthDetailsService).getInstanceHealthDetails(stack, I_2);
 
-        verify(orchestratorStateParamsProvider, never())
+        verify(orchestratorParamsProvider, never())
                 .createStateParamsForSingleTarget(stack, I_3.getDiscoveryFQDN(), ModifyProxyConfigOrchestratorService.MODIFY_PROXY_STATE);
         verify(hostOrchestrator, never()).runOrchestratorState(stateParams3);
         verify(healthDetailsService, never()).getInstanceHealthDetails(stack, I_3);
-        verify(orchestratorStateParamsProvider, never())
+        verify(orchestratorParamsProvider, never())
                 .createStateParamsForSingleTarget(stack, I_1.getDiscoveryFQDN(), ModifyProxyConfigOrchestratorService.MODIFY_PROXY_STATE);
         verify(hostOrchestrator, never()).runOrchestratorState(stateParams1);
         verify(healthDetailsService, never()).getInstanceHealthDetails(stack, I_1);

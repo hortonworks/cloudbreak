@@ -48,7 +48,7 @@ class UpgradeCcmCheckPrerequisitesHandlerTest {
     @Test
     void checkPrerequisitesInAnyCase() {
         underTest.accept(event);
-        verify(upgradeCcmService).checkPrerequsities(STACK_ID);
+        verify(upgradeCcmService).checkPrerequsities(STACK_ID, Tunnel.CCM);
         verify(eventBus).notify(eq(UPGRADE_CCM_CHECK_PREREQUISITES_FINISHED_EVENT.event()), eventCaptor.capture());
         Event<UpgradeCcmEvent> eventResult = eventCaptor.getValue();
         assertThat(eventResult.getData().getOldTunnel()).isEqualTo(Tunnel.CCM);

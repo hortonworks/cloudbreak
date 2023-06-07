@@ -130,7 +130,7 @@ class UpgradeCcmFlowIntegrationTest {
 
     @Test
     public void testCcmUpgradeWhenPreparationFails() throws CloudbreakOrchestratorException {
-        doThrow(new BadRequestException()).when(upgradeCcmService).checkPrerequsities(1L);
+        doThrow(new BadRequestException()).when(upgradeCcmService).checkPrerequsities(1L, CCM);
         testFlow(CALLED_ONCE_TILL_PREPARATION, false);
     }
 
@@ -234,7 +234,7 @@ class UpgradeCcmFlowIntegrationTest {
         int i = 0;
         InOrder inOrder = Mockito.inOrder(upgradeCcmService);
         inOrder.verify(upgradeCcmService, times(expected[i++])).checkPrerequisitesState(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(expected[i++])).checkPrerequsities(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).checkPrerequsities(STACK_ID, CCM);
         inOrder.verify(upgradeCcmService, times(expected[i++])).changeTunnelState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).changeTunnel(STACK_ID, Tunnel.latestUpgradeTarget());
         inOrder.verify(upgradeCcmService, times(expected[i++])).obtainAgentDataState(STACK_ID);
@@ -280,7 +280,7 @@ class UpgradeCcmFlowIntegrationTest {
     private void flowFinishedSuccessfully() {
         ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
         verify(flowLogRepository, times(2)).save(flowLog.capture());
-        assertTrue(flowLog.getAllValues().stream().anyMatch(f -> f.getFinalized()), "flow has not finalized");
+        assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
     }
 
     private FlowIdentifier triggerFlow() {

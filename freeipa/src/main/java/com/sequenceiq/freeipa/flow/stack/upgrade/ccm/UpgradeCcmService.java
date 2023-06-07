@@ -3,13 +3,17 @@ package com.sequenceiq.freeipa.flow.stack.upgrade.ccm;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.AVAILABLE;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.UPGRADE_CCM_IN_PROGRESS;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -20,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
@@ -80,13 +85,51 @@ public class UpgradeCcmService {
     @Inject
     private UpgradeService upgradeService;
 
-    public void checkPrerequsities(Long stackId) {
+    @Value("${cdp.ccm.v2.servers.cidr:}")
+    private String ccmV2ServersCidr;
+
+    public void checkPrerequsities(Long stackId, Tunnel oldTunnel) {
+        checkFreeIpaIsOnLatestImage(stackId);
+        if (oldTunnel == Tunnel.CCM && StringUtils.isNotBlank(ccmV2ServersCidr)) {
+            LOGGER.debug("Old tunnel is CCMv1 and CCMv2 servers CIDR is provided: {}, running connectivity test to CCMv2 servers", ccmV2ServersCidr);
+            checkCcmV2ServerConnectivity(stackId);
+        }
+    }
+
+    private void checkFreeIpaIsOnLatestImage(Long stackId) {
         Stack stack = stackService.getStackById(stackId);
         ImageEntity stackImage = imageService.getByStackId(stackId);
         FreeIpaUpgradeOptions freeIpaUpgradeOptions = upgradeService.collectUpgradeOptions(stack.getAccountId(), stack.getEnvironmentCrn(),
                 Objects.requireNonNullElse(stackImage.getImageCatalogName(), stackImage.getImageCatalogUrl()));
         if (!freeIpaUpgradeOptions.getImages().isEmpty()) {
             throw new CloudbreakServiceException("FreeIPA is not on the latest available image. Please upgrade that first. CCM upgrade is not possible yet.");
+        }
+    }
+
+    private void checkCcmV2ServerConnectivity(Long stackId) {
+        Map<String, String> result = upgradeCcmOrchestratorService.checkCcmV2Connectivity(stackId, ccmV2ServersCidr);
+        LOGGER.debug("Returned result from CCMv2 Connectivity Check: {}", result);
+        if (result != null) {
+            String failures = result.values().stream()
+                    .peek(resultJson -> LOGGER.debug("Trying to parse JSON: {}", resultJson))
+                    .map(resultJson -> JsonUtil.readValueOpt(resultJson, ConnectivityCheckResponse.class))
+                    .peek(optResult -> {
+                        if (optResult.isEmpty()) {
+                            LOGGER.debug("Failed to parse, returned empty value.");
+                        }
+                    })
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .filter(response -> response.result() == CheckResult.FAILED)
+                    .map(ConnectivityCheckResponse::reason)
+                    .distinct()
+                    .collect(Collectors.joining("\n"));
+            if (StringUtils.isBlank(failures)) {
+                LOGGER.info("Connectivity check to {} has passed", ccmV2ServersCidr);
+            } else {
+                String message = String.format("Connectivity check to %s has failed. Reasons: %s", ccmV2ServersCidr, failures);
+                throw new CloudbreakServiceException(message);
+            }
         }
     }
 
@@ -218,7 +261,7 @@ public class UpgradeCcmService {
         DetailedStackStatus detailedStatus = AVAILABLE;
         String statusReason = "Upgrade CCM completed";
         if (!minaRemoved) {
-            statusReason = statusReason + ", but removing MINA was unsuccessful.";
+            statusReason += ", but removing MINA was unsuccessful.";
         }
         stackUpdater.updateStackStatus(stackId, detailedStatus, statusReason);
     }

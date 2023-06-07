@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedExcepti
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorRunParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
@@ -35,6 +36,8 @@ public class DiskSpaceValidationService {
     private static final double GATEWAY_NODE_PARCEL_SIZE_MULTIPLIER = 3.5;
 
     private static final double PARCEL_SIZE_MULTIPLIER = 2.5;
+
+    private static final String DISK_FREE_SPACE_COMMAND = "df -k / | tail -1 | awk '{print $4}'";
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -64,7 +67,9 @@ public class DiskSpaceValidationService {
         stack.setResources(new HashSet<>(resourceService.getAllByStackId(stack.getId())));
         Set<Node> nodes = stackUtil.collectNodesWithDiskData(stack);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-        return hostOrchestrator.getFreeDiskSpaceByNodes(nodes, gatewayConfigs);
+        OrchestratorRunParams runParams = new OrchestratorRunParams(nodes, gatewayConfigs,
+                DISK_FREE_SPACE_COMMAND, "Failed to get free disk space on hosts.");
+        return hostOrchestrator.runShellCommandOnNodes(runParams);
     }
 
     private Map<String, String> getNotEligibleNodes(Map<String, String> freeDiskSpaceByNodes, long parcelSize, List<InstanceMetadataView> gatewayInstances) {

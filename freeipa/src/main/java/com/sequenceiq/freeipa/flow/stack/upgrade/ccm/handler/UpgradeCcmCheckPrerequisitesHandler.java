@@ -43,7 +43,7 @@ public class UpgradeCcmCheckPrerequisitesHandler extends AbstractUpgradeCcmEvent
     protected Selectable doAccept(HandlerEvent<UpgradeCcmEvent> event) {
         UpgradeCcmEvent request = event.getData();
         LOGGER.info("Checking prerequisites for CCM upgrade...");
-        upgradeCcmService.checkPrerequsities(request.getResourceId());
+        upgradeCcmService.checkPrerequsities(request.getResourceId(), request.getOldTunnel());
         return UPGRADE_CCM_CHECK_PREREQUISITES_FINISHED_EVENT.createBasedOn(request);
     }
 
