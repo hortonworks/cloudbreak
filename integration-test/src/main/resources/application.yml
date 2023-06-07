@@ -84,7 +84,7 @@ integrationtest:
   internalDistroXBlueprintName: "%s - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
   clouderamanager:
     defaultUser: admin
-    defaultPassword: Admin123
+    defaultPassword: cb1STPneh2b6KyJn
     defaultPort: 7180
   cloudProvider: MOCK
   runtimeVersion: 7.2.15
