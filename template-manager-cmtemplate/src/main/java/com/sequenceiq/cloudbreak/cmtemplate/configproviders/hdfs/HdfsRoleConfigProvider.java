@@ -92,10 +92,12 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
-        if (isSDXOptimizationEnabled(source)) {
-            configs.add(config(DFS_ENCRYPT_DATA_TRANSFER, "true"));
-            configs.add(config(DFS_DATA_TRANSFER_PROTECTION, "privacy"));
+        if (isSDXOptimizationEnabled(source) || source.getGeneralClusterConfigs().isGovCloud()) {
             configs.add(config(HADOOP_RPC_PROTECTION, "privacy"));
+        }
+        if (isSDXOptimizationEnabled(source)) {
+            configs.add(config(DFS_DATA_TRANSFER_PROTECTION, "privacy"));
+            configs.add(config(DFS_ENCRYPT_DATA_TRANSFER, "true"));
         }
         return configs;
     }
