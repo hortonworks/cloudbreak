@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -20,6 +22,7 @@ import org.mockito.quality.Strictness;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.publickey.PublicKeyDescribeRequest;
 import com.sequenceiq.cloudbreak.cloud.model.publickey.PublicKeyRegisterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.publickey.PublicKeyUnregisterRequest;
 
@@ -27,6 +30,7 @@ import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.ec2.model.DeleteKeyPairRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsResponse;
 import software.amazon.awssdk.services.ec2.model.ImportKeyPairRequest;
+import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 
 @ExtendWith(MockitoExtension.class)
 class AwsPublicKeyConnectorTest {
@@ -102,6 +106,38 @@ class AwsPublicKeyConnectorTest {
         DeleteKeyPairRequest result = captor.getValue();
         assertThat(result.keyName()).isEqualTo(PUBLIC_KEY_ID);
         verifyNoMoreInteractions(ec2client);
+    }
+
+    @Test
+    void rawPublicKeyTest() {
+        when(ec2client.describeKeyPairs(any())).thenReturn(DescribeKeyPairsResponse.builder()
+                .keyPairs(KeyPairInfo.builder().keyName("publicKeyId").publicKey("publicKey").build())
+                .build());
+        PublicKeyDescribeRequest request = PublicKeyDescribeRequest.builder()
+                .withCredential(new CloudCredential("credId", "credName", "account"))
+                .withPublicKeyId("publicKeyId")
+                .withRegion("region")
+                .withCloudPlatform("AWS")
+                .build();
+
+        String publicKey = underTest.rawPublicKey(request);
+        verifyNoMoreInteractions(ec2client);
+        assertEquals("publicKey", publicKey);
+    }
+
+    @Test
+    void rawPublicKeyExceptionTest() {
+        doThrow(AwsServiceException.class).when(ec2client).describeKeyPairs(any());
+        PublicKeyDescribeRequest request = PublicKeyDescribeRequest.builder()
+                .withCredential(new CloudCredential("credId", "credName", "account"))
+                .withPublicKeyId("publicKeyId")
+                .withRegion("region")
+                .withCloudPlatform("AWS")
+                .build();
+
+        String publicKey = underTest.rawPublicKey(request);
+        verifyNoMoreInteractions(ec2client);
+        assertEquals(null, publicKey);
     }
 
     @Test

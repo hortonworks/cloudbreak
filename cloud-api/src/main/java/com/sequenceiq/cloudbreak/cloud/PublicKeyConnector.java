@@ -14,4 +14,6 @@ public interface PublicKeyConnector extends CloudPlatformAware {
     void unregister(PublicKeyUnregisterRequest request);
 
     boolean exists(PublicKeyDescribeRequest request);
+
+    String rawPublicKey(PublicKeyDescribeRequest request);
 }

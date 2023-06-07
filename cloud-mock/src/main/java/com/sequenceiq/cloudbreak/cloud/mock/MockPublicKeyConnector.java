@@ -58,6 +58,11 @@ public class MockPublicKeyConnector implements PublicKeyConnector {
     }
 
     @Override
+    public String rawPublicKey(PublicKeyDescribeRequest request) {
+        return null;
+    }
+
+    @Override
     public Platform platform() {
         return Platform.platform("MOCK");
     }

@@ -19,7 +19,9 @@ import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.ec2.model.DeleteKeyPairRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsResponse;
 import software.amazon.awssdk.services.ec2.model.ImportKeyPairRequest;
+import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 
 @Service
 public class AwsPublicKeyConnector implements PublicKeyConnector {
@@ -84,6 +86,21 @@ public class AwsPublicKeyConnector implements PublicKeyConnector {
     }
 
     @Override
+    public String rawPublicKey(PublicKeyDescribeRequest request) {
+        LOGGER.debug("Describe public key {} in {} region on AWS", request.getPublicKeyId(), request.getRegion());
+        AwsCredentialView awsCredential = new AwsCredentialView(request.getCredential());
+        try {
+            AmazonEc2Client client = awsClient.createEc2Client(awsCredential, request.getRegion());
+            return rawPublicKey(client, request.getPublicKeyId());
+        } catch (Exception e) {
+            String errorMessage = String.format("Failed to describe public key [%s:'%s', region: '%s'], detailed message: %s",
+                    getType(awsCredential), getAwsId(awsCredential), request.getRegion(), e.getMessage());
+            LOGGER.error(errorMessage, e);
+        }
+        return null;
+    }
+
+    @Override
     public Platform platform() {
         return AwsConstants.AWS_PLATFORM;
     }
@@ -102,6 +119,17 @@ public class AwsPublicKeyConnector implements PublicKeyConnector {
             LOGGER.debug("Key-pair does not exist: {}", publicKeyId);
         }
         return false;
+    }
+
+    private String rawPublicKey(AmazonEc2Client client, String publicKeyId) {
+        try {
+            DescribeKeyPairsResponse describeKeyPairsResponse = client.describeKeyPairs(DescribeKeyPairsRequest.builder()
+                    .keyNames(publicKeyId).includePublicKey(Boolean.TRUE).build());
+            return describeKeyPairsResponse.keyPairs().stream().findFirst().map(KeyPairInfo::publicKey).orElse(null);
+        } catch (AwsServiceException e) {
+            LOGGER.debug("Key-pair does not exist: {}", publicKeyId);
+        }
+        return null;
     }
 
     private String getAwsId(AwsCredentialView awsCredential) {
