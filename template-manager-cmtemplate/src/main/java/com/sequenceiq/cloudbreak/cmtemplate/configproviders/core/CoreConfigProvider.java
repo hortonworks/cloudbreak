@@ -84,7 +84,7 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
                 apiClusterTemplateConfigs.add(config(CORE_SITE_SAFETY_VALVE, hdfsCoreSiteSafetyValveValue.toString()));
             }
         }
-        if (isSDXOptimizationNeeded(source)) {
+        if (isSDXOptimizationNeeded(source) || source.getGeneralClusterConfigs().isGovCloud()) {
             apiClusterTemplateConfigs.add(config(HADOOP_RPC_PROTECTION, "privacy"));
         }
 
