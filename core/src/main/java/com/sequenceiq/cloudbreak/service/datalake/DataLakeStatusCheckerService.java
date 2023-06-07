@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.datalake;
 
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -38,8 +39,10 @@ public class DataLakeStatusCheckerService {
                     .forEach(sdxClusterResponse -> {
                         SdxClusterStatusResponse status = sdxClusterResponse.getStatus();
                         if (!(status.isRollingUpgradeInProgress() || status.isAvailable())) {
-                            throw new BadRequestException("This action requires the Data Lake to be available, but the status is "
-                                    + sdxClusterResponse.getStatusReason());
+                            throw new BadRequestException(String.format("This action requires the Data Lake to be available, " +
+                                    "but the status is '%s', Reason: '%s'.",
+                                    sdxClusterResponse.getStatus().name(),
+                                    Objects.toString(sdxClusterResponse.getStatusReason(), "")));
                         }
                     });
         }
