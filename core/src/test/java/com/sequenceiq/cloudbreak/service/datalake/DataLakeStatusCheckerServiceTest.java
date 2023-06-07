@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.datalake;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -84,7 +85,22 @@ public class DataLakeStatusCheckerServiceTest {
 
         when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(sdxClusterResponses);
 
-        assertThrows(BadRequestException.class, () -> underTest.validateAvailableState(stack));
+        BadRequestException e = assertThrows(BadRequestException.class, () -> underTest.validateAvailableState(stack));
+        assertEquals("This action requires the Data Lake to be available, " +
+                "but the status is 'DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS', Reason: 'Vertical Scale in Progress'.", e.getMessage());
+    }
+
+    @Test
+    public void testValidateAvailableStateShouldThrowExceptionWhenSdxIsNotAvailableAndStatusDetailIsNull() {
+        Stack stack = createStack();
+        List<SdxClusterResponse> sdxClusterResponses = createSdxResponse(SdxClusterStatusResponse.DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS,
+                null);
+
+        when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(sdxClusterResponses);
+
+        BadRequestException e = assertThrows(BadRequestException.class, () -> underTest.validateAvailableState(stack));
+        assertEquals("This action requires the Data Lake to be available, " +
+                "but the status is 'DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS', Reason: ''.", e.getMessage());
     }
 
     private Stack createStack() {
