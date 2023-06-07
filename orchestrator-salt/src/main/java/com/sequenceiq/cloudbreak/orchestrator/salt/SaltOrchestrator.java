@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTi
 import com.sequenceiq.cloudbreak.orchestrator.host.GrainOperation;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorGrainRunnerParams;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorRunParams;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateRetryParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
@@ -1163,19 +1164,19 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public Map<String, String> getFreeDiskSpaceByNodes(Set<Node> nodes, List<GatewayConfig> gatewayConfigs) {
-        Map<String, String> freeDiskSpaceByNode;
+    public Map<String, String> runShellCommandOnNodes(OrchestratorRunParams runParams) {
+        Map<String, String> result;
         try {
-            GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(gatewayConfigs);
+            GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(runParams.gatewayConfigs());
             SaltConnector sc = saltService.createSaltConnector(primaryGateway);
-            Target<String> allHosts = new HostList(nodes.stream().map(Node::getHostname).collect(Collectors.toSet()));
-            freeDiskSpaceByNode = saltStateService.runCommandOnHosts(retry, sc, allHosts, "df -k / | tail -1 | awk '{print $4}'");
+            Target<String> allHosts = new HostList(runParams.nodes().stream().map(Node::getHostname).collect(Collectors.toSet()));
+            result = saltStateService.runCommandOnHosts(retry, sc, allHosts, runParams.command());
         } catch (Exception e) {
-            String errorMessage = String.format("Failed to get free disk space on hosts. Reason: %s", e.getMessage());
-            LOGGER.warn(errorMessage, e);
-            throw new CloudbreakServiceException(errorMessage, e);
+            String message = String.format("%s Reason: %s", runParams.errorMessage(), e.getMessage());
+            LOGGER.warn(message, e);
+            throw new CloudbreakServiceException(message, e);
         }
-        return freeDiskSpaceByNode;
+        return result;
     }
 
     @Override

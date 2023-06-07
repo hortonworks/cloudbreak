@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation;
 
 import static java.util.Collections.emptySet;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -11,12 +13,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
@@ -24,14 +27,15 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorRunParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class DiskSpaceValidationServiceTest {
+@ExtendWith(MockitoExtension.class)
+class DiskSpaceValidationServiceTest {
 
     private static final long STACK_ID = 1L;
 
@@ -58,8 +62,8 @@ public class DiskSpaceValidationServiceTest {
 
     private Map<String, String> freeSpaceByNodes;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void before() {
         stack = createStack();
         gatewayConfigs = Collections.emptyList();
         nodes = Collections.emptySet();
@@ -68,17 +72,17 @@ public class DiskSpaceValidationServiceTest {
         when(resourceService.getAllByStackId(STACK_ID)).thenReturn(emptySet());
         when(stackUtil.collectNodesWithDiskData(stack)).thenReturn(nodes);
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gatewayConfigs);
-        when(hostOrchestrator.getFreeDiskSpaceByNodes(nodes, gatewayConfigs)).thenReturn(freeSpaceByNodes);
+        when(hostOrchestrator.runShellCommandOnNodes(any(OrchestratorRunParams.class))).thenReturn(freeSpaceByNodes);
     }
 
     @Test
-    public void testValidateFreeSpaceForUpgradeShouldNotThrowExceptionWhenThereAreEnoughFreeSpaceForUpgrade() {
+    void testValidateFreeSpaceForUpgradeShouldNotThrowExceptionWhenThereAreEnoughFreeSpaceForUpgrade() {
         underTest.validateFreeSpaceForUpgrade(stack, 9000L);
         verifyMocks();
     }
 
     @Test
-    public void testValidateFreeSpaceForUpgradeShouldThrowExceptionWhenThereAreNoEnoughFreeSpaceAndTheRequiredSpaceIsReturnedInMb() {
+    void testValidateFreeSpaceForUpgradeShouldThrowExceptionWhenThereAreNoEnoughFreeSpaceAndTheRequiredSpaceIsReturnedInMb() {
         Exception exception = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validateFreeSpaceForUpgrade(stack, 92000L));
         assertEquals("There is not enough free space on the nodes to perform upgrade operation. The required and the available free space by nodes: host1: "
                         + "required free space is: 225 MB and the available free space is: 89 MB, "
@@ -88,7 +92,7 @@ public class DiskSpaceValidationServiceTest {
     }
 
     @Test
-    public void testValidateFreeSpaceForUpgradeShouldThrowExceptionWhenThereAreNoEnoughFreeSpaceAndTheRequiredSpaceIsReturnedInGb() {
+    void testValidateFreeSpaceForUpgradeShouldThrowExceptionWhenThereAreNoEnoughFreeSpaceAndTheRequiredSpaceIsReturnedInGb() {
         Exception exception = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validateFreeSpaceForUpgrade(stack, 1750000L));
         assertEquals("There is not enough free space on the nodes to perform upgrade operation. The required and the available free space by nodes: host1: "
                         + "required free space is: 4.2 GB and the available free space is: 89 MB, "
@@ -101,7 +105,12 @@ public class DiskSpaceValidationServiceTest {
         verify(resourceService).getAllByStackId(STACK_ID);
         verify(stackUtil).collectNodesWithDiskData(stack);
         verify(gatewayConfigService).getAllGatewayConfigs(stack);
-        verify(hostOrchestrator).getFreeDiskSpaceByNodes(nodes, gatewayConfigs);
+        ArgumentCaptor<OrchestratorRunParams> paramCaptor = ArgumentCaptor.forClass(OrchestratorRunParams.class);
+        verify(hostOrchestrator).runShellCommandOnNodes(paramCaptor.capture());
+        OrchestratorRunParams params = paramCaptor.getValue();
+        assertThat(params.nodes()).isEqualTo(nodes);
+        assertThat(params.gatewayConfigs()).isEqualTo(gatewayConfigs);
+        assertThat(params.command()).contains("df -k");
     }
 
     private Map<String, String> createFreeSpaceByNodesMap() {

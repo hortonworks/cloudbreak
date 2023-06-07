@@ -23,14 +23,14 @@ import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaNodeUtilService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
-class OrchestratorStateParamsProviderTest {
+class OrchestratorParamsProviderTest {
 
     private static final long STACK_ID = 123L;
 
     private static final String STATE = "state";
 
     @InjectMocks
-    private OrchestratorStateParamsProvider underTest;
+    private OrchestratorParamsProvider underTest;
 
     @Mock
     private StackService stackService;

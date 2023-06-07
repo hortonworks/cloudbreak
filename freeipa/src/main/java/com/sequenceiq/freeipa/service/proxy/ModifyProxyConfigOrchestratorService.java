@@ -18,7 +18,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.orchestrator.OrchestratorStateParamsProvider;
+import com.sequenceiq.freeipa.service.orchestrator.OrchestratorParamsProvider;
 import com.sequenceiq.freeipa.service.stack.FreeIpaSafeInstanceHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -33,7 +33,7 @@ public class ModifyProxyConfigOrchestratorService {
     private StackService stackService;
 
     @Inject
-    private OrchestratorStateParamsProvider orchestratorStateParamsProvider;
+    private OrchestratorParamsProvider orchestratorParamsProvider;
 
     @Inject
     private HostOrchestrator hostOrchestrator;
@@ -47,7 +47,7 @@ public class ModifyProxyConfigOrchestratorService {
 
         for (InstanceMetaData instance : sortedInstances) {
             String hostName = instance.getDiscoveryFQDN();
-            OrchestratorStateParams stateParams = orchestratorStateParamsProvider.createStateParamsForSingleTarget(stack, hostName, MODIFY_PROXY_STATE);
+            OrchestratorStateParams stateParams = orchestratorParamsProvider.createStateParamsForSingleTarget(stack, hostName, MODIFY_PROXY_STATE);
             LOGGER.debug("Calling applyModifyProxyState for instance {} with state params '{}'", hostName, stateParams);
             hostOrchestrator.runOrchestratorState(stateParams);
             runHealthCheck(stack, instance);

@@ -221,7 +221,7 @@ class UpgradeCcmFlowChainIntegrationTest {
         int i = 0;
         InOrder inOrder = Mockito.inOrder(upgradeCcmService, userDataService, resourcesApi);
         inOrder.verify(upgradeCcmService, times(expected[i++])).checkPrerequisitesState(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(expected[i++])).checkPrerequsities(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).checkPrerequsities(STACK_ID, Tunnel.CCM);
         inOrder.verify(upgradeCcmService, times(expected[i++])).changeTunnelState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).changeTunnel(STACK_ID, Tunnel.latestUpgradeTarget());
         inOrder.verify(upgradeCcmService, times(expected[i++])).obtainAgentDataState(STACK_ID);
