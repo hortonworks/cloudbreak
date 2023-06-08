@@ -813,7 +813,7 @@ existing-stack-patcher:
     metering-azure-metadata:
       enabled: false
       date-before: '2022-01-18'
-      custom-rpm-url: https://archive.cloudera.com/cp_clients/thunderhead-metering-heartbeat-application-0.1-SNAPSHOT.x86_64.rpm
+      custom-rpm-url: https://archive.cloudera.com/cp_clients/thunderhead-metering-heartbeat-application-1.0.0-b8780.x86_64.rpm
     metering-follow-inodes:
       enabled: true
     cluster-public-endpoint:

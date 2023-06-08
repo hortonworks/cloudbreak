@@ -3,7 +3,7 @@
 {% set os = salt['grains.get']('os') %}
 {% set metering_service_name = 'metering-heartbeat-application' %}
 {% set metering_package_name = 'thunderhead-metering-heartbeat-application' %}
-{% set metering_package_version = '0.1-SNAPSHOT' %}
+{% set metering_package_version = '1.0.0-b8780' %}
 {% set metering_rmp_repo_url = 'https://archive.cloudera.com/cp_clients/'%}
 {% set metering_rpm_location = metering_rmp_repo_url + metering_package_name + '-' + metering_package_version + '.x86_64.rpm' %}
 
@@ -14,7 +14,7 @@
 install_metering_rpm_manually:
   cmd.run:
     - name: "rpm -i {{ metering_rpm_location }}"
-    - onlyif: "! rpm -q {{ metering_package_name }}"
+    - onlyif: "! test -e /opt/metering-heartbeat"
 
 stop_metering_heartbeat_application_if_needed:
   service.dead:

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 METERING_PACKAGE_NAME="thunderhead-metering-heartbeat-application"
-METERING_FILE_NAME="$METERING_PACKAGE_NAME-0.1-SNAPSHOT.x86_64.rpm"
+METERING_FILE_NAME="$METERING_PACKAGE_NAME-1.0.0-b8780.x86_64.rpm"
 : ${METERING_ARCHIVE_URL:="https://archive.cloudera.com/cp_clients/$METERING_FILE_NAME"}
 : ${METERING_SERVICE_DELIVERY_URL:="https://cloudera-service-delivery-cache.s3.amazonaws.com/$METERING_PACKAGE_NAME/clients/$METERING_FILE_NAME"}
 : ${LOGFILE_FOLDER:="/var/log/metering-upgrade"}
