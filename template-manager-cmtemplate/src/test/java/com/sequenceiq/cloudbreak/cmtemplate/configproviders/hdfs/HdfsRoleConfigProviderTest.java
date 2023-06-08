@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -133,6 +134,32 @@ class HdfsRoleConfigProviderTest {
             assertEquals(3, serviceConfigs.size());
             assertEquals("true", configMap.get("dfs_encrypt_data_transfer").getValue());
             assertEquals("privacy", configMap.get("dfs_data_transfer_protection").getValue());
+            assertEquals("privacy", configMap.get("hadoop_rpc_protection").getValue());
+        });
+    }
+
+    @Test
+    void optimizedHDFSReplicaHAServiceConfigWhenGovCloudShouldReturnRpcProtectionTrue() {
+        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
+        HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
+        HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
+        HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
+        HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, 3);
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setGovCloud(true);
+        String inputJson = FileReaderUtils.readFileFromClasspathQuietly("input/namenode-ha.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
+                .withStackType(StackType.DATALAKE)
+                .withHostgroupViews(Set.of(gateway, master, quorum, worker))
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
+                .build();
+
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
+            List<ApiClusterTemplateConfig> serviceConfigs = subject.getServiceConfigs(cmTemplateProcessor, preparationObject);
+            Map<String, ApiClusterTemplateConfig> configMap = cmTemplateProcessor.mapByName(serviceConfigs);
+            assertEquals(1, serviceConfigs.size());
             assertEquals("privacy", configMap.get("hadoop_rpc_protection").getValue());
         });
     }

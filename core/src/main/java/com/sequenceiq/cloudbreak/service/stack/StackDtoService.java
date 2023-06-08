@@ -208,7 +208,7 @@ public class StackDtoService {
 
     public List<InstanceGroupDto> getInstanceMetadataByInstanceGroup(Long stackId) {
         List<InstanceGroupDto> groupListMap = new ArrayList<>();
-        List<InstanceMetadataView> imDto = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stackId);
+        List<InstanceMetadataView> imDto = instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(stackId);
         Map<Long, Map<InstanceGroupView, List<InstanceMetadataView>>> group = new HashMap<>();
         List<InstanceGroupView> instanceGroups = instanceGroupService.getInstanceGroupViewByStackId(stackId);
         instanceGroups.forEach(it -> group.put(it.getId(), new HashMap<>()));
