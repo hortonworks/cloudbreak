@@ -4,6 +4,7 @@
   "unbound": 380.0,
   "sssd.ssh": 50.0,
   "postgresql.pg11-alternatives": 500.0,
+  "postgresql.pg14-alternatives": 500.0,
   "postgresql.root-certs": 30.0,
   "postgresql": 15000.0,
   "cloudera.agent": 3500.0,

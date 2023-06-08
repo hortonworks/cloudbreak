@@ -11,12 +11,18 @@
 
 {% if 'None' != configure_remote_db %}
 
+{% set postgres_version = salt['pillar.get']('postgres:postgres_version', '10') | int %}
 include:
-{%- if salt[ 'pillar.get' ]('postgres:postgres_version', '10') | int == 11 %}
+{%- if postgres_version == 11 %}
 {%- if not salt['file.file_exists']('/usr/pgsql-11/bin/psql') %}
   - postgresql.pg11-install
 {%- endif %}
   - postgresql.pg11-alternatives
+{%- elif postgres_version == 14  %}
+{%- if not salt['file.file_exists']('/usr/pgsql-14/bin/psql') %}
+  - postgresql.pg14-install
+{%- endif %}
+  - postgresql.pg14-alternatives
 {%- endif %}
   - postgresql.disaster_recovery.recover
 
