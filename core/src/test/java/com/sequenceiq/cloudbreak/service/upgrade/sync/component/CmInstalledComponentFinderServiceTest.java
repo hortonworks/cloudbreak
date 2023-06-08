@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.CustomParcelFilterService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmParcelSyncOperationResult;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmRepoSyncOperationResult;
 
@@ -39,6 +40,9 @@ public class CmInstalledComponentFinderServiceTest {
 
     @Mock
     private ImageReaderService imageReaderService;
+
+    @Mock
+    private CustomParcelFilterService customParcelFilterService;
 
     @InjectMocks
     private CmInstalledComponentFinderService underTest;
@@ -66,13 +70,14 @@ public class CmInstalledComponentFinderServiceTest {
     @Test
     void testFindParcelComponents() {
         Set<Image> candidateImages = Set.of(mock(Image.class));
-        Set<ClouderaManagerProduct> candidateCmProduct = Set.of(new ClouderaManagerProduct());
+        Set<ClouderaManagerProduct> candidateCmProduct = Set.of(new ClouderaManagerProduct().withName("C"));
         Set<ParcelInfo> queriedParcelInfo = Set.of(new ParcelInfo("", "", ParcelStatus.ACTIVATED));
         Set<ClouderaManagerProduct> chosenClouderaManagerProducts = Set.of(new ClouderaManagerProduct());
         when(stack.isDatalake()).thenReturn(true);
         when(imageReaderService.getParcels(candidateImages, true)).thenReturn(candidateCmProduct);
         when(cmInfoRetriever.queryActiveParcels(eq(stack))).thenReturn(queriedParcelInfo);
         when(cmProductChooserService.chooseParcelProduct(queriedParcelInfo, candidateCmProduct)).thenReturn(chosenClouderaManagerProducts);
+        when(customParcelFilterService.filterCustomParcels(queriedParcelInfo, candidateCmProduct)).thenReturn(queriedParcelInfo);
 
         CmParcelSyncOperationResult cmParcelSyncOperationResult = underTest.findParcelComponents(stack, candidateImages);
 
@@ -80,6 +85,7 @@ public class CmInstalledComponentFinderServiceTest {
         verify(imageReaderService).getParcels(candidateImages, true);
         verify(cmInfoRetriever).queryActiveParcels(stack);
         verify(cmProductChooserService).chooseParcelProduct(queriedParcelInfo, candidateCmProduct);
+        verify(customParcelFilterService).filterCustomParcels(queriedParcelInfo, candidateCmProduct);
     }
 
 }
