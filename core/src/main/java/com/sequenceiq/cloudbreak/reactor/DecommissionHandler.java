@@ -179,7 +179,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
             LOGGER.warn("Bulk host removal was unsuccessful, fallback to single host removal.");
             return singleHostsRemoval(request, hostNames, forced, stackDto, clusterDecomissionService, hostsToRemove);
         }
-        return new DecommissionResult(request, hostsToRemove.keySet());
+        return new DecommissionResult(request, hostNames);
     }
 
     private DecommissionResult singleHostsRemoval(DecommissionRequest request, Set<String> hostNames, boolean forced, StackDto stackDto,
@@ -196,8 +196,9 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
             cleanUpFreeIpa(stackDto.getStack(), hostsToRemove);
             List<InstanceMetadataView> deletedHosts = deleteHosts(decommissionedHostNames, clusterDecomissionService, hostsToRemove);
             cleanUpAfterRemoval(forced, clusterDecomissionService, deletedHosts);
+            LOGGER.info("Removed hostnames from CM and IPA : {}", decommissionedHostNames);
         }
-        return new DecommissionResult(request, decommissionedHostNames);
+        return new DecommissionResult(request, hostNames);
     }
 
     private void cleanUpAfterRemoval(boolean forced, ClusterDecomissionService clusterDecomissionService, Collection<InstanceMetadataView> deletedHosts)
@@ -209,7 +210,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
 
     private Set<String> getHostNamesForPrivateIds(DecommissionRequest request, StackDto stackDto) {
         return request.getPrivateIds().stream().map(privateId -> {
-            Optional<InstanceMetadataView> instanceMetadata = stackDto.getNotDeletedInstanceMetadata(privateId);
+            Optional<InstanceMetadataView> instanceMetadata = stackDto.getInstanceMetadata(privateId);
             return instanceMetadata.map(InstanceMetadataView::getDiscoveryFQDN).orElse(null);
         }).filter(StringUtils::isNotEmpty).collect(Collectors.toSet());
     }

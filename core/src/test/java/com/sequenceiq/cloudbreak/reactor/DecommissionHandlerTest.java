@@ -159,7 +159,7 @@ class DecommissionHandlerTest {
     @Test
     public void shouldContinueSingleHostDecommissionIfForcedAndFailed() throws CloudbreakException, ClusterClientInitException {
         when(entitlementService.bulkHostsRemovalFromCMSupported(any())).thenReturn(Boolean.FALSE);
-        when(stackDto.getNotDeletedInstanceMetadata(eq(PRIVATE_ID))).thenReturn(Optional.of(instance));
+        when(stackDto.getInstanceMetadata(eq(PRIVATE_ID))).thenReturn(Optional.of(instance));
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterDecomissionService()).thenReturn(clusterDecomissionService);
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
@@ -185,7 +185,7 @@ class DecommissionHandlerTest {
     @Test
     public void shouldContinueSingleHostDecommissionFailIfNotForced() throws CloudbreakException, ClusterClientInitException {
         when(entitlementService.bulkHostsRemovalFromCMSupported(any())).thenReturn(Boolean.FALSE);
-        when(stackDto.getNotDeletedInstanceMetadata(eq(PRIVATE_ID))).thenReturn(Optional.of(instance));
+        when(stackDto.getInstanceMetadata(eq(PRIVATE_ID))).thenReturn(Optional.of(instance));
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterDecomissionService()).thenReturn(clusterDecomissionService);
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
@@ -213,7 +213,7 @@ class DecommissionHandlerTest {
     public void testBulkHostDecommission() throws ClusterClientInitException {
         when(entitlementService.bulkHostsRemovalFromCMSupported(any())).thenReturn(Boolean.TRUE);
         when(runtimeVersionService.getRuntimeVersion(any())).thenReturn(Optional.of(CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_14.getVersion()));
-        when(stackDto.getNotDeletedInstanceMetadata(eq(PRIVATE_ID))).thenReturn(Optional.of(instance));
+        when(stackDto.getInstanceMetadata(eq(PRIVATE_ID))).thenReturn(Optional.of(instance));
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterDecomissionService()).thenReturn(clusterDecomissionService);
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
