@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOP_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
-import static com.sequenceiq.cloudbreak.rotation.secret.type.CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD;
 import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;

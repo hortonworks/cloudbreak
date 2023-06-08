@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
@@ -67,7 +68,7 @@ public class VaultRotationExecutor implements RotationExecutor<VaultRotationCont
 
     @Override
     public SecretRotationStep getType() {
-        return SecretRotationStep.VAULT;
+        return CommonSecretRotationStep.VAULT;
     }
 
     @Override

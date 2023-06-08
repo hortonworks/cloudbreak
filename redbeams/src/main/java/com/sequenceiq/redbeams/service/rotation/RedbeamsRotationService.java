@@ -11,10 +11,10 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
-import com.sequenceiq.cloudbreak.rotation.secret.type.RedbeamsSecretType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.rotation.service.SecretRotationValidator;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
+import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 @Service

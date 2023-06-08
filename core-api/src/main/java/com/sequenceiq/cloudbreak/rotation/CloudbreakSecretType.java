@@ -1,15 +1,15 @@
-package com.sequenceiq.cloudbreak.rotation.secret.type;
+package com.sequenceiq.cloudbreak.rotation;
 
-import static com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep.CLUSTER_PROXY;
-import static com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep.CM_USER;
-import static com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep.REDBEAMS_ROTATE_POLLING;
-import static com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep.SALT_PILLAR;
-import static com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep.VAULT;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.CLUSTER_PROXY;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.CM_USER;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_PILLAR;
+import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
+import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.VAULT;
 
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
+import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 
 public enum CloudbreakSecretType implements SecretType {
     CLUSTER_CB_CM_ADMIN_PASSWORD(List.of(VAULT, CM_USER, CLUSTER_PROXY)),

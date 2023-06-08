@@ -13,10 +13,11 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
@@ -71,7 +72,7 @@ public class SaltPillarRotationExecutor implements RotationExecutor<SaltPillarRo
 
     @Override
     public SecretRotationStep getType() {
-        return SecretRotationStep.SALT_PILLAR;
+        return CloudbreakSecretRotationStep.SALT_PILLAR;
     }
 
     @Override

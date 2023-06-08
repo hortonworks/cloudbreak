@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.secret;
 
+import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
+
 public class SecretRotationException extends RuntimeException {
 
     private final SecretRotationStep failedRotationStep;
@@ -21,5 +23,12 @@ public class SecretRotationException extends RuntimeException {
 
     public SecretRotationStep getFailedRotationStep() {
         return failedRotationStep;
+    }
+
+    public static SecretRotationStep getFailedStepFromException(Exception ex) {
+        if (ex instanceof SecretRotationException) {
+            return ((SecretRotationException) ex).getFailedRotationStep();
+        }
+        return null;
     }
 }

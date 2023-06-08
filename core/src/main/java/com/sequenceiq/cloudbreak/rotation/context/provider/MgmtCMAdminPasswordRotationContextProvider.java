@@ -4,8 +4,8 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
-import com.sequenceiq.cloudbreak.rotation.secret.type.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 

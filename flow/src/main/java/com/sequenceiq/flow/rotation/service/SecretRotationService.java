@@ -17,8 +17,9 @@ import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
+import com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.vault.ThreadBasedVaultReadFieldProvider;
 
@@ -44,7 +45,7 @@ public class SecretRotationService {
         if (executionNeeded(executionType, RotationFlowExecutionType.ROLLBACK, resourceId, secretType)) {
             Map<SecretRotationStep, ? extends RotationContext> contexts = getContexts(secretType, resourceId);
             Set<String> affectedSecrets = contexts.entrySet().stream()
-                    .filter(entry -> SecretRotationStep.VAULT.equals(entry.getKey()))
+                    .filter(entry -> CommonSecretRotationStep.VAULT.equals(entry.getKey()))
                     .map(Map.Entry::getValue)
                     .map(context -> ((VaultRotationContext) context).getVaultPathSecretMap().keySet())
                     .flatMap(Collection::stream)

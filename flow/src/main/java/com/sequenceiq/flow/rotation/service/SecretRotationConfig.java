@@ -1,7 +1,6 @@
 package com.sequenceiq.flow.rotation.service;
 
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,9 +16,9 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
 import com.sequenceiq.cloudbreak.rotation.secret.application.ApplicationSecretRotationInformation;
+import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 
 @Configuration
 public class SecretRotationConfig {
@@ -56,13 +55,13 @@ public class SecretRotationConfig {
             Set<SecretRotationStep> supportedSteps = Arrays.stream(supportedSecretType.getEnumConstants())
                     .flatMap(secretType -> secretType.getSteps().stream())
                     .collect(Collectors.toSet());
-            Map<SecretRotationStep, RotationExecutor<? extends RotationContext>> bean = new EnumMap<>(SecretRotationStep.class);
+            Map<SecretRotationStep, RotationExecutor<? extends RotationContext>> beans = Maps.newHashMap();
             for (RotationExecutor<? extends RotationContext> rotationExecutor : rotationExecutors.get()) {
                 if (supportedSteps.contains(rotationExecutor.getType())) {
-                    bean.put(rotationExecutor.getType(), rotationExecutor);
+                    beans.put(rotationExecutor.getType(), rotationExecutor);
                 }
             }
-            return Maps.immutableEnumMap(bean);
+            return beans;
         } else {
             return Map.of();
         }

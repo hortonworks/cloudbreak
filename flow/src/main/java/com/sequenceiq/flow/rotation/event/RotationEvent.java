@@ -13,6 +13,8 @@ import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.rotation.RotationFlowContext;
+import com.sequenceiq.flow.rotation.serialization.SecretTypeDeserializer;
+import com.sequenceiq.flow.rotation.serialization.SecretTypeSerializer;
 
 public class RotationEvent extends BaseFlowEvent {
 

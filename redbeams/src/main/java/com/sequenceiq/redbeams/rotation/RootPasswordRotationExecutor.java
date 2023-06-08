@@ -3,7 +3,7 @@ package com.sequenceiq.redbeams.rotation;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-import static com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep.PROVIDER_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.redbeams.rotation.RedbeamsSecretRotationStep.PROVIDER_DATABASE_ROOT_PASSWORD;
 
 import javax.inject.Inject;
 
@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;

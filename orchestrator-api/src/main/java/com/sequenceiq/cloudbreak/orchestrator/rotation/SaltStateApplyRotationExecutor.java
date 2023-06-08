@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 
 @Component
 public class SaltStateApplyRotationExecutor implements RotationExecutor<SaltStateApplyRotationContext> {
@@ -54,7 +54,7 @@ public class SaltStateApplyRotationExecutor implements RotationExecutor<SaltStat
 
     @Override
     public SecretRotationStep getType() {
-        return SecretRotationStep.SALT_STATE_APPLY;
+        return OrchestratorSecretRotationStep.SALT_STATE_APPLY;
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.sequenceiq.flow.rotation;
 
+import static com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException.getFailedStepFromException;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -14,6 +16,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -53,7 +56,7 @@ public class SecretRotationActions {
             @Override
             protected void doExecute(RotationFlowContext context, SecretRotationTriggerEvent payload, Map<Object, Object> variables) throws Exception {
                 if (RotationFlowExecutionType.ROLLBACK.equals(payload.getExecutionType())) {
-                    sendEvent(context, ExecuteRotationFailedEvent.fromPayload(payload, new SecretRotationException(EXPLICIT_ROLLBACK_EXECUTION, null)));
+                    sendEvent(context, ExecuteRotationFailedEvent.fromPayload(payload, new SecretRotationException(EXPLICIT_ROLLBACK_EXECUTION, null), null));
                 } else {
                     sendEvent(context, ExecuteRotationTriggerEvent.fromPayload(payload));
                 }
@@ -61,7 +64,8 @@ public class SecretRotationActions {
 
             @Override
             protected Object getFailurePayload(SecretRotationTriggerEvent payload, Optional<RotationFlowContext> flowContext, Exception ex) {
-                return RotationFailedEvent.fromPayload(SecretRotationEvent.ROTATION_FAILED_EVENT.event(), payload, ex);
+                SecretRotationStep failedStep = getFailedStepFromException(ex);
+                return RotationFailedEvent.fromPayload(SecretRotationEvent.ROTATION_FAILED_EVENT.event(), payload, ex, failedStep);
             }
         };
     }
@@ -84,7 +88,8 @@ public class SecretRotationActions {
 
             @Override
             protected Object getFailurePayload(ExecuteRotationFinishedEvent payload, Optional<RotationFlowContext> flowContext, Exception ex) {
-                return RotationFailedEvent.fromPayload(SecretRotationEvent.ROTATION_FAILED_EVENT.event(), payload, ex);
+                SecretRotationStep failedStep = getFailedStepFromException(ex);
+                return RotationFailedEvent.fromPayload(SecretRotationEvent.ROTATION_FAILED_EVENT.event(), payload, ex, failedStep);
             }
         };
     }
@@ -107,12 +112,12 @@ public class SecretRotationActions {
                     LOGGER.debug("Execution type is not set or not explicit ROLLBACK, set flow failed for: {}", context.getResourceCrn());
                     flow.setFlowFailed(payload.getException());
                 }
-                sendEvent(context, RollbackRotationTriggerEvent.fromPayload(payload, payload.getException()));
+                sendEvent(context, RollbackRotationTriggerEvent.fromPayload(payload));
             }
 
             @Override
             protected Object getFailurePayload(ExecuteRotationFailedEvent payload, Optional<RotationFlowContext> flowContext, Exception ex) {
-                return RotationFailedEvent.fromPayload(SecretRotationEvent.ROTATION_FAILED_EVENT.event(), payload, ex);
+                return RotationFailedEvent.fromPayload(SecretRotationEvent.ROTATION_FAILED_EVENT.event(), payload, ex, payload.getFailedStep());
             }
         };
     }

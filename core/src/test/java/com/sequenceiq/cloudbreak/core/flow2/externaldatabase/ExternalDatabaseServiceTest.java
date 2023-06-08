@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.externaldatabase;
 
 import static com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType.ROTATE;
-import static com.sequenceiq.cloudbreak.rotation.secret.type.RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.redbeams.rotation.RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -531,7 +531,7 @@ class ExternalDatabaseServiceTest {
     void rotateDatabaseSecretsShouldFailIfRedbeamsFlowChainIsNotTriggered() {
         when(redbeamsClient.rotateSecret(any())).thenReturn(new FlowIdentifier(FlowType.NOT_TRIGGERED, null));
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD.name(), ROTATE));
+                () -> underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE));
         String expected = String.format("Database flow failed in Redbeams. Database crn: %s, flow: FlowIdentifier{type=%s, pollableId='%s'}",
                 RDBMS_CRN, FlowType.NOT_TRIGGERED, null);
         assertEquals(expected, cloudbreakServiceException.getMessage());
@@ -541,7 +541,7 @@ class ExternalDatabaseServiceTest {
     void rotateDatabaseSecretsShouldFailIfReturnedFlowInformationIsNull() {
         when(redbeamsClient.rotateSecret(any())).thenReturn(null);
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD.name(), ROTATE));
+                () -> underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE));
         String expected = String.format("Database flow failed in Redbeams. Database crn: %s, flow: null", RDBMS_CRN);
         assertEquals(expected, cloudbreakServiceException.getMessage());
     }
@@ -551,7 +551,7 @@ class ExternalDatabaseServiceTest {
         when(redbeamsClient.rotateSecret(any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, RDBMS_FLOW_ID));
         when(redbeamsClient.hasFlowChainRunningByFlowChainId(RDBMS_FLOW_ID)).thenReturn(createFlowCheckResponse(Boolean.FALSE, Boolean.TRUE));
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD.name(), ROTATE));
+                () -> underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE));
         String expected = String.format("Database flow failed in Redbeams. Database crn: %s, flow: FlowIdentifier{type=%s, pollableId='%s'}",
                 RDBMS_CRN, FlowType.FLOW_CHAIN, RDBMS_FLOW_ID);
         assertEquals(expected, cloudbreakServiceException.getMessage());
@@ -561,7 +561,7 @@ class ExternalDatabaseServiceTest {
     void rotateDatabaseSecretsShouldSucceed() {
         when(redbeamsClient.rotateSecret(any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, RDBMS_FLOW_ID));
         when(redbeamsClient.hasFlowChainRunningByFlowChainId(RDBMS_FLOW_ID)).thenReturn(createFlowCheckResponse(Boolean.FALSE, Boolean.FALSE));
-        underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD.name(), ROTATE);
+        underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE);
         ArgumentCaptor<RotateDatabaseServerSecretV4Request> requestCaptor = ArgumentCaptor.forClass(RotateDatabaseServerSecretV4Request.class);
         verify(redbeamsClient, times(1)).rotateSecret(requestCaptor.capture());
         RotateDatabaseServerSecretV4Request request = requestCaptor.getValue();

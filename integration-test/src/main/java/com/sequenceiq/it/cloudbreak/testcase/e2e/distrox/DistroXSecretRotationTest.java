@@ -1,9 +1,9 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
-import static com.sequenceiq.cloudbreak.rotation.secret.type.CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD;
-import static com.sequenceiq.cloudbreak.rotation.secret.type.CloudbreakSecretType.CLUSTER_MGMT_CM_ADMIN_PASSWORD;
-import static com.sequenceiq.cloudbreak.rotation.secret.type.DatalakeSecretType.DATALAKE_CB_CM_ADMIN_PASSWORD;
-import static com.sequenceiq.cloudbreak.rotation.secret.type.DatalakeSecretType.DATALAKE_MGMT_CM_ADMIN_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_MGMT_CM_ADMIN_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CB_CM_ADMIN_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_MGMT_CM_ADMIN_PASSWORD;
 
 import java.util.Set;
 
