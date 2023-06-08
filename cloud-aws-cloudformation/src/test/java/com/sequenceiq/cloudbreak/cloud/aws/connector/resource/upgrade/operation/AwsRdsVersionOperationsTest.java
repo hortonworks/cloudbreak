@@ -94,6 +94,7 @@ public class AwsRdsVersionOperationsTest {
                 {"version 6.1", "6.1"},
                 {"version 7.1", "7.1"},
                 {"version 8.1", "8.1"},
+                {"version 15.1", "15.1"},
                 {"version 123.1", "123.1"},
         };
     }
@@ -115,6 +116,7 @@ public class AwsRdsVersionOperationsTest {
                 {"version 11.1", "11.1", "postgres11"},
                 {"version 12.1", "12.1", "postgres12"},
                 {"version 13.1", "13.1", "postgres13"},
+                {"version 14.1", "14.1", "postgres14"},
         };
     }
 

@@ -7,11 +7,14 @@
 {% set close_connections = salt['pillar.get']('disaster_recovery:close_connections') %}
 {% set compression_level = salt['pillar.get']('disaster_recovery:compression_level', '0') %}
 {% set database_name = salt['pillar.get']('disaster_recovery:database_name', '') %}
+{% set postgres_version = salt['pillar.get']('postgres:postgres_version', '10') | int %}
 
 include:
   - postgresql.disaster_recovery
-{%- if salt['pillar.get']('postgres:postgres_version', '10') | int == 11 %}
+{%- if postgres_version == 11 %}
   - postgresql.pg11-alternatives
+{%- elif postgres_version == 14 %}
+  - postgresql.pg14-alternatives
 {%- endif %}
 
 {% if 'None' != configure_remote_db %}

@@ -5,6 +5,7 @@
   "postgresql.root-certs": 60.0,
   "postgresql": 15000.0,
   "postgresql.pg11-alternatives": 500.0,
+  "postgresql.pg14-alternatives": 500.0,
   "cloudera.agent": 7500.0,
   "cloudera.agent.start": 100000.0,
   "monitoring.scripts": 850.0,
