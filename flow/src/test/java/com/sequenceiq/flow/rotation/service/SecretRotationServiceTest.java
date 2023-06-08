@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -23,18 +24,19 @@ import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
-import com.sequenceiq.cloudbreak.rotation.secret.type.CloudbreakSecretType;
-import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
+import com.sequenceiq.flow.rotation.TestRotationContext;
+import com.sequenceiq.flow.rotation.TestSecretRotationStep;
+import com.sequenceiq.flow.rotation.TestSecretType;
 
 @ExtendWith(MockitoExtension.class)
 public class SecretRotationServiceTest {
 
     @Mock
-    private RotationExecutor<? extends RotationContext> rotationExecutor;
+    private RotationExecutor executor;
 
     @Mock
-    private RotationContextProvider rotationContextProvider;
+    private RotationContextProvider contextProvider;
 
     @InjectMocks
     private SecretRotationService underTest;
@@ -42,76 +44,63 @@ public class SecretRotationServiceTest {
     @BeforeEach
     public void setup() throws IllegalAccessException {
         FieldUtils.writeDeclaredField(underTest, "rotationExecutorMap",
-                Map.of(SecretRotationStep.VAULT, rotationExecutor,
-                        SecretRotationStep.CM_USER, rotationExecutor,
-                        SecretRotationStep.CLUSTER_PROXY, rotationExecutor), true);
+                Map.of(TestSecretRotationStep.TEST_STEP, executor), true);
         FieldUtils.writeDeclaredField(underTest, "rotationContextProviderMap",
-                Map.of(CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD, rotationContextProvider), true);
+                Map.of(TestSecretType.TEST, contextProvider), true);
+        generateTestContexts();
     }
 
     @Test
     public void testRotateWhenNotNeeded() {
-        underTest.executeRotation(CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD, "resource", RotationFlowExecutionType.FINALIZE);
+        underTest.executeRotation(TestSecretType.TEST, "resource", RotationFlowExecutionType.FINALIZE);
 
-        verifyNoInteractions(rotationExecutor, rotationContextProvider);
+        verifyNoInteractions(executor, contextProvider);
     }
 
     @Test
     public void testRotateWhenContextMissing() {
-        when(rotationContextProvider.getContexts(anyString())).thenReturn(Map.of());
+        when(contextProvider.getContexts(anyString())).thenReturn(Map.of());
 
         assertThrows(RuntimeException.class, () ->
-                underTest.executeRotation(CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD, "resource", null));
+                underTest.executeRotation(TestSecretType.TEST, "resource", null));
 
-        verify(rotationContextProvider).getContexts(anyString());
-        verifyNoInteractions(rotationExecutor);
+        verify(contextProvider).getContexts(anyString());
+        verifyNoInteractions(executor);
     }
 
     @Test
     public void testRotate() {
-        generateTestContexts();
-        doNothing().when(rotationExecutor).executeRotate(any());
+        doNothing().when(executor).executeRotate(any());
 
-        underTest.executeRotation(CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD, "resource", null);
+        underTest.executeRotation(TestSecretType.TEST, "resource", null);
 
-        verify(rotationContextProvider).getContexts(anyString());
-        verify(rotationExecutor, times(3)).executeRotate(any());
+        verify(contextProvider).getContexts(anyString());
+        verify(executor, times(1)).executeRotate(any());
     }
 
     @Test
     public void testFinalize() {
-        generateTestContexts();
-        doNothing().when(rotationExecutor).executeFinalize(any());
+        doNothing().when(executor).executeFinalize(any());
 
-        underTest.finalizeRotation(CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD, "resource", null);
+        underTest.finalizeRotation(TestSecretType.TEST, "resource", null);
 
-        verify(rotationContextProvider).getContexts(anyString());
-        verify(rotationExecutor, times(3)).executeFinalize(any());
+        verify(contextProvider).getContexts(anyString());
+        verify(executor, times(1)).executeFinalize(any());
     }
 
     @Test
     public void testRollback() {
-        generateTestContexts();
-        doNothing().when(rotationExecutor).executeRollback(any());
+        doNothing().when(executor).executeRollback(any());
 
-        underTest.rollbackRotation(CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD, "resource", null, SecretRotationStep.VAULT);
+        underTest.rollbackRotation(TestSecretType.TEST, "resource", null, TestSecretRotationStep.TEST_STEP);
 
-        verify(rotationContextProvider).getContexts(anyString());
-        verify(rotationExecutor).executeRollback(any());
+        verify(contextProvider).getContexts(anyString());
+        verify(executor).executeRollback(any());
     }
 
     private void generateTestContexts() {
         Map<SecretRotationStep, RotationContext> contextMap = Map.of(
-                SecretRotationStep.VAULT, VaultRotationContext.builder().withResourceCrn("resource").withVaultPathSecretMap(Map.of()).build(),
-                SecretRotationStep.CM_USER, new TestRotationContext("resource"),
-                SecretRotationStep.CLUSTER_PROXY, new TestRotationContext("resource"));
-        when(rotationContextProvider.getContexts(anyString())).thenReturn(contextMap);
-    }
-
-    public static class TestRotationContext extends RotationContext {
-
-        protected TestRotationContext(String resourceCrn) {
-            super(resourceCrn);
-        }
+                TestSecretRotationStep.TEST_STEP, new TestRotationContext("resource"));
+        lenient().when(contextProvider.getContexts(any())).thenReturn(contextMap);
     }
 }

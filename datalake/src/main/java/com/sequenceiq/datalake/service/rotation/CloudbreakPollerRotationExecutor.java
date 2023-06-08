@@ -3,7 +3,7 @@ package com.sequenceiq.datalake.service.rotation;
 import static com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType.FINALIZE;
 import static com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType.ROLLBACK;
 import static com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType.ROTATE;
-import static com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
+import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
 
 import javax.inject.Inject;
 
@@ -11,13 +11,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
-import com.sequenceiq.cloudbreak.rotation.secret.context.CloudbreakPollerRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.context.PollerRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 
 @Component
-public class CloudbreakPollerRotationExecutor implements RotationExecutor<CloudbreakPollerRotationContext> {
+public class CloudbreakPollerRotationExecutor implements RotationExecutor<PollerRotationContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakPollerRotationExecutor.class);
 
@@ -25,10 +26,10 @@ public class CloudbreakPollerRotationExecutor implements RotationExecutor<Cloudb
     private SdxRotationService sdxRotationService;
 
     @Override
-    public void rotate(CloudbreakPollerRotationContext rotationContext) {
+    public void rotate(PollerRotationContext rotationContext) {
         try {
             LOGGER.info("Rotate cloudbreak secret started for {}", rotationContext.getResourceCrn());
-            sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType().name(), ROTATE);
+            sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), (CloudbreakSecretType) rotationContext.getSecretType(), ROTATE);
             LOGGER.info("Rotate cloudbreak secret finished for {}", rotationContext.getResourceCrn());
         } catch (Exception e) {
             LOGGER.warn("Rotate cloudbreak secret failed for {}", rotationContext.getResourceCrn(), e);
@@ -37,10 +38,10 @@ public class CloudbreakPollerRotationExecutor implements RotationExecutor<Cloudb
     }
 
     @Override
-    public void rollback(CloudbreakPollerRotationContext rotationContext) {
+    public void rollback(PollerRotationContext rotationContext) {
         try {
             LOGGER.info("Rollback cloudbreak secret started for {}", rotationContext.getResourceCrn());
-            sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType().name(), ROLLBACK);
+            sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), (CloudbreakSecretType) rotationContext.getSecretType(), ROLLBACK);
             LOGGER.info("Rollback cloudbreak secret finished for {}", rotationContext.getResourceCrn());
         } catch (Exception e) {
             LOGGER.warn("Rollback cloudbreak secret failed for {}", rotationContext.getResourceCrn(), e);
@@ -49,10 +50,10 @@ public class CloudbreakPollerRotationExecutor implements RotationExecutor<Cloudb
     }
 
     @Override
-    public void finalize(CloudbreakPollerRotationContext rotationContext) {
+    public void finalize(PollerRotationContext rotationContext) {
         try {
             LOGGER.info("Finalize cloudbreak secret started for {}", rotationContext.getResourceCrn());
-            sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType().name(), FINALIZE);
+            sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), (CloudbreakSecretType) rotationContext.getSecretType(), FINALIZE);
             LOGGER.info("Finalize cloudbreak secret finished for {}", rotationContext.getResourceCrn());
         } catch (Exception e) {
             LOGGER.warn("Finalize cloudbreak secret failed for {}", rotationContext.getResourceCrn(), e);
@@ -66,7 +67,7 @@ public class CloudbreakPollerRotationExecutor implements RotationExecutor<Cloudb
     }
 
     @Override
-    public Class<CloudbreakPollerRotationContext> getContextClass() {
-        return CloudbreakPollerRotationContext.class;
+    public Class<PollerRotationContext> getContextClass() {
+        return PollerRotationContext.class;
     }
 }

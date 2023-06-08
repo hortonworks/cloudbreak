@@ -1,10 +1,10 @@
 package com.sequenceiq.datalake.service.rotation.context.provider;
 
-import static com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
-import static com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep.REDBEAMS_ROTATE_POLLING;
-import static com.sequenceiq.cloudbreak.rotation.secret.type.CloudbreakSecretType.DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
-import static com.sequenceiq.cloudbreak.rotation.secret.type.DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD;
-import static com.sequenceiq.cloudbreak.rotation.secret.type.RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
+import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
+import static com.sequenceiq.redbeams.rotation.RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,10 +13,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContextProvider;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
-import com.sequenceiq.cloudbreak.rotation.secret.context.CloudbreakPollerRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.context.RedbeamsPollerRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.context.PollerRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 
 @Component
 public class DatalakeExternalDatabaseRootPasswordRotationContextProvider implements RotationContextProvider {
@@ -24,8 +23,8 @@ public class DatalakeExternalDatabaseRootPasswordRotationContextProvider impleme
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         Map<SecretRotationStep, RotationContext> context = new HashMap<>();
-        context.put(REDBEAMS_ROTATE_POLLING, new RedbeamsPollerRotationContext(resourceCrn, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD));
-        context.put(CLOUDBREAK_ROTATE_POLLING, new CloudbreakPollerRotationContext(resourceCrn, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD));
+        context.put(REDBEAMS_ROTATE_POLLING, new PollerRotationContext(resourceCrn, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD));
+        context.put(CLOUDBREAK_ROTATE_POLLING, new PollerRotationContext(resourceCrn, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD));
         return context;
     }
 

@@ -10,11 +10,13 @@ import javax.inject.Inject;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.context.CMUserRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.ClusterProxyRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContextProvider;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -62,9 +64,9 @@ public abstract class CMUserRotationContextProvider implements RotationContextPr
                 .withResourceCrn(stack.getResourceCrn())
                 .build();
 
-        result.put(SecretRotationStep.CLUSTER_PROXY, clusterProxyRotationContext);
-        result.put(SecretRotationStep.VAULT, vaultRotationContext);
-        result.put(SecretRotationStep.CM_USER, cmUserRotationContext);
+        result.put(CloudbreakSecretRotationStep.CLUSTER_PROXY, clusterProxyRotationContext);
+        result.put(CommonSecretRotationStep.VAULT, vaultRotationContext);
+        result.put(CloudbreakSecretRotationStep.CM_USER, cmUserRotationContext);
         return result;
     }
 

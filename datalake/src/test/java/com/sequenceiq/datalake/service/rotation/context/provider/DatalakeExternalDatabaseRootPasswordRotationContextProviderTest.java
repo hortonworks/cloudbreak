@@ -10,12 +10,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
-import com.sequenceiq.cloudbreak.rotation.secret.context.CloudbreakPollerRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.context.RedbeamsPollerRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.type.CloudbreakSecretType;
-import com.sequenceiq.cloudbreak.rotation.secret.type.RedbeamsSecretType;
+import com.sequenceiq.cloudbreak.rotation.secret.context.PollerRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
+import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 
 @ExtendWith(MockitoExtension.class)
 class DatalakeExternalDatabaseRootPasswordRotationContextProviderTest {
@@ -28,18 +28,18 @@ class DatalakeExternalDatabaseRootPasswordRotationContextProviderTest {
     @Test
     void testGetContexts() {
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
-        assertThat(contexts).containsOnlyKeys(SecretRotationStep.REDBEAMS_ROTATE_POLLING, SecretRotationStep.CLOUDBREAK_ROTATE_POLLING);
+        assertThat(contexts).containsOnlyKeys(CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING, CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING);
 
-        assertThat(contexts.get(SecretRotationStep.REDBEAMS_ROTATE_POLLING)).isInstanceOf(RedbeamsPollerRotationContext.class);
-        RedbeamsPollerRotationContext redbeamsPollerRotationContext = (RedbeamsPollerRotationContext) contexts.get(SecretRotationStep.REDBEAMS_ROTATE_POLLING);
+        assertThat(contexts.get(CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING)).isInstanceOf(PollerRotationContext.class);
+        PollerRotationContext redbeamsPollerRotationContext = (PollerRotationContext) contexts.get(CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING);
         assertEquals(RESOURCE_CRN, redbeamsPollerRotationContext.getResourceCrn());
         assertEquals(RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, redbeamsPollerRotationContext.getSecretType());
 
-        assertThat(contexts.get(SecretRotationStep.CLOUDBREAK_ROTATE_POLLING)).isInstanceOf(CloudbreakPollerRotationContext.class);
-        CloudbreakPollerRotationContext cloudbreakPollerRotationContext =
-                (CloudbreakPollerRotationContext) contexts.get(SecretRotationStep.CLOUDBREAK_ROTATE_POLLING);
-        assertEquals(RESOURCE_CRN, cloudbreakPollerRotationContext.getResourceCrn());
-        assertEquals(CloudbreakSecretType.DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD, cloudbreakPollerRotationContext.getSecretType());
+        assertThat(contexts.get(CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING)).isInstanceOf(PollerRotationContext.class);
+        PollerRotationContext pollerRotationContext =
+                (PollerRotationContext) contexts.get(CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING);
+        assertEquals(RESOURCE_CRN, pollerRotationContext.getResourceCrn());
+        assertEquals(CloudbreakSecretType.DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD, pollerRotationContext.getSecretType());
     }
 
 }

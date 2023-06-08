@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
@@ -36,6 +35,7 @@ import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.dto.Credential;
+import com.sequenceiq.redbeams.rotation.RedbeamsSecretRotationStep;
 import com.sequenceiq.redbeams.rotation.RootPasswordRotationExecutor;
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
@@ -135,7 +135,7 @@ class RootPasswordRotationExecutorTest {
                 () -> underTest.rotate(new RotationContext(RESOURCE_CRN)));
 
         assertEquals("Root password is not in rotation state in Vault, thus rotation is not possible.", secretRotationException.getMessage());
-        assertEquals(SecretRotationStep.PROVIDER_DATABASE_ROOT_PASSWORD, secretRotationException.getFailedRotationStep());
+        assertEquals(RedbeamsSecretRotationStep.PROVIDER_DATABASE_ROOT_PASSWORD, secretRotationException.getFailedRotationStep());
         verify(dbStackService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(databaseServerConfigService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(secretService, times(1)).getRotation(eq(ROOT_PASSWORD));

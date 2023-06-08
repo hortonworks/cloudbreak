@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
 import com.sequenceiq.cloudbreak.rotation.secret.application.ApplicationSecretRotationInformation;
-import com.sequenceiq.cloudbreak.rotation.secret.type.RedbeamsSecretType;
 
 @Component
 public class RedbeamsSecretRotationInformation implements ApplicationSecretRotationInformation {

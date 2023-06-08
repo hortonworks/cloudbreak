@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
-import com.sequenceiq.cloudbreak.rotation.secret.type.DatalakeSecretType;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -52,6 +51,7 @@ import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.rotation.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
+import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 @ExtendWith(MockitoExtension.class)
 class SdxReactorFlowManagerTest {

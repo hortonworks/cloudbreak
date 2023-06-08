@@ -1,12 +1,12 @@
-package com.sequenceiq.cloudbreak.rotation.secret.type;
+package com.sequenceiq.redbeams.rotation;
 
-import static com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep.PROVIDER_DATABASE_ROOT_PASSWORD;
-import static com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep.VAULT;
+import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.VAULT;
+import static com.sequenceiq.redbeams.rotation.RedbeamsSecretRotationStep.PROVIDER_DATABASE_ROOT_PASSWORD;
 
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
+import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 
 public enum RedbeamsSecretType implements SecretType {
 

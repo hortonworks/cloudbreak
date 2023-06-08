@@ -11,12 +11,14 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContextProvider;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
-import com.sequenceiq.cloudbreak.rotation.secret.type.RedbeamsSecretType;
+import com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.rotation.RedbeamsSecretRotationStep;
+import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 import com.sequenceiq.redbeams.service.PasswordGeneratorService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
@@ -46,8 +48,8 @@ public class ExternalDatabaseRootPasswordRotationContextProvider implements Rota
                 .withResourceCrn(resourceCrn)
                 .withVaultPathSecretMap(newSecretMap)
                 .build();
-        contexts.put(SecretRotationStep.VAULT, vaultRotationContext);
-        contexts.put(SecretRotationStep.PROVIDER_DATABASE_ROOT_PASSWORD, new RotationContext(resourceCrn));
+        contexts.put(CommonSecretRotationStep.VAULT, vaultRotationContext);
+        contexts.put(RedbeamsSecretRotationStep.PROVIDER_DATABASE_ROOT_PASSWORD, new RotationContext(resourceCrn));
         return contexts;
     }
 

@@ -61,7 +61,7 @@ public class RollbackRotationHandlerTest {
     }
 
     private static RollbackRotationTriggerEvent getTriggerEvent() {
-        return new RollbackRotationTriggerEvent(null, null, null, null, null, null);
+        return new RollbackRotationTriggerEvent(null, null, null, null, null, null, null);
     }
 
 }

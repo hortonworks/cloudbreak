@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
 import com.sequenceiq.cloudbreak.rotation.secret.application.ApplicationSecretRotationInformation;
-import com.sequenceiq.cloudbreak.rotation.secret.type.DatalakeSecretType;
+import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 @Component
 public class DatalakeSecretRotationInformation implements ApplicationSecretRotationInformation {
