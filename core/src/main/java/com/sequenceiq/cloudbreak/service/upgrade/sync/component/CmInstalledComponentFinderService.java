@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.CustomParcelFilterService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmParcelSyncOperationResult;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmRepoSyncOperationResult;
 
@@ -27,6 +28,9 @@ public class CmInstalledComponentFinderService {
     @Inject
     private CmServerQueryService cmServerQueryService;
 
+    @Inject
+    private CustomParcelFilterService customParcelFilterService;
+
     public CmRepoSyncOperationResult findCmRepoComponent(Stack stack, Set<Image> candidateImages) {
         Set<ClouderaManagerRepo> candidateCmRepos = imageReaderService.getCmRepos(candidateImages);
         Optional<String> cmVersionOptional = cmServerQueryService.queryCmVersion(stack);
@@ -36,8 +40,13 @@ public class CmInstalledComponentFinderService {
 
     public CmParcelSyncOperationResult findParcelComponents(Stack stack, Set<Image> candidateImages) {
         Set<ClouderaManagerProduct> candidateProducts = imageReaderService.getParcels(candidateImages, stack.isDatalake());
-        Set<ParcelInfo> activeParcels = cmServerQueryService.queryActiveParcels(stack);
+        Set<ParcelInfo> activeParcels = getActiveParcels(stack, candidateProducts);
         Set<ClouderaManagerProduct> activeProducts = cmProductChooserService.chooseParcelProduct(activeParcels, candidateProducts);
         return new CmParcelSyncOperationResult(activeParcels, activeProducts);
+    }
+
+    private Set<ParcelInfo> getActiveParcels(Stack stack, Set<ClouderaManagerProduct> candidateProducts) {
+        Set<ParcelInfo> activeParcels = cmServerQueryService.queryActiveParcels(stack);
+        return customParcelFilterService.filterCustomParcels(activeParcels, candidateProducts);
     }
 }
