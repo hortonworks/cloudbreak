@@ -18,6 +18,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VARIANT_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ENCRYPTION_AT_HOST;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CO2_CALCULATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_COST_CALCULATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
@@ -1042,6 +1043,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_CM_BULK_HOSTS_REMOVAL))
                                 .addEntitlements(createEntitlement(CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS))
                                 .addEntitlements(createEntitlement(CDP_GCP_RAZ))
+                                .addEntitlements(createEntitlement(CDP_CB_AZURE_MULTIAZ))
                                 .setGlobalPasswordPolicy(workloadPasswordPolicy)
                                 .setAccountId(accountId)
                                 .setExternalAccountId("external-" + accountId)

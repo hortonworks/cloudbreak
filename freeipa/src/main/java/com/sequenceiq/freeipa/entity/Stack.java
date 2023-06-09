@@ -158,6 +158,8 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
     @SecretValue
     private Secret ccmParameters = Secret.EMPTY;
 
+    private boolean multiAz;
+
     public Long getId() {
         return id;
     }
@@ -516,6 +518,14 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
         this.ccmParameters = new Secret(rawCcmParameters);
     }
 
+    public boolean isMultiAz() {
+        return multiAz;
+    }
+
+    public void setMultiAz(boolean multiAz) {
+        this.multiAz = multiAz;
+    }
+
     @Override
     public String toString() {
         return "Stack{" +
@@ -544,6 +554,7 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
                 ", appVersion='" + appVersion + '\'' +
                 ", minaSshdServiceId='" + minaSshdServiceId + '\'' +
                 ", ccmV2AgentCrn='" + ccmV2AgentCrn + '\'' +
+                ", multiAz='" + multiAz + '\'' +
                 '}';
     }
 
@@ -580,7 +591,8 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
                     && Objects.equals(minaSshdServiceId, stack.minaSshdServiceId)
                     && Objects.equals(ccmV2AgentCrn, stack.ccmV2AgentCrn)
                     && Objects.equals(version, stack.version)
-                    && Objects.equals(ccmParameters, stack.ccmParameters);
+                    && Objects.equals(ccmParameters, stack.ccmParameters)
+                    && multiAz == stack.multiAz;
         }
     }
 
@@ -588,7 +600,7 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
     public int hashCode() {
         return Objects.hash(id, resourceCrn, name, environmentCrn, accountId, region, created, platformvariant, availabilityZone, cloudPlatform, gatewayport,
                 useCcm, tunnel, clusterProxyRegistered, terminated, tags, telemetry, backup, template, owner, appVersion, minaSshdServiceId, ccmV2AgentCrn,
-                version, ccmParameters);
+                version, ccmParameters, multiAz);
     }
 
     @Override

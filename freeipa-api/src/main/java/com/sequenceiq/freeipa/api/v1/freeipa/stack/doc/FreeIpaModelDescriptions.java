@@ -27,6 +27,8 @@ public class FreeIpaModelDescriptions {
     public static final String AWS_SPOT_PERCENTAGE = "Percentage of spot instances launched in FreeIpa instance group";
     public static final String AWS_SPOT_MAX_PRICE = "Max price per hour of spot instances launched in FreeIpa instance group";
 
+    public static final String MULTIAZ = "whether FreeIPA is MultiAZ or not";
+
     private FreeIpaModelDescriptions() {
     }
 

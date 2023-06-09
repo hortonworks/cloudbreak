@@ -1,14 +1,18 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_FREEIPA;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_MULTIAZ;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -18,6 +22,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaImageRequest;
@@ -25,6 +31,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaRespo
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
+import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.MultiAzValidator;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaInstanceCountByGroupProvider;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,6 +50,9 @@ public class FreeIpaConverterTest {
 
     @Mock
     private FreeIpaInstanceCountByGroupProvider ipaInstanceCountByGroupProvider;
+
+    @Mock
+    private MultiAzValidator multiAzValidator;
 
     @InjectMocks
     private FreeIpaConverter underTest;
@@ -136,9 +146,7 @@ public class FreeIpaConverterTest {
         AttachedFreeIpaRequest request = new AttachedFreeIpaRequest();
         request.setCreate(true);
         request.setImage(aFreeIpaImage(IMAGE_CATALOG, IMAGE_ID));
-        request.setEnableMultiAz(true);
         // WHEN
-        when(entitlementService.awsNativeFreeIpaEnabled(anyString())).thenReturn(true);
         FreeIpaCreationDto result = underTest.convert(request, "id", CloudConstants.AWS);
         // THEN
         verify(ipaInstanceCountByGroupProvider).getInstanceCount(any());
@@ -201,6 +209,79 @@ public class FreeIpaConverterTest {
         verify(ipaInstanceCountByGroupProvider).getInstanceCount(any());
         assertNotNull(result.getRecipes());
         assertThat(result.getRecipes()).containsExactlyInAnyOrder("recipe1", "recipe2");
+    }
+
+    @Test
+    public void testConvertWithMultiAzForAws() {
+        // GIVEN
+        AttachedFreeIpaRequest request = new AttachedFreeIpaRequest();
+        request.setCreate(true);
+        request.setEnableMultiAz(true);
+        // WHEN
+        when(multiAzValidator.suportedMultiAzForEnvironment("AWS")).thenReturn(true);
+        when(multiAzValidator.getMultiAzEntitlements(CloudPlatform.AWS)).thenReturn(Set.of(CDP_CB_AWS_NATIVE_FREEIPA));
+        when(entitlementService.getEntitlements(anyString())).thenReturn(List.of("CDP_CB_AWS_NATIVE_FREEIPA"));
+        underTest.convert(request, "id", CloudConstants.AWS);
+        // THEN
+        verify(ipaInstanceCountByGroupProvider).getInstanceCount(any());
+    }
+
+    @Test
+    public void testConvertWithMultiAzForAzure() {
+        // GIVEN
+        AttachedFreeIpaRequest request = new AttachedFreeIpaRequest();
+        request.setCreate(true);
+        request.setEnableMultiAz(true);
+        // WHEN
+        when(multiAzValidator.suportedMultiAzForEnvironment("AZURE")).thenReturn(true);
+        when(multiAzValidator.getMultiAzEntitlements(CloudPlatform.AZURE)).thenReturn(Set.of(CDP_CB_AZURE_MULTIAZ));
+        when(entitlementService.getEntitlements(anyString())).thenReturn(List.of("CDP_CB_AZURE_MULTIAZ"));
+        underTest.convert(request, "id", CloudConstants.AZURE);
+        // THEN
+        verify(ipaInstanceCountByGroupProvider).getInstanceCount(any());
+    }
+
+    @Test
+    public void testConvertWithMultiAzForNonSupportedCloudPlatform() {
+        // GIVEN
+        AttachedFreeIpaRequest request = new AttachedFreeIpaRequest();
+        request.setCreate(true);
+        request.setEnableMultiAz(true);
+        // WHEN
+        when(multiAzValidator.suportedMultiAzForEnvironment("GCP")).thenReturn(false);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.convert(request, "id", CloudConstants.GCP));
+        assertEquals("Multi Availability Zone is not supported for GCP", badRequestException.getMessage());
+    }
+
+    @Test
+    public void testConvertWithMultiAzForAwsEntitlementNotPresent() {
+        // GIVEN
+        AttachedFreeIpaRequest request = new AttachedFreeIpaRequest();
+        request.setCreate(true);
+        request.setEnableMultiAz(true);
+        // WHEN
+        when(multiAzValidator.suportedMultiAzForEnvironment("AWS")).thenReturn(true);
+        when(multiAzValidator.getMultiAzEntitlements(CloudPlatform.AWS)).thenReturn(Set.of(CDP_CB_AWS_NATIVE_FREEIPA));
+        when(entitlementService.getEntitlements(anyString())).thenReturn(List.of("Dummy"));
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.convert(request, "id", CloudConstants.AWS));
+        assertEquals("You need to be entitled for CDP_CB_AWS_NATIVE_FREEIPA to provision FreeIPA in Multi Availability Zone", badRequestException.getMessage());
+    }
+
+    @Test
+    public void testConvertWithMultiAzForAzureEntitlementNotPresent() {
+        // GIVEN
+        AttachedFreeIpaRequest request = new AttachedFreeIpaRequest();
+        request.setCreate(true);
+        request.setEnableMultiAz(true);
+        // WHEN
+        when(multiAzValidator.suportedMultiAzForEnvironment("AZURE")).thenReturn(true);
+        when(multiAzValidator.getMultiAzEntitlements(CloudPlatform.AZURE)).thenReturn(Set.of(CDP_CB_AZURE_MULTIAZ));
+        when(entitlementService.getEntitlements(anyString())).thenReturn(List.of("Dummy"));
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.convert(request, "id", CloudConstants.AZURE));
+        assertEquals("You need to be entitled for CDP_CB_AZURE_MULTIAZ to provision FreeIPA in Multi Availability Zone", badRequestException.getMessage());
     }
 
     private FreeIpaImageRequest aFreeIpaImage(String catalog, String id) {

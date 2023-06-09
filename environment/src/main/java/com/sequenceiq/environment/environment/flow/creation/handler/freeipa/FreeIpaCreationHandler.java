@@ -244,6 +244,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         CreateFreeIpaRequest createFreeIpaRequest = new CreateFreeIpaRequest();
         createFreeIpaRequest.setEnvironmentCrn(environment.getResourceCrn());
         createFreeIpaRequest.setName(environment.getName() + "-freeipa");
+        createFreeIpaRequest.setMultiAz(multiAzRequired);
 
         FreeIpaServerRequest freeIpaServerRequest = freeIpaServerRequestProvider.create(environment);
         createFreeIpaRequest.setFreeIpa(freeIpaServerRequest);

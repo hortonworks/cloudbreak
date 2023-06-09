@@ -134,8 +134,9 @@ public class CreateFreeIpaRequestToStackConverterTest {
         when(costTagging.prepareDefaultTags(any())).thenReturn(new HashMap<>());
         Future<String> owner = CompletableFuture.completedFuture("dummyUser");
 
-        underTest.convert(source, environmentResponse, ACCOUNT_ID, owner, "crn1", CloudPlatform.AZURE.name());
+        Stack stack = underTest.convert(source, environmentResponse, ACCOUNT_ID, owner, "crn1", CloudPlatform.AZURE.name());
         assertEquals(mapCaptorForEncryption.getValue().get(DISK_ENCRYPTION_SET_ID), "dummyDiskEncryptionSetId");
+        assertEquals(stack.isMultiAz(), false);
     }
 
     @Test
@@ -152,6 +153,7 @@ public class CreateFreeIpaRequestToStackConverterTest {
         freeIpaServerRequest.setHostname("dummyHostName");
         source.setNetwork(new NetworkRequest());
         source.setFreeIpa(freeIpaServerRequest);
+        source.setMultiAz(true);
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setAws(AwsEnvironmentParameters.builder()
                 .withAwsDiskEncryptionParameters(AwsDiskEncryptionParameters.builder()
@@ -184,11 +186,13 @@ public class CreateFreeIpaRequestToStackConverterTest {
         assertEquals(stack.getPlatformvariant(), "AWS_NATIVE");
         assertNull(mapCaptorForEncryption.getValue().get(GCP_KMS_ENCRYPTION_KEY));
         assertNull(mapCaptorForEncryption.getValue().get(DISK_ENCRYPTION_SET_ID));
+        assertEquals(stack.isMultiAz(), true);
     }
 
     @Test
     void testConvertForInstanceGroupsWhenEncryptionKeyIsPresentForGcp() {
         CreateFreeIpaRequest source = createCreateFreeIpaRequest();
+        source.setMultiAz(false);
 
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
 
@@ -214,8 +218,9 @@ public class CreateFreeIpaRequestToStackConverterTest {
         when(costTagging.prepareDefaultTags(any())).thenReturn(new HashMap<>());
         Future<String> owner = CompletableFuture.completedFuture("dummyUser");
 
-        underTest.convert(source, environmentResponse, ACCOUNT_ID, owner, "crn1", CloudPlatform.GCP.name());
+        Stack stack = underTest.convert(source, environmentResponse, ACCOUNT_ID, owner, "crn1", CloudPlatform.GCP.name());
         assertEquals(mapCaptorForEncryption.getValue().get(GCP_KMS_ENCRYPTION_KEY), "dummyEncryptionKey");
+        assertEquals(stack.isMultiAz(), false);
     }
 
     private CreateFreeIpaRequest createCreateFreeIpaRequest() {
