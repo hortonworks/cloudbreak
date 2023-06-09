@@ -9,7 +9,6 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.context.ClusterProxyRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
@@ -24,22 +23,14 @@ public class ClusterProxyRotationExecutor implements RotationExecutor<ClusterPro
 
     @Override
     public void rotate(ClusterProxyRotationContext rotationContext) {
-        try {
-            StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
-            clusterProxyService.reRegisterCluster(stackDto.getId());
-        } catch (Exception e) {
-            throw new SecretRotationException("Reregistration in cluster proxy failed during rotation.", e, getType());
-        }
+        StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
+        clusterProxyService.reRegisterCluster(stackDto.getId());
     }
 
     @Override
     public void rollback(ClusterProxyRotationContext rotationContext) {
-        try {
-            StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
-            clusterProxyService.reRegisterCluster(stackDto.getId());
-        } catch (Exception e) {
-            throw new SecretRotationException("Reregistration in cluster proxy failed during rollback.", e, getType());
-        }
+        StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
+        clusterProxyService.reRegisterCluster(stackDto.getId());
     }
 
     @Override

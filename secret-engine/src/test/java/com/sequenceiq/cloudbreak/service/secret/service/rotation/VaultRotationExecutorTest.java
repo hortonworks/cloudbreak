@@ -36,7 +36,7 @@ public class VaultRotationExecutorTest {
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
-        underTest.rotate(rotationContext);
+        underTest.executeRotate(rotationContext);
 
         verify(secretService, times(1)).putRotation(eq("secretPath"), eq("secret"));
     }
@@ -48,7 +48,7 @@ public class VaultRotationExecutorTest {
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
-        underTest.finalize(rotationContext);
+        underTest.executeFinalize(rotationContext);
 
         verify(secretService, times(1)).update(eq("secretPath"), eq("new"));
     }
@@ -60,7 +60,7 @@ public class VaultRotationExecutorTest {
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
-        underTest.rollback(rotationContext);
+        underTest.executeRollback(rotationContext);
 
         verify(secretService, times(1)).update(eq("secretPath"), eq("old"));
     }
@@ -72,6 +72,6 @@ public class VaultRotationExecutorTest {
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
-        assertThrows(SecretRotationException.class, () -> underTest.rotate(rotationContext));
+        assertThrows(SecretRotationException.class, () -> underTest.executeRotate(rotationContext));
     }
 }

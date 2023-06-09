@@ -65,26 +65,12 @@ public class RootPasswordRotationExecutor implements RotationExecutor<RotationCo
 
     @Override
     public void rotate(RotationContext rotationContext) {
-        try {
-            updateRootPasswordOnProvider(rotationContext, false);
-        } catch (SecretRotationException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.warn("Rotation of {} failed for {}", getType(), rotationContext.getResourceCrn(), e);
-            throw new SecretRotationException(e, getType());
-        }
+        updateRootPasswordOnProvider(rotationContext, false);
     }
 
     @Override
     public void rollback(RotationContext rotationContext) {
-        try {
-            updateRootPasswordOnProvider(rotationContext, true);
-        } catch (SecretRotationException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.warn("Rollback of {} failed for {}", getType(), rotationContext.getResourceCrn(), e);
-            throw new SecretRotationException(e, getType());
-        }
+        updateRootPasswordOnProvider(rotationContext, true);
     }
 
     @Override

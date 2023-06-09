@@ -35,27 +35,22 @@ public class CMUserRotationExecutor implements RotationExecutor<CMUserRotationCo
     private SecretService secretService;
 
     @Override
-    public void rotate(CMUserRotationContext rotationContext) {
+    public void rotate(CMUserRotationContext rotationContext) throws Exception {
         LOGGER.info("Starting rotation of CM user for resource {} by creating a new user.", rotationContext.getResourceCrn());
-        try {
-            RotationSecret userRotationSecret = secretService.getRotation(rotationContext.getUserSecret());
-            RotationSecret passwordRotationSecret = secretService.getRotation(rotationContext.getPasswordSecret());
-            if (userRotationSecret.isRotation() && passwordRotationSecret.isRotation()) {
-                ClusterSecurityService clusterSecurityService = getClusterSecurityService(rotationContext);
-                String clientUser = secretService.get(rotationContext.getClientUserSecret());
-                String clientPassword = secretService.get(rotationContext.getClientPasswordSecret());
-                clusterSecurityService.createNewUser(
-                        userRotationSecret.getBackupSecret(),
-                        userRotationSecret.getSecret(),
-                        passwordRotationSecret.getSecret(),
-                        clientUser,
-                        clientPassword);
-            } else {
-                throw new SecretRotationException("User or password is not in rotation state in Vault, thus rotation of CM user is not possible.", getType());
-            }
-        } catch (Exception e) {
-            LOGGER.error("Rotation of CM user failed, ", e);
-            throw new SecretRotationException(e, getType());
+        RotationSecret userRotationSecret = secretService.getRotation(rotationContext.getUserSecret());
+        RotationSecret passwordRotationSecret = secretService.getRotation(rotationContext.getPasswordSecret());
+        if (userRotationSecret.isRotation() && passwordRotationSecret.isRotation()) {
+            ClusterSecurityService clusterSecurityService = getClusterSecurityService(rotationContext);
+            String clientUser = secretService.get(rotationContext.getClientUserSecret());
+            String clientPassword = secretService.get(rotationContext.getClientPasswordSecret());
+            clusterSecurityService.createNewUser(
+                    userRotationSecret.getBackupSecret(),
+                    userRotationSecret.getSecret(),
+                    passwordRotationSecret.getSecret(),
+                    clientUser,
+                    clientPassword);
+        } else {
+            throw new SecretRotationException("User or password is not in rotation state in Vault, thus rotation of CM user is not possible.", getType());
         }
     }
 

@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.context.PollerRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
@@ -27,38 +26,23 @@ public class RedbeamsPollerRotationExecutor implements RotationExecutor<PollerRo
 
     @Override
     public void rotate(PollerRotationContext rotationContext) {
-        try {
-            LOGGER.info("Rotate redbeams secret started for {}", rotationContext.getResourceCrn());
-            sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), (RedbeamsSecretType) rotationContext.getSecretType(), ROTATE);
-            LOGGER.info("Rotate redbeams secret finished for {}", rotationContext.getResourceCrn());
-        } catch (Exception e) {
-            LOGGER.warn("Rotate redbeams secret failed for {}", rotationContext.getResourceCrn(), e);
-            throw new SecretRotationException("Rotate redbeams secret failed", e, getType());
-        }
+        LOGGER.info("Rotate redbeams secret started for {}", rotationContext.getResourceCrn());
+        sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), (RedbeamsSecretType) rotationContext.getSecretType(), ROTATE);
+        LOGGER.info("Rotate redbeams secret finished for {}", rotationContext.getResourceCrn());
     }
 
     @Override
     public void rollback(PollerRotationContext rotationContext) {
-        try {
-            LOGGER.info("Rollback redbeams secret started for {}", rotationContext.getResourceCrn());
-            sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), (RedbeamsSecretType) rotationContext.getSecretType(), ROLLBACK);
-            LOGGER.info("Rollback redbeams secret finished for {}", rotationContext.getResourceCrn());
-        } catch (Exception e) {
-            LOGGER.warn("Rollback redbeams secret failed for {}", rotationContext.getResourceCrn(), e);
-            throw new SecretRotationException("Rollback redbeams secret failed", e, getType());
-        }
+        LOGGER.info("Rollback redbeams secret started for {}", rotationContext.getResourceCrn());
+        sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), (RedbeamsSecretType) rotationContext.getSecretType(), ROLLBACK);
+        LOGGER.info("Rollback redbeams secret finished for {}", rotationContext.getResourceCrn());
     }
 
     @Override
     public void finalize(PollerRotationContext rotationContext) {
-        try {
-            LOGGER.info("Finalize redbeams secret started for {}", rotationContext.getResourceCrn());
-            sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), (RedbeamsSecretType) rotationContext.getSecretType(), FINALIZE);
-            LOGGER.info("Finalize redbeams secret finished for {}", rotationContext.getResourceCrn());
-        } catch (Exception e) {
-            LOGGER.warn("Finalize redbeams secret failed for {}", rotationContext.getResourceCrn(), e);
-            throw new SecretRotationException("Finalize redbeams secret failed", e, getType());
-        }
+        LOGGER.info("Finalize redbeams secret started for {}", rotationContext.getResourceCrn());
+        sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), (RedbeamsSecretType) rotationContext.getSecretType(), FINALIZE);
+        LOGGER.info("Finalize redbeams secret finished for {}", rotationContext.getResourceCrn());
     }
 
     @Override

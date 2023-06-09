@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.context.PollerRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -33,44 +32,29 @@ public class RedbeamsPollerRotationExecutor implements RotationExecutor<PollerRo
 
     @Override
     public void rotate(PollerRotationContext rotationContext) {
-        try {
-            LOGGER.info("Rotate redbeams secret started for {}", rotationContext.getResourceCrn());
-            StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
-            externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(),
-                    (RedbeamsSecretType) rotationContext.getSecretType(), ROTATE);
-            LOGGER.info("Rotate redbeams secret finished for {}", rotationContext.getResourceCrn());
-        } catch (Exception e) {
-            LOGGER.warn("Rotate redbeams secret failed for {}", rotationContext.getResourceCrn(), e);
-            throw new SecretRotationException("Rotate redbeams secret failed", e, getType());
-        }
+        LOGGER.info("Rotate redbeams secret started for {}", rotationContext.getResourceCrn());
+        StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
+        externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(),
+                (RedbeamsSecretType) rotationContext.getSecretType(), ROTATE);
+        LOGGER.info("Rotate redbeams secret finished for {}", rotationContext.getResourceCrn());
     }
 
     @Override
     public void rollback(PollerRotationContext rotationContext) {
-        try {
-            LOGGER.info("Rollback redbeams secret started for {}", rotationContext.getResourceCrn());
-            StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
-            externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(),
-                    (RedbeamsSecretType) rotationContext.getSecretType(), ROLLBACK);
-            LOGGER.info("Rollback redbeams secret finished for {}", rotationContext.getResourceCrn());
-        } catch (Exception e) {
-            LOGGER.info("Rollback redbeams secret failed for {}", rotationContext.getResourceCrn(), e);
-            throw new SecretRotationException("Rollback redbeams secret failed", e, getType());
-        }
+        LOGGER.info("Rollback redbeams secret started for {}", rotationContext.getResourceCrn());
+        StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
+        externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(),
+                (RedbeamsSecretType) rotationContext.getSecretType(), ROLLBACK);
+        LOGGER.info("Rollback redbeams secret finished for {}", rotationContext.getResourceCrn());
     }
 
     @Override
     public void finalize(PollerRotationContext rotationContext) {
-        try {
-            LOGGER.info("Finalize redbeams secret started for {}", rotationContext.getResourceCrn());
-            StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
-            externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(),
-                    (RedbeamsSecretType) rotationContext.getSecretType(), FINALIZE);
-            LOGGER.info("Finalize redbeams secret finished for {}", rotationContext.getResourceCrn());
-        } catch (Exception e) {
-            LOGGER.info("Finalize redbeams secret failed for {}", rotationContext.getResourceCrn(), e);
-            throw new SecretRotationException("Finalize redbeams secret failed", e, getType());
-        }
+        LOGGER.info("Finalize redbeams secret started for {}", rotationContext.getResourceCrn());
+        StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
+        externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(),
+                (RedbeamsSecretType) rotationContext.getSecretType(), FINALIZE);
+        LOGGER.info("Finalize redbeams secret finished for {}", rotationContext.getResourceCrn());
     }
 
     @Override

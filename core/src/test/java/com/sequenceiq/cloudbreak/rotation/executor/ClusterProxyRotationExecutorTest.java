@@ -55,7 +55,7 @@ public class ClusterProxyRotationExecutorTest {
         when(clusterProxyService.reRegisterCluster(anyLong())).thenThrow(new CloudbreakServiceException("something"));
 
         assertThrows(SecretRotationException.class, () ->
-                underTest.rotate(ClusterProxyRotationContext.builder().withResourceCrn("resource").build()));
+                underTest.executeRotate(ClusterProxyRotationContext.builder().withResourceCrn("resource").build()));
 
         verify(clusterProxyService).reRegisterCluster(eq(1L));
     }
