@@ -2,10 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.template.compute;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -17,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.RolledbackResourcesException;
@@ -145,24 +145,25 @@ public class CloudFailureHandler {
             LOGGER.info("InstanceGroup node count lower than 1 which is incorrect so error will be thrown");
             throwError(statuses);
         } else {
-            Map<ResourceType, ComputeResourceBuilder<ResourceBuilderContext>> resourceBuilderMap = getResourceBuilderMap(resourceBuilders, variant);
+            Multimap<ResourceType, ComputeResourceBuilder<ResourceBuilderContext>> resourceBuilderMap = getResourceBuilderMap(resourceBuilders, variant);
             for (CloudResourceStatus cloudResourceStatus : statuses) {
-                try {
-                    if (rollbackIds.contains(cloudResourceStatus.getPrivateId())) {
-                        ComputeResourceBuilder<ResourceBuilderContext> resourceBuilderForType =
-                                resourceBuilderMap.get(cloudResourceStatus.getCloudResource().getType());
-                        deleteResource(auth, ctx, resourceBuilderForType, cloudResourceStatus);
+                if (rollbackIds.contains(cloudResourceStatus.getPrivateId())) {
+                    for (ComputeResourceBuilder<ResourceBuilderContext> resourceBuilder :
+                            resourceBuilderMap.get(cloudResourceStatus.getCloudResource().getType())) {
+                        try {
+                            deleteResource(auth, ctx, resourceBuilder, cloudResourceStatus);
+                        } catch (Exception e) {
+                            LOGGER.warn("Resource can not be deleted. Reason: " + e.getMessage(), e);
+                        }
                     }
-                } catch (Exception e) {
-                    LOGGER.warn("Resource can not be deleted. Reason: " + e.getMessage(), e);
                 }
             }
         }
     }
 
-    private Map<ResourceType, ComputeResourceBuilder<ResourceBuilderContext>> getResourceBuilderMap(ResourceBuilders resourceBuilders, Variant variant) {
+    private Multimap<ResourceType, ComputeResourceBuilder<ResourceBuilderContext>> getResourceBuilderMap(ResourceBuilders resourceBuilders, Variant variant) {
         List<ComputeResourceBuilder<ResourceBuilderContext>> computeResourceBuilders = resourceBuilders.compute(variant);
-        Map<ResourceType, ComputeResourceBuilder<ResourceBuilderContext>> resourceBuilderMap = new HashMap<>();
+        Multimap<ResourceType, ComputeResourceBuilder<ResourceBuilderContext>> resourceBuilderMap = ArrayListMultimap.create();
         for (ComputeResourceBuilder<ResourceBuilderContext> resourceBuilder : computeResourceBuilders) {
             resourceBuilderMap.put(resourceBuilder.resourceType(), resourceBuilder);
         }
