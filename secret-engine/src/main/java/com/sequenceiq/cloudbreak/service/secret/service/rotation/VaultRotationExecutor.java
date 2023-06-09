@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.secret.service.rotation;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -7,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
@@ -23,47 +24,36 @@ public class VaultRotationExecutor implements RotationExecutor<VaultRotationCont
     private SecretService secretService;
 
     @Override
-    public void rotate(VaultRotationContext rotationContext) {
-        rotationContext.getVaultPathSecretMap().forEach((vaultPath, newSecret) -> {
-            try {
-                if (!secretService.getRotation(vaultPath).isRotation()) {
-                    secretService.putRotation(vaultPath, newSecret);
-                }
-            } catch (Exception e) {
-                LOGGER.error("Error during {} secret rotation.", vaultPath, e);
-                throw new SecretRotationException(e, getType());
+    public void rotate(VaultRotationContext rotationContext) throws Exception {
+        for (Map.Entry<String, String> entry : rotationContext.getVaultPathSecretMap().entrySet()) {
+            String vaultPath = entry.getKey();
+            String newSecret = entry.getValue();
+            if (!secretService.getRotation(vaultPath).isRotation()) {
+                secretService.putRotation(vaultPath, newSecret);
             }
-        });
+        }
     }
 
     @Override
-    public void rollback(VaultRotationContext rotationContext) {
-        rotationContext.getVaultPathSecretMap().forEach((vaultPath, newSecret) -> {
-            try {
-                RotationSecret rotationSecret = secretService.getRotation(vaultPath);
-                if (rotationSecret.isRotation()) {
-                    secretService.update(vaultPath, rotationSecret.getBackupSecret());
-                }
-            } catch (Exception e) {
-                LOGGER.error("Error during {} secret rollback.", vaultPath, e);
-                throw new SecretRotationException(e, getType());
+    public void rollback(VaultRotationContext rotationContext) throws Exception {
+        for (Map.Entry<String, String> entry : rotationContext.getVaultPathSecretMap().entrySet()) {
+            String vaultPath = entry.getKey();
+            RotationSecret rotationSecret = secretService.getRotation(vaultPath);
+            if (rotationSecret.isRotation()) {
+                secretService.update(vaultPath, rotationSecret.getBackupSecret());
             }
-        });
+        }
     }
 
     @Override
-    public void finalize(VaultRotationContext rotationContext) {
-        rotationContext.getVaultPathSecretMap().forEach((vaultPath, newSecret) -> {
-            try {
-                RotationSecret rotationSecret = secretService.getRotation(vaultPath);
-                if (rotationSecret.isRotation()) {
-                    secretService.update(vaultPath, rotationSecret.getSecret());
-                }
-            } catch (Exception e) {
-                LOGGER.error("Error during {} secret finalization.", vaultPath, e);
-                throw new SecretRotationException(e, getType());
+    public void finalize(VaultRotationContext rotationContext) throws Exception {
+        for (Map.Entry<String, String> entry : rotationContext.getVaultPathSecretMap().entrySet()) {
+            String vaultPath = entry.getKey();
+            RotationSecret rotationSecret = secretService.getRotation(vaultPath);
+            if (rotationSecret.isRotation()) {
+                secretService.update(vaultPath, rotationSecret.getSecret());
             }
-        });
+        }
     }
 
     @Override

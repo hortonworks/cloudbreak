@@ -57,8 +57,8 @@ class SaltPillarRotationExecutorTest {
         when(stackDtoService.getByCrn(eq(RESOURCE_CRN))).thenThrow(NotFoundException.notFound("Stack", RESOURCE_CRN).get());
         Function saltPillarGenerator = mock(Function.class);
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
-                () -> underTest.rotate(new SaltPillarRotationContext(RESOURCE_CRN, saltPillarGenerator)));
-        Assertions.assertEquals("Salt pillar rotation failed for resourceCrn", secretRotationException.getMessage());
+                () -> underTest.executeRotate(new SaltPillarRotationContext(RESOURCE_CRN, saltPillarGenerator)));
+        Assertions.assertEquals("Rotation failed at SALT_PILLAR step for resourceCrn", secretRotationException.getMessage());
     }
 
     @Test
@@ -73,14 +73,14 @@ class SaltPillarRotationExecutorTest {
         doThrow(new RuntimeException("error")).when(hostOrchestrator)
                 .saveCustomPillars(any(), any(), any());
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
-                () -> underTest.rotate(new SaltPillarRotationContext(RESOURCE_CRN, saltPillarGenerator)));
-        Assertions.assertEquals("Salt pillar rotation failed for resourceCrn", secretRotationException.getMessage());
+                () -> underTest.executeRotate(new SaltPillarRotationContext(RESOURCE_CRN, saltPillarGenerator)));
+        Assertions.assertEquals("Rotation failed at SALT_PILLAR step for resourceCrn", secretRotationException.getMessage());
         verify(hostOrchestrator, times(1)).saveCustomPillars(any(), any(), any());
         verify(saltStateParamsService, times(1)).createStateParams(eq(stackDto), isNull(), eq(true), anyInt(), anyInt());
     }
 
     @Test
-    void rotateShouldSucceed() throws CloudbreakOrchestratorFailedException {
+    void rotateShouldSucceed() throws Exception {
         when(saltStateParamsService.createStateParams(any(), any(), anyBoolean(), anyInt(), anyInt())).thenReturn(new OrchestratorStateParams());
         StackDto stackDto = mock(StackDto.class);
         Cluster cluster = new Cluster();
@@ -88,13 +88,13 @@ class SaltPillarRotationExecutorTest {
         when(stackDto.getCluster()).thenReturn(cluster);
         when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         Function saltPillarGenerator = mock(Function.class);
-        underTest.rotate(new SaltPillarRotationContext(RESOURCE_CRN, saltPillarGenerator));
+        underTest.executeRotate(new SaltPillarRotationContext(RESOURCE_CRN, saltPillarGenerator));
         verify(hostOrchestrator, times(1)).saveCustomPillars(any(), any(), any());
         verify(saltStateParamsService, times(1)).createStateParams(eq(stackDto), isNull(), eq(true), anyInt(), anyInt());
     }
 
     @Test
-    void rollbackShouldSucceed() throws CloudbreakOrchestratorFailedException {
+    void rollbackShouldSucceed() throws Exception {
         when(saltStateParamsService.createStateParams(any(), any(), anyBoolean(), anyInt(), anyInt())).thenReturn(new OrchestratorStateParams());
         StackDto stackDto = mock(StackDto.class);
         Cluster cluster = new Cluster();
@@ -102,7 +102,7 @@ class SaltPillarRotationExecutorTest {
         when(stackDto.getCluster()).thenReturn(cluster);
         when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         Function saltPillarGenerator = mock(Function.class);
-        underTest.rollback(new SaltPillarRotationContext(RESOURCE_CRN, saltPillarGenerator));
+        underTest.executeRollback(new SaltPillarRotationContext(RESOURCE_CRN, saltPillarGenerator));
         verify(hostOrchestrator, times(1)).saveCustomPillars(any(), any(), any());
         verify(saltStateParamsService, times(1)).createStateParams(eq(stackDto), isNull(), eq(true), anyInt(), anyInt());
     }
@@ -110,7 +110,7 @@ class SaltPillarRotationExecutorTest {
     @Test
     void finalizeShouldDoNothing() throws CloudbreakOrchestratorFailedException {
         Function saltPillarGenerator = mock(Function.class);
-        underTest.finalize(new SaltPillarRotationContext(RESOURCE_CRN, saltPillarGenerator));
+        underTest.executeFinalize(new SaltPillarRotationContext(RESOURCE_CRN, saltPillarGenerator));
         verify(hostOrchestrator, never()).saveCustomPillars(any(), any(), any());
         verify(saltStateParamsService, never()).createStateParams(any(), any(), anyBoolean(), anyInt(), anyInt());
     }

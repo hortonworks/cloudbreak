@@ -52,12 +52,12 @@ public class CMUserRotationExecutorTest {
     private CMUserRotationExecutor underTest;
 
     @Test
-    public void testRotation() throws CloudbreakException {
+    public void testRotation() throws Exception {
         ClusterSecurityService clusterSecurityService = setup();
         doNothing().when(clusterSecurityService).createNewUser(anyString(), anyString(), anyString(), anyString(), anyString());
 
         CMUserRotationContext rotationContext = getRotationContext();
-        underTest.rotate(rotationContext);
+        underTest.executeRotate(rotationContext);
 
         verify(clusterSecurityService, times(1)).createNewUser(
                 eq("old" + USER),
@@ -73,7 +73,7 @@ public class CMUserRotationExecutorTest {
                 new RotationSecret(String.valueOf(i.getArguments()[0]), null));
         CMUserRotationContext rotationContext = getRotationContext();
 
-        assertThrows(SecretRotationException.class, () -> underTest.rotate(rotationContext));
+        assertThrows(SecretRotationException.class, () -> underTest.executeRotate(rotationContext));
     }
 
     @Test
@@ -82,7 +82,7 @@ public class CMUserRotationExecutorTest {
                 new RotationSecret(String.valueOf(i.getArguments()[0]), null));
         CMUserRotationContext rotationContext = getRotationContext();
 
-        assertThrows(SecretRotationException.class, () -> underTest.rollback(rotationContext));
+        assertThrows(SecretRotationException.class, () -> underTest.executeRollback(rotationContext));
     }
 
     @Test
@@ -91,7 +91,7 @@ public class CMUserRotationExecutorTest {
                 new RotationSecret(String.valueOf(i.getArguments()[0]), null));
         CMUserRotationContext rotationContext = getRotationContext();
 
-        assertThrows(SecretRotationException.class, () -> underTest.finalize(rotationContext));
+        assertThrows(SecretRotationException.class, () -> underTest.executeFinalize(rotationContext));
     }
 
     @Test
@@ -101,7 +101,7 @@ public class CMUserRotationExecutorTest {
                 .createNewUser(anyString(), anyString(), anyString(), anyString(), anyString());
 
         CMUserRotationContext rotationContext = getRotationContext();
-        assertThrows(SecretRotationException.class, () -> underTest.rotate(rotationContext));
+        assertThrows(SecretRotationException.class, () -> underTest.executeRotate(rotationContext));
 
         verify(clusterSecurityService, times(1)).createNewUser(
                 eq("old" + USER),
