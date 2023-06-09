@@ -128,6 +128,7 @@ public class CreateFreeIpaRequestToStackConverter {
         stack.setGatewayport(source.getGatewayPort() == null ? nginxPort : source.getGatewayPort());
         stack.setStackStatus(new StackStatus(stack, "Stack provision requested.", DetailedStackStatus.PROVISION_REQUESTED));
         stack.setAvailabilityZone(Optional.ofNullable(source.getPlacement()).map(PlacementBase::getAvailabilityZone).orElse(null));
+        stack.setMultiAz(Boolean.TRUE.equals(source.getMultiAz()));
         updateCloudPlatformAndRelatedFields(source, stack, cloudPlatform);
         stack.setStackAuthentication(stackAuthenticationConverter.convert(source.getAuthentication()));
         if (source.getNetwork() != null) {

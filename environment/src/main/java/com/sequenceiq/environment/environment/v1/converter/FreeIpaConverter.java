@@ -1,16 +1,21 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaImageRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
@@ -21,6 +26,7 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDt
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto.Builder;
+import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.MultiAzValidator;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaInstanceCountByGroupProvider;
 
 @Component
@@ -31,6 +37,9 @@ public class FreeIpaConverter {
 
     @Inject
     private FreeIpaInstanceCountByGroupProvider ipaInstanceCountByGroupProvider;
+
+    @Inject
+    private MultiAzValidator multiAzValidator;
 
     public FreeIpaResponse convert(FreeIpaCreationDto freeIpaCreation) {
         if (freeIpaCreation == null) {
@@ -77,11 +86,19 @@ public class FreeIpaConverter {
             builder.withCreate(request.getCreate());
             builder.withEnableMultiAz(request.isEnableMultiAz());
             if (request.isEnableMultiAz()) {
-                if (!cloudPlatform.equalsIgnoreCase(CloudConstants.AWS)) {
-                    throw new BadRequestException("You need to provision AWS environment to use Multi Availability Zone.");
+                if (!multiAzValidator.suportedMultiAzForEnvironment(cloudPlatform)) {
+                    throw new BadRequestException(String.format("Multi Availability Zone is not supported for %s",
+                            CloudPlatform.valueOf(cloudPlatform).getDislayName()));
                 }
-                if (!entitlementService.awsNativeFreeIpaEnabled(accountId)) {
-                    throw new BadRequestException("You need to be entitled for CDP_CB_AWS_NATIVE_FREEIPA to provision FreeIPA in Multi Availability Zone.");
+                List<String> entitlements = entitlementService.getEntitlements(accountId);
+                Set<Entitlement> requiredEntitlements = multiAzValidator.getMultiAzEntitlements(CloudPlatform.valueOf(cloudPlatform));
+                List<String> missingEntitlements = requiredEntitlements.stream()
+                        .filter(entitlement -> !entitlements.contains(entitlement.name()))
+                        .map(entitlement -> entitlement.name())
+                        .collect(Collectors.toList());
+                if (!CollectionUtils.isEmpty(missingEntitlements)) {
+                    throw new BadRequestException(String.format("You need to be entitled for %s to provision FreeIPA in Multi Availability Zone",
+                            StringUtils.join(missingEntitlements, ",")));
                 }
             }
             Optional.ofNullable(request.getInstanceType())
