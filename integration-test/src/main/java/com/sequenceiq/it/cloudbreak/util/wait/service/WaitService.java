@@ -66,7 +66,7 @@ public class WaitService<T extends WaitObject> {
         return Result.result(WaitResult.EXIT);
     }
 
-    private void sleep(Duration duration, Map<String, String> statusMap) {
+    public void sleep(Duration duration, Map<String, String> statusMap) {
         try {
             Thread.sleep(duration.toMillis());
         } catch (InterruptedException e) {

@@ -10,11 +10,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -72,6 +74,7 @@ import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.StructuredEventUtil;
+import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
@@ -106,6 +109,9 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
+
+    @Inject
+    private FlowUtil flowUtilSingleStatus;
 
     public SdxInternalTestDto(TestContext testContext) {
         super(new SdxInternalClusterRequest(), testContext);
@@ -230,7 +236,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     public SdxInternalTestDto withDefaultSDXSettings(Optional<Integer> gatewayPort) {
         StackTestDto stack = getTestContext().given(StackTestDto.class);
-        Boolean clusterIsGiven = getTestContext().get(ClusterTestDto.class.getSimpleName()) == null;
+        boolean clusterIsGiven = getTestContext().get(ClusterTestDto.class.getSimpleName()) == null;
         ClusterTestDto cluster = getTestContext().given(ClusterTestDto.class);
         if (clusterIsGiven) {
             cluster = getTestContext().given(ClusterTestDto.class);
@@ -304,17 +310,9 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     public SdxInternalTestDto withEnvironment() {
-        EnvironmentTestDto environment = getTestContext().given(EnvironmentTestDto.class);
+        EnvironmentTestDto environment = getTestContext().get(EnvironmentTestDto.class);
         if (environment == null) {
             throw new IllegalArgumentException(String.format("Environment has not been provided for this internal Sdx: '%s' response!", getName()));
-        }
-        return withEnvironmentName(environment.getResponse().getName());
-    }
-
-    public SdxInternalTestDto withEnvironmentClass(Class<EnvironmentTestDto> environmentClass) {
-        EnvironmentTestDto environment = getTestContext().get(environmentClass.getSimpleName());
-        if (environment == null) {
-            throw new IllegalArgumentException(String.format("Environment has not been provided for this Sdx: '%s' response!", getName()));
         }
         return withEnvironmentName(environment.getResponse().getName());
     }
@@ -660,15 +658,64 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
             return this;
         }
         List<InstanceGroupV4Response> instanceGroups = getResponse().getStackV4Response().getInstanceGroups().stream()
-                .filter(instanceGroupV4Response -> hostGroups.contains(instanceGroupV4Response.getName()))
-                .collect(Collectors.toList());
+                .filter(instanceGroup -> hostGroups.contains(instanceGroup.getName()))
+                .toList();
         if (hostGroups.size() == instanceGroups.size()) {
             List<String> instanceIds =
-                    instanceGroups.stream().flatMap(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream())
-                            .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList());
+                    instanceGroups.stream().flatMap(instanceGroup -> instanceGroup.getMetadata().stream())
+                            .map(InstanceMetaDataV4Response::getInstanceId).toList();
             return awaitForInstance(Map.of(instanceIds, instanceStatus));
         } else {
             throw new IllegalStateException("Can't find instance groups with this name: " + hostGroups);
         }
+    }
+
+    public String awaitForPrivateIp(TestContext testContext, SdxClient client, String hostGroupName) {
+        int attempts = 0;
+        int maxAttempts = flowUtilSingleStatus.getMaxRetry();
+        String result = null;
+
+        if (!getTestContext().getExceptionMap().isEmpty()) {
+            Log.await(LOGGER, String.format("Await for %s host group should be skipped because of previous error!", hostGroupName));
+            return result;
+        }
+
+        while (attempts <= maxAttempts) {
+            LOGGER.info("Waiting for {} host group to be available | round {}.", hostGroupName, attempts);
+            refreshResponse(testContext, client);
+            Set<InstanceMetaDataV4Response> metadata = getInstanceMetaData(hostGroupName);
+            Optional<InstanceMetaDataV4Response> instanceMetaData = metadata.stream()
+                    .findFirst();
+            result = instanceMetaData.isPresent() ? instanceMetaData.get().getPrivateIp() : null;
+            if (StringUtils.isNotBlank(result)) {
+                LOGGER.info("Found {} private IP for {} host group!", result, hostGroupName);
+                break;
+            } else {
+                client.waiterService().sleep(flowUtilSingleStatus.getPollingDurationOrTheDefault(emptyRunningParameter()), Map.of(hostGroupName, "host group"));
+                attempts++;
+            }
+        }
+        if (maxAttempts < attempts && StringUtils.isBlank(result)) {
+            throw new IllegalStateException("Cannot find valid instance group with this name: " + hostGroupName);
+        }
+        return result;
+    }
+
+    private void refreshResponse(TestContext testContext, SdxClient client) {
+        setResponse(client.getDefaultClient()
+                .sdxEndpoint()
+                .getDetail(getName(), new HashSet<>())
+        );
+    }
+
+    private Set<InstanceMetaDataV4Response> getInstanceMetaData(String hostGroupName) {
+        return getResponse()
+                .getStackV4Response()
+                .getInstanceGroups()
+                .stream()
+                    .filter(ig -> ig.getName().equals(hostGroupName))
+                    .findFirst()
+                    .get()
+                    .getMetadata();
     }
 }

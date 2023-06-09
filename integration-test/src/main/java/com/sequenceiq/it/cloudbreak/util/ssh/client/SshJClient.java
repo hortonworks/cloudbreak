@@ -90,6 +90,12 @@ public class SshJClient {
         ssh.newSCPFileTransfer().upload(sourceFilePath, destinationPath);
     }
 
+    protected void download(SSHClient ssh, String sourceFilePath, String destinationPath) throws IOException {
+        LOGGER.info("Waiting for [{}] file to be downloaded to [{}]...", sourceFilePath, destinationPath);
+        ssh.setTimeout(120000);
+        ssh.newSCPFileTransfer().download(sourceFilePath, destinationPath);
+    }
+
     protected void uploadToHost(String instanceIP, String sourceFile, String destinationPath) {
         try (SSHClient sshClient = createSshClient(instanceIP, null, null, null)) {
             upload(sshClient, sourceFile, destinationPath);

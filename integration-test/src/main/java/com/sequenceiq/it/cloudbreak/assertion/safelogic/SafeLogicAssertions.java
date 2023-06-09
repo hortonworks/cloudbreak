@@ -24,16 +24,16 @@ public class SafeLogicAssertions {
     private SshSafeLogicActions sshSafeLogicActions;
 
     public void validate(TestContext testContext) {
-        SdxTestDto sdxTestDto = testContext.given(SdxTestDto.class);
-        if (sdxTestDto.getResponse() != null) {
+        SdxTestDto sdxTestDto = testContext.get(SdxTestDto.class);
+        if (sdxTestDto != null && sdxTestDto.getResponse() != null) {
             validate(testContext, getSdxIpAddresses(sdxTestDto));
         }
-        SdxInternalTestDto sdxInternalTestDto = testContext.given(SdxInternalTestDto.class);
-        if (sdxInternalTestDto.getResponse() != null) {
+        SdxInternalTestDto sdxInternalTestDto = testContext.get(SdxInternalTestDto.class);
+        if (sdxInternalTestDto != null && sdxInternalTestDto.getResponse() != null) {
             validate(testContext, getSdxIpAddresses(sdxInternalTestDto));
         }
-        DistroXTestDto distroXTestDto = testContext.given(DistroXTestDto.class);
-        if (distroXTestDto.getResponse() != null) {
+        DistroXTestDto distroXTestDto = testContext.get(DistroXTestDto.class);
+        if (distroXTestDto != null && distroXTestDto.getResponse() != null) {
             validate(testContext, getDistroXIpAddresses(distroXTestDto));
         }
     }
