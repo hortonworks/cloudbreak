@@ -5,8 +5,6 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static java.lang.String.format;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -16,7 +14,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
-import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
@@ -40,6 +38,8 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXMarketplaceImageTests.class);
 
+    private static final int MARKETPLACE_IMAGE_PARTS_COUNT = 4;
+
     @Inject
     private SdxTestClient sdxTestClient;
 
@@ -48,6 +48,9 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
 
     @Inject
     private DistroXTestClient distroXTestClient;
+
+    @Inject
+    private CommonClusterManagerProperties commonClusterManagerProperties;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -72,31 +75,25 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
         String clouderaManager = resourcePropertyProvider().getName();
         String imageSettings = resourcePropertyProvider().getName();
         String dhImageSettings = resourcePropertyProvider().getName();
+        String imgCatalogKey = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
         String masterInstanceGroup = "master";
         String idbrokerInstanceGroup = "idbroker";
         String telemetry = "telemetry";
-        CloudProvider cloudProvider = testContext.getCloudProvider();
-        AtomicReference<String> selectedImageID = new AtomicReference<>();
 
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
 
         String distrox = resourcePropertyProvider().getName();
 
-        String imgCatalogKey = "mp-img-cat";
         testContext
                 .given(imgCatalogKey, ImageCatalogTestDto.class)
                 .withName(imgCatalogKey)
-                .withUrl("https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-marketplace-image-catalog.json")
+                .withUrl(commonClusterManagerProperties.getUpgrade()
+                        .getImageCatalogUrl3rdParty())
                 .when(imageCatalogTestClient.createIfNotExistV4())
-                .when((tc, dto, client) -> {
-                    selectedImageID.set(cloudProvider.getLatestPreWarmedImageIDByRuntime(tc, dto, client, "7.2.16"));
-                    return dto;
-                })
                 .given(imageSettings, ImageSettingsTestDto.class)
                     .withImageCatalog(imgCatalogKey)
-                    .withImageId(selectedImageID.get())
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
                     .withBlueprintName(getDefaultSDXBlueprintName())
@@ -128,15 +125,14 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
                     Log.log(LOGGER, format(" Image Catalog URL: %s ", dto.getResponse().getStackV4Response().getImage().getCatalogUrl()));
                     Log.log(LOGGER, format(" Image ID: %s ", dto.getResponse().getStackV4Response().getImage().getId()));
 
-                    if (!dto.getResponse().getStackV4Response().getImage().getId().equals(selectedImageID.get())) {
-                        throw new TestFailException(" The selected image ID is: " + dto.getResponse().getStackV4Response().getImage().getId() + " instead of: "
-                                + selectedImageID.get());
+                    if (!hasMarketplaceFormat(dto.getResponse().getStackV4Response().getImage().getName())) {
+                        throw new TestFailException(" The selected image name is: " + dto.getResponse().getStackV4Response().getImage().getName() +
+                                ". It is not an Azure Marketplace image.");
                     }
                     return dto;
                 })
                 .given(dhImageSettings, DistroXImageTestDto.class)
                     .withImageCatalog(imgCatalogKey)
-                    .withImageId(selectedImageID.get())
                 .given(distrox, DistroXTestDto.class)
                     .withImageSettings(dhImageSettings)
                 .when(distroXTestClient.create(), key(distrox))
@@ -147,12 +143,22 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
                     Log.log(LOGGER, format(" Image Catalog URL: %s ", dto.getResponse().getImage().getCatalogUrl()));
                     Log.log(LOGGER, format(" Image ID: %s ", dto.getResponse().getImage().getId()));
 
-                    if (!dto.getResponse().getImage().getId().equals(selectedImageID.get())) {
-                        throw new TestFailException(" The selected image ID is: " + dto.getResponse().getImage().getId() + " instead of: "
-                                + selectedImageID.get());
+                    if (!hasMarketplaceFormat(dto.getResponse().getImage().getName())) {
+                        throw new TestFailException(" The selected image name is: " + dto.getResponse().getImage().getName() +
+                                ". It is not an Azure Marketplace image.");
                     }
                     return dto;
                 })
                 .validate();
+    }
+
+    public boolean hasMarketplaceFormat(String imageName) {
+        String[] splitUri = imageName.split(":");
+        if (splitUri.length != MARKETPLACE_IMAGE_PARTS_COUNT) {
+            LOGGER.debug("Image with name {} is not a valid Marketplace image", imageName);
+            return false;
+        } else {
+            return true;
+        }
     }
 }
