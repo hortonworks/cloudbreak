@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.executor.UserDataRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationProgressService;
 import com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataSecretModifier;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
@@ -127,9 +129,14 @@ class UserDataRotationExecutorTest {
     @Mock
     private CloudStack cloudStack;
 
+    @Mock
+    private SecretRotationProgressService secretRotationProgressService;
+
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws IllegalAccessException {
         lenient().when(cloudStackConverter.convert(any())).thenReturn(cloudStack);
+        FieldUtils.writeField(underTest, "secretRotationProgressService", Optional.of(secretRotationProgressService), true);
+        lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
     }
 
     @Test

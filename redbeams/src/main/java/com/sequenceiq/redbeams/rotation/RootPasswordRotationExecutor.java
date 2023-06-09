@@ -19,8 +19,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.rotation.secret.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
@@ -35,7 +35,7 @@ import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigServic
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 @Component
-public class RootPasswordRotationExecutor implements RotationExecutor<RotationContext> {
+public class RootPasswordRotationExecutor extends AbstractRotationExecutor<RotationContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RootPasswordRotationExecutor.class);
 

@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
+import com.sequenceiq.cloudbreak.rotation.secret.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 @Component
-public class VaultRotationExecutor implements RotationExecutor<VaultRotationContext> {
+public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotationContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultRotationExecutor.class);
 

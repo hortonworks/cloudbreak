@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -12,6 +13,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,6 +26,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext.SaltStateApplyRotationContextBuilder;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationProgressService;
 
 @ExtendWith(MockitoExtension.class)
 public class SaltStateApplyRotationExecutorTest {
@@ -30,8 +34,17 @@ public class SaltStateApplyRotationExecutorTest {
     @Mock
     private HostOrchestrator hostOrchestrator;
 
+    @Mock
+    private SecretRotationProgressService secretRotationProgressService;
+
     @InjectMocks
     private SaltStateApplyRotationExecutor underTest;
+
+    @BeforeEach
+    public void mockProgressService() throws IllegalAccessException {
+        FieldUtils.writeField(underTest, "secretRotationProgressService", Optional.of(secretRotationProgressService), true);
+        lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
+    }
 
     @Test
     public void testPreValidation() throws CloudbreakOrchestratorFailedException {
@@ -68,7 +81,7 @@ public class SaltStateApplyRotationExecutorTest {
     public void testRotation() throws Exception {
         doNothing().when(hostOrchestrator).executeSaltState(any(), any(), any(), any(), any(), any());
 
-        underTest.executeRotate(createContext(List.of("state"), Optional.empty(), Optional.empty()));
+        underTest.executeRotate(createContext(List.of("state"), Optional.empty(), Optional.empty()), null);
 
         verify(hostOrchestrator).executeSaltState(any(), any(), eq(List.of("state")), any(), any(), any());
     }
@@ -78,7 +91,7 @@ public class SaltStateApplyRotationExecutorTest {
         doThrow(new CloudbreakOrchestratorFailedException("something")).when(hostOrchestrator).executeSaltState(any(), any(), any(), any(), any(), any());
 
         assertThrows(SecretRotationException.class, () ->
-                underTest.executeRotate(createContext(List.of("state"), Optional.empty(), Optional.empty())));
+                underTest.executeRotate(createContext(List.of("state"), Optional.empty(), Optional.empty()), null));
 
         verify(hostOrchestrator).executeSaltState(any(), any(), eq(List.of("state")), any(), any(), any());
     }
@@ -88,7 +101,7 @@ public class SaltStateApplyRotationExecutorTest {
         doThrow(new CloudbreakOrchestratorFailedException("something")).when(hostOrchestrator).executeSaltState(any(), any(), any(), any(), any(), any());
 
         assertThrows(SecretRotationException.class, () ->
-                underTest.executeRollback(createContext(List.of("state"), Optional.empty(), Optional.empty())));
+                underTest.executeRollback(createContext(List.of("state"), Optional.empty(), Optional.empty()), null));
 
         verify(hostOrchestrator).executeSaltState(any(), any(), eq(List.of("state")), any(), any(), any());
     }
@@ -97,7 +110,7 @@ public class SaltStateApplyRotationExecutorTest {
     public void testRollbackWithOwnStates() throws Exception {
         doNothing().when(hostOrchestrator).executeSaltState(any(), any(), any(), any(), any(), any());
 
-        underTest.executeRollback(createContext(List.of("state"), Optional.of(List.of("rollback")), Optional.empty()));
+        underTest.executeRollback(createContext(List.of("state"), Optional.of(List.of("rollback")), Optional.empty()), null);
 
         verify(hostOrchestrator).executeSaltState(any(), any(), eq(List.of("rollback")), any(), any(), any());
     }
@@ -106,7 +119,7 @@ public class SaltStateApplyRotationExecutorTest {
     public void testRollbackWithOriginalStates() throws Exception {
         doNothing().when(hostOrchestrator).executeSaltState(any(), any(), any(), any(), any(), any());
 
-        underTest.executeRollback(createContext(List.of("state"), Optional.empty(), Optional.empty()));
+        underTest.executeRollback(createContext(List.of("state"), Optional.empty(), Optional.empty()), null);
 
         verify(hostOrchestrator).executeSaltState(any(), any(), eq(List.of("state")), any(), any(), any());
     }
@@ -115,7 +128,7 @@ public class SaltStateApplyRotationExecutorTest {
     public void testFinalization() throws Exception {
         doNothing().when(hostOrchestrator).executeSaltState(any(), any(), any(), any(), any(), any());
 
-        underTest.executeFinalize(createContext(List.of("state"), Optional.empty(), Optional.of(List.of("finalize"))));
+        underTest.executeFinalize(createContext(List.of("state"), Optional.empty(), Optional.of(List.of("finalize"))), null);
 
         verify(hostOrchestrator).executeSaltState(any(), any(), eq(List.of("finalize")), any(), any(), any());
     }
@@ -125,14 +138,14 @@ public class SaltStateApplyRotationExecutorTest {
         doThrow(new CloudbreakOrchestratorFailedException("something")).when(hostOrchestrator).executeSaltState(any(), any(), any(), any(), any(), any());
 
         assertThrows(SecretRotationException.class, () ->
-                underTest.executeFinalize(createContext(List.of("state"), Optional.empty(), Optional.of(List.of("finalize")))));
+                underTest.executeFinalize(createContext(List.of("state"), Optional.empty(), Optional.of(List.of("finalize"))), null));
 
         verify(hostOrchestrator).executeSaltState(any(), any(), eq(List.of("finalize")), any(), any(), any());
     }
 
     @Test
     public void testFinalizationIfNotNeeded() throws Exception {
-        underTest.executeFinalize(createContext(List.of("state"), Optional.empty(), Optional.empty()));
+        underTest.executeFinalize(createContext(List.of("state"), Optional.empty(), Optional.empty()), null);
 
         verifyNoInteractions(hostOrchestrator);
     }

@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.rotation.UserDataRotationContext;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
+import com.sequenceiq.cloudbreak.rotation.secret.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataSecretModifier;
@@ -46,7 +46,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
-public class UserDataRotationExecutor implements RotationExecutor<UserDataRotationContext> {
+public class UserDataRotationExecutor extends AbstractRotationExecutor<UserDataRotationContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDataRotationExecutor.class);
 

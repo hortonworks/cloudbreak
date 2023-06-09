@@ -12,12 +12,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
+import com.sequenceiq.cloudbreak.rotation.secret.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.context.PollerRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 
 @Component
-public class CloudbreakPollerRotationExecutor implements RotationExecutor<PollerRotationContext> {
+public class CloudbreakPollerRotationExecutor extends AbstractRotationExecutor<PollerRotationContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakPollerRotationExecutor.class);
 

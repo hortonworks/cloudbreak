@@ -14,10 +14,11 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.rotation.secret.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContextProvider;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
+import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationProgressService;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
 import com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
@@ -30,10 +31,13 @@ public class SecretRotationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretRotationService.class);
 
     @Inject
-    private Map<SecretRotationStep, RotationExecutor<? extends RotationContext>> rotationExecutorMap;
+    private Map<SecretRotationStep, AbstractRotationExecutor<? extends RotationContext>> rotationExecutorMap;
 
     @Inject
     private Map<SecretType, RotationContextProvider> rotationContextProviderMap;
+
+    @Inject
+    private SecretRotationProgressService secretRotationProgressService;
 
     public void executePreValidation(SecretType secretType, String resourceId, RotationFlowExecutionType executionType) {
         if (executionNeeded(executionType, RotationFlowExecutionType.ROTATE, resourceId, secretType)) {
@@ -52,7 +56,7 @@ public class SecretRotationService {
             LOGGER.info("Contexts generation for secret rotation of {} regarding resource {} is finished.", secretType, resourceId);
             secretType.getSteps().forEach(step -> {
                 LOGGER.info("Executing rotation step {} for secret {} regarding resource {}", step, secretType, resourceId);
-                rotationExecutorMap.get(step).executeRotate(contexts.get(step));
+                rotationExecutorMap.get(step).executeRotate(contexts.get(step), secretType);
             });
         }
     }
@@ -81,7 +85,8 @@ public class SecretRotationService {
                 RotationContext rotationContext = contexts.get(step);
                 LOGGER.info("Rolling back rotation step {} for secret {} regarding resource {}.", step, secretType, resourceId);
                 LOGGER.trace("Affected secrets of rotation's rollback: {}", Joiner.on(",").join(affectedSecrets));
-                ThreadBasedVaultReadFieldProvider.doRollback(affectedSecrets, () -> rotationExecutorMap.get(step).executeRollback(rotationContext));
+                ThreadBasedVaultReadFieldProvider.doRollback(affectedSecrets, () ->
+                        rotationExecutorMap.get(step).executeRollback(rotationContext, secretType));
             });
         }
     }
@@ -97,8 +102,9 @@ public class SecretRotationService {
             });
             Lists.reverse(secretType.getSteps()).forEach(step -> {
                 LOGGER.info("Finalizing rotation step {} for secret {} regarding resource {}.", step, secretType, resourceId);
-                rotationExecutorMap.get(step).executeFinalize(contexts.get(step));
+                rotationExecutorMap.get(step).executeFinalize(contexts.get(step), secretType);
             });
+            secretRotationProgressService.deleteAll(resourceId, secretType);
         }
     }
 

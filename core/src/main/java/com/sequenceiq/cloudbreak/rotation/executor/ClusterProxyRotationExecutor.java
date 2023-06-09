@@ -10,12 +10,12 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterPro
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.context.ClusterProxyRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
+import com.sequenceiq.cloudbreak.rotation.secret.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @Component
-public class ClusterProxyRotationExecutor implements RotationExecutor<ClusterProxyRotationContext> {
+public class ClusterProxyRotationExecutor extends AbstractRotationExecutor<ClusterProxyRotationContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyRotationExecutor.class);
 

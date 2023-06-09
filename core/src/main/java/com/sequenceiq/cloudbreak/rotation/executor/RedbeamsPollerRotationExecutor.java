@@ -13,14 +13,14 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
+import com.sequenceiq.cloudbreak.rotation.secret.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.context.PollerRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 
 @Component
-public class RedbeamsPollerRotationExecutor implements RotationExecutor<PollerRotationContext> {
+public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<PollerRotationContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsPollerRotationExecutor.class);
 

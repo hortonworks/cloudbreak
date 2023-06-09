@@ -1,7 +1,8 @@
-package com.sequenceiq.flow.rotation;
+package com.sequenceiq.cloudbreak.rotation.secret;
 
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 
 public enum TestSecretRotationStep implements SecretRotationStep {
-    TEST_STEP
+    STEP
+
 }

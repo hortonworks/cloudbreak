@@ -16,6 +16,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationProgressService;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.usage.SecretRotationUsageProcessor;
 import com.sequenceiq.flow.core.AbstractAction;
@@ -47,6 +48,9 @@ public class SecretRotationActions {
 
     @Inject
     private Optional<SecretRotationUsageProcessor> secretRotationUsageProcessor;
+
+    @Inject
+    private SecretRotationProgressService secretRotationProgressService;
 
     @Bean(name = "PRE_VALIDATE_ROTATION_STATE")
     public Action<?, ?> executePreValidationAction() {
@@ -177,6 +181,7 @@ public class SecretRotationActions {
                     LOGGER.debug("Execution type is not set or not explicit ROLLBACK, set flow failed for: {}", context.getResourceCrn());
                     flow.setFlowFailed(payload.getException());
                 }
+                secretRotationProgressService.deleteAll(context.getResourceCrn(), payload.getSecretType());
                 secretRotationUsageProcessor.ifPresent(processor -> processor.rotationFailed(context.getSecretType(), resourceCrn,
                         message, context.getExecutionType()));
                 LOGGER.debug("Secret rotation failed, change resource status for {}", resourceCrn);

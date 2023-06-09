@@ -15,11 +15,11 @@ import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
+import com.sequenceiq.cloudbreak.rotation.secret.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 
 @Component
-public class SaltStateApplyRotationExecutor implements RotationExecutor<SaltStateApplyRotationContext> {
+public class SaltStateApplyRotationExecutor extends AbstractRotationExecutor<SaltStateApplyRotationContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltStateApplyRotationExecutor.class);
 

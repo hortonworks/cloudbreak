@@ -10,8 +10,8 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.context.CMUserRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @Component
-public class CMUserRotationExecutor implements RotationExecutor<CMUserRotationContext> {
+public class CMUserRotationExecutor extends AbstractRotationExecutor<CMUserRotationContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CMUserRotationExecutor.class);
 

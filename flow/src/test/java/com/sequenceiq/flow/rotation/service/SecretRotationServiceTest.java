@@ -1,5 +1,6 @@
 package com.sequenceiq.flow.rotation.service;
 
+import static com.sequenceiq.cloudbreak.rotation.secret.TestSecretRotationStep.STEP;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -21,24 +22,26 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.rotation.secret.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContextProvider;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.secret.TestRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.TestSecretType;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
-import com.sequenceiq.flow.rotation.TestRotationContext;
-import com.sequenceiq.flow.rotation.TestSecretRotationStep;
-import com.sequenceiq.flow.rotation.TestSecretType;
 
 @ExtendWith(MockitoExtension.class)
 public class SecretRotationServiceTest {
 
     @Mock
-    private RotationExecutor executor;
+    private AbstractRotationExecutor executor;
 
     @Mock
     private RotationContextProvider contextProvider;
+
+    @Mock
+    private SecretRotationStepProgressService secretRotationStepProgressService;
 
     @InjectMocks
     private SecretRotationService underTest;
@@ -46,7 +49,7 @@ public class SecretRotationServiceTest {
     @BeforeEach
     public void setup() throws IllegalAccessException {
         FieldUtils.writeDeclaredField(underTest, "rotationExecutorMap",
-                Map.of(TestSecretRotationStep.TEST_STEP, executor), true);
+                Map.of(STEP, executor), true);
         FieldUtils.writeDeclaredField(underTest, "rotationContextProviderMap",
                 Map.of(TestSecretType.TEST, contextProvider), true);
         generateTestContexts();
@@ -72,12 +75,12 @@ public class SecretRotationServiceTest {
 
     @Test
     public void testRotate() {
-        doNothing().when(executor).executeRotate(any());
+        doNothing().when(executor).executeRotate(any(), any());
 
         underTest.executeRotation(TestSecretType.TEST, "resource", null);
 
         verify(contextProvider).getContexts(anyString());
-        verify(executor, times(1)).executeRotate(any());
+        verify(executor, times(1)).executeRotate(any(), any());
     }
 
     @Test
@@ -92,12 +95,13 @@ public class SecretRotationServiceTest {
 
     @Test
     public void testFinalize() {
-        doNothing().when(executor).executeFinalize(any());
+        doNothing().when(secretRotationStepProgressService).deleteAll(any(), any());
+        doNothing().when(executor).executeFinalize(any(), any());
 
         underTest.finalizeRotation(TestSecretType.TEST, "resource", null);
 
         verify(contextProvider).getContexts(anyString());
-        verify(executor, times(1)).executeFinalize(any());
+        verify(executor, times(1)).executeFinalize(any(), any());
     }
 
     @Test
@@ -108,23 +112,23 @@ public class SecretRotationServiceTest {
                 underTest.finalizeRotation(TestSecretType.TEST, "resource", null));
 
         verify(contextProvider).getContexts(anyString());
-        verify(executor, times(0)).executeFinalize(any());
+        verify(executor, times(0)).executeFinalize(any(), any());
         verify(executor, times(1)).executePostValidation(any());
     }
 
     @Test
     public void testRollback() {
-        doNothing().when(executor).executeRollback(any());
+        doNothing().when(executor).executeRollback(any(), any());
 
-        underTest.rollbackRotation(TestSecretType.TEST, "resource", null, TestSecretRotationStep.TEST_STEP);
+        underTest.rollbackRotation(TestSecretType.TEST, "resource", null, STEP);
 
         verify(contextProvider).getContexts(anyString());
-        verify(executor).executeRollback(any());
+        verify(executor).executeRollback(any(), any());
     }
 
     private void generateTestContexts() {
         Map<SecretRotationStep, RotationContext> contextMap = Map.of(
-                TestSecretRotationStep.TEST_STEP, new TestRotationContext("resource"));
+                STEP, new TestRotationContext("resource"));
         lenient().when(contextProvider.getContexts(any())).thenReturn(contextMap);
     }
 }

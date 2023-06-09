@@ -11,13 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
+import com.sequenceiq.cloudbreak.rotation.secret.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.context.PollerRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 
 @Component
-public class RedbeamsPollerRotationExecutor implements RotationExecutor<PollerRotationContext> {
+public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<PollerRotationContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsPollerRotationExecutor.class);
 

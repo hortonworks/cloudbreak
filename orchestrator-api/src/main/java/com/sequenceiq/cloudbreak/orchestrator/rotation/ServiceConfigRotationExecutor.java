@@ -16,12 +16,12 @@ import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
+import com.sequenceiq.cloudbreak.rotation.secret.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 
 @Component
-public class ServiceConfigRotationExecutor implements RotationExecutor<ServiceConfigRotationContext> {
+public class ServiceConfigRotationExecutor extends AbstractRotationExecutor<ServiceConfigRotationContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceConfigRotationExecutor.class);
 

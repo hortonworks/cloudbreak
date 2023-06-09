@@ -14,6 +14,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 
 @TestConfiguration
 @EntityScan(basePackages = {"com.sequenceiq.flow.domain",
+        "com.sequenceiq.flow.rotation",
         "com.sequenceiq.environment",
         "com.sequenceiq.cloudbreak.ha.domain",
         "com.sequenceiq.cloudbreak.structuredevent.domain"})
