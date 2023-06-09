@@ -17,13 +17,13 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
+import com.sequenceiq.cloudbreak.rotation.secret.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @Component
-public class SaltPillarRotationExecutor implements RotationExecutor<SaltPillarRotationContext> {
+public class SaltPillarRotationExecutor extends AbstractRotationExecutor<SaltPillarRotationContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltPillarRotationExecutor.class);
 

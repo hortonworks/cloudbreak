@@ -4,12 +4,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationProgressService;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
@@ -27,8 +32,17 @@ public class VaultRotationExecutorTest {
     @Mock
     private SecretService secretService;
 
+    @Mock
+    private SecretRotationProgressService secretRotationProgressService;
+
     @InjectMocks
     private VaultRotationExecutor underTest;
+
+    @BeforeEach
+    public void mockProgressService() throws IllegalAccessException {
+        FieldUtils.writeField(underTest, "secretRotationProgressService", Optional.of(secretRotationProgressService), true);
+        lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
+    }
 
     @Test
     public void testPreValidation() {
@@ -85,7 +99,7 @@ public class VaultRotationExecutorTest {
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
-        underTest.executeRotate(rotationContext);
+        underTest.executeRotate(rotationContext, null);
 
         verify(secretService, times(1)).putRotation(eq("secretPath"), eq("secret"));
     }
@@ -97,7 +111,7 @@ public class VaultRotationExecutorTest {
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
-        underTest.executeFinalize(rotationContext);
+        underTest.executeFinalize(rotationContext, null);
 
         verify(secretService, times(1)).update(eq("secretPath"), eq("new"));
     }
@@ -109,7 +123,7 @@ public class VaultRotationExecutorTest {
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
-        underTest.executeRollback(rotationContext);
+        underTest.executeRollback(rotationContext, null);
 
         verify(secretService, times(1)).update(eq("secretPath"), eq("old"));
     }
@@ -121,6 +135,6 @@ public class VaultRotationExecutorTest {
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
-        assertThrows(SecretRotationException.class, () -> underTest.executeRotate(rotationContext));
+        assertThrows(SecretRotationException.class, () -> underTest.executeRotate(rotationContext, null));
     }
 }

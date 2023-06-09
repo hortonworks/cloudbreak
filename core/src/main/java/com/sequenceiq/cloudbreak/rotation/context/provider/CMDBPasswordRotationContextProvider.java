@@ -109,6 +109,7 @@ public class CMDBPasswordRotationContextProvider implements RotationContextProvi
                 .build();
 
         CustomJobRotationContext customJobRotationContext = CustomJobRotationContext.builder()
+                .withResourceCrn(stack.getResourceCrn())
                 .withRotationJob(() -> waitForClouderaManagerToStartup(stack))
                 .withRollbackJob(() -> waitForClouderaManagerToStartup(stack))
                 .build();

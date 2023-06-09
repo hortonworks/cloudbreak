@@ -1,5 +1,7 @@
 package com.sequenceiq.flow.rotation.service;
 
+import static com.sequenceiq.cloudbreak.rotation.secret.TestSecretType.TEST;
+import static com.sequenceiq.cloudbreak.rotation.secret.TestSecretType.TEST_2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -13,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
-import com.sequenceiq.flow.rotation.TestSecretType;
+import com.sequenceiq.cloudbreak.rotation.secret.TestSecretType;
 
 @ExtendWith(MockitoExtension.class)
 class SecretRotationValidatorTest {
@@ -39,7 +41,7 @@ class SecretRotationValidatorTest {
     @Test
     void mapSecretTypesShouldSucceed() {
         List<SecretType> secretTypes =
-                underTest.mapSecretTypes(List.of("TEST", "TEST2"), TestSecretType.class);
-        assertThat(secretTypes).containsExactly(TestSecretType.TEST, TestSecretType.TEST2);
+                underTest.mapSecretTypes(List.of("TEST", "TEST_2"), TestSecretType.class);
+        assertThat(secretTypes).containsExactly(TEST, TEST_2);
     }
 }

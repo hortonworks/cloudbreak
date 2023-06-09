@@ -29,6 +29,7 @@ import org.springframework.data.repository.support.Repositories;
         "com.sequenceiq.cloudbreak.workspace.repository",
         "com.sequenceiq.cloudbreak.workspace.model",
         "com.sequenceiq.flow.domain",
+        "com.sequenceiq.flow.rotation",
         "com.sequenceiq.cloudbreak.ha.domain",
         "com.sequenceiq.cloudbreak.structuredevent.repository",
         "com.sequenceiq.cloudbreak.structuredevent.domain"

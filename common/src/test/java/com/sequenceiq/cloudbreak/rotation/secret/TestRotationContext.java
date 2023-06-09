@@ -1,6 +1,4 @@
-package com.sequenceiq.flow.rotation;
-
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
+package com.sequenceiq.cloudbreak.rotation.secret;
 
 public class TestRotationContext extends RotationContext {
 

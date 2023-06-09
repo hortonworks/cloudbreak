@@ -10,14 +10,14 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.context.CMServiceConfigRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
+import com.sequenceiq.cloudbreak.rotation.secret.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @Component
-public class CMServiceConfigRotationExecutor implements RotationExecutor<CMServiceConfigRotationContext> {
+public class CMServiceConfigRotationExecutor extends AbstractRotationExecutor<CMServiceConfigRotationContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CMServiceConfigRotationExecutor.class);
 

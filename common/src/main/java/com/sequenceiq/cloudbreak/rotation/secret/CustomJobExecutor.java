@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 
 @Component
-public class CustomJobExecutor implements RotationExecutor<CustomJobRotationContext> {
+public class CustomJobExecutor extends AbstractRotationExecutor<CustomJobRotationContext> {
 
     @Override
     public void rotate(CustomJobRotationContext rotationContext) throws Exception {
