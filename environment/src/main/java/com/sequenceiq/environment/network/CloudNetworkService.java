@@ -25,6 +25,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.network.dto.AwsParams;
+import com.sequenceiq.environment.network.dto.GcpParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
@@ -94,11 +95,15 @@ public class CloudNetworkService {
                 network, filter, subnetIds);
         } else if (isGcp(environmentDto.getCloudPlatform())) {
             Map<String, String> filter = new HashMap<>();
-            filter.put(GcpStackUtil.NETWORK_ID, network.getGcp().getNetworkId());
-            filter.put(GcpStackUtil.SHARED_PROJECT_ID, network.getGcp().getSharedProjectId());
+            GcpParams gcpNetworkParams = network.getGcp();
+            filter.put(GcpStackUtil.NETWORK_ID, gcpNetworkParams.getNetworkId());
+            filter.put(GcpStackUtil.SHARED_PROJECT_ID, gcpNetworkParams.getSharedProjectId());
             boolean createFireWallRule = !isNullOrEmpty(environmentDto.getSecurityAccess().getCidr());
             filter.put(GcpStackUtil.NO_FIREWALL_RULES, String.valueOf(!createFireWallRule));
-            filter.put(GcpStackUtil.NO_PUBLIC_IP, String.valueOf(Boolean.TRUE.equals(network.getGcp().getNoPublicIp())));
+            filter.put(GcpStackUtil.NO_PUBLIC_IP, String.valueOf(Boolean.TRUE.equals(gcpNetworkParams.getNoPublicIp())));
+            Set<String> zones = gcpNetworkParams.getAvailabilityZones();
+            String customAvailabilityZone = !CollectionUtils.isEmpty(zones) && zones.size() == 1 ? zones.stream().findFirst().get() : "";
+            filter.put(GcpStackUtil.CUSTOM_AVAILABILITY_ZONE, customAvailabilityZone);
             buildSubnetIdFilter(subnetIds, filter);
             return fetchCloudNetwork(environmentDto.getRegions(), environmentDto.getCredential(), environmentDto.getCloudPlatform(),
                 network, filter, subnetIds);
@@ -125,11 +130,15 @@ public class CloudNetworkService {
                 network, filter, subnetIds);
         } else if (isGcp(environment.getCloudPlatform())) {
             Map<String, String> filter = new HashMap<>();
-            filter.put(GcpStackUtil.NETWORK_ID, network.getGcp().getNetworkId());
-            filter.put(GcpStackUtil.SHARED_PROJECT_ID, network.getGcp().getSharedProjectId());
+            GcpParams gcpParams = network.getGcp();
+            filter.put(GcpStackUtil.NETWORK_ID, gcpParams.getNetworkId());
+            filter.put(GcpStackUtil.SHARED_PROJECT_ID, gcpParams.getSharedProjectId());
             boolean createFireWallRule = !isNullOrEmpty(environment.getCidr());
             filter.put(GcpStackUtil.NO_FIREWALL_RULES, String.valueOf(!createFireWallRule));
-            filter.put(GcpStackUtil.NO_PUBLIC_IP, String.valueOf(Boolean.TRUE.equals(network.getGcp().getNoPublicIp())));
+            filter.put(GcpStackUtil.NO_PUBLIC_IP, String.valueOf(Boolean.TRUE.equals(gcpParams.getNoPublicIp())));
+            Set<String> zones = gcpParams.getAvailabilityZones();
+            String customAvailabilityZone = !CollectionUtils.isEmpty(zones) && zones.size() == 1 ? zones.stream().findFirst().get() : "";
+            filter.put(GcpStackUtil.CUSTOM_AVAILABILITY_ZONE, customAvailabilityZone);
             buildSubnetIdFilter(subnetIds, filter);
             return fetchCloudNetwork(environment.getRegionSet(), environment.getCredential(), environment.getCloudPlatform(),
                 network, filter, subnetIds);

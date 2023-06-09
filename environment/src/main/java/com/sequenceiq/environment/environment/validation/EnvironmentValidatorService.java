@@ -45,7 +45,7 @@ import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeSe
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyArnValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyUrlValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyValidator;
-import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
+import com.sequenceiq.environment.environment.validation.validators.NetworkValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
 import com.sequenceiq.environment.environment.validation.validators.TagValidator;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -61,7 +61,7 @@ public class EnvironmentValidatorService {
 
     private static final int ALL_SPOT_PERCENTAGE = 100;
 
-    private final NetworkCreationValidator networkCreationValidator;
+    private final NetworkValidator networkValidator;
 
     private final PlatformParameterService platformParameterService;
 
@@ -89,7 +89,7 @@ public class EnvironmentValidatorService {
 
     private final Integer ipaMinimumInstanceCountByGroup;
 
-    public EnvironmentValidatorService(NetworkCreationValidator networkCreationValidator,
+    public EnvironmentValidatorService(NetworkValidator networkValidator,
             PlatformParameterService platformParameterService,
             EnvironmentResourceService environmentResourceService,
             CredentialService credentialService,
@@ -103,7 +103,7 @@ public class EnvironmentValidatorService {
             EncryptionKeyValidator encryptionKeyValidator,
             EnvironmentRecipeService recipeService,
             @Value("${environment.freeipa.groupInstanceCount.minimum}") Integer ipaMinimumInstanceCountByGroup) {
-        this.networkCreationValidator = networkCreationValidator;
+        this.networkValidator = networkValidator;
         this.platformParameterService = platformParameterService;
         this.environmentResourceService = environmentResourceService;
         this.credentialService = credentialService;
@@ -124,7 +124,7 @@ public class EnvironmentValidatorService {
     }
 
     public ValidationResultBuilder validateNetworkCreation(Environment environment, NetworkDto network) {
-        return networkCreationValidator.validateNetworkCreation(environment, network);
+        return networkValidator.validateNetworkCreation(environment, network);
     }
 
     public ValidationResult validateTags(EnvironmentCreationDto environmentCreationDto) {

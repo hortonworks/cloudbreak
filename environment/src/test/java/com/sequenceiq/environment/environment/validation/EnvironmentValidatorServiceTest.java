@@ -44,7 +44,7 @@ import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeSe
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyArnValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyUrlValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyValidator;
-import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
+import com.sequenceiq.environment.environment.validation.validators.NetworkValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
 import com.sequenceiq.environment.environment.validation.validators.TagValidator;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
@@ -59,7 +59,7 @@ class EnvironmentValidatorServiceTest {
     private static final int FREE_IPA_INSTANCE_COUNT_BY_GROUP = 2;
 
     @Mock
-    private NetworkCreationValidator networkCreationValidator;
+    private NetworkValidator networkCreationValidator;
 
     @Mock
     private PlatformParameterService platformParameterService;

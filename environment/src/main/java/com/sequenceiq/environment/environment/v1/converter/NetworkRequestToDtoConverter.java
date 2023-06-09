@@ -77,6 +77,7 @@ public class NetworkRequestToDtoConverter {
                     .withNetworkId(network.getGcp().getNetworkId())
                     .withNoFirewallRules(Boolean.TRUE.equals(network.getGcp().getNoFirewallRules()))
                     .withNoPublicIp(Boolean.TRUE.equals(network.getGcp().getNoPublicIp()))
+                    .withAvailabilityZones(network.getGcp().getAvailabilityZones())
                     .build();
             builder.withGcp(gcpParams);
             builder.withNetworkId(gcpParams.getNetworkId());

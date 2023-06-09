@@ -53,6 +53,8 @@ public class GcpStackUtil {
 
     public static final String NO_PUBLIC_IP = "noPublicIp";
 
+    public static final String CUSTOM_AVAILABILITY_ZONE = "customAvailabilityZone";
+
     public static final String NO_FIREWALL_RULES = "noFirewallRules";
 
     public static final String REGION = "region";
