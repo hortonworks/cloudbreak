@@ -3,6 +3,7 @@ package com.sequenceiq.environment.network.v1.converter;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,20 +46,22 @@ class GcpEnvironmentNetworkConverterTest {
 
     @Test
     void convertToNetwork() {
-        GcpNetwork baseNetwork = new GcpNetwork();
-        baseNetwork.setNetworkId(NETWORK_ID);
-        baseNetwork.setSharedProjectId(PROJECT_ID);
-        baseNetwork.setNoPublicIp(true);
-        baseNetwork.setNoFirewallRules(true);
+        GcpNetwork gcpNetwork = new GcpNetwork();
+        gcpNetwork.setNetworkId(NETWORK_ID);
+        gcpNetwork.setSharedProjectId(PROJECT_ID);
+        gcpNetwork.setNoPublicIp(true);
+        gcpNetwork.setNoFirewallRules(true);
         EnvironmentView env = new EnvironmentView();
         env.setLocation(LOCATION);
-        baseNetwork.setEnvironment(env);
-        baseNetwork.setSubnetMetas(Map.of("subnet1", new CloudSubnet("id1", "subnet1"),
+        gcpNetwork.setEnvironment(env);
+        gcpNetwork.setSubnetMetas(Map.of("subnet1", new CloudSubnet("id1", "subnet1"),
                 "subnet2", new CloudSubnet("id2", "subnet2")));
-        baseNetwork.setEndpointGatewaySubnetMetas(Map.of("subnet3", new CloudSubnet("id3", "subnet3"),
+        gcpNetwork.setEndpointGatewaySubnetMetas(Map.of("subnet3", new CloudSubnet("id3", "subnet3"),
                 "subnet4", new CloudSubnet("id4", "subnet4")));
+        Set<String> availabilityZones = Set.of("gcp-region1-zone1");
+        gcpNetwork.setAvailabilityZones(availabilityZones);
 
-        Network result = underTest.convertToNetwork(baseNetwork);
+        Network result = underTest.convertToNetwork(gcpNetwork);
 
         assertThat(result.getParameters())
                 .containsEntry(GcpStackUtil.NETWORK_ID, NETWORK_ID)
@@ -75,6 +78,7 @@ class GcpEnvironmentNetworkConverterTest {
                     assertThat(k).isEqualTo(NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID);
                     assertThat(v).satisfiesAnyOf(v2 -> assertThat(v2).isEqualTo("subnet3"),
                             v2 -> assertThat(v2).isEqualTo("subnet4"));
-                });
+                })
+                .containsEntry(NetworkConstants.AVAILABILITY_ZONES, availabilityZones);
     }
 }

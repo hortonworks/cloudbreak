@@ -6,8 +6,10 @@ import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PRIVATE;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -59,6 +61,7 @@ public class GcpEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
             gcpNetwork.setNoFirewallRules(gcpParams.getNoFirewallRules());
             gcpNetwork.setNoPublicIp(gcpParams.getNoPublicIp());
             gcpNetwork.setSharedProjectId(gcpParams.getSharedProjectId());
+            gcpNetwork.setAvailabilityZones(gcpParams.getAvailabilityZones());
         }
         return gcpNetwork;
     }
@@ -81,6 +84,9 @@ public class GcpEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
 
         Object noPublicIp = properties.get("noPublicIp");
         gcpNetwork.setNoPublicIp(noPublicIp != null && Boolean.parseBoolean(noPublicIp.toString()));
+
+        Object availabilityZones = properties.get(NetworkConstants.AVAILABILITY_ZONES);
+        gcpNetwork.setAvailabilityZones((Set<String>) Optional.ofNullable(availabilityZones).orElse(new HashSet<>()));
 
         gcpNetwork.setSubnetMetas(createdCloudNetwork.getSubnets().stream()
                 .collect(Collectors.toMap(
@@ -110,6 +116,7 @@ public class GcpEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
         Optional.ofNullable(gcpNetwork.getNoFirewallRules()).ifPresent(gcpParamsBuilder::withNoFirewallRules);
         Optional.ofNullable(gcpNetwork.getNoPublicIp()).ifPresent(gcpParamsBuilder::withNoPublicIp);
         Optional.ofNullable(gcpNetwork.getSharedProjectId()).ifPresent(gcpParamsBuilder::withSharedProjectId);
+        Optional.ofNullable(gcpNetwork.getAvailabilityZones()).ifPresent(gcpParamsBuilder::withAvailabilityZones);
         return builder
                 .withGcp(gcpParamsBuilder.build())
                 .build();
@@ -142,6 +149,7 @@ public class GcpEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
         param.put(GcpStackUtil.NO_PUBLIC_IP, gcpNetwork.getNoPublicIp());
         param.put(GcpStackUtil.NO_FIREWALL_RULES, gcpNetwork.getNoFirewallRules());
         param.put(NetworkConstants.SUBNET_ID, baseNetwork.getSubnetMetas().entrySet().stream().findFirst().get().getKey());
+        param.put(NetworkConstants.AVAILABILITY_ZONES, gcpNetwork.getAvailabilityZones());
         baseNetwork.getEndpointGatewaySubnetMetas().entrySet().stream().findFirst()
                 .ifPresent(meta -> param.put(NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID, meta.getKey()));
         param.put(GcpStackUtil.REGION, baseNetwork.getEnvironments().stream().findFirst().get().getLocation());

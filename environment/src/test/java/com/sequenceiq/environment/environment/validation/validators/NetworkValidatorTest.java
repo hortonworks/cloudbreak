@@ -27,7 +27,7 @@ import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.dto.YarnParams;
 
-public class NetworkCreationValidatorTest {
+public class NetworkValidatorTest {
 
     @Mock
     private EnvironmentNetworkValidator environmentNetworkValidatorMock;
@@ -40,14 +40,14 @@ public class NetworkCreationValidatorTest {
 
     private final Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform = new EnumMap<>(CloudPlatform.class);
 
-    private NetworkCreationValidator underTest;
+    private NetworkValidator underTest;
 
     private Environment environment;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        underTest = new NetworkCreationValidator(environmentNetworkValidatorsByCloudPlatform, environmentDtoConverter, subnetUsageValidator);
+        underTest = new NetworkValidator(environmentNetworkValidatorsByCloudPlatform, environmentDtoConverter, subnetUsageValidator);
         environment = EnvironmentTestData.newTestEnvironment();
         environmentNetworkValidatorsByCloudPlatform.put(CloudPlatform.AZURE, environmentNetworkValidatorMock);
     }

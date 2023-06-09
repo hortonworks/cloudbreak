@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.validation.network.gcp;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -24,6 +25,9 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @Component
 public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidator {
+
+    static final String MULTIPLE_AVAILABILITY_ZONES_PROVIDED_ERROR_MSG = "The multiple availability zones feature isn't available for GCP yet. "
+            + "Please configure only one zone on field 'availabilityZones'";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpEnvironmentNetworkValidator.class);
 
@@ -64,6 +68,7 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
             checkSubnetsProvidedWhenExistingNetwork(resultBuilder, gcpParams, networkDto.getSubnetMetas());
             checkExistingNetworkParamsProvidedWhenSubnetsPresent(networkDto, resultBuilder);
             checkNetworkIdIsSpecifiedWhenSubnetIdsArePresent(resultBuilder, gcpParams, networkDto);
+            checkAvailabilityZones(resultBuilder, gcpParams);
         } else if (StringUtils.isEmpty(networkDto.getNetworkCidr())) {
             resultBuilder.error(missingParamsErrorMsg(GCP));
         }
@@ -113,6 +118,14 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
                     gcpParams.getNetworkId());
             LOGGER.info(message);
             resultBuilder.error(message);
+        }
+    }
+
+    private static void checkAvailabilityZones(ValidationResult.ValidationResultBuilder resultBuilder, GcpParams gcpParams) {
+        Set<String> availabilityZones = gcpParams.getAvailabilityZones();
+        if (CollectionUtils.isNotEmpty(availabilityZones) && availabilityZones.size() > 1) {
+            LOGGER.info(MULTIPLE_AVAILABILITY_ZONES_PROVIDED_ERROR_MSG);
+            resultBuilder.error(MULTIPLE_AVAILABILITY_ZONES_PROVIDED_ERROR_MSG);
         }
     }
 

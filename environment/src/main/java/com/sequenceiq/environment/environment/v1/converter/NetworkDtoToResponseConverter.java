@@ -29,7 +29,7 @@ public class NetworkDtoToResponseConverter {
     }
 
     public EnvironmentNetworkResponse convert(NetworkDto network, Tunnel tunnel, boolean detailedResponse) {
-        ProvidedSubnetIds preferedSubnetId = getPreferedSubnetId(network, tunnel, detailedResponse);
+        ProvidedSubnetIds preferredSubnetId = getPreferredSubnetId(network, tunnel, detailedResponse);
 
         return EnvironmentNetworkResponse.builder()
                 .withCrn(network.getResourceCrn())
@@ -41,8 +41,8 @@ public class NetworkDtoToResponseConverter {
                 .withDwxSubnets(network.getDwxSubnets())
                 .withMlxSubnets(network.getMlxSubnets())
                 .withLiftieSubnets(network.getMlxSubnets())
-                .withPreferedSubnetId(getPreferedSubnetId(preferedSubnetId, detailedResponse))
-                .withPreferedSubnetIds(getPreferedSubnetIds(preferedSubnetId, detailedResponse))
+                .withPreferedSubnetId(getPreferredSubnetId(preferredSubnetId, detailedResponse))
+                .withPreferedSubnetIds(getPreferredSubnetIds(preferredSubnetId, detailedResponse))
                 .withPrivateSubnetCreation(network.getPrivateSubnetCreation())
                 .withServiceEndpointCreation(network.getServiceEndpointCreation())
                 .withOutboundInternetTraffic(network.getOutboundInternetTraffic())
@@ -70,6 +70,7 @@ public class NetworkDtoToResponseConverter {
                         .withSharedProjectId(p.getSharedProjectId())
                         .withNoFirewallRules(p.getNoFirewallRules())
                         .withNoPublicIp(p.getNoPublicIp())
+                        .withAvailabilityZones(p.getAvailabilityZones())
                         .build()))
                 .withYarn(getIfNotNull(network.getYarn(), p -> EnvironmentNetworkYarnParams.EnvironmentNetworkYarnParamsBuilder
                         .anEnvironmentNetworkYarnParams()
@@ -84,7 +85,7 @@ public class NetworkDtoToResponseConverter {
                 .build();
     }
 
-    public ProvidedSubnetIds getPreferedSubnetId(NetworkDto network, Tunnel tunnel, boolean detailedResponse) {
+    public ProvidedSubnetIds getPreferredSubnetId(NetworkDto network, Tunnel tunnel, boolean detailedResponse) {
         ProvidedSubnetIds providedSubnetIds = null;
         if (detailedResponse) {
             providedSubnetIds = subnetIdProvider.subnets(
@@ -96,7 +97,7 @@ public class NetworkDtoToResponseConverter {
         return providedSubnetIds;
     }
 
-    public String getPreferedSubnetId(ProvidedSubnetIds providedSubnetIds, boolean detailedResponse) {
+    public String getPreferredSubnetId(ProvidedSubnetIds providedSubnetIds, boolean detailedResponse) {
         String subnetId = null;
         if (detailedResponse) {
             if (providedSubnetIds != null) {
@@ -106,7 +107,7 @@ public class NetworkDtoToResponseConverter {
         return subnetId;
     }
 
-    public Set<String> getPreferedSubnetIds(ProvidedSubnetIds providedSubnetIds, boolean detailedResponse) {
+    public Set<String> getPreferredSubnetIds(ProvidedSubnetIds providedSubnetIds, boolean detailedResponse) {
         Set<String> subnetIds = new HashSet<>();
         if (detailedResponse) {
             if (providedSubnetIds != null) {
