@@ -5,20 +5,19 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerStackDescriptorV4Response;
@@ -32,9 +31,7 @@ import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.UtilTestClient;
-import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
-import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerProductTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
@@ -53,6 +50,7 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.it.cloudbreak.util.ssh.action.ScpDownloadClusterLogsActions;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 import net.schmizz.sshj.SSHClient;
@@ -71,6 +69,8 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
 
     private static final String CHILD_ENVIRONMENT_KEY = "childEnvironment";
 
+    private static final String CHILD_SDX_KEY = "childDataLake";
+
     private static final String MOCK_UMS_PASSWORD_INVALID = "Invalid password";
 
     private static final String MASTER_INSTANCE_GROUP = "master";
@@ -87,14 +87,11 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
 
     private static final String REDHAT7 = "redhat7";
 
-    private static final Map<String, InstanceStatus> INSTANCES_HEALTHY = new HashMap<>() {{
-        put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
-        put(HostGroupType.IDBROKER.getName(), InstanceStatus.SERVICES_HEALTHY);
-    }};
-
     private static final String STACK_AUTHENTICATION = "stackAuthentication";
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    private String sdxGatewayPrivateIp;
 
     @Value("${integrationtest.aws.hybridCloudSecurityGroupID}")
     private String hybridCloudSecurityGroupID;
@@ -110,6 +107,9 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
 
     @Inject
     private BlueprintTestClient blueprintTestClient;
+
+    @Inject
+    private ScpDownloadClusterLogsActions yarnClusterLogs;
 
     @Inject
     private UtilTestClient utilTestClient;
@@ -129,21 +129,22 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
 
         testContext
                 .given("childtelemetry", TelemetryTestDto.class)
-                .withLogging(CloudPlatform.YARN)
-                .withReportClusterLogs()
+                    .withLogging(CHILD_CLOUD_PLATFORM)
+                    .withReportClusterLogs()
                 .given(CHILD_ENVIRONMENT_CREDENTIAL_KEY, CredentialTestDto.class, CHILD_CLOUD_PLATFORM)
-                .when(credentialTestClient.create(), RunningParameter.key(CHILD_ENVIRONMENT_CREDENTIAL_KEY))
+                .when(credentialTestClient.create(), key(CHILD_ENVIRONMENT_CREDENTIAL_KEY))
                 .given(CHILD_ENVIRONMENT_NETWORK_KEY, EnvironmentNetworkTestDto.class, CHILD_CLOUD_PLATFORM)
                 .given(CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class, CHILD_CLOUD_PLATFORM)
-                .withCredentialName(testContext.get(CHILD_ENVIRONMENT_CREDENTIAL_KEY).getName())
-                .withParentEnvironment()
-                .withNetwork(CHILD_ENVIRONMENT_NETWORK_KEY)
-                .withTelemetry("childtelemetry")
-                .when(environmentTestClient.create(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
-                .await(EnvironmentStatus.AVAILABLE, RunningParameter.key(CHILD_ENVIRONMENT_KEY))
-                .when(environmentTestClient.describe(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
+                    .withCredentialName(testContext.get(CHILD_ENVIRONMENT_CREDENTIAL_KEY).getName())
+                    .withParentEnvironment()
+                    .withNetwork(CHILD_ENVIRONMENT_NETWORK_KEY)
+                    .withTelemetry("childtelemetry")
+                .when(environmentTestClient.create(), key(CHILD_ENVIRONMENT_KEY))
+                .await(EnvironmentStatus.AVAILABLE, key(CHILD_ENVIRONMENT_KEY))
+                .when(environmentTestClient.describe(), key(CHILD_ENVIRONMENT_KEY))
                 .given(BlueprintTestDto.class, CHILD_CLOUD_PLATFORM)
-                .when(blueprintTestClient.listV4());
+                .when(blueprintTestClient.listV4())
+                .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -155,7 +156,6 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
             and = "instances are not accessible via ssh by invalid username and password"
     )
     public void testCreateSdxOnChildEnvironment(TestContext testContext) {
-        String sdxInternal = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
         String clouderaManager = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
         String cluster = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
         String cmProduct = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
@@ -191,18 +191,29 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                     .withBlueprintName(getDefaultSDXBlueprintName())
                     .withValidateBlueprint(Boolean.FALSE)
                     .withClouderaManager(clouderaManager)
-                .given(MASTER_INSTANCE_GROUP, InstanceGroupTestDto.class, CHILD_CLOUD_PLATFORM).withHostGroup(MASTER).withNodeCount(1)
-                .given(IDBROKER_INSTANCE_GROUP, InstanceGroupTestDto.class, CHILD_CLOUD_PLATFORM).withHostGroup(IDBROKER).withNodeCount(1)
+                .given(MASTER_INSTANCE_GROUP, InstanceGroupTestDto.class, CHILD_CLOUD_PLATFORM)
+                    .withHostGroup(MASTER)
+                    .withNodeCount(1)
+                .given(IDBROKER_INSTANCE_GROUP, InstanceGroupTestDto.class, CHILD_CLOUD_PLATFORM)
+                    .withHostGroup(IDBROKER)
+                    .withNodeCount(1)
                 .given(STACK_AUTHENTICATION, StackAuthenticationTestDto.class, CHILD_CLOUD_PLATFORM)
-                .given(stack, StackTestDto.class, CHILD_CLOUD_PLATFORM).withCluster(cluster)
+                .given(stack, StackTestDto.class, CHILD_CLOUD_PLATFORM)
+                    .withCluster(cluster)
                     .withInstanceGroups(MASTER_INSTANCE_GROUP, IDBROKER_INSTANCE_GROUP)
                     .withStackAuthentication(STACK_AUTHENTICATION)
                     .withTelemetry("telemetry")
-                .given(sdxInternal, SdxInternalTestDto.class, CHILD_CLOUD_PLATFORM)
+                .given(CHILD_SDX_KEY, SdxInternalTestDto.class, CHILD_CLOUD_PLATFORM)
                     .withStackRequest(key(cluster), key(stack))
-                    .withEnvironmentKey(RunningParameter.key(CHILD_ENVIRONMENT_KEY))
-                .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .await(SdxClusterStatusResponse.RUNNING)
+                    .withEnvironmentKey(key(CHILD_ENVIRONMENT_KEY))
+                .when(sdxTestClient.createInternal(), key(CHILD_SDX_KEY))
+                .await(SdxClusterStatusResponse.STACK_CREATION_IN_PROGRESS, key(CHILD_SDX_KEY).withoutWaitForFlow())
+                .then((tc, dto, client) -> {
+                    sdxGatewayPrivateIp = dto.awaitForPrivateIp(tc, client, MASTER.getName());
+                    LOGGER.info("SDX master instance IP: {}", sdxGatewayPrivateIp);
+                    return dto;
+                })
+                .await(SdxClusterStatusResponse.RUNNING, key(CHILD_SDX_KEY).withWaitForFlow(Boolean.TRUE))
                 .awaitForHealthyInstances()
                 .then((tc, dto, client) -> {
                     String environmentCrn = dto.getResponse().getEnvironmentCrn();
@@ -220,10 +231,41 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                     }
                     return dto;
                 })
-                .given(CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class, CHILD_CLOUD_PLATFORM)
-                .when(environmentTestClient.cascadingDelete(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
-                .await(EnvironmentStatus.ARCHIVED, RunningParameter.key(CHILD_ENVIRONMENT_KEY))
                 .validate();
+    }
+
+    @Override
+    @AfterMethod(alwaysRun = true)
+    public void tearDown(Object[] data) {
+        TestContext testContext = (TestContext) data[0];
+
+        LOGGER.info("Tear down AWS-YCloud E2E context");
+
+        if (StringUtils.isBlank(sdxGatewayPrivateIp)) {
+            LOGGER.warn("Error occured while creating SDX stack! So cannot download cluster logs from SDX.");
+        } else {
+            try {
+                SdxInternalTestDto sdxInternalTestDto = testContext.get(CHILD_SDX_KEY);
+                String environmentCrnSdx = sdxInternalTestDto.getResponse().getEnvironmentCrn();
+                String sdxName = sdxInternalTestDto.getResponse().getName();
+                LOGGER.info("Downloading YCloud SDX logs...");
+                yarnClusterLogs.downloadClusterLogs(environmentCrnSdx, sdxName, sdxGatewayPrivateIp, "sdx");
+                LOGGER.info("YCloud SDX logs have been downloaded!");
+            } catch (Exception sdxError) {
+                LOGGER.warn("Error occured while downloading SDX logs!", sdxError);
+            }
+        }
+
+        LOGGER.info("Terminating the child environment with cascading delete...");
+        testContext
+                .given(CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class, CHILD_CLOUD_PLATFORM)
+                    .withCredentialName(testContext.get(CHILD_ENVIRONMENT_CREDENTIAL_KEY).getName())
+                    .withParentEnvironment()
+                .when(environmentTestClient.cascadingDelete(), key(CHILD_ENVIRONMENT_KEY).withSkipOnFail(Boolean.FALSE))
+                .await(EnvironmentStatus.ARCHIVED, key(CHILD_ENVIRONMENT_KEY).withSkipOnFail(Boolean.FALSE));
+        LOGGER.info("Child environment has been deleted!");
+
+        testContext.cleanupTestContext();
     }
 
     private String getDefaultSDXBlueprintName() {
@@ -250,7 +292,7 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
             client.authPassword(testContext.getWorkloadUserName(), MOCK_UMS_PASSWORD_INVALID);
             throw new TestFailException(String.format("SSH authentication passed with invalid password on host %s.", host));
         } catch (UserAuthException ex) {
-            //Expected
+            LOGGER.info("Expected: SSH authentication failure has been happend!");
         }
     }
 
