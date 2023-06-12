@@ -9,8 +9,8 @@
         "s3:ListBucket"
       ],
       "Resource": [
-        "arn:aws:s3:::<your-backup-bucket>/*",
-        "arn:aws:s3:::<your-backup-bucket>"
+        "arn:aws:s3:::${BACKUP_LOCATION_BASE}/*",
+        "arn:aws:s3:::${BACKUP_LOCATION_BASE}"
       ]
     }
   ]
