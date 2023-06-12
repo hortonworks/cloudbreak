@@ -427,11 +427,19 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         if (environment.getFreeIpaCreation() != null) {
             String imageCatalog = environment.getFreeIpaCreation().getImageCatalog();
             String imageId = environment.getFreeIpaCreation().getImageId();
+            String imageOs = environment.getFreeIpaCreation().getImageOs();
             if (!Strings.isNullOrEmpty(imageId)) {
                 LOGGER.info("FreeIPA creation with a pre-defined image catalog and image id: '{}', '{}'", imageCatalog, imageId);
                 ImageSettingsRequest imageSettings = new ImageSettingsRequest();
                 imageSettings.setCatalog(imageCatalog);
                 imageSettings.setId(imageId);
+                imageSettings.setOs(imageOs);
+                createFreeIpaRequest.setImage(imageSettings);
+            } else if (!Strings.isNullOrEmpty(imageOs)) {
+                LOGGER.info("FreeIPA creation with a pre-defined image catalog and OS type: '{}', '{}'", imageCatalog, imageOs);
+                ImageSettingsRequest imageSettings = new ImageSettingsRequest();
+                imageSettings.setCatalog(imageCatalog);
+                imageSettings.setOs(imageOs);
                 createFreeIpaRequest.setImage(imageSettings);
             } else {
                 LOGGER.info("FreeIPA creation without pre-defined image settings. FreeIpa serivce is going to handle default settings.");

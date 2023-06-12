@@ -139,6 +139,7 @@ public class EnvironmentModelDescription {
     public static final String FREEIPA_IMAGE = "Image parameters for FreeIpa instance creation.";
     public static final String FREEIPA_IMAGE_CATALOG = "Image catalog for FreeIpa instance creation.";
     public static final String FREEIPA_IMAGE_ID = "Image ID for FreeIpa instance creation.";
+    public static final String FREEIPA_IMAGE_OS_TYPE = "OS type to be chosen from the image catalog";
 
     public static final String PROXYCONFIG_NAME = "Name of the proxyconfig of the environment.";
     public static final String PROXYCONFIG_RESPONSE = "ProxyConfig attached to the environment.";

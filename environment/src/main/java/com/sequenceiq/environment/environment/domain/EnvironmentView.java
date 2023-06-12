@@ -131,6 +131,8 @@ public class EnvironmentView extends CompactView implements AuthResource {
 
     private String freeIpaImageId;
 
+    private String freeIpaImageOs;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "environment_freeiparecipes", joinColumns = @JoinColumn(name = "environment_id", referencedColumnName = "id"))
     @Column(name = "recipe")
@@ -489,6 +491,14 @@ public class EnvironmentView extends CompactView implements AuthResource {
 
     public void setFreeIpaImageId(String freeIpaImageId) {
         this.freeIpaImageId = freeIpaImageId;
+    }
+
+    public String getFreeIpaImageOs() {
+        return freeIpaImageOs;
+    }
+
+    public void setFreeIpaImageOs(String freeIpaImageOs) {
+        this.freeIpaImageOs = freeIpaImageOs;
     }
 
     public boolean isFreeIpaEnableMultiAz() {
