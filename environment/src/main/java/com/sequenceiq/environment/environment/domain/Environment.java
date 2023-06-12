@@ -85,6 +85,8 @@ public class Environment implements AuthResource, AccountAwareResource {
 
     private String freeIpaImageId;
 
+    private String freeIpaImageOs;
+
     @Column(nullable = false)
     private boolean freeIpaEnableMultiAz;
 
@@ -417,6 +419,14 @@ public class Environment implements AuthResource, AccountAwareResource {
 
     public void setFreeIpaImageId(String freeIpaImageId) {
         this.freeIpaImageId = freeIpaImageId;
+    }
+
+    public String getFreeIpaImageOs() {
+        return freeIpaImageOs;
+    }
+
+    public void setFreeIpaImageOs(String freeIpaImageOs) {
+        this.freeIpaImageOs = freeIpaImageOs;
     }
 
     public EnvironmentAuthentication getAuthentication() {

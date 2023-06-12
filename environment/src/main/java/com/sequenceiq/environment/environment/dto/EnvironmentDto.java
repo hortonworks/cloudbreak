@@ -8,9 +8,10 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.Environme
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.ProxyDetails;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto.Builder;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
-@JsonDeserialize(builder = EnvironmentDto.Builder.class)
+@JsonDeserialize(builder = Builder.class)
 public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDetails {
 
     private Credential credential;

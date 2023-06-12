@@ -20,6 +20,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaRespo
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto.Builder;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaInstanceCountByGroupProvider;
 
 @Component
@@ -40,7 +41,7 @@ public class FreeIpaConverter {
             Optional.ofNullable(freeIpaCreation.getAws())
                     .map(this::convertAws)
                     .ifPresent(response::setAws);
-            response.setImage(convertImage(freeIpaCreation.getImageCatalog(), freeIpaCreation.getImageId()));
+            response.setImage(convertImage(freeIpaCreation.getImageCatalog(), freeIpaCreation.getImageId(), freeIpaCreation.getImageOs()));
             response.setEnableMultiAz(freeIpaCreation.isEnableMultiAz());
             return response;
         }
@@ -59,18 +60,19 @@ public class FreeIpaConverter {
         return result;
     }
 
-    private FreeIpaImageResponse convertImage(String catalog, String id) {
+    private FreeIpaImageResponse convertImage(String catalog, String id, String os) {
         FreeIpaImageResponse result = null;
-        if (!Strings.isNullOrEmpty(catalog) && !Strings.isNullOrEmpty(id)) {
+        if ((!Strings.isNullOrEmpty(catalog) && !Strings.isNullOrEmpty(id)) || !Strings.isNullOrEmpty(os)) {
             result = new FreeIpaImageResponse();
             result.setCatalog(catalog);
             result.setId(id);
+            result.setOs(os);
         }
         return result;
     }
 
     public FreeIpaCreationDto convert(AttachedFreeIpaRequest request, String accountId, String cloudPlatform) {
-        FreeIpaCreationDto.Builder builder = FreeIpaCreationDto.builder(ipaInstanceCountByGroupProvider.getInstanceCount(request));
+        Builder builder = FreeIpaCreationDto.builder(ipaInstanceCountByGroupProvider.getInstanceCount(request));
         if (request != null) {
             builder.withCreate(request.getCreate());
             builder.withEnableMultiAz(request.isEnableMultiAz());
@@ -96,6 +98,7 @@ public class FreeIpaConverter {
             if (image != null) {
                 builder.withImageCatalog(image.getCatalog());
                 builder.withImageId(image.getId());
+                builder.withImageOs(image.getOs());
             }
             Set<String> recipes = request.getRecipes();
             if (recipes != null) {

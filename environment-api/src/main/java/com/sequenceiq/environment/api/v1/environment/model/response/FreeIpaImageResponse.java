@@ -14,6 +14,9 @@ public class FreeIpaImageResponse implements Serializable {
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_IMAGE_ID)
     private String id;
 
+    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_IMAGE_OS_TYPE)
+    private String os;
+
     public String getCatalog() {
         return catalog;
     }
@@ -30,11 +33,20 @@ public class FreeIpaImageResponse implements Serializable {
         this.id = id;
     }
 
+    public String getOs() {
+        return os;
+    }
+
+    public void setOs(String os) {
+        this.os = os;
+    }
+
     @Override
     public String toString() {
         return "FreeIpaImageResponse{" +
                 "catalog='" + catalog + '\'' +
                 ", id='" + id + '\'' +
+                ", os='" + os + '\'' +
                 '}';
     }
 }

@@ -24,11 +24,16 @@ public class FreeIpaImageRequest implements Serializable {
     @Size(max = 255)
     private String id;
 
+    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_IMAGE_OS_TYPE)
+    @Size(max = 255)
+    private String os;
+
     @Override
     public String toString() {
         return "FreeIpaImageRequest{" +
-                "catalog=" + catalog +
-                ", id=" + id +
+                "catalog='" + catalog + '\'' +
+                ", id='" + id + '\'' +
+                ", os='" + os + '\'' +
                 '}';
     }
 
@@ -46,5 +51,13 @@ public class FreeIpaImageRequest implements Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getOs() {
+        return os;
+    }
+
+    public void setOs(String os) {
+        this.os = os;
     }
 }

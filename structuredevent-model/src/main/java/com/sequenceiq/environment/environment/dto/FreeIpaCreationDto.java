@@ -22,6 +22,8 @@ public class FreeIpaCreationDto {
 
     private String imageId;
 
+    private String imageOs;
+
     private String instanceType;
 
     private FreeIpaCreationDto(Builder builder) {
@@ -31,6 +33,7 @@ public class FreeIpaCreationDto {
         imageCatalog = builder.imageCatalog;
         enableMultiAz = builder.enableMultiAz;
         imageId = builder.imageId;
+        imageOs = builder.imageOs;
         instanceType = builder.instanceType;
         recipes = builder.recipes;
     }
@@ -75,6 +78,14 @@ public class FreeIpaCreationDto {
         this.imageId = imageId;
     }
 
+    public String getImageOs() {
+        return imageOs;
+    }
+
+    public void setImageOs(String imageOs) {
+        this.imageOs = imageOs;
+    }
+
     public boolean isEnableMultiAz() {
         return enableMultiAz;
     }
@@ -109,6 +120,7 @@ public class FreeIpaCreationDto {
                 ", enableMultiAz=" + enableMultiAz +
                 ", imageCatalog='" + imageCatalog + '\'' +
                 ", imageId='" + imageId + '\'' +
+                ", imageOs='" + imageOs + '\'' +
                 ", instanceType='" + instanceType + '\'' +
                 '}';
     }
@@ -129,6 +141,8 @@ public class FreeIpaCreationDto {
         private String imageCatalog;
 
         private String imageId;
+
+        private String imageOs;
 
         private boolean enableMultiAz;
 
@@ -165,6 +179,11 @@ public class FreeIpaCreationDto {
 
         public Builder withImageId(String imageId) {
             this.imageId = imageId;
+            return this;
+        }
+
+        public Builder withImageOs(String imageOs) {
+            this.imageOs = imageOs;
             return this;
         }
 
