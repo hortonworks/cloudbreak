@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.orchestrator.rotation;
+package com.sequenceiq.cloudbreak.rotation.context;
 
 import java.util.List;
 import java.util.Optional;

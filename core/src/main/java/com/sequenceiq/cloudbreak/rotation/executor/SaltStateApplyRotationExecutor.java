@@ -1,6 +1,6 @@
-package com.sequenceiq.cloudbreak.orchestrator.rotation;
+package com.sequenceiq.cloudbreak.rotation.executor;
 
-import static com.sequenceiq.cloudbreak.orchestrator.rotation.OrchestratorSecretRotationStep.SALT_STATE_APPLY;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_STATE_APPLY;
 
 import java.util.List;
 
@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 
