@@ -199,8 +199,17 @@ public class ExternalDatabaseService {
                 .stopAfterDelay(DB_POLLING_CONFIG.getTimeout(), DB_POLLING_CONFIG.getTimeoutTimeUnit())
                 .run(() -> pollFlowState(flowIdentifier));
         if (!success) {
-            String message = String.format("Upgrade database flow failed in RedBeams. Database crn: %s, upgrade flow: %s",
-                    databaseCrn, flowIdentifier);
+            String errorDescription;
+            try {
+                DatabaseServerV4Response rdsStatus = redbeamsClient.getByCrn(databaseCrn);
+                LOGGER.info("Response from redbeams: {}", rdsStatus);
+                errorDescription = rdsStatus.getStatusReason();
+            } catch (CloudbreakServiceException | NotFoundException e) {
+                errorDescription = e.getMessage();
+                LOGGER.info("Error {} returned for database crn: {}", errorDescription, databaseCrn);
+            }
+            String message = String.format("Database upgrade failed with error: %s. Database crn: %s, upgrade flow: %s",
+                    errorDescription, databaseCrn, flowIdentifier);
             LOGGER.warn(message);
             throw new CloudbreakServiceException(message);
         }
