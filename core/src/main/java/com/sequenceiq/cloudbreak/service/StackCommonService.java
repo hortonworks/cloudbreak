@@ -317,7 +317,7 @@ public class StackCommonService {
     }
 
     private void validateVerticalScalingRequest(Stack stack, StackVerticalScaleV4Request verticalScaleV4Request) {
-        verticalScalingValidatorService.validateProvider(stack, verticalScaleV4Request);
+        verticalScalingValidatorService.validateProvider(stack);
         verticalScalingValidatorService.validateRequest(stack, verticalScaleV4Request);
         verticalScalingValidatorService.validateInstanceType(stack, verticalScaleV4Request);
     }

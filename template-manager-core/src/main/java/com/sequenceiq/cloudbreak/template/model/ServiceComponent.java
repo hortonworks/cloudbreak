@@ -6,18 +6,13 @@ import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class ServiceComponent implements Comparable<ServiceComponent> {
 
     private static final String UNKNOWN_SERVICE = "";
 
     private final Pair<String, String> serviceComponent;
 
-    @JsonCreator
-    private ServiceComponent(@JsonProperty("service") String service,
-            @JsonProperty("component") String component) {
+    private ServiceComponent(String service, String component) {
         serviceComponent = Pair.of(service, component);
     }
 
