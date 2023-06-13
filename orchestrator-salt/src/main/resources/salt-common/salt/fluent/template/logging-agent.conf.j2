@@ -2,6 +2,9 @@
 # CONFIGURED BY SALT - do not edit
 <system>
   workers {{ numberOfWorkers }}
+  <log>
+    rotate_size 1048576
+  </log>
 </system>
 {% if fluent.dbusClusterLogsCollection %}# DATABUS - CLUSTER BUNDLE LOGS ENABLED - do not edit{% endif %}
 {% if fluent.cloudStorageLoggingEnabled or fluent.cloudLoggingServiceEnabled %}
