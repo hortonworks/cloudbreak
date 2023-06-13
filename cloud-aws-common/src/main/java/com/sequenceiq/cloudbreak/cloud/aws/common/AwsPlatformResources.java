@@ -45,6 +45,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudParameterConst;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonDynamoDBClient;
@@ -213,6 +214,9 @@ public class AwsPlatformResources implements PlatformResources {
     @Inject
     private AwsPageCollector awsPageCollector;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Value("${cb.aws.vm.parameter.definition.path:}")
     private String awsVmParameterDefinitionPath;
 
@@ -361,7 +365,7 @@ public class AwsPlatformResources implements PlatformResources {
                 first = false;
                 describeVpcsRequest = describeVpcsRequest.toBuilder().nextToken(describeVpcsResponse == null ? null : describeVpcsResponse.nextToken()).build();
                 describeVpcsResponse = ec2Client.describeVpcs(describeVpcsRequest);
-                Set<CloudNetwork> partialNetworks = getCloudNetworks(ec2Client, allRouteTables, describeVpcsResponse);
+                Set<CloudNetwork> partialNetworks = getCloudNetworks(ec2Client, allRouteTables, describeVpcsResponse, cloudCredential);
                 cloudNetworks.addAll(partialNetworks);
             }
             Map<String, Set<CloudNetwork>> result = new HashMap<>();
@@ -386,13 +390,14 @@ public class AwsPlatformResources implements PlatformResources {
 
     private Set<CloudNetwork> getCloudNetworks(AmazonEc2Client ec2Client,
             List<RouteTable> describeRouteTablesResponse,
-            DescribeVpcsResponse describeVpcsResponse) {
+            DescribeVpcsResponse describeVpcsResponse,
+            ExtendedCloudCredential cloudCredential) {
 
         Set<CloudNetwork> cloudNetworks = new HashSet<>();
         LOGGER.debug("Processing VPCs");
         for (Vpc vpc : describeVpcsResponse.vpcs()) {
             List<Subnet> awsSubnets = getSubnets(ec2Client, vpc);
-            Set<CloudSubnet> subnets = convertAwsSubnetsToCloudSubnets(describeRouteTablesResponse, awsSubnets);
+            Set<CloudSubnet> subnets = convertAwsSubnetsToCloudSubnets(describeRouteTablesResponse, awsSubnets, cloudCredential);
 
             Map<String, Object> properties = prepareNetworkProperties(vpc);
             Optional<String> name = getName(vpc.tags());
@@ -422,13 +427,14 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     private Set<CloudSubnet> convertAwsSubnetsToCloudSubnets(List<RouteTable> describeRouteTablesResponse,
-        List<Subnet> awsSubnets) {
+        List<Subnet> awsSubnets, ExtendedCloudCredential cloudCredential) {
         Set<CloudSubnet> subnets = new HashSet<>();
         for (Subnet subnet : awsSubnets) {
             boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(
                     describeRouteTablesResponse,
                     subnet.subnetId(),
-                    subnet.vpcId());
+                    subnet.vpcId(),
+                    entitlementService.cdpTrialEnabled(cloudCredential.getAccountId()));
             LOGGER.info("The subnet {} has internetGateway value is '{}'", subnet, hasInternetGateway);
 
             Optional<String> subnetName = getName(subnet.tags());
