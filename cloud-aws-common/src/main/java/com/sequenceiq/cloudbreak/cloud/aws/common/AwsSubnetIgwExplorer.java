@@ -30,11 +30,11 @@ public class AwsSubnetIgwExplorer {
 
     private static final String TRIAL_DESTINATION_PREFIX = "pl-";
 
-    public boolean hasInternetGatewayOrVpceOfSubnet(List<RouteTable> routeTables, String subnetId, String vpcId) {
+    public boolean hasInternetGatewayOrVpceOfSubnet(List<RouteTable> routeTables, String subnetId, String vpcId, boolean hasTrialEntitlement) {
         Optional<RouteTable> routeTable = getRouteTableForSubnet(routeTables, subnetId, vpcId);
         LOGGER.debug("Route table for subnet '{}' (VPC is '{}'): '{}'", subnetId, vpcId, routeTable);
 
-        Optional<Route> routeWithInternetGatewayOrVpce = getRouteWithInternetGatewayOrVPCE(routeTable);
+        Optional<Route> routeWithInternetGatewayOrVpce = getRouteWithInternetGatewayOrVPCE(routeTable, hasTrialEntitlement);
         LOGGER.debug("Route with IGW or trial setup for subnet '{}' (VPC is '{}'): '{}'", subnetId, vpcId, routeWithInternetGatewayOrVpce);
 
         return routeWithInternetGatewayOrVpce.isPresent();
@@ -69,12 +69,12 @@ public class AwsSubnetIgwExplorer {
                 .findFirst();
     }
 
-    private Optional<Route> getRouteWithInternetGatewayOrVPCE(Optional<RouteTable> routeTable) {
+    private Optional<Route> getRouteWithInternetGatewayOrVPCE(Optional<RouteTable> routeTable, boolean hasTrialEntitlement) {
         Optional<Route> returnRoute = routeTable.stream()
                 .flatMap(rt -> rt.routes().stream())
                 .filter(route -> isInternetGatewayConfigured(route))
                 .findFirst();
-        if (returnRoute.isEmpty()) {
+        if (returnRoute.isEmpty() && hasTrialEntitlement) {
             // Trial setup
             Set<Route> collectVpces = routeTable.stream()
                     .flatMap(rt -> rt.routes().stream())

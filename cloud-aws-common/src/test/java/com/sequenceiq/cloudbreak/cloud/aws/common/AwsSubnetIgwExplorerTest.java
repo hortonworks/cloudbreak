@@ -36,7 +36,7 @@ public class AwsSubnetIgwExplorerTest {
 
     @Test
     public void testWithNoRouteTable() {
-        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(), SUBNET_ID, VPC_ID);
+        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(), SUBNET_ID, VPC_ID, false);
         assertFalse(hasInternetGateway);
     }
 
@@ -48,7 +48,7 @@ public class AwsSubnetIgwExplorerTest {
                 .associations(RouteTableAssociation.builder().subnetId(SUBNET_ID).build())
                 .build();
 
-        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
+        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID, false);
 
         assertTrue(hasInternetGateway);
     }
@@ -61,7 +61,7 @@ public class AwsSubnetIgwExplorerTest {
                 .associations(RouteTableAssociation.builder().subnetId(SUBNET_ID).build())
                 .build();
 
-        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
+        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID, false);
 
         assertFalse(hasInternetGateway);
     }
@@ -74,7 +74,7 @@ public class AwsSubnetIgwExplorerTest {
                 .associations(RouteTableAssociation.builder().subnetId(DIFFERENT_SUBNET_ID).build())
                 .build();
 
-        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
+        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID, false);
 
         assertFalse(hasInternetGateway);
     }
@@ -86,7 +86,7 @@ public class AwsSubnetIgwExplorerTest {
                 .associations(RouteTableAssociation.builder().subnetId(SUBNET_ID).build())
                 .build();
 
-        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
+        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID, false);
 
         assertFalse(hasInternetGateway);
     }
@@ -98,7 +98,7 @@ public class AwsSubnetIgwExplorerTest {
                 .associations(RouteTableAssociation.builder().subnetId(DIFFERENT_SUBNET_ID).build())
                 .build();
 
-        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
+        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID, false);
 
         assertFalse(hasInternetGateway);
     }
@@ -109,7 +109,7 @@ public class AwsSubnetIgwExplorerTest {
                 .vpcId(VPC_ID)
                 .build();
 
-        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
+        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID, false);
 
         assertFalse(hasInternetGateway);
     }
@@ -122,13 +122,13 @@ public class AwsSubnetIgwExplorerTest {
                 .associations(RouteTableAssociation.builder().main(Boolean.TRUE).build())
                 .build();
 
-        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
+        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID, false);
 
         assertFalse(hasInternetGateway);
     }
 
     @Test
-    public void testWithMainRouteTableAssociationAndIgwPresentWithNotOpenCidrButVPCEforTrialIsThereBlockAsDestination() {
+    public void testWithMainRouteTableAssociationAndIgwPresentWithNotOpenCidrButVPCEforTrialIsThereBlockAsDestinationAndTrialEntitlement() {
         RouteTable routeTable = RouteTable.builder()
                 .vpcId(VPC_ID)
                 .routes(
@@ -149,9 +149,36 @@ public class AwsSubnetIgwExplorerTest {
                 .associations(RouteTableAssociation.builder().main(Boolean.TRUE).build())
                 .build();
 
-        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
+        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID, true);
 
         assertTrue(hasInternetGateway);
+    }
+
+    @Test
+    public void testWithMainRouteTableAssociationAndIgwPresentWithNotOpenCidrButVPCEforTrialIsThereBlockAsDestinationAndTrialEntitlementNotGranted() {
+        RouteTable routeTable = RouteTable.builder()
+                .vpcId(VPC_ID)
+                .routes(
+                        Route.builder()
+                                .gatewayId(GATEWAY_ID)
+                                .destinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK)
+                                .build(),
+                        Route.builder()
+                                .gatewayId("vpce-124")
+                                .destinationPrefixListId("pl-1")
+                                .destinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK)
+                                .build(),
+                        Route.builder()
+                                .gatewayId("vpce-123")
+                                .destinationCidrBlock(OPEN_CIDR_BLOCK)
+                                .build()
+                )
+                .associations(RouteTableAssociation.builder().main(Boolean.TRUE).build())
+                .build();
+
+        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID, false);
+
+        assertFalse(hasInternetGateway);
     }
 
     @Test
@@ -162,7 +189,7 @@ public class AwsSubnetIgwExplorerTest {
                 .associations(RouteTableAssociation.builder().main(Boolean.TRUE).build())
                 .build();
 
-        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
+        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID, false);
 
         assertFalse(hasInternetGateway);
     }
@@ -175,7 +202,7 @@ public class AwsSubnetIgwExplorerTest {
                 .associations(RouteTableAssociation.builder().main(Boolean.TRUE).build())
                 .build();
 
-        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
+        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID, false);
 
         assertTrue(hasInternetGateway);
     }
@@ -204,7 +231,7 @@ public class AwsSubnetIgwExplorerTest {
                 .build();
         routeTables.add(custom2RouteTable);
 
-        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(routeTables, SUBNET_ID, VPC_ID);
+        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(routeTables, SUBNET_ID, VPC_ID, false);
 
         assertFalse(hasInternetGateway);
     }
@@ -233,7 +260,7 @@ public class AwsSubnetIgwExplorerTest {
                 .build();
         routeTables.add(custom2RouteTable);
 
-        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(routeTables, SUBNET_ID, VPC_ID);
+        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(routeTables, SUBNET_ID, VPC_ID, false);
 
         assertFalse(hasInternetGateway);
     }
@@ -255,7 +282,7 @@ public class AwsSubnetIgwExplorerTest {
                 .build();
         routeTables.add(customRouteTable);
 
-        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(routeTables, SUBNET_ID, VPC_ID);
+        boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(routeTables, SUBNET_ID, VPC_ID, false);
 
         assertTrue(hasInternetGateway);
     }

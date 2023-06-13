@@ -37,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonDynamoDBClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
@@ -131,6 +132,9 @@ public class AwsPlatformResourcesTest {
 
     @Mock
     private AwsDefaultZoneProvider awsDefaultZoneProvider;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @Mock
     private AmazonKmsClient awskmsClient;
@@ -419,7 +423,7 @@ public class AwsPlatformResourcesTest {
     }
 
     @Test
-    public void networksSubnetsShouldBeFilteredByEnabledRegions() {
+    public void networksSubnetsShouldBeFilteredByEnabledRegionsAndNotCdpTrialAccount() {
         DescribeRouteTablesResponse routeTables = DescribeRouteTablesResponse.builder().build();
         when(amazonEC2Client.describeRouteTables(any())).thenReturn(routeTables);
         DescribeVpcsResponse vpcs = DescribeVpcsResponse.builder().vpcs(Vpc.builder().build()).build();
@@ -427,6 +431,24 @@ public class AwsPlatformResourcesTest {
         DescribeSubnetsResponse subnets = DescribeSubnetsResponse.builder()
                 .subnets(List.of(Subnet.builder().availabilityZone("not-enabled-az").mapPublicIpOnLaunch(true).build()))
                 .build();
+        when(entitlementService.cdpTrialEnabled(anyString())).thenReturn(false);
+        when(amazonEC2Client.describeSubnets(any())).thenReturn(subnets);
+        CloudNetworks cloudNetworks = underTest.networks(cloudCredential, region, Map.of());
+
+        assertThat(cloudNetworks.getCloudNetworkResponses().get(REGION_NAME))
+                .allMatch(cloudNetwork -> cloudNetwork.getSubnets().isEmpty());
+    }
+
+    @Test
+    public void networksSubnetsShouldBeFilteredByEnabledRegionsAndCdpTrialAccount() {
+        DescribeRouteTablesResponse routeTables = DescribeRouteTablesResponse.builder().build();
+        when(amazonEC2Client.describeRouteTables(any())).thenReturn(routeTables);
+        DescribeVpcsResponse vpcs = DescribeVpcsResponse.builder().vpcs(Vpc.builder().build()).build();
+        when(amazonEC2Client.describeVpcs(any())).thenReturn(vpcs);
+        DescribeSubnetsResponse subnets = DescribeSubnetsResponse.builder()
+                .subnets(List.of(Subnet.builder().availabilityZone("not-enabled-az").mapPublicIpOnLaunch(true).build()))
+                .build();
+        when(entitlementService.cdpTrialEnabled(anyString())).thenReturn(true);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(subnets);
         CloudNetworks cloudNetworks = underTest.networks(cloudCredential, region, Map.of());
 
