@@ -45,6 +45,8 @@ public class CloudStack {
 
     private final String coreUserData;
 
+    private final boolean multiAz;
+
     public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template,
             InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem,
             String gatewayUserData, String coreUserData) {
@@ -52,11 +54,18 @@ public class CloudStack {
                 Collections.emptyList(), gatewayUserData, coreUserData);
     }
 
+    public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template,
+            InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem,
+            String gatewayUserData, String coreUserData, boolean multiAz) {
+        this(groups, network, image, parameters, tags, template, instanceAuthentication, loginUserName, publicKey, fileSystem,
+                Collections.emptyList(), null, gatewayUserData, coreUserData, multiAz);
+    }
+
     public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags,
             String template, InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem,
             List<CloudLoadBalancer> loadBalancers, String gatewayUserData, String coreUserData) {
         this(groups, network, image, parameters, tags, template, instanceAuthentication, loginUserName, publicKey, fileSystem,
-                loadBalancers, null, gatewayUserData, coreUserData);
+                loadBalancers, null, gatewayUserData, coreUserData, false);
     }
 
     @JsonCreator
@@ -74,7 +83,8 @@ public class CloudStack {
             @JsonProperty("loadBalancers") List<CloudLoadBalancer> loadBalancers,
             @JsonProperty("additionalFileSystem") SpiFileSystem additionalFileSystem,
             @JsonProperty("gatewayUserData") String gatewayUserData,
-            @JsonProperty("coreUserData") String coreUserData) {
+            @JsonProperty("coreUserData") String coreUserData,
+            @JsonProperty("multiAz") boolean multiAz) {
         this.groups = ImmutableList.copyOf(groups);
         this.network = network;
         this.image = image;
@@ -89,11 +99,12 @@ public class CloudStack {
         this.additionalFileSystem = Optional.ofNullable(additionalFileSystem);
         this.gatewayUserData = gatewayUserData;
         this.coreUserData = coreUserData;
+        this.multiAz = multiAz;
     }
 
     public CloudStack replaceImage(Image newImage) {
         return new CloudStack(groups, network, newImage, parameters, tags, template, instanceAuthentication, loginUserName, publicKey,
-                fileSystem.orElse(null), loadBalancers, additionalFileSystem.orElse(null), gatewayUserData, coreUserData);
+                fileSystem.orElse(null), loadBalancers, additionalFileSystem.orElse(null), gatewayUserData, coreUserData, multiAz);
     }
 
     public List<Group> getGroups() {
@@ -164,6 +175,10 @@ public class CloudStack {
         }
     }
 
+    public boolean isMultiAz() {
+        return multiAz;
+    }
+
     @Override
     public String toString() {
         return "CloudStack{" +
@@ -178,6 +193,7 @@ public class CloudStack {
                 ", instanceAuthentication=" + instanceAuthentication +
                 ", fileSystem=" + fileSystem +
                 ", additionalFileSystem=" + additionalFileSystem +
+                ", multiAz=" + multiAz +
                 '}';
     }
 }
