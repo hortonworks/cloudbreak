@@ -165,7 +165,7 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
                     generateServiceKeytab(ipaClient, environmentCrn);
                     dnsLookups(testContext.given(SdxTestDto.class));
                     cleanUp(testContext, ipaClient, environmentCrn);
-                    kinit(testContext.given(SdxTestDto.class), ipaClient, environmentCrn);
+//                    kinit(testContext.given(SdxTestDto.class), ipaClient, environmentCrn);
                     syncUsers(testContext, ipaClient, environmentCrn, accountId);
                 } catch (TestFailException e) {
                     if (firstTestFailure) {
