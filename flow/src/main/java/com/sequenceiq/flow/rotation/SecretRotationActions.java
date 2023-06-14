@@ -56,6 +56,8 @@ public class SecretRotationActions {
             @Override
             protected void doExecute(RotationFlowContext context, SecretRotationTriggerEvent payload, Map<Object, Object> variables) throws Exception {
                 if (RotationFlowExecutionType.ROLLBACK.equals(payload.getExecutionType())) {
+                    LOGGER.info("Routing execution of rotation flow to rollback state, since execution type is specified for secret {} and resource {}",
+                            payload.getSecretType(), payload.getResourceCrn());
                     sendEvent(context, ExecuteRotationFailedEvent.fromPayload(payload, new SecretRotationException(EXPLICIT_ROLLBACK_EXECUTION, null), null));
                 } else {
                     sendEvent(context, ExecuteRotationTriggerEvent.fromPayload(payload));

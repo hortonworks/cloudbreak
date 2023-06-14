@@ -29,6 +29,7 @@ public class VaultRotationExecutor implements RotationExecutor<VaultRotationCont
             String vaultPath = entry.getKey();
             String newSecret = entry.getValue();
             if (!secretService.getRotation(vaultPath).isRotation()) {
+                LOGGER.info("Adding new secret to vault path {}", vaultPath);
                 secretService.putRotation(vaultPath, newSecret);
             }
         }
@@ -40,6 +41,7 @@ public class VaultRotationExecutor implements RotationExecutor<VaultRotationCont
             String vaultPath = entry.getKey();
             RotationSecret rotationSecret = secretService.getRotation(vaultPath);
             if (rotationSecret.isRotation()) {
+                LOGGER.info("Removing new secret from vault path {}", vaultPath);
                 secretService.update(vaultPath, rotationSecret.getBackupSecret());
             }
         }
@@ -51,6 +53,7 @@ public class VaultRotationExecutor implements RotationExecutor<VaultRotationCont
             String vaultPath = entry.getKey();
             RotationSecret rotationSecret = secretService.getRotation(vaultPath);
             if (rotationSecret.isRotation()) {
+                LOGGER.info("Removing old secret from vault path {}", vaultPath);
                 secretService.update(vaultPath, rotationSecret.getSecret());
             }
         }
