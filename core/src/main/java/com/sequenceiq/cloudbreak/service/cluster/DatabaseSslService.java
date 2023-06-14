@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
+import com.sequenceiq.cloudbreak.util.DatabaseParameterFallbackUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 
@@ -96,7 +98,7 @@ public class DatabaseSslService {
                 throw new IllegalStateException("Mismatching sslDetails.sslEnabledForStack in RedbeamsDbCertificateProvider response. " +
                         "Expecting false because the stack uses an embedded DB, but it was true.");
             }
-            sslEnforcementForStackEmbeddedDatabaseEnabled = isSslEnforcementForEmbeddedDatabaseEnabled(stackView, cluster, creation);
+            sslEnforcementForStackEmbeddedDatabaseEnabled = isSslEnforcementForEmbeddedDatabaseEnabled(stackView, cluster, stackDto.getDatabase(), creation);
             sslDetails.setSslEnabledForStack(sslEnforcementForStackEmbeddedDatabaseEnabled);
             LOGGER.info("SSL enforcement is {} for the stack embedded DB", sslEnforcementForStackEmbeddedDatabaseEnabled ? ENABLED : DISABLED);
         } else {
@@ -123,7 +125,8 @@ public class DatabaseSslService {
                 Stack datalakeStack = datalakeStackOpt.get();
                 Cluster datalakeCluster = datalakeStack.getCluster();
                 if (isEmbeddedDatabase(datalakeCluster)) {
-                    response = isSslEnforcementForEmbeddedDatabaseEnabled(datalakeStack, datalakeCluster, creation);
+                    response = isSslEnforcementForEmbeddedDatabaseEnabled(datalakeStack, datalakeCluster,
+                            DatabaseParameterFallbackUtil.getOrCreateDatabase(datalakeStack), creation);
                     LOGGER.info("SSL enforcement is {} for the parent datalake stack embedded DB", response ? ENABLED : DISABLED);
                 } else {
                     LOGGER.info("The parent datalake stack uses an external DB");
@@ -141,12 +144,12 @@ public class DatabaseSslService {
         return !dbServerConfigurer.isRemoteDatabaseRequested(clusterView.getDatabaseServerCrn());
     }
 
-    private boolean isSslEnforcementForEmbeddedDatabaseEnabled(StackView stackView, ClusterView clusterView, boolean creation) {
+    private boolean isSslEnforcementForEmbeddedDatabaseEnabled(StackView stackView, ClusterView clusterView, Database database, boolean creation) {
         boolean response;
         String stackName = stackView.getName();
         String stackCrn = stackView.getResourceCrn();
         if (creation) {
-            response = embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView);
+            response = embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView, database);
             LOGGER.info("Retrieving dbSslEnabled from EmbeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled() for stack '{}' with CRN '{}': {}",
                     stackName, stackCrn, response);
         } else {

@@ -133,7 +133,7 @@ class AbstractRdsConfigProviderTest {
         when(stackDto.getCluster()).thenReturn(testCluster);
         when(stackDto.getStack()).thenReturn(testStack);
         when(rdsConfigWithoutClusterService.findByClusterId(anyLong())).thenReturn(Set.of(rdsConfigWithoutCluster));
-        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(testStack, testCluster)).thenReturn(sslEnforcement);
+        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(testStack, testCluster, null)).thenReturn(sslEnforcement);
 
         Map<String, Object> result = underTest.createServicePillarConfigMapIfNeeded(stackDto);
 
