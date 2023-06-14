@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.view.delegate.StackViewDelegate;
 
@@ -120,6 +121,11 @@ public interface StackDtoRepository extends Repository<Stack, Long> {
             "LEFT JOIN s.network n " +
             "WHERE s.id = :stackId")
     Optional<Network> getNetworkByStackById(@Param("stackId") long stackId);
+
+    @Query("SELECT d FROM Stack s " +
+            "LEFT JOIN s.database d " +
+            "WHERE s.id = :stackId")
+    Optional<Database> getDatabaseByStackById(@Param("stackId") long stackId);
 
     @Query(BASE_QUERY
             + "WHERE s.id = :stackId "

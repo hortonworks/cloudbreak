@@ -89,7 +89,6 @@ class PostgresConfigServiceTest {
     @Test
     void decorateServicePillarWithPostgresIfNeededTestCertsWhenSslDisabledFromDatabaseSslService() {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
-        when(stack.getStack()).thenReturn(new Stack());
         Cluster cluster = new Cluster();
         cluster.setDbSslEnabled(false);
         cluster.setDbSslRootCertBundle(null);
@@ -134,7 +133,6 @@ class PostgresConfigServiceTest {
     void decorateServicePillarWithPostgresWhenReusedDatabaseListWasEmpty() {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         ReflectionTestUtils.setField(underTest, "databasesReusedDuringRecovery", List.of());
-        when(stack.getStack()).thenReturn(new Stack());
         Cluster cluster = new Cluster();
         cluster.setDbSslEnabled(false);
         when(stack.getCluster()).thenReturn(cluster);
@@ -150,12 +148,9 @@ class PostgresConfigServiceTest {
     void decorateServicePillarWithPostgresWhenReusedDatabaseListIsNotEmpty() {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         ReflectionTestUtils.setField(underTest, "databasesReusedDuringRecovery", List.of("HIVE"));
-        Stack stackView = new Stack();
-        stackView.setExternalDatabaseEngineVersion(DBVERSION);
-        when(stack.getStack()).thenReturn(stackView);
+        when(stack.getExternalDatabaseEngineVersion()).thenReturn(DBVERSION);
         Cluster cluster = new Cluster();
         cluster.setDbSslEnabled(false);
-        stackView.setCluster(cluster);
         when(stack.getCluster()).thenReturn(cluster);
         when(databaseSslService.getDbSslDetailsForCreationAndUpdateInCluster(stack)).thenReturn(new DatabaseSslDetails(new HashSet<>(), false));
 
@@ -185,14 +180,12 @@ class PostgresConfigServiceTest {
         Set<String> rootCerts = new LinkedHashSet<>();
         rootCerts.add("cert1");
         rootCerts.add("cert2");
-        Stack stackView = new Stack();
-        stackView.setExternalDatabaseEngineVersion(DBVERSION);
         Cluster cluster = new Cluster();
         cluster.setDbSslRootCertBundle(null);
         cluster.setDatabaseServerCrn("crn");
         cluster.setId(CLUSTER_ID);
-        when(stack.getStack()).thenReturn(stackView);
         when(stack.getCluster()).thenReturn(cluster);
+        when(stack.getExternalDatabaseEngineVersion()).thenReturn(DBVERSION);
         when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
         when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
         when(databaseSslService.getDbSslDetailsForCreationAndUpdateInCluster(stack)).thenReturn(new DatabaseSslDetails(rootCerts, sslEnabledForStack));
@@ -286,13 +279,11 @@ class PostgresConfigServiceTest {
         Set<String> rootCerts = new LinkedHashSet<>();
         rootCerts.add("cert1");
         rootCerts.add("cert2");
-        Stack stackView = new Stack();
-        stackView.setExternalDatabaseEngineVersion(DBVERSION);
         Cluster cluster = new Cluster();
         cluster.setDbSslRootCertBundle(null);
         cluster.setDatabaseServerCrn("crn");
         cluster.setId(CLUSTER_ID);
-        when(stack.getStack()).thenReturn(stackView);
+        when(stack.getExternalDatabaseEngineVersion()).thenReturn(DBVERSION);
         when(stack.getCluster()).thenReturn(cluster);
         when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
         when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
