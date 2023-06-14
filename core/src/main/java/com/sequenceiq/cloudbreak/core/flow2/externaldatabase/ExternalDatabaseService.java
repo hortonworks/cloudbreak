@@ -202,6 +202,28 @@ public class ExternalDatabaseService {
         }
     }
 
+    private void pollUntilUpgradeFlowFinished(String databaseCrn, FlowIdentifier flowIdentifier) {
+        Boolean success = Polling.waitPeriodly(DB_POLLING_CONFIG.getSleepTime(), DB_POLLING_CONFIG.getSleepTimeUnit())
+                .stopIfException(DB_POLLING_CONFIG.getStopPollingIfExceptionOccured())
+                .stopAfterDelay(DB_POLLING_CONFIG.getTimeout(), DB_POLLING_CONFIG.getTimeoutTimeUnit())
+                .run(() -> pollFlowState(flowIdentifier));
+        if (!success) {
+            String errorDescription;
+            try {
+                DatabaseServerV4Response rdsStatus = redbeamsClient.getByCrn(databaseCrn);
+                LOGGER.info("Response from redbeams: {}", rdsStatus);
+                errorDescription = rdsStatus.getStatusReason();
+            } catch (CloudbreakServiceException | NotFoundException e) {
+                errorDescription = e.getMessage();
+                LOGGER.info("Error {} returned for database crn: {}", errorDescription, databaseCrn);
+            }
+            String message = String.format("Database upgrade failed with error: %s. Database crn: %s, upgrade flow: %s",
+                    errorDescription, databaseCrn, flowIdentifier);
+            LOGGER.warn(message);
+            throw new CloudbreakServiceException(message);
+        }
+    }
+
     public void rotateDatabaseSecret(String databaseServerCrn, RedbeamsSecretType secretType, RotationFlowExecutionType executionType) {
         LOGGER.info("Rotating external database server secret: {} for database server {}", secretType, databaseServerCrn);
         RotateDatabaseServerSecretV4Request request = new RotateDatabaseServerSecretV4Request();

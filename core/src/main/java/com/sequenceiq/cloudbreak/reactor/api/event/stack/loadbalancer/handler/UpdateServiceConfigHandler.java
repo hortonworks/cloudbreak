@@ -81,7 +81,7 @@ public class UpdateServiceConfigHandler extends ExceptionCatcherEventHandler<Upd
             ClusterApi clusterApi = clusterApiConnectors.getConnector(stackDto);
             clusterApi.clusterModificationService().updateServiceConfigAndRestartService(HUE_SERVICE, HUE_KNOX_PROXYHOSTS, String.join(",", proxyhosts));
             LOGGER.debug("Updating CM frontend URL with load balancer DNS");
-            clusterHostServiceRunner.updateClusterConfigs(stackDto, false);
+            clusterHostServiceRunner.updateClusterConfigs(stackDto);
             LOGGER.debug("Service config update was successful");
             return new UpdateServiceConfigSuccess(stack.getId());
         } catch (Exception e) {
