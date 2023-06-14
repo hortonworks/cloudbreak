@@ -1,14 +1,12 @@
 package com.sequenceiq.cloudbreak.service;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Enums;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
@@ -17,16 +15,13 @@ import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.BlackListedLoadBasedVerticalScaleRole;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Service
@@ -47,30 +42,13 @@ public class VerticalScalingValidatorService {
     @Inject
     private CloudParameterCache cloudParameterCache;
 
-    @Inject
-    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
-
-    public void validateProvider(Stack stack, StackVerticalScaleV4Request verticalScaleV4Request) {
+    public void validateProvider(Stack stack) {
         if (!cloudParameterCache.isVerticalScalingSupported(stack.getCloudPlatform())) {
             throw new BadRequestException(String.format("Vertical scaling is not supported on %s cloudplatform", stack.getCloudPlatform()));
         }
-        if (!stack.isStopped() && !validateHostGroup(stack, verticalScaleV4Request)) {
+        if (!stack.isStopped()) {
             throw new BadRequestException(String.format("You must stop %s to be able to vertically scale it.", stack.getName()));
         }
-    }
-
-    public boolean validateHostGroup(Stack stack, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
-        String blueprintText = stack.getBlueprint().getBlueprintText();
-        BlueprintTextProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
-        Set<String> hostTemplateComponents = processor.getComponentsInHostGroup(stackVerticalScaleV4Request.getGroup());
-        for (String service : hostTemplateComponents) {
-            com.google.common.base.Optional<BlackListedLoadBasedVerticalScaleRole> enumValue =
-                    Enums.getIfPresent(BlackListedLoadBasedVerticalScaleRole.class, service);
-            if (enumValue.isPresent()) {
-                return false;
-            }
-        }
-        return true;
     }
 
     public void validateRequest(Stack stack, StackVerticalScaleV4Request verticalScaleV4Request) {
