@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.rotation.executor;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
@@ -15,6 +17,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 @Component
 public class ClusterProxyRotationExecutor implements RotationExecutor<ClusterProxyRotationContext> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyRotationExecutor.class);
+
     @Inject
     private StackDtoService stackDtoService;
 
@@ -23,12 +27,14 @@ public class ClusterProxyRotationExecutor implements RotationExecutor<ClusterPro
 
     @Override
     public void rotate(ClusterProxyRotationContext rotationContext) {
+        LOGGER.info("Reregistring stack {} in cluster proxy for secret rotation.", rotationContext.getResourceCrn());
         StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
         clusterProxyService.reRegisterCluster(stackDto.getId());
     }
 
     @Override
     public void rollback(ClusterProxyRotationContext rotationContext) {
+        LOGGER.info("Reregistring stack {} in cluster proxy for rollback of secret rotation.", rotationContext.getResourceCrn());
         StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
         clusterProxyService.reRegisterCluster(stackDto.getId());
     }
