@@ -167,10 +167,6 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
         return network;
     }
 
-    public Map<String, InstanceGroupDto> getInstanceGroups() {
-        return instanceGroups;
-    }
-
     public Set<Resource> getResources() {
         if (resources == null) {
             throw new NotImplementedException("Resource fetch are disabled");
