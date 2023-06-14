@@ -10,7 +10,6 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.event.FlowPayload;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.InstanceStorageInfo;
 
 public class CoreVerticalScaleResult extends CloudPlatformResult implements FlowPayload {
 
@@ -20,20 +19,16 @@ public class CoreVerticalScaleResult extends CloudPlatformResult implements Flow
 
     private final StackVerticalScaleV4Request stackVerticalScaleV4Request;
 
-    private final List<InstanceStorageInfo> instanceStoreInfo;
-
     @JsonCreator
     public CoreVerticalScaleResult(
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("resourceStatus") ResourceStatus resourceStatus,
             @JsonProperty("results") List<CloudResourceStatus> results,
-            @JsonProperty("stackVerticalScaleV4Request") StackVerticalScaleV4Request stackVerticalScaleV4Request,
-            @JsonProperty("instanceStoreInfo") List<InstanceStorageInfo> instanceStoreInfo) {
+            @JsonProperty("stackVerticalScaleV4Request") StackVerticalScaleV4Request stackVerticalScaleV4Request) {
         super(resourceId);
         this.resourceStatus = resourceStatus;
         this.results = results;
         this.stackVerticalScaleV4Request = stackVerticalScaleV4Request;
-        this.instanceStoreInfo = instanceStoreInfo;
     }
 
     public CoreVerticalScaleResult(String statusReason, Exception errorDetails, Long resourceId,
@@ -42,7 +37,6 @@ public class CoreVerticalScaleResult extends CloudPlatformResult implements Flow
         this.resourceStatus = ResourceStatus.FAILED;
         this.stackVerticalScaleV4Request = stackVerticalScaleV4Request;
         this.results = new ArrayList<>();
-        this.instanceStoreInfo = new ArrayList<>();
     }
 
     public List<CloudResourceStatus> getResults() {
@@ -59,9 +53,5 @@ public class CoreVerticalScaleResult extends CloudPlatformResult implements Flow
 
     public StackVerticalScaleV4Request getStackVerticalScaleV4Request() {
         return stackVerticalScaleV4Request;
-    }
-
-    public List<InstanceStorageInfo> getInstanceStoreInfo() {
-        return instanceStoreInfo;
     }
 }

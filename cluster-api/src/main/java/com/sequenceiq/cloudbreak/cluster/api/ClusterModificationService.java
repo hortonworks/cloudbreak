@@ -95,12 +95,4 @@ public interface ClusterModificationService {
     default void restartClusterServices() {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
-
-    void stopClouderaManagerService(String serviceType) throws Exception;
-
-    void startClouderaManagerService(String serviceType) throws Exception;
-
-    Map<String, String> fetchServiceStatuses() throws Exception;
-
-    void updateServiceConfig(String serviceName, Map<String, String> config, List<String> roleGroupNames) throws CloudbreakException;
 }

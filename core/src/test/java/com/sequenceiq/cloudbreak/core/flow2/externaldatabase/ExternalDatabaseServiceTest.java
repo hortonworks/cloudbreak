@@ -102,6 +102,10 @@ class ExternalDatabaseServiceTest {
 
     private static final String STACK_VERSION_BAD = "7.2.1";
 
+    private static final String UPGRADE_ERROR_REASON = "upgrade error happened";
+
+    private static final String DATABASE_NOT_FOUND = "Database not found";
+
     @Mock
     private RedbeamsClientService redbeamsClient;
 
@@ -501,6 +505,10 @@ class ExternalDatabaseServiceTest {
 
         UpgradeDatabaseServerV4Response response = new UpgradeDatabaseServerV4Response();
         response.setFlowIdentifier(new FlowIdentifier(FlowType.FLOW, RDBMS_FLOW_ID));
+        DatabaseServerV4Response dbServerResponse = new DatabaseServerV4Response();
+        dbServerResponse.setCrn(RDBMS_CRN);
+        dbServerResponse.setStatusReason(UPGRADE_ERROR_REASON);
+        when(redbeamsClient.getByCrn(RDBMS_CRN)).thenReturn(dbServerResponse);
         when(redbeamsClient.upgradeByCrn(eq(RDBMS_CRN), any())).thenReturn(response);
 
         when(redbeamsClient.hasFlowRunningByFlowId(RDBMS_FLOW_ID)).thenReturn(createFlowCheckResponse(Boolean.FALSE, Boolean.TRUE));
