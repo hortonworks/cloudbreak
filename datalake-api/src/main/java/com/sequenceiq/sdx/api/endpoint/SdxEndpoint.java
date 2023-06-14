@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
+import com.sequenceiq.sdx.api.model.DatalakeHorizontalScaleRequest;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
 import com.sequenceiq.sdx.api.model.SdxBackupLocationValidationRequest;
 import com.sequenceiq.sdx.api.model.SdxChangeImageCatalogRequest;
@@ -379,4 +380,11 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Rotate SDX secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateSDXSecrets", hidden = true)
     FlowIdentifier rotateSecrets(@Valid @NotNull SdxSecretRotationRequest request);
+
+    @PUT
+    @Path("name/{name}/horizontal_scale")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Initiates the horizontal scaling on Data Lake", produces = MediaType.APPLICATION_JSON,
+            nickname = "horizontalScaleByName")
+    FlowIdentifier horizontalScaleByName(@PathParam("name") String name, @Valid DatalakeHorizontalScaleRequest scaleRequest);
 }

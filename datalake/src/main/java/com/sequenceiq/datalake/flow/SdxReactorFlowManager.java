@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.flow;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RESIZE_TRIGGERED;
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_VALIDATION_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.recovery.DatalakeUpgradeRecoveryEvent.DATALAKE_RECOVERY_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.preparation.DatalakeUpgradePreparationEvent.DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
@@ -50,6 +51,7 @@ import com.sequenceiq.datalake.flow.cert.renew.event.SdxStartCertRenewalEvent;
 import com.sequenceiq.datalake.flow.cert.rotation.event.SdxStartCertRotationEvent;
 import com.sequenceiq.datalake.flow.datalake.cmsync.event.SdxCmSyncStartEvent;
 import com.sequenceiq.datalake.flow.datalake.recovery.event.DatalakeRecoveryStartEvent;
+import com.sequenceiq.datalake.flow.datalake.scale.event.DatalakeHorizontalScaleSdxEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradePreparationFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeStartEvent;
@@ -83,6 +85,7 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.rotation.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.flow.service.FlowNameFormatService;
+import com.sequenceiq.sdx.api.model.DatalakeHorizontalScaleRequest;
 import com.sequenceiq.sdx.api.model.SdxRecoveryType;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
@@ -336,6 +339,14 @@ public class SdxReactorFlowManager {
         String selector = SaltUpdateEvent.SALT_UPDATE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new SaltUpdateTriggerEvent(cluster.getId(), userId), cluster.getClusterName());
+    }
+
+    public FlowIdentifier triggerHorizontalScaleDataLake(SdxCluster sdxCluster, DatalakeHorizontalScaleRequest scaleRequest) {
+        String selector = DATALAKE_HORIZONTAL_SCALE_EVENT.selector();
+        String userId = ThreadBasedUserCrnProvider.getUserCrn();
+        DatalakeHorizontalScaleSdxEvent sdxEvent = new DatalakeHorizontalScaleSdxEvent(selector, sdxCluster.getId(), sdxCluster.getName(), userId,
+                sdxCluster.getResourceCrn(), scaleRequest, null, null, null);
+        return notify(selector, sdxEvent, sdxCluster.getClusterName());
     }
 
     public FlowIdentifier triggerSecretRotation(SdxCluster sdxCluster, List<SecretType> secretTypes, RotationFlowExecutionType executionType) {

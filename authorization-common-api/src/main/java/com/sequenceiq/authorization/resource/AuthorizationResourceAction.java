@@ -51,6 +51,7 @@ public enum AuthorizationResourceAction {
     UPGRADE_DATALAKE("datalake/upgradeDatalake", AuthorizationResourceType.DATALAKE),
     RECOVER_DATALAKE("datalake/recoverDatalake", AuthorizationResourceType.DATALAKE),
     DATALAKE_VERTICAL_SCALING("environments/verticalScale", AuthorizationResourceType.DATALAKE),
+    DATALAKE_HORIZONTAL_SCALING("datalake/horizontalScale", AuthorizationResourceType.DATALAKE),
     SYNC_COMPONENT_VERSIONS_FROM_CM_DATALAKE("datalake/syncComponentVersionsFromCm", AuthorizationResourceType.DATALAKE),
     CHANGE_IMAGE_CATALOG_DATALAKE("datalake/changeImageCatalog", AuthorizationResourceType.DATALAKE),
     ROTATE_CERT_DATALAKE("datalake/rotateAutoTlsCertDatalake", AuthorizationResourceType.DATALAKE),

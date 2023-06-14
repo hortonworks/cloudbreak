@@ -455,8 +455,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
         String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response);
         String os = Optional.ofNullable(imageV4Response).map(ImageV4Response::getOs)
-                        .or(() -> Optional.ofNullable(internalStackV4Request).map(StackV4Request::getImage).map(ImageSettingsV4Request::getOs))
-                        .orElse(null);
+                .or(() -> Optional.ofNullable(internalStackV4Request).map(StackV4Request::getImage).map(ImageSettingsV4Request::getOs))
+                .orElse(null);
 
         validateCcmV2Requirement(environment, runtimeVersion);
 

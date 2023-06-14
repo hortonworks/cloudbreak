@@ -390,7 +390,7 @@ class SdxServiceTest {
                 .thenReturn(true);
         lenient().when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
         lenient().when(externalDatabaseConfigurer.configure(any(CloudPlatform.class), any(), ArgumentMatchers.isNull(), any(SdxDatabaseRequest.class),
-                        any(SdxCluster.class))).thenReturn(new SdxDatabase());
+                any(SdxCluster.class))).thenReturn(new SdxDatabase());
     }
 
     @Test

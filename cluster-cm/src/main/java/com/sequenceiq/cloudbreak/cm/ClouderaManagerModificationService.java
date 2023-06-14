@@ -1126,4 +1126,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             LOGGER.warn("Don't run start roles command because hosts are empty");
         }
     }
+
+    @Override
+    public void refreshCluster() throws Exception {
+        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(v31Client);
+        deployConfigAndRefreshCMStaleServices(clustersResourceApi, false);
+    }
 }

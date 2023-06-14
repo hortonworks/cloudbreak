@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.scale.ServicesRollingRestartEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.rotatepassword.RotateSaltPasswordEvent;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
@@ -472,5 +473,10 @@ public class ReactorFlowManager {
             }
         }
         return new NetworkScaleDetails(preferredSubnetIds);
+    }
+
+    public FlowIdentifier triggerServicesRollingRestart(Long stackId) {
+        String selector = ServicesRollingRestartEvent.SERVICES_ROLLING_RESTART_TRIGGER_EVENT.event();
+        return reactorNotifier.notify(stackId, selector, new StackEvent(stackId));
     }
 }

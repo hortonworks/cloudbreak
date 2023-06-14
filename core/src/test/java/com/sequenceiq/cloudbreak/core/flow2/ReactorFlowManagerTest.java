@@ -172,6 +172,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerVerticalScale(STACK_ID, new StackVerticalScaleV4Request());
         underTest.triggerOsUpgradeByUpgradeSetsFlow(STACK_ID, "AWS", new ImageChangeDto(STACK_ID, null), List.of());
         underTest.triggerDetermineDatalakeDataSizes(STACK_ID, "asdf");
+        underTest.triggerServicesRollingRestart(STACK_ID);
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {
