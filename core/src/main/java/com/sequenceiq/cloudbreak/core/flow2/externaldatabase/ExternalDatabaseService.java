@@ -180,22 +180,22 @@ public class ExternalDatabaseService {
                 targetMajorVersion.name(), cluster.getName());
         String databaseCrn = cluster.getDatabaseServerCrn();
 
-            if (externalDatabaseReferenceExist(databaseCrn)) {
-                try {
-                    UpgradeDatabaseServerV4Request request = new UpgradeDatabaseServerV4Request();
-                    request.setUpgradeTargetMajorVersion(targetMajorVersion);
-                    UpgradeDatabaseServerV4Response response = redbeamsClient.upgradeByCrn(databaseCrn, request);
-                    if (null == response.getFlowIdentifier()) {
-                        LOGGER.info(response.getReason());
-                    } else {
-                        pollUntilFlowFinished(databaseCrn, response.getFlowIdentifier());
-                    }
-                } catch (NotFoundException notFoundException) {
-                    LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
+        if (externalDatabaseReferenceExist(databaseCrn)) {
+            try {
+                UpgradeDatabaseServerV4Request request = new UpgradeDatabaseServerV4Request();
+                request.setUpgradeTargetMajorVersion(targetMajorVersion);
+                UpgradeDatabaseServerV4Response response = redbeamsClient.upgradeByCrn(databaseCrn, request);
+                if (null == response.getFlowIdentifier()) {
+                    LOGGER.info(response.getReason());
+                } else {
+                    pollUntilFlowFinished(databaseCrn, response.getFlowIdentifier());
                 }
-            } else {
-                LOGGER.warn("[INVESTIGATE] The external database crn reference was not present");
+            } catch (NotFoundException notFoundException) {
+                LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
             }
+        } else {
+            LOGGER.warn("[INVESTIGATE] The external database crn reference was not present");
+        }
     }
 
     public void rotateDatabaseSecret(String databaseServerCrn, RedbeamsSecretType secretType, RotationFlowExecutionType executionType) {
@@ -219,7 +219,16 @@ public class ExternalDatabaseService {
                     .stopAfterDelay(DB_POLLING_CONFIG.getTimeout(), DB_POLLING_CONFIG.getTimeoutTimeUnit())
                     .run(() -> pollFlowState(flowIdentifier));
             if (success == null || !success) {
-                handleUnsuccessfulFlow(databaseCrn, flowIdentifier, null);
+                String errorDescription;
+                try {
+                    DatabaseServerV4Response rdsStatus = redbeamsClient.getByCrn(databaseCrn);
+                    LOGGER.info("Response from redbeams: {}", rdsStatus);
+                    errorDescription = rdsStatus.getStatusReason();
+                } catch (CloudbreakServiceException | NotFoundException e) {
+                    errorDescription = e.getMessage();
+                    LOGGER.info("Error {} returned for database crn: {}", errorDescription, databaseCrn);
+                }
+                handleUnsuccessfulFlow(databaseCrn, flowIdentifier, new UserBreakException(errorDescription));
             }
         } catch (UserBreakException e) {
             handleUnsuccessfulFlow(databaseCrn, flowIdentifier, e);
@@ -227,8 +236,8 @@ public class ExternalDatabaseService {
     }
 
     private static void handleUnsuccessfulFlow(String databaseCrn, FlowIdentifier flowIdentifier, UserBreakException e) {
-        String message = String.format("Database flow failed in Redbeams. Database crn: %s, flow: %s",
-                databaseCrn, flowIdentifier);
+        String message = String.format("Database flow failed in Redbeams with error: '%s'. Database crn: %s, flow: %s",
+                e != null ? e.getMessage() : "unknown", databaseCrn, flowIdentifier);
         LOGGER.warn(message);
         throw new CloudbreakServiceException(message, e);
     }
