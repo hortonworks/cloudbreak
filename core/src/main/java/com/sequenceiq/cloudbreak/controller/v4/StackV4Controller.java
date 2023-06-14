@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
@@ -642,5 +643,11 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public FlowIdentifier rotateSecrets(Long workspaceId, StackV4SecretRotationRequest request, @InitiatorUserCrn String initiatorUserCrn) {
         return stackOperationService.rotateSecrets(request.getCrn(), List.of(request.getSecret()), request.getExecutionType());
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATALAKE_HORIZONTAL_SCALING)
+    public FlowIdentifier rollingRestartServices(Long workspaceId, @ResourceCrn String crn) {
+        return stackOperationService.triggerServicesRollingRestart(crn);
     }
 }

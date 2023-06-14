@@ -722,4 +722,10 @@ public interface StackV4Endpoint {
     @ApiOperation(value = ROTATE_STACK_SECRETS, produces = MediaType.APPLICATION_JSON, nickname = "rotateStackSecrets", hidden = true)
     FlowIdentifier rotateSecrets(@PathParam("workspaceId") Long workspaceId, @Valid @NotNull StackV4SecretRotationRequest request,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @POST
+    @Path("{crn}/cm_rolling_restart")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Services rolling restart", produces = MediaType.APPLICATION_JSON, nickname = "rollingRestartServices")
+    FlowIdentifier rollingRestartServices(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn);
 }

@@ -608,6 +608,13 @@ public enum ResourceEvent {
     DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS("datalake.verticalscale.datalake.in.progress"),
     DATALAKE_VERTICAL_SCALE_ON_DATALAKE_FAILED("datalake.verticalscale.datalake.failed"),
     DATALAKE_VERTICAL_SCALE_FAILED("datalake.verticalscale.failed"),
+    DATALAKE_HORIZONTAL_SCALE_VALIDATION_IN_PROGRESS("datalake.horizontalscale.validation.in.progress"),
+    DATALAKE_HORIZONTAL_SCALE_VALIDATION_FAILED("datalake.horizontalscale.validation.failed"),
+    DATALAKE_HORIZONTAL_SCALE_SERVICES_RESTART_IN_PROGRESS("datalake.horizontalscale.services.restart.in.progress"),
+    DATALAKE_HORIZONTAL_SCALE_IN_PROGRESS("datalake.horizontalscale.in.progress"),
+    DATALAKE_HORIZONTAL_SCALE_FINISHED("datalake.horizontalscale.finished"),
+    DATALAKE_HORIZONTAL_SCALE_FAILED("datalake.horizontalscale.failed"),
+
 
     DATALAKE_SECRET_ROTATION_IN_PROGRESS("datalake.secret.rotation.in.progress"),
     DATALAKE_SECRET_ROTATION_FINISHED("datalake.secret.rotation.finished"),

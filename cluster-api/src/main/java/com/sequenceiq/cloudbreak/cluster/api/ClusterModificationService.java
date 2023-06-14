@@ -95,4 +95,6 @@ public interface ClusterModificationService {
     default void restartClusterServices() {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
+
+    void refreshCluster() throws Exception;
 }

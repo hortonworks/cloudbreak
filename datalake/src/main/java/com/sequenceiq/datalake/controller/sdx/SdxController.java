@@ -55,6 +55,7 @@ import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.SdxDeleteService;
 import com.sequenceiq.datalake.service.rotation.SdxRotationService;
+import com.sequenceiq.datalake.service.sdx.SdxHorizontalScalingService;
 import com.sequenceiq.datalake.service.sdx.SdxImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.SdxRecommendationService;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
@@ -70,6 +71,7 @@ import com.sequenceiq.datalake.service.sdx.stop.SdxStopService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
+import com.sequenceiq.sdx.api.model.DatalakeHorizontalScaleRequest;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
 import com.sequenceiq.sdx.api.model.SdxBackupLocationValidationRequest;
 import com.sequenceiq.sdx.api.model.SdxChangeImageCatalogRequest;
@@ -150,6 +152,9 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private SdxRotationService sdxRotationService;
+
+    @Inject
+    private SdxHorizontalScalingService sdxHorizontalScalingService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
@@ -512,6 +517,12 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = UPGRADE_DATALAKE)
     public FlowIdentifier rotateSecrets(@RequestObject SdxSecretRotationRequest request) {
         return sdxRotationService.triggerSecretRotation(request.getCrn(), request.getSecrets(), request.getExecutionType());
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DATALAKE_HORIZONTAL_SCALING)
+    public FlowIdentifier horizontalScaleByName(@ResourceName String name, @Valid DatalakeHorizontalScaleRequest scaleRequest) {
+        return sdxHorizontalScalingService.horizontalScaleDatalake(name, scaleRequest);
     }
 
     private SdxCluster getSdxClusterByName(String name) {

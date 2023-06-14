@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterCommissionService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.ClusterServicesRestartService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -47,6 +48,9 @@ class ClusterStartHandlerTest {
 
     @Mock
     private ClusterCommissionService clusterCommissionService;
+
+    @Mock
+    private ClusterServicesRestartService clusterServicesRestartService;
 
     @InjectMocks
     private ClusterStartHandler underTest;

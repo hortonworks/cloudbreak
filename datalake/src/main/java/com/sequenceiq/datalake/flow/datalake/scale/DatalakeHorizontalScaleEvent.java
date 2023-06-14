@@ -1,0 +1,20 @@
+package com.sequenceiq.datalake.flow.datalake.scale;
+
+import com.sequenceiq.flow.core.FlowEvent;
+
+public enum DatalakeHorizontalScaleEvent implements FlowEvent {
+
+    DATALAKE_HORIZONTAL_SCALE_EVENT,
+    DATALAKE_HORIZONTAL_SCALE_VALIDATION_START_EVENT,
+    DATALAKE_HORIZONTAL_SCALE_VALIDATION_FAILED_EVENT,
+    DATALAKE_HORIZONTAL_SCALE_START_EVENT,
+    DATALAKE_HORIZONTAL_SCALE_CM_ROLLING_RESTART_EVENT,
+    DATALAKE_HORIZONTAL_SCALE_CM_RESTART_FAILED_EVENT,
+    DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT,
+    DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT;
+
+    @Override
+    public String event() {
+        return name();
+    }
+}

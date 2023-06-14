@@ -93,6 +93,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZU
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STOP_START_SCALING_FAILURE_RECOVERY;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATALAKE_HORIZONTAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
@@ -556,6 +557,10 @@ public class EntitlementService {
 
     public boolean isDatalakeDatabaseBackupCompressionEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_DATALAKE_DB_BACKUP_ENABLE_COMPRESSION);
+    }
+
+    public boolean isDatalakeHorizontalScaleEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, DATALAKE_HORIZONTAL_SCALE);
     }
 
     public List<String> getEntitlements(String accountId) {

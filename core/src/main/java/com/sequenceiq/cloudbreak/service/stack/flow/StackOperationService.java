@@ -503,4 +503,9 @@ public class StackOperationService {
         }
 
     }
+
+    public FlowIdentifier triggerServicesRollingRestart(String crn) {
+        StackView stack = stackDtoService.getStackViewByCrn(crn);
+        return flowManager.triggerServicesRollingRestart(stack.getId());
+    }
 }
