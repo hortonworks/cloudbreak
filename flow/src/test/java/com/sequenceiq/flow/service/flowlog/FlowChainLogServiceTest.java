@@ -113,6 +113,58 @@ class FlowChainLogServiceTest {
     }
 
     @Test
+    void testGetRelatedFlowChainLogsWithSameCreatedAndLastFlowChainHavingEmptyQueue() {
+        List<FlowChainLog> flowChainLogs = List.of(
+                setupFlowChainLogWithIdWithoutParentId(1L, "1", true, 1L),
+                setupFlowChainLogWithIdWithoutParentId(2L, "1", false, 1L)
+        );
+        Queue<Selectable> chain = underTest.getRelatedFlowChainLogs(flowChainLogs).get(0).getChainAsQueue();
+        assertTrue(chain.isEmpty());
+    }
+
+    @Test
+    void testGetRelatedFlowChainLogsWithSameCreatedAndLastFlowChainHavingQueue() {
+        List<FlowChainLog> flowChainLogs = List.of(
+                setupFlowChainLogWithIdWithoutParentId(1L, "1", false, 1L),
+                setupFlowChainLogWithIdWithoutParentId(2L, "1", true, 1L)
+        );
+        Queue<Selectable> chain = underTest.getRelatedFlowChainLogs(flowChainLogs).get(0).getChainAsQueue();
+        assertFalse(chain.isEmpty());
+    }
+
+    @Test
+    void testGetRelatedFlowChainLogsWithDifferentCreatedAndLastFlowChainHavingEmptyQueue() {
+        List<FlowChainLog> flowChainLogs = List.of(
+                setupFlowChainLogWithIdWithoutParentId(1L, "1", true, 1L),
+                setupFlowChainLogWithIdWithoutParentId(2L, "1", false, 2L)
+        );
+        Queue<Selectable> chain = underTest.getRelatedFlowChainLogs(flowChainLogs).get(0).getChainAsQueue();
+        assertTrue(chain.isEmpty());
+    }
+
+    @Test
+    void testGetRelatedFlowChainLogsWithDifferentCreatedAndLastFlowChainHavingQueue() {
+        List<FlowChainLog> flowChainLogs = List.of(
+                setupFlowChainLogWithIdWithoutParentId(1L, "1", false, 1L),
+                setupFlowChainLogWithIdWithoutParentId(2L, "1", true, 2L)
+        );
+        Queue<Selectable> chain = underTest.getRelatedFlowChainLogs(flowChainLogs).get(0).getChainAsQueue();
+        assertFalse(chain.isEmpty());
+    }
+
+    @Test
+    void testGetRelatedFlowChainLogsWithContradictoryIdAndCreatedOrderButCreatedDeterminesFinalOrder() {
+        List<FlowChainLog> flowChainLogs = List.of(
+                setupFlowChainLogWithIdWithoutParentId(1L, "1", false, 4L),
+                setupFlowChainLogWithIdWithoutParentId(2L, "1", true, 3L),
+                setupFlowChainLogWithIdWithoutParentId(3L, "1", true, 2L),
+                setupFlowChainLogWithIdWithoutParentId(4L, "1", true, 1L)
+        );
+        Queue<Selectable> chain = underTest.getRelatedFlowChainLogs(flowChainLogs).get(0).getChainAsQueue();
+        assertTrue(chain.isEmpty());
+    }
+
+    @Test
     void testFlowTypeEmpty() {
         String flowChainType = underTest.getFlowChainType(null);
         assertNull(flowChainType, "For null input the flowChainType must be null");
@@ -173,6 +225,16 @@ class FlowChainLogServiceTest {
         return flowChainLog;
     }
 
+    private FlowChainLog flowChainLogWithId(Long id, String flowChainId, String parentFlowChainId, long created) {
+        FlowChainLog flowChainLog = new FlowChainLog();
+        flowChainLog.setId(id);
+        flowChainLog.setFlowChainId(flowChainId);
+        flowChainLog.setParentFlowChainId(parentFlowChainId);
+        flowChainLog.setCreated(created);
+        flowChainLog.setChainJackson(JsonUtil.writeValueAsStringSilent(new ConcurrentLinkedQueue<>()));
+        return flowChainLog;
+    }
+
     private void setUpParent(FlowChainLog child, FlowChainLog parent) {
         when(flowLogRepository.findFirstByFlowChainIdOrderByCreatedDesc(child.getParentFlowChainId()))
                 .thenReturn(Optional.of(parent));
@@ -185,6 +247,16 @@ class FlowChainLogServiceTest {
 
     private FlowChainLog flowChainLog(String flowChanId, boolean hasEventInQueue, Long created) {
         FlowChainLog flowChainLog = flowChainLog(flowChanId, flowChanId + FLOWCHAIN_PARENT_SUFFIX, created);
+        Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
+        if (hasEventInQueue) {
+            flowEventChain.add(new TestEvent());
+        }
+        flowChainLog.setChainJackson(TypedJsonUtil.writeValueAsStringSilent(flowEventChain));
+        return flowChainLog;
+    }
+
+    private FlowChainLog setupFlowChainLogWithIdWithoutParentId(Long id, String flowChanId, boolean hasEventInQueue, Long created) {
+        FlowChainLog flowChainLog = flowChainLogWithId(id, flowChanId, null, created);
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         if (hasEventInQueue) {
             flowEventChain.add(new TestEvent());
