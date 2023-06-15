@@ -13,10 +13,13 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,16 +32,26 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
+import com.azure.core.http.rest.PagedIterable;
+import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
+import com.azure.resourcemanager.compute.ComputeManager;
+import com.azure.resourcemanager.compute.fluent.ComputeManagementClient;
+import com.azure.resourcemanager.compute.fluent.ResourceSkusClient;
 import com.azure.resourcemanager.compute.fluent.models.DiskInner;
+import com.azure.resourcemanager.compute.fluent.models.ResourceSkuInner;
 import com.azure.resourcemanager.compute.fluent.models.VirtualMachineInner;
 import com.azure.resourcemanager.compute.models.CachingTypes;
 import com.azure.resourcemanager.compute.models.Disk;
 import com.azure.resourcemanager.compute.models.DiskSkuTypes;
 import com.azure.resourcemanager.compute.models.Disks;
 import com.azure.resourcemanager.compute.models.Encryption;
+import com.azure.resourcemanager.compute.models.ResourceSkuLocationInfo;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
+import com.azure.resourcemanager.compute.models.VirtualMachines;
 import com.azure.resourcemanager.keyvault.models.AccessPolicy;
 import com.azure.resourcemanager.keyvault.models.AccessPolicyEntry;
 import com.azure.resourcemanager.keyvault.models.KeyPermissions;
@@ -51,7 +64,10 @@ import com.azure.resourcemanager.postgresql.PostgreSqlManager;
 import com.azure.resourcemanager.postgresql.models.Server;
 import com.azure.resourcemanager.postgresql.models.Server.Update;
 import com.azure.resourcemanager.postgresql.models.Servers;
+import com.azure.resourcemanager.resources.fluentcore.arm.AvailabilityZoneId;
 import com.azure.resourcemanager.resources.fluentcore.model.implementation.IndexableRefreshableWrapperImpl;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureDisk;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureLoadBalancerFrontend;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.common.api.type.LoadBalancerType;
@@ -346,5 +362,85 @@ class AzureClientTest {
         verify(server, times(1)).update();
         verify(update, times(1)).withAdministratorLoginPassword(eq(NEW_PASSWORD));
         verify(update, times(1)).apply();
+    }
+
+    static Object[] zoneInfoFromAzure() {
+        Map<String, List<String>> azureZoneInfo = new HashMap<>();
+        azureZoneInfo.put("instanceType1", List.of("1"));
+        azureZoneInfo.put("instanceType2", List.of("1", "2"));
+        azureZoneInfo.put("instanceType3", List.of("1", "2", "3"));
+        return new Object[] {Collections.emptyMap(),
+                Map.of("instanceType1", List.of("1")),
+                azureZoneInfo
+                };
+    }
+
+    @ParameterizedTest
+    @MethodSource("zoneInfoFromAzure")
+    void testGetAvailabilityZones(Map<String, List<String>> azureZoneInfo) {
+        VirtualMachines virtualMachines = mock(VirtualMachines.class);
+        when(azureResourceManager.virtualMachines()).thenReturn(virtualMachines);
+        ComputeManager computeManager = mock(ComputeManager.class);
+        when(virtualMachines.manager()).thenReturn(computeManager);
+        ComputeManagementClient computeManagementClient = mock(ComputeManagementClient.class);
+        when(computeManager.serviceClient()).thenReturn(computeManagementClient);
+        ResourceSkusClient resourceSkusClient = mock(ResourceSkusClient.class);
+        when(computeManagementClient.getResourceSkus()).thenReturn(resourceSkusClient);
+        PagedIterable<ResourceSkuInner> pagedIterable = mock(PagedIterable.class);
+        when(resourceSkusClient.list(any(), any(), any())).thenReturn(pagedIterable);
+        AzureListResult<ResourceSkuInner> azureListResult = mock(AzureListResult.class);
+        when(azureListResultFactory.create(pagedIterable)).thenReturn(azureListResult);
+        List<ResourceSkuInner> list = getResourceSkus(azureZoneInfo);
+        when(azureListResult.getStream()).thenReturn(list.stream());
+        Map<String, List<String>> zoneInfo = underTest.getAvailabilityZones("westus2");
+        Assertions.assertEquals(azureZoneInfo.size(), zoneInfo.size());
+        azureZoneInfo.entrySet().stream().forEach(entry -> {
+            Assertions.assertEquals(true, zoneInfo.containsKey(entry.getKey()));
+            Assertions.assertEquals(entry.getValue(), zoneInfo.get(entry.getKey()));
+        });
+    }
+
+    static Object[] azureZones() {
+        return new Object[]{null, "1", "2", "3"};
+    }
+
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    @ParameterizedTest(name = "testCreateManagedDiskWithAvailabilityZoneForAZ{0}")
+    @MethodSource("azureZones")
+    public void testCreateManagedDiskWithAvailabilityZone(String availabilityZone) {
+        Disk.DefinitionStages.WithCreate withCreate = setUpForDiskCreation();
+        underTest.createManagedDisk(new AzureDisk("volume-1", 100, AzureDiskType.STANDARD_SSD_LRS, "westus2", "my-rg",
+                Map.of(), null, availabilityZone));
+        verify(withCreate, times(availabilityZone == null ? 0 : 1)).withAvailabilityZone(eq(AvailabilityZoneId.fromString(availabilityZone)));
+    }
+
+    private Disk.DefinitionStages.WithCreate setUpForDiskCreation() {
+        Disks disks = mock(Disks.class);
+        when(azureResourceManager.disks()).thenReturn(disks);
+        Disk.DefinitionStages.Blank withBlank = mock(Disk.DefinitionStages.Blank.class);
+        when(disks.define(any())).thenReturn(withBlank);
+        Disk.DefinitionStages.WithGroup withGroup = mock(Disk.DefinitionStages.WithGroup.class);
+        when(withBlank.withRegion(Region.US_WEST2)).thenReturn(withGroup);
+        Disk.DefinitionStages.WithDiskSource withDiskSource = mock(Disk.DefinitionStages.WithDiskSource.class);
+        when(withGroup.withExistingResourceGroup("my-rg")).thenReturn(withDiskSource);
+        Disk.DefinitionStages.WithDataDiskSource withDataDiskSource = mock(Disk.DefinitionStages.WithDataDiskSource.class);
+        when(withDiskSource.withData()).thenReturn(withDataDiskSource);
+        Disk.DefinitionStages.WithCreate withCreate = mock(Disk.DefinitionStages.WithCreate.class);
+        when(withDataDiskSource.withSizeInGB(100)).thenReturn(withCreate);
+        when(withCreate.withTags(any())).thenReturn(withCreate);
+        when(withCreate.withSku(any())).thenReturn(withCreate);
+        when(withCreate.withAvailabilityZone(any())).thenReturn(withCreate);
+        return withCreate;
+    }
+
+    private List<ResourceSkuInner> getResourceSkus(Map<String, List<String>> instanceInformation) {
+        return instanceInformation.entrySet().stream().map(entry -> {
+                ResourceSkuInner resourceSkuInner = mock(ResourceSkuInner.class);
+                ResourceSkuLocationInfo resourceSkuLocationInfo = mock(ResourceSkuLocationInfo.class);
+                when(resourceSkuInner.name()).thenReturn(entry.getKey());
+                when(resourceSkuInner.locationInfo()).thenReturn(List.of(resourceSkuLocationInfo));
+                when(resourceSkuLocationInfo.zones()).thenReturn(entry.getValue());
+                return resourceSkuInner;
+        }).collect(Collectors.toList());
     }
 }
