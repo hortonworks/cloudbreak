@@ -253,6 +253,16 @@ public class ComputeResourceService {
         return result;
     }
 
+    private int getNewNodeCount(Iterable<Group> groups) {
+        int fullNodeCount = 0;
+        for (Group group : groups) {
+            fullNodeCount += (long) group.getInstances().stream()
+                    .filter(cloudInstance -> InstanceStatus.CREATE_REQUESTED.equals(cloudInstance.getTemplate().getStatus()))
+                    .count();
+        }
+        return fullNodeCount;
+    }
+
     private int getFullNodeCount(Iterable<Group> groups) {
         int fullNodeCount = 0;
         for (Group group : groups) {
@@ -308,7 +318,7 @@ public class ComputeResourceService {
                     CloudFailureContext cloudFailureContext = new CloudFailureContext(auth,
                             new ScaleContext(upscale, adjustmentTypeAndThreshold.getAdjustmentType(), adjustmentTypeAndThreshold.getThreshold()), ctx);
                     cloudFailureHandler.rollbackIfNecessary(cloudFailureContext, failedResources, resourceStatuses, group, resourceBuilders,
-                            getFullNodeCount(groups)
+                            getNewNodeCount(groups)
                     );
                     results.addAll(filterResourceStatuses(resourceStatuses, ResourceStatus.CREATED));
                 }
