@@ -102,6 +102,12 @@ class ExternalDatabaseServiceTest {
 
     private static final String STACK_VERSION_BAD = "7.2.1";
 
+    private static final String UPGRADE_ERROR_REASON = "upgrade error happened";
+
+    private static final String ROTATE_ERROR_REASON = "rotate error happened";
+
+    private static final String DATABASE_NOT_FOUND = "Database not found";
+
     @Mock
     private RedbeamsClientService redbeamsClient;
 
@@ -216,7 +222,7 @@ class ExternalDatabaseServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { false, true })
+    @ValueSource(booleans = {false, true})
     void terminateDatabase(boolean forced) throws JsonProcessingException {
         Cluster cluster = new Cluster();
         cluster.setDatabaseServerCrn(RDBMS_CRN);
@@ -501,13 +507,18 @@ class ExternalDatabaseServiceTest {
 
         UpgradeDatabaseServerV4Response response = new UpgradeDatabaseServerV4Response();
         response.setFlowIdentifier(new FlowIdentifier(FlowType.FLOW, RDBMS_FLOW_ID));
+        DatabaseServerV4Response dbServerResponse = new DatabaseServerV4Response();
+        dbServerResponse.setCrn(RDBMS_CRN);
+        dbServerResponse.setStatusReason(UPGRADE_ERROR_REASON);
+        when(redbeamsClient.getByCrn(RDBMS_CRN)).thenReturn(dbServerResponse);
         when(redbeamsClient.upgradeByCrn(eq(RDBMS_CRN), any())).thenReturn(response);
 
         when(redbeamsClient.hasFlowRunningByFlowId(RDBMS_FLOW_ID)).thenReturn(createFlowCheckResponse(Boolean.FALSE, Boolean.TRUE));
 
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.upgradeDatabase(cluster, targetMajorVersion));
-        String expected = String.format("Database flow failed in Redbeams. Database crn: %s, flow: FlowIdentifier{type=FLOW, pollableId='%s'}",
+        String expected = String.format("Database flow failed in Redbeams with error: 'upgrade error happened'. "
+                        + "Database crn: %s, flow: FlowIdentifier{type=FLOW, pollableId='%s'}",
                 RDBMS_CRN, RDBMS_FLOW_ID);
         assertEquals(expected, cloudbreakServiceException.getMessage());
 
@@ -541,7 +552,8 @@ class ExternalDatabaseServiceTest {
         when(redbeamsClient.rotateSecret(any())).thenReturn(new FlowIdentifier(FlowType.NOT_TRIGGERED, null));
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE));
-        String expected = String.format("Database flow failed in Redbeams. Database crn: %s, flow: FlowIdentifier{type=%s, pollableId='%s'}",
+        String expected = String.format("Database flow failed in Redbeams with error: 'Flow null not triggered'. "
+                        + "Database crn: %s, flow: FlowIdentifier{type=%s, pollableId='%s'}",
                 RDBMS_CRN, FlowType.NOT_TRIGGERED, null);
         assertEquals(expected, cloudbreakServiceException.getMessage());
     }
@@ -551,7 +563,7 @@ class ExternalDatabaseServiceTest {
         when(redbeamsClient.rotateSecret(any())).thenReturn(null);
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE));
-        String expected = String.format("Database flow failed in Redbeams. Database crn: %s, flow: null", RDBMS_CRN);
+        String expected = String.format("Database flow failed in Redbeams with error: 'unknown'. Database crn: %s, flow: null", RDBMS_CRN);
         assertEquals(expected, cloudbreakServiceException.getMessage());
     }
 
@@ -559,10 +571,17 @@ class ExternalDatabaseServiceTest {
     void rotateDatabaseSecretsShouldFailIfRedbeamsFlowChainFailed() {
         when(redbeamsClient.rotateSecret(any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, RDBMS_FLOW_ID));
         when(redbeamsClient.hasFlowChainRunningByFlowChainId(RDBMS_FLOW_ID)).thenReturn(createFlowCheckResponse(Boolean.FALSE, Boolean.TRUE));
+        DatabaseServerV4Response dbServerResponse = new DatabaseServerV4Response();
+        dbServerResponse.setCrn(RDBMS_CRN);
+        dbServerResponse.setStatusReason(ROTATE_ERROR_REASON);
+        when(redbeamsClient.getByCrn(RDBMS_CRN)).thenReturn(dbServerResponse);
+
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE));
-        String expected = String.format("Database flow failed in Redbeams. Database crn: %s, flow: FlowIdentifier{type=%s, pollableId='%s'}",
-                RDBMS_CRN, FlowType.FLOW_CHAIN, RDBMS_FLOW_ID);
+
+        String expected = String.format("Database flow failed in Redbeams with error: '%s'. Database crn: %s, "
+                        + "flow: FlowIdentifier{type=%s, pollableId='%s'}",
+                ROTATE_ERROR_REASON, RDBMS_CRN, FlowType.FLOW_CHAIN, RDBMS_FLOW_ID);
         assertEquals(expected, cloudbreakServiceException.getMessage());
     }
 
@@ -577,6 +596,35 @@ class ExternalDatabaseServiceTest {
         assertEquals(RDBMS_CRN, request.getCrn());
         assertEquals(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD.name(), request.getSecret());
         assertEquals(ROTATE, request.getExecutionType());
+    }
+
+    @Test
+    void upgradeDatabaseFlowFetchDatabaseFromRedbeamsFailed() {
+        Cluster cluster = spy(new Cluster());
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+
+        UpgradeTargetMajorVersion targetMajorVersion = UpgradeTargetMajorVersion.VERSION_11;
+
+        UpgradeDatabaseServerV4Response response = new UpgradeDatabaseServerV4Response();
+        response.setFlowIdentifier(new FlowIdentifier(FlowType.FLOW, RDBMS_FLOW_ID));
+
+        when(redbeamsClient.getByCrn(RDBMS_CRN)).thenThrow(new NotFoundException(DATABASE_NOT_FOUND));
+        when(redbeamsClient.upgradeByCrn(eq(RDBMS_CRN), any())).thenReturn(response);
+        when(redbeamsClient.hasFlowRunningByFlowId(RDBMS_FLOW_ID)).thenReturn(
+                createFlowCheckResponse(Boolean.TRUE, Boolean.FALSE),
+                createFlowCheckResponse(Boolean.FALSE, Boolean.TRUE));
+
+        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.upgradeDatabase(cluster, targetMajorVersion));
+        String expected = String.format("Database flow failed in Redbeams with error: '%s'. Database crn: %s, flow: "
+                        + "FlowIdentifier{type=%s, pollableId='%s'}",
+                DATABASE_NOT_FOUND, RDBMS_CRN, FlowType.FLOW, RDBMS_FLOW_ID);
+        assertEquals(expected, cloudbreakServiceException.getMessage());
+
+        ArgumentCaptor<UpgradeDatabaseServerV4Request> argumentCaptor = ArgumentCaptor.forClass(UpgradeDatabaseServerV4Request.class);
+        verify(redbeamsClient).upgradeByCrn(eq(RDBMS_CRN), argumentCaptor.capture());
+        assertEquals(targetMajorVersion, argumentCaptor.getValue().getUpgradeTargetMajorVersion());
+        verify(redbeamsClient, times(2)).hasFlowRunningByFlowId(RDBMS_FLOW_ID);
     }
 
     private static FlowCheckResponse createFlowCheckResponse(Boolean hasActiveFlow, Boolean failed) {
