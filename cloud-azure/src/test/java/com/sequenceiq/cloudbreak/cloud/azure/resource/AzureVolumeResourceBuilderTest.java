@@ -6,10 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -40,6 +37,7 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import com.azure.resourcemanager.compute.models.Disk;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureDisk;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
@@ -356,7 +354,7 @@ public class AzureVolumeResourceBuilderTest {
     void buildTestWhenNoVolumeSet() throws Exception {
         List<CloudResource> result = underTest.build(context, cloudInstance, PRIVATE_ID, auth, group, List.of(), cloudStack);
 
-        verify(azureClient, never()).createManagedDisk(anyString(), anyInt(), any(AzureDiskType.class), anyString(), anyString(), anyMap(), anyString());
+        verify(azureClient, never()).createManagedDisk(any());
 
         assertThat(result).isNotNull();
         assertThat(result).hasSize(0);
@@ -372,7 +370,7 @@ public class AzureVolumeResourceBuilderTest {
 
         List<CloudResource> result = underTest.build(context, cloudInstance, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
 
-        verify(azureClient, never()).createManagedDisk(anyString(), anyInt(), any(AzureDiskType.class), anyString(), anyString(), anyMap(), anyString());
+        verify(azureClient, never()).createManagedDisk(any());
 
         assertThat(result).isNotNull();
         assertThat(result).hasSize(1);
@@ -394,7 +392,7 @@ public class AzureVolumeResourceBuilderTest {
 
         List<CloudResource> result = underTest.build(context, cloudInstance, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
 
-        verify(azureClient, never()).createManagedDisk(anyString(), anyInt(), any(AzureDiskType.class), anyString(), anyString(), anyMap(), anyString());
+        verify(azureClient, never()).createManagedDisk(any());
 
         assertThat(result).isNotNull();
         assertThat(result).hasSize(1);
@@ -412,7 +410,8 @@ public class AzureVolumeResourceBuilderTest {
                 .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
                 .withName(VOLUME_NAME).build();
 
-        when(azureClient.createManagedDisk(VOLUME_ID, VOLUME_SIZE, AzureDiskType.STANDARD_SSD_LRS, REGION, RESOURCE_GROUP, Map.of(), null)).thenReturn(disk);
+        when(azureClient.createManagedDisk(new AzureDisk(VOLUME_ID, VOLUME_SIZE, AzureDiskType.STANDARD_SSD_LRS, REGION, RESOURCE_GROUP,
+                Map.of(), null, null))).thenReturn(disk);
 
         List<CloudResource> result = underTest.build(context, cloudInstance, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
 
@@ -434,7 +433,8 @@ public class AzureVolumeResourceBuilderTest {
 
         when(instanceTemplate.getStringParameter(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID)).thenReturn(DISK_ENCRYPTION_SET_ID);
 
-        when(azureClient.createManagedDisk(VOLUME_ID, VOLUME_SIZE, AzureDiskType.STANDARD_SSD_LRS, REGION, RESOURCE_GROUP, Map.of(), null)).thenReturn(disk);
+        when(azureClient.createManagedDisk(new AzureDisk(VOLUME_ID, VOLUME_SIZE, AzureDiskType.STANDARD_SSD_LRS, REGION, RESOURCE_GROUP,
+                        Map.of(), null, null))).thenReturn(disk);
 
         List<CloudResource> result = underTest.build(context, cloudInstance, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
 
@@ -457,8 +457,8 @@ public class AzureVolumeResourceBuilderTest {
         when(instanceTemplate.getParameter(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, Object.class)).thenReturn(true);
         when(instanceTemplate.getStringParameter(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID)).thenReturn(DISK_ENCRYPTION_SET_ID);
 
-        when(azureClient.createManagedDisk(VOLUME_ID, VOLUME_SIZE, AzureDiskType.STANDARD_SSD_LRS, REGION, RESOURCE_GROUP, Map.of(), DISK_ENCRYPTION_SET_ID))
-                .thenReturn(disk);
+        when(azureClient.createManagedDisk(new AzureDisk(VOLUME_ID, VOLUME_SIZE, AzureDiskType.STANDARD_SSD_LRS, REGION, RESOURCE_GROUP, Map.of(),
+                DISK_ENCRYPTION_SET_ID, null))).thenReturn(disk);
 
         List<CloudResource> result = underTest.build(context, cloudInstance, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
 

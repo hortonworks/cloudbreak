@@ -34,6 +34,7 @@ import com.azure.resourcemanager.resources.fluentcore.arm.AvailabilityZoneId;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureDisk;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
@@ -136,6 +137,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                     .withName(resourceNameService.volumeSet(stackName, groupName, privateId, hashableString))
                     .withGroup(group.getName())
                     .withStatus(CommonStatus.REQUESTED)
+                    .withAvailabilityZone(availabilityZone)
                     .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
                                     .withAvailabilityZone(availabilityZone)
                                     .withDeleteOnTermination(Boolean.TRUE)
@@ -204,8 +206,9 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                         Disk result = client.getDiskByName(resourceGroupName, volume.getId());
                         if (result == null) {
                             result = client.createManagedDisk(
-                                    volume.getId(), volume.getSize(), AzureDiskType.getByValue(
-                                            volume.getType()), region, resourceGroupName, cloudStack.getTags(), diskEncryptionSetId);
+                                    new AzureDisk(volume.getId(), volume.getSize(), AzureDiskType.getByValue(
+                                            volume.getType()), region, resourceGroupName, cloudStack.getTags(), diskEncryptionSetId,
+                                    resource.getAvailabilityZone()));
                         } else {
                             LOGGER.info("Managed disk for resource group: {}, name: {} already exists: {}", resourceGroupName, volume.getId(), result);
                         }
