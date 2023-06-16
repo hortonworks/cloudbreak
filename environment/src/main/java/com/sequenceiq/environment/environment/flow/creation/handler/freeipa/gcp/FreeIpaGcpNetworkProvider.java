@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
@@ -18,6 +20,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkR
 
 @Component
 public class FreeIpaGcpNetworkProvider implements FreeIpaNetworkProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaGcpNetworkProvider.class);
 
     @Override
     public NetworkRequest network(EnvironmentDto environment, boolean multiAzRequired) {
@@ -38,7 +41,26 @@ public class FreeIpaGcpNetworkProvider implements FreeIpaNetworkProvider {
     @Override
     public String availabilityZone(NetworkRequest networkRequest, EnvironmentDto environment) {
         GcpNetworkParameters gcpNetworkParameters = networkRequest.getGcp();
-        return environment.getNetwork().getSubnetMetas().get(gcpNetworkParameters.getSubnetId()).getAvailabilityZone();
+        String availabilityZoneOfSubnet = environment.getNetwork()
+                .getSubnetMetas()
+                .get(gcpNetworkParameters.getSubnetId())
+                .getAvailabilityZone();
+
+        GcpParams gcpParams = environment.getNetwork()
+                .getGcp();
+        String selectedZone = availabilityZoneOfSubnet;
+        if (gcpParams != null) {
+            selectedZone = gcpParams
+                    .getAvailabilityZones()
+                    .stream()
+                    .findFirst()
+                    .orElseGet(() -> {
+                        LOGGER.info("Availability zone hasn't set explicitly on Environment level, falling back to subnet's AZ: '{}'", availabilityZoneOfSubnet);
+                        return availabilityZoneOfSubnet;
+                    });
+        }
+        LOGGER.info("Selected availability zone for FreeIpa: '{}'", selectedZone);
+        return selectedZone;
     }
 
     @Override

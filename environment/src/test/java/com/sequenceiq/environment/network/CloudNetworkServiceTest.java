@@ -15,17 +15,23 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
@@ -33,6 +39,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.validation.network.NetworkTestUtils;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.AzureParams;
+import com.sequenceiq.environment.network.dto.GcpParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
@@ -64,7 +71,7 @@ class CloudNetworkServiceTest {
     @Mock
     private CloudNetworks cloudNetworks;
 
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private EnvironmentDto testEnvironmentDto;
 
     @Mock
@@ -533,6 +540,79 @@ class CloudNetworkServiceTest {
         assertEquals(TEST_SUBNET_ID, gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
 
         verify(platformParameterService, times(0)).getCloudNetworks(any());
+    }
+
+    @Test
+    @DisplayName("when retrieveSubnetMetadata has called with EnvironmentDto and the platform is GCP, then we should fetch the cloud networks from the " +
+            "provider with the dedicated GCP related filters in place")
+    void testRetrieveSubnetMetadataByEnvironmentDtoWhenPlatformIsGcpThenWeShouldFetchTheCloudNetworksFromProviderWithSpecificFilters() {
+        Set<String> availabilityZones = Set.of("gcp-region1-zone1");
+        String networkId = "networkid";
+        String sharedProjectId = "sharedProjectId";
+        Boolean noPublicIp = Boolean.TRUE;
+        GcpParams gcpParams = GcpParams.builder()
+                .withAvailabilityZones(availabilityZones)
+                .withNetworkId(networkId)
+                .withSharedProjectId(sharedProjectId)
+                .withNoPublicIp(noPublicIp)
+                .build();
+
+        String testSubnetName = "someSubnet";
+        CloudSubnet cloudSubnet = new CloudSubnet(TEST_SUBNET_ID, testSubnetName);
+        CloudNetwork cloudNetwork = new CloudNetwork("someCloudNetwork", TEST_SUBNET_ID, Set.of(cloudSubnet),
+                Collections.emptyMap());
+        Map<String, Set<CloudNetwork>> cloudNetworksFromProvider = new LinkedHashMap<>();
+        cloudNetworksFromProvider.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork));
+        CloudSubnet cloudSubnet2 = new CloudSubnet(TEST_SUBNET_ID, testSubnetName);
+        CloudNetwork cloudNetwork2 = new CloudNetwork("someCloudNetwork", "someCloudNetwork", Set.of(cloudSubnet2),
+                Collections.emptyMap());
+        Map<String, Set<CloudNetwork>> cloudNetworksFromProvider2 = new LinkedHashMap<>();
+        cloudNetworksFromProvider2.put(DEFAULT_TEST_REGION_NAME, Set.of(cloudNetwork2));
+
+        when(testNetworkDto.getSubnetIds()).thenReturn(DEFAULT_TEST_SUBNET_ID_SET);
+        when(testNetworkDto.getEndpointGatewaySubnetIds()).thenReturn(DEFAULT_TEST_SUBNET_ID_SET);
+        when(testNetworkDto.getGcp()).thenReturn(gcpParams);
+        when(testEnvironmentDto.getCloudPlatform()).thenReturn(CloudPlatform.GCP.name());
+        when(testEnvironmentDto.getSecurityAccess().getCidr()).thenReturn("10.0.0.0/0");
+        when(cloudNetworks.getCloudNetworkResponses()).thenReturn(cloudNetworksFromProvider);
+
+        Map<String, CloudSubnet> result = underTest.retrieveSubnetMetadata(testEnvironmentDto, testNetworkDto);
+
+        when(cloudNetworks.getCloudNetworkResponses()).thenReturn(cloudNetworksFromProvider2);
+        Map<String, CloudSubnet> gatewayResult = underTest.retrieveEndpointGatewaySubnetMetadata(testEnvironmentDto, testNetworkDto);
+
+        byte expectedAmountOfResultCloudSubnet = 1;
+
+        assertNotNull(result);
+        assertEquals(expectedAmountOfResultCloudSubnet, result.size(), "The amount of result CloudSubnet(s) must be: " + expectedAmountOfResultCloudSubnet);
+        assertEquals(TEST_SUBNET_ID, result.get(result.keySet().iterator().next()).getId());
+
+        assertNotNull(gatewayResult);
+        assertEquals(expectedAmountOfResultCloudSubnet, gatewayResult.size(),
+                "The amount of result CloudSubnet(s) for the gateway endpoint must be: " + expectedAmountOfResultCloudSubnet);
+        assertEquals(TEST_SUBNET_ID, gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
+
+        verify(platformParameterService, times(2)).getCloudNetworks(any());
+        assertThat(result.get(testSubnetName).getDeploymentRestrictions())
+                .containsExactlyElementsOf(DeploymentRestriction.ALL);
+        assertThat(gatewayResult.get(testSubnetName).getDeploymentRestrictions())
+                .containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
+
+        //verify GCP related filters in place via argument captor
+        ArgumentCaptor<PlatformResourceRequest> argumentCaptor = ArgumentCaptor.forClass(PlatformResourceRequest.class);
+        verify(platformParameterService, times(2)).getCloudNetworks(argumentCaptor.capture());
+        argumentCaptor.getAllValues()
+                .forEach(capturedRequest -> {
+                    Map<String, String> capturedFilters = capturedRequest.getFilters();
+                    Assertions.assertAll("Verify that GCP filters are in place",
+                            () -> assertEquals(availabilityZones.stream().findFirst().get(), capturedFilters.get(GcpStackUtil.CUSTOM_AVAILABILITY_ZONE)),
+                            () -> assertEquals(sharedProjectId, capturedFilters.get(GcpStackUtil.SHARED_PROJECT_ID)),
+                            () -> assertEquals(String.valueOf(noPublicIp), capturedFilters.get(GcpStackUtil.NO_PUBLIC_IP)),
+                            () -> assertEquals(Boolean.FALSE.toString(), capturedFilters.get(GcpStackUtil.NO_FIREWALL_RULES)),
+                            () -> assertEquals(TEST_SUBNET_ID, capturedFilters.get(NetworkConstants.SUBNET_IDS)),
+                            () -> assertEquals(networkId, capturedFilters.get(GcpStackUtil.NETWORK_ID))
+                    );
+                });
     }
 
     private Map<String, Set<CloudNetwork>> cloudSubnetCreator(byte amountToCreate) {

@@ -54,6 +54,22 @@ public class NetworkRequestToDtoConverterTest {
     }
 
     @Test
+    void testConvertGcpWithCustomAvailabilityZone() {
+        EnvironmentNetworkRequest network = createNetworkRequest();
+        EnvironmentNetworkGcpParams gcpParams = createGcpParams();
+        Set<String> availabilityZones = Set.of("gcp-region1-zone1");
+        gcpParams.setAvailabilityZones(availabilityZones);
+        network.setGcp(gcpParams);
+
+        NetworkDto actual = underTest.convert(network);
+
+        assertEquals(network.getGcp().getNetworkId(), actual.getGcp().getNetworkId());
+        assertEquals(network.getGcp().getNetworkId(), actual.getNetworkId());
+        assertEquals(network.getGcp().getAvailabilityZones(), availabilityZones);
+        assertCommonFields(network, actual);
+    }
+
+    @Test
     void testConvertAzure() {
         EnvironmentNetworkRequest network = createNetworkRequest();
         network.setAzure(createAzureParams());

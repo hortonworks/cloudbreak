@@ -170,10 +170,14 @@ public class GcpPlatformResources implements PlatformResources {
         String networkId = null;
         List<String> subnetIds = new ArrayList<>();
         String sharedProjectId = null;
+        String customAvailabilityZone;
         if (filters != null) {
             networkId = filters.getOrDefault("networkId", null);
             subnetIds = getSubnetIds(filters);
             sharedProjectId = filters.getOrDefault("sharedProjectId", null);
+            customAvailabilityZone = filters.getOrDefault(GcpStackUtil.CUSTOM_AVAILABILITY_ZONE, "");
+        } else {
+            customAvailabilityZone = "";
         }
 
         LOGGER.debug("Get subnets with filter values, networkId : {}, subnetId : {}", networkId, subnetIds);
@@ -186,10 +190,12 @@ public class GcpPlatformResources implements PlatformResources {
                 .execute()
                 .getZones()
                 .stream()
+                .filter(zoneName -> zoneName.endsWith(customAvailabilityZone))
                 .findFirst()
                 .map(tmpZone -> tmpZone.substring(tmpZone.lastIndexOf('/') + 1))
                 .orElse(null);
         LOGGER.debug("Zone chosen for the subnets is {}", zone);
+
         for (Network network : networkList.getItems()) {
             Map<String, Object> properties = new HashMap<>();
             properties.put("gatewayIPv4", Strings.nullToEmpty(network.getGatewayIPv4()));
@@ -251,7 +257,7 @@ public class GcpPlatformResources implements PlatformResources {
                     Subnetwork subnetwork = compute.subnetworks().get(tmpProjectId, region.value(), subnetId).execute();
                     subnetworkList.getItems().add(subnetwork);
                 } catch (Exception e) {
-                    LOGGER.info("Could not get Subnetworks from {} project with {} subnetId: {}", tmpProjectId, subnetId, e);
+                    LOGGER.info("Could not get Subnet with project: '{}' region: '{}' with subnetId: '{}'", tmpProjectId, region.value(), subnetId, e);
                 }
             }
         }

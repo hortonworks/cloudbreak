@@ -21,9 +21,9 @@ import com.sequenceiq.environment.environment.validation.network.EnvironmentNetw
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @Component
-public class NetworkCreationValidator {
+public class NetworkValidator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NetworkCreationValidator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetworkValidator.class);
 
     private final Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform;
 
@@ -31,7 +31,7 @@ public class NetworkCreationValidator {
 
     private final SubnetUsageValidator subnetUsageValidator;
 
-    public NetworkCreationValidator(Map<CloudPlatform, EnvironmentNetworkValidator> envNetworkValidators, EnvironmentDtoConverter environmentDtoConverter,
+    public NetworkValidator(Map<CloudPlatform, EnvironmentNetworkValidator> envNetworkValidators, EnvironmentDtoConverter environmentDtoConverter,
             SubnetUsageValidator subnetUsageValidator) {
         environmentNetworkValidatorsByCloudPlatform = envNetworkValidators;
         this.environmentDtoConverter = environmentDtoConverter;

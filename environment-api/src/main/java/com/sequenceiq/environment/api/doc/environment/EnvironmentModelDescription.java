@@ -35,6 +35,7 @@ public class EnvironmentModelDescription {
     public static final String GCP_SHARED_PROJECT_ID = "Gcp shared project id";
     public static final String GCP_NO_PUBLIC_IP = "Gcp no public ip";
     public static final String GCP_NO_FIREWALL_RULES = "Gcp no firewall rules";
+    public static final String GCP_AVAILABILITY_ZONES = "Gcp availability zones";
 
     public static final String AZURE_RESOURCE_GROUP_NAME = "Azure Resource Group Name of the specified network";
     public static final String AZURE_PRIVATE_DNS_ZONE_ID = "Full resource ID of an existing Azure private DNS zone";
