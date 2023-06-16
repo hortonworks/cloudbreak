@@ -223,7 +223,16 @@ public class ExternalDatabaseService {
                     .stopAfterDelay(DB_POLLING_CONFIG.getTimeout(), DB_POLLING_CONFIG.getTimeoutTimeUnit())
                     .run(() -> pollFlowState(flowIdentifier));
             if (success == null || !success) {
-                handleUnsuccessfulFlow(databaseCrn, flowIdentifier, null);
+                String errorDescription;
+                try {
+                    DatabaseServerV4Response rdsStatus = redbeamsClient.getByCrn(databaseCrn);
+                    LOGGER.info("Response from redbeams: {}", rdsStatus);
+                    errorDescription = rdsStatus.getStatusReason();
+                } catch (CloudbreakServiceException | NotFoundException e) {
+                    errorDescription = e.getMessage();
+                    LOGGER.info("Error {} returned for database crn: {}", errorDescription, databaseCrn);
+                }
+                handleUnsuccessfulFlow(databaseCrn, flowIdentifier, new UserBreakException(errorDescription));
             }
         } catch (UserBreakException e) {
             handleUnsuccessfulFlow(databaseCrn, flowIdentifier, e);
@@ -231,8 +240,8 @@ public class ExternalDatabaseService {
     }
 
     private static void handleUnsuccessfulFlow(String databaseCrn, FlowIdentifier flowIdentifier, UserBreakException e) {
-        String message = String.format("Database flow failed in Redbeams. Database crn: %s, flow: %s",
-                databaseCrn, flowIdentifier);
+        String message = String.format("Database flow failed in Redbeams with error: '%s'. Database crn: %s, flow: %s",
+                e != null ? e.getMessage() : "unknown", databaseCrn, flowIdentifier);
         LOGGER.warn(message);
         throw new CloudbreakServiceException(message, e);
     }
