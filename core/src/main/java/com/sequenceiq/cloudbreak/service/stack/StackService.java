@@ -174,7 +174,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
-    private OpenSshPublicKeyValidator rsaPublicKeyValidator;
+    private OpenSshPublicKeyValidator openSshPublicKeyValidator;
 
     @Inject
     private StackResponseDecorator stackResponseDecorator;
@@ -568,7 +568,9 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         GetPlatformTemplateRequest templateRequest = connector.triggerGetTemplate(stack);
 
         if (!stack.getStackAuthentication().passwordAuthenticationRequired() && !Strings.isNullOrEmpty(stack.getStackAuthentication().getPublicKey())) {
-            rsaPublicKeyValidator.validate(stack.getStackAuthentication().getPublicKey());
+            // FIPS mode if and only if using AWS GovCloud
+            boolean fipsEnabled = CloudConstants.AWS_NATIVE_GOV.equals(stack.getPlatformVariant());
+            openSshPublicKeyValidator.validate(stack.getStackAuthentication().getPublicKey(), fipsEnabled);
         }
         if (stack.getOrchestrator() != null) {
             orchestratorService.save(stack.getOrchestrator());

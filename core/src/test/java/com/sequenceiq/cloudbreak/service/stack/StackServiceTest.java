@@ -1,13 +1,15 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -35,6 +37,10 @@ import javax.ws.rs.InternalServerErrorException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -57,6 +63,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.converter.stack.AutoscaleStackToAutoscaleStackResponseJsonConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.StackToStackV4RequestConverter;
@@ -80,6 +87,7 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
+import com.sequenceiq.cloudbreak.service.environment.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
@@ -96,7 +104,7 @@ import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.flow.core.FlowLogService;
 
 @ExtendWith(MockitoExtension.class)
-public class StackServiceTest {
+class StackServiceTest {
 
     private static final Long STACK_ID = 1L;
 
@@ -114,6 +122,8 @@ public class StackServiceTest {
 
     private static final LocalDateTime MOCK_NOW = LocalDateTime.of(1969, 4, 1, 4, 20);
 
+    private static final String PUBLIC_KEY = "ssh-rsa foobar";
+
     @Captor
     public final ArgumentCaptor<String> crnCaptor = ArgumentCaptor.forClass(String.class);
 
@@ -125,6 +135,9 @@ public class StackServiceTest {
 
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
+
+    @Mock
+    private OpenSshPublicKeyValidator openSshPublicKeyValidator;
 
     @Mock
     private Stack stack;
@@ -236,7 +249,7 @@ public class StackServiceTest {
     }
 
     @Test
-    void testWhenStackCouldNotFindByItsIdThenExceptionWouldThrown() {
+    void testWhenStackCouldNotBeFoundByItsIdThenExceptionWouldBeThrown() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> underTest.getById(STACK_ID))
@@ -325,6 +338,43 @@ public class StackServiceTest {
         }
     }
 
+    @ParameterizedTest(name = "publicKey={0}")
+    @NullSource
+    @ValueSource(strings = {""})
+    void testCreateNoPublicKey(String publicKey) {
+        when(stack.getPlatformVariant()).thenReturn(VARIANT_VALUE);
+        when(stackAuthentication.getPublicKey()).thenReturn(publicKey);
+
+        stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.create(stack, statedImage, user, workspace, Optional.empty()));
+
+        verify(connector, never()).checkAndGetPlatformVariant(any(Stack.class));
+        verify(stack, never()).setPlatformVariant(anyString());
+        verify(openSshPublicKeyValidator, never()).validate(anyString(), anyBoolean());
+    }
+
+    static Object[][] testCreatePublicKeyDataProvider() {
+        return new Object[][]{
+                // platformVariant, fipsEnabledExpected
+                {VARIANT_VALUE, false},
+                {CloudConstants.AWS_NATIVE_GOV, true},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("testCreatePublicKeyDataProvider")
+    void testCreatePublicKey(String platformVariant, boolean fipsEnabledExpected) {
+        when(stack.getPlatformVariant()).thenReturn(platformVariant);
+        when(stackAuthentication.getPublicKey()).thenReturn(PUBLIC_KEY);
+
+        stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.create(stack, statedImage, user, workspace, Optional.empty()));
+
+        verify(connector, never()).checkAndGetPlatformVariant(any(Stack.class));
+        verify(stack, never()).setPlatformVariant(anyString());
+        verify(openSshPublicKeyValidator).validate(PUBLIC_KEY, fipsEnabledExpected);
+    }
+
     @Test
     void testGetAllForAutoscaleWithNullSetFromDb() throws TransactionExecutionException {
         when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> {
@@ -406,7 +456,8 @@ public class StackServiceTest {
         doReturn(List.of(createStackImageView("[]")))
                 .when(stackRepository).findImagesOfAliveStacks(thresholdTimestamp);
 
-        assertThrows("Could not deserialize image from string []", IllegalStateException.class, () -> underTest.getImagesOfAliveStacks(0));
+        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.getImagesOfAliveStacks(0));
+        assertThat(illegalStateException).hasMessage("Could not deserialize image for stack 0 from Json{value='[]'}");
     }
 
     @Test
@@ -603,4 +654,5 @@ public class StackServiceTest {
         when(stackRepository.updateExternalDatabaseEngineVersion(1L, "11")).thenReturn(0);
         assertThrows(NotFoundException.class, () -> underTest.updateExternalDatabaseEngineVersion(1L, "11"));
     }
+
 }
