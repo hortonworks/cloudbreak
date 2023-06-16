@@ -24,7 +24,7 @@ public interface RotationExecutor<C extends RotationContext> {
     Class<C> getContextClass();
 
     default C castContext(RotationContext context) {
-        if (context.getClass().isAssignableFrom(getContextClass())) {
+        if (getContextClass().isAssignableFrom(context.getClass())) {
             return (C) context;
         }
         throw new SecretRotationException(String.format("Type of provided context for rotation step %s is not correct.", getType()), getType());

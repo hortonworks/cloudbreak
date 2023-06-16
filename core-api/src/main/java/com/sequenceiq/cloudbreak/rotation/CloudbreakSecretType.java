@@ -8,6 +8,8 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SA
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_STATE_RUN;
 import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.CUSTOM_JOB;
 import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
+import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.SERVICE_CONFIG;
+import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.USER_DATA;
 import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.VAULT;
 
 import java.util.List;
@@ -22,7 +24,8 @@ public enum CloudbreakSecretType implements SecretType {
     DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD(List.of(SALT_PILLAR)),
     CLUSTER_CM_DB_PASSWORD(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CUSTOM_JOB)),
     USER_KEYPAIR(List.of(SALT_STATE_RUN, CUSTOM_JOB)),
-    CLUSTER_CM_SERVICES_DB_PASSWORD(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE));
+    CLUSTER_CM_SERVICES_DB_PASSWORD(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE)),
+    SALT_BOOT_SECRETS(List.of(VAULT, CUSTOM_JOB, SERVICE_CONFIG, USER_DATA));
 
     private final List<SecretRotationStep> steps;
 

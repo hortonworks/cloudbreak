@@ -4,6 +4,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDe
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.GET_USED_SUBNETS_BY_ENVIRONMENT_CRN;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.LIST_RETRYABLE_FLOWS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.RETRY;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.ROTATE_SECRETS_BY_CRN;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.UPDATE_SALT;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.VERTICAL_SCALE_BY_CRN;
 
@@ -48,6 +49,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaRespons
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleRequest;
@@ -281,7 +283,7 @@ public interface FreeIpaV1Endpoint {
     @GET
     @Path("retry")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LIST_RETRYABLE_FLOWS,  produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "listRetryableFlowsV1")
+    @ApiOperation(value = LIST_RETRYABLE_FLOWS, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "listRetryableFlowsV1")
     List<RetryableFlowResponse> listRetryableFlows(@QueryParam("environment") @NotEmpty String environmentCrn);
 
     @PUT
@@ -304,7 +306,7 @@ public interface FreeIpaV1Endpoint {
     @ApiOperation(value = FreeIpaOperationDescriptions.INTERNAL_UPGRADE_CCM_BY_ENVID, produces = MediaType.APPLICATION_JSON,
             notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "internalUpgradeCcmByEnvironmentV1")
     OperationStatus upgradeCcmInternal(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
-            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
             @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @PUT
@@ -315,13 +317,13 @@ public interface FreeIpaV1Endpoint {
     OperationStatus modifyProxyConfigInternal(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
             @ValidCrn(resource = CrnResourceDescriptor.PROXY) @QueryParam("previousProxy") String previousProxyCrn,
-            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
             @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @GET
     @Path("get_recommendation")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = GET_RECOMMENDATION,  produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "getRecommendationV1")
+    @ApiOperation(value = GET_RECOMMENDATION, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "getRecommendationV1")
     FreeIpaRecommendationResponse getRecommendation(
             @ValidCrn(resource = CrnResourceDescriptor.CREDENTIAL) @QueryParam("credentialCrn") @NotEmpty String credentialCrn,
             @QueryParam("region") @NotEmpty String region,
@@ -343,5 +345,14 @@ public interface FreeIpaV1Endpoint {
             nickname = "getUsedSubnetsByEnvironment")
     UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") String environmentCrn);
+
+    @PUT
+    @Path("rotate_secret")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ROTATE_SECRETS_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+            nickname = "rotateSecretsByCrn")
+    FlowIdentifier rotateSecretsByCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
+            @Valid @NotNull FreeIpaSecretRotationRequest request);
 
 }

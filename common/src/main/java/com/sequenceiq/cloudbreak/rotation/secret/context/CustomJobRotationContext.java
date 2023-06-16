@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.rotation.context;
+package com.sequenceiq.cloudbreak.rotation.secret.context;
 
 import java.util.Optional;
 

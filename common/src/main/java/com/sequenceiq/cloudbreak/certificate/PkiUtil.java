@@ -103,6 +103,15 @@ public class PkiUtil {
         }
     }
 
+    public static PublicKey getPublicKey(String privateKeyPem) {
+        try (PEMParser pemParser = new PEMParser(new StringReader(clarifyPemKey(privateKeyPem)))) {
+            PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();
+            return new JcaPEMKeyConverter().getPublicKey(pemKeyPair.getPublicKeyInfo());
+        } catch (IOException e) {
+            throw new SecurityException(e);
+        }
+    }
+
     public static String generateSignature(String privateKeyPem, byte[] data) {
         RSAKeyParameters rsaKeyParameters = CACHE.get(privateKeyPem);
 
