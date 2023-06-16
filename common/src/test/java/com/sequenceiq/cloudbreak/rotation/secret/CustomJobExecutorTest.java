@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.rotation.executor;
+package com.sequenceiq.cloudbreak.rotation.secret;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
@@ -11,10 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.rotation.context.CustomJobRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
-import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
+import com.sequenceiq.cloudbreak.rotation.secret.context.CustomJobRotationContext;
 
 @ExtendWith(MockitoExtension.class)
 class CustomJobExecutorTest {
@@ -32,7 +29,7 @@ class CustomJobExecutorTest {
     private CustomJobExecutor underTest;
 
     @Test
-    public void testRotation() throws Exception {
+    public void testRotation() {
         underTest.executeRotate(createContext(rotateCustomJob, null, null));
 
         verify(rotateCustomJob).run();
@@ -41,8 +38,8 @@ class CustomJobExecutorTest {
     }
 
     @Test
-    public void testRotationFailure() throws CloudbreakRuntimeException {
-        doThrow(new CloudbreakRuntimeException("something")).when(rotateCustomJob).run();
+    public void testRotationFailure() {
+        doThrow(new RuntimeException("something")).when(rotateCustomJob).run();
 
         assertThrows(SecretRotationException.class, () ->
                 underTest.executeRotate(createContext(rotateCustomJob, null, null)));
@@ -53,8 +50,8 @@ class CustomJobExecutorTest {
     }
 
     @Test
-    public void testRollbackFailure() throws CloudbreakRuntimeException {
-        doThrow(new CloudbreakRuntimeException("something")).when(rollbackCustomJob).run();
+    public void testRollbackFailure() {
+        doThrow(new RuntimeException("something")).when(rollbackCustomJob).run();
 
         assertThrows(SecretRotationException.class, () ->
                 underTest.executeRollback(createContext(rotateCustomJob, rollbackCustomJob, null)));
@@ -65,7 +62,7 @@ class CustomJobExecutorTest {
     }
 
     @Test
-    public void testFinalization() throws Exception {
+    public void testFinalization() {
         underTest.executeFinalize(createContext(rotateCustomJob, null, finalizeCustomJob));
 
         verify(rotateCustomJob, times(0)).run();
@@ -74,8 +71,8 @@ class CustomJobExecutorTest {
     }
 
     @Test
-    public void testFinalizationFailure() throws CloudbreakRuntimeException {
-        doThrow(new CloudbreakRuntimeException("something")).when(finalizeCustomJob).run();
+    public void testFinalizationFailure() {
+        doThrow(new RuntimeException("something")).when(finalizeCustomJob).run();
 
         assertThrows(SecretRotationException.class, () ->
                 underTest.executeFinalize(createContext(rotateCustomJob, null, finalizeCustomJob)));

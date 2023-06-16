@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.image.userdata;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
@@ -110,6 +111,21 @@ public class UserDataService {
         ImageEntity image = imageService.getByStackId(stackId);
 
         String gatewayUserdataSecret = image.getGatewayUserdataSecret().getSecret();
+
+        image.setUserdata(null);
+        image.setGatewayUserdata(userdata);
+
+        secretService.delete(gatewayUserdataSecret);
+
+        return imageService.save(image);
+    }
+
+    public ImageEntity updateUserData(Long stackId, Function<String, String> userdataUpdateFunction) {
+        LOGGER.debug("Updating user data for stack {}", stackId);
+        ImageEntity image = imageService.getByStackId(stackId);
+
+        String gatewayUserdataSecret = image.getGatewayUserdataSecret().getSecret();
+        String userdata = userdataUpdateFunction.apply(image.getGatewayUserdata());
 
         image.setUserdata(null);
         image.setGatewayUserdata(userdata);

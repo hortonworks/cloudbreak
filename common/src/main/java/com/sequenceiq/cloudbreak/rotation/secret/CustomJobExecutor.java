@@ -1,9 +1,8 @@
-package com.sequenceiq.cloudbreak.rotation.executor;
+package com.sequenceiq.cloudbreak.rotation.secret;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.rotation.context.CustomJobRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
+import com.sequenceiq.cloudbreak.rotation.secret.context.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 

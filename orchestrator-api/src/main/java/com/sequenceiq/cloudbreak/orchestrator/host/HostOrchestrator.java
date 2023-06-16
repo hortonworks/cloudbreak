@@ -151,6 +151,9 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     void uploadStates(List<GatewayConfig> allGatewayConfigs, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException;
 
+    void uploadFile(GatewayConfig gatewayConfig, Set<String> targets, ExitCriteriaModel exitCriteriaModel,
+            String path, String fileName, byte[] content) throws CloudbreakOrchestratorFailedException;
+
     LocalDate getPasswordExpiryDate(List<GatewayConfig> allGatewayConfigs, String user) throws CloudbreakOrchestratorException;
 
     void createCronForUserHomeCreation(List<GatewayConfig> gatewayConfigs, Set<String> targets, ExitCriteriaModel exitModel)

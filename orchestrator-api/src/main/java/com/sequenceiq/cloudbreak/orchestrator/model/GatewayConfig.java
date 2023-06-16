@@ -181,6 +181,16 @@ public class GatewayConfig {
         return this;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public Builder toBuilder() {
+        return new Builder(this.connectionAddress, this.publicAddress, this.privateAddress, this.hostname, this.serverCert, this.clientCert, this.clientKey,
+                this.gatewayPort, this.instanceId, this.saltPassword, this.saltBootPassword, this.signatureKey, this.knoxGatewayEnabled, this.primary,
+                this.saltSignPrivateKey, this.saltSignPublicKey, this.userFacingCert, this.userFacingKey, this.path, this.protocol);
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder("GatewayConfig{");
         sb.append("connectionAddress='").append(connectionAddress).append('\'');
@@ -193,5 +203,187 @@ public class GatewayConfig {
         sb.append(", primary=").append(primary);
         sb.append('}');
         return sb.toString();
+    }
+
+    public static class Builder {
+        private String connectionAddress;
+
+        private String publicAddress;
+
+        private String privateAddress;
+
+        private String hostname;
+
+        private String serverCert;
+
+        private String clientCert;
+
+        private String clientKey;
+
+        private Integer gatewayPort;
+
+        private String instanceId;
+
+        private String saltPassword;
+
+        private String saltBootPassword;
+
+        private String signatureKey;
+
+        private Boolean knoxGatewayEnabled;
+
+        private boolean primary;
+
+        private String saltSignPrivateKey;
+
+        private String saltSignPublicKey;
+
+        private String userFacingCert;
+
+        private String userFacingKey;
+
+        private Optional<String> path = Optional.empty();
+
+        private String protocol = "https";
+
+        public Builder() {
+        }
+
+        public Builder(String connectionAddress, String publicAddress, String privateAddress, String hostname, String serverCert, String clientCert,
+                String clientKey,
+                Integer gatewayPort, String instanceId, String saltPassword, String saltBootPassword, String signatureKey, Boolean knoxGatewayEnabled,
+                boolean primary,
+                String saltSignPrivateKey, String saltSignPublicKey, String userFacingCert, String userFacingKey, Optional<String> path, String protocol) {
+            this.connectionAddress = connectionAddress;
+            this.publicAddress = publicAddress;
+            this.privateAddress = privateAddress;
+            this.hostname = hostname;
+            this.serverCert = serverCert;
+            this.clientCert = clientCert;
+            this.clientKey = clientKey;
+            this.gatewayPort = gatewayPort;
+            this.instanceId = instanceId;
+            this.saltPassword = saltPassword;
+            this.saltBootPassword = saltBootPassword;
+            this.signatureKey = signatureKey;
+            this.knoxGatewayEnabled = knoxGatewayEnabled;
+            this.primary = primary;
+            this.saltSignPrivateKey = saltSignPrivateKey;
+            this.saltSignPublicKey = saltSignPublicKey;
+            this.userFacingCert = userFacingCert;
+            this.userFacingKey = userFacingKey;
+            this.path = path;
+            this.protocol = protocol;
+        }
+
+        public Builder withConnectionAddress(String connectionAddress) {
+            this.connectionAddress = connectionAddress;
+            return this;
+        }
+
+        public Builder withPublicAddress(String publicAddress) {
+            this.publicAddress = publicAddress;
+            return this;
+        }
+
+        public Builder withPrivateAddress(String privateAddress) {
+            this.privateAddress = privateAddress;
+            return this;
+        }
+
+        public Builder withHostname(String hostname) {
+            this.hostname = hostname;
+            return this;
+        }
+
+        public Builder withServerCert(String serverCert) {
+            this.serverCert = serverCert;
+            return this;
+        }
+
+        public Builder withClientCert(String clientCert) {
+            this.clientCert = clientCert;
+            return this;
+        }
+
+        public Builder withClientKey(String clientKey) {
+            this.clientKey = clientKey;
+            return this;
+        }
+
+        public Builder withGatewayPort(Integer gatewayPort) {
+            this.gatewayPort = gatewayPort;
+            return this;
+        }
+
+        public Builder withInstanceId(String instanceId) {
+            this.instanceId = instanceId;
+            return this;
+        }
+
+        public Builder withSaltPassword(String saltPassword) {
+            this.saltPassword = saltPassword;
+            return this;
+        }
+
+        public Builder withSaltBootPassword(String saltBootPassword) {
+            this.saltBootPassword = saltBootPassword;
+            return this;
+        }
+
+        public Builder withSignatureKey(String signatureKey) {
+            this.signatureKey = signatureKey;
+            return this;
+        }
+
+        public Builder withKnoxGatewayEnabled(Boolean knoxGatewayEnabled) {
+            this.knoxGatewayEnabled = knoxGatewayEnabled;
+            return this;
+        }
+
+        public Builder withPrimary(boolean primary) {
+            this.primary = primary;
+            return this;
+        }
+
+        public Builder withSaltSignPrivateKey(String saltSignPrivateKey) {
+            this.saltSignPrivateKey = saltSignPrivateKey;
+            return this;
+        }
+
+        public Builder withSaltSignPublicKey(String saltSignPublicKey) {
+            this.saltSignPublicKey = saltSignPublicKey;
+            return this;
+        }
+
+        public Builder withUserFacingCert(String userFacingCert) {
+            this.userFacingCert = userFacingCert;
+            return this;
+        }
+
+        public Builder withUserFacingKey(String userFacingKey) {
+            this.userFacingKey = userFacingKey;
+            return this;
+        }
+
+        public Builder withPath(Optional<String> path) {
+            this.path = path;
+            return this;
+        }
+
+        public Builder withProtocol(String protocol) {
+            this.protocol = protocol;
+            return this;
+        }
+
+        public GatewayConfig build() {
+            GatewayConfig gatewayConfig =
+                    new GatewayConfig(connectionAddress, publicAddress, privateAddress, hostname, gatewayPort, instanceId, serverCert, clientCert, clientKey,
+                            saltPassword, saltBootPassword, signatureKey, knoxGatewayEnabled, primary, saltSignPrivateKey, saltSignPublicKey, userFacingCert,
+                            userFacingKey);
+            path.ifPresent(gatewayConfig::withPath);
+            gatewayConfig.withProtocol(protocol);
+            return gatewayConfig;
+        }
     }
 }

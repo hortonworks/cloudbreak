@@ -152,7 +152,7 @@ dependencies {
   implementation project(':cloud-gcp')
   implementation project(':cloud-template')
 
-  runtimeOnly project(':orchestrator-salt')
+  implementation project(':orchestrator-salt')
   runtimeOnly project(':cloud-mock')
   runtimeOnly project(':cloud-azure')
   runtimeOnly project(':cloud-gcp')

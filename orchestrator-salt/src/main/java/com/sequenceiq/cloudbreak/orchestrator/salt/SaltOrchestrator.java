@@ -1680,6 +1680,21 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
+    public void uploadFile(
+            GatewayConfig primaryGateway,
+            Set<String> targets,
+            ExitCriteriaModel exitCriteriaModel,
+            String path,
+            String fileName,
+            byte[] content) throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            uploadFileToTargets(sc, targets, exitCriteriaModel, path, fileName, content);
+        } catch (Exception e) {
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public LocalDate getPasswordExpiryDate(List<GatewayConfig> allGatewayConfigs, String user) throws CloudbreakOrchestratorException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargets = getGatewayHostnames(allGatewayConfigs);
