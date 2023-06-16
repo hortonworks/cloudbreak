@@ -1,8 +1,12 @@
 package com.sequenceiq.environment.api.v1.environment.model;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.validation.constraints.Size;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -28,6 +32,9 @@ public class EnvironmentNetworkGcpParams implements Serializable {
 
     @ApiModelProperty(value = EnvironmentModelDescription.GCP_NO_FIREWALL_RULES, required = true)
     private Boolean noFirewallRules;
+
+    @ApiModelProperty(EnvironmentModelDescription.GCP_AVAILABILITY_ZONES)
+    private Set<String> availabilityZones = Set.of();
 
     public String getNetworkId() {
         return networkId;
@@ -61,6 +68,14 @@ public class EnvironmentNetworkGcpParams implements Serializable {
         this.noFirewallRules = noFirewallRules;
     }
 
+    public Set<String> getAvailabilityZones() {
+        return availabilityZones;
+    }
+
+    public void setAvailabilityZones(Set<String> availabilityZones) {
+        this.availabilityZones = availabilityZones;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentNetworkGcpParams{" +
@@ -68,6 +83,7 @@ public class EnvironmentNetworkGcpParams implements Serializable {
                 ", sharedProjectId='" + sharedProjectId + '\'' +
                 ", noPublicIp=" + noPublicIp +
                 ", noFirewallRules=" + noFirewallRules +
+                ", availabilityZones=[" + String.join(",", availabilityZones) + "]" +
                 '}';
     }
 
@@ -79,6 +95,8 @@ public class EnvironmentNetworkGcpParams implements Serializable {
         private Boolean noPublicIp;
 
         private Boolean noFirewallRules;
+
+        private final Set<String> availabilityZones = new HashSet<>();
 
         private EnvironmentNetworkGcpParamsBuilder() {
         }
@@ -107,12 +125,20 @@ public class EnvironmentNetworkGcpParams implements Serializable {
             return this;
         }
 
+        public EnvironmentNetworkGcpParamsBuilder withAvailabilityZones(Set<String> availabilityZones) {
+            if (CollectionUtils.isNotEmpty(availabilityZones)) {
+                this.availabilityZones.addAll(availabilityZones);
+            }
+            return this;
+        }
+
         public EnvironmentNetworkGcpParams build() {
             EnvironmentNetworkGcpParams environmentNetworkGcpParams = new EnvironmentNetworkGcpParams();
             environmentNetworkGcpParams.setNetworkId(networkId);
             environmentNetworkGcpParams.setSharedProjectId(sharedProjectId);
             environmentNetworkGcpParams.setNoPublicIp(noPublicIp);
             environmentNetworkGcpParams.setNoFirewallRules(noFirewallRules);
+            environmentNetworkGcpParams.setAvailabilityZones(availabilityZones);
             return environmentNetworkGcpParams;
         }
     }

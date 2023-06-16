@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
-import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
+import com.sequenceiq.environment.environment.validation.validators.NetworkValidator;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dao.repository.BaseNetworkRepository;
@@ -39,7 +39,7 @@ public class NetworkService {
 
     private final EnvironmentNetworkService environmentNetworkService;
 
-    private final NetworkCreationValidator networkCreationValidator;
+    private final NetworkValidator networkValidator;
 
     private final CloudNetworkService cloudNetworkService;
 
@@ -47,13 +47,13 @@ public class NetworkService {
 
     public NetworkService(BaseNetworkRepository baseNetworkRepository,
             Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap, CloudNetworkService cloudNetworkService,
-            EnvironmentNetworkService environmentNetworkService, NetworkCreationValidator networkCreationValidator,
+            EnvironmentNetworkService environmentNetworkService, NetworkValidator networkValidator,
             RegionAwareCrnGenerator regionAwareCrnGenerator) {
         networkRepository = baseNetworkRepository;
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
         this.environmentNetworkService = environmentNetworkService;
         this.cloudNetworkService = cloudNetworkService;
-        this.networkCreationValidator = networkCreationValidator;
+        this.networkValidator = networkValidator;
         this.regionAwareCrnGenerator = regionAwareCrnGenerator;
     }
 
@@ -88,7 +88,7 @@ public class NetworkService {
         NetworkDto cloneNetworkDto = NetworkDto.builder(originalNetworkDto)
                 .withSubnetMetas(editDto.getNetworkDto().getSubnetMetas())
                 .build();
-        ValidationResultBuilder validationResultBuilder = networkCreationValidator.validateNetworkEdit(environment, cloneNetworkDto);
+        ValidationResultBuilder validationResultBuilder = networkValidator.validateNetworkEdit(environment, cloneNetworkDto);
         ValidationResult validationResult = validationResultBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());

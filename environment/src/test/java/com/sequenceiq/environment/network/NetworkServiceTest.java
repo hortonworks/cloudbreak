@@ -39,7 +39,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
-import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
+import com.sequenceiq.environment.environment.validation.validators.NetworkValidator;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.GcpNetwork;
@@ -61,7 +61,7 @@ public class NetworkServiceTest {
 
     private EnvironmentNetworkService environmentNetworkService = mock(EnvironmentNetworkService.class);
 
-    private NetworkCreationValidator networkCreationValidator = mock(NetworkCreationValidator.class);
+    private NetworkValidator networkCreationValidator = mock(NetworkValidator.class);
 
     private EnvironmentNetworkConverter environmentNetworkConverter = mock(EnvironmentNetworkConverter.class);
 
