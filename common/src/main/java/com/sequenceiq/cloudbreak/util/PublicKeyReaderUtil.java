@@ -3,13 +3,16 @@ package com.sequenceiq.cloudbreak.util;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.PublicKey;
-import java.security.spec.DSAPublicKeySpec;
+import java.security.spec.EdECPoint;
+import java.security.spec.EdECPublicKeySpec;
 import java.security.spec.KeySpec;
+import java.security.spec.NamedParameterSpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.ArrayUtils;
 
 import com.sequenceiq.cloudbreak.util.PublicKeyReaderUtil.PublicKeyParseException.ErrorCode;
 
@@ -20,10 +23,14 @@ public final class PublicKeyReaderUtil {
 
     private static final String SSH2_RSA_KEY = "ssh-rsa";
 
+    private static final String SSH2_ED25519_KEY = "ssh-ed25519";
+
+    private static final int NUM_BYTES_ED25519 = 32;
+
     private PublicKeyReaderUtil() {
     }
 
-    public static PublicKey load(String key) throws PublicKeyParseException {
+    public static PublicKey load(String key, boolean fipsEnabled) throws PublicKeyParseException {
         int c = key.charAt(0);
 
         String base64;
@@ -38,41 +45,20 @@ public final class PublicKeyReaderUtil {
 
         SSH2DataBuffer buf = new SSH2DataBuffer(Base64.decodeBase64(base64.getBytes()));
         String type = buf.readString();
-        PublicKey ret;
-        if (SSH2_RSA_KEY.equals(type)) {
-            ret = decodePublicKey(buf);
-        } else {
-            throw new PublicKeyParseException(ErrorCode.UNKNOWN_PUBLIC_KEY_CERTIFICATE_FORMAT);
-        }
 
-        return ret;
+        return switch (type) {
+            case SSH2_RSA_KEY -> decodeRsaPublicKey(buf);
+            case SSH2_ED25519_KEY -> {
+                if (fipsEnabled) {
+                    throw new PublicKeyParseException(ErrorCode.SSH2ED25519_FORBIDDEN_IN_FIPS_MODE);
+                }
+                yield decodeEd25519PublicKey(buf);
+            }
+            default -> throw new PublicKeyParseException(ErrorCode.UNKNOWN_PUBLIC_KEY_CERTIFICATE_FORMAT);
+        };
     }
 
-    public static PublicKey loadOpenSsh(String key) throws PublicKeyParseException {
-        int c = key.charAt(0);
-
-        String base64;
-
-        if (c == 's') {
-            base64 = extractOpenSSHBase64(key);
-        } else {
-            throw new PublicKeyParseException(ErrorCode.UNKNOWN_PUBLIC_KEY_FILE_FORMAT);
-        }
-
-        SSH2DataBuffer buf = new SSH2DataBuffer(Base64.decodeBase64(base64.getBytes()));
-        String type = buf.readString();
-        PublicKey ret;
-        if (SSH2_RSA_KEY.equals(type)) {
-            ret = decodePublicKey(buf);
-        } else {
-            throw new PublicKeyParseException(ErrorCode.UNKNOWN_PUBLIC_KEY_CERTIFICATE_FORMAT);
-        }
-
-        return ret;
-    }
-
-    public static String extractOpenSSHBase64(String key)
-            throws PublicKeyParseException {
+    private static String extractOpenSSHBase64(String key) throws PublicKeyParseException {
         String base64;
         try {
             StringTokenizer st = new StringTokenizer(key);
@@ -118,32 +104,13 @@ public final class PublicKeyReaderUtil {
         }
 
         if (!endKey) {
-            throw new PublicKeyParseException(
-                    ErrorCode.CORRUPT_SECSSH_PUBLIC_KEY_STRING);
+            throw new PublicKeyParseException(ErrorCode.CORRUPT_SECSSH_PUBLIC_KEY_STRING);
         }
 
         return base64Data.toString();
     }
 
-    private static PublicKey decodeDSAPublicKey(SSH2DataBuffer buffer) throws PublicKeyParseException {
-        BigInteger p = buffer.readMPint();
-        BigInteger q = buffer.readMPint();
-        BigInteger g = buffer.readMPint();
-        BigInteger y = buffer.readMPint();
-
-        try {
-            KeyFactory dsaKeyFact = KeyFactory.getInstance("DSA");
-            KeySpec dsaPubSpec = new DSAPublicKeySpec(y, p, q, g);
-
-            return dsaKeyFact.generatePublic(dsaPubSpec);
-
-        } catch (Exception e) {
-            throw new PublicKeyParseException(
-                    ErrorCode.SSH2DSA_ERROR_DECODING_PUBLIC_KEY_BLOB, e);
-        }
-    }
-
-    private static PublicKey decodePublicKey(SSH2DataBuffer buffer) throws PublicKeyParseException {
+    private static PublicKey decodeRsaPublicKey(SSH2DataBuffer buffer) throws PublicKeyParseException {
         BigInteger e = buffer.readMPint();
         BigInteger n = buffer.readMPint();
 
@@ -152,19 +119,35 @@ public final class PublicKeyReaderUtil {
             KeySpec rsaPubSpec = new RSAPublicKeySpec(n, e);
 
             return rsaKeyFact.generatePublic(rsaPubSpec);
-
         } catch (Exception ex) {
             throw new PublicKeyParseException(ErrorCode.SSH2RSA_ERROR_DECODING_PUBLIC_KEY_BLOB, ex);
         }
     }
 
+    private static PublicKey decodeEd25519PublicKey(SSH2DataBuffer buffer) throws PublicKeyParseException {
+        EdECPoint point = buffer.readEdEcPoint();
+
+        try {
+            KeyFactory ed25519KeyFact = KeyFactory.getInstance("Ed25519");
+            KeySpec ed25519PubSpec = new EdECPublicKeySpec(NamedParameterSpec.ED25519, point);
+
+            return ed25519KeyFact.generatePublic(ed25519PubSpec);
+        } catch (Exception ex) {
+            throw new PublicKeyParseException(ErrorCode.SSH2ED25519_ERROR_DECODING_PUBLIC_KEY_BLOB, ex);
+        }
+    }
+
     private static class SSH2DataBuffer {
 
-        public static final int INT1 = 24;
+        private static final int INT1 = 24;
 
-        public static final int INT2 = 16;
+        private static final int INT2 = 16;
 
-        public static final int INT3 = 8;
+        private static final int INT3 = 8;
+
+        private static final int U_BYTE_MAX_VALUE = 0xFF;
+
+        private static final int NUM_BITS_7 = 7;
 
         private final byte[] data;
 
@@ -183,7 +166,21 @@ public final class PublicKeyReaderUtil {
             return new String(readByteArray());
         }
 
-        private int readUInt32() {
+        public EdECPoint readEdEcPoint() throws PublicKeyParseException {
+            byte[] raw = readByteArray();
+            if (raw.length != NUM_BYTES_ED25519) {
+                throw new PublicKeyParseException(ErrorCode.MALFORMED_ED25519_ED_EC_POINT);
+            }
+            int lastByte = raw[raw.length - 1] & U_BYTE_MAX_VALUE;
+            boolean xOdd = lastByte >> NUM_BITS_7 == 1;
+            raw[raw.length - 1] &= Byte.MAX_VALUE;
+            // The input is encoded as little-endian, whereas BigInteger expects big-endian.
+            ArrayUtils.reverse(raw);
+            BigInteger y = new BigInteger(1, raw);
+            return new EdECPoint(xOdd, y);
+        }
+
+        private int readUInt32BigEndian() {
             int byte1 = data[pos++];
             int byte2 = data[pos++];
             int byte3 = data[pos++];
@@ -192,10 +189,9 @@ public final class PublicKeyReaderUtil {
         }
 
         private byte[] readByteArray() throws PublicKeyParseException {
-            int len = readUInt32();
+            int len = readUInt32BigEndian();
             if (len < 0 || len > (data.length - pos)) {
-                throw new PublicKeyParseException(
-                        ErrorCode.CORRUPT_BYTE_ARRAY_ON_READ);
+                throw new PublicKeyParseException(ErrorCode.CORRUPT_BYTE_ARRAY_ON_READ);
             }
             byte[] str = new byte[len];
             System.arraycopy(data, pos, str, 0, len);
@@ -213,8 +209,7 @@ public final class PublicKeyReaderUtil {
             this.errorCode = errorCode;
         }
 
-        private PublicKeyParseException(ErrorCode errorCode,
-                Throwable cause) {
+        private PublicKeyParseException(ErrorCode errorCode, Throwable cause) {
             super(errorCode.message, cause);
             this.errorCode = errorCode;
         }
@@ -232,11 +227,15 @@ public final class PublicKeyReaderUtil {
 
             CORRUPT_SECSSH_PUBLIC_KEY_STRING("Corrupt SECSSH public key string"),
 
-            SSH2DSA_ERROR_DECODING_PUBLIC_KEY_BLOB("SSH2DSA: error decoding public key blob"),
-
             SSH2RSA_ERROR_DECODING_PUBLIC_KEY_BLOB("SSH2RSA: error decoding public key blob"),
 
-            CORRUPT_BYTE_ARRAY_ON_READ("Public key length is shorter than 2048 bits or byte array is corrupt.");
+            SSH2ED25519_FORBIDDEN_IN_FIPS_MODE("SSH2ED25519: this key type is not allowed when running clusters in FIPS mode"),
+
+            SSH2ED25519_ERROR_DECODING_PUBLIC_KEY_BLOB("SSH2ED25519: error decoding public key blob"),
+
+            CORRUPT_BYTE_ARRAY_ON_READ("Public key length is shorter than 2048 bits or byte array is corrupt."),
+
+            MALFORMED_ED25519_ED_EC_POINT("SSH2ED25519: byte array for EdECPoint must be " + NUM_BYTES_ED25519 + " bytes long");
 
             private final String message;
 

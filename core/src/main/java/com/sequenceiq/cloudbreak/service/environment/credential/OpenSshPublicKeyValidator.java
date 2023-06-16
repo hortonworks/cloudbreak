@@ -14,9 +14,9 @@ public class OpenSshPublicKeyValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenSshPublicKeyValidator.class);
 
     @Measure(OpenSshPublicKeyValidator.class)
-    public void validate(String publicKey) {
+    public void validate(String publicKey, boolean fipsEnabled) {
         try {
-            PublicKeyReaderUtil.load(publicKey);
+            PublicKeyReaderUtil.load(publicKey, fipsEnabled);
         } catch (Exception e) {
             String errorMessage = String.format("Could not validate publickey certificate [certificate: '%s'], detailed message: %s",
                     publicKey, e.getMessage());
@@ -24,4 +24,5 @@ public class OpenSshPublicKeyValidator {
             throw new BadRequestException(errorMessage, e);
         }
     }
+
 }
