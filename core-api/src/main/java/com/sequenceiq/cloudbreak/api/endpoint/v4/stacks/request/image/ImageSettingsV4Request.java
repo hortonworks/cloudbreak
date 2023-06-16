@@ -20,7 +20,7 @@ public class ImageSettingsV4Request implements JsonEntity {
     @ApiModelProperty(StackModelDescription.IMAGE_ID)
     private String id;
 
-    @ApiModelProperty(StackModelDescription.OS_TYPE)
+    @ApiModelProperty(StackModelDescription.IMAGE_OS)
     private String os;
 
     public String getCatalog() {

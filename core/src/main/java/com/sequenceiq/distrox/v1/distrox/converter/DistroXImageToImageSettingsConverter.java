@@ -12,6 +12,7 @@ public class DistroXImageToImageSettingsConverter {
         ImageSettingsV4Request response = new ImageSettingsV4Request();
         response.setCatalog(source.getCatalog());
         response.setId(source.getId());
+        response.setOs(source.getOs());
         return response;
     }
 
@@ -19,6 +20,7 @@ public class DistroXImageToImageSettingsConverter {
         DistroXImageV1Request response = new DistroXImageV1Request();
         response.setCatalog(source.getCatalog());
         response.setId(source.getId());
+        response.setOs(source.getOs());
         return response;
     }
 

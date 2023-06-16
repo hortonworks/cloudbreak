@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ImageModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
@@ -24,6 +25,9 @@ public class StackImageV4Response implements JsonEntity {
 
     @ApiModelProperty(ImageModelDescription.IMAGE_CATALOG_NAME)
     private String catalogName;
+
+    @ApiModelProperty(ModelDescriptions.StackModelDescription.IMAGE_OS)
+    private String os;
 
     public String getName() {
         return name;
@@ -55,5 +59,13 @@ public class StackImageV4Response implements JsonEntity {
 
     public void setCatalogName(String catalogName) {
         this.catalogName = catalogName;
+    }
+
+    public String getOs() {
+        return os;
+    }
+
+    public void setOs(String os) {
+        this.os = os;
     }
 }

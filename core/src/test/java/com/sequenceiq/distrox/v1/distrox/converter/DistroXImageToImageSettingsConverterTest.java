@@ -23,12 +23,14 @@ class DistroXImageToImageSettingsConverterTest {
         DistroXImageV1Request input = new DistroXImageV1Request();
         input.setCatalog("someCatalog");
         input.setId("someId");
+        input.setOs("someOs");
 
         ImageSettingsV4Request result = underTest.convert(input);
 
         assertNotNull(result);
         assertEquals(input.getCatalog(), result.getCatalog());
         assertEquals(input.getId(), result.getId());
+        assertEquals(input.getOs(), result.getOs());
     }
 
     @Test
@@ -36,12 +38,14 @@ class DistroXImageToImageSettingsConverterTest {
         ImageSettingsV4Request input = new ImageSettingsV4Request();
         input.setCatalog("someCatalog");
         input.setId("someId");
+        input.setOs("someOs");
 
         DistroXImageV1Request result = underTest.convert(input);
 
         assertNotNull(result);
         assertEquals(input.getCatalog(), result.getCatalog());
         assertEquals(input.getId(), result.getId());
+        assertEquals(input.getOs(), result.getOs());
     }
 
 }
