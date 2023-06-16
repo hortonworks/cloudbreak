@@ -434,6 +434,19 @@ class EnvironmentValidatorServiceTest {
         assertFalse(validationResult.hasError());
     }
 
+    @Test
+    void testValidateWhenRequestedFreeipaHasImageIdAndImageOs() {
+        FreeIpaCreationDto freeIpaCreationDto = FreeIpaCreationDto.builder(1)
+                .withImageId("id")
+                .withImageOs("os")
+                .build();
+
+        ValidationResult validationResult = underTest.validateFreeIpaCreation(freeIpaCreationDto);
+        assertTrue(validationResult.hasError());
+        assertEquals("FreeIpa deployment requests can not have both image id and image os parameters set.",
+                validationResult.getErrors().get(0));
+    }
+
     private Environment aValidEnvirontmentWithParent() {
         Environment parentEnvironment = new Environment();
         parentEnvironment.setCloudPlatform(CloudPlatform.AWS.name());

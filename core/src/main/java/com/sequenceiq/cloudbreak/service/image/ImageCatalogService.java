@@ -291,7 +291,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         List<Image> baseImages = statedImages.getImages().getBaseImages();
         Optional<Image> defaultBaseImage = getLatestImageDefaultPreferred(baseImages);
         if (defaultBaseImage.isEmpty()) {
-            throw new CloudbreakImageNotFoundException(baseImageNotFoundErrorMessage(platform, imageFilter.getImageCatalog()));
+            throw new CloudbreakImageNotFoundException(baseImageNotFoundErrorMessage(platform, imageFilter));
         }
         return statedImage(defaultBaseImage.get(), statedImages.getImageCatalogUrl(), statedImages.getImageCatalogName());
     }
@@ -305,8 +305,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                     .map(ImageCatalogPlatform::nameToLowerCase)
                     .findFirst();
             String platform = firstImage.orElse("");
-            throw new CloudbreakImageNotFoundException(
-                    imageNotFoundErrorMessage(platform, imageFilter.getClusterVersion(), imageFilter.getImageCatalog()));
+            throw new CloudbreakImageNotFoundException(imageNotFoundErrorMessage(platform, imageFilter));
         }
         return statedImage(selectedImage.get(), statedImages.getImageCatalogUrl(), statedImages.getImageCatalogName());
     }
@@ -330,14 +329,22 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return matchingVersionImages;
     }
 
-    private String baseImageNotFoundErrorMessage(String platform, ImageCatalog imageCatalog) {
-        return String.format("Could not find any base image for platform '%s' and Cloudbreak version '%s' in '%s' image catalog.",
-                platform, cbVersion, Optional.ofNullable(imageCatalog).map(ImageCatalog::getName).orElse(null));
+    private String baseImageNotFoundErrorMessage(String platform, ImageFilter imageFilter) {
+        return String.format("Could not find any base image for platform '%s', os '%s' and Cloudbreak version '%s' in '%s' image catalog.",
+                platform, getOses(imageFilter), cbVersion, getImageCatalogName(imageFilter));
     }
 
-    private String imageNotFoundErrorMessage(String platform, String runtime, ImageCatalog imageCatalog) {
-        return String.format("Could not find any image for platform '%s', runtime '%s' and Cloudbreak version '%s' in '%s' image catalog.",
-                platform, runtime, cbVersion, Optional.ofNullable(imageCatalog).map(ImageCatalog::getName).orElse(null));
+    private String imageNotFoundErrorMessage(String platform, ImageFilter imageFilter) {
+        return String.format("Could not find any image for platform '%s', os '%s', runtime '%s' and Cloudbreak version '%s' in '%s' image catalog.",
+                platform, getOses(imageFilter), imageFilter.getClusterVersion(), cbVersion, getImageCatalogName(imageFilter));
+    }
+
+    private String getOses(ImageFilter imageFilter) {
+        return Optional.ofNullable(imageFilter.getOperatingSystems()).stream().flatMap(Set::stream).collect(Collectors.joining(","));
+    }
+
+    private String getImageCatalogName(ImageFilter imageFilter) {
+        return Optional.ofNullable(imageFilter.getImageCatalog()).map(ImageCatalog::getName).orElse(null);
     }
 
     public StatedImages getImages(Long workspaceId, String imageCatalogName, ImageCatalogPlatform provider) throws CloudbreakImageCatalogException {
