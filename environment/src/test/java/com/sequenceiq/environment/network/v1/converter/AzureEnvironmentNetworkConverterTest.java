@@ -117,6 +117,7 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
         assertEquals(RegistrationType.EXISTING, actual.getRegistrationType());
         assertTrue(SUBNET_IDS.containsAll(actual.getSubnetMetas().keySet()));
+        assertEquals(Collections.emptySet(), actual.getAvailabilityZones());
         verify(environmentViewConverter).convert(environment);
     }
 
@@ -157,6 +158,7 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(azureNetwork.getNetworkCidr(), actual.getNetworkCidr());
         assertEquals(azureNetwork.getResourceCrn(), actual.getResourceCrn());
         assertEquals(azureNetwork.getNetworkId(), actual.getAzure().getNetworkId());
+        assertEquals(Collections.emptySet(), actual.getAzure().getAvailabilityZones());
     }
 
     @Test
@@ -164,6 +166,7 @@ class AzureEnvironmentNetworkConverterTest {
         AzureNetwork azureNetwork = createAzureNetwork();
         azureNetwork.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
         azureNetwork.setEndpointGatewaySubnetMetas(createEndpointSubnetMetas());
+        azureNetwork.setAvailabilityZones(Set.of("1", "2"));
 
         NetworkDto actual = underTest.convertToDto(azureNetwork);
 
@@ -181,6 +184,7 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(azureNetwork.getNetworkCidr(), actual.getNetworkCidr());
         assertEquals(azureNetwork.getResourceCrn(), actual.getResourceCrn());
         assertEquals(azureNetwork.getNetworkId(), actual.getAzure().getNetworkId());
+        assertEquals(azureNetwork.getAvailabilityZones(), actual.getAzure().getAvailabilityZones());
     }
 
     @Test
@@ -265,6 +269,7 @@ class AzureEnvironmentNetworkConverterTest {
         azureNetwork.setNetworkId(NETWORK_ID);
         azureNetwork.setResourceGroupName(RESOURCE_GROUP_NAME);
         azureNetwork.setNoPublicIp(true);
+        azureNetwork.setAvailabilityZones(Collections.emptySet());
         return azureNetwork;
     }
 

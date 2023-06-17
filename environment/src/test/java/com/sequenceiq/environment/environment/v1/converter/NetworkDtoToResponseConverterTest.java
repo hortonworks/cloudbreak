@@ -73,6 +73,7 @@ public class NetworkDtoToResponseConverterTest {
         assertEquals(network.getAzure().getDatabasePrivateDnsZoneId(), actual.getAzure().getDatabasePrivateDnsZoneId());
         assertEquals(network.getAzure().getAksPrivateDnsZoneId(), actual.getAzure().getAksPrivateDnsZoneId());
         assertEquals(network.getAzure().isNoOutboundLoadBalancer(), actual.getAzure().getNoOutboundLoadBalancer());
+        assertEquals(network.getAzure().getAvailabilityZones(), actual.getAzure().getAvailabilityZones());
         assertNull(actual.getAws());
         assertNull(actual.getYarn());
         assertNull(actual.getMock());
@@ -164,6 +165,7 @@ public class NetworkDtoToResponseConverterTest {
                 .withDatabasePrivateDnsZoneId("database-private-dns-zone-id")
                 .withAksPrivateDnsZoneId("aks-private-dns-zone-id")
                 .withNoOutboundLoadBalancer(true)
+                .withAvailabilityZones(Set.of("1", "2"))
                 .build();
     }
 

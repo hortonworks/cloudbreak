@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model;
 
+import java.util.Set;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -38,6 +40,9 @@ public class EnvironmentNetworkAzureParams {
 
     @ApiModelProperty(EnvironmentModelDescription.NO_OUTBOUND_LOAD_BALANCER)
     private Boolean noOutboundLoadBalancer;
+
+    @ApiModelProperty(EnvironmentModelDescription.AZURE_AVAILABILITY_ZONES)
+    private Set<String> availabilityZones;
 
     public String getNetworkId() {
         return networkId;
@@ -87,6 +92,14 @@ public class EnvironmentNetworkAzureParams {
         this.noOutboundLoadBalancer = noOutboundLoadBalancer;
     }
 
+    public Set<String> getAvailabilityZones() {
+        return availabilityZones;
+    }
+
+    public void setAvailabilityZones(Set<String> availabilityZones) {
+        this.availabilityZones = availabilityZones;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentNetworkAzureParams{" +
@@ -96,6 +109,7 @@ public class EnvironmentNetworkAzureParams {
                 ", aksPrivateDnsZoneId='" + aksPrivateDnsZoneId + '\'' +
                 ", noPublicIp=" + noPublicIp +
                 ", noOutboundLoadBalancer=" + noOutboundLoadBalancer +
+                ", availabilityZones=" + availabilityZones +
                 '}';
     }
 
@@ -111,6 +125,8 @@ public class EnvironmentNetworkAzureParams {
         private String aksPrivateDnsZoneId;
 
         private Boolean noOutboundLoadBalancer;
+
+        private Set<String> availabilityZones;
 
         private EnvironmentNetworkAzureParamsBuilder() {
         }
@@ -149,6 +165,11 @@ public class EnvironmentNetworkAzureParams {
             return this;
         }
 
+        public EnvironmentNetworkAzureParamsBuilder withAvailabilityZones(Set<String> availabilityZones) {
+            this.availabilityZones = availabilityZones;
+            return this;
+        }
+
         public EnvironmentNetworkAzureParams build() {
             EnvironmentNetworkAzureParams environmentNetworkAzureParams = new EnvironmentNetworkAzureParams();
             environmentNetworkAzureParams.setNetworkId(networkId);
@@ -157,6 +178,7 @@ public class EnvironmentNetworkAzureParams {
             environmentNetworkAzureParams.setDatabasePrivateDnsZoneId(databasePrivateDnsZoneId);
             environmentNetworkAzureParams.setAksPrivateDnsZoneId(aksPrivateDnsZoneId);
             environmentNetworkAzureParams.setNoOutboundLoadBalancer(noOutboundLoadBalancer);
+            environmentNetworkAzureParams.setAvailabilityZones(availabilityZones);
             return environmentNetworkAzureParams;
         }
     }

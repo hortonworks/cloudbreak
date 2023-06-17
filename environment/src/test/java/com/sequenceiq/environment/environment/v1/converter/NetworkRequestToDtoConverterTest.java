@@ -9,6 +9,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
@@ -82,6 +83,26 @@ public class NetworkRequestToDtoConverterTest {
         assertEquals(network.getAzure().getDatabasePrivateDnsZoneId(), actual.getAzure().getDatabasePrivateDnsZoneId());
         assertEquals(network.getAzure().getAksPrivateDnsZoneId(), actual.getAzure().getAksPrivateDnsZoneId());
         assertEquals(network.getAzure().getNoOutboundLoadBalancer(), actual.getAzure().isNoOutboundLoadBalancer());
+        assertEquals(network.getAzure().getAvailabilityZones(), actual.getAzure().getAvailabilityZones());
+        assertCommonFields(network, actual);
+    }
+
+    @Test
+    void testConvertAzureWithDefaultAvailabilityZones() {
+        ReflectionTestUtils.setField(underTest, "azureAvailabilityZones", Set.of("1", "2", "3"));
+        EnvironmentNetworkRequest network = createNetworkRequest();
+        network.setAzure(createAzureParams());
+        network.getAzure().setAvailabilityZones(null);
+
+        NetworkDto actual = underTest.convert(network);
+
+        assertEquals(network.getAzure().getNetworkId(), actual.getAzure().getNetworkId());
+        assertEquals(network.getAzure().getResourceGroupName(), actual.getAzure().getResourceGroupName());
+        assertEquals(network.getAzure().getNoPublicIp(), actual.getAzure().isNoPublicIp());
+        assertEquals(network.getAzure().getDatabasePrivateDnsZoneId(), actual.getAzure().getDatabasePrivateDnsZoneId());
+        assertEquals(network.getAzure().getAksPrivateDnsZoneId(), actual.getAzure().getAksPrivateDnsZoneId());
+        assertEquals(network.getAzure().getNoOutboundLoadBalancer(), actual.getAzure().isNoOutboundLoadBalancer());
+        assertEquals(Set.of("1", "2", "3"), actual.getAzure().getAvailabilityZones());
         assertCommonFields(network, actual);
     }
 
@@ -163,6 +184,7 @@ public class NetworkRequestToDtoConverterTest {
         azureParams.setDatabasePrivateDnsZoneId("database-private-dns-zone-id");
         azureParams.setAksPrivateDnsZoneId("aks-private-dns-zone-id");
         azureParams.setNoOutboundLoadBalancer(true);
+        azureParams.setAvailabilityZones(Set.of("1", "2", "3"));
         return azureParams;
     }
 
