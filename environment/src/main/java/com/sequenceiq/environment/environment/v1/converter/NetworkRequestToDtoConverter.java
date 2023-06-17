@@ -6,7 +6,9 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -31,6 +33,9 @@ public class NetworkRequestToDtoConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkRequestToDtoConverter.class);
 
+    @Value("${cb.multiaz.azure.availabilityZones}")
+    private Set<String> azureAvailabilityZones;
+
     public NetworkDto convert(EnvironmentNetworkRequest network) {
         LOGGER.debug("Converting network request to dto");
         NetworkDto.Builder builder = NetworkDto.builder();
@@ -49,6 +54,8 @@ public class NetworkRequestToDtoConverter {
                     .withDatabasePrivateDnsZoneId(network.getAzure().getDatabasePrivateDnsZoneId())
                     .withAksPrivateDnsZoneId(network.getAzure().getAksPrivateDnsZoneId())
                     .withNoOutboundLoadBalancer(isNoOutboundLoadBalancer(network.getAzure()))
+                    .withAvailabilityZones(!CollectionUtils.isEmpty(network.getAzure().getAvailabilityZones()) ?
+                            network.getAzure().getAvailabilityZones() : azureAvailabilityZones)
                     .build();
             builder.withAzure(azureParams);
             builder.withNetworkId(network.getAzure().getNetworkId());

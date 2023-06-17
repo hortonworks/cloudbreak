@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.network.dto;
 
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
@@ -18,6 +20,8 @@ public class AzureParams {
 
     private boolean noOutboundLoadBalancer;
 
+    private Set<String> availabilityZones;
+
     private AzureParams(Builder builder) {
         networkId = builder.networkId;
         resourceGroupName = builder.resourceGroupName;
@@ -25,6 +29,7 @@ public class AzureParams {
         databasePrivateDnsZoneId = builder.databasePrivateDnsZoneId;
         noOutboundLoadBalancer = builder.noOutboundLoadBalancer;
         aksPrivateDnsZoneId = builder.aksPrivateDnsZoneId;
+        availabilityZones = builder.availabilityZones;
     }
 
     public String getNetworkId() {
@@ -75,6 +80,14 @@ public class AzureParams {
         this.noOutboundLoadBalancer = noOutboundLoadBalancer;
     }
 
+    public Set<String> getAvailabilityZones() {
+        return availabilityZones;
+    }
+
+    public void setAvailabilityZones(Set<String> availabilityZones) {
+        this.availabilityZones = availabilityZones;
+    }
+
     @Override
     public String toString() {
         return "AzureParams{" +
@@ -84,6 +97,7 @@ public class AzureParams {
                 ", databasePrivateDnsZoneId='" + databasePrivateDnsZoneId + '\'' +
                 ", aksPrivateDnsZoneId='" + aksPrivateDnsZoneId + '\'' +
                 ", noOutboundLoadBalancer='" + noOutboundLoadBalancer + '\'' +
+                ", availabilityZones='" + availabilityZones + '\'' +
                 '}';
     }
 
@@ -104,6 +118,8 @@ public class AzureParams {
         private String aksPrivateDnsZoneId;
 
         private boolean noOutboundLoadBalancer;
+
+        private Set<String> availabilityZones;
 
         private Builder() {
         }
@@ -135,6 +151,11 @@ public class AzureParams {
 
         public Builder withNoOutboundLoadBalancer(boolean noOutboundLoadBalancer) {
             this.noOutboundLoadBalancer = noOutboundLoadBalancer;
+            return this;
+        }
+
+        public Builder withAvailabilityZones(Set<String> availabilityZones) {
+            this.availabilityZones = availabilityZones;
             return this;
         }
 

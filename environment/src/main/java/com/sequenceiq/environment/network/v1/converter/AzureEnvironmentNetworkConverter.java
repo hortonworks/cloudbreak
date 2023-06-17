@@ -53,6 +53,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
             if (ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT.equals(network.getServiceEndpointCreation())) {
                 azureNetwork.setDatabasePrivateDnsZoneId(azureParams.getDatabasePrivateDnsZoneId());
             }
+            azureNetwork.setAvailabilityZones(azureParams.getAvailabilityZones());
         }
         return azureNetwork;
     }
@@ -105,6 +106,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
                                 .withDatabasePrivateDnsZoneId(azureNetwork.getDatabasePrivateDnsZoneId())
                                 .withAksPrivateDnsZoneId(azureNetwork.getAksPrivateDnsZoneId())
                                 .withNoOutboundLoadBalancer(azureNetwork.isNoOutboundLoadBalancer())
+                                .withAvailabilityZones(azureNetwork.getAvailabilityZones())
                                 .build())
                 .build();
     }
