@@ -1,12 +1,9 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.handler;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,7 +16,6 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.LoadBalancerMetadataFailure;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.LoadBalancerMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.LoadBalancerMetadataSuccess;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -61,16 +57,6 @@ public class LoadBalancerMetadataHandler extends ExceptionCatcherEventHandler<Lo
             List<CloudLoadBalancerMetadata> loadBalancerStatuses = loadBalancerMetadataService.collectMetadata(cloudContext,
                 request.getCloudCredential(), request.getTypesPresentInStack(), request.getCloudResources());
 
-            Set<CloudLoadBalancerMetadata> failedStatues = loadBalancerStatuses.stream()
-                .filter(this::isMissingMetadata)
-                .collect(Collectors.toSet());
-            if (!failedStatues.isEmpty()) {
-                Set<String> names = failedStatues.stream()
-                    .map(CloudLoadBalancerMetadata::getName)
-                    .collect(Collectors.toSet());
-                throw new CloudbreakException("Creation failed for load balancers: " + names);
-            }
-
             LOGGER.info("Persisting load balancer metadata to the database: {}", loadBalancerStatuses);
             metadataSetupService.saveLoadBalancerMetadata(stack, loadBalancerStatuses);
 
@@ -80,11 +66,5 @@ public class LoadBalancerMetadataHandler extends ExceptionCatcherEventHandler<Lo
             LOGGER.warn("Failed to fetch cloud load balancer metadata.", e);
             return new LoadBalancerMetadataFailure(request.getResourceId(), e);
         }
-    }
-
-    private boolean isMissingMetadata(CloudLoadBalancerMetadata metadataStatus) {
-        return metadataStatus.getType() == null ||
-            !(StringUtils.isNotEmpty(metadataStatus.getIp()) ||
-            StringUtils.isNotEmpty(metadataStatus.getCloudDns()) && StringUtils.isNotEmpty(metadataStatus.getHostedZoneId()));
     }
 }
