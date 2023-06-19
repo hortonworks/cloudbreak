@@ -29,6 +29,7 @@ import com.sequenceiq.datalake.flow.datalake.scale.event.DatalakeHorizontalScale
 import com.sequenceiq.datalake.flow.datalake.scale.event.DatalakeHorizontalScaleFlowEvent.DatalakeHorizontalScaleFlowEventBuilder;
 import com.sequenceiq.datalake.flow.datalake.scale.event.DatalakeHorizontalScaleSdxEvent;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
+import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.SdxHorizontalScalingService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -50,6 +51,9 @@ public class DatalakeHorizontalScaleActions {
 
     @Inject
     private SdxHorizontalScalingService sdxHorizontalScalingService;
+
+    @Inject
+    private DistroxService distroxService;
 
     @Bean(name = "DATALAKE_HORIZONTAL_SCALE_VALIDATION_STATE")
     public Action<?, ?> datalakeHorizontalScaleValidationStart() {
@@ -139,6 +143,24 @@ public class DatalakeHorizontalScaleActions {
                         payload.getResourceId());
                 LOGGER.warn("Datalake Horizontal scale CM rolling restart Failed with error {}", ex.getMessage());
                 return payload;
+            }
+        };
+    }
+
+    @Bean("DATALAKE_HORIZONTAL_SCALE_DATAHUB_REFRESH_STATE")
+    public Action<?, ?> datalakeHorizontalScaleDataHubRefresh() {
+        return new AbstractDatalakeHorizontalScaleAction<>(DatalakeHorizontalScaleFlowEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, DatalakeHorizontalScaleFlowEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Datahub refresh triggered by the Datalake horizontal scale flow");
+                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_HORIZONTAL_SCALE_DATAHUB_REFRESH_IN_PROGRESS,
+                        "DataHub(s) refresh In Progress", payload.getResourceId());
+                SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
+                distroxService.restartAttachedDistroxClusters(sdxCluster.getEnvCrn());
+                DatalakeHorizontalScaleFlowEventBuilder resultEventBuilder = DatalakeHorizontalScaleFlowEvent
+                        .datalakeHorizontalScaleFlowEventBuilderFactory(payload)
+                        .setSelector(DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT.selector());
+                sendEvent(context, DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT.selector(), resultEventBuilder);
             }
         };
     }

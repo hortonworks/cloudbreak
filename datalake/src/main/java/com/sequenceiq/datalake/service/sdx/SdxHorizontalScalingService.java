@@ -66,9 +66,9 @@ public class SdxHorizontalScalingService {
 
     public FlowIdentifier horizontalScaleDatalake(String name, DatalakeHorizontalScaleRequest scaleRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        if (!entitlementService.isDatalakeHorizontalScaleEnabled(accountId)) {
-            throw new BadRequestException(String.format("Datalake horizontal scale is not enabled for account %s.", accountId));
-        }
+//        if (!entitlementService.isDatalakeHorizontalScaleEnabled(accountId)) {
+//            throw new BadRequestException(String.format("Datalake horizontal scale is not enabled for account %s.", accountId));
+//        }
 
         LOGGER.info("Horizontal scaling Datalake with name {}", name);
         SdxCluster sdxCluster = sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(accountId, name)

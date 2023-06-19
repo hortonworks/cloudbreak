@@ -41,12 +41,12 @@ public class ServicesRollingRestartFlowConfig extends StackStatusFinalizerAbstra
 
                     .from(ROLLING_RESTART_FAILED_STATE)
                     .to(FINAL_STATE)
-                    .event(ServicesRollingRestartEvent.FINALIZED_EVENT)
+                    .event(ServicesRollingRestartEvent.SERVICES_ROLLING_RESTART_FINISHED_EVENT)
                     .noFailureEvent()
 
                     .from(ROLLING_RESTART_FINISHED_STATE)
                     .to(FINAL_STATE)
-                    .event(ServicesRollingRestartEvent.FINALIZED_EVENT)
+                    .event(ServicesRollingRestartEvent.SERVICES_ROLLING_RESTART_FINISHED_EVENT)
                     .noFailureEvent()
 
                     .build();

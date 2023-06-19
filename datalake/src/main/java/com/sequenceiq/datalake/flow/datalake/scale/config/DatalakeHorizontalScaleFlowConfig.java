@@ -2,10 +2,12 @@ package com.sequenceiq.datalake.flow.datalake.scale.config;
 
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_CM_RESTART_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_CM_ROLLING_RESTART_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_DATAHUB_REFRESH_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_START_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleState.DATALAKE_HORIZONTAL_SCALE_DATAHUB_REFRESH_STATE;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleState.DATALAKE_HORIZONTAL_SCALE_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleState.DATALAKE_HORIZONTAL_SCALE_FINISHED_STATE;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleState.DATALAKE_HORIZONTAL_SCALE_SERVICES_RESTART_STATE;
@@ -48,6 +50,11 @@ public class DatalakeHorizontalScaleFlowConfig extends AbstractFlowConfiguration
                     .failureEvent(DATALAKE_HORIZONTAL_SCALE_CM_RESTART_FAILED_EVENT)
 
                     .from(DATALAKE_HORIZONTAL_SCALE_SERVICES_RESTART_STATE)
+                    .to(DATALAKE_HORIZONTAL_SCALE_DATAHUB_REFRESH_STATE)
+                    .event(DATALAKE_HORIZONTAL_SCALE_DATAHUB_REFRESH_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(DATALAKE_HORIZONTAL_SCALE_DATAHUB_REFRESH_STATE)
                     .to(DATALAKE_HORIZONTAL_SCALE_FINISHED_STATE)
                     .event(DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT)
                     .defaultFailureEvent()

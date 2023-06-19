@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.flow.datalake.scale.handler;
 
-import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_DATAHUB_REFRESH_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleHandlerEvent.DATALAKE_HORIZONTAL_SCALE_CM_ROLLING_RESTART_HANDLER;
 
 import java.util.concurrent.TimeUnit;
@@ -70,7 +70,7 @@ public class DatalakeHorizontalScaleServicesRollingRestartWaitHandler extends Ev
         LOGGER.debug("Services Rolling restart finsihed");
         DatalakeHorizontalScaleFlowEventBuilder resultEventBuilder = DatalakeHorizontalScaleFlowEvent
                 .datalakeHorizontalScaleFlowEventBuilderFactory(data)
-                .setSelector(DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT.selector());
+                .setSelector(DATALAKE_HORIZONTAL_SCALE_DATAHUB_REFRESH_EVENT.selector());
         eventSender().sendEvent(resultEventBuilder.build(), event.getHeaders());
     }
 }
