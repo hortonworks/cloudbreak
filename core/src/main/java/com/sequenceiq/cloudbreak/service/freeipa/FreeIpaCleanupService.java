@@ -50,7 +50,7 @@ public class FreeIpaCleanupService {
 
     private static final int POLL_INTERVAL = 5000;
 
-    private static final int WAIT_SEC = 600;
+    private static final int WAIT_SEC = 3600;
 
     private static final Set<CleanupStep> STEPS_TO_SKIP_ON_RECOVER = Set.of(REMOVE_HOSTS, REMOVE_VAULT_ENTRIES, REMOVE_USERS, REMOVE_ROLES);
 
