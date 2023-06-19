@@ -612,6 +612,22 @@ class MetadataSetupServiceTest {
         assertEquals(gw2DiscoveryFQDN, gws.get(0).getDiscoveryFQDN());
     }
 
+    @Test
+    void testLoadBalancerMetadataValidation() {
+        StackIdView stackIdView = new StackIdViewImpl(STACK_ID, STACK_NAME, "no");
+        Iterable<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata =
+                List.of(CloudLoadBalancerMetadata
+                        .builder()
+                        .withName("LoadBalancerTest")
+                        .withType(LoadBalancerType.PUBLIC)
+                        .build());
+
+        CloudbreakServiceException thrown = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.saveLoadBalancerMetadata(stack, cloudLoadBalancerMetadata));
+
+        assertEquals("Load balancer metadata collection failed", thrown.getMessage());
+    }
+
     private Image createImage() {
         return new Image(null, null, null, null, null, null, "image-id", null);
     }

@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 
@@ -377,6 +378,8 @@ public class MetadataSetupService {
         try {
             LOGGER.info("Save load balancer metadata for stack: {}", stack.getName());
 
+            validateCloudLoadBalancerMetadata(cloudLoadBalancerMetadataList);
+
             Set<LoadBalancer> allLoadBalancerMetadata = loadBalancerPersistenceService.findByStackId(stack.getId());
 
             for (CloudLoadBalancerMetadata cloudLoadBalancerMetadata : cloudLoadBalancerMetadataList) {
@@ -434,6 +437,30 @@ public class MetadataSetupService {
         } catch (Exception ex) {
             throw new CloudbreakServiceException("Load balancer metadata collection failed", ex);
         }
+    }
+
+    private void validateCloudLoadBalancerMetadata(Iterable<CloudLoadBalancerMetadata> loadBalancers) {
+        Set<CloudLoadBalancerMetadata> loadbalancersMissingMetadata =
+                StreamSupport
+                        .stream(loadBalancers.spliterator(), false)
+                        .filter(this::isMissingMetadata)
+                        .collect(Collectors.toSet());
+        if (!loadbalancersMissingMetadata.isEmpty()) {
+            LOGGER.error("Load Balancers missing metadata: {}", loadbalancersMissingMetadata);
+            Set<String> names =
+                    loadbalancersMissingMetadata
+                            .stream()
+                            .map(CloudLoadBalancerMetadata::getName)
+                            .collect(Collectors.toSet());
+            throw new CloudbreakServiceException("Creation failed for load balancers: " + names);
+        }
+    }
+
+    private boolean isMissingMetadata(CloudLoadBalancerMetadata cloudLoadBalancerMetadata) {
+        return cloudLoadBalancerMetadata.getType() == null ||
+                !(StringUtils.hasText(cloudLoadBalancerMetadata.getIp()) ||
+                        StringUtils.hasText(cloudLoadBalancerMetadata.getCloudDns())
+                                && StringUtils.hasText(cloudLoadBalancerMetadata.getHostedZoneId()));
     }
 
     private LoadBalancer createLoadBalancerMetadataIfAbsent(Iterable<LoadBalancer> allLoadBalancerMetadata,
