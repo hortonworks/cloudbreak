@@ -661,43 +661,34 @@ public class AzureUtils {
 
     private Optional<String> handleDeleteErrors(Consumer<String> deleteConsumer, String resourceType, String resourceId, boolean cancelException) {
         try {
-            LOGGER.debug("Deleteing {} {}", resourceType, resourceId);
+            LOGGER.debug("Deleting {} {}", resourceType, resourceId);
             deleteConsumer.accept(resourceId);
             return Optional.empty();
         } catch (ManagementException e) {
             LOGGER.warn("Exception during resource delete", e);
-            Optional<String> errorMessageOptional = getErrorMessage(resourceType, resourceId, e);
+            Optional<String> errorMessageOptional = getDeletionErrorMessage(resourceType, resourceId, e);
             if (errorMessageOptional.isEmpty()) {
                 return Optional.empty();
             }
             if (cancelException) {
-                LOGGER.warn(errorMessageOptional.get());
-                LOGGER.warn("{} {} deletion failed, continuing because termination is forced", resourceType, resourceId);
+                LOGGER.warn("{} {} deletion failed, continuing because termination is forced, details: {}",
+                        resourceType, resourceId, errorMessageOptional.get());
                 return errorMessageOptional;
             } else {
-                LOGGER.warn(errorMessageOptional.get());
+                LOGGER.warn("{} {} deletion failed, details: {}", resourceType, resourceId, errorMessageOptional.get());
                 throw new CloudConnectorException(errorMessageOptional.get(), e);
             }
         }
     }
 
-    private Optional<String> getErrorMessage(String resourceType, String resourceId, ManagementException e) {
-        ManagementError cloudError = e.getValue();
-        if (cloudError == null) {
-            return Optional.of(String.format("%s %s deletion failed: '%s', please go to Azure Portal for details",
-                    resourceType, resourceId, e.getMessage()));
-        }
-
-        String errorCode = cloudError.getCode();
-        if ("ResourceGroupNotFound".equals(errorCode)) {
+    private Optional<String> getDeletionErrorMessage(String resourceType, String resourceId, ManagementException e) {
+        if (e.getValue() != null && "ResourceGroupNotFound".equals(e.getValue().getCode())) {
             LOGGER.warn("{} {} does not exist, assuming that it has already been deleted", resourceType, resourceId);
             return Optional.empty();
             // leave errorMessage null => do not throw exception
         } else {
-            String details =
-                    cloudError.getDetails() != null ? cloudError.getDetails().stream().map(ManagementError::getMessage).collect(Collectors.joining(", ")) : "";
-            return Optional.of(String.format("%s %s deletion failed, status code %s, error message: %s, details: %s",
-                    resourceType, resourceId, errorCode, cloudError.getMessage(), details));
+            String errorMessage = getErrorMessage(e, resourceType + " deletion");
+            return Optional.of(errorMessage);
         }
     }
 
@@ -777,31 +768,22 @@ public class AzureUtils {
     }
 
     public CloudConnectorException convertToCloudConnectorException(ManagementException e, String actionDescription) {
-        LOGGER.warn("{} failed, cloud exception happened:", actionDescription, e);
-        if (e.getValue() != null && e.getValue().getDetails() != null) {
-            String details = e.getValue().getDetails().stream().map(this::getCloudErrorMessage).collect(Collectors.joining(", "));
-            return new CloudConnectorException(String.format("%s failed, status code %s, error message: %s, details: %s",
-                    actionDescription, e.getValue().getCode(), e.getValue().getMessage(), details));
+        String errorMessage = getErrorMessage(e, actionDescription);
+        LOGGER.warn("{} failed, cloud exception happened, details: {}", actionDescription, errorMessage, e);
+        if (e.getValue() != null && marketplaceRelatedError(e.getValue().getCode(), e.getValue().getMessage())) {
+            return new CloudImageException(errorMessage);
         } else {
-            return new CloudConnectorException(String.format("%s failed: '%s', please go to Azure Portal for detailed message", actionDescription, e));
+            return new CloudConnectorException(errorMessage);
         }
     }
 
-    public CloudConnectorException convertToCloudException(ManagementException e, String actionDescription) {
-        LOGGER.warn(String.format("%s failed, %s exception happened:", actionDescription, e.getClass()), e);
+    private String getErrorMessage(ManagementException e, String actionDescription) {
         if (e.getValue() != null && e.getValue().getDetails() != null) {
-            String errorCode = e.getValue().getCode();
-            String errorMessage = e.getValue().getMessage();
             String details = e.getValue().getDetails().stream().map(this::getCloudErrorMessage).collect(Collectors.joining(", "));
-            String exceptionMessage = String.format("%s failed, status code %s, error message: %s, details: %s",
-                    actionDescription, errorCode, errorMessage, details);
-            if (marketplaceRelatedError(errorCode, errorMessage)) {
-                return new CloudImageException(exceptionMessage);
-            } else {
-                return new CloudConnectorException(exceptionMessage);
-            }
+            return String.format("%s failed, status code %s, error message: %s, details: %s",
+                    actionDescription, e.getValue().getCode(), e.getValue().getMessage(), details);
         } else {
-            return new CloudConnectorException(String.format("%s failed: '%s', please go to Azure Portal for detailed message", actionDescription, e));
+            return String.format("%s failed: '%s', please go to Azure Portal for detailed message", actionDescription, e);
         }
     }
 
@@ -821,8 +803,15 @@ public class AzureUtils {
                     .map(PolicyViolation.class::cast)
                     .map(policyViolation -> "Policy definition: " + policyViolation.category() + " - " + policyViolation.details())
                     .collect(Collectors.joining(". "));
+        } else if (cloudError.getDetails() != null) {
+            String details = cloudError.getDetails().stream()
+                    .filter(detail -> detail != null)
+                    .map(ManagementError::getMessage)
+                    .collect(Collectors.joining(", "));
+            return String.format("%s (details: %s)", cloudError.getMessage(), details);
+        } else {
+            return cloudError.getMessage();
         }
-        return cloudError.getMessage();
     }
 
     public CloudConnectorException convertToCloudConnectorException(Throwable e, String actionDescription) {

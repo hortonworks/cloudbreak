@@ -161,7 +161,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
                     resourceGroupName, stackName, notifier, cloudContext, subnetNameList, networkName, client);
             azureComputeResourceService.buildComputeResourcesForLaunch(ac, stack, adjustmentTypeWithThreshold, instances, networkResources);
         } catch (ManagementException e) {
-            throw azureUtils.convertToCloudException(e, "Stack provisioning");
+            throw azureUtils.convertToCloudConnectorException(e, "Stack provisioning");
         } catch (Exception e) {
             LOGGER.warn("Provisioning error:", e);
             throw new CloudConnectorException(String.format("Error in provisioning stack %s: %s", stackName, e.getMessage()));

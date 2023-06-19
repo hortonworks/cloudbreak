@@ -480,7 +480,7 @@ public class AzureUtilsTest {
     }
 
     @Test
-    void convertToCloudExceptionTestWhenPermissionExceptionAndDetails() {
+    void convertToCloudConnectorExceptionTestWhenPermissionExceptionAndDetails() {
         String message = "The client does not have authorization to perform action 'Microsoft.Marketplace/offerTypes/publishers/offers/plans/agreements/read'";
 
         ManagementError managementError = AzureTestUtils.managementError("AuthorizationFailed", message);
@@ -490,7 +490,7 @@ public class AzureUtilsTest {
         AzureTestUtils.setDetails(managementError, details);
         ManagementException e = new ManagementException("Authorization failed", null, managementError);
 
-        CloudConnectorException result = underTest.convertToCloudException(e, "Stack provision failed");
+        CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Stack provision failed");
 
         verifyCloudConnectorException(result,
                 "Stack provision failed failed, status code AuthorizationFailed, error message: The client does not have authorization to perform action " +
@@ -500,7 +500,7 @@ public class AzureUtilsTest {
     }
 
     @Test
-    void convertToCloudExceptionTestWhenTermsExceptionAndDetails() {
+    void convertToCloudConnectorExceptionTestWhenTermsExceptionAndDetails() {
         String message = "Marketplace purchase eligibilty check returned errors. See inner errors for details.";
 
         ManagementError managementError = AzureTestUtils.managementError("MarketplacePurchaseEligibilityFailed", message);
@@ -510,7 +510,7 @@ public class AzureUtilsTest {
         AzureTestUtils.setDetails(managementError, details);
         ManagementException e = new ManagementException("Terms failed", null, managementError);
 
-        CloudConnectorException result = underTest.convertToCloudException(e, "Stack provision failed");
+        CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Stack provision failed");
 
         verifyCloudConnectorException(result,
                 "Stack provision failed failed, status code MarketplacePurchaseEligibilityFailed, error message: Marketplace purchase eligibilty check " +
@@ -520,7 +520,7 @@ public class AzureUtilsTest {
     }
 
     @Test
-    void convertToCloudExceptionTestWhenNonMatchingExceptionAndDetails() {
+    void convertToCloudConnectorExceptionTestWhenNonMatchingExceptionAndDetails() {
         String message = "Marketplace purchase eligibilty check returned errors. See inner errors for details.";
 
         ManagementError managementError = AzureTestUtils.managementError("foo", message);
@@ -530,7 +530,7 @@ public class AzureUtilsTest {
         AzureTestUtils.setDetails(managementError, details);
         ManagementException e = new ManagementException("Terms failed", null, managementError);
 
-        CloudConnectorException result = underTest.convertToCloudException(e, "Stack provision failed");
+        CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Stack provision failed");
 
         verifyCloudConnectorException(result,
                 "Stack provision failed failed, status code foo, error message: Marketplace purchase eligibilty check returned errors. " +
@@ -540,17 +540,17 @@ public class AzureUtilsTest {
     }
 
     @Test
-    void convertToCloudExceptionTestWhenExceptionHasNoDetails() {
+    void convertToCloudConnectorExceptionTestWhenExceptionHasNoDetails() {
         String message = "Marketplace purchase eligibilty check returned errors. See inner errors for details.";
         ManagementError managementError = AzureTestUtils.managementError("MarketplacePurchaseEligibilityFailed", message);
         ManagementException e = new ManagementException("Terms failed", null, managementError);
 
-        CloudConnectorException result = underTest.convertToCloudException(e, "Checking resources");
+        CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Checking resources");
 
         verifyCloudConnectorException(result,
                 "Checking resources failed: 'com.azure.core.management.exception.ManagementException: Terms failed: Marketplace purchase eligibilty" +
                         " check returned errors. See inner errors for details.', please go to Azure Portal for detailed message");
-        assertNotEquals(CloudImageException.class, result.getClass());
+        assertEquals(CloudImageException.class, result.getClass());
     }
 
     @Test
@@ -646,6 +646,23 @@ public class AzureUtilsTest {
         CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Checking resources");
 
         assertThat(result).isSameAs(cloudConnectorException);
+    }
+
+    @Test
+    void convertToCloudConnectorExceptionTestWhenNonMatchingExceptionAndDetailsOfDetails() {
+        ManagementError parent = AzureTestUtils.managementError("parent", "Marketplace purchase eligibilty check returned errors");
+        ManagementError childDetail = AzureTestUtils.managementError("child", "childdetail");
+        ManagementError grandChildDetail = AzureTestUtils.managementError("grandchild", "grandchilddetail");
+        AzureTestUtils.setDetails(parent, List.of(childDetail));
+        AzureTestUtils.setDetails(childDetail, List.of(grandChildDetail));
+        ManagementException e = new ManagementException("Terms failed", null, parent);
+
+        CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Stack provision failed");
+
+        verifyCloudConnectorException(result,
+                "Stack provision failed failed, status code parent, error message: Marketplace purchase eligibilty check returned errors," +
+                        " details: childdetail (details: grandchilddetail)");
+        assertNotEquals(CloudImageException.class, result.getClass());
     }
 
     @Test
