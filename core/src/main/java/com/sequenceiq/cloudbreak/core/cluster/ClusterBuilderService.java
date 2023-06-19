@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Service
 public class ClusterBuilderService implements PaasRemoteDataContextSupplier {
@@ -101,8 +100,7 @@ public class ClusterBuilderService implements PaasRemoteDataContextSupplier {
         boolean ldapConfigured = ldapConfigService.isLdapConfigExistsForEnvironment(stackDto.getStack().getEnvironmentCrn(), stackDto.getStack().getName());
         connector.changeOriginalCredentialsAndCreateCloudbreakUser(ldapConfigured);
         if (StackType.DATALAKE.equals(stackDto.getType())) {
-            SdxClusterResponse sdxCluster = sdxService.getSdxClusterByEnvironmentCrn(stackDto.getStack().getResourceCrn());
-            if (sdxCluster.getClusterShape().isHA()) {
+            if (sdxService.isSdxClusterHA(stackDto.getStack().getResourceCrn())) {
                 connector.clusterModificationService().reconfigureCMMemory();
             }
         }
