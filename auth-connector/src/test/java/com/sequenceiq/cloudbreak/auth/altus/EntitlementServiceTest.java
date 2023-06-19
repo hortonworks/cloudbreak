@@ -115,9 +115,6 @@ class EntitlementServiceTest {
                 {"DATAHUB_STOP_START_SCALING_FAILURE_RECOVERY",
                         (EntitlementCheckFunction) EntitlementService::stopStartScalingFailureRecoveryEnabled, true},
 
-                {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, false},
-                {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, true},
-
                 {"CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionDatahubEnabled, false},
                 {"CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionDatahubEnabled, true},
 

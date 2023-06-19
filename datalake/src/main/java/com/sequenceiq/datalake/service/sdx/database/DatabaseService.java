@@ -22,7 +22,6 @@ import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -192,8 +191,7 @@ public class DatabaseService {
         req.setClusterCrn(sdxCluster.getCrn());
 
         String runtime = sdxCluster.getRuntime();
-        if (platformConfig.isExternalDatabaseSslEnforcementSupportedFor(cloudPlatform) && isSslEnforcementSupportedForRuntime(runtime)
-                && entitlementService.databaseWireEncryptionEnabled(Crn.safeFromString(environmentCrn).getAccountId())) {
+        if (platformConfig.isExternalDatabaseSslEnforcementSupportedFor(cloudPlatform) && isSslEnforcementSupportedForRuntime(runtime)) {
             LOGGER.info("Applying external DB SSL enforcement for cloud platform {} and runtime version {}", cloudPlatform, runtime);
             SslConfigV4Request sslConfigV4Request = new SslConfigV4Request();
             sslConfigV4Request.setSslMode(SslMode.ENABLED);

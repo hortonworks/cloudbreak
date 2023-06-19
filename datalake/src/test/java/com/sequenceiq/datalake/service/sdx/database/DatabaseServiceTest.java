@@ -116,24 +116,21 @@ public class DatabaseServiceTest {
 
     static Object[][] sslEnforcementDataProvider() {
         return new Object[][]{
-                // testCaseName supportedPlatform runtime entitled sslEnforcementAppliedExpected
-                {"supportedPlatform=false", false, null, null, false},
-                {"supportedPlatform=true and runtime=null and entitled=false", true, null, false, false},
-                {"supportedPlatform=true and runtime=null and entitled=true", true, null, true, true},
-                {"supportedPlatform=true and runtime=7.0.0", true, "7.0.0", null, false},
-                {"supportedPlatform=true and runtime=7.1.0", true, "7.1.0", null, false},
-                {"supportedPlatform=true and runtime=7.2.0", true, "7.2.0", null, false},
-                {"supportedPlatform=true and runtime=7.2.1", true, "7.2.1", null, false},
-                {"supportedPlatform=true and runtime=7.2.2 and entitled=false", true, "7.2.2", false, false},
-                {"supportedPlatform=true and runtime=7.2.2 and entitled=true", true, "7.2.2", true, true},
-                {"supportedPlatform=true and runtime=7.2.3 and entitled=false", true, "7.2.3", false, false},
-                {"supportedPlatform=true and runtime=7.2.3 and entitled=true", true, "7.2.3", true, true},
+                // testCaseName supportedPlatform runtime sslEnforcementAppliedExpected
+                {"supportedPlatform=false", false, null, false},
+                {"supportedPlatform=true and runtime=null", true, null, true},
+                {"supportedPlatform=true and runtime=7.0.0", true, "7.0.0", false},
+                {"supportedPlatform=true and runtime=7.1.0", true, "7.1.0", false},
+                {"supportedPlatform=true and runtime=7.2.0", true, "7.2.0", false},
+                {"supportedPlatform=true and runtime=7.2.1", true, "7.2.1", false},
+                {"supportedPlatform=true and runtime=7.2.2", true, "7.2.2", true},
+                {"supportedPlatform=true and runtime=7.2.3", true, "7.2.3", true},
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("sslEnforcementDataProvider")
-    public void shouldSetDbConfigBasedOnClusterShape(String testCaseName, boolean supportedPlatform, String runtime, Boolean entitled,
+    public void shouldSetDbConfigBasedOnClusterShape(String testCaseName, boolean supportedPlatform, String runtime,
             boolean sslEnforcementAppliedExpected) {
         SdxCluster cluster = new SdxCluster();
         cluster.setClusterName("NAME");
@@ -151,9 +148,6 @@ public class DatabaseServiceTest {
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
         when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
         when(platformConfig.isExternalDatabaseSslEnforcementSupportedFor(CloudPlatform.AWS)).thenReturn(supportedPlatform);
-        if (entitled != null) {
-            when(entitlementService.databaseWireEncryptionEnabled(ACCOUNT_ID)).thenReturn(entitled);
-        }
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         SdxStatusEntity status = new SdxStatusEntity();
