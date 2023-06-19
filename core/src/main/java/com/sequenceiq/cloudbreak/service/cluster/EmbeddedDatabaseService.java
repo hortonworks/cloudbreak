@@ -80,7 +80,7 @@ public class EmbeddedDatabaseService {
         StackType stackType = stackView.getType();
         boolean sslEnforcementEnabled = false;
         if (stackType == StackType.DATALAKE) {
-            sslEnforcementEnabled = entitlementService.databaseWireEncryptionEnabled(accountId);
+            sslEnforcementEnabled = true;
         } else if (stackType == StackType.WORKLOAD) {
             sslEnforcementEnabled = entitlementService.databaseWireEncryptionDatahubEnabled(accountId);
         }
