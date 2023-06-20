@@ -169,6 +169,39 @@ public class VerticalScaleInstanceProviderTest {
     }
 
     @Test
+    public void testRequestWhenWeAreRequestedInstanceWithResourceDiskButTheInstanceHasNoAttachedDisk() {
+        String instanceTypeNameInStack = "Standard_D6S_v5";
+        String instanceTypeNameInRequest = "Standard_D64_v5";
+        Optional<VmType> current = vmTypeOptional(
+                instanceTypeNameInStack,
+                1,
+                1,
+                new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
+                false
+        );
+        Optional<VmType> requested = vmTypeOptional(
+                instanceTypeNameInRequest,
+                1,
+                1,
+                new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
+                true
+        );
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any())).thenReturn(true);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
+            underTest.validInstanceTypeForVerticalScaling(current, requested);
+        });
+
+        assertEquals("Unable to resize since changing from resource disk to non-resource disk VM size and " +
+                        "vice-versa is not allowed. Please refer to https://aka.ms/AAah4sj for more details.",
+                badRequestException.getMessage());
+    }
+
+    @Test
     void listInstanceTypesTestWhenNoCloudVmResponses() {
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.of(), Map.of());
 
@@ -188,7 +221,8 @@ public class VerticalScaleInstanceProviderTest {
                 1,
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
-                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
+                false
         );
 
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
@@ -228,7 +262,8 @@ public class VerticalScaleInstanceProviderTest {
                 1,
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
-                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
+                false
         );
 
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
@@ -248,7 +283,8 @@ public class VerticalScaleInstanceProviderTest {
                 1,
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
-                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
+                false
         );
 
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
@@ -268,7 +304,8 @@ public class VerticalScaleInstanceProviderTest {
                 1,
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
-                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
+                false
         );
 
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
@@ -291,7 +328,8 @@ public class VerticalScaleInstanceProviderTest {
                 1,
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
-                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
+                false
         );
 
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
@@ -305,16 +343,22 @@ public class VerticalScaleInstanceProviderTest {
         verifySuitableInstances(result);
     }
 
-    private Optional<VmType> vmTypeOptional(String name, int memory, int cpu, VolumeParameterConfig autoAttached, VolumeParameterConfig ephemeral) {
-        return Optional.of(vmType(name, memory, cpu, autoAttached, ephemeral));
+    private Optional<VmType> vmTypeOptional(String name, int memory, int cpu, VolumeParameterConfig autoAttached,
+        VolumeParameterConfig ephemeral, boolean resourceDisk) {
+        return Optional.of(vmType(name, memory, cpu, autoAttached, ephemeral, resourceDisk));
     }
 
-    private VmType vmType(String name, int memory, int cpu, VolumeParameterConfig autoAttached, VolumeParameterConfig ephemeral) {
+    private Optional<VmType> vmTypeOptional(String name, int memory, int cpu, VolumeParameterConfig autoAttached, VolumeParameterConfig ephemeral) {
+        return Optional.of(vmType(name, memory, cpu, autoAttached, ephemeral, false));
+    }
+
+    private VmType vmType(String name, int memory, int cpu, VolumeParameterConfig autoAttached, VolumeParameterConfig ephemeral, boolean resourceDisk) {
         return vmTypeWithMeta(name,
                 VmTypeMeta.VmTypeMetaBuilder.builder()
                         .withAutoAttachedConfig(autoAttached)
                         .withCpuAndMemory(cpu, memory)
                         .withEphemeralConfig(ephemeral)
+                        .withResourceDiskAttached(resourceDisk)
                         .create(),
                 false);
     }
