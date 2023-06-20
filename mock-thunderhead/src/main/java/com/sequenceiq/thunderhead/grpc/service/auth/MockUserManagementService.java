@@ -21,7 +21,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZUR
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CO2_CALCULATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_COST_CALCULATION;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA;
@@ -361,9 +360,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.differentdatahubversionthandatalake.enabled}")
     private boolean enableDifferentDataHubVersionThanDataLake;
-
-    @Value("${auth.mock.database.wire.encryption.datahub.enable}")
-    private boolean enableDatabaseWireEncryptionDatahub;
 
     @Value("${auth.mock.datalake.loadbalancer.enable}")
     private boolean datalakeLoadBalancerEnabled;
@@ -828,9 +824,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableDifferentDataHubVersionThanDataLake) {
             builder.addEntitlements(createEntitlement(CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE));
-        }
-        if (enableDatabaseWireEncryptionDatahub) {
-            builder.addEntitlements(createEntitlement(CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB));
         }
         if (datalakeLoadBalancerEnabled) {
             builder.addEntitlements(createEntitlement(CDP_DATA_LAKE_LOAD_BALANCER));
