@@ -274,8 +274,6 @@ class ExternalDatabaseServiceTest {
         when(cmTemplateProcessor.getStackVersion()).thenReturn(STACK_VERSION_GOOD);
 
         provisionDatabaseTestSslInternal(blueprint, false);
-
-        verify(entitlementService, never()).databaseWireEncryptionDatahubEnabled(anyString());
     }
 
     private void provisionDatabaseTestSslInternal(Blueprint blueprint, boolean sslEnabledExpected) throws JsonProcessingException {
@@ -345,7 +343,6 @@ class ExternalDatabaseServiceTest {
 
         verify(cmTemplateProcessorFactory, never()).get(anyString());
         verify(cmTemplateProcessor, never()).getStackVersion();
-        verify(entitlementService, never()).databaseWireEncryptionDatahubEnabled(anyString());
     }
 
     @Test
@@ -359,7 +356,6 @@ class ExternalDatabaseServiceTest {
 
         verify(cmTemplateProcessorFactory, never()).get(anyString());
         verify(cmTemplateProcessor, never()).getStackVersion();
-        verify(entitlementService, never()).databaseWireEncryptionDatahubEnabled(anyString());
     }
 
     @ParameterizedTest(name = "runtime={0}")
@@ -374,21 +370,6 @@ class ExternalDatabaseServiceTest {
         when(cmTemplateProcessor.getStackVersion()).thenReturn(runtime);
 
         provisionDatabaseTestSslInternal(blueprint, false);
-
-        verify(entitlementService, never()).databaseWireEncryptionDatahubEnabled(anyString());
-    }
-
-    @Test
-    void provisionDatabaseTestSslWhenNotEntitled() throws JsonProcessingException {
-        when(externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(CLOUD_PLATFORM)).thenReturn(true);
-
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(BLUEPRINT_TEXT);
-        when(cmTemplateProcessorFactory.get(BLUEPRINT_TEXT)).thenReturn(cmTemplateProcessor);
-        when(cmTemplateProcessor.getStackVersion()).thenReturn(STACK_VERSION_GOOD);
-        when(entitlementService.databaseWireEncryptionDatahubEnabled(ACCOUNT_ID)).thenReturn(false);
-
-        provisionDatabaseTestSslInternal(blueprint, false);
     }
 
     @ParameterizedTest(name = "runtime={0}")
@@ -400,7 +381,6 @@ class ExternalDatabaseServiceTest {
         blueprint.setBlueprintText(BLUEPRINT_TEXT);
         when(cmTemplateProcessorFactory.get(BLUEPRINT_TEXT)).thenReturn(cmTemplateProcessor);
         when(cmTemplateProcessor.getStackVersion()).thenReturn(runtime);
-        when(entitlementService.databaseWireEncryptionDatahubEnabled(ACCOUNT_ID)).thenReturn(true);
 
         provisionDatabaseTestSslInternal(blueprint, true);
     }

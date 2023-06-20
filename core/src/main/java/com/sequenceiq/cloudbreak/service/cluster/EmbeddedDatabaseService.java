@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -78,14 +77,8 @@ public class EmbeddedDatabaseService {
     }
 
     public boolean isSslEnforcementForEmbeddedDatabaseEnabled(StackView stackView, ClusterView clusterView, Database database) {
-        String accountId = Crn.safeFromString(stackView.getResourceCrn()).getAccountId();
         StackType stackType = stackView.getType();
-        boolean sslEnforcementEnabled = false;
-        if (stackType == StackType.DATALAKE) {
-            sslEnforcementEnabled = true;
-        } else if (stackType == StackType.WORKLOAD) {
-            sslEnforcementEnabled = entitlementService.databaseWireEncryptionDatahubEnabled(accountId);
-        }
+        boolean sslEnforcementEnabled = stackType == StackType.DATALAKE || stackType == StackType.WORKLOAD;
         String runtime = getRuntime(clusterView);
         boolean response = sslEnforcementEnabled && isEmbeddedDatabaseOnAttachedDiskEnabledByStackView(stackView, clusterView, database) &&
                 isSslEnforcementSupportedForRuntime(runtime);
