@@ -92,6 +92,8 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CFM_VERSION_2_2_3_0 = () -> "2.2.3.0";
 
+    public static final Versioned CFM_VERSION_2_2_6_200 = () -> "2.2.6.200";
+
     public static final Versioned FLINK_VERSION_1_15_1 = () -> "1.15.1";
 
     public static final Versioned CDPD_VERSION_7_2_11 = () -> "7.2.11";
