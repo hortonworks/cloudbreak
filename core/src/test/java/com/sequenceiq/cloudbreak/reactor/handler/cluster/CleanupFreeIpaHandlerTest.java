@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLEANUP_FREEIPA_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLEANUP_FREEIPA_FINISHED_EVENT;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -81,7 +82,7 @@ class CleanupFreeIpaHandlerTest {
 
         underTest.accept(cleanupFreeIpaEvent);
 
-        verify(eventBus).notify(eq(CLEANUP_FREEIPA_FINISHED_EVENT.event()), any(Event.class));
+        verify(eventBus).notify(eq(CLEANUP_FREEIPA_FAILED_EVENT.event()), any(Event.class));
     }
 
     @Test
@@ -93,6 +94,6 @@ class CleanupFreeIpaHandlerTest {
 
         underTest.accept(cleanupFreeIpaEvent);
 
-        verify(eventBus).notify(eq(CLEANUP_FREEIPA_FINISHED_EVENT.event()), any(Event.class));
+        verify(eventBus).notify(eq(CLEANUP_FREEIPA_FAILED_EVENT.event()), any(Event.class));
     }
 }
