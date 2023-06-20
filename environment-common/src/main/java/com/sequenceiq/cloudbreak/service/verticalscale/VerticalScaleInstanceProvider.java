@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.verticalscale;
 
+import static com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.RESOURCE_DISK_ATTACHED;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -87,8 +89,24 @@ public class VerticalScaleInstanceProvider {
                     currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
             validateAutoAttached(currentInstanceTypeName, requestedInstanceTypeName,
                     currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
+            validateResourceDisk(currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
         } else {
             throw new BadRequestException("The requested instancetype does not exist on provider side.");
+        }
+    }
+
+    private void validateResourceDisk(VmTypeMeta currentInstanceTypeMetaData, VmTypeMeta requestedInstanceTypeMetaData) {
+        Object currentInstanceTypeResourceDisk = currentInstanceTypeMetaData.getProperties().get(RESOURCE_DISK_ATTACHED);
+        Object requestedInstanceTypeResourceDisk = requestedInstanceTypeMetaData.getProperties().get(RESOURCE_DISK_ATTACHED);
+
+        if (currentInstanceTypeResourceDisk != null && requestedInstanceTypeResourceDisk != null) {
+            Boolean currentInstanceTypeResourceDiskBoolean = Boolean.valueOf(currentInstanceTypeResourceDisk.toString());
+            Boolean requestedInstanceTypeResourceDiskBoolean = Boolean.valueOf(requestedInstanceTypeResourceDisk.toString());
+            if (currentInstanceTypeResourceDiskBoolean != requestedInstanceTypeResourceDiskBoolean) {
+                throw new BadRequestException("Unable to resize since changing from resource disk to non-resource " +
+                        "disk VM size and vice-versa is not allowed. " +
+                        "Please refer to https://aka.ms/AAah4sj for more details.");
+            }
         }
     }
 
