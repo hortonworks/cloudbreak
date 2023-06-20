@@ -16,15 +16,13 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
-import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
 public class NifiRegistryRoleConfigProvider extends AbstractRdsRoleConfigProvider {
-
-    public static final Versioned CFM_VERSION_2_2_7_0 = () -> "2.2.7.0";
 
     static final String DATABASE_USER = "nifi.registry.db.username";
 
@@ -41,12 +39,10 @@ public class NifiRegistryRoleConfigProvider extends AbstractRdsRoleConfigProvide
         String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
                 "" : source.getBlueprintView().getProcessor().getStackVersion();
         if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_0_1)) {
-            switch (roleType) {
-                case NifiRegistryRoles.NIFI_REGISTRY_SERVER:
-                    return generateDatabaseConfig(source);
-                default:
-                    return List.of();
-            }
+            return switch (roleType) {
+                case NifiRegistryRoles.NIFI_REGISTRY_SERVER -> generateDatabaseConfig(source);
+                default -> List.of();
+            };
         }
         return List.of();
     }
@@ -55,15 +51,19 @@ public class NifiRegistryRoleConfigProvider extends AbstractRdsRoleConfigProvide
         RdsView nifiRegistryRdsView = getRdsView(source);
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
 
-        configs.add(config(DATABASE_URL, nifiRegistryRdsView.getConnectionURL()));
         configs.add(config(DRIVER_CLASS, nifiRegistryRdsView.getConnectionDriver()));
         configs.add(config(DATABASE_USER, nifiRegistryRdsView.getConnectionUserName()));
         configs.add(config(DATABASE_PASSWORD, nifiRegistryRdsView.getConnectionPassword()));
 
         Optional<ClouderaManagerProduct> cfm = getCfmProduct(source);
-        if (cfm.isEmpty() || isVersionOlderThanLimited(cfm.get().getVersion(), CFM_VERSION_2_2_7_0)) {
+        String connectionURL = nifiRegistryRdsView.getConnectionURL();
+        if (cfm.isEmpty() || isVersionOlderThanLimited(cfm.get().getVersion(), CMRepositoryVersionUtil.CFM_VERSION_2_2_6_200)) {
             configs.add(config(DRIVER_DIRECTORY, "/usr/share/java/"));
+            if (nifiRegistryRdsView.isUseSsl()) {
+                connectionURL = connectionURL.replace("sslmode=verify-full", "sslmode=require");
+            }
         }
+        configs.add(config(DATABASE_URL, connectionURL));
 
         return unmodifiableList(configs);
     }
@@ -82,4 +82,5 @@ public class NifiRegistryRoleConfigProvider extends AbstractRdsRoleConfigProvide
     protected DatabaseType dbType() {
         return DatabaseType.NIFIREGISTRY;
     }
+
 }

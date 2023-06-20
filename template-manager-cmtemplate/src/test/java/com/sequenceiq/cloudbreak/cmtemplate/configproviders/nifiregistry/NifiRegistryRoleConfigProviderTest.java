@@ -7,12 +7,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
@@ -20,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil;
@@ -28,13 +33,14 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class NifiRegistryRoleConfigProviderTest {
+@ExtendWith(MockitoExtension.class)
+class NifiRegistryRoleConfigProviderTest {
 
-    private final NifiRegistryRoleConfigProvider underTest = new NifiRegistryRoleConfigProvider();
+    @InjectMocks
+    private NifiRegistryRoleConfigProvider underTest;
 
     @Test
-    public void testGetSchemaRegistryServiceConfigs701() {
+    void testGetRegistryServiceConfigs700() {
         String inputJson = loadBlueprint("7.0.0");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor);
@@ -44,7 +50,7 @@ public class NifiRegistryRoleConfigProviderTest {
     }
 
     @Test
-    public void testGetSchemaRegistryRoleConfigs720() {
+    void testGetRoleConfigs720() {
         String inputJson = loadBlueprint("7.2.0");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor);
@@ -60,7 +66,7 @@ public class NifiRegistryRoleConfigProviderTest {
     }
 
     @Test
-    public void testThatUseParcelEmbeddedJdbcDriversIfAvailable() {
+    void testGetRoleConfigsWhenUsingParcelEmbeddedJdbcDriversIfAvailable() {
         String inputJson = loadBlueprint("7.2.0");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor, "2.2.7.0");
@@ -74,11 +80,45 @@ public class NifiRegistryRoleConfigProviderTest {
                         config("nifi.registry.db.driver.class", "org.postgresql.Driver")));
     }
 
+    static Object[][] getRoleConfigsTestWhenSslDataProvider() {
+        return new Object[][]{
+                // cfmVersion, sslMode, expectedDbUrl
+                {"2.2.5.100", RdsSslMode.DISABLED, "jdbc:postgresql://testhost:5432/nifi_registry"},
+                {"2.2.5.100", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=require&sslrootcert=/foo/bar.pem"},
+                {"2.2.6.0", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=require&sslrootcert=/foo/bar.pem"},
+                {"2.2.6.199", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=require&sslrootcert=/foo/bar.pem"},
+                {"2.2.6.200", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=verify-full&sslrootcert=/foo/bar.pem"},
+                {"2.2.6.201", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=verify-full&sslrootcert=/foo/bar.pem"},
+                {"2.2.7.0", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=verify-full&sslrootcert=/foo/bar.pem"},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("getRoleConfigsTestWhenSslDataProvider")
+    void getRoleConfigsTestWhenSsl(String cfmVersion, RdsSslMode sslMode, String expectedDbUrl) {
+        String inputJson = loadBlueprint("7.2.0");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor, cfmVersion, sslMode);
+
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(NifiRegistryRoles.NIFI_REGISTRY_SERVER, preparationObject);
+
+        Optional<String> dbUrlOptional = roleConfigs.stream()
+                .filter(c -> "nifi.registry.db.url".equals(c.getName()))
+                .map(ApiClusterTemplateConfig::getValue)
+                .findFirst();
+        assertThat(dbUrlOptional).isPresent();
+        assertThat(dbUrlOptional).hasValue(expectedDbUrl);
+    }
+
     private TemplatePreparationObject getTemplatePreparationObject(CmTemplateProcessor cmTemplateProcessor) {
         return getTemplatePreparationObject(cmTemplateProcessor, "2.2.6.0");
     }
 
     private TemplatePreparationObject getTemplatePreparationObject(CmTemplateProcessor cmTemplateProcessor, String cfmVersion) {
+        return getTemplatePreparationObject(cmTemplateProcessor, cfmVersion, RdsSslMode.DISABLED);
+    }
+
+    private TemplatePreparationObject getTemplatePreparationObject(CmTemplateProcessor cmTemplateProcessor, String cfmVersion, RdsSslMode sslMode) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
         BlueprintView blueprintView = new BlueprintView(null, null, null, cmTemplateProcessor);
@@ -92,13 +132,14 @@ public class NifiRegistryRoleConfigProviderTest {
         when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://testhost:5432/nifi_registry");
         when(rdsConfig.getConnectionUserName()).thenReturn("nifi_registry_server_user");
         when(rdsConfig.getConnectionPassword()).thenReturn("nifi_registry_server_password");
+        when(rdsConfig.getSslMode()).thenReturn(sslMode);
 
         return TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(blueprintView)
                 .withHostgroupViews(Set.of(master, worker))
                 .withRdsViews(Set.of(rdsConfig)
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "/foo/bar.pem"))
                         .collect(Collectors.toSet()))
                 .withProductDetails(repo, products)
                 .build();
@@ -115,4 +156,5 @@ public class NifiRegistryRoleConfigProviderTest {
     private String loadBlueprint(String cdhVersion) {
         return FileReaderUtils.readFileFromClasspathQuietly("input/nifiregistry.bp").replace("__CDH_VERSION__", cdhVersion);
     }
+
 }
