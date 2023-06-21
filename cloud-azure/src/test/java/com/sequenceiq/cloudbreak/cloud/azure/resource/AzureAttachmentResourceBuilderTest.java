@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.azure.resourcemanager.compute.models.Disk;
@@ -23,6 +24,7 @@ import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.context.AzureContext;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -38,6 +40,9 @@ public class AzureAttachmentResourceBuilderTest {
     @Mock
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
+    @Spy
+    private AzureInstanceFinder azureInstanceFinder;
+
     @InjectMocks
     private AzureAttachmentResourceBuilder underTest;
 
@@ -49,8 +54,9 @@ public class AzureAttachmentResourceBuilderTest {
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes(null, null, null,
                 volumes, null, null);
         volumeSetAttributes.setDiscoveryFQDN("fqdn1");
+        CloudResource instanceResource = createResource(AZURE_INSTANCE, Map.of());
         List<CloudResource> buildableResource = Lists.newArrayList(
-                createResource(AZURE_INSTANCE, Map.of()),
+                instanceResource,
                 createResource(AZURE_VOLUMESET, Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
         );
         CloudInstance cloudInstance = new CloudInstance("instance", null, null, null, null, Map.of(FQDN, "fqdn1"));
@@ -65,7 +71,9 @@ public class AzureAttachmentResourceBuilderTest {
         when(azureClient.getDiskById(any())).thenReturn(disk);
         when(disk.id()).thenReturn("diskid");
         when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), any(CloudStack.class))).thenReturn("resourceGroup");
-        underTest.build(null, cloudInstance, 1L, auth, null, buildableResource, mock(CloudStack.class));
+        AzureContext azureContext = mock(AzureContext.class);
+        when(azureContext.getComputeResources(1L)).thenReturn(List.of(instanceResource));
+        underTest.build(azureContext, cloudInstance, 1L, auth, null, buildableResource, mock(CloudStack.class));
     }
 
     @Test
@@ -75,8 +83,9 @@ public class AzureAttachmentResourceBuilderTest {
         );
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes(null, null, null,
                 volumes, null, null);
+        CloudResource instanceResource = createResource(AZURE_INSTANCE, Map.of());
         List<CloudResource> buildableResource = Lists.newArrayList(
-                createResource(AZURE_INSTANCE, Map.of()),
+                instanceResource,
                 createResource(AZURE_VOLUMESET, Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
         );
         CloudInstance cloudInstance = new CloudInstance("instance", null, null, null, null, Map.of());
@@ -91,7 +100,9 @@ public class AzureAttachmentResourceBuilderTest {
         when(azureClient.getDiskById(any())).thenReturn(disk);
         when(disk.id()).thenReturn("diskid");
         when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), any(CloudStack.class))).thenReturn("resourceGroup");
-        underTest.build(null, cloudInstance, 1L, auth, null, buildableResource, mock(CloudStack.class));
+        AzureContext azureContext = mock(AzureContext.class);
+        when(azureContext.getComputeResources(1L)).thenReturn(List.of(instanceResource));
+        underTest.build(azureContext, cloudInstance, 1L, auth, null, buildableResource, mock(CloudStack.class));
     }
 
     @Test
@@ -102,8 +113,9 @@ public class AzureAttachmentResourceBuilderTest {
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes(null, null, null,
                 volumes, null, null);
         volumeSetAttributes.setDiscoveryFQDN("fqdn1");
+        CloudResource instanceResource = createResource(AZURE_INSTANCE, Map.of());
         List<CloudResource> buildableResource = Lists.newArrayList(
-                createResource(AZURE_INSTANCE, Map.of()),
+                instanceResource,
                 createResource(AZURE_VOLUMESET, Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
         );
         CloudInstance cloudInstance =
@@ -119,8 +131,10 @@ public class AzureAttachmentResourceBuilderTest {
         when(azureClient.getDiskById(any())).thenReturn(disk);
         when(disk.id()).thenReturn("diskid");
         when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), any(CloudStack.class))).thenReturn("resourceGroup");
+        AzureContext azureContext = mock(AzureContext.class);
+        when(azureContext.getComputeResources(1L)).thenReturn(List.of(instanceResource));
         assertThrows(AzureResourceException.class, () ->
-                underTest.build(null, cloudInstance, 1L, auth, null, buildableResource, mock(CloudStack.class)),
+                underTest.build(azureContext, cloudInstance, 1L, auth, null, buildableResource, mock(CloudStack.class)),
                 "Not possible to attach volume with FQDN nonmatchingfqdn to instance with FQDN fqdn1");
     }
 

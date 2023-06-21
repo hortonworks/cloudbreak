@@ -36,8 +36,7 @@ public class AzureContextService {
             Map<Long, CloudResource> groupInstances = instances.stream()
                     .filter(instance -> instance.getGroup().equals(group.getName()))
                     .collect(Collectors.toMap(instance -> (Long) instance.getParameters().get(PRIVATE_ID), identity()));
-            for (int i = 0; i < privateIds.size(); i++) {
-                Long privateId = privateIds.get(i);
+            for (Long privateId : privateIds) {
                 context.addComputeResources(privateId, List.of(groupInstances.get(privateId)));
             }
         });

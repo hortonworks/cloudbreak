@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,6 +38,9 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
     @Inject
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
+    @Inject
+    private AzureInstanceFinder azureInstanceFinder;
+
     @Override
     public List<CloudResource> create(AzureContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         LOGGER.info("Prepare instance resource to attach to");
@@ -47,11 +51,7 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
     public List<CloudResource> build(AzureContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) {
 
-        CloudResource cloudResourceInstance = buildableResource.stream()
-                .filter(cloudResource -> cloudResource.getType().equals(ResourceType.AZURE_INSTANCE))
-                .findFirst()
-                .orElseThrow(() -> new AzureResourceException("Instance resource not found"));
-
+        CloudResource cloudResourceInstance = azureInstanceFinder.getInstanceCloudResource(privateId, context.getComputeResources(privateId));
         LOGGER.info("Attach disk to the instance {}", cloudResourceInstance);
 
         CloudContext cloudContext = auth.getCloudContext();
@@ -62,30 +62,39 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
 
         CloudResource volumeSet = buildableResource.stream()
                 .filter(cloudResource -> cloudResource.getType().equals(ResourceType.AZURE_VOLUMESET))
-                .filter(cloudResource -> !cloudResourceInstance.getInstanceId().equals(cloudResource.getInstanceId()))
+                .filter(cloudResource -> getVolumeSetAttributes(cloudResource) != null)
                 .findFirst()
                 .orElseThrow(() -> new AzureResourceException("Volume set resource not found"));
 
         VolumeSetAttributes volumeSetAttributes = getVolumeSetAttributes(volumeSet);
-        volumeSetAttributes.getVolumes().forEach(volume -> attachVolumeIfNeeded(client, vm, diskIds, volume,
-                volumeSetAttributes.getDiscoveryFQDN(), instance.getParameters().get(CloudInstance.FQDN)));
+        LOGGER.debug("Volume set attributes: {}", volumeSetAttributes);
+        List<VolumeSetAttributes.Volume> volumes = volumeSetAttributes.getVolumes();
+        attachVolumesIfNeeded(client, vm, diskIds, volumes, volumeSetAttributes.getDiscoveryFQDN(), instance.getParameters().get(CloudInstance.FQDN));
         volumeSet.setInstanceId(cloudResourceInstance.getInstanceId());
         volumeSet.setStatus(CommonStatus.CREATED);
         LOGGER.info("Volume set {} attached successfully", volumeSet);
         return List.of(volumeSet);
     }
 
-    private void attachVolumeIfNeeded(AzureClient client, VirtualMachine vm, Set<String> diskIds, VolumeSetAttributes.Volume volume,
+    private void attachVolumesIfNeeded(AzureClient client, VirtualMachine vm, Set<String> diskIds, List<VolumeSetAttributes.Volume> volumes,
             String volumeFqdn, Object instanceFqdn) {
-        Disk disk = client.getDiskById(volume.getId());
-        if (!diskIds.contains(disk.id())) {
-            validateVolumeFqdnBeforeAttachment(volumeFqdn, instanceFqdn);
-            if (disk.isAttachedToVirtualMachine()) {
-                detachDiskFromVmByVmId(client, disk);
+        List<Disk> disks = new ArrayList<>();
+        for (VolumeSetAttributes.Volume volume : volumes) {
+            Disk disk = client.getDiskById(volume.getId());
+            if (!diskIds.contains(disk.id())) {
+                validateVolumeFqdnBeforeAttachment(volumeFqdn, instanceFqdn);
+                if (disk.isAttachedToVirtualMachine()) {
+                    detachDiskFromVmByVmId(client, disk);
+                }
+                disks.add(disk);
+            } else {
+                LOGGER.info("Managed disk {} is already attached to VM {}", disk, vm);
             }
-            attachDiskToVm(client, disk, vm);
+        }
+        if (!disks.isEmpty()) {
+            attachDisksToVm(client, disks, vm);
         } else {
-            LOGGER.info("Managed disk {} is already attached to VM {}", disk, vm);
+            LOGGER.info("Disk list is empty");
         }
     }
 
@@ -97,13 +106,13 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
 
     private void detachDiskFromVmByVmId(AzureClient client, Disk disk) {
         VirtualMachine vm = client.getVirtualMachine(disk.virtualMachineId());
-        LOGGER.info("Going to detach disk ([id: {}]) from virtual machine ([id: {}])", disk.id(), vm.vmId());
+        LOGGER.info("Going to detach disk ([id: {}]) from virtual machine ([name: {}])", disk.id(), vm.name());
         client.detachDiskFromVm(disk.id(), client.getVirtualMachine(disk.virtualMachineId()));
     }
 
-    private void attachDiskToVm(AzureClient client, Disk disk, VirtualMachine vm) {
-        LOGGER.info("Going to attach disk ([id: {}]) to virtual machine ([id: {}])", disk.id(), vm.vmId());
-        client.attachDiskToVm(disk, vm);
+    private void attachDisksToVm(AzureClient client, List<Disk> disks, VirtualMachine vm) {
+        LOGGER.info("Going to attach disks ({}) to virtual machine ([name: {}])", disks, vm.name());
+        client.attachDisksToVm(disks, vm);
     }
 
     @Override

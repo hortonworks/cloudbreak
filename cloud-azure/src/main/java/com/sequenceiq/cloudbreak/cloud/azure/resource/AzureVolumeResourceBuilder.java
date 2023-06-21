@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.PRIVATE_ID;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,6 +31,8 @@ import org.springframework.util.CollectionUtils;
 import com.azure.resourcemanager.compute.models.Disk;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.azure.resourcemanager.resources.fluentcore.arm.AvailabilityZoneId;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
@@ -50,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
 import com.sequenceiq.cloudbreak.util.DeviceNameGenerator;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -75,6 +80,12 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
     @Inject
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
+    @Inject
+    private ResourceRetriever resourceRetriever;
+
+    @Inject
+    private AzureInstanceFinder azureInstanceFinder;
+
     @Override
     public List<CloudResource> create(AzureContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         LOGGER.info("Creating volume resources");
@@ -82,26 +93,33 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         if (Objects.isNull(computeResources) || computeResources.isEmpty()) {
             return null;
         }
-        CloudResource vm = context.getComputeResources(privateId)
-                .stream()
-                .filter(cloudResource -> ResourceType.AZURE_INSTANCE.equals(cloudResource.getType()))
-                .findFirst()
-                .get();
-
-        Optional<CloudResource> reattachableVolumeSet = computeResources.stream()
-                .filter(resource -> ResourceType.AZURE_VOLUMESET.equals(resource.getType()))
-                .filter(cloudResource -> CommonStatus.DETACHED.equals(cloudResource.getStatus()) || vm.getInstanceId().equals(cloudResource.getInstanceId()))
-                .findFirst();
-        LOGGER.info("Reattachable volume set {}",
-                reattachableVolumeSet.map(cloudResource -> "is present with name:" + cloudResource.getName())
-                        .orElse("is not present"));
+        CloudResource vm = azureInstanceFinder.getInstanceCloudResource(privateId, computeResources);
+        Optional<CloudResource> reattachableVolumeSet = getReattachableVolumeSet(computeResources, vm);
 
         return List.of(reattachableVolumeSet.orElseGet(
                 createVolumeSet(privateId, auth, group, vm, context.getStringParameter(PlatformParametersConsts.RESOURCE_CRN_PARAMETER))));
     }
 
+    private Optional<CloudResource> getReattachableVolumeSet(List<CloudResource> computeResources, CloudResource vm) {
+        LOGGER.debug("Find reattachable volume set for {}", vm);
+        Optional<CloudResource> reattachableVolumeSet = computeResources.stream()
+                .filter(resource -> ResourceType.AZURE_VOLUMESET.equals(resource.getType()))
+                .filter(cloudResource -> CommonStatus.DETACHED.equals(cloudResource.getStatus()) || vm.getInstanceId().equals(cloudResource.getInstanceId()))
+                .findFirst();
+        reattachableVolumeSet.ifPresent(cloudResource -> cloudResource.setInstanceId(vm.getInstanceId()));
+        LOGGER.info("Reattachable volume set {}",
+                reattachableVolumeSet.map(cloudResource -> "is present with name:" + cloudResource.getName())
+                        .orElse("is not present"));
+        return reattachableVolumeSet;
+    }
+
     private Supplier<CloudResource> createVolumeSet(long privateId, AuthenticatedContext auth, Group group, CloudResource vm, String stackCrn) {
         return () -> {
+            String instanceId = vm.getInstanceId();
+            Optional<CloudResource> volumeSetForInstanceId = findVolumeSetForInstanceId(instanceId, auth, group);
+            if (volumeSetForInstanceId.isPresent()) {
+                return volumeSetForInstanceId.get();
+            }
             AzureResourceNameService resourceNameService = getResourceNameService();
 
             InstanceTemplate template = group.getReferenceInstanceTemplate();
@@ -112,24 +130,40 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
             String hashableString = stackCrn + System.currentTimeMillis();
 
             return CloudResource.builder()
+                    .withInstanceId(instanceId)
                     .withPersistent(true)
                     .withType(resourceType())
                     .withName(resourceNameService.volumeSet(stackName, groupName, privateId, hashableString))
                     .withGroup(group.getName())
                     .withStatus(CommonStatus.REQUESTED)
                     .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
-                            .withAvailabilityZone(availabilityZone)
-                            .withDeleteOnTermination(Boolean.TRUE)
-                            .withVolumes(
-                                    template.getVolumes().stream()
-                                            .map(volume -> new VolumeSetAttributes.Volume(
-                                                    resourceNameService.attachedDisk(stackName, groupName, privateId,
-                                                            template.getVolumes().indexOf(volume), hashableString),
-                                                    null, volume.getSize(), volume.getType(), volume.getVolumeUsageType()))
-                                            .collect(toList()))
-                            .build()))
+                                    .withAvailabilityZone(availabilityZone)
+                                    .withDeleteOnTermination(Boolean.TRUE)
+                                    .withVolumes(
+                                            template.getVolumes().stream()
+                                                    .map(volume -> new VolumeSetAttributes.Volume(
+                                                            resourceNameService.attachedDisk(stackName, groupName, privateId,
+                                                                    template.getVolumes().indexOf(volume), hashableString),
+                                                            null, volume.getSize(), volume.getType(), volume.getVolumeUsageType()))
+                                                    .collect(toList()))
+                                    .build(),
+                            PRIVATE_ID, privateId))
                     .build();
         };
+    }
+
+    @NotNull
+    private Optional<CloudResource> findVolumeSetForInstanceId(String instanceId, AuthenticatedContext auth, Group group) {
+        LOGGER.debug("Find volume set for instance id: {}", instanceId);
+        List<CloudResource> createdAndRequestedVolumeSets = resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.CREATED,
+                ResourceType.AZURE_VOLUMESET, auth.getCloudContext().getId(), group.getName());
+        LOGGER.debug("Created volume sets: {}", createdAndRequestedVolumeSets);
+        createdAndRequestedVolumeSets.addAll(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.REQUESTED,
+                ResourceType.AZURE_VOLUMESET, auth.getCloudContext().getId(), group.getName()));
+        LOGGER.debug("Created and requested volume sets: {}", createdAndRequestedVolumeSets);
+        return createdAndRequestedVolumeSets.stream()
+                .filter(cr -> Objects.equals(instanceId, cr.getInstanceId()))
+                .findFirst();
     }
 
     private String getAvailabilityZone(AuthenticatedContext auth, CloudResource vm) {
@@ -217,6 +251,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                 .withGroup(resource.getGroup())
                 .withType(resource.getType())
                 .withStatus(status)
+                .withInstanceId(resource.getInstanceId())
                 .withName(resource.getName())
                 .withParameters(resource.getParameters())
                 .build();
@@ -250,9 +285,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
             CloudResource cloudResource = cloudResourceStatus.getCloudResource();
             List<String> volumeIds = getVolumeIds(cloudResource);
             LOGGER.info("VolumeIds to delete: {}", String.join(", ", volumeIds));
-            for (String volumeId : volumeIds) {
-                detachVolume(client, cloudResource, volumeId);
-            }
+            detachVolumes(client, cloudResource, volumeIds);
             LOGGER.info("Going to attempt to delete the following managed disks (based on the following IDs) on Azure: {}",
                     String.join(",", volumeIds));
             azureUtils.deleteManagedDisks(client, volumeIds);
@@ -265,19 +298,31 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                 .collect(toList());
     }
 
-    private void detachVolume(AzureClient client, CloudResource cloudResource, String volumeId) {
+    private void detachVolumes(AzureClient client, CloudResource cloudResource, List<String> volumeIds) {
         String instanceName = cloudResource.getInstanceId();
-        try {
+        Multimap<String, String> vmDiskMap = ArrayListMultimap.create();
+        for (String volumeId : volumeIds) {
             Disk diskById = client.getDiskById(volumeId);
             if (diskById.isAttachedToVirtualMachine()) {
-                LOGGER.info("Trying to detach volume {} from {}", volumeId, instanceName);
-                VirtualMachine virtualMachine = client.getVirtualMachine(diskById.virtualMachineId());
-                client.detachDiskFromVm(volumeId, virtualMachine);
+                String vmId = diskById.virtualMachineId();
+                LOGGER.info("Volume {} is attached to {}", volumeId, vmId);
+                vmDiskMap.put(vmId, volumeId);
             } else {
                 LOGGER.info("No need to detach disk(VolumeId:'{}') as it is not attached to any VM", volumeId);
             }
-        } catch (RuntimeException e) {
-            LOGGER.warn("Can not detach " + volumeId + " from " + instanceName, e);
+        }
+        LOGGER.info("VM disk map: {}", vmDiskMap);
+        for (String vm : vmDiskMap.keySet()) {
+            VirtualMachine virtualMachine = client.getVirtualMachine(vm);
+            if (Objects.equals(virtualMachine.name(), instanceName)) {
+                try {
+                    client.detachDisksFromVm(vmDiskMap.get(vm), virtualMachine);
+                } catch (RuntimeException e) {
+                    LOGGER.warn("Can not detach " + volumeIds + " from " + instanceName, e);
+                }
+            } else {
+                LOGGER.warn("{} disks are not attached to the correct VM: {}", vmDiskMap.get(vm), instanceName);
+            }
         }
     }
 
