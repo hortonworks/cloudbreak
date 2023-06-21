@@ -1,15 +1,19 @@
 package com.sequenceiq.cloudbreak.cloud.azure.util;
 
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.function.Supplier;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
 import com.microsoft.aad.msal4j.MsalServiceException;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
 @Component
 public class AzureExceptionHandler {
@@ -52,6 +56,7 @@ public class AzureExceptionHandler {
             }
         } catch (ManagementException me) {
             LOGGER.warn("ManagementException has been thrown during azure operation", me);
+            String builtErrorMessage = buildErrorMessage(me);
             if (azureExceptionHandlerParameters.isHandleAllExceptions()) {
                 LOGGER.debug("Handle all exceptions is turned on");
                 return null;
@@ -60,8 +65,27 @@ public class AzureExceptionHandler {
                 LOGGER.debug("Handle not found exception is turned on");
                 return null;
             }
-            throw me;
+            throw new CloudConnectorException(builtErrorMessage, me);
         }
+    }
+
+    @NotNull
+    public static String buildErrorMessage(ManagementException me) {
+        StringJoiner errorMessageBuilder = new StringJoiner(". ");
+        errorMessageBuilder.add("Azure management error happened");
+        errorMessageBuilder.add(me.getMessage());
+        ManagementError managementError = me.getValue();
+        if (managementError != null) {
+            LOGGER.warn("Azure management error: {}", managementError);
+            errorMessageBuilder.add(managementError.getMessage());
+            if (managementError.getDetails() != null) {
+                LOGGER.warn("Azure management error detail: {}", managementError.getDetails());
+                for (ManagementError detail : managementError.getDetails()) {
+                    errorMessageBuilder.add(detail.getMessage());
+                }
+            }
+        }
+        return errorMessageBuilder.toString();
     }
 
     public void handleException(Runnable function) {

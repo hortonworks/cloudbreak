@@ -171,6 +171,7 @@ class AzureClientTest {
         int sizeInGb = 4096;
 
         Disk disk = mock(Disk.class);
+        List<Disk> disks = List.of(disk);
         VirtualMachine virtualMachine = mock(VirtualMachine.class);
         VirtualMachineInner virtualMachineInner = mock(VirtualMachineInner.class);
         VirtualMachine.Update virtualMachineUpdate = mock(VirtualMachine.Update.class);
@@ -184,7 +185,7 @@ class AzureClientTest {
         when(disk.sizeInGB()).thenReturn(sizeInGb);
         ArgumentCaptor<CachingTypes> captor = ArgumentCaptor.forClass(CachingTypes.class);
 
-        underTest.attachDiskToVm(disk, virtualMachine);
+        underTest.attachDisksToVm(disks, virtualMachine);
         verify(virtualMachineUpdate, times(1)).withDataDiskDefaultCachingType(captor.capture());
         Assertions.assertEquals(CachingTypes.NONE, captor.getValue());
     }
@@ -195,6 +196,7 @@ class AzureClientTest {
         DiskSkuTypes diskSkuTypes = DiskSkuTypes.PREMIUM_LRS;
 
         Disk disk = mock(Disk.class);
+        List<Disk> disks = List.of(disk);
         VirtualMachine virtualMachine = mock(VirtualMachine.class);
         VirtualMachineInner virtualMachineInner = mock(VirtualMachineInner.class);
         VirtualMachine.Update virtualMachineUpdate = mock(VirtualMachine.Update.class);
@@ -209,7 +211,7 @@ class AzureClientTest {
         when(disk.sku()).thenReturn(diskSkuTypes);
         ArgumentCaptor<CachingTypes> captor = ArgumentCaptor.forClass(CachingTypes.class);
 
-        underTest.attachDiskToVm(disk, virtualMachine);
+        underTest.attachDisksToVm(disks, virtualMachine);
         verify(virtualMachineUpdate, times(1)).withDataDiskDefaultCachingType(captor.capture());
         Assertions.assertEquals(CachingTypes.READ_ONLY, captor.getValue());
     }
@@ -220,6 +222,7 @@ class AzureClientTest {
         DiskSkuTypes diskSkuTypes = DiskSkuTypes.ULTRA_SSD_LRS;
 
         Disk disk = mock(Disk.class);
+        List<Disk> disks = List.of(disk);
         VirtualMachine virtualMachine = mock(VirtualMachine.class);
         VirtualMachineInner virtualMachineInner = mock(VirtualMachineInner.class);
         VirtualMachine.Update virtualMachineUpdate = mock(VirtualMachine.Update.class);
@@ -234,7 +237,7 @@ class AzureClientTest {
         when(disk.sku()).thenReturn(diskSkuTypes);
         ArgumentCaptor<CachingTypes> captor = ArgumentCaptor.forClass(CachingTypes.class);
 
-        underTest.attachDiskToVm(disk, virtualMachine);
+        underTest.attachDisksToVm(disks, virtualMachine);
         verify(virtualMachineUpdate, times(1)).withDataDiskDefaultCachingType(captor.capture());
         Assertions.assertEquals(CachingTypes.READ_ONLY, captor.getValue());
     }

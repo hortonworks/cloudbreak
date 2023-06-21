@@ -184,6 +184,9 @@ class AwsVolumeResourceBuilderTest {
     @Spy
     private AwsMethodExecutor awsMethodExecutor;
 
+    @Spy
+    private AwsInstanceFinder awsInstanceFinder;
+
     @Captor
     private ArgumentCaptor<CreateVolumeRequest> createVolumeRequestCaptor;
 
@@ -192,6 +195,10 @@ class AwsVolumeResourceBuilderTest {
 
     @BeforeEach
     void setUp() {
+        CloudResource cloudResource = mock(CloudResource.class);
+        lenient().when(cloudResource.getType()).thenReturn(ResourceType.AWS_INSTANCE);
+        lenient().when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
+        lenient().when(awsContext.getComputeResources(PRIVATE_ID)).thenReturn(List.of(cloudResource));
         lenient().when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         lenient().when(cloudContext.getLocation()).thenReturn(location);
         lenient().when(location.getRegion()).thenReturn(region);
@@ -332,7 +339,7 @@ class AwsVolumeResourceBuilderTest {
                 any(), eq("groupName"))).thenReturn(List.of());
         when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.REQUESTED), eq(ResourceType.AWS_VOLUMESET),
                 any(), eq("groupName"))).thenReturn(List.of());
-        Optional<CloudResource> actual = underTest.fetchCloudResourceFromDBIfAvailable(0L, authenticatedContext, group, List.of(instanceResource));
+        Optional<CloudResource> actual = underTest.fetchCloudResourceFromDBIfAvailable(instanceResource.getInstanceId(), authenticatedContext, group);
         assertTrue(actual.isEmpty());
         verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.CREATED), eq(ResourceType.AWS_VOLUMESET),
                 any(), eq("groupName"));
@@ -351,7 +358,7 @@ class AwsVolumeResourceBuilderTest {
                 any(), eq("groupName"))).thenReturn(List.of());
         when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.REQUESTED), eq(ResourceType.AWS_VOLUMESET),
                 any(), eq("groupName"))).thenReturn(List.of(volumeSet));
-        Optional<CloudResource> actual = underTest.fetchCloudResourceFromDBIfAvailable(0L, authenticatedContext, group, List.of(instanceResource));
+        Optional<CloudResource> actual = underTest.fetchCloudResourceFromDBIfAvailable(instanceResource.getInstanceId(), authenticatedContext, group);
         assertFalse(actual.isEmpty());
         assertEquals(volumeSet, actual.get());
         verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.CREATED), eq(ResourceType.AWS_VOLUMESET),
@@ -369,7 +376,7 @@ class AwsVolumeResourceBuilderTest {
         CloudResource volumeSet = CloudResource.builder().cloudResource(createVolumeSet(emptyList())).withInstanceId("instanceId").build();
         when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.CREATED), eq(ResourceType.AWS_VOLUMESET),
                 any(), eq("groupName"))).thenReturn(List.of(volumeSet));
-        Optional<CloudResource> actual = underTest.fetchCloudResourceFromDBIfAvailable(0L, authenticatedContext, group, List.of(instanceResource));
+        Optional<CloudResource> actual = underTest.fetchCloudResourceFromDBIfAvailable(instanceResource.getInstanceId(), authenticatedContext, group);
         assertFalse(actual.isEmpty());
         assertEquals(volumeSet, actual.get());
         verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.CREATED), eq(ResourceType.AWS_VOLUMESET),
