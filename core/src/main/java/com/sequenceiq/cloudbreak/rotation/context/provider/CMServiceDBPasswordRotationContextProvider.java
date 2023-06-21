@@ -110,6 +110,8 @@ public class CMServiceDBPasswordRotationContextProvider implements RotationConte
                 .withStates(List.of("postgresql.rotate.init"))
                 .withRollbackStates(List.of("postgresql.rotate.rollback"))
                 .withCleanupStates(List.of("postgresql.rotate.finalize"))
+                .withPreValidateStates(List.of("postgresql.rotate.prevalidate"))
+                .withPostValidateStates(List.of("postgresql.rotate.postvalidate"))
                 .build();
 
         CMServiceConfigRotationContext cmServiceConfigRotationContext = new CMServiceConfigRotationContext(stack.getResourceCrn(), cmServiceConfigTable);

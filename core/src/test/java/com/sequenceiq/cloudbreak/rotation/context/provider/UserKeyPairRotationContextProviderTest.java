@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.repository.StackAuthenticationRepository;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
-import com.sequenceiq.cloudbreak.rotation.context.SaltRunOrchestratorStateRotationContextGenerator;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -65,7 +64,7 @@ class UserKeyPairRotationContextProviderTest {
     private EnvironmentAuthenticationResponse environmentAuthenticationResponse;
 
     @Mock
-    private SaltRunOrchestratorStateRotationContextGenerator saltRunOrchestratorStateRotationContextGenerator;
+    private UserKeyPairSaltStateRunRotationContextGenerator userKeyPairSaltStateRunRotationContextGenerator;
 
     @InjectMocks
     private UserKeyPairRotationContextProvider undertest;

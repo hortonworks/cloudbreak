@@ -195,8 +195,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     public DatabaseServerV4Response register(DatabaseServerV4Request request) {
         MDCBuilder.addEnvironmentCrn(request.getEnvironmentCrn());
         DatabaseServerConfig server = databaseServerConfigService.create(
-                databaseServerV4RequestToDatabaseServerConfigConverter.convert(request), DEFAULT_WORKSPACE, false);
-        //notify(ResourceEvent.DATABASE_SERVER_CONFIG_CREATED);
+                databaseServerV4RequestToDatabaseServerConfigConverter.convert(request), DEFAULT_WORKSPACE);
         return databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server);
     }
 
@@ -205,7 +204,6 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     public DatabaseServerV4Response deleteByCrn(@TenantAwareParam @ResourceCrn String crn, boolean force) {
         // RedbeamsTerminationService handles both service-managed and user-managed database servers
         DatabaseServerConfig deleted = redbeamsTerminationService.terminateByCrn(crn, force);
-        //notify(ResourceEvent.DATABASE_SERVER_CONFIG_DELETED);
         return databaseServerConfigToDatabaseServerV4ResponseConverter.convert(deleted);
     }
 
@@ -222,7 +220,6 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     public DatabaseServerV4Responses deleteMultiple(@ResourceCrnList Set<String> crns, boolean force) {
         // RedbeamsTerminationService handles both service-managed and user-managed database servers
         Set<DatabaseServerConfig> deleted = redbeamsTerminationService.terminateMultipleByCrn(crns, force);
-        //notify(ResourceEvent.DATABASE_SERVER_CONFIG_DELETED);
         return new DatabaseServerV4Responses(deleted.stream()
                 .map(d -> databaseServerConfigToDatabaseServerV4ResponseConverter.convert(d))
                 .collect(Collectors.toSet()));

@@ -144,7 +144,14 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         } catch (Exception e) {
             throw new CloudbreakException(String.format("Error occurred during deletion of user %s in CM", userName), e);
         }
+    }
 
+    @Override
+    public void checkUser(String userName, String clientUser, String clientPassword) throws Exception {
+        ApiClient client = getClient(stack.getGatewayPort(), clientUser, clientPassword, clientConfig);
+        UsersResourceApi usersResourceApi = clouderaManagerApiFactory.getUserResourceApi(client);
+        ApiUser2List userList = usersResourceApi.readUsers2("SUMMARY");
+        getUser(userList, userName).orElseThrow(() -> new CloudbreakException(String.format("User %s does not exists in CM!", userName)));
     }
 
     @Override

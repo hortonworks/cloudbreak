@@ -26,6 +26,16 @@ public class CustomJobExecutor implements RotationExecutor<CustomJobRotationCont
     }
 
     @Override
+    public void preValidate(CustomJobRotationContext rotationContext) throws Exception {
+
+    }
+
+    @Override
+    public void postValidate(CustomJobRotationContext rotationContext) throws Exception {
+
+    }
+
+    @Override
     public SecretRotationStep getType() {
         return CommonSecretRotationStep.CUSTOM_JOB;
     }

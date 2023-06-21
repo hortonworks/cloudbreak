@@ -212,6 +212,35 @@ public class ClouderaManagerSecurityServiceTest {
     }
 
     @Test
+    public void testGetUser() throws Exception {
+        initTestInput(ADMIN);
+        UsersResourceApi usersResourceApi = mock(UsersResourceApi.class);
+        ApiUser2List userList = createApiUser2List();
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(any(), any(), anyString(), anyString(), anyString())).thenReturn(apiClient);
+        when(clouderaManagerApiFactory.getUserResourceApi(any())).thenReturn(usersResourceApi);
+        when(usersResourceApi.readUsers2("SUMMARY")).thenReturn(userList);
+
+        underTest.checkUser(ADMIN, "clientUser", "clientPass");
+
+        verify(usersResourceApi).readUsers2(anyString());
+    }
+
+    @Test
+    public void testGetUserWhenNotExists() throws Exception {
+        initTestInput(ADMIN);
+        UsersResourceApi usersResourceApi = mock(UsersResourceApi.class);
+        ApiUser2List userList = createApiUser2List();
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(any(), any(), anyString(), anyString(), anyString())).thenReturn(apiClient);
+        when(clouderaManagerApiFactory.getUserResourceApi(any())).thenReturn(usersResourceApi);
+        when(usersResourceApi.readUsers2("SUMMARY")).thenReturn(userList);
+
+        assertThrows(CloudbreakException.class, () ->
+                underTest.checkUser("other", "clientUser", "clientPass"));
+
+        verify(usersResourceApi).readUsers2(anyString());
+    }
+
+    @Test
     public void testChangeOriginalCredentialsAndCreateCloudbreakUserWhenLdapIsConfiguredAndAdminUserIsProvided()
             throws CloudbreakException, ApiException, ClouderaManagerClientInitException {
         initTestInput(ADMIN);

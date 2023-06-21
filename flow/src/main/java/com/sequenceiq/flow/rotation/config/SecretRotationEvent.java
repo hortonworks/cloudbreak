@@ -4,12 +4,14 @@ import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.rotation.event.ExecuteRotationFailedEvent;
 import com.sequenceiq.flow.rotation.event.ExecuteRotationFinishedEvent;
+import com.sequenceiq.flow.rotation.event.PreValidateRotationFinishedEvent;
 import com.sequenceiq.flow.rotation.event.RotationFailedEvent;
 import com.sequenceiq.flow.rotation.event.SecretRotationTriggerEvent;
 
 public enum SecretRotationEvent implements FlowEvent {
 
     SECRET_ROTATION_TRIGGER_EVENT(EventSelectorUtil.selector(SecretRotationTriggerEvent.class)),
+    PRE_VALIDATE_ROTATION_FINISHED_EVENT(EventSelectorUtil.selector(PreValidateRotationFinishedEvent.class)),
     EXECUTE_ROTATION_FINISHED_EVENT(EventSelectorUtil.selector(ExecuteRotationFinishedEvent.class)),
     EXECUTE_ROTATION_FAILED_EVENT(EventSelectorUtil.selector(ExecuteRotationFailedEvent.class)),
     ROTATION_FAILED_EVENT(EventSelectorUtil.selector(RotationFailedEvent.class)),

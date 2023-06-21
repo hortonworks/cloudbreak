@@ -19,6 +19,7 @@ remotedbport="{{ values['remote_db_port'] }}"
 dbname="{{ values['database'] }}"
 service="{{ service }}"
 remotedbpass="{{ values['remote_admin_pw'] }}"
+oldpassword="{{ rotationvalues['oldPassword'] }}"
 newpassword="{{ rotationvalues['newPassword'] }}"
 
 set -e
@@ -50,6 +51,14 @@ if [[ "$rotationphase" == "finalize" ]];then
         echo "REVOKE ALL PRIVILEGES ON DATABASE $dbname FROM $oldusername;" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
         echo "DROP USER IF EXISTS $oldusername;" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
     fi
+fi
+
+if [[ "$rotationphase" == "prevalidate" ]];then
+
+fi
+
+if [[ "$rotationphase" == "postvalidate" ]];then
+
 fi
 
 set +e

@@ -27,9 +27,6 @@ import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.RedbeamsPoller;
-import com.sequenceiq.datalake.service.sdx.SdxService;
-import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
-import com.sequenceiq.datalake.service.sdx.flowwait.SdxWaitService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.rotation.service.SecretRotationValidator;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
@@ -54,15 +51,6 @@ public class SdxRotationService {
 
     @Inject
     private StackV4Endpoint stackV4Endpoint;
-
-    @Inject
-    private CloudbreakFlowService cloudbreakFlowService;
-
-    @Inject
-    private SdxService sdxService;
-
-    @Inject
-    private SdxWaitService sdxWaitService;
 
     @Inject
     private DatabaseServerV4Endpoint databaseServerV4Endpoint;

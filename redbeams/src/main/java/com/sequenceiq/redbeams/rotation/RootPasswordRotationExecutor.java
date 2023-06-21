@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
@@ -74,6 +75,33 @@ public class RootPasswordRotationExecutor implements RotationExecutor<RotationCo
     @Override
     public void finalize(RotationContext rotationContext) {
         LOGGER.info("Finalize database root password rotation, nothing to do.");
+    }
+
+    @Override
+    public void preValidate(RotationContext rotationContext) throws Exception {
+        ExternalDatabaseStatus databaseServerStatus = getExternalDatabaseStatus(rotationContext);
+        if (!ExternalDatabaseStatus.STARTED.equals(databaseServerStatus)) {
+            throw new SecretRotationException("Database is not running or transition is in progress, thus rotation is not possible!", getType());
+        }
+    }
+
+    @Override
+    public void postValidate(RotationContext rotationContext) throws Exception {
+        ExternalDatabaseStatus databaseServerStatus = getExternalDatabaseStatus(rotationContext);
+        if (!ExternalDatabaseStatus.STARTED.equals(databaseServerStatus)) {
+            throw new SecretRotationException("Database is not running or transition is in progress, thus rotation has been failed!", getType());
+        }
+    }
+
+    private ExternalDatabaseStatus getExternalDatabaseStatus(RotationContext rotationContext) throws Exception {
+        DBStack dbStack = dbStackService.getByCrn(rotationContext.getResourceCrn());
+        CloudContext cloudContext = getCloudContext(dbStack);
+        Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());
+        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
+        CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+        AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
+        DatabaseStack databaseStack = dbStackToDatabaseStackConverter.convert(dbStack);
+        return connector.resources().getDatabaseServerStatus(ac, databaseStack);
     }
 
     @Override

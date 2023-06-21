@@ -35,6 +35,17 @@ public class SecretRotationService {
     @Inject
     private Map<SecretType, RotationContextProvider> rotationContextProviderMap;
 
+    public void executePreValidation(SecretType secretType, String resourceId, RotationFlowExecutionType executionType) {
+        if (executionNeeded(executionType, RotationFlowExecutionType.ROTATE, resourceId, secretType)) {
+            Map<SecretRotationStep, ? extends RotationContext> contexts = getContexts(secretType, resourceId);
+            LOGGER.info("Contexts generation for validation before secret rotation of {} regarding resource {} is finished.", secretType, resourceId);
+            secretType.getSteps().forEach(step -> {
+                LOGGER.info("Executing pre validation step {} for secret {} regarding resource {}", step, secretType, resourceId);
+                rotationExecutorMap.get(step).executePreValidation(contexts.get(step));
+            });
+        }
+    }
+
     public void executeRotation(SecretType secretType, String resourceId, RotationFlowExecutionType executionType) {
         if (executionNeeded(executionType, RotationFlowExecutionType.ROTATE, resourceId, secretType)) {
             Map<SecretRotationStep, ? extends RotationContext> contexts = getContexts(secretType, resourceId);
@@ -78,7 +89,12 @@ public class SecretRotationService {
     public void finalizeRotation(SecretType secretType, String resourceId, RotationFlowExecutionType executionType) {
         if (executionNeeded(executionType, RotationFlowExecutionType.FINALIZE, resourceId, secretType)) {
             Map<SecretRotationStep, ? extends RotationContext> contexts = getContexts(secretType, resourceId);
-            LOGGER.info("Contexts generation for secret rotation's finalization of {} regarding resource {} is finished.", secretType, resourceId);
+            LOGGER.info("Contexts generation for secret rotation's post validation and finalization of {} regarding resource {} is finished.",
+                    secretType, resourceId);
+            Lists.reverse(secretType.getSteps()).forEach(step -> {
+                LOGGER.info("Post validating rotation step {} for secret {} regarding resource {}.", step, secretType, resourceId);
+                rotationExecutorMap.get(step).executePostValidation(contexts.get(step));
+            });
             Lists.reverse(secretType.getSteps()).forEach(step -> {
                 LOGGER.info("Finalizing rotation step {} for secret {} regarding resource {}.", step, secretType, resourceId);
                 rotationExecutorMap.get(step).executeFinalize(contexts.get(step));

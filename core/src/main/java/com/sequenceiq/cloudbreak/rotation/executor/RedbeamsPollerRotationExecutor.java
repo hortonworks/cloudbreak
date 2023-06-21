@@ -55,6 +55,16 @@ public class RedbeamsPollerRotationExecutor implements RotationExecutor<PollerRo
     }
 
     @Override
+    public void preValidate(PollerRotationContext rotationContext) throws Exception {
+
+    }
+
+    @Override
+    public void postValidate(PollerRotationContext rotationContext) throws Exception {
+
+    }
+
+    @Override
     public SecretRotationStep getType() {
         return REDBEAMS_ROTATE_POLLING;
     }

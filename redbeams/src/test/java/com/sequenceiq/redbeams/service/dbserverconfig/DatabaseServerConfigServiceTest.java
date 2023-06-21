@@ -11,7 +11,6 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.lenient;
@@ -34,10 +33,8 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.validation.Errors;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
@@ -179,7 +176,7 @@ public class DatabaseServerConfigServiceTest {
         when(repository.save(server)).thenReturn(server);
 
         DatabaseServerConfig createdServer = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.create(server, 0L, false));
+                () -> underTest.create(server, 0L));
 
         assertEquals(server, createdServer);
         assertEquals(0L, createdServer.getWorkspaceId().longValue());
@@ -200,7 +197,7 @@ public class DatabaseServerConfigServiceTest {
         when(repository.save(server)).thenReturn(server);
 
         DatabaseServerConfig createdServer = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.create(server, 0L, false));
+                () -> underTest.create(server, 0L));
 
         assertEquals(DatabaseVendor.POSTGRES.connectionDriver(), createdServer.getConnectionDriver());
     }
@@ -209,7 +206,7 @@ public class DatabaseServerConfigServiceTest {
     public void testCreateAlreadyExists() {
         when(repository.findByName(anyString())).thenReturn(Optional.of(server));
 
-        assertThrows(BadRequestException.class, () -> underTest.create(server, 0L, false));
+        assertThrows(BadRequestException.class, () -> underTest.create(server, 0L));
     }
 
     @Test
@@ -220,21 +217,7 @@ public class DatabaseServerConfigServiceTest {
         AccessDeniedException e = new AccessDeniedException("no way");
         when(repository.save(server)).thenThrow(e);
 
-        assertThrows(AccessDeniedException.class, () -> underTest.create(server, 0L, false));
-    }
-
-    @Test
-    public void testCreateConnectionFailure() {
-        server.setConnectionDriver("org.postgresql.MyCustomDriver");
-        doAnswer(new Answer() {
-            public Object answer(InvocationOnMock invocation) {
-                Errors errors = invocation.getArgument(1);
-                errors.rejectValue("databaseVendor", "", "bad vendor");
-                errors.reject("", "epic fail");
-                return null;
-            }
-        }).when(connectionValidator).validate(eq(server), any(Errors.class));
-        assertThrows(IllegalArgumentException.class, () -> underTest.create(server, 0L, true));
+        assertThrows(AccessDeniedException.class, () -> underTest.create(server, 0L));
     }
 
     @Test
@@ -355,35 +338,6 @@ public class DatabaseServerConfigServiceTest {
         when(repository.findByResourceCrnIn(Set.of(SERVER_CRN, SERVER_2_CRN))).thenReturn(serverSet);
         NotFoundException exception = assertThrows(NotFoundException.class, () -> underTest.getByCrns(crnSet));
         assertThat(exception.getMessage(), containsString("found with crn(s) " + SERVER_2_CRN));
-    }
-
-    @Test
-    public void testTestConnectionSuccess() {
-        when(repository.findByResourceCrn(SERVER_CRN)).thenReturn(Optional.of(server));
-
-        String result = underTest.testConnection(SERVER_CRN.toString());
-
-        assertEquals("success", result);
-        verify(connectionValidator).validate(eq(server), any(Errors.class));
-    }
-
-    @Test
-    public void testTestConnectionFailure() {
-        when(repository.findByResourceCrn(SERVER_CRN)).thenReturn(Optional.of(server));
-        doAnswer(new Answer() {
-            public Object answer(InvocationOnMock invocation) {
-                Errors errors = invocation.getArgument(1);
-                errors.rejectValue("databaseVendor", "", "bad vendor");
-                errors.reject("", "epic fail");
-                return null;
-            }
-        }).when(connectionValidator).validate(eq(server), any(Errors.class));
-
-        String result = underTest.testConnection(SERVER_CRN.toString());
-
-        assertTrue(result.contains("epic fail"));
-        assertTrue(result.contains("databaseVendor: bad vendor"));
-        verify(connectionValidator).validate(eq(server), any(Errors.class));
     }
 
     @Test

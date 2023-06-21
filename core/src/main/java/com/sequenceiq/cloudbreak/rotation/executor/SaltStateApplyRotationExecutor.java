@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.rotation.executor;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_STATE_APPLY;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
@@ -44,10 +46,26 @@ public class SaltStateApplyRotationExecutor implements RotationExecutor<SaltStat
 
     @Override
     public void finalize(SaltStateApplyRotationContext context) throws Exception {
-        if (context.getCleanupStates().isPresent()) {
-            LOGGER.info("Executing salt states [{}] regarding finalization of secret rotation.",
-                    Joiner.on(",").join(context.getCleanupStates().get()));
-            hostOrchestrator.executeSaltState(context.getGatewayConfig(), context.getTargets(), context.getCleanupStates().get(),
+        executeStatesIfPresent(context.getCleanupStates(), "finalization", context);
+    }
+
+    @Override
+    public void preValidate(SaltStateApplyRotationContext context) throws Exception {
+        hostOrchestrator.ping(context.getTargets(), context.getGatewayConfig());
+        executeStatesIfPresent(context.getPreValidateStates(), "pre validation", context);
+    }
+
+    @Override
+    public void postValidate(SaltStateApplyRotationContext context) throws Exception {
+        executeStatesIfPresent(context.getPostValidateStates(), "post validation", context);
+    }
+
+    private void executeStatesIfPresent(Optional<List<String>> states, String message, SaltStateApplyRotationContext context)
+            throws CloudbreakOrchestratorFailedException {
+        if (states.isPresent()) {
+            LOGGER.info("Executing salt states [{}] regarding {} of secret rotation.",
+                    Joiner.on(",").join(states.get()), message);
+            hostOrchestrator.executeSaltState(context.getGatewayConfig(), context.getTargets(), states.get(),
                     context.getExitCriteriaModel(), context.getMaxRetry(), context.getMaxRetryOnError());
         }
     }

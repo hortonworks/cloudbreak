@@ -21,6 +21,10 @@ public class SaltStateApplyRotationContext extends RotationContext {
 
     private final Optional<List<String>> cleanupStates;
 
+    private final Optional<List<String>> preValidateStates;
+
+    private final Optional<List<String>> postValidateStates;
+
     private final ExitCriteriaModel exitCriteriaModel;
 
     private final Optional<Integer> maxRetry;
@@ -28,14 +32,16 @@ public class SaltStateApplyRotationContext extends RotationContext {
     private final Optional<Integer> maxRetryOnError;
 
     public SaltStateApplyRotationContext(String resourceCrn, GatewayConfig gatewayConfig, Set<String> targets, List<String> states,
-            Optional<List<String>> rollBackStates, Optional<List<String>> cleanupStates, ExitCriteriaModel exitCriteriaModel,
-            Optional<Integer> maxRetry, Optional<Integer> maxRetryOnError) {
+            Optional<List<String>> rollBackStates, Optional<List<String>> cleanupStates, Optional<List<String>> preValidateStates,
+            Optional<List<String>> postValidateStates, ExitCriteriaModel exitCriteriaModel, Optional<Integer> maxRetry, Optional<Integer> maxRetryOnError) {
         super(resourceCrn);
         this.gatewayConfig = gatewayConfig;
         this.targets = targets;
         this.states = states;
         this.rollBackStates = rollBackStates;
         this.cleanupStates = cleanupStates;
+        this.preValidateStates = preValidateStates;
+        this.postValidateStates = postValidateStates;
         this.exitCriteriaModel = exitCriteriaModel;
         this.maxRetry = maxRetry;
         this.maxRetryOnError = maxRetryOnError;
@@ -65,6 +71,14 @@ public class SaltStateApplyRotationContext extends RotationContext {
         return cleanupStates;
     }
 
+    public Optional<List<String>> getPreValidateStates() {
+        return preValidateStates;
+    }
+
+    public Optional<List<String>> getPostValidateStates() {
+        return postValidateStates;
+    }
+
     public Optional<Integer> getMaxRetry() {
         return maxRetry;
     }
@@ -90,6 +104,10 @@ public class SaltStateApplyRotationContext extends RotationContext {
         private Optional<List<String>> rollBackStates = Optional.empty();
 
         private Optional<List<String>> cleanupStates = Optional.empty();
+
+        private Optional<List<String>> preValidateStates = Optional.empty();
+
+        private Optional<List<String>> postValidateStates = Optional.empty();
 
         private ExitCriteriaModel exitCriteriaModel;
 
@@ -127,6 +145,16 @@ public class SaltStateApplyRotationContext extends RotationContext {
             return this;
         }
 
+        public SaltStateApplyRotationContextBuilder withPreValidateStates(List<String> preValidateStates) {
+            this.preValidateStates = Optional.of(preValidateStates);
+            return this;
+        }
+
+        public SaltStateApplyRotationContextBuilder withPostValidateStates(List<String> postValidateStates) {
+            this.postValidateStates = Optional.of(postValidateStates);
+            return this;
+        }
+
         public SaltStateApplyRotationContextBuilder withExitCriteriaModel(ExitCriteriaModel exitCriteriaModel) {
             this.exitCriteriaModel = exitCriteriaModel;
             return this;
@@ -143,8 +171,8 @@ public class SaltStateApplyRotationContext extends RotationContext {
         }
 
         public SaltStateApplyRotationContext build() {
-            return new SaltStateApplyRotationContext(resourceCrn, gatewayConfig, targets, states, rollBackStates, cleanupStates,
-                    exitCriteriaModel, maxRetry, maxRetryOnError);
+            return new SaltStateApplyRotationContext(resourceCrn, gatewayConfig, targets, states, rollBackStates, cleanupStates, preValidateStates,
+                    postValidateStates, exitCriteriaModel, maxRetry, maxRetryOnError);
         }
 
     }

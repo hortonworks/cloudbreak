@@ -1741,6 +1741,16 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
+    @Override
+    public void ping(Set<String> target, GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
+            saltStateService.ping(sc, new HostList(target));
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during salt ping.", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
     private void executeSingleSaltState(Set<String> target, ExitCriteriaModel exitModel, Optional<Integer> maxRetry, Optional<Integer> maxRetryOnError,
             SaltConnector sc, String state) throws Exception {
         StateRunner stateRunner = new StateRunner(saltStateService, target, state);

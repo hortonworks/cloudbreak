@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.rotation.context;
+package com.sequenceiq.cloudbreak.rotation.context.provider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -17,13 +17,14 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.rotation.context.SaltRunOrchestratorStateRotationContext;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
 
 @ExtendWith(MockitoExtension.class)
-class SaltRunOrchestratorStateRotationContextGeneratorTest {
+class UserKeyPairSaltStateRunRotationContextGeneratorTest {
 
     private static final String RESOURCE_CRN = "resourceCrn";
 
@@ -44,7 +45,7 @@ class SaltRunOrchestratorStateRotationContextGeneratorTest {
     private GatewayConfigService gatewayConfigService;
 
     @InjectMocks
-    private SaltRunOrchestratorStateRotationContextGenerator undertest;
+    private UserKeyPairSaltStateRunRotationContextGenerator undertest;
 
     @Mock
     private StackDto stackDto;

@@ -11,9 +11,9 @@
     - source: salt://postgresql/rotate/scripts/rotate_db_secrets_remote.sh
     - template: jinja
 
-finalize-db-secrets-remote:
+postvalidate-db-secrets-remote:
   cmd.run:
-    - name: runuser -l postgres -s /bin/bash -c '/opt/salt/scripts/rotate/rotate_db_secrets_remote.sh finalize'
+    - name: runuser -l postgres -s /bin/bash -c '/opt/salt/scripts/rotate/rotate_db_secrets_remote.sh postvalidate'
     - require:
       - file: /opt/salt/scripts/rotate/rotate_db_secrets_remote.sh
 
@@ -28,16 +28,10 @@ finalize-db-secrets-remote:
     - source: salt://postgresql/rotate/scripts/rotate_db_secrets.sh
     - template: jinja
 
-finalize-db-secrets:
+postvalidate-db-secrets:
   cmd.run:
-    - name: runuser -l postgres -s /bin/bash -c '/opt/salt/scripts/rotate/rotate_db_secrets.sh finalize'
+    - name: runuser -l postgres -s /bin/bash -c '/opt/salt/scripts/rotate/rotate_db_secrets.sh postvalidate'
     - require:
       - file: /opt/salt/scripts/rotate/rotate_db_secrets.sh
-
-restart-pgsql-if-rotation-finalized:
-  service.running:
-    - name: postgresql
-    - watch:
-      - cmd: finalize-db-secrets
 
 {% endif %}

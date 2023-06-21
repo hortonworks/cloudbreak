@@ -56,6 +56,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
@@ -77,6 +78,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatus;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.grain.GrainUploader;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
@@ -974,5 +976,23 @@ class SaltOrchestratorTest {
                 Optional.of(3), Optional.of(3));
 
         verify(saltRunner).runner(any(), any(), any(), anyInt(), anyInt());
+    }
+
+    @Test
+    void testPing() throws CloudbreakOrchestratorFailedException {
+        when(saltStateService.ping(any(), any())).thenReturn(new PingResponse());
+
+        saltOrchestrator.ping(Set.of(), gatewayConfig);
+
+        verify(saltStateService).ping(any(), any());
+    }
+
+    @Test
+    void testPingIfFails() throws CloudbreakOrchestratorFailedException {
+        when(saltStateService.ping(any(), any())).thenThrow(new CloudbreakServiceException("pingouch"));
+
+        assertThrows(CloudbreakOrchestratorFailedException.class, () -> saltOrchestrator.ping(Set.of(), gatewayConfig));
+
+        verify(saltStateService).ping(any(), any());
     }
 }

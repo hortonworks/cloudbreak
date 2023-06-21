@@ -51,6 +51,16 @@ public class CMServiceConfigRotationExecutor implements RotationExecutor<CMServi
     }
 
     @Override
+    public void preValidate(CMServiceConfigRotationContext rotationContext) throws Exception {
+        LOGGER.trace("CM Service config rotation will be validated during rotation to reduce CM API calls.");
+    }
+
+    @Override
+    public void postValidate(CMServiceConfigRotationContext rotationContext) throws Exception {
+
+    }
+
+    @Override
     public SecretRotationStep getType() {
         return CM_SERVICE;
     }
