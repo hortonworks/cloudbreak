@@ -36,7 +36,7 @@ public class CMUserRotationExecutor implements RotationExecutor<CMUserRotationCo
 
     @Override
     public void rotate(CMUserRotationContext rotationContext) throws Exception {
-        LOGGER.info("Starting rotation of CM user for resource {} by creating a new user.", rotationContext.getResourceCrn());
+        LOGGER.info("Starting rotation of CM user by creating a new user.");
         RotationSecret userRotationSecret = secretService.getRotation(rotationContext.getUserSecret());
         RotationSecret passwordRotationSecret = secretService.getRotation(rotationContext.getPasswordSecret());
         if (userRotationSecret.isRotation() && passwordRotationSecret.isRotation()) {
@@ -56,7 +56,7 @@ public class CMUserRotationExecutor implements RotationExecutor<CMUserRotationCo
 
     @Override
     public void rollback(CMUserRotationContext rotationContext) {
-        LOGGER.info("Starting to rollback rotation of CM user for resource {} by deleting the new user", rotationContext.getResourceCrn());
+        LOGGER.info("Starting to rollback rotation of CM user by deleting the new user");
         RotationSecret userRotationSecret = secretService.getRotation(rotationContext.getUserSecret());
         if (userRotationSecret.isRotation()) {
             deleteUser(userRotationSecret.getSecret(), rotationContext);
@@ -67,7 +67,7 @@ public class CMUserRotationExecutor implements RotationExecutor<CMUserRotationCo
 
     @Override
     public void finalize(CMUserRotationContext rotationContext) {
-        LOGGER.info("Finalizing rotation of CM user for resource {} by deleting the old user", rotationContext.getResourceCrn());
+        LOGGER.info("Finalizing rotation of CM user by deleting the old user");
         RotationSecret userRotationSecret = secretService.getRotation(rotationContext.getUserSecret());
         if (userRotationSecret.isRotation()) {
             deleteUser(userRotationSecret.getBackupSecret(), rotationContext);

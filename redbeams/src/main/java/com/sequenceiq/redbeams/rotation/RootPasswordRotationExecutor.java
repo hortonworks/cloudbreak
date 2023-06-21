@@ -38,10 +38,6 @@ public class RootPasswordRotationExecutor implements RotationExecutor<RotationCo
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RootPasswordRotationExecutor.class);
 
-    private static final String ROTATION_STATE = "rotation";
-
-    private static final String ROLLBACK_STATE = "rollback";
-
     @Inject
     private DBStackService dbStackService;
 
@@ -65,17 +61,19 @@ public class RootPasswordRotationExecutor implements RotationExecutor<RotationCo
 
     @Override
     public void rotate(RotationContext rotationContext) {
+        LOGGER.info("Rotate database root password.");
         updateRootPasswordOnProvider(rotationContext, false);
     }
 
     @Override
     public void rollback(RotationContext rotationContext) {
+        LOGGER.info("Rollback database root password.");
         updateRootPasswordOnProvider(rotationContext, true);
     }
 
     @Override
     public void finalize(RotationContext rotationContext) {
-        LOGGER.info("Database root password finalize finished, nothing to do.");
+        LOGGER.info("Finalize database root password rotation, nothing to do.");
     }
 
     @Override
@@ -89,11 +87,8 @@ public class RootPasswordRotationExecutor implements RotationExecutor<RotationCo
     }
 
     private void updateRootPasswordOnProvider(RotationContext rotationContext, boolean rollback) {
-        String rotationState = getRotationState(rollback);
-        LOGGER.info("Starting {} of database root password: {}", rotationState, rotationContext.getResourceCrn());
         DBStack dbStack = dbStackService.getByCrn(rotationContext.getResourceCrn());
         DatabaseServerConfig databaseServerConfig = databaseServerConfigService.getByCrn(rotationContext.getResourceCrn());
-
         RotationSecret databaseServerRootPasswordRotation = secretService.getRotation(dbStack.getDatabaseServer().getRootPasswordSecret());
         RotationSecret databaseServerConfigRootPasswordRotation = secretService.getRotation(databaseServerConfig.getConnectionPasswordSecret());
         if (databaseServerRootPasswordRotation.isRotation() && databaseServerConfigRootPasswordRotation.isRotation()) {
@@ -105,14 +100,13 @@ public class RootPasswordRotationExecutor implements RotationExecutor<RotationCo
             DatabaseStack databaseStack = dbStackToDatabaseStackConverter.convert(dbStack);
             String password = rollback ? databaseServerRootPasswordRotation.getBackupSecret() : databaseServerRootPasswordRotation.getSecret();
             connector.resources().updateDatabaseRootPassword(ac, databaseStack, password);
+        } else if (rollback) {
+            LOGGER.warn("Root password is not in rotation state in Vault, rollback is not possible, return without errors.");
         } else {
-            throw new SecretRotationException("Root password is not in rotation state in Vault, thus " + rotationState + " is not possible.", getType());
+            String message = "Root password is not in rotation state in Vault, rotation is not possible.";
+            LOGGER.warn(message);
+            throw new SecretRotationException(message, getType());
         }
-        LOGGER.info("Database root password {} finished: {}", rotationState, rotationContext.getResourceCrn());
-    }
-
-    private String getRotationState(boolean rollback) {
-        return rollback ? ROLLBACK_STATE : ROTATION_STATE;
     }
 
     private static CloudContext getCloudContext(DBStack dbStack) {

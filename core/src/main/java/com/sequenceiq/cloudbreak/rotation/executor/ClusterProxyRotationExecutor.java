@@ -27,14 +27,14 @@ public class ClusterProxyRotationExecutor implements RotationExecutor<ClusterPro
 
     @Override
     public void rotate(ClusterProxyRotationContext rotationContext) {
-        LOGGER.info("Reregistring stack {} in cluster proxy for secret rotation.", rotationContext.getResourceCrn());
+        LOGGER.info("Reregistring stack in cluster proxy for secret rotation.");
         StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
         clusterProxyService.reRegisterCluster(stackDto.getId());
     }
 
     @Override
     public void rollback(ClusterProxyRotationContext rotationContext) {
-        LOGGER.info("Reregistring stack {} in cluster proxy for rollback of secret rotation.", rotationContext.getResourceCrn());
+        LOGGER.info("Reregistring stack in cluster proxy for rollback of secret rotation.");
         StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
         clusterProxyService.reRegisterCluster(stackDto.getId());
     }

@@ -32,29 +32,26 @@ public class RedbeamsPollerRotationExecutor implements RotationExecutor<PollerRo
 
     @Override
     public void rotate(PollerRotationContext rotationContext) {
-        LOGGER.info("Rotate redbeams secret started for {}", rotationContext.getResourceCrn());
+        LOGGER.info("Rotate redbeams secret: {}", rotationContext.getSecretType());
         StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
         externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(),
                 (RedbeamsSecretType) rotationContext.getSecretType(), ROTATE);
-        LOGGER.info("Rotate redbeams secret finished for {}", rotationContext.getResourceCrn());
     }
 
     @Override
     public void rollback(PollerRotationContext rotationContext) {
-        LOGGER.info("Rollback redbeams secret started for {}", rotationContext.getResourceCrn());
+        LOGGER.info("Rollback redbeams secret: {}", rotationContext.getSecretType());
         StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
         externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(),
                 (RedbeamsSecretType) rotationContext.getSecretType(), ROLLBACK);
-        LOGGER.info("Rollback redbeams secret finished for {}", rotationContext.getResourceCrn());
     }
 
     @Override
     public void finalize(PollerRotationContext rotationContext) {
-        LOGGER.info("Finalize redbeams secret started for {}", rotationContext.getResourceCrn());
+        LOGGER.info("Finalize redbeams secret: {}", rotationContext.getSecretType());
         StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
         externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(),
                 (RedbeamsSecretType) rotationContext.getSecretType(), FINALIZE);
-        LOGGER.info("Finalize redbeams secret finished for {}", rotationContext.getResourceCrn());
     }
 
     @Override
