@@ -134,7 +134,7 @@ class RootPasswordRotationExecutorTest {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.rotate(new RotationContext(RESOURCE_CRN)));
 
-        assertEquals("Root password is not in rotation state in Vault, thus rotation is not possible.", secretRotationException.getMessage());
+        assertEquals("Root password is not in rotation state in Vault, rotation is not possible.", secretRotationException.getMessage());
         assertEquals(RedbeamsSecretRotationStep.PROVIDER_DATABASE_ROOT_PASSWORD, secretRotationException.getFailedRotationStep());
         verify(dbStackService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(databaseServerConfigService, times(1)).getByCrn(eq(RESOURCE_CRN));
@@ -180,6 +180,32 @@ class RootPasswordRotationExecutorTest {
         verify(cloudPlatformConnectors, times(1)).get(any());
         verify(dbStackToDatabaseStackConverter, times(1)).convert(eq(dbStack));
         verify(resourceConnector, times(1)).updateDatabaseRootPassword(any(), any(), eq(ROOT_PASSWORD_BACKUP));
+    }
+
+    @Test
+    void rollbackShouldFinishedWithoutErrorWhenSecretsAreNotInRotationState() {
+        DBStack dbStack = new DBStack();
+        dbStack.setEnvironmentId(ENVIRONMENT_ID);
+        dbStack.setOwnerCrn(Crn.fromString("crn:cdp:iam:us-west-1:default:user:owner@cloudera.com"));
+        DatabaseServer databaseServer = mock(DatabaseServer.class);
+        dbStack.setDatabaseServer(databaseServer);
+        when(databaseServer.getRootPasswordSecret()).thenReturn(ROOT_PASSWORD);
+        when(dbStackService.getByCrn(RESOURCE_CRN)).thenReturn(dbStack);
+        DatabaseServerConfig databaseServerConfig = mock(DatabaseServerConfig.class);
+        when(databaseServerConfig.getConnectionPasswordSecret()).thenReturn(CONNECTION_PASSWORD);
+        when(databaseServerConfigService.getByCrn(RESOURCE_CRN)).thenReturn(databaseServerConfig);
+        when(secretService.getRotation(eq(ROOT_PASSWORD))).thenReturn(new RotationSecret(ROOT_PASSWORD, null));
+        when(secretService.getRotation(eq(CONNECTION_PASSWORD))).thenReturn(new RotationSecret(CONNECTION_PASSWORD, null));
+        underTest.rollback(new RotationContext(RESOURCE_CRN));
+
+        verify(dbStackService, times(1)).getByCrn(eq(RESOURCE_CRN));
+        verify(databaseServerConfigService, times(1)).getByCrn(eq(RESOURCE_CRN));
+        verify(secretService, times(1)).getRotation(eq(ROOT_PASSWORD));
+        verify(secretService, times(1)).getRotation(eq(CONNECTION_PASSWORD));
+        verify(credentialService, never()).getCredentialByEnvCrn(any());
+        verify(credentialToCloudCredentialConverter, never()).convert(any());
+        verify(cloudPlatformConnectors, never()).get(any());
+        verify(dbStackToDatabaseStackConverter, never()).convert(eq(dbStack));
     }
 
     @Test

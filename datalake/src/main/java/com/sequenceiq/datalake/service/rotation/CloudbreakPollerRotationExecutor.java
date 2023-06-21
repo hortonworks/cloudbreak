@@ -26,23 +26,20 @@ public class CloudbreakPollerRotationExecutor implements RotationExecutor<Poller
 
     @Override
     public void rotate(PollerRotationContext rotationContext) {
-        LOGGER.info("Rotate cloudbreak secret started for {}", rotationContext.getResourceCrn());
+        LOGGER.info("Rotate cloudbreak secret: {}", rotationContext.getSecretType());
         sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), (CloudbreakSecretType) rotationContext.getSecretType(), ROTATE);
-        LOGGER.info("Rotate cloudbreak secret finished for {}", rotationContext.getResourceCrn());
     }
 
     @Override
     public void rollback(PollerRotationContext rotationContext) {
-        LOGGER.info("Rollback cloudbreak secret started for {}", rotationContext.getResourceCrn());
+        LOGGER.info("Rollback cloudbreak secret: {}", rotationContext.getSecretType());
         sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), (CloudbreakSecretType) rotationContext.getSecretType(), ROLLBACK);
-        LOGGER.info("Rollback cloudbreak secret finished for {}", rotationContext.getResourceCrn());
     }
 
     @Override
     public void finalize(PollerRotationContext rotationContext) {
-        LOGGER.info("Finalize cloudbreak secret started for {}", rotationContext.getResourceCrn());
+        LOGGER.info("Finalize cloudbreak secret: {}", rotationContext.getSecretType());
         sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), (CloudbreakSecretType) rotationContext.getSecretType(), FINALIZE);
-        LOGGER.info("Finalize cloudbreak secret finished for {}", rotationContext.getResourceCrn());
     }
 
     @Override

@@ -13,6 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Assertions;
@@ -70,6 +71,7 @@ class SaltPillarRotationExecutorTest {
         when(stackDto.getCluster()).thenReturn(cluster);
         when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         Function saltPillarGenerator = mock(Function.class);
+        when(saltPillarGenerator.apply(any())).thenReturn(new HashMap<>());
         doThrow(new RuntimeException("error")).when(hostOrchestrator)
                 .saveCustomPillars(any(), any(), any());
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
@@ -88,6 +90,7 @@ class SaltPillarRotationExecutorTest {
         when(stackDto.getCluster()).thenReturn(cluster);
         when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         Function saltPillarGenerator = mock(Function.class);
+        when(saltPillarGenerator.apply(any())).thenReturn(new HashMap<>());
         underTest.executeRotate(new SaltPillarRotationContext(RESOURCE_CRN, saltPillarGenerator));
         verify(hostOrchestrator, times(1)).saveCustomPillars(any(), any(), any());
         verify(saltStateParamsService, times(1)).createStateParams(eq(stackDto), isNull(), eq(true), anyInt(), anyInt());
@@ -102,6 +105,7 @@ class SaltPillarRotationExecutorTest {
         when(stackDto.getCluster()).thenReturn(cluster);
         when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         Function saltPillarGenerator = mock(Function.class);
+        when(saltPillarGenerator.apply(any())).thenReturn(new HashMap<>());
         underTest.executeRollback(new SaltPillarRotationContext(RESOURCE_CRN, saltPillarGenerator));
         verify(hostOrchestrator, times(1)).saveCustomPillars(any(), any(), any());
         verify(saltStateParamsService, times(1)).createStateParams(eq(stackDto), isNull(), eq(true), anyInt(), anyInt());

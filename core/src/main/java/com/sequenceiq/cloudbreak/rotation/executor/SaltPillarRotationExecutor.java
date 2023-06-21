@@ -44,24 +44,23 @@ public class SaltPillarRotationExecutor implements RotationExecutor<SaltPillarRo
         updateSaltPillar(rotationContext, "rotation");
     }
 
-    private void updateSaltPillar(SaltPillarRotationContext rotationContext, String rotationState) throws CloudbreakOrchestratorFailedException {
-        LOGGER.debug("Salt pillar {} for {}", rotationState, rotationContext.getResourceCrn());
-        StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
-        Map<String, SaltPillarProperties> servicePillar = rotationContext.getServicePillarGenerator().apply(rotationContext.getResourceCrn());
-        hostOrchestrator.saveCustomPillars(new SaltConfig(servicePillar),
-                new ClusterDeletionBasedExitCriteriaModel(stackDto.getId(), stackDto.getCluster().getId()),
-                saltStateParamsService.createStateParams(stackDto, null, true, MAX_RETRY, MAX_RETRY_ON_ERROR));
-        LOGGER.debug("Salt pillar {} finished for {}", rotationState, rotationContext.getResourceCrn());
-    }
-
     @Override
     public void rollback(SaltPillarRotationContext rotationContext) throws Exception {
         updateSaltPillar(rotationContext, "rollback");
     }
 
+    private void updateSaltPillar(SaltPillarRotationContext rotationContext, String rotationState) throws CloudbreakOrchestratorFailedException {
+        StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
+        Map<String, SaltPillarProperties> servicePillar = rotationContext.getServicePillarGenerator().apply(rotationContext.getResourceCrn());
+        LOGGER.info("Salt pillar {}, keys: {}", rotationState, servicePillar.keySet());
+        hostOrchestrator.saveCustomPillars(new SaltConfig(servicePillar),
+                new ClusterDeletionBasedExitCriteriaModel(stackDto.getId(), stackDto.getCluster().getId()),
+                saltStateParamsService.createStateParams(stackDto, null, true, MAX_RETRY, MAX_RETRY_ON_ERROR));
+    }
+
     @Override
     public void finalize(SaltPillarRotationContext rotationContext) {
-        LOGGER.debug("Finalize salt pillar for {}", rotationContext.getResourceCrn());
+        LOGGER.info("Finalize salt pillar rotation, nothing to do.");
     }
 
     @Override
