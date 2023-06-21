@@ -19,6 +19,7 @@ oldusername="{{ rotationvalues['oldUser'] }}"
 newusername="{{ rotationvalues['newUser'] }}"
 dbname="{{ values['database'] }}"
 service="{{ service }}"
+oldpassword="{{ rotationvalues['oldPassword'] }}"
 newpassword="{{ rotationvalues['newPassword'] }}"
 
 if [[ "$rotationphase" == "rotation" ]];then
@@ -53,6 +54,14 @@ if [[ "$rotationphase" == "finalize" ]];then
         echo "REVOKE ALL PRIVILEGES ON DATABASE $dbname FROM $oldusername;" | psql -U postgres -d $dbname -v "ON_ERROR_STOP=1"
         echo "DROP USER IF EXISTS $oldusername;" | psql -U postgres -d $dbname -v "ON_ERROR_STOP=1"
     fi
+fi
+
+if [[ "$rotationphase" == "prevalidate" ]];then
+
+fi
+
+if [[ "$rotationphase" == "postvalidate" ]];then
+
 fi
 
 {% endif %}

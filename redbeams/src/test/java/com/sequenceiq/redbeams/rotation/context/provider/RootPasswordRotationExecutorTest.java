@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
@@ -81,28 +83,54 @@ class RootPasswordRotationExecutorTest {
     private RootPasswordRotationExecutor underTest;
 
     @Test
+    void preValidationShouldSucceed() throws Exception {
+        ResourceConnector resourceConnector = mockResourceConnector(mockDbStack());
+        when(resourceConnector.getDatabaseServerStatus(any(), any())).thenReturn(ExternalDatabaseStatus.STARTED);
+
+        underTest.executePreValidation(new RotationContext(RESOURCE_CRN));
+
+        verify(resourceConnector).getDatabaseServerStatus(any(), any());
+    }
+
+    @Test
+    void preValidationShouldFailIfDatabaseNotStarted() throws Exception {
+        ResourceConnector resourceConnector = mockResourceConnector(mockDbStack());
+        when(resourceConnector.getDatabaseServerStatus(any(), any())).thenReturn(ExternalDatabaseStatus.STOPPED);
+
+        assertThrows(SecretRotationException.class, () -> underTest.executePreValidation(new RotationContext(RESOURCE_CRN)));
+
+        verify(resourceConnector).getDatabaseServerStatus(any(), any());
+    }
+
+    @Test
+    void postValidationShouldSucceed() throws Exception {
+        ResourceConnector resourceConnector = mockResourceConnector(mockDbStack());
+        when(resourceConnector.getDatabaseServerStatus(any(), any())).thenReturn(ExternalDatabaseStatus.STARTED);
+
+        underTest.executePostValidation(new RotationContext(RESOURCE_CRN));
+
+        verify(resourceConnector).getDatabaseServerStatus(any(), any());
+    }
+
+    @Test
+    void postValidationShouldFailIfDatabaseNotStarted() throws Exception {
+        ResourceConnector resourceConnector = mockResourceConnector(mockDbStack());
+        when(resourceConnector.getDatabaseServerStatus(any(), any())).thenReturn(ExternalDatabaseStatus.STOPPED);
+
+        assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(new RotationContext(RESOURCE_CRN)));
+
+        verify(resourceConnector).getDatabaseServerStatus(any(), any());
+    }
+
+    @Test
     void rotateShouldSucceed() {
-        DBStack dbStack = new DBStack();
-        dbStack.setEnvironmentId(ENVIRONMENT_ID);
-        dbStack.setOwnerCrn(Crn.fromString("crn:cdp:iam:us-west-1:default:user:owner@cloudera.com"));
-        DatabaseServer databaseServer = mock(DatabaseServer.class);
-        dbStack.setDatabaseServer(databaseServer);
-        when(databaseServer.getRootPasswordSecret()).thenReturn(ROOT_PASSWORD);
-        when(dbStackService.getByCrn(RESOURCE_CRN)).thenReturn(dbStack);
+        DBStack dbStack = mockDbStack();
         DatabaseServerConfig databaseServerConfig = mock(DatabaseServerConfig.class);
         when(databaseServerConfig.getConnectionPasswordSecret()).thenReturn(CONNECTION_PASSWORD);
         when(databaseServerConfigService.getByCrn(RESOURCE_CRN)).thenReturn(databaseServerConfig);
         when(secretService.getRotation(eq(ROOT_PASSWORD))).thenReturn(new RotationSecret(ROOT_PASSWORD, ROOT_PASSWORD_BACKUP));
         when(secretService.getRotation(eq(CONNECTION_PASSWORD))).thenReturn(new RotationSecret(CONNECTION_PASSWORD, CONNECTION_PASSWORD_BACKUP));
-        when(credentialService.getCredentialByEnvCrn(any())).thenReturn(new Credential("credCrn", "name", "attributes", "accountId"));
-        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
-        CloudConnector cloudConnector = mock(CloudConnector.class);
-        when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
-        Authenticator authenticator = mock(Authenticator.class);
-        when(cloudConnector.authentication()).thenReturn(authenticator);
-        when(dbStackToDatabaseStackConverter.convert(eq(dbStack))).thenReturn(new DatabaseStack(null, null, new HashMap<>(), null));
-        ResourceConnector resourceConnector = mock(ResourceConnector.class);
-        when(cloudConnector.resources()).thenReturn(resourceConnector);
+        ResourceConnector resourceConnector = mockResourceConnector(dbStack);
         underTest.rotate(new RotationContext(RESOURCE_CRN));
 
         verify(dbStackService, times(1)).getByCrn(eq(RESOURCE_CRN));
@@ -118,13 +146,7 @@ class RootPasswordRotationExecutorTest {
 
     @Test
     void rotateShouldFailWhenSecretsAreNotInRotationState() {
-        DBStack dbStack = new DBStack();
-        dbStack.setEnvironmentId(ENVIRONMENT_ID);
-        dbStack.setOwnerCrn(Crn.fromString("crn:cdp:iam:us-west-1:default:user:owner@cloudera.com"));
-        DatabaseServer databaseServer = mock(DatabaseServer.class);
-        dbStack.setDatabaseServer(databaseServer);
-        when(databaseServer.getRootPasswordSecret()).thenReturn(ROOT_PASSWORD);
-        when(dbStackService.getByCrn(RESOURCE_CRN)).thenReturn(dbStack);
+        DBStack dbStack = mockDbStack();
         DatabaseServerConfig databaseServerConfig = mock(DatabaseServerConfig.class);
         when(databaseServerConfig.getConnectionPasswordSecret()).thenReturn(CONNECTION_PASSWORD);
         when(databaseServerConfigService.getByCrn(RESOURCE_CRN)).thenReturn(databaseServerConfig);
@@ -148,27 +170,13 @@ class RootPasswordRotationExecutorTest {
 
     @Test
     void rollbackShouldSucceed() {
-        DBStack dbStack = new DBStack();
-        dbStack.setEnvironmentId(ENVIRONMENT_ID);
-        dbStack.setOwnerCrn(Crn.fromString("crn:cdp:iam:us-west-1:default:user:owner@cloudera.com"));
-        DatabaseServer databaseServer = mock(DatabaseServer.class);
-        dbStack.setDatabaseServer(databaseServer);
-        when(databaseServer.getRootPasswordSecret()).thenReturn(ROOT_PASSWORD);
-        when(dbStackService.getByCrn(RESOURCE_CRN)).thenReturn(dbStack);
+        DBStack dbStack = mockDbStack();
         DatabaseServerConfig databaseServerConfig = mock(DatabaseServerConfig.class);
         when(databaseServerConfig.getConnectionPasswordSecret()).thenReturn(CONNECTION_PASSWORD);
         when(databaseServerConfigService.getByCrn(RESOURCE_CRN)).thenReturn(databaseServerConfig);
         when(secretService.getRotation(eq(ROOT_PASSWORD))).thenReturn(new RotationSecret(ROOT_PASSWORD, ROOT_PASSWORD_BACKUP));
         when(secretService.getRotation(eq(CONNECTION_PASSWORD))).thenReturn(new RotationSecret(CONNECTION_PASSWORD, CONNECTION_PASSWORD_BACKUP));
-        when(credentialService.getCredentialByEnvCrn(any())).thenReturn(new Credential("credCrn", "name", "attributes", "accountId"));
-        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
-        CloudConnector cloudConnector = mock(CloudConnector.class);
-        when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
-        Authenticator authenticator = mock(Authenticator.class);
-        when(cloudConnector.authentication()).thenReturn(authenticator);
-        when(dbStackToDatabaseStackConverter.convert(eq(dbStack))).thenReturn(new DatabaseStack(null, null, new HashMap<>(), null));
-        ResourceConnector resourceConnector = mock(ResourceConnector.class);
-        when(cloudConnector.resources()).thenReturn(resourceConnector);
+        ResourceConnector resourceConnector = mockResourceConnector(dbStack);
         underTest.rollback(new RotationContext(RESOURCE_CRN));
 
         verify(dbStackService, times(1)).getByCrn(eq(RESOURCE_CRN));
@@ -218,5 +226,29 @@ class RootPasswordRotationExecutorTest {
         verify(credentialToCloudCredentialConverter, never()).convert(any());
         verify(cloudPlatformConnectors, never()).get(any());
         verify(dbStackToDatabaseStackConverter, never()).convert(any());
+    }
+
+    private ResourceConnector mockResourceConnector(DBStack dbStack) {
+        when(credentialService.getCredentialByEnvCrn(any())).thenReturn(new Credential("credCrn", "name", "attributes", "accountId"));
+        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
+        CloudConnector cloudConnector = mock(CloudConnector.class);
+        when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
+        Authenticator authenticator = mock(Authenticator.class);
+        when(cloudConnector.authentication()).thenReturn(authenticator);
+        when(dbStackToDatabaseStackConverter.convert(eq(dbStack))).thenReturn(new DatabaseStack(null, null, new HashMap<>(), null));
+        ResourceConnector resourceConnector = mock(ResourceConnector.class);
+        when(cloudConnector.resources()).thenReturn(resourceConnector);
+        return resourceConnector;
+    }
+
+    private DBStack mockDbStack() {
+        DBStack dbStack = new DBStack();
+        dbStack.setEnvironmentId(ENVIRONMENT_ID);
+        dbStack.setOwnerCrn(Crn.fromString("crn:cdp:iam:us-west-1:default:user:owner@cloudera.com"));
+        DatabaseServer databaseServer = mock(DatabaseServer.class);
+        dbStack.setDatabaseServer(databaseServer);
+        lenient().when(databaseServer.getRootPasswordSecret()).thenReturn(ROOT_PASSWORD);
+        when(dbStackService.getByCrn(RESOURCE_CRN)).thenReturn(dbStack);
+        return dbStack;
     }
 }

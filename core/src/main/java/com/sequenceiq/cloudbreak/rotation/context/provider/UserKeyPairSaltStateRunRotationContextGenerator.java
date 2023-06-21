@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.rotation.context;
+package com.sequenceiq.cloudbreak.rotation.context.provider;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.rotation.context.SaltRunOrchestratorStateRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.SaltRunOrchestratorStateRotationContext.SaltRunOrchestratorStateRotationContextBuilder;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
@@ -32,7 +33,7 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
-public class SaltRunOrchestratorStateRotationContextGenerator {
+public class UserKeyPairSaltStateRunRotationContextGenerator {
 
     private static final int MAX_RETRY = 10;
 
@@ -66,9 +67,8 @@ public class SaltRunOrchestratorStateRotationContextGenerator {
                     .withMaxRetryOnError(MAX_RETRY)
                     .withStates(List.of(REPLACE_SSH_PUBLICKEY_STATE))
                     .withRotateParams(getUserKeyPairRotationParams(environment.getAuthentication().getLoginUserName(), publicKeys.getRight()))
-                    .withRollbackStates(Optional.of(List.of(REPLACE_SSH_PUBLICKEY_STATE)))
-                    .withRollbackParams(Optional.of(getUserKeyPairRotationParams(stack.getStackAuthentication().getLoginUserName(), publicKeys.getLeft())))
-                    .withCleanupStates(Optional.empty());
+                    .withRollbackStates(List.of(REPLACE_SSH_PUBLICKEY_STATE))
+                    .withRollbackParams(getUserKeyPairRotationParams(stack.getStackAuthentication().getLoginUserName(), publicKeys.getLeft()));
         }
         return saltRunOrchestratorStateRotationContextBuilder.build();
     }

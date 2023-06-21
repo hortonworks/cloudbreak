@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.secret.service.rotation;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -28,6 +29,54 @@ public class VaultRotationExecutorTest {
 
     @InjectMocks
     private VaultRotationExecutor underTest;
+
+    @Test
+    public void testPreValidation() {
+        when(secretService.isSecret(any())).thenReturn(Boolean.TRUE);
+
+        VaultRotationContext rotationContext = VaultRotationContext.builder()
+                .withVaultPathSecretMap(Map.of("secretPath", "secret"))
+                .build();
+        underTest.executePreValidation(rotationContext);
+
+        verify(secretService).isSecret(any());
+    }
+
+    @Test
+    public void testPreValidationIfSecretInvalid() {
+        when(secretService.isSecret(any())).thenReturn(Boolean.FALSE);
+
+        VaultRotationContext rotationContext = VaultRotationContext.builder()
+                .withVaultPathSecretMap(Map.of("secretPath", "secret"))
+                .build();
+        assertThrows(SecretRotationException.class, () -> underTest.executePreValidation(rotationContext));
+
+        verify(secretService).isSecret(any());
+    }
+
+    @Test
+    public void testPostValidation() {
+        when(secretService.getRotation(anyString())).thenReturn(new RotationSecret("new", "old"));
+
+        VaultRotationContext rotationContext = VaultRotationContext.builder()
+                .withVaultPathSecretMap(Map.of("secretPath", "secret"))
+                .build();
+        underTest.executePostValidation(rotationContext);
+
+        verify(secretService).getRotation(any());
+    }
+
+    @Test
+    public void testPostValidationIfRotationCorrupted() {
+        when(secretService.getRotation(anyString())).thenReturn(new RotationSecret("new", null));
+
+        VaultRotationContext rotationContext = VaultRotationContext.builder()
+                .withVaultPathSecretMap(Map.of("secretPath", "secret"))
+                .build();
+        assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(rotationContext));
+
+        verify(secretService).getRotation(any());
+    }
 
     @Test
     public void testVaultRotation() throws Exception {

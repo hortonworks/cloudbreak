@@ -255,7 +255,7 @@ public class DatabaseServerV4ControllerTest {
 
     public void testRegister() {
         when(databaseServerV4RequestToDatabaseServerConfigConverter.convert(request)).thenReturn(server);
-        when(service.create(server, DatabaseServerV4Controller.DEFAULT_WORKSPACE, false)).thenReturn(server);
+        when(service.create(server, DatabaseServerV4Controller.DEFAULT_WORKSPACE)).thenReturn(server);
         when(databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server)).thenReturn(serverResponse);
 
         DatabaseServerV4Response response = underTest.register(request);

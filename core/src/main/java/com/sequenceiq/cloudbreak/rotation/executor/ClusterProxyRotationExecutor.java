@@ -41,6 +41,16 @@ public class ClusterProxyRotationExecutor implements RotationExecutor<ClusterPro
 
     @Override
     public void finalize(ClusterProxyRotationContext rotationContext) {
+    }
+
+    @Override
+    public void preValidate(ClusterProxyRotationContext rotationContext) throws Exception {
+        // if CP reregistration needed, then it means there is some communication with some component (CM, IPA, etc)
+        // prevalidation of the given component should validate the CP connectivity itself too, thus we can skip this
+    }
+
+    @Override
+    public void postValidate(ClusterProxyRotationContext rotationContext) throws Exception {
 
     }
 

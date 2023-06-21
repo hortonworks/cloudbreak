@@ -17,6 +17,8 @@ public interface ClusterSecurityService {
 
     void deleteUser(String userName, String clientUser, String clientPassword) throws CloudbreakException;
 
+    void checkUser(String userName, String clientUser, String clientPassword) throws Exception;
+
     void replaceUserNamePassword(String newUserName, String newPassword) throws CloudbreakException;
 
     void updateUserNamePassword(String newPassword) throws CloudbreakException;

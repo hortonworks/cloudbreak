@@ -151,7 +151,7 @@ public class RedbeamsCreationService {
         dbServerConfig.setResourceCrn(Crn.safeFromString(dbStack.getResourceCrn()));
         dbServerConfig.setClusterCrn(clusterCrn);
 
-        databaseServerConfigService.create(dbServerConfig, DEFAULT_WORKSPACE, false);
+        databaseServerConfigService.create(dbServerConfig, DEFAULT_WORKSPACE);
     }
 
 }

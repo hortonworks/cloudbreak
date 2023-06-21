@@ -7,9 +7,10 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,41 @@ class SaltRunOrchestratorStateRotationExecutorTest {
 
     @Captor
     private ArgumentCaptor<OrchestratorStateParams> orchestratorStateParamsArgumentCaptor;
+
+    @Test
+    public void testPreValidation() throws CloudbreakOrchestratorFailedException {
+        doNothing().when(hostOrchestrator).ping(any(), any());
+        doNothing().when(hostOrchestrator).runOrchestratorState(any());
+
+        underTest.executePreValidation(createContext(List.of("state"), Optional.empty(), Optional.empty()));
+
+        verify(hostOrchestrator).ping(any(), any());
+        verify(hostOrchestrator).runOrchestratorState(orchestratorStateParamsArgumentCaptor.capture());
+        OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsArgumentCaptor.getValue();
+        assertEquals("preValidate", orchestratorStateParams.getState());
+    }
+
+    @Test
+    public void testPreValidationIfPingFails() throws CloudbreakOrchestratorFailedException {
+        doThrow(new CloudbreakOrchestratorFailedException("pingpong")).when(hostOrchestrator).ping(any(), any());
+
+        assertThrows(SecretRotationException.class, () ->
+                underTest.executePreValidation(createContext(List.of("state"), Optional.empty(), Optional.empty())));
+
+        verify(hostOrchestrator).ping(any(), any());
+        verifyNoMoreInteractions(hostOrchestrator);
+    }
+
+    @Test
+    public void testPostValidation() throws CloudbreakOrchestratorFailedException {
+        doNothing().when(hostOrchestrator).runOrchestratorState(any());
+
+        underTest.executePostValidation(createContext(List.of("state"), Optional.empty(), Optional.empty()));
+
+        verify(hostOrchestrator).runOrchestratorState(orchestratorStateParamsArgumentCaptor.capture());
+        OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsArgumentCaptor.getValue();
+        assertEquals("postValidate", orchestratorStateParams.getState());
+    }
 
     @Test
     public void testRotation() throws Exception {
@@ -117,15 +153,13 @@ class SaltRunOrchestratorStateRotationExecutorTest {
     private SaltRunOrchestratorStateRotationContext createContext(List<String> states, Optional<List<String>> rollbackStates,
             Optional<List<String>> finalizeStates) {
         SaltRunOrchestratorStateRotationContextBuilder saltStateApplyRotationContextBuilder = new SaltRunOrchestratorStateRotationContextBuilder()
-                .withStates(states);
-        if (rollbackStates.isPresent()) {
-            saltStateApplyRotationContextBuilder.withRollbackStates(rollbackStates)
-                    .withRollbackParams(Optional.of(new HashMap<>()));
-        }
-        if (finalizeStates.isPresent()) {
-            saltStateApplyRotationContextBuilder.withCleanupStates(finalizeStates)
-                    .withCleanupParams(Optional.of(new HashMap<>()));
-        }
+                .withStates(states).withRotateParams(Map.of());
+        rollbackStates.ifPresent(strings -> saltStateApplyRotationContextBuilder.withRollbackStates(strings)
+                .withRollbackParams(Map.of()).withRollbackParams(Map.of()));
+        finalizeStates.ifPresent(strings -> saltStateApplyRotationContextBuilder.withCleanupStates(strings)
+                .withCleanupParams(Map.of()).withCleanupParams(Map.of()));
+        saltStateApplyRotationContextBuilder.withPreValidateStates(List.of("preValidate")).withPreValidateParams(Map.of());
+        saltStateApplyRotationContextBuilder.withPostValidateStates(List.of("postValidate")).withPostValidateParams(Map.of());
         return saltStateApplyRotationContextBuilder.build();
     }
 

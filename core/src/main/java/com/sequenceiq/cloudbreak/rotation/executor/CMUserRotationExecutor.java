@@ -69,14 +69,38 @@ public class CMUserRotationExecutor implements RotationExecutor<CMUserRotationCo
     public void finalize(CMUserRotationContext rotationContext) throws Exception {
         LOGGER.info("Finalizing rotation of CM user by deleting the old user");
         RotationSecret userRotationSecret = secretService.getRotation(rotationContext.getUserSecret());
-        RotationSecret passwordRotationSecret = secretService.getRotation(rotationContext.getPasswordSecret());
-        if (userRotationSecret.isRotation() && passwordRotationSecret.isRotation()) {
-            LOGGER.info("Before old user deletion, checking if API call is possible with new user!");
-            getClusterSecurityService(rotationContext).testUser(userRotationSecret.getSecret(), passwordRotationSecret.getSecret());
+        if (userRotationSecret.isRotation()) {
             deleteUser(userRotationSecret.getBackupSecret(), rotationContext);
         } else {
             throw new SecretRotationException("User or password is not in rotation state in Vault, thus we cannot finalize it.", getType());
         }
+    }
+
+    @Override
+    public void preValidate(CMUserRotationContext rotationContext) throws Exception {
+        String user = secretService.get(rotationContext.getUserSecret());
+        checkUser(rotationContext, user);
+    }
+
+    @Override
+    public void postValidate(CMUserRotationContext rotationContext) throws Exception {
+        RotationSecret userRotationSecret = secretService.getRotation(rotationContext.getUserSecret());
+        RotationSecret passwordRotationSecret = secretService.getRotation(rotationContext.getPasswordSecret());
+        if (userRotationSecret.isRotation() && passwordRotationSecret.isRotation()) {
+            LOGGER.info("Checking if new user is present in CM!");
+            checkUser(rotationContext, userRotationSecret.getSecret());
+            LOGGER.info("Checking if CM API call is possible with new user!");
+            getClusterSecurityService(rotationContext).testUser(userRotationSecret.getSecret(), passwordRotationSecret.getSecret());
+        } else {
+            throw new SecretRotationException("User and password is not in rotation state in Vault, thus rotation of CM user have been failed.", getType());
+        }
+    }
+
+    private void checkUser(CMUserRotationContext rotationContext, String user) throws Exception {
+        ClusterSecurityService clusterSecurityService = getClusterSecurityService(rotationContext);
+        String clientUser = secretService.get(rotationContext.getClientUserSecret());
+        String clientPassword = secretService.get(rotationContext.getClientPasswordSecret());
+        clusterSecurityService.checkUser(user, clientUser, clientPassword);
     }
 
     private void deleteUser(String user, CMUserRotationContext rotationContext) {

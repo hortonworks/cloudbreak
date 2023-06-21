@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExit
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
@@ -61,6 +62,19 @@ public class SaltPillarRotationExecutor implements RotationExecutor<SaltPillarRo
     @Override
     public void finalize(SaltPillarRotationContext rotationContext) {
         LOGGER.info("Finalize salt pillar rotation, nothing to do.");
+    }
+
+    @Override
+    public void preValidate(SaltPillarRotationContext rotationContext) throws Exception {
+        StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
+        OrchestratorStateParams stateParams =
+                saltStateParamsService.createStateParams(stackDto, null, true, MAX_RETRY, MAX_RETRY_ON_ERROR);
+        hostOrchestrator.ping(stateParams.getTargetHostNames(), stateParams.getPrimaryGatewayConfig());
+    }
+
+    @Override
+    public void postValidate(SaltPillarRotationContext rotationContext) throws Exception {
+
     }
 
     @Override

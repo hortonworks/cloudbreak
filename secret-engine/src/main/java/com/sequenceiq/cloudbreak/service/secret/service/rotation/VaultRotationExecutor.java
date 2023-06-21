@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
+import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
@@ -55,6 +56,27 @@ public class VaultRotationExecutor implements RotationExecutor<VaultRotationCont
             if (rotationSecret.isRotation()) {
                 LOGGER.info("Removing old secret from vault path {}", vaultPath);
                 secretService.update(vaultPath, rotationSecret.getSecret());
+            }
+        }
+    }
+
+    @Override
+    public void preValidate(VaultRotationContext rotationContext) throws Exception {
+        for (Map.Entry<String, String> entry : rotationContext.getVaultPathSecretMap().entrySet()) {
+            String vaultPath = entry.getKey();
+            if (!secretService.isSecret(vaultPath)) {
+                throw new SecretRotationException(String.format("%s is not a vault path, thus rotation is not possible!", vaultPath), getType());
+            }
+        }
+    }
+
+    @Override
+    public void postValidate(VaultRotationContext rotationContext) throws Exception {
+        for (Map.Entry<String, String> entry : rotationContext.getVaultPathSecretMap().entrySet()) {
+            String vaultPath = entry.getKey();
+            if (!secretService.getRotation(vaultPath).isRotation()) {
+                String message = String.format("%s vault path is not in rotation state, thus something went wrong during rotation!", vaultPath);
+                throw new SecretRotationException(message, getType());
             }
         }
     }

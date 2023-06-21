@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
+import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.flow.rotation.TestRotationContext;
 import com.sequenceiq.flow.rotation.TestSecretRotationStep;
@@ -79,6 +81,16 @@ public class SecretRotationServiceTest {
     }
 
     @Test
+    public void testPreValidate() {
+        doNothing().when(executor).executePreValidation(any());
+
+        underTest.executePreValidation(TestSecretType.TEST, "resource", null);
+
+        verify(contextProvider).getContexts(anyString());
+        verify(executor, times(1)).executePreValidation(any());
+    }
+
+    @Test
     public void testFinalize() {
         doNothing().when(executor).executeFinalize(any());
 
@@ -86,6 +98,18 @@ public class SecretRotationServiceTest {
 
         verify(contextProvider).getContexts(anyString());
         verify(executor, times(1)).executeFinalize(any());
+    }
+
+    @Test
+    public void testFinalizeIfPostValidateFails() {
+        doThrow(new SecretRotationException("anything", null)).when(executor).executePostValidation(any());
+
+        assertThrows(SecretRotationException.class, () ->
+                underTest.finalizeRotation(TestSecretType.TEST, "resource", null));
+
+        verify(contextProvider).getContexts(anyString());
+        verify(executor, times(0)).executeFinalize(any());
+        verify(executor, times(1)).executePostValidation(any());
     }
 
     @Test

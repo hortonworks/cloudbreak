@@ -20,48 +20,31 @@ public class SaltRunOrchestratorStateRotationContext extends SaltStateApplyRotat
 
     private final Optional<Map<String, Object>> cleanupParams;
 
+    private final Optional<Map<String, Object>> prevalidateParams;
+
+    private final Optional<Map<String, Object>> postValidateParams;
+
     private final Boolean stateRunNeeded;
 
     SaltRunOrchestratorStateRotationContext(String resourceCrn, GatewayConfig gatewayConfig, Set<String> targets,
-            List<String> states, Map<String, Object> rotateParams, Optional<List<String>> rollBackStates, Optional<Map<String, Object>> rollbackParams,
+            List<String> states, Map<String, Object> rotateParams,
+            Optional<List<String>> rollBackStates, Optional<Map<String, Object>> rollbackParams,
             Optional<List<String>> cleanupStates, Optional<Map<String, Object>> cleanupParams,
-            ExitCriteriaModel exitCriteriaModel, Optional<Integer> maxRetry, Optional<Integer> maxRetryOnError,
-            Boolean stateRunNeeded) {
+            Optional<List<String>> preValidateStates,  Optional<Map<String, Object>> preValidateParams,
+            Optional<List<String>> postValidateStates,  Optional<Map<String, Object>> postValidateParams,
+            ExitCriteriaModel exitCriteriaModel, Optional<Integer> maxRetry, Optional<Integer> maxRetryOnError, Boolean stateRunNeeded) {
         super(resourceCrn, gatewayConfig, targets, states,
-                rollBackStates, cleanupStates, exitCriteriaModel,
+                rollBackStates, cleanupStates, preValidateStates, postValidateStates, exitCriteriaModel,
                 maxRetry, maxRetryOnError);
         this.rotateParams = rotateParams;
         this.rollbackParams = rollbackParams;
         this.cleanupParams = cleanupParams;
+        this.prevalidateParams = preValidateParams;
+        this.postValidateParams = postValidateParams;
         this.stateRunNeeded = stateRunNeeded;
     }
 
-    public OrchestratorStateParams getRotateOrchestratorStateParams() {
-        OrchestratorStateParams stateParams = getBaseParams();
-        stateParams.setState(getStates().get(0));
-        stateParams.setStateParams(rotateParams);
-        return stateParams;
-    }
-
-    public OrchestratorStateParams getRollbackOrchestratorStateParams() {
-        OrchestratorStateParams stateParams = getBaseParams();
-        stateParams.setState(getStateFromOptionalStates(getRollBackStates()));
-        stateParams.setStateParams(rollbackParams.orElse(null));
-        return stateParams;
-    }
-
-    public OrchestratorStateParams getCleanupOrchestratorStateParams() {
-        OrchestratorStateParams stateParams = getBaseParams();
-        stateParams.setState(getStateFromOptionalStates(getCleanupStates()));
-        stateParams.setStateParams(cleanupParams.orElse(null));
-        return stateParams;
-    }
-
-    private String getStateFromOptionalStates(Optional<List<String>> states) {
-        return states.map(l -> l.get(0)).orElse(null);
-    }
-
-    private OrchestratorStateParams getBaseParams() {
+    public OrchestratorStateParams getBaseParams() {
         OrchestratorStateParams stateParams = new OrchestratorStateParams();
         stateParams.setPrimaryGatewayConfig(getGatewayConfig());
         stateParams.setTargetHostNames(getTargets());
@@ -81,8 +64,24 @@ public class SaltRunOrchestratorStateRotationContext extends SaltStateApplyRotat
         return rollbackParams;
     }
 
+    public Optional<Map<String, Object>> getCleanupParams() {
+        return cleanupParams;
+    }
+
+    public Optional<Map<String, Object>> getPrevalidateParams() {
+        return prevalidateParams;
+    }
+
+    public Optional<Map<String, Object>> getPostValidateParams() {
+        return postValidateParams;
+    }
+
     public Boolean stateRunNeeded() {
         return stateRunNeeded;
+    }
+
+    public String getStateFromOptionalStates(Optional<List<String>> states) {
+        return states.map(l -> l.get(0)).orElse(null);
     }
 
     public boolean rollbackStateExists() {
@@ -93,6 +92,14 @@ public class SaltRunOrchestratorStateRotationContext extends SaltStateApplyRotat
         return getStateFromOptionalStates(getCleanupStates()) != null && cleanupParams.isPresent();
     }
 
+    public boolean preValidateStateExists() {
+        return getStateFromOptionalStates(getPreValidateStates()) != null && prevalidateParams.isPresent();
+    }
+
+    public boolean postValidateStateExists() {
+        return getStateFromOptionalStates(getPostValidateStates()) != null && postValidateParams.isPresent();
+    }
+
     public static class SaltRunOrchestratorStateRotationContextBuilder {
 
         private Map<String, Object> rotateParams;
@@ -100,6 +107,10 @@ public class SaltRunOrchestratorStateRotationContext extends SaltStateApplyRotat
         private Optional<Map<String, Object>> rollbackParams = Optional.empty();
 
         private Optional<Map<String, Object>> cleanupParams = Optional.empty();
+
+        private Optional<Map<String, Object>> preValidateParams = Optional.empty();
+
+        private Optional<Map<String, Object>> postValidateParams = Optional.empty();
 
         private String resourceCrn;
 
@@ -112,6 +123,10 @@ public class SaltRunOrchestratorStateRotationContext extends SaltStateApplyRotat
         private Optional<List<String>> rollBackStates = Optional.empty();
 
         private Optional<List<String>> cleanupStates = Optional.empty();
+
+        private Optional<List<String>> preValidateStates = Optional.empty();
+
+        private Optional<List<String>> postValidateStates = Optional.empty();
 
         private ExitCriteriaModel exitCriteriaModel;
 
@@ -141,13 +156,23 @@ public class SaltRunOrchestratorStateRotationContext extends SaltStateApplyRotat
             return this;
         }
 
-        public SaltRunOrchestratorStateRotationContextBuilder withRollbackStates(Optional<List<String>> rollBackStates) {
-            this.rollBackStates = rollBackStates;
+        public SaltRunOrchestratorStateRotationContextBuilder withRollbackStates(List<String> rollBackStates) {
+            this.rollBackStates = Optional.of(rollBackStates);
             return this;
         }
 
-        public SaltRunOrchestratorStateRotationContextBuilder withCleanupStates(Optional<List<String>> cleanupStates) {
-            this.cleanupStates = cleanupStates;
+        public SaltRunOrchestratorStateRotationContextBuilder withCleanupStates(List<String> cleanupStates) {
+            this.cleanupStates = Optional.of(cleanupStates);
+            return this;
+        }
+
+        public SaltRunOrchestratorStateRotationContextBuilder withPreValidateStates(List<String> preValidateStates) {
+            this.preValidateStates = Optional.of(preValidateStates);
+            return this;
+        }
+
+        public SaltRunOrchestratorStateRotationContextBuilder withPostValidateStates(List<String> postValidateStates) {
+            this.postValidateStates = Optional.of(postValidateStates);
             return this;
         }
 
@@ -161,13 +186,23 @@ public class SaltRunOrchestratorStateRotationContext extends SaltStateApplyRotat
             return this;
         }
 
-        public SaltRunOrchestratorStateRotationContextBuilder withRollbackParams(Optional<Map<String, Object>> rollBackParams) {
-            this.rollbackParams = rollBackParams;
+        public SaltRunOrchestratorStateRotationContextBuilder withRollbackParams(Map<String, Object> rollBackParams) {
+            this.rollbackParams = Optional.of(rollBackParams);
             return this;
         }
 
-        public SaltRunOrchestratorStateRotationContextBuilder withCleanupParams(Optional<Map<String, Object>> cleanupParams) {
-            this.cleanupParams = cleanupParams;
+        public SaltRunOrchestratorStateRotationContextBuilder withCleanupParams(Map<String, Object> cleanupParams) {
+            this.cleanupParams = Optional.of(cleanupParams);
+            return this;
+        }
+
+        public SaltRunOrchestratorStateRotationContextBuilder withPreValidateParams(Map<String, Object> preValidateParams) {
+            this.preValidateParams = Optional.of(preValidateParams);
+            return this;
+        }
+
+        public SaltRunOrchestratorStateRotationContextBuilder withPostValidateParams(Map<String, Object> postValidateParams) {
+            this.postValidateParams = Optional.of(postValidateParams);
             return this;
         }
 
@@ -188,8 +223,8 @@ public class SaltRunOrchestratorStateRotationContext extends SaltStateApplyRotat
 
         public SaltRunOrchestratorStateRotationContext build() {
             return new SaltRunOrchestratorStateRotationContext(resourceCrn, gatewayConfig, targets,
-                    states, rotateParams, rollBackStates, rollbackParams, cleanupStates, cleanupParams,
-                    exitCriteriaModel, maxRetry, maxRetryOnError, stateRunNeeded);
+                    states, rotateParams, rollBackStates, rollbackParams, cleanupStates, cleanupParams, preValidateStates, preValidateParams,
+                    postValidateStates, postValidateParams, exitCriteriaModel, maxRetry, maxRetryOnError, stateRunNeeded);
         }
     }
 }

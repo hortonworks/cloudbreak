@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.context.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.CustomJobRotationContext.CustomJobRotationContextBuilder;
-import com.sequenceiq.cloudbreak.rotation.context.SaltRunOrchestratorStateRotationContextGenerator;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
@@ -47,7 +46,7 @@ public class UserKeyPairRotationContextProvider implements RotationContextProvid
     private StackAuthenticationRepository stackAuthenticationRepository;
 
     @Inject
-    private SaltRunOrchestratorStateRotationContextGenerator saltRunOrchestratorStateRotationContextGenerator;
+    private UserKeyPairSaltStateRunRotationContextGenerator userKeyPairSaltStateRunRotationContextGenerator;
 
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceId) {
@@ -60,7 +59,7 @@ public class UserKeyPairRotationContextProvider implements RotationContextProvid
         boolean changedKeyPair = customerChangedTheKeyPair(stack.getStackAuthentication(), environment.getAuthentication());
 
         result.put(CloudbreakSecretRotationStep.SALT_STATE_RUN,
-                saltRunOrchestratorStateRotationContextGenerator.generate(changedKeyPair, stack.getResourceCrn(), stack, environment));
+                userKeyPairSaltStateRunRotationContextGenerator.generate(changedKeyPair, stack.getResourceCrn(), stack, environment));
         result.put(CommonSecretRotationStep.CUSTOM_JOB, getCustomJobRotationContext(changedKeyPair, stack.getResourceCrn(), stack, environment));
         return result;
     }

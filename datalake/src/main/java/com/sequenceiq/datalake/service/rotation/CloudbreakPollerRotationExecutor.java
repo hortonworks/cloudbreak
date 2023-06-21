@@ -43,6 +43,16 @@ public class CloudbreakPollerRotationExecutor implements RotationExecutor<Poller
     }
 
     @Override
+    public void preValidate(PollerRotationContext rotationContext) throws Exception {
+
+    }
+
+    @Override
+    public void postValidate(PollerRotationContext rotationContext) throws Exception {
+
+    }
+
+    @Override
     public SecretRotationStep getType() {
         return CLOUDBREAK_ROTATE_POLLING;
     }

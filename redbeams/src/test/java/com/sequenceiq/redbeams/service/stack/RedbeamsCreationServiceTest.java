@@ -130,7 +130,7 @@ class RedbeamsCreationServiceTest {
         assertThat(dbStack.getTemplate()).isEqualTo(TEMPLATE);
 
         ArgumentCaptor<DatabaseServerConfig> databaseServerConfigCaptor = ArgumentCaptor.forClass(DatabaseServerConfig.class);
-        verify(databaseServerConfigService).create(databaseServerConfigCaptor.capture(), eq(RedbeamsCreationService.DEFAULT_WORKSPACE), eq(false));
+        verify(databaseServerConfigService).create(databaseServerConfigCaptor.capture(), eq(RedbeamsCreationService.DEFAULT_WORKSPACE));
         DatabaseServerConfig databaseServerConfig = databaseServerConfigCaptor.getValue();
         assertThat(databaseServerConfig.getResourceStatus()).isEqualTo(ResourceStatus.SERVICE_MANAGED);
         assertThat(databaseServerConfig.getAccountId()).isEqualTo(ACCOUNT_ID);

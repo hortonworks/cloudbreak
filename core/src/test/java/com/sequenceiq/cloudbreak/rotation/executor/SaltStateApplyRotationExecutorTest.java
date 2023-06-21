@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,37 @@ public class SaltStateApplyRotationExecutorTest {
 
     @InjectMocks
     private SaltStateApplyRotationExecutor underTest;
+
+    @Test
+    public void testPreValidation() throws CloudbreakOrchestratorFailedException {
+        doNothing().when(hostOrchestrator).ping(any(), any());
+        doNothing().when(hostOrchestrator).executeSaltState(any(), any(), any(), any(), any(), any());
+
+        underTest.executePreValidation(createContext(List.of("state"), Optional.empty(), Optional.empty()));
+
+        verify(hostOrchestrator).ping(any(), any());
+        verify(hostOrchestrator).executeSaltState(any(), any(), eq(List.of("preValidate")), any(), any(), any());
+    }
+
+    @Test
+    public void testPreValidationIfPingFails() throws CloudbreakOrchestratorFailedException {
+        doThrow(new CloudbreakOrchestratorFailedException("pingpong")).when(hostOrchestrator).ping(any(), any());
+
+        assertThrows(SecretRotationException.class, () ->
+                underTest.executePreValidation(createContext(List.of("state"), Optional.empty(), Optional.empty())));
+
+        verify(hostOrchestrator).ping(any(), any());
+        verifyNoMoreInteractions(hostOrchestrator);
+    }
+
+    @Test
+    public void testPostValidation() throws CloudbreakOrchestratorFailedException {
+        doNothing().when(hostOrchestrator).executeSaltState(any(), any(), any(), any(), any(), any());
+
+        underTest.executePostValidation(createContext(List.of("state"), Optional.empty(), Optional.empty()));
+
+        verify(hostOrchestrator).executeSaltState(any(), any(), eq(List.of("postValidate")), any(), any(), any());
+    }
 
     @Test
     public void testRotation() throws Exception {
@@ -107,12 +139,10 @@ public class SaltStateApplyRotationExecutorTest {
 
     private SaltStateApplyRotationContext createContext(List<String> states, Optional<List<String>> rollbackStates, Optional<List<String>> finalizeStates) {
         SaltStateApplyRotationContextBuilder saltStateApplyRotationContextBuilder = SaltStateApplyRotationContext.builder().withStates(states);
-        if (rollbackStates.isPresent()) {
-            saltStateApplyRotationContextBuilder.withRollbackStates(rollbackStates.get());
-        }
-        if (finalizeStates.isPresent()) {
-            saltStateApplyRotationContextBuilder.withCleanupStates(finalizeStates.get());
-        }
+        rollbackStates.ifPresent(saltStateApplyRotationContextBuilder::withRollbackStates);
+        finalizeStates.ifPresent(saltStateApplyRotationContextBuilder::withCleanupStates);
+        saltStateApplyRotationContextBuilder.withPreValidateStates(List.of("preValidate"));
+        saltStateApplyRotationContextBuilder.withPostValidateStates(List.of("postValidate"));
         return saltStateApplyRotationContextBuilder.build();
     }
 }

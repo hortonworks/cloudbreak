@@ -101,6 +101,8 @@ public class CMDBPasswordRotationContextProvider implements RotationContextProvi
                 .withRollbackStates(List.of("cloudera.manager.server-stop", "postgresql.rotate.rollback",
                         "cloudera.manager.rotate.rollback-secrets", "cloudera.manager.server-start"))
                 .withCleanupStates(List.of("postgresql.rotate.finalize"))
+                .withPreValidateStates(List.of("postgresql.rotate.prevalidate"))
+                .withPostValidateStates(List.of("postgresql.rotate.postvalidate"))
                 .build();
 
         CustomJobRotationContext customJobRotationContext = CustomJobRotationContext.builder()

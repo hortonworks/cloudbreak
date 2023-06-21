@@ -1,7 +1,5 @@
 package com.sequenceiq.redbeams.service.dbserverconfig;
 
-import static com.sequenceiq.redbeams.service.RedbeamsConstants.DATABASE_TEST_RESULT_SUCCESS;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -21,8 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.MapBindingResult;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
@@ -105,7 +101,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         return repository.findByWorkspaceIdAndEnvironmentId(workspaceId, environmentCrn);
     }
 
-    public DatabaseServerConfig create(DatabaseServerConfig resource, Long workspaceId, boolean test) {
+    public DatabaseServerConfig create(DatabaseServerConfig resource, Long workspaceId) {
 
         if (repository.findByName(resource.getName()).isPresent()) {
             throw new BadRequestException(String.format("%s already exists with name '%s' in workspace %d",
@@ -115,16 +111,6 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
             resource.setConnectionDriver(resource.getDatabaseVendor().connectionDriver());
             LOGGER.info("Database server configuration lacked a connection driver; defaulting to {}",
                     resource.getConnectionDriver());
-        }
-
-        if (test) {
-            // FIXME? Currently no checks if logged-in user has access to workspace
-            // Compare with AbstractWorkspaceAwareResourceService
-            String testResults = testConnection(resource);
-
-            if (!testResults.equals(DATABASE_TEST_RESULT_SUCCESS)) {
-                throw new IllegalArgumentException(testResults);
-            }
         }
 
         try {
@@ -258,21 +244,6 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         }
 
         return resources;
-    }
-
-    public String testConnection(String crn) {
-        return testConnection(getByCrn(crn));
-    }
-
-    public String testConnection(DatabaseServerConfig resource) {
-        MapBindingResult errors = new MapBindingResult(new HashMap(), "databaseServer");
-        connectionValidator.validate(resource, errors);
-        if (!errors.hasErrors()) {
-            return DATABASE_TEST_RESULT_SUCCESS;
-        }
-        return errors.getAllErrors().stream()
-                .map(e -> (e instanceof FieldError ? ((FieldError) e).getField() + ": " : "") + e.getDefaultMessage())
-                .collect(Collectors.joining("; "));
     }
 
     public String createDatabaseOnServer(String serverCrn, String databaseName, String databaseType, Optional<String> databaseDescription) {

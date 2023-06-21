@@ -15,6 +15,10 @@ public interface RotationExecutor<C extends RotationContext> {
 
     void finalize(C rotationContext) throws Exception;
 
+    void preValidate(C rotationContext) throws Exception;
+
+    void postValidate(C rotationContext) throws Exception;
+
     SecretRotationStep getType();
 
     Class<C> getContextClass();
@@ -31,8 +35,7 @@ public interface RotationExecutor<C extends RotationContext> {
             rotate(castContext(context));
         } catch (Exception e) {
             String errorMessage = String.format("Rotation failed at %s step for %s", getType(), context.getResourceCrn());
-            LOGGER.error(errorMessage, e);
-            throw new SecretRotationException(errorMessage, e, getType());
+            logAndThrow(e, errorMessage);
         }
     }
 
@@ -41,8 +44,7 @@ public interface RotationExecutor<C extends RotationContext> {
             rollback(castContext(context));
         } catch (Exception e) {
             String errorMessage = String.format("Rollback of rotation failed at %s step for %s", getType(), context.getResourceCrn());
-            LOGGER.error(errorMessage, e);
-            throw new SecretRotationException(errorMessage, e, getType());
+            logAndThrow(e, errorMessage);
         }
     }
 
@@ -51,8 +53,30 @@ public interface RotationExecutor<C extends RotationContext> {
             finalize(castContext(context));
         } catch (Exception e) {
             String errorMessage = String.format("Finalize rotation failed at %s step for %s", getType(), context.getResourceCrn());
-            LOGGER.error(errorMessage, e);
-            throw new SecretRotationException(errorMessage, e, getType());
+            logAndThrow(e, errorMessage);
         }
+    }
+
+    default void executePreValidation(RotationContext context) {
+        try {
+            preValidate(castContext(context));
+        } catch (Exception e) {
+            String errorMessage = String.format("Pre validation of rotation failed at %s step for %s", getType(), context.getResourceCrn());
+            logAndThrow(e, errorMessage);
+        }
+    }
+
+    default void executePostValidation(RotationContext context) {
+        try {
+            postValidate(castContext(context));
+        } catch (Exception e) {
+            String errorMessage = String.format("Post validation of rotation failed at %s step for %s", getType(), context.getResourceCrn());
+            logAndThrow(e, errorMessage);
+        }
+    }
+
+    private void logAndThrow(Exception e, String errorMessage) {
+        LOGGER.error(errorMessage, e);
+        throw new SecretRotationException(errorMessage, e, getType());
     }
 }
