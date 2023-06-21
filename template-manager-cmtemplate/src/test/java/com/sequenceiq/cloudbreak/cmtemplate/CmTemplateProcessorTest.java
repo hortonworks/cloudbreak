@@ -779,6 +779,26 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
+    void testMergeCustomRoleConfigsWithMultipleRCGsOfTheSameRoleType() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
+
+        List<ApiClusterTemplateConfig> configs = List.of(new ApiClusterTemplateConfig().name("nodemanager_java_heapsize").value("123456789"),
+                new ApiClusterTemplateConfig().name("nodemanager_resource_cpu_vcores").value("8"));
+        List<ApiClusterTemplateRoleConfigGroup> nodeManagerRcgs = List.of(new ApiClusterTemplateRoleConfigGroup().roleType("NODEMANAGER").configs(configs));
+
+        ApiClusterTemplateService yarn = underTest.getServiceByType("YARN").get();
+
+        underTest.mergeCustomRoleConfigs(yarn, nodeManagerRcgs);
+
+        List<ApiClusterTemplateConfig> resultingWorkerConfigs = yarn.getRoleConfigGroups().stream()
+                .filter(role -> role.getRefName().contains("WORKER")).findAny().get().getConfigs();
+        List<ApiClusterTemplateConfig> resultingComputeConfigs = yarn.getRoleConfigGroups().stream()
+                .filter(role -> role.getRefName().contains("COMPUTE")).findAny().get().getConfigs();
+        assertThat(resultingWorkerConfigs).hasSameElementsAs(configs);
+        assertThat(resultingComputeConfigs).hasSameElementsAs(configs);
+    }
+
+    @Test
     void testIfCustomServiceConfigsMapIsRetrievedCorrectly() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
         Map<String, List<ApiClusterTemplateConfig>> expectedMap = new HashMap<>();

@@ -678,17 +678,19 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         }
         List<ApiClusterTemplateRoleConfigGroup> currentRoleConfigs = service.getRoleConfigGroups();
         newCustomRoleConfigGroups.forEach(newCustomRoleConfigGroup -> {
-            Optional<ApiClusterTemplateRoleConfigGroup> configIfExists = currentRoleConfigs.stream()
+            List<ApiClusterTemplateRoleConfigGroup> configGroups = currentRoleConfigs.stream()
                     .filter(currentConfig -> currentConfig.getRoleType().equalsIgnoreCase(newCustomRoleConfigGroup.getRoleType()))
-                    .findFirst();
-            if (configIfExists.isEmpty()) {
+                    .collect(Collectors.toList());
+            if (configGroups.isEmpty()) {
                 throw new NotFoundException("Role " + newCustomRoleConfigGroup.getRoleType() + " does not exist for service " + service.getServiceType());
             }
-            if (configIfExists.get().getConfigs() == null) {
-                setRoleConfigs(configIfExists.get(), newCustomRoleConfigGroup.getConfigs());
-            } else {
-                List<ApiClusterTemplateConfig> mergedConfigs = mergeCustomConfigs(configIfExists.get().getConfigs(), newCustomRoleConfigGroup.getConfigs());
-                setRoleConfigs(configIfExists.get(), mergedConfigs);
+            for (ApiClusterTemplateRoleConfigGroup configGroup : configGroups) {
+                if (configGroup.getConfigs() == null) {
+                    setRoleConfigs(configGroup, newCustomRoleConfigGroup.getConfigs());
+                } else {
+                    List<ApiClusterTemplateConfig> mergedConfigs = mergeCustomConfigs(configGroup.getConfigs(), newCustomRoleConfigGroup.getConfigs());
+                    setRoleConfigs(configGroup, mergedConfigs);
+                }
             }
         });
     }
