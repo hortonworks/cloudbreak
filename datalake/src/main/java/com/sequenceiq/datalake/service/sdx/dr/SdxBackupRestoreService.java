@@ -812,6 +812,7 @@ public class SdxBackupRestoreService {
         if (requireNonEmptyPath && cluster.isRangerRazEnabled()) {
             backupLocation = appendBackupsIfRootLocation(backupLocation);
         }
+        LOGGER.info("Backup location after potential modification is {}", backupLocation);
         return backupLocation;
     }
 
@@ -827,9 +828,11 @@ public class SdxBackupRestoreService {
         try {
             URI uri = new URI(backupLocation);
             if (Strings.isNullOrEmpty(uri.getPath())) {
+                LOGGER.info("Appending '/backups' to backup location {}", backupLocation);
                 return backupLocation + "/backups";
             }
             if ("/".equals(uri.getPath())) {
+                LOGGER.info("Appending 'backups' to backup location {}", backupLocation);
                 return backupLocation + "backups";
             }
         } catch (URISyntaxException e) {
