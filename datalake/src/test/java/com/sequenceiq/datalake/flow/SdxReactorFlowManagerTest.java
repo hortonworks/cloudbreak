@@ -21,6 +21,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,6 +41,7 @@ import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
+import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.modifyproxy.ModifyProxyConfigTrackerEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
@@ -232,4 +234,34 @@ class SdxReactorFlowManagerTest {
         return sdxCluster;
     }
 
+    @Test
+    void testBackupLocationOnTriggerRuntimeUpgrade() {
+        ArgumentCaptor<? extends SdxEvent> argumentCaptor = ArgumentCaptor.forClass(SdxEvent.class);
+
+        when(environmentClientService.getBackupLocation(eq(sdxCluster.getEnvCrn()))).thenReturn("WRONG_LOCATION");
+        when(sdxBackupRestoreService.shouldSdxBackupBePerformed(any())).thenReturn(true);
+        when(sdxBackupRestoreService.modifyBackupLocation(any(), any())).thenReturn("CORRECT_LOCATION");
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerDatalakeRuntimeUpgradeFlow(
+                sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED,
+                        TestConstants.DO_NOT_KEEP_VARIANT));
+
+        verify(eventFactory).createEventWithErrHandler(anyMap(), argumentCaptor.capture());
+        DatalakeUpgradeFlowChainStartEvent upgradeEvent = (DatalakeUpgradeFlowChainStartEvent) argumentCaptor.getValue();
+        assertEquals("CORRECT_LOCATION", upgradeEvent.getBackupLocation());
+    }
+
+    @Test
+    void testBackupLocationOnTriggerSdxResize() {
+        ArgumentCaptor<? extends SdxEvent> argumentCaptor = ArgumentCaptor.forClass(SdxEvent.class);
+
+        when(environmentClientService.getBackupLocation(eq(sdxCluster.getEnvCrn()))).thenReturn("WRONG_LOCATION");
+        when(sdxBackupRestoreService.modifyBackupLocation(any(), any())).thenReturn("CORRECT_LOCATION");
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerSdxResize(sdxCluster.getId(), sdxCluster, SKIP_OPTIONS));
+
+        verify(eventFactory).createEventWithErrHandler(anyMap(), argumentCaptor.capture());
+        DatalakeResizeFlowChainStartEvent resizeEvent = (DatalakeResizeFlowChainStartEvent) argumentCaptor.getValue();
+        assertEquals("CORRECT_LOCATION", resizeEvent.getBackupLocation());
+    }
 }
