@@ -47,7 +47,6 @@ import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
-import com.sequenceiq.sdx.api.model.SdxDatabaseBackupRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
 
 @Configuration
@@ -148,16 +147,11 @@ public class DatalakeBackupActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeDatabaseBackupStartEvent payload, Map<Object, Object> variables) {
-                SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
-                String backupLocation = sdxBackupRestoreService.modifyBackupLocation(sdxCluster, payload.getBackupRequest().getBackupLocation());
-                SdxDatabaseBackupRequest sdxDatabaseBackupRequest = payload.getBackupRequest();
-                sdxDatabaseBackupRequest.setBackupLocation(backupLocation);
                 LOGGER.info("Datalake database backup has been started for {} with backup location {}", payload.getResourceId(),
-                        sdxDatabaseBackupRequest.getBackupLocation());
+                        payload.getBackupRequest().getBackupLocation());
 
-                sdxBackupRestoreService.databaseBackup(payload.getDrStatus(),
-                        payload.getResourceId(),
-                        sdxDatabaseBackupRequest);
+                sdxBackupRestoreService.databaseBackup(payload.getDrStatus(), payload.getResourceId(),
+                        payload.getBackupRequest());
                 variables.put(DATABASE_MAX_DURATION_IN_MIN, payload.getBackupRequest().getDatabaseMaxDurationInMin());
                 sendEvent(context, DATALAKE_DATABASE_BACKUP_IN_PROGRESS_EVENT.event(), payload);
             }

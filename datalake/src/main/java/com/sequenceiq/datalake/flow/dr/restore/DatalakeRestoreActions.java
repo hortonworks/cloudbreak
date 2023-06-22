@@ -180,7 +180,8 @@ public class DatalakeRestoreActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeDatabaseRestoreStartEvent payload, Map<Object, Object> variables) {
                 if (payload.getBackupLocation() != null) {
-                    LOGGER.info("Datalake database restore has been started for {}", payload.getResourceId());
+                    LOGGER.info("Datalake database restore has been started for {} with backup location {}", payload.getResourceId(),
+                            payload.getBackupLocation());
                     sdxBackupRestoreService.databaseRestore(payload.getDrStatus(),
                             payload.getResourceId(),
                             payload.getBackupId(),

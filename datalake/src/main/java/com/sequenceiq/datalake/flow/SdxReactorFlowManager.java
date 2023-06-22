@@ -130,13 +130,14 @@ public class SdxReactorFlowManager {
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         boolean performBackup = sdxBackupRestoreService.shouldSdxBackupBePerformed(newSdxCluster);
         boolean performRestore = sdxBackupRestoreService.shouldSdxRestoreBePerformed(newSdxCluster);
+        String backupLocation = sdxBackupRestoreService.modifyBackupLocation(newSdxCluster,
+                environmentClientService.getBackupLocation(newSdxCluster.getEnvCrn()));
         if (!performBackup) {
             sdxBackupRestoreService.checkExistingBackup(newSdxCluster, userId);
         }
         eventSenderService.sendEventAndNotification(newSdxCluster, DATALAKE_RESIZE_TRIGGERED);
         return notify(SDX_RESIZE_FLOW_CHAIN_START_EVENT, new DatalakeResizeFlowChainStartEvent(sdxClusterId, newSdxCluster, userId,
-                environmentClientService.getBackupLocation(newSdxCluster.getEnvCrn()), performBackup, performRestore,
-                skipOptions), newSdxCluster.getClusterName());
+                backupLocation, performBackup, performRestore, skipOptions), newSdxCluster.getClusterName());
     }
 
     public FlowIdentifier triggerSdxResizeRecovery(SdxCluster oldSdxCluster, Optional<SdxCluster> newSdxCluster) {
@@ -172,10 +173,12 @@ public class SdxReactorFlowManager {
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         if (!skipBackup && sdxBackupRestoreService.shouldSdxBackupBePerformed(cluster)) {
             LOGGER.info("Triggering backup before an upgrade");
+            String backupLocation = sdxBackupRestoreService.modifyBackupLocation(cluster,
+                    environmentClientService.getBackupLocation(cluster.getEnvCrn()));
             return notify(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT,
                     new DatalakeUpgradeFlowChainStartEvent(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT, cluster.getId(),
-                            userId, imageId, replaceVms.getBooleanValue(), environmentClientService.getBackupLocation(cluster.getEnvCrn()),
-                            skipOptions, rollingUpgradeEnabled, keepVariant),
+                            userId, imageId, replaceVms.getBooleanValue(), backupLocation, skipOptions,
+                            rollingUpgradeEnabled, keepVariant),
                     cluster.getClusterName());
         } else {
             return notify(DATALAKE_UPGRADE_EVENT.event(), new DatalakeUpgradeStartEvent(DATALAKE_UPGRADE_EVENT.event(), cluster.getId(),
