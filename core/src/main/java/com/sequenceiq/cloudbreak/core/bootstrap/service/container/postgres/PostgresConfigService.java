@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.UpgradeRdsBackupRestoreStateParamsProvider;
 import com.sequenceiq.cloudbreak.view.ClusterView;
-import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class PostgresConfigService {
@@ -180,10 +179,9 @@ public class PostgresConfigService {
         } else {
             postgresConfig.putAll(embeddedDatabaseConfigProvider.collectEmbeddedDatabaseConfigs(stackDto));
         }
-        StackView stack = stackDto.getStack();
-        if (StringUtils.isNotBlank(stack.getExternalDatabaseEngineVersion())) {
-            LOGGER.debug("Configuring embedded DB version to [{}]", stack.getExternalDatabaseEngineVersion());
-            postgresConfig.put(POSTGRES_VERSION, stack.getExternalDatabaseEngineVersion());
+        if (StringUtils.isNotBlank(stackDto.getExternalDatabaseEngineVersion())) {
+            LOGGER.debug("Configuring embedded DB version to [{}]", stackDto.getExternalDatabaseEngineVersion());
+            postgresConfig.put(POSTGRES_VERSION, stackDto.getExternalDatabaseEngineVersion());
         }
         if (CollectionUtils.isNotEmpty(databasesReusedDuringRecovery)) {
             postgresConfig.put("recovery_reused_databases", databasesReusedDuringRecovery);
