@@ -25,8 +25,18 @@ public class DatabaseParameterFallbackUtilTest {
         Database database = new Database();
         database.setExternalDatabaseEngineVersion("2.0");
         String fallbackDatabaseEngineVersion = "fallback2.0";
-        assertEquals("2.0", DatabaseParameterFallbackUtil.getExternalDatabaseEngineVersion(database, fallbackDatabaseEngineVersion));
+        assertEquals("2.0", DatabaseParameterFallbackUtil.getExternalDatabaseEngineVersion(database, "2.0"));
+        assertEquals(fallbackDatabaseEngineVersion, DatabaseParameterFallbackUtil.getExternalDatabaseEngineVersion(database, fallbackDatabaseEngineVersion));
         assertEquals(fallbackDatabaseEngineVersion, DatabaseParameterFallbackUtil.getExternalDatabaseEngineVersion(null, fallbackDatabaseEngineVersion));
+        assertEquals(fallbackDatabaseEngineVersion, DatabaseParameterFallbackUtil.getExternalDatabaseEngineVersion(
+                new Database(), fallbackDatabaseEngineVersion));
+    }
+
+    @Test
+    public void testGetDatabaseEngineVersionNull() {
+        Database database = new Database();
+        String fallbackDatabaseEngineVersion = "fallback2.0";
+        assertEquals("fallback2.0", DatabaseParameterFallbackUtil.getExternalDatabaseEngineVersion(database, fallbackDatabaseEngineVersion));
     }
 
     @Test
@@ -38,5 +48,69 @@ public class DatabaseParameterFallbackUtilTest {
                 DatabaseParameterFallbackUtil.getExternalDatabaseCreationType(sdxDatabase, fallbackDatabaseAvailabilityType));
         assertEquals(DatabaseAvailabilityType.HA,
                 DatabaseParameterFallbackUtil.getExternalDatabaseCreationType(null, fallbackDatabaseAvailabilityType));
+    }
+
+    @Test
+    public void testGetOrCreateDatabaseNoDB() {
+        Stack stack = new Stack();
+        stack.setExternalDatabaseEngineVersion("2.0");
+        stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.HA);
+        Database actualDatabase = DatabaseParameterFallbackUtil.getOrCreateDatabase(stack);
+        assertEquals("2.0", actualDatabase.getExternalDatabaseEngineVersion());
+        assertEquals(DatabaseAvailabilityType.HA, actualDatabase.getExternalDatabaseAvailabilityType());
+    }
+
+    @Test
+    public void testGetOrCreateDatabaseWithDB() {
+        Stack stack = new Stack();
+        Database database = new Database();
+        database.setExternalDatabaseEngineVersion("2.0");
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.HA);
+        stack.setDatabase(database);
+        Database actualDatabase = DatabaseParameterFallbackUtil.getOrCreateDatabase(stack);
+        assertEquals(database, actualDatabase);
+    }
+
+    @Test
+    public void testGetOrCreateDatabaseWithDifferentVersion() {
+        Stack stack = new Stack();
+        stack.setExternalDatabaseEngineVersion("1.0");
+        Database database = new Database();
+        database.setExternalDatabaseEngineVersion("2.0");
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.HA);
+        stack.setDatabase(database);
+        Database actualDatabase = DatabaseParameterFallbackUtil.getOrCreateDatabase(stack);
+        assertEquals(actualDatabase.getExternalDatabaseEngineVersion(), "1.0");
+    }
+
+    @Test
+    public void testGetOrCreateDatabaseViewNoDB() {
+        Stack stack = new Stack();
+        stack.setExternalDatabaseEngineVersion("2.0");
+        stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.HA);
+        Database actualDatabase = DatabaseParameterFallbackUtil.getOrCreateDatabase(null, stack);
+        assertEquals("2.0", actualDatabase.getExternalDatabaseEngineVersion());
+        assertEquals(DatabaseAvailabilityType.HA, actualDatabase.getExternalDatabaseAvailabilityType());
+    }
+
+    @Test
+    public void testGetOrCreateDatabaseViewWithDB() {
+        Stack stack = new Stack();
+        Database database = new Database();
+        database.setExternalDatabaseEngineVersion("2.0");
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.HA);
+        Database actualDatabase = DatabaseParameterFallbackUtil.getOrCreateDatabase(database, stack);
+        assertEquals(database, actualDatabase);
+    }
+
+    @Test
+    public void testGetOrCreateDatabaseViewWithDifferentVersion() {
+        Stack stack = new Stack();
+        stack.setExternalDatabaseEngineVersion("1.0");
+        Database database = new Database();
+        database.setExternalDatabaseEngineVersion("2.0");
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.HA);
+        Database actualDatabase = DatabaseParameterFallbackUtil.getOrCreateDatabase(database, stack);
+        assertEquals(actualDatabase.getExternalDatabaseEngineVersion(), "1.0");
     }
 }
