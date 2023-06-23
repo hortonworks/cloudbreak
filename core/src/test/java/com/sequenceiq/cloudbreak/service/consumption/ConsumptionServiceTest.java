@@ -291,7 +291,7 @@ class ConsumptionServiceTest {
     private StackDto stackDto(CloudPlatform cloudPlatform, StackType stackType, boolean hasBlueprint, boolean hasBlueprintText) {
         StackView stack = stack(cloudPlatform, stackType);
         Blueprint blueprint = hasBlueprint ? blueprint(hasBlueprintText) : null;
-        return new StackDto(stack, null, null, null, null, null, null, null, blueprint, null, null, null, null, null, null, null, null);
+        return new StackDto(stack, null, null, null, null, null, null, blueprint, null, null, null, null, null, null, null, null);
     }
 
     private Blueprint blueprint(boolean hasBlueprintText) {

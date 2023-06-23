@@ -25,11 +25,8 @@ public class DatabaseParameterFallbackUtilTest {
         Database database = new Database();
         database.setExternalDatabaseEngineVersion("2.0");
         String fallbackDatabaseEngineVersion = "fallback2.0";
-        assertEquals("2.0", DatabaseParameterFallbackUtil.getExternalDatabaseEngineVersion(database, "2.0"));
-        assertEquals(fallbackDatabaseEngineVersion, DatabaseParameterFallbackUtil.getExternalDatabaseEngineVersion(database, fallbackDatabaseEngineVersion));
+        assertEquals("2.0", DatabaseParameterFallbackUtil.getExternalDatabaseEngineVersion(database, fallbackDatabaseEngineVersion));
         assertEquals(fallbackDatabaseEngineVersion, DatabaseParameterFallbackUtil.getExternalDatabaseEngineVersion(null, fallbackDatabaseEngineVersion));
-        assertEquals(fallbackDatabaseEngineVersion, DatabaseParameterFallbackUtil.getExternalDatabaseEngineVersion(
-                new Database(), fallbackDatabaseEngineVersion));
     }
 
     @Test

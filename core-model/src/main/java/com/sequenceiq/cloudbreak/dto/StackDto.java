@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
-import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.StackParameters;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
@@ -53,8 +52,6 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
     private ClusterView cluster;
 
     private Network network;
-
-    private Database database;
 
     private Workspace workspace;
 
@@ -82,14 +79,13 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
 
     private Map<InstanceGroupView, List<String>> availabilityZonesByInstanceGroup;
 
-    public StackDto(StackView stack, ClusterView cluster, Network network, Database database, Workspace workspace, Tenant tenant, Map<String,
-            InstanceGroupDto> instanceGroups, Set<Resource> resources, Blueprint blueprint, GatewayView gateway, Orchestrator orchestrator,
+    public StackDto(StackView stack, ClusterView cluster, Network network, Workspace workspace, Tenant tenant, Map<String, InstanceGroupDto> instanceGroups,
+            Set<Resource> resources, Blueprint blueprint, GatewayView gateway, Orchestrator orchestrator,
             FileSystem fileSystem, FileSystem additionalFileSystem, Set<ClusterComponentView> clusterComponents, List<StackParameters> stackParameters,
             SecurityConfig securityConfig, Map<InstanceGroupView, List<String>> availabilityZonesByInstanceGroup) {
         this.stack = stack;
         this.cluster = cluster;
         this.network = network;
-        this.database = database;
         this.workspace = workspace;
         this.instanceGroups = instanceGroups;
         this.resources = resources;
@@ -169,10 +165,6 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
 
     public Network getNetwork() {
         return network;
-    }
-
-    public Database getDatabase() {
-        return database;
     }
 
     public Set<Resource> getResources() {

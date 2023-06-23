@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -29,7 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
@@ -151,7 +148,7 @@ class DatabaseSslServiceTest {
         assertThat(result.getSslCerts()).isEqualTo(sslCerts);
         assertThat(result.isSslEnabledForStack()).isEqualTo(sslEnabledForStack);
 
-        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
+        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class));
         verify(datalakeService, never()).getDatalakeStackByDatahubStack(any(StackView.class));
         verify(freeipaClientService, never()).getRootCertificateByEnvironmentCrn(anyString());
         verify(clusterService).updateDbSslCert(CLUSTER_ID, result);
@@ -173,7 +170,7 @@ class DatabaseSslServiceTest {
         assertThat(result.getSslCerts()).isEqualTo(sslCerts);
         assertThat(result.isSslEnabledForStack()).isEqualTo(sslEnabledForStack);
 
-        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
+        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class));
         verify(freeipaClientService, never()).getRootCertificateByEnvironmentCrn(anyString());
         verify(clusterService).updateDbSslCert(CLUSTER_ID, result);
     }
@@ -197,7 +194,7 @@ class DatabaseSslServiceTest {
         assertThat(result.getSslCerts()).isEqualTo(sslCerts);
         assertThat(result.isSslEnabledForStack()).isEqualTo(sslEnabledForStack);
 
-        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
+        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class));
         verify(freeipaClientService, never()).getRootCertificateByEnvironmentCrn(anyString());
         verify(clusterService).updateDbSslCert(CLUSTER_ID, result);
     }
@@ -207,7 +204,7 @@ class DatabaseSslServiceTest {
         DatabaseSslDetails sslDetails = new DatabaseSslDetails(Set.of(), false);
         when(dbCertificateProvider.getRelatedSslCerts(stackDto)).thenReturn(sslDetails);
         when(dbServerConfigurer.isRemoteDatabaseRequested(DATABASE_SERVER_CRN)).thenReturn(false);
-        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(eq(stackView), eq(clusterView), isNull())).thenReturn(false);
+        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView)).thenReturn(false);
         when(stackView.getType()).thenReturn(StackType.DATALAKE);
         when(clusterView.getId()).thenReturn(CLUSTER_ID);
 
@@ -227,7 +224,7 @@ class DatabaseSslServiceTest {
         DatabaseSslDetails sslDetails = new DatabaseSslDetails(Set.of(), false);
         when(dbCertificateProvider.getRelatedSslCerts(stackDto)).thenReturn(sslDetails);
         when(dbServerConfigurer.isRemoteDatabaseRequested(DATABASE_SERVER_CRN)).thenReturn(false);
-        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView, null)).thenReturn(false);
+        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView)).thenReturn(false);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
         when(datalakeService.getDatalakeStackByDatahubStack(stackView)).thenReturn(Optional.empty());
         when(clusterView.getId()).thenReturn(CLUSTER_ID);
@@ -254,7 +251,7 @@ class DatabaseSslServiceTest {
         when(datalakeStack.getCluster()).thenReturn(datalakeCluster);
         when(datalakeCluster.getDatabaseServerCrn()).thenReturn(DATABASE_SERVER_CRN_DATALAKE);
         when(dbServerConfigurer.isRemoteDatabaseRequested(DATABASE_SERVER_CRN_DATALAKE)).thenReturn(false);
-        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(eq(datalakeStack), eq(datalakeCluster), any())).thenReturn(false);
+        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(datalakeStack, datalakeCluster)).thenReturn(false);
         when(clusterView.getId()).thenReturn(CLUSTER_ID);
 
         DatabaseSslDetails result = underTest.getDbSslDetailsForCreationAndUpdateInCluster(stackDto);
@@ -283,7 +280,7 @@ class DatabaseSslServiceTest {
         DatabaseSslDetails sslDetails = new DatabaseSslDetails(sslCerts, false);
         when(dbCertificateProvider.getRelatedSslCerts(stackDto)).thenReturn(sslDetails);
         when(dbServerConfigurer.isRemoteDatabaseRequested(DATABASE_SERVER_CRN)).thenReturn(false);
-        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView, null)).thenReturn(false);
+        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView)).thenReturn(false);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
         when(datalakeService.getDatalakeStackByDatahubStack(stackView)).thenReturn(Optional.of(datalakeStack));
         when(datalakeStack.getCluster()).thenReturn(datalakeCluster);
@@ -308,7 +305,7 @@ class DatabaseSslServiceTest {
         DatabaseSslDetails sslDetails = new DatabaseSslDetails(sslCerts, false);
         when(dbCertificateProvider.getRelatedSslCerts(stackDto)).thenReturn(sslDetails);
         when(dbServerConfigurer.isRemoteDatabaseRequested(DATABASE_SERVER_CRN)).thenReturn(false);
-        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView, null)).thenReturn(true);
+        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView)).thenReturn(true);
         when(stackView.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
         when(freeipaClientService.getRootCertificateByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(CERT_EMBEDDED);
         when(clusterView.getId()).thenReturn(CLUSTER_ID);
@@ -334,7 +331,7 @@ class DatabaseSslServiceTest {
         DatabaseSslDetails sslDetails = new DatabaseSslDetails(Set.of(), false);
         when(dbCertificateProvider.getRelatedSslCerts(stackDto)).thenReturn(sslDetails);
         when(dbServerConfigurer.isRemoteDatabaseRequested(DATABASE_SERVER_CRN)).thenReturn(false);
-        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView, null)).thenReturn(true);
+        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView)).thenReturn(true);
         when(stackView.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
         when(freeipaClientService.getRootCertificateByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(rootCertificate);
 
@@ -360,7 +357,7 @@ class DatabaseSslServiceTest {
         assertThat(illegalStateException).hasMessage("Mismatching sslDetails.sslEnabledForStack in RedbeamsDbCertificateProvider response. " +
                 "Expecting false because the stack uses an embedded DB, but it was true.");
 
-        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
+        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class));
         verify(stackView, never()).getType();
         verify(datalakeService, never()).getDatalakeStackByDatahubStack(any(StackView.class));
         verify(freeipaClientService, never()).getRootCertificateByEnvironmentCrn(anyString());
@@ -372,13 +369,13 @@ class DatabaseSslServiceTest {
         DatabaseSslDetails sslDetails = new DatabaseSslDetails(Set.of(), false);
         when(dbCertificateProvider.getRelatedSslCerts(stackDto)).thenReturn(sslDetails);
         when(dbServerConfigurer.isRemoteDatabaseRequested(DATABASE_SERVER_CRN)).thenReturn(false);
-        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView, null)).thenReturn(false);
+        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView)).thenReturn(false);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
         when(datalakeService.getDatalakeStackByDatahubStack(stackView)).thenReturn(Optional.of(datalakeStack));
         when(datalakeStack.getCluster()).thenReturn(datalakeCluster);
         when(datalakeCluster.getDatabaseServerCrn()).thenReturn(DATABASE_SERVER_CRN_DATALAKE);
         when(dbServerConfigurer.isRemoteDatabaseRequested(DATABASE_SERVER_CRN_DATALAKE)).thenReturn(false);
-        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(eq(datalakeStack), eq(datalakeCluster), any(Database.class))).thenReturn(true);
+        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(datalakeStack, datalakeCluster)).thenReturn(true);
         when(stackView.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
         when(freeipaClientService.getRootCertificateByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(CERT_EMBEDDED);
         when(clusterView.getId()).thenReturn(CLUSTER_ID);
@@ -404,7 +401,7 @@ class DatabaseSslServiceTest {
         when(datalakeStack.getCluster()).thenReturn(datalakeCluster);
         when(datalakeCluster.getDatabaseServerCrn()).thenReturn(DATABASE_SERVER_CRN_DATALAKE);
         when(dbServerConfigurer.isRemoteDatabaseRequested(DATABASE_SERVER_CRN_DATALAKE)).thenReturn(false);
-        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(eq(datalakeStack), eq(datalakeCluster), any(Database.class))).thenReturn(true);
+        when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(datalakeStack, datalakeCluster)).thenReturn(true);
         when(stackView.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
         when(freeipaClientService.getRootCertificateByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(CERT_EMBEDDED);
         when(clusterView.getId()).thenReturn(CLUSTER_ID);
@@ -418,7 +415,7 @@ class DatabaseSslServiceTest {
         assertThat(result.getSslCerts()).contains(CERT_EMBEDDED);
         assertThat(result.isSslEnabledForStack()).isEqualTo(sslEnabledForStack);
 
-        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView, null);
+        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView);
         verify(clusterService).updateDbSslCert(CLUSTER_ID, result);
     }
 
@@ -437,7 +434,7 @@ class DatabaseSslServiceTest {
         assertThat(result.getSslCerts()).isEqualTo(sslCerts);
         assertThat(result.isSslEnabledForStack()).isEqualTo(sslEnabledForStack);
 
-        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
+        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class));
         verify(clusterView, never()).getDbSslEnabled();
         verify(datalakeService, never()).getDatalakeStackByDatahubStack(any(StackView.class));
         verify(freeipaClientService, never()).getRootCertificateByEnvironmentCrn(anyString());
@@ -460,7 +457,7 @@ class DatabaseSslServiceTest {
         assertThat(result.getSslCerts()).isEqualTo(sslCerts);
         assertThat(result.isSslEnabledForStack()).isEqualTo(sslEnabledForStack);
 
-        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
+        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class));
         verify(clusterView, never()).getDbSslEnabled();
         verify(freeipaClientService, never()).getRootCertificateByEnvironmentCrn(anyString());
         verify(clusterService).updateDbSslCert(CLUSTER_ID, result);
@@ -485,7 +482,7 @@ class DatabaseSslServiceTest {
         assertThat(result.getSslCerts()).isEqualTo(sslCerts);
         assertThat(result.isSslEnabledForStack()).isEqualTo(sslEnabledForStack);
 
-        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
+        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class));
         verify(clusterView, never()).getDbSslEnabled();
         verify(datalakeCluster, never()).getDbSslEnabled();
         verify(freeipaClientService, never()).getRootCertificateByEnvironmentCrn(anyString());
@@ -509,7 +506,7 @@ class DatabaseSslServiceTest {
         assertThat(result.getSslCerts()).isEmpty();
         assertThat(result.isSslEnabledForStack()).isFalse();
 
-        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
+        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class));
         verify(datalakeService, never()).getDatalakeStackByDatahubStack(any(StackView.class));
         verify(freeipaClientService, never()).getRootCertificateByEnvironmentCrn(anyString());
         verify(clusterService).updateDbSslCert(CLUSTER_ID, result);
@@ -533,7 +530,7 @@ class DatabaseSslServiceTest {
         assertThat(result.getSslCerts()).isEmpty();
         assertThat(result.isSslEnabledForStack()).isFalse();
 
-        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
+        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class));
         verify(freeipaClientService, never()).getRootCertificateByEnvironmentCrn(anyString());
         verify(clusterService).updateDbSslCert(CLUSTER_ID, result);
     }
@@ -571,7 +568,7 @@ class DatabaseSslServiceTest {
         assertThat(result.getSslCerts()).isEqualTo(sslCerts);
         assertThat(result.isSslEnabledForStack()).isEqualTo(sslEnabledForStack);
 
-        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
+        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class));
         verify(clusterView, never()).getDbSslEnabled();
         verify(freeipaClientService, never()).getRootCertificateByEnvironmentCrn(anyString());
         verify(clusterService).updateDbSslCert(CLUSTER_ID, result);
@@ -610,7 +607,7 @@ class DatabaseSslServiceTest {
         assertThat(result.getSslCerts()).isEqualTo(sslCerts);
         assertThat(result.isSslEnabledForStack()).isFalse();
 
-        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
+        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class));
         verify(datalakeCluster, never()).getDbSslEnabled();
         verify(freeipaClientService, never()).getRootCertificateByEnvironmentCrn(anyString());
         verify(clusterService).updateDbSslCert(CLUSTER_ID, result);
@@ -636,7 +633,7 @@ class DatabaseSslServiceTest {
         assertThat(result.getSslCerts()).contains(CERT_EMBEDDED);
         assertThat(result.isSslEnabledForStack()).isTrue();
 
-        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
+        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class));
         verify(stackView, never()).getType();
         verify(datalakeService, never()).getDatalakeStackByDatahubStack(any(StackView.class));
         verify(clusterService).updateDbSslCert(CLUSTER_ID, result);
@@ -658,7 +655,7 @@ class DatabaseSslServiceTest {
 
         assertThat(illegalStateException).hasMessage("Got a blank FreeIPA root certificate.");
 
-        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
+        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class));
         verify(stackView, never()).getType();
         verify(datalakeService, never()).getDatalakeStackByDatahubStack(any(StackView.class));
         verify(clusterService, never()).updateDbSslCert(anyLong(), any(DatabaseSslDetails.class));
@@ -676,7 +673,7 @@ class DatabaseSslServiceTest {
         assertThat(illegalStateException).hasMessage("Mismatching sslDetails.sslEnabledForStack in RedbeamsDbCertificateProvider response. " +
                 "Expecting false because the stack uses an embedded DB, but it was true.");
 
-        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
+        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class));
         verify(clusterView, never()).getDbSslEnabled();
         verify(stackView, never()).getType();
         verify(datalakeService, never()).getDatalakeStackByDatahubStack(any(StackView.class));
@@ -708,7 +705,7 @@ class DatabaseSslServiceTest {
         assertThat(result.getSslCerts()).isEqualTo(Set.of(CERT_EMBEDDED));
         assertThat(result.isSslEnabledForStack()).isFalse();
 
-        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
+        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class));
         verify(clusterService).updateDbSslCert(CLUSTER_ID, result);
     }
 
@@ -738,7 +735,7 @@ class DatabaseSslServiceTest {
         assertThat(result.getSslCerts()).contains(CERT_EMBEDDED);
         assertThat(result.isSslEnabledForStack()).isEqualTo(sslEnabledForStack);
 
-        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
+        verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class));
         verify(clusterView, never()).getDbSslEnabled();
         verify(clusterService).updateDbSslCert(CLUSTER_ID, result);
     }

@@ -13,8 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
-import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @ExtendWith(MockitoExtension.class)
 class UpgradeEmbeddedDBPreparationStateParamsProviderTest {
@@ -25,9 +25,9 @@ class UpgradeEmbeddedDBPreparationStateParamsProviderTest {
     @Test
     void testCreateParamsIfDbVersionIsSet() {
         StackDto stackDto = mock(StackDto.class);
-        Database database = new Database();
-        database.setExternalDatabaseEngineVersion("version");
-        when(stackDto.getDatabase()).thenReturn(database);
+        StackView stackView = mock(StackView.class);
+        when(stackView.getExternalDatabaseEngineVersion()).thenReturn("version");
+        when(stackDto.getStack()).thenReturn(stackView);
         ReflectionTestUtils.setField(underTest, "targetMajorVersion", TargetMajorVersion.VERSION_11);
         Map<String, Object> actualResult = underTest.createParamsForEmbeddedDBUpgradePreparation(stackDto);
         Map<String, String> upgradeParams = (Map<String, String>) ((Map<String, Object>) actualResult.get("postgres")).get("upgrade");
@@ -40,8 +40,8 @@ class UpgradeEmbeddedDBPreparationStateParamsProviderTest {
     @Test
     void testCreateParamsIfDbVersionIsNotSet() {
         StackDto stackDto = mock(StackDto.class);
-        Database database = new Database();
-        when(stackDto.getDatabase()).thenReturn(database);
+        StackView stackView = mock(StackView.class);
+        when(stackDto.getStack()).thenReturn(stackView);
         ReflectionTestUtils.setField(underTest, "targetMajorVersion", TargetMajorVersion.VERSION_11);
         Map<String, Object> actualResult = underTest.createParamsForEmbeddedDBUpgradePreparation(stackDto);
         Map<String, String> upgradeParams = (Map<String, String>) ((Map<String, Object>) actualResult.get("postgres")).get("upgrade");
