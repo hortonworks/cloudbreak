@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.sdx.database;
 
+import java.util.Optional;
+
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
@@ -38,7 +40,18 @@ public class DatabaseParameterFallbackUtil {
     }
 
     public static String getDatabaseEngineVersion(SdxDatabase sdxDatabase, String fallbackDatabaseEngineVersion) {
-        return sdxDatabase != null ? sdxDatabase.getDatabaseEngineVersion() : fallbackDatabaseEngineVersion;
+        String result;
+        if (sdxDatabase != null) {
+            String dbEngineVersion = Optional.of(sdxDatabase).map(SdxDatabase::getDatabaseEngineVersion).orElse("");
+            if (fallbackDatabaseEngineVersion != null && !dbEngineVersion.equals(fallbackDatabaseEngineVersion)) {
+                result = fallbackDatabaseEngineVersion;
+            } else {
+                result = dbEngineVersion;
+            }
+        } else {
+            result = fallbackDatabaseEngineVersion;
+        }
+        return result;
     }
 
     public static boolean isCreateDatabase(SdxDatabase sdxDatabase, boolean fallbackCreateDatabase) {
