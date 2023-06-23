@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.ResourceUtil;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -151,6 +152,8 @@ public interface StackDtoDelegate {
 
     Network getNetwork();
 
+    Database getDatabase();
+
     List<InstanceGroupDto> getInstanceGroupDtos();
 
     Set<String> getAvailabilityZonesByInstanceGroup(Long instanceGroupId);
@@ -228,7 +231,11 @@ public interface StackDtoDelegate {
     }
 
     default DatabaseAvailabilityType getExternalDatabaseCreationType() {
-        return getStack().getExternalDatabaseCreationType();
+        return getDatabase().getExternalDatabaseAvailabilityType();
+    }
+
+    default String getExternalDatabaseEngineVersion() {
+        return getDatabase().getExternalDatabaseEngineVersion();
     }
 
     default String getTenantName() {

@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -138,9 +139,10 @@ class RdsUpgradeServiceTest {
     @Test
     void testUpgradeRdsWithValidSetupThenSuccess() {
         Stack stack = createStack(Status.AVAILABLE);
+        StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
         when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
-        when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
+        when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
         when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE))).thenReturn(flowId);
@@ -157,10 +159,10 @@ class RdsUpgradeServiceTest {
     void testUpgradeRdsRejectedOnDataHubWithEmbeddedDB() {
         Stack stack = createStack(Status.AVAILABLE);
         stack.setType(StackType.WORKLOAD);
-        stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.ON_ROOT_VOLUME);
+        StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.ON_ROOT_VOLUME);
 
         when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
-        when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
+        when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION));
 
@@ -173,9 +175,10 @@ class RdsUpgradeServiceTest {
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         when(environmentService.getByCrn(anyString())).thenReturn(environmentResponse);
         Stack stack = createStack(Status.AVAILABLE);
+        StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
         when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
-        when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
+        when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
         when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(null), eq(null))).thenReturn(flowId);
@@ -195,9 +198,10 @@ class RdsUpgradeServiceTest {
         ReflectionUtils.setField(defaultTargetMajorVersion, underTest, TARGET_VERSION);
 
         Stack stack = createStack(Status.AVAILABLE);
+        StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
         when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
-        when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
+        when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
         when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE))).thenReturn(flowId);
@@ -213,9 +217,10 @@ class RdsUpgradeServiceTest {
     @Test
     void testUpgradeRdsWithValidSetupAndMissingDatabaseVersionThenSuccess() {
         Stack stack = createStack(Status.AVAILABLE);
+        StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
         when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(null));
-        when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
+        when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
         when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE))).thenReturn(flowId);
@@ -231,8 +236,9 @@ class RdsUpgradeServiceTest {
     @Test
     void testWhenRdsAlreadyUpgradedThenError() {
         Stack stack = createStack(Status.AVAILABLE);
+        StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_11));
-        when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
+        when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         when(messagesService.getMessage(CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED.getMessage(),
                 List.of(MajorVersion.VERSION_11.getMajorVersion()))).thenReturn(ERROR_REASON);
 
@@ -246,9 +252,10 @@ class RdsUpgradeServiceTest {
     @Test
     void testUpgradeRdsWithInvalidRuntimeVersionThenError() {
         Stack stack = createStack(Status.AVAILABLE);
+        StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
         when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
-        when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
+        when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         String errorMessage = "Runtime version is not valid.";
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.of(errorMessage));
 
@@ -323,8 +330,9 @@ class RdsUpgradeServiceTest {
     @EnumSource(value = Status.class, names = {"AVAILABLE", "MAINTENANCE_MODE_ENABLED", "EXTERNAL_DATABASE_UPGRADE_FAILED"}, mode = EnumSource.Mode.EXCLUDE)
     void testWhenStackUnavailableThenError(Status status) {
         Stack stack = createStack(status);
+        StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
-        when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
+        when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         when(messagesService.getMessage(CLUSTER_RDS_UPGRADE_NOT_AVAILABLE.getMessage(), List.of(status.name()))).thenReturn(ERROR_REASON);
 
         Assertions.assertThatCode(() -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION))
@@ -338,9 +346,10 @@ class RdsUpgradeServiceTest {
     @EnumSource(value = DatabaseServerStatus.class, names = {"AVAILABLE", "UPGRADE_FAILED"})
     void testUpgradeRdsWithValidDatabaseStatusThenSuccess(DatabaseServerStatus status) {
         Stack stack = createStack(Status.AVAILABLE);
+        StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
         when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10, status));
-        when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
+        when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
         when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE))).thenReturn(flowId);
@@ -356,9 +365,10 @@ class RdsUpgradeServiceTest {
     @Test
     void testUpgradeRdsWithDatabaseNullStatusThenError() {
         Stack stack = createStack(Status.AVAILABLE);
+        StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
         when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10, null));
-        when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
+        when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
@@ -373,9 +383,10 @@ class RdsUpgradeServiceTest {
     @EnumSource(value = DatabaseServerStatus.class, names = {"AVAILABLE", "UPGRADE_FAILED"}, mode = EnumSource.Mode.EXCLUDE)
     void testUpgradeRdsWithDatabaseNotAvailableThenError(DatabaseServerStatus status) {
         Stack stack = createStack(Status.AVAILABLE);
+        StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
         when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10, status));
-        when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
+        when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
@@ -410,10 +421,16 @@ class RdsUpgradeServiceTest {
         workspace.setTenant(tenant);
         stack.setWorkspace(workspace);
         stack.setStackStatus(new StackStatus(stack, status, null, null));
-        stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.HA);
         Cluster cluster = new Cluster();
         cluster.setId(CLUSTER_ID);
         stack.setCluster(cluster);
         return stack;
+    }
+
+    private StackDto createStackDto(Stack stack, DatabaseAvailabilityType databaseAvailabilityType) {
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getStack()).thenReturn(stack);
+        when(stackDto.getExternalDatabaseCreationType()).thenReturn(databaseAvailabilityType);
+        return stackDto;
     }
 }
