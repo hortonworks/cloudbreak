@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.AzureHighAvailabiltyMode;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
@@ -55,6 +56,7 @@ public class AzureDatabaseServerParameterSetterTest {
         AzureDatabaseServerV4Parameters azureDatabaseServerV4Parameters = captor.getValue();
         assertEquals(true, azureDatabaseServerV4Parameters.getGeoRedundantBackup());
         assertEquals(30, azureDatabaseServerV4Parameters.getBackupRetentionDays());
+        assertEquals(AzureHighAvailabiltyMode.SAME_ZONE, azureDatabaseServerV4Parameters.getHighAvailabilityMode());
     }
 
     @Test
@@ -65,6 +67,7 @@ public class AzureDatabaseServerParameterSetterTest {
         AzureDatabaseServerV4Parameters azureDatabaseServerV4Parameters = captor.getValue();
         assertEquals(false, azureDatabaseServerV4Parameters.getGeoRedundantBackup());
         assertEquals(7, azureDatabaseServerV4Parameters.getBackupRetentionDays());
+        assertEquals(AzureHighAvailabiltyMode.DISABLED, azureDatabaseServerV4Parameters.getHighAvailabilityMode());
     }
 
     @Test
@@ -76,6 +79,7 @@ public class AzureDatabaseServerParameterSetterTest {
         assertEquals(false, azureDatabaseServerV4Parameters.getGeoRedundantBackup());
         assertEquals(7, azureDatabaseServerV4Parameters.getBackupRetentionDays());
         assertEquals("13", azureDatabaseServerV4Parameters.getDbVersion());
+        assertEquals(AzureHighAvailabiltyMode.DISABLED, azureDatabaseServerV4Parameters.getHighAvailabilityMode());
     }
 
     @ParameterizedTest

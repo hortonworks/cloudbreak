@@ -1,0 +1,5 @@
+{
+  "instanceType": "Standard_E4ds_v4",
+  "vendor": "postgres",
+  "volumeSize": 128
+}

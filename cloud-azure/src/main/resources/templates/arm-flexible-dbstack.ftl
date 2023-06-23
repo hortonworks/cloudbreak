@@ -18,7 +18,13 @@
     },
     "skuName": {
       "type": "string",
-      "defaultValue": "Standard_E4ds_v4",
+      "defaultValue": "${skuName!"Standard_E4ds_v4"}",
+      "allowedValues": [
+        "Standard_D2ds_v4",
+        "Standard_D4ds_v4",
+        "Standard_E2ds_v4",
+        "Standard_E4ds_v4"
+      ],
       "metadata": {
         "description": "Azure database for PostgreSQL SKU name."
       }
@@ -27,7 +33,7 @@
       "type": "string",
       "defaultValue" : "${skuTier!"MemoryOptimized"}",
       "allowedValues": [
-        "Basic",
+        "Burstable",
         "GeneralPurpose",
         "MemoryOptimized"
       ],
@@ -77,11 +83,19 @@
     },
     "skuSizeGB": {
       "type": "int",
-      "defaultValue": 128
+      "defaultValue": ${(skuSizeGB!128)?c}
     },
     "haMode": {
       "type": "string",
-      "defaultValue": "Disabled"
+      "defaultValue": "${highAvailability!"Disabled"}",
+      "allowedValues": [
+        "Disabled",
+        "SameZone",
+        "ZoneRedundant"
+      ],
+      "metadata": {
+        "description": "The high availability mode of the database."
+      }
     },
     "availabilityZone": {
       "type": "string",
@@ -89,7 +103,20 @@
     },
     "version": {
       "type": "string",
-      "defaultValue": "12"
+      "defaultValue": "${dbVersion}"
+    },
+    "serverTags": {
+      "type":"object",
+      "defaultValue": {
+        <#if serverTags?? && serverTags?has_content>
+          <#list serverTags?keys as key>
+            "${key}": "${serverTags[key]}"<#if key_has_next>,</#if>
+          </#list>
+        </#if>
+      },
+      "metadata": {
+        "description": "User defined tags to be attached to the resource."
+      }
     },
     "virtualNetworkExternalId": {
       "type": "string",
@@ -117,6 +144,7 @@
         "name": "[parameters('skuName')]",
         "tier": "[parameters('skuTier')]"
       },
+      "tags": "[parameters('serverTags')]",
       "properties": {
         "version": "[parameters('dbVersion')]",
         "administratorLogin": "[parameters('administratorLogin')]",

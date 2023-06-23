@@ -154,35 +154,34 @@
         "privateEndpointName": {
             "defaultValue": "${privateEndpointName}",
             "type": "String"
-        }
-        <#if dataEncryption == true>
-        , "keyVaultName": {
-              "type": "string",
-              "defaultValue" : "${keyVaultName}",
-              "metadata": {
+        }<#if dataEncryption == true>,
+        "keyVaultName": {
+            "type": "string",
+            "defaultValue" : "${keyVaultName}",
+            "metadata": {
                 "description": "Key vault name where the key to use is stored"
-              }
+            }
         },
         "keyVaultResourceGroupName": {
-              "type": "string",
-              "defaultValue" : "${keyVaultResourceGroupName}",
-              "metadata": {
+            "type": "string",
+            "defaultValue" : "${keyVaultResourceGroupName}",
+            "metadata": {
                 "description": "Key vault resource group name where it is stored"
-              }
+            }
         },
         "keyName": {
-              "type": "string",
-              "defaultValue" : "${keyName}",
-              "metadata": {
+            "type": "string",
+            "defaultValue" : "${keyName}",
+            "metadata": {
                 "description": "Key name in the key vault to use as encryption protector"
-              }
+            }
         },
         "keyVersion": {
-              "type": "string",
-              "defaultValue" : "${keyVersion}",
-              "metadata": {
+            "type": "string",
+            "defaultValue" : "${keyVersion}",
+            "metadata": {
                 "description": "Version of the key in the key vault to use as encryption protector"
-              }
+            }
         }
         </#if>
     },

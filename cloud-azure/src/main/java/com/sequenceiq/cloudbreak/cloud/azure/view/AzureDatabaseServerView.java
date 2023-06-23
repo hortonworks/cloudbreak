@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.view;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.AzureHighAvailabiltyMode;
 
 public class AzureDatabaseServerView {
 
@@ -32,12 +33,18 @@ public class AzureDatabaseServerView {
     @VisibleForTesting
     static final String KEY_VAULT_RESOURCE_GROUP_NAME = "keyVaultResourceGroupName";
 
+    private static final String HIGH_AVAILABILITY = "highAvailability";
+
     private static final int NUM_MB_IN_GB = 1024;
 
     private final DatabaseServer databaseServer;
 
     public AzureDatabaseServerView(DatabaseServer databaseServer) {
         this.databaseServer = databaseServer;
+    }
+
+    public Long getStorageSizeInGb() {
+        return databaseServer.getStorageSize();
     }
 
     public Long getAllocatedStorageInMb() {
@@ -122,5 +129,9 @@ public class AzureDatabaseServerView {
 
     public AzureDatabaseType getAzureDatabaseType() {
         return AzureDatabaseType.safeValueOf(databaseServer.getStringParameter(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY));
+    }
+
+    public AzureHighAvailabiltyMode getHighAvailabilityMode() {
+        return AzureHighAvailabiltyMode.safeValueOf(databaseServer.getStringParameter(AzureHighAvailabiltyMode.AZURE_HA_MODE_KEY));
     }
 }

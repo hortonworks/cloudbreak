@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseServerParamete
 import com.sequenceiq.cloudbreak.service.externaldatabase.PollingConfig;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseServerParameter;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfig;
+import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfigKey;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -83,7 +84,7 @@ public class ExternalDatabaseService {
 
     private final ClusterRepository clusterRepository;
 
-    private final Map<CloudPlatform, DatabaseStackConfig> dbConfigs;
+    private final Map<DatabaseStackConfigKey, DatabaseStackConfig> dbConfigs;
 
     private final Map<CloudPlatform, DatabaseServerParameterDecorator> parameterDecoratorMap;
 
@@ -96,7 +97,7 @@ public class ExternalDatabaseService {
     private final CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     public ExternalDatabaseService(RedbeamsClientService redbeamsClient, ClusterRepository clusterRepository,
-            Map<CloudPlatform, DatabaseStackConfig> dbConfigs, Map<CloudPlatform, DatabaseServerParameterDecorator> parameterDecoratorMap,
+            Map<DatabaseStackConfigKey, DatabaseStackConfig> dbConfigs, Map<CloudPlatform, DatabaseServerParameterDecorator> parameterDecoratorMap,
             DatabaseObtainerService databaseObtainerService, EntitlementService entitlementService, ExternalDatabaseConfig externalDatabaseConfig,
             CmTemplateProcessorFactory cmTemplateProcessorFactory) {
         this.redbeamsClient = redbeamsClient;
@@ -358,7 +359,8 @@ public class ExternalDatabaseService {
 
     private DatabaseServerV4StackRequest getDatabaseServerStackRequest(CloudPlatform cloudPlatform, DatabaseAvailabilityType externalDatabase,
             String databaseEngineVersion, Map<String, Object> attributes) {
-        DatabaseStackConfig databaseStackConfig = dbConfigs.get(cloudPlatform);
+        DatabaseStackConfig databaseStackConfig = dbConfigs.get(new DatabaseStackConfigKey(cloudPlatform,
+                parameterDecoratorMap.get(cloudPlatform).getDatabaseType(attributes).orElse(null)));
         if (databaseStackConfig == null) {
             throw new BadRequestException("Database config for cloud platform " + cloudPlatform + " not found");
         }
@@ -367,7 +369,7 @@ public class ExternalDatabaseService {
         request.setDatabaseVendor(databaseStackConfig.getVendor());
         request.setStorageSize(databaseStackConfig.getVolumeSize());
         DatabaseServerParameter serverParameter = DatabaseServerParameter.builder()
-                .withHighlyAvailable(DatabaseAvailabilityType.HA == externalDatabase)
+                .withAvailabilityType(externalDatabase)
                 .withEngineVersion(databaseEngineVersion)
                 .withAttributes(attributes)
                 .build();
