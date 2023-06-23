@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.conf;
 
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -21,7 +22,10 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseServerParameterDecorator;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfig;
+import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfigKey;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.DatabaseType;
 
 @Configuration
 public class ExternalDatabaseConfig {
@@ -39,6 +43,8 @@ public class ExternalDatabaseConfig {
 
     @Value("${cb.externaldatabase.sslenforcement.supported.platform:AWS,AZURE}")
     private Set<CloudPlatform> dbServiceSslEnforcementSupportedPlatforms;
+
+    private final Map<CloudPlatform, Set<? extends DatabaseType>> databaseTypeMap = Map.of(CloudPlatform.AZURE, EnumSet.allOf(AzureDatabaseType.class));
 
     @Inject
     private Set<DatabaseServerParameterDecorator> databaseServerParameterDecorators;
@@ -90,27 +96,43 @@ public class ExternalDatabaseConfig {
     }
 
     @Bean
-    public Map<CloudPlatform, DatabaseStackConfig> databaseConfigs() throws IOException {
-        ImmutableMap.Builder<CloudPlatform, DatabaseStackConfig> builder = new ImmutableMap.Builder<>();
+    public Map<DatabaseStackConfigKey, DatabaseStackConfig> databaseConfigs() throws IOException {
+        ImmutableMap.Builder<DatabaseStackConfigKey, DatabaseStackConfig> builder = new ImmutableMap.Builder<>();
 
         for (CloudPlatform cloudPlatform : allPossibleExternalDbPlatforms) {
-            Optional<DatabaseStackConfig> dbConfig = readDatabaseStackConfigResource(cloudPlatform);
-            if (dbConfig.isPresent()) {
-                builder.put(cloudPlatform, dbConfig.get());
+            Set<? extends DatabaseType> databaseTypes = databaseTypeMap.getOrDefault(cloudPlatform, Set.of());
+            if (databaseTypes.isEmpty()) {
+                readDatabaseStackConfigResource(cloudPlatform, null)
+                        .ifPresent(dbc -> builder.put(new DatabaseStackConfigKey(cloudPlatform, null), dbc));
+            } else {
+                for (DatabaseType databaseType : databaseTypes) {
+                    readDatabaseStackConfigResource(cloudPlatform, databaseType)
+                            .ifPresent(dbc -> builder.put(new DatabaseStackConfigKey(cloudPlatform, databaseType), dbc));
+                }
             }
         }
         return builder.build();
     }
 
-    private Optional<DatabaseStackConfig> readDatabaseStackConfigResource(CloudPlatform cloudPlatform)
+    private String getResourcePath(CloudPlatform cloudPlatform, DatabaseType databaseType) {
+        String cloudPlatformString = cloudPlatform.toString().toLowerCase(Locale.US);
+        String resourcePath;
+        if (databaseType == null) {
+            resourcePath = String.format("externaldatabase/%s/database-template.json", cloudPlatformString);
+        } else {
+            resourcePath = String.format("externaldatabase/%s/database-%s-template.json", cloudPlatformString, databaseType.shortName());
+        }
+        return resourcePath;
+    }
+
+    private Optional<DatabaseStackConfig> readDatabaseStackConfigResource(CloudPlatform cloudPlatform, DatabaseType databaseType)
             throws IOException {
-        String resourcePath = String.format("externaldatabase/%s/database-template.json", cloudPlatform.toString().toLowerCase(Locale.US));
+        String resourcePath = getResourcePath(cloudPlatform, databaseType);
         String databaseTemplateJson = FileReaderUtils.readFileFromClasspathQuietly(resourcePath);
         if (databaseTemplateJson == null) {
-            LOGGER.debug("No readable external database template found for cloud platform {}, skipping", cloudPlatform);
+            LOGGER.debug("No readable external database template found for cloud platform {} and database type {}, skipping", cloudPlatform, databaseType);
             return Optional.empty();
         }
         return Optional.of(JsonUtil.readValue(databaseTemplateJson, DatabaseStackConfig.class));
     }
-
 }

@@ -5,8 +5,6 @@ import java.util.Map;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -14,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.AzureHighAvailabiltyMode;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.AzureDatabaseServerModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
@@ -39,6 +38,8 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
     private static final String STORAGE_AUTO_GROW = "storageAutoGrow";
 
     private static final String AZURE_DATABASE_TYPE = AzureDatabaseType.AZURE_DATABASE_TYPE_KEY;
+
+    private static final String HIGH_AVAILABILITY = AzureHighAvailabiltyMode.AZURE_HA_MODE_KEY;
 
     @Min(value = 7, message = "backupRetentionDays must be 7 or higher")
     @ApiModelProperty(AzureDatabaseServerModelDescriptions.BACKUP_RETENTION_DAYS)
@@ -67,6 +68,9 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
 
     @ApiModelProperty(AzureDatabaseServerModelDescriptions.AZURE_DATABASE_TYPE)
     private AzureDatabaseType azureDatabaseType;
+
+    @ApiModelProperty(AzureDatabaseServerModelDescriptions.HIGH_AVAILABILITY)
+    private AzureHighAvailabiltyMode highAvailabilityMode;
 
     public Integer getBackupRetentionDays() {
         return backupRetentionDays;
@@ -132,6 +136,14 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
         this.azureDatabaseType = azureDatabaseType;
     }
 
+    public AzureHighAvailabiltyMode getHighAvailabilityMode() {
+        return highAvailabilityMode;
+    }
+
+    public void setHighAvailabilityMode(AzureHighAvailabiltyMode highAvailabilityMode) {
+        this.highAvailabilityMode = highAvailabilityMode;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
@@ -143,6 +155,7 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
         putIfValueNotNull(map, SKU_TIER, skuTier);
         putIfValueNotNull(map, STORAGE_AUTO_GROW, storageAutoGrow);
         putIfValueNotNull(map, AZURE_DATABASE_TYPE, azureDatabaseType == null ? AzureDatabaseType.SINGLE_SERVER.name() : azureDatabaseType.name());
+        putIfValueNotNull(map, HIGH_AVAILABILITY, highAvailabilityMode == null ? AzureHighAvailabiltyMode.DISABLED.name() : highAvailabilityMode.name());
         return map;
     }
 
@@ -162,7 +175,7 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
         skuFamily = getParameterOrNull(parameters, SKU_FAMILY);
         skuTier = getParameterOrNull(parameters, SKU_TIER);
         storageAutoGrow = Boolean.valueOf(getParameterOrNull(parameters, STORAGE_AUTO_GROW));
-        String azureDatabaseTypeStr = getParameterOrNull(parameters, AZURE_DATABASE_TYPE);
-        azureDatabaseType = StringUtils.isBlank(azureDatabaseTypeStr) ? AzureDatabaseType.SINGLE_SERVER : AzureDatabaseType.valueOf(azureDatabaseTypeStr);
+        azureDatabaseType = AzureDatabaseType.safeValueOf(getParameterOrNull(parameters, AZURE_DATABASE_TYPE));
+        highAvailabilityMode = AzureHighAvailabiltyMode.safeValueOf(getParameterOrNull(parameters, HIGH_AVAILABILITY));
     }
 }

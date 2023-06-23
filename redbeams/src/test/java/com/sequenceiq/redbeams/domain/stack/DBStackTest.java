@@ -19,6 +19,8 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.AzureHighAvailabiltyMode;
 import com.sequenceiq.redbeams.api.model.common.Status;
 
 public class DBStackTest {
@@ -162,18 +164,23 @@ public class DBStackTest {
         databaseServer.setAttributes(SAMPLE_JSON);
         dbStack.setDatabaseServer(databaseServer);
         dbStack.setMajorVersion(MajorVersion.VERSION_11);
-        assertEquals(expectedJson, dbStack.getDatabaseServer().getAttributes());
+        assertEquals(expectedJson.getMap(), dbStack.getDatabaseServer().getAttributes().getMap());
     }
 
     private static Stream<Arguments> provideJsonContentsPerProvider() {
         return Stream.of(
                 Arguments.of(CloudPlatform.AWS,
-                        new Json("{\"engineVersion\":\"11\",\"cloudPlatform\":\"AWS\"}")),
+                        new Json(Map.of("engineVersion", "11", "cloudPlatform", "AWS"))),
                 Arguments.of(CloudPlatform.GCP,
-                        new Json("{\"engineVersion\":\"11\",\"cloudPlatform\":\"GCP\"}")),
+                        new Json(Map.of("engineVersion", "11", "cloudPlatform", "GCP"))),
                 Arguments.of(CloudPlatform.AZURE,
-                        new Json("{\"cloudPlatform\":\"AZURE\",\"AZURE_DATABASE_TYPE\":\"SINGLE_SERVER\"," +
-                                "\"geoRedundantBackup\":false,\"dbVersion\":\"11\",\"storageAutoGrow\":false}")),
+                        new Json(Map.ofEntries(
+                                Map.entry("cloudPlatform", "AZURE"),
+                                Map.entry(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.SINGLE_SERVER.name()),
+                                Map.entry("geoRedundantBackup", false),
+                                Map.entry("dbVersion", "11"),
+                                Map.entry("storageAutoGrow", false),
+                                Map.entry(AzureHighAvailabiltyMode.AZURE_HA_MODE_KEY, AzureHighAvailabiltyMode.DISABLED.name())))),
                 Arguments.of(CloudPlatform.MOCK, SAMPLE_JSON),
                 Arguments.of(CloudPlatform.YARN, SAMPLE_JSON),
                 Arguments.of(CloudPlatform.OPENSTACK, SAMPLE_JSON)

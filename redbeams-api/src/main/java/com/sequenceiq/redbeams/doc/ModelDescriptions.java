@@ -156,6 +156,7 @@ public final class ModelDescriptions {
         public static final String STORAGE_AUTO_GROW = "Whether the database server will automatically grow storage when necessary";
         public static final String DB_VERSION = "The version of the database software to use";
         public static final String AZURE_DATABASE_TYPE = "The type of the azure database: single server / flexible server";
+        public static final String HIGH_AVAILABILITY = "Whether to use a highly available deployment";
     }
 
     public static class GcpDatabaseServerModelDescriptions {

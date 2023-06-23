@@ -10,6 +10,7 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.AzureHighAvailabiltyMode;
 
 public class AzureDatabaseServerV4ParametersTest {
 
@@ -52,7 +53,8 @@ public class AzureDatabaseServerV4ParametersTest {
         assertThat(underTest.asMap()).containsOnly(Map.entry("backupRetentionDays", 3),
                 Map.entry("dbVersion", "1.2.3"),
                 Map.entry("cloudPlatform", "AZURE"),
-                Map.entry(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.SINGLE_SERVER.name()));
+                Map.entry(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.SINGLE_SERVER.name()),
+                Map.entry(AzureHighAvailabiltyMode.AZURE_HA_MODE_KEY, AzureHighAvailabiltyMode.DISABLED.name()));
 
         underTest.setSkuCapacity(5);
         underTest.setSkuFamily("some-family");
@@ -68,9 +70,11 @@ public class AzureDatabaseServerV4ParametersTest {
                 Map.entry("skuTier", "some-tier"),
                 Map.entry("geoRedundantBackup", true),
                 Map.entry("storageAutoGrow", true),
-                Map.entry(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.SINGLE_SERVER.name()));
+                Map.entry(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.SINGLE_SERVER.name()),
+                Map.entry(AzureHighAvailabiltyMode.AZURE_HA_MODE_KEY, AzureHighAvailabiltyMode.DISABLED.name()));
 
         underTest.setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
+        underTest.setHighAvailabilityMode(AzureHighAvailabiltyMode.SAME_ZONE);
 
         assertThat(underTest.asMap()).containsOnly(Map.entry("backupRetentionDays", 3),
                 Map.entry("dbVersion", "1.2.3"),
@@ -80,7 +84,8 @@ public class AzureDatabaseServerV4ParametersTest {
                 Map.entry("skuTier", "some-tier"),
                 Map.entry("geoRedundantBackup", true),
                 Map.entry("storageAutoGrow", true),
-                Map.entry(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name()));
+                Map.entry(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name()),
+                Map.entry(AzureHighAvailabiltyMode.AZURE_HA_MODE_KEY, AzureHighAvailabiltyMode.SAME_ZONE.name()));
     }
 
     @Test
@@ -98,6 +103,7 @@ public class AzureDatabaseServerV4ParametersTest {
                 .put("skuTier", "some-tier")
                 .put("geoRedundantBackup", true)
                 .put("storageAutoGrow", true)
+                .put("highAvailability", AzureHighAvailabiltyMode.DISABLED.name())
                 .build();
 
         underTest.parse(parameters);
@@ -110,6 +116,7 @@ public class AzureDatabaseServerV4ParametersTest {
         assertThat(underTest.getGeoRedundantBackup()).isTrue();
         assertThat(underTest.getStorageAutoGrow()).isTrue();
         assertThat(underTest.getAzureDatabaseType()).isEqualTo(AzureDatabaseType.SINGLE_SERVER);
+        assertThat(underTest.getHighAvailabilityMode()).isEqualTo(AzureHighAvailabiltyMode.DISABLED);
     }
 
 }
