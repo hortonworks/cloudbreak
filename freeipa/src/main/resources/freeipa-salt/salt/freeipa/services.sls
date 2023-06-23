@@ -26,6 +26,14 @@ ipacustodiaRestartSec:
      - repl: 'RestartSec=3'
      - backup: False
 
+certmongerIpaServiceDependency:
+   file.replace:
+     - name: /usr/lib/systemd/system/certmonger.service
+     - pattern: '^After=(.*)'
+     - repl: 'After=\1 ipa.service'
+     - backup: False
+     - unless: grep "After=.*ipa\.service.*" /usr/lib/systemd/system/certmonger.service
+
 {%- if grains['init'] == 'systemd' %}
 {%- for service in pillar['freeipa']['services'] %}
 {%- set command = 'systemctl show -p FragmentPath ' + service %}
