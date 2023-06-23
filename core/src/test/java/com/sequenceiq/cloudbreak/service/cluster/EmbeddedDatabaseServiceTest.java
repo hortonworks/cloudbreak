@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
-import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -148,7 +147,7 @@ public class EmbeddedDatabaseServiceTest {
         StackView stack = createStackView(1);
         when(cloudParameterCache.isVolumeAttachmentSupported(CLOUDPLATFORM)).thenReturn(true);
         // WHEN
-        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabledByStackView(stack, null, null);
+        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabledByStackView(stack, null);
         // THEN
         assertTrue(actualResult);
     }
@@ -159,7 +158,7 @@ public class EmbeddedDatabaseServiceTest {
         StackView stack = createStackView(0);
         when(cloudParameterCache.isVolumeAttachmentSupported(CLOUDPLATFORM)).thenReturn(false);
         // WHEN
-        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabledByStackView(stack, null, null);
+        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabledByStackView(stack, null);
         // THEN
         assertFalse(actualResult);
     }
@@ -168,10 +167,9 @@ public class EmbeddedDatabaseServiceTest {
     public void testIsEmbeddedDatabaseOnAttachedDiskEnabledByStackViewWhenExternalDBUsed() {
         // GIVEN
         StackView stack = createStackView(0);
-        Database database = new Database();
-        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NON_HA);
+        when(stack.getExternalDatabaseCreationType()).thenReturn(DatabaseAvailabilityType.NON_HA);
         // WHEN
-        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabledByStackView(stack, null, database);
+        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabledByStackView(stack, null);
         // THEN
         assertFalse(actualResult);
     }
@@ -183,7 +181,7 @@ public class EmbeddedDatabaseServiceTest {
         Cluster cluster = new Cluster();
         cluster.setDatabaseServerCrn("dbcrn");
         // WHEN
-        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabledByStackView(stack, cluster, null);
+        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabledByStackView(stack, cluster);
         // THEN
         assertFalse(actualResult);
     }
@@ -192,10 +190,9 @@ public class EmbeddedDatabaseServiceTest {
     public void testIsEmbeddedDatabaseOnAttachedDiskEnabledByStackViewWhenEmbeddedDbOnRootDisk() {
         // GIVEN
         StackView stack = createStackView(0);
-        Database database = new Database();
-        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.ON_ROOT_VOLUME);
+        when(stack.getExternalDatabaseCreationType()).thenReturn(DatabaseAvailabilityType.ON_ROOT_VOLUME);
         // WHEN
-        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabledByStackView(stack, null, database);
+        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabledByStackView(stack, null);
         // THEN
         assertFalse(actualResult);
     }
@@ -303,7 +300,7 @@ public class EmbeddedDatabaseServiceTest {
         lenient().when(entitlementService.databaseWireEncryptionEnabled(ACCOUNT_ID)).thenReturn(dlEntitlementEnabled);
         lenient().when(entitlementService.databaseWireEncryptionDatahubEnabled(ACCOUNT_ID)).thenReturn(dhEntitlementEnabled);
 
-        assertThat(underTest.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView, null)).isEqualTo(resultExpected);
+        assertThat(underTest.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView)).isEqualTo(resultExpected);
     }
 
     private void isSslEnforcementForEmbeddedDatabaseEnabledTestInternalBlueprintOnly(Optional<Blueprint> blueprintOptional, boolean resultExpected) {

@@ -130,6 +130,6 @@ public class TargetedUpscaleSupportServiceTest {
     private StackDto getStackDto() {
         Stack stack = new Stack();
         stack.setResourceCrn(DATAHUB_CRN);
-        return new StackDto(stack, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        return new StackDto(stack, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 }

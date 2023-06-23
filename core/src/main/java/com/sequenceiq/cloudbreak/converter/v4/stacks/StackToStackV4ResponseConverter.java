@@ -167,7 +167,7 @@ public class StackToStackV4ResponseConverter {
         response.setTimeToLive(getStackTimeToLive(stack));
         response.setVariant(Strings.isNullOrEmpty(source.getPlatformVariant()) ? source.getCloudPlatform() : source.getPlatformVariant());
         response.setExternalDatabase(externalDatabaseToDatabaseResponseConverter
-                .convert(stack.getExternalDatabaseCreationType(), stack.getExternalDatabaseEngineVersion()));
+                .convert(source.getExternalDatabaseCreationType(), source.getExternalDatabaseEngineVersion()));
         response.setJavaVersion(source.getJavaVersion());
         datalakeService.addSharedServiceResponse(source.getDatalakeCrn(), response);
         filterExposedServicesByType(source.getType(), response.getCluster());

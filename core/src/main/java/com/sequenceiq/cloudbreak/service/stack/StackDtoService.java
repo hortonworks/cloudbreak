@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
-import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackParameters;
@@ -46,7 +45,6 @@ import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.util.DatabaseParameterFallbackUtil;
 import com.sequenceiq.cloudbreak.view.AvailabilityZoneView;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.GatewayView;
@@ -178,7 +176,6 @@ public class StackDtoService {
         }
         ClusterView cluster = clusterDtoRepository.findByStackId(stackView.getId()).orElse(null);
         Network network = stackDtoRepository.getNetworkByStackById(stackView.getId()).orElse(null);
-        Database database = createDatabase(stackDtoRepository.getDatabaseByStackById(stackView.getId()).orElse(null), stackView);
         Workspace workspace = workspaceService.getByIdWithoutAuth(stackView.getWorkspaceId());
         Blueprint blueprint = null;
         GatewayView gateway = null;
@@ -205,12 +202,8 @@ public class StackDtoService {
                                     e -> instanceGroups.stream().filter(ig -> ig.getId().equals(e.getKey())).findFirst().get(),
                                     e -> e.getValue().stream().map(AvailabilityZoneView::getAvailabilityZone).collect(Collectors.toList())));
         }
-        return new StackDto(stackView, cluster, network, database, workspace, workspace.getTenant(), groupListMap, resources, blueprint, gateway,
+        return new StackDto(stackView, cluster, network, workspace, workspace.getTenant(), groupListMap, resources, blueprint, gateway,
                 orchestrator, fileSystem, additionalFileSystem, components, parameters, securityConfig, availabilityZonesByStackId);
-    }
-
-    private Database createDatabase(Database database, StackView stack) {
-        return DatabaseParameterFallbackUtil.getOrCreateDatabase(database, stack);
     }
 
     public List<InstanceGroupDto> getInstanceMetadataByInstanceGroup(Long stackId) {
