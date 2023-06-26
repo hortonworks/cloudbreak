@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.health;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -64,12 +65,21 @@ public class HikariStateHealthIndicatorTest {
 
     @Test
     public void testPoolIsFullAndRedinessDownIsEnabled() {
+        // Since we have not done a dump yet, therefroe it should be default 0 (aka 1st Jan, 1970)
+        assertEquals(0, Long.parseLong(ReflectionTestUtils.getField(underTest, "lastDumpTime").toString()));
+
         configDataSource(genericDs, "app", 30, 30);
         ReflectionTestUtils.setField(underTest, "setReadinessProbeDownIfPoolIsFull", true);
 
-        Health health = underTest.health();
+        Health health1 = underTest.health();
+        Health health2 = underTest.health();
 
-        assertEquals(Status.DOWN, health.getStatus());
+        //just to check whether we ate not flipping state after two consequential run
+        assertEquals(health1.getStatus(), health2.getStatus());
+        assertEquals(Status.DOWN, health2.getStatus());
+
+        // After we made the dump, it should not be 0 (aka 1st Jan, 1970)
+        assertNotEquals(0, Long.parseLong(ReflectionTestUtils.getField(underTest, "lastDumpTime").toString()));
     }
 
     private void configDataSource(HikariDataSource ds, String poolName, Integer active, Integer max) {

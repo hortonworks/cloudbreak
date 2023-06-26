@@ -22,6 +22,10 @@ public class HikariStateHealthIndicator implements HealthIndicator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HikariStateHealthIndicator.class);
 
+    private static final long DUMP_FREQUENCY_MS = 60000;
+
+    private volatile long lastDumpTime;
+
     @Value("${hikari.pool.readiness.down-if-pool-is-full}")
     private boolean setReadinessProbeDownIfPoolIsFull;
 
@@ -69,8 +73,24 @@ public class HikariStateHealthIndicator implements HealthIndicator {
 
     private void threadDumpIfNeeded(boolean poolIsFull) {
         if (poolIsFull) {
-            LOGGER.info("Application has run out of open db connections");
-            ThreadDumpUtil.logThreadDumpOfEveryThread();
+            if (isDumpNeeded()) {
+                LOGGER.info("Application has run out of open db connections");
+                ThreadDumpUtil.logThreadDumpOfEveryThread();
+            } else {
+                LOGGER.info("Although the pool is full, we do not create a new dump since {} ms has not passed since the latest thread dump",
+                        DUMP_FREQUENCY_MS);
+            }
         }
+    }
+
+    private synchronized boolean isDumpNeeded() {
+        boolean createDump = false;
+        long currentTimeMillis = System.currentTimeMillis();
+        long timeDifference = currentTimeMillis - lastDumpTime;
+        if (timeDifference > DUMP_FREQUENCY_MS) {
+            lastDumpTime = currentTimeMillis;
+            createDump = true;
+        }
+        return createDump;
     }
 }
