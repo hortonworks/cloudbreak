@@ -1124,7 +1124,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 validationBuilder.error("SDX cluster request must not specify both runtime version and image at the same time because image " +
                         "decides runtime version.");
             }
-        } else if (imageSettingsV4Request != null && StringUtils.isBlank(clusterRequest.getRuntime())) {
+        } else if (isImageSpecified(imageSettingsV4Request) && StringUtils.isBlank(clusterRequest.getRuntime())) {
             if (cloudPlatform.equals(MOCK)) {
                 clusterRequest.setRuntime(MEDIUM_DUTY_REQUIRED_VERSION);
             } else {
@@ -1137,6 +1137,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
+    }
+
+    private boolean isImageSpecified(ImageSettingsV4Request imageSettingsV4Request) {
+        return imageSettingsV4Request != null && !StringUtils.isBlank(imageSettingsV4Request.getId());
     }
 
     private void validateInternalSdxRequest(StackV4Request stackv4Request, SdxClusterRequest sdxClusterRequest) {
