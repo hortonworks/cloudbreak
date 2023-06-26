@@ -64,6 +64,11 @@ public class FreeIpaImageProvider implements ImageProvider {
                 .map(i -> new ImageWrapper(i, catalogUrl, null));
     }
 
+    @Override
+    public Optional<ImageWrapper> getImage(ImageSettingsRequest imageSettings, String region, String platform, String accountId) {
+        return getImage(imageSettings, region, platform);
+    }
+
     public List<ImageWrapper> getImages(ImageSettingsRequest imageSettings, String region, String platform) {
         String imageId = imageSettings.getId();
         String catalogUrl = StringUtils.isNotBlank(imageSettings.getCatalog()) ? imageSettings.getCatalog() : defaultCatalogUrl;

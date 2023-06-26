@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.rotation;
+package com.sequenceiq.freeipa.service.rotation.saltboot.userdata.executor;
 
 import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.USER_DATA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,9 +24,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.rotation.UserDataRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationProgressService;
+import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataSecretModifier;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.util.UserDataReplacer;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.image.userdata.UserDataService;
-import com.sequenceiq.freeipa.service.rotation.executor.UserDataRotationExecutor;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)

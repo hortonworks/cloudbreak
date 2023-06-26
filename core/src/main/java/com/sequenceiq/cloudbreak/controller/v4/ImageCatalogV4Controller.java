@@ -239,6 +239,15 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     }
 
     @Override
+    @InternalOnly
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
+    public ImageV4Response getSingleImageByCatalogNameAndImageIdInternal(Long workspaceId, @ResourceName String name, String imageId,
+            @AccountId String accountId) throws Exception {
+        StatedImage statedImage = imageCatalogService.getImageByCatalogName(restRequestThreadLocalService.getRequestedWorkspaceId(), imageId, name);
+        return imageToImageV4ResponseConverter.convert(statedImage.getImage());
+    }
+
+    @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
     public ImageV4Response getSingleImageByCatalogNameAndImageId(Long workspaceId, @ResourceName String name, String imageId) throws Exception {
         StatedImage statedImage = imageCatalogService.getImageByCatalogName(restRequestThreadLocalService.getRequestedWorkspaceId(), imageId, name);

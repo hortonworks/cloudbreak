@@ -18,6 +18,54 @@ public class ThreadBasedVaultReadFieldProvider {
 
     }
 
+    public static void doWithNewSecret(Set<String> affectedSecrets, Runnable runnable) {
+        String originalReadFieldName = READ_FIELD_NAME.get();
+        READ_FIELD_NAME.set(VaultConstants.FIELD_SECRET);
+        AFFECTED_SECRETS.set(affectedSecrets);
+        try {
+            runnable.run();
+        } finally {
+            READ_FIELD_NAME.set(originalReadFieldName);
+            AFFECTED_SECRETS.set(Set.of());
+        }
+    }
+
+    public static <T> T doWithNewSecret(Set<String> affectedSecrets, Supplier<T> callable) {
+        String originalReadFieldName = READ_FIELD_NAME.get();
+        READ_FIELD_NAME.set(VaultConstants.FIELD_SECRET);
+        AFFECTED_SECRETS.set(affectedSecrets);
+        try {
+            return callable.get();
+        } finally {
+            READ_FIELD_NAME.set(originalReadFieldName);
+            AFFECTED_SECRETS.set(Set.of());
+        }
+    }
+
+    public static void doWithBackup(Set<String> affectedSecrets, Runnable runnable) {
+        String originalReadFieldName = READ_FIELD_NAME.get();
+        READ_FIELD_NAME.set(VaultConstants.FIELD_BACKUP);
+        AFFECTED_SECRETS.set(affectedSecrets);
+        try {
+            runnable.run();
+        } finally {
+            READ_FIELD_NAME.set(originalReadFieldName);
+            AFFECTED_SECRETS.set(Set.of());
+        }
+    }
+
+    public static <T> T doWithBackup(Set<String> affectedSecrets, Supplier<T> callable) {
+        String originalReadFieldName = READ_FIELD_NAME.get();
+        READ_FIELD_NAME.set(VaultConstants.FIELD_BACKUP);
+        AFFECTED_SECRETS.set(affectedSecrets);
+        try {
+            return callable.get();
+        } finally {
+            READ_FIELD_NAME.set(originalReadFieldName);
+            AFFECTED_SECRETS.set(Set.of());
+        }
+    }
+
     public static <T> T doRollback(Set<String> affectedSecrets, Supplier<T> callable) {
         READ_FIELD_NAME.set(VaultConstants.FIELD_BACKUP);
         AFFECTED_SECRETS.set(affectedSecrets);

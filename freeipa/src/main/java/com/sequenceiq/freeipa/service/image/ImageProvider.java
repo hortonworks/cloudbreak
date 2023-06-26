@@ -10,5 +10,7 @@ public interface ImageProvider {
 
     Optional<ImageWrapper> getImage(ImageSettingsRequest imageSettings, String region, String platformString);
 
+    Optional<ImageWrapper> getImage(ImageSettingsRequest imageSettings, String region, String platformString, String accountId);
+
     List<ImageWrapper> getImages(ImageSettingsRequest imageSettings, String region, String platformString);
 }

@@ -78,6 +78,10 @@ public class FreeIpa implements AccountIdAwareResource {
         this.adminGroupName = adminGroupName;
     }
 
+    public Secret getAdminPasswordSecret() {
+        return adminPassword;
+    }
+
     public String getAdminPassword() {
         return adminPassword.getRaw();
     }

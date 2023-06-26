@@ -161,6 +161,14 @@ public interface ImageCatalogV4Endpoint {
             @QueryParam("imageId") String imageId) throws Exception;
 
     @GET
+    @Path("{name}/singleimage/internal")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGE_BY_NAME_AND_ID, produces = MediaType.APPLICATION_JSON,
+            notes = IMAGE_CATALOG_NOTES, nickname = "getSingleImageByNameAndIdInternal")
+    ImageV4Response getSingleImageByCatalogNameAndImageIdInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("imageId") String imageId, @AccountId @QueryParam("accountId") String accountId) throws Exception;
+
+    @GET
     @Path("image/{imageId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGE_FROM_DEFAULT_BY_ID, produces = MediaType.APPLICATION_JSON,

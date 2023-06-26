@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.rotation.saltboot;
+package com.sequenceiq.freeipa.service.rotation.saltboot.contextprovider;
 
 import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.CUSTOM_JOB;
 import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.SERVICE_CONFIG;
@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
-import com.sequenceiq.cloudbreak.cloud.rotation.UserDataRotationContext;
 import com.sequenceiq.cloudbreak.orchestrator.rotation.ServiceConfigRotationContext;
 import com.sequenceiq.cloudbreak.orchestrator.rotation.ServiceUpdateConfiguration;
 import com.sequenceiq.cloudbreak.orchestrator.salt.rotation.SaltBootPasswordUserDataModifier;
@@ -30,6 +29,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
 import com.sequenceiq.cloudbreak.rotation.secret.context.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;

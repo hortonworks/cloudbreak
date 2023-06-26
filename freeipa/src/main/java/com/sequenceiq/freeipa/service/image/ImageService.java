@@ -150,7 +150,12 @@ public class ImageService {
         return imageProviderFactory.getImageProvider(imageSettings.getCatalog())
                 .getImage(imageSettings, region, platform)
                 .orElseThrow(() -> throwImageNotFoundException(region, imageSettings.getId(), Optional.ofNullable(imageSettings.getOs()).orElse(defaultOs)));
+    }
 
+    public ImageWrapper getImage(ImageSettingsRequest imageSettings, String region, String platform, String accountId) {
+        return imageProviderFactory.getImageProvider(imageSettings.getCatalog())
+                .getImage(imageSettings, region, platform, accountId)
+                .orElseThrow(() -> throwImageNotFoundException(region, imageSettings.getId(), Optional.ofNullable(imageSettings.getOs()).orElse(defaultOs)));
     }
 
     private List<ImageWrapper> getImages(ImageSettingsRequest imageSettings, String region, String platformString) {
@@ -250,7 +255,7 @@ public class ImageService {
     public Image getImageForStack(Stack stack) {
         final ImageEntity imageEntity = getByStack(stack);
         final ImageSettingsRequest imageSettings = imageEntityToImageSettingsRequest(imageEntity);
-        final ImageWrapper imageWrapper = getImage(imageSettings, stack.getRegion(), platformStringTransformer.getPlatformString(stack));
+        final ImageWrapper imageWrapper = getImage(imageSettings, stack.getRegion(), platformStringTransformer.getPlatformString(stack), stack.getAccountId());
 
         return imageWrapper.getImage();
     }

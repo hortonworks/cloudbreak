@@ -1,11 +1,10 @@
-package com.sequenceiq.cloudbreak.cloud.rotation;
+package com.sequenceiq.cloudbreak.rotation.secret.userdata;
 
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataSecretModifier;
 
 public class UserDataRotationContext extends RotationContext {
 

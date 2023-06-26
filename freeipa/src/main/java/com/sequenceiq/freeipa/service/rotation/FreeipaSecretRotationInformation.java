@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.application.ApplicationSecretRo
 import com.sequenceiq.freeipa.api.rotation.FreeIpaSecretType;
 
 @Component
-public class FreeIpaApplicationSecretRotationInformation implements ApplicationSecretRotationInformation {
+public class FreeipaSecretRotationInformation implements ApplicationSecretRotationInformation {
 
     @Override
     public Class<? extends SecretType> supportedSecretType() {

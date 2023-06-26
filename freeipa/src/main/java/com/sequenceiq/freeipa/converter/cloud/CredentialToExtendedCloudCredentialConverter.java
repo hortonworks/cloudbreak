@@ -29,7 +29,7 @@ public class CredentialToExtendedCloudCredentialConverter {
                 credential.getCloudPlatform(),
                 "",
                 crnService.getCurrentUserId(),
-                crnService.getCurrentAccountId(),
-                entitlementService.getEntitlements(crnService.getCurrentAccountId()));
+                cloudCredential.getAccountId(),
+                entitlementService.getEntitlements(cloudCredential.getAccountId()));
     }
 }
