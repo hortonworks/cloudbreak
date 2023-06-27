@@ -51,6 +51,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
@@ -122,6 +123,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.LoadBalancerType;
@@ -676,6 +678,123 @@ class ClusterHostServiceRunnerTest {
                 .anyMatch(f -> "PRIVATE".equals(f.get("type")) && "ip2".equals(f.get("ip")));
     }
 
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testEDLRangerToplogy() throws IOException, CloudbreakOrchestratorFailedException {
+        setupMocksForRunClusterServices();
+        Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
+                node("gateway1"), node("master1"));
+        when(stackUtil.collectNodes(any())).thenReturn(nodes);
+        when(exposedServiceCollector.getAllServiceNames()).thenReturn(Set.of("RANGER"));
+        Map<String, List<String>> locations = new HashMap<>();
+        locations.put("RANGER", List.of("master1", "master2"));
+        when(componentLocator.getComponentLocation(any(), any())).thenReturn(locations);
+        StackView stackViewMock = mock(StackView.class);
+        when(stackViewMock.getId()).thenReturn(STACK_ID);
+        ReflectionTestUtils.setField(stack, "stack", stackViewMock);
+        InstanceGroupView instanceGroupView = mock(InstanceGroupView.class);
+        InstanceMetadataView instanceMetadataView = mock(InstanceMetadataView.class);
+        when(instanceMetadataView.getInstanceMetadataType()).thenReturn(InstanceMetadataType.GATEWAY_PRIMARY);
+        when(instanceGroupView.getGroupName()).thenReturn("GATEWAY");
+        Map<String, InstanceGroupDto> instanceGroups = new HashMap<>();
+        InstanceGroupDto instanceGroupDto = new InstanceGroupDto(instanceGroupView, List.of(instanceMetadataView));
+        instanceGroups.put("GATEWAY", instanceGroupDto);
+        String edlBP = FileReaderUtils.readFileFromClasspath("cdp-sdx-enterprise.bp");
+        Blueprint bp = new Blueprint();
+        bp.setBlueprintText(edlBP);
+        ReflectionTestUtils.setField(stack, "instanceGroups", instanceGroups);
+        ReflectionTestUtils.setField(stack, "blueprint", bp);
+        underTest.redeployGatewayPillarOnly(stack);
+        ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfigCaptor.capture());
+        Set<Node> allNodes = allNodesCaptor.getValue();
+        assertEquals(5, allNodes.size());
+        SaltConfig saltConfig = saltConfigCaptor.getValue();
+        SaltPillarProperties gatewayPillarProperties = saltConfig.getServicePillarConfig().get("gateway");
+        Map<String, Object> props = (HashMap<String, Object>) gatewayPillarProperties.getProperties().get("gateway");
+        Map<String, List<String>> location = (HashMap<String, List<String>>) props.get("location");
+        List<String> ranger = location.get("RANGER");
+        assertTrue(ranger.contains("master1"));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testMDRangerToplogy() throws IOException, CloudbreakOrchestratorFailedException {
+        setupMocksForRunClusterServices();
+        Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
+                node("gateway1"), node("master1"));
+        when(stackUtil.collectNodes(any())).thenReturn(nodes);
+        when(exposedServiceCollector.getAllServiceNames()).thenReturn(Set.of("RANGER"));
+        Map<String, List<String>> locations = new HashMap<>();
+        locations.put("RANGER", List.of("master1", "master2"));
+        when(componentLocator.getComponentLocation(any(), any())).thenReturn(locations);
+        StackView stackViewMock = mock(StackView.class);
+        when(stackViewMock.getId()).thenReturn(STACK_ID);
+        ReflectionTestUtils.setField(stack, "stack", stackViewMock);
+        InstanceGroupView instanceGroupView = mock(InstanceGroupView.class);
+        InstanceMetadataView instanceMetadataView = mock(InstanceMetadataView.class);
+        when(instanceMetadataView.getInstanceMetadataType()).thenReturn(InstanceMetadataType.GATEWAY_PRIMARY);
+        when(instanceGroupView.getGroupName()).thenReturn("GATEWAY");
+        Map<String, InstanceGroupDto> instanceGroups = new HashMap<>();
+        InstanceGroupDto instanceGroupDto = new InstanceGroupDto(instanceGroupView, List.of(instanceMetadataView));
+        instanceGroups.put("GATEWAY", instanceGroupDto);
+        String mediumDutyBP = FileReaderUtils.readFileFromClasspath("cdp-sdx-medium-ha.bp");
+        Blueprint bp = new Blueprint();
+        bp.setBlueprintText(mediumDutyBP);
+        ReflectionTestUtils.setField(stack, "instanceGroups", instanceGroups);
+        ReflectionTestUtils.setField(stack, "blueprint", bp);
+        underTest.redeployGatewayPillarOnly(stack);
+        ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfigCaptor.capture());
+        Set<Node> allNodes = allNodesCaptor.getValue();
+        assertEquals(5, allNodes.size());
+        SaltConfig saltConfig = saltConfigCaptor.getValue();
+        SaltPillarProperties gatewayPillarProperties = saltConfig.getServicePillarConfig().get("gateway");
+        Map<String, Object> props = (HashMap<String, Object>) gatewayPillarProperties.getProperties().get("gateway");
+        Map<String, List<String>> location = (HashMap<String, List<String>>) props.get("location");
+        List<String> ranger = location.get("RANGER");
+        assertTrue(ranger.contains("master1"));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testLDRangerToplogy() throws IOException, CloudbreakOrchestratorFailedException {
+        setupMocksForRunClusterServices();
+        Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
+                node("gateway1"), node("master1"));
+        when(stackUtil.collectNodes(any())).thenReturn(nodes);
+        when(exposedServiceCollector.getAllServiceNames()).thenReturn(Set.of("RANGER"));
+        Map<String, List<String>> locations = new HashMap<>();
+        locations.put("RANGER", List.of("master1", "master2"));
+        when(componentLocator.getComponentLocation(any(), any())).thenReturn(locations);
+        StackView stackViewMock = mock(StackView.class);
+        when(stackViewMock.getId()).thenReturn(STACK_ID);
+        ReflectionTestUtils.setField(stack, "stack", stackViewMock);
+        InstanceGroupView instanceGroupView = mock(InstanceGroupView.class);
+        InstanceMetadataView instanceMetadataView = mock(InstanceMetadataView.class);
+        when(instanceMetadataView.getInstanceMetadataType()).thenReturn(InstanceMetadataType.GATEWAY_PRIMARY);
+        when(instanceGroupView.getGroupName()).thenReturn("GATEWAY");
+        Map<String, InstanceGroupDto> instanceGroups = new HashMap<>();
+        InstanceGroupDto instanceGroupDto = new InstanceGroupDto(instanceGroupView, List.of(instanceMetadataView));
+        instanceGroups.put("GATEWAY", instanceGroupDto);
+        String lightDutyBP = FileReaderUtils.readFileFromClasspath("cdp-sdx.bp");
+        Blueprint bp = new Blueprint();
+        bp.setBlueprintText(lightDutyBP);
+        ReflectionTestUtils.setField(stack, "instanceGroups", instanceGroups);
+        ReflectionTestUtils.setField(stack, "blueprint", bp);
+        underTest.redeployGatewayPillarOnly(stack);
+        ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfigCaptor.capture());
+        Set<Node> allNodes = allNodesCaptor.getValue();
+        assertEquals(5, allNodes.size());
+        SaltConfig saltConfig = saltConfigCaptor.getValue();
+        SaltPillarProperties gatewayPillarProperties = saltConfig.getServicePillarConfig().get("gateway");
+        Map<String, Object> props = (HashMap<String, Object>) gatewayPillarProperties.getProperties().get("gateway");
+        Map<String, List<String>> location = (HashMap<String, List<String>>) props.get("location");
+        List<String> ranger = location.get("RANGER");
+        assertTrue(ranger.contains("master1"));
+    }
+
     private void setupMocksForRunClusterServices() {
         when(umsClient.getAccountDetails(any(), any())).thenReturn(UserManagementProto.Account.getDefaultInstance());
         when(stackView.getTunnel()).thenReturn(Tunnel.DIRECT);
@@ -692,7 +811,9 @@ class ClusterHostServiceRunnerTest {
         when(gatewayConfig.getHostname()).thenReturn("hostname");
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
-        when(exposedServiceCollector.getRangerService()).thenReturn(mock(ExposedService.class));
+        ExposedService rangerMock = mock(ExposedService.class);
+        when(rangerMock.getServiceName()).thenReturn("RANGER");
+        when(exposedServiceCollector.getRangerService()).thenReturn(rangerMock);
         ExposedService cmExposedService = mock(ExposedService.class);
         when(cmExposedService.getServiceName()).thenReturn("CM");
         ExposedService rangerRazExposedService = mock(ExposedService.class);

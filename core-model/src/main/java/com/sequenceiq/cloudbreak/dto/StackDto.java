@@ -460,5 +460,4 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
     public boolean isOnGovPlatformVariant() {
         return CloudConstants.AWS_NATIVE_GOV.equals(getPlatformVariant());
     }
-
 }
