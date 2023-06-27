@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.template.model;
 
 import java.util.Optional;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 
@@ -53,6 +54,8 @@ public class GeneralClusterConfigs {
     private boolean govCloud;
 
     private String creatorWorkloadUserCrn;
+
+    private Set<String> otherGatewayInstancesDiscoveryFQDN;
 
     public OrchestratorType getOrchestratorType() {
         return orchestratorType;
@@ -244,5 +247,13 @@ public class GeneralClusterConfigs {
 
     public void setCreatorWorkloadUserCrn(String creatorWorkloadUserCrn) {
         this.creatorWorkloadUserCrn = creatorWorkloadUserCrn;
+    }
+
+    public Set<String> getOtherGatewayInstancesDiscoveryFQDN() {
+        return otherGatewayInstancesDiscoveryFQDN;
+    }
+
+    public void setOtherGatewayInstancesDiscoveryFQDN(Set<String> otherGatewayInstancesDiscoveryFQDN) {
+        this.otherGatewayInstancesDiscoveryFQDN = otherGatewayInstancesDiscoveryFQDN;
     }
 }

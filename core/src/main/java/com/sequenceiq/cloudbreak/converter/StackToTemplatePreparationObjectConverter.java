@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil.getEphemeralVolumeWhichMustBeProvisioned;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -91,6 +92,7 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.GatewayView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
@@ -412,6 +414,10 @@ public class StackToTemplatePreparationObjectConverter {
             Optional<String> instanceDiscoveryFQDN = generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN();
             if (instanceDiscoveryFQDN.isEmpty()) {
                 generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of(stack.getPrimaryGatewayInstance().getDiscoveryFQDN()));
+                List<InstanceMetadataView> otherInstanceMetadata = new ArrayList<>(stack.getAllAvailableGatewayInstances());
+                otherInstanceMetadata.remove(stack.getPrimaryGatewayInstance());
+                generalClusterConfigs.setOtherGatewayInstancesDiscoveryFQDN(otherInstanceMetadata.stream()
+                        .map(im -> im.getDiscoveryFQDN()).collect(Collectors.toSet()));
             }
         }
         generalClusterConfigs.setLoadBalancerGatewayFqdn(Optional.ofNullable(loadBalancerFqdnUtil.getLoadBalancerUserFacingFQDN(source.getId())));
