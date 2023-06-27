@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_PILLAR;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_STATE_APPLY;
+import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.CUSTOM_JOB;
 import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.VAULT;
 
 import java.text.SimpleDateFormat;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
@@ -27,14 +29,17 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
+import com.sequenceiq.cloudbreak.rotation.context.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContextProvider;
+import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -62,6 +67,9 @@ public class CMDBPasswordRotationContextProvider implements RotationContextProvi
 
     @Inject
     private ClusterHostServiceRunner clusterHostServiceRunner;
+
+    @Inject
+    private ClusterApiConnectors clusterApiConnectors;
 
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resource) {
@@ -95,10 +103,25 @@ public class CMDBPasswordRotationContextProvider implements RotationContextProvi
                 .withCleanupStates(List.of("postgresql.rotate.finalize"))
                 .build();
 
+        CustomJobRotationContext customJobRotationContext = CustomJobRotationContext.builder()
+                .withRotationJob(() -> waitForClouderaManagerToStartup(stack))
+                .withRollbackJob(() -> waitForClouderaManagerToStartup(stack))
+                .build();
+
         result.put(VAULT, vaultRotationContext);
         result.put(SALT_PILLAR, pillarUpdateRotationContext);
         result.put(SALT_STATE_APPLY, stateApplyRotationContext);
+        result.put(CUSTOM_JOB, customJobRotationContext);
         return result;
+    }
+
+    private void waitForClouderaManagerToStartup(StackDto stack) {
+        try {
+            ClusterApi connector = clusterApiConnectors.getConnector(stack);
+            connector.clusterSetupService().waitForServer(false);
+        } catch (Exception e) {
+            throw new SecretRotationException(e, CUSTOM_JOB);
+        }
     }
 
     private Map<String, SaltPillarProperties> getRotationPillarProperties(String resource) {

@@ -12,6 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpStatus;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +34,7 @@ import com.cloudera.api.swagger.model.ApiUser2;
 import com.cloudera.api.swagger.model.ApiUser2List;
 import com.cloudera.api.swagger.model.HTTPMethod;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
+import com.sequenceiq.cloudbreak.auth.altus.exception.UnauthorizedException;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -57,6 +60,10 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerSecurityService.class);
 
     private static final String ADMIN_USER = "admin";
+
+    private static final int TEST_MAX_ATTEMPTS = 5;
+
+    private static final int TEST_BACKOFF = 5000;
 
     @Inject
     private ClouderaManagerSecurityConfigProvider securityConfigProvider;
@@ -86,6 +93,22 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     public ClouderaManagerSecurityService(StackDtoDelegate stack, HttpClientConfig clientConfig) {
         this.stack = stack;
         this.clientConfig = clientConfig;
+    }
+
+    @Override
+    @Retryable(value = UnauthorizedException.class, maxAttempts = TEST_MAX_ATTEMPTS, backoff = @Backoff(delay = TEST_BACKOFF))
+    public void testUser(String user, String password) throws CloudbreakException {
+        try {
+            ApiClient client = getClient(stack.getGatewayPort(), user, password, clientConfig);
+            clouderaManagerApiFactory.getUserResourceApi(client).readUsers2("SUMMARY");
+        } catch (ApiException ae) {
+            if (HttpStatus.UNAUTHORIZED.value() == ae.getCode()) {
+                throw new UnauthorizedException("Test user is not authorized for CM call");
+            }
+            throw new CloudbreakException(String.format("Error occurred during test of user %s.", user), ae);
+        } catch (Exception e) {
+            throw new CloudbreakException(String.format("Error occurred during test of user %s.", user), e);
+        }
     }
 
     @Override

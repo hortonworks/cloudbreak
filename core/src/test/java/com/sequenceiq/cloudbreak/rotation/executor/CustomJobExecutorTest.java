@@ -86,11 +86,11 @@ class CustomJobExecutorTest {
     }
 
     private RotationContext createContext(Runnable rotateCustomJob, Runnable rollbackCustomJob, Runnable finalizeCustomJob) {
-        return new CustomJobRotationContext.CustomJobRotationContextBuilder()
+        return CustomJobRotationContext.builder()
                 .withRotationJob(rotateCustomJob)
                 .withRollbackJob(rollbackCustomJob)
                 .withFinalizeJob(finalizeCustomJob)
-                .bulild();
+                .build();
     }
 
 }

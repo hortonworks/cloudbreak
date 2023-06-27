@@ -10,6 +10,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.exception.UnauthorizedException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -116,7 +118,7 @@ public class CMUserRotationExecutorTest {
         ClusterSecurityService clusterSecurityService = setup();
         CMUserRotationContext rotationContext = getRotationContext();
 
-        underTest.rollback(rotationContext);
+        underTest.executeRollback(rotationContext);
 
         verify(clusterSecurityService, times(1)).deleteUser(
                 eq(USER),
@@ -125,16 +127,30 @@ public class CMUserRotationExecutorTest {
     }
 
     @Test
-    public void testFinalize() throws CloudbreakException {
+    public void testFinalize() throws Exception {
         ClusterSecurityService clusterSecurityService = setup();
         CMUserRotationContext rotationContext = getRotationContext();
+        doNothing().when(clusterSecurityService).testUser(anyString(), anyString());
 
-        underTest.finalize(rotationContext);
+        underTest.executeFinalize(rotationContext);
 
         verify(clusterSecurityService, times(1)).deleteUser(
                 eq("old" + USER),
                 eq(CLIENT_PREFIX + USER),
                 eq(CLIENT_PREFIX + PASS));
+        verify(clusterSecurityService).testUser(eq(USER), eq(PASS));
+    }
+
+    @Test
+    public void testFinalizeIfTestFails() throws Exception {
+        ClusterSecurityService clusterSecurityService = setup();
+        CMUserRotationContext rotationContext = getRotationContext();
+        doThrow(new UnauthorizedException("something")).when(clusterSecurityService).testUser(anyString(), anyString());
+
+        assertThrows(SecretRotationException.class, () -> underTest.executeFinalize(rotationContext));
+
+        verify(clusterSecurityService).testUser(eq(USER), eq(PASS));
+        verifyNoMoreInteractions(clusterSecurityService);
     }
 
     private static CMUserRotationContext getRotationContext() {

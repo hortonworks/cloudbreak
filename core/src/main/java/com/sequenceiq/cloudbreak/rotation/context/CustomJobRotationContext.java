@@ -31,6 +31,10 @@ public class CustomJobRotationContext extends RotationContext {
         return finalizeJob;
     }
 
+    public static CustomJobRotationContextBuilder builder() {
+        return new CustomJobRotationContextBuilder();
+    }
+
     public static class CustomJobRotationContextBuilder {
 
         private String resourceCrn;
@@ -61,7 +65,7 @@ public class CustomJobRotationContext extends RotationContext {
             return this;
         }
 
-        public CustomJobRotationContext bulild() {
+        public CustomJobRotationContext build() {
             return new CustomJobRotationContext(resourceCrn, rotationJob, rollbackJob, finalizeJob);
         }
     }
