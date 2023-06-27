@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -17,9 +18,9 @@ import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
-import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 /**
  * Waits for a CM managed host to heartbeat, and the ApiHealthSummary to go into a Good state.
@@ -42,14 +43,32 @@ public class ClouderaManagerHostHealthyStatusChecker extends AbstractClouderaMan
     @VisibleForTesting
     final Set<String> hostnamesToCheckFor;
 
+    @VisibleForTesting
+    final Set<InstanceMetadataView> hostsToCheckFor;
+
     public ClouderaManagerHostHealthyStatusChecker(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            ClusterEventService clusterEventService, Set<String> hostnamesToCheckFor) {
+            ClusterEventService clusterEventService, Set<InstanceMetadataView> hostsToCheckFor) {
         super(clouderaManagerApiPojoFactory, clusterEventService);
         // TODO CB-15132: Introduce a threshold on this polling. Return hosts which have moved into a good state within a time window.
         start = Instant.now();
-        this.hostnamesToCheckFor = new HashSet<>(hostnamesToCheckFor);
+        this.hostnamesToCheckFor = new HashSet<>(hostsToCheckFor.stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toUnmodifiableSet()));
+        this.hostsToCheckFor = hostsToCheckFor;
         initialNodeCount = hostnamesToCheckFor.size();
         LOGGER.info("Initialized ClouderaManagerHostHealthyStatusChecker with start={}, hostNamesToCheckFor.size()={}", start, hostnamesToCheckFor.size());
+    }
+
+    @Override
+    public Set<Long> getFailedInstanceIds() {
+        Set<Long> failedInstanceIds = new HashSet<>();
+        for (String hostNameToCheckFor: hostnamesToCheckFor) {
+            for (InstanceMetadataView instanceMetadataView : hostsToCheckFor) {
+                if (instanceMetadataView.getDiscoveryFQDN().equals(hostNameToCheckFor)) {
+                    failedInstanceIds.add(instanceMetadataView.getPrivateId());
+                    break;
+                }
+            }
+        }
+        return failedInstanceIds;
     }
 
     @Override
@@ -69,7 +88,7 @@ public class ClouderaManagerHostHealthyStatusChecker extends AbstractClouderaMan
         int post = hostnamesToCheckFor.size();
         LOGGER.debug("NumHostsFoundToBeHealthy={}, pendingHostCount={}", post - pre, post);
 
-        return hostnamesToCheckFor.size() == 0;
+        return hostnamesToCheckFor.isEmpty();
     }
 
     private Set<String> fetchGoodHostsFromManager(ClouderaManagerPollerObject pollerObject) throws ApiException {
@@ -108,9 +127,8 @@ public class ClouderaManagerHostHealthyStatusChecker extends AbstractClouderaMan
 
     @Override
     public void handleTimeout(ClouderaManagerPollerObject pollerObject) {
-        throw new ClouderaManagerOperationFailedException(
-                String.format("Operation timed out. Failed while waiting for %d nodes to move into health state. MissingNodeCount=%d, MissingNodes=[%s]",
-                        initialNodeCount, hostnamesToCheckFor.size(), hostnamesToCheckFor));
+        LOGGER.warn("Operation timed out. Failed while waiting for {} nodes to move into health state. MissingNodeCount={}, MissingNodes={}",
+                initialNodeCount, hostnamesToCheckFor.size(), hostnamesToCheckFor);
     }
 
     @Override

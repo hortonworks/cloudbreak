@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_CMHOSTSSTARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_CM_TIMEOUT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_EXCLUDE_LOST_NODES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_WAITING_HOSTSTART;
 
@@ -14,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -31,6 +33,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartUpscaleCommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartUpscaleCommissionViaCMResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -96,14 +99,33 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
                     String.valueOf(allInstancesToCommission.size()));
 
             ClusterSetupService clusterSetupService = clusterApiConnectors.getConnector(stack).clusterSetupService();
-            clusterSetupService.waitForHostsHealthy(new HashSet<>(allInstancesToCommission));
+            ExtendedPollingResult extendedPollingResult = clusterSetupService.waitForHostsHealthy(new HashSet<>(allInstancesToCommission));
+            List<InstanceMetadataView> healthyInstancesToCommision;
+            if (!extendedPollingResult.isSuccess()) {
+                healthyInstancesToCommision = allInstancesToCommission.stream().filter(instanceMetadataView -> !extendedPollingResult.getFailedInstanceIds()
+                        .contains(instanceMetadataView.getPrivateId())).collect(Collectors.toList());
+                List<InstanceMetadataView> unhealthyInstances = allInstancesToCommission.stream()
+                        .filter(instanceMetadataView -> extendedPollingResult.getFailedInstanceIds()
+                        .contains(instanceMetadataView.getPrivateId())).collect(Collectors.toList());
+                if (healthyInstancesToCommision.isEmpty()) {
+                    throw new BadRequestException(String.format("Operation timed out. Failed while waiting for %d nodes to move into health state. " +
+                            "MissingNodes=[%s]", allInstancesToCommission.size(), allInstancesToCommission.stream().map(InstanceMetadataView::getDiscoveryFQDN)
+                            .collect(Collectors.toList())));
+                }
+                flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_CM_TIMEOUT,
+                        String.valueOf(allInstancesToCommission.size()), String.valueOf(unhealthyInstances.size()),
+                        String.join(", ", unhealthyInstances.stream()
+                                .map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toList())));
+            } else {
+                healthyInstancesToCommision = allInstancesToCommission.stream().toList();
+            }
 
             flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_CMHOSTSSTARTED,
-                    String.valueOf(allInstancesToCommission.size()));
+                    String.valueOf(healthyInstancesToCommision.size()));
 
             ClusterCommissionService clusterCommissionService = clusterApiConnectors.getConnector(stack).clusterCommissionService();
 
-            Set<String> hostNames = allInstancesToCommission.stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.toSet());
+            Set<String> hostNames = healthyInstancesToCommision.stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toSet());
             LOGGER.debug("HostNames to recommission: count={}, hostNames={}", hostNames.size(), hostNames);
 
             HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), request.getHostGroupName())

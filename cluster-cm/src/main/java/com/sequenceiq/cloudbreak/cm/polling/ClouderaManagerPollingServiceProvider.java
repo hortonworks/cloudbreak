@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.cm.polling.task.SilentCMDecommissionHostListene
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Service
 public class ClouderaManagerPollingServiceProvider {
@@ -95,11 +96,12 @@ public class ClouderaManagerPollingServiceProvider {
                     new ClouderaManagerStatusListenerTask(clouderaManagerApiPojoFactory, clusterEventService));
     }
 
-    public ExtendedPollingResult startPollingCmHostStatusHealthy(StackDtoDelegate stack, ApiClient apiClient, Set<String> hostnamesToWaitFor) {
+    public ExtendedPollingResult startPollingCmHostStatusHealthy(StackDtoDelegate stack, ApiClient apiClient, Set<InstanceMetadataView> hostsToWaitFor) {
         LOGGER.debug("Waiting for Cloudera Manager hosts to connect and become healthy. NodeCount={}, Nodes=[{}], [Server address: {}]",
-                hostnamesToWaitFor.size(), hostnamesToWaitFor, stack.getClusterManagerIp());
+                hostsToWaitFor.size(), hostsToWaitFor.stream().map(InstanceMetadataView::getDiscoveryFQDN)
+                        .toList(), stack.getClusterManagerIp());
         return pollApiWithTimeListener(stack, apiClient, POLL_FOR_5_MINUTES,
-                new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, hostnamesToWaitFor));
+                new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, hostsToWaitFor));
     }
 
     public ExtendedPollingResult startPollingCmHostStatus(StackDtoDelegate stack, ApiClient apiClient) {

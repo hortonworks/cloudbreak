@@ -8,11 +8,10 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.assertj.core.util.Sets;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +29,8 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClouderaManagerHostHealthyStatusCheckerTest {
@@ -54,8 +55,12 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
 
     @Test
     public void testSingleGoodHostOnFirstInvocation() throws ApiException {
-        Set<String> hostnamesToCheckFor = Sets.newHashSet(Arrays.asList("h1"));
-        underTest = new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, hostnamesToCheckFor);
+        Set<InstanceMetadataView> instanceMetadatas = new HashSet<>();
+        InstanceMetaData instanceMetaData1 = new InstanceMetaData();
+        instanceMetaData1.setDiscoveryFQDN("h1");
+        instanceMetaData1.setPrivateId(1L);
+        instanceMetadatas.add(instanceMetaData1);
+        underTest = new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, instanceMetadatas);
 
         ApiHostList apiHostList = new ApiHostList().items(List.of(
                 constructApiHost("h1", underTest.start.plusMillis(1), ApiHealthSummary.GOOD, false, ApiCommissionState.COMMISSIONED)));
@@ -67,8 +72,12 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
 
     @Test
     public void testHostNotMarkedAsGood() throws ApiException {
-        Set<String> hostnamesToCheckFor = Sets.newHashSet(Arrays.asList("h1"));
-        underTest = new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, hostnamesToCheckFor);
+        Set<InstanceMetadataView> instanceMetadatas = new HashSet<>();
+        InstanceMetaData instanceMetaData1 = new InstanceMetaData();
+        instanceMetaData1.setDiscoveryFQDN("h1");
+        instanceMetaData1.setPrivateId(1L);
+        instanceMetadatas.add(instanceMetaData1);
+        underTest = new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, instanceMetadatas);
 
         ApiHostList apiHostList;
         boolean result;
@@ -100,8 +109,12 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
 
     @Test
     public void testHostMarkedAsGoodDespiteMaintenanceCommissionState() throws ApiException {
-        Set<String> hostnamesToCheckFor = Sets.newHashSet(Arrays.asList("h1"));
-        underTest = new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, hostnamesToCheckFor);
+        Set<InstanceMetadataView> instanceMetadatas = new HashSet<>();
+        InstanceMetaData instanceMetaData1 = new InstanceMetaData();
+        instanceMetaData1.setDiscoveryFQDN("h1");
+        instanceMetaData1.setPrivateId(1L);
+        instanceMetadatas.add(instanceMetaData1);
+        underTest = new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, instanceMetadatas);
 
         ApiHostList apiHostList;
         boolean result;
@@ -133,8 +146,20 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
 
     @Test
     public void testSeriesOfInvocations() throws ApiException {
-        Set<String> hostnamesToCheckFor = Sets.newHashSet(Arrays.asList("h1", "h2", "h3"));
-        underTest = new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, hostnamesToCheckFor);
+        Set<InstanceMetadataView> instanceMetadatas = new HashSet<>();
+        InstanceMetaData instanceMetaData1 = new InstanceMetaData();
+        instanceMetaData1.setDiscoveryFQDN("h1");
+        instanceMetaData1.setPrivateId(1L);
+        instanceMetadatas.add(instanceMetaData1);
+        InstanceMetaData instanceMetaData2 = new InstanceMetaData();
+        instanceMetaData2.setDiscoveryFQDN("h2");
+        instanceMetaData2.setPrivateId(2L);
+        instanceMetadatas.add(instanceMetaData2);
+        InstanceMetaData instanceMetaData3 = new InstanceMetaData();
+        instanceMetaData3.setDiscoveryFQDN("h3");
+        instanceMetaData3.setPrivateId(3L);
+        instanceMetadatas.add(instanceMetaData3);
+        underTest = new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, instanceMetadatas);
         ApiHostList apiHostList;
         boolean result;
 

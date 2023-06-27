@@ -394,7 +394,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     }
 
     @Override
-    public void waitForHostsHealthy(Set<InstanceMetadataView> hostsInCluster) throws ClusterClientInitException {
+    public ExtendedPollingResult waitForHostsHealthy(Set<InstanceMetadataView> hostsInCluster) throws ClusterClientInitException {
         ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
@@ -404,8 +404,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
-        clouderaManagerPollingServiceProvider.startPollingCmHostStatusHealthy(
-                stack, client, hostsInCluster.stream().map(x -> x.getDiscoveryFQDN()).collect(Collectors.toUnmodifiableSet()));
+        return clouderaManagerPollingServiceProvider.startPollingCmHostStatusHealthy(
+                stack, client, hostsInCluster);
     }
 
     @Override

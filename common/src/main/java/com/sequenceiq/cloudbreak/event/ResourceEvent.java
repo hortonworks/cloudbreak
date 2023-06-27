@@ -408,6 +408,7 @@ public enum ResourceEvent {
     CLUSTER_SCALING_STOPSTART_UPSCALE_EXCLUDE_LOST_NODES("cluster.scaling.stopstart.upscale.exclude.lost.nodes"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_COULDNOTCOMMISSION("cluster.scaling.stopstart.upscale.couldnotcommission"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_WAITING_HOSTSTART("cluster.scaling.stopstart.upscale.waiting.hoststart"),
+    CLUSTER_SCALING_STOPSTART_UPSCALE_CM_TIMEOUT("cluster.scaling.stopstart.upscale.cm.timeout"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_CMHOSTSSTARTED("cluster.scaling.stopstart.upscale.cmhostsstarted"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_START_FAILED("cluster.scaling.stopstart.upscale.start.failed"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_COMMISSION_FAILED("cluster.scaling.stopstart.upscale.commission.failed"),

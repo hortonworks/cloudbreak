@@ -4,10 +4,8 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -47,6 +45,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartUpscaleCommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartUpscaleCommissionViaCMResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -61,7 +60,7 @@ public class StopStartUpscaleCommissionViaCMHandlerTest {
 
     private static final Long STACK_ID = 100L;
 
-    private static final Long CLUSTER_ID = 101L;
+    private static final Long CLUSTER_ID = 11L;
 
     private static final String INSTANCE_ID_PREFIX = "i-";
 
@@ -109,6 +108,8 @@ public class StopStartUpscaleCommissionViaCMHandlerTest {
         int commissionInstanceCount = 5;
         List<InstanceMetaData> instancesToCommission = createInstanceMetaDataWithStatus(commissionInstanceCount, "fqdn-",
                 InstanceStatus.SERVICES_RUNNING);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
+        when(clusterSetupService.waitForHostsHealthy(new HashSet<>(instancesToCommission))).thenReturn(extendedPollingResult);
         HostGroup hostGroup = createHostGroup(instancesToCommission);
 
         Set<String> hostNames = instancesToCommission.stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.toSet());
@@ -134,6 +135,8 @@ public class StopStartUpscaleCommissionViaCMHandlerTest {
         int commissionInstanceCount = 5;
         List<InstanceMetaData> instancesToCommission = createInstanceMetaDataWithStatus(commissionInstanceCount, "fqdn-",
                 InstanceStatus.SERVICES_RUNNING);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
+        when(clusterSetupService.waitForHostsHealthy(new HashSet<>(instancesToCommission))).thenReturn(extendedPollingResult);
         HostGroup hostGroup = createHostGroup(instancesToCommission);
 
         Set<String> hostNames = instancesToCommission.stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.toSet());
@@ -160,6 +163,8 @@ public class StopStartUpscaleCommissionViaCMHandlerTest {
         int commissionInstanceCount = 5;
         List<InstanceMetaData> instancesToCommission = createInstanceMetaDataWithStatus(commissionInstanceCount, "fqdn-",
                 InstanceStatus.SERVICES_RUNNING);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
+        when(clusterSetupService.waitForHostsHealthy(new HashSet<>(instancesToCommission))).thenReturn(extendedPollingResult);
         HostGroup hostGroup = createHostGroup(instancesToCommission);
 
         Set<String> hostNames = instancesToCommission.stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.toSet());
@@ -185,6 +190,8 @@ public class StopStartUpscaleCommissionViaCMHandlerTest {
         int commissionInstanceCount = 5;
         List<InstanceMetaData> instancesToCommission = createInstanceMetaDataWithStatus(commissionInstanceCount, "fqdn-",
                 InstanceStatus.SERVICES_RUNNING);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
+        when(clusterSetupService.waitForHostsHealthy(new HashSet<>(instancesToCommission))).thenReturn(extendedPollingResult);
         HostGroup hostGroup = createHostGroup(instancesToCommission);
 
         Set<String> hostNames = instancesToCommission.stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.toSet());
@@ -207,9 +214,16 @@ public class StopStartUpscaleCommissionViaCMHandlerTest {
     }
 
     @Test
-    void testErrorFromWaitForHostsHealthy() throws ClusterClientInitException {
+    void testWhenOneCmHostDidNotStart() throws ClusterClientInitException {
         int commissionInstanceCount = 5;
         List<InstanceMetaData> instancesToCommission = createInstanceMetaDataWithStatus(commissionInstanceCount, "fqdn-",
+                InstanceStatus.SERVICES_RUNNING);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().withPayload(Set.of(5L)).build();
+        when(clusterSetupService.waitForHostsHealthy(new HashSet<>(instancesToCommission))).thenReturn(extendedPollingResult);
+
+        StopStartUpscaleCommissionViaCMRequest request =
+                new StopStartUpscaleCommissionViaCMRequest(1L,  INSTANCE_GROUP_NAME, new ArrayList<>(instancesToCommission), emptyList());
+        instancesToCommission = createInstanceMetaDataWithStatus(4, "fqdn-",
                 InstanceStatus.SERVICES_RUNNING);
         HostGroup hostGroup = createHostGroup(instancesToCommission);
 
@@ -218,21 +232,15 @@ public class StopStartUpscaleCommissionViaCMHandlerTest {
         Set<String> recommissionedFqdns = cmAvailableHosts.keySet().stream().collect(Collectors.toUnmodifiableSet());
 
         setupPerTestMocks(hostGroup, hostNames, cmAvailableHosts,  recommissionedFqdns);
-        doThrow(new RuntimeException("waitForHostsHealthyException")).when(clusterSetupService).waitForHostsHealthy(anySet());
-
-        StopStartUpscaleCommissionViaCMRequest request =
-                new StopStartUpscaleCommissionViaCMRequest(1L,  INSTANCE_GROUP_NAME, new ArrayList<>(instancesToCommission), emptyList());
 
         HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
         Selectable selectable = underTest.doAccept(handlerEvent);
         assertThat(selectable).isInstanceOf(StopStartUpscaleCommissionViaCMResult.class);
 
         StopStartUpscaleCommissionViaCMResult result = (StopStartUpscaleCommissionViaCMResult) selectable;
-        assertThat(result.getSuccessfullyCommissionedFqdns()).hasSize(0);
+        assertThat(result.getSuccessfullyCommissionedFqdns()).hasSize(4);
         assertThat(result.getNotRecommissionedFqdns()).hasSize(0);
-        assertThat(result.getErrorDetails().getMessage()).isEqualTo("waitForHostsHealthyException");
-        assertThat(result.getStatus()).isEqualTo(EventStatus.FAILED);
-        assertThat(result.selector()).isEqualTo("STOPSTARTUPSCALECOMMISSIONVIACMRESULT_ERROR");
+        assertThat(result.getStatus()).isEqualTo(EventStatus.OK);
     }
 
     @Test
@@ -240,6 +248,8 @@ public class StopStartUpscaleCommissionViaCMHandlerTest {
         int commissionInstanceCount = 5;
         List<InstanceMetaData> instancesToCommission = createInstanceMetaDataWithStatus(commissionInstanceCount, "fqdn-",
                 InstanceStatus.SERVICES_RUNNING);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
+        when(clusterSetupService.waitForHostsHealthy(new HashSet<>(instancesToCommission))).thenReturn(extendedPollingResult);
         HostGroup hostGroup = createHostGroup(instancesToCommission);
 
         Set<String> hostNames = instancesToCommission.stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.toSet());
@@ -270,6 +280,8 @@ public class StopStartUpscaleCommissionViaCMHandlerTest {
         int commissionInstanceCount = 5;
         List<InstanceMetaData> instancesToCommission = createInstanceMetaDataWithStatus(commissionInstanceCount, "fqdn-",
                 InstanceStatus.SERVICES_RUNNING);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
+        when(clusterSetupService.waitForHostsHealthy(new HashSet<>(instancesToCommission))).thenReturn(extendedPollingResult);
         HostGroup hostGroup = createHostGroup(instancesToCommission);
 
         Set<String> hostNames = instancesToCommission.stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.toSet());
@@ -306,6 +318,9 @@ public class StopStartUpscaleCommissionViaCMHandlerTest {
         List<InstanceMetaData> combined = Stream.of(instancesToCommission, lostInstanceMetaDataToExclude).flatMap(Collection::stream).toList();
         HostGroup hostGroup = createHostGroup(combined);
 
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
+        when(clusterSetupService.waitForHostsHealthy(new HashSet<>(combined))).thenReturn(extendedPollingResult);
+
         Set<String> hostNames = combined.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
         Set<String> disconnectedNMHostNames = lostInstanceMetaDataToExclude.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
         Map<String, InstanceMetaData> cmAvailableHosts = instancesToCommission.stream().collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN,
@@ -336,6 +351,7 @@ public class StopStartUpscaleCommissionViaCMHandlerTest {
         instanceGroup.setGroupName(INSTANCE_GROUP_NAME);
         for (int i = 0; i < count; i++) {
             InstanceMetaData instanceMetaData = new InstanceMetaData();
+            instanceMetaData.setPrivateId(i + 1L);
             instanceMetaData.setInstanceId(INSTANCE_ID_PREFIX + i);
             instanceMetaData.setInstanceStatus(status);
             instanceMetaData.setInstanceGroup(instanceGroup);
@@ -371,7 +387,6 @@ public class StopStartUpscaleCommissionViaCMHandlerTest {
 
         lenient().when(hostGroupService.getByClusterIdAndName(eq(CLUSTER_ID), eq(INSTANCE_GROUP_NAME))).thenReturn(Optional.of(hostGroup));
 
-        lenient().doNothing().when(clusterSetupService).waitForHostsHealthy(anySet());
         lenient().when(clusterCommissionService.collectHostsToCommission(eq(hostGroup), eq(hostnames))).thenReturn(cmAvailableHosts);
 
         lenient().when(clusterCommissionService.recommissionClusterNodes(cmAvailableHosts)).thenReturn(recommissionedFqdns);
