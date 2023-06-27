@@ -378,7 +378,7 @@ public interface SdxEndpoint {
     @PUT
     @Path("rotate_secret")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Rotate SDX secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateSDXSecrets", hidden = true)
+    @ApiOperation(value = "Rotate SDX secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateSDXSecrets")
     FlowIdentifier rotateSecrets(@Valid @NotNull SdxSecretRotationRequest request);
 
     @PUT
