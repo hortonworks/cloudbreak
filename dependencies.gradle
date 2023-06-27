@@ -6,7 +6,7 @@ ext {
 
   // Spring
   caffeineVersion = '2.8.1'
-  springBootVersion = '2.7.12'
+  springBootVersion = '2.7.13'
   springDataJpaFrameworkVersion = '2.7.12'
   springFrameworkVersion = '5.3.27'
   springSecurityVersion = '5.6.9'
