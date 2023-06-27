@@ -67,7 +67,7 @@ public class UserKeyPairRotationContextProvider implements RotationContextProvid
 
     private CustomJobRotationContext getCustomJobRotationContext(boolean changedKeyPair, String resourceCrn, StackDto stack,
             DetailedEnvironmentResponse environment) {
-        CustomJobRotationContextBuilder customJobRotationContextBuilder = new CustomJobRotationContextBuilder();
+        CustomJobRotationContextBuilder customJobRotationContextBuilder = CustomJobRotationContext.builder();
         customJobRotationContextBuilder.withResourceCrn(resourceCrn);
         if (changedKeyPair) {
             customJobRotationContextBuilder.withRotationJob(() -> stackAuthenticationRepository
@@ -75,7 +75,7 @@ public class UserKeyPairRotationContextProvider implements RotationContextProvid
             customJobRotationContextBuilder.withRollbackJob(() -> stackAuthenticationRepository
                     .save(stack.getStackAuthentication()));
         }
-        return customJobRotationContextBuilder.bulild();
+        return customJobRotationContextBuilder.build();
     }
 
     private StackAuthentication updateAuthentication(StackAuthentication stackAuthentication, EnvironmentAuthenticationResponse envAuthentication) {

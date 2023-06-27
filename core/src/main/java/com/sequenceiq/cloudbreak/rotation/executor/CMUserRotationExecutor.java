@@ -66,13 +66,16 @@ public class CMUserRotationExecutor implements RotationExecutor<CMUserRotationCo
     }
 
     @Override
-    public void finalize(CMUserRotationContext rotationContext) {
+    public void finalize(CMUserRotationContext rotationContext) throws Exception {
         LOGGER.info("Finalizing rotation of CM user by deleting the old user");
         RotationSecret userRotationSecret = secretService.getRotation(rotationContext.getUserSecret());
-        if (userRotationSecret.isRotation()) {
+        RotationSecret passwordRotationSecret = secretService.getRotation(rotationContext.getPasswordSecret());
+        if (userRotationSecret.isRotation() && passwordRotationSecret.isRotation()) {
+            LOGGER.info("Before old user deletion, checking if API call is possible with new user!");
+            getClusterSecurityService(rotationContext).testUser(userRotationSecret.getSecret(), passwordRotationSecret.getSecret());
             deleteUser(userRotationSecret.getBackupSecret(), rotationContext);
         } else {
-            throw new SecretRotationException("User is not in rotation state in Vault, thus we cannot finalize it.", getType());
+            throw new SecretRotationException("User or password is not in rotation state in Vault, thus we cannot finalize it.", getType());
         }
     }
 

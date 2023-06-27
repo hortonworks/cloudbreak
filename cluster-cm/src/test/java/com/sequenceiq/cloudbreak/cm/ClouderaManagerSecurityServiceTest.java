@@ -51,6 +51,7 @@ import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiUser2;
 import com.cloudera.api.swagger.model.ApiUser2List;
+import com.sequenceiq.cloudbreak.auth.altus.exception.UnauthorizedException;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
@@ -107,6 +108,46 @@ public class ClouderaManagerSecurityServiceTest {
         clientConfig = new HttpClientConfig("localhost");
         underTest = new ClouderaManagerSecurityService(stack, clientConfig);
         MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void testTestUser() throws ClouderaManagerClientInitException, ApiException, CloudbreakException {
+        initTestInput(ADMIN);
+        UsersResourceApi usersResourceApi = mock(UsersResourceApi.class);
+        ApiUser2List userList = createApiUser2List();
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(any(), any(), anyString(), anyString(), anyString())).thenReturn(apiClient);
+        when(clouderaManagerApiFactory.getUserResourceApi(any())).thenReturn(usersResourceApi);
+        when(usersResourceApi.readUsers2("SUMMARY")).thenReturn(userList);
+
+        underTest.testUser(ADMIN, ADMIN);
+
+        verify(usersResourceApi, times(1)).readUsers2(any());
+    }
+
+    @Test
+    public void testTestUserIfNot401Occured() throws ClouderaManagerClientInitException, ApiException {
+        initTestInput(ADMIN);
+        UsersResourceApi usersResourceApi = mock(UsersResourceApi.class);
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(any(), any(), anyString(), anyString(), anyString())).thenReturn(apiClient);
+        when(clouderaManagerApiFactory.getUserResourceApi(any())).thenReturn(usersResourceApi);
+        when(usersResourceApi.readUsers2("SUMMARY")).thenThrow(new ApiException(503, "something"));
+
+        assertThrows(CloudbreakException.class, () -> underTest.testUser(ADMIN, ADMIN));
+
+        verify(usersResourceApi, times(1)).readUsers2(any());
+    }
+
+    @Test
+    public void testTestUserIf401Occured() throws ClouderaManagerClientInitException, ApiException {
+        initTestInput(ADMIN);
+        UsersResourceApi usersResourceApi = mock(UsersResourceApi.class);
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(any(), any(), anyString(), anyString(), anyString())).thenReturn(apiClient);
+        when(clouderaManagerApiFactory.getUserResourceApi(any())).thenReturn(usersResourceApi);
+        when(usersResourceApi.readUsers2("SUMMARY")).thenThrow(new ApiException(401, "something"));
+
+        assertThrows(UnauthorizedException.class, () -> underTest.testUser(ADMIN, ADMIN));
+
+        verify(usersResourceApi, times(1)).readUsers2(any());
     }
 
     @Test
