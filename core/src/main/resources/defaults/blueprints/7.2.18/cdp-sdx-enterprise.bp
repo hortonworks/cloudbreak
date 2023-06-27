@@ -72,7 +72,7 @@
       },
       {
         "cardinality":0,
-        "refName":"solrHG",
+        "refName":"solrScaleOut",
         "roleConfigGroupsRefNames":[
           "solr-SOLR_SERVER-EXTERNAL",
           "solr-GATEWAY-BASE"
@@ -80,7 +80,7 @@
       },
       {
         "cardinality":0,
-        "refName":"storageHG",
+        "refName":"storageScaleOut",
         "roleConfigGroupsRefNames":[
           "hbase-REGIONSERVER-EXTERNAL",
           "hdfs-DATANODE-EXTERNAL",
@@ -90,7 +90,7 @@
       },
       {
         "cardinality":0,
-        "refName":"kafkaHG",
+        "refName":"kafkaScaleOut",
         "roleConfigGroupsRefNames":[
           "kafka-KAFKA_BROKER-EXTERNAL",
           "kafka-GATEWAY-BASE"
@@ -98,13 +98,13 @@
       },
       {
         "cardinality":0,
-        "refName":"razHG",
+        "refName":"razScaleOut",
         "roleConfigGroupsRefNames":[
         ]
       },
       {
         "cardinality":0,
-        "refName":"atlasHG",
+        "refName":"atlasScaleOut",
         "roleConfigGroupsRefNames":[
           "atlas-ATLAS_SERVER-EXTERNAL",
           "hdfs-GATEWAY-BASE",
@@ -113,7 +113,7 @@
       },
       {
         "cardinality":0,
-        "refName":"hmsHG",
+        "refName":"hmsScaleOut",
         "roleConfigGroupsRefNames":[
           "hive-HIVEMETASTORE-EXTERNAL",
           "hive-GATEWAY-BASE"

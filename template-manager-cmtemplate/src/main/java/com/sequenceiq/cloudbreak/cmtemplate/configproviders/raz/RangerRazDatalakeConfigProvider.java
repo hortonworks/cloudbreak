@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -12,13 +13,15 @@ import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
+import com.sequenceiq.common.api.type.InstanceGroupName;
 
 /**
  * Enables the Ranger Raz service.
  */
 @Component
 public class RangerRazDatalakeConfigProvider extends RangerRazBaseConfigProvider {
-    private static final Set<String> ADDITIONAL_SERVICE_HOSTGROUPS = Set.of("master", "razhg");
+    private static final Set<String> ADDITIONAL_SERVICE_HOSTGROUPS = Set.of(InstanceGroupName.MASTER.name().toLowerCase(Locale.ROOT),
+            InstanceGroupName.RAZSCALEOUT.name().toLowerCase(Locale.ROOT));
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
