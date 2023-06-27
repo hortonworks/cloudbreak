@@ -748,12 +748,7 @@ public class ClusterHostServiceRunner {
         gateway.putAll(createGatewayUserFacingCertAndFqdn(gatewayConfig, stackDto));
         gateway.put("kerberos", kerberosConfig != null);
 
-        ExposedService rangerService = exposedServiceCollector.getRangerService();
-        List<String> rangerLocations = serviceLocations.get(rangerService.getServiceName());
-        if (!CollectionUtils.isEmpty(rangerLocations)) {
-            List<String> rangerGatewayHosts = getRangerFqdn(stackDto, gatewayConfig.getHostname(), rangerLocations);
-            serviceLocations.put(rangerService.getServiceName(), rangerGatewayHosts);
-        }
+        addRangerServiceIfAvailable(gatewayConfig, stackDto, serviceLocations);
 
         addRangerRazServiceIfAvailable(stackDto, serviceLocations, gatewayConfig);
 
@@ -768,6 +763,19 @@ public class ClusterHostServiceRunner {
             gateway.putAll(loadBalancerProperties);
         }
         return Map.of("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
+    }
+
+    private void addRangerServiceIfAvailable(GatewayConfig gatewayConfig, StackDto stackDto, Map<String, List<String>> serviceLocations) {
+        ExposedService rangerService = exposedServiceCollector.getRangerService();
+        List<String> rangerLocations = serviceLocations.get(rangerService.getServiceName());
+        if (!CollectionUtils.isEmpty(rangerLocations)) {
+            List<String> rangerGatewayHosts = getRangerFqdn(stackDto, gatewayConfig.getHostname(), rangerLocations);
+            if (CollectionUtils.isEmpty(rangerGatewayHosts)) {
+                serviceLocations.put(rangerService.getServiceName(), asList(rangerLocations.iterator().next()));
+            } else {
+                serviceLocations.put(rangerService.getServiceName(), rangerGatewayHosts);
+            }
+        }
     }
 
     private Map<String, Object> createKnoxRelatedGatewayConfiguration(StackDto stackDto, VirtualGroupRequest virtualGroupRequest,
@@ -824,9 +832,9 @@ public class ClusterHostServiceRunner {
 
     private List<Map<String, String>> getFrontendMap(Set<LoadBalancer> loadBalancers) {
         return loadBalancers.stream()
-            .filter(lb -> isNotEmpty(lb.getIp()))
-            .map(lb -> Map.of("type", lb.getType().name(), "ip", lb.getIp()))
-            .collect(Collectors.toList());
+                .filter(lb -> isNotEmpty(lb.getIp()))
+                .map(lb -> Map.of("type", lb.getType().name(), "ip", lb.getIp()))
+                .collect(Collectors.toList());
     }
 
     private boolean isFloatingIpEnabled(Set<LoadBalancer> loadBalancers) {
