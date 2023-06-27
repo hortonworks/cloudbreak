@@ -203,6 +203,7 @@ public class HueConfigProviderTest {
         generalClusterConfigs.setExternalFQDN(expectedExternalFQDN);
         generalClusterConfigs.setKnoxUserFacingCertConfigured(true);
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of(expectedInternalFQDN));
+        generalClusterConfigs.setOtherGatewayInstancesDiscoveryFQDN(Set.of(expectedInternalFQDN));
 
         TemplatePreparationObject tpo = new Builder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
@@ -251,10 +252,12 @@ public class HueConfigProviderTest {
 
         String expectedExternalFQDN = "myaddress.cloudera.site";
         String expectedInternalFQDN = "private-gateway.cloudera.site";
+        String expectedInternalOtherFQDN = "private-other-gateway.cloudera.site";
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setExternalFQDN(expectedExternalFQDN);
         generalClusterConfigs.setKnoxUserFacingCertConfigured(true);
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of(expectedInternalFQDN));
+        generalClusterConfigs.setOtherGatewayInstancesDiscoveryFQDN(Set.of(expectedInternalFQDN, expectedInternalOtherFQDN));
 
         TemplatePreparationObject tpo = new Builder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
@@ -271,7 +274,7 @@ public class HueConfigProviderTest {
 
         verify(safetyValve, never()).addContent(anyString());
         Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
-        String proxyHostsExpected = String.join(",", expectedInternalFQDN, expectedExternalFQDN);
+        String proxyHostsExpected = String.join(",", expectedInternalFQDN, expectedInternalOtherFQDN, expectedExternalFQDN);
         assertThat(configToValue).containsOnly(
                 entry("database_host", HOST),
                 entry("database_port", PORT),
@@ -307,6 +310,7 @@ public class HueConfigProviderTest {
         generalClusterConfigs.setExternalFQDN(expectedExternalFQDN);
         generalClusterConfigs.setKnoxUserFacingCertConfigured(true);
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of(expectedInternalFQDN));
+        generalClusterConfigs.setOtherGatewayInstancesDiscoveryFQDN(Set.of(expectedInternalFQDN));
 
         TemplatePreparationObject tpo = new Builder()
                 .withGeneralClusterConfigs(generalClusterConfigs)

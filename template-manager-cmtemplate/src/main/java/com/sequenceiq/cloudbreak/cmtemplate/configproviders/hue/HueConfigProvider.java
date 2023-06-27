@@ -107,6 +107,7 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
             Set<String> proxyHosts = new LinkedHashSet<>();
             if (generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().isPresent()) {
                 proxyHosts.add(generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().get());
+                proxyHosts.addAll(generalClusterConfigs.getOtherGatewayInstancesDiscoveryFQDN());
             }
             if (StringUtils.isNotEmpty(generalClusterConfigs.getExternalFQDN())) {
                 proxyHosts.add(generalClusterConfigs.getExternalFQDN());

@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.cmtemplate.general;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -44,6 +47,8 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setCloudbreakAmbariPassword(cluster.getCloudbreakAmbariPassword());
         generalClusterConfigs.setNodeCount(stack.getFullNodeCount().intValue());
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable(stack.getPrimaryGatewayInstance().getDiscoveryFQDN()));
+        generalClusterConfigs.setOtherGatewayInstancesDiscoveryFQDN(
+                getOtherGatewayInstancesFqdns(stack.getPrimaryGatewayInstance(), stack.getAllAvailableGatewayInstances()));
         generalClusterConfigs.setVariant(cluster.getVariant());
         generalClusterConfigs.setAutoTlsEnabled(cluster.getAutoTlsEnabled());
         boolean userFacingCertHasBeenGenerated = StringUtils.isNotEmpty(stack.getSecurityConfig().getUserFacingKey())
@@ -86,5 +91,11 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setAutoTlsEnabled(autoTlsEnabled);
         generalClusterConfigs.setGovCloud(credential.isGovCloud());
         return generalClusterConfigs;
+    }
+
+    private Set<String> getOtherGatewayInstancesFqdns(InstanceMetadataView primaryGateway, List<InstanceMetadataView> allInstancesMetadata) {
+        List<InstanceMetadataView> otherInstanceMetadata = new ArrayList<>(allInstancesMetadata);
+        otherInstanceMetadata.remove(primaryGateway);
+        return otherInstanceMetadata.stream().map(im -> im.getDiscoveryFQDN()).collect(Collectors.toSet());
     }
 }
