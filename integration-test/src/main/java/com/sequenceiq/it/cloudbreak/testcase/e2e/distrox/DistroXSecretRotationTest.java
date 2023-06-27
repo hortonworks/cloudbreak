@@ -50,15 +50,15 @@ public class DistroXSecretRotationTest extends AbstractE2ETest {
             given = "there is a running default Distrox cluster",
             when = "secrets are getting rotated",
             then = "rotation should be successful and cluster should be available")
-    public void testDistroXCMAdminUserSecretRotation(TestContext testContext, ITestContext iTestContext) {
+    public void testSecretRotation(TestContext testContext, ITestContext iTestContext) {
         testContext
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.rotateSecret(Set.of(DATALAKE_MGMT_CM_ADMIN_PASSWORD, DATALAKE_CB_CM_ADMIN_PASSWORD,
-                        DATALAKE_CM_DB_PASSWORD, DATALAKE_CM_SERVICE_DB_PASSWORD)))
+                        DATALAKE_CM_SERVICE_DB_PASSWORD, DATALAKE_CM_DB_PASSWORD)))
                 .awaitForFlow()
                 .given(DistroXTestDto.class)
                 .when(distroXTestClient.rotateSecret(Set.of(CLUSTER_MGMT_CM_ADMIN_PASSWORD, CLUSTER_CB_CM_ADMIN_PASSWORD,
-                        CLUSTER_CM_DB_PASSWORD, CLUSTER_CM_SERVICES_DB_PASSWORD)))
+                        CLUSTER_CM_SERVICES_DB_PASSWORD, CLUSTER_CM_DB_PASSWORD)))
                 .awaitForFlow()
                 .validate();
 

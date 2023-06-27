@@ -43,7 +43,7 @@ public class SdxRotationService {
     @Value("${sdx.stack.rotate.sleeptime_sec:20}")
     private int sleepTimeInSec;
 
-    @Value("${sdx.stack.rotate.duration_min:5}")
+    @Value("${sdx.stack.rotate.duration_min:15}")
     private int durationInMinutes;
 
     @Inject
