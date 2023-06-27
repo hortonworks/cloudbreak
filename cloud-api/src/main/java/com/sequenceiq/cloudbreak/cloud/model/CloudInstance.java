@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
@@ -98,6 +99,7 @@ public class CloudInstance extends DynamicModel {
         this.availabilityZone = availabilityZone;
     }
 
+    @JsonIgnore
     public String getDbIdOrDefaultIfNotExists() {
         Long dbId = getParameter(CloudInstance.ID, Long.class);
         if (dbId != null) {

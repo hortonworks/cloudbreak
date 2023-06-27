@@ -1,15 +1,21 @@
 package com.sequenceiq.cloudbreak.cloud.azure.upscale;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.PRIVATE_ID;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_INSTANCE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,14 +51,18 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.Retry;
@@ -108,6 +118,9 @@ public class AzureUpscaleServiceTest {
     private ResourceNotifier resourceNotifier;
 
     @Mock
+    private ResourceRetriever resourceRetriever;
+
+    @Mock
     private AzureCloudResourceService azureCloudResourceService;
 
     @Mock
@@ -116,6 +129,8 @@ public class AzureUpscaleServiceTest {
     @BeforeEach
     public void before() {
         when(azureUtils.getStackName(any(CloudContext.class))).thenReturn(STACK_NAME);
+        when(azureUtils.getFullInstanceId(nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class)))
+                .thenReturn("instanceid");
         when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), eq(stack))).thenReturn(RESOURCE_GROUP);
     }
 
@@ -125,7 +140,11 @@ public class AzureUpscaleServiceTest {
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, null);
         CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
         List<CloudResource> resources = List.of(createCloudResource("volumes", ResourceType.AZURE_VOLUMESET), template);
-        List<Group> scaledGroups = createScaledGroups();
+        InstanceTemplate instanceTemplate = mock(InstanceTemplate.class);
+        when(instanceTemplate.getPrivateId()).thenReturn(1L);
+        when(instanceTemplate.getGroupName()).thenReturn("worker");
+        when(instanceTemplate.getStatus()).thenReturn(InstanceStatus.CREATE_REQUESTED);
+        List<Group> scaledGroups = createScaledGroups(new CloudInstance("instanceid", instanceTemplate, null, null, null));
 
         when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
         when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
@@ -138,6 +157,8 @@ public class AzureUpscaleServiceTest {
         when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP)).thenReturn(newInstances);
         when(azureCloudResourceService.getNetworkResources(resources)).thenReturn(NETWORK_RESOURCES);
         when(azureScaleUtilService.getArmTemplate(anyList(), anyString())).thenReturn(template);
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, AZURE_INSTANCE, cloudContext.getId())).thenReturn(new ArrayList<>());
+        doNothing().when(cloudResourceHelper).updateDeleteOnTerminationFlag(anyList(), anyBoolean(), any());
 
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
         List<CloudResourceStatus> actual = underTest.upscale(ac, stack, resources, azureStackView, client,
@@ -154,8 +175,19 @@ public class AzureUpscaleServiceTest {
         verify(azureCloudResourceService).getNetworkResources(resources);
         verify(azureUtils).getStackName(any(CloudContext.class));
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(any(CloudContext.class), eq(stack));
-        verify(azureComputeResourceService).buildComputeResourcesForUpscale(ac, stack, scaledGroups, newInstances, List.of(), NETWORK_RESOURCES,
-                adjustmentTypeWithThreshold);
+        ArgumentCaptor<List<CloudResource>> newInstancesArgumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(azureComputeResourceService).buildComputeResourcesForUpscale(eq(ac), eq(stack), eq(scaledGroups), newInstancesArgumentCaptor.capture(),
+                eq(List.of()), eq(NETWORK_RESOURCES), eq(adjustmentTypeWithThreshold));
+        List<CloudResource> cloudResourceList = newInstancesArgumentCaptor.getValue();
+        assertThat(cloudResourceList).extracting(CloudResource::getType).containsExactly(AZURE_INSTANCE);
+        assertThat(cloudResourceList).extracting(CloudResource::getStatus).containsExactly(CommonStatus.CREATED);
+        assertThat(cloudResourceList).extracting(CloudResource::getName).containsExactly("instance");
+        assertThat(cloudResourceList).extracting(CloudResource::isPersistent).containsExactly(true);
+        assertThat(cloudResourceList).extracting(CloudResource::isStackAware).containsExactly(true);
+        assertThat(cloudResourceList).extracting(CloudResource::getInstanceId).containsExactly("instanceid");
+        assertThat(cloudResourceList).extracting(CloudResource::getParameters).extracting(map -> map.get(PRIVATE_ID)).containsExactly(1L);
+        verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(false), any());
+        verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(true), any());
     }
 
     @Test
@@ -164,7 +196,11 @@ public class AzureUpscaleServiceTest {
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, null);
         CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
         List<CloudResource> resources = List.of(createCloudResource("volumes", ResourceType.AZURE_VOLUMESET), template);
-        List<Group> scaledGroups = createScaledGroups();
+        InstanceTemplate instanceTemplate = mock(InstanceTemplate.class);
+        when(instanceTemplate.getPrivateId()).thenReturn(1L);
+        when(instanceTemplate.getGroupName()).thenReturn("worker");
+        when(instanceTemplate.getStatus()).thenReturn(InstanceStatus.CREATE_REQUESTED);
+        List<Group> scaledGroups = createScaledGroups(new CloudInstance("instanceid", instanceTemplate, null, null, null));
 
         when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
         ApiError cloudError = new ApiError();
@@ -211,7 +247,11 @@ public class AzureUpscaleServiceTest {
         CloudResource alreadyCreatedVolumeSet = createCloudResource("alreadycreatedvolumes", ResourceType.AZURE_VOLUMESET, CommonStatus.CREATED,
                 "instanceid");
         List<CloudResource> resources = List.of(detachedVolumeSet, alreadyCreatedVolumeSet, notReattachableVolumeSet, template);
-        List<Group> scaledGroups = createScaledGroups();
+        InstanceTemplate instanceTemplate = mock(InstanceTemplate.class);
+        when(instanceTemplate.getPrivateId()).thenReturn(1L);
+        when(instanceTemplate.getGroupName()).thenReturn("worker");
+        when(instanceTemplate.getStatus()).thenReturn(InstanceStatus.CREATE_REQUESTED);
+        List<Group> scaledGroups = createScaledGroups(new CloudInstance("instanceid", instanceTemplate, null, null, null));
 
         when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
         when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
@@ -223,17 +263,29 @@ public class AzureUpscaleServiceTest {
         when(azureCloudResourceService.getDeploymentCloudResources(templateDeployment)).thenReturn(newInstances);
         when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP)).thenReturn(newInstances);
         when(azureCloudResourceService.getNetworkResources(resources)).thenReturn(NETWORK_RESOURCES);
+        doNothing().when(cloudResourceHelper).updateDeleteOnTerminationFlag(anyList(), anyBoolean(), any());
 
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
         underTest.upscale(ac, stack, resources, azureStackView, client, adjustmentTypeWithThreshold);
 
+        ArgumentCaptor<List<CloudResource>> newInstancesArgumentCaptor = ArgumentCaptor.forClass(List.class);
         ArgumentCaptor<List<CloudResource>> reattachCaptor = ArgumentCaptor.forClass(List.class);
-        verify(azureComputeResourceService).buildComputeResourcesForUpscale(eq(ac), eq(stack), eq(scaledGroups), eq(newInstances), reattachCaptor.capture(),
-                eq(NETWORK_RESOURCES), eq(adjustmentTypeWithThreshold));
+        verify(azureComputeResourceService).buildComputeResourcesForUpscale(eq(ac), eq(stack), eq(scaledGroups), newInstancesArgumentCaptor.capture(),
+                reattachCaptor.capture(), eq(NETWORK_RESOURCES), eq(adjustmentTypeWithThreshold));
+        List<CloudResource> cloudResourceList = newInstancesArgumentCaptor.getValue();
+        assertThat(cloudResourceList).extracting(CloudResource::getType).containsExactly(AZURE_INSTANCE);
+        assertThat(cloudResourceList).extracting(CloudResource::getStatus).containsExactly(CommonStatus.CREATED);
+        assertThat(cloudResourceList).extracting(CloudResource::getName).containsExactly("instance");
+        assertThat(cloudResourceList).extracting(CloudResource::isPersistent).containsExactly(true);
+        assertThat(cloudResourceList).extracting(CloudResource::isStackAware).containsExactly(true);
+        assertThat(cloudResourceList).extracting(CloudResource::getInstanceId).containsExactly("instanceid");
+        assertThat(cloudResourceList).extracting(CloudResource::getParameters).extracting(map -> map.get(PRIVATE_ID)).containsExactly(1L);
         List<CloudResource> reattachableVolumeSets = reattachCaptor.getValue();
         assertEquals(2, reattachableVolumeSets.size());
         assertEquals(detachedVolumeSet, reattachableVolumeSets.get(0));
         assertEquals(alreadyCreatedVolumeSet, reattachableVolumeSets.get(1));
+        verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(false), any());
+        verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(true), any());
     }
 
     @Test
@@ -242,7 +294,11 @@ public class AzureUpscaleServiceTest {
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, null);
         CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
         List<CloudResource> resources = List.of(createCloudResource("volumes", ResourceType.AZURE_VOLUMESET), template);
-        List<Group> scaledGroups = createScaledGroups();
+        InstanceTemplate instanceTemplate = mock(InstanceTemplate.class);
+        when(instanceTemplate.getPrivateId()).thenReturn(1L);
+        when(instanceTemplate.getGroupName()).thenReturn("worker");
+        when(instanceTemplate.getStatus()).thenReturn(InstanceStatus.CREATE_REQUESTED);
+        List<Group> scaledGroups = createScaledGroups(new CloudInstance("instanceid", instanceTemplate, null, null, null));
 
         when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
         ApiError cloudError = AzureTestUtils.apiError("code", "Error happened");
@@ -262,8 +318,9 @@ public class AzureUpscaleServiceTest {
                 .contains("Stack upscale failed, status code code, error message: Error happened, details: Please check the power state later");
     }
 
-    private List<Group> createScaledGroups() {
+    private List<Group> createScaledGroups(CloudInstance cloudInstance) {
         Group group = mock(Group.class);
+        when(group.getInstances()).thenReturn(List.of(cloudInstance));
         return Collections.singletonList(group);
     }
 

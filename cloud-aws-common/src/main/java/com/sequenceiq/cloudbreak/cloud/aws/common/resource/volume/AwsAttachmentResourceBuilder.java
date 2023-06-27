@@ -59,6 +59,9 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
     @Inject
     private VolumeResourceCollector volumeResourceCollector;
 
+    @Inject
+    private AwsInstanceFinder awsInstanceFinder;
+
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         LOGGER.debug("Prepare instance resource to attach to");
@@ -68,11 +71,6 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
     @Override
     public List<CloudResource> build(AwsContext context, CloudInstance cloudInstance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
-        CloudResource instance = buildableResource.stream()
-                .filter(cloudResource -> cloudResource.getType().equals(ResourceType.AWS_INSTANCE))
-                .findFirst()
-                .orElseThrow(() -> new AwsResourceException("Instance resource not found"));
-
         Optional<CloudResource> volumeSetOpt = buildableResource.stream()
                 .filter(cloudResource -> cloudResource.getType().equals(ResourceType.AWS_VOLUMESET))
                 .findFirst();
@@ -82,17 +80,18 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
             return List.of();
         }
         CloudResource volumeSet = volumeSetOpt.get();
+        String instanceId = awsInstanceFinder.getInstanceId(privateId, context.getComputeResources(privateId));
 
         AmazonEc2Client client = getAmazonEc2Client(auth);
 
         VolumeSetAttributes volumeSetAttributes = volumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
-        LOGGER.debug("Attach volume set {} to instance {}", volumeSetAttributes, instance.getInstanceId());
+        LOGGER.debug("Attach volume set {} to instance {}", volumeSetAttributes, instanceId);
         LOGGER.debug("Creating attach volume requests and submitting to executor for stack '{}', group '{}'",
                 auth.getCloudContext().getName(), group.getName());
         List<Future<?>> futures = volumeSetAttributes.getVolumes().stream()
                 .filter(volume -> !StringUtils.equals(AwsDiskType.Ephemeral.value(), volume.getType()))
                 .map(volume -> AttachVolumeRequest.builder()
-                        .instanceId(instance.getInstanceId())
+                        .instanceId(instanceId)
                         .volumeId(volume.getId())
                         .device(volume.getDevice())
                         .build())
@@ -105,27 +104,27 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
                 future.get();
             } catch (Throwable throwable) {
                 LOGGER.info("Attachment failed with error.", throwable);
-                checkIfEveryVolumesAttachedSuccessfullyEvenIfSomethingFailed(instance, client, volumeSetAttributes, throwable);
+                checkIfEveryVolumesAttachedSuccessfullyEvenIfSomethingFailed(instanceId, client, volumeSetAttributes, throwable);
             }
         }
         LOGGER.debug("Attach volume requests sent");
 
-        volumeSet.setInstanceId(instance.getInstanceId());
+        volumeSet.setInstanceId(instanceId);
         volumeSet.setStatus(CommonStatus.CREATED);
         return List.of(volumeSet);
     }
 
-    private void checkIfEveryVolumesAttachedSuccessfullyEvenIfSomethingFailed(CloudResource instance, AmazonEc2Client client,
+    private void checkIfEveryVolumesAttachedSuccessfullyEvenIfSomethingFailed(String instanceId, AmazonEc2Client client,
             VolumeSetAttributes volumeSetAttributes, Throwable throwable) {
         List<String> volumeIdsToAttach =
                 volumeSetAttributes.getVolumes().stream().map(VolumeSetAttributes.Volume::getId).collect(Collectors.toList());
         DescribeVolumesResponse describeVolumesResponse = client.describeVolumes(DescribeVolumesRequest.builder()
                 .filters(Filter.builder()
                         .name("attachment.instance-id")
-                        .values(List.of(instance.getInstanceId()))
+                        .values(List.of(instanceId))
                         .build())
                 .build());
-        LOGGER.info("Describe volume result for instanceid: {}, {}", instance.getInstanceId(), describeVolumesResponse);
+        LOGGER.info("Describe volume result for instanceid: {}, {}", instanceId, describeVolumesResponse);
         List<Volume> volumes = describeVolumesResponse.volumes();
         List<String> volumeIdsForInstance = volumes.stream().map(Volume::volumeId).collect(Collectors.toList());
         LOGGER.info("Volume IDs to attach {}", volumeIdsToAttach);

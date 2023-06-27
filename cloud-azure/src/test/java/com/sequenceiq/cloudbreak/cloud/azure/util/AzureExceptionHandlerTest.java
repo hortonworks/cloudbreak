@@ -23,6 +23,7 @@ import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
 import com.microsoft.aad.msal4j.MsalServiceException;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureExceptionHandlerTest {
@@ -56,13 +57,13 @@ public class AzureExceptionHandlerTest {
     }
 
     @Test
-    void handleExceptionWhenManagementExceptionNotHandledThenThrowsOriginalException() {
+    void handleExceptionWhenManagementExceptionNotHandledThenThrowsCloudConnectorException() {
         Supplier<String> stringSupplier = () -> {
             throw getManagementException(HttpStatus.FORBIDDEN);
         };
 
         Assertions.assertThatThrownBy(() -> underTest.handleException(stringSupplier))
-                .isExactlyInstanceOf(ManagementException.class);
+                .isExactlyInstanceOf(CloudConnectorException.class);
     }
 
     @Test
@@ -99,13 +100,13 @@ public class AzureExceptionHandlerTest {
     }
 
     @Test
-    void handleExceptionWithDefaultWhenManagementExceptionNotHandledThenThrowsOriginalException() {
+    void handleExceptionWithDefaultWhenManagementExceptionNotHandledThenThrowsCloudConnectorException() {
         Supplier<String> stringSupplier = () -> {
             throw getManagementException(HttpStatus.FORBIDDEN);
         };
 
         Assertions.assertThatThrownBy(() -> underTest.handleException(stringSupplier, "default"))
-                .isExactlyInstanceOf(ManagementException.class);
+                .isExactlyInstanceOf(CloudConnectorException.class);
     }
 
     @Test
@@ -143,13 +144,13 @@ public class AzureExceptionHandlerTest {
 
     @ParameterizedTest
     @EnumSource(value = HttpStatus.class, names = {"NOT_FOUND"}, mode = EnumSource.Mode.EXCLUDE)
-    void handleExceptionWithDefaultAndHandleNotFoundWhenOtherThanNotFoundThenThrowsOriginalException(HttpStatus httpStatus) {
+    void handleExceptionWithDefaultAndHandleNotFoundWhenOtherThanNotFoundThenThrowsCloudConnectorException(HttpStatus httpStatus) {
         Supplier<String> stringSupplier = () -> {
             throw getManagementException(httpStatus);
         };
 
         Assertions.assertThatThrownBy(() -> underTest.handleException(stringSupplier, "default", HANDLE_NOT_FOUND_EXCEPTIONS))
-                .isExactlyInstanceOf(ManagementException.class);
+                .isExactlyInstanceOf(CloudConnectorException.class);
     }
 
     private ManagementException getManagementException(HttpStatus httpStatus) {

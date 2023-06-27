@@ -296,24 +296,48 @@ public class AzureClient {
         }
     }
 
-    public void attachDiskToVm(Disk disk, VirtualMachine vm) {
-        LOGGER.debug("attach managed disk {} to VM {}", disk, vm);
-        CachingTypes cachingTypes = CachingTypes.READ_WRITE;
-        if (disk.sizeInGB() > MAX_AZURE_MANAGED_DISK_SIZE_WITH_CACHE) {
-            cachingTypes = CachingTypes.NONE;
-        } else if (ULTRA_SSD_LRS.equals(disk.sku())
-                || PREMIUM_LRS.equals(disk.sku())
-                || STANDARD_LRS.equals(disk.sku())
-                || STANDARD_SSD_LRS.equals(disk.sku())) {
-            cachingTypes = CachingTypes.READ_ONLY;
-        }
+    public void attachDisksToVm(List<Disk> disks, VirtualMachine vm) {
         // This is needed because of bug https://github.com/Azure/azure-libraries-for-java/issues/632
         // It affects the VM-s launched from Azure Marketplace images
         vm.innerModel().withPlan(null);
-        vm.update()
-                .withExistingDataDisk(disk)
-                .withDataDiskDefaultCachingType(cachingTypes)
-                .apply();
+        VirtualMachine.Update update = vm.update();
+        CachingTypes cachingTypes = getCachingType(disks);
+        update.withDataDiskDefaultCachingType(cachingTypes);
+
+        for (Disk disk : disks) {
+            LOGGER.debug("attach managed disk {} to VM {}", disk.id(), vm.id());
+            update.withExistingDataDisk(disk);
+        }
+        update.apply();
+    }
+
+    private CachingTypes getCachingType(List<Disk> disks) {
+        Disk firstDisk = disks.get(0);
+        CachingTypes cachingTypes = CachingTypes.READ_WRITE;
+        if (firstDisk.sizeInGB() > MAX_AZURE_MANAGED_DISK_SIZE_WITH_CACHE) {
+            cachingTypes = CachingTypes.NONE;
+        } else if (ULTRA_SSD_LRS.equals(firstDisk.sku())
+                || PREMIUM_LRS.equals(firstDisk.sku())
+                || STANDARD_LRS.equals(firstDisk.sku())
+                || STANDARD_SSD_LRS.equals(firstDisk.sku())) {
+            cachingTypes = CachingTypes.READ_ONLY;
+        }
+        return cachingTypes;
+    }
+
+    public void detachDisksFromVm(Collection<String> ids, VirtualMachine vm) {
+        LOGGER.debug("detach managed disks with ids={}", ids);
+        VirtualMachine.Update update = vm.update();
+        vm.dataDisks()
+                .values()
+                .stream()
+                .filter(virtualMachineDataDisk -> ids.contains(virtualMachineDataDisk.id()))
+                .forEach(virtualMachineDataDisk -> {
+                    int lun = virtualMachineDataDisk.lun();
+                    LOGGER.debug("detaches a managed data disk with LUN {} from the virtual machine {}", lun, vm);
+                    update.withoutDataDisk(lun);
+                });
+        update.apply();
     }
 
     public void detachDiskFromVm(String id, VirtualMachine vm) {

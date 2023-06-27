@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.template.compute;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
+import com.sequenceiq.cloudbreak.cloud.template.OrderedBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -148,8 +150,11 @@ public class CloudFailureHandler {
             Multimap<ResourceType, ComputeResourceBuilder<ResourceBuilderContext>> resourceBuilderMap = getResourceBuilderMap(resourceBuilders, variant);
             for (CloudResourceStatus cloudResourceStatus : statuses) {
                 if (rollbackIds.contains(cloudResourceStatus.getPrivateId())) {
-                    for (ComputeResourceBuilder<ResourceBuilderContext> resourceBuilder :
-                            resourceBuilderMap.get(cloudResourceStatus.getCloudResource().getType())) {
+                    List<ComputeResourceBuilder<ResourceBuilderContext>> reverseOrderedBuilders =
+                            resourceBuilderMap.get(cloudResourceStatus.getCloudResource().getType())
+                                    .stream().sorted(Comparator.comparingInt(OrderedBuilder::order).reversed())
+                                    .toList();
+                    for (ComputeResourceBuilder<ResourceBuilderContext> resourceBuilder : reverseOrderedBuilders) {
                         try {
                             deleteResource(auth, ctx, resourceBuilder, cloudResourceStatus);
                         } catch (Exception e) {

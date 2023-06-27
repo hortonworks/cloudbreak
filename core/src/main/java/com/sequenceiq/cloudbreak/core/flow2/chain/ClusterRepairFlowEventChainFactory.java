@@ -359,8 +359,8 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                 entitlementService.isEmbeddedPostgresUpgradeEnabled(Crn.safeFromString(stackView.getResourceCrn()).getAccountId());
         boolean upgradeRequested = event.isUpgrade();
         boolean embeddedDBOnAttachedDisk = embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stackDto);
-        String currentDbVersion = StringUtils.isNotEmpty(stackView.getExternalDatabaseEngineVersion())
-                ? stackView.getExternalDatabaseEngineVersion() : DEFAULT_DB_VERSION;
+        String currentDbVersion = StringUtils.isNotEmpty(stackDto.getExternalDatabaseEngineVersion())
+                ? stackDto.getExternalDatabaseEngineVersion() : DEFAULT_DB_VERSION;
         boolean versionsAreDifferent = !targetMajorVersion.getMajorVersion().equals(currentDbVersion);
         if (embeddedPostgresUpgradeEnabled && upgradeRequested && embeddedDBOnAttachedDisk && versionsAreDifferent) {
             LOGGER.debug("Embedded db upgrade is possible and needed.");

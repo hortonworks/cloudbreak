@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -90,23 +91,24 @@ public class RdsUpgradeService {
     public RdsUpgradeV4Response upgradeRds(NameOrCrn nameOrCrn, TargetMajorVersion targetMajorVersion) {
         TargetMajorVersion calculatedVersion = ObjectUtils.defaultIfNull(targetMajorVersion, defaultTargetMajorVersion);
         String accountId = restRequestThreadLocalService.getAccountId();
-        StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
+        StackDto stackDto = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        StackView stackView = stackDto.getStack();
 
-        boolean dataHubWithEmbeddedDatabase = !stack.isDatalake() && stack.getExternalDatabaseCreationType().isEmbedded();
+        boolean dataHubWithEmbeddedDatabase = !stackView.isDatalake() && stackDto.getExternalDatabaseCreationType().isEmbedded();
         if (dataHubWithEmbeddedDatabase) {
             LOGGER.warn("Database upgrade is not allowed for DataHubs with embedded database ");
             throw new BadRequestException("Database upgrade is not allowed for DataHubs with embedded database");
         }
 
-        MDCBuilder.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stackView);
         LOGGER.info("RDS upgrade has been initiated for stack {} to version {}, request version was {}",
                 nameOrCrn.getNameOrCrn(), calculatedVersion, targetMajorVersion);
-        validate(nameOrCrn, stack, calculatedVersion, accountId);
-        LOGGER.info("External database for stack {} will be upgraded to version {}", stack.getName(), calculatedVersion.getMajorVersion());
-        DetailedEnvironmentResponse environment = environmentService.getByCrn(stack.getEnvironmentCrn());
+        validate(nameOrCrn, stackView, calculatedVersion, accountId);
+        LOGGER.info("External database for stack {} will be upgraded to version {}", stackView.getName(), calculatedVersion.getMajorVersion());
+        DetailedEnvironmentResponse environment = environmentService.getByCrn(stackView.getEnvironmentCrn());
         String backupLocation = getBackupLocation(environment);
         String backupInstanceProfile = getBackupInstanceProfile(environment);
-        return triggerRdsUpgradeFlow(stack, calculatedVersion, backupLocation, backupInstanceProfile);
+        return triggerRdsUpgradeFlow(stackView, calculatedVersion, backupLocation, backupInstanceProfile);
     }
 
     private void validate(NameOrCrn nameOrCrn, StackView stack, TargetMajorVersion targetMajorVersion, String accountId) {

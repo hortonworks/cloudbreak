@@ -46,7 +46,7 @@ class StackDtoTest {
         InstanceGroupView instanceGroupView = mock(InstanceGroupView.class);
         when(instanceGroupView.getTemplate()).thenReturn(mock(Template.class));
         instanceGroups.put("worker", new InstanceGroupDto(instanceGroupView, workerInstanceMetadataViews));
-        StackDto stackDto = new StackDto(null, null, null, null, null, instanceGroups, null, null, null, null, null, null, null, null, null, null);
+        StackDto stackDto = new StackDto(null, null, null, null, null, null, instanceGroups, null, null, null, null, null, null, null, null, null, null);
         Set<Node> allFunctioningNodes = stackDto.getAllFunctioningNodes();
         assertThat(allFunctioningNodes, hasItem(hasProperty("hostname", equalTo("fqdn2"))));
         assertThat(allFunctioningNodes, hasItem(hasProperty("hostname", equalTo("fqdn3"))));

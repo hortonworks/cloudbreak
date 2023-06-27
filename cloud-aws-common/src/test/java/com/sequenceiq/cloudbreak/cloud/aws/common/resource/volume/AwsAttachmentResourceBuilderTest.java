@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.task.AsyncTaskExecutor;
 
@@ -48,6 +49,9 @@ public class AwsAttachmentResourceBuilderTest {
     @Mock
     private CommonAwsClient awsClient;
 
+    @Spy
+    private AwsInstanceFinder awsInstanceFinder;
+
     @Mock
     private VolumeResourceCollector volumeResourceCollector;
 
@@ -78,7 +82,9 @@ public class AwsAttachmentResourceBuilderTest {
         CloudContext cloudContext = mock(CloudContext.class);
         when(cloudContext.getLocation()).thenReturn(Location.location(Region.region("eu"), AvailabilityZone.availabilityZone("az1")));
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
-        awsAttachmentResourceBuilder.build(mock(AwsContext.class), null, 1L, authenticatedContext, mock(Group.class), buildableResource, null);
+        AwsContext awsContext = mock(AwsContext.class);
+        when(awsContext.getComputeResources(1L)).thenReturn(buildableResource);
+        awsAttachmentResourceBuilder.build(awsContext, null, 1L, authenticatedContext, mock(Group.class), buildableResource, null);
     }
 
     @Test
@@ -106,8 +112,10 @@ public class AwsAttachmentResourceBuilderTest {
         CloudContext cloudContext = mock(CloudContext.class);
         when(cloudContext.getLocation()).thenReturn(Location.location(Region.region("eu"), AvailabilityZone.availabilityZone("az1")));
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        AwsContext awsContext = mock(AwsContext.class);
+        when(awsContext.getComputeResources(1L)).thenReturn(buildableResource);
         CloudbreakServiceException runtimeException = Assertions.assertThrows(CloudbreakServiceException.class,
-                () -> awsAttachmentResourceBuilder.build(mock(AwsContext.class), null, 1L, authenticatedContext,
+                () -> awsAttachmentResourceBuilder.build(awsContext, null, 1L, authenticatedContext,
                         mock(Group.class), buildableResource, null));
         assertEquals("Volume attachment were unsuccessful. " + errorMessage, runtimeException.getMessage());
     }

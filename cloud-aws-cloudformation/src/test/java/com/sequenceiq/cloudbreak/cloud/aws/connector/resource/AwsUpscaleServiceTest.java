@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -156,6 +157,7 @@ class AwsUpscaleServiceTest {
         allInstances.add(workerInstance5);
         when(cfStackUtil.getInstanceCloudResources(eq(authenticatedContext), eq(amazonCloudFormationClient), eq(amazonAutoScalingClient), anyList()))
                 .thenReturn(allInstances);
+        doNothing().when(cloudResourceHelper).updateDeleteOnTerminationFlag(anyList(), anyBoolean(), any());
 
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         List<Group> groups = new ArrayList<>();
@@ -190,6 +192,8 @@ class AwsUpscaleServiceTest {
         assertThat(newInstances, hasItem(workerInstance4));
         assertThat(newInstances, hasItem(workerInstance5));
         verify(cfStackUtil, times(0)).addLoadBalancerTargets(any(), any(), any());
+        verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(false), any());
+        verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(true), any());
     }
 
     @Test
@@ -320,6 +324,7 @@ class AwsUpscaleServiceTest {
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
         when(awsComputeResourceService.buildComputeResourcesForUpscale(any(), any(), anyList(), anyList(), anyList(), anyList(),
                 eq(adjustmentTypeWithThreshold))).thenThrow(new CloudConnectorException("volume create error"));
+        doNothing().when(cloudResourceHelper).updateDeleteOnTerminationFlag(anyList(), anyBoolean(), any());
 
         CloudConnectorException exception = assertThrows(CloudConnectorException.class,
                 () -> awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList, adjustmentTypeWithThreshold));
@@ -335,6 +340,7 @@ class AwsUpscaleServiceTest {
         verify(awsAutoScalingService, times(1)).terminateInstance(eq(amazonAutoScalingClient), eq("i-worker4"));
         verify(awsAutoScalingService, times(1)).terminateInstance(eq(amazonAutoScalingClient), eq("i-worker5"));
         verify(cfStackUtil, times(0)).addLoadBalancerTargets(any(), any(), any());
+        verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(false), any());
     }
 
     @Test
@@ -373,6 +379,7 @@ class AwsUpscaleServiceTest {
         when(cfStackUtil.getInstanceCloudResources(eq(authenticatedContext), eq(amazonCloudFormationClient), eq(amazonAutoScalingClient), anyList()))
                 .thenReturn(allInstances);
         doNothing().when(cfStackUtil).addLoadBalancerTargets(any(), any(), any());
+        doNothing().when(cloudResourceHelper).updateDeleteOnTerminationFlag(anyList(), anyBoolean(), any());
 
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         List<Group> groups = new ArrayList<>();
@@ -399,6 +406,8 @@ class AwsUpscaleServiceTest {
         awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList, adjustmentTypeWithThreshold);
 
         verify(cfStackUtil, times(2)).addLoadBalancerTargets(any(), any(), any());
+        verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(false), any());
+        verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(true), any());
     }
 
     private Group getWorkerGroup(InstanceAuthentication instanceAuthentication) {
