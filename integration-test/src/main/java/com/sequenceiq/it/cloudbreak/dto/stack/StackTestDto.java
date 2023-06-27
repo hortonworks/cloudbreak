@@ -151,6 +151,8 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
         return new Clue(
                 getResponse().getName(),
                 getResponse().getCrn(),
+                null,
+                null,
                 auditEvents,
                 List.of(),
                 getResponse(),

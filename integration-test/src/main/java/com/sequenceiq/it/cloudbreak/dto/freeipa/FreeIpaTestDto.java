@@ -60,6 +60,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIp
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.context.Clue;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
@@ -76,7 +77,11 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
+import com.sequenceiq.it.cloudbreak.search.ClusterLogsStorageUrl;
+import com.sequenceiq.it.cloudbreak.search.KibanaSearchUrl;
+import com.sequenceiq.it.cloudbreak.search.SearchUrl;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
+import com.sequenceiq.it.cloudbreak.search.StorageUrl;
 import com.sequenceiq.it.cloudbreak.util.FreeIpaInstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.StructuredEventUtil;
 
@@ -518,21 +523,37 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     @Override
     public Clue investigate() {
+        CloudProviderProxy cloudProvider = getTestContext().getCloudProvider();
+        StorageUrl storageUrl = new ClusterLogsStorageUrl();
+        SearchUrl searchUrl = new KibanaSearchUrl();
+        String freeIpaCloudStorageUrl = null;
+
         if (getResponse() == null) {
             return null;
         }
+
+        String resourceName = getResponse().getName();
+        String resourceCrn = getResponse().getCrn();
         boolean hasSpotTermination = (getResponse().getInstanceGroups() == null) ? false : getResponse().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetaData().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
         List<CDPStructuredEvent> structuredEvents = List.of();
-        if (getResponse() != null && getResponse().getCrn() != null) {
+        if (getResponse() != null && resourceCrn != null) {
             CDPStructuredEventV1Endpoint cdpStructuredEventV1Endpoint =
                     getTestContext().getMicroserviceClient(FreeIpaClient.class).getDefaultClient().structuredEventsV1Endpoint();
-            structuredEvents = StructuredEventUtil.getStructuredEvents(cdpStructuredEventV1Endpoint, getResponse().getCrn());
+            structuredEvents = StructuredEventUtil.getStructuredEvents(cdpStructuredEventV1Endpoint, resourceCrn);
         }
+        if (getResponse().getTelemetry() != null) {
+            String baseLocation = getResponse().getTelemetry().getLogging().getStorageLocation();
+            freeIpaCloudStorageUrl = storageUrl.getFreeIpaStorageUrl(resourceName, resourceCrn, baseLocation, cloudProvider);
+        }
+        List<Searchable> listOfSearchables = List.of(this);
+        String freeIpaKibanaUrl = searchUrl.getSearchUrl(listOfSearchables, getTestContext().getTestStartTime(), getTestContext().getTestEndTime());
         return new Clue(
-                getResponse().getName(),
-                getResponse().getCrn(),
+                resourceName,
+                resourceCrn,
+                freeIpaCloudStorageUrl,
+                freeIpaKibanaUrl,
                 null,
                 structuredEvents,
                 getResponse(),

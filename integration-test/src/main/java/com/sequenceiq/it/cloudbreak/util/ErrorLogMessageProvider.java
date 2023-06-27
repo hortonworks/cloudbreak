@@ -95,7 +95,13 @@ public class ErrorLogMessageProvider {
             clues.forEach(clue -> {
                 appendLine(builder, "");
                 appendLine(builder, clue.getName() + " - " + clue.getCrn());
-
+                appendLine(builder, "<br>");
+                appendLine(builder, "Cluster logs: ");
+                appendLine(builder, "<a href=\"" + clue.getStorageUrl() + "\" target=\"_blank\">" + clue.getStorageUrl() + "</a>");
+                appendLine(builder, "<br>");
+                appendLine(builder, "Kibana query: ");
+                appendLine(builder, "<a href=\"" + clue.getSearchUrl() + "\" target=\"_blank\">" + clue.getSearchUrl() + "</a>");
+                appendLine(builder, "<br>");
                 if (clue.getAuditEvents() != null && CollectionUtils.isNotEmpty(clue.getAuditEvents().getResponses())) {
                     appendLine(builder, "Audit events:");
                     appendLine(builder, formatAuditEvents(clue.getAuditEvents().getResponses()));

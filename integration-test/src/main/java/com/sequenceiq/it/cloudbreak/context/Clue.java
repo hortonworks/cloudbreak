@@ -19,14 +19,22 @@ public class Clue {
 
     private final boolean hasSpotTermination;
 
+    private final String storageUrl;
+
+    private final String searchUrl;
+
     public Clue(String name,
             String crn,
+            String storageUrl,
+            String searchUrl,
             AuditEventV4Responses auditEvents,
             List<CDPStructuredEvent> cdpStructuredEvents,
             Object response,
             boolean hasSpotTermination) {
         this.name = name;
         this.crn = crn;
+        this.storageUrl = storageUrl;
+        this.searchUrl = searchUrl;
         this.auditEvents = auditEvents;
         this.cdpStructuredEvents = cdpStructuredEvents;
         this.response = response;
@@ -39,6 +47,14 @@ public class Clue {
 
     public String getCrn() {
         return crn;
+    }
+
+    public String getStorageUrl() {
+        return storageUrl;
+    }
+
+    public String getSearchUrl() {
+        return searchUrl;
     }
 
     public AuditEventV4Responses getAuditEvents() {

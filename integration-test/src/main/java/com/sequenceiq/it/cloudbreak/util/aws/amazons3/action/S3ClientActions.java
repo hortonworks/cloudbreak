@@ -168,7 +168,12 @@ public class S3ClientActions extends S3Client {
         if (StringUtils.containsIgnoreCase(getAwsProperties().getRegion(), "us-gov")) {
             deploymentS3Console = "https://console.amazonaws-us-gov.com/s3/buckets/";
         }
-        return format("%s%s?region=%s&prefix=%s%s/&showversions=false",
-                deploymentS3Console, bucketName, getAwsProperties().getRegion(), getKeyPrefix(baseLocation), clusterLogPath);
+        if (StringUtils.contains(getKeyPrefix(baseLocation), clusterLogPath)) {
+            return format("%s%s?region=%s&prefix=%s/&showversions=false",
+                    deploymentS3Console, bucketName, getAwsProperties().getRegion(), getKeyPrefix(baseLocation));
+        } else {
+            return format("%s%s?region=%s&prefix=%s%s/&showversions=false",
+                    deploymentS3Console, bucketName, getAwsProperties().getRegion(), getKeyPrefix(baseLocation), clusterLogPath);
+        }
     }
 }
