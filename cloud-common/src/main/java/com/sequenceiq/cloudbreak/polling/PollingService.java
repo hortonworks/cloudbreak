@@ -86,6 +86,7 @@ public class PollingService<T> {
                     .timeout()
                     .withException(actual)
                     .withPayload(statusCheckerTask.getFailedInstanceIds())
+                    .withPayloadWithHostNames(statusCheckerTask.getFailedHostNames())
                     .build();
         }
         LOGGER.debug("Poller exiting.");

@@ -56,7 +56,7 @@ public interface ClusterSetupService {
 
     ExtendedPollingResult waitForHosts(Set<InstanceMetadataView> hostsInCluster) throws ClusterClientInitException;
 
-    void waitForHostsHealthy(Set<InstanceMetadataView> hostsInCluster) throws ClusterClientInitException;
+    List<InstanceMetadataView> waitForHostsHealthy(Set<InstanceMetadataView> hostsInCluster) throws ClusterClientInitException;
 
     String getSdxContext();
 

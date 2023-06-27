@@ -20,6 +20,10 @@ public interface StatusCheckerTask<T> {
         return Collections.emptySet();
     }
 
+    default Set<String> getFailedHostNames() {
+        return Collections.emptySet();
+    }
+
     default boolean initialExitCheck(T t) {
         return true;
     }

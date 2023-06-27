@@ -10,10 +10,13 @@ public class ExtendedPollingResult {
 
     private Set<Long> failedInstanceIds;
 
-    private ExtendedPollingResult(PollingResult pollingResult, Exception exception, Set<Long> payload) {
+    private Set<String> failedHostNames;
+
+    private ExtendedPollingResult(PollingResult pollingResult, Exception exception, Set<Long> payload, Set<String> failedHostNames) {
         this.pollingResult = pollingResult;
         this.exception = exception;
         this.failedInstanceIds = payload;
+        this.failedHostNames = failedHostNames;
     }
 
     public boolean isSuccess() {
@@ -44,8 +47,14 @@ public class ExtendedPollingResult {
         return failedInstanceIds;
     }
 
+    public Set<String> getFailedHostNames() {
+        return failedHostNames;
+    }
+
     public static class ExtendedPollingResultBuilder {
         private Set<Long> failedInstaceIds;
+
+        private Set<String> failedHostNames;
 
         private Exception exception;
 
@@ -53,6 +62,11 @@ public class ExtendedPollingResult {
 
         public ExtendedPollingResultBuilder withPayload(Set<Long> failedInstanceIds) {
             this.failedInstaceIds = failedInstanceIds;
+            return this;
+        }
+
+        public ExtendedPollingResultBuilder withPayloadWithHostNames(Set<String> failedHostNames) {
+            this.failedHostNames = failedHostNames;
             return this;
         }
 
@@ -87,7 +101,7 @@ public class ExtendedPollingResult {
         }
 
         public ExtendedPollingResult build() {
-            return new ExtendedPollingResult(pollingResult, exception, failedInstaceIds);
+            return new ExtendedPollingResult(pollingResult, exception, failedInstaceIds, failedHostNames);
         }
     }
 

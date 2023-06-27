@@ -17,7 +17,6 @@ import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
-import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 
@@ -50,6 +49,11 @@ public class ClouderaManagerHostHealthyStatusChecker extends AbstractClouderaMan
         this.hostnamesToCheckFor = new HashSet<>(hostnamesToCheckFor);
         initialNodeCount = hostnamesToCheckFor.size();
         LOGGER.info("Initialized ClouderaManagerHostHealthyStatusChecker with start={}, hostNamesToCheckFor.size()={}", start, hostnamesToCheckFor.size());
+    }
+
+    @Override
+    public Set<String> getFailedHostNames() {
+        return hostnamesToCheckFor;
     }
 
     @Override
@@ -108,9 +112,8 @@ public class ClouderaManagerHostHealthyStatusChecker extends AbstractClouderaMan
 
     @Override
     public void handleTimeout(ClouderaManagerPollerObject pollerObject) {
-        throw new ClouderaManagerOperationFailedException(
-                String.format("Operation timed out. Failed while waiting for %d nodes to move into health state. MissingNodeCount=%d, MissingNodes=[%s]",
-                        initialNodeCount, hostnamesToCheckFor.size(), hostnamesToCheckFor));
+        LOGGER.debug("Operation timed out. Failed while waiting for {} nodes to move into health state. MissingNodeCount={}, MissingNodes={}",
+                initialNodeCount, hostnamesToCheckFor.size(), hostnamesToCheckFor);
     }
 
     @Override
