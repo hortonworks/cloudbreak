@@ -85,9 +85,9 @@ public class AzureUtils {
 
     private static final int HOST_GROUP_LENGTH = 3;
 
-    private static final int NETWORKINTERFACE_DETACH_CHECKING_INTERVAL = 5000;
+    private static final int NETWORKINTERFACE_DETACH_CHECKING_INTERVAL = 20000;
 
-    private static final int NETWORKINTERFACE_DETACH_CHECKING_MAXATTEMPT = 5;
+    private static final int NETWORKINTERFACE_DETACH_CHECKING_MAXATTEMPT = 10;
 
     private static final int MAX_DISK_ENCRYPTION_SET_NAME_LENGTH = 80;
 
@@ -457,11 +457,11 @@ public class AzureUtils {
             syncPollingScheduler.schedule(networkInterfaceDetachCheckerTask, NETWORKINTERFACE_DETACH_CHECKING_INTERVAL,
                     NETWORKINTERFACE_DETACH_CHECKING_MAXATTEMPT, 1);
         } catch (Exception e) {
-            throw new CloudConnectorException("Error during waiting for network detach: ", e);
+            throw new CloudConnectorException("Error during waiting for network detach: " + e.getMessage(), e);
         }
     }
 
-    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    @Retryable(backoff = @Backoff(delay = 30, multiplier = 2, maxDelay = 120), maxAttempts = 5)
     public void deleteNetworkInterfaces(AzureClient azureClient, String resourceGroupName, Collection<String> networkInterfaceNames) {
         LOGGER.info("Delete network interfaces: {}", networkInterfaceNames);
         List<String> failedToDeleteNetworkInterfaces = new ArrayList<>();
@@ -482,7 +482,7 @@ public class AzureUtils {
         }
     }
 
-    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    @Retryable(backoff = @Backoff(delay = 30, multiplier = 2, maxDelay = 120), maxAttempts = 5)
     public void deletePublicIps(AzureClient azureClient, String resourceGroupName, Collection<String> publicIpNames) {
         LOGGER.info("Delete public ips: {}", publicIpNames);
         List<String> failedToDeletePublicIps = new ArrayList<>();

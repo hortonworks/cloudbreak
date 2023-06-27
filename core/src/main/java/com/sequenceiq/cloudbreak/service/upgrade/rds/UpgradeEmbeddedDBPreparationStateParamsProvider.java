@@ -28,8 +28,8 @@ public class UpgradeEmbeddedDBPreparationStateParamsProvider {
     private TargetMajorVersion targetMajorVersion;
 
     public Map<String, Object> createParamsForEmbeddedDBUpgradePreparation(StackDto stackDto) {
-        String originalVersion = StringUtils.isNotEmpty(stackDto.getStack().getExternalDatabaseEngineVersion())
-                ? stackDto.getStack().getExternalDatabaseEngineVersion() : DEFAULT_ORIGINAL_POSTGRES_VERSION;
+        String originalVersion = StringUtils.isNotEmpty(stackDto.getDatabase().getExternalDatabaseEngineVersion())
+                ? stackDto.getDatabase().getExternalDatabaseEngineVersion() : DEFAULT_ORIGINAL_POSTGRES_VERSION;
         Map<String, Object> params = new HashMap<>();
         Map<String, Object> postgresParams = new HashMap<>();
         params.put("postgres", postgresParams);

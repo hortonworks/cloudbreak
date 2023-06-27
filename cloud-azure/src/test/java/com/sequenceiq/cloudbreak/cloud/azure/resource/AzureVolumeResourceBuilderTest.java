@@ -31,6 +31,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -61,6 +62,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -131,6 +133,12 @@ public class AzureVolumeResourceBuilderTest {
 
     @Mock
     private AzureUtils azureUtils;
+
+    @Spy
+    private AzureInstanceFinder azureInstanceFinder;
+
+    @Mock
+    private ResourceRetriever resourceRetriever;
 
     @Mock
     private AzureResourceNameService resourceNameService;
@@ -332,11 +340,13 @@ public class AzureVolumeResourceBuilderTest {
         when(azureClient.listDisksByResourceGroup(eq("resource-group"))).thenReturn(azureListResult);
         VirtualMachine virtualMachine = mock(VirtualMachine.class);
         when(azureClient.getVirtualMachine(eq("instance1"))).thenReturn(virtualMachine);
-
+        when(virtualMachine.name()).thenReturn("instance1");
         underTest.delete(context, auth, volumeSetResource);
 
         verify(azureClient, times(1)).getVirtualMachine(eq("instance1"));
-        verify(azureClient, times(1)).detachDiskFromVm(eq("vol1"), eq(virtualMachine));
+        verify(azureClient, times(1)).detachDisksFromVm(collectionCaptor.capture(), eq(virtualMachine));
+        Collection<String> detachedDisks = collectionCaptor.getValue();
+        assertThat(detachedDisks).containsOnly("vol1");
         verify(azureUtils, times(1)).deleteManagedDisks(any(), collectionCaptor.capture());
         Collection<String> deletedAzureManagedDisks = collectionCaptor.getValue();
         assertThat(deletedAzureManagedDisks).contains("vol1");

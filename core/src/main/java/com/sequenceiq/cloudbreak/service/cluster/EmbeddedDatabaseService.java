@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -52,8 +53,9 @@ public class EmbeddedDatabaseService {
         return isEmbeddedDatabaseOnAttachedDiskEnabledInternal(stack.getExternalDatabaseCreationType(), stack.getCloudPlatform(), cluster);
     }
 
-    boolean isEmbeddedDatabaseOnAttachedDiskEnabledByStackView(StackView stack, ClusterView cluster) {
-        return isEmbeddedDatabaseOnAttachedDiskEnabledInternal(stack.getExternalDatabaseCreationType(), stack.getCloudPlatform(), cluster);
+    boolean isEmbeddedDatabaseOnAttachedDiskEnabledByStackView(StackView stack, ClusterView cluster, Database database) {
+        return isEmbeddedDatabaseOnAttachedDiskEnabledInternal(database != null ? database.getExternalDatabaseAvailabilityType() : null,
+                stack.getCloudPlatform(), cluster);
     }
 
     private boolean isEmbeddedDatabaseOnAttachedDiskEnabledInternal(DatabaseAvailabilityType externalDatabaseCreationType, String cloudPlatform,
@@ -75,7 +77,7 @@ public class EmbeddedDatabaseService {
         return cluster.getEmbeddedDatabaseOnAttachedDisk() && calculateVolumeCountOnGatewayGroup(gatewayGroup.map(InstanceGroupView::getTemplate)) > 0;
     }
 
-    public boolean isSslEnforcementForEmbeddedDatabaseEnabled(StackView stackView, ClusterView clusterView) {
+    public boolean isSslEnforcementForEmbeddedDatabaseEnabled(StackView stackView, ClusterView clusterView, Database database) {
         String accountId = Crn.safeFromString(stackView.getResourceCrn()).getAccountId();
         StackType stackType = stackView.getType();
         boolean sslEnforcementEnabled = false;
@@ -85,7 +87,7 @@ public class EmbeddedDatabaseService {
             sslEnforcementEnabled = entitlementService.databaseWireEncryptionDatahubEnabled(accountId);
         }
         String runtime = getRuntime(clusterView);
-        boolean response = sslEnforcementEnabled && isEmbeddedDatabaseOnAttachedDiskEnabledByStackView(stackView, clusterView) &&
+        boolean response = sslEnforcementEnabled && isEmbeddedDatabaseOnAttachedDiskEnabledByStackView(stackView, clusterView, database) &&
                 isSslEnforcementSupportedForRuntime(runtime);
         LOGGER.info("Embedded DB SSL enforcement is {} for runtime version {}", response ? "enabled" : "disabled", runtime);
         return response;

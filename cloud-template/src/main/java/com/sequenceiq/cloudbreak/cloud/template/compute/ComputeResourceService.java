@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.template.compute;
 
+import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
 import static com.sequenceiq.cloudbreak.cloud.template.compute.CloudFailureHandler.ScaleContext;
 import static java.lang.String.format;
@@ -257,7 +258,7 @@ public class ComputeResourceService {
         int fullNodeCount = 0;
         for (Group group : groups) {
             fullNodeCount += (long) group.getInstances().stream()
-                    .filter(cloudInstance -> InstanceStatus.CREATE_REQUESTED.equals(cloudInstance.getTemplate().getStatus()))
+                    .filter(cloudInstance -> CREATE_REQUESTED.equals(cloudInstance.getTemplate().getStatus()))
                     .count();
         }
         return fullNodeCount;
@@ -291,7 +292,9 @@ public class ComputeResourceService {
             List<CloudResourceStatus> results = new ArrayList<>();
             Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
             for (Group group : getOrderedCopy(groups)) {
-                List<CloudInstance> instances = group.getInstances();
+                List<CloudInstance> instances = group.getInstances().stream()
+                        .filter(cloudInstance -> CREATE_REQUESTED.equals(cloudInstance.getTemplate().getStatus()))
+                        .collect(Collectors.toList());
                 Integer createBatchSize = resourceBuilders.getCreateBatchSize(auth.getCloudContext().getVariant());
 
                 LOGGER.debug("Split the instances to {} chunks to execute the operation in parallel", createBatchSize);

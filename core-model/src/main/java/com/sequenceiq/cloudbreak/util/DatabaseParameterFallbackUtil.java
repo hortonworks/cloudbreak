@@ -1,9 +1,14 @@
 package com.sequenceiq.cloudbreak.util;
 
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 // TODO It's only needed for handling backward compatibility, can be removed in CB-22002
 public class DatabaseParameterFallbackUtil {
@@ -27,10 +32,55 @@ public class DatabaseParameterFallbackUtil {
     }
 
     public static String getExternalDatabaseEngineVersion(Database database, String fallbackExternalDatabaseEngineVersion) {
-        return database != null ? database.getExternalDatabaseEngineVersion() : fallbackExternalDatabaseEngineVersion;
+        String result;
+        if (database != null) {
+            String dbEngineVersion = Optional.of(database).map(Database::getExternalDatabaseEngineVersion).orElse(null);
+            if (fallbackExternalDatabaseEngineVersion != null && !StringUtils.equals(dbEngineVersion, fallbackExternalDatabaseEngineVersion)) {
+                result = fallbackExternalDatabaseEngineVersion;
+            } else {
+                result = dbEngineVersion;
+            }
+        } else {
+            result = fallbackExternalDatabaseEngineVersion;
+        }
+        return result;
     }
 
     public static DatabaseAvailabilityType getExternalDatabaseCreationType(Database database, DatabaseAvailabilityType fallbackExternalDatabaseCreationType) {
         return database != null ? database.getExternalDatabaseAvailabilityType() : fallbackExternalDatabaseCreationType;
+    }
+
+    public static Database getOrCreateDatabase(Stack stack) {
+        if (stack.getDatabase() == null) {
+            Database database = new Database();
+            database.setExternalDatabaseAvailabilityType(stack.getExternalDatabaseCreationType());
+            database.setExternalDatabaseEngineVersion(stack.getExternalDatabaseEngineVersion());
+            return database;
+        } else {
+            String stackDbEngineVersion = stack.getExternalDatabaseEngineVersion();
+            if (stackDbEngineVersion != null && !stackDbEngineVersion.equals(stack.getDatabase().getExternalDatabaseEngineVersion())) {
+                Database database = new Database();
+                database.setExternalDatabaseAvailabilityType(stack.getExternalDatabaseCreationType());
+                database.setExternalDatabaseEngineVersion(stack.getExternalDatabaseEngineVersion());
+                return database;
+            } else {
+                return stack.getDatabase();
+            }
+        }
+    }
+
+    public static Database getOrCreateDatabase(Database database, StackView stack) {
+        if (database == null) {
+            Database result = new Database();
+            result.setExternalDatabaseEngineVersion(stack.getExternalDatabaseEngineVersion());
+            result.setExternalDatabaseAvailabilityType(stack.getExternalDatabaseCreationType());
+            return result;
+        } else {
+            String stackDbEngineVersion = stack.getExternalDatabaseEngineVersion();
+            if (stackDbEngineVersion != null && !stackDbEngineVersion.equals(database.getExternalDatabaseEngineVersion())) {
+                database.setExternalDatabaseEngineVersion(stack.getExternalDatabaseEngineVersion());
+            }
+            return database;
+        }
     }
 }

@@ -124,10 +124,11 @@ public class AwsUpscaleService {
 
             List<Group> groupsWithNewInstances = getGroupsWithNewInstances(scaledGroups);
             List<CloudResource> newInstances = getNewInstances(scaledGroups, instances);
-            List<CloudResource> reattachableVolumeSets = getReattachableVolumeSets(scaledGroups, resources);
+            List<CloudResource> reattachableVolumeSets = getReattachableVolumeSets(resources);
             List<CloudResource> networkResources = resources.stream()
                     .filter(cloudResource -> ResourceType.AWS_SUBNET.equals(cloudResource.getType()))
                     .collect(Collectors.toList());
+            cloudResourceHelper.updateDeleteOnTerminationFlag(reattachableVolumeSets, false, ac.getCloudContext());
             List<CloudResourceStatus> cloudResourceStatuses = awsComputeResourceService
                     .buildComputeResourcesForUpscale(ac, stack, groupsWithNewInstances, newInstances, reattachableVolumeSets, networkResources,
                             adjustmentTypeWithThreshold);
@@ -135,10 +136,11 @@ public class AwsUpscaleService {
             List<String> failedResources = cloudResourceStatuses.stream().map(CloudResourceStatus::getCloudResource)
                     .filter(cloudResource -> CommonStatus.FAILED == cloudResource.getStatus())
                     .map(cloudResource -> cloudResource.getType() + " - " + cloudResource.getName())
-                    .collect(Collectors.toList());
+                    .toList();
             if (!failedResources.isEmpty()) {
                 throw new RuntimeException("Additional resource creation failed: " + failedResources);
             }
+            cloudResourceHelper.updateDeleteOnTerminationFlag(reattachableVolumeSets, true, ac.getCloudContext());
             awsTaggingService.tagRootVolumes(ac, amazonEC2Client, instances, stack.getTags());
             awsCloudWatchService.addCloudWatchAlarmsForSystemFailures(instances, regionName, credentialView, stack.getTags());
 
@@ -321,13 +323,15 @@ public class AwsUpscaleService {
     }
 
     private List<CloudResource> getNewInstances(List<Group> scaledGroups, List<CloudResource> instances) {
-        return instances.stream().filter(instance -> {
+        List<CloudResource> collectedInstances = instances.stream().filter(instance -> {
             Group group = scaledGroups.stream().filter(scaledGroup -> scaledGroup.getName().equals(instance.getGroup())).findFirst().get();
             return group.getInstances().stream().noneMatch(inst -> instance.getInstanceId().equals(inst.getInstanceId()));
         }).collect(Collectors.toList());
+        LOGGER.debug("Collected instances: {}", collectedInstances);
+        return collectedInstances;
     }
 
-    private List<CloudResource> getReattachableVolumeSets(List<Group> scaledGroups, List<CloudResource> resources) {
+    private List<CloudResource> getReattachableVolumeSets(List<CloudResource> resources) {
         List<CloudResource> volumeSets = resources.stream()
                 .filter(cloudResource -> ResourceType.AWS_VOLUMESET.equals(cloudResource.getType()))
                 .filter(cloudResource -> CommonStatus.DETACHED.equals(cloudResource.getStatus()))
@@ -337,7 +341,7 @@ public class AwsUpscaleService {
     }
 
     private List<Group> getGroupsWithNewInstances(List<Group> scaledGroups) {
-        return scaledGroups.stream().map(group -> {
+        List<Group> collectedGroupsWithNewInstances = scaledGroups.stream().map(group -> {
             List<CloudInstance> newInstances = group.getInstances().stream()
                     .filter(instance -> Objects.isNull(instance.getInstanceId())).collect(Collectors.toList());
 
@@ -345,6 +349,8 @@ public class AwsUpscaleService {
                     group.getInstanceAuthentication(), group.getLoginUserName(),
                     group.getPublicKey(), group.getRootVolumeSize(), group.getIdentity(), group.getNetwork(), group.getTags());
         }).collect(Collectors.toList());
+        LOGGER.debug("Collected groups with new instances: {}", collectedGroupsWithNewInstances);
+        return collectedGroupsWithNewInstances;
     }
 
 }

@@ -44,8 +44,16 @@ public class DatabaseParameterFallbackUtilTest {
         SdxDatabase sdxDatabase = new SdxDatabase();
         sdxDatabase.setDatabaseEngineVersion("2.0");
         String fallbackDatabaseEngineVersion = "fallback2.0";
-        assertEquals("2.0", DatabaseParameterFallbackUtil.getDatabaseEngineVersion(sdxDatabase, fallbackDatabaseEngineVersion));
+        assertEquals("fallback2.0", DatabaseParameterFallbackUtil.getDatabaseEngineVersion(sdxDatabase, fallbackDatabaseEngineVersion));
         assertEquals(fallbackDatabaseEngineVersion, DatabaseParameterFallbackUtil.getDatabaseEngineVersion(null, fallbackDatabaseEngineVersion));
+    }
+
+    @Test
+    public void testGetDatabaseEngineVersionNull() {
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseEngineVersion(null);
+        String fallbackDatabaseEngineVersion = "fallback2.0";
+        assertEquals("fallback2.0", DatabaseParameterFallbackUtil.getDatabaseEngineVersion(sdxDatabase, fallbackDatabaseEngineVersion));
     }
 
     @Test

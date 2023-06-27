@@ -1,9 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.azure.upscale;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.PRIVATE_ID;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_INSTANCE;
+
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -33,8 +38,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
@@ -70,6 +77,9 @@ public class AzureUpscaleService {
     @Inject
     private AzureCloudResourceService azureCloudResourceService;
 
+    @Inject
+    private ResourceRetriever resourceRetriever;
+
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources, AzureStackView azureStackView,
             AzureClient client, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) throws QuotaExceededException {
         CloudContext cloudContext = ac.getCloudContext();
@@ -81,9 +91,14 @@ public class AzureUpscaleService {
         List<CloudResource> osDiskResources = new ArrayList<>();
 
         OffsetDateTime preDeploymentTime = OffsetDateTime.now();
-        filterExistingInstances(azureStackView);
+
+        List<CloudResource> createdCloudInstances =
+                resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, AZURE_INSTANCE, cloudContext.getId());
+        LOGGER.debug("Created cloud instances: {}", createdCloudInstances);
+        filterExistingInstances(stackName, azureStackView, createdCloudInstances);
         try {
             List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
+            Map<String, Long> requestedInstancesPrivateIdMap = getRequestedInstancesPrivateIdMap(stackName, scaledGroups);
             CloudResource armTemplate = azureScaleUtilService.getArmTemplate(resources, stackName);
 
             Deployment templateDeployment =
@@ -98,19 +113,23 @@ public class AzureUpscaleService {
             } else {
                 LOGGER.warn("Skipping OS disk collection as there was no VM instance found amongst cloud resources for {}!", stackName);
             }
-
+            replaceAzureInstances(templateResources, newInstances);
             azureCloudResourceService.saveCloudResources(resourceNotifier, cloudContext, ListUtils.union(templateResources, osDiskResources));
 
             List<CloudResource> reattachableVolumeSets = getReattachableVolumeSets(resources, newInstances);
             List<CloudResource> networkResources = azureCloudResourceService.getNetworkResources(resources);
+            createdCloudInstances.addAll(newInstances);
+            List<CloudResource> createRequestedInstances = getRequestedInstancesWithPrivateId(createdCloudInstances, requestedInstancesPrivateIdMap);
+            cloudResourceHelper.updateDeleteOnTerminationFlag(reattachableVolumeSets, false, ac.getCloudContext());
+            azureComputeResourceService.buildComputeResourcesForUpscale(ac, stack, scaledGroups, createRequestedInstances, reattachableVolumeSets,
+                    networkResources, adjustmentTypeWithThreshold);
+            cloudResourceHelper.updateDeleteOnTerminationFlag(reattachableVolumeSets, true, ac.getCloudContext());
 
-            azureComputeResourceService.buildComputeResourcesForUpscale(ac, stack, scaledGroups, newInstances, reattachableVolumeSets, networkResources,
-                    adjustmentTypeWithThreshold);
-
-            List<CloudResourceStatus> successfulInstances = newInstances.stream()
+            List<CloudResourceStatus> successfulInstances = createRequestedInstances.stream()
                     .map(cloudResource ->
-                            new CloudResourceStatus(cloudResource, ResourceStatus.CREATED, cloudResource.getParameter(CloudResource.PRIVATE_ID, Long.class)))
+                            new CloudResourceStatus(cloudResource, ResourceStatus.CREATED, cloudResource.getParameter(PRIVATE_ID, Long.class)))
                     .collect(Collectors.toList());
+
             return ListUtils.union(Collections.singletonList(new CloudResourceStatus(armTemplate, ResourceStatus.IN_PROGRESS)),
                     successfulInstances);
         } catch (Retry.ActionFailedException e) {
@@ -135,9 +154,47 @@ public class AzureUpscaleService {
         }
     }
 
-    private void filterExistingInstances(AzureStackView azureStackView) {
+    private Map<String, Long> getRequestedInstancesPrivateIdMap(String stackName, List<Group> scaledGroups) {
+        Map<String, Long> instanceIdPrivateIdMap = scaledGroups.stream().flatMap(group -> group.getInstances().stream())
+                .filter(cloudInstance -> InstanceStatus.CREATE_REQUESTED.equals(cloudInstance.getTemplate().getStatus()))
+                .collect(Collectors.toMap(cloudInstance -> azureUtils.getFullInstanceId(stackName, cloudInstance.getTemplate().getGroupName(),
+                                Long.toString(cloudInstance.getTemplate().getPrivateId()), cloudInstance.getDbIdOrDefaultIfNotExists()),
+                        cloudInstance -> cloudInstance.getTemplate().getPrivateId()));
+        LOGGER.debug("Instance id private id map: {}", instanceIdPrivateIdMap);
+        return instanceIdPrivateIdMap;
+    }
+
+    private void replaceAzureInstances(List<CloudResource> templateResources, List<CloudResource> newInstances) {
+        LOGGER.debug("Replace azure instances with the detailed instances");
+        templateResources.removeIf(cloudResource -> AZURE_INSTANCE.equals(cloudResource.getType()));
+        templateResources.addAll(newInstances);
+        LOGGER.debug("Template resources after replacement: {}", templateResources);
+    }
+
+    private List<CloudResource> getRequestedInstancesWithPrivateId(List<CloudResource> createdCloudInstances, Map<String, Long> instanceIdPrivateIdMap) {
+        return createdCloudInstances.stream()
+                .filter(cloudResource -> instanceIdPrivateIdMap.containsKey(cloudResource.getInstanceId()))
+                .map(cloudResource -> CloudResource.builder().cloudResource(cloudResource)
+                        .withParameters(Map.of(PRIVATE_ID, instanceIdPrivateIdMap.get(cloudResource.getInstanceId())))
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    private void filterExistingInstances(String stackName, AzureStackView azureStackView, List<CloudResource> existingCloudInstances) {
+        LOGGER.debug("Azure stack view before filtering existing instances {}", azureStackView);
         azureStackView.getInstancesByGroupType().forEach((key, value) -> value.removeIf(AzureInstanceView::hasRealInstanceId));
+        azureStackView.getInstancesByGroupType().forEach((key, value) -> value.removeIf(azureInstanceView -> existingCloudInstances.stream()
+                .anyMatch(cloudResource -> {
+                    String instanceId = azureUtils.getFullInstanceId(stackName, azureInstanceView.getGroupName(),
+                            Long.toString(azureInstanceView.getPrivateId()), azureInstanceView.getInstance().getDbIdOrDefaultIfNotExists());
+                    boolean instanceIdFoundInExistingInstances = Objects.equals(cloudResource.getInstanceId(), instanceId);
+                    if (instanceIdFoundInExistingInstances) {
+                        LOGGER.debug("Instance id found in existing cloud instances: {}", instanceId);
+                    }
+                    return instanceIdFoundInExistingInstances;
+                })));
         azureStackView.getInstancesByGroupType().entrySet().removeIf(group -> group.getValue() == null || group.getValue().isEmpty());
+        LOGGER.debug("Azure stack view after filtering existing instances {}", azureStackView);
     }
 
     private List<CloudResource> getReattachableVolumeSets(List<CloudResource> resources, List<CloudResource> newInstances) {
