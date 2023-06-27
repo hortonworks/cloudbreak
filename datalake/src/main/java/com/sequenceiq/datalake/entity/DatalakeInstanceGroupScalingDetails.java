@@ -8,12 +8,12 @@ public enum DatalakeInstanceGroupScalingDetails {
     GATEWAY("gateway", false, 2),
     AUXILIARY("auxiliary", false, 1),
     CORE("core", true, 3),
-    SOLRHG("solrhg", true, 0),
-    STORAGEHG("storagehg", true, 0),
-    KAFKAHG("kafkahg", true, 0),
-    RAZHG("razhg", true, 0),
-    ATLASHG("atlashg", true, 0),
-    HMSHG("hmshg", true, 0);
+    SOLR_SCALE_OUT("solr_scale_out", true, 0),
+    STORAGE_SCALE_OUT("storage_scale_out", true, 0),
+    KAFKA_SCALE_OUT("kafka_scale_out", true, 0),
+    RAZ_SCALE_OUT("raz_scale_out", true, 0),
+    ATLAS_SCALE_OUT("atlas_scale_out", true, 0),
+    HMS_SCALE_OUT("hms_scale_out", true, 0);
 
     private final String name;
 
