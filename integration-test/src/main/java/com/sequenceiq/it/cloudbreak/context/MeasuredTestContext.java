@@ -1,10 +1,12 @@
 package com.sequenceiq.it.cloudbreak.context;
 
 import java.time.Duration;
+import java.util.Date;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
+import org.testng.ITestResult;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -61,6 +63,21 @@ public class MeasuredTestContext extends MockedTestContext {
     @Override
     public TestParameter getTestParameter() {
         return wrappedTestContext.getTestParameter();
+    }
+
+    @Override
+    public ITestResult getCurrentTestResult() {
+        return wrappedTestContext.getCurrentTestResult();
+    }
+
+    @Override
+    public Date getTestStartTime() {
+        return wrappedTestContext.getTestStartTime();
+    }
+
+    @Override
+    public Date getTestEndTime() {
+        return wrappedTestContext.getTestEndTime();
     }
 
     @Override

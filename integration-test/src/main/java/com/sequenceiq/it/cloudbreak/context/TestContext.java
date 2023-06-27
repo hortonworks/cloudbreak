@@ -5,8 +5,13 @@ import static java.lang.String.format;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -179,6 +184,32 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public TestParameter getTestParameter() {
         return testParameter;
+    }
+
+    public ITestResult getCurrentTestResult() {
+        return Reporter.getCurrentTestResult();
+    }
+
+    public Date getTestStartTime() {
+        Date startTime = getCurrentTestResult().getTestContext().getStartDate();
+        if (startTime == null) {
+            startTime = new Date(getCurrentTestResult().getStartMillis());
+        }
+        return startTime;
+    }
+
+    public Date getTestEndTime() {
+        Date endTime = getCurrentTestResult().getTestContext().getEndDate();
+        if (endTime == null) {
+            endTime = new Date(getCurrentTestResult().getEndMillis());
+        }
+        LocalDateTime end = endTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        LocalDateTime start = getTestStartTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        long duration = ChronoUnit.DAYS.between(start, end);
+        if (duration < 0 || duration > 1) {
+            endTime = Calendar.getInstance().getTime();
+        }
+        return endTime;
     }
 
     public Map<String, CloudbreakTestDto> getResourceNames() {
@@ -1281,7 +1312,7 @@ public abstract class TestContext implements ApplicationContextAware {
                     .collect(Collectors.toList());
             String errorMessage = errorLogMessageProvider.getMessage(exceptionMap, clues);
 
-            ITestResult testResult = Reporter.getCurrentTestResult();
+            ITestResult testResult = getCurrentTestResult();
             Throwable testFailException = errorLogMessageProvider.getException(exceptionMap);
 
             if (testFailException != null) {

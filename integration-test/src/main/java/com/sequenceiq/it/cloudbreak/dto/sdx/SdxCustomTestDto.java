@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEven
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Clue;
@@ -36,7 +37,11 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
+import com.sequenceiq.it.cloudbreak.search.ClusterLogsStorageUrl;
+import com.sequenceiq.it.cloudbreak.search.KibanaSearchUrl;
+import com.sequenceiq.it.cloudbreak.search.SearchUrl;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
+import com.sequenceiq.it.cloudbreak.search.StorageUrl;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.StructuredEventUtil;
@@ -244,27 +249,42 @@ public class SdxCustomTestDto extends AbstractSdxTestDto<SdxCustomClusterRequest
 
     @Override
     public Clue investigate() {
+        CloudProviderProxy cloudProvider = getTestContext().getCloudProvider();
+        StorageUrl storageUrl = new ClusterLogsStorageUrl();
+        SearchUrl searchUrl = new KibanaSearchUrl();
+        String datalakeCloudStorageUrl = null;
+
         if (getResponse() == null || getResponse().getCrn() == null) {
             return null;
         }
 
+        String resourceName = getResponse().getName();
+        String resourceCrn = getResponse().getCrn();
         AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
                 getTestContext().getMicroserviceClient(CloudbreakClient.class),
                 CloudbreakEventService.DATALAKE_RESOURCE_TYPE,
                 null,
-                getResponse().getCrn());
+                resourceCrn);
         boolean hasSpotTermination = (getResponse().getStackV4Response() == null) ? false : getResponse().getStackV4Response().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetadata().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
         List<CDPStructuredEvent> structuredEvents = List.of();
-        if (getResponse() != null && getResponse().getCrn() != null) {
+        if (getResponse() != null && resourceCrn != null) {
             CDPStructuredEventV1Endpoint cdpStructuredEventV1Endpoint =
                     getTestContext().getMicroserviceClient(SdxClient.class).getDefaultClient().structuredEventsV1Endpoint();
-            structuredEvents = StructuredEventUtil.getStructuredEvents(cdpStructuredEventV1Endpoint, getResponse().getCrn());
+            structuredEvents = StructuredEventUtil.getStructuredEvents(cdpStructuredEventV1Endpoint, resourceCrn);
         }
+        if (getTestContext().get(EnvironmentTestDto.class) != null || getTestContext().get(EnvironmentTestDto.class).getResponse() != null) {
+            String baseLocation = getTestContext().get(EnvironmentTestDto.class).getResponse().getTelemetry().getLogging().getStorageLocation();
+            datalakeCloudStorageUrl = storageUrl.getDatalakeStorageUrl(resourceName, resourceCrn, baseLocation, cloudProvider);
+        }
+        List<Searchable> listOfSearchables = List.of(this);
+        String datalakeKibanaUrl = searchUrl.getSearchUrl(listOfSearchables, getTestContext().getTestStartTime(), getTestContext().getTestEndTime());
         return new Clue(
-                getResponse().getName(),
-                getResponse().getCrn(),
+                resourceName,
+                resourceCrn,
+                datalakeCloudStorageUrl,
+                datalakeKibanaUrl,
                 auditEvents,
                 structuredEvents,
                 getResponse(),

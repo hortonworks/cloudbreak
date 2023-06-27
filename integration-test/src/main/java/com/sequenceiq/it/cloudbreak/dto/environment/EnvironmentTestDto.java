@@ -55,7 +55,11 @@ import com.sequenceiq.it.cloudbreak.dto.DeletableEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
+import com.sequenceiq.it.cloudbreak.search.ClusterLogsStorageUrl;
+import com.sequenceiq.it.cloudbreak.search.KibanaSearchUrl;
+import com.sequenceiq.it.cloudbreak.search.SearchUrl;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
+import com.sequenceiq.it.cloudbreak.search.StorageUrl;
 import com.sequenceiq.it.cloudbreak.util.StructuredEventUtil;
 
 @Prototype
@@ -451,6 +455,9 @@ public class EnvironmentTestDto
 
     @Override
     public Clue investigate() {
+        StorageUrl storageUrl = new ClusterLogsStorageUrl();
+        SearchUrl searchUrl = new KibanaSearchUrl();
+
         if (getResponse() == null) {
             return null;
         }
@@ -460,9 +467,13 @@ public class EnvironmentTestDto
                     getTestContext().getMicroserviceClient(EnvironmentClient.class).getDefaultClient().structuredEventsV1Endpoint();
             structuredEvents = StructuredEventUtil.getStructuredEvents(cdpStructuredEventV1Endpoint, getResponse().getCrn());
         }
+        List<Searchable> listOfSearchables = List.of(this);
+        String environmentKibanaUrl = searchUrl.getSearchUrl(listOfSearchables, getTestContext().getTestStartTime(), getTestContext().getTestEndTime());
         return new Clue(
                 getResponse().getName(),
                 getResponse().getCrn(),
+                null,
+                environmentKibanaUrl,
                 null,
                 structuredEvents,
                 getResponse(),

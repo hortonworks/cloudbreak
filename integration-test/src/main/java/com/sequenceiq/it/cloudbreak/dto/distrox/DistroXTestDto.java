@@ -41,6 +41,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsIns
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.context.Clue;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
@@ -53,7 +54,11 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.search.ClusterLogsStorageUrl;
+import com.sequenceiq.it.cloudbreak.search.KibanaSearchUrl;
+import com.sequenceiq.it.cloudbreak.search.SearchUrl;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
+import com.sequenceiq.it.cloudbreak.search.StorageUrl;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
@@ -334,9 +339,17 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Override
     public Clue investigate() {
+        CloudProviderProxy cloudProvider = getTestContext().getCloudProvider();
+        StorageUrl storageUrl = new ClusterLogsStorageUrl();
+        SearchUrl searchUrl = new KibanaSearchUrl();
+        String datahubCloudStorageUrl = null;
+
         if (getResponse() == null || getResponse().getId() == null) {
             return null;
         }
+
+        String resourceName = getResponse().getName();
+        String resourceCrn = getResponse().getCrn();
         AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
                 getTestContext().getMicroserviceClient(CloudbreakClient.class),
                 CloudbreakEventService.DATAHUB_RESOURCE_TYPE,
@@ -345,9 +358,18 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         boolean hasSpotTermination = (getResponse().getInstanceGroups() == null) ? false : getResponse().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetadata().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
+
+        if (getResponse().getTelemetry() != null) {
+            String baseLocation = getResponse().getTelemetry().getLogging().getStorageLocation();
+            datahubCloudStorageUrl = storageUrl.getDataHubStorageUrl(resourceName, resourceCrn, baseLocation, cloudProvider);
+        }
+        List<Searchable> listOfSearchables = List.of(this);
+        String datahubKibanaUrl = searchUrl.getSearchUrl(listOfSearchables, getTestContext().getTestStartTime(), getTestContext().getTestEndTime());
         return new Clue(
-                getResponse().getName(),
-                getResponse().getCrn(),
+                resourceName,
+                resourceCrn,
+                datahubCloudStorageUrl,
+                datahubKibanaUrl,
                 auditEvents,
                 List.of(),
                 getResponse(),
