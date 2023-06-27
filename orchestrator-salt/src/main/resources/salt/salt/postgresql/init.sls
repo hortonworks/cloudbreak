@@ -8,10 +8,10 @@
 {% set postgres_data_on_attached_disk = salt['pillar.get']('postgres:postgres_data_on_attached_disk', 'False') %}
 {% set command = 'systemctl show -p FragmentPath postgresql' %}
 {% set unitFile = salt['cmd.run'](command) | replace("FragmentPath=","") %}
+{% set postgres_version = salt['pillar.get']('postgres:postgres_version', '10') | int %}
 
 {% if 'None' != configure_remote_db %}
 
-{% set postgres_version = salt['pillar.get']('postgres:postgres_version', '10') | int %}
 include:
 {%- if postgres_version == 11 %}
 {%- if not salt['file.file_exists']('/usr/pgsql-11/bin/psql') %}
@@ -51,7 +51,7 @@ init-services-db-remote:
       - file: {{ postgresql.root_certs_file }}
 {%- endif %}
 
-{%- else %}
+{%- else %} {# 'None' == configure_remote_db #}
 
 {%- if postgres_data_on_attached_disk %}
 
@@ -97,9 +97,12 @@ create_embeddeddb_certificate:
 
 {%- endif %}
 
-{%- if salt['pillar.get']('postgres:postgres_version', '10') | int == 11 %}
+{%- if postgres_version == 11 %}
 include:
   - postgresql.pg11
+{%- elif postgres_version == 14 %}
+include:
+  - postgresql.pg14
 {%- endif %}
 
 ensure-postgres-stopped-before-initdb:
