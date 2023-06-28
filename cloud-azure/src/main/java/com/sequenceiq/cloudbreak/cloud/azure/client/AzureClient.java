@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +37,6 @@ import com.azure.resourcemanager.authorization.models.RoleAssignments;
 import com.azure.resourcemanager.compute.ComputeManager;
 import com.azure.resourcemanager.compute.fluent.models.DiskEncryptionSetInner;
 import com.azure.resourcemanager.compute.fluent.models.DiskInner;
-import com.azure.resourcemanager.compute.fluent.models.ResourceSkuInner;
 import com.azure.resourcemanager.compute.models.AvailabilitySet;
 import com.azure.resourcemanager.compute.models.CachingTypes;
 import com.azure.resourcemanager.compute.models.Disk;
@@ -51,7 +48,6 @@ import com.azure.resourcemanager.compute.models.Encryption;
 import com.azure.resourcemanager.compute.models.EncryptionSetIdentity;
 import com.azure.resourcemanager.compute.models.KeyForDiskEncryptionSet;
 import com.azure.resourcemanager.compute.models.OperatingSystemStateTypes;
-import com.azure.resourcemanager.compute.models.ResourceSkuLocationInfo;
 import com.azure.resourcemanager.compute.models.SourceVault;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.azure.resourcemanager.compute.models.VirtualMachineCustomImage;
@@ -106,7 +102,6 @@ import com.azure.storage.common.StorageSharedKeyCredential;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
-import com.sequenceiq.cloudbreak.cloud.azure.AzureDisk;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureLoadBalancerFrontend;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
@@ -274,17 +269,18 @@ public class AzureClient {
                 .findAny();
     }
 
-    public Disk createManagedDisk(AzureDisk azureDisk) {
-        LOGGER.debug("create managed disk with name={}", azureDisk.getDiskName());
-        Disk.DefinitionStages.WithCreate withCreate = azure.disks().define(azureDisk.getDiskName())
-                .withRegion(RegionUtil.findByLabelOrName(azureDisk.getRegion()))
-                .withExistingResourceGroup(azureDisk.getResourceGroupName())
+    public Disk createManagedDisk(
+            String diskName, int diskSize, AzureDiskType diskType, String region, String resourceGroupName, Map<String, String> tags,
+            String diskEncryptionSetId) {
+        LOGGER.debug("create managed disk with name={}", diskName);
+        Disk.DefinitionStages.WithCreate withCreate = azure.disks().define(diskName)
+                .withRegion(RegionUtil.findByLabelOrName(region))
+                .withExistingResourceGroup(resourceGroupName)
                 .withData()
-                .withSizeInGB(azureDisk.getDiskSize())
-                .withTags(azureDisk.getTags())
-                .withSku(convertAzureDiskTypeToDiskSkuTypes(azureDisk.getDiskType()))
-                .withAvailabilityZone(AvailabilityZoneId.fromString(azureDisk.getAvailabilityZone()));
-        setupDiskEncryptionWithDesIfNeeded(azureDisk.getDiskEncryptionSetId(), withCreate);
+                .withSizeInGB(diskSize)
+                .withTags(tags)
+                .withSku(convertAzureDiskTypeToDiskSkuTypes(diskType));
+        setupDiskEncryptionWithDesIfNeeded(diskEncryptionSetId, withCreate);
         return withCreate.create();
     }
 
@@ -1002,34 +998,6 @@ public class AzureClient {
             return matcher.group(1);
         }
         return null;
-    }
-
-    public Map<String, List<String>> getAvailabilityZones(String region) throws ProviderAuthenticationFailedException {
-        return handleException(() -> {
-            Map<String, List<String>> zoneInfo = new HashMap<>();
-            if (!StringUtils.isEmpty(region)) {
-                String criteria = "location eq '" + RegionUtil.findByLabelOrName(region).name() + "'";
-                LOGGER.debug("Fetch AZ info from Azure for region {} and criteria {}", region, criteria);
-                AzureListResult<ResourceSkuInner> azureResult = azureListResultFactory.create(azure
-                        .virtualMachines()
-                        .manager()
-                        .serviceClient()
-                        .getResourceSkus()
-                        .list(criteria, null, com.azure.core.util.Context.NONE));
-
-                azureResult.getStream().forEach(sku -> {
-                    List<ResourceSkuLocationInfo> locations = sku.locationInfo();
-                    if (locations != null) {
-                        locations.stream().forEach(loc -> {
-                            zoneInfo.put(sku.name(), loc.zones());
-                        });
-                    }
-                });
-            } else {
-                LOGGER.error("Region is not provided so not fetching the zone information");
-            }
-            return zoneInfo;
-        });
     }
 
     public void updateAdministratorLoginPassword(String resourceGroupName, String serverName, String newPassword) {

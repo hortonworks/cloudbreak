@@ -234,7 +234,6 @@ public class AzurePlatformResources implements PlatformResources {
     public CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Set<VirtualMachineSize> vmTypes = client.getVmTypes(region.value());
-        Map<String, List<String>> availabilityZones = client.getAvailabilityZones(region.value());
 
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
@@ -255,11 +254,6 @@ public class AzurePlatformResources implements PlatformResources {
             } else {
                 builder.withResourceDiskAttached(false);
             }
-
-            List<String> azs = availabilityZones.getOrDefault(virtualMachineSize.name(), new ArrayList<>());
-            LOGGER.debug("Availability Zones for VM type {} are {}", virtualMachineSize.name(), azs);
-
-            builder.withAvailabilityZones(azs);
 
             VmType vmType = VmType.vmTypeWithMeta(virtualMachineSize.name(), builder.create(), true);
             types.add(vmType);
