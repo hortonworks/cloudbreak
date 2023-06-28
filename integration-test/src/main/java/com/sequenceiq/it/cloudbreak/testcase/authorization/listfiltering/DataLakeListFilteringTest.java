@@ -63,11 +63,14 @@ public class DataLakeListFilteringTest extends AbstractIntegrationTest {
         useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_A);
         resourceCreator.createDefaultCredential(testContext);
         resourceCreator.createDefaultEnvironment(testContext);
+        EnvironmentTestDto environment = testContext.get(EnvironmentTestDto.class);
+        resourceCreator.createNewFreeIpa(testContext, environment);
         SdxInternalTestDto dataLakeA = resourceCreator.createDefaultDataLake(testContext);
 
         useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_B);
         CredentialTestDto credential = resourceCreator.createNewCredential(testContext);
         EnvironmentTestDto environmentB = resourceCreator.createNewEnvironment(testContext, credential);
+        resourceCreator.createNewFreeIpa(testContext, environmentB);
         SdxInternalTestDto dataLakeB = resourceCreator.createNewDataLake(testContext, environmentB);
 
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, dataLakeA.getName());

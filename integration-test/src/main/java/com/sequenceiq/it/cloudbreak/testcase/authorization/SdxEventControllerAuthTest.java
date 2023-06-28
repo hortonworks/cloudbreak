@@ -35,6 +35,7 @@ import com.sequenceiq.it.cloudbreak.dto.util.SdxEventTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
+import com.sequenceiq.it.cloudbreak.util.ResourceCreator;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class SdxEventControllerAuthTest extends AbstractIntegrationTest {
@@ -55,6 +56,9 @@ public class SdxEventControllerAuthTest extends AbstractIntegrationTest {
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
+    private ResourceCreator resourceCreator;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -84,6 +88,12 @@ public class SdxEventControllerAuthTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .validate();
+
+        EnvironmentTestDto environment = testContext.get(EnvironmentTestDto.class);
+        resourceCreator.createNewFreeIpa(testContext, environment);
+
+        testContext
                 .given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentUser()
