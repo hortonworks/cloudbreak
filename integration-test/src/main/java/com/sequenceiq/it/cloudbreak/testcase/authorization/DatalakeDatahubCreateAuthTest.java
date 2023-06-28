@@ -30,6 +30,7 @@ import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.RenewDatalakeCertificateTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
+import com.sequenceiq.it.cloudbreak.util.ResourceCreator;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
@@ -51,6 +52,9 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
+    private ResourceCreator resourceCreator;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -79,6 +83,12 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .validate();
+
+        EnvironmentTestDto environment = testContext.get(EnvironmentTestDto.class);
+        resourceCreator.createNewFreeIpa(testContext, environment);
+
+        testContext
                 .given(UmsTestDto.class)
                     .assignTarget(EnvironmentTestDto.class.getSimpleName())
                     .withDatahubCreator()

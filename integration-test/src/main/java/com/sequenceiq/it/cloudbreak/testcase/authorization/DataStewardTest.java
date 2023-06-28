@@ -22,6 +22,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
+import com.sequenceiq.it.cloudbreak.util.ResourceCreator;
 
 public class DataStewardTest extends AbstractIntegrationTest {
 
@@ -39,6 +40,9 @@ public class DataStewardTest extends AbstractIntegrationTest {
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
+    private ResourceCreator resourceCreator;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -58,6 +62,8 @@ public class DataStewardTest extends AbstractIntegrationTest {
         useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
+        EnvironmentTestDto environment = testContext.get(EnvironmentTestDto.class);
+        resourceCreator.createNewFreeIpa(testContext, environment);
 
         testContext
                 .given(UmsTestDto.class)
