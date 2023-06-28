@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -25,6 +27,8 @@ import com.sequenceiq.freeipa.service.image.ImageService;
 
 @Service
 public class MetadataSetupService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetadataSetupService.class);
 
     @Inject
     private InstanceGroupService instanceGroupService;
@@ -65,7 +69,10 @@ public class MetadataSetupService {
             instanceMetaDataEntry.setPrivateId(privateId);
             instanceMetaDataEntry.setStartDate(clock.getCurrentTimeMillis());
             instanceMetaDataEntry.setSubnetId(cloudInstance.getSubnetId());
-            instanceMetaDataEntry.setAvailabilityZone(cloudInstance.getAvailabilityZone());
+            if (instanceMetaDataEntry.getAvailabilityZone() == null) {
+                LOGGER.debug("Set Availability Zone since it is null");
+                instanceMetaDataEntry.setAvailabilityZone(cloudInstance.getAvailabilityZone());
+            }
             instanceMetaDataEntry.setInstanceName(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME));
             instanceMetaDataEntry.setLifeCycle(convertLifeCycle(md));
             if (instanceMetaDataEntry.getInstanceMetadataType() == null) {

@@ -1,12 +1,14 @@
 package com.sequenceiq.environment.api.v1.environment.model.base;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Set;
 
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.SubnetType;
 import com.sequenceiq.cloudbreak.validation.ValidSubnet;
 import com.sequenceiq.common.api.type.LoadBalancerCreation;
@@ -194,5 +196,12 @@ public abstract class EnvironmentNetworkBase implements Serializable {
 
     public void setGcp(EnvironmentNetworkGcpParams gcp) {
         this.gcp = gcp;
+    }
+
+    public Set<String> getAvailabilityZones(CloudPlatform cloudPlatform) {
+        switch (cloudPlatform) {
+            case AZURE : return azure != null ? azure.getAvailabilityZones() : Collections.emptySet();
+            default : return Collections.emptySet();
+        }
     }
 }

@@ -20,13 +20,26 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.converter.AvailabilityZoneConverter;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceGroupNetwork;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.CredentialService;
 
 @Service
 public class MultiAzCalculatorService {
@@ -35,6 +48,18 @@ public class MultiAzCalculatorService {
 
     @Inject
     private MultiAzValidator multiAzValidator;
+
+    @Inject
+    private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Inject
+    private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
+
+    @Inject
+    private CredentialService credentialService;
+
+    @Inject
+    private AvailabilityZoneConverter availabilityZoneConverter;
 
     public Map<String, String> prepareSubnetAzMap(DetailedEnvironmentResponse environment) {
         Map<String, String> subnetAzPairs = new HashMap<>();
@@ -187,5 +212,75 @@ public class MultiAzCalculatorService {
         } else {
             return Set.of();
         }
+    }
+
+    public void populateAvailabilityZones(Stack stack, DetailedEnvironmentResponse environment, InstanceGroup instanceGroup) {
+        if (stack.isMultiAz()) {
+            if (instanceGroup.getInstanceGroupNetwork() == null) {
+                instanceGroup.setInstanceGroupNetwork(new InstanceGroupNetwork());
+            }
+            Set<String> availabilityZonesForInstanceGroup = availabilityZoneConverter.getAvailabilityZonesFromJsonAttributes(
+                    instanceGroup.getInstanceGroupNetwork().getAttributes());
+            if (CollectionUtils.isEmpty(availabilityZonesForInstanceGroup)) {
+                LOGGER.debug("CloudPlatform is {} PlatformVariant is {}", stack.getCloudPlatform(), stack.getPlatformvariant());
+                CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
+                        Platform.platform(stack.getCloudPlatform()),
+                        Variant.variant(stack.getPlatformvariant()));
+                AvailabilityZoneConnector availabilityZoneConnector = cloudPlatformConnectors.get(cloudPlatformVariant).availabilityZoneConnector();
+                if (availabilityZoneConnector != null) {
+                    Set<String> availabilityZones = availabilityZoneConnector.getAvailabilityZones(extendedCloudCredentialConverter
+                                    .convert(credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn())), environment.getNetwork()
+                                    .getAvailabilityZones(CloudPlatform.valueOf(stack.getCloudPlatform())),
+                            instanceGroup.getTemplate().getInstanceType(), Region.region(environment.getLocation().getName()));
+                    if (availabilityZones.size() < availabilityZoneConnector.getMinZonesForFreeIpa()) {
+                        LOGGER.error("Number of zones are less than min number of Zones");
+                        throw new BadRequestException(String.format("Based on configured availability zones and instance type, number of available zones " +
+                                        "for instance group %s are %s. Please configure at least %s zones for Multi Az deployment", instanceGroup.getGroupName(),
+                                availabilityZones.size(), availabilityZoneConnector.getMinZonesForFreeIpa()));
+                    }
+                    LOGGER.debug("Availability Zones for instance group are  {}", availabilityZones);
+                    instanceGroup.getInstanceGroupNetwork().setAttributes(availabilityZoneConverter.getJsonAttributesWithAvailabilityZones(availabilityZones,
+                            instanceGroup.getInstanceGroupNetwork().getAttributes()));
+                } else {
+                    LOGGER.debug("Implementation for AvailabilityZoneConnector is not present for CloudPlatform {} and PlatformVariant {}",
+                            stack.getCloudPlatform(), stack.getPlatformvariant());
+                }
+
+            } else {
+                LOGGER.debug("Availability Zones {} are already provided for Instance Group {} in the request",
+                        availabilityZonesForInstanceGroup.stream().collect(Collectors.joining(",")),
+                        instanceGroup.getGroupName());
+            }
+        } else {
+            LOGGER.debug("Multi AZ is not enabled for {}", stack.getName());
+        }
+
+    }
+
+    public void populateAvailabilityZonesForInstances(Stack stack, InstanceGroup instanceGroup) {
+        if (stack.isMultiAz()) {
+            Set<String> availabilityZones = instanceGroup.getInstanceGroupNetwork() != null ? availabilityZoneConverter.getAvailabilityZonesFromJsonAttributes(
+                    instanceGroup.getInstanceGroupNetwork().getAttributes()) : Collections.emptySet();
+            if (!CollectionUtils.isEmpty(availabilityZones)) {
+                Set<InstanceMetaData> instanceMetaDataSets = instanceGroup.getNotDeletedInstanceMetaDataSet();
+                Map<String, Long> zoneToNodeCountMap = availabilityZones.stream().collect(Collectors.toMap(Function.identity(),
+                        z -> instanceMetaDataSets.stream().filter(instance -> z.equals(instance.getAvailabilityZone())).count()));
+                LOGGER.debug("Initialized zoneToNodeCountMap {}", zoneToNodeCountMap);
+                instanceMetaDataSets.stream().
+                        forEach(instance -> {
+                            if (instance.getAvailabilityZone() == null) {
+                                String availabilityZone = Collections.min(zoneToNodeCountMap.entrySet(), Map.Entry.comparingByValue()).getKey();
+                                zoneToNodeCountMap.put(availabilityZone, zoneToNodeCountMap.get(availabilityZone) + 1);
+                                instance.setAvailabilityZone(availabilityZone);
+                            }
+                            LOGGER.debug("Availability Zones for instance {} is {}", instance.getInstanceId(), instance.getAvailabilityZone());
+                        });
+            } else {
+                LOGGER.debug("Availability Zones are not available for Instance Group {} ", instanceGroup.getGroupName());
+            }
+        } else {
+            LOGGER.debug("Multi AZ is not enabled for {}", stack.getName());
+        }
+
     }
 }

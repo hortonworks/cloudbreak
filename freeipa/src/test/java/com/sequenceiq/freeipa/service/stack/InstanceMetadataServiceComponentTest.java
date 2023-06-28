@@ -27,20 +27,24 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.converter.AvailabilityZoneConverter;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
+import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceGroupNetwork;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
+import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.image.ImageService;
@@ -212,6 +216,18 @@ public class InstanceMetadataServiceComponentTest {
         private FreeIpaService freeIpaService;
 
         @MockBean
+        private CloudPlatformConnectors cloudPlatformConnectors;
+
+        @MockBean
+        private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
+
+        @MockBean
+        private CredentialService credentialService;
+
+        @MockBean
         private ImageService imageService;
+
+        @MockBean
+        private AvailabilityZoneConverter availabilityZoneConverter;
     }
 }

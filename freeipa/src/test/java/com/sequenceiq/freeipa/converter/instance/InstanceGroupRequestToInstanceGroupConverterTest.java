@@ -39,6 +39,7 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.SecurityGroup;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.Template;
+import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceGroupProvider;
 import com.sequenceiq.freeipa.util.CloudArgsForIgConverter;
 
@@ -64,6 +65,9 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
 
     @Mock
     private DefaultInstanceGroupProvider defaultInstanceGroupProvider;
+
+    @Mock
+    private MultiAzCalculatorService multiAzCalculatorService;
 
     @Test
     public void testConvertWithNullTemplate() {
