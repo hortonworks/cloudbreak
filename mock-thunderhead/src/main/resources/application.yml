@@ -83,7 +83,7 @@ auth:
     workloadiam.sync:
       routing.enable: false
       enable: false
-    saas.sdx.integration.enable: true
+    saas.sdx.integration.enable: false
     salt.rotatepassword.enable: true
     postgres.upgrade.embedded.enable: true
     postgres.upgrade.exception.enable: false
