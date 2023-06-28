@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -15,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatusWithMessage;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 
@@ -40,17 +42,18 @@ public class AwsLaunchConfigurationUpdateService {
     private InstanceInAutoScalingGroupUpdater instanceUpdater;
 
     public void updateLaunchConfigurations(AuthenticatedContext authenticatedContext, CloudStack stack, CloudResource cfResource,
-            Map<LaunchTemplateField, String> updatableFields) {
-        updateLaunchConfigurationsForGroupsOrAll(authenticatedContext, stack, cfResource, updatableFields, null);
+            Map<LaunchTemplateField, String> updatableFields, boolean onlyMetadataCheckRequired) {
+        updateLaunchConfigurationsForGroupsOrAll(authenticatedContext, stack, cfResource, updatableFields, null, onlyMetadataCheckRequired);
     }
 
-    public void updateLaunchConfigurations(AuthenticatedContext authenticatedContext, CloudStack stack, CloudResource cfResource,
-            Map<LaunchTemplateField, String> updatableFields, Group group) {
-        updateLaunchConfigurationsForGroupsOrAll(authenticatedContext, stack, cfResource, updatableFields, group);
+    public CloudResourceStatusWithMessage updateLaunchConfigurations(AuthenticatedContext authenticatedContext, CloudStack stack, CloudResource cfResource,
+        Map<LaunchTemplateField, String> updatableFields, Group group, boolean onlyMetadataCheckRequired) {
+        return updateLaunchConfigurationsForGroupsOrAll(authenticatedContext, stack, cfResource, updatableFields, group, onlyMetadataCheckRequired);
     }
 
-    private void updateLaunchConfigurationsForGroupsOrAll(AuthenticatedContext authenticatedContext, CloudStack stack, CloudResource cfResource,
-            Map<LaunchTemplateField, String> updatableFields, Group group) {
+    private CloudResourceStatusWithMessage updateLaunchConfigurationsForGroupsOrAll(AuthenticatedContext authenticatedContext,
+            CloudStack stack, CloudResource cfResource, Map<LaunchTemplateField, String> updatableFields, Group group, boolean onlyMetadataCheckRequired) {
+        CloudResourceStatusWithMessage.Builder message = new CloudResourceStatusWithMessage.Builder();
         AwsCredentialView credentialView = new AwsCredentialView(authenticatedContext.getCloudCredential());
         String regionName = authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName();
         AmazonCloudFormationClient cloudFormationClient = awsClient.createCloudFormationClient(credentialView, regionName);
@@ -61,12 +64,24 @@ public class AwsLaunchConfigurationUpdateService {
                 : filterForSingleAsgByGroup(authenticatedContext, cfResource, group, cloudFormationClient, autoScalingClient);
         List<LaunchConfiguration> oldLaunchConfigurations = launchConfigurationHandler.getLaunchConfigurations(autoScalingClient, scalingGroups.keySet());
         for (LaunchConfiguration oldLaunchConfiguration : oldLaunchConfigurations) {
-            changelaunchConfigurationInAutoscalingGroup(authenticatedContext, stack, autoScalingClient, scalingGroups, oldLaunchConfiguration, updatableFields);
+            if (onlyMetadataCheckRequired) {
+                Optional<String> currentInstanceType = oldLaunchConfiguration.getValueForField(LaunchTemplateField.INSTANCE_TYPE.name(), String.class);
+                String requestedInstance = updatableFields.get(LaunchTemplateField.INSTANCE_TYPE);
+                if (!currentInstanceType.isEmpty() && !currentInstanceType.get().equals(requestedInstance)) {
+                    message.addMessages(String.format("group %s from VM type %s to %s", group.getName(),
+                            currentInstanceType,
+                            group.getReferenceInstanceConfiguration().getTemplate().getFlavor()));
+                }
+            } else {
+                changelaunchConfigurationInAutoscalingGroup(authenticatedContext, stack, autoScalingClient, scalingGroups,
+                        oldLaunchConfiguration, updatableFields);
+                if (group != null) {
+                    AmazonEc2Client ec2Client = awsClient.createEc2Client(credentialView, regionName);
+                    scalingGroups.keySet().forEach(autoScalingGroup -> instanceUpdater.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group));
+                }
+            }
         }
-        if (group != null) {
-            AmazonEc2Client ec2Client = awsClient.createEc2Client(credentialView, regionName);
-            scalingGroups.keySet().forEach(autoScalingGroup -> instanceUpdater.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group));
-        }
+        return message.build();
     }
 
     private Map<AutoScalingGroup, String> filterForSingleAsgByGroup(AuthenticatedContext ac, CloudResource cfResource, Group group,
@@ -80,7 +95,6 @@ public class AwsLaunchConfigurationUpdateService {
     private void changelaunchConfigurationInAutoscalingGroup(AuthenticatedContext authenticatedContext, CloudStack stack,
             AmazonAutoScalingClient autoScalingClient, Map<AutoScalingGroup, String> scalingGroups, LaunchConfiguration oldLaunchConfiguration,
             Map<LaunchTemplateField, String> updatableFields) {
-
         Map.Entry<AutoScalingGroup, String> autoScalingGroup = getAutoScalingGroupForLaunchConfiguration(scalingGroups, oldLaunchConfiguration);
 
         String launchConfigurationName = launchConfigurationHandler.createNewLaunchConfiguration(updatableFields, autoScalingClient, oldLaunchConfiguration,

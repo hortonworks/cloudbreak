@@ -111,7 +111,7 @@ public class AwsLaunchConfigurationUpdateServiceTest {
         when(launchConfigurationHandler.createNewLaunchConfiguration(eq(Map.of(LaunchTemplateField.IMAGE_ID, "imageName")), eq(autoScalingClient),
                 eq(oldLaunchConfigs.get(0)), eq(ac.getCloudContext()), eq(ac), eq(stack))).thenReturn(newLCName);
 
-        underTest.updateLaunchConfigurations(ac, stack, cfResource, Map.of(LaunchTemplateField.IMAGE_ID, IMAGE_NAME));
+        underTest.updateLaunchConfigurations(ac, stack, cfResource, Map.of(LaunchTemplateField.IMAGE_ID, IMAGE_NAME), false);
 
         verify(autoScalingGroupHandler, times(1)).getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource);
         verify(launchConfigurationHandler, times(1)).getLaunchConfigurations(autoScalingClient, scalingGroupStringMap.keySet());
@@ -150,7 +150,7 @@ public class AwsLaunchConfigurationUpdateServiceTest {
         AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         when(awsClient.createEc2Client(any(AwsCredentialView.class), eq("region"))).thenReturn(ec2Client);
 
-        underTest.updateLaunchConfigurations(ac, stack, cfResource, Map.of(LaunchTemplateField.IMAGE_ID, IMAGE_NAME), group);
+        underTest.updateLaunchConfigurations(ac, stack, cfResource, Map.of(LaunchTemplateField.IMAGE_ID, IMAGE_NAME), group, false);
 
         verify(autoScalingGroupHandler, times(1)).getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource);
         verify(launchConfigurationHandler, times(1)).getLaunchConfigurations(autoScalingClient, scalingGroupStringMap.keySet());

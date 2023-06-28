@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -16,9 +17,11 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateImageResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatusWithMessage;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.common.api.type.CommonResourceType;
 
 @Component
@@ -31,6 +34,9 @@ public class UpdateImageHandler implements CloudPlatformEventHandler<UpdateImage
 
     @Inject
     private EventBus eventBus;
+
+    @Inject
+    private NotificationSender notificationSender;
 
     @Override
     public Class<UpdateImageRequest> type() {
@@ -51,7 +57,7 @@ public class UpdateImageHandler implements CloudPlatformEventHandler<UpdateImage
             cloudResources.stream().filter(resource -> resource.getType().getCommonResourceType() == CommonResourceType.TEMPLATE)
                     .forEach(resource -> resource.putParameter(CloudResource.IMAGE, stack.getImage().getImageName()));
 
-            connector.resources().update(auth, stack, cloudResources, UpdateType.IMAGE_UPDATE);
+            connector.resources().update(auth, stack, cloudResources, UpdateType.IMAGE_UPDATE, Optional.empty());
             UpdateImageResult result = new UpdateImageResult(request.getResourceId());
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));

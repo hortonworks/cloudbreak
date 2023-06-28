@@ -10,6 +10,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatusWithMessage;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
@@ -249,7 +251,8 @@ public class YarnResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, UpdateType type) {
+    public CloudResourceStatusWithMessage update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+        UpdateType type, Optional<String> groupName) {
         return null;
     }
 

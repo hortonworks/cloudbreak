@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatusWithMessage;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -219,14 +221,20 @@ public class StackUpscaleService {
         }
     }
 
-    public List<CloudResourceStatus> verticalScale(AuthenticatedContext ac, CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
+    public CloudResourceStatusWithMessage verticalScale(AuthenticatedContext ac, CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
         CloudConnector connector) throws Exception {
         CloudStack cloudStack = request.getCloudStack();
+        CloudResourceStatusWithMessage update;
         try {
-            return connector.resources().update(ac, cloudStack, request.getResourceList(), UpdateType.VERTICAL_SCALE);
+            update = connector.resources().update(ac, cloudStack, request.getResourceList(), UpdateType.VERTICAL_SCALE,
+                    Optional.of(request.getStackVerticalScaleV4Request().getGroup()));
         } catch (Exception e) {
-            return handleExceptionAndRetryUpdate(request, connector, ac, cloudStack, e, UpdateType.VERTICAL_SCALE);
+            update = handleExceptionAndRetryUpdate(request, connector, ac, cloudStack, e, UpdateType.VERTICAL_SCALE);
         }
+        for (String message : update.getMessages()) {
+            flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.VERTICAL_SCALE_OUT_OF_SYNC, message);
+        }
+        return update;
     }
 
     private List<CloudResourceStatus> handleQuotaExceptionAndRetryUpscale(UpscaleStackRequest<UpscaleStackResult> request, CloudConnector connector,
@@ -241,11 +249,12 @@ public class StackUpscaleService {
                 adjustmentTypeWithThreshold);
     }
 
-    private List<CloudResourceStatus> handleExceptionAndRetryUpdate(CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
+    private CloudResourceStatusWithMessage handleExceptionAndRetryUpdate(CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
         CloudConnector connector, AuthenticatedContext ac, CloudStack cloudStack, Exception e, UpdateType type) throws Exception {
         flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 e.getMessage());
-        return connector.resources().update(ac, cloudStack, request.getResourceList(), type);
+        return connector.resources().update(ac, cloudStack, request.getResourceList(), type,
+                Optional.ofNullable(request.getStackVerticalScaleV4Request().getGroup()));
     }
 
     private int getRemovableNodeCount(AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, QuotaExceededException quotaExceededException,

@@ -12,6 +12,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,12 +29,15 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatusWithMessage;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import io.grpc.xds.shaded.io.envoyproxy.envoy.config.accesslog.v3.ComparisonFilter;
 
 @ExtendWith(MockitoExtension.class)
 class AwsUpdateServiceTest {
@@ -64,12 +68,13 @@ class AwsUpdateServiceTest {
                 .withParameters(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
                 .build();
 
-        List<CloudResourceStatus> statuses = underTest.update(ac, stack, Collections.singletonList(cloudResource), UpdateType.IMAGE_UPDATE);
+        CloudResourceStatusWithMessage statuses = underTest.update(ac, stack, Collections.singletonList(cloudResource), UpdateType.IMAGE_UPDATE,
+                Optional.empty());
 
         verify(awsImageUpdateService, times(1)).updateImage(ac, stack, cloudResource);
-        assertEquals(1, statuses.size());
-        assertEquals(ResourceStatus.UPDATED, statuses.get(0).getStatus());
-        assertEquals(cloudResource, statuses.get(0).getCloudResource());
+        assertEquals(1, statuses.getResourceStatuses().size());
+        assertEquals(ResourceStatus.UPDATED, statuses.getResourceStatuses().get(0).getStatus());
+        assertEquals(cloudResource, statuses.getResourceStatuses().get(0).getCloudResource());
     }
 
     @Test
@@ -83,10 +88,11 @@ class AwsUpdateServiceTest {
                 .withType(ResourceType.AWS_LAUNCHCONFIGURATION)
                 .build();
 
-        List<CloudResourceStatus> statuses = underTest.update(ac, stack, List.of(cloudResource, launch), UpdateType.IMAGE_UPDATE);
+        CloudResourceStatusWithMessage statuses = underTest.update(ac, stack, List.of(cloudResource, launch), UpdateType.IMAGE_UPDATE,
+                Optional.empty());
 
         verify(awsImageUpdateService, times(0)).updateImage(ac, stack, cloudResource);
-        assertEquals(0, statuses.size());
+        assertEquals(0, statuses.getResourceStatuses().size());
     }
 
     @Test
@@ -102,10 +108,10 @@ class AwsUpdateServiceTest {
                 .withParameters(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
                 .build();
 
-        List<CloudResourceStatus> statuses = underTest.update(ac, stack, List.of(cloudResource, cf), UpdateType.IMAGE_UPDATE);
+        CloudResourceStatusWithMessage statuses = underTest.update(ac, stack, List.of(cloudResource, cf), UpdateType.IMAGE_UPDATE, Optional.empty());
 
         verify(awsImageUpdateService, times(0)).updateImage(ac, stack, cloudResource);
-        assertEquals(1, statuses.size());
+        assertEquals(1, statuses.getResourceStatuses().size());
     }
 
     @Test
@@ -132,10 +138,10 @@ class AwsUpdateServiceTest {
 
         String encodedCoreUserData = Base64.getEncoder().encodeToString(userData.get(InstanceGroupType.CORE).getBytes());
         Map<LaunchTemplateField, String> coreFields = Map.of(LaunchTemplateField.USER_DATA, encodedCoreUserData);
-        verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(coreFields, ac, cf.getName(), coreGroup, stack);
+        verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(coreFields, ac, cf.getName(), coreGroup, stack, false);
         String encodedGatewayUserData = Base64.getEncoder().encodeToString(userData.get(InstanceGroupType.GATEWAY).getBytes());
         Map<LaunchTemplateField, String> gatewayFields = Map.of(LaunchTemplateField.USER_DATA, encodedGatewayUserData);
-        verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(gatewayFields, ac, cf.getName(), gatewayGroup, stack);
+        verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(gatewayFields, ac, cf.getName(), gatewayGroup, stack, false);
     }
 
     @Test
@@ -157,14 +163,15 @@ class AwsUpdateServiceTest {
         when(stack.getTemplate()).thenReturn("AWS::EC2::LaunchTemplate");
 
 
-        underTest.update(ac, stack, Collections.singletonList(cloudResource), UpdateType.VERTICAL_SCALE);
+        underTest.update(ac, stack, Collections.singletonList(cloudResource), UpdateType.VERTICAL_SCALE, Optional.empty());
 
         Map<LaunchTemplateField, String> updatableFields = Map.of(
                 LaunchTemplateField.INSTANCE_TYPE,
                 "m42.xxxl",
                 LaunchTemplateField.ROOT_DISK,
                 "100");
-        verify(awsLaunchTemplateUpdateService, times(1)).updateLaunchTemplate(eq(updatableFields), any(), eq("cf"), eq(gatewayGroup), eq(stack));
+        verify(awsLaunchTemplateUpdateService, times(1)).updateLaunchTemplate(eq(updatableFields), any(),
+                eq("cf"), eq(gatewayGroup), eq(stack), eq(false));
     }
 
     @Test
@@ -186,7 +193,7 @@ class AwsUpdateServiceTest {
         when(stack.getTemplate()).thenReturn("AWS::EC2::LaunchConfiguration");
 
 
-        underTest.update(ac, stack, Collections.singletonList(cloudResource), UpdateType.VERTICAL_SCALE);
+        underTest.update(ac, stack, Collections.singletonList(cloudResource), UpdateType.VERTICAL_SCALE, Optional.empty());
 
         Map<LaunchTemplateField, String> updatableFields = Map.of(
                 LaunchTemplateField.INSTANCE_TYPE,
@@ -194,6 +201,6 @@ class AwsUpdateServiceTest {
                 LaunchTemplateField.ROOT_DISK,
                 "100");
         verify(launchConfigurationUpdateService, times(1))
-                .updateLaunchConfigurations(any(), eq(stack), eq(cloudResource), eq(updatableFields), eq(gatewayGroup));
+                .updateLaunchConfigurations(any(), eq(stack), eq(cloudResource), eq(updatableFields), eq(gatewayGroup), eq(false));
     }
 }

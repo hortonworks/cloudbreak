@@ -6,9 +6,11 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.swing.text.html.Option;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.LaunchTemplateField;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatusWithMessage;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
@@ -49,7 +52,9 @@ public class AwsUpdateService {
     @Inject
     private AwsLaunchConfigurationUpdateService launchConfigurationUpdateService;
 
-    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, UpdateType type) {
+    public CloudResourceStatusWithMessage update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+        UpdateType type, Optional<String> groupName) {
+        CloudResourceStatusWithMessage message = new CloudResourceStatusWithMessage.Builder().build();
         ArrayList<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
         LOGGER.info("The update method which will be followed is {}.", type);
         if (!resources.isEmpty()) {
@@ -67,16 +72,22 @@ public class AwsUpdateService {
                             cloudResourceStatuses.add(new CloudResourceStatus(cloudResource, ResourceStatus.UPDATED)));
                 }
             } else if (type.equals(UpdateType.VERTICAL_SCALE)) {
-                updateWithVerticalScaling(authenticatedContext, stack, resources);
+                message = updateWithVerticalScaling(authenticatedContext, stack, resources, groupName);
             }
         }
-        return cloudResourceStatuses;
+        return message;
     }
 
-    private void updateWithVerticalScaling(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
+    private CloudResourceStatusWithMessage updateWithVerticalScaling(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+        Optional<String> groupName) {
         String cfTemplate = stack.getTemplate();
         CloudResource cfResource = getCloudFormationStack(resources);
+        CloudResourceStatusWithMessage message = new CloudResourceStatusWithMessage.Builder().build();
         for (Group group : stack.getGroups()) {
+            boolean onlyMetadataCheckRequired = false;
+            if (group.getName().equalsIgnoreCase(groupName.get())) {
+                onlyMetadataCheckRequired = true;
+            }
             Map<LaunchTemplateField, String> updatableFields = Map.of(
                     LaunchTemplateField.INSTANCE_TYPE,
                     group.getReferenceInstanceConfiguration().getTemplate().getFlavor(),
@@ -85,13 +96,13 @@ public class AwsUpdateService {
             );
             if (cfTemplate.contains(LAUNCH_TEMPLATE)) {
                 LOGGER.info("Update fields on launchtemplate {} on group {} on cf {}", updatableFields, group.getName(), cfResource.getName());
-                awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group, stack);
+                message = awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group, stack, onlyMetadataCheckRequired);
             } else {
                 LOGGER.info("Update fields on launchconfiguration {} on group {} on cf {}", updatableFields, group.getName(), cfResource.getName());
-                launchConfigurationUpdateService.updateLaunchConfigurations(authenticatedContext, stack, cfResource, updatableFields, group);
+                message = launchConfigurationUpdateService.updateLaunchConfigurations(authenticatedContext, stack, cfResource, updatableFields, group, onlyMetadataCheckRequired);
             }
         }
-
+        return message;
     }
 
     public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
@@ -103,7 +114,8 @@ public class AwsUpdateService {
                 String groupUserData = userData.get(group.getType());
                 String encodedGroupUserData = Base64.getEncoder().encodeToString(groupUserData.getBytes());
                 Map<LaunchTemplateField, String> updatableFields = Map.of(LaunchTemplateField.USER_DATA, encodedGroupUserData);
-                awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group, stack);
+                awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(),
+                        group, stack, false);
             });
         } else {
             throw new NotImplementedException("UserData update for stack template is not implemented yet, only for AWS::EC2::LaunchTemplate.");

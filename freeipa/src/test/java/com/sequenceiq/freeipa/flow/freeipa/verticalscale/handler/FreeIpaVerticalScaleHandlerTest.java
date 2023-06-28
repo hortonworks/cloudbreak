@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatusWithMessage;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
@@ -111,7 +112,7 @@ public class FreeIpaVerticalScaleHandlerTest {
                 any(AuthenticatedContext.class),
                 any(com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleRequest.class),
                 any(CloudConnector.class))
-        ).thenReturn(List.of());
+        ).thenReturn(new CloudResourceStatusWithMessage.Builder().build());
 
         underTest.accept(new Event<>(freeIpaVerticalScaleRequest));
     }

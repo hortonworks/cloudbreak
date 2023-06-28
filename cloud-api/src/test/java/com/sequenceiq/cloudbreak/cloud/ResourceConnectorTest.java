@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatusWithMessage;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
@@ -120,7 +122,8 @@ class ResourceConnectorTest {
         }
 
         @Override
-        public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, UpdateType type) {
+        public CloudResourceStatusWithMessage update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+            UpdateType type, Optional<String> groupName) {
             return null;
         }
 

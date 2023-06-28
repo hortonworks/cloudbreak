@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatusWithMessage;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
@@ -268,7 +270,8 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> update(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, UpdateType type) throws Exception {
+    public CloudResourceStatusWithMessage update(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources,
+        UpdateType type, Optional<String> groupName) throws Exception {
         LOGGER.info("Update stack with resources: {}", resources);
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();
@@ -293,7 +296,9 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         List<CloudResourceStatus> computeStatuses = computeResourceService.update(context, auth, stack, computeResources);
         cloudResourceStatuses.addAll(computeStatuses);
 
-        return cloudResourceStatuses;
+        return new CloudResourceStatusWithMessage.Builder()
+                .withResourceStatuses(cloudResourceStatuses)
+                .build();
     }
 
     @Override

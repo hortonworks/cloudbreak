@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
@@ -9,6 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatusWithMessage;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
@@ -238,7 +240,8 @@ public interface ResourceConnector {
      * @return the status of updated resources
      * @throws Exception in case of any error
      */
-    List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, UpdateType type)
+    CloudResourceStatusWithMessage update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+        UpdateType type, Optional<String> groupName)
             throws Exception;
 
     /**

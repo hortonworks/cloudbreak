@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatusWithMessage;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
@@ -179,8 +180,10 @@ public class TestApplicationContext {
                 .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.CREATED)));
         when(resourceConnector.terminate(any(), any(), any()))
                 .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.DELETED)));
-        when(resourceConnector.update(any(), any(), any(), any()))
-                .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
+        when(resourceConnector.update(any(), any(), any(), any(), any()))
+                .thenReturn(new CloudResourceStatusWithMessage.Builder()
+                .withResourceStatuses(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)))
+                .build());
         when(resourceConnector.upscale(any(), any(), any(), any()))
                 .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
         when(resourceConnector.downscale(any(), any(), any(), anyList(), any()))

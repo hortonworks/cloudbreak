@@ -25,7 +25,7 @@ public class AwsImageUpdateService {
         String cfTemplate = stack.getTemplate();
         if (cfTemplate.contains(AwsUpdateService.LAUNCH_CONFIGURATION)) {
             awsLaunchConfigurationUpdateService.updateLaunchConfigurations(authenticatedContext, stack, cfResource,
-                    Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()));
+                    Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()), false);
         } else if (cfTemplate.contains(AwsUpdateService.LAUNCH_TEMPLATE)) {
             awsLaunchTemplateUpdateService.updateFieldsOnAllLaunchTemplate(authenticatedContext,
                     cfResource.getName(), Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()), stack);

@@ -55,7 +55,7 @@ public class AwsImageUpdateServiceTest {
         underTest.updateImage(ac, stack, cfResource);
 
         String cfName = cfResource.getName();
-        verify(awsLaunchConfigurationUpdateService).updateLaunchConfigurations(ac, stack, cfResource, Map.of(LaunchTemplateField.IMAGE_ID, IMAGE_NAME));
+        verify(awsLaunchConfigurationUpdateService).updateLaunchConfigurations(ac, stack, cfResource, Map.of(LaunchTemplateField.IMAGE_ID, IMAGE_NAME), false);
         verify(awsLaunchTemplateUpdateService, never()).updateFieldsOnAllLaunchTemplate(eq(ac), eq(cfName), anyMap(), eq(stack));
     }
 
@@ -68,7 +68,7 @@ public class AwsImageUpdateServiceTest {
 
         String cfName = cfResource.getName();
         verify(awsLaunchTemplateUpdateService).updateFieldsOnAllLaunchTemplate(eq(ac), eq(cfName), anyMap(), eq(stack));
-        verify(awsLaunchConfigurationUpdateService, never()).updateLaunchConfigurations(ac, stack, cfResource, Map.of(LaunchTemplateField.IMAGE_ID, IMAGE_NAME));
+        verify(awsLaunchConfigurationUpdateService, never()).updateLaunchConfigurations(ac, stack, cfResource, Map.of(LaunchTemplateField.IMAGE_ID, IMAGE_NAME), false);
     }
 
     @Test
@@ -80,6 +80,6 @@ public class AwsImageUpdateServiceTest {
         String cfName = cfResource.getName();
         verify(awsLaunchTemplateUpdateService, never()).updateFieldsOnAllLaunchTemplate(eq(ac), eq(cfName), anyMap(), eq(stack));
         verify(awsLaunchConfigurationUpdateService, never())
-                .updateLaunchConfigurations(ac, stack, cfResource, Map.of(LaunchTemplateField.IMAGE_ID, IMAGE_NAME));
+                .updateLaunchConfigurations(ac, stack, cfResource, Map.of(LaunchTemplateField.IMAGE_ID, IMAGE_NAME), false);
     }
 }

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.upscale;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -40,7 +41,7 @@ public class AzureVerticalScaleService {
     private AzureVirtualMachineService azureVirtualMachineService;
 
     public List<CloudResourceStatus> verticalScale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources, AzureStackView azureStackView,
-            AzureClient client) throws QuotaExceededException {
+        AzureClient client, Optional<String> groupName) throws QuotaExceededException {
         CloudContext cloudContext = ac.getCloudContext();
         String stackName = azureUtils.getStackName(cloudContext);
         try {

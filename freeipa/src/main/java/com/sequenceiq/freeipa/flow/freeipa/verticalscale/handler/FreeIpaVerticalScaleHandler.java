@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.handler.CloudPlatformEventHandler;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatusWithMessage;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
@@ -56,12 +57,12 @@ public class FreeIpaVerticalScaleHandler implements CloudPlatformEventHandler<Fr
         try {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
-            List<CloudResourceStatus> resourceStatus = verticalScale.verticalScale(ac, request, connector);
+            CloudResourceStatusWithMessage resourceStatus = verticalScale.verticalScale(ac, request, connector);
             LOGGER.info("Vertical scaling resource statuses: {}", resourceStatus);
             FreeIpaVerticalScaleResult result = new FreeIpaVerticalScaleResult(
                     request.getResourceId(),
                     ResourceStatus.UPDATED,
-                    resourceStatus,
+                    resourceStatus.getResourceStatuses(),
                     freeIPAVerticalScaleV1Request);
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));

@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatusWithMessage;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeRequest;
@@ -64,23 +65,25 @@ public class FreeIpaVerticalScaleService {
         }
     }
 
-    public List<CloudResourceStatus> verticalScale(AuthenticatedContext ac, FreeIpaVerticalScaleRequest request,
-            CloudConnector connector) throws Exception {
+    public CloudResourceStatusWithMessage verticalScale(AuthenticatedContext ac, FreeIpaVerticalScaleRequest request,
+        CloudConnector connector) throws Exception {
         CloudStack cloudStack = request.getCloudStack();
         try {
-            return connector.resources().update(ac, cloudStack, request.getResourceList(), UpdateType.VERTICAL_SCALE);
+            return connector.resources().update(ac, cloudStack, request.getResourceList(), UpdateType.VERTICAL_SCALE,
+                    Optional.ofNullable(request.getFreeIPAVerticalScaleRequest().getGroup()));
         } catch (Exception e) {
             LOGGER.info("Exception occured on update process retrying the operation. Error was: {}", e.getMessage(), e);
             return handleExceptionAndRetryUpdate(request, connector, ac, cloudStack, UpdateType.VERTICAL_SCALE);
         }
     }
 
-    private List<CloudResourceStatus> handleExceptionAndRetryUpdate(
+    private CloudResourceStatusWithMessage handleExceptionAndRetryUpdate(
             FreeIpaVerticalScaleRequest request,
             CloudConnector connector,
             AuthenticatedContext ac,
             CloudStack cloudStack,
             UpdateType type) throws Exception {
-        return connector.resources().update(ac, cloudStack, request.getResourceList(), type);
+        return connector.resources().update(ac, cloudStack, request.getResourceList(), type,
+                Optional.ofNullable(request.getFreeIPAVerticalScaleRequest().getGroup()));
     }
 }

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatusWithMessage;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -171,7 +173,8 @@ public class MockResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, UpdateType type) {
+    public CloudResourceStatusWithMessage update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+        UpdateType type, Optional<String> groupName) {
         List<CloudResourceStatus> cloudResourceStatuses = resources.stream().map(r -> {
                     Group group = stack.getGroups().stream().filter(g -> g.getName().equals(r.getGroup())).findFirst()
                             .orElseThrow(NotFoundException.notFound("Group", r.getGroup()));
@@ -180,7 +183,9 @@ public class MockResourceConnector implements ResourceConnector {
                     return new CloudResourceStatus(r, UPDATED);
                 })
                 .collect(Collectors.toList());
-        return cloudResourceStatuses;
+        return new CloudResourceStatusWithMessage.Builder()
+                .withResourceStatuses(cloudResourceStatuses)
+                .build();
     }
 
     @Override

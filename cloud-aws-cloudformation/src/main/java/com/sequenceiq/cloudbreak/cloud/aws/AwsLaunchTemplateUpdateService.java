@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatusWithMessage;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 
@@ -110,8 +111,9 @@ public class AwsLaunchTemplateUpdateService {
         }
     }
 
-    public void updateLaunchTemplate(Map<LaunchTemplateField, String> updatableFields, AuthenticatedContext ac, String stackName, Group group,
-            CloudStack cloudStack) {
+    public CloudResourceStatusWithMessage updateLaunchTemplate(Map<LaunchTemplateField, String> updatableFields, AuthenticatedContext ac, String stackName, Group group,
+        CloudStack cloudStack, boolean onlyMetaDataCheckRequired) {
+        CloudResourceStatusWithMessage.Builder message = new CloudResourceStatusWithMessage.Builder();
         AmazonCloudFormationClient amazonCloudFormationClient = getAmazonCloudFormationClient(ac);
         AmazonAutoScalingClient autoScalingClient = getAutoScalingClient(ac);
         AmazonEc2Client ec2Client = getEc2Client(ac);
@@ -124,19 +126,32 @@ public class AwsLaunchTemplateUpdateService {
 
             LOGGER.info("Get launch template specification for {} autoscaling group", autoScalingGroup.autoScalingGroupName());
             LaunchTemplateSpecification launchTemplateSpecification = getLaunchTemplateSpecification(autoScalingGroup);
-            LOGGER.info("Update launch template specification for {} autoscaling group", autoScalingGroup.autoScalingGroupName());
-            CreateLaunchTemplateVersionResponse newLaunchTemplate = createLaunchTemplateVersion(ec2Client, updatableFields,
-                    launchTemplateSpecification, cloudStack);
-            LOGGER.info("Set the new launchtemplate version on autoscaling group for {} autoscaling group", autoScalingGroup.autoScalingGroupName());
-            setLaunchTemplateNewVersionAsDefault(ec2Client, launchTemplateSpecification, newLaunchTemplate);
-            updateAutoScalingGroup(updatableFields,
-                    autoScalingClient,
-                    autoScalingGroup,
-                    launchTemplateSpecification,
-                    newLaunchTemplate);
-            LOGGER.info("Update all instance for {} autoscaling group", autoScalingGroup.autoScalingGroupName());
-            instanceUpdater.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group);
+            if (onlyMetaDataCheckRequired) {
+                LOGGER.info("Check launch template specification for {} autoscaling group", autoScalingGroup.autoScalingGroupName());
+                String currentInstanceType = launchTemplateSpecification
+                        .getValueForField(LaunchTemplateField.INSTANCE_TYPE.name(), String.class)
+                        .get();
+                if (!group.getReferenceInstanceConfiguration().getTemplate().getFlavor().equalsIgnoreCase(currentInstanceType)) {
+                    message.addMessages(String.format("group %s from VM type %s to %s", group.getName(),
+                            currentInstanceType,
+                            group.getReferenceInstanceConfiguration().getTemplate().getFlavor()));
+                }
+            } else {
+                LOGGER.info("Update launch template specification for {} autoscaling group", autoScalingGroup.autoScalingGroupName());
+                CreateLaunchTemplateVersionResponse newLaunchTemplate = createLaunchTemplateVersion(ec2Client, updatableFields,
+                        launchTemplateSpecification, cloudStack);
+                LOGGER.info("Set the new launchtemplate version on autoscaling group for {} autoscaling group", autoScalingGroup.autoScalingGroupName());
+                setLaunchTemplateNewVersionAsDefault(ec2Client, launchTemplateSpecification, newLaunchTemplate);
+                updateAutoScalingGroup(updatableFields,
+                        autoScalingClient,
+                        autoScalingGroup,
+                        launchTemplateSpecification,
+                        newLaunchTemplate);
+                LOGGER.info("Update all instance for {} autoscaling group", autoScalingGroup.autoScalingGroupName());
+                instanceUpdater.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group);
+            }
         }
+        return message.build();
     }
 
     private void setLaunchTemplateNewVersionAsDefault(AmazonEc2Client ec2Client, LaunchTemplateSpecification launchTemplateSpecification,

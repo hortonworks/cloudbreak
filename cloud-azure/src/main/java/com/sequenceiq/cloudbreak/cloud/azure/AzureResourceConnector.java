@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -39,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatusWithMessage;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
@@ -331,16 +333,21 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, UpdateType type)
-            throws QuotaExceededException {
+    public CloudResourceStatusWithMessage update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+        UpdateType type, Optional<String> groupName) throws QuotaExceededException {
         LOGGER.info("The update method which will be followed is {}.", type);
         if (type.equals(UpdateType.VERTICAL_SCALE)) {
             AzureClient client = authenticatedContext.getParameter(AzureClient.class);
             AzureStackView azureStackView = azureStackViewProvider
                     .getAzureStack(new AzureCredentialView(authenticatedContext.getCloudCredential()), stack, client, authenticatedContext);
-            return azureVerticalScaleService.verticalScale(authenticatedContext, stack, resources, azureStackView, client);
+            return new CloudResourceStatusWithMessage.Builder()
+                    .withResourceStatuses(azureVerticalScaleService.verticalScale(authenticatedContext, stack, resources,
+                            azureStackView, client, groupName))
+                    .build();
         }
-        return List.of();
+        return new CloudResourceStatusWithMessage.Builder()
+                .withResourceStatuses(List.of())
+                .build();
     }
 
     @Override
