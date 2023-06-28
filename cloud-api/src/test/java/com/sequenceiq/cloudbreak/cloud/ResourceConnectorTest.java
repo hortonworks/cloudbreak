@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -120,7 +121,8 @@ class ResourceConnectorTest {
         }
 
         @Override
-        public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, UpdateType type) {
+        public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack,
+            List<CloudResource> resources, UpdateType type, Optional<String> group) {
             return null;
         }
 

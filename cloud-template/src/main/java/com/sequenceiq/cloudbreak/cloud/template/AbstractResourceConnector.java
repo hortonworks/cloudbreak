@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -268,7 +269,8 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> update(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, UpdateType type) throws Exception {
+    public List<CloudResourceStatus> update(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources,
+        UpdateType type, Optional<String> group) throws Exception {
         LOGGER.info("Update stack with resources: {}", resources);
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();
@@ -290,7 +292,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
 
         //compute
         List<CloudResource> computeResources = computeResourceService.getComputeResources(variant, resources);
-        List<CloudResourceStatus> computeStatuses = computeResourceService.update(context, auth, stack, computeResources);
+        List<CloudResourceStatus> computeStatuses = computeResourceService.update(context, auth, stack, computeResources, group);
         cloudResourceStatuses.addAll(computeStatuses);
 
         return cloudResourceStatuses;
