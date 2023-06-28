@@ -6,6 +6,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -49,7 +50,8 @@ public class AwsUpdateService {
     @Inject
     private AwsLaunchConfigurationUpdateService launchConfigurationUpdateService;
 
-    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, UpdateType type) {
+    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+        UpdateType type, Optional<String> targetGroupName) {
         ArrayList<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
         LOGGER.info("The update method which will be followed is {}.", type);
         if (!resources.isEmpty()) {
@@ -67,28 +69,31 @@ public class AwsUpdateService {
                             cloudResourceStatuses.add(new CloudResourceStatus(cloudResource, ResourceStatus.UPDATED)));
                 }
             } else if (type.equals(UpdateType.VERTICAL_SCALE)) {
-                updateWithVerticalScaling(authenticatedContext, stack, resources);
+                updateWithVerticalScaling(authenticatedContext, stack, resources, targetGroupName);
             }
         }
         return cloudResourceStatuses;
     }
 
-    private void updateWithVerticalScaling(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
+    private void updateWithVerticalScaling(AuthenticatedContext authenticatedContext, CloudStack stack,
+        List<CloudResource> resources, Optional<String> groupName) {
         String cfTemplate = stack.getTemplate();
         CloudResource cfResource = getCloudFormationStack(resources);
         for (Group group : stack.getGroups()) {
-            Map<LaunchTemplateField, String> updatableFields = Map.of(
-                    LaunchTemplateField.INSTANCE_TYPE,
-                    group.getReferenceInstanceConfiguration().getTemplate().getFlavor(),
-                    LaunchTemplateField.ROOT_DISK,
-                    String.valueOf(group.getRootVolumeSize())
-            );
-            if (cfTemplate.contains(LAUNCH_TEMPLATE)) {
-                LOGGER.info("Update fields on launchtemplate {} on group {} on cf {}", updatableFields, group.getName(), cfResource.getName());
-                awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group, stack);
-            } else {
-                LOGGER.info("Update fields on launchconfiguration {} on group {} on cf {}", updatableFields, group.getName(), cfResource.getName());
-                launchConfigurationUpdateService.updateLaunchConfigurations(authenticatedContext, stack, cfResource, updatableFields, group);
+            if (!groupName.isEmpty() && group.getName().equalsIgnoreCase(groupName.get())) {
+                Map<LaunchTemplateField, String> updatableFields = Map.of(
+                        LaunchTemplateField.INSTANCE_TYPE,
+                        group.getReferenceInstanceConfiguration().getTemplate().getFlavor(),
+                        LaunchTemplateField.ROOT_DISK,
+                        String.valueOf(group.getRootVolumeSize())
+                );
+                if (cfTemplate.contains(LAUNCH_TEMPLATE)) {
+                    LOGGER.info("Update fields on launchtemplate {} on group {} on cf {}", updatableFields, group.getName(), cfResource.getName());
+                    awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group, stack);
+                } else {
+                    LOGGER.info("Update fields on launchconfiguration {} on group {} on cf {}", updatableFields, group.getName(), cfResource.getName());
+                    launchConfigurationUpdateService.updateLaunchConfigurations(authenticatedContext, stack, cfResource, updatableFields, group);
+                }
             }
         }
 

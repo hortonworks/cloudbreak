@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -171,7 +172,8 @@ public class MockResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, UpdateType type) {
+    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+        UpdateType type, Optional<String> groupName) {
         List<CloudResourceStatus> cloudResourceStatuses = resources.stream().map(r -> {
                     Group group = stack.getGroups().stream().filter(g -> g.getName().equals(r.getGroup())).findFirst()
                             .orElseThrow(NotFoundException.notFound("Group", r.getGroup()));

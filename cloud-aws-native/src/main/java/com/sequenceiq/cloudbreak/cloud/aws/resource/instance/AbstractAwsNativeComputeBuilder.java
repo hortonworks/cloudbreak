@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.AbstractAwsNativeResourceBuilder;
@@ -30,7 +31,7 @@ public abstract class AbstractAwsNativeComputeBuilder extends AbstractAwsNativeR
 
     @Override
     public CloudResource update(AwsContext context, CloudResource cloudResource, CloudInstance instance,
-        AuthenticatedContext auth, CloudStack cloudStack) throws Exception {
+        AuthenticatedContext auth, CloudStack cloudStack, Optional<String> targetGroupName) throws Exception {
         return null;
     }
 

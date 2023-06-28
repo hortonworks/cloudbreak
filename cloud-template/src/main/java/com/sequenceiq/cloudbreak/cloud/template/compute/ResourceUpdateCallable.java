@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.template.compute;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
@@ -39,6 +40,8 @@ public class ResourceUpdateCallable implements Callable<ResourceRequestResult<Li
 
     private final ComputeResourceBuilder<ResourceBuilderContext> builder;
 
+    private final Optional<String> targetGroup;
+
     public ResourceUpdateCallable(ResourceUpdateCallablePayload payload, SyncPollingScheduler<List<CloudResourceStatus>> syncPollingScheduler,
         ResourcePollTaskFactory resourcePollTaskFactory) {
         this.syncPollingScheduler = syncPollingScheduler;
@@ -49,6 +52,7 @@ public class ResourceUpdateCallable implements Callable<ResourceRequestResult<Li
         this.instance = payload.getCloudInstance();
         this.stack = payload.getCloudStack();
         this.builder = payload.getBuilder();
+        this.targetGroup = payload.getTargetGroup();
     }
 
     @Override
@@ -57,7 +61,7 @@ public class ResourceUpdateCallable implements Callable<ResourceRequestResult<Li
         if (resource.getStatus().resourceExists()) {
             CloudResource updateResource;
             try {
-                updateResource = builder.update(context, resource, instance, auth, stack);
+                updateResource = builder.update(context, resource, instance, auth, stack, targetGroup);
             } catch (PreserveResourceException ignored) {
                 LOGGER.debug("Preserve resource for later use.");
                 CloudResourceStatus status = new CloudResourceStatus(resource, ResourceStatus.CREATED);

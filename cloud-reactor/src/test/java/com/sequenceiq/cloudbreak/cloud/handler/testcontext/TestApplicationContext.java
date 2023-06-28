@@ -179,7 +179,7 @@ public class TestApplicationContext {
                 .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.CREATED)));
         when(resourceConnector.terminate(any(), any(), any()))
                 .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.DELETED)));
-        when(resourceConnector.update(any(), any(), any(), any()))
+        when(resourceConnector.update(any(), any(), any(), any(), any()))
                 .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
         when(resourceConnector.upscale(any(), any(), any(), any()))
                 .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
