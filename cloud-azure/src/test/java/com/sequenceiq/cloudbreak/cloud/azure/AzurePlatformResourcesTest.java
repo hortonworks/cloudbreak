@@ -6,14 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,7 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.cloud.model.VmType;
 
 @ExtendWith(MockitoExtension.class)
 class AzurePlatformResourcesTest {
@@ -64,7 +60,6 @@ class AzurePlatformResourcesTest {
         virtualMachineSizes.add(createVirtualMachineSize("Standard_DS2_v2", 20000));
         virtualMachineSizes.add(createVirtualMachineSize("Standard_E64ds_v4", 1400000));
         when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
-        when(azureClient.getAvailabilityZones(region.value())).thenReturn(Map.of());
 
         CloudVmTypes actual = underTest.virtualMachines(cloudCredential, region, Map.of());
 
@@ -81,17 +76,6 @@ class AzurePlatformResourcesTest {
                             .anyMatch(cloudVMResponse -> virtualMachineSize.name().equals(cloudVMResponse.value()));
                     assertTrue(virtualMachineSizeCouldBeFoundInResult);
                 });
-        virtualMachineSizes.forEach(virtualMachineSize -> {
-            List<String> availabilityZones = actual.getCloudVmResponses()
-                    .get(region.value())
-                    .stream()
-                    .filter(vmType -> virtualMachineSize.name().equals(vmType.value()))
-                    .findFirst()
-                    .map(vmType -> vmType.getMetaData().getAvailabilityZones())
-                    .orElse(null);
-            assertEquals(availabilityZones, Collections.emptyList());
-
-        });
     }
 
     @Test
@@ -105,12 +89,6 @@ class AzurePlatformResourcesTest {
         virtualMachineSizes.add(createVirtualMachineSize("Standard_E64ds_v4", 1400000));
         virtualMachineSizes.add(e64sVmTypeWithoutResourceDisk);
         when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
-        Map<String, List<String>> zoneInfo = new HashMap<>();
-        zoneInfo.put("Standard_D2s_v4", List.of("1", "2"));
-        zoneInfo.put("Standard_E64s_v4", List.of("2", "3"));
-        zoneInfo.put("Standard_DS2_v2", List.of("1"));
-        zoneInfo.put("Standard_E64ds_v4", List.of("1", "2", "3"));
-        when(azureClient.getAvailabilityZones(region.value())).thenReturn(zoneInfo);
 
         CloudVmTypes actual = underTest.virtualMachines(cloudCredential, region, Map.of());
 
@@ -119,18 +97,6 @@ class AzurePlatformResourcesTest {
         assertFalse(actual.getCloudVmResponses().isEmpty());
         assertNotNull(actual.getCloudVmResponses().get(region.value()));
         assertEquals(virtualMachineSizes.size(), actual.getCloudVmResponses().get(region.value()).size());
-        virtualMachineSizes.forEach(virtualMachineSize -> {
-            VmType matchingVm = actual.getCloudVmResponses()
-                    .get(region.value())
-                    .stream()
-                    .filter(vmType -> virtualMachineSize.name().equals(vmType.value()))
-                    .findFirst()
-                    .orElse(null);
-            if (matchingVm == null) {
-                fail("VM from input is not present in response");
-            }
-            assertEquals(zoneInfo.get(matchingVm.value()), matchingVm.getMetaData().getAvailabilityZones());
-        });
     }
 
     @Test
