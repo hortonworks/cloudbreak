@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureContext;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -34,7 +35,7 @@ public abstract class AbstractAzureComputeBuilder extends AbstractAzureResourceB
 
     @Override
     public CloudResource update(AzureContext context, CloudResource cloudResource, CloudInstance instance,
-            AuthenticatedContext auth, CloudStack cloudStack) throws Exception {
+            AuthenticatedContext auth, CloudStack cloudStack, Optional<String> targetGroupName) throws Exception {
         return null;
     }
 }

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
@@ -238,7 +239,8 @@ public interface ResourceConnector {
      * @return the status of updated resources
      * @throws Exception in case of any error
      */
-    List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, UpdateType type)
+    List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+            UpdateType type, Optional<String> group)
             throws Exception;
 
     /**

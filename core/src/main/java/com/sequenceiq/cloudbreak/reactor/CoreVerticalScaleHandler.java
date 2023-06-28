@@ -51,7 +51,8 @@ public class CoreVerticalScaleHandler implements CloudPlatformEventHandler<CoreV
         try {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = getAuthenticatedContext(request, cloudContext, connector);
-            List<CloudResourceStatus> resourceStatus = stackUpscaleService.verticalScale(ac, request, connector);
+            List<CloudResourceStatus> resourceStatus = stackUpscaleService.verticalScale(ac, request, connector,
+                    stackVerticalScaleV4Request.getGroup());
             LOGGER.info("Vertical scaling resource statuses: {}", resourceStatus);
             CoreVerticalScaleResult result = new CoreVerticalScaleResult(
                     request.getResourceId(),
