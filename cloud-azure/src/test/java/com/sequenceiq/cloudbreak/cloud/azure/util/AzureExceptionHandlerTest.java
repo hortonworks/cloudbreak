@@ -23,7 +23,6 @@ import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
 import com.microsoft.aad.msal4j.MsalServiceException;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureExceptionHandlerTest {
@@ -63,7 +62,7 @@ public class AzureExceptionHandlerTest {
         };
 
         Assertions.assertThatThrownBy(() -> underTest.handleException(stringSupplier))
-                .isExactlyInstanceOf(CloudConnectorException.class);
+                .isExactlyInstanceOf(ManagementException.class);
     }
 
     @Test
@@ -106,7 +105,7 @@ public class AzureExceptionHandlerTest {
         };
 
         Assertions.assertThatThrownBy(() -> underTest.handleException(stringSupplier, "default"))
-                .isExactlyInstanceOf(CloudConnectorException.class);
+                .isExactlyInstanceOf(ManagementException.class);
     }
 
     @Test
@@ -150,7 +149,7 @@ public class AzureExceptionHandlerTest {
         };
 
         Assertions.assertThatThrownBy(() -> underTest.handleException(stringSupplier, "default", HANDLE_NOT_FOUND_EXCEPTIONS))
-                .isExactlyInstanceOf(CloudConnectorException.class);
+                .isExactlyInstanceOf(ManagementException.class);
     }
 
     private ManagementException getManagementException(HttpStatus httpStatus) {
