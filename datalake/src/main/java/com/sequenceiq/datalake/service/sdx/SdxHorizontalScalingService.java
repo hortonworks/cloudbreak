@@ -3,7 +3,9 @@ package com.sequenceiq.datalake.service.sdx;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.YARN;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE;
+import static java.util.function.Predicate.*;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -14,7 +16,6 @@ import javax.inject.Inject;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -72,20 +73,12 @@ public class SdxHorizontalScalingService {
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
 
-    private static Map<String, Set<InstanceMetaDataV4Response>> getInstanceMap(StackV4Response stack, String target, String gatewayInstanceName) {
-        Map<String, Set<InstanceMetaDataV4Response>> instanceMap = stack.getInstanceGroups().stream()
-                .filter(instance -> instance.getName().equalsIgnoreCase(target) || instance.getName().equalsIgnoreCase(gatewayInstanceName))
-                .collect(Collectors.toMap(instance -> instance.getName().toLowerCase(Locale.ROOT), InstanceGroupV4Response::getMetadata));
-        return instanceMap;
-    }
-
-    private List<InstanceMetaDataV4Response> getGatewayHealthyMetadata(String gatewayInstanceName, Map<String, Set<InstanceMetaDataV4Response>> instanceMap) {
-        List<InstanceMetaDataV4Response> gatewayMetaData = instanceMap.get(gatewayInstanceName).stream()
-                .filter(data -> data.getInstanceType() == InstanceMetadataType.GATEWAY_PRIMARY &&
-                        (!data.getInstanceStatus().equals(InstanceStatus.SERVICES_HEALTHY)
-                                || !data.getInstanceStatus().equals(InstanceStatus.SERVICES_RUNNING)))
-                .toList();
-        return gatewayMetaData;
+    private static Set<InstanceMetaDataV4Response> getInstances(StackV4Response stack, String target) {
+        return stack.getInstanceGroups().stream()
+                .filter(instance -> instance.getName().equalsIgnoreCase(target))
+                .map(InstanceGroupV4Response::getMetadata)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
     }
 
     public FlowIdentifier horizontalScaleDatalake(String name, DatalakeHorizontalScaleRequest scaleRequest) {
@@ -140,48 +133,49 @@ public class SdxHorizontalScalingService {
         if (YARN == stackResponse.getCloudPlatform()) {
             throw new BadRequestException("The Data lake horizontal scaling is not supported on YCloud");
         }
-        String nodeRequestValid = isNodeRequestValid(stackResponse, request);
-        if (StringUtils.isNotEmpty(nodeRequestValid)) {
-            throw new BadRequestException(nodeRequestValid);
-        }
+        assertNodeRequestValid(stackResponse, request);
     }
 
-    private String isNodeRequestValid(StackV4Response stack, DatalakeHorizontalScaleRequest request) {
+    private void assertNodeRequestValid(StackV4Response stack, DatalakeHorizontalScaleRequest request) {
         if (request.getDesiredCount() < 0) {
             LOGGER.warn("Negative nodeCount was requested.");
-            return "Negative nodeCount is not accepted. If you want to downscale your Data lake please use lower number than the actual node count";
+            throw new BadRequestException(
+                    "Negative nodeCount is not accepted. If you want to downscale your Data lake please use lower number than the actual node count");
         }
         String target = request.getGroup();
         String gatewayInstanceName = DatalakeInstanceGroupScalingDetails.GATEWAY.getName().toLowerCase(Locale.ROOT);
-        Map<String, Set<InstanceMetaDataV4Response>> instanceMap = getInstanceMap(stack, target, gatewayInstanceName);
-        if (!instanceMap.containsKey(target)) {
+        Set<InstanceMetaDataV4Response> targetGroupInstances = getInstances(stack, target);
+        Set<InstanceMetaDataV4Response> gatewayInstances = getInstances(stack, target);
+        if (targetGroupInstances.isEmpty()) {
             LOGGER.warn("The requested hostgroup name not found!");
-            return String.format("The requested hostgroup name not found! The requested hostgroup name is %s", target);
+            throw new BadRequestException("The requested hostgroup name not found! The requested hostgroup name is " + target);
         }
-        if (!instanceMap.containsKey(gatewayInstanceName)) {
+        if (gatewayInstances.isEmpty()) {
             LOGGER.error("Gateway node is not found in the Stack Instance Map. The horizontal scale cannot be performed while the CM is not " +
                     "available StackId: {}", stack.getId());
             List<String> instanceGroupList = stack.getInstanceGroups().stream().map(InstanceGroupV4Base::getName).toList();
-            return String.format("The Gateway instance not found. The horizontal scale cannot be performed while the CM is not reachable" +
-                    ", found instances: %s", instanceGroupList);
+            throw new BadRequestException(
+                    "The Gateway instance not found. The horizontal scale cannot be performed while the CM is not reachable, found instances: " + instanceGroupList);
         }
-        List<InstanceMetaDataV4Response> gatewayMetaData = getGatewayHealthyMetadata(gatewayInstanceName, instanceMap);
-        if (!gatewayMetaData.isEmpty()) {
+        List<InstanceStatus> gatewayInstancesStatuses = gatewayInstances.stream()
+                .filter(data -> data.getInstanceType() == InstanceMetadataType.GATEWAY_PRIMARY)
+                .map(InstanceMetaDataV4Response::getInstanceStatus)
+                .toList();
+        boolean gatewaysHasFaultyInstances = gatewayInstancesStatuses.stream()
+                .anyMatch(not(status -> status == InstanceStatus.SERVICES_HEALTHY || status == InstanceStatus.SERVICES_RUNNING));
+        if (gatewaysHasFaultyInstances) {
             LOGGER.warn("Gateway(CM node) is not healthy. Can not start horizontal scaling");
-            List<InstanceStatus> instanceStatuses = gatewayMetaData.stream().map(InstanceMetaDataV4Response::getInstanceStatus).toList();
-            return String.format("Gateway instances are not healthy. Please repair the node and retry horizontal scaling Actual Gateway statuses: %s",
-                    instanceStatuses);
+            throw new BadRequestException("Gateway instances are not healthy. Please repair the node and retry horizontal scaling Actual Gateway statuses: " + gatewayInstancesStatuses);
         }
         DatalakeInstanceGroupScalingDetails targetInstanceGroupName = DatalakeInstanceGroupScalingDetails.valueOf(request.getGroup().toUpperCase(Locale.ROOT));
         if (targetInstanceGroupName.getMinimumNodeCount() > request.getDesiredCount()) {
             LOGGER.warn("Requested nodeCount is less than the minimum nodeCount.");
-            return String.format("Requested node count is less than the minimum node count. The minimum node cont for %s is %d",
-                    targetInstanceGroupName.name(), targetInstanceGroupName.getMinimumNodeCount());
+            throw new BadRequestException(String.format("Requested node count is less than the minimum node count. The minimum node cont for %s is %d",
+                    targetInstanceGroupName.name(), targetInstanceGroupName.getMinimumNodeCount()));
         }
         if (isDownscaleBlocked(targetInstanceGroupName) && isDownscale(stack, request)) {
-            return "The storage hostgroup down scale is not supported, because it can cause data loss";
+            throw new BadRequestException("The storage hostgroup down scale is not supported, because it can cause data loss");
         }
-        return "";
     }
 
     private boolean isDownscaleBlocked(DatalakeInstanceGroupScalingDetails targetInstanceGroupName) {
@@ -199,10 +193,11 @@ public class SdxHorizontalScalingService {
     }
 
     private boolean isDownscale(StackV4Response stack, DatalakeHorizontalScaleRequest request) {
-        return stack.getInstanceGroups().stream()
+        int currentNodeCount = stack.getInstanceGroups().stream()
                 .filter(instance -> instance.getName().equals(request.getGroup().toLowerCase(Locale.ROOT)))
                 .map(InstanceGroupV4Base::getNodeCount)
                 .mapToInt(Integer::intValue)
-                .sum() > request.getDesiredCount();
+                .sum();
+        return currentNodeCount > request.getDesiredCount();
     }
 }
