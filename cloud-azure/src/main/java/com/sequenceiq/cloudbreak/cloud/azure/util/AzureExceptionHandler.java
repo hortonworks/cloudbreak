@@ -4,7 +4,6 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Supplier;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -13,7 +12,6 @@ import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
 import com.microsoft.aad.msal4j.MsalServiceException;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
 @Component
 public class AzureExceptionHandler {
@@ -56,7 +54,8 @@ public class AzureExceptionHandler {
             }
         } catch (ManagementException me) {
             LOGGER.warn("ManagementException has been thrown during azure operation", me);
-            String builtErrorMessage = buildErrorMessage(me);
+            logErrorMessage(me);
+
             if (azureExceptionHandlerParameters.isHandleAllExceptions()) {
                 LOGGER.debug("Handle all exceptions is turned on");
                 return null;
@@ -65,12 +64,11 @@ public class AzureExceptionHandler {
                 LOGGER.debug("Handle not found exception is turned on");
                 return null;
             }
-            throw new CloudConnectorException(builtErrorMessage, me);
+            throw me;
         }
     }
 
-    @NotNull
-    public static String buildErrorMessage(ManagementException me) {
+    public void logErrorMessage(ManagementException me) {
         StringJoiner errorMessageBuilder = new StringJoiner(". ");
         errorMessageBuilder.add("Azure management error happened");
         errorMessageBuilder.add(me.getMessage());
@@ -85,7 +83,7 @@ public class AzureExceptionHandler {
                 }
             }
         }
-        return errorMessageBuilder.toString();
+        LOGGER.warn(errorMessageBuilder.toString());
     }
 
     public void handleException(Runnable function) {
