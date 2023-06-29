@@ -2,8 +2,10 @@ package com.sequenceiq.environment.environment.validation.network.gcp;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -13,7 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
+import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -22,19 +27,29 @@ import com.sequenceiq.environment.environment.validation.network.EnvironmentNetw
 import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.dto.GcpParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.platformresource.PlatformParameterService;
+import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 
 @Component
 public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidator {
 
-    static final String MULTIPLE_AVAILABILITY_ZONES_PROVIDED_ERROR_MSG = "The multiple availability zones feature isn't available for GCP yet. "
+    private static final String MULTIPLE_AVAILABILITY_ZONES_PROVIDED_ERROR_MSG = "The multiple availability zones feature isn't available for GCP yet. "
             + "Please configure only one zone on field 'availabilityZones'";
+
+    private static final String INVALID_ZONE_PATTERN = "The requested region '%s' doesn't contain the requested '%s' availability zone(s), "
+            + "available zones: '%s'";
+
+    private static final String INVALID_REGION_PATTERN = "The environment's requested region '%s' doesn't exist on GCP side.";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpEnvironmentNetworkValidator.class);
 
     private final CloudNetworkService cloudNetworkService;
 
-    public GcpEnvironmentNetworkValidator(CloudNetworkService cloudNetworkService) {
+    private final PlatformParameterService platformParameterService;
+
+    public GcpEnvironmentNetworkValidator(CloudNetworkService cloudNetworkService, PlatformParameterService platformParameterService) {
         this.cloudNetworkService = cloudNetworkService;
+        this.platformParameterService = platformParameterService;
     }
 
     @Override
@@ -49,6 +64,7 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
         EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
         checkSubnetsProvidedWhenExistingNetwork(resultBuilder, networkDto, networkDto.getGcp(),
                 cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto));
+        checkAvailabilityZones(resultBuilder, environmentDto, networkDto);
     }
 
     @Override
@@ -126,6 +142,42 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
         if (CollectionUtils.isNotEmpty(availabilityZones) && availabilityZones.size() > 1) {
             LOGGER.info(MULTIPLE_AVAILABILITY_ZONES_PROVIDED_ERROR_MSG);
             resultBuilder.error(MULTIPLE_AVAILABILITY_ZONES_PROVIDED_ERROR_MSG);
+        }
+    }
+
+    private void checkAvailabilityZones(ValidationResult.ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto, NetworkDto networkDto) {
+        PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
+        platformResourceRequest.setCredential(environmentDto.getCredential());
+        platformResourceRequest.setCloudPlatform(environmentDto.getCloudPlatform());
+        CloudRegions regionsByCredential = platformParameterService.getRegionsByCredential(platformResourceRequest, true);
+        Map<Region, List<AvailabilityZone>> cloudRegions = regionsByCredential.getCloudRegions();
+        Region requestedRegion = Region.region(environmentDto.getLocation().getName());
+
+        if (networkDto.getGcp() != null && CollectionUtils.isNotEmpty(networkDto.getGcp().getAvailabilityZones()) && MapUtils.isNotEmpty(cloudRegions)) {
+            Set<AvailabilityZone> requestedZones = networkDto.getGcp().getAvailabilityZones()
+                    .stream()
+                    .map(AvailabilityZone::availabilityZone)
+                    .collect(Collectors.toSet());
+            if (cloudRegions.containsKey(requestedRegion)) {
+                List<AvailabilityZone> zonesInRegion = cloudRegions.get(requestedRegion);
+                Set<String> invalidZones = requestedZones.stream()
+                        .filter(Predicate.not(zonesInRegion::contains))
+                        .map(AvailabilityZone::value)
+                        .collect(Collectors.toSet());
+                if (CollectionUtils.isNotEmpty(zonesInRegion) && !invalidZones.isEmpty()) {
+                    String msg = String.format(INVALID_ZONE_PATTERN,
+                            requestedRegion.getRegionName(),
+                            String.join(",", invalidZones),
+                            zonesInRegion.stream().map(AvailabilityZone::value).collect(Collectors.joining(",")));
+                    LOGGER.info(msg);
+                    resultBuilder.error(msg);
+                }
+            } else {
+                String errorMessage = String.format(INVALID_REGION_PATTERN, requestedRegion.getRegionName());
+                LOGGER.warn(errorMessage);
+                resultBuilder.error(errorMessage);
+            }
+
         }
     }
 
