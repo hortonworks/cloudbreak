@@ -57,11 +57,11 @@ if [[ "$rotationphase" == "finalize" ]];then
 fi
 
 if [[ "$rotationphase" == "prevalidate" ]];then
-
+    echo "Check if $oldusername exists."
 fi
 
 if [[ "$rotationphase" == "postvalidate" ]];then
-
+    echo "Check if $newusername exists."
 fi
 
 {% endif %}
