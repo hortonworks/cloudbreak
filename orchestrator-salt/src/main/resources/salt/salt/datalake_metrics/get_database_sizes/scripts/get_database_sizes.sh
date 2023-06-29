@@ -61,8 +61,12 @@ getDataSizesForDatabases() {
     TRIMMED_DB=$(echo "$DB" | tr -d '"')
     if doesDatabaseExist "$TRIMMED_DB" ; then
       CUR_DB_SIZE=$(runPSQLCommand "select sum(pg_table_size(quote_ident(tablename)::regclass)) from pg_tables where schemaname not in ('pg_catalog','information_schema');" "$TRIMMED_DB")
-      RESULT="${RESULT}${DB}:${CUR_DB_SIZE},"
-      doLog "Size of database ${DB} is ${CUR_DB_SIZE} bytes."
+      if [ -z "$CUR_DB_SIZE" ]; then
+        doLog "Unable to get size of database ${DB} even though it seems to exist..."
+      else
+        RESULT="${RESULT}${DB}:${CUR_DB_SIZE},"
+        doLog "Size of database ${DB} is ${CUR_DB_SIZE} bytes."
+      fi
     fi
   done
 
