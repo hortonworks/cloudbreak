@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -331,14 +332,14 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, UpdateType type)
-            throws QuotaExceededException {
+    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+        UpdateType type, Optional<String> group) throws QuotaExceededException {
         LOGGER.info("The update method which will be followed is {}.", type);
         if (type.equals(UpdateType.VERTICAL_SCALE)) {
             AzureClient client = authenticatedContext.getParameter(AzureClient.class);
             AzureStackView azureStackView = azureStackViewProvider
                     .getAzureStack(new AzureCredentialView(authenticatedContext.getCloudCredential()), stack, client, authenticatedContext);
-            return azureVerticalScaleService.verticalScale(authenticatedContext, stack, resources, azureStackView, client);
+            return azureVerticalScaleService.verticalScale(authenticatedContext, stack, resources, azureStackView, client, group);
         }
         return List.of();
     }

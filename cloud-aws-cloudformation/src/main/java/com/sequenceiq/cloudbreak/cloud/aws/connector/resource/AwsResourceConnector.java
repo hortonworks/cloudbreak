@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -186,8 +187,9 @@ public class AwsResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, UpdateType type) {
-        return awsUpdateService.update(authenticatedContext, stack, resources, type);
+    public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+        UpdateType type, Optional<String> group) {
+        return awsUpdateService.update(authenticatedContext, stack, resources, type, group);
     }
 
     @Override

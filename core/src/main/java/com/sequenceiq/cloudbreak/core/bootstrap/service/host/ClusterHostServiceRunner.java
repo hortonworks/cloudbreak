@@ -824,9 +824,9 @@ public class ClusterHostServiceRunner {
 
     private List<Map<String, String>> getFrontendMap(Set<LoadBalancer> loadBalancers) {
         return loadBalancers.stream()
-            .filter(lb -> isNotEmpty(lb.getIp()))
-            .map(lb -> Map.of("type", lb.getType().name(), "ip", lb.getIp()))
-            .collect(Collectors.toList());
+                .filter(lb -> isNotEmpty(lb.getIp()))
+                .map(lb -> Map.of("type", lb.getType().name(), "ip", lb.getIp()))
+                .collect(Collectors.toList());
     }
 
     private boolean isFloatingIpEnabled(Set<LoadBalancer> loadBalancers) {
@@ -905,6 +905,10 @@ public class ClusterHostServiceRunner {
             List<String> hosts = rangerLocations.stream()
                     .filter(s -> s.contains(gatewayGroupName))
                     .collect(Collectors.toList());
+            // If the ranger is not on Gateway node we have to expose other node.
+            if (CollectionUtils.isEmpty(hosts)) {
+                return asList(rangerLocations.iterator().next());
+            }
             return hosts;
         }
         return rangerLocations.contains(primaryGatewayFqdn) ? asList(primaryGatewayFqdn) : asList(rangerLocations.iterator().next());
