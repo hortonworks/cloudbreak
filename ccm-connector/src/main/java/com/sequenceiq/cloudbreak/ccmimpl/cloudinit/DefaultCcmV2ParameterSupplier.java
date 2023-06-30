@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2Parameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2Parameters;
 import com.sequenceiq.cloudbreak.ccm.exception.CcmV2Exception;
 import com.sequenceiq.cloudbreak.ccm.key.CcmResourceUtil;
-import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2ManagementClient;
+import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2RetryingClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component("DefaultCcmV2ParameterSupplier")
@@ -29,7 +29,7 @@ public class DefaultCcmV2ParameterSupplier implements CcmV2ParameterSupplier {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCcmV2ParameterSupplier.class);
 
     @Inject
-    private CcmV2ManagementClient ccmV2Client;
+    private CcmV2RetryingClient ccmV2Client;
 
     public CcmV2Parameters getCcmV2Parameters(@Nonnull String accountId, @Nonnull Optional<String> environmentCrnOpt,
         @Nonnull String clusterGatewayDomain, @Nonnull String agentKeyId) {

@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.ccm.termination.CcmV2AgentTerminationListener;
-import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2ManagementClient;
+import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2RetryingClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component
@@ -16,7 +16,7 @@ public class DefaultCcmV2AgentTerminationListener implements CcmV2AgentTerminati
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCcmV2AgentTerminationListener.class);
 
     @Inject
-    private CcmV2ManagementClient ccmV2Client;
+    private CcmV2RetryingClient ccmV2Client;
 
     @Override
     public void deregisterInvertingProxyAgent(String ccmV2AgentCrn) {
