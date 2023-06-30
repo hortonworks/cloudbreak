@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -15,8 +16,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
 import com.sequenceiq.cloudbreak.rotation.context.SaltRunOrchestratorStateRotationContext;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
@@ -59,8 +62,12 @@ class UserKeyPairSaltStateRunRotationContextGeneratorTest {
     @Mock
     private EnvironmentAuthenticationResponse environmentAuthenticationResponse;
 
+    @Mock
+    private ExitCriteriaProvider exitCriteriaProvider;
+
     @Test
     void testGenerateContext() {
+        when(exitCriteriaProvider.get(any())).thenReturn(ClusterDeletionBasedExitCriteriaModel.nonCancellableModel());
         when(stackDto.getStackAuthentication()).thenReturn(stackAuthentication);
         when(detailedEnvironmentResponse.getAuthentication()).thenReturn(environmentAuthenticationResponse);
         when(stackAuthentication.getPublicKeyId()).thenReturn("pk1");

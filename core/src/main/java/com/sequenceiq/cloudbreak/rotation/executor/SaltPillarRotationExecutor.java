@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -16,6 +15,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
@@ -40,6 +40,9 @@ public class SaltPillarRotationExecutor implements RotationExecutor<SaltPillarRo
     @Inject
     private SaltStateParamsService saltStateParamsService;
 
+    @Inject
+    private ExitCriteriaProvider exitCriteriaProvider;
+
     @Override
     public void rotate(SaltPillarRotationContext rotationContext) throws Exception {
         updateSaltPillar(rotationContext, "rotation");
@@ -54,8 +57,7 @@ public class SaltPillarRotationExecutor implements RotationExecutor<SaltPillarRo
         StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
         Map<String, SaltPillarProperties> servicePillar = rotationContext.getServicePillarGenerator().apply(rotationContext.getResourceCrn());
         LOGGER.info("Salt pillar {}, keys: {}", rotationState, servicePillar.keySet());
-        hostOrchestrator.saveCustomPillars(new SaltConfig(servicePillar),
-                new ClusterDeletionBasedExitCriteriaModel(stackDto.getId(), stackDto.getCluster().getId()),
+        hostOrchestrator.saveCustomPillars(new SaltConfig(servicePillar), exitCriteriaProvider.get(stackDto),
                 saltStateParamsService.createStateParams(stackDto, null, true, MAX_RETRY, MAX_RETRY_ON_ERROR));
     }
 

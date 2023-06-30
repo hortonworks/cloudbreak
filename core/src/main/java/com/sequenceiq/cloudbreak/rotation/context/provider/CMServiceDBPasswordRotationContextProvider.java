@@ -28,12 +28,12 @@ import com.google.common.collect.Table;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
 import com.sequenceiq.cloudbreak.rotation.context.CMServiceConfigRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
@@ -72,11 +72,15 @@ public class CMServiceDBPasswordRotationContextProvider implements RotationConte
     @Inject
     private List<AbstractRdsConfigProvider> rdsConfigProviders;
 
+    @Inject
+    private ExitCriteriaProvider exitCriteriaProvider;
+
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resource) {
         Map<SecretRotationStep, RotationContext> result = Maps.newHashMap();
         StackDto stack = stackService.getByCrn(resource);
         ClusterView cluster = stack.getCluster();
+
         Set<RDSConfig> rdsConfigs = getRdsConfigs(cluster);
         Map<RDSConfig, Pair<String, String>> newUserPassPairs = rdsConfigs.stream()
                 .filter(rdsConfig -> rdsConfigProviders.stream().anyMatch(configProvider -> matchRdsTypeWithString(configProvider.getRdsType(), rdsConfig)))
@@ -104,7 +108,7 @@ public class CMServiceDBPasswordRotationContextProvider implements RotationConte
                 .withResourceCrn(stack.getResourceCrn())
                 .withGatewayConfig(primaryGatewayConfig)
                 .withTargets(Set.of(primaryGatewayConfig.getHostname()))
-                .withExitCriteriaModel(ClusterDeletionBasedExitCriteriaModel.nonCancellableModel())
+                .withExitCriteriaModel(exitCriteriaProvider.get(stack))
                 .withMaxRetry(SALT_STATE_MAX_RETRY)
                 .withMaxRetryOnError(SALT_STATE_MAX_RETRY)
                 .withStates(List.of("postgresql.rotate.init"))
