@@ -185,4 +185,11 @@ public interface UsageReporter {
      */
     void cdpEnvironmentProxyConfigEditEvent(
             UsageProto.CDPEnvironmentProxyConfigEditEvent details);
+
+    /**
+     * Reports a secret rotation event
+     * @param details the event details
+     */
+    void cdpSecretRotationEvent(
+            UsageProto.CDPSecretRotationEvent details);
 }

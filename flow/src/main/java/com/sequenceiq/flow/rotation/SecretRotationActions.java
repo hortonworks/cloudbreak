@@ -17,6 +17,7 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.secret.usage.SecretRotationUsageProcessor;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -43,6 +44,9 @@ public class SecretRotationActions {
 
     @Inject
     private SecretRotationStatusService secretRotationStatusService;
+
+    @Inject
+    private Optional<SecretRotationUsageProcessor> secretRotationUsageProcessor;
 
     @Bean(name = "PRE_VALIDATE_ROTATION_STATE")
     public Action<?, ?> executePreValidationAction() {
@@ -164,14 +168,20 @@ public class SecretRotationActions {
             @Override
             protected void doExecute(RotationFlowContext context, RotationFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 Flow flow = getFlow(context.getFlowId());
-                if (RotationFlowExecutionType.ROLLBACK != payload.getExecutionType()
-                        || !EXPLICIT_ROLLBACK_EXECUTION.equals(payload.getException().getMessage())) {
+                String resourceCrn = context.getResourceCrn();
+                String message = payload.getException().getMessage();
+                if (RotationFlowExecutionType.ROLLBACK == payload.getExecutionType() && EXPLICIT_ROLLBACK_EXECUTION.equals(message)) {
+                    // if the execution tpye is ROLLBACK, we need to know from the calling service wheter it was successful or not
+                    LOGGER.debug("Explicit rollback, doesnt set flow failed.");
+                } else {
                     LOGGER.debug("Execution type is not set or not explicit ROLLBACK, set flow failed for: {}", context.getResourceCrn());
                     flow.setFlowFailed(payload.getException());
                 }
-                LOGGER.debug("Secret rotation failed, change resource status for {}", context.getResourceCrn());
-                secretRotationStatusService.rotationFailed(context.getResourceCrn(), payload.getException().getMessage());
-                LOGGER.debug("Secret rotation failed, resource status changed for {}", context.getResourceCrn());
+                secretRotationUsageProcessor.ifPresent(processor -> processor.rotationFailed(context.getSecretType(), resourceCrn,
+                        message, context.getExecutionType()));
+                LOGGER.debug("Secret rotation failed, change resource status for {}", resourceCrn);
+                secretRotationStatusService.rotationFailed(resourceCrn, message);
+                LOGGER.debug("Secret rotation failed, resource status changed for {}", resourceCrn);
                 sendEvent(context, RotationEvent.fromContext(SecretRotationEvent.ROTATION_FAILURE_HANDLED_EVENT.event(), context));
             }
 
