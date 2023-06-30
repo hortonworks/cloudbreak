@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPSecretRotationEvent;
 import com.sequenceiq.cloudbreak.usage.model.UsageContext;
 import com.sequenceiq.cloudbreak.usage.strategy.CompositeUsageProcessingStrategy;
 import com.sequenceiq.cloudbreak.usage.strategy.UsageProcessingStrategy;
@@ -302,6 +303,14 @@ public class UsageReportProcessor implements UsageReporter {
         checkNotNull(details);
         usageProcessingStrategy.processUsage(eventBuilder()
                 .setCdpEnvironmentProxyConfigEditEvent(details)
+                .build(), null);
+    }
+
+    @Override
+    public void cdpSecretRotationEvent(CDPSecretRotationEvent details) {
+        checkNotNull(details);
+        usageProcessingStrategy.processUsage(eventBuilder()
+                .setCdpSecretRotationEvent(details)
                 .build(), null);
     }
 

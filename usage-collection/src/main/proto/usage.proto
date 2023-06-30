@@ -278,6 +278,14 @@ message Event {
     ApplicationMetricsReportEvent ApplicationMetricsReportEvent = 132;
     // A CDP CML model V2 upload event.
     ModelV2UploadedEvent modelV2UploadedEvent = 133;
+    // A Replication Manager usage statistics was reported
+    RMUsageStatistics rmUsageStatistics = 136;
+    // A CDP CDE usage event that reports heartbeats of active services
+    CDPCDEActiveServicesHeartbeat cdpCDEActiveServicesHeartbeat  = 137;
+    // A CDP CDE usage event that reports heartbeats of active virtual clusters
+    CDPCDEActiveVCHeartbeat cdpCDEActiveVCHeartbeat  = 138;
+    // A secret rotation started/finished/failed.
+    CDPSecretRotationEvent cdpSecretRotationEvent = 139;
   }
 }
 
@@ -294,6 +302,8 @@ message AltusIamAccountType {
     MANAGED_SKYNET_CDPONE_TRIAL = 3;
     // A managed Skynet CDP trial account.
     MANAGED_SKYNET_CDP_TRIAL = 4;
+    // DEPRECATED: C1C accounts. C1C accounts are created by users using an email.
+    C1C = 5;
   }
 }
 
@@ -928,6 +938,9 @@ message CDPCMLWorkspaceStatus {
     VALIDATE_MIGRATION_FINISHED = 64;
     // The status when the validate CDSW migration has failed.
     VALIDATE_MIGRATION_FAILED = 65;
+
+    // The status when the healthpoller is not able to reach the KubeAPI server of a workspace.
+    CONNECTION_FAILED = 66;
   }
 }
 
@@ -1152,6 +1165,8 @@ message CDPCMLWorkspaceNodeStatesHeartbeat {
   string workspaceVersion = 8;
   // The status of the CML workspace
   string workspaceStatus = 9;
+  // The information regarding metering pods
+  string meteringInfo = 10;
 }
 
 message CDPCMLWorkspaceNodeState {
@@ -1491,6 +1506,10 @@ message CDPLiftieClusterNodesSummary {
   int32 numNodesNonmeteredUnhealthy = 6;
   // The names of any unhealthy nodes
   repeated string unhealthyNodes = 7;
+  // The number of CDE Tier1 (CORE) nodes
+  int32 numNodesTier1 = 8;
+  // The number of CDE Tier2 (ALLP) nodes
+  int32 numNodesTier2 = 9;
 }
 
 message CDPLiftieClusterMeteringPodsSummary {
@@ -1541,6 +1560,8 @@ message CDPLiftieClusterPodStatesHeartbeatSummary {
   string clusterId = 2;
   // Total number of pods
   int32 totalNumPods = 3;
+  // total number of unhealthy pods
+  int32 totalUnhealthyPods = 12;
   // Summary Info of Metering Pods
   CDPLiftieClusterPodSummmary meteringPods = 4;
   // Summary Info of Fluentd Pods
@@ -1555,6 +1576,8 @@ message CDPLiftieClusterPodStatesHeartbeatSummary {
   repeated string unhealthyPodList = 9;
   // The workload region
   string workloadRegion = 10;
+  // The CDP environment CRN.
+  string environmentCrn = 11;
 }
 
 message CDPLiftieClusterPodSummmary {
@@ -1845,6 +1868,13 @@ message CDPClusterStatus {
     DELETE_EBS_VOLUMES_FINISHED = 62;
     // The status when a delete volume operation on a cluster has failed.
     DELETE_EBS_VOLUMES_FAILED = 63;
+
+    // The status when a CM sync operation is started.
+    CM_SYNC_STARTED = 64;
+    // The status when a CM sync operation is finished.
+    CM_SYNC_FINISHED = 65;
+    // The status when a CM sync operation is failed.
+    CM_SYNC_FAILED = 66;
   }
 }
 
@@ -2522,6 +2552,12 @@ message CDPDFServiceRequested {
   bool privateCluster = 14;
   // Is validation skipped for enable and update requests
   bool runValidations = 15;
+  // Is User Defined Routing(UDR) mode enabled?
+  bool userDefinedRouting = 16;
+  // Is a custom Pod CIDR range defined for assigning IPs to pods in the kubernetes cluster
+  bool customPodCidr = 17;
+  // Is a custom Service CIDR range defined for assigning IPs to services in the kubernetes cluster
+  bool customServiceCidr = 18;
 }
 
 message CDPDFServiceStatusChanged {
@@ -3543,6 +3579,55 @@ message CDPCDEServiceUpgradeRequested {
   string targetKubernetesVersion = 8;
 }
 
+// Heartbeat that reports all the active CDE services.
+message CDPCDEActiveServicesHeartbeat {
+  repeated CDPCDEActiveServiceDetails cdpCDEActiveServiceDetails = 1;
+}
+
+// Details of a CDE service to be reported in a heartbeat.
+message CDPCDEActiveServiceDetails {
+  // The ID of the CDE service.
+  string id = 1;
+  // The CDP account ID.
+  string accountId = 2;
+  // The CRN of the CDE cluster's environment.
+  string environmentCrn = 3;
+  // The cluster CRN.
+  string clusterCrn = 4;
+  // The environment type. Indicates the platform being used, mainly AWS or Azure.
+  CDPEnvironmentsEnvironmentType.Value environmentType = 5;
+  // The CDE version.
+  string cdeVersion = 6;
+  // Status of the CDP CDE service.
+  string status = 7;
+  // Kubernetes version of CDE service.
+  string kubernetesVersion = 8;
+  // Number of active virtual clusters in the service.
+  int32 numActiveVirtualClusters = 9;
+}
+
+// Heartbeat that reports all the active Virtual clusters.
+message CDPCDEActiveVCHeartbeat {
+  repeated CDPCDEActiveVCDetails cdpCDEActiveVCDetails = 1;
+}
+
+// Details of a virtual cluster to be reported in the heartbeat.
+message CDPCDEActiveVCDetails{
+  // The ID of the CDP CDE virtual cluster.
+  string id = 1;
+  // The ID of the CDP CDE service for which the virtual cluster creation was requested.
+  string clusterId = 2;
+  // The CRN of the CDP CDE service for which the virtual cluster creation was requested.
+  string clusterCrn = 3;
+  // The CDP account ID.
+  string accountId = 4;
+  // Spark version of the virtual cluster.
+  string sparkVersion = 5;
+  // Status of the CDP CDE virtual cluster.
+  string status = 6;
+  // Tier of the virtual cluster.
+  string appTier = 7;
+}
 
 // Generated when a CDP CDE job run is initiated or its status changes.
 message CDPCDEJobRunStatusChanged {
@@ -4168,8 +4253,9 @@ message CDPTrialEnvironment {
 
 // The pattern and status for CDP Trial workloads.
 message CDPTrialWorkload {
-  // Pattern used by the trial workload. Currently supported CDP trial workload patterns are CDP_OPEN_DATA_LAKEHOUSE.
+  // Pattern used by the trial workload. Currently supported CDP trial workload patterns are CDP_OPEN_DATA_LAKEHOUSE and CDP_DATA_DISTRIBUTION_AND_STREAM_ANALYTICS.
   // CDP_OPEN_DATA_LAKEHOUSE - Indicates open data lakehouse pattern for CDP.
+  // CDP_DATA_DISTRIBUTION_AND_STREAM_ANALYTICS - Indicates data flow pattern for CDP.
   string pattern = 1;
   // Status of the workload deployment for the trial.
   CDPTrialWorkloadStatus.Value status = 2;
@@ -4528,9 +4614,11 @@ message ExperimentRunEvent {
   string status = 5;
   string action= 6;
   uint32 tags = 7;
-  uint32 metrics = 8;
   uint32 params = 9;
   uint32 artifacts = 10;
+  string history = 11;
+  string version = 12;
+  string engineId = 13;
 }
 
 message ModelDeployedEvent {
@@ -4680,4 +4768,58 @@ message ModelV2UploadedEvent {
   string runId = 5;
   uint32 userId = 6;
   uint32 projectId = 7;
+}
+
+// A Replication manager policy statistics details
+message RMPolicyStatistics {
+  // Amount of replication policies of certain type managed by Replication Manager
+  int32 amount = 1;
+}
+
+// A Replication manager statistics details
+message RMUsageStatistics {
+  // Amount of clusters managed by Replication Manager
+  int32 amountOfClusters = 1;
+  // Amount of replication policies managed by Replication Manager
+  int32 amountOfPolicies = 2;
+  // Details of HDFS Policies managed by Replication manager
+  RMPolicyStatistics hdfsPolicies = 3;
+  // Details of HIVE Policies managed by Replication manager
+  RMPolicyStatistics hivePolicies = 4;
+  // Details of HBase Policies managed by Replication manager
+  RMPolicyStatistics hbasePolicies = 5;
+}
+
+// Status of secret rotation event
+message CDPSecretRotationStatus {
+  enum Value {
+    // Indicates that status cannot be recognized
+    UNKNOWN = 0;
+    // Indicates that it is a secret rotation started event
+    STARTED = 1;
+    // Indicates that it is a secret rotation finished event
+    FINISHED = 2;
+    // Indicates that it is a secret rotation failed event
+    FAILED = 3;
+    // Indicates that it is a secret rotation rollback started event
+    ROLLBACK_STARTED = 4;
+    // Indicates that it is a secret rotation rollback finished event
+    ROLLBACK_FINISHED = 5;
+    // Indicates that it is a secret rotation rollback failed event
+    ROLLBACK_FAILED = 6;
+  }
+}
+
+// Event about secret rotation
+message CDPSecretRotationEvent {
+  // Status of secret rotation
+  CDPSecretRotationStatus.Value status = 1;
+  // CRN of resource
+  string resourceCrn = 2;
+  // Secret type
+  string secretType = 3;
+  // Status reason
+  string reason = 4;
+  // corresponding account id
+  string accountId = 5;
 }
