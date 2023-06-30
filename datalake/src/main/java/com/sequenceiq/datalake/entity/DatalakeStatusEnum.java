@@ -130,6 +130,8 @@ public enum DatalakeStatusEnum {
                 return DATALAKE_UPGRADE_CCM_FAILED;
             case SALT_PASSWORD_ROTATION_IN_PROGRESS:
                 return SALT_PASSWORD_ROTATION_FAILED;
+            case DATALAKE_SECRET_ROTATION_IN_PROGRESS:
+                return DATALAKE_SECRET_ROTATION_FAILED;
             default:
                 return this;
         }

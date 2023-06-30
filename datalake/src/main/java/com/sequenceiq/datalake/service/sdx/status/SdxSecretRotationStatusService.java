@@ -6,6 +6,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
+import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxStatusEntity;
+import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.rotation.status.service.SecretRotationStatusService;
 
 @Primary
@@ -15,6 +18,9 @@ public class SdxSecretRotationStatusService implements SecretRotationStatusServi
     @Inject
     private SdxStatusService sdxStatusService;
 
+    @Inject
+    private SdxService sdxService;
+
     @Override
     public void rotationStarted(String resourceCrn) {
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_IN_PROGRESS, null, resourceCrn);
@@ -22,7 +28,11 @@ public class SdxSecretRotationStatusService implements SecretRotationStatusServi
 
     @Override
     public void rotationFinished(String resourceCrn) {
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_FINISHED, null, resourceCrn);
+        SdxCluster sdxCluster = sdxService.getByCrn(resourceCrn);
+        SdxStatusEntity actualStatusForSdx = sdxStatusService.getActualStatusForSdx(sdxCluster);
+        if (actualStatusForSdx.getStatus() != DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_FAILED) {
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_FINISHED, null, resourceCrn);
+        }
     }
 
     @Override
