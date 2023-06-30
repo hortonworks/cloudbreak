@@ -12,9 +12,11 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -27,6 +29,7 @@ import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.core.chain.finalize.config.FlowChainFinalizeState;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent;
@@ -51,6 +54,10 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
 
     private static final int PRIMARY_GW_INSTANCE_COUNT = 1;
 
+    private static final int MAX_NODE_COUNT_FOR_UPSCALE = AvailabilityType.HA.getInstanceCount() + 1;
+
+    private static final int MAX_NODE_COUNT_FOR_DOWNSCALE = AvailabilityType.HA.getInstanceCount();
+
     @Inject
     private InstanceGroupService instanceGroupService;
 
@@ -71,8 +78,8 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
                 .withOperationId(event.getOperationId()));
 
         int nonPrimaryGwInstanceCount = event.getInstanceIds().size();
-        int instanceCountForUpscale = nonPrimaryGwInstanceCount + PRIMARY_GW_INSTANCE_COUNT + 1;
-        int instanceCountForDownscale = nonPrimaryGwInstanceCount + PRIMARY_GW_INSTANCE_COUNT;
+        int instanceCountForUpscale = Math.min(nonPrimaryGwInstanceCount + PRIMARY_GW_INSTANCE_COUNT + 1, MAX_NODE_COUNT_FOR_UPSCALE);
+        int instanceCountForDownscale = Math.min(nonPrimaryGwInstanceCount + PRIMARY_GW_INSTANCE_COUNT, MAX_NODE_COUNT_FOR_DOWNSCALE);
         Set<String> groupNames = instanceGroupService.findGroupNamesByStackId(event.getResourceId());
         flowEventChain.addAll(createScaleEventsForNonPgwInstances(event, instanceCountForUpscale, instanceCountForDownscale, groupNames));
         flowEventChain.addAll(createScaleEventsAndChangePgw(event, instanceCountForUpscale, instanceCountForDownscale, groupNames));
@@ -98,16 +105,20 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
         LOGGER.debug("Add events for primary gateway with id: [{}]", event.getPrimareGwInstanceId());
         List<Selectable> events = new ArrayList<>(PRIMARY_GW_EVENT_COUNT);
         ArrayList<String> instanceIdToDownscale = Lists.newArrayList(event.getPrimareGwInstanceId());
-        addMigrationFlowIfNeed(event, events, groupNames, "Resource create flow");
-        events.add(new UpscaleEvent(UpscaleFlowEvent.UPSCALE_EVENT.event(), event.getResourceId(), instanceIdToDownscale,
-                instanceCountForUpscale, Boolean.FALSE, true, false, event.getOperationId(), event.getTriggeredVariant()));
-        ArrayList<String> oldInstances = new ArrayList<>(event.getInstanceIds());
-        oldInstances.add(event.getPrimareGwInstanceId());
-        events.add(new ChangePrimaryGatewayEvent(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), event.getResourceId(),
-                oldInstances, Boolean.FALSE, event.getOperationId()));
-        events.add(new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), event.getResourceId(), instanceIdToDownscale,
-                instanceCountForDownscale, false, true, false, event.getOperationId()));
-        addMigrationFlowIfNeed(event, events, groupNames, "CloudFormation cleanup");
+        if (CollectionUtils.isEmpty(event.getInstancesOnOldImage()) || event.getInstancesOnOldImage().contains(event.getPrimareGwInstanceId())) {
+            events.addAll(createMigrationFlowIfNeeded(event, groupNames, "Resource create flow"));
+            events.add(new UpscaleEvent(UpscaleFlowEvent.UPSCALE_EVENT.event(), event.getResourceId(), instanceIdToDownscale,
+                    instanceCountForUpscale, Boolean.FALSE, true, false, event.getOperationId(), event.getTriggeredVariant()));
+            ArrayList<String> oldInstances = new ArrayList<>(event.getInstanceIds());
+            oldInstances.add(event.getPrimareGwInstanceId());
+            events.add(new ChangePrimaryGatewayEvent(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), event.getResourceId(),
+                    oldInstances, Boolean.FALSE, event.getOperationId()));
+            events.add(new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), event.getResourceId(), instanceIdToDownscale,
+                    instanceCountForDownscale, false, true, false, event.getOperationId()));
+            events.addAll(createMigrationFlowIfNeeded(event, groupNames, "CloudFormation cleanup"));
+        } else {
+            LOGGER.info("Primary gateway is already upgraded");
+        }
         return events;
     }
 
@@ -116,10 +127,12 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
         LOGGER.debug("Add scale events for non primary gateway instances. upscale count: [{}] downscale count: [{}]",
                 instanceCountForUpscale, instanceCountForDownscale);
         List<Selectable> events = new ArrayList<>(event.getInstanceIds().size() * 2);
-        if (!event.getInstanceIds().isEmpty()) {
-            addMigrationFlowIfNeed(event, events, groupNames, "Non Pw instances found, migration flow");
+        Set<String> instanceIds = CollectionUtils.isEmpty(event.getInstancesOnOldImage()) ? event.getInstanceIds()
+                : event.getInstanceIds().stream().filter(instanceId -> event.getInstancesOnOldImage().contains(instanceId)).collect(Collectors.toSet());
+        if (!instanceIds.isEmpty()) {
+            events.addAll(createMigrationFlowIfNeeded(event, groupNames, "Non Pw instances found, migration flow"));
         }
-        for (String instanceId : event.getInstanceIds()) {
+        for (String instanceId : instanceIds) {
             LOGGER.debug("Add upscale and downscale event for [{}]", instanceId);
             ArrayList<String> instanceIdToDownscale = Lists.newArrayList(instanceId);
             events.add(new UpscaleEvent(UpscaleFlowEvent.UPSCALE_EVENT.event(), event.getResourceId(), instanceIdToDownscale, instanceCountForUpscale,
@@ -127,19 +140,20 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
             events.add(new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(),
                     event.getResourceId(), instanceIdToDownscale, instanceCountForDownscale, false, true, false, event.getOperationId()));
         }
-        if (!event.getInstanceIds().isEmpty()) {
-            addMigrationFlowIfNeed(event, events, groupNames, "Non Pw instances found, cloudFormation cleanup");
+        if (!instanceIds.isEmpty()) {
+            events.addAll(createMigrationFlowIfNeeded(event, groupNames, "Non Pw instances found, cloudFormation cleanup"));
         }
         return events;
     }
 
-    private void addMigrationFlowIfNeed(UpgradeEvent event, List<Selectable> events, Set<String> groupNames, String flow) {
+    private List<AwsVariantMigrationTriggerEvent> createMigrationFlowIfNeeded(UpgradeEvent event, Set<String> groupNames, String flow) {
         if (event.isNeedMigration()) {
             LOGGER.debug(flow + " flow added to FreeIPA upgrade");
-            groupNames.forEach(g -> {
-                events.add(new AwsVariantMigrationTriggerEvent(AwsVariantMigrationEvent.CREATE_RESOURCES_EVENT.event(), event.getResourceId(), g));
-            });
-
+            return groupNames.stream()
+                    .map(g -> new AwsVariantMigrationTriggerEvent(AwsVariantMigrationEvent.CREATE_RESOURCES_EVENT.event(), event.getResourceId(), g))
+                    .collect(Collectors.toList());
+        } else {
+            return List.of();
         }
     }
 }

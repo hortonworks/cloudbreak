@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceLifeCycle;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceLifeCycle;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
@@ -20,6 +21,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.image.ImageService;
 
 @Service
 public class MetadataSetupService {
@@ -33,16 +35,20 @@ public class MetadataSetupService {
     @Inject
     private Clock clock;
 
+    @Inject
+    private ImageService imageService;
+
     public int saveInstanceMetaData(Stack stack, Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatusList, InstanceStatus status) {
         int newInstances = 0;
         Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
+        Json image = new Json(imageService.getCloudImageByStackId(stack.getId()));
         boolean primaryIgSelected = allInstanceMetadata.stream().anyMatch(imd -> imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY);
         for (CloudVmMetaDataStatus cloudVmMetaDataStatus : cloudVmMetaDataStatusList) {
             CloudInstance cloudInstance = cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance();
             CloudInstanceMetaData md = cloudVmMetaDataStatus.getMetaData();
             Long privateId = cloudInstance.getTemplate().getPrivateId();
             String instanceId = cloudInstance.getInstanceId();
-            InstanceMetaData instanceMetaDataEntry = createInstanceMetadataIfAbsent(allInstanceMetadata, privateId, instanceId);
+            InstanceMetaData instanceMetaDataEntry = createInstanceMetadataIfAbsent(allInstanceMetadata, privateId, instanceId, image);
             if (instanceMetaDataEntry.getInstanceId() == null) {
                 newInstances++;
             }
@@ -101,7 +107,7 @@ public class MetadataSetupService {
                 .orElse(InstanceLifeCycle.getDefault());
     }
 
-    private InstanceMetaData createInstanceMetadataIfAbsent(Iterable<InstanceMetaData> allInstanceMetadata, Long privateId, String instanceId) {
+    private InstanceMetaData createInstanceMetadataIfAbsent(Iterable<InstanceMetaData> allInstanceMetadata, Long privateId, String instanceId, Json image) {
         if (privateId != null) {
             for (InstanceMetaData instanceMetaData : allInstanceMetadata) {
                 if (Objects.equals(instanceMetaData.getPrivateId(), privateId)) {
@@ -115,7 +121,9 @@ public class MetadataSetupService {
                 }
             }
         }
-        return new InstanceMetaData();
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setImage(image);
+        return instanceMetaData;
     }
 
 }

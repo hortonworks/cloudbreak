@@ -34,4 +34,14 @@ class ImageToImageEntityConverterTest {
 
         assertEquals("1.2.3", result);
     }
+
+    @Test
+    void testExtractLdapAgentVersionCloudImage() {
+        com.sequenceiq.cloudbreak.cloud.model.Image source =
+                new com.sequenceiq.cloudbreak.cloud.model.Image("asd", Map.of(), "osss", "type", "url", "name", "imid", Map.of("freeipa-ldap-agent", "1.2.3"));
+
+        String result = underTest.extractLdapAgentVersion(source);
+
+        assertEquals("1.2.3", result);
+    }
 }

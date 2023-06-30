@@ -29,6 +29,9 @@ public class UpgradeEvent extends StackEvent {
 
     private final VerticalScaleRequest verticalScaleRequest;
 
+    @SuppressWarnings("IllegalType")
+    private final HashSet<String> instancesOnOldImage;
+
     @JsonCreator
     public UpgradeEvent(
             @JsonProperty("selector") String selector,
@@ -40,7 +43,8 @@ public class UpgradeEvent extends StackEvent {
             @JsonProperty("backupSet") boolean backupSet,
             @JsonProperty("needMigration") boolean needMigration,
             @JsonProperty("triggeredVariant") String triggeredVariant,
-            @JsonProperty("verticalScaleRequest") VerticalScaleRequest verticalScaleRequest) {
+            @JsonProperty("verticalScaleRequest") VerticalScaleRequest verticalScaleRequest,
+            @JsonProperty("instancesOnOldImage") HashSet<String> instancesOnOldImage) {
         super(selector, stackId);
         this.instanceIds = instanceIds;
         this.primareGwInstanceId = primareGwInstanceId;
@@ -50,6 +54,7 @@ public class UpgradeEvent extends StackEvent {
         this.needMigration = needMigration;
         this.triggeredVariant = triggeredVariant;
         this.verticalScaleRequest = verticalScaleRequest;
+        this.instancesOnOldImage = instancesOnOldImage;
     }
 
     public Set<String> getInstanceIds() {
@@ -84,6 +89,10 @@ public class UpgradeEvent extends StackEvent {
         return verticalScaleRequest;
     }
 
+    public Set<String> getInstancesOnOldImage() {
+        return instancesOnOldImage;
+    }
+
     @Override
     public boolean equalsEvent(StackEvent other) {
         return isClassAndEqualsEvent(UpgradeEvent.class, other,
@@ -94,7 +103,8 @@ public class UpgradeEvent extends StackEvent {
                         && Objects.equals(triggeredVariant, event.triggeredVariant)
                         && backupSet == event.backupSet
                         && needMigration == event.needMigration
-                        && Objects.equals(verticalScaleRequest, event.verticalScaleRequest));
+                        && Objects.equals(verticalScaleRequest, event.verticalScaleRequest)
+                        && Objects.equals(instancesOnOldImage, event.instancesOnOldImage));
     }
 
 }

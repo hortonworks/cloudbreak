@@ -92,6 +92,9 @@ public class ImageServiceTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private FreeipaPlatformStringTransformer platformStringTransformer;
+
     @Captor
     private ArgumentCaptor<ImageSettingsRequest> imageSettingsRequestCaptor;
 
@@ -176,6 +179,7 @@ public class ImageServiceTest {
         when(image.getUuid()).thenReturn(IMAGE_UUID);
         when(imageRepository.save(any(ImageEntity.class))).thenAnswer(invocation -> invocation.getArgument(0, ImageEntity.class));
         when(imageConverter.extractLdapAgentVersion(image)).thenReturn("1.2.3");
+        when(platformStringTransformer.getPlatformString(stack)).thenReturn("aws");
 
         ImageEntity imageEntity = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.changeImage(stack, imageRequest));
 
@@ -198,6 +202,7 @@ public class ImageServiceTest {
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(DEFAULT_REGION, EXISTING_ID)));
         when(imageRepository.save(any(ImageEntity.class))).thenAnswer(invocation -> invocation.getArgument(0, ImageEntity.class));
         when(imageConverter.convert(any(), any())).thenReturn(new ImageEntity());
+        when(platformStringTransformer.getPlatformString(stack)).thenReturn("aws");
 
         ImageEntity imageEntity = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, imageRequest));
 
@@ -247,6 +252,7 @@ public class ImageServiceTest {
         Image image = new Image(123L, "now", "desc", DEFAULT_OS, IMAGE_UUID, Map.of(), "os", Map.of(), true);
         ImageWrapper imageWrapper = new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG);
         when(imageProvider.getImage(any(), any(), any())).thenReturn(Optional.of(imageWrapper));
+        when(platformStringTransformer.getPlatformString(stack)).thenReturn("aws");
 
         ImageCatalog result = underTest.generateImageCatalogForStack(stack);
 

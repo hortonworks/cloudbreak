@@ -1,15 +1,18 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.HostMetadataModelDescription;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.InstanceGroupModelDescription;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.InstanceMetaDataModelDescription;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsResponse;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("InstanceMetaDataV1Response")
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class InstanceMetaDataResponse {
 
@@ -48,6 +51,8 @@ public class InstanceMetaDataResponse {
 
     @ApiModelProperty(InstanceGroupModelDescription.AVAILABILITY_ZONE)
     private String availabilityZone;
+
+    private ImageSettingsResponse image;
 
     public String getInstanceGroup() {
         return instanceGroup;
@@ -145,6 +150,14 @@ public class InstanceMetaDataResponse {
         this.availabilityZone = availabilityZone;
     }
 
+    public ImageSettingsResponse getImage() {
+        return image;
+    }
+
+    public void setImage(ImageSettingsResponse image) {
+        this.image = image;
+    }
+
     @Override
     public String toString() {
         return "InstanceMetaDataResponse{" +
@@ -160,6 +173,7 @@ public class InstanceMetaDataResponse {
                 ", lifeCycle=" + lifeCycle +
                 ", subnetId='" + subnetId + '\'' +
                 ", availabilityZone='" + availabilityZone + '\'' +
+                ", image=" + image +
                 '}';
     }
 }

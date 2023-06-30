@@ -43,6 +43,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @SpringBootTest(classes = InstanceMetadataServiceComponentTest.TestConfig.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -209,5 +210,8 @@ public class InstanceMetadataServiceComponentTest {
 
         @MockBean
         private FreeIpaService freeIpaService;
+
+        @MockBean
+        private ImageService imageService;
     }
 }

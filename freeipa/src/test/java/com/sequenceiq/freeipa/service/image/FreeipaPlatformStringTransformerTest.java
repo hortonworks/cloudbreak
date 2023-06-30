@@ -1,14 +1,12 @@
 package com.sequenceiq.freeipa.service.image;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureConstants;
@@ -16,11 +14,9 @@ import com.sequenceiq.cloudbreak.cloud.gcp.GcpConstants;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.freeipa.entity.Stack;
 
-@ExtendWith(MockitoExtension.class)
-class PlatformStringTransformerTest {
+class FreeipaPlatformStringTransformerTest {
 
-    @InjectMocks
-    private ImageService imageService;
+    private FreeipaPlatformStringTransformer underTest = new FreeipaPlatformStringTransformer();
 
     private static Stream<Arguments> variantFlags() {
         return Stream.of(
@@ -52,7 +48,7 @@ class PlatformStringTransformerTest {
         Stack stack = new Stack();
         stack.setCloudPlatform(platform);
         stack.setPlatformvariant(variant);
-        Assert.assertEquals(expected.toLowerCase(), imageService.getPlatformString(stack).toLowerCase());
+        assertEquals(expected.toLowerCase(), underTest.getPlatformString(stack).toLowerCase());
     }
 
 }

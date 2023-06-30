@@ -52,13 +52,8 @@ public class InstanceGroupRequestToInstanceGroupConverter {
     @Inject
     private DefaultInstanceGroupProvider defaultInstanceGroupProvider;
 
-    public InstanceGroup convert(InstanceGroupRequest source,
-        NetworkRequest networkRequest,
-        String accountId,
-        Stack stack,
-        FreeIpaServerRequest ipaServerRequest,
-        DetailedEnvironmentResponse environment,
-        EnumMap<CloudArgsForIgConverter, String> cloudArgsForIgConverter) {
+    public InstanceGroup convert(InstanceGroupRequest source, NetworkRequest networkRequest, String accountId, Stack stack,
+            FreeIpaServerRequest ipaServerRequest, DetailedEnvironmentResponse environment, EnumMap<CloudArgsForIgConverter, String> cloudArgsForIgConverter) {
         InstanceGroup instanceGroup = new InstanceGroup();
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(stack.getCloudPlatform());
         instanceGroup.setTemplate(source.getInstanceTemplate() == null

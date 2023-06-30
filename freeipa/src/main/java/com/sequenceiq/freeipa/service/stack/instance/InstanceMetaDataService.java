@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.common.model.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
@@ -34,6 +35,7 @@ import com.sequenceiq.freeipa.entity.projection.StackAuthenticationView;
 import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
 
 @Service
@@ -52,8 +54,12 @@ public class InstanceMetaDataService {
     @Inject
     private FreeIpaService freeIpaService;
 
+    @Inject
+    private ImageService imageService;
+
     public void saveInstanceRequests(Stack stack, List<Group> groups) {
         Set<InstanceGroup> instanceGroups = stack.getInstanceGroups();
+        Json image = new Json(imageService.getCloudImageByStackId(stack.getId()));
         for (Group group : groups) {
             InstanceGroup instanceGroup = getInstanceGroup(instanceGroups, group.getName());
             List<InstanceMetaData> existingInGroup = instanceMetaDataRepository.findAllByInstanceGroupAndInstanceStatus(instanceGroup,
@@ -67,6 +73,7 @@ public class InstanceMetaDataService {
                     instanceMetaData.setInstanceStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED);
                     instanceMetaData.setInstanceGroup(instanceGroup);
                     instanceMetaData.setVariant(stack.getPlatformvariant());
+                    instanceMetaData.setImage(image);
                     instanceMetaDataRepository.save(instanceMetaData);
                 }
             }
@@ -121,6 +128,7 @@ public class InstanceMetaDataService {
 
     public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances, List<InstanceMetaData> instancesToRemove) {
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
+        Json image = new Json(imageService.getCloudImageByStackId(stack.getId()));
         DetailedEnvironmentResponse environment = measure(() -> cachedEnvironmentClientService.getByCrn(stack.getEnvironmentCrn()),
                 LOGGER, "Environment properties were queried under {} ms for environment {}", stack.getEnvironmentCrn());
         Map<String, List<CloudInstance>> instancesPerGroup = cloudInstances.stream()
@@ -138,6 +146,7 @@ public class InstanceMetaDataService {
                     instanceMetaData.setInstanceStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED);
                     instanceMetaData.setInstanceGroup(instanceGroup);
                     instanceMetaData.setDiscoveryFQDN(freeIpa.getHostname() + String.format("%d.", privateId) + freeIpa.getDomain());
+                    instanceMetaData.setImage(image);
                     if (instanceIdsToRemoveIterator.hasNext()) {
                         InstanceMetaData nextInstanceMetadata = instanceIdsToRemoveIterator.next();
                         instanceMetaData.setAvailabilityZone(nextInstanceMetadata.getAvailabilityZone());

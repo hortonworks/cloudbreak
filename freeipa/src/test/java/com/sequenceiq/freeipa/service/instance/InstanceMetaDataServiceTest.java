@@ -35,6 +35,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
@@ -73,6 +74,9 @@ public class InstanceMetaDataServiceTest {
 
     @Mock
     private CachedEnvironmentClientService cachedEnvironmentClientService;
+
+    @Mock
+    private ImageService imageService;
 
     private Set<InstanceMetaData> getInstancesFromStack() {
         Stack stack = initializeStackWithInstanceGroup();
@@ -161,6 +165,9 @@ public class InstanceMetaDataServiceTest {
         when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(subnetAzMap);
         Map<String, Integer> subnetUsage = Map.of();
         when(multiAzCalculatorService.calculateCurrentSubnetUsage(subnetAzMap, instanceGroup)).thenReturn(subnetUsage);
+        com.sequenceiq.cloudbreak.cloud.model.Image image =
+                new com.sequenceiq.cloudbreak.cloud.model.Image("a", Map.of(), "b", "v", "cat", "nmame", "id", Map.of());
+        when(imageService.getCloudImageByStackId(STACK_ID)).thenReturn(image);
 
         Stack actualStack = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances, Collections.emptyList());
 
@@ -171,6 +178,7 @@ public class InstanceMetaDataServiceTest {
                 .filter(im -> INSTANCE_PRIVATE_ID_3 == im.getPrivateId())
                 .findFirst().get();
         assertEquals("ipa3.dom", instanceMetaData.getDiscoveryFQDN());
+        assertEquals(image.getImageId(), instanceMetaData.getImage().getSilent(com.sequenceiq.cloudbreak.cloud.model.Image.class).getImageId());
         verify(multiAzCalculatorService, times(0)).filterSubnetByLeastUsedAz(actualInstanceGroup, subnetAzMap);
         verify(multiAzCalculatorService, times(0)).updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, subnetUsage, instanceMetaData, actualInstanceGroup);
     }

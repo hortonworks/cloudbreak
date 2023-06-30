@@ -95,7 +95,17 @@ class UpgradeValidationServiceTest {
         ImageInfoResponse selectedImage = new ImageInfoResponse();
         selectedImage.setId("111-222");
 
-        assertThrows(BadRequestException.class, () -> underTest.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage));
+        assertThrows(BadRequestException.class, () -> underTest.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage, Set.of()));
+    }
+
+    @Test
+    public void testCurrentAndSelectedImageAreTheSameThereAreInstancesOnOldImage() {
+        ImageInfoResponse currentImage = new ImageInfoResponse();
+        currentImage.setId("111-222");
+        ImageInfoResponse selectedImage = new ImageInfoResponse();
+        selectedImage.setId("111-222");
+
+        underTest.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage, Set.of("a"));
     }
 
     @Test
@@ -105,6 +115,6 @@ class UpgradeValidationServiceTest {
         ImageInfoResponse selectedImage = new ImageInfoResponse();
         selectedImage.setId("111-333");
 
-        underTest.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
+        underTest.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage, Set.of());
     }
 }
