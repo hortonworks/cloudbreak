@@ -592,4 +592,11 @@ public interface DistroXV1Endpoint {
     @Path("rotate_secret")
     @ApiOperation(value = "Rotate DistroX secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateDistroXSecrets")
     FlowIdentifier rotateSecrets(@Valid @NotNull DistroXSecretRotationRequest request);
+
+    @POST
+    @Path("/crn/{crn}/refresh_datalake_config")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Refresh Data lake configuration", produces = MediaType.APPLICATION_JSON, nickname = "refreshDatalakeConfig")
+    FlowIdentifier refreshDatalakeConfig(@ValidCrn(resource = {CrnResourceDescriptor.DATALAKE}) @PathParam("crn") String crn);
+
 }
