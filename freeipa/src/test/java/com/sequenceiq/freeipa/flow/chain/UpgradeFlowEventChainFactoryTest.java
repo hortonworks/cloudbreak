@@ -51,7 +51,7 @@ class UpgradeFlowEventChainFactoryTest {
     public void testFlowChainCreation() {
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
         UpgradeEvent event = new UpgradeEvent("selector", STACK_ID, Sets.newHashSet("repl1", "repl2"), "pgw", OPERATION_ID,
-                imageSettingsRequest, false, false, null, null);
+                imageSettingsRequest, false, false, null, null, null);
 
         FlowTriggerEventQueue eventQueue = underTest.createFlowTriggerEventQueue(event);
 
@@ -152,10 +152,204 @@ class UpgradeFlowEventChainFactoryTest {
     }
 
     @Test
+    public void testFlowChainCreationOnlyOneRepl() {
+        ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
+        UpgradeEvent event = new UpgradeEvent("selector", STACK_ID, Sets.newHashSet("repl1", "repl2"), "pgw", OPERATION_ID,
+                imageSettingsRequest, false, false, null, null, Sets.newHashSet("repl2"));
+
+        FlowTriggerEventQueue eventQueue = underTest.createFlowTriggerEventQueue(event);
+
+        assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
+        Queue<Selectable> queue = eventQueue.getQueue();
+        assertEquals(5, queue.size());
+
+        SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
+        assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
+        assertEquals(STACK_ID, saltUpdateTriggerEvent.getResourceId());
+        assertEquals(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), saltUpdateTriggerEvent.selector());
+        assertFalse(saltUpdateTriggerEvent.isFinalChain());
+
+        ImageChangeEvent imageChangeEvent = (ImageChangeEvent) queue.poll();
+        assertEquals(OPERATION_ID, imageChangeEvent.getOperationId());
+        assertEquals(STACK_ID, imageChangeEvent.getResourceId());
+        assertEquals(IMAGE_CHANGE_EVENT.event(), imageChangeEvent.selector());
+        assertEquals(imageSettingsRequest, imageChangeEvent.getRequest());
+
+        UpscaleEvent upscaleEvent1 = (UpscaleEvent) queue.poll();
+        assertEquals(OPERATION_ID, upscaleEvent1.getOperationId());
+        assertEquals(STACK_ID, upscaleEvent1.getResourceId());
+        assertTrue(upscaleEvent1.isChained());
+        assertFalse(upscaleEvent1.isFinalChain());
+        assertFalse(upscaleEvent1.getRepair());
+        assertEquals(UpscaleFlowEvent.UPSCALE_EVENT.event(), upscaleEvent1.selector());
+        assertEquals(4, upscaleEvent1.getInstanceCountByGroup());
+
+        DownscaleEvent downscaleEvent1 = (DownscaleEvent) queue.poll();
+        assertEquals(OPERATION_ID, downscaleEvent1.getOperationId());
+        assertEquals(STACK_ID, downscaleEvent1.getResourceId());
+        assertTrue(downscaleEvent1.isChained());
+        assertFalse(downscaleEvent1.isFinalChain());
+        assertFalse(downscaleEvent1.isRepair());
+        assertEquals(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), downscaleEvent1.selector());
+        assertEquals(3, downscaleEvent1.getInstanceCountByGroup());
+        assertEquals(1, downscaleEvent1.getInstanceIds().size());
+        String firstInstanceToDownscale = downscaleEvent1.getInstanceIds().get(0);
+        assertTrue(firstInstanceToDownscale.startsWith("repl2"));
+
+        SaltUpdateTriggerEvent saltUpdateTriggerEvent2 = (SaltUpdateTriggerEvent) queue.poll();
+        assertEquals(OPERATION_ID, saltUpdateTriggerEvent2.getOperationId());
+        assertEquals(STACK_ID, saltUpdateTriggerEvent2.getResourceId());
+        assertEquals(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), saltUpdateTriggerEvent2.selector());
+        assertTrue(saltUpdateTriggerEvent2.isChained());
+        assertTrue(saltUpdateTriggerEvent2.isFinalChain());
+    }
+
+    @Test
+    public void testFlowChainCreationOnlyPgw() {
+        ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
+        UpgradeEvent event = new UpgradeEvent("selector", STACK_ID, Sets.newHashSet("repl1", "repl2"), "pgw", OPERATION_ID,
+                imageSettingsRequest, false, false, null, null, Sets.newHashSet("pgw"));
+
+        FlowTriggerEventQueue eventQueue = underTest.createFlowTriggerEventQueue(event);
+
+        assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
+        Queue<Selectable> queue = eventQueue.getQueue();
+        assertEquals(6, queue.size());
+
+        SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
+        assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
+        assertEquals(STACK_ID, saltUpdateTriggerEvent.getResourceId());
+        assertEquals(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), saltUpdateTriggerEvent.selector());
+        assertFalse(saltUpdateTriggerEvent.isFinalChain());
+
+        ImageChangeEvent imageChangeEvent = (ImageChangeEvent) queue.poll();
+        assertEquals(OPERATION_ID, imageChangeEvent.getOperationId());
+        assertEquals(STACK_ID, imageChangeEvent.getResourceId());
+        assertEquals(IMAGE_CHANGE_EVENT.event(), imageChangeEvent.selector());
+        assertEquals(imageSettingsRequest, imageChangeEvent.getRequest());
+
+        UpscaleEvent upscaleEvent3 = (UpscaleEvent) queue.poll();
+        assertEquals(OPERATION_ID, upscaleEvent3.getOperationId());
+        assertEquals(STACK_ID, upscaleEvent3.getResourceId());
+        assertTrue(upscaleEvent3.isChained());
+        assertFalse(upscaleEvent3.isFinalChain());
+        assertFalse(upscaleEvent3.getRepair());
+        assertEquals(UpscaleFlowEvent.UPSCALE_EVENT.event(), upscaleEvent3.selector());
+        assertEquals(4, upscaleEvent3.getInstanceCountByGroup());
+
+        ChangePrimaryGatewayEvent changePrimaryGatewayEvent = (ChangePrimaryGatewayEvent) queue.poll();
+        assertEquals(OPERATION_ID, changePrimaryGatewayEvent.getOperationId());
+        assertEquals(STACK_ID, changePrimaryGatewayEvent.getResourceId());
+        assertFalse(changePrimaryGatewayEvent.getFinalChain());
+        assertEquals(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), changePrimaryGatewayEvent.selector());
+        assertEquals(3, changePrimaryGatewayEvent.getRepairInstanceIds().size());
+        assertTrue(List.of("repl1", "repl2", "pgw").containsAll(changePrimaryGatewayEvent.getRepairInstanceIds()));
+
+        DownscaleEvent downscaleEvent3 = (DownscaleEvent) queue.poll();
+        assertEquals(OPERATION_ID, downscaleEvent3.getOperationId());
+        assertEquals(STACK_ID, downscaleEvent3.getResourceId());
+        assertTrue(downscaleEvent3.isChained());
+        assertFalse(downscaleEvent3.isFinalChain());
+        assertFalse(downscaleEvent3.isRepair());
+        assertEquals(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), downscaleEvent3.selector());
+        assertEquals(3, downscaleEvent3.getInstanceCountByGroup());
+        assertEquals(1, downscaleEvent3.getInstanceIds().size());
+        assertEquals("pgw", downscaleEvent3.getInstanceIds().get(0));
+
+        SaltUpdateTriggerEvent saltUpdateTriggerEvent2 = (SaltUpdateTriggerEvent) queue.poll();
+        assertEquals(OPERATION_ID, saltUpdateTriggerEvent2.getOperationId());
+        assertEquals(STACK_ID, saltUpdateTriggerEvent2.getResourceId());
+        assertEquals(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), saltUpdateTriggerEvent2.selector());
+        assertTrue(saltUpdateTriggerEvent2.isChained());
+        assertTrue(saltUpdateTriggerEvent2.isFinalChain());
+    }
+
+    @Test
+    public void testFlowChainCreationWithOldInstances() {
+        ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
+        UpgradeEvent event = new UpgradeEvent("selector", STACK_ID, Sets.newHashSet("repl1", "repl2"), "pgw", OPERATION_ID,
+                imageSettingsRequest, false, false, null, null, Sets.newHashSet("repl2", "pgw"));
+
+        FlowTriggerEventQueue eventQueue = underTest.createFlowTriggerEventQueue(event);
+
+        assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
+        Queue<Selectable> queue = eventQueue.getQueue();
+        assertEquals(8, queue.size());
+
+        SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
+        assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
+        assertEquals(STACK_ID, saltUpdateTriggerEvent.getResourceId());
+        assertEquals(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), saltUpdateTriggerEvent.selector());
+        assertFalse(saltUpdateTriggerEvent.isFinalChain());
+
+        ImageChangeEvent imageChangeEvent = (ImageChangeEvent) queue.poll();
+        assertEquals(OPERATION_ID, imageChangeEvent.getOperationId());
+        assertEquals(STACK_ID, imageChangeEvent.getResourceId());
+        assertEquals(IMAGE_CHANGE_EVENT.event(), imageChangeEvent.selector());
+        assertEquals(imageSettingsRequest, imageChangeEvent.getRequest());
+
+        UpscaleEvent upscaleEvent1 = (UpscaleEvent) queue.poll();
+        assertEquals(OPERATION_ID, upscaleEvent1.getOperationId());
+        assertEquals(STACK_ID, upscaleEvent1.getResourceId());
+        assertTrue(upscaleEvent1.isChained());
+        assertFalse(upscaleEvent1.isFinalChain());
+        assertFalse(upscaleEvent1.getRepair());
+        assertEquals(UpscaleFlowEvent.UPSCALE_EVENT.event(), upscaleEvent1.selector());
+        assertEquals(4, upscaleEvent1.getInstanceCountByGroup());
+
+        DownscaleEvent downscaleEvent1 = (DownscaleEvent) queue.poll();
+        assertEquals(OPERATION_ID, downscaleEvent1.getOperationId());
+        assertEquals(STACK_ID, downscaleEvent1.getResourceId());
+        assertTrue(downscaleEvent1.isChained());
+        assertFalse(downscaleEvent1.isFinalChain());
+        assertFalse(downscaleEvent1.isRepair());
+        assertEquals(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), downscaleEvent1.selector());
+        assertEquals(3, downscaleEvent1.getInstanceCountByGroup());
+        assertEquals(1, downscaleEvent1.getInstanceIds().size());
+        String firstInstanceToDownscale = downscaleEvent1.getInstanceIds().get(0);
+        assertTrue(firstInstanceToDownscale.startsWith("repl2"));
+
+        UpscaleEvent upscaleEvent3 = (UpscaleEvent) queue.poll();
+        assertEquals(OPERATION_ID, upscaleEvent3.getOperationId());
+        assertEquals(STACK_ID, upscaleEvent3.getResourceId());
+        assertTrue(upscaleEvent3.isChained());
+        assertFalse(upscaleEvent3.isFinalChain());
+        assertFalse(upscaleEvent3.getRepair());
+        assertEquals(UpscaleFlowEvent.UPSCALE_EVENT.event(), upscaleEvent3.selector());
+        assertEquals(4, upscaleEvent3.getInstanceCountByGroup());
+
+        ChangePrimaryGatewayEvent changePrimaryGatewayEvent = (ChangePrimaryGatewayEvent) queue.poll();
+        assertEquals(OPERATION_ID, changePrimaryGatewayEvent.getOperationId());
+        assertEquals(STACK_ID, changePrimaryGatewayEvent.getResourceId());
+        assertFalse(changePrimaryGatewayEvent.getFinalChain());
+        assertEquals(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), changePrimaryGatewayEvent.selector());
+        assertEquals(3, changePrimaryGatewayEvent.getRepairInstanceIds().size());
+        assertTrue(List.of("repl1", "repl2", "pgw").containsAll(changePrimaryGatewayEvent.getRepairInstanceIds()));
+
+        DownscaleEvent downscaleEvent3 = (DownscaleEvent) queue.poll();
+        assertEquals(OPERATION_ID, downscaleEvent3.getOperationId());
+        assertEquals(STACK_ID, downscaleEvent3.getResourceId());
+        assertTrue(downscaleEvent3.isChained());
+        assertFalse(downscaleEvent3.isFinalChain());
+        assertFalse(downscaleEvent3.isRepair());
+        assertEquals(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), downscaleEvent3.selector());
+        assertEquals(3, downscaleEvent3.getInstanceCountByGroup());
+        assertEquals(1, downscaleEvent3.getInstanceIds().size());
+        assertEquals("pgw", downscaleEvent3.getInstanceIds().get(0));
+
+        SaltUpdateTriggerEvent saltUpdateTriggerEvent2 = (SaltUpdateTriggerEvent) queue.poll();
+        assertEquals(OPERATION_ID, saltUpdateTriggerEvent2.getOperationId());
+        assertEquals(STACK_ID, saltUpdateTriggerEvent2.getResourceId());
+        assertEquals(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), saltUpdateTriggerEvent2.selector());
+        assertTrue(saltUpdateTriggerEvent2.isChained());
+        assertTrue(saltUpdateTriggerEvent2.isFinalChain());
+    }
+
+    @Test
     public void testFlowChainCreationWithVerticalScale() {
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
         UpgradeEvent event = new UpgradeEvent("selector", STACK_ID, Sets.newHashSet("repl1", "repl2"), "pgw", OPERATION_ID,
-                imageSettingsRequest, false, false, null, new VerticalScaleRequest());
+                imageSettingsRequest, false, false, null, new VerticalScaleRequest(), null);
 
         FlowTriggerEventQueue eventQueue = underTest.createFlowTriggerEventQueue(event);
 

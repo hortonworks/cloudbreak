@@ -10,6 +10,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestrationNode;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceLifeCycle;
@@ -67,6 +69,10 @@ public class InstanceMetaData implements OrchestrationNode {
     private InstanceLifeCycle lifeCycle;
 
     private String variant;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json image;
 
     public String getPrivateIp() {
         return privateIp;
@@ -251,6 +257,14 @@ public class InstanceMetaData implements OrchestrationNode {
 
     public void setVariant(String variant) {
         this.variant = variant;
+    }
+
+    public Json getImage() {
+        return image;
+    }
+
+    public void setImage(Json image) {
+        this.image = image;
     }
 
     @Override

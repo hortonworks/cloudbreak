@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
@@ -219,17 +220,22 @@ public class RebootActions {
             }
 
             @Override
-            protected RebootContext createFlowContext(FlowParameters flowParameters, StateContext<RebootState,
-                    RebootEvent> stateContext, InstanceFailureEvent payload) {
+            protected RebootContext createFlowContext(FlowParameters flowParameters, StateContext<RebootState, RebootEvent> stateContext,
+                    InstanceFailureEvent payload) {
                 Long stackId = payload.getResourceId();
                 Stack stack = stackService.getStackById(stackId);
                 MDCBuilder.buildMdcContext(stack);
+                Flow flow = getFlow(flowParameters.getFlowId());
+                flow.setFlowFailed(payload.getException());
 
-                return new RebootContext(flowParameters, stack, payload.getInstanceIds().stream().map(instanceId -> {
-                    InstanceMetaData md = new InstanceMetaData();
-                    md.setInstanceId(instanceId);
-                    return md;
-                }).collect(Collectors.toList()), null, null);
+                List<InstanceMetaData> instanceMetaData = payload.getInstanceIds().stream()
+                        .map(instanceId -> {
+                            InstanceMetaData md = new InstanceMetaData();
+                            md.setInstanceId(instanceId);
+                            return md;
+                        })
+                        .collect(Collectors.toList());
+                return new RebootContext(flowParameters, stack, instanceMetaData, null, null);
             }
 
             @Override

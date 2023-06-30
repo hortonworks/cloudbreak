@@ -5,6 +5,7 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -61,9 +62,8 @@ public class Image {
         return userdata;
     }
 
+    @Deprecated
     public void setUserdata(Map<InstanceGroupType, String> userdata) {
-        // This is a deprecated field because of FedRAMP we moved this value into vault. Old clusters still
-        // using this value but the new clusters using stack.coreUserData and stack.gatewayUserData
         this.userdata = userdata;
     }
 
@@ -89,6 +89,31 @@ public class Image {
 
     public Map<String, String> getPackageVersions() {
         return packageVersions == null ? new HashMap<>() : packageVersions;
+    }
+
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            Image image = (Image) o;
+            return Objects.equals(imageName, image.imageName)
+                    && Objects.equals(userdata, image.userdata)
+                    && Objects.equals(os, image.os)
+                    && Objects.equals(osType, image.osType)
+                    && Objects.equals(imageCatalogUrl, image.imageCatalogUrl)
+                    && Objects.equals(imageId, image.imageId)
+                    && Objects.equals(imageCatalogName, image.imageCatalogName)
+                    && Objects.equals(packageVersions, image.packageVersions);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(imageName, userdata, os, osType, imageCatalogUrl, imageId, imageCatalogName, packageVersions);
     }
 
     @Override

@@ -20,9 +20,11 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
@@ -33,6 +35,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSetti
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.converter.image.ImageConverter;
 import com.sequenceiq.freeipa.converter.stack.CreateFreeIpaRequestToStackConverter;
 import com.sequenceiq.freeipa.converter.stack.StackToDescribeFreeIpaResponseConverter;
 import com.sequenceiq.freeipa.dto.Credential;
@@ -124,6 +127,9 @@ public class FreeIpaCreationService {
     @Inject
     private FreeIpaRecipeService freeIpaRecipeService;
 
+    @Inject
+    private ImageConverter imageConverter;
+
     @Value("${info.app.version:}")
     private String appVersion;
 
@@ -166,6 +172,8 @@ public class FreeIpaCreationService {
                 freeIpaRecipeService.sendCreationUsageReport(stack.getResourceCrn(), CollectionUtils.emptyIfNull(request.getRecipes()).size());
                 ImageSettingsRequest imageSettingsRequest = request.getImage();
                 ImageEntity image = imageService.create(savedStack, Objects.nonNull(imageSettingsRequest) ? imageSettingsRequest : new ImageSettingsRequest());
+                Image imageForIm = imageConverter.convert(image);
+                stack.getAllInstanceMetaDataList().forEach(im -> im.setImage(new Json(imageForIm)));
                 FreeIpa freeIpa = freeIpaService.create(savedStack, request.getFreeIpa());
                 return Triple.of(savedStack, image, freeIpa);
             });

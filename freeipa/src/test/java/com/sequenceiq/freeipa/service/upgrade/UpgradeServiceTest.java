@@ -7,12 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -22,8 +24,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -127,9 +131,63 @@ class UpgradeServiceTest {
         assertTrue(upgradeEvent.isNeedMigration());
         assertEquals(triggeredVariant, upgradeEvent.getTriggeredVariant());
         assertNull(upgradeEvent.getVerticalScaleRequest());
+        assertEquals(3, upgradeEvent.getInstancesOnOldImage().size());
+        assertTrue(upgradeEvent.getInstancesOnOldImage().containsAll(Set.of("pgw", "im2", "im3")));
 
         verify(validationService).validateStackForUpgrade(allInstances, stack);
-        verify(validationService).validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
+        verify(validationService).validateSelectedImageDifferentFromCurrent(eq(currentImage), eq(selectedImage), anySet());
+    }
+
+    @Test
+    public void testUpgradeTriggeredWithInstancesOnOldImage() {
+        FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
+        request.setImage(new ImageSettingsRequest());
+        request.setEnvironmentCrn(ENVIRONMENT_CRN);
+        String triggeredVariant = "triggeredVariant";
+
+        Stack stack = mock(Stack.class);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        Set<InstanceMetaData> allInstances = createValidImSet();
+        Image oldImage = new Image("name", Map.of(), "alma", "rocky", null, null, "111-222", Map.of());
+        Image newImage = new Image("name", Map.of(), "alma", "rocky", null, null, "333-444", Map.of());
+        allInstances.stream().filter(im -> "pgw".equalsIgnoreCase(im.getInstanceId())).forEach(im -> im.setImage(new Json(oldImage)));
+        allInstances.stream().filter(im -> !"pgw".equalsIgnoreCase(im.getInstanceId())).forEach(im -> im.setImage(new Json(newImage)));
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
+        ImageInfoResponse selectedImage = mockSelectedImage(request, stack);
+        when(imageService.fetchCurrentImage(stack)).thenReturn(selectedImage);
+        Operation operation = mockOperation(OperationState.RUNNING);
+        ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "flowId");
+        when(flowManager.notify(eq(FlowChainTriggers.UPGRADE_TRIGGER_EVENT), eventCaptor.capture())).thenReturn(flowIdentifier);
+        when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenReturn(createPgwIm());
+        when(instanceMetaDataService.getNonPrimaryGwInstances(allInstances)).thenReturn(createGwImSet());
+        when(awsMigrationUtil.calculateUpgradeVariant(stack, ACCOUNT_ID)).thenReturn(triggeredVariant);
+        when(awsMigrationUtil.isAwsVariantMigrationIsFeasible(stack, triggeredVariant)).thenReturn(true);
+        when(rootVolumeSizeProvider.getForPlatform(CloudPlatform.MOCK.name())).thenReturn(100);
+
+        FreeIpaUpgradeResponse response = underTest.upgradeFreeIpa(ACCOUNT_ID, request);
+
+        assertEquals(flowIdentifier, response.getFlowIdentifier());
+        assertEquals(operation.getOperationId(), response.getOperationId());
+        assertEquals(selectedImage, response.getOriginalImage());
+        assertEquals(selectedImage, response.getTargetImage());
+
+        UpgradeEvent upgradeEvent = (UpgradeEvent) eventCaptor.getValue();
+        assertEquals(request.getImage(), upgradeEvent.getImageSettingsRequest());
+        assertEquals(operation.getOperationId(), upgradeEvent.getOperationId());
+        assertEquals("pgw", upgradeEvent.getPrimareGwInstanceId());
+        assertEquals(2, upgradeEvent.getInstanceIds().size());
+        assertTrue(Set.of("im2", "im3").containsAll(upgradeEvent.getInstanceIds()));
+        assertFalse(upgradeEvent.isBackupSet());
+        assertTrue(upgradeEvent.isNeedMigration());
+        assertEquals(triggeredVariant, upgradeEvent.getTriggeredVariant());
+        assertNull(upgradeEvent.getVerticalScaleRequest());
+        assertEquals(1, upgradeEvent.getInstancesOnOldImage().size());
+        assertTrue(upgradeEvent.getInstancesOnOldImage().contains("pgw"));
+
+        verify(validationService).validateStackForUpgrade(allInstances, stack);
+        verify(validationService).validateSelectedImageDifferentFromCurrent(eq(selectedImage), eq(selectedImage), anySet());
     }
 
     @Test
@@ -184,7 +242,7 @@ class UpgradeServiceTest {
         assertNull(verticalScaleRequest.getTemplate().getInstanceType());
 
         verify(validationService).validateStackForUpgrade(allInstances, stack);
-        verify(validationService).validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
+        verify(validationService).validateSelectedImageDifferentFromCurrent(eq(currentImage), eq(selectedImage), anySet());
     }
 
     @Test
@@ -225,7 +283,7 @@ class UpgradeServiceTest {
         assertTrue(upgradeEvent.isBackupSet());
 
         verify(validationService).validateStackForUpgrade(allInstances, stack);
-        verify(validationService).validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
+        verify(validationService).validateSelectedImageDifferentFromCurrent(eq(currentImage), eq(selectedImage), anySet());
     }
 
     private Operation mockOperation(OperationState operationState) {
@@ -286,7 +344,7 @@ class UpgradeServiceTest {
         assertTrue(Set.of("im2", "im3").containsAll(upgradeEvent.getInstanceIds()));
 
         verify(validationService).validateStackForUpgrade(allInstances, stack);
-        verify(validationService).validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
+        verify(validationService).validateSelectedImageDifferentFromCurrent(eq(currentImage), eq(selectedImage), anySet());
     }
 
     @Test
@@ -327,7 +385,7 @@ class UpgradeServiceTest {
         assertThrows(BadRequestException.class, () -> underTest.upgradeFreeIpa(ACCOUNT_ID, request));
 
         verify(validationService).validateStackForUpgrade(allInstances, stack);
-        verify(validationService).validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
+        verify(validationService).validateSelectedImageDifferentFromCurrent(eq(currentImage), eq(selectedImage), anySet());
     }
 
     private InstanceMetaData createPgwIm() {

@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
@@ -76,7 +77,8 @@ public class UpgradeService {
         ImageInfoResponse currentImage = imageService.fetchCurrentImage(stack);
         ImageSettingsRequest imageSettingsRequest = assembleImageSettingsRequest(request, currentImage);
         ImageInfoResponse selectedImage = imageService.selectImage(stack, imageSettingsRequest);
-        validationService.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
+        HashSet<String> instancesOnOldImage = selectInstancesWithOldImage(allInstances, selectedImage);
+        validationService.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage, instancesOnOldImage);
         return triggerUpgrade(request, stack, allInstances, imageSettingsRequest, selectedImage, currentImage, accountId);
     }
 
@@ -116,12 +118,32 @@ public class UpgradeService {
                     verticalScaleRequest.setTemplate(templateRequest);
                     return verticalScaleRequest;
                 }).collect(Collectors.toList());
+        HashSet<String> instancesOnOldImage = selectInstancesWithOldImage(allInstances, selectedImage);
         UpgradeEvent upgradeEvent = new UpgradeEvent(FlowChainTriggers.UPGRADE_TRIGGER_EVENT, stack.getId(), nonPgwInstanceIds, pgwInstanceId,
                 operation.getOperationId(), imageSettingsRequest, Objects.nonNull(stack.getBackup()), needMigration, triggeredVariant,
-                verticalScaleRequests.isEmpty() ? null : verticalScaleRequests.get(0));
+                verticalScaleRequests.isEmpty() ? null : verticalScaleRequests.get(0), instancesOnOldImage);
         LOGGER.info("Trigger upgrade flow with event: {}", upgradeEvent);
         FlowIdentifier flowIdentifier = flowManager.notify(FlowChainTriggers.UPGRADE_TRIGGER_EVENT, upgradeEvent);
         return new FreeIpaUpgradeResponse(flowIdentifier, selectedImage, currentImage, operation.getOperationId());
+    }
+
+    @SuppressWarnings("IllegalType")
+    private HashSet<String> selectInstancesWithOldImage(Set<InstanceMetaData> allInstances, ImageInfoResponse imageInfoResponse) {
+        LOGGER.debug("Instances for image check: {} and selected image: {}", allInstances, imageInfoResponse);
+        HashSet<String> instancesWithOldImage = allInstances.stream().filter(im -> {
+                    if (im.getImage() != null) {
+                        Image image = im.getImage().getSilent(Image.class);
+                        return !(Objects.equals(image.getImageId(), imageInfoResponse.getId())
+                                && (Objects.equals(image.getImageCatalogName(), imageInfoResponse.getCatalog())
+                                || Objects.equals(image.getImageCatalogUrl(), imageInfoResponse.getCatalog())));
+                    } else {
+                        return true;
+                    }
+                })
+                .map(InstanceMetaData::getInstanceId)
+                .collect(Collectors.toCollection(HashSet::new));
+        LOGGER.info("Instances with outdated image or without image info: {}", instancesWithOldImage);
+        return instancesWithOldImage;
     }
 
     private Operation startUpgradeOperation(String accountId, FreeIpaUpgradeRequest request) {
@@ -153,7 +175,13 @@ public class UpgradeService {
         imageSettingsRequest.setCatalog(catalog);
         LOGGER.debug("Using ImageSettingsRequest to query for possible target images: {}", imageSettingsRequest);
         List<ImageInfoResponse> targetImages = imageService.findTargetImages(stack, imageSettingsRequest, currentImage);
-        LOGGER.debug("Found target images: {}", targetImages);
-        return targetImages;
+        if (targetImages.isEmpty()) {
+            Set<String> instancesWithOldImage = selectInstancesWithOldImage(stack.getNotDeletedInstanceMetaDataSet(), currentImage);
+            LOGGER.debug("Target image is empty, if there is any instance on old image, return with current image");
+            return instancesWithOldImage.isEmpty() ? List.of() : List.of(currentImage);
+        } else {
+            LOGGER.debug("Found target images: {}", targetImages);
+            return targetImages;
+        }
     }
 }

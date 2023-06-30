@@ -4,16 +4,23 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import javax.inject.Inject;
+
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
+import com.sequenceiq.freeipa.converter.image.ImageToImageSettingsResponseConverter;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 
 @Component
 public class InstanceMetaDataToInstanceMetaDataResponseConverter implements Converter<InstanceMetaData, InstanceMetaDataResponse> {
 
     private static final String NOT_AVAILABLE = "N/A";
+
+    @Inject
+    private ImageToImageSettingsResponseConverter imageConverter;
 
     @Override
     public InstanceMetaDataResponse convert(InstanceMetaData source) {
@@ -33,6 +40,10 @@ public class InstanceMetaDataToInstanceMetaDataResponseConverter implements Conv
         metaDataJson.setLifeCycle(source.getLifeCycle());
         metaDataJson.setAvailabilityZone(source.getAvailabilityZone());
         metaDataJson.setSubnetId(source.getSubnetId());
+        if (source.getImage() != null) {
+            Image image = source.getImage().getSilent(Image.class);
+            metaDataJson.setImage(imageConverter.convert(image));
+        }
         return metaDataJson;
     }
 

@@ -1,18 +1,33 @@
 package com.sequenceiq.freeipa.converter.instance;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Map;
+import java.util.Optional;
+
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceLifeCycle;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
+import com.sequenceiq.freeipa.converter.image.ImageToImageSettingsResponseConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 
+@ExtendWith(MockitoExtension.class)
 public class InstanceMetaDataToInstanceMetaDataResponseConverterTest {
 
     private static final String PRIVATE_IP = "10.1.2.3";
@@ -37,27 +52,30 @@ public class InstanceMetaDataToInstanceMetaDataResponseConverterTest {
 
     private static final InstanceLifeCycle LIFE_CYCLE = InstanceLifeCycle.NORMAL;
 
-    private InstanceMetaDataToInstanceMetaDataResponseConverter underTest;
+    private static final Image IMAGE = new Image("imgname", Map.of(), "alma", "rocky", "url", "name", "imgid", Map.of());
 
-    @BeforeEach
-    void setUp() {
-        underTest = new InstanceMetaDataToInstanceMetaDataResponseConverter();
-    }
+    @Mock
+    private ImageToImageSettingsResponseConverter imageConverter;
+
+    @InjectMocks
+    private InstanceMetaDataToInstanceMetaDataResponseConverter underTest;
 
     static Object[][] convertTestDataProvider() {
         return new Object[][]{
                 // testCaseName publicIp privateIp publicIpExpected
-                {"publicIp=null, privateIp=null", null, null, null},
-                {"publicIp=PUBLIC_IP, privateIp=null", PUBLIC_IP, null, PUBLIC_IP},
-                {"publicIp=null, privateIp=PRIVATE_IP", null, PRIVATE_IP, "N/A"},
-                {"publicIp=PUBLIC_IP, privateIp=PRIVATE_IP", PUBLIC_IP, PRIVATE_IP, PUBLIC_IP},
+                {"publicIp=null, privateIp=null", null, null, null, null},
+                {"publicIp=PUBLIC_IP, privateIp=null", PUBLIC_IP, null, PUBLIC_IP, IMAGE},
+                {"publicIp=null, privateIp=PRIVATE_IP", null, PRIVATE_IP, "N/A", null},
+                {"publicIp=PUBLIC_IP, privateIp=PRIVATE_IP", PUBLIC_IP, PRIVATE_IP, PUBLIC_IP, IMAGE},
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("convertTestDataProvider")
-    void convertTest(String testCaseName, String publicIp, String privateIp, String publicIpExpected) {
-        InstanceMetaData instanceMetaData = createInstanceMetaData(publicIp, privateIp);
+    void convertTest(String testCaseName, String publicIp, String privateIp, String publicIpExpected, Image image) {
+        InstanceMetaData instanceMetaData = createInstanceMetaData(publicIp, privateIp, image);
+        ImageSettingsResponse imageSettingsResponse = new ImageSettingsResponse();
+        Optional.ofNullable(image).ifPresent(img -> when(imageConverter.convert(img)).thenReturn(imageSettingsResponse));
 
         InstanceMetaDataResponse result = underTest.convert(instanceMetaData);
 
@@ -73,9 +91,15 @@ public class InstanceMetaDataToInstanceMetaDataResponseConverterTest {
         assertThat(result.getInstanceStatus()).isEqualTo(INSTANCE_STATUS);
         assertThat(result.getInstanceType()).isEqualTo(INSTANCE_METADATA_TYPE);
         assertThat(result.getLifeCycle()).isEqualTo(LIFE_CYCLE);
+        if (image == null) {
+            assertNull(result.getImage());
+            verifyNoInteractions(imageConverter);
+        } else {
+            assertEquals(imageSettingsResponse, result.getImage());
+        }
     }
 
-    private InstanceMetaData createInstanceMetaData(String publicIp, String privateIp) {
+    private InstanceMetaData createInstanceMetaData(String publicIp, String privateIp, Image image) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName(INSTANCE_GROUP);
 
@@ -91,6 +115,7 @@ public class InstanceMetaDataToInstanceMetaDataResponseConverterTest {
         result.setInstanceStatus(INSTANCE_STATUS);
         result.setInstanceMetadataType(INSTANCE_METADATA_TYPE);
         result.setLifeCycle(LIFE_CYCLE);
+        Optional.ofNullable(image).ifPresent(img -> result.setImage(new Json(img)));
         return result;
     }
 

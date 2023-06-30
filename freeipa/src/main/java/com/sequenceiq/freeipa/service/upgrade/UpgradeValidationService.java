@@ -5,6 +5,7 @@ import static java.util.function.Predicate.not;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -49,8 +50,8 @@ public class UpgradeValidationService {
         throw new BadRequestException("Some of the instances is not available. Please fix them first! Instances: " + notAvailableInstances);
     }
 
-    public void validateSelectedImageDifferentFromCurrent(ImageInfoResponse currentImage, ImageInfoResponse selectedImage) {
-        if (currentImage.getId().equals(selectedImage.getId())) {
+    public void validateSelectedImageDifferentFromCurrent(ImageInfoResponse currentImage, ImageInfoResponse selectedImage, Set<String> instancesOnOldImage) {
+        if (currentImage.getId().equals(selectedImage.getId()) && CollectionUtils.isEmpty(instancesOnOldImage)) {
             LOGGER.warn("Selected {} and current {} image are the same", selectedImage, currentImage);
             throw new BadRequestException("Selected and current image are the same with id: " + currentImage.getId());
         }

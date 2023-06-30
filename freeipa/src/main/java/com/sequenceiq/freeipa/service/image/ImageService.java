@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.service.image;
 
-import static com.sequenceiq.cloudbreak.common.gov.CommonGovService.GOV;
-
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,8 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -28,13 +24,13 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSetti
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Images;
+import com.sequenceiq.freeipa.converter.image.ImageConverter;
 import com.sequenceiq.freeipa.converter.image.ImageToImageEntityConverter;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.image.change.action.ImageRevisionReaderService;
 import com.sequenceiq.freeipa.repository.ImageRepository;
-import com.sequenceiq.freeipa.service.image.userdata.UserDataService;
 
 @Service
 public class ImageService {
@@ -65,7 +61,10 @@ public class ImageService {
     private String defaultOs;
 
     @Inject
-    private UserDataService userDataService;
+    private ImageConverter imageEntityToImageConverter;
+
+    @Inject
+    private FreeipaPlatformStringTransformer platformStringTransformer;
 
     public ImageEntity create(Stack stack, ImageSettingsRequest imageRequest) {
         Pair<ImageWrapper, String> imageWrapperAndNamePair = fetchImageWrapperAndName(stack, imageRequest);
@@ -94,7 +93,7 @@ public class ImageService {
 
     public Pair<ImageWrapper, String> fetchImageWrapperAndName(Stack stack, ImageSettingsRequest imageRequest) {
         String region = stack.getRegion();
-        String platformString = getPlatformString(stack);
+        String platformString = platformStringTransformer.getPlatformString(stack);
         ImageWrapper imageWrapper = getImage(imageRequest, region, platformString);
         String imageName = determineImageName(platformString, region, imageWrapper.getImage());
         LOGGER.info("Selected VM image for CloudPlatform '{}' and region '{}' is: {} from: {} image catalog with '{}' catalog name",
@@ -102,22 +101,9 @@ public class ImageService {
         return Pair.of(imageWrapper, imageName);
     }
 
-    @VisibleForTesting
-    String getPlatformString(Stack stack) {
-        String platformVariant = stack.getPlatformvariant();
-        String platform = stack.getCloudPlatform().toLowerCase();
-        if (Strings.isNullOrEmpty(platformVariant)) {
-            return platform;
-        } else if (platformVariant.toLowerCase().endsWith(GOV)) {
-            return platform.concat(GOV).toLowerCase();
-        } else {
-            return platform;
-        }
-    }
-
     public List<Pair<ImageWrapper, String>> fetchImagesWrapperAndName(Stack stack, ImageSettingsRequest imageRequest) {
         String region = stack.getRegion();
-        String platformString = getPlatformString(stack);
+        String platformString = platformStringTransformer.getPlatformString(stack);
         List<ImageWrapper> imageWrappers = getImages(imageRequest, region, platformString);
         LOGGER.debug("Images found: {}", imageWrappers);
         return imageWrappers.stream().map(imgw -> Pair.of(imgw, determineImageName(platformString, region, imgw.getImage()))).collect(Collectors.toList());
@@ -264,7 +250,7 @@ public class ImageService {
     public Image getImageForStack(Stack stack) {
         final ImageEntity imageEntity = getByStack(stack);
         final ImageSettingsRequest imageSettings = imageEntityToImageSettingsRequest(imageEntity);
-        final ImageWrapper imageWrapper = getImage(imageSettings, stack.getRegion(), getPlatformString(stack));
+        final ImageWrapper imageWrapper = getImage(imageSettings, stack.getRegion(), platformStringTransformer.getPlatformString(stack));
 
         return imageWrapper.getImage();
     }
@@ -295,5 +281,10 @@ public class ImageService {
                 .minusDays(Optional.ofNullable(thresholdInDays).orElse(0));
         final long thresholdTimestamp = Timestamp.valueOf(thresholdDate).getTime();
         return imageRepository.findImagesOfAliveStacks(thresholdTimestamp);
+    }
+
+    public com.sequenceiq.cloudbreak.cloud.model.Image getCloudImageByStackId(Long stackId) {
+        ImageEntity imageEntity = getByStackId(stackId);
+        return imageEntityToImageConverter.convert(imageEntity);
     }
 }
