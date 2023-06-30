@@ -129,6 +129,7 @@ restart_nginx_after_ssl_reconfig_with_user_facing:
   service.running:
     - name: nginx
     - enable: True
+    - reload: True
     - watch:
       - file: /etc/nginx/sites-enabled/ssl.conf
       - file: /etc/nginx/sites-enabled/ssl-user-facing.conf
