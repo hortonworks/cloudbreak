@@ -25,7 +25,7 @@ import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterC
 import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameters;
-import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2ManagementClient;
+import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2RetryingClient;
 
 @ExtendWith(MockitoExtension.class)
 class DefaultCcmV2JumpgateParameterSupplierTest {
@@ -46,7 +46,7 @@ class DefaultCcmV2JumpgateParameterSupplierTest {
     private DefaultCcmV2JumpgateParameterSupplier underTest;
 
     @Mock
-    private CcmV2ManagementClient ccmV2Client;
+    private CcmV2RetryingClient ccmV2Client;
 
     @ParameterizedTest(name = "singleWayTls = {0}, useHmac = {1}")
     @MethodSource("parameterScenarios")

@@ -12,7 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2ManagementClient;
+import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2RetryingClient;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultCcmV2AgentTerminationListenerTest {
@@ -21,7 +21,7 @@ public class DefaultCcmV2AgentTerminationListenerTest {
     private DefaultCcmV2AgentTerminationListener underTest;
 
     @Mock
-    private CcmV2ManagementClient ccmV2Client;
+    private CcmV2RetryingClient ccmV2Client;
 
     @Test
     public void testDeregisterInvertingProxyAgent() {

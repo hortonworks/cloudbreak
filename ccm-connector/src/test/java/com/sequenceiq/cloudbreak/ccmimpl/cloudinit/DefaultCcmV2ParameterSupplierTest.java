@@ -25,7 +25,7 @@ import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterC
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2Parameters;
 import com.sequenceiq.cloudbreak.ccm.exception.CcmV2Exception;
-import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2ManagementClient;
+import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2RetryingClient;
 
 @ExtendWith(MockitoExtension.class)
 class DefaultCcmV2ParameterSupplierTest {
@@ -48,7 +48,7 @@ class DefaultCcmV2ParameterSupplierTest {
     private DefaultCcmV2ParameterSupplier underTest;
 
     @Mock
-    private CcmV2ManagementClient ccmV2Client;
+    private CcmV2RetryingClient ccmV2Client;
 
     @Test
     void testGetCcmV2Parameter() {
