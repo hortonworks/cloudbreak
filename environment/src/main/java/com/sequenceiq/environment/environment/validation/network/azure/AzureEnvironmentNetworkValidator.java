@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.validation.network.azure;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -10,6 +11,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -32,6 +34,9 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
     private final CloudNetworkService cloudNetworkService;
 
     private final AzurePrivateEndpointValidator azurePrivateEndpointValidator;
+
+    @Value("${cb.multiaz.azure.availabilityZones}")
+    private Set<String> azureAvailabilityZones;
 
     public AzureEnvironmentNetworkValidator(CloudNetworkService cloudNetworkService,
             AzurePrivateEndpointValidator azurePrivateEndpointValidator) {
@@ -78,6 +83,7 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
             checkResourceGroupNameWhenExistingNetwork(resultBuilder, azureParams);
             checkNetworkIdWhenExistingNetwork(resultBuilder, azureParams);
             checkNetworkIdIsSpecifiedWhenSubnetIdsArePresent(resultBuilder, azureParams, networkDto);
+            validateAvailabilityZones(resultBuilder, azureParams);
         } else if (StringUtils.isEmpty(networkDto.getNetworkCidr())) {
             resultBuilder.error(missingParamsErrorMsg(AZURE));
         }
@@ -148,6 +154,20 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
                     azureParams.getNetworkId(), azureParams.getResourceGroupName());
             LOGGER.info(message);
             resultBuilder.error(message);
+        }
+    }
+
+    private void validateAvailabilityZones(ValidationResultBuilder resultBuilder, AzureParams azureParams) {
+        if (CollectionUtils.isNotEmpty(azureParams.getAvailabilityZones())) {
+            Set<String> invalidAvailabilityZones = azureParams.getAvailabilityZones().stream().filter(az -> !azureAvailabilityZones.contains(az))
+                    .collect(Collectors.toSet());
+            if (CollectionUtils.isNotEmpty(invalidAvailabilityZones)) {
+                String message = String.format("Availability zones %s are not valid. Valid availability zones are %s.",
+                        invalidAvailabilityZones.stream().sorted().collect(Collectors.joining(",")),
+                        azureAvailabilityZones.stream().sorted().collect(Collectors.joining(",")));
+                LOGGER.error(message);
+                resultBuilder.error(message);
+            }
         }
     }
 
