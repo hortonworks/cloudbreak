@@ -3,7 +3,7 @@
 This is a standalone [Spring Boot](https://spring.io/projects/spring-boot) application. We can run [Cloudbreak](https://docs.cloudera.com/HDPDocuments/Cloudbreak/Cloudbreak-2.9.0/introduction/content/cb_what-is-cloudbreak.html) specific [TestNG](https://testng.org/doc/) test suites in parallel. 
 
 ## Build
-1. Build the [Integration Test](https://github.com/hortonworks/cloudbreak/tree/master/integration-test) project with:
+1. Build the [Integration Test](https://github.infra.cloudera.com/cloudbreak/cloudbreak/tree/master/integration-test) project with:
  ```./gradlew :integration-test:clean build -x test```
  *Note:*
  ```-x test``` is optional here
@@ -12,7 +12,7 @@ This is a standalone [Spring Boot](https://spring.io/projects/spring-boot) appli
 ## Quickstart setup of Integration tests with required parameters
 1. You need a config file under `~/.dp/config`
  *Note:*
- This can be achieved by installing the [DP CLI](https://github.com/hortonworks/cb-cli) on your machine then [configure](https://github.com/hortonworks/cb-cli#configure) it.
+ This can be achieved by installing the [DP CLI](https://github.infra.cloudera.com/cloudbreak/cloudbreak-cli) on your machine then [configure](https://github.infra.cloudera.com/cloudbreak/cb-cli#configure) it.
  ```dp configure --server localhost --workspace your@email --profile localhost```
 2. For API testing you should have a `localhost` profile in your DP Config file:
  ```
@@ -32,7 +32,7 @@ To launch the Integration Test application you should execute the `com.sequencei
 ### IntegrationTestApp Run Configuration﻿
 1. Create your own and separate test folder on your local machine, for example `~/integration-test`
 2. Create your own `aplication.yml` file there
-    - You should create a local copy of [application.yml](https://github.com/hortonworks/cloudbreak/blob/master/integration-test/src/main/resources/application.yml)
+    - You should create a local copy of [application.yml](https://github.infra.cloudera.com/cloudbreak/cloudbreak/blob/master/integration-test/src/main/resources/application.yml)
     - You should update your application YAML file with all your secrets that are needed for your test(s)
     - `cloudProvider` should be updated correctly based on your tested provider (AWS, AZURE, YARN)
     - Server URLs/addresses should be updated correctly based on your tested environment (for integration testing: http://localhost)
@@ -63,7 +63,7 @@ To launch the Integration Test application you should execute the `com.sequencei
  `cloudbreak.integration-test.main`
 
 ## Run E2E Tests on your local machine
-You should have a running [Cloudbreak](https://github.com/hortonworks/cloudbreak) before start testing, and after a successful build, you should have the `integration-test.jar` file at `integration-test/build/libs/`.
+You should have a running [Cloudbreak](https://github.infra.cloudera.com/cloudbreak/cloudbreak) before start testing, and after a successful build, you should have the `integration-test.jar` file at `integration-test/build/libs/`.
 
 > **Note:**
 > For Azure E2E tests a new resource group at Azure subscription is createing before test run. The new Azure resource group name should be set at `integrationtest.azure.resourcegroup.name` application parameter or environment variable.
@@ -71,7 +71,7 @@ You should have a running [Cloudbreak](https://github.com/hortonworks/cloudbreak
 ### Run a selected E2E test in Terminal
 1. Create your own and separate test folder on your local machine, for example `~/integration-test`
 2. Create your own `aplication.yml` file there
-    - You should create a local copy of [application.yml](https://github.com/hortonworks/cloudbreak/blob/master/integration-test/src/main/resources/application.yml)
+    - You should create a local copy of [application.yml](https://github.infra.cloudera.com/cloudbreak/cloudbreak/blob/master/integration-test/src/main/resources/application.yml)
     - You should update your application YAML file with all your secrets that are needed for your test(s)
     - `cloudProvider` should be updated correctly based on your tested provider (AWS, AZURE, YARN)
     - Server URLs/addresses should be updated correctly based on your tested environment (for integration testing: http://localhost)
@@ -80,19 +80,19 @@ You should have a running [Cloudbreak](https://github.com/hortonworks/cloudbreak
 4. Run a selected E2E test:
  `java -jar cloudbreak-integration-test.jar --integrationtest.command=suiteurls --integrationtest.suiteFiles=file:/Users/[YOUR USER FOLDER]/[YOUR CLOUDBREAK FOLDER]/integration-test/src/main/resources/testsuites/e2e/aws-sdx-upgrade-tests.yaml`
  *Note:*
- You should have a previously created YAML [test suite](https://github.com/hortonworks/cloudbreak/tree/master/integration-test/src/main/resources/testsuites) file for your test, in this case `aws-sdx-upgrade-tests.yaml`
+ You should have a previously created YAML [test suite](https://github.infra.cloudera.com/cloudbreak/cloudbreak/tree/master/integration-test/src/main/resources/testsuites) file for your test, in this case `aws-sdx-upgrade-tests.yaml`
 
 ## Code organization
 
 ### Test cases
-Test cases are located under folder `https://github.com/hortonworks/cloudbreak/tree/master/integration-test/src/main/java/com/sequenceiq/it/cloudbreak/testcase`:
+Test cases are located under folder `https://github.infra.cloudera.com/cloudbreak/cloudbreak/tree/master/integration-test/src/main/java/com/sequenceiq/it/cloudbreak/testcase`:
 - Integration Tests: `mock`
 - End To End Tests: `e2e`
 - Smoke Tests: `smoke`
 - Real UMS Tests: `authorization` ([UMS host and cache timeout values](#locally-running-authorization-tests) needs to be changed before running these tests)
 
 *Note:*
-[E2E tests](https://github.com/hortonworks/cloudbreak/tree/master/integration-test/src/main/java/com/sequenceiq/it/cloudbreak/testcase/e2e) are organized into domain-specific packages (distrox, sdx etc.).
+[E2E tests](https://github.infra.cloudera.com/cloudbreak/cloudbreak/tree/master/integration-test/src/main/java/com/sequenceiq/it/cloudbreak/testcase/e2e) are organized into domain-specific packages (distrox, sdx etc.).
 
 ### Cloud agnostic tests
 Tests should be written in a cloud-vendor agnostic manner. Cloud-specific code should be hidden behind following interfaces:

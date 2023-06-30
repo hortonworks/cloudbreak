@@ -126,10 +126,9 @@ public class EndpointConfig extends ResourceConfig {
         swaggerConfig.setVersion(cbVersion);
         swaggerConfig.setSchemes(new String[]{"http", "https"});
         swaggerConfig.setBasePath(CoreApi.API_ROOT_CONTEXT);
-        swaggerConfig.setLicenseUrl("https://github.com/hortonworks/cloudbreak/blob/master/LICENSE");
+        swaggerConfig.setLicenseUrl("https://github.infra.cloudera.com/cloudbreak/cloudbreak/blob/master/LICENSE");
         swaggerConfig.setResourcePackage("com.sequenceiq.cloudbreak.api,com.sequenceiq.distrox.api,com.sequenceiq.flow.api,com.sequenceiq.authorization");
         swaggerConfig.setScan(true);
-        swaggerConfig.setContact("https://hortonworks.com/contact-sales/");
         swaggerConfig.setPrettyPrint(true);
         SwaggerConfigLocator.getInstance().putConfig(SwaggerContextService.CONFIG_ID_DEFAULT, swaggerConfig);
     }

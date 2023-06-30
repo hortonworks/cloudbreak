@@ -1,10 +1,5 @@
 # Cloudbreak
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/566493a63aaaf0c61bd4/maintainability)](https://codeclimate.com/github/hortonworks/cloudbreak/maintainability)
-[![Build Automated](https://img.shields.io/docker/automated/hortonworks/cloudbreak.svg)](https://hub.docker.com/r/hortonworks/cloudbreak/)
-[![Build Pulls](https://img.shields.io/docker/pulls/hortonworks/cloudbreak.svg)](https://hub.docker.com/r/hortonworks/cloudbreak/)
-[![Licence](https://img.shields.io/github/license/hortonworks/cloudbreak.svg)](https://github.com/hortonworks/cloudbreak/blob/master/LICENSE)
-
 - [Local Development Setup](#local-development-setup)
     * [Cloudbreak Deployer](#cloudbreak-deployer)
         + [Cloudbreak Service Ports](#cloudbreak-service-ports)
@@ -52,9 +47,9 @@ You'll need Docker. For Mac, use [Docker Desktop for Mac](https://docs.docker.co
 
 ## Cloudbreak Deployer
 
-The simplest way to set up the working environment to be able to start Cloudbreak on your local machine is to use the [Cloudbreak Deployer](https://github.com/hortonworks/cloudbreak-deployer).
+The simplest way to set up the working environment to be able to start Cloudbreak on your local machine is to use the [Cloudbreak Deployer](https://github.infra.cloudera.com/cloudbreak/cloudbreak-deployer).
 
-First you need to create a sandbox directory which will store the necessary configuration files and dependencies of [Cloudbreak Deployer](https://github.com/hortonworks/cloudbreak-deployer). This directory must be created outside the cloned Cloudbreak git repository:
+First you need to create a sandbox directory which will store the necessary configuration files and dependencies of [Cloudbreak Deployer](https://github.infra.cloudera.com/cloudbreak/cloudbreak-deployer). This directory must be created outside the cloned Cloudbreak git repository:
 ```
 mkdir cbd-local
 cd cbd-local
@@ -62,7 +57,7 @@ cd cbd-local
 
 The next step is to download the latest cloudbreak-deployer onto your machine:
 ```
-curl -s https://raw.githubusercontent.com/hortonworks/cloudbreak-deployer/master/install-dev | sh && cbd --version
+curl -s https://github.infra.cloudera.com/raw/cloudbreak/cloudbreak-deployer/master/install-dev | sh && cbd --version
 ```
 
 Add the following to the file named `Profile` under the `cbd-local` directory you have just created. Please note, when a `cbd` command is executed you should go to the deployment's directory where your `Profile` file is found (`cbd-local` in our example). The `CB_SCHEMA_SCRIPTS_LOCATION` environment variable configures the location of SQL scripts that are in the `core/src/main/resources/schema` directory in the cloned Cloudbreak git repository.
@@ -192,7 +187,7 @@ You can track any other application's logs to check the results by executing the
 cbd logs periscope # or any other service name supported in CB_LOCAL_DEV_LIST
 ```
 
-If everything went well then Cloudbreak will be available on https://localhost. For more details and config parameters please check the documentation of [Cloudbreak Deployer](https://github.com/hortonworks/cloudbreak-deployer).
+If everything went well then Cloudbreak will be available on https://localhost. For more details and config parameters please check the documentation of [Cloudbreak Deployer](https://github.infra.cloudera.com/cloudbreak/cloudbreak-deployer).
 
 The deployer has generated a `certs` directory under `cbd-local` directory which will be needed later on to set up IDEA properly.
 
@@ -224,7 +219,7 @@ This will update the .git/config directory to apply configs from the .gitconfig 
 
 ### Check Out the Cloudbreak Repository
 
-Go to https://github.com/hortonworks/cloudbreak, either clone or download the repository, use SSH which is described here: https://help.github.com/articles/connecting-to-github-with-ssh/
+Go to https://github.infra.cloudera.com/cloudbreak/cloudbreak, either clone or download the repository, use SSH which is described here: https://help.github.com/articles/connecting-to-github-with-ssh/
 
 **Important**: update `~/.gradle/gradle.properties` file with the two following properties in order to download artifacts from the internal repository. You can find the details on our [Wiki page](https://cloudera.atlassian.net/wiki/spaces/ENG/pages/793674498/CM+SDK+Credentials+-+Gradle+properties).
 - `defaultCmPrivateRepoUser`
@@ -292,7 +287,7 @@ And, select the new scheme `Default (1)`.
 Otherwise, IntelliJ will constantly reorder your imports differently from CB conventions.
 
 ### PKIX SSL Error - Import Mock-Infrastructure's certificate to your Java trust store before launch FreeIPA or Cloudbreak(core) locally
-[We needed to eliminate](https://github.com/hortonworks/cloudbreak/pull/13278/files#diff-f1e661d9b4ab2d595976d4ed701e8f29907fa1b4a6fac64214dd2549eabd6e40L62-L83) the vulnerable `TrustEveryThingTrustStore` implementation from our code base
+[We needed to eliminate](https://github.infra.cloudera.com/cloudbreak/cloudbreak/pull/13278/files#diff-f1e661d9b4ab2d595976d4ed701e8f29907fa1b4a6fac64214dd2549eabd6e40L62-L83) the vulnerable `TrustEveryThingTrustStore` implementation from our code base
 and this indicates that the certificate of the Mock-Infrastructure service needs to be added to the Java trust store **if you run FreeIPA and/or Cloudbreak(core) services locally and would like to create deployments with `mock` provider or simply run the integration tests locally.**
 Because the image catalog could not be downloaded from the mentioned service due to SSL handshake issues, for example:
 ```
@@ -305,7 +300,7 @@ Example import commands, **do not forget to update the path of the certificate t
 sudo keytool -import -alias mock-infra -noprompt -file "/home/${USER}/prj/cloudbreak/mock-infrastructure/src/main/resources/keystore/infrastructure-mock.cer" -keystore         /etc/ssl/certs/java/cacerts -storepass changeit
 
 # How to import on MacOS
-keytool -import -alias mock-infra -noprompt -file ~/prj/hortonworks/cloudbreak/mock-infrastructure/src/main/resources/keystore/infrastructure-mock.cer -keystore /opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home/lib/security/cacerts -storepass changeit
+keytool -import -alias mock-infra -noprompt -file ~/prj/cloudbreak/cloudbreak/mock-infrastructure/src/main/resources/keystore/infrastructure-mock.cer -keystore /opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home/lib/security/cacerts -storepass changeit
 ```
 
 If you still get the same error then specify the `Trust Store` for `Cloudbreak(core)` and/or `FreeIpa`:
@@ -807,13 +802,13 @@ At the time of this writing, we don't enforce any formal requirements to the pul
 
 We were talking about what we should avoid, but let's see a few good examples, which helps the reviewer to understand the purpose of that commit:
 
-https://github.com/hortonworks/cloudbreak/commit/56fdde5c6f48f48a378b505a170b3e3d83225c85
+https://github.infra.cloudera.com/cloudbreak/cloudbreak/commit/56fdde5c6f48f48a378b505a170b3e3d83225c85
 
-https://github.com/hortonworks/cloudbreak/commit/d09b0074c45af209ccf34855dcf4c1f34c3ccebb
+https://github.infra.cloudera.com/cloudbreak/cloudbreak/commit/d09b0074c45af209ccf34855dcf4c1f34c3ccebb
 
-https://github.com/hortonworks/cloudbreak/commit/c93b91fd6a08de7516ab763098f2dcd3abc149f0
+https://github.infra.cloudera.com/cloudbreak/cloudbreak/commit/c93b91fd6a08de7516ab763098f2dcd3abc149f0
 
-https://github.com/hortonworks/cloudbreak/commit/f50f5c8f38941db958eac27c663ae00ecba7b0f5
+https://github.infra.cloudera.com/cloudbreak/cloudbreak/commit/f50f5c8f38941db958eac27c663ae00ecba7b0f5
 
 
 ## Coding Guidelines
@@ -830,4 +825,4 @@ In addition, please do not merge branches together if you can solve your problem
 
 
 ## Additional Info
-> * [Cloudbreak Service Provider Interface (SPI)](https://github.com/hortonworks/cloudbreak/blob/master/docs/spi.md)
+> * [Cloudbreak Service Provider Interface (SPI)](https://github.infra.cloudera.com/cloudbreak/cloudbreak/blob/master/docs/spi.md)
