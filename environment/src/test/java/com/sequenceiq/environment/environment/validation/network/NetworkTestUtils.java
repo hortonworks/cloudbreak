@@ -103,6 +103,7 @@ public class NetworkTestUtils {
         }
         return builder
                 .withNoPublicIp(noPublicIp)
+                .withAvailabilityZones(Set.of("1", "2"))
                 .build();
     }
 

@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -53,6 +54,7 @@ class AzureEnvironmentNetworkValidatorTest {
         MockitoAnnotations.initMocks(this);
         underTest = new AzureEnvironmentNetworkValidator(cloudNetworkService,
                 azurePrivateEndpointValidator);
+        ReflectionTestUtils.setField(underTest, "azureAvailabilityZones", Set.of("1", "2", "3"));
     }
 
     @Test
@@ -308,6 +310,32 @@ class AzureEnvironmentNetworkValidatorTest {
 
         NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of(
                 "If networkId is specified, then resourceGroupName must be specified too."));
+    }
+
+    @Test
+    void testValidateDuringRequestWhenOneAvailabilityZonesIsInvalid() {
+        AzureParams azureParams = NetworkTestUtils.getAzureParams(true, false, false);
+        azureParams.setAvailabilityZones(Set.of("1", "Invalid1"));
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, null, "0.0.0.0/0", null);
+
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateDuringRequest(networkDto, resultBuilder);
+
+        NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of(
+                "Availability zones Invalid1 are not valid. Valid availability zones are 1,2,3."));
+    }
+
+    @Test
+    void testValidateDuringRequestWhenMultipleAvailabilityZonesAreInvalid() {
+        AzureParams azureParams = NetworkTestUtils.getAzureParams(true, false, false);
+        azureParams.setAvailabilityZones(Set.of("1", "Invalid1", "Invalid2"));
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, null, "0.0.0.0/0", null);
+
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateDuringRequest(networkDto, resultBuilder);
+
+        NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of(
+                "Availability zones Invalid1,Invalid2 are not valid. Valid availability zones are 1,2,3."));
     }
 
     private Map<String, CloudSubnet> getCloudSubnets(boolean privateEndpointNetworkPoliciesEnabled) {
