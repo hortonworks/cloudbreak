@@ -20,11 +20,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
 import com.sequenceiq.cloudbreak.rotation.context.CMServiceConfigRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
@@ -56,11 +58,15 @@ public class CMServiceDBPasswordRotationContextProviderTest {
     @Mock
     private AbstractRdsConfigProvider rdsConfigProvider;
 
+    @Mock
+    private ExitCriteriaProvider exitCriteriaProvider;
+
     @InjectMocks
     private CMServiceDBPasswordRotationContextProvider underTest;
 
     @Test
     public void testGetContext() throws IllegalAccessException {
+        when(exitCriteriaProvider.get(any())).thenReturn(ClusterDeletionBasedExitCriteriaModel.nonCancellableModel());
         FieldUtils.writeDeclaredField(underTest, "rdsRoleConfigProviders", List.of(rdsRoleConfigProvider), true);
         FieldUtils.writeDeclaredField(underTest, "rdsConfigProviders", List.of(rdsConfigProvider), true);
         Cluster cluster = mockCluster();

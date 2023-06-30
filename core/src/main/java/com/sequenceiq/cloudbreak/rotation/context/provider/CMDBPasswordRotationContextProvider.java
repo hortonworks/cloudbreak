@@ -21,7 +21,6 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -29,6 +28,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
+import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
 import com.sequenceiq.cloudbreak.rotation.context.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
@@ -71,6 +71,9 @@ public class CMDBPasswordRotationContextProvider implements RotationContextProvi
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
 
+    @Inject
+    private ExitCriteriaProvider exitCriteriaProvider;
+
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resource) {
         Map<SecretRotationStep, RotationContext> result = Maps.newHashMap();
@@ -93,7 +96,7 @@ public class CMDBPasswordRotationContextProvider implements RotationContextProvi
                 .withResourceCrn(stack.getResourceCrn())
                 .withGatewayConfig(primaryGatewayConfig)
                 .withTargets(Set.of(primaryGatewayConfig.getHostname()))
-                .withExitCriteriaModel(ClusterDeletionBasedExitCriteriaModel.nonCancellableModel())
+                .withExitCriteriaModel(exitCriteriaProvider.get(stack))
                 .withMaxRetry(SALT_STATE_MAX_RETRY)
                 .withMaxRetryOnError(SALT_STATE_MAX_RETRY)
                 .withStates(List.of("cloudera.manager.server-stop", "postgresql.rotate.init",

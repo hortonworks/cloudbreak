@@ -21,9 +21,9 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.publickey.PublicKeyDescribeRequest;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
 import com.sequenceiq.cloudbreak.rotation.context.SaltRunOrchestratorStateRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.SaltRunOrchestratorStateRotationContext.SaltRunOrchestratorStateRotationContextBuilder;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -51,6 +51,9 @@ public class UserKeyPairSaltStateRunRotationContextGenerator {
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
+    @Inject
+    private ExitCriteriaProvider exitCriteriaProvider;
+
     public SaltRunOrchestratorStateRotationContext generate(boolean changedKeyPair, String resourceCrn, StackDto stack,
             DetailedEnvironmentResponse environment) {
         SaltRunOrchestratorStateRotationContextBuilder saltRunOrchestratorStateRotationContextBuilder = new SaltRunOrchestratorStateRotationContextBuilder();
@@ -62,7 +65,7 @@ public class UserKeyPairSaltStateRunRotationContextGenerator {
             Pair<String, String> publicKeys = getPublicKeys(environment, stack, changedKeyPair);
             saltRunOrchestratorStateRotationContextBuilder.withGatewayConfig(primaryGatewayConfig)
                     .withTargets(stack.getRunningInstanceMetaDataSet().stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toSet()))
-                    .withExitCriteriaModel(ClusterDeletionBasedExitCriteriaModel.nonCancellableModel())
+                    .withExitCriteriaModel(exitCriteriaProvider.get(stack))
                     .withMaxRetry(MAX_RETRY)
                     .withMaxRetryOnError(MAX_RETRY)
                     .withStates(List.of(REPLACE_SSH_PUBLICKEY_STATE))
