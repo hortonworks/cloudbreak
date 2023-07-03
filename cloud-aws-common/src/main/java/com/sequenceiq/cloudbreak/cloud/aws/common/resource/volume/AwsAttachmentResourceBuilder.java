@@ -136,7 +136,7 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Override
     public CloudResource update(AwsContext context, CloudResource cloudResource, CloudInstance instance,
-            AuthenticatedContext auth, CloudStack cloudStack) throws Exception {
+            AuthenticatedContext auth, CloudStack cloudStack, Optional<String> targetGroupName) throws Exception {
         return null;
     }
 

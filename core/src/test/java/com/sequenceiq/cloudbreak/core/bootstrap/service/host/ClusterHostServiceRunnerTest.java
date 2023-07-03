@@ -849,6 +849,123 @@ class ClusterHostServiceRunnerTest {
         when(stackToTemplatePreparationObjectConverter.convert(any())).thenReturn(templatePreparationObject);
     }
 
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testEDLRangerToplogy() throws IOException, CloudbreakOrchestratorFailedException {
+        setupMocksForRunClusterServices();
+        Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
+                node("gateway1"), node("master1"));
+        when(stackUtil.collectNodes(any())).thenReturn(nodes);
+        when(exposedServiceCollector.getAllServiceNames()).thenReturn(Set.of("RANGER"));
+        Map<String, List<String>> locations = new HashMap<>();
+        locations.put("RANGER", List.of("master1", "master2"));
+        when(componentLocator.getComponentLocation(any(), any())).thenReturn(locations);
+        StackView stackViewMock = mock(StackView.class);
+        when(stackViewMock.getId()).thenReturn(STACK_ID);
+        ReflectionTestUtils.setField(stack, "stack", stackViewMock);
+        InstanceGroupView instanceGroupView = mock(InstanceGroupView.class);
+        InstanceMetadataView instanceMetadataView = mock(InstanceMetadataView.class);
+        when(instanceMetadataView.getInstanceMetadataType()).thenReturn(InstanceMetadataType.GATEWAY_PRIMARY);
+        when(instanceGroupView.getGroupName()).thenReturn("GATEWAY");
+        Map<String, InstanceGroupDto> instanceGroups = new HashMap<>();
+        InstanceGroupDto instanceGroupDto = new InstanceGroupDto(instanceGroupView, List.of(instanceMetadataView));
+        instanceGroups.put("GATEWAY", instanceGroupDto);
+        String edlBP = FileReaderUtils.readFileFromClasspath("cdp-sdx-enterprise.bp");
+        Blueprint bp = new Blueprint();
+        bp.setBlueprintText(edlBP);
+        ReflectionTestUtils.setField(stack, "instanceGroups", instanceGroups);
+        ReflectionTestUtils.setField(stack, "blueprint", bp);
+        underTest.redeployGatewayPillarOnly(stack);
+        ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfigCaptor.capture());
+        Set<Node> allNodes = allNodesCaptor.getValue();
+        assertEquals(5, allNodes.size());
+        SaltConfig saltConfig = saltConfigCaptor.getValue();
+        SaltPillarProperties gatewayPillarProperties = saltConfig.getServicePillarConfig().get("gateway");
+        Map<String, Object> props = (HashMap<String, Object>) gatewayPillarProperties.getProperties().get("gateway");
+        Map<String, List<String>> location = (HashMap<String, List<String>>) props.get("location");
+        List<String> ranger = location.get("RANGER");
+        assertTrue(ranger.contains("master1"));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testMDRangerToplogy() throws IOException, CloudbreakOrchestratorFailedException {
+        setupMocksForRunClusterServices();
+        Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
+                node("gateway1"), node("master1"));
+        when(stackUtil.collectNodes(any())).thenReturn(nodes);
+        when(exposedServiceCollector.getAllServiceNames()).thenReturn(Set.of("RANGER"));
+        Map<String, List<String>> locations = new HashMap<>();
+        locations.put("RANGER", List.of("master1", "master2"));
+        when(componentLocator.getComponentLocation(any(), any())).thenReturn(locations);
+        StackView stackViewMock = mock(StackView.class);
+        when(stackViewMock.getId()).thenReturn(STACK_ID);
+        ReflectionTestUtils.setField(stack, "stack", stackViewMock);
+        InstanceGroupView instanceGroupView = mock(InstanceGroupView.class);
+        InstanceMetadataView instanceMetadataView = mock(InstanceMetadataView.class);
+        when(instanceMetadataView.getInstanceMetadataType()).thenReturn(InstanceMetadataType.GATEWAY_PRIMARY);
+        when(instanceGroupView.getGroupName()).thenReturn("GATEWAY");
+        Map<String, InstanceGroupDto> instanceGroups = new HashMap<>();
+        InstanceGroupDto instanceGroupDto = new InstanceGroupDto(instanceGroupView, List.of(instanceMetadataView));
+        instanceGroups.put("GATEWAY", instanceGroupDto);
+        String mediumDutyBP = FileReaderUtils.readFileFromClasspath("cdp-sdx-medium-ha.bp");
+        Blueprint bp = new Blueprint();
+        bp.setBlueprintText(mediumDutyBP);
+        ReflectionTestUtils.setField(stack, "instanceGroups", instanceGroups);
+        ReflectionTestUtils.setField(stack, "blueprint", bp);
+        underTest.redeployGatewayPillarOnly(stack);
+        ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfigCaptor.capture());
+        Set<Node> allNodes = allNodesCaptor.getValue();
+        assertEquals(5, allNodes.size());
+        SaltConfig saltConfig = saltConfigCaptor.getValue();
+        SaltPillarProperties gatewayPillarProperties = saltConfig.getServicePillarConfig().get("gateway");
+        Map<String, Object> props = (HashMap<String, Object>) gatewayPillarProperties.getProperties().get("gateway");
+        Map<String, List<String>> location = (HashMap<String, List<String>>) props.get("location");
+        List<String> ranger = location.get("RANGER");
+        assertTrue(ranger.contains("master1"));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testLDRangerToplogy() throws IOException, CloudbreakOrchestratorFailedException {
+        setupMocksForRunClusterServices();
+        Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
+                node("gateway1"), node("master1"));
+        when(stackUtil.collectNodes(any())).thenReturn(nodes);
+        when(exposedServiceCollector.getAllServiceNames()).thenReturn(Set.of("RANGER"));
+        Map<String, List<String>> locations = new HashMap<>();
+        locations.put("RANGER", List.of("master1", "master2"));
+        when(componentLocator.getComponentLocation(any(), any())).thenReturn(locations);
+        StackView stackViewMock = mock(StackView.class);
+        when(stackViewMock.getId()).thenReturn(STACK_ID);
+        ReflectionTestUtils.setField(stack, "stack", stackViewMock);
+        InstanceGroupView instanceGroupView = mock(InstanceGroupView.class);
+        InstanceMetadataView instanceMetadataView = mock(InstanceMetadataView.class);
+        when(instanceMetadataView.getInstanceMetadataType()).thenReturn(InstanceMetadataType.GATEWAY_PRIMARY);
+        when(instanceGroupView.getGroupName()).thenReturn("GATEWAY");
+        Map<String, InstanceGroupDto> instanceGroups = new HashMap<>();
+        InstanceGroupDto instanceGroupDto = new InstanceGroupDto(instanceGroupView, List.of(instanceMetadataView));
+        instanceGroups.put("GATEWAY", instanceGroupDto);
+        String lightDutyBP = FileReaderUtils.readFileFromClasspath("cdp-sdx.bp");
+        Blueprint bp = new Blueprint();
+        bp.setBlueprintText(lightDutyBP);
+        ReflectionTestUtils.setField(stack, "instanceGroups", instanceGroups);
+        ReflectionTestUtils.setField(stack, "blueprint", bp);
+        underTest.redeployGatewayPillarOnly(stack);
+        ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfigCaptor.capture());
+        Set<Node> allNodes = allNodesCaptor.getValue();
+        assertEquals(5, allNodes.size());
+        SaltConfig saltConfig = saltConfigCaptor.getValue();
+        SaltPillarProperties gatewayPillarProperties = saltConfig.getServicePillarConfig().get("gateway");
+        Map<String, Object> props = (HashMap<String, Object>) gatewayPillarProperties.getProperties().get("gateway");
+        Map<String, List<String>> location = (HashMap<String, List<String>>) props.get("location");
+        List<String> ranger = location.get("RANGER");
+        assertTrue(ranger.contains("master1"));
+    }
+
     private void createInstanceGroup(Template template, List<InstanceGroupDto> instanceGroups, String fqdn1, String fqdn2,
             String privateIp1, String privateIp2) {
         InstanceGroup instanceGroup = new InstanceGroup();

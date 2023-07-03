@@ -123,9 +123,10 @@ public class ComputeResourceService {
         return flatList(futureResults.get(FutureResult.SUCCESS));
     }
 
-    public List<CloudResourceStatus> update(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack stack, List<CloudResource> cloudResource) {
+    public List<CloudResourceStatus> update(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack stack,
+        List<CloudResource> cloudResource, Optional<String> group) {
         LOGGER.info("Update compute resources.");
-        return new ResourceBuilder(ctx, auth).updateResources(ctx, auth, cloudResource, stack);
+        return new ResourceBuilder(ctx, auth).updateResources(ctx, auth, cloudResource, stack, group);
     }
 
     public List<CloudVmInstanceStatus> stopInstances(ResourceBuilderContext context, AuthenticatedContext auth, List<CloudInstance> cloudInstances) {
@@ -330,7 +331,7 @@ public class ComputeResourceService {
         }
 
         public List<CloudResourceStatus> updateResources(ResourceBuilderContext ctx, AuthenticatedContext auth,
-                List<CloudResource> computeResources, CloudStack cloudStack) {
+                List<CloudResource> computeResources, CloudStack cloudStack, Optional<String> group) {
             List<CloudResourceStatus> results = new ArrayList<>();
             Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
             Variant variant = auth.getCloudContext().getVariant();
@@ -345,7 +346,7 @@ public class ComputeResourceService {
                             .findFirst();
                     if (instance.isPresent()) {
                         ResourceUpdateCallablePayload resourceUpdateCallablePayload
-                                = new ResourceUpdateCallablePayload(cloudResource, instance.get(), ctx, auth, cloudStack, builder);
+                                = new ResourceUpdateCallablePayload(cloudResource, instance.get(), ctx, auth, cloudStack, builder, group);
                         ResourceUpdateCallable updateCallable = resourceActionFactory.buildUpdateCallable(resourceUpdateCallablePayload);
                         Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(updateCallable);
                         futures.add(future);
