@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -107,7 +108,7 @@ public class AzureVerticalScaleServiceTest {
                 .thenReturn("group");
         when(azureVirtualMachineService.getVirtualMachinesByName(any(), any(), any())).thenReturn(new HashMap<>());
 
-        List<CloudResourceStatus> actual = underTest.verticalScale(ac, stack, resources, azureStackView, client);
+        List<CloudResourceStatus> actual = underTest.verticalScale(ac, stack, resources, azureStackView, client, Optional.empty());
 
         assertEquals(0, actual.size());
     }
@@ -127,7 +128,7 @@ public class AzureVerticalScaleServiceTest {
         when(azureUtils.getInstanceList(any(CloudStack.class)))
                 .thenThrow(new Retry.ActionFailedException("VMs not started in time.", new ApiErrorException("Error", null, cloudError)));
         CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class, () ->
-                underTest.verticalScale(ac, stack, resources, azureStackView, client)
+                underTest.verticalScale(ac, stack, resources, azureStackView, client, Optional.empty())
         );
 
         assertThat(cloudConnectorException.getMessage())

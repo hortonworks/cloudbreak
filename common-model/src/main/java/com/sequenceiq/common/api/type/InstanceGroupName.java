@@ -7,12 +7,12 @@ public enum InstanceGroupName {
     GATEWAY("gateway"),
     AUXILIARY("auxiliary"),
     CORE("core"),
-    SOLRHG("solrhg"),
-    STORAGEHG("storagehg"),
-    KAFKAHG("kafkahg"),
-    RAZHG("razhg"),
-    ATLASHG("atlashg"),
-    HMSHG("hmshg");
+    SOLR_SCALE_OUT("solr_scale_out"),
+    STORAGE_SCALE_OUT("storage_scale_out"),
+    KAFKA_SCALE_OUT("kafka_scale_out"),
+    RAZ_SCALE_OUT("raz_scale_out"),
+    ATLAS_SCALE_OUT("atlas_scale_out"),
+    HMS_SCALE_OUT("hms_scale_out");
 
     private final String name;
 

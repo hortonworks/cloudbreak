@@ -12,6 +12,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,7 +65,8 @@ class AwsUpdateServiceTest {
                 .withParameters(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
                 .build();
 
-        List<CloudResourceStatus> statuses = underTest.update(ac, stack, Collections.singletonList(cloudResource), UpdateType.IMAGE_UPDATE);
+        List<CloudResourceStatus> statuses = underTest.update(ac, stack, Collections.singletonList(cloudResource),
+                UpdateType.IMAGE_UPDATE, Optional.empty());
 
         verify(awsImageUpdateService, times(1)).updateImage(ac, stack, cloudResource);
         assertEquals(1, statuses.size());
@@ -83,7 +85,8 @@ class AwsUpdateServiceTest {
                 .withType(ResourceType.AWS_LAUNCHCONFIGURATION)
                 .build();
 
-        List<CloudResourceStatus> statuses = underTest.update(ac, stack, List.of(cloudResource, launch), UpdateType.IMAGE_UPDATE);
+        List<CloudResourceStatus> statuses = underTest.update(ac, stack, List.of(cloudResource, launch),
+                UpdateType.IMAGE_UPDATE, Optional.empty());
 
         verify(awsImageUpdateService, times(0)).updateImage(ac, stack, cloudResource);
         assertEquals(0, statuses.size());
@@ -102,7 +105,8 @@ class AwsUpdateServiceTest {
                 .withParameters(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
                 .build();
 
-        List<CloudResourceStatus> statuses = underTest.update(ac, stack, List.of(cloudResource, cf), UpdateType.IMAGE_UPDATE);
+        List<CloudResourceStatus> statuses = underTest.update(ac, stack, List.of(cloudResource, cf),
+                UpdateType.IMAGE_UPDATE, Optional.empty());
 
         verify(awsImageUpdateService, times(0)).updateImage(ac, stack, cloudResource);
         assertEquals(1, statuses.size());
@@ -157,7 +161,7 @@ class AwsUpdateServiceTest {
         when(stack.getTemplate()).thenReturn("AWS::EC2::LaunchTemplate");
 
 
-        underTest.update(ac, stack, Collections.singletonList(cloudResource), UpdateType.VERTICAL_SCALE);
+        underTest.update(ac, stack, Collections.singletonList(cloudResource), UpdateType.VERTICAL_SCALE, Optional.of("gwGroup"));
 
         Map<LaunchTemplateField, String> updatableFields = Map.of(
                 LaunchTemplateField.INSTANCE_TYPE,
@@ -165,6 +169,30 @@ class AwsUpdateServiceTest {
                 LaunchTemplateField.ROOT_DISK,
                 "100");
         verify(awsLaunchTemplateUpdateService, times(1)).updateLaunchTemplate(eq(updatableFields), any(), eq("cf"), eq(gatewayGroup), eq(stack));
+    }
+
+    @Test
+    void verticalScaleLaunchTemplateWhenGroupNotPresentedShouldNotCallModificationService() {
+        CloudResource cloudResource = CloudResource.builder()
+                .withName("cf")
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .withParameters(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
+                .build();
+        Group gatewayGroup = mock(Group.class);
+        when(gatewayGroup.getName()).thenReturn("gwGroup");
+        when(stack.getGroups()).thenReturn(List.of(gatewayGroup));
+        when(stack.getTemplate()).thenReturn("AWS::EC2::LaunchTemplate");
+
+
+        underTest.update(ac, stack, Collections.singletonList(cloudResource), UpdateType.VERTICAL_SCALE, Optional.of("gwGroup1"));
+
+        Map<LaunchTemplateField, String> updatableFields = Map.of(
+                LaunchTemplateField.INSTANCE_TYPE,
+                "m42.xxxl",
+                LaunchTemplateField.ROOT_DISK,
+                "100");
+        verify(awsLaunchTemplateUpdateService, times(0)).updateLaunchTemplate(eq(updatableFields), any(), eq("cf"), eq(gatewayGroup), eq(stack));
+        verify(launchConfigurationUpdateService, times(0)).updateLaunchConfigurations(any(), any(), any(), any());
     }
 
     @Test
@@ -186,7 +214,7 @@ class AwsUpdateServiceTest {
         when(stack.getTemplate()).thenReturn("AWS::EC2::LaunchConfiguration");
 
 
-        underTest.update(ac, stack, Collections.singletonList(cloudResource), UpdateType.VERTICAL_SCALE);
+        underTest.update(ac, stack, Collections.singletonList(cloudResource), UpdateType.VERTICAL_SCALE, Optional.of("gwGroup"));
 
         Map<LaunchTemplateField, String> updatableFields = Map.of(
                 LaunchTemplateField.INSTANCE_TYPE,

@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -220,12 +221,13 @@ public class StackUpscaleService {
     }
 
     public List<CloudResourceStatus> verticalScale(AuthenticatedContext ac, CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
-        CloudConnector connector) throws Exception {
+        CloudConnector connector, String group) throws Exception {
         CloudStack cloudStack = request.getCloudStack();
         try {
-            return connector.resources().update(ac, cloudStack, request.getResourceList(), UpdateType.VERTICAL_SCALE);
+            return connector.resources().update(ac, cloudStack, request.getResourceList(), UpdateType.VERTICAL_SCALE,
+                    Optional.ofNullable(group));
         } catch (Exception e) {
-            return handleExceptionAndRetryUpdate(request, connector, ac, cloudStack, e, UpdateType.VERTICAL_SCALE);
+            return handleExceptionAndRetryUpdate(request, connector, ac, cloudStack, e, UpdateType.VERTICAL_SCALE, group);
         }
     }
 
@@ -242,10 +244,11 @@ public class StackUpscaleService {
     }
 
     private List<CloudResourceStatus> handleExceptionAndRetryUpdate(CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
-        CloudConnector connector, AuthenticatedContext ac, CloudStack cloudStack, Exception e, UpdateType type) throws Exception {
+        CloudConnector connector, AuthenticatedContext ac, CloudStack cloudStack, Exception e,
+        UpdateType type, String group) throws Exception {
         flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 e.getMessage());
-        return connector.resources().update(ac, cloudStack, request.getResourceList(), type);
+        return connector.resources().update(ac, cloudStack, request.getResourceList(), type, Optional.ofNullable(group));
     }
 
     private int getRemovableNodeCount(AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, QuotaExceededException quotaExceededException,
