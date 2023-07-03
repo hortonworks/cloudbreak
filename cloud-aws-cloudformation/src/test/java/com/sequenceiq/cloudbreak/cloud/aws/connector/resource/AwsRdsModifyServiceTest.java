@@ -139,10 +139,11 @@ public class AwsRdsModifyServiceTest {
         ArgumentCaptor<ModifyDbInstanceRequest> modifyDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(ModifyDbInstanceRequest.class);
         when(amazonRDS.modifyDBInstance(modifyDBInstanceRequestArgumentCaptor.capture())).thenReturn(ModifyDbInstanceResponse.builder().build());
         when(provider.getDbInstanceModifyWaiter()).thenReturn(rdsWaiter);
+        when(provider.getDbMasterPasswordStartWaiter()).thenReturn(rdsWaiter);
 
         victim.updateMasterUserPassword(authenticatedContext, dbStack, NEW_PASSWORD);
 
         assertEquals(DB_INSTANCE_IDENTIFIER, modifyDBInstanceRequestArgumentCaptor.getValue().dbInstanceIdentifier());
-        verify(rdsWaiter, times(1)).run(any());
+        verify(rdsWaiter, times(2)).run(any());
     }
 }
