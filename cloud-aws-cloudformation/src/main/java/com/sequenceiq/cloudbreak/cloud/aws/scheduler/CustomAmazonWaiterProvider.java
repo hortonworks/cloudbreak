@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.AutoscalingActivit
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.AutoscalingInstancesInServiceAcceptor;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.DbInstanceStopFailureAcceptor;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.DbInstanceStopSuccessAcceptor;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.DescribeDbInstanceForMasterPasswordChangeSuccessAcceptor;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.DescribeDbInstanceForModifyFailureAcceptor;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.DescribeDbInstanceForModifySuccessAcceptor;
 
@@ -67,6 +68,17 @@ public class CustomAmazonWaiterProvider {
         List<WaiterAcceptor<? super DescribeDbInstancesResponse>> acceptors = new ArrayList<>();
         acceptors.add(new DescribeDbInstanceForModifyFailureAcceptor());
         acceptors.add(new DescribeDbInstanceForModifySuccessAcceptor());
+        acceptors.addAll(WaitersRuntime.DEFAULT_ACCEPTORS);
+        return Waiter.builder(DescribeDbInstancesResponse.class)
+                .acceptors(acceptors)
+                .overrideConfiguration(createWaiterOverrideConfiguration(MAX_ATTEMPTS))
+                .build();
+    }
+
+    public Waiter<DescribeDbInstancesResponse> getDbMasterPasswordStartWaiter() {
+        List<WaiterAcceptor<? super DescribeDbInstancesResponse>> acceptors = new ArrayList<>();
+        acceptors.add(new DescribeDbInstanceForModifyFailureAcceptor());
+        acceptors.add(new DescribeDbInstanceForMasterPasswordChangeSuccessAcceptor());
         acceptors.addAll(WaitersRuntime.DEFAULT_ACCEPTORS);
         return Waiter.builder(DescribeDbInstancesResponse.class)
                 .acceptors(acceptors)

@@ -62,12 +62,20 @@ public class AwsRdsModifyService {
         LOGGER.info("Modify master user password for database: {}", dbInstanceIdentifier);
         try {
             rdsClient.modifyDBInstance(modifyDBInstanceRequest);
+            // master password change starts asynchronously, so we have to wait for the 'resetting-master-credentials' status first
+            waitUntilMasterPasswordResetStarts(dbInstanceIdentifier, rdsClient, "Failed to start master user password change");
             waitUntilModifyFinishes(dbInstanceIdentifier, rdsClient, "Failed to change master user password");
             LOGGER.info("Master user password modified for database: {}", dbInstanceIdentifier);
         } catch (RuntimeException e) {
             LOGGER.warn("Master user password modification failed for database: {}, reason: {}", dbInstanceIdentifier, e.getMessage());
             throw new CloudConnectorException(e.getMessage(), e);
         }
+    }
+
+    private void waitUntilMasterPasswordResetStarts(String dbInstanceIdentifier, AmazonRdsClient rdsClient, String exceptionMessage) {
+        Waiter<DescribeDbInstancesResponse> rdsWaiter = customAmazonWaiterProvider.getDbMasterPasswordStartWaiter();
+        DescribeDbInstancesRequest describeDBInstancesRequest = DescribeDbInstancesRequest.builder().dbInstanceIdentifier(dbInstanceIdentifier).build();
+        run(() -> rdsClient.describeDBInstances(describeDBInstancesRequest), rdsWaiter, exceptionMessage);
     }
 
     private void waitUntilModifyFinishes(String dbInstanceIdentifier, AmazonRdsClient rdsClient, String exceptionMessage) {
