@@ -47,7 +47,7 @@ public class MultiAzValidatorTest {
                 instanceGroup(Set.of("subnet-123")),
                 instanceGroup(Set.of("subnet-123"))
         );
-        underTest.validateMultiAzForStack(variant, instanceGroups, builder);
+        underTest.validateMultiAzForStack(1L, variant, instanceGroups, builder);
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
     }
 
@@ -70,7 +70,7 @@ public class MultiAzValidatorTest {
                 instanceGroup(Set.of("subnet-123", "subnet-145")),
                 instanceGroup(Set.of("subnet-123"))
         );
-        underTest.validateMultiAzForStack(variant, instanceGroups, builder);
+        underTest.validateMultiAzForStack(1L, variant, instanceGroups, builder);
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
     }
 
@@ -81,7 +81,7 @@ public class MultiAzValidatorTest {
                 instanceGroup(Set.of("subnet-123")),
                 instanceGroup(Set.of("subnet-123"))
         );
-        underTest.validateMultiAzForStack(variant, instanceGroups, builder);
+        underTest.validateMultiAzForStack(1L, variant, instanceGroups, builder);
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
     }
 
@@ -92,7 +92,7 @@ public class MultiAzValidatorTest {
                 instanceGroup(Set.of("subnet-123", "subnet-145")),
                 instanceGroup(Set.of("subnet-123"))
         );
-        underTest.validateMultiAzForStack(variant, instanceGroups, builder);
+        underTest.validateMultiAzForStack(1L, variant, instanceGroups, builder);
         Mockito.verify(builder, Mockito.times(1)).error(anyString());
     }
 

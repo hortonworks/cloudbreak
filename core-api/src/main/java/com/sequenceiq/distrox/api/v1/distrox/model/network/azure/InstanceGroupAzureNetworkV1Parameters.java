@@ -24,12 +24,23 @@ public class InstanceGroupAzureNetworkV1Parameters extends MappableBase implemen
     @ApiModelProperty
     private List<String> subnetIds = new ArrayList<>();
 
+    @ApiModelProperty
+    private List<String> availabilityZones = new ArrayList<>();
+
     public List<String> getSubnetIds() {
         return subnetIds;
     }
 
     public void setSubnetIds(List<String> subnetIds) {
         this.subnetIds = subnetIds;
+    }
+
+    public List<String> getAvailabilityZones() {
+        return availabilityZones;
+    }
+
+    public void setAvailabilityZones(List<String> availabilityZones) {
+        this.availabilityZones = availabilityZones;
     }
 
     @Override
@@ -42,12 +53,14 @@ public class InstanceGroupAzureNetworkV1Parameters extends MappableBase implemen
     @Override
     public void parse(Map<String, Object> parameters) {
         subnetIds = getStringList(parameters, NetworkConstants.SUBNET_IDS);
+        availabilityZones = getStringList(parameters, NetworkConstants.AVAILABILITY_ZONES);
     }
 
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
         map.put(NetworkConstants.SUBNET_IDS, subnetIds);
+        map.put(NetworkConstants.AVAILABILITY_ZONES, availabilityZones);
         return map;
     }
 }

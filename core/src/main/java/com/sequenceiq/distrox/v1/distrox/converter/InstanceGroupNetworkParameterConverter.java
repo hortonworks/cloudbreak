@@ -111,8 +111,11 @@ public class InstanceGroupNetworkParameterConverter {
             } else if (source.getValue() != null) {
                 response.setSubnetIds(List.of(source.getValue().getPreferedSubnetId()));
             }
+            List<String> availabilityZones = key.getAvailabilityZones();
+            if (zonesDefined(availabilityZones)) {
+                response.setAvailabilityZones(availabilityZones);
+            }
         }
-
         return response;
     }
 
@@ -165,6 +168,10 @@ public class InstanceGroupNetworkParameterConverter {
 
     private boolean subnetIdsDefined(List<String> subnetIds) {
         return subnetIds != null && !subnetIds.isEmpty();
+    }
+
+    private boolean zonesDefined(List<String> zones) {
+        return zones != null && !zones.isEmpty();
     }
 
 }

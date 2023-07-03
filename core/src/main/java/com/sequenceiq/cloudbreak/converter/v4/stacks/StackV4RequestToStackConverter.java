@@ -9,6 +9,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -44,12 +45,15 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureConstants;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.metering.MeteringServiceFieldResolver;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -59,6 +63,7 @@ import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.authentication.StackAuthenticationV4RequestToStackAuthenticationConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterV4RequestToClusterConverter;
@@ -76,6 +81,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.GatewaySecurityGroupDecorator;
@@ -173,6 +179,15 @@ public class StackV4RequestToStackConverter {
     @Inject
     private DatabaseRequestToDatabaseConverter databaseRequestToDatabaseConverter;
 
+    @Inject
+    private CloudParameterService cloudParameterService;
+
+    @Inject
+    private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
+
+    @Inject
+    private CredentialConverter credentialConverter;
+
     public Stack convert(StackV4Request source) {
         Workspace workspace = workspaceService.getForCurrentUser();
 
@@ -254,6 +269,7 @@ public class StackV4RequestToStackConverter {
         stack.setName(source.getName());
         stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
         stack.setOrchestrator(getOrchestrator());
+        stack.setMultiAz(Optional.ofNullable(source.getMultiAz()).orElse(false));
         updateCustomDomainOrKerberos(source, stack);
     }
 
@@ -450,19 +466,17 @@ public class StackV4RequestToStackConverter {
         String subnetId = getStackSubnetIdIfExists(stack);
         List<InstanceGroupV4Request> instanceGroups = source.getInstanceGroups();
         for (InstanceGroupV4Request instanceGroup : instanceGroups) {
-            if (instanceGroup.getNetwork() == null) {
-                InstanceGroupNetworkV4Request instanceGroupNetworkV4Request = new InstanceGroupNetworkV4Request();
-                setNetworkByProvider(source, instanceGroup, instanceGroupNetworkV4Request, subnetId);
-            }
+            InstanceGroupNetworkV4Request instanceGroupNetworkV4Request = new InstanceGroupNetworkV4Request();
+            setNetworkByProvider(environment, source, instanceGroup, instanceGroupNetworkV4Request, subnetId);
             setupEndpointGatewayNetwork(instanceGroup.getNetwork(), stack, instanceGroup.getName(), environment);
         }
     }
 
-    private void setNetworkByProvider(StackV4Request source, InstanceGroupV4Request instanceGroup,
-            InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
+    private void setNetworkByProvider(DetailedEnvironmentResponse environment, StackV4Request source,
+            InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
         switch (source.getCloudPlatform()) {
             case AWS -> setUpAws(instanceGroup, instanceGroupNetworkV4Request, subnetId);
-            case AZURE -> setUpAzure(instanceGroup, instanceGroupNetworkV4Request, subnetId);
+            case AZURE -> setUpAzure(environment, source, instanceGroup, instanceGroupNetworkV4Request, subnetId);
             case GCP -> setUpGcp(instanceGroup, instanceGroupNetworkV4Request, subnetId);
             case YARN -> setUpYarn(instanceGroup, instanceGroupNetworkV4Request);
             case MOCK -> setUpMock(instanceGroup, instanceGroupNetworkV4Request, subnetId);
@@ -472,7 +486,7 @@ public class StackV4RequestToStackConverter {
     }
 
     private void setUpMock(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
-        if (!isEmpty(subnetId)) {
+        if (!isEmpty(subnetId) && instanceGroup.getNetwork() == null) {
             InstanceGroupMockNetworkV4Parameters mock = new InstanceGroupMockNetworkV4Parameters();
             mock.setSubnetIds(List.of(subnetId));
             instanceGroupNetworkV4Request.setMock(mock);
@@ -481,13 +495,15 @@ public class StackV4RequestToStackConverter {
     }
 
     private void setUpYarn(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request) {
-        InstanceGroupYarnNetworkV4Parameters yarn = new InstanceGroupYarnNetworkV4Parameters();
-        instanceGroupNetworkV4Request.setYarn(yarn);
-        instanceGroup.setNetwork(instanceGroupNetworkV4Request);
+        if (instanceGroup.getNetwork() == null) {
+            InstanceGroupYarnNetworkV4Parameters yarn = new InstanceGroupYarnNetworkV4Parameters();
+            instanceGroupNetworkV4Request.setYarn(yarn);
+            instanceGroup.setNetwork(instanceGroupNetworkV4Request);
+        }
     }
 
     private void setUpGcp(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
-        if (!isEmpty(subnetId)) {
+        if (!isEmpty(subnetId) && instanceGroup.getNetwork() == null) {
             InstanceGroupGcpNetworkV4Parameters gcp = new InstanceGroupGcpNetworkV4Parameters();
             gcp.setSubnetIds(List.of(subnetId));
             instanceGroupNetworkV4Request.setGcp(gcp);
@@ -495,17 +511,76 @@ public class StackV4RequestToStackConverter {
         }
     }
 
-    private void setUpAzure(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
-        if (!com.google.common.base.Strings.isNullOrEmpty(subnetId)) {
+    private void setUpAzure(DetailedEnvironmentResponse environment, StackV4Request source, InstanceGroupV4Request instanceGroup,
+        InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
+        InstanceGroupNetworkV4Request network = instanceGroup.getNetwork();
+        boolean mustConfigureSubnetId = isMustConfigureSubnetId(subnetId, network);
+
+        if (mustConfigureSubnetId) {
             InstanceGroupAzureNetworkV4Parameters azure = new InstanceGroupAzureNetworkV4Parameters();
             azure.setSubnetIds(List.of(subnetId));
             instanceGroupNetworkV4Request.setAzure(azure);
             instanceGroup.setNetwork(instanceGroupNetworkV4Request);
         }
+
+        if (source.getMultiAz()) {
+            CloudVmTypes vmTypesV2 = cloudParameterService.getVmTypesV2(
+                    extendedCloudCredentialConverter.convert(credentialConverter.convert(environment.getCredential())),
+                    environment.getLocation().getName(),
+                    AzureConstants.VARIANT.value(),
+                    null,
+                    new HashMap<>());
+            final List<String> availabilityZonesForInstanceType;
+            if (vmTypesV2.getCloudVmResponses() != null && vmTypesV2.getCloudVmResponses().get(environment.getLocation().getName()) != null) {
+                availabilityZonesForInstanceType = vmTypesV2.getCloudVmResponses().get(environment.getLocation().getName()).stream()
+                        .filter(vmType -> vmType.value().equals(instanceGroup.getTemplate().getInstanceType()))
+                        .map(vmType -> vmType.getMetaData().getAvailabilityZones())
+                        .findFirst().orElse(new ArrayList<>());
+                LOGGER.debug("Availability Zones for Instance Type {} are {} ", instanceGroup.getTemplate().getInstanceType(),
+                        availabilityZonesForInstanceType);
+            } else {
+                availabilityZonesForInstanceType = new ArrayList<>();
+            }
+            List<String> environmentZones = environment.getNetwork().getAzure().getAvailabilityZones().stream().collect(Collectors.toList());
+            environmentZones.removeIf(zone -> !availabilityZonesForInstanceType.contains(zone));
+            LOGGER.debug("Availability Zones for Instance Type {} which are also at environment are {} ",
+                    instanceGroup.getTemplate().getInstanceType(), environmentZones);
+            if (instanceGroup.getNetwork() == null) {
+                instanceGroup.setNetwork(new InstanceGroupNetworkV4Request());
+            }
+            if (instanceGroup.getNetwork().getAzure() == null) {
+                instanceGroup.getNetwork().setAzure(new InstanceGroupAzureNetworkV4Parameters());
+            }
+            if (CollectionUtils.isEmpty(instanceGroup.getNetwork().getAzure().getAvailabilityZones())) {
+                instanceGroup.getNetwork().getAzure().setAvailabilityZones(environmentZones);
+            }
+        } else {
+            LOGGER.debug("Availability Zones are not available");
+        }
+    }
+
+    private static boolean isMustConfigureSubnetId(String subnetId, InstanceGroupNetworkV4Request network) {
+        boolean mustConfigureSubnetId = false;
+        if (network != null) {
+            InstanceGroupAzureNetworkV4Parameters azure = network.getAzure();
+            if (azure != null) {
+                if (azure.getSubnetIds() != null || azure.getSubnetIds().isEmpty()) {
+                    mustConfigureSubnetId = true;
+                }
+            } else {
+                mustConfigureSubnetId = true;
+            }
+        } else {
+            mustConfigureSubnetId = true;
+        }
+        if (com.google.common.base.Strings.isNullOrEmpty(subnetId)) {
+            mustConfigureSubnetId = false;
+        }
+        return mustConfigureSubnetId;
     }
 
     private void setUpAws(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
-        if (!isEmpty(subnetId)) {
+        if (!isEmpty(subnetId) && instanceGroup.getNetwork() == null) {
             InstanceGroupAwsNetworkV4Parameters aws = new InstanceGroupAwsNetworkV4Parameters();
             aws.setSubnetIds(List.of(subnetId));
             instanceGroupNetworkV4Request.setAws(aws);

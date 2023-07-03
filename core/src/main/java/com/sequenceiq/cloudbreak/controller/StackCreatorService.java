@@ -198,6 +198,7 @@ public class StackCreatorService {
         stackStub.setCreator(user);
         StackType stackType = determineStackTypeBasedOnTheUsedApi(stackStub, distroxRequest);
         stackStub.setType(stackType);
+        stackStub.setMultiAz(Optional.ofNullable(stackRequest.getMultiAz()).orElse(false));
         String platformString = stackStub.getCloudPlatform().toLowerCase();
 
         MDCBuilder.buildMdcContext(stackStub);
@@ -375,8 +376,6 @@ public class StackCreatorService {
     void fillInstanceMetadata(DetailedEnvironmentResponse environment, Stack stack) {
         long privateIdNumber = 0;
         Map<String, String> subnetAzPairs = multiAzCalculatorService.prepareSubnetAzMap(environment);
-        String stackSubnetId = getStackSubnetIdIfExists(stack);
-        String stackAz = stackSubnetId == null ? null : subnetAzPairs.get(stackSubnetId);
         for (InstanceGroup instanceGroup : sortInstanceGroups(stack)) {
             for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
                 instanceMetaData.setPrivateId(privateIdNumber++);

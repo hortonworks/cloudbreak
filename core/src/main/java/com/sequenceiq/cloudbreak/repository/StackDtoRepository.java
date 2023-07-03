@@ -27,6 +27,7 @@ public interface StackDtoRepository extends Repository<Stack, Long> {
             + "s.region as region, "
             + "s.gatewayPort as gatewayPort, "
             + "s.tunnel as tunnel, "
+            + "s.multiAz as multiAz, "
             + "s.environmentCrn as environmentCrn, "
             + "s.type as type, "
             + "CASE WHEN (s.stackVersion is not null) THEN s.stackVersion ELSE b.stackVersion END as stackVersion,"

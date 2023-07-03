@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -255,18 +256,33 @@ public class StackDecorator {
     private Set<AvailabilityZone> getAvailabilityZones(DetailedEnvironmentResponse environment, InstanceGroup group, Json attributes) {
         Set<AvailabilityZone> azs = new HashSet<>();
         if (attributes != null) {
-            List<String> subnetIds = (List<String>) attributes.getMap().getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>());
-            for (String subnetId : subnetIds) {
-                for (Map.Entry<String, CloudSubnet> cloudSubnetEntry : environment.getNetwork().getSubnetMetas().entrySet()) {
-                    CloudSubnet value = cloudSubnetEntry.getValue();
-                    if (subnetId.equals(value.getId()) || subnetId.equals(value.getName())) {
-                        AvailabilityZone az = new AvailabilityZone();
-                        az.setAvailabilityZone(value.getAvailabilityZone());
-                        az.setInstanceGroup(group);
-                        azs.add(az);
-                        break;
+            if (environment.getCloudPlatform().equalsIgnoreCase(CloudPlatform.AWS.name())) {
+                List<String> subnetIds = (List<String>) attributes.getMap().getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>());
+                for (String subnetId : subnetIds) {
+                    for (Map.Entry<String, CloudSubnet> cloudSubnetEntry : environment.getNetwork().getSubnetMetas().entrySet()) {
+                        CloudSubnet value = cloudSubnetEntry.getValue();
+                        if (subnetId.equals(value.getId()) || subnetId.equals(value.getName())) {
+                            AvailabilityZone az = new AvailabilityZone();
+                            az.setAvailabilityZone(value.getAvailabilityZone());
+                            az.setInstanceGroup(group);
+                            azs.add(az);
+                            break;
+                        }
                     }
                 }
+            } else {
+                // Json always return with List object
+                List<String> zones = (List<String>) attributes.getMap().getOrDefault(NetworkConstants.AVAILABILITY_ZONES, new ArrayList<>());
+                azs = zones
+                        .stream()
+                        .map(z -> {
+                                AvailabilityZone az = new AvailabilityZone();
+                                az.setAvailabilityZone(z);
+                                az.setInstanceGroup(group);
+                                return az;
+                            }
+                        )
+                        .collect(Collectors.toSet());
             }
         }
         return azs;

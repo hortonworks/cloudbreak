@@ -74,6 +74,7 @@ public class StackToStackDetailsConverter {
         stackDetails.setCloudPlatform(source.getCloudPlatform());
         stackDetails.setStatus(source.getStatus().name());
         stackDetails.setJavaVersion(source.getJavaVersion());
+        stackDetails.setMultiAz(source.getMultiAz());
         if (source.getDetailedStatus() != null) {
             stackDetails.setDetailedStatus(source.getDetailedStatus().name());
         }

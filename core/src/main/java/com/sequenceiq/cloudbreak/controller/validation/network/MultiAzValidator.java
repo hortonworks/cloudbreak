@@ -7,9 +7,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +26,10 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.view.AvailabilityZoneView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
 @Component
@@ -35,6 +42,12 @@ public class MultiAzValidator {
 
     @Value("${cb.multiaz.supported.instancemetadata.platforms:AWS,GCP,AZURE,YARN}")
     private Set<String> supportedInstanceMetadataPlatforms;
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private InstanceGroupService instanceGroupService;
 
     @PostConstruct
     public void initSupportedVariants() {
@@ -51,12 +64,17 @@ public class MultiAzValidator {
     }
 
     public void validateMultiAzForStack(
+        Long id,
         String variant,
         Collection<InstanceGroup> instanceGroups,
         ValidationResult.ValidationResultBuilder validationBuilder) {
         Set<String> allSubnetIds = collectSubnetIds(new ArrayList<>(instanceGroups));
         if (allSubnetIds.size() > 1 && !supportedVariant(variant)) {
                 validationBuilder.error(String.format("Multiple Availability Zone feature is not supported for %s variant", variant));
+        }
+        Set<String> allZones = collectZones(id);
+        if (allZones.size() > 1) {
+            stackService.updateMultiAzFlag(id, true);
         }
     }
 
@@ -93,5 +111,20 @@ public class MultiAzValidator {
             }
         }
         return allSubnetIds;
+    }
+
+    public Set<String> collectZones(Long stackId) {
+        Set<String> allZones = new HashSet<>();
+        Map<Long, List<AvailabilityZoneView>> availabilityZonesByStackId = instanceGroupService.getAvailabilityZonesByStackId(stackId);
+        for (List<AvailabilityZoneView> availabilityZoneViews : availabilityZonesByStackId.values()) {
+            if (availabilityZoneViews != null) {
+                allZones.addAll(
+                        availabilityZoneViews.stream()
+                                .map(e -> e.getAvailabilityZone())
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toSet()));
+            }
+        }
+        return allZones;
     }
 }

@@ -58,6 +58,9 @@ public class InstanceMetadataServiceComponentTest {
     @Inject
     private InstanceMetaDataRepository repository;
 
+    @Inject
+    private StackService stackService;
+
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
@@ -188,6 +191,9 @@ public class InstanceMetadataServiceComponentTest {
 
         @MockBean
         private ResourceRetriever resourceRetriever;
+
+        @MockBean
+        private StackService stackService;
 
         @MockBean
         private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;

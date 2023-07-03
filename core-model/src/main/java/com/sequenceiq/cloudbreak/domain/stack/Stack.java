@@ -256,6 +256,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     @JoinColumn(name = "database_id")
     private Database database;
 
+    private boolean multiAz;
+
     public String getResourceCrn() {
         return resourceCrn;
     }
@@ -1078,8 +1080,17 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return javaVersion;
     }
 
+    @Override
+    public boolean getMultiAz() {
+        return multiAz;
+    }
+
     public void setJavaVersion(Integer javaVersion) {
         this.javaVersion = javaVersion;
+    }
+
+    public void setMultiAz(boolean multiAz) {
+        this.multiAz = multiAz;
     }
 
     @Override
@@ -1145,6 +1156,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 ", originalName=" + originalName +
                 ", javaVersion=" + javaVersion +
                 ", database=" + database +
+                ", multiAz=" + multiAz +
                 '}';
     }
 

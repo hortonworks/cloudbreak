@@ -75,4 +75,6 @@ public interface StackListItem {
     String getExternalDatabaseEngineVersion();
 
     Long getLastUpdated();
+
+    boolean getMultiAz();
 }
