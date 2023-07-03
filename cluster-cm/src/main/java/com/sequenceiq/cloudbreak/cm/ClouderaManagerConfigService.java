@@ -12,6 +12,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
@@ -41,6 +43,8 @@ public class ClouderaManagerConfigService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerConfigService.class);
 
     private static final String KNOX_SERVICE = "KNOX";
+
+    private static final int BACKOFF = 5000;
 
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
@@ -216,6 +220,7 @@ public class ClouderaManagerConfigService {
         }
     }
 
+    @Retryable(value = ClouderaManagerOperationFailedException.class, backoff = @Backoff(delay = BACKOFF))
     public ApiServiceConfig readServiceConfig(ApiClient client, String clusterName, String serviceName) {
         try {
             LOGGER.debug("Reading {} service config from Cloudera Manager for cluster {}.", serviceName, clusterName);
@@ -227,6 +232,7 @@ public class ClouderaManagerConfigService {
         }
     }
 
+    @Retryable(value = ClouderaManagerOperationFailedException.class, backoff = @Backoff(delay = BACKOFF))
     public ApiRoleConfigGroupList readRoleConfigGroupConfigs(ApiClient client, String clusterName, String serviceName) {
         try {
             LOGGER.debug("Reading config groups of {} service in Cloudera Manager for cluster {}.", serviceName, clusterName);
@@ -238,6 +244,7 @@ public class ClouderaManagerConfigService {
         }
     }
 
+    @Retryable(value = ClouderaManagerOperationFailedException.class, backoff = @Backoff(delay = BACKOFF))
     public void modifyServiceConfigs(ApiClient client, String clusterName, Map<String, String> config, String serviceName) {
         try {
             LOGGER.debug("Modifying {} service configs [{}] of Cloudera Manager for cluster {}.",
@@ -252,6 +259,7 @@ public class ClouderaManagerConfigService {
         }
     }
 
+    @Retryable(value = ClouderaManagerOperationFailedException.class, backoff = @Backoff(delay = BACKOFF))
     public void modifyRoleConfigGroups(ApiClient client, String clusterName, String serviceName, String roleConfigGroupName, Map<String, String> config) {
         try {
             LOGGER.debug("Modifying {} config group of {} service regarding configs [{}] in Cloudera Manager for cluster {}.",
