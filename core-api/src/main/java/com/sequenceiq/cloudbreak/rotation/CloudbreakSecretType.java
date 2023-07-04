@@ -6,16 +6,13 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.CM
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_PILLAR;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_STATE_APPLY;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_STATE_RUN;
-import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.CUSTOM_JOB;
-import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
-import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.SERVICE_CONFIG;
-import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.USER_DATA;
-import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.VAULT;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.SALTBOOT_CONFIG;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.USER_DATA;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 
 import java.util.List;
-
-import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
-import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 
 public enum CloudbreakSecretType implements SecretType {
     CLUSTER_CB_CM_ADMIN_PASSWORD(List.of(VAULT, CM_USER, CLUSTER_PROXY)),
@@ -25,7 +22,7 @@ public enum CloudbreakSecretType implements SecretType {
     CLUSTER_CM_DB_PASSWORD(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CUSTOM_JOB)),
     USER_KEYPAIR(List.of(SALT_STATE_RUN, CUSTOM_JOB)),
     CLUSTER_CM_SERVICES_DB_PASSWORD(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE)),
-    SALT_BOOT_SECRETS(List.of(VAULT, CUSTOM_JOB, SERVICE_CONFIG, USER_DATA));
+    SALT_BOOT_SECRETS(List.of(VAULT, CUSTOM_JOB, SALTBOOT_CONFIG, USER_DATA));
 
     private final List<SecretRotationStep> steps;
 

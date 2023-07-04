@@ -1,12 +1,12 @@
 package com.sequenceiq.sdx.rotation;
 
-import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
-import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
 
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
-import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.SecretType;
 
 public enum DatalakeSecretType implements SecretType {
 

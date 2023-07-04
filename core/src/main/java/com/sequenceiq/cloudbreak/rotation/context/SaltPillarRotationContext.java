@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 
 public class SaltPillarRotationContext extends RotationContext {
 

@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,10 +25,10 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationProgressService;
-import com.sequenceiq.cloudbreak.rotation.secret.context.PollerRotationContext;
+import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
+import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,14 +45,13 @@ class RedbeamsPollerRotationExecutorTest {
     private StackDtoService stackDtoService;
 
     @Mock
-    private SecretRotationProgressService secretRotationProgressService;
+    private SecretRotationStepProgressService secretRotationProgressService;
 
     @InjectMocks
     private RedbeamsPollerRotationExecutor underTest;
 
     @BeforeEach
-    public void mockProgressService() throws IllegalAccessException {
-        FieldUtils.writeField(underTest, "secretRotationProgressService", Optional.of(secretRotationProgressService), true);
+    public void mockProgressService() {
         lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
     }
 

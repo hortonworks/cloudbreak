@@ -10,11 +10,11 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
+import com.sequenceiq.cloudbreak.rotation.SecretType;
+import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
+import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.event.EventSelectorUtil;
-import com.sequenceiq.flow.rotation.chain.SecretRotationFlowChainTriggerEvent;
-import com.sequenceiq.flow.rotation.service.SecretRotationValidator;
 import com.sequenceiq.freeipa.api.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.freeipa.entity.Stack;

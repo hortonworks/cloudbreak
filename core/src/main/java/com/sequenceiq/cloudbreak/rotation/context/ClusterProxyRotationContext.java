@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.rotation.context;
 
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 
 public class ClusterProxyRotationContext extends RotationContext {
 

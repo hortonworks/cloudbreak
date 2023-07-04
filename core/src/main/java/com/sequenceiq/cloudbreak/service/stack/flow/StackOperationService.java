@@ -52,8 +52,9 @@ import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
+import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
+import com.sequenceiq.cloudbreak.rotation.SecretType;
+import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidator;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
@@ -75,7 +76,6 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.flow.rotation.service.SecretRotationValidator;
 
 @Service
 public class StackOperationService {

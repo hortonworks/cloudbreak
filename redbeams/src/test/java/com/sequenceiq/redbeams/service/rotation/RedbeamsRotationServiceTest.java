@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.service.rotation;
 
-import static com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType.ROTATE;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 import static com.sequenceiq.redbeams.rotation.RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.flow.rotation.service.SecretRotationValidator;
+import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidator;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
