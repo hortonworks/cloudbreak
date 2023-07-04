@@ -24,6 +24,8 @@ public class FreeIpaUpgradeRequest {
 
     private ImageSettingsRequest image;
 
+    private Boolean allowMajorOsUpgrade;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -40,11 +42,20 @@ public class FreeIpaUpgradeRequest {
         this.image = image;
     }
 
+    public Boolean getAllowMajorOsUpgrade() {
+        return allowMajorOsUpgrade;
+    }
+
+    public void setAllowMajorOsUpgrade(Boolean allowMajorOsUpgrade) {
+        this.allowMajorOsUpgrade = allowMajorOsUpgrade;
+    }
+
     @Override
     public String toString() {
         return "FreeIpaUpgradeRequest{" +
                 "environmentCrn='" + environmentCrn + '\'' +
                 ", image=" + image +
+                ", allowMajorOsUpgrade=" + allowMajorOsUpgrade +
                 '}';
     }
 }

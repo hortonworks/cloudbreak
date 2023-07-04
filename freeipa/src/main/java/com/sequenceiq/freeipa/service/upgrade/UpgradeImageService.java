@@ -15,11 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.ImageInfoResponse;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.image.FreeIpaImageFilterSettings;
 import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageService;
 
@@ -33,9 +33,9 @@ public class UpgradeImageService {
     @Inject
     private ImageService imageService;
 
-    public ImageInfoResponse selectImage(Stack stack, ImageSettingsRequest imageSettingsRequest) {
-        Pair<ImageWrapper, String> imageWrapperAndName = imageService.fetchImageWrapperAndName(stack, imageSettingsRequest);
-        LOGGER.info("Selected image {} from request {}", imageWrapperAndName, imageSettingsRequest);
+    public ImageInfoResponse selectImage(FreeIpaImageFilterSettings imageFilterParams) {
+        Pair<ImageWrapper, String> imageWrapperAndName = imageService.fetchImageWrapperAndName(imageFilterParams);
+        LOGGER.info("Selected image {} from request {}", imageWrapperAndName, imageFilterParams);
         return convertImageWrapperAndNameToImageInfoResponse(imageWrapperAndName);
     }
 
@@ -63,9 +63,10 @@ public class UpgradeImageService {
         return imageInfoResponse;
     }
 
-    public List<ImageInfoResponse> findTargetImages(Stack stack, ImageSettingsRequest imageSettingsRequest, ImageInfoResponse currentImage) {
+    public List<ImageInfoResponse> findTargetImages(Stack stack, String catalog, ImageInfoResponse currentImage, Boolean allowMajorOsUpgrade) {
         Optional<String> currentImageDate = getCurrentImageDate(stack, currentImage);
-        List<Pair<ImageWrapper, String>> imagesWrapperAndName = imageService.fetchImagesWrapperAndName(stack, imageSettingsRequest);
+        List<Pair<ImageWrapper, String>> imagesWrapperAndName = imageService.fetchImagesWrapperAndName(stack, catalog, currentImage.getOs(),
+                allowMajorOsUpgrade);
         return imagesWrapperAndName.stream()
                 .filter(imageWrapperAndName -> currentImageDate.isPresent()
                         && isCandidateImageNewerThanCurrent(imageWrapperAndName.getLeft(), currentImageDate.get()))
@@ -99,16 +100,18 @@ public class UpgradeImageService {
         try {
             String catalog = Optional.ofNullable(currentImage.getCatalog()).orElse(currentImage.getCatalogName());
             LOGGER.debug("Current image date field is empty. Using catalog [{}] to get image date", catalog);
-            ImageSettingsRequest imageSettings = new ImageSettingsRequest();
-            imageSettings.setCatalog(catalog);
-            imageSettings.setId(currentImage.getId());
-            imageSettings.setOs(currentImage.getOs());
-            ImageWrapper image = imageService.getImage(imageSettings, stack.getRegion(), stack.getCloudPlatform().toLowerCase());
+            FreeIpaImageFilterSettings freeIpaImageFilterSettings = createFreeIpaImageFilterSettings(stack, currentImage, catalog);
+            ImageWrapper image = imageService.getImage(freeIpaImageFilterSettings);
             LOGGER.debug("Image date from catalog: {}", image.getImage().getDate());
             return Optional.ofNullable(image.getImage().getDate());
         } catch (ImageNotFoundException e) {
             LOGGER.warn("Image not found, returning empty date", e);
             return Optional.empty();
         }
+    }
+
+    private FreeIpaImageFilterSettings createFreeIpaImageFilterSettings(Stack stack, ImageInfoResponse currentImage, String catalog) {
+        return new FreeIpaImageFilterSettings(currentImage.getId(), catalog, currentImage.getOs(), stack.getRegion(), stack.getCloudPlatform().toLowerCase(),
+                false);
     }
 }

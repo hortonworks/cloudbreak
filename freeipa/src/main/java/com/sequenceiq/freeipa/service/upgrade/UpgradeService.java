@@ -36,6 +36,8 @@ import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
 import com.sequenceiq.freeipa.flow.stack.migration.handler.AwsMigrationUtil;
 import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.image.FreeIpaImageFilterSettings;
+import com.sequenceiq.freeipa.service.image.FreeipaPlatformStringTransformer;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
@@ -69,6 +71,9 @@ public class UpgradeService {
     @Inject
     private DefaultRootVolumeSizeProvider rootVolumeSizeProvider;
 
+    @Inject
+    private FreeipaPlatformStringTransformer platformStringTransformer;
+
     @SuppressWarnings("IllegalType")
     public FreeIpaUpgradeResponse upgradeFreeIpa(String accountId, FreeIpaUpgradeRequest request) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(request.getEnvironmentCrn(), accountId);
@@ -76,10 +81,16 @@ public class UpgradeService {
         validationService.validateStackForUpgrade(allInstances, stack);
         ImageInfoResponse currentImage = imageService.fetchCurrentImage(stack);
         ImageSettingsRequest imageSettingsRequest = assembleImageSettingsRequest(request, currentImage);
-        ImageInfoResponse selectedImage = imageService.selectImage(stack, imageSettingsRequest);
+        FreeIpaImageFilterSettings freeIpaImageFilterSettings = createFreeIpaImageFilterSettings(stack, request, imageSettingsRequest);
+        ImageInfoResponse selectedImage = imageService.selectImage(freeIpaImageFilterSettings);
         HashSet<String> instancesOnOldImage = selectInstancesWithOldImage(allInstances, selectedImage);
         validationService.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage, instancesOnOldImage);
         return triggerUpgrade(request, stack, allInstances, imageSettingsRequest, selectedImage, currentImage, accountId);
+    }
+
+    private FreeIpaImageFilterSettings createFreeIpaImageFilterSettings(Stack stack, FreeIpaUpgradeRequest request, ImageSettingsRequest imageSettingsRequest) {
+        return new FreeIpaImageFilterSettings(imageSettingsRequest.getId(), imageSettingsRequest.getCatalog(), imageSettingsRequest.getOs(), stack.getRegion(),
+                platformStringTransformer.getPlatformString(stack), Boolean.TRUE.equals(request.getAllowMajorOsUpgrade()));
     }
 
     @SuppressWarnings("IllegalType")
@@ -117,7 +128,7 @@ public class UpgradeService {
                     templateRequest.setRootVolume(rootVolume);
                     verticalScaleRequest.setTemplate(templateRequest);
                     return verticalScaleRequest;
-                }).collect(Collectors.toList());
+                }).toList();
         HashSet<String> instancesOnOldImage = selectInstancesWithOldImage(allInstances, selectedImage);
         UpgradeEvent upgradeEvent = new UpgradeEvent(FlowChainTriggers.UPGRADE_TRIGGER_EVENT, stack.getId(), nonPgwInstanceIds, pgwInstanceId,
                 operation.getOperationId(), imageSettingsRequest, Objects.nonNull(stack.getBackup()), needMigration, triggeredVariant,
@@ -155,11 +166,11 @@ public class UpgradeService {
         return operation;
     }
 
-    public FreeIpaUpgradeOptions collectUpgradeOptions(String accountId, String environmentCrn, String catalog) {
+    public FreeIpaUpgradeOptions collectUpgradeOptions(String accountId, String environmentCrn, String catalog, Boolean allowMajorOsUpgrade) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(environmentCrn, accountId);
         ImageInfoResponse currentImage = imageService.fetchCurrentImage(stack);
         String catalogForRequest = Optional.ofNullable(catalog).or(() -> Optional.ofNullable(currentImage.getCatalog())).orElse(currentImage.getCatalogName());
-        List<ImageInfoResponse> targetImages = getTargetImages(catalogForRequest, stack, currentImage);
+        List<ImageInfoResponse> targetImages = getTargetImages(catalogForRequest, stack, currentImage, allowMajorOsUpgrade);
         return createFreeIpaUpgradeOptions(targetImages, currentImage);
     }
 
@@ -170,11 +181,9 @@ public class UpgradeService {
         return freeIpaUpgradeOptions;
     }
 
-    private List<ImageInfoResponse> getTargetImages(String catalog, Stack stack, ImageInfoResponse currentImage) {
-        ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
-        imageSettingsRequest.setCatalog(catalog);
-        LOGGER.debug("Using ImageSettingsRequest to query for possible target images: {}", imageSettingsRequest);
-        List<ImageInfoResponse> targetImages = imageService.findTargetImages(stack, imageSettingsRequest, currentImage);
+    private List<ImageInfoResponse> getTargetImages(String catalog, Stack stack, ImageInfoResponse currentImage, Boolean allowMajorOsUpgrade) {
+        LOGGER.debug("Using ImageSettingsRequest to query for possible target images: {}", catalog);
+        List<ImageInfoResponse> targetImages = imageService.findTargetImages(stack, catalog, currentImage, allowMajorOsUpgrade);
         if (targetImages.isEmpty()) {
             Set<String> instancesWithOldImage = selectInstancesWithOldImage(stack.getNotDeletedInstanceMetaDataSet(), currentImage);
             LOGGER.debug("Target image is empty, if there is any instance on old image, return with current image");

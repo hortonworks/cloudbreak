@@ -100,7 +100,7 @@ public class UpgradeCcmService {
         Stack stack = stackService.getStackById(stackId);
         ImageEntity stackImage = imageService.getByStackId(stackId);
         FreeIpaUpgradeOptions freeIpaUpgradeOptions = upgradeService.collectUpgradeOptions(stack.getAccountId(), stack.getEnvironmentCrn(),
-                Objects.requireNonNullElse(stackImage.getImageCatalogName(), stackImage.getImageCatalogUrl()));
+                Objects.requireNonNullElse(stackImage.getImageCatalogName(), stackImage.getImageCatalogUrl()), false);
         if (!freeIpaUpgradeOptions.getImages().isEmpty()) {
             throw new CloudbreakServiceException("FreeIPA is not on the latest available image. Please upgrade that first. CCM upgrade is not possible yet.");
         }

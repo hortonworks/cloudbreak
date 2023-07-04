@@ -91,22 +91,29 @@ public class ImageService {
         return imageRepository.save(imageEntity);
     }
 
-    public Pair<ImageWrapper, String> fetchImageWrapperAndName(Stack stack, ImageSettingsRequest imageRequest) {
-        String region = stack.getRegion();
-        String platformString = platformStringTransformer.getPlatformString(stack);
-        ImageWrapper imageWrapper = getImage(imageRequest, region, platformString);
+    public Pair<ImageWrapper, String> fetchImageWrapperAndName(FreeIpaImageFilterSettings imageFilterSettings) {
+        String region = imageFilterSettings.region();
+        String platformString = imageFilterSettings.platform();
+        ImageWrapper imageWrapper = getImage(imageFilterSettings);
         String imageName = determineImageName(platformString, region, imageWrapper.getImage());
         LOGGER.info("Selected VM image for CloudPlatform '{}' and region '{}' is: {} from: {} image catalog with '{}' catalog name",
                 platformString, region, imageName, imageWrapper.getCatalogUrl(), imageWrapper.getCatalogName());
         return Pair.of(imageWrapper, imageName);
     }
 
-    public List<Pair<ImageWrapper, String>> fetchImagesWrapperAndName(Stack stack, ImageSettingsRequest imageRequest) {
+    public List<Pair<ImageWrapper, String>> fetchImagesWrapperAndName(Stack stack, String catalog, String currentImageOs, Boolean allowMajorOsUpgrade) {
         String region = stack.getRegion();
         String platformString = platformStringTransformer.getPlatformString(stack);
-        List<ImageWrapper> imageWrappers = getImages(imageRequest, region, platformString);
+        List<ImageWrapper> imageWrappers = getImages(new FreeIpaImageFilterSettings(null, catalog, currentImageOs, stack.getRegion(), platformString,
+                Boolean.TRUE.equals(allowMajorOsUpgrade)));
         LOGGER.debug("Images found: {}", imageWrappers);
         return imageWrappers.stream().map(imgw -> Pair.of(imgw, determineImageName(platformString, region, imgw.getImage()))).collect(Collectors.toList());
+    }
+
+    private Pair<ImageWrapper, String> fetchImageWrapperAndName(Stack stack, ImageSettingsRequest imageRequest) {
+        FreeIpaImageFilterSettings imageFilterSettings = new FreeIpaImageFilterSettings(imageRequest.getId(), imageRequest.getCatalog(), imageRequest.getOs(),
+                stack.getRegion(), platformStringTransformer.getPlatformString(stack), false);
+        return fetchImageWrapperAndName(imageFilterSettings);
     }
 
     private ImageEntity updateImageWithNewValues(Stack stack, ImageWrapper imageWrapper, String imageName) {
@@ -146,16 +153,16 @@ public class ImageService {
         return imageRepository.save(imageEntity);
     }
 
-    public ImageWrapper getImage(ImageSettingsRequest imageSettings, String region, String platform) {
-        return imageProviderFactory.getImageProvider(imageSettings.getCatalog())
-                .getImage(imageSettings, region, platform)
-                .orElseThrow(() -> throwImageNotFoundException(region, imageSettings.getId(), Optional.ofNullable(imageSettings.getOs()).orElse(defaultOs)));
+    public ImageWrapper getImage(FreeIpaImageFilterSettings imageFilterParams) {
+        return imageProviderFactory.getImageProvider(imageFilterParams.catalog())
+                .getImage(imageFilterParams)
+                .orElseThrow(() -> throwImageNotFoundException(imageFilterParams.region(), imageFilterParams.currentImageId(),
+                        Optional.ofNullable(imageFilterParams.os()).orElse(defaultOs)));
 
     }
 
-    private List<ImageWrapper> getImages(ImageSettingsRequest imageSettings, String region, String platformString) {
-        return imageProviderFactory.getImageProvider(imageSettings.getCatalog())
-                .getImages(imageSettings, region, platformString);
+    private List<ImageWrapper> getImages(FreeIpaImageFilterSettings imageFilterParams) {
+        return imageProviderFactory.getImageProvider(imageFilterParams.catalog()).getImages(imageFilterParams);
     }
 
     public String determineImageName(String platformString, String region, Image imgFromCatalog) {
@@ -248,18 +255,16 @@ public class ImageService {
     }
 
     public Image getImageForStack(Stack stack) {
-        final ImageEntity imageEntity = getByStack(stack);
-        final ImageSettingsRequest imageSettings = imageEntityToImageSettingsRequest(imageEntity);
-        final ImageWrapper imageWrapper = getImage(imageSettings, stack.getRegion(), platformStringTransformer.getPlatformString(stack));
-
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettingsFromImageEntity(stack);
+        ImageWrapper imageWrapper = getImage(imageFilterSettings);
         return imageWrapper.getImage();
     }
 
-    private ImageSettingsRequest imageEntityToImageSettingsRequest(ImageEntity imageEntity) {
-        final ImageSettingsRequest imageSettings = new ImageSettingsRequest();
-        imageSettings.setCatalog(Objects.requireNonNullElse(imageEntity.getImageCatalogName(), imageEntity.getImageCatalogUrl()));
-        imageSettings.setId(imageEntity.getImageId());
-        return imageSettings;
+    private FreeIpaImageFilterSettings createImageFilterSettingsFromImageEntity(Stack stack) {
+        ImageEntity imageEntity = getByStack(stack);
+        return new FreeIpaImageFilterSettings(imageEntity.getImageId(),
+                Objects.requireNonNullElse(imageEntity.getImageCatalogName(), imageEntity.getImageCatalogUrl()), imageEntity.getOs(), stack.getRegion(),
+                platformStringTransformer.getPlatformString(stack), false);
     }
 
     private Image copyImageWithAdvertisedFlag(Image source) {

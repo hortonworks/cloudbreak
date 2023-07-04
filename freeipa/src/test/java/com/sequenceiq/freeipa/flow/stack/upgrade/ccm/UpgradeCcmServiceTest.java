@@ -158,7 +158,7 @@ class UpgradeCcmServiceTest {
         when(imageService.getByStackId(STACK_ID)).thenReturn(imageEntity);
         FreeIpaUpgradeOptions upgradeOptions = new FreeIpaUpgradeOptions();
         upgradeOptions.setImages(new ArrayList<>());
-        when(upgradeService.collectUpgradeOptions(ACCOUNT_ID, ENV_CRN, "catalog")).thenReturn(upgradeOptions);
+        when(upgradeService.collectUpgradeOptions(ACCOUNT_ID, ENV_CRN, "catalog", false)).thenReturn(upgradeOptions);
     }
 
 }

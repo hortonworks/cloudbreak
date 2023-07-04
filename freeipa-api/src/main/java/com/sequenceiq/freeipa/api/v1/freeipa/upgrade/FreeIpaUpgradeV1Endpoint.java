@@ -42,5 +42,6 @@ public interface FreeIpaUpgradeV1Endpoint {
             nickname = "getFreeIpaUpgradeOptionsV1")
     FreeIpaUpgradeOptions getFreeIpaUpgradeOptions(
             @QueryParam("environmentCrn") @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotEmpty String environmentCrn,
-            @QueryParam("catalog") String catalog);
+            @QueryParam("catalog") String catalog,
+            @QueryParam("allowMajorOsUpgrade") Boolean allowMajorOsUpgrade);
 }
