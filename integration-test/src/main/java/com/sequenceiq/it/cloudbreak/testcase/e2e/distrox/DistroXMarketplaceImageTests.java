@@ -5,6 +5,8 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static java.lang.String.format;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -86,6 +88,8 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
 
         String distrox = resourcePropertyProvider().getName();
 
+        String selectedImageID = getLatestPrewarmedImageId(testContext);
+
         testContext
                 .given(imgCatalogKey, ImageCatalogTestDto.class)
                 .withName(imgCatalogKey)
@@ -94,6 +98,7 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
                 .when(imageCatalogTestClient.createIfNotExistV4())
                 .given(imageSettings, ImageSettingsTestDto.class)
                     .withImageCatalog(imgCatalogKey)
+                    .withImageId(selectedImageID)
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
                     .withBlueprintName(getDefaultSDXBlueprintName())
@@ -133,6 +138,7 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
                 })
                 .given(dhImageSettings, DistroXImageTestDto.class)
                     .withImageCatalog(imgCatalogKey)
+                    .withImageId(selectedImageID)
                 .given(distrox, DistroXTestDto.class)
                     .withImageSettings(dhImageSettings)
                 .when(distroXTestClient.create(), key(distrox))
@@ -160,5 +166,16 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
         } else {
             return true;
         }
+    }
+
+    protected String getLatestPrewarmedImageId(TestContext testContext) {
+        AtomicReference<String> selectedImageID = new AtomicReference<>();
+        testContext
+                .given(ImageCatalogTestDto.class)
+                .when((tc, dto, client) -> {
+                    selectedImageID.set(tc.getCloudProvider().getLatestMarketplacePreWarmedImageID(tc, dto, client));
+                    return dto;
+                });
+        return selectedImageID.get();
     }
 }

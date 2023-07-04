@@ -24,6 +24,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeI
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
@@ -281,6 +282,11 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     protected abstract ClusterTestDto withCluster(ClusterTestDto cluster);
 
     protected abstract DistroXClusterTestDto withCluster(DistroXClusterTestDto cluster);
+
+    @Override
+    public String getLatestMarketplacePreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
+        throw new TestFailException("Marketplace images are not supported on this platform");
+    }
 
     public String getLatestPreWarmedImage(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform, boolean govCloud) {
         return getLatestPreWarmedImageByRuntimeVersion(imageCatalogTestDto, cloudbreakClient, platform, govCloud,

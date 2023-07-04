@@ -2,7 +2,9 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.azure;
 
 import static java.lang.String.format;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -14,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
@@ -72,6 +75,8 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureCloudProvider.class);
 
     private static final String DEFAULT_STORAGE_NAME = "apitest" + UUID.randomUUID().toString().replaceAll("-", "");
+
+    private static final String MARKETPLACE_REGION = "default";
 
     @Inject
     private AzureProperties azureProperties;
@@ -421,6 +426,37 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         return getLatestPreWarmedImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AZURE.name(), false);
+    }
+
+    @Override
+    public String getLatestMarketplacePreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
+        try {
+            Optional<ImageV4Response> prewarmedImagesForRuntime = cloudbreakClient
+                    .getDefaultClient()
+                    .imageCatalogV4Endpoint()
+                    .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
+                            CloudPlatform.AZURE.name(), null, null, false)
+                    .getCdhImages().stream()
+                    .filter(image -> image.getImageSetsByProvider().entrySet()
+                            .stream()
+                            .anyMatch(i -> i.getValue().containsKey(MARKETPLACE_REGION)))
+                    .filter(image -> StringUtils.equalsIgnoreCase(image.getStackDetails().getVersion(),
+                            commonClusterManagerProperties().getRuntimeVersion()))
+                    .max(Comparator.comparing(ImageV4Response::getPublished));
+
+            ImageV4Response latestPrewarmedImage = prewarmedImagesForRuntime
+                    .orElseThrow(() ->
+                            new IllegalStateException(format("Cannot find pre-warmed Azure Marketplace images at Azure provider for '%s' runtime version!",
+                            commonClusterManagerProperties().getRuntimeVersion())));
+            Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
+            Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
+            Log.log(LOGGER, format(" Selected Pre-warmed Image Date: %s | ID: %s | Description: %s ", latestPrewarmedImage.getDate(),
+                    latestPrewarmedImage.getUuid(), latestPrewarmedImage.getDescription()));
+            return latestPrewarmedImage.getUuid();
+        } catch (Exception e) {
+            LOGGER.error("Cannot fetch pre-warmed images from '{}' image catalog, because of: {}", imageCatalogTestDto.getRequest().getName(), e);
+            throw new TestFailException(format("Cannot fetch pre-warmed images from '%s' image catalog!", imageCatalogTestDto.getRequest().getName(), e));
+        }
     }
 
     @Override
