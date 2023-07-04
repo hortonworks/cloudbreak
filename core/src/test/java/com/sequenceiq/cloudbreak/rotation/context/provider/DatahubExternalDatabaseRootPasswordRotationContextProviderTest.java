@@ -12,12 +12,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.DatabaseRootPasswordSaltPillarGenerator;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
+import com.sequenceiq.cloudbreak.rotation.context.PollerRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.context.PollerRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep;
-import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 
 @ExtendWith(MockitoExtension.class)

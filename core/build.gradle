@@ -230,6 +230,9 @@ dependencies {
     because 'because there is no jar for 2.4.3 in maven central repo...'
   }
 
+  implementation project(':secret-rotation')
+  implementation project(':secret-rotation-common')
+  implementation project(':secret-rotation-api')
   implementation project(':core-api')
   implementation project(':core-model')
   implementation project(':orchestrator-api')

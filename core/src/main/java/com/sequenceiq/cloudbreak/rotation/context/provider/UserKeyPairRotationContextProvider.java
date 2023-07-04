@@ -16,13 +16,12 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.repository.StackAuthenticationRepository;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContextProvider;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
-import com.sequenceiq.cloudbreak.rotation.secret.context.CustomJobRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.context.CustomJobRotationContext.CustomJobRotationContextBuilder;
-import com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep;
-import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.SecretType;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
+import com.sequenceiq.cloudbreak.rotation.context.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -66,7 +65,7 @@ public class UserKeyPairRotationContextProvider implements RotationContextProvid
 
     private CustomJobRotationContext getCustomJobRotationContext(boolean changedKeyPair, String resourceCrn, StackDto stack,
             DetailedEnvironmentResponse environment) {
-        CustomJobRotationContextBuilder customJobRotationContextBuilder = CustomJobRotationContext.builder();
+        CustomJobRotationContext.CustomJobRotationContextBuilder customJobRotationContextBuilder = CustomJobRotationContext.builder();
         customJobRotationContextBuilder.withResourceCrn(resourceCrn);
         if (changedKeyPair) {
             customJobRotationContextBuilder.withRotationJob(() -> stackAuthenticationRepository

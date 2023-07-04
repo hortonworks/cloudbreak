@@ -13,6 +13,8 @@ jar {
 dependencies {
     implementation project(':common')
     implementation project(':cloud-common')
+    implementation project(':secret-rotation-common')
+    implementation project(':secret-rotation-api')
 
     implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonDatabindVersion
     implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion

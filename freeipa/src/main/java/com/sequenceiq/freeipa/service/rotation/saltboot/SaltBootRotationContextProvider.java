@@ -1,9 +1,9 @@
 package com.sequenceiq.freeipa.service.rotation.saltboot;
 
-import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.CUSTOM_JOB;
-import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.SERVICE_CONFIG;
-import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.USER_DATA;
-import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.VAULT;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.SERVICE_CONFIG;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.USER_DATA;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 
 import java.security.PublicKey;
 import java.util.List;
@@ -20,17 +20,17 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
-import com.sequenceiq.cloudbreak.cloud.rotation.UserDataRotationContext;
 import com.sequenceiq.cloudbreak.orchestrator.rotation.ServiceConfigRotationContext;
 import com.sequenceiq.cloudbreak.orchestrator.rotation.ServiceUpdateConfiguration;
 import com.sequenceiq.cloudbreak.orchestrator.salt.rotation.SaltBootPasswordUserDataModifier;
 import com.sequenceiq.cloudbreak.orchestrator.salt.rotation.SaltBootSignKeyUserDataModifier;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContextProvider;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
-import com.sequenceiq.cloudbreak.rotation.secret.context.CustomJobRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
-import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.SecretType;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
+import com.sequenceiq.cloudbreak.rotation.context.CustomJobRotationContext;
+import com.sequenceiq.cloudbreak.rotation.userdata.UserDataRotationContext;
+import com.sequenceiq.cloudbreak.rotation.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -83,7 +83,7 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
         String saltBootPasswordSecret = securityConfig.getSaltSecurityConfig().getSaltBootPasswordVaultSecret();
         String saltBootPrivateKeySecret = securityConfig.getSaltSecurityConfig().getSaltBootSignPrivateKeyVaultSecret();
         return ImmutableMap.<SecretRotationStep, RotationContext>builder()
-                .put(VAULT, getVaultRotationContext(saltBootPasswordSecret, saltBootPrivateKeySecret))
+                .put(VAULT, getVaultRotationContext(resourceId, saltBootPasswordSecret, saltBootPrivateKeySecret))
                 .put(CUSTOM_JOB, getUpdateDatabaseJob(resourceId, environmentCrn.getAccountId(), saltBootPasswordSecret, saltBootPrivateKeySecret))
                 .put(SERVICE_CONFIG, getServiceConfigRotationContext(stack, saltBootPasswordSecret, saltBootPrivateKeySecret))
                 .put(USER_DATA, new UserDataRotationContext(resourceId,
@@ -176,8 +176,9 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
                 .replace("$PUBLIC_KEY", BASE64.encode(PkiUtil.getPublicKeyDer(new String(BASE64.decode(privateKey)))));
     }
 
-    private VaultRotationContext getVaultRotationContext(String saltBootPasswordSecret, String saltBootPrivateKeySecret) {
+    private VaultRotationContext getVaultRotationContext(String resourceCrn, String saltBootPasswordSecret, String saltBootPrivateKeySecret) {
         return VaultRotationContext.builder()
+                .withResourceCrn(resourceCrn)
                 .withVaultPathSecretMap(ImmutableMap.<String, String>builder()
                         .put(saltBootPasswordSecret, PasswordUtil.generatePassword())
                         .put(saltBootPrivateKeySecret, BaseEncoding.base64().encode(PkiUtil.convert(PkiUtil.generateKeypair().getPrivate()).getBytes()))

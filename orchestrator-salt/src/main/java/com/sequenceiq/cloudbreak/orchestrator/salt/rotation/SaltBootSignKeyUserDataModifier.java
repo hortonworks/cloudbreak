@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
-import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataSecretModifier;
+import com.sequenceiq.cloudbreak.rotation.userdata.UserDataSecretModifier;
 import com.sequenceiq.cloudbreak.util.UserDataReplacer;
 
 @Component

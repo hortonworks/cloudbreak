@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
   implementation project(":common")
+  implementation project(':secret-rotation-api')
 
   implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jApiVersion
   implementation group: 'org.springframework', name: 'spring-aspects', version: springFrameworkVersion

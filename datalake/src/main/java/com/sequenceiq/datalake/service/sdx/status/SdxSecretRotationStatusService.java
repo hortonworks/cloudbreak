@@ -5,11 +5,11 @@ import javax.inject.Inject;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.rotation.service.SecretRotationStatusService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.service.sdx.SdxService;
-import com.sequenceiq.flow.rotation.status.service.SecretRotationStatusService;
 
 @Primary
 @Component

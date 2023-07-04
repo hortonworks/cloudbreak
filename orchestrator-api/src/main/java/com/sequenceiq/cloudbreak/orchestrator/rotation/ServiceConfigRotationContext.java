@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.rotation;
 
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 
 public abstract class ServiceConfigRotationContext extends RotationContext {
 

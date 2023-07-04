@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.context.CMServiceConfigRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationProgressService;
+import com.sequenceiq.cloudbreak.rotation.service.SecretRotationProgressService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;

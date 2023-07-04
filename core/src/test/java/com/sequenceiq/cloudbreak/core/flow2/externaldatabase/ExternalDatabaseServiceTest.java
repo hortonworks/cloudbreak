@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.externaldatabase;
 
-import static com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType.ROTATE;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 import static com.sequenceiq.redbeams.rotation.RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;

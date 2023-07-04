@@ -15,6 +15,7 @@ jar {
 }
 
 dependencies {
+  implementation project(':secret-rotation-api')
   implementation project(':authorization-common-api')
   api project(':cloud-api')
   api project(':auth-connector')

@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.rotation;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataSecretModifier;
+import com.sequenceiq.cloudbreak.rotation.userdata.UserDataSecretModifier;
 import com.sequenceiq.cloudbreak.util.UserDataReplacer;
 
 @Component
