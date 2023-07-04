@@ -49,6 +49,8 @@ public class CoreImageProviderTest {
 
     private static final String VM_IMAGE_REFERENCE = "vm image";
 
+    private static final String ACCOUNT_ID = "cloudera";
+
     private static final Map<String, Map<String, String>> VM_IMAGES = Collections.singletonMap(PLATFORM, Collections.singletonMap(REGION, VM_IMAGE_REFERENCE));
 
     @Mock
@@ -64,7 +66,7 @@ public class CoreImageProviderTest {
     public void shouldReturnEmptyInCaseOfException() throws Exception {
         when(imageCatalogV4Endpoint.getSingleImageByCatalogNameAndImageId(WORKSPACE_ID_DEFAULT, CATALOG_NAME, IMAGE_ID)).thenThrow(new RuntimeException());
 
-        Optional<ImageWrapper> actual = victim.getImage(anImageSettings(), REGION, PLATFORM);
+        Optional<ImageWrapper> actual = victim.getImage(ACCOUNT_ID, anImageSettings(), REGION, PLATFORM);
 
         assertTrue(actual.isEmpty());
     }
@@ -73,7 +75,7 @@ public class CoreImageProviderTest {
     public void shouldReturnEmptyInCaseOfNullResponse() throws Exception {
         when(imageCatalogV4Endpoint.getSingleImageByCatalogNameAndImageId(WORKSPACE_ID_DEFAULT, CATALOG_NAME, IMAGE_ID)).thenReturn(null);
 
-        Optional<ImageWrapper> actual = victim.getImage(anImageSettings(), REGION, PLATFORM);
+        Optional<ImageWrapper> actual = victim.getImage(ACCOUNT_ID, anImageSettings(), REGION, PLATFORM);
 
         assertTrue(actual.isEmpty());
     }
@@ -82,7 +84,7 @@ public class CoreImageProviderTest {
     public void shouldReturnResult() throws Exception {
         when(imageCatalogV4Endpoint.getSingleImageByCatalogNameAndImageId(WORKSPACE_ID_DEFAULT, CATALOG_NAME, IMAGE_ID)).thenReturn(anImageResponse());
 
-        Optional<ImageWrapper> actual = victim.getImage(anImageSettings(), REGION, PLATFORM);
+        Optional<ImageWrapper> actual = victim.getImage(ACCOUNT_ID, anImageSettings(), REGION, PLATFORM);
         Image image = actual.get().getImage();
 
         assertEquals(DATE, image.getDate());
@@ -99,7 +101,7 @@ public class CoreImageProviderTest {
 
         ImageSettingsRequest imageSettings = new ImageSettingsRequest();
         imageSettings.setCatalog(CATALOG_NAME);
-        List<ImageWrapper> result = victim.getImages(imageSettings, "", PLATFORM);
+        List<ImageWrapper> result = victim.getImages(ACCOUNT_ID, imageSettings, "", PLATFORM);
 
         assertTrue(result.isEmpty());
     }
@@ -111,7 +113,7 @@ public class CoreImageProviderTest {
 
         ImageSettingsRequest imageSettings = new ImageSettingsRequest();
         imageSettings.setCatalog(CATALOG_NAME);
-        List<ImageWrapper> result = victim.getImages(imageSettings, "", PLATFORM);
+        List<ImageWrapper> result = victim.getImages(ACCOUNT_ID, imageSettings, "", PLATFORM);
 
         assertTrue(result.isEmpty());
     }
@@ -123,7 +125,7 @@ public class CoreImageProviderTest {
 
         ImageSettingsRequest imageSettings = new ImageSettingsRequest();
         imageSettings.setCatalog(CATALOG_NAME);
-        List<ImageWrapper> result = victim.getImages(imageSettings, "", PLATFORM);
+        List<ImageWrapper> result = victim.getImages(ACCOUNT_ID, imageSettings, "", PLATFORM);
 
         assertTrue(result.isEmpty());
     }
@@ -137,7 +139,7 @@ public class CoreImageProviderTest {
 
         ImageSettingsRequest imageSettings = new ImageSettingsRequest();
         imageSettings.setCatalog(CATALOG_NAME);
-        List<ImageWrapper> result = victim.getImages(imageSettings, "", PLATFORM);
+        List<ImageWrapper> result = victim.getImages(ACCOUNT_ID, imageSettings, "", PLATFORM);
 
         assertEquals(1, result.size());
         ImageWrapper imageWrapper = result.get(0);

@@ -95,7 +95,7 @@ public class ImageService {
     public Pair<ImageWrapper, String> fetchImageWrapperAndName(Stack stack, ImageSettingsRequest imageRequest) {
         String region = stack.getRegion();
         String platformString = getPlatformString(stack);
-        ImageWrapper imageWrapper = getImage(imageRequest, region, platformString);
+        ImageWrapper imageWrapper = getImage(stack.getAccountId(), imageRequest, region, platformString);
         String imageName = determineImageName(platformString, region, imageWrapper.getImage());
         LOGGER.info("Selected VM image for CloudPlatform '{}' and region '{}' is: {} from: {} image catalog with '{}' catalog name",
                 platformString, region, imageName, imageWrapper.getCatalogUrl(), imageWrapper.getCatalogName());
@@ -118,7 +118,7 @@ public class ImageService {
     public List<Pair<ImageWrapper, String>> fetchImagesWrapperAndName(Stack stack, ImageSettingsRequest imageRequest) {
         String region = stack.getRegion();
         String platformString = getPlatformString(stack);
-        List<ImageWrapper> imageWrappers = getImages(imageRequest, region, platformString);
+        List<ImageWrapper> imageWrappers = getImages(stack.getAccountId(), imageRequest, region, platformString);
         LOGGER.debug("Images found: {}", imageWrappers);
         return imageWrappers.stream().map(imgw -> Pair.of(imgw, determineImageName(platformString, region, imgw.getImage()))).collect(Collectors.toList());
     }
@@ -160,16 +160,16 @@ public class ImageService {
         return imageRepository.save(imageEntity);
     }
 
-    public ImageWrapper getImage(ImageSettingsRequest imageSettings, String region, String platform) {
+    public ImageWrapper getImage(String accountId, ImageSettingsRequest imageSettings, String region, String platform) {
         return imageProviderFactory.getImageProvider(imageSettings.getCatalog())
-                .getImage(imageSettings, region, platform)
+                .getImage(accountId, imageSettings, region, platform)
                 .orElseThrow(() -> throwImageNotFoundException(region, imageSettings.getId(), Optional.ofNullable(imageSettings.getOs()).orElse(defaultOs)));
 
     }
 
-    private List<ImageWrapper> getImages(ImageSettingsRequest imageSettings, String region, String platformString) {
+    private List<ImageWrapper> getImages(String accountId, ImageSettingsRequest imageSettings, String region, String platformString) {
         return imageProviderFactory.getImageProvider(imageSettings.getCatalog())
-                .getImages(imageSettings, region, platformString);
+                .getImages(accountId, imageSettings, region, platformString);
     }
 
     public String determineImageName(String platformString, String region, Image imgFromCatalog) {
@@ -264,7 +264,7 @@ public class ImageService {
     public Image getImageForStack(Stack stack) {
         final ImageEntity imageEntity = getByStack(stack);
         final ImageSettingsRequest imageSettings = imageEntityToImageSettingsRequest(imageEntity);
-        final ImageWrapper imageWrapper = getImage(imageSettings, stack.getRegion(), getPlatformString(stack));
+        final ImageWrapper imageWrapper = getImage(stack.getAccountId(), imageSettings, stack.getRegion(), getPlatformString(stack));
 
         return imageWrapper.getImage();
     }

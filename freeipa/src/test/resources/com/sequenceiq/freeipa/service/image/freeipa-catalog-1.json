@@ -108,6 +108,41 @@
         "os": "centos7",
         "os_type": "redhat7",
         "uuid": "91851893-8340-411d-afb7-e1b55107fb10"
+      },
+      {
+        "date": "2023-07-05",
+        "description": "Cloudbreak official prewarmed IPA image",
+        "images": {
+          "aws": {
+            "af-south-1": "ami-04d2bcd85d94d94c1",
+            "ap-east-1": "ami-04cbe95ed40152f0a",
+            "ap-northeast-1": "ami-0fb16474bb4e5b32b",
+            "ap-northeast-2": "ami-0963996c6a5cd5444",
+            "ap-south-1": "ami-0c7c5934da0ed33fd",
+            "ap-southeast-1": "ami-062aecaf76b8b3d43",
+            "ap-southeast-2": "ami-0620d99af88ef2d9c",
+            "ap-southeast-3": "ami-025558987dc3c03f9",
+            "ca-central-1": "ami-006d5461c1dcb02e0",
+            "eu-central-1": "ami-05ecf3428d75b30d1",
+            "eu-central-2": "ami-0ae457ff2be2b8a5b",
+            "eu-north-1": "ami-0857f83ab4bde001e",
+            "eu-south-1": "ami-04130130b1e9383d1",
+            "eu-south-2": "ami-05b76725953fb453d",
+            "eu-west-1": "ami-06df140d001a07419",
+            "eu-west-2": "ami-01363e868ff604ecf",
+            "eu-west-3": "ami-0be56dfafc43fe6c6",
+            "me-central-1": "ami-058883bc86a720a4d",
+            "me-south-1": "ami-0667a2b30876c10d7",
+            "sa-east-1": "ami-0315ea333c5a0e3d0",
+            "us-east-1": "ami-0be49ddbc18a9ac0b",
+            "us-east-2": "ami-023560f1b4912d32e",
+            "us-west-1": "ami-0bc6119986f38318b",
+            "us-west-2": "ami-04c4232549a04967a"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "uuid": "b465c893-fe04-44b1-ae8e-0452bbb39c99"
       }
     ]
   },
@@ -116,7 +151,8 @@
       {
         "images": [
           "61851893-8340-411d-afb7-e1b55107fb10",
-          "71851893-8340-411d-afb7-e1b55107fb10"
+          "71851893-8340-411d-afb7-e1b55107fb10",
+          "b465c893-fe04-44b1-ae8e-0452bbb39c99"
         ],
         "defaults": [
           "71851893-8340-411d-afb7-e1b55107fb10"

@@ -10,11 +10,14 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.AdditionalAnswers.returnsSecondArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.List;
@@ -47,6 +50,12 @@ public class FreeIpaImageProviderTest {
 
     private static final String DEFAULT_OS = "redhat7";
 
+    private static final String NON_EXISTING_OS = "Ubuntu7";
+
+    private static final String CENTOS7 = "centos7";
+
+    private static final String REDHAT8 = "redhat8";
+
     private static final String DEFAULT_PLATFORM = "aws";
 
     private static final String DEFAULT_REGION = "eu-west-1";
@@ -59,19 +68,29 @@ public class FreeIpaImageProviderTest {
 
     private static final String NON_EXISTING_ID = "fake-ami-0a6931aea1415eb0e";
 
-    private static final String NON_EXISTING_OS = "Ubuntu7";
-
     private static final String DEFAULT_VERSION = "2.20.0-dev.1";
 
     private static final String IMAGE_UUID = "61851893-8340-411d-afb7-e1b55107fb10";
 
+    private static final String REDHAT8_IMAGE_UUID = "b465c893-fe04-44b1-ae8e-0452bbb39c99";
+
     private static final String NON_DEFAULT_OS_IMAGE_UUID = "91851893-8340-411d-afb7-e1b55107fb10";
+
+    private static final String ACCOUNT_ID = "cloudera";
+
+    private static final String ACCOUNT_ID_REDHAT8 = "cloudera_rhel8";
 
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
 
     @Mock
     private ProviderSpecificImageFilter providerSpecificImageFilter;
+
+    @Mock
+    private PreferredOsService preferredOsService;
+
+    @Mock
+    private SupportedOsService supportedOsService;
 
     @InjectMocks
     private FreeIpaImageProvider underTest;
@@ -83,8 +102,12 @@ public class FreeIpaImageProviderTest {
     public void setup() throws Exception {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, CATALOG_FILE);
         lenient().when(providerSpecificImageFilter.filterImages(any(), anyList())).then(returnsSecondArg());
+        lenient().when(preferredOsService.getPreferredOs(ACCOUNT_ID, CENTOS7)).thenReturn(CENTOS7);
+        lenient().when(preferredOsService.getPreferredOs(ACCOUNT_ID, DEFAULT_OS)).thenReturn(DEFAULT_OS);
+        lenient().when(preferredOsService.getPreferredOs(ACCOUNT_ID, null)).thenReturn(DEFAULT_OS);
+        lenient().when(supportedOsService.isSupported(eq(ACCOUNT_ID), any())).thenReturn(true);
+        lenient().when(supportedOsService.isSupported(ACCOUNT_ID, REDHAT8)).thenReturn(false);
 
-        ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "defaultOs", DEFAULT_OS, null);
         ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "defaultCatalogUrl", DEFAULT_CATALOG_URL, null);
         ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "freeIpaVersion", DEFAULT_VERSION, null);
     }
@@ -92,9 +115,10 @@ public class FreeIpaImageProviderTest {
     @Test
     public void testGetImageGivenNoInputWithInvalidAppVersion() {
         ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "freeIpaVersion", "2.21.0-dcv.1", null);
-        ImageSettingsRequest is = setupImageSettingsRequest(null, null, "centos7");
+        ImageSettingsRequest is = setupImageSettingsRequest(null, null, CENTOS7);
 
-        Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM).get().getImage();
+
+        Image image = underTest.getImage(ACCOUNT_ID, is, DEFAULT_REGION, DEFAULT_PLATFORM).get().getImage();
 
         assertEquals("centos7", image.getOs());
         assertEquals("2019-05-09", image.getDate());
@@ -116,9 +140,9 @@ public class FreeIpaImageProviderTest {
     @Test
     public void testGetImagesGivenNoInputWithInvalidAppVersion() {
         ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "freeIpaVersion", "2.21.0-dcv.1", null);
-        ImageSettingsRequest is = setupImageSettingsRequest(null, null, "centos7");
+        ImageSettingsRequest is = setupImageSettingsRequest(null, null, CENTOS7);
 
-        List<ImageWrapper> images = underTest.getImages(is, DEFAULT_REGION, DEFAULT_PLATFORM);
+        List<ImageWrapper> images = underTest.getImages(ACCOUNT_ID, is, DEFAULT_REGION, DEFAULT_PLATFORM);
 
         assertTrue(images.isEmpty());
     }
@@ -126,7 +150,7 @@ public class FreeIpaImageProviderTest {
     private void doTestGetImageGivenNoInput() {
         ImageSettingsRequest is = setupImageSettingsRequest(null, null, null);
 
-        Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM).get().getImage();
+        Image image = underTest.getImage(ACCOUNT_ID, is, DEFAULT_REGION, DEFAULT_PLATFORM).get().getImage();
 
         assertEquals(DEFAULT_OS, image.getOs());
         assertEquals(LATEST_DATE_NO_INPUT, image.getDate());
@@ -137,7 +161,7 @@ public class FreeIpaImageProviderTest {
     public void testGetImageGivenAllInput() {
         ImageSettingsRequest is = setupImageSettingsRequest(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, DEFAULT_OS);
 
-        Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM).get().getImage();
+        Image image = underTest.getImage(ACCOUNT_ID, is, DEFAULT_REGION, DEFAULT_PLATFORM).get().getImage();
 
         assertEquals(DEFAULT_OS, image.getOs());
         assertEquals(LATEST_DATE, image.getDate());
@@ -145,10 +169,23 @@ public class FreeIpaImageProviderTest {
     }
 
     @Test
+    public void testGetImageWithoutOsAndPreferredRedhat8() {
+        when(preferredOsService.getPreferredOs(ACCOUNT_ID_REDHAT8, null)).thenReturn(REDHAT8);
+        when(supportedOsService.isSupported(ACCOUNT_ID_REDHAT8, REDHAT8)).thenReturn(true);
+
+        ImageSettingsRequest is = setupImageSettingsRequest(REDHAT8_IMAGE_UUID, CUSTOM_IMAGE_CATALOG_URL, null);
+
+        Image image = underTest.getImage(ACCOUNT_ID_REDHAT8, is, DEFAULT_REGION, DEFAULT_PLATFORM).get().getImage();
+
+        assertEquals(REDHAT8, image.getOs());
+        assertEquals(REDHAT8_IMAGE_UUID, image.getUuid());
+    }
+
+    @Test
     public void testGetImagesGivenAllInput() {
         ImageSettingsRequest is = setupImageSettingsRequest(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, DEFAULT_OS);
 
-        List<ImageWrapper> images = underTest.getImages(is, DEFAULT_REGION, DEFAULT_PLATFORM);
+        List<ImageWrapper> images = underTest.getImages(ACCOUNT_ID, is, DEFAULT_REGION, DEFAULT_PLATFORM);
 
         assertEquals(1, images.size());
         ImageWrapper imageWrapper = images.get(0);
@@ -164,7 +201,7 @@ public class FreeIpaImageProviderTest {
     public void testGetImageGivenAllInputNonExistentOS() {
         ImageSettingsRequest is = setupImageSettingsRequest(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, NON_EXISTING_OS);
 
-        Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM).get().getImage();
+        Image image = underTest.getImage(ACCOUNT_ID, is, DEFAULT_REGION, DEFAULT_PLATFORM).get().getImage();
 
         assertEquals(DEFAULT_OS, image.getOs());
         assertEquals(LATEST_DATE, image.getDate());
@@ -175,7 +212,7 @@ public class FreeIpaImageProviderTest {
     public void testGetImagesGivenAllInputNonExistentOS() {
         ImageSettingsRequest is = setupImageSettingsRequest(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, NON_EXISTING_OS);
 
-        List<ImageWrapper> images = underTest.getImages(is, DEFAULT_REGION, DEFAULT_PLATFORM);
+        List<ImageWrapper> images = underTest.getImages(ACCOUNT_ID, is, DEFAULT_REGION, DEFAULT_PLATFORM);
 
         assertEquals(1, images.size());
         ImageWrapper imageWrapper = images.get(0);
@@ -191,7 +228,7 @@ public class FreeIpaImageProviderTest {
     public void testGetImageGivenIdInputFound() {
         ImageSettingsRequest is = setupImageSettingsRequest(EXISTING_ID, null, null);
 
-        Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM).get().getImage();
+        Image image = underTest.getImage(ACCOUNT_ID, is, DEFAULT_REGION, DEFAULT_PLATFORM).get().getImage();
 
         assertEquals(DEFAULT_OS, image.getOs());
         assertEquals(LATEST_DATE, image.getDate());
@@ -202,7 +239,7 @@ public class FreeIpaImageProviderTest {
     public void testGetImagesGivenIdInputFound() {
         ImageSettingsRequest is = setupImageSettingsRequest(EXISTING_ID, null, null);
 
-        List<ImageWrapper> images = underTest.getImages(is, DEFAULT_REGION, DEFAULT_PLATFORM);
+        List<ImageWrapper> images = underTest.getImages(ACCOUNT_ID, is, DEFAULT_REGION, DEFAULT_PLATFORM);
 
         assertEquals(1, images.size());
         ImageWrapper imageWrapper = images.get(0);
@@ -218,16 +255,27 @@ public class FreeIpaImageProviderTest {
     public void testGetImageGivenUuidInputFound() {
         ImageSettingsRequest is = setupImageSettingsRequest(IMAGE_UUID, null, null);
 
-        Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM).get().getImage();
+        Image image = underTest.getImage(ACCOUNT_ID, is, DEFAULT_REGION, DEFAULT_PLATFORM).get().getImage();
 
         assertEquals(IMAGE_UUID, image.getUuid());
+    }
+
+    @Test
+    public void testGetImageGivenUuidInputFoundButOsNotSupported() {
+        when(supportedOsService.isSupported(ACCOUNT_ID, DEFAULT_OS)).thenReturn(false);
+
+        ImageSettingsRequest is = setupImageSettingsRequest(IMAGE_UUID, null, null);
+
+        Exception exception = assertThrows(IllegalArgumentException.class,
+                () -> underTest.getImage(ACCOUNT_ID, is, DEFAULT_REGION, DEFAULT_PLATFORM).get().getImage());
+        assertEquals("The OS 'redhat7' of the selected image '61851893-8340-411d-afb7-e1b55107fb10' is not supported.", exception.getMessage());
     }
 
     @Test
     public void testGetImagesGivenUuidInputFound() {
         ImageSettingsRequest is = setupImageSettingsRequest(IMAGE_UUID, null, null);
 
-        List<ImageWrapper> images = underTest.getImages(is, DEFAULT_REGION, DEFAULT_PLATFORM);
+        List<ImageWrapper> images = underTest.getImages(ACCOUNT_ID, is, DEFAULT_REGION, DEFAULT_PLATFORM);
 
         assertEquals(1, images.size());
         ImageWrapper imageWrapper = images.get(0);
@@ -243,7 +291,7 @@ public class FreeIpaImageProviderTest {
     public void testGetImageGivenIdInputNotFound() {
         ImageSettingsRequest is = setupImageSettingsRequest(NON_EXISTING_ID, null, null);
 
-        Optional<ImageWrapper> result = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM);
+        Optional<ImageWrapper> result = underTest.getImage(ACCOUNT_ID, is, DEFAULT_REGION, DEFAULT_PLATFORM);
 
         assertFalse(result.isPresent());
     }
@@ -252,7 +300,7 @@ public class FreeIpaImageProviderTest {
     public void testGetImagesGivenIdInputNotFound() {
         ImageSettingsRequest is = setupImageSettingsRequest(NON_EXISTING_ID, null, null);
 
-        List<ImageWrapper> images = underTest.getImages(is, DEFAULT_REGION, DEFAULT_PLATFORM);
+        List<ImageWrapper> images = underTest.getImages(ACCOUNT_ID, is, DEFAULT_REGION, DEFAULT_PLATFORM);
 
         assertTrue(images.isEmpty());
     }
@@ -261,7 +309,7 @@ public class FreeIpaImageProviderTest {
     public void testGetImageGivenUuidInputFoundWithNotDefaultOs() {
         ImageSettingsRequest is = setupImageSettingsRequest(NON_DEFAULT_OS_IMAGE_UUID, null, null);
 
-        Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM).get().getImage();
+        Image image = underTest.getImage(ACCOUNT_ID, is, DEFAULT_REGION, DEFAULT_PLATFORM).get().getImage();
 
         assertEquals(NON_DEFAULT_OS_IMAGE_UUID, image.getUuid());
     }
@@ -270,7 +318,7 @@ public class FreeIpaImageProviderTest {
     public void testGetImagesGivenUuidInputNotFoundWithNotDefaultOs() {
         ImageSettingsRequest is = setupImageSettingsRequest(NON_DEFAULT_OS_IMAGE_UUID, null, null);
 
-        List<ImageWrapper> images = underTest.getImages(is, DEFAULT_REGION, DEFAULT_PLATFORM);
+        List<ImageWrapper> images = underTest.getImages(ACCOUNT_ID, is, DEFAULT_REGION, DEFAULT_PLATFORM);
 
         assertTrue(images.isEmpty());
     }
@@ -279,7 +327,7 @@ public class FreeIpaImageProviderTest {
     public void testGetImagesNoInput() {
         ImageSettingsRequest imageSettingsRequest = setupImageSettingsRequest(null, null, null);
 
-        List<ImageWrapper> images = underTest.getImages(imageSettingsRequest, DEFAULT_REGION, DEFAULT_PLATFORM);
+        List<ImageWrapper> images = underTest.getImages(ACCOUNT_ID, imageSettingsRequest, DEFAULT_REGION, DEFAULT_PLATFORM);
 
         assertEquals(2, images.size());
         assertThat(images, everyItem(allOf(

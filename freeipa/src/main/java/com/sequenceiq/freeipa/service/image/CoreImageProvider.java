@@ -37,7 +37,7 @@ public class CoreImageProvider implements ImageProvider {
     private WebApplicationExceptionMessageExtractor messageExtractor;
 
     @Override
-    public Optional<ImageWrapper> getImage(ImageSettingsRequest imageSettings, String region, String platform) {
+    public Optional<ImageWrapper> getImage(String accountId, ImageSettingsRequest imageSettings, String region, String platform) {
         try {
             ImageV4Response imageV4Response = imageCatalogV4Endpoint.getSingleImageByCatalogNameAndImageId(
                     WORKSPACE_ID_DEFAULT, imageSettings.getCatalog(), imageSettings.getId());
@@ -52,7 +52,7 @@ public class CoreImageProvider implements ImageProvider {
     }
 
     @Override
-    public List<ImageWrapper> getImages(ImageSettingsRequest imageSettings, String region, String platform) {
+    public List<ImageWrapper> getImages(String accountId, ImageSettingsRequest imageSettings, String region, String platform) {
         try {
             ImagesV4Response imagesV4Response = imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, imageSettings.getCatalog(), null, platform, null,
                     null, false);

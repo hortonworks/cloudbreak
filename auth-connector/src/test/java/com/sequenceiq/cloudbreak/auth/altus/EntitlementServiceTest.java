@@ -202,6 +202,12 @@ class EntitlementServiceTest {
 
                 {"CDP_AZURE_DATABASE_FLEXIBLE_SERVER", (EntitlementCheckFunction) EntitlementService::isAzureDatabaseFlexibleServerEnabled, false},
                 {"CDP_AZURE_DATABASE_FLEXIBLE_SERVER", (EntitlementCheckFunction) EntitlementService::isAzureDatabaseFlexibleServerEnabled, true},
+
+                {"ENABLE_RHEL8_IMAGES", (EntitlementCheckFunction) EntitlementService::isRhel8ImageSupportEnabled, false},
+                {"ENABLE_RHEL8_IMAGES", (EntitlementCheckFunction) EntitlementService::isRhel8ImageSupportEnabled, true},
+
+                {"PREFER_RHEL8_IMAGES", (EntitlementCheckFunction) EntitlementService::isRhel8ImagePreferred, false},
+                {"PREFER_RHEL8_IMAGES", (EntitlementCheckFunction) EntitlementService::isRhel8ImagePreferred, true},
         };
     }
 
