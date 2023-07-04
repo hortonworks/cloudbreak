@@ -11,12 +11,12 @@ public enum InstanceCountParameter {
     ZOOKEEPER_INSTANCE_COUNT("zookeeperInstanceCount"),
     AUXILIARY_INSTANCE_COUNT("auxiliaryInstanceCount"),
     CORE_INSTANCE_COUNT("coreInstanceCount"),
-    SOLR_SCALE_OUT_INSTANCE_COUNT("solrhgInstanceCount"),
-    STORAGE_SCALE_OUT_INSTANCE_COUNT("storagehgInstanceCount"),
-    KAFKA_SCALE_OUT_INSTANCE_COUNT("kafkahgInstanceCount"),
-    RAZ_SCALE_OUT_INSTANCE_COUNT("razhgInstanceCount"),
-    ATLAS_SCALE_OUT_INSTANCE_COUNT("atlashgInstanceCount"),
-    HMS_SCALE_OUT_INSTANCE_COUNT("hmshgInstanceCount");
+    SOLRHG_INSTANCE_COUNT("solrhgInstanceCount"),
+    STORAGEHG_INSTANCE_COUNT("storagehgInstanceCount"),
+    KAFKAHG_INSTANCE_COUNT("kafkahgInstanceCount"),
+    RAZHG_INSTANCE_COUNT("razhgInstanceCount"),
+    ATLASHG_INSTANCE_COUNT("atlashgInstanceCount"),
+    HMSHG_INSTANCE_COUNT("hmshgInstanceCount");
 
     private final String name;
 
