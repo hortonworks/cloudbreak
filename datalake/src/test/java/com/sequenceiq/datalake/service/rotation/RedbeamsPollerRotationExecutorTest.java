@@ -98,4 +98,10 @@ class RedbeamsPollerRotationExecutorTest {
         verify(sdxRotationService, times(1)).rotateRedbeamsSecret(eq(RESOURCE_CRN),
                 eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(FINALIZE));
     }
+
+    @Test
+    void preValidateShouldSucceed() {
+        underTest.preValidate(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD));
+        verify(sdxRotationService, times(1)).preValidateRedbeamsRotation(eq(RESOURCE_CRN));
+    }
 }

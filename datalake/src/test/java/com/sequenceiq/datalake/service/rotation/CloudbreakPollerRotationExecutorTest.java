@@ -99,4 +99,10 @@ class CloudbreakPollerRotationExecutorTest {
                 eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(FINALIZE));
     }
 
+    @Test
+    void preValidateShouldSucceed() {
+        underTest.preValidate(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD));
+        verify(sdxRotationService, times(1)).preValidateCloudbreakRotation(eq(RESOURCE_CRN));
+    }
+
 }

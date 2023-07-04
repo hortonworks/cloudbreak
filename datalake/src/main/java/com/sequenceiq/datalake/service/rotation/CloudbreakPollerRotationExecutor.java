@@ -43,13 +43,12 @@ public class CloudbreakPollerRotationExecutor extends AbstractRotationExecutor<P
     }
 
     @Override
-    public void preValidate(PollerRotationContext rotationContext) throws Exception {
-
+    public void preValidate(PollerRotationContext rotationContext) {
+        sdxRotationService.preValidateCloudbreakRotation(rotationContext.getResourceCrn());
     }
 
     @Override
-    public void postValidate(PollerRotationContext rotationContext) throws Exception {
-
+    public void postValidate(PollerRotationContext rotationContext) {
     }
 
     @Override

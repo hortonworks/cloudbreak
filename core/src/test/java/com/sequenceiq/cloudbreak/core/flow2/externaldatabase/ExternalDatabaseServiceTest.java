@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
+import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseOperation;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseServerParameterDecorator;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseServerParameter;
@@ -62,7 +63,9 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.flow.api.model.StateStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigV4Request;
@@ -597,6 +600,35 @@ class ExternalDatabaseServiceTest {
         assertEquals(RDBMS_CRN, request.getCrn());
         assertEquals(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD.name(), request.getSecret());
         assertEquals(ROTATE, request.getExecutionType());
+    }
+
+    @Test
+    void preValidateShouldFailIfDatabaseCrnIsNull() {
+        SecretRotationException secretRotationException = assertThrows(SecretRotationException.class, () -> underTest.preValidateDatabaseSecretRotation(null));
+        assertEquals("No database server crn found, rotation is not possible.", secretRotationException.getMessage());
+        verify(redbeamsClient, never()).getLastFlowId(eq(RDBMS_CRN));
+    }
+
+    @Test
+    void preValidateShouldFailIfLastFlowIsRunningInRedbeams() {
+        FlowLogResponse lastFlow = new FlowLogResponse();
+        lastFlow.setStateStatus(StateStatus.PENDING);
+        lastFlow.setCurrentState("currentState");
+        when(redbeamsClient.getLastFlowId(eq(RDBMS_CRN))).thenReturn(lastFlow);
+        SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
+                () -> underTest.preValidateDatabaseSecretRotation(RDBMS_CRN));
+        assertEquals("Polling in Redbeams is not possible since last known state of flow for the database is currentState",
+                secretRotationException.getMessage());
+        verify(redbeamsClient, times(1)).getLastFlowId(eq(RDBMS_CRN));
+    }
+
+    @Test
+    void preValidateShouldSucceedIfLastFlowIsNotRunningInRedbeams() {
+        FlowLogResponse lastFlow = new FlowLogResponse();
+        lastFlow.setStateStatus(StateStatus.SUCCESSFUL);
+        when(redbeamsClient.getLastFlowId(eq(RDBMS_CRN))).thenReturn(lastFlow);
+        underTest.preValidateDatabaseSecretRotation(RDBMS_CRN);
+        verify(redbeamsClient, times(1)).getLastFlowId(eq(RDBMS_CRN));
     }
 
     @Test
