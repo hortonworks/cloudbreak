@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,13 +31,18 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
+import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.RedbeamsPoller;
+import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
+import com.sequenceiq.datalake.service.sdx.flowcheck.RedbeamsFlowService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.flow.api.model.StateStatus;
 import com.sequenceiq.flow.rotation.service.SecretRotationValidator;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
@@ -78,6 +84,12 @@ class SdxRotationServiceTest {
 
     @Mock
     private SecretRotationValidator secretRotationValidator;
+
+    @Mock
+    private RedbeamsFlowService redbeamsFlowService;
+
+    @Mock
+    private CloudbreakFlowService cloudbreakFlowService;
 
     @InjectMocks
     private SdxRotationService underTest;
@@ -156,4 +168,71 @@ class SdxRotationServiceTest {
         assertEquals("No sdx cluster found with crn: " + RESOURCE_CRN, cloudbreakServiceException.getMessage());
     }
 
+    @Test
+    void preValidateRedbeamsRotationShouldFailIfSdxClusterNotFound() {
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.empty());
+        NotFoundException notFoundException = assertThrows(NotFoundException.class,
+                () -> underTest.preValidateRedbeamsRotation(RESOURCE_CRN));
+        assertEquals("SdxCluster 'crn:cdp:datalake:us-west-1:1234:environment:1' not found.", notFoundException.getMessage());
+        verify(redbeamsFlowService, never()).getLastFlowId(anyString());
+    }
+
+    @Test
+    void preValidateRedbeamsRotationShouldFailDatabaseCrnIsEmpty() {
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(new SdxCluster()));
+        SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
+                () -> underTest.preValidateRedbeamsRotation(RESOURCE_CRN));
+        assertEquals("No database server found for sdx cluster, rotation is not possible.", secretRotationException.getMessage());
+        verify(redbeamsFlowService, never()).getLastFlowId(anyString());
+    }
+
+    @Test
+    void preValidateRedbeamsRotationShouldFailIfRedbeamsFlowIsRunning() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setDatabaseCrn(DATABASE_CRN);
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(sdxCluster));
+        FlowLogResponse lastFlow = new FlowLogResponse();
+        lastFlow.setStateStatus(StateStatus.PENDING);
+        lastFlow.setCurrentState("currentState");
+        when(redbeamsFlowService.getLastFlowId(eq(DATABASE_CRN))).thenReturn(lastFlow);
+        SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
+                () -> underTest.preValidateRedbeamsRotation(RESOURCE_CRN));
+        assertEquals("Polling in Redbeams is not possible since last known state of flow for the database is currentState",
+                secretRotationException.getMessage());
+        verify(redbeamsFlowService, times(1)).getLastFlowId(eq(DATABASE_CRN));
+    }
+
+    @Test
+    void preValidateRedbeamsRotationShouldSucceedIfRedbeamsFlowIsNotRunning() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setDatabaseCrn(DATABASE_CRN);
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(sdxCluster));
+        FlowLogResponse lastFlow = new FlowLogResponse();
+        lastFlow.setStateStatus(StateStatus.SUCCESSFUL);
+        when(redbeamsFlowService.getLastFlowId(eq(DATABASE_CRN))).thenReturn(lastFlow);
+        underTest.preValidateRedbeamsRotation(RESOURCE_CRN);
+        verify(redbeamsFlowService, times(1)).getLastFlowId(eq(DATABASE_CRN));
+    }
+
+    @Test
+    void preValidateCloudbreakRotationShouldFailIfCloudbreakFlowIsRunning() {
+        FlowLogResponse lastFlow = new FlowLogResponse();
+        lastFlow.setStateStatus(StateStatus.PENDING);
+        lastFlow.setCurrentState("currentState");
+        when(cloudbreakFlowService.getLastFlowId(eq(RESOURCE_CRN))).thenReturn(lastFlow);
+        SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
+                () -> underTest.preValidateCloudbreakRotation(RESOURCE_CRN));
+        assertEquals("Polling in CB is not possible since last known state of flow for cluster is currentState",
+                secretRotationException.getMessage());
+        verify(cloudbreakFlowService, times(1)).getLastFlowId(eq(RESOURCE_CRN));
+    }
+
+    @Test
+    void preValidateCloudberakRotationShouldSucceedIfCloudbreakFlowIsNotRunning() {
+        FlowLogResponse lastFlow = new FlowLogResponse();
+        lastFlow.setStateStatus(StateStatus.SUCCESSFUL);
+        when(cloudbreakFlowService.getLastFlowId(eq(RESOURCE_CRN))).thenReturn(lastFlow);
+        underTest.preValidateCloudbreakRotation(RESOURCE_CRN);
+        verify(cloudbreakFlowService, times(1)).getLastFlowId(eq(RESOURCE_CRN));
+    }
 }

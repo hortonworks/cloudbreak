@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
+import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
@@ -27,7 +28,11 @@ import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.RedbeamsPoller;
+import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
+import com.sequenceiq.datalake.service.sdx.flowcheck.RedbeamsFlowService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowLogResponse;
+import com.sequenceiq.flow.api.model.StateStatus;
 import com.sequenceiq.flow.rotation.service.SecretRotationValidator;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
@@ -69,6 +74,12 @@ public class SdxRotationService {
 
     @Inject
     private SecretRotationValidator secretRotationValidator;
+
+    @Inject
+    private RedbeamsFlowService redbeamsFlowService;
+
+    @Inject
+    private CloudbreakFlowService cloudbreakFlowService;
 
     public void rotateCloudbreakSecret(String datalakeCrn, CloudbreakSecretType secretType, RotationFlowExecutionType executionType) {
         SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn)
@@ -120,6 +131,28 @@ public class SdxRotationService {
             }
         } else {
             throw new CloudbreakServiceException("Account is not entitled to execute any secret rotation!");
+        }
+    }
+
+    public void preValidateRedbeamsRotation(String datalakeCrn) {
+        SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn)
+                .orElseThrow(notFound("SdxCluster", datalakeCrn));
+        if (sdxCluster.getDatabaseCrn() == null) {
+            throw new SecretRotationException("No database server found for sdx cluster, rotation is not possible.", null);
+        }
+        FlowLogResponse lastFlow = redbeamsFlowService.getLastFlowId(sdxCluster.getDatabaseCrn());
+        if (lastFlow != null && lastFlow.getStateStatus() == StateStatus.PENDING) {
+            String message = String.format("Polling in Redbeams is not possible since last known state of flow for the database is %s",
+                    lastFlow.getCurrentState());
+            throw new SecretRotationException(message, null);
+        }
+    }
+
+    public void preValidateCloudbreakRotation(String datalakeCrn) {
+        FlowLogResponse lastFlow = cloudbreakFlowService.getLastFlowId(datalakeCrn);
+        if (lastFlow != null && lastFlow.getStateStatus() == StateStatus.PENDING) {
+            String message = String.format("Polling in CB is not possible since last known state of flow for cluster is %s", lastFlow.getCurrentState());
+            throw new SecretRotationException(message, null);
         }
     }
 }

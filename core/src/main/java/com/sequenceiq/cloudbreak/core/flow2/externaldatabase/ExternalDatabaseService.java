@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
+import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseOperation;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseServerParameterDecorator;
 import com.sequenceiq.cloudbreak.service.externaldatabase.PollingConfig;
@@ -48,7 +49,9 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.flow.api.model.StateStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigV4Request;
@@ -213,6 +216,18 @@ public class ExternalDatabaseService {
             handleUnsuccessfulFlow(databaseServerCrn, flowIdentifier, null);
         } else {
             pollUntilFlowFinished(databaseServerCrn, flowIdentifier);
+        }
+    }
+
+    public void preValidateDatabaseSecretRotation(String databaseServerCrn) {
+        if (StringUtils.isEmpty(databaseServerCrn)) {
+            throw new SecretRotationException("No database server crn found, rotation is not possible.", null);
+        }
+        FlowLogResponse lastFlow = redbeamsClient.getLastFlowId(databaseServerCrn);
+        if (lastFlow != null && lastFlow.getStateStatus() == StateStatus.PENDING) {
+            String message = String.format("Polling in Redbeams is not possible since last known state of flow for the database is %s",
+                    lastFlow.getCurrentState());
+            throw new SecretRotationException(message, null);
         }
     }
 

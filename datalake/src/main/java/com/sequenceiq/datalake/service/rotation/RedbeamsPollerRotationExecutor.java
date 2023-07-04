@@ -43,13 +43,12 @@ public class RedbeamsPollerRotationExecutor implements RotationExecutor<PollerRo
     }
 
     @Override
-    public void preValidate(PollerRotationContext rotationContext) throws Exception {
-
+    public void preValidate(PollerRotationContext rotationContext) {
+        sdxRotationService.preValidateRedbeamsRotation(rotationContext.getResourceCrn());
     }
 
     @Override
-    public void postValidate(PollerRotationContext rotationContext) throws Exception {
-
+    public void postValidate(PollerRotationContext rotationContext) {
     }
 
     @Override

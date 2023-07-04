@@ -55,13 +55,14 @@ public class RedbeamsPollerRotationExecutor implements RotationExecutor<PollerRo
     }
 
     @Override
-    public void preValidate(PollerRotationContext rotationContext) throws Exception {
-
+    public void preValidate(PollerRotationContext rotationContext) {
+        LOGGER.info("Pre validate redbeams secret rotation: {}", rotationContext.getSecretType());
+        StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
+        externalDatabaseService.preValidateDatabaseSecretRotation(stackDto.getCluster().getDatabaseServerCrn());
     }
 
     @Override
-    public void postValidate(PollerRotationContext rotationContext) throws Exception {
-
+    public void postValidate(PollerRotationContext rotationContext) {
     }
 
     @Override

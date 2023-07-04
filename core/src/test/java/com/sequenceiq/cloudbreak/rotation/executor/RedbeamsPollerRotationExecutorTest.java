@@ -176,4 +176,16 @@ class RedbeamsPollerRotationExecutorTest {
                 eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(RotationFlowExecutionType.FINALIZE));
     }
 
+    @Test
+    void preValidateShouldSucceed() {
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(DATABASE_SERVER_CRN);
+        when(stackDto.getCluster()).thenReturn(cluster);
+        underTest.preValidate(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD));
+        verify(stackDtoService, times(1)).getByCrn(eq(RESOURCE_CRN));
+        verify(externalDatabaseService, times(1)).preValidateDatabaseSecretRotation(eq(DATABASE_SERVER_CRN));
+    }
+
 }

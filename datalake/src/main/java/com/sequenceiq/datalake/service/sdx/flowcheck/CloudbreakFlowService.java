@@ -21,7 +21,7 @@ import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.FlowType;
 
 @Service
-public class CloudbreakFlowService {
+public class CloudbreakFlowService extends AbstractFlowService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakFlowService.class);
 
@@ -37,12 +37,9 @@ public class CloudbreakFlowService {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public FlowLogResponse getLastCloudbreakFlowChainId(SdxCluster sdxCluster) {
-        FlowLogResponse lastFlowByResourceName = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> flowEndpoint.getLastFlowByResourceCrn(sdxCluster.getStackCrn()));
-        logFlowLogResponse(lastFlowByResourceName);
-        return lastFlowByResourceName;
+    @Override
+    protected FlowEndpoint flowEndpoint() {
+        return flowEndpoint;
     }
 
     public List<FlowLogResponse> getFlowLogsByFlowId(String flowId) {
@@ -102,16 +99,6 @@ public class CloudbreakFlowService {
         }
     }
 
-    public FlowState getLastKnownFlowStateByFlowId(String flowId) {
-        LOGGER.info("Checking cloudbreak {} {}", FlowType.FLOW, flowId);
-        FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> flowEndpoint.hasFlowRunningByFlowId(flowId)
-        );
-        logCbFlowStatus(flowId, flowCheckResponse.getHasActiveFlow());
-        return flowCheckResponseToFlowStateConverter.convert(flowCheckResponse);
-    }
-
     public void saveLastCloudbreakFlowChainId(SdxCluster sdxCluster, FlowIdentifier flowIdentifier) {
         if (flowIdentifier == null) {
             LOGGER.info("Cloudbreak not sent flow identifier for cluster falling back to flow API.");
@@ -169,30 +156,5 @@ public class CloudbreakFlowService {
     private void resetFlowIdAndFlowChainId(SdxCluster sdxCluster) {
         sdxCluster.setLastCbFlowId(null);
         sdxCluster.setLastCbFlowChainId(null);
-    }
-
-    private void logCbFlowChainStatus(String flowChainId, Boolean hasActiveFlow) {
-        logActiveStatus(FlowType.FLOW_CHAIN, hasActiveFlow, flowChainId);
-    }
-
-    private void logCbFlowStatus(String flowId, Boolean hasActiveFlow) {
-        logActiveStatus(FlowType.FLOW, hasActiveFlow, flowId);
-    }
-
-    private void logActiveStatus(FlowType flowType, Boolean hasActiveFlow, String id) {
-        if (hasActiveFlow == null || !hasActiveFlow) {
-            LOGGER.info("Cloudbreak {} {} is NOT ACTIVE", flowType, id);
-        } else {
-            LOGGER.info("Cloudbreak {} {} is ACTIVE", flowType, id);
-        }
-    }
-
-    private void logFlowLogResponse(FlowLogResponse lastFlowByResourceName) {
-        LOGGER.info("Found last flow from Cloudbreak, flowId: {} created: {} nextEvent:{} resourceId: {} stateStatus: {}",
-                lastFlowByResourceName.getFlowId(),
-                lastFlowByResourceName.getCreated(),
-                lastFlowByResourceName.getNextEvent(),
-                lastFlowByResourceName.getResourceId(),
-                lastFlowByResourceName.getStateStatus());
     }
 }
