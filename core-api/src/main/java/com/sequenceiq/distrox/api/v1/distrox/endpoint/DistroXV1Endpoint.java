@@ -590,6 +590,6 @@ public interface DistroXV1Endpoint {
 
     @PUT
     @Path("rotate_secret")
-    @ApiOperation(value = "Rotate DistroX secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateDistroXSecrets", hidden = true)
+    @ApiOperation(value = "Rotate DistroX secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateDistroXSecrets")
     FlowIdentifier rotateSecrets(@Valid @NotNull DistroXSecretRotationRequest request);
 }
