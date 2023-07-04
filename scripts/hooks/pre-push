@@ -14,7 +14,7 @@
 
 set -e
 
-msg_regex='^[a-z]+\-[0-9]+\s|^Merge|^Bumps.*from'
+msg_regex='^[a-z]+\-[0-9]+\s?|^Merge|^Bumps.*from|^Revert'
 
 echo "[Starting] JIRA ID in commit message validation"
 
