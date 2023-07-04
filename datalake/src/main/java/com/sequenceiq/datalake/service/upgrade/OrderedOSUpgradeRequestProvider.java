@@ -1,16 +1,16 @@
 package com.sequenceiq.datalake.service.upgrade;
 
-import static com.sequenceiq.common.api.type.InstanceGroupName.ATLAS_SCALE_OUT;
+import static com.sequenceiq.common.api.type.InstanceGroupName.ATLASHG;
 import static com.sequenceiq.common.api.type.InstanceGroupName.AUXILIARY;
 import static com.sequenceiq.common.api.type.InstanceGroupName.CORE;
 import static com.sequenceiq.common.api.type.InstanceGroupName.GATEWAY;
-import static com.sequenceiq.common.api.type.InstanceGroupName.HMS_SCALE_OUT;
+import static com.sequenceiq.common.api.type.InstanceGroupName.HMSHG;
 import static com.sequenceiq.common.api.type.InstanceGroupName.IDBROKER;
-import static com.sequenceiq.common.api.type.InstanceGroupName.KAFKA_SCALE_OUT;
+import static com.sequenceiq.common.api.type.InstanceGroupName.KAFKAHG;
 import static com.sequenceiq.common.api.type.InstanceGroupName.MASTER;
-import static com.sequenceiq.common.api.type.InstanceGroupName.RAZ_SCALE_OUT;
-import static com.sequenceiq.common.api.type.InstanceGroupName.SOLR_SCALE_OUT;
-import static com.sequenceiq.common.api.type.InstanceGroupName.STORAGE_SCALE_OUT;
+import static com.sequenceiq.common.api.type.InstanceGroupName.RAZHG;
+import static com.sequenceiq.common.api.type.InstanceGroupName.SOLRHG;
+import static com.sequenceiq.common.api.type.InstanceGroupName.STORAGEHG;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -119,12 +119,12 @@ public class OrderedOSUpgradeRequestProvider {
 
     private Set<String> collectInstanceIdsFromInstanceGroups(Map<String, List<String>> instanceIdsByInstanceGroup) {
         Set<String> instanceIds = new HashSet<>();
-        pollInstanceIdFromServiceHostGroup(instanceIdsByInstanceGroup, SOLR_SCALE_OUT, instanceIds);
-        pollInstanceIdFromServiceHostGroup(instanceIdsByInstanceGroup, STORAGE_SCALE_OUT, instanceIds);
-        pollInstanceIdFromServiceHostGroup(instanceIdsByInstanceGroup, KAFKA_SCALE_OUT, instanceIds);
-        pollInstanceIdFromServiceHostGroup(instanceIdsByInstanceGroup, RAZ_SCALE_OUT, instanceIds);
-        pollInstanceIdFromServiceHostGroup(instanceIdsByInstanceGroup, ATLAS_SCALE_OUT, instanceIds);
-        pollInstanceIdFromServiceHostGroup(instanceIdsByInstanceGroup, HMS_SCALE_OUT, instanceIds);
+        pollInstanceIdFromServiceHostGroup(instanceIdsByInstanceGroup, SOLRHG, instanceIds);
+        pollInstanceIdFromServiceHostGroup(instanceIdsByInstanceGroup, STORAGEHG, instanceIds);
+        pollInstanceIdFromServiceHostGroup(instanceIdsByInstanceGroup, KAFKAHG, instanceIds);
+        pollInstanceIdFromServiceHostGroup(instanceIdsByInstanceGroup, RAZHG, instanceIds);
+        pollInstanceIdFromServiceHostGroup(instanceIdsByInstanceGroup, ATLASHG, instanceIds);
+        pollInstanceIdFromServiceHostGroup(instanceIdsByInstanceGroup, HMSHG, instanceIds);
         return instanceIds;
     }
 

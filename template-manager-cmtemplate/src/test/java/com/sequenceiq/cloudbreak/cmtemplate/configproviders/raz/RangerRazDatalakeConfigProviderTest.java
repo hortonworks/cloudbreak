@@ -179,7 +179,7 @@ public class RangerRazDatalakeConfigProviderTest {
         generalClusterConfigs.setEnableRangerRaz(true);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, List.of());
         HostgroupView idbroker = new HostgroupView("idbroker", 0, InstanceGroupType.CORE, List.of());
-        HostgroupView razHG = new HostgroupView("raz_scale_out", 0, InstanceGroupType.CORE, List.of());
+        HostgroupView razHG = new HostgroupView("razhg", 0, InstanceGroupType.CORE, List.of());
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withStackType(StackType.DATALAKE)
                 .withCloudPlatform(cloudPlatform)
@@ -189,7 +189,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
-        ApiClusterTemplateService razHGService = additionalServices.get("raz_scale_out");
+        ApiClusterTemplateService razHGService = additionalServices.get("razhg");
         List<ApiClusterTemplateRoleConfigGroup> razHGRoleConfigGroups = razHGService.getRoleConfigGroups();
         ApiClusterTemplateService masterService = additionalServices.get("master");
         List<ApiClusterTemplateRoleConfigGroup> masterRoleConfigGroups = masterService.getRoleConfigGroups();

@@ -1,16 +1,16 @@
 package com.sequenceiq.datalake.service.upgrade;
 
-import static com.sequenceiq.common.api.type.InstanceGroupName.ATLAS_SCALE_OUT;
+import static com.sequenceiq.common.api.type.InstanceGroupName.ATLASHG;
 import static com.sequenceiq.common.api.type.InstanceGroupName.AUXILIARY;
 import static com.sequenceiq.common.api.type.InstanceGroupName.CORE;
 import static com.sequenceiq.common.api.type.InstanceGroupName.GATEWAY;
-import static com.sequenceiq.common.api.type.InstanceGroupName.HMS_SCALE_OUT;
+import static com.sequenceiq.common.api.type.InstanceGroupName.HMSHG;
 import static com.sequenceiq.common.api.type.InstanceGroupName.IDBROKER;
-import static com.sequenceiq.common.api.type.InstanceGroupName.KAFKA_SCALE_OUT;
+import static com.sequenceiq.common.api.type.InstanceGroupName.KAFKAHG;
 import static com.sequenceiq.common.api.type.InstanceGroupName.MASTER;
-import static com.sequenceiq.common.api.type.InstanceGroupName.RAZ_SCALE_OUT;
-import static com.sequenceiq.common.api.type.InstanceGroupName.SOLR_SCALE_OUT;
-import static com.sequenceiq.common.api.type.InstanceGroupName.STORAGE_SCALE_OUT;
+import static com.sequenceiq.common.api.type.InstanceGroupName.RAZHG;
+import static com.sequenceiq.common.api.type.InstanceGroupName.SOLRHG;
+import static com.sequenceiq.common.api.type.InstanceGroupName.STORAGEHG;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -97,26 +97,26 @@ class OrderedOSUpgradeRequestProviderTest {
                 createInstanceMetadata(GATEWAY, 1)
         )));
         instanceGroups.add(createInstanceGroup(Set.of(createInstanceMetadata(AUXILIARY, 0))));
-        instanceGroups.add(createInstanceGroup(Set.of(createInstanceMetadata(SOLR_SCALE_OUT, 3))));
-        instanceGroups.add(createInstanceGroup(Set.of(createInstanceMetadata(STORAGE_SCALE_OUT, 3))));
+        instanceGroups.add(createInstanceGroup(Set.of(createInstanceMetadata(SOLRHG, 3))));
+        instanceGroups.add(createInstanceGroup(Set.of(createInstanceMetadata(STORAGEHG, 3))));
         instanceGroups.add(createInstanceGroup(Set.of(
-                createInstanceMetadata(KAFKA_SCALE_OUT, 3),
-                createInstanceMetadata(KAFKA_SCALE_OUT, 4)
+                createInstanceMetadata(KAFKAHG, 3),
+                createInstanceMetadata(KAFKAHG, 4)
         )));
         instanceGroups.add(createInstanceGroup(Set.of(
-                createInstanceMetadata(RAZ_SCALE_OUT, 3),
-                createInstanceMetadata(RAZ_SCALE_OUT, 4),
-                createInstanceMetadata(RAZ_SCALE_OUT, 5)
+                createInstanceMetadata(RAZHG, 3),
+                createInstanceMetadata(RAZHG, 4),
+                createInstanceMetadata(RAZHG, 5)
         )));
         instanceGroups.add(createInstanceGroup(Set.of(
-                createInstanceMetadata(ATLAS_SCALE_OUT, 3),
-                createInstanceMetadata(ATLAS_SCALE_OUT, 4),
-                createInstanceMetadata(ATLAS_SCALE_OUT, 5),
-                createInstanceMetadata(ATLAS_SCALE_OUT, 6)
+                createInstanceMetadata(ATLASHG, 3),
+                createInstanceMetadata(ATLASHG, 4),
+                createInstanceMetadata(ATLASHG, 5),
+                createInstanceMetadata(ATLASHG, 6)
         )));
         instanceGroups.add(createInstanceGroup(Set.of(
-                createInstanceMetadata(HMS_SCALE_OUT, 3),
-                createInstanceMetadata(HMS_SCALE_OUT, 4)
+                createInstanceMetadata(HMSHG, 3),
+                createInstanceMetadata(HMSHG, 4)
         )));
 
         OrderedOSUpgradeSetRequest actual = underTest.createDatalakeOrderedOSUpgradeSetRequest(createStackV4Response(instanceGroups), TARGET_IMAGE_ID);
@@ -137,14 +137,13 @@ class OrderedOSUpgradeRequestProviderTest {
         assertThat(actual.getOrderedOsUpgradeSets().get(2).getInstanceIds(),
                 containsInAnyOrder(Set.of("i-core2", "i-gateway1").toArray()));
         assertThat(actual.getOrderedOsUpgradeSets().get(3).getInstanceIds(),
-                containsInAnyOrder(Set.of("i-solr_scale_out3", "i-storage_scale_out3", "i-kafka_scale_out3", "i-raz_scale_out3", "i-atlas_scale_out3",
-                        "i-hms_scale_out3").toArray()));
+                containsInAnyOrder(Set.of("i-solrhg3", "i-storagehg3", "i-kafkahg3", "i-razhg3", "i-atlashg3", "i-hmshg3").toArray()));
         assertThat(actual.getOrderedOsUpgradeSets().get(4).getInstanceIds(),
-                containsInAnyOrder(Set.of("i-kafka_scale_out4", "i-raz_scale_out4", "i-atlas_scale_out4", "i-hms_scale_out4").toArray()));
+                containsInAnyOrder(Set.of("i-kafkahg4", "i-razhg4", "i-atlashg4", "i-hmshg4").toArray()));
         assertThat(actual.getOrderedOsUpgradeSets().get(5).getInstanceIds(),
-                containsInAnyOrder(Set.of("i-raz_scale_out5", "i-atlas_scale_out5").toArray()));
+                containsInAnyOrder(Set.of("i-razhg5", "i-atlashg5").toArray()));
         assertThat(actual.getOrderedOsUpgradeSets().get(6).getInstanceIds(),
-                containsInAnyOrder(Set.of("i-atlas_scale_out6").toArray()));
+                containsInAnyOrder(Set.of("i-atlashg6").toArray()));
     }
 
     @Test
