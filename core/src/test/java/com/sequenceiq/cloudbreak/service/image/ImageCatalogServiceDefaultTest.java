@@ -119,12 +119,19 @@ public class ImageCatalogServiceDefaultTest {
 
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                {DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "latest-hdp", "5.0.0", "" },
-                {DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "latest-hdp", "5.0.0", "centos7" },
-                {DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "latest-amazonlinux-hdp", "5.0.0", "amazonlinux2" },
-                {DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "second-latest-hdp", "6.0.0", "" },
-                {DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "second-latest-hdp", "6.1.0", "" },
-                {DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "latest-hdp", "9.0.0", "" }
+                    // catalog                  //provider  //clusterVersion    // expected image           //cbversion     //os
+                { "Testing catalog for filterin 2.6 runtimes  for 5.0.0 CB  without os limit",
+                    DEFAULT_CDH_IMAGE_CATALOG, "aws",      "2.6",              "latest-hdp",               "5.0.0",        "" },
+                { "Testing catalog for filterin 2.6 runtimes for 5.0.0 CB with centos7 limit",
+                    DEFAULT_CDH_IMAGE_CATALOG, "aws",      "2.6",              "latest-hdp",               "5.0.0",        "centos7" },
+                { "Testing catalog for filterin 2.6 runtimes for 5.0.0 CB with amazonlinux2 limit",
+                    DEFAULT_CDH_IMAGE_CATALOG, "aws",      "2.6",              "latest-amazonlinux-hdp",   "5.0.0",        "amazonlinux2" },
+                { "Testing catalog for filterin 2.6 runtimes for 6.0.0 CB without os limit",
+                    DEFAULT_CDH_IMAGE_CATALOG, "aws",      "2.6",              "second-latest-hdp",        "6.0.0",        "" },
+                { "Testing catalog for filterin 2.6 runtimes for 6.1.0 CB without os limit",
+                    DEFAULT_CDH_IMAGE_CATALOG, "aws",      "2.6",              "second-latest-hdp",        "6.1.0",        "" },
+                { "Testing catalog for filterin 2.6 runtimes for 9.0.0 CB without os limit",
+                    DEFAULT_CDH_IMAGE_CATALOG, "aws",      "2.6",              "latest-hdp",               "9.0.0",        "" }
         });
     }
 
@@ -148,10 +155,10 @@ public class ImageCatalogServiceDefaultTest {
         ReflectionTestUtils.setField(versionBasedImageCatalogService, "versionBasedImageProvider", versionBasedImageProvider);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testGetDefaultImageShouldReturnProperDefaultImage(String catalogFile, String provider, String clusterVersion, String expectedImageId,
-            String cbVersion, String os) throws Exception {
+    public void testGetDefaultImageShouldReturnProperDefaultImage(String name, String catalogFile, String provider,
+            String clusterVersion, String expectedImageId, String cbVersion, String os) throws Exception {
         // GIVEN
         String catalogJson = FileReaderUtils.readFileFromClasspath(catalogFile);
         CloudbreakImageCatalogV3 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV3.class);
