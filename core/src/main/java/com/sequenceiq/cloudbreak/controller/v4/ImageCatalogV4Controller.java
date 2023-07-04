@@ -201,8 +201,13 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @DisableCheckPermissions
     public ImagesV4Response getImages(Long workspaceId, String stackName, String platform,
             String runtimeVersion, String imageType, boolean govCloud) throws Exception {
-        Images images = imageCatalogService.getImagesFromDefault(restRequestThreadLocalService.getRequestedWorkspaceId(), stackName,
-                platformStringTransformer.getPlatformStringForImageCatalog(platform, govCloud), Collections.emptySet(), govCloud);
+        Images images = imageCatalogService.getImagesFromDefault(
+                restRequestThreadLocalService.getRequestedWorkspaceId(),
+                stackName,
+                platformStringTransformer.getPlatformStringForImageCatalog(platform, govCloud),
+                Collections.emptySet(),
+                runtimeVersion,
+                govCloud);
         return imagesToImagesV4ResponseConverter.convert(images);
     }
 
@@ -210,8 +215,13 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
     public ImagesV4Response getImagesByName(Long workspaceId, @ResourceName String name, String stackName, String platform,
         String runtimeVersion, String imageType, boolean govCloud) throws Exception {
-        Images images = imageCatalogService.getImagesByCatalogName(restRequestThreadLocalService.getRequestedWorkspaceId(), name, stackName,
-                platformStringTransformer.getPlatformStringForImageCatalog(platform, govCloud), govCloud);
+        Images images = imageCatalogService.getImagesByCatalogName(
+                restRequestThreadLocalService.getRequestedWorkspaceId(),
+                name,
+                stackName,
+                platformStringTransformer.getPlatformStringForImageCatalog(platform, govCloud),
+                runtimeVersion,
+                govCloud);
         return imagesToImagesV4ResponseConverter.convert(images);
     }
 

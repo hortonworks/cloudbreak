@@ -828,13 +828,13 @@
             "us-west-2": "ami-89b60be9"
           }
         },
-        "os": "centos7",
-        "os_type": "redhat7",
+        "os": "amazonlinux2",
+        "os_type": "amazonlinux2",
         "repo": {
-          "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.0.0-608"
+          "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.6.0.0-331"
         },
         "uuid": "2.5.0.0-608-31139004-fc4c-4172-ab39-9ca5c473fe28-2.6.0.0-331",
-        "version": "2.5.0.0-608"
+        "version": "2.6.0.0-331"
       },
       {
         "date": "2017-01-19",
@@ -872,7 +872,7 @@
           "redhat6": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.0.0-608"
         },
         "uuid": "2.5.0.0-608-3f571a38-2fa3-4c6c-9452-057b27adacdd-2.6.0.0-331",
-        "version": "2.5.0.0-608"
+        "version": "2.6.0.0-331"
       },
       {
         "date": "2017-02-10",
@@ -910,7 +910,7 @@
           "redhat6": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.0.0-771"
         },
         "uuid": "2.5.0.0-771-43f25ef0-0ecd-4802-9563-183be5814978-2.6.0.0-422",
-        "version": "2.5.0.0-771"
+        "version": "2.6.0.0-331"
       },
       {
         "date": "2017-03-16",
@@ -948,7 +948,7 @@
           "redhat6": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.0.0-1094"
         },
         "uuid": "2.5.0.0-1094-4b02d4f4-bc8b-41fb-8653-04c0828f75f6-2.6.0.0-598",
-        "version": "2.5.0.0-1094"
+        "version": "2.6.0.0-331"
       },
       {
         "date": "2017-03-23",
@@ -986,7 +986,7 @@
           "redhat6": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.0.0-1096"
         },
         "uuid": "2.5.0.0-1096-328d571d-d95d-4a69-a7f3-6bfbba0e3950-2.6.0.0-598",
-        "version": "2.5.0.0-1096"
+        "version": "2.6.0.0-598"
       },
       {
         "date": "2017-06-12",
@@ -1024,7 +1024,7 @@
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.0.2-65"
         },
         "uuid": "2.5.0.2-65-fe0ba14f-cb44-4573-ac8c-23cbc72bbd57-2.6.0.1-152",
-        "version": "2.5.0.2-65"
+        "version": "2.6.0.1-152"
       },
       {
         "date": "2017-06-08",
@@ -1062,7 +1062,7 @@
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.0.2-65"
         },
         "uuid": "2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145",
-        "version": "2.5.0.2-65"
+        "version": "2.6.0.1-152"
       },
       {
         "date": "2017-05-11",
@@ -1100,7 +1100,7 @@
           "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.0.3"
         },
         "uuid": "2.5.0.3-7-27d7cb22-3d7e-485a-9266-10fb09d632f4-2.6.1.0-55",
-        "version": "2.5.0.3-7"
+        "version": "2.6.1.0-55"
       },
       {
         "date": "2017-04-24",
@@ -1138,7 +1138,7 @@
           "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.0.3-7"
         },
         "uuid": "2.5.0.3-7-0af7ea50-d096-4c2a-8d5b-32f323cef86b-2.6.1.0-22",
-        "version": "2.5.0.3-7"
+        "version": "2.6.1.0-22"
       },
       {
         "date": "2017-07-05",
@@ -1176,7 +1176,7 @@
           "redhat6": "http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.1.2-1"
         },
         "uuid": "2.5.1.2-1-ee64754a-091e-4251-8c27-2326d583928b-2.6.1.4-1",
-        "version": "2.5.1.2-1"
+        "version": "2.6.1.4-1"
       },
       {
         "date": "2017-07-19",
@@ -1246,13 +1246,13 @@
             "us-west-2": "ami-e047b798"
           }
         },
-        "os": "centos7",
-        "os_type": "redhat7",
+        "os": "amazonlinux2",
+        "os_type": "amazonlinux2",
         "repo": {
           "redhat6": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.2.0"
         },
         "uuid": "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
-        "version": "2.5.2.0"
+        "version": "2.6.2.0"
       },
       {
         "date": "2017-10-23",
@@ -1287,10 +1287,10 @@
         "os": "centos7",
         "os_type": "redhat7",
         "repo": {
-          "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.2.5-3"
+          "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.6.2.4-5"
         },
         "uuid": "second-latest-hdp",
-        "version": "2.5.2.5-3"
+        "version": "2.6.2.4-5"
       },
       {
         "date": "2017-10-23",
@@ -1325,10 +1325,10 @@
         "os": "amazonlinux2",
         "os_type": "amazonlinux2",
         "repo": {
-          "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.2.5-3"
+          "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.6.2.5-3"
         },
         "uuid": "latest-amazonlinux-hdp",
-        "version": "2.5.2.5-3"
+        "version": "2.6.2.5-3"
       },
       {
         "date": "2017-10-24",
@@ -1363,11 +1363,11 @@
         "os": "centos7",
         "os_type": "redhat7",
         "repo": {
-          "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.2.5-3",
-          "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.2.5-3"
+          "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.6.2.4-5",
+          "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.6.2.4-5"
         },
         "uuid": "latest-hdp",
-        "version": "2.5.2.5-3"
+        "version": "2.6.2.4-5"
       }
     ]
   },

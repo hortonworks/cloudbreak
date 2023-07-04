@@ -82,9 +82,21 @@ public class VersionBasedImageProvider {
         }
         LOGGER.info("The following images are matching for CB version ({}): {} ", currentCbVersion, vMImageUUIDs);
 
-        List<Image> baseImages = filterImagesByPlatforms(imageFilter.getPlatforms(), imageCatalogV3.getImages().getBaseImages(), vMImageUUIDs);
-        List<Image> cdhImages = filterImagesByPlatforms(imageFilter.getPlatforms(), imageCatalogV3.getImages().getCdhImages(), vMImageUUIDs);
-        List<Image> freeipaImages = filterImagesByPlatforms(imageFilter.getPlatforms(), imageCatalogV3.getImages().getFreeIpaImages(), vMImageUUIDs);
+        List<Image> baseImages = filterImagesByPlatforms(
+                imageFilter.getPlatforms(),
+                imageCatalogV3.getImages().getBaseImages(),
+                vMImageUUIDs,
+                imageFilter.getClusterVersion());
+        List<Image> cdhImages = filterImagesByPlatforms(
+                imageFilter.getPlatforms(),
+                imageCatalogV3.getImages().getCdhImages(),
+                vMImageUUIDs,
+                imageFilter.getClusterVersion());
+        List<Image> freeipaImages = filterImagesByPlatforms(
+                imageFilter.getPlatforms(),
+                imageCatalogV3.getImages().getFreeIpaImages(),
+                vMImageUUIDs,
+                imageFilter.getClusterVersion());
 
         List<Image> defaultImages = defaultVMImageUUIDs.stream()
                 .map(imageId -> getImage(imageId, imageCatalogV3.getImages()))
@@ -111,9 +123,11 @@ public class VersionBasedImageProvider {
                 : imageFilter.getCbVersion();
     }
 
-    private List<Image> filterImagesByPlatforms(Collection<ImageCatalogPlatform> platforms, Collection<Image> images, Collection<String> vMImageUUIDs) {
+    private List<Image> filterImagesByPlatforms(Collection<ImageCatalogPlatform> platforms, Collection<Image> images,
+        Collection<String> vMImageUUIDs, String runtimeVersion) {
         List<Image> imageList = images.stream()
                 .filter(isPlatformMatching(platforms, vMImageUUIDs))
+                .filter(img -> isRuntimeVersionMatching(img, runtimeVersion))
                 .collect(toList());
         return providerSpecificImageFilter.filterImages(platforms, imageList);
     }
@@ -123,6 +137,10 @@ public class VersionBasedImageProvider {
                 && img.getImageSetsByProvider().keySet()
                 .stream()
                 .anyMatch(actualPlatform -> platformMatches(platforms, actualPlatform));
+    }
+
+    private boolean isRuntimeVersionMatching(Image image, String runtimeVersion) {
+        return runtimeVersion == null || (image.getVersion() != null && image.getVersion().startsWith(runtimeVersion));
     }
 
     private boolean platformMatches(Collection<ImageCatalogPlatform> platforms, String p) {
