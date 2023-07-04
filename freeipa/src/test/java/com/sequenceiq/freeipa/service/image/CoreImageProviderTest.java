@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 
@@ -64,7 +63,7 @@ public class CoreImageProviderTest {
     public void shouldReturnEmptyInCaseOfException() throws Exception {
         when(imageCatalogV4Endpoint.getSingleImageByCatalogNameAndImageId(WORKSPACE_ID_DEFAULT, CATALOG_NAME, IMAGE_ID)).thenThrow(new RuntimeException());
 
-        Optional<ImageWrapper> actual = victim.getImage(anImageSettings(), REGION, PLATFORM);
+        Optional<ImageWrapper> actual = victim.getImage(createImageFilterSettings());
 
         assertTrue(actual.isEmpty());
     }
@@ -73,7 +72,7 @@ public class CoreImageProviderTest {
     public void shouldReturnEmptyInCaseOfNullResponse() throws Exception {
         when(imageCatalogV4Endpoint.getSingleImageByCatalogNameAndImageId(WORKSPACE_ID_DEFAULT, CATALOG_NAME, IMAGE_ID)).thenReturn(null);
 
-        Optional<ImageWrapper> actual = victim.getImage(anImageSettings(), REGION, PLATFORM);
+        Optional<ImageWrapper> actual = victim.getImage(createImageFilterSettings());
 
         assertTrue(actual.isEmpty());
     }
@@ -82,7 +81,7 @@ public class CoreImageProviderTest {
     public void shouldReturnResult() throws Exception {
         when(imageCatalogV4Endpoint.getSingleImageByCatalogNameAndImageId(WORKSPACE_ID_DEFAULT, CATALOG_NAME, IMAGE_ID)).thenReturn(anImageResponse());
 
-        Optional<ImageWrapper> actual = victim.getImage(anImageSettings(), REGION, PLATFORM);
+        Optional<ImageWrapper> actual = victim.getImage(createImageFilterSettings());
         Image image = actual.get().getImage();
 
         assertEquals(DATE, image.getDate());
@@ -97,9 +96,7 @@ public class CoreImageProviderTest {
         when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false))
                 .thenReturn(new ImagesV4Response());
 
-        ImageSettingsRequest imageSettings = new ImageSettingsRequest();
-        imageSettings.setCatalog(CATALOG_NAME);
-        List<ImageWrapper> result = victim.getImages(imageSettings, "", PLATFORM);
+        List<ImageWrapper> result = victim.getImages(createImageFilterSettings());
 
         assertTrue(result.isEmpty());
     }
@@ -109,9 +106,7 @@ public class CoreImageProviderTest {
         when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false))
                 .thenThrow(new WebApplicationException());
 
-        ImageSettingsRequest imageSettings = new ImageSettingsRequest();
-        imageSettings.setCatalog(CATALOG_NAME);
-        List<ImageWrapper> result = victim.getImages(imageSettings, "", PLATFORM);
+        List<ImageWrapper> result = victim.getImages(createImageFilterSettings());
 
         assertTrue(result.isEmpty());
     }
@@ -121,9 +116,7 @@ public class CoreImageProviderTest {
         when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false))
                 .thenThrow(new Exception());
 
-        ImageSettingsRequest imageSettings = new ImageSettingsRequest();
-        imageSettings.setCatalog(CATALOG_NAME);
-        List<ImageWrapper> result = victim.getImages(imageSettings, "", PLATFORM);
+        List<ImageWrapper> result = victim.getImages(createImageFilterSettings());
 
         assertTrue(result.isEmpty());
     }
@@ -135,9 +128,7 @@ public class CoreImageProviderTest {
         when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false))
                 .thenReturn(imagesV4Response);
 
-        ImageSettingsRequest imageSettings = new ImageSettingsRequest();
-        imageSettings.setCatalog(CATALOG_NAME);
-        List<ImageWrapper> result = victim.getImages(imageSettings, "", PLATFORM);
+        List<ImageWrapper> result = victim.getImages(createImageFilterSettings());
 
         assertEquals(1, result.size());
         ImageWrapper imageWrapper = result.get(0);
@@ -151,12 +142,8 @@ public class CoreImageProviderTest {
         assertEquals(VM_IMAGE_REFERENCE, image.getImageSetsByProvider().get(PLATFORM).get(REGION));
     }
 
-    private ImageSettingsRequest anImageSettings() {
-        ImageSettingsRequest imageSettings = new ImageSettingsRequest();
-        imageSettings.setCatalog(CATALOG_NAME);
-        imageSettings.setId(IMAGE_ID);
-
-        return imageSettings;
+    private FreeIpaImageFilterSettings createImageFilterSettings() {
+        return new FreeIpaImageFilterSettings(IMAGE_ID, CATALOG_NAME, null, REGION, PLATFORM, false);
     }
 
     private ImageV4Response anImageResponse() {

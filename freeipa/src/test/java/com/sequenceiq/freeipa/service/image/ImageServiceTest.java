@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,7 +26,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
@@ -96,7 +94,7 @@ public class ImageServiceTest {
     private FreeipaPlatformStringTransformer platformStringTransformer;
 
     @Captor
-    private ArgumentCaptor<ImageSettingsRequest> imageSettingsRequestCaptor;
+    private ArgumentCaptor<FreeIpaImageFilterSettings> imageFilterSettingsCaptor;
 
     @Test
     public void testDetermineImageNameFound() {
@@ -151,16 +149,13 @@ public class ImageServiceTest {
 
     @Test
     public void testGetImageGivenIdInputNotFound() {
-        ImageSettingsRequest imageSettings = new ImageSettingsRequest();
-        imageSettings.setCatalog(IMAGE_CATALOG);
-        imageSettings.setId(FAKE_ID);
-        imageSettings.setOs(DEFAULT_OS);
+        FreeIpaImageFilterSettings imageSettings = new FreeIpaImageFilterSettings(FAKE_ID, IMAGE_CATALOG, DEFAULT_OS, REGION, DEFAULT_PLATFORM, false);
 
         when(imageProviderFactory.getImageProvider(IMAGE_CATALOG)).thenReturn(imageProvider);
-        when(imageProvider.getImage(imageSettings, REGION, DEFAULT_PLATFORM)).thenReturn(Optional.empty());
+        when(imageProvider.getImage(imageSettings)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(RuntimeException.class, () ->
-                underTest.getImage(imageSettings, REGION, DEFAULT_PLATFORM));
+                underTest.getImage(imageSettings));
         String exceptionMessage = "Could not find any image with id: 'fake-ami-0a6931aea1415eb0e' in region 'eu-west-1' with OS 'redhat7'.";
         assertEquals(exceptionMessage, exception.getMessage());
     }
@@ -172,8 +167,7 @@ public class ImageServiceTest {
         stack.setRegion(REGION);
         ImageSettingsRequest imageRequest = new ImageSettingsRequest();
         when(imageProviderFactory.getImageProvider(any())).thenReturn(imageProvider);
-        when(imageProvider.getImage(imageRequest, stack.getRegion(), stack.getCloudPlatform()))
-                .thenReturn(Optional.of(new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG)));
+        when(imageProvider.getImage(any())).thenReturn(Optional.of(new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG)));
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
         when(imageRepository.getByStack(stack)).thenReturn(new ImageEntity());
         when(image.getUuid()).thenReturn(IMAGE_UUID);
@@ -197,8 +191,7 @@ public class ImageServiceTest {
         stack.setRegion(DEFAULT_REGION);
         ImageSettingsRequest imageRequest = new ImageSettingsRequest();
         when(imageProviderFactory.getImageProvider(any())).thenReturn(imageProvider);
-        when(imageProvider.getImage(imageRequest, stack.getRegion(), stack.getCloudPlatform()))
-                .thenReturn(Optional.of(new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG)));
+        when(imageProvider.getImage(any())).thenReturn(Optional.of(new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG)));
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(DEFAULT_REGION, EXISTING_ID)));
         when(imageRepository.save(any(ImageEntity.class))).thenAnswer(invocation -> invocation.getArgument(0, ImageEntity.class));
         when(imageConverter.convert(any(), any())).thenReturn(new ImageEntity());
@@ -251,15 +244,18 @@ public class ImageServiceTest {
         when(imageProviderFactory.getImageProvider(IMAGE_CATALOG)).thenReturn(imageProvider);
         Image image = new Image(123L, "now", "desc", DEFAULT_OS, IMAGE_UUID, Map.of(), "os", Map.of(), true);
         ImageWrapper imageWrapper = new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG);
-        when(imageProvider.getImage(any(), any(), any())).thenReturn(Optional.of(imageWrapper));
+        when(imageProvider.getImage(any())).thenReturn(Optional.of(imageWrapper));
         when(platformStringTransformer.getPlatformString(stack)).thenReturn("aws");
 
         ImageCatalog result = underTest.generateImageCatalogForStack(stack);
 
-        verify(imageProvider).getImage(imageSettingsRequestCaptor.capture(), eq(REGION), eq(DEFAULT_PLATFORM));
-        assertThat(imageSettingsRequestCaptor.getValue())
-                .returns(IMAGE_CATALOG, ImageSettingsBase::getCatalog)
-                .returns(IMAGE_UUID, ImageSettingsBase::getId);
+        verify(imageProvider).getImage(imageFilterSettingsCaptor.capture());
+        assertThat(imageFilterSettingsCaptor.getValue())
+                .returns(IMAGE_CATALOG, FreeIpaImageFilterSettings::catalog)
+                .returns(IMAGE_UUID, FreeIpaImageFilterSettings::currentImageId)
+                .returns(REGION, FreeIpaImageFilterSettings::region)
+                .returns(DEFAULT_PLATFORM, FreeIpaImageFilterSettings::platform)
+                .returns(DEFAULT_OS, FreeIpaImageFilterSettings::os);
 
         assertThat(result.getImages().getFreeipaImages())
                 .containsExactly(image);

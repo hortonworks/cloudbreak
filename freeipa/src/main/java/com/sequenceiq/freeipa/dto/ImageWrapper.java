@@ -4,11 +4,11 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 
 public class ImageWrapper {
 
-    private Image image;
+    private final Image image;
 
-    private String catalogUrl;
+    private final String catalogUrl;
 
-    private String catalogName;
+    private final String catalogName;
 
     public ImageWrapper(Image image, String catalogUrl, String catalogName) {
         this.image = image;

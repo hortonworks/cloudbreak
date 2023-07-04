@@ -36,8 +36,8 @@ public class FreeIpaUpgradeV1Controller implements FreeIpaUpgradeV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = UPGRADE_FREEIPA)
-    public FreeIpaUpgradeOptions getFreeIpaUpgradeOptions(@ResourceCrn String environmentCrn, String catalog) {
+    public FreeIpaUpgradeOptions getFreeIpaUpgradeOptions(@ResourceCrn String environmentCrn, String catalog, Boolean allowMajorOsUpgrade) {
         String accountId = crnService.getCurrentAccountId();
-        return upgradeService.collectUpgradeOptions(accountId, environmentCrn, catalog);
+        return upgradeService.collectUpgradeOptions(accountId, environmentCrn, catalog, allowMajorOsUpgrade);
     }
 }

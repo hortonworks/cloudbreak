@@ -1,12 +1,9 @@
 package com.sequenceiq.freeipa.service.image;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -15,14 +12,12 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.FreeIpaVersions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
@@ -34,8 +29,6 @@ public class FreeIpaImageProvider implements ImageProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaImageProvider.class);
 
     private static final Pattern VERSION_PATTERN = Pattern.compile("^([0-9]+\\.[0-9]+\\.[0-9]+-(dev\\.|rc\\.|[b]))[0-9]+$");
-
-    private static final String DEFAULT_REGION = "default";
 
     @Inject
     private ImageCatalogProvider imageCatalogProvider;
@@ -50,27 +43,22 @@ public class FreeIpaImageProvider implements ImageProvider {
     private String freeIpaVersion;
 
     @Inject
-    private ProviderSpecificImageFilter providerSpecificImageFilter;
+    private FreeIpaImageFilter freeIpaImageFilter;
 
     @Override
-    public Optional<ImageWrapper> getImage(ImageSettingsRequest imageSettings, String region, String platform) {
-        String imageId = imageSettings.getId();
-        String catalogUrl = StringUtils.isNotBlank(imageSettings.getCatalog()) ? imageSettings.getCatalog() : defaultCatalogUrl;
-        String imageOs = StringUtils.isNotBlank(imageSettings.getOs()) ? imageSettings.getOs() : defaultOs;
-
-        ImageCatalog cachedImageCatalog = imageCatalogProvider.getImageCatalog(catalogUrl);
-        return findImageForAppVersion(region, platform, imageId, imageOs, cachedImageCatalog)
-                .or(() -> retryAfterEvictingCache(region, platform, imageId, catalogUrl, imageOs))
-                .map(i -> new ImageWrapper(i, catalogUrl, null));
+    public Optional<ImageWrapper> getImage(FreeIpaImageFilterSettings imageFilterParams) {
+        FreeIpaImageFilterSettings imageFilterSettings = populateImageFilterSettings(imageFilterParams);
+        ImageCatalog cachedImageCatalog = imageCatalogProvider.getImageCatalog(imageFilterSettings.catalog());
+        return findImageForAppVersion(imageFilterSettings, cachedImageCatalog)
+                .or(() -> retryAfterEvictingCache(imageFilterSettings))
+                .map(i -> new ImageWrapper(i, imageFilterSettings.catalog(), null));
     }
 
-    public List<ImageWrapper> getImages(ImageSettingsRequest imageSettings, String region, String platform) {
-        String imageId = imageSettings.getId();
-        String catalogUrl = StringUtils.isNotBlank(imageSettings.getCatalog()) ? imageSettings.getCatalog() : defaultCatalogUrl;
-        String imageOs = StringUtils.isNotBlank(imageSettings.getOs()) ? imageSettings.getOs() : defaultOs;
-
-        ImageCatalog cachedImageCatalog = imageCatalogProvider.getImageCatalog(catalogUrl);
-        List<Image> compatibleImages = findImage(imageId, imageOs, cachedImageCatalog.getImages().getFreeipaImages(), region, platform);
+    @Override
+    public List<ImageWrapper> getImages(FreeIpaImageFilterSettings freeIpaImageFilterSettings) {
+        FreeIpaImageFilterSettings imageFilterSettings = populateImageFilterSettings(freeIpaImageFilterSettings);
+        ImageCatalog cachedImageCatalog = imageCatalogProvider.getImageCatalog(imageFilterSettings.catalog());
+        List<Image> compatibleImages = findImages(cachedImageCatalog.getImages().getFreeipaImages(), imageFilterSettings);
         List<String> imagesInVersions = filterFreeIpaVersionsByAppVersion(cachedImageCatalog.getVersions().getFreeIpaVersions()).stream()
                 .map(FreeIpaVersions::getImageIds)
                 .flatMap(Collection::stream)
@@ -79,39 +67,45 @@ public class FreeIpaImageProvider implements ImageProvider {
         LOGGER.debug("Compatible images: {} " + System.lineSeparator() + "Images in versions: {}", compatibleImages, imagesInVersions);
         return compatibleImages.stream()
                 .filter(image -> imagesInVersions.contains(image.getUuid()))
-                .map(image -> new ImageWrapper(image, catalogUrl, null))
+                .map(image -> new ImageWrapper(image, imageFilterSettings.catalog(), null))
                 .collect(Collectors.toList());
     }
 
-    private Optional<Image> findImageForAppVersion(String region, String platform, String imageId, String imageOs, ImageCatalog catalog) {
+    private FreeIpaImageFilterSettings populateImageFilterSettings(FreeIpaImageFilterSettings imageFilterSettings) {
+        return new FreeIpaImageFilterSettings(imageFilterSettings.currentImageId(),
+                StringUtils.isNotBlank(imageFilterSettings.catalog()) ? imageFilterSettings.catalog() : defaultCatalogUrl,
+                StringUtils.isNotBlank(imageFilterSettings.os()) ? imageFilterSettings.os() : defaultOs,
+                imageFilterSettings.region(), imageFilterSettings.platform(), imageFilterSettings.allowMajorOsUpgrade());
+    }
+
+    private Optional<Image> findImageForAppVersion(FreeIpaImageFilterSettings freeIpaImageFilterSettings, ImageCatalog catalog) {
         List<FreeIpaVersions> versions = filterFreeIpaVersionsByAppVersion(catalog.getVersions().getFreeIpaVersions());
-        List<Image> compatibleImages = findImage(imageId, imageOs, catalog.getImages().getFreeipaImages(), region, platform);
+        List<Image> compatibleImages = findImages(catalog.getImages().getFreeipaImages(), freeIpaImageFilterSettings);
         LOGGER.debug("[{}] compatible images found, by the following parameters: imageId: {}, imageOs: {}, region: {}, platform: {}",
-                compatibleImages.size(), imageId, imageOs, region, platform);
+                compatibleImages.size(), freeIpaImageFilterSettings.currentImageId(), freeIpaImageFilterSettings.os(), freeIpaImageFilterSettings.region(),
+                freeIpaImageFilterSettings.region());
 
         return findImageInDefaults(versions, compatibleImages)
                 .or(() -> findImageByApplicationVersion(versions, compatibleImages))
                 .or(() -> findMostRecentImage(compatibleImages));
     }
 
-    private List<Image> findImage(String imageId, String imageOs, List<Image> images, String region, String platform) {
-        if (StringUtils.isNotBlank(imageId)) {
+    private List<Image> findImages(List<Image> images, FreeIpaImageFilterSettings imageFilterSettings) {
+        if (StringUtils.isNotBlank(imageFilterSettings.currentImageId())) {
             return images.stream()
-                    .filter(img -> img.getImageSetsByProvider().containsKey(platform) && filterRegion(region, platform, img))
+                    .filter(img -> img.getImageSetsByProvider().containsKey(imageFilterSettings.platform()) && filterRegion(imageFilterSettings, img))
                     //It's not clear why we check the provider image reference (eg. the AMI in case of AWS) as imageId here.
                     //For safety and backward compatibility reasons the check remains here but should be checked if it really needed.
-                    .filter(img -> hasSameUuid(imageId, img) || isMatchingImageIdInRegion(imageId, region, platform, img))
+                    .filter(img -> hasSameUuid(imageFilterSettings.currentImageId(), img) || isMatchingImageIdInRegion(imageFilterSettings, img))
                     .collect(Collectors.toList());
         } else {
-            return filterImages(images, imageOs, platform, region).stream()
-                    .filter(image -> image.getImageSetsByProvider().containsKey(platform))
-                    .collect(Collectors.toList());
+            return freeIpaImageFilter.filterImages(images, imageFilterSettings);
         }
     }
 
-    private Boolean isMatchingImageIdInRegion(String imageId, String region, String platform, Image img) {
-        return Optional.ofNullable(img.getImageSetsByProvider().get(platform).get(region))
-                .map(reg -> reg.equalsIgnoreCase(imageId))
+    private Boolean isMatchingImageIdInRegion(FreeIpaImageFilterSettings imageFilterSettings, Image img) {
+        return Optional.ofNullable(img.getImageSetsByProvider().get(imageFilterSettings.platform()).get(imageFilterSettings.region()))
+                .map(reg -> reg.equalsIgnoreCase(imageFilterSettings.currentImageId()))
                 .orElse(false);
     }
 
@@ -119,42 +113,17 @@ public class FreeIpaImageProvider implements ImageProvider {
         return img.getUuid().equalsIgnoreCase(imageId);
     }
 
-    private boolean filterRegion(String region, String platform, Image img) {
-        Set<String> regionSet = img.getImageSetsByProvider().get(platform).keySet();
-        return CollectionUtils.containsAny(regionSet, region, DEFAULT_REGION);
+    private boolean filterRegion(FreeIpaImageFilterSettings imageFilterSettings, Image img) {
+        return freeIpaImageFilter.filterRegion(imageFilterSettings, img);
     }
 
-    private List<Image> filterImages(List<Image> imageList, String os, String platform, String region) {
-        Predicate<Image> predicate = img -> img.getOs().equalsIgnoreCase(os) &&
-                img.getImageSetsByProvider().containsKey(platform) &&
-                filterRegion(region, platform, img);
-        Map<Boolean, List<Image>> partitionedImages =
-                Optional.ofNullable(imageList).
-                        orElse(Collections.emptyList()).
-                        stream()
-                        .collect(Collectors.partitioningBy(predicate));
-        if (hasFiltered(partitionedImages)) {
-            LOGGER.debug("Used filter for: | {} | Images filtered: {}",
-                    os,
-                    partitionedImages.get(false).stream().map(Image::toString).collect(Collectors.joining(", ")));
-            List<Image> images = partitionedImages.get(true);
-            return providerSpecificImageFilter.filterImages(platform, images);
-        } else {
-            LOGGER.warn("No FreeIPA image found with OS {}, falling back to the latest available one if such exists!", os);
-            return imageList;
-        }
-    }
-
-    private boolean hasFiltered(Map<Boolean, List<Image>> partitioned) {
-        return !partitioned.get(true).isEmpty();
-    }
-
-    private Optional<Image> retryAfterEvictingCache(String region, String platform, String imageId, String catalogUrl, String imageOs) {
-        LOGGER.debug("Image not found with the parameters: imageId: {}, imageOs: {}, region: {}, platform: {}", imageId, imageOs, region, platform);
+    private Optional<Image> retryAfterEvictingCache(FreeIpaImageFilterSettings imageFilterSettings) {
+        LOGGER.debug("Image not found with the parameters: imageId: {}, imageOs: {}, region: {}, platform: {}", imageFilterSettings.currentImageId(),
+                imageFilterSettings.os(), imageFilterSettings.region(), imageFilterSettings.platform());
         LOGGER.debug("Evicting image catalog cache to retry.");
-        imageCatalogProvider.evictImageCatalogCache(catalogUrl);
-        ImageCatalog renewedImageCatalog = imageCatalogProvider.getImageCatalog(catalogUrl);
-        return findImageForAppVersion(region, platform, imageId, imageOs, renewedImageCatalog);
+        imageCatalogProvider.evictImageCatalogCache(imageFilterSettings.catalog());
+        ImageCatalog renewedImageCatalog = imageCatalogProvider.getImageCatalog(imageFilterSettings.catalog());
+        return findImageForAppVersion(imageFilterSettings, renewedImageCatalog);
     }
 
     private Optional<Image> findMostRecentImage(List<Image> compatibleImages) {
@@ -164,16 +133,16 @@ public class FreeIpaImageProvider implements ImageProvider {
 
     private Optional<Image> findImageByApplicationVersion(List<FreeIpaVersions> versions, List<Image> compatibleImages) {
         LOGGER.debug("Default image not found. Attempt to find an image, compatible with the application version.");
-        return filterImages(versions, compatibleImages, FreeIpaVersions::getImageIds);
+        return findImage(versions, compatibleImages, FreeIpaVersions::getImageIds);
     }
 
     private Optional<Image> findImageInDefaults(List<FreeIpaVersions> versions, List<Image> compatibleImages) {
         LOGGER.debug("Attempt to find a default image to use.");
-        return filterImages(versions, compatibleImages, FreeIpaVersions::getDefaults);
+        return findImage(versions, compatibleImages, FreeIpaVersions::getDefaults);
     }
 
-    private Optional<Image> filterImages(List<FreeIpaVersions> freeIpaVersions, List<Image> images, Function<FreeIpaVersions, List<String>> memberFunction) {
-        List<String> imageIds = freeIpaVersions.stream().map(memberFunction).flatMap(Collection::stream).collect(Collectors.toList());
+    private Optional<Image> findImage(List<FreeIpaVersions> freeIpaVersions, List<Image> images, Function<FreeIpaVersions, List<String>> memberFunction) {
+        List<String> imageIds = freeIpaVersions.stream().map(memberFunction).flatMap(Collection::stream).toList();
         return images.stream().filter(image -> imageIds.contains(image.getUuid())).max(Comparator.comparing(Image::getDate));
     }
 

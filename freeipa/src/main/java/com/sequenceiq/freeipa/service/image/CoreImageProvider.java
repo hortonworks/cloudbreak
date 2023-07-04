@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 
@@ -37,14 +36,14 @@ public class CoreImageProvider implements ImageProvider {
     private WebApplicationExceptionMessageExtractor messageExtractor;
 
     @Override
-    public Optional<ImageWrapper> getImage(ImageSettingsRequest imageSettings, String region, String platform) {
+    public Optional<ImageWrapper> getImage(FreeIpaImageFilterSettings imageFilterSettings) {
         try {
             ImageV4Response imageV4Response = imageCatalogV4Endpoint.getSingleImageByCatalogNameAndImageId(
-                    WORKSPACE_ID_DEFAULT, imageSettings.getCatalog(), imageSettings.getId());
+                    WORKSPACE_ID_DEFAULT, imageFilterSettings.catalog(), imageFilterSettings.currentImageId());
 
             Optional<Image> image = convert(imageV4Response);
 
-            return image.map(i -> new ImageWrapper(i, defaultCatalogUrl, imageSettings.getCatalog()));
+            return image.map(i -> new ImageWrapper(i, defaultCatalogUrl, imageFilterSettings.catalog()));
         } catch (Exception ex) {
             LOGGER.warn("Image lookup failed: {}", ex.getMessage());
             return Optional.empty();
@@ -52,16 +51,17 @@ public class CoreImageProvider implements ImageProvider {
     }
 
     @Override
-    public List<ImageWrapper> getImages(ImageSettingsRequest imageSettings, String region, String platform) {
+    public List<ImageWrapper> getImages(FreeIpaImageFilterSettings imageFilterSettings) {
         try {
-            ImagesV4Response imagesV4Response = imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, imageSettings.getCatalog(), null, platform, null,
+            ImagesV4Response imagesV4Response = imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, imageFilterSettings.catalog(), null,
+                    imageFilterSettings.platform(), null,
                     null, false);
             LOGGER.debug("Images received: {}", imagesV4Response);
             return Optional.ofNullable(imagesV4Response.getFreeipaImages()).
                     orElseGet(List::of).stream()
                     .map(this::convert)
                     .flatMap(Optional::stream)
-                    .map(img -> new ImageWrapper(img, null, imageSettings.getCatalog()))
+                    .map(img -> new ImageWrapper(img, null, imageFilterSettings.catalog()))
                     .collect(Collectors.toList());
         } catch (WebApplicationException e) {
             String errorMessage = messageExtractor.getErrorMessage(e);

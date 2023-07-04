@@ -15,13 +15,13 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackFailed;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackRequest;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackSuccess;
+import com.sequenceiq.freeipa.service.image.FreeIpaImageFilterSettings;
 import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageProvider;
 import com.sequenceiq.freeipa.service.image.ImageProviderFactory;
@@ -72,13 +72,10 @@ public class ImageFallbackHandler extends ExceptionCatcherEventHandler<ImageFall
         try {
             ImageEntity currentImage = imageService.getByStack(stack);
             ImageProvider imageProvider = imageProviderFactory.getImageProvider(currentImage.getImageCatalogName());
-            ImageSettingsRequest imageSettings = new ImageSettingsRequest();
-            imageSettings.setCatalog(currentImage.getImageCatalogName());
-            imageSettings.setOs(currentImage.getOs());
-            imageSettings.setId(currentImage.getImageId());
+            FreeIpaImageFilterSettings imageFilterSettings = createFreeIpaImageFilterSettings(stack, currentImage);
             String imgNotFoundMsg = String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
-                    imageSettings.getCatalog(), stack.getCloudPlatform(), stack.getRegion());
-            ImageWrapper imageWrapper = imageProvider.getImage(imageSettings, stack.getRegion(), stack.getCloudPlatform())
+                    imageFilterSettings.catalog(), stack.getCloudPlatform(), stack.getRegion());
+            ImageWrapper imageWrapper = imageProvider.getImage(imageFilterSettings)
                     .orElseThrow(() -> new ImageNotFoundException(imgNotFoundMsg));
             String newImageName = imageService.determineImageNameByRegion(stack.getCloudPlatform(), stack.getRegion(), imageWrapper.getImage());
             currentImage.setImageName(newImageName);
@@ -91,6 +88,11 @@ public class ImageFallbackHandler extends ExceptionCatcherEventHandler<ImageFall
         }
 
         return new ImageFallbackSuccess(stackId);
+    }
+
+    private FreeIpaImageFilterSettings createFreeIpaImageFilterSettings(Stack stack, ImageEntity currentImage) {
+        return new FreeIpaImageFilterSettings(currentImage.getImageId(), currentImage.getImageCatalogName(), currentImage.getOs(), stack.getRegion(),
+                stack.getCloudPlatform(), false);
     }
 
 }

@@ -50,6 +50,8 @@ import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
 import com.sequenceiq.freeipa.flow.stack.migration.handler.AwsMigrationUtil;
 import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.image.FreeIpaImageFilterSettings;
+import com.sequenceiq.freeipa.service.image.FreeipaPlatformStringTransformer;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
@@ -61,7 +63,7 @@ class UpgradeServiceTest {
 
     public static final String ENVIRONMENT_CRN = "ENV_CRN";
 
-    private static final String RESOURCE_CRN = "crn:cdp:freeipa:us-west-1:accId:freeipa:969db858-ea8f-46ed-9e0d-216dd7ea8bf1";
+    private static final String IMAGE_CATALOG = "cat";
 
     @Mock
     private OperationService operationService;
@@ -87,6 +89,9 @@ class UpgradeServiceTest {
     @Mock
     private DefaultRootVolumeSizeProvider rootVolumeSizeProvider;
 
+    @Mock
+    private FreeipaPlatformStringTransformer platformStringTransformer;
+
     @InjectMocks
     private UpgradeService underTest;
 
@@ -102,7 +107,7 @@ class UpgradeServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = createValidImSet();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
-        ImageInfoResponse selectedImage = mockSelectedImage(request, stack);
+        ImageInfoResponse selectedImage = mockSelectedImage();
         ImageInfoResponse currentImage = mockCurrentImage(stack);
         Operation operation = mockOperation(OperationState.RUNNING);
         ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
@@ -154,7 +159,7 @@ class UpgradeServiceTest {
         allInstances.stream().filter(im -> "pgw".equalsIgnoreCase(im.getInstanceId())).forEach(im -> im.setImage(new Json(oldImage)));
         allInstances.stream().filter(im -> !"pgw".equalsIgnoreCase(im.getInstanceId())).forEach(im -> im.setImage(new Json(newImage)));
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
-        ImageInfoResponse selectedImage = mockSelectedImage(request, stack);
+        ImageInfoResponse selectedImage = mockSelectedImage();
         when(imageService.fetchCurrentImage(stack)).thenReturn(selectedImage);
         Operation operation = mockOperation(OperationState.RUNNING);
         ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
@@ -208,7 +213,7 @@ class UpgradeServiceTest {
         instanceGroup.setTemplate(template);
         instanceGroup.setGroupName("master");
         when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup));
-        ImageInfoResponse selectedImage = mockSelectedImage(request, stack);
+        ImageInfoResponse selectedImage = mockSelectedImage();
         ImageInfoResponse currentImage = mockCurrentImage(stack);
         Operation operation = mockOperation(OperationState.RUNNING);
         ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
@@ -257,7 +262,7 @@ class UpgradeServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = createValidImSet();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
-        ImageInfoResponse selectedImage = mockSelectedImage(request, stack);
+        ImageInfoResponse selectedImage = mockSelectedImage();
         ImageInfoResponse currentImage = mockCurrentImage(stack);
         Operation operation = mockOperation(OperationState.RUNNING);
         ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
@@ -301,10 +306,10 @@ class UpgradeServiceTest {
         return currentImage;
     }
 
-    private ImageInfoResponse mockSelectedImage(FreeIpaUpgradeRequest request, Stack stack) {
+    private ImageInfoResponse mockSelectedImage() {
         ImageInfoResponse selectedImage = new ImageInfoResponse();
         selectedImage.setId("333-444");
-        when(imageService.selectImage(stack, request.getImage())).thenReturn(selectedImage);
+        when(imageService.selectImage(any(FreeIpaImageFilterSettings.class))).thenReturn(selectedImage);
         return selectedImage;
     }
 
@@ -319,7 +324,7 @@ class UpgradeServiceTest {
         Set<InstanceMetaData> allInstances = createValidImSet();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
         ImageInfoResponse selectedImage = new ImageInfoResponse();
-        when(imageService.selectImage(eq(stack), any(ImageSettingsRequest.class))).thenReturn(selectedImage);
+        when(imageService.selectImage(any(FreeIpaImageFilterSettings.class))).thenReturn(selectedImage);
         ImageInfoResponse currentImage = mockCurrentImage(stack);
         Operation operation = mockOperation(OperationState.RUNNING);
         ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
@@ -376,7 +381,7 @@ class UpgradeServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = createValidImSet();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
-        ImageInfoResponse selectedImage = mockSelectedImage(request, stack);
+        ImageInfoResponse selectedImage = mockSelectedImage();
         ImageInfoResponse currentImage = mockCurrentImage(stack);
         mockOperation(OperationState.REJECTED);
         when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenReturn(createPgwIm());
@@ -426,17 +431,15 @@ class UpgradeServiceTest {
         currentImage.setCatalog("cat2");
         currentImage.setCatalogName("catName");
         when(imageService.fetchCurrentImage(stack)).thenReturn(currentImage);
-        ArgumentCaptor<ImageSettingsRequest> captor = ArgumentCaptor.forClass(ImageSettingsRequest.class);
         ImageInfoResponse targetImage = new ImageInfoResponse();
-        when(imageService.findTargetImages(eq(stack), captor.capture(), eq(currentImage))).thenReturn(List.of(targetImage));
+        when(imageService.findTargetImages(stack, "cat2", currentImage, true)).thenReturn(List.of(targetImage));
 
-        FreeIpaUpgradeOptions result = underTest.collectUpgradeOptions(ACCOUNT_ID, ENVIRONMENT_CRN, "cat");
+        FreeIpaUpgradeOptions result = underTest.collectUpgradeOptions(ACCOUNT_ID, ENVIRONMENT_CRN, "cat2", true);
 
         assertEquals(currentImage, result.getCurrentImage());
         assertEquals(1, result.getImages().size());
         assertEquals(targetImage, result.getImages().get(0));
-        ImageSettingsRequest imageSettingsRequest = captor.getValue();
-        assertEquals("cat", imageSettingsRequest.getCatalog());
+        verify(imageService).findTargetImages(stack, "cat2", currentImage, true);
     }
 
     @Test
@@ -444,20 +447,18 @@ class UpgradeServiceTest {
         Stack stack = new Stack();
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         ImageInfoResponse currentImage = new ImageInfoResponse();
-        currentImage.setCatalog("cat2");
-        currentImage.setCatalogName("catName");
+        currentImage.setCatalog(IMAGE_CATALOG);
+        currentImage.setCatalogName(IMAGE_CATALOG);
         when(imageService.fetchCurrentImage(stack)).thenReturn(currentImage);
-        ArgumentCaptor<ImageSettingsRequest> captor = ArgumentCaptor.forClass(ImageSettingsRequest.class);
         ImageInfoResponse targetImage = new ImageInfoResponse();
-        when(imageService.findTargetImages(eq(stack), captor.capture(), eq(currentImage))).thenReturn(List.of(targetImage));
+        when(imageService.findTargetImages(stack, IMAGE_CATALOG, currentImage, true)).thenReturn(List.of(targetImage));
 
-        FreeIpaUpgradeOptions result = underTest.collectUpgradeOptions(ACCOUNT_ID, ENVIRONMENT_CRN, null);
+        FreeIpaUpgradeOptions result = underTest.collectUpgradeOptions(ACCOUNT_ID, ENVIRONMENT_CRN, null, true);
 
         assertEquals(currentImage, result.getCurrentImage());
         assertEquals(1, result.getImages().size());
         assertEquals(targetImage, result.getImages().get(0));
-        ImageSettingsRequest imageSettingsRequest = captor.getValue();
-        assertEquals("cat2", imageSettingsRequest.getCatalog());
+        verify(imageService).findTargetImages(stack, IMAGE_CATALOG, currentImage, true);
     }
 
     @Test
@@ -465,18 +466,16 @@ class UpgradeServiceTest {
         Stack stack = new Stack();
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         ImageInfoResponse currentImage = new ImageInfoResponse();
-        currentImage.setCatalogName("catName");
+        currentImage.setCatalogName(IMAGE_CATALOG);
         when(imageService.fetchCurrentImage(stack)).thenReturn(currentImage);
-        ArgumentCaptor<ImageSettingsRequest> captor = ArgumentCaptor.forClass(ImageSettingsRequest.class);
         ImageInfoResponse targetImage = new ImageInfoResponse();
-        when(imageService.findTargetImages(eq(stack), captor.capture(), eq(currentImage))).thenReturn(List.of(targetImage));
+        when(imageService.findTargetImages(stack, IMAGE_CATALOG, currentImage, true)).thenReturn(List.of(targetImage));
 
-        FreeIpaUpgradeOptions result = underTest.collectUpgradeOptions(ACCOUNT_ID, ENVIRONMENT_CRN, null);
+        FreeIpaUpgradeOptions result = underTest.collectUpgradeOptions(ACCOUNT_ID, ENVIRONMENT_CRN, null, true);
 
         assertEquals(currentImage, result.getCurrentImage());
         assertEquals(1, result.getImages().size());
         assertEquals(targetImage, result.getImages().get(0));
-        ImageSettingsRequest imageSettingsRequest = captor.getValue();
-        assertEquals("catName", imageSettingsRequest.getCatalog());
+        verify(imageService).findTargetImages(stack, IMAGE_CATALOG, currentImage, true);
     }
 }
