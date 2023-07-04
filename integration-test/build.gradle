@@ -104,6 +104,9 @@ dependencies {
   implementation (project(':redbeams-api')) {
     transitive = false;
   }
+  implementation (project(':secret-rotation-api')) {
+    transitive = false;
+  }
   implementation (project(':audit-connector')) {
     transitive = false;
   }

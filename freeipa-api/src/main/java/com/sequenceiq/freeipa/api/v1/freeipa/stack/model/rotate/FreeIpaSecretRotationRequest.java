@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType;
+import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 
 import io.swagger.annotations.ApiModel;
 

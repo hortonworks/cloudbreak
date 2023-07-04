@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 
 public class SaltStateApplyRotationContext extends RotationContext {
 

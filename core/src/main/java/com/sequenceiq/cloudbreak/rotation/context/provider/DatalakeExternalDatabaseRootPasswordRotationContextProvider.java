@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.DatabaseRootPasswordSaltPillarGenerator;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.SecretType;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContextProvider;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
-import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 
 @Component
 public class DatalakeExternalDatabaseRootPasswordRotationContextProvider implements RotationContextProvider {

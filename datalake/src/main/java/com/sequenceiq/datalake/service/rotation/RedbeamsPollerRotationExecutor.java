@@ -1,9 +1,10 @@
 package com.sequenceiq.datalake.service.rotation;
 
-import static com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType.FINALIZE;
-import static com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType.ROLLBACK;
-import static com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType.ROTATE;
-import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
+
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.FINALIZE;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 
 import javax.inject.Inject;
 
@@ -11,9 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.rotation.secret.AbstractRotationExecutor;
-import com.sequenceiq.cloudbreak.rotation.secret.context.PollerRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
+import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
 import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 
 @Component

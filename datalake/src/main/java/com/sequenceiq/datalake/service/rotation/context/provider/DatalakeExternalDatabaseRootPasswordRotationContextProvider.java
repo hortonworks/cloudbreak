@@ -1,8 +1,8 @@
 package com.sequenceiq.datalake.service.rotation.context.provider;
 
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
-import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
-import static com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
 import static com.sequenceiq.redbeams.rotation.RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD;
 
@@ -11,11 +11,11 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContextProvider;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
-import com.sequenceiq.cloudbreak.rotation.secret.context.PollerRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.SecretType;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
+import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
 
 @Component
 public class DatalakeExternalDatabaseRootPasswordRotationContextProvider implements RotationContextProvider {

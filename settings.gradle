@@ -82,4 +82,6 @@ include 'cloud-consumption-api'
 include 'auth-distributor-connector'
 include 'sdx-connector'
 include 'wiam-connector'
+include 'secret-rotation-api'
+include 'secret-rotation'
 

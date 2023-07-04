@@ -14,9 +14,8 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.AbstractRotationExecutor;
-import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
 
 @Component
 public class SaltStateApplyRotationExecutor extends AbstractRotationExecutor<SaltStateApplyRotationContext> {

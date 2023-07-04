@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.service.rotation;
 
-import static com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType.ROTATE;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,7 +31,8 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidator;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
@@ -43,7 +44,6 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.api.model.StateStatus;
-import com.sequenceiq.flow.rotation.service.SecretRotationValidator;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 

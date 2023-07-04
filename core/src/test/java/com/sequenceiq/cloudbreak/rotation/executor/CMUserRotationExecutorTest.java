@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,9 +28,9 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.CMUserRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationProgressService;
+import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
@@ -57,14 +56,13 @@ public class CMUserRotationExecutorTest {
     private SecretService secretService;
 
     @Mock
-    private SecretRotationProgressService secretRotationProgressService;
+    private SecretRotationStepProgressService secretRotationProgressService;
 
     @InjectMocks
     private CMUserRotationExecutor underTest;
 
     @BeforeEach
-    public void mockProgressService() throws IllegalAccessException {
-        FieldUtils.writeField(underTest, "secretRotationProgressService", Optional.of(secretRotationProgressService), true);
+    public void mockProgressService() {
         lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
     }
 

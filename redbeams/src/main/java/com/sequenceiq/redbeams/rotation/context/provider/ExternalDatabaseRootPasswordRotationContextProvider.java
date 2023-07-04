@@ -9,11 +9,11 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContextProvider;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretType;
-import com.sequenceiq.cloudbreak.rotation.secret.step.CommonSecretRotationStep;
-import com.sequenceiq.cloudbreak.rotation.secret.step.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.SecretType;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;

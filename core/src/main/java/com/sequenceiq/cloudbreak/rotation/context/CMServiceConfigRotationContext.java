@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.context;
 
 import com.google.common.collect.Table;
-import com.sequenceiq.cloudbreak.rotation.secret.RotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 
 public class CMServiceConfigRotationContext extends RotationContext {
 

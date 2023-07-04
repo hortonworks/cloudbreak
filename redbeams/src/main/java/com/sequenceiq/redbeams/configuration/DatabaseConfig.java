@@ -122,7 +122,7 @@ public class DatabaseConfig extends MultiDataSourceConfig {
         LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
 
         entityManagerFactory.setPackagesToScan("com.sequenceiq.redbeams", "com.sequenceiq.flow", "com.sequenceiq.cloudbreak.ha",
-                "com.sequenceiq.cloudbreak.structuredevent.domain");
+                "com.sequenceiq.cloudbreak.structuredevent.domain", "com.sequenceiq.cloudbreak.rotation");
         entityManagerFactory.setDataSource(dataSource());
 
         entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter());

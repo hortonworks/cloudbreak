@@ -1,8 +1,8 @@
 package com.sequenceiq.datalake.service.rotation;
 
-import static com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType.FINALIZE;
-import static com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType.ROLLBACK;
-import static com.sequenceiq.cloudbreak.rotation.secret.RotationFlowExecutionType.ROTATE;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.FINALIZE;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 import static com.sequenceiq.redbeams.rotation.RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -15,7 +15,6 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Optional;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,9 +23,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationProgressService;
-import com.sequenceiq.cloudbreak.rotation.secret.context.PollerRotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
+import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 
 @ExtendWith(MockitoExtension.class)
 class RedbeamsPollerRotationExecutorTest {
@@ -37,14 +36,13 @@ class RedbeamsPollerRotationExecutorTest {
     private SdxRotationService sdxRotationService;
 
     @Mock
-    private SecretRotationProgressService secretRotationProgressService;
+    private SecretRotationStepProgressService secretRotationProgressService;
 
     @InjectMocks
     private RedbeamsPollerRotationExecutor underTest;
 
     @BeforeEach
-    public void mockProgressService() throws IllegalAccessException {
-        FieldUtils.writeField(underTest, "secretRotationProgressService", Optional.of(secretRotationProgressService), true);
+    public void mockProgressService() {
         lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
     }
 

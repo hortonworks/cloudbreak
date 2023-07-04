@@ -24,7 +24,7 @@ import org.springframework.data.repository.support.Repositories;
 @DataJpaTest(properties = {
         "spring.jpa.properties.hibernate.session_factory.statement_inspector=com.sequenceiq.environment.service.integration.SqlStatementInspector"})
 @EntityScan(basePackages = {"com.sequenceiq.flow.domain",
-        "com.sequenceiq.flow.rotation",
+        "com.sequenceiq.cloudbreak.rotation",
         "com.sequenceiq.environment",
         "com.sequenceiq.cloudbreak.ha.domain",
         "com.sequenceiq.cloudbreak.structuredevent.domain"})

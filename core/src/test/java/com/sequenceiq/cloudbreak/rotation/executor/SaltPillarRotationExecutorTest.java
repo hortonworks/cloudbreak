@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,9 +35,9 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationException;
-import com.sequenceiq.cloudbreak.rotation.secret.SecretRotationProgressService;
+import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
@@ -62,15 +61,14 @@ class SaltPillarRotationExecutorTest {
     private ExitCriteriaProvider exitCriteriaProvider;
 
     @Mock
-    private SecretRotationProgressService secretRotationProgressService;
+    private SecretRotationStepProgressService secretRotationProgressService;
 
     @InjectMocks
     private SaltPillarRotationExecutor underTest;
 
     @BeforeEach
-    void setup() throws IllegalAccessException {
+    void setup() {
         lenient().when(exitCriteriaProvider.get(any())).thenReturn(ClusterDeletionBasedExitCriteriaModel.nonCancellableModel());
-        FieldUtils.writeField(underTest, "secretRotationProgressService", Optional.of(secretRotationProgressService), true);
         lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
     }
 
