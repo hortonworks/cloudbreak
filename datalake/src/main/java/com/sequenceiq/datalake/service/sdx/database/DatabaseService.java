@@ -220,8 +220,7 @@ public class DatabaseService {
     }
 
     private DatabaseServerV4StackRequest getDatabaseServerRequest(CloudPlatform cloudPlatform, SdxCluster sdxCluster) {
-        DatabaseConfig databaseConfig = dbConfigs.get(new DatabaseConfigKey(cloudPlatform, sdxCluster.getClusterShape(),
-                databaseServerParameterSetterMap.get(cloudPlatform).getDatabaseType(sdxCluster.getSdxDatabase()).orElse(null)));
+        DatabaseConfig databaseConfig = dbConfigs.get(new DatabaseConfigKey(cloudPlatform, sdxCluster.getClusterShape()));
         if (databaseConfig == null) {
             throw new BadRequestException("Database config for cloud platform " + cloudPlatform + ", cluster shape "
                     + sdxCluster.getClusterShape() + " not found");

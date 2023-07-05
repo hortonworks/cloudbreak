@@ -2,24 +2,22 @@ package com.sequenceiq.cloudbreak.service.externaldatabase.model;
 
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
-
 public class DatabaseServerParameter {
 
-    private final DatabaseAvailabilityType availabilityType;
+    private final boolean highlyAvailable;
 
     private final String engineVersion;
 
     private final Map<String, Object> attributes;
 
     private DatabaseServerParameter(Builder builder) {
-        this.availabilityType = builder.availabilityType;
+        this.highlyAvailable = builder.highlyAvailable;
         this.engineVersion = builder.engineVersion;
         this.attributes = builder.attributes != null ? builder.attributes : Map.of();
     }
 
-    public DatabaseAvailabilityType getAvailabilityType() {
-        return availabilityType;
+    public boolean isHighlyAvailable() {
+        return highlyAvailable;
     }
 
     public String getEngineVersion() {
@@ -36,14 +34,14 @@ public class DatabaseServerParameter {
 
     public static class Builder {
 
-        private DatabaseAvailabilityType availabilityType;
+        private boolean highlyAvailable;
 
         private String engineVersion;
 
         private Map<String, Object> attributes;
 
-        public Builder withAvailabilityType(DatabaseAvailabilityType availabilityType) {
-            this.availabilityType = availabilityType;
+        public Builder withHighlyAvailable(boolean highlyAvailable) {
+            this.highlyAvailable = highlyAvailable;
             return this;
         }
 

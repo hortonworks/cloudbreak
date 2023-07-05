@@ -1,11 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure.conf;
 
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,10 +11,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.sequenceiq.cloudbreak.cloud.azure.AzureDatabaseTemplateModelBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.logger.concurrent.MDCCopyingThreadPoolExecutor;
-import com.sequenceiq.common.model.AzureDatabaseType;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
@@ -65,12 +60,5 @@ public class AzureConfig {
                 new ThreadFactoryBuilder().setDaemon(true).setNameFormat(AZURE_CLIENT_THREAD_POOL + "-%s").build(),
                 (r, executor) -> LOGGER.error("Task has been rejected from 'azure-worker' threadpool. Executor state: " + executor));
         return ExecutorServiceMetrics.monitor(meterRegistry, threadPoolExecutor, AZURE_CLIENT_THREAD_POOL, "threadpool");
-    }
-
-    @Bean(name = "azureDatabaseTemplateModelBuilderMap")
-    public Map<AzureDatabaseType, AzureDatabaseTemplateModelBuilder> azureDatabaseTemplateModelBuilderMap(
-            List<AzureDatabaseTemplateModelBuilder> templateModelBuilders) {
-        return templateModelBuilders.stream().collect(
-                Collectors.toMap(AzureDatabaseTemplateModelBuilder::azureDatabaseType, modelBuiler -> modelBuiler));
     }
 }

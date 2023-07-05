@@ -57,7 +57,6 @@ import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseOperation;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseServerParameterDecorator;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseServerParameter;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfig;
-import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfigKey;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
@@ -115,7 +114,7 @@ class ExternalDatabaseServiceTest {
     @Mock
     private ClusterRepository clusterRepository;
 
-    private final Map<DatabaseStackConfigKey, DatabaseStackConfig> dbConfigs = new HashMap<>();
+    private final Map<CloudPlatform, DatabaseStackConfig> dbConfigs = new HashMap<>();
 
     @Mock
     private Map<CloudPlatform, DatabaseServerParameterDecorator> parameterDecoratorMap;
@@ -149,7 +148,7 @@ class ExternalDatabaseServiceTest {
         environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCloudPlatform(CLOUD_PLATFORM.name());
         environmentResponse.setCrn(ENV_CRN);
-        dbConfigs.put(new DatabaseStackConfigKey(CLOUD_PLATFORM, null), new DatabaseStackConfig(INSTANCE_TYPE, VENDOR, VOLUME_SIZE));
+        dbConfigs.put(CLOUD_PLATFORM, new DatabaseStackConfig(INSTANCE_TYPE, VENDOR, VOLUME_SIZE));
         lenient().when(parameterDecoratorMap.get(CLOUD_PLATFORM)).thenReturn(dbServerParameterDecorator);
     }
 
@@ -189,7 +188,7 @@ class ExternalDatabaseServiceTest {
         verify(dbServerParameterDecorator).setParameters(any(), serverParameterCaptor.capture());
         verify(clusterRepository).save(cluster);
         DatabaseServerParameter paramValue = serverParameterCaptor.getValue();
-        assertThat(paramValue.getAvailabilityType()).isEqualTo(availability);
+        assertThat(paramValue.isHighlyAvailable()).isEqualTo(availability == DatabaseAvailabilityType.HA);
     }
 
     @ParameterizedTest
@@ -219,7 +218,7 @@ class ExternalDatabaseServiceTest {
         verify(dbServerParameterDecorator).setParameters(any(), serverParameterCaptor.capture());
         verify(clusterRepository).save(cluster);
         DatabaseServerParameter paramValue = serverParameterCaptor.getValue();
-        assertThat(paramValue.getAvailabilityType()).isEqualTo(availability);
+        assertThat(paramValue.isHighlyAvailable()).isEqualTo(availability == DatabaseAvailabilityType.HA);
     }
 
     @ParameterizedTest
@@ -305,7 +304,7 @@ class ExternalDatabaseServiceTest {
 
         DatabaseServerParameter serverParameter = serverParameterCaptor.getValue();
         assertThat(serverParameter).isNotNull();
-        assertThat(serverParameter.getAvailabilityType()).isEqualTo(DatabaseAvailabilityType.HA);
+        assertThat(serverParameter.isHighlyAvailable()).isTrue();
 
         ArgumentCaptor<AllocateDatabaseServerV4Request> allocateRequestCaptor = ArgumentCaptor.forClass(AllocateDatabaseServerV4Request.class);
         verify(redbeamsClient).create(allocateRequestCaptor.capture());

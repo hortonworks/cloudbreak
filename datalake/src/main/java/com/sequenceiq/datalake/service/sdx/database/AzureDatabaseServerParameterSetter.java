@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.service.sdx.database;
 
-import java.util.Optional;
-
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.AzureDatabaseType;
-import com.sequenceiq.common.model.AzureHighAvailabiltyMode;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
@@ -50,11 +47,9 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
         if (SdxDatabaseAvailabilityType.HA.equals(availabilityType)) {
             parameters.setBackupRetentionDays(backupRetentionPeriodHa);
             parameters.setGeoRedundantBackup(geoRedundantBackupHa);
-            parameters.setHighAvailabilityMode(AzureHighAvailabiltyMode.SAME_ZONE);
         } else if (SdxDatabaseAvailabilityType.NON_HA.equals(availabilityType)) {
             parameters.setBackupRetentionDays(backupRetentionPeriodNonHa);
             parameters.setGeoRedundantBackup(geoRedundantBackupNonHa);
-            parameters.setHighAvailabilityMode(AzureHighAvailabiltyMode.DISABLED);
         } else {
             throw new IllegalArgumentException(availabilityType + " database availability type is not supported on Azure.");
         }
@@ -63,11 +58,6 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
         }
         parameters.setAzureDatabaseType(getAzureDatabaseType(sdxCluster.getSdxDatabase()));
         request.setAzure(parameters);
-    }
-
-    @Override
-    public Optional<AzureDatabaseType> getDatabaseType(SdxDatabase sdxDatabase) {
-        return Optional.of(getAzureDatabaseType(sdxDatabase));
     }
 
     @Override

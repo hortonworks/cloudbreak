@@ -1,7 +1,6 @@
 package com.sequenceiq.datalake.configuration;
 
 import java.io.IOException;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -22,8 +21,6 @@ import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.common.model.AzureDatabaseType;
-import com.sequenceiq.common.model.DatabaseType;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseConfig;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseConfigKey;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseServerParameterSetter;
@@ -48,8 +45,6 @@ public class PlatformConfig {
 
     @Value("${datalake.supported.raz.platform:AWS,AZURE,GCP}")
     private List<CloudPlatform> razSupportedPlatforms;
-
-    private final Map<CloudPlatform, Set<? extends DatabaseType>> databaseTypeMap = Map.of(CloudPlatform.AZURE, EnumSet.allOf(AzureDatabaseType.class));
 
     @Inject
     private Set<DatabaseServerParameterSetter> databaseServerParameterSetters;
@@ -107,40 +102,24 @@ public class PlatformConfig {
 
         for (CloudPlatform cloudPlatform : allPossibleExternalDbPlatforms) {
             for (SdxClusterShape sdxClusterShape : SdxClusterShape.values()) {
-                Set<? extends DatabaseType> databaseTypes = databaseTypeMap.getOrDefault(cloudPlatform, Set.of());
-                if (databaseTypes.isEmpty()) {
-                    readDbConfig(cloudPlatform, sdxClusterShape, null)
-                            .ifPresent(dbc -> builder.put(new DatabaseConfigKey(cloudPlatform, sdxClusterShape, null), dbc));
-                } else {
-                    for (DatabaseType databaseType : databaseTypes) {
-                        readDbConfig(cloudPlatform, sdxClusterShape, databaseType)
-                                .ifPresent(dbc -> builder.put(new DatabaseConfigKey(cloudPlatform, sdxClusterShape, databaseType), dbc));
-                    }
+                Optional<DatabaseConfig> dbConfig = readDbConfig(cloudPlatform, sdxClusterShape);
+                if (dbConfig.isPresent()) {
+                    builder.put(new DatabaseConfigKey(cloudPlatform, sdxClusterShape), dbConfig.get());
                 }
             }
         }
         return builder.build();
     }
 
-    private String getResourcePath(CloudPlatform cloudPlatform, SdxClusterShape sdxClusterShape, DatabaseType databaseType) {
-        String clusterShapeString = sdxClusterShape.toString().toLowerCase(Locale.US).replaceAll("_", "-");
-        String cloudPlatformString = cloudPlatform.toString().toLowerCase(Locale.US);
-        String resourcePath;
-        if (databaseType == null) {
-            resourcePath = String.format("rds/%s/database-%s-template.json", cloudPlatformString, clusterShapeString);
-        } else {
-            resourcePath = String.format("rds/%s/database-%s-%s-template.json", cloudPlatformString, clusterShapeString, databaseType.shortName());
-        }
-        return resourcePath;
-    }
-
-    private Optional<DatabaseConfig> readDbConfig(CloudPlatform cloudPlatform, SdxClusterShape sdxClusterShape, DatabaseType databaseType)
+    private Optional<DatabaseConfig> readDbConfig(CloudPlatform cloudPlatform, SdxClusterShape sdxClusterShape)
             throws IOException {
-        String resourcePath = getResourcePath(cloudPlatform, sdxClusterShape, databaseType);
+        String resourcePath = String.format("rds/%s/database-%s-template.json",
+                cloudPlatform.toString().toLowerCase(Locale.US),
+                sdxClusterShape.toString().toLowerCase(Locale.US).replaceAll("_", "-"));
         String databaseTemplateJson = FileReaderUtils.readFileFromClasspathQuietly(resourcePath);
         if (databaseTemplateJson == null) {
-            LOGGER.debug("No readable database config found for cloud platform {}, cluster shape {}, databasetype {}: skipping",
-                    cloudPlatform, sdxClusterShape, databaseType);
+            LOGGER.debug("No readable database config found for cloud platform {}, cluster shape {}: skipping",
+                    cloudPlatform, sdxClusterShape);
             return Optional.empty();
         }
         return Optional.of(JsonUtil.readValue(databaseTemplateJson, DatabaseConfig.class));

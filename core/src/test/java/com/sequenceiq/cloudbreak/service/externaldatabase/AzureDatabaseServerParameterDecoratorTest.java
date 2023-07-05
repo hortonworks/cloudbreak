@@ -9,10 +9,8 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseServerParameter;
 import com.sequenceiq.common.model.AzureDatabaseType;
-import com.sequenceiq.common.model.AzureHighAvailabiltyMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureDatabaseServerV4Parameters;
 
@@ -27,7 +25,7 @@ class AzureDatabaseServerParameterDecoratorTest {
         ReflectionTestUtils.setField(underTest, "geoRedundantBackupNonHa", Boolean.FALSE);
         DatabaseServerV4StackRequest databaseServerV4StackRequest = new DatabaseServerV4StackRequest();
         DatabaseServerParameter databaseServerParameter = DatabaseServerParameter.builder()
-                .withAvailabilityType(DatabaseAvailabilityType.HA)
+                .withHighlyAvailable(true)
                 .withEngineVersion("11")
                 .withAttributes(Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.SINGLE_SERVER.name()))
                 .build();
@@ -37,7 +35,6 @@ class AzureDatabaseServerParameterDecoratorTest {
         assertTrue(azureDatabaseServerV4Parameters.getGeoRedundantBackup());
         assertEquals("11", azureDatabaseServerV4Parameters.getDbVersion());
         assertEquals(AzureDatabaseType.SINGLE_SERVER, azureDatabaseServerV4Parameters.getAzureDatabaseType());
-        assertEquals(AzureHighAvailabiltyMode.SAME_ZONE, azureDatabaseServerV4Parameters.getHighAvailabilityMode());
     }
 
     @Test
@@ -48,7 +45,7 @@ class AzureDatabaseServerParameterDecoratorTest {
         ReflectionTestUtils.setField(underTest, "geoRedundantBackupNonHa", Boolean.FALSE);
         DatabaseServerV4StackRequest databaseServerV4StackRequest = new DatabaseServerV4StackRequest();
         DatabaseServerParameter databaseServerParameter = DatabaseServerParameter.builder()
-                .withAvailabilityType(DatabaseAvailabilityType.NONE)
+                .withHighlyAvailable(false)
                 .withEngineVersion("11")
                 .withAttributes(Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name()))
                 .build();
@@ -58,7 +55,6 @@ class AzureDatabaseServerParameterDecoratorTest {
         assertFalse(azureDatabaseServerV4Parameters.getGeoRedundantBackup());
         assertEquals("11", azureDatabaseServerV4Parameters.getDbVersion());
         assertEquals(AzureDatabaseType.FLEXIBLE_SERVER, azureDatabaseServerV4Parameters.getAzureDatabaseType());
-        assertEquals(AzureHighAvailabiltyMode.DISABLED, azureDatabaseServerV4Parameters.getHighAvailabilityMode());
     }
 
     @Test
@@ -69,7 +65,7 @@ class AzureDatabaseServerParameterDecoratorTest {
         ReflectionTestUtils.setField(underTest, "geoRedundantBackupNonHa", Boolean.FALSE);
         DatabaseServerV4StackRequest databaseServerV4StackRequest = new DatabaseServerV4StackRequest();
         DatabaseServerParameter databaseServerParameter = DatabaseServerParameter.builder()
-                .withAvailabilityType(DatabaseAvailabilityType.NON_HA)
+                .withHighlyAvailable(false)
                 .withEngineVersion("11")
                 .build();
         underTest.setParameters(databaseServerV4StackRequest, databaseServerParameter);
@@ -78,6 +74,5 @@ class AzureDatabaseServerParameterDecoratorTest {
         assertFalse(azureDatabaseServerV4Parameters.getGeoRedundantBackup());
         assertEquals("11", azureDatabaseServerV4Parameters.getDbVersion());
         assertEquals(AzureDatabaseType.SINGLE_SERVER, azureDatabaseServerV4Parameters.getAzureDatabaseType());
-        assertEquals(AzureHighAvailabiltyMode.DISABLED, azureDatabaseServerV4Parameters.getHighAvailabilityMode());
     }
 }

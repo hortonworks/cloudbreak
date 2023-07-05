@@ -1,8 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -12,7 +11,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,13 +18,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView;
-import com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -37,7 +33,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
-import com.sequenceiq.common.model.AzureDatabaseType;
 
 import freemarker.template.Template;
 
@@ -90,10 +85,7 @@ public class AzureTemplateBuilderDbTest {
     private AzureDatabaseTemplateProvider azureDatabaseTemplateProvider;
 
     @Mock
-    private Map<AzureDatabaseType, AzureDatabaseTemplateModelBuilder> azureDatabaseTemplateModelBuilderMap;
-
-    @Mock
-    private AzureDatabaseTemplateModelBuilder azureDatabaseTemplateModelBuilder;
+    private AzureUtils azureUtils;
 
     private CloudContext cloudContext;
 
@@ -123,18 +115,18 @@ public class AzureTemplateBuilderDbTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("templatesPathDataProvider")
-    void buildTestWhenUseSslEnforcementFalse(String templatePath) throws IOException {
+    void buildTestWhenUseSslEnforcementFalse(String templatePath) {
         buildTestWhenUseSslEnforcementInternal(templatePath, false);
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("templatesPathDataProvider")
-    void buildTestWhenUseSslEnforcementTrue(String templatePath) throws IOException {
+    void buildTestWhenUseSslEnforcementTrue(String templatePath) {
         buildTestWhenUseSslEnforcementInternal(templatePath, true);
     }
 
     @Test
-    void buildTestWhenDataEncryptionParametersPresent() throws IOException {
+    void buildTestWhenDataEncryptionParametersPresent() {
         Template template = Optional.ofNullable(factoryBean.getObject())
                 .map(config -> {
                     try {
@@ -159,22 +151,73 @@ public class AzureTemplateBuilderDbTest {
                 .build();
 
         DatabaseStack databaseStack = new DatabaseStack(network, databaseServer, Collections.emptyMap(), template.toString());
-        when(azureDatabaseTemplateModelBuilderMap.get(AzureDatabaseType.SINGLE_SERVER)).thenReturn(azureDatabaseTemplateModelBuilder);
-        when(azureDatabaseTemplateModelBuilder.buildModel(any(AzureDatabaseServerView.class), any(AzureNetworkView.class), any(DatabaseStack.class)))
-                .thenReturn(createDefaultModel(false));
-        when(azureDatabaseTemplateProvider.getTemplate(databaseStack)).thenReturn(template);
+        Mockito.when(azureDatabaseTemplateProvider.getTemplate(databaseStack)).thenReturn(template);
+        Mockito.when(azureUtils.encodeString(SUBNET_ID)).thenReturn("hash");
 
         String result = underTest.build(cloudContext, databaseStack);
 
         assertThat(JsonUtil.isValid(result)).overridingErrorMessage("Invalid JSON: " + result).isTrue();
-        JsonNode parameters = JsonUtil.readTree(result).get("parameters");
-        checkParameter(parameters.get("keyVaultName"), "string", "dummyVault");
-        checkParameter(parameters.get("keyVaultResourceGroupName"), "string", "dummyResourceGroup");
-        checkParameter(parameters.get("keyName"), "string", "dummyKey");
-        checkParameter(parameters.get("keyVersion"), "string", "dummyVersion");
+        assertThat(result).contains("\"keyVaultName\": {\n" +
+                "              \"type\": \"string\",\n" +
+                "              \"defaultValue\" : \"dummyVault\",\n" +
+                "              \"metadata\": {\n" +
+                "                \"description\": \"Key vault name where the key to use is stored\"\n" +
+                "              }\n" +
+                "        },\n" +
+                "        \"keyVaultResourceGroupName\": {\n" +
+                "              \"type\": \"string\",\n" +
+                "              \"defaultValue\" : \"dummyResourceGroup\",\n" +
+                "              \"metadata\": {\n" +
+                "                \"description\": \"Key vault resource group name where it is stored\"\n" +
+                "              }\n" +
+                "        },\n" +
+                "        \"keyName\": {\n" +
+                "              \"type\": \"string\",\n" +
+                "              \"defaultValue\" : \"dummyKey\",\n" +
+                "              \"metadata\": {\n" +
+                "                \"description\": \"Key name in the key vault to use as encryption protector\"\n" +
+                "              }\n" +
+                "        },\n" +
+                "        \"keyVersion\": {\n" +
+                "              \"type\": \"string\",\n" +
+                "              \"defaultValue\" : \"dummyVersion\",\n" +
+                "              \"metadata\": {\n" +
+                "                \"description\": \"Version of the key in the key vault to use as encryption protector\"\n" +
+                "              }\n" +
+                "        }");
+
     }
 
-    private void buildTestWhenUseSslEnforcementInternal(String templatePath, boolean useSslEnforcement) throws IOException {
+    @Test
+    void buildTestWhenDataEncryptionParametersPresentAndKeyVersionError() {
+        Template template = Optional.ofNullable(factoryBean.getObject())
+                .map(config -> {
+                    try {
+                        return config.getTemplate("templates/arm-dbstack.ftl", "UTF-8");
+                    } catch (IOException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }).orElseThrow();
+        Subnet subnet = new Subnet(SUBNET_CIDR);
+        Network network = new Network(subnet, List.of(NETWORK_CIDR), OutboundInternetTraffic.ENABLED);
+        network.putParameter("subnets", FULL_SUBNET_ID);
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("dbVersion", "10");
+        params.put(KEY_URL, "https://dummyVault.vault.azure.net/keys/dummyKey");
+        params.put(KEY_VAULT_RESOURCE_GROUP_NAME, "dummyResourceGroup");
+        DatabaseServer databaseServer = DatabaseServer.builder()
+                .withServerId(SERVER_ID)
+                .withRootUserName(ROOT_USER_NAME)
+                .withRootPassword(ROOT_PASSWORD)
+                .withLocation(REGION)
+                .withParams(params)
+                .build();
+
+        DatabaseStack databaseStack = new DatabaseStack(network, databaseServer, Collections.emptyMap(), template.toString());
+        assertThrows(IllegalArgumentException.class, () -> underTest.build(cloudContext, databaseStack));
+    }
+
+    private void buildTestWhenUseSslEnforcementInternal(String templatePath, boolean useSslEnforcement) {
         Template template = Optional.ofNullable(factoryBean.getObject())
                 .map(config -> {
                     try {
@@ -184,22 +227,22 @@ public class AzureTemplateBuilderDbTest {
                     }
                 }).orElseThrow();
         DatabaseStack databaseStack = createDatabaseStack(useSslEnforcement, template.toString());
-        when(azureDatabaseTemplateProvider.getTemplate(databaseStack)).thenReturn(template);
-        when(azureDatabaseTemplateModelBuilderMap.get(AzureDatabaseType.SINGLE_SERVER)).thenReturn(azureDatabaseTemplateModelBuilder);
-        when(azureDatabaseTemplateModelBuilder.buildModel(any(AzureDatabaseServerView.class), any(AzureNetworkView.class), any(DatabaseStack.class)))
-                .thenReturn(createDefaultModel(useSslEnforcement));
+        Mockito.when(azureDatabaseTemplateProvider.getTemplate(databaseStack)).thenReturn(template);
+        Mockito.when(azureUtils.encodeString(SUBNET_ID)).thenReturn("hash");
 
         String result = underTest.build(cloudContext, databaseStack);
 
         assertThat(JsonUtil.isValid(result)).overridingErrorMessage("Invalid JSON: " + result).isTrue();
-        JsonNode parameters = JsonUtil.readTree(result).get("parameters");
-        checkParameter(parameters.get("useSslEnforcement"), "bool", String.valueOf(useSslEnforcement));
-        checkParameter(parameters.get("privateEndpointName"), "String", "pe-hash-to-myServer");
-    }
-
-    private <T> void checkParameter(JsonNode parameter, String type, String valueStr) {
-        Assertions.assertEquals(type, parameter.get("type").asText());
-        Assertions.assertEquals(valueStr, parameter.get("defaultValue").asText());
+        assertThat(result).contains(
+                "        \"useSslEnforcement\": {\n" +
+                        "            \"type\": \"bool\",\n" +
+                        "            \"defaultValue\": " + useSslEnforcement + ",");
+        assertThat(result).contains(
+                "        \"privateEndpointName\": {\n" +
+                        "            \"defaultValue\": \"pe-hash-to-myServer\",\n" +
+                        "            \"type\": \"String\"\n" +
+                        "        }"
+        );
     }
 
     private DatabaseStack createDatabaseStack(boolean useSslEnforcement, String template) {
@@ -219,22 +262,4 @@ public class AzureTemplateBuilderDbTest {
         return new DatabaseStack(network, databaseServer, Collections.emptyMap(), template);
     }
 
-    private Map<String, Object> createDefaultModel(boolean useSslEnforcement) {
-        return Map.ofEntries(
-                Map.entry("dbServerName", "dbname"),
-                Map.entry("dbVersion", "dbversion"),
-                Map.entry("adminLoginName", "root"),
-                Map.entry("adminPassword", "pwd"),
-                Map.entry("location", "location"),
-                Map.entry("keyVaultName", "dummyVault"),
-                Map.entry("keyVaultResourceGroupName", "dummyResourceGroup"),
-                Map.entry("keyName", "dummyKey"),
-                Map.entry("keyVersion", "dummyVersion"),
-                Map.entry("batchSize", 1),
-                Map.entry("subnets", ""),
-                Map.entry("usePrivateEndpoints", false),
-                Map.entry("privateEndpointName", "pe-hash-to-myServer"),
-                Map.entry("dataEncryption", true),
-                Map.entry("useSslEnforcement", useSslEnforcement));
-    }
 }
