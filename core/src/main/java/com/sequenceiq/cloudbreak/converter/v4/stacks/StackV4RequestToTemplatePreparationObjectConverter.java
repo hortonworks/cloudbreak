@@ -372,10 +372,11 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
 
     private void decorateDatalakeView(StackV4Request source, TemplatePreparationObject.Builder builder) {
         DatalakeView datalakeView = null;
-        if (StringUtils.isNotEmpty(source.getEnvironmentCrn()) && StackType.WORKLOAD.equals(source.getType())) {
+        if (StringUtils.isNotEmpty(source.getEnvironmentCrn())) {
             List<SdxClusterResponse> datalakes = sdxClientService.getByEnvironmentCrn(source.getEnvironmentCrn());
             if (!datalakes.isEmpty()) {
-                datalakeView = new DatalakeView(datalakes.get(0).getRangerRazEnabled());
+                SdxClusterResponse datalake = datalakes.get(0);
+                datalakeView = new DatalakeView(datalake.getRangerRazEnabled(), datalake.getCrn());
             }
         }
         builder.withDataLakeView(datalakeView);

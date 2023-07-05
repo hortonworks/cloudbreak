@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.saas.sdx.SdxService;
-import com.sequenceiq.cloudbreak.saas.sdx.TargetPlatform;
+import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 
 @Configuration
 public class PlatformConfig {

@@ -10,6 +10,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
@@ -25,7 +26,8 @@ public class RangerRazDatalakeConfigProvider extends RangerRazBaseConfigProvider
         return StackType.DATALAKE == source.getStackType()
                 && CMRepositoryVersionUtil.isRazConfigurationSupported(
                         source.getProductDetailsView().getCm().getVersion(), source.getCloudPlatform(), source.getStackType())
-                && source.getGeneralClusterConfigs().isEnableRangerRaz();
+                && source.getGeneralClusterConfigs().isEnableRangerRaz()
+                && TargetPlatform.PAAS.equals(TargetPlatform.getByCrn(source.getDatalakeView().get().getCrn()));
     }
 
     @Override

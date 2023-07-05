@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.List;
 import java.util.Map;
@@ -12,11 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -27,6 +31,10 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 public class RangerRazDatalakeConfigProviderTest {
+
+    private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:default:datalake:e438a2db-d650-4132-ae62-242c5ba2f784";
+
+    private static final String SAAS_DATALAKE_CRN = "crn:cdp:sdxsvc:us-west-1:cloudera:instance:f22e7f31-a98d-424d-917a-a62a36cb3c9e";
 
     private final RangerRazDatalakeConfigProvider configProvider = new RangerRazDatalakeConfigProvider();
 
@@ -59,6 +67,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
+                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -81,6 +90,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
+                .withDataLakeView(new DatalakeView(true, DATALAKE_CRN))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -103,6 +113,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
+                .withDataLakeView(new DatalakeView(true, DATALAKE_CRN))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -124,6 +135,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
+                .withDataLakeView(new DatalakeView(true, DATALAKE_CRN))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -155,6 +167,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
+                .withDataLakeView(new DatalakeView(true, DATALAKE_CRN))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -186,6 +199,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker, razHG))
+                .withDataLakeView(new DatalakeView(true, DATALAKE_CRN))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -224,6 +238,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
+                .withDataLakeView(new DatalakeView(true, DATALAKE_CRN))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -243,7 +258,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withStackType(StackType.WORKLOAD)
                 .withCloudPlatform(cloudPlatform)
                 .withProductDetails(cmRepo, List.of())
-                .withDataLakeView(new DatalakeView(true))
+                .withDataLakeView(new DatalakeView(true, DATALAKE_CRN))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, worker))
                 .build();
@@ -253,10 +268,10 @@ public class RangerRazDatalakeConfigProviderTest {
     }
 
     @Test
-    @DisplayName("CM 7.2.0 DL is used and Raz is requested, but YARN, no additional service needs to be added to the template")
+    @DisplayName("CM 7.2.10 DL is used and Raz is requested, but YARN, no additional service needs to be added to the template")
     void getAdditionalServicesWhenRazIsEnabledAndNotAwsOrAzure() {
         ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
-        cmRepo.setVersion("7.2.0");
+        cmRepo.setVersion("7.2.10");
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setEnableRangerRaz(true);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, List.of());
@@ -267,10 +282,40 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
+                .withDataLakeView(new DatalakeView(true, DATALAKE_CRN))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
         assertEquals(0, additionalServices.size());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("razCloudPlatformDataProvider")
+    @DisplayName("CM 7.2.0, DL is used, Raz is requested, but is not configured for Saas DL")
+    void isConfigurationNeededShouldReturnFalseForSaasDatalke(String testCaseName, CloudPlatform cloudPlatform) {
+        ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
+        cmRepo.setVersion("7.2.0");
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setEnableRangerRaz(true);
+        HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, List.of());
+        HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, List.of());
+        TemplatePreparationObject preparationObject = Builder.builder()
+                .withStackType(StackType.DATALAKE)
+                .withCloudPlatform(cloudPlatform)
+                .withProductDetails(cmRepo, List.of())
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withDataLakeView(new DatalakeView(true, SAAS_DATALAKE_CRN))
+                .withHostgroupViews(Set.of(master, worker))
+                .build();
+
+        try (MockedStatic<CMRepositoryVersionUtil> versionUtilMockedStatic = Mockito.mockStatic(CMRepositoryVersionUtil.class)) {
+            versionUtilMockedStatic.when(() -> CMRepositoryVersionUtil.isRazConfigurationSupported(cmRepo.getVersion(), preparationObject.getCloudPlatform(),
+                    preparationObject.getStackType())).thenReturn(true);
+
+            boolean configurationIsNeeded = configProvider.isConfigurationNeeded(cmTemplateProcessor, preparationObject);
+
+            assertFalse(configurationIsNeeded);
+        }
     }
 
 }
