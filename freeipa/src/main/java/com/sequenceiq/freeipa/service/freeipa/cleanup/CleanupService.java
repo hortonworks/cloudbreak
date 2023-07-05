@@ -50,6 +50,7 @@ import com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCacheService;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCleanupService;
 import com.sequenceiq.freeipa.ldap.LdapConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientRetryService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.freeipa.host.HostDeletionService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
@@ -104,6 +105,9 @@ public class CleanupService {
 
     @Inject
     private FreeIpaStatusValidator statusValidator;
+
+    @Inject
+    private FreeIpaClientRetryService retryService;
 
     @Value("${freeipa.server.deletion.check.maxWaitSeconds}")
     private int serverDeletionCheckMaxWaitSeconds;
@@ -201,7 +205,7 @@ public class CleanupService {
     private void deleteRecord(FreeIpaClient client, Set<String> dnsCleanupSuccess, Map<String, String> dnsCleanupFailed, String zone, String host,
             DnsRecord record) {
         try {
-            client.deleteDnsRecord(record.getIdnsname(), zone);
+            retryService.retryWhenRetryableWithoutValue(() -> client.deleteDnsRecord(record.getIdnsname(), zone));
             dnsCleanupSuccess.add(host);
         } catch (FreeIpaClientException e) {
             if (FreeIpaClientExceptionUtil.isNotFoundException(e)) {
@@ -217,7 +221,7 @@ public class CleanupService {
             DnsRecord record) {
         try {
             List<String> srvRecords = record.getHostRelatedSrvRecords(host);
-            client.deleteDnsSrvRecord(record.getIdnsname(), zone, srvRecords);
+            retryService.retryWhenRetryableWithoutValue(() -> client.deleteDnsSrvRecord(record.getIdnsname(), zone, srvRecords));
             if (!dnsCleanupFailed.containsKey(host)) {
                 dnsCleanupSuccess.add(host);
             }
@@ -264,7 +268,7 @@ public class CleanupService {
             LOGGER.debug("Services to delete: {}", services);
             for (String service : services) {
                 try {
-                    client.deleteService(service);
+                    retryService.retryWhenRetryableWithoutValue(() -> client.deleteService(service));
                 } catch (FreeIpaClientException e) {
                     if (!FreeIpaClientExceptionUtil.isNotFoundException(e)) {
                         LOGGER.info("Service delete failed for service: {}", service, e);
@@ -298,7 +302,7 @@ public class CleanupService {
         Set<String> usersUid = client.userListAllUids();
         users.stream().filter(usersUid::contains).forEach(userUid -> {
             try {
-                client.deleteUser(userUid);
+                retryService.retryWhenRetryableWithoutValue(() -> client.deleteUser(userUid));
                 userCleanupSuccess.add(userUid);
             } catch (FreeIpaClientException e) {
                 if (FreeIpaClientExceptionUtil.isNotFoundException(e)) {
@@ -341,7 +345,7 @@ public class CleanupService {
         roles.stream().filter(roleNames::contains).forEach(role -> {
             try {
                 LOGGER.debug("Delete role: {}", role);
-                client.deleteRole(role);
+                retryService.retryWhenRetryableWithoutValue(() -> client.deleteRole(role));
                 roleCleanupSuccess.add(role);
             } catch (FreeIpaClientException e) {
                 if (FreeIpaClientExceptionUtil.isNotFoundException(e)) {

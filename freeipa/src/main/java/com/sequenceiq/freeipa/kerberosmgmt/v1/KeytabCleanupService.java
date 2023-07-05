@@ -7,6 +7,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
@@ -48,6 +50,10 @@ public class KeytabCleanupService {
     @Inject
     private KeytabCommonService keytabCommonService;
 
+    @Retryable(value = RetryableFreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public void deleteServicePrincipal(ServicePrincipalRequest request, String accountId) throws FreeIpaClientException, DeleteException {
         LOGGER.debug("Request to delete service principal for account {}: {}", accountId, request);
         Stack freeIpaStack = keytabCommonService.getFreeIpaStackWithMdcContext(request.getEnvironmentCrn(), accountId);
@@ -68,6 +74,10 @@ public class KeytabCleanupService {
         keytabCacheService.deleteByEnvironmentCrnAndPrincipal(request.getEnvironmentCrn(), canonicalPrincipal);
     }
 
+    @Retryable(value = RetryableFreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public void deleteHost(HostRequest request, String accountId) throws FreeIpaClientException {
         FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientByAccountAndEnvironment(request.getEnvironmentCrn(), accountId);
         cleanupServicesForHost(request, accountId, ipaClient);
@@ -75,6 +85,10 @@ public class KeytabCleanupService {
         cleanupVaultAndRolesForHost(request, accountId, ipaClient);
     }
 
+    @Retryable(value = RetryableFreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public void removeHostRelatedKerberosConfiguration(HostRequest request, String accountId, FreeIpaClient ipaClient) throws FreeIpaClientException {
         cleanupServicesForHost(request, accountId, ipaClient);
         cleanupVaultAndRolesForHost(request, accountId, ipaClient);
