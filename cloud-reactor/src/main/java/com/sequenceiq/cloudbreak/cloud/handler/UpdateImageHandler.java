@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -51,7 +52,7 @@ public class UpdateImageHandler implements CloudPlatformEventHandler<UpdateImage
             cloudResources.stream().filter(resource -> resource.getType().getCommonResourceType() == CommonResourceType.TEMPLATE)
                     .forEach(resource -> resource.putParameter(CloudResource.IMAGE, stack.getImage().getImageName()));
 
-            connector.resources().update(auth, stack, cloudResources, UpdateType.IMAGE_UPDATE);
+            connector.resources().update(auth, stack, cloudResources, UpdateType.IMAGE_UPDATE, Optional.empty());
             UpdateImageResult result = new UpdateImageResult(request.getResourceId());
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));

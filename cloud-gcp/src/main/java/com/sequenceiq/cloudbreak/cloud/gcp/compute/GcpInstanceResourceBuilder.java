@@ -373,21 +373,26 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Override
     public CloudResource update(GcpContext context, CloudResource resource, CloudInstance cloudInstance,
-            AuthenticatedContext auth, CloudStack cloudStack) throws Exception {
+            AuthenticatedContext auth, CloudStack cloudStack, Optional<String> targetGroupName) throws Exception {
         String projectId = gcpStackUtil.getProjectId(auth.getCloudCredential());
         String availabilityZone = cloudInstance.getAvailabilityZone();
         Compute compute = context.getCompute();
         String instanceId = cloudInstance.getInstanceId();
         try {
-            LOGGER.info("Gcp operations are preparing: instanceId: {}, projectId: {}, availabilityZone: {}", instanceId, projectId, availabilityZone);
-            Get get = compute.instances().get(projectId, availabilityZone, instanceId);
-            Instance gcpInstance = get.execute();
-            gcpInstance.setMachineType(String.format(MACHINETYPE_URL,
-                    projectId, availabilityZone, cloudInstance.getTemplate().getFlavor()));
-            Compute.Instances.Update update = compute.instances().update(projectId, availabilityZone, gcpInstance.getName(), gcpInstance);
-            Operation operation = update.execute();
-            LOGGER.debug("Operation with {} successfully inited on {} instance.", operation.getName(), cloudInstance.getInstanceId());
-            return createOperationAwareCloudResource(resource, operation);
+            if (!targetGroupName.isEmpty() && cloudInstance.getTemplate().getGroupName().equalsIgnoreCase(targetGroupName.get())) {
+                LOGGER.info("Gcp operations are preparing: group: {}, instanceId: {}, projectId: {}, availabilityZone: {}",
+                        targetGroupName.get(), instanceId, projectId, availabilityZone);
+                Get get = compute.instances().get(projectId, availabilityZone, instanceId);
+                Instance gcpInstance = get.execute();
+                gcpInstance.setMachineType(String.format(MACHINETYPE_URL,
+                        projectId, availabilityZone, cloudInstance.getTemplate().getFlavor()));
+                Compute.Instances.Update update = compute.instances().update(projectId, availabilityZone, gcpInstance.getName(), gcpInstance);
+                Operation operation = update.execute();
+                LOGGER.debug("Operation with {} successfully inited on {} instance.", operation.getName(), cloudInstance.getInstanceId());
+                return createOperationAwareCloudResource(resource, operation);
+            } else {
+                return null;
+            }
         } catch (TokenResponseException e) {
             throw gcpStackUtil.getMissingServiceAccountKeyError(e, context.getProjectId());
         } catch (IOException e) {

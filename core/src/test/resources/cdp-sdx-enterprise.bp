@@ -32,6 +32,7 @@
           "ranger-RANGER_USERSYNC-BASE",
           "ranger-RANGER_TAGSYNC-BASE",
           "hive-HIVEMETASTORE-BASE",
+          "ranger-RANGER_ADMIN-BASE",
           "knox-KNOX_GATEWAY-BASE",
           "solr-GATEWAY-BASE",
           "hdfs-GATEWAY-BASE",
