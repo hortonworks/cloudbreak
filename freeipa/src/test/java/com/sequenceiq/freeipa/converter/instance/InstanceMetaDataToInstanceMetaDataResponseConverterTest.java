@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import java.util.Optional;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -97,6 +98,29 @@ public class InstanceMetaDataToInstanceMetaDataResponseConverterTest {
         } else {
             assertEquals(imageSettingsResponse, result.getImage());
         }
+    }
+
+    @Test
+    void convertTestImageJsonEmpty() {
+        InstanceMetaData instanceMetaData = createInstanceMetaData("1", "2", null);
+        instanceMetaData.setImage(new Json(null));
+
+        InstanceMetaDataResponse result = underTest.convert(instanceMetaData);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getPrivateIp()).isEqualTo("2");
+        assertThat(result.getPublicIp()).isEqualTo("1");
+        assertThat(result.getSshPort()).isEqualTo(SSH_PORT);
+        assertThat(result.getInstanceId()).isEqualTo(INSTANCE_ID);
+        assertThat(result.getDiscoveryFQDN()).isEqualTo(DISCOVERY_FQDN);
+        assertThat(result.getInstanceGroup()).isEqualTo(INSTANCE_GROUP);
+        assertThat(result.getSubnetId()).isEqualTo(SUBNET_ID);
+        assertThat(result.getAvailabilityZone()).isEqualTo(AVAILABILITY_ZONE);
+        assertThat(result.getInstanceStatus()).isEqualTo(INSTANCE_STATUS);
+        assertThat(result.getInstanceType()).isEqualTo(INSTANCE_METADATA_TYPE);
+        assertThat(result.getLifeCycle()).isEqualTo(LIFE_CYCLE);
+        assertNull(result.getImage());
+        verifyNoInteractions(imageConverter);
     }
 
     private InstanceMetaData createInstanceMetaData(String publicIp, String privateIp, Image image) {

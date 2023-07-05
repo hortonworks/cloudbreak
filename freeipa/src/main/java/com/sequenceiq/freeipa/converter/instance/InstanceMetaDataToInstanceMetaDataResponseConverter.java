@@ -6,6 +6,7 @@ import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +41,7 @@ public class InstanceMetaDataToInstanceMetaDataResponseConverter implements Conv
         metaDataJson.setLifeCycle(source.getLifeCycle());
         metaDataJson.setAvailabilityZone(source.getAvailabilityZone());
         metaDataJson.setSubnetId(source.getSubnetId());
-        if (source.getImage() != null) {
+        if (source.getImage() != null && StringUtils.isNotBlank(source.getImage().getValue())) {
             Image image = source.getImage().getSilent(Image.class);
             metaDataJson.setImage(imageConverter.convert(image));
         }

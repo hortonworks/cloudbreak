@@ -131,7 +131,7 @@ public class UpgradeService {
     private HashSet<String> selectInstancesWithOldImage(Set<InstanceMetaData> allInstances, ImageInfoResponse imageInfoResponse) {
         LOGGER.debug("Instances for image check: {} and selected image: {}", allInstances, imageInfoResponse);
         HashSet<String> instancesWithOldImage = allInstances.stream().filter(im -> {
-                    if (im.getImage() != null) {
+                    if (im.getImage() != null && StringUtils.isNotBlank(im.getImage().getValue())) {
                         Image image = im.getImage().getSilent(Image.class);
                         return !(Objects.equals(image.getImageId(), imageInfoResponse.getId())
                                 && (Objects.equals(image.getImageCatalogName(), imageInfoResponse.getCatalog())
