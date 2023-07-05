@@ -152,6 +152,11 @@ public class EnvironmentTestDto
         return this;
     }
 
+    public EnvironmentTestDto withMultiAzFreeIpa() {
+        getRequest().getFreeIpa().setEnableMultiAz(true);
+        return this;
+    }
+
     public EnvironmentTestDto withFreeIpa(AttachedFreeIpaRequest attachedFreeIpaRequest) {
         getRequest().setFreeIpa(attachedFreeIpaRequest);
         return this;
