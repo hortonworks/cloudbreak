@@ -23,6 +23,7 @@ import org.springframework.security.util.FieldUtils;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.saas.sdx.polling.PollingResult;
+import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 
 @ExtendWith(MockitoExtension.class)
 public class PlatformAwareSdxConnectorTest {

@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
+import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
@@ -92,6 +93,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -126,6 +128,8 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private static final String REGION = "region-1";
 
     private static final String AVAILABILITY_ZONE = "az-1";
+
+    private static final String SAAS_DATALAKE_CRN = "crn:cdp:sdxsvc:us-west-1:cloudera:instance:f22e7f31-a98d-424d-917a-a62a36cb3c9e";
 
     @InjectMocks
     private StackV4RequestToTemplatePreparationObjectConverter underTest;
@@ -227,6 +231,9 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     @Mock
     private RdsViewProvider rdsViewProvider;
 
+    @Mock
+    private SdxClientService sdxClientService;
+
     @BeforeEach
     public void setUp() {
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
@@ -264,6 +271,15 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(awsMockAccountMappingService.getGroupMappings(REGION, cloudCredential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
         when(awsMockAccountMappingService.getUserMappings(REGION, cloudCredential)).thenReturn(MOCK_USER_MAPPINGS);
         when(exposedServiceCollector.getAllKnoxExposed(any())).thenReturn(Set.of());
+        when(sdxClientService.getByEnvironmentCrn(source.getEnvironmentCrn())).thenReturn(getSdxClusterResponse());
+    }
+
+    private List<SdxClusterResponse> getSdxClusterResponse() {
+        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
+        sdxClusterResponse.setRangerRazEnabled(true);
+        sdxClusterResponse.setCrn(SAAS_DATALAKE_CRN);
+
+        return List.of(sdxClusterResponse);
     }
 
     @Test

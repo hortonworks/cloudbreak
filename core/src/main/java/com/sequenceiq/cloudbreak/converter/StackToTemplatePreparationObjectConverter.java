@@ -386,7 +386,8 @@ public class StackToTemplatePreparationObjectConverter {
         if (StringUtils.isNotEmpty(source.getEnvironmentCrn()) && StackType.WORKLOAD.equals(source.getType())) {
             List<SdxClusterResponse> datalakes = sdxClientService.getByEnvironmentCrn(source.getEnvironmentCrn());
             if (!datalakes.isEmpty()) {
-                datalakeView = new DatalakeView(datalakes.get(0).getRangerRazEnabled());
+                SdxClusterResponse datalake = datalakes.get(0);
+                datalakeView = new DatalakeView(datalake.getRangerRazEnabled(), datalake.getCrn());
             }
         }
         builder.withDataLakeView(datalakeView);

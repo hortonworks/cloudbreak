@@ -19,6 +19,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.saas.sdx.polling.PollingResult;
 import com.sequenceiq.cloudbreak.saas.sdx.status.StatusCheckResult;
+import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 
 @Service
 public class PlatformAwareSdxConnector {

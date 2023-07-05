@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.saas.client.sdx.GrpcSdxSaasClient;
 import com.sequenceiq.cloudbreak.saas.client.sdx.GrpcServiceDiscoveryClient;
 import com.sequenceiq.cloudbreak.saas.sdx.polling.PollingResult;
 import com.sequenceiq.cloudbreak.saas.sdx.status.StatusCheckResult;
+import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 
 @Service
 public class SaasSdxService extends AbstractSdxService<SDXSvcCommonProto.InstanceHighLevelStatus.Value> {

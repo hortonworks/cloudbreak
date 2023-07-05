@@ -6,8 +6,11 @@ public class DatalakeView {
 
     private boolean razEnabled;
 
-    public DatalakeView(boolean razEnabled) {
+    private String crn;
+
+    public DatalakeView(boolean razEnabled, String crn) {
         this.razEnabled = razEnabled;
+        this.crn = crn;
     }
 
     @Override
@@ -19,15 +22,20 @@ public class DatalakeView {
             return false;
         }
         DatalakeView that = (DatalakeView) o;
-        return razEnabled == that.razEnabled;
+
+        return crn.equals(that.crn);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(razEnabled);
+        return Objects.hash(crn);
     }
 
     public boolean isRazEnabled() {
         return razEnabled;
+    }
+
+    public String getCrn() {
+        return crn;
     }
 }
