@@ -96,6 +96,9 @@ public class DescribeFreeIpaResponse {
     @ApiModelProperty(value = FreeIpaModelDescriptions.USERSYNC_STATUS_DETAILS)
     private UserSyncStatusResponse userSyncStatus;
 
+    @ApiModelProperty(value = FreeIpaModelDescriptions.MULTIAZ)
+    private boolean multiAz;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -264,6 +267,14 @@ public class DescribeFreeIpaResponse {
         this.recipes = recipes;
     }
 
+    public boolean isMultiAz() {
+        return multiAz;
+    }
+
+    public void setMultiAz(boolean multiAz) {
+        this.multiAz = multiAz;
+    }
+
     @Override
     public String toString() {
         return "DescribeFreeIpaResponse{" +
@@ -287,6 +298,7 @@ public class DescribeFreeIpaResponse {
                 ", cloudStorage=" + cloudStorage +
                 ", userSyncStatus=" + userSyncStatus +
                 ", recipes=" + recipes +
+                ", multiAz=" + multiAz +
                 '}';
     }
 }

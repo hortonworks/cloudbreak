@@ -163,7 +163,8 @@ class StackToDescribeFreeIpaResponseConverterTest {
                 .returns(VARIANT, DescribeFreeIpaResponse::getVariant)
                 // TODO decorateWithCloudStorageAndTelemetry
                 .returns(USERSYNC_STATUS_RESPONSE, DescribeFreeIpaResponse::getUserSyncStatus)
-                .returns(tunnel, DescribeFreeIpaResponse::getTunnel);
+                .returns(tunnel, DescribeFreeIpaResponse::getTunnel)
+                .returns(true, DescribeFreeIpaResponse::isMultiAz);
 
         assertThat(result.getRecipes()).containsExactlyInAnyOrder("recipe1", "recipe2");
         assertThat(freeIpaServerResponse)
@@ -185,6 +186,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
         stack.setPlatformvariant(VARIANT);
         stack.setGatewayport(GATEWAY_PORT);
         stack.setTunnel(tunnel);
+        stack.setMultiAz(true);
         return stack;
     }
 
