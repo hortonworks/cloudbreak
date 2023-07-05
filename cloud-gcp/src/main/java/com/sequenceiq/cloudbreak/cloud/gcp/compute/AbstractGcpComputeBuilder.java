@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.AbstractGcpResourceBuilder;
@@ -35,7 +36,7 @@ public abstract class AbstractGcpComputeBuilder extends AbstractGcpResourceBuild
 
     @Override
     public CloudResource update(GcpContext context, CloudResource cloudResource, CloudInstance instance,
-            AuthenticatedContext auth, CloudStack cloudStack) throws Exception {
+            AuthenticatedContext auth, CloudStack cloudStack, Optional<String> targetGroupName) throws Exception {
         return null;
     }
 }

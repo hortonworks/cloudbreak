@@ -913,6 +913,10 @@ public class ClusterHostServiceRunner {
             List<String> hosts = rangerLocations.stream()
                     .filter(s -> s.contains(gatewayGroupName))
                     .collect(Collectors.toList());
+            // If the ranger is not on Gateway node we have to expose other node.
+            if (CollectionUtils.isEmpty(hosts)) {
+                return asList(rangerLocations.iterator().next());
+            }
             return hosts;
         }
         return rangerLocations.contains(primaryGatewayFqdn) ? asList(primaryGatewayFqdn) : asList(rangerLocations.iterator().next());

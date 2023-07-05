@@ -156,7 +156,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
     @Override
     public CloudResource update(AwsContext context, CloudResource cloudResource, CloudInstance instance,
-            AuthenticatedContext auth, CloudStack cloudStack) throws Exception {
+            AuthenticatedContext auth, CloudStack cloudStack, Optional<String> targetGroup) throws Exception {
         AmazonEc2Client amazonEc2Client = context.getAmazonEc2Client();
         Optional<Instance> existedOpt = resourceById(amazonEc2Client, instance.getInstanceId());
         Instance awsInstance;
@@ -165,7 +165,11 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
             LOGGER.info("Instance exists with name: {} ({}), check the state: {}", awsInstance.instanceId(), instance.getInstanceId(),
                     awsInstance.state().name());
             String requestedInstanceType = instance.getTemplate().getFlavor();
-            if (!awsInstance.instanceType().toString().equals(requestedInstanceType)) {
+            if (isThisGroupApplicable(instance, targetGroup, awsInstance, requestedInstanceType)) {
+                LOGGER.info("Modify group {}, from instance type {}, to instance type {}.",
+                        targetGroup.get(),
+                        awsInstance.instanceType().name(),
+                        instance.getTemplate().getFlavor());
                 ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = ModifyInstanceAttributeRequest.builder()
                         .instanceId(awsInstance.instanceId())
                         .instanceType(AttributeValue.builder().value(instance.getTemplate().getFlavor()).build())
@@ -177,6 +181,11 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
         }
         return null;
+    }
+
+    private boolean isThisGroupApplicable(CloudInstance instance, Optional<String> targetGroup, Instance awsInstance, String requestedInstanceType) {
+        return !targetGroup.isEmpty() && targetGroup.equals(instance.getTemplate().getGroupName())
+                && !awsInstance.instanceType().toString().equals(requestedInstanceType);
     }
 
     Collection<BlockDeviceMapping> blocks(Group group, CloudStack cloudStack, AuthenticatedContext ac) {
