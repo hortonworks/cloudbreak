@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
@@ -18,12 +20,16 @@ import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Host;
 import com.sequenceiq.freeipa.client.model.IpaServer;
 import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientRetryService;
 
 @Service
 public class HostDeletionService {
     private static final Logger LOGGER = LoggerFactory.getLogger(HostDeletionService.class);
 
     private static final String HOST_DELETION_FAILED = "Failed to delete hosts.";
+
+    @Inject
+    private FreeIpaClientRetryService retryService;
 
     public Pair<Set<String>, Map<String, String>> removeHosts(FreeIpaClient client, Set<String> hosts) throws FreeIpaClientException {
         return removeHosts(client, hosts, false);
@@ -47,13 +53,11 @@ public class HostDeletionService {
         for (String host : hostsToRemove) {
             try {
                 if (servers) {
-                    client.deleteServer(host);
+                    retryService.retryWhenRetryableWithoutValue(() -> client.deleteServer(host));
                 } else {
-                    client.deleteHost(host);
+                    retryService.retryWhenRetryableWithoutValue(() -> client.deleteHost(host));
                 }
                 hostCleanupSuccess.add(host);
-            } catch (RetryableFreeIpaClientException e) {
-                throw e;
             } catch (FreeIpaClientException e) {
                 handleErrorDuringDeletion(hostCleanupSuccess, hostCleanupFailed, host, e);
             }
