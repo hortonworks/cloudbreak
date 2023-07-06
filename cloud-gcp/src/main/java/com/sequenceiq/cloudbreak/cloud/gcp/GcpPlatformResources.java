@@ -201,34 +201,36 @@ public class GcpPlatformResources implements PlatformResources {
                 .orElse(null);
         LOGGER.debug("Zone chosen for the subnets is {}", zone);
 
-        for (Network network : networkList.getItems()) {
-            Map<String, Object> properties = new HashMap<>();
-            properties.put("gatewayIPv4", Strings.nullToEmpty(network.getGatewayIPv4()));
-            properties.put("description", Strings.nullToEmpty(network.getDescription()));
-            properties.put("IPv4Range", Strings.nullToEmpty(network.getIPv4Range()));
-            properties.put("creationTimestamp", Strings.nullToEmpty(network.getCreationTimestamp()));
+        if (networkList != null) {
+            for (Network network : networkList.getItems()) {
+                Map<String, Object> properties = new HashMap<>();
+                properties.put("gatewayIPv4", Strings.nullToEmpty(network.getGatewayIPv4()));
+                properties.put("description", Strings.nullToEmpty(network.getDescription()));
+                properties.put("IPv4Range", Strings.nullToEmpty(network.getIPv4Range()));
+                properties.put("creationTimestamp", Strings.nullToEmpty(network.getCreationTimestamp()));
 
-            Set<CloudSubnet> subnets = new HashSet<>();
-            if (subnetworkList != null && network.getSubnetworks() != null && subnetworkList.getItems() != null) {
-                for (Subnetwork subnetwork : subnetworkList.getItems()) {
-                    if (network.getSubnetworks().contains(subnetwork.getSelfLink())) {
-                        boolean igwAvailable = !Strings.isNullOrEmpty(subnetwork.getGatewayAddress());
-                        subnets.add(
-                                new CloudSubnet(
-                                        subnetwork.getId().toString(),
-                                        subnetwork.getName(),
-                                        zone,
-                                        subnetwork.getIpCidrRange(),
-                                        subnetwork.getPrivateIpGoogleAccess(),
-                                        !subnetwork.getPrivateIpGoogleAccess(),
-                                        igwAvailable,
-                                        igwAvailable ? PUBLIC : PRIVATE));
+                Set<CloudSubnet> subnets = new HashSet<>();
+                if (subnetworkList != null && network.getSubnetworks() != null && subnetworkList.getItems() != null) {
+                    for (Subnetwork subnetwork : subnetworkList.getItems()) {
+                        if (network.getSubnetworks().contains(subnetwork.getSelfLink())) {
+                            boolean igwAvailable = !Strings.isNullOrEmpty(subnetwork.getGatewayAddress());
+                            subnets.add(
+                                    new CloudSubnet(
+                                            subnetwork.getId().toString(),
+                                            subnetwork.getName(),
+                                            zone,
+                                            subnetwork.getIpCidrRange(),
+                                            subnetwork.getPrivateIpGoogleAccess(),
+                                            !subnetwork.getPrivateIpGoogleAccess(),
+                                            igwAvailable,
+                                            igwAvailable ? PUBLIC : PRIVATE));
+                        }
                     }
                 }
-            }
 
-            CloudNetwork cloudNetwork = new CloudNetwork(network.getName(), network.getId().toString(), subnets, properties);
-            cloudNetworks.add(cloudNetwork);
+                CloudNetwork cloudNetwork = new CloudNetwork(network.getName(), network.getId().toString(), subnets, properties);
+                cloudNetworks.add(cloudNetwork);
+            }
         }
         result.put(region.value(), cloudNetworks);
 
