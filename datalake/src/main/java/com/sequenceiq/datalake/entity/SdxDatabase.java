@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.entity;
 
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -25,9 +27,6 @@ public class SdxDatabase {
     @SequenceGenerator(name = "sdx_database_generator", sequenceName = "sdxdatabase_id_seq", allocationSize = 1)
     private Long id;
 
-    @Column(name = "sdxcluster_id")
-    private Long sdxClusterId;
-
     @Convert(converter = SdxDatabaseAvailabilityTypeConverter.class)
     private SdxDatabaseAvailabilityType databaseAvailabilityType;
 
@@ -50,21 +49,13 @@ public class SdxDatabase {
         this.id = id;
     }
 
-    public Long getSdxClusterId() {
-        return sdxClusterId;
-    }
-
-    public void setSdxClusterId(Long sdxClusterId) {
-        this.sdxClusterId = sdxClusterId;
-    }
-
     public SdxDatabaseAvailabilityType getDatabaseAvailabilityType() {
         return DatabaseParameterFallbackUtil.getDatabaseAvailabilityType(databaseAvailabilityType, createDatabase);
     }
 
     public void setDatabaseAvailabilityType(SdxDatabaseAvailabilityType databaseAvailabilityType) {
         this.databaseAvailabilityType = databaseAvailabilityType;
-        createDatabase = !SdxDatabaseAvailabilityType.NONE.equals(databaseAvailabilityType);
+        createDatabase = SdxDatabaseAvailabilityType.hasExternalDatabase(databaseAvailabilityType);
     }
 
     public String getDatabaseEngineVersion() {
@@ -98,4 +89,28 @@ public class SdxDatabase {
     public void setAttributes(Json attributes) {
         this.attributes = attributes;
     }
+
+    public boolean hasExternalDatabase() {
+        return SdxDatabaseAvailabilityType.hasExternalDatabase(getDatabaseAvailabilityType());
+    }
+
+    //CHECKSTYLE:OFF
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SdxDatabase that = (SdxDatabase) o;
+        return createDatabase == that.createDatabase &&
+                Objects.equals(id, that.id) &&
+                databaseAvailabilityType == that.databaseAvailabilityType &&
+                Objects.equals(databaseCrn, that.databaseCrn) &&
+                Objects.equals(databaseEngineVersion, that.databaseEngineVersion) &&
+                Objects.equals(attributes, that.attributes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, databaseAvailabilityType, createDatabase, databaseCrn, databaseEngineVersion, attributes);
+    }
+    //CHECKSTYLE:ON
 }

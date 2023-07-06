@@ -35,8 +35,6 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.converter.SdxClusterShapeConverter;
-import com.sequenceiq.datalake.converter.SdxDatabaseAvailabilityTypeConverter;
-import com.sequenceiq.datalake.service.sdx.database.DatabaseParameterFallbackUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
@@ -134,33 +132,8 @@ public class SdxCluster implements AccountAwareResource {
     @Column(nullable = false)
     private boolean detached;
 
-    /**
-     * @deprecated Kept only for backward compatibility. Use the {@link SdxDatabase#createDatabase} instead. Will be removed in CB-21369.
-     */
-    @Deprecated
-    @Column(nullable = false)
-    private boolean createDatabase;
-
-    /**
-     * @deprecated Kept only for backward compatibility. Use the {@link SdxDatabase#databaseCrn} instead. Will be removed in CB-21369.
-     */
-    @Deprecated
-    private String databaseCrn;
-
-    /**
-     * @deprecated Kept only for backward compatibility. Use the {@link SdxDatabase#databaseEngineVersion} instead. Will be removed in CB-21369.
-     */
-    @Deprecated
-    private String databaseEngineVersion;
-
-    /**
-     * @deprecated Kept only for backward compatibility. Use the {@link SdxDatabase#databaseAvailabilityType} instead. Will be removed in CB-21369.
-     */
-    @Deprecated
-    @Convert(converter = SdxDatabaseAvailabilityTypeConverter.class)
-    private SdxDatabaseAvailabilityType databaseAvailabilityType;
-
-    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @NotNull
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "sdxdatabase_id")
     private SdxDatabase sdxDatabase;
 
@@ -363,7 +336,7 @@ public class SdxCluster implements AccountAwareResource {
     }
 
     public boolean isCreateDatabase() {
-        return DatabaseParameterFallbackUtil.isCreateDatabase(sdxDatabase, createDatabase);
+        return sdxDatabase.isCreateDatabase();
     }
 
     public boolean isRangerRazEnabled() {
@@ -390,41 +363,20 @@ public class SdxCluster implements AccountAwareResource {
         this.detached = detached;
     }
 
-    /**
-     * @deprecated Kept only for backward compatibility. Use the {@link #setDatabaseAvailabilityType(SdxDatabaseAvailabilityType)} instead.
-     */
-    @Deprecated
-    public void setCreateDatabase(Boolean createDatabase) {
-        this.createDatabase = createDatabase;
-    }
-
     public String getDatabaseCrn() {
-        return DatabaseParameterFallbackUtil.getDatabaseCrn(sdxDatabase, databaseCrn);
-    }
-
-    public void setDatabaseCrn(String databaseCrn) {
-        this.databaseCrn = databaseCrn;
+        return sdxDatabase.getDatabaseCrn();
     }
 
     public SdxDatabaseAvailabilityType getDatabaseAvailabilityType() {
-        return DatabaseParameterFallbackUtil.getDatabaseAvailabilityType(sdxDatabase, databaseAvailabilityType, createDatabase);
+        return sdxDatabase.getDatabaseAvailabilityType();
     }
 
     public boolean hasExternalDatabase() {
-        return SdxDatabaseAvailabilityType.hasExternalDatabase(getDatabaseAvailabilityType());
-    }
-
-    public void setDatabaseAvailabilityType(SdxDatabaseAvailabilityType databaseAvailabilityType) {
-        this.databaseAvailabilityType = databaseAvailabilityType;
-        createDatabase = SdxDatabaseAvailabilityType.hasExternalDatabase(databaseAvailabilityType);
+        return sdxDatabase.hasExternalDatabase();
     }
 
     public String getDatabaseEngineVersion() {
-        return DatabaseParameterFallbackUtil.getDatabaseEngineVersion(sdxDatabase, databaseEngineVersion);
-    }
-
-    public void setDatabaseEngineVersion(String databaseEngineVersion) {
-        this.databaseEngineVersion = databaseEngineVersion;
+        return sdxDatabase.getDatabaseEngineVersion();
     }
 
     public void setResourceCrn(String resourceCrn) {
@@ -457,8 +409,7 @@ public class SdxCluster implements AccountAwareResource {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SdxCluster that = (SdxCluster) o;
-        return createDatabase == that.createDatabase &&
-                Objects.equals(id, that.id) &&
+        return Objects.equals(id, that.id) &&
                 Objects.equals(accountId, that.accountId) &&
                 Objects.equals(crn, that.crn) &&
                 Objects.equals(clusterName, that.clusterName) &&
@@ -473,41 +424,54 @@ public class SdxCluster implements AccountAwareResource {
                 Objects.equals(deleted, that.deleted) &&
                 Objects.equals(detached, that.detached) &&
                 Objects.equals(created, that.created) &&
-                Objects.equals(databaseCrn, that.databaseCrn) &&
                 Objects.equals(cloudStorageBaseLocation, that.cloudStorageBaseLocation) &&
                 Objects.equals(enableMultiAz, that.enableMultiAz) &&
                 cloudStorageFileSystemType == that.cloudStorageFileSystemType &&
-                databaseAvailabilityType == that.databaseAvailabilityType &&
                 rangerRazEnabled == that.rangerRazEnabled &&
                 certExpirationState == that.certExpirationState &&
                 Objects.equals(sdxClusterServiceVersion, that.sdxClusterServiceVersion) &&
-                Objects.equals(databaseEngineVersion, that.databaseEngineVersion);
+                Objects.equals(sdxDatabase, that.sdxDatabase);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, accountId, crn, clusterName, envName, envCrn, stackCrn, clusterShape, tags, stackId, stackRequest,
-                stackRequestToCloudbreak, deleted, created, createDatabase, databaseCrn, cloudStorageBaseLocation, cloudStorageFileSystemType,
-                databaseAvailabilityType, rangerRazEnabled, certExpirationState, sdxClusterServiceVersion, enableMultiAz, databaseEngineVersion);
+                stackRequestToCloudbreak, deleted, created, cloudStorageBaseLocation, cloudStorageFileSystemType,
+                rangerRazEnabled, certExpirationState, sdxClusterServiceVersion, enableMultiAz);
     }
 
     @Override
     public String toString() {
         return "SdxCluster{" +
-                "crn='" + crn + '\'' +
+                "id=" + id +
+                ", accountId='" + accountId + '\'' +
+                ", crn='" + crn + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", originalCrn='" + originalCrn + '\'' +
                 ", clusterName='" + clusterName + '\'' +
+                ", name='" + name + '\'' +
                 ", envName='" + envName + '\'' +
                 ", envCrn='" + envCrn + '\'' +
+                ", stackCrn='" + stackCrn + '\'' +
                 ", runtime='" + runtime + '\'' +
-                ", Detached='" + detached + '\'' +
                 ", clusterShape=" + clusterShape +
-                ", createDatabase=" + createDatabase +
+                ", tags=" + tags +
+                ", stackId=" + stackId +
+                ", stackRequest=" + stackRequest +
+                ", stackRequestToCloudbreak=" + stackRequestToCloudbreak +
+                ", deleted=" + deleted +
+                ", created=" + created +
                 ", cloudStorageBaseLocation='" + cloudStorageBaseLocation + '\'' +
+                ", cloudStorageFileSystemType=" + cloudStorageFileSystemType +
+                ", repairFlowChainId='" + repairFlowChainId + '\'' +
+                ", lastCbFlowChainId='" + lastCbFlowChainId + '\'' +
+                ", lastCbFlowId='" + lastCbFlowId + '\'' +
                 ", rangerRazEnabled=" + rangerRazEnabled +
-                ", certExpirationState=" + certExpirationState +
-                ", sdxClusterServiceVersion=" + sdxClusterServiceVersion +
                 ", enableMultiAz=" + enableMultiAz +
-                ", databaseEngineVersion=" + databaseEngineVersion +
+                ", certExpirationState=" + certExpirationState +
+                ", sdxClusterServiceVersion='" + sdxClusterServiceVersion + '\'' +
+                ", detached=" + detached +
+                ", sdxDatabase=" + sdxDatabase +
                 '}';
     }
 

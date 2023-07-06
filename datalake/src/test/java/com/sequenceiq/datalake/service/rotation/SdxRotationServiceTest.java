@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
@@ -112,7 +113,9 @@ class SdxRotationServiceTest {
     void rotateRedbeamsSecretShouldSucceed() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(SDX_CLUSTER_ID);
-        sdxCluster.setDatabaseCrn(DATABASE_CRN);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseCrn(DATABASE_CRN);
+        sdxCluster.setSdxDatabase(sdxDatabase);
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.of(sdxCluster));
         RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
@@ -138,7 +141,9 @@ class SdxRotationServiceTest {
 
     @Test
     void rotateRedbeamsSecretShouldFailIfDatabaseCrnNotFound() {
-        when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.of(new SdxCluster()));
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setSdxDatabase(new SdxDatabase());
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.of(sdxCluster));
         RuntimeException runtimeException = assertThrows(RuntimeException.class,
                 () -> underTest.rotateRedbeamsSecret(RESOURCE_CRN, RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE));
         verify(sdxClusterRepository, times(1)).findByCrnAndDeletedIsNull(eq(RESOURCE_CRN));
@@ -174,7 +179,10 @@ class SdxRotationServiceTest {
 
     @Test
     void preValidateRedbeamsRotationShouldFailDatabaseCrnIsEmpty() {
-        when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(new SdxCluster()));
+        SdxCluster sdxCluster = new SdxCluster();
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxCluster.setSdxDatabase(sdxDatabase);
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(sdxCluster));
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.preValidateRedbeamsRotation(RESOURCE_CRN));
         assertEquals("No database server found for sdx cluster, rotation is not possible.", secretRotationException.getMessage());
@@ -184,7 +192,9 @@ class SdxRotationServiceTest {
     @Test
     void preValidateRedbeamsRotationShouldFailIfRedbeamsFlowIsRunning() {
         SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setDatabaseCrn(DATABASE_CRN);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseCrn(DATABASE_CRN);
+        sdxCluster.setSdxDatabase(sdxDatabase);
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(sdxCluster));
         FlowLogResponse lastFlow = new FlowLogResponse();
         lastFlow.setStateStatus(StateStatus.PENDING);
@@ -200,7 +210,9 @@ class SdxRotationServiceTest {
     @Test
     void preValidateRedbeamsRotationShouldSucceedIfRedbeamsFlowIsNotRunning() {
         SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setDatabaseCrn(DATABASE_CRN);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseCrn(DATABASE_CRN);
+        sdxCluster.setSdxDatabase(sdxDatabase);
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(sdxCluster));
         FlowLogResponse lastFlow = new FlowLogResponse();
         lastFlow.setStateStatus(StateStatus.SUCCESSFUL);

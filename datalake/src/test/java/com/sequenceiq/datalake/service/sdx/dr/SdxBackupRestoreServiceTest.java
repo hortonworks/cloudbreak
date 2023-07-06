@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.entity.operation.SdxOperation;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
@@ -520,7 +521,9 @@ public class SdxBackupRestoreServiceTest {
         sdxCluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
         sdxCluster.setEnvName("test-env");
         sdxCluster.setCrn("crn:sdxcluster");
-        sdxCluster.setDatabaseCrn("crn:sdxcluster");
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseCrn("crn:sdxcluster");
+        sdxCluster.setSdxDatabase(sdxDatabase);
         sdxCluster.setId(1L);
         return sdxCluster;
     }
