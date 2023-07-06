@@ -400,7 +400,12 @@ public class GcpClientActions extends GcpClient {
         Log.log(LOGGER, format(" Google GCS Log Path: %s", logPath));
         Log.log(LOGGER, format(" Google GCS Cluster Logs: %s", clusterLogPath));
 
-        return format("https://console.cloud.google.com/storage/browser/%s/%s%s?project=gcp-dev-cloudbreak",
-                bucketName, getKeyPrefix(baseLocation), clusterLogPath);
+        if (StringUtils.contains(getKeyPrefix(baseLocation), clusterLogPath)) {
+            return format("https://console.cloud.google.com/storage/browser/%s/%s?project=gcp-dev-cloudbreak",
+                    bucketName, getKeyPrefix(baseLocation));
+        } else {
+            return format("https://console.cloud.google.com/storage/browser/%s/%s%s?project=gcp-dev-cloudbreak",
+                    bucketName, getKeyPrefix(baseLocation), clusterLogPath);
+        }
     }
 }
