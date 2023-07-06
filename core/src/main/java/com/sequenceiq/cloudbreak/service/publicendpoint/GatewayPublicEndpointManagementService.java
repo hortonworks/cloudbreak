@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
@@ -62,6 +64,9 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
 
     @Inject
     private FlowMessageService flowMessageService;
+
+    @Inject
+    private TransactionService transactionService;
 
     public boolean isCertRenewalTriggerable(StackView stack) {
         return manageCertificateAndDnsInPem()
@@ -146,17 +151,17 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         String endpoint = loadBalancer.getEndpoint();
         if (loadBalancer.getDns() != null && loadBalancer.getHostedZoneId() != null) {
             LOGGER.info("Creating load balancer DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'",
-                endpoint, environment.getName(), loadBalancer.getDns());
+                    endpoint, environment.getName(), loadBalancer.getDns());
             success = getDnsManagementService().createOrUpdateDnsEntryWithCloudDns(accountId, endpoint,
-                environment.getName(), loadBalancer.getDns(), loadBalancer.getHostedZoneId());
+                    environment.getName(), loadBalancer.getDns(), loadBalancer.getHostedZoneId());
         } else if (loadBalancer.getIp() != null) {
             LOGGER.info("Creating load balancer DNS entry with endpoint name: '{}', environment name: '{}' and IP: '{}'",
-                endpoint, environment.getName(), loadBalancer.getIp());
+                    endpoint, environment.getName(), loadBalancer.getIp());
             success = getDnsManagementService().createOrUpdateDnsEntryWithIp(accountId, endpoint,
-                environment.getName(), false, List.of(loadBalancer.getIp()));
+                    environment.getName(), false, List.of(loadBalancer.getIp()));
         } else {
             LOGGER.warn("Could not find IP or cloud DNS info for load balancer with endpoint {}" +
-                " and environment name: '{}'. DNS registration will be skipped.", loadBalancer.getEndpoint(), environment.getName());
+                    " and environment name: '{}'. DNS registration will be skipped.", loadBalancer.getEndpoint(), environment.getName());
         }
 
         if (success) {
@@ -211,14 +216,14 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
             String endpoint = loadBalancer.getEndpoint();
             if (loadBalancer.getDns() != null && loadBalancer.getHostedZoneId() != null) {
                 LOGGER.info("Deleting load balancer DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'",
-                    endpoint, environmentName, loadBalancer.getDns());
+                        endpoint, environmentName, loadBalancer.getDns());
                 getDnsManagementService().deleteDnsEntryWithCloudDns(accountId, endpoint,
-                    environmentName, loadBalancer.getDns(), loadBalancer.getHostedZoneId());
+                        environmentName, loadBalancer.getDns(), loadBalancer.getHostedZoneId());
             } else if (loadBalancer.getIp() != null) {
                 LOGGER.info("Deleting load balancer DNS entry with endpoint name: '{}', environment name: '{}' and IP: '{}'",
-                    endpoint, environmentName, loadBalancer.getIp());
+                        endpoint, environmentName, loadBalancer.getIp());
                 getDnsManagementService().deleteDnsEntryWithIp(accountId, endpoint,
-                    environmentName, false, List.of(loadBalancer.getIp()));
+                        environmentName, false, List.of(loadBalancer.getIp()));
             }
         }
     }
@@ -235,10 +240,10 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     private void generateCertAndSaveForStack(StackDtoDelegate stack) {
         LOGGER.info("Acquire certificate from PEM service and save for stack");
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        SecurityConfig securityConfig = stack.getSecurityConfig();
         Set<String> hueHostGroups = getHueHostGroups(stack);
+        SecurityConfig securityConfig = stack.getSecurityConfig();
         try {
-            KeyPair keyPair = getKeyPairForStack(stack);
+            KeyPair keyPair = getKeyPairForStack(securityConfig);
             String endpointName = getEndpointNameForStack(stack);
             Set<String> loadBalancerEndpoints = getLoadBalancerNamesForStack(stack);
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
@@ -259,8 +264,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
             LOGGER.info("Acquiring certificate with common name:{} and SANs: {}", commonName, String.join(",", subjectAlternativeNames));
             PKCS10CertificationRequest csr = PkiUtil.csr(keyPair, commonName, subjectAlternativeNames);
             List<String> certs = getCertificateCreationService().create(accountId, endpointName, environmentName, csr, stack.getResourceCrn());
-            securityConfig.setUserFacingCert(String.join("", certs));
-            securityConfigService.save(securityConfig);
+            saveCertificates(securityConfig, certs);
         } catch (Exception e) {
             String msg = "The certificate could not be generated by Public Endpoint Management service: " + e.getMessage();
             LOGGER.info(msg, e);
@@ -268,13 +272,23 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         }
     }
 
-    private KeyPair getKeyPairForStack(StackDtoDelegate stack) {
+    private void saveCertificates(SecurityConfig securityConfig, List<String> certs) throws TransactionService.TransactionExecutionException {
+        if (CollectionUtils.isNotEmpty(certs)) {
+            LOGGER.debug("Saving the new certificates into the database");
+            transactionService.required(() -> {
+                securityConfig.setUserFacingCert(String.join("", certs));
+                return securityConfigService.save(securityConfig);
+            });
+        } else {
+            LOGGER.debug("No certificate has been generated, no save is necessary");
+        }
+    }
+
+    private KeyPair getKeyPairForStack(SecurityConfig securityConfig) {
         KeyPair keyPair;
-        SecurityConfig securityConfig = stack.getSecurityConfig();
         if (StringUtils.isEmpty(securityConfig.getUserFacingKey())) {
             keyPair = PkiUtil.generateKeypair();
             securityConfig.setUserFacingKey(PkiUtil.convert(keyPair.getPrivate()));
-            securityConfigService.save(securityConfig);
         } else {
             keyPair = PkiUtil.fromPrivateKeyPem(securityConfig.getUserFacingKey());
             if (keyPair == null) {
@@ -286,12 +300,24 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
 
     public String updateDnsEntryForCluster(StackDtoDelegate stack) {
         String fqdn = updateDnsEntry(stack, null);
-        if (fqdn != null) {
-            ClusterView cluster = stack.getCluster();
-            clusterService.updateFqdnOnCluster(cluster.getId(), fqdn);
-            LOGGER.info("The '{}' domain name has been generated, registered through PEM service and saved for the cluster.", fqdn);
-        }
+        saveClusterFqdn(stack, fqdn);
         return fqdn;
+    }
+
+    private void saveClusterFqdn(StackDtoDelegate stack, String fqdn) {
+        try {
+            transactionService.required(() -> {
+                if (fqdn != null) {
+                    ClusterView cluster = stack.getCluster();
+                    clusterService.updateFqdnOnCluster(cluster.getId(), fqdn);
+                }
+            });
+            LOGGER.info("The '{}' domain name has been generated, registered through PEM service and saved for the cluster.", fqdn);
+        } catch (TransactionService.TransactionExecutionException e) {
+            String msg = "The FQDN after DNS update could not be saved to the cluster due to transaction issues: " + e.getMessage();
+            LOGGER.warn(msg, e);
+            throw new CloudbreakServiceException(msg, e);
+        }
     }
 
     private String getEndpointNameForStack(StackDtoDelegate stack) {

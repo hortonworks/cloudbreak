@@ -30,9 +30,6 @@ public class ClusterCertificateReissueHandler implements EventHandler<ClusterCer
     private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
     @Inject
-    private TransactionService transactionService;
-
-    @Inject
     private StackService stackService;
 
     @Override
@@ -58,9 +55,7 @@ public class ClusterCertificateReissueHandler implements EventHandler<ClusterCer
     }
 
     private void reissueCertificate(Long stackId) throws TransactionService.TransactionExecutionException {
-        transactionService.required(() -> {
-            Stack stack = stackService.getById(stackId);
-            clusterPublicEndpointManagementService.renewCertificate(stack);
-        });
+        Stack stack = stackService.getByIdWithGatewayInTransaction(stackId);
+        clusterPublicEndpointManagementService.renewCertificate(stack);
     }
 }
