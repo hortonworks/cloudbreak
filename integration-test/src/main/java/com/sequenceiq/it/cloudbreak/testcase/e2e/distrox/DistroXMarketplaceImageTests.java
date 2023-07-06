@@ -88,17 +88,15 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
 
         String distrox = resourcePropertyProvider().getName();
 
-        String selectedImageID = getLatestPrewarmedImageId(testContext);
-
         testContext
                 .given(imgCatalogKey, ImageCatalogTestDto.class)
-                .withName(imgCatalogKey)
-                .withUrl(commonClusterManagerProperties.getUpgrade()
-                        .getImageCatalogUrl3rdParty())
+                    .withName(imgCatalogKey)
+                    .withUrl(commonClusterManagerProperties.getUpgrade()
+                            .getImageCatalogUrl3rdParty())
                 .when(imageCatalogTestClient.createIfNotExistV4())
                 .given(imageSettings, ImageSettingsTestDto.class)
                     .withImageCatalog(imgCatalogKey)
-                    .withImageId(selectedImageID)
+                    .withImageId(getLatestMarketplacePrewarmedImageId(imgCatalogKey, testContext))
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
                     .withBlueprintName(getDefaultSDXBlueprintName())
@@ -138,7 +136,7 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
                 })
                 .given(dhImageSettings, DistroXImageTestDto.class)
                     .withImageCatalog(imgCatalogKey)
-                    .withImageId(selectedImageID)
+                    .withImageId(getLatestMarketplacePrewarmedImageId(imgCatalogKey, testContext))
                 .given(distrox, DistroXTestDto.class)
                     .withImageSettings(dhImageSettings)
                 .when(distroXTestClient.create(), key(distrox))
@@ -168,10 +166,10 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
         }
     }
 
-    protected String getLatestPrewarmedImageId(TestContext testContext) {
+    protected String getLatestMarketplacePrewarmedImageId(String imgCatalogKey, TestContext testContext) {
         AtomicReference<String> selectedImageID = new AtomicReference<>();
         testContext
-                .given(ImageCatalogTestDto.class)
+                .given(imgCatalogKey, ImageCatalogTestDto.class)
                 .when((tc, dto, client) -> {
                     selectedImageID.set(tc.getCloudProvider().getLatestMarketplacePreWarmedImageID(tc, dto, client));
                     return dto;
