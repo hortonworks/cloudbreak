@@ -152,7 +152,7 @@ get_nvme_device_names() {
         log $log_file searched $volume_serial_id, found \"$found_device\"
         if [ -z "$found_device" ]; then
             serial_id_stripped=$(strip_serial_id $volume_serial_id)
-            found_device=${serial_id_stripped_to_device_path_map[$serial_id_stripped])}
+            found_device=${serial_id_stripped_to_device_path_map[$serial_id_stripped]}
             log $log_file searched $serial_id_stripped, found \"$found_device\"
         fi
         if [ -z "$found_device" ]; then

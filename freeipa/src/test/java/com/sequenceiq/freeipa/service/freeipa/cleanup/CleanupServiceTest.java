@@ -6,7 +6,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,19 +19,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.data.util.Pair;
 
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
+import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaClientRunnable;
 import com.sequenceiq.freeipa.client.FreeIpaErrorCodes;
 import com.sequenceiq.freeipa.client.model.Cert;
 import com.sequenceiq.freeipa.client.model.DnsRecord;
@@ -37,10 +45,12 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
 import com.sequenceiq.freeipa.ldap.LdapConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientRetryService;
 import com.sequenceiq.freeipa.service.freeipa.host.HostDeletionService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class CleanupServiceTest {
 
     private static final long STACK_ID = 1L;
@@ -67,6 +77,17 @@ public class CleanupServiceTest {
 
     @Mock
     private PollingService<FreeIpaServerDeletionPollerObject> freeIpaDeletionPollerService;
+
+    @Mock
+    private FreeIpaClientRetryService retryService;
+
+    @BeforeEach
+    void init() throws FreeIpaClientException {
+        lenient().doAnswer(invocation -> {
+            invocation.getArgument(0, FreeIpaClientRunnable.class).run();
+            return null;
+        }).when(retryService).retryWhenRetryableWithoutValue(any(FreeIpaClientRunnable.class));
+    }
 
     @Test
     public void testRevokeCertsWithLongHostnames() throws FreeIpaClientException {
@@ -514,13 +535,15 @@ public class CleanupServiceTest {
         DnsRecord ptrRecord = new DnsRecord();
         ptrRecord.setIdnsname("1.0");
         ptrRecord.setPtrrecord(List.of("ptrRecord"));
-        when(client.findAllDnsRecordInZone(dnsZone.getIdnsname())).thenReturn(Set.of(deleteMe, notFound, failed));
-        when(client.deleteDnsRecord(failed.getIdnsname(), domain)).thenThrow(new FreeIpaClientException("delete failed"));
-        when(client.deleteDnsRecord(notFound.getIdnsname(), domain))
-                .thenThrow(new FreeIpaClientException("Not found", new JsonRpcClientException(FreeIpaErrorCodes.NOT_FOUND.getValue(), "Not found", null)));
-        when(client.findAllDnsRecordInZone(reverseZone.getIdnsname())).thenReturn(Set.of(ptrRecord));
-        when(client.findAllDnsRecordInZone(disappearingZone.getIdnsname()))
-                .thenThrow(new FreeIpaClientException("Not found zone", new JsonRpcClientException(FreeIpaErrorCodes.NOT_FOUND.getValue(), "Not found", null)));
+        doReturn(Set.of(deleteMe, notFound, failed)).when(client).findAllDnsRecordInZone(eq(dnsZone.getIdnsname()));
+        doReturn(new RPCResponse()).when(client).deleteDnsRecord("1.0", "0.10.in-addr.arpa.");
+        doThrow(new FreeIpaClientException("delete failed"))
+                .when(client).deleteDnsRecord("failed", "test.com");
+        doThrow(new FreeIpaClientException("Not found", new JsonRpcClientException(FreeIpaErrorCodes.NOT_FOUND.getValue(), "Not found", null)))
+                .when(client).deleteDnsRecord("notfound", "test.com");
+        doReturn(Set.of(ptrRecord)).when(client).findAllDnsRecordInZone(eq(reverseZone.getIdnsname()));
+        doThrow(new FreeIpaClientException("Not found zone", new JsonRpcClientException(FreeIpaErrorCodes.NOT_FOUND.getValue(), "Not found", null)))
+                .when(client).findAllDnsRecordInZone(eq(disappearingZone.getIdnsname()));
 
         Pair<Set<String>, Map<String, String>> result = cleanupService.removeDnsEntries(STACK_ID,
                 Set.of(deleteMe.getIdnsname(), notFound.getIdnsname(), failed.getIdnsname(), "ptrRecord"),

@@ -40,12 +40,20 @@
     "label": "find_device_and_format"
   },
   {
+    "path": "/var/log/find-device-and-format-allout.log",
+    "label": "find_device_and_format_allout"
+  },
+  {
     "path": "/var/log/get_uuid_list.log",
     "label": "get_uuid_list"
   },
   {
     "path": "/var/log/mount-disks.log",
     "label": "mount_disks"
+  },
+  {
+    "path": "/var/log/mount-disks-allout.log",
+    "label": "mount_disks_allout"
   },
   {
     "path": "/var/log/cdp_resources_check/cdp-resources-check.log*",

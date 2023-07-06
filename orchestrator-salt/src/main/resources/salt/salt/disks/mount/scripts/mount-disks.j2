@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -x
 
 DATABASE_VOLUME_INDEX="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['database_volume_index'] }}"
 ATTACHED_VOLUME_NAME_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_name_list'] }}"
