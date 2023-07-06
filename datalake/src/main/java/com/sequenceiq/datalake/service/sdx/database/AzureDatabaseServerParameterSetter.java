@@ -12,7 +12,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.AzureHighAvailabiltyMode;
-import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureDatabaseServerV4Parameters;
@@ -41,12 +40,11 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
     private AzureDatabaseAttributesService azureDatabaseAttributesService;
 
     @Override
-    public void setParameters(DatabaseServerV4StackRequest request, SdxCluster sdxCluster) {
+    public void setParameters(DatabaseServerV4StackRequest request, SdxDatabase sdxDatabase) {
         AzureDatabaseServerV4Parameters parameters = new AzureDatabaseServerV4Parameters();
-        SdxDatabaseAvailabilityType availabilityType = DatabaseParameterFallbackUtil.getDatabaseAvailabilityType(sdxCluster.getSdxDatabase(),
-                sdxCluster.getDatabaseAvailabilityType(), sdxCluster.isCreateDatabase());
-        String databaseEngineVersion = DatabaseParameterFallbackUtil.getDatabaseEngineVersion(
-                sdxCluster.getSdxDatabase(), sdxCluster.getDatabaseEngineVersion());
+        SdxDatabaseAvailabilityType availabilityType = DatabaseParameterFallbackUtil.getDatabaseAvailabilityType(
+                sdxDatabase.getDatabaseAvailabilityType(), sdxDatabase.isCreateDatabase());
+        String databaseEngineVersion = sdxDatabase.getDatabaseEngineVersion();
         if (SdxDatabaseAvailabilityType.HA.equals(availabilityType)) {
             parameters.setBackupRetentionDays(backupRetentionPeriodHa);
             parameters.setGeoRedundantBackup(geoRedundantBackupHa);
@@ -61,7 +59,7 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
         if (StringUtils.isNotEmpty(databaseEngineVersion)) {
             parameters.setDbVersion(databaseEngineVersion);
         }
-        parameters.setAzureDatabaseType(getAzureDatabaseType(sdxCluster.getSdxDatabase()));
+        parameters.setAzureDatabaseType(getAzureDatabaseType(sdxDatabase));
         request.setAzure(parameters);
     }
 

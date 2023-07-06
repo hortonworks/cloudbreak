@@ -90,6 +90,7 @@ import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
@@ -543,6 +544,7 @@ class SdxServiceTest {
         sdxCluster.setEnvCrn(ENVIRONMENT_CRN);
         sdxCluster.setEnvName("envir");
         sdxCluster.setClusterName("sdx-cluster-name");
+        sdxCluster.setSdxDatabase(new SdxDatabase());
         return sdxCluster;
     }
 
@@ -624,7 +626,7 @@ class SdxServiceTest {
 
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setClusterShape(MEDIUM_DUTY_HA);
-        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
@@ -644,7 +646,7 @@ class SdxServiceTest {
         sdxCluster.setId(1L);
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.GCS);
         sdxCluster.setClusterShape(LIGHT_DUTY);
-        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setRuntime(runtime);
         sdxCluster.setCloudStorageBaseLocation("gcs://some/dir/");
 
@@ -684,7 +686,7 @@ class SdxServiceTest {
 
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setClusterShape(LIGHT_DUTY);
-        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setDetached(true);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
@@ -703,7 +705,7 @@ class SdxServiceTest {
 
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setClusterShape(LIGHT_DUTY);
-        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setDetached(true);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
@@ -725,7 +727,7 @@ class SdxServiceTest {
 
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setClusterShape(LIGHT_DUTY);
-        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setDetached(true);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
@@ -750,7 +752,7 @@ class SdxServiceTest {
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setId(1L);
         sdxCluster.setClusterShape(LIGHT_DUTY);
-        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setRuntime(runtime);
         sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
 
@@ -786,7 +788,7 @@ class SdxServiceTest {
 
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setClusterShape(LIGHT_DUTY);
-        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
@@ -817,7 +819,7 @@ class SdxServiceTest {
 
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setClusterShape(LIGHT_DUTY);
-        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
@@ -848,7 +850,7 @@ class SdxServiceTest {
 
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setClusterShape(LIGHT_DUTY);
-        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
@@ -879,7 +881,7 @@ class SdxServiceTest {
 
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setClusterShape(LIGHT_DUTY);
-        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setRuntime(invalidRuntime);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
@@ -905,7 +907,7 @@ class SdxServiceTest {
 
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setClusterShape(LIGHT_DUTY);
-        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setRuntime(invalidRuntime);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
@@ -930,7 +932,7 @@ class SdxServiceTest {
 
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setClusterShape(LIGHT_DUTY);
-        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
@@ -956,7 +958,7 @@ class SdxServiceTest {
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setId(1L);
         sdxCluster.setClusterShape(LIGHT_DUTY);
-        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setRuntime(runtime);
         sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
 
@@ -997,7 +999,7 @@ class SdxServiceTest {
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setId(1L);
         sdxCluster.setClusterShape(LIGHT_DUTY);
-        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setRuntime(runtime);
         sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
 

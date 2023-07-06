@@ -24,17 +24,14 @@ public class DatabaseParameterFallbackUtil {
         sdxDatabase.setDatabaseAvailabilityType(databaseAvailabilityType);
         sdxDatabase.setDatabaseEngineVersion(dbEngineVersion);
         sdxDatabase.setAttributes(attributes);
-        // TODO only for backward compatibility, can be removed in CB-21369
-        sdxCluster.setDatabaseAvailabilityType(databaseAvailabilityType);
-        sdxCluster.setDatabaseEngineVersion(dbEngineVersion);
         return sdxDatabase;
     }
 
     public static void setDatabaseCrn(SdxCluster sdxCluster, String databaseCrn) {
-        createSdxDatabaseIfMissing(sdxCluster);
+        if (sdxCluster.getSdxDatabase() == null) {
+            throw new IllegalArgumentException("SdxDatabase cannot be null in sdxcluster!");
+        }
         sdxCluster.getSdxDatabase().setDatabaseCrn(databaseCrn);
-        // TODO only for backward compatibility, can be removed in CB-21369
-        sdxCluster.setDatabaseCrn(databaseCrn);
     }
 
     public static String getDatabaseCrn(SdxDatabase sdxDatabase, String fallbackDatabaseCrn) {
@@ -78,17 +75,6 @@ public class DatabaseParameterFallbackUtil {
             } else {
                 return SdxDatabaseAvailabilityType.NONE;
             }
-        }
-    }
-
-    private static void createSdxDatabaseIfMissing(SdxCluster sdxCluster) {
-        SdxDatabase sdxDatabase = sdxCluster.getSdxDatabase();
-        if (sdxDatabase == null) {
-            sdxDatabase = new SdxDatabase();
-            sdxDatabase.setDatabaseEngineVersion(sdxCluster.getDatabaseEngineVersion());
-            sdxDatabase.setDatabaseAvailabilityType(sdxCluster.getDatabaseAvailabilityType());
-            sdxDatabase.setDatabaseCrn(sdxCluster.getDatabaseCrn());
-            sdxCluster.setSdxDatabase(sdxDatabase);
         }
     }
 }

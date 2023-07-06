@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
@@ -94,8 +95,8 @@ class SdxDeleteServiceTest {
     @Test
     void testDeleteSdxWhenSdxHasExternalDatabaseButCrnIsMissingShouldThrowNotFoundException() {
         SdxCluster sdxCluster = getSdxCluster();
-        sdxCluster.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
-        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.getSdxDatabase().setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
         sdxStatusEntity.setStatus(DatalakeStatusEnum.RUNNING);
@@ -109,8 +110,8 @@ class SdxDeleteServiceTest {
     @Test
     void testDeleteSdxWhenSdxHasExternalDatabaseButCrnIsMissingShouldNotThrowNotFoundException() {
         SdxCluster sdxCluster = getSdxCluster();
-        sdxCluster.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
-        sdxCluster.setDatabaseCrn(null);
+        sdxCluster.getSdxDatabase().setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
         sdxStatusEntity.setStatus(DatalakeStatusEnum.PROVISIONING_FAILED);
@@ -156,6 +157,7 @@ class SdxDeleteServiceTest {
         sdxCluster.setEnvCrn(ENVIRONMENT_CRN);
         sdxCluster.setEnvName("envir");
         sdxCluster.setClusterName("sdx-cluster-name");
+        sdxCluster.setSdxDatabase(new SdxDatabase());
         return sdxCluster;
     }
 

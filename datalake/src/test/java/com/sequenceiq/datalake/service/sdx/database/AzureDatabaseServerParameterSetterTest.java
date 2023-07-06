@@ -50,7 +50,7 @@ public class AzureDatabaseServerParameterSetterTest {
 
     @Test
     public void testHAServer() {
-        underTest.setParameters(request, createSdxCluster(SdxDatabaseAvailabilityType.HA, null));
+        underTest.setParameters(request, createSdxDatabase(SdxDatabaseAvailabilityType.HA, null));
 
         verify(request).setAzure(captor.capture());
         AzureDatabaseServerV4Parameters azureDatabaseServerV4Parameters = captor.getValue();
@@ -61,7 +61,7 @@ public class AzureDatabaseServerParameterSetterTest {
 
     @Test
     public void testNonHAServer() {
-        underTest.setParameters(request, createSdxCluster(SdxDatabaseAvailabilityType.NON_HA, null));
+        underTest.setParameters(request, createSdxDatabase(SdxDatabaseAvailabilityType.NON_HA, null));
 
         verify(request).setAzure(captor.capture());
         AzureDatabaseServerV4Parameters azureDatabaseServerV4Parameters = captor.getValue();
@@ -72,7 +72,7 @@ public class AzureDatabaseServerParameterSetterTest {
 
     @Test
     public void testEngineVersion() {
-        underTest.setParameters(request, createSdxCluster(SdxDatabaseAvailabilityType.NON_HA, "13"));
+        underTest.setParameters(request, createSdxDatabase(SdxDatabaseAvailabilityType.NON_HA, "13"));
 
         verify(request).setAzure(captor.capture());
         AzureDatabaseServerV4Parameters azureDatabaseServerV4Parameters = captor.getValue();
@@ -86,7 +86,7 @@ public class AzureDatabaseServerParameterSetterTest {
     @EnumSource(AzureDatabaseType.class)
     public void testAzureDatabaseType(AzureDatabaseType azureDatabaseType) {
         when(azureDatabaseAttributesService.getAzureDatabaseType(any(SdxDatabase.class))).thenReturn(azureDatabaseType);
-        underTest.setParameters(request, createSdxCluster(SdxDatabaseAvailabilityType.NON_HA, "13"));
+        underTest.setParameters(request, createSdxDatabase(SdxDatabaseAvailabilityType.NON_HA, "13"));
         verify(request).setAzure(captor.capture());
         assertEquals(azureDatabaseType, captor.getValue().getAzureDatabaseType());
     }
@@ -95,7 +95,7 @@ public class AzureDatabaseServerParameterSetterTest {
     public void shouldThrowExceptionWhenAvailabilityTypeIsNotSupported() {
         IllegalArgumentException result =
                 Assertions.assertThrows(IllegalArgumentException.class,
-                        () -> underTest.setParameters(request, createSdxCluster(SdxDatabaseAvailabilityType.NONE, null)));
+                        () -> underTest.setParameters(request, createSdxDatabase(SdxDatabaseAvailabilityType.NONE, null)));
 
         assertEquals("NONE database availability type is not supported on Azure.", result.getMessage());
     }
@@ -107,5 +107,12 @@ public class AzureDatabaseServerParameterSetterTest {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setSdxDatabase(sdxDatabase);
         return sdxCluster;
+    }
+
+    private SdxDatabase createSdxDatabase(SdxDatabaseAvailabilityType sdxDatabaseAvailabilityType, String databaseEngineVeersion) {
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseAvailabilityType(sdxDatabaseAvailabilityType);
+        sdxDatabase.setDatabaseEngineVersion(databaseEngineVeersion);
+        return sdxDatabase;
     }
 }

@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessage
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -467,6 +468,7 @@ class ProvisionerServiceTest {
                 .setAccountId("asd")
                 .setResource("asd")
                 .build().toString());
+        sdxCluster.setSdxDatabase(new SdxDatabase());
         return sdxCluster;
     }
 }

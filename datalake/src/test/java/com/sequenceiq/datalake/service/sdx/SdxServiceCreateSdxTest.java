@@ -84,8 +84,10 @@ import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -129,6 +131,9 @@ class SdxServiceCreateSdxTest {
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
+
+    @Mock
+    private SdxDatabaseRepository sdxDatabaseRepository;
 
     @Mock
     private SdxReactorFlowManager sdxReactorFlowManager;
@@ -361,6 +366,12 @@ class SdxServiceCreateSdxTest {
             sdxWithId.setId(id);
             return sdxWithId;
         });
+        when(sdxDatabaseRepository.save(any(SdxDatabase.class))).thenAnswer(invocation -> {
+            SdxDatabase sdxWithId = invocation.getArgument(0, SdxDatabase.class);
+            sdxWithId.setId(id);
+            return sdxWithId;
+        });
+        when(externalDatabaseConfigurer.configure(any(), any(), any(), any(), any())).thenReturn(new SdxDatabase());
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest, AZURE, null);
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
@@ -730,7 +741,7 @@ class SdxServiceCreateSdxTest {
         setSpot(sdxClusterRequest);
         withCloudStorage(sdxClusterRequest);
         when(imageCatalogService.getImageResponseFromImageRequest(eq(sdxClusterRequest.getImageSettingsV4Request()), any())).thenReturn(imageResponse);
-
+        when(externalDatabaseConfigurer.configure(any(), eq(OS), any(), any(), any())).thenReturn(new SdxDatabase());
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
