@@ -197,6 +197,11 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
         Log.log(LOGGER, format(" Azure Blob Log Path: %s", keyPrefix));
         Log.log(LOGGER, format(" Azure Blob Cluster Logs: %s", clusterLogPath));
 
+        if (StringUtils.contains(keyPrefix, clusterLogPath)) {
+            LOGGER.info("Azure Adls Gen 2 Blob is present at '{}' container in storage directory with path: [{}]", containerName, keyPrefix);
+            return format("https://autotestingapi.blob.core.windows.net/%s/%s",
+                    containerName, keyPrefix);
+        }
         try {
             DataLakeDirectoryClient storageDirectory = cloudBlobContainer.getDirectoryClient(keyPrefix);
             DataLakeDirectoryClient logsDirectory = storageDirectory.getSubdirectoryClient(clusterLogPath);
@@ -209,6 +214,8 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
                 throw new TestFailException(format("Azure Adls Gen 2 Blob is NOT present at '%s' container in '%s' storage directory with path: [%s]",
                         containerName, keyPrefix, clusterLogPath));
             }
+        } catch (TestFailException testFail) {
+            throw testFail;
         } catch (Exception e) {
             LOGGER.error("Azure Adls Gen 2 Blob couldn't process the call. So returning with error!", e);
             throw new TestFailException("Azure Adls Gen 2 Blob couldn't process the call.", e);
