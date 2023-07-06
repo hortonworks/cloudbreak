@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -x
+
 source /opt/salt/scripts/format-and-mount-common.sh
 
 # INPUT
