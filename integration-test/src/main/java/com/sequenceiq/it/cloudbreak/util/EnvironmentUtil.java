@@ -77,4 +77,18 @@ public class EnvironmentUtil {
                     .withCreateFreeIpa(Boolean.TRUE)
                     .withOneFreeIpaNode();
     }
+
+    public EnvironmentTestDto createCCMv2Environment(TestContext testContext) {
+        return testContext
+                .given("telemetry", TelemetryTestDto.class)
+                    .withLogging()
+                    .withReportClusterLogs()
+                .given(EnvironmentTestDto.class)
+                    .withNetwork()
+                    .withTelemetry("telemetry")
+                    .withTunnel(Tunnel.CCMV2_JUMPGATE)
+                    .withOverrideTunnel()
+                    .withCreateFreeIpa(Boolean.TRUE)
+                    .withOneFreeIpaNode();
+    }
 }

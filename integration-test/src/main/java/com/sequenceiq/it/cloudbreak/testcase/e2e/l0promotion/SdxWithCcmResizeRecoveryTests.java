@@ -25,7 +25,7 @@ public class SdxWithCcmResizeRecoveryTests extends PreconditionSdxE2ETest {
 
     @Override
     protected void initiateEnvironmentCreation(TestContext testContext) {
-        environmentUtil.createCCMv1Environment(testContext)
+        environmentUtil.createCCMv2Environment(testContext)
                     .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
                         commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(environmentTestClient.create())
@@ -36,7 +36,7 @@ public class SdxWithCcmResizeRecoveryTests extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is an available environment with a running SDX cluster connected via CCMv1",
+            given = "there is an available environment with a running SDX cluster connected via CCMv2 Jumpgate",
             when = "resize is performed on the SDX cluster but fails during provisioning",
             then = "recovery should be available and successful when run, the original cluster should be up and running"
     )
