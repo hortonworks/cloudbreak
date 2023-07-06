@@ -8,6 +8,8 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.junit.jupiter.api.Assertions;
@@ -33,6 +36,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.certificate.service.CertificateCreationService;
 import com.sequenceiq.cloudbreak.certificate.service.DnsManagementService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -102,12 +106,16 @@ class GatewayPublicEndpointManagementServiceTest {
     @Mock
     private LoadBalancerConfigService loadBalancerConfigService;
 
+    @Mock
+    private TransactionService transactionService;
+
     @InjectMocks
     private GatewayPublicEndpointManagementService underTest;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws TransactionService.TransactionExecutionException {
         ReflectionTestUtils.setField(underTest, "certGenerationEnabled", Boolean.TRUE);
+        lenient().when(transactionService.required(any(Supplier.class))).then(invocationOnMock -> ((Supplier) invocationOnMock.getArgument(0)).get());
     }
 
     @Test
@@ -155,7 +163,12 @@ class GatewayPublicEndpointManagementServiceTest {
     }
 
     @Test
-    void testRenewCertificateWhenCertGenerationIsTriggerableAndDnsEntryShouldBeCreated() throws IOException {
+    void testRenewCertificateWhenCertGenerationIsTriggerableAndDnsEntryShouldBeCreated() throws IOException, TransactionService.TransactionExecutionException {
+        doAnswer((invocation) -> {
+            ((Runnable) invocation.getArgument(0)).run();
+            return null;
+        }).when(transactionService).required(any(Runnable.class));
+
         SecurityConfig securityConfig = new SecurityConfig();
         securityConfig.setUserFacingCert("CERT");
         securityConfig.setUserFacingKey(USER_FACING_PRIVATE_KEY);
@@ -177,7 +190,7 @@ class GatewayPublicEndpointManagementServiceTest {
         String fqdn = endpointName + "." + environmentDomain;
         when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, environment)).thenReturn(fqdn);
         when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
-                eq(stack.getResourceCrn()))).thenReturn(List.of());
+                eq(stack.getResourceCrn()))).thenReturn(List.of("aCertificate"));
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(anyString(), anyString(), anyString(), anyBoolean(), any())).thenReturn(true);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.renewCertificate(stack));
@@ -219,7 +232,7 @@ class GatewayPublicEndpointManagementServiceTest {
         when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, environment)).thenReturn(fqdn);
 
         when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
-                eq(stack.getResourceCrn()))).thenReturn(List.of());
+                eq(stack.getResourceCrn()))).thenReturn(List.of("aCertificate"));
         cluster.setFqdn(fqdn);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.renewCertificate(stack));
@@ -264,7 +277,7 @@ class GatewayPublicEndpointManagementServiceTest {
         when(domainNameProvider.getCommonName(endpointName, environment)).thenReturn(commonName);
         when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, environment)).thenReturn(fqdn);
         when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
-                eq(stack.getResourceCrn()))).thenReturn(List.of());
+                eq(stack.getResourceCrn()))).thenReturn(List.of("aCertificate"));
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
                 eq(List.of(primaryGatewayInstance.getPublicIpWrapper())))).thenReturn(Boolean.TRUE);
 
@@ -278,7 +291,7 @@ class GatewayPublicEndpointManagementServiceTest {
         verify(dnsManagementService, times(1))
                 .createOrUpdateDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
                         eq(List.of(primaryGatewayInstance.getPublicIpWrapper())));
-        verify(securityConfigService, times(2)).save(any(SecurityConfig.class));
+        verify(securityConfigService, times(1)).save(any(SecurityConfig.class));
         Assertions.assertEquals(Boolean.TRUE, result);
     }
 
@@ -306,7 +319,7 @@ class GatewayPublicEndpointManagementServiceTest {
         when(domainNameProvider.getCommonName(endpointName, environment)).thenReturn(commonName);
         when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, environment)).thenReturn(fqdn);
         when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
-                eq(stack.getResourceCrn()))).thenReturn(List.of());
+                eq(stack.getResourceCrn()))).thenReturn(List.of("aCertificate"));
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
                 eq(List.of(primaryGatewayInstance.getPublicIpWrapper())))).thenReturn(Boolean.TRUE);
 
@@ -554,7 +567,7 @@ class GatewayPublicEndpointManagementServiceTest {
         when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, environment)).thenReturn(fqdn);
         when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), lbEndpointName, environment)).thenReturn(lbfqdn);
         when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
-                eq(stack.getResourceCrn()))).thenReturn(List.of());
+                eq(stack.getResourceCrn()))).thenReturn(List.of("aCertificate"));
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
                 eq(List.of(primaryGatewayInstance.getPublicIpWrapper())))).thenReturn(Boolean.TRUE);
         when(dnsManagementService.createOrUpdateDnsEntryWithCloudDns(eq("123"), eq(lbEndpointName), eq(envName), eq(cloudDns),
@@ -575,7 +588,7 @@ class GatewayPublicEndpointManagementServiceTest {
         verify(dnsManagementService, times(1))
                 .createOrUpdateDnsEntryWithCloudDns(eq("123"), eq(lbEndpointName), eq(envName), eq(cloudDns),
                         eq(hostedZoneId));
-        verify(securityConfigService, times(2)).save(any(SecurityConfig.class));
+        verify(securityConfigService, times(1)).save(any(SecurityConfig.class));
         Assertions.assertEquals(Boolean.TRUE, result);
     }
 
@@ -611,7 +624,7 @@ class GatewayPublicEndpointManagementServiceTest {
         when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, environment)).thenReturn(fqdn);
         when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), lbEndpointName, environment)).thenReturn(lbfqdn);
         when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
-                eq(stack.getResourceCrn()))).thenReturn(List.of());
+                eq(stack.getResourceCrn()))).thenReturn(List.of("aCertificate"));
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
                 eq(List.of(primaryGatewayInstance.getPublicIpWrapper())))).thenReturn(Boolean.TRUE);
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(eq("123"), eq(lbEndpointName), eq(envName), eq(Boolean.FALSE),
@@ -632,7 +645,7 @@ class GatewayPublicEndpointManagementServiceTest {
         verify(dnsManagementService, times(1))
                 .createOrUpdateDnsEntryWithIp(eq("123"), eq(lbEndpointName), eq(envName), eq(Boolean.FALSE),
                         eq(List.of(lbIp)));
-        verify(securityConfigService, times(2)).save(any(SecurityConfig.class));
+        verify(securityConfigService, times(1)).save(any(SecurityConfig.class));
         Assertions.assertEquals(Boolean.TRUE, result);
     }
 
