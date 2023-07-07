@@ -42,6 +42,8 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
 
     private static final int MARKETPLACE_IMAGE_PARTS_COUNT = 4;
 
+    private static final String RUNTIME_VERSION = "7.2.15";
+
     @Inject
     private SdxTestClient sdxTestClient;
 
@@ -120,6 +122,7 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
                     .withCloudStorage(getCloudStorageRequest(testContext))
                     .withStackRequest(key(cluster), key(stack))
                     .withTelemetry(telemetry)
+                    .withRuntimeVersion(RUNTIME_VERSION)
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
@@ -171,7 +174,7 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
         testContext
                 .given(imgCatalogKey, ImageCatalogTestDto.class)
                 .when((tc, dto, client) -> {
-                    selectedImageID.set(tc.getCloudProvider().getLatestMarketplacePreWarmedImageID(tc, dto, client));
+                    selectedImageID.set(tc.getCloudProvider().getLatestMarketplacePreWarmedImageID(tc, dto, client, RUNTIME_VERSION));
                     return dto;
                 });
         return selectedImageID.get();

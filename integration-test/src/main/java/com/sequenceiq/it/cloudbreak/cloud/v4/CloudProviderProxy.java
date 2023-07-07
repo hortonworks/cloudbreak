@@ -119,8 +119,9 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
-    public String getLatestMarketplacePreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        return getDelegate(imageCatalogTestDto).getLatestMarketplacePreWarmedImageID(testContext, imageCatalogTestDto, cloudbreakClient);
+    public String getLatestMarketplacePreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient,
+            String runtimeVersion) {
+        return getDelegate(imageCatalogTestDto).getLatestMarketplacePreWarmedImageID(testContext, imageCatalogTestDto, cloudbreakClient, runtimeVersion);
     }
 
     @Override
