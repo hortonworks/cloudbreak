@@ -429,7 +429,8 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getLatestMarketplacePreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
+    public String getLatestMarketplacePreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient,
+            String runtimeVersion) {
         try {
             Optional<ImageV4Response> prewarmedImagesForRuntime = cloudbreakClient
                     .getDefaultClient()
@@ -441,13 +442,13 @@ public class AzureCloudProvider extends AbstractCloudProvider {
                             .stream()
                             .anyMatch(i -> i.getValue().containsKey(MARKETPLACE_REGION)))
                     .filter(image -> StringUtils.equalsIgnoreCase(image.getStackDetails().getVersion(),
-                            commonClusterManagerProperties().getRuntimeVersion()))
+                            runtimeVersion))
                     .max(Comparator.comparing(ImageV4Response::getPublished));
 
             ImageV4Response latestPrewarmedImage = prewarmedImagesForRuntime
                     .orElseThrow(() ->
                             new IllegalStateException(format("Cannot find pre-warmed Azure Marketplace images at Azure provider for '%s' runtime version!",
-                            commonClusterManagerProperties().getRuntimeVersion())));
+                                    runtimeVersion)));
             Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
             Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
             Log.log(LOGGER, format(" Selected Pre-warmed Image Date: %s | ID: %s | Description: %s ", latestPrewarmedImage.getDate(),

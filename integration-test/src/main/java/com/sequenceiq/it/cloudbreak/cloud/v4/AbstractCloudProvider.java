@@ -284,7 +284,8 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     protected abstract DistroXClusterTestDto withCluster(DistroXClusterTestDto cluster);
 
     @Override
-    public String getLatestMarketplacePreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
+    public String getLatestMarketplacePreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient,
+            String runtimeVersion) {
         throw new TestFailException("Marketplace images are not supported on this platform");
     }
 
