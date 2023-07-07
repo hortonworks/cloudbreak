@@ -8,8 +8,6 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
@@ -17,8 +15,6 @@ import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 
 @Component
 public class JobCountMetricConfigurator {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JobCountMetricConfigurator.class);
 
     @Inject
     private GroupNameToJobCountFunction groupNameToJobCountFunction;

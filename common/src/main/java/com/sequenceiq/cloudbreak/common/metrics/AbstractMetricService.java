@@ -24,7 +24,7 @@ import io.micrometer.core.instrument.Timer;
 
 public abstract class AbstractMetricService implements MetricService {
 
-    private final ConcurrentMap<String, AtomicDouble> gaugeMetricMap = new ConcurrentHashMap<>();
+    private final ConcurrentMap<GaugeMetricKey, AtomicDouble> gaugeMetricMap = new ConcurrentHashMap<>();
 
     /**
      * Set the specified gauge value.
@@ -39,10 +39,12 @@ public abstract class AbstractMetricService implements MetricService {
 
     @Override
     public void gauge(Metric metric, double value, Map<String, String> tagsMap) {
-        String metricName = getMetricName(metric);
-        gaugeMetricMap.computeIfAbsent(metricName, name -> {
-            Iterable<Tag> tags = tagsMap.entrySet().stream().map(label -> Tag.of(label.getKey(), label.getValue().toLowerCase())).collect(Collectors.toList());
-            return Metrics.gauge(name, tags, new AtomicDouble(value));
+        GaugeMetricKey key = new GaugeMetricKey(getMetricName(metric), tagsMap);
+        gaugeMetricMap.computeIfAbsent(key, gaugeKey -> {
+            Iterable<Tag> tags = gaugeKey.tags().entrySet().stream()
+                    .map(label -> Tag.of(label.getKey(), label.getValue().toLowerCase()))
+                    .collect(Collectors.toList());
+            return Metrics.gauge(gaugeKey.metricName(), tags, new AtomicDouble(value));
         }).set(value);
     }
 
@@ -126,4 +128,7 @@ public abstract class AbstractMetricService implements MetricService {
     }
 
     protected abstract Optional<String> getMetricPrefix();
+
+    private record GaugeMetricKey(String metricName, Map<String, String> tags) {
+    }
 }
