@@ -12,6 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.app.StaticApplicationContext;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
+
 public class HibernateTransactionInterceptor extends EmptyInterceptor {
 
     private static final long DEFAULT_TRANSACTION_MAX_TIME_WARNING = 500;
@@ -34,10 +37,26 @@ public class HibernateTransactionInterceptor extends EmptyInterceptor {
         Long txStartTime = transactionMap.remove(tx);
         if (txStartTime != null) {
             long transactionTime = NANOSECONDS.toMillis(txCompletionTime - txStartTime);
+            addToMetric(transactionTime);
             if (transactionTime > maxTransactionTimeThreshold) {
                 LOGGER.warn("Transaction time warning (>{}ms): {}ms", maxTransactionTimeThreshold, transactionTime);
             }
         }
+    }
+
+    private void addToMetric(long transactionTime) {
+        StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).walk(stackFrameStream -> stackFrameStream
+                .skip(3)
+                .filter(stackFrame -> stackFrame.getClassName().contains("com.sequenceiq") &&
+                        !stackFrame.getClassName().contains("com.sequenceiq.cloudbreak.common.service.TransactionService"))
+                .findFirst()).ifPresent(frame -> {
+            String callerClassName = frame.getClassName();
+            String callerMethodName = frame.getMethodName();
+            Counter transactionTimeCounter = Metrics.counter("transaction.time", "caller", callerClassName + "." + callerMethodName);
+            transactionTimeCounter.increment(transactionTime);
+            Counter transactionCountCounter = Metrics.counter("transaction.count", "caller", callerClassName + "." + callerMethodName);
+            transactionCountCounter.increment();
+        });
     }
 
     @Override
