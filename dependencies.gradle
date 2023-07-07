@@ -103,6 +103,7 @@ ext {
   // Tracing
   micrometerVersion = '1.10.4'
   micrometerJersey2Version = '1.8.13'
+  microMeterJvmExtrasVersion = '0.2.2'
 
   // TO REMOVE
   jasyptVersion = '1.9.2'
