@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfigView;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryPillarConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryRepoConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryRepoConfigurationHolder;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryUpgradeConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.context.LogShipperContext;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
@@ -37,16 +38,16 @@ public class TelemetryCommonConfigService implements TelemetryPillarConfigGenera
 
     private final TelemetryUpgradeConfiguration telemetryUpgradeConfiguration;
 
-    private final TelemetryRepoConfiguration telemetryRepoConfiguration;
+    private final TelemetryRepoConfigurationHolder telemetryRepoConfigurationHolder;
 
     private final AltusDatabusConnectionConfiguration altusDatabusConnectionConfiguration;
 
     public TelemetryCommonConfigService(AnonymizationRuleResolver anonymizationRuleResolver, TelemetryUpgradeConfiguration telemetryUpgradeConfiguration,
-            TelemetryRepoConfiguration telemetryRepoConfiguration, AltusDatabusConnectionConfiguration altusDatabusConnectionConfiguration) {
+            TelemetryRepoConfigurationHolder telemetryRepoConfigurationHolder, AltusDatabusConnectionConfiguration altusDatabusConnectionConfiguration) {
         this.anonymizationRuleResolver = anonymizationRuleResolver;
         this.telemetryUpgradeConfiguration = telemetryUpgradeConfiguration;
         this.altusDatabusConnectionConfiguration = altusDatabusConnectionConfiguration;
-        this.telemetryRepoConfiguration = telemetryRepoConfiguration;
+        this.telemetryRepoConfigurationHolder = telemetryRepoConfigurationHolder;
     }
 
     @Override
@@ -68,6 +69,9 @@ public class TelemetryCommonConfigService implements TelemetryPillarConfigGenera
                 builder.withDesiredCdpRequestSignerVersion(telemetryUpgradeConfiguration.getCdpRequestSigner().getDesiredVersion());
             }
         }
+
+        TelemetryRepoConfiguration telemetryRepoConfiguration = telemetryRepoConfigurationHolder.selectCorrectRepoConfig(context);
+
         return builder
                 .withClusterDetails(clusterDetails)
                 .withRules(anonymizationRuleResolver.decodeRules(telemetry.getRules()))
@@ -76,10 +80,10 @@ public class TelemetryCommonConfigService implements TelemetryPillarConfigGenera
                 .withDatabusConnectRetryTimes(altusDatabusConnectionConfiguration.getRetryTimes())
                 .withDatabusConnectRetryDelay(altusDatabusConnectionConfiguration.getRetryDelaySeconds())
                 .withDatabusConnectRetryMaxTime(altusDatabusConnectionConfiguration.getRetryMaxTimeSeconds())
-                .withRepoName(telemetryRepoConfiguration.getName())
-                .withRepoBaseUrl(telemetryRepoConfiguration.getBaseUrl())
-                .withRepoGpgKey(telemetryRepoConfiguration.getGpgKey())
-                .withRepoGpgCheck(telemetryRepoConfiguration.getGpgCheck())
+                .withRepoName(telemetryRepoConfiguration.name())
+                .withRepoBaseUrl(telemetryRepoConfiguration.baseUrl())
+                .withRepoGpgKey(telemetryRepoConfiguration.gpgKey())
+                .withRepoGpgCheck(telemetryRepoConfiguration.gpgCheck())
                 .build();
     }
 
