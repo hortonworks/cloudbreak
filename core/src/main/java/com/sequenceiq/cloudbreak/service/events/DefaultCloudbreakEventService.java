@@ -8,7 +8,6 @@ import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -43,7 +42,6 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 @Service
-@Transactional
 public class DefaultCloudbreakEventService implements CloudbreakEventService, ClusterEventService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudbreakEventService.class);
