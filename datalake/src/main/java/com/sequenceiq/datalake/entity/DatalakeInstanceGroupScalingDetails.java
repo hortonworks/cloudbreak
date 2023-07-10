@@ -7,7 +7,7 @@ public enum DatalakeInstanceGroupScalingDetails {
     IDBROKER("idbroker", false, 2),
     GATEWAY("gateway", false, 2),
     AUXILIARY("auxiliary", false, 1),
-    CORE("core", true, 3),
+    CORE("core", false, 3),
     SOLRHG("solrhg", true, 0),
     STORAGEHG("storagehg", true, 0),
     KAFKAHG("kafkahg", true, 0),

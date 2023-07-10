@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -114,9 +115,10 @@ public class SdxHorizontalScalingServiceTest {
         scaleRequest.setDesiredCount(0);
         assertThrows(BadRequestException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
         scaleRequest.setGroup("core");
-        scaleRequest.setDesiredCount(1);
+        scaleRequest.setDesiredCount(3);
         assertThrows(BadRequestException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
-        scaleRequest.setDesiredCount(4);
+        scaleRequest.setGroup("solrhg");
+        scaleRequest.setDesiredCount(3);
         underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest);
     }
 
@@ -136,7 +138,14 @@ public class SdxHorizontalScalingServiceTest {
         InstanceGroupV4Response auxiliary = new InstanceGroupV4Response();
         auxiliary.setName("auxiliary");
         auxiliary.setMinimumNodeCount(1);
-        stackV4Response.setInstanceGroups(List.of(core, auxiliary));
+        InstanceGroupV4Response gateway = new InstanceGroupV4Response();
+        gateway.setName("gateway");
+        gateway.setMinimumNodeCount(2);
+        InstanceGroupV4Response solrhg = new InstanceGroupV4Response();
+        solrhg.setName("solrhg");
+        solrhg.setMinimumNodeCount(0);
+        stackV4Response.setInstanceGroups(List.of(core, auxiliary, gateway, solrhg));
+        stackV4Response.setStatus(Status.AVAILABLE);
         return stackV4Response;
     }
 
