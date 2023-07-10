@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.lifetime;
 
+import static org.springframework.scheduling.config.ScheduledTaskRegistrar.CRON_DISABLED;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -26,9 +28,10 @@ public class ScheduledLifetimeChecker {
     @Inject
     private Clock clock;
 
-    @Scheduled(fixedRate = 60 * 1000, initialDelay = 60 * 1000)
+    @Scheduled(cron = CRON_DISABLED)
     public void validate() {
         stackService.getAllAlive().forEach(stack ->
+                // WARNING - it is very suboptimal to do a query for every stack one by one, fix this before enable it again!!!
                 stackService.getTtlValueForStack(stack.getId()).ifPresent(ttl -> {
                     if (isInDeletableStatus(stack) && isExceeded(stack.getCreationFinished(), ttl.toMillis())) {
                         LOGGER.info("Stack is exceeded at {}ms because is in deletable status and ttl is expired, ttl: {}",
