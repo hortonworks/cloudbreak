@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
-import com.sequenceiq.cloudbreak.rotation.context.PollerRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
 
 @Component
 public class DatalakeExternalDatabaseRootPasswordRotationContextProvider implements RotationContextProvider {

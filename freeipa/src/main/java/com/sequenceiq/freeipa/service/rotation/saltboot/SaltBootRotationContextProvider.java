@@ -20,17 +20,15 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
-import com.sequenceiq.cloudbreak.orchestrator.rotation.ServiceConfigRotationContext;
-import com.sequenceiq.cloudbreak.orchestrator.rotation.ServiceUpdateConfiguration;
-import com.sequenceiq.cloudbreak.orchestrator.salt.rotation.SaltBootPasswordUserDataModifier;
-import com.sequenceiq.cloudbreak.orchestrator.salt.rotation.SaltBootSignKeyUserDataModifier;
+import com.sequenceiq.cloudbreak.rotation.secret.userdata.SaltBootPasswordUserDataModifier;
+import com.sequenceiq.cloudbreak.rotation.secret.userdata.SaltBootSignKeyUserDataModifier;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
-import com.sequenceiq.cloudbreak.rotation.context.CustomJobRotationContext;
-import com.sequenceiq.cloudbreak.rotation.userdata.UserDataRotationContext;
-import com.sequenceiq.cloudbreak.rotation.vault.VaultRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -130,18 +128,18 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
         return FreeIpaSecretType.SALT_BOOT_SECRETS;
     }
 
-    private ServiceConfigRotationContext getServiceConfigRotationContext(Stack stack, String saltBootPasswordSecret, String saltBootPrivateKeySecret) {
-        return new ServiceConfigRotationContext(stack.getResourceCrn()) {
+    private SaltBootConfigRotationContext getServiceConfigRotationContext(Stack stack, String saltBootPasswordSecret, String saltBootPrivateKeySecret) {
+        return new SaltBootConfigRotationContext(stack.getResourceCrn()) {
 
             @Override
-            public ServiceUpdateConfiguration getServiceUpdateConfiguration() {
+            public SaltBootUpdateConfiguration getServiceUpdateConfiguration() {
                 RotationSecret saltBootPassword = secretService.getRotation(saltBootPasswordSecret);
                 RotationSecret saltBootPrivateKey = secretService.getRotation(saltBootPrivateKeySecret);
                 String oldSaltBootPassword = saltBootPassword.isRotation() ? saltBootPassword.getBackupSecret() : saltBootPassword.getSecret();
                 String newSaltBootPassword = saltBootPassword.getSecret();
                 String oldSaltBootPrivateKey = saltBootPrivateKey.isRotation() ? saltBootPrivateKey.getBackupSecret() : saltBootPrivateKey.getSecret();
                 String newSaltBootPrivateKey = saltBootPrivateKey.getSecret();
-                return new ServiceUpdateConfiguration(
+                return new SaltBootUpdateConfiguration(
                         gatewayConfigService.getPrimaryGatewayConfig(stack),
                         oldSaltBootPassword,
                         newSaltBootPassword,

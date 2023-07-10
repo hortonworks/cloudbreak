@@ -22,11 +22,11 @@ jar {
 }
 
 dependencies {
+  api project(':secret-rotation-api')
   implementation project(':common')
   implementation project(':secret-engine')
-  implementation project(':secret-rotation-api')
-  implementation project(':secret-rotation-common')
-  implementation project(":flow")
+  implementation project(':flow')
+  implementation project(':usage-collection')
   implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
   implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion

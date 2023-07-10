@@ -46,6 +46,10 @@ public class SecretRotationStepProgress {
         this.created = created;
     }
 
+    public boolean isFinished() {
+        return finished != null;
+    }
+
     public Long getId() {
         return id;
     }

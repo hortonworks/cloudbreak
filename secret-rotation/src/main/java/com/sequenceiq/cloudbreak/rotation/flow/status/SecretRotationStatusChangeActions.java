@@ -12,11 +12,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.rotation.flow.status.config.SecretRotationStatusChangeEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.status.config.SecretRotationStatusChangeState;
 import com.sequenceiq.cloudbreak.rotation.flow.status.event.RotationStatusChangeFailHandledEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.status.event.RotationStatusChangeFailedEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.status.event.RotationStatusChangeFinishedEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.status.event.RotationStatusChangeTriggerEvent;
-import com.sequenceiq.cloudbreak.rotation.service.SecretRotationStatusService;
+import com.sequenceiq.cloudbreak.rotation.service.status.SecretRotationStatusService;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;

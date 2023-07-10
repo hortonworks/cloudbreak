@@ -15,6 +15,7 @@ import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.common.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
 
 @Component

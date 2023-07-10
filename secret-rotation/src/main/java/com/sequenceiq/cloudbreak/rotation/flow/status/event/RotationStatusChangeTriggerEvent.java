@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
-import com.sequenceiq.cloudbreak.rotation.flow.status.SecretRotationStatusChangeEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.status.config.SecretRotationStatusChangeEvent;
 
 public class RotationStatusChangeTriggerEvent extends RotationStatusChangeEvent {
 

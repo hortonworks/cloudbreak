@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
+import com.sequenceiq.datalake.service.rotation.SdxSecretRotationStatusService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 
 @ExtendWith(MockitoExtension.class)

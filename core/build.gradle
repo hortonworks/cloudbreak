@@ -231,8 +231,6 @@ dependencies {
   }
 
   implementation project(':secret-rotation')
-  implementation project(':secret-rotation-common')
-  implementation project(':secret-rotation-api')
   implementation project(':core-api')
   implementation project(':core-model')
   implementation project(':orchestrator-api')

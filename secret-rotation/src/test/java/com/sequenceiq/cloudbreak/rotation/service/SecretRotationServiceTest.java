@@ -29,7 +29,8 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.common.TestRotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.TestSecretType;
-import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
+import com.sequenceiq.cloudbreak.rotation.common.AbstractRotationExecutor;
+import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationProgressService;
 
 @ExtendWith(MockitoExtension.class)
 public class SecretRotationServiceTest {
@@ -41,7 +42,7 @@ public class SecretRotationServiceTest {
     private RotationContextProvider contextProvider;
 
     @Mock
-    private SecretRotationStepProgressService secretRotationStepProgressService;
+    private SecretRotationProgressService secretRotationProgressService;
 
     @InjectMocks
     private SecretRotationService underTest;
@@ -95,7 +96,7 @@ public class SecretRotationServiceTest {
 
     @Test
     public void testFinalize() {
-        doNothing().when(secretRotationStepProgressService).deleteAll(any(), any());
+        doNothing().when(secretRotationProgressService).deleteAll(any(), any());
         doNothing().when(executor).executeFinalize(any(), any());
 
         underTest.finalizeRotation(TestSecretType.TEST, "resource", null);

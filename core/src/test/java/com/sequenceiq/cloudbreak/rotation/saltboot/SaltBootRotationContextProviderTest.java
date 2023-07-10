@@ -16,13 +16,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.orchestrator.rotation.ServiceConfigRotationContext;
 import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.context.CustomJobRotationContext;
-import com.sequenceiq.cloudbreak.rotation.userdata.UserDataRotationContext;
-import com.sequenceiq.cloudbreak.rotation.vault.VaultRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
@@ -73,7 +72,7 @@ class SaltBootRotationContextProviderTest {
 
         assertInstanceOf(VaultRotationContext.class, contexts.get(CommonSecretRotationStep.VAULT));
         assertInstanceOf(CustomJobRotationContext.class, contexts.get(CommonSecretRotationStep.CUSTOM_JOB));
-        assertInstanceOf(ServiceConfigRotationContext.class, contexts.get(CommonSecretRotationStep.SERVICE_CONFIG));
+        assertInstanceOf(SaltBootConfigRotationContext.class, contexts.get(CommonSecretRotationStep.SERVICE_CONFIG));
         assertInstanceOf(UserDataRotationContext.class, contexts.get(CommonSecretRotationStep.USER_DATA));
     }
 }

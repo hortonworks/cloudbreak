@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.rotation.flow.status.event;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.rotation.flow.status.SecretRotationStatusChangeEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.status.config.SecretRotationStatusChangeEvent;
 
 public class RotationStatusChangeFailHandledEvent extends RotationStatusChangeEvent {
 

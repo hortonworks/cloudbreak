@@ -25,8 +25,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
-import com.sequenceiq.cloudbreak.rotation.context.PollerRotationContext;
-import com.sequenceiq.cloudbreak.rotation.service.SecretRotationProgressService;
+import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
+import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationProgressService;
 
 @ExtendWith(MockitoExtension.class)
 class RedbeamsPollerRotationExecutorTest {

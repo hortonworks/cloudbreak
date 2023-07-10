@@ -19,9 +19,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
-import com.sequenceiq.cloudbreak.rotation.flow.event.PreValidateRotationFinishedEvent;
-import com.sequenceiq.cloudbreak.rotation.flow.event.PreValidateRotationTriggerEvent;
-import com.sequenceiq.cloudbreak.rotation.flow.event.RotationFailedEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.PreValidateRotationFinishedEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.PreValidateRotationTriggerEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RotationFailedEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.rotation.handler.PreValidateRotationHandler;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationService;
 
 @ExtendWith(MockitoExtension.class)

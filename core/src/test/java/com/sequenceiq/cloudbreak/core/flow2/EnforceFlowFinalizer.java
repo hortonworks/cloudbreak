@@ -12,8 +12,8 @@ import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
 import com.google.common.base.Joiner;
-import com.sequenceiq.cloudbreak.rotation.flow.config.SecretRotationFlowConfig;
-import com.sequenceiq.cloudbreak.rotation.flow.status.SecretRotationStatusChangeFlowConfig;
+import com.sequenceiq.cloudbreak.rotation.flow.rotation.config.SecretRotationFlowConfig;
+import com.sequenceiq.cloudbreak.rotation.flow.status.config.SecretRotationStatusChangeFlowConfig;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 
 public class EnforceFlowFinalizer {

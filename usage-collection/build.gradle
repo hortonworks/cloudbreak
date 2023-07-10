@@ -14,8 +14,6 @@ apply plugin: 'com.google.protobuf'
 dependencies {
   implementation project(':common')
   implementation project(':streaming-common')
-  implementation project(':secret-rotation-api')
-  implementation project(':secret-rotation-common')
   implementation project(':databus-connector')
 
   implementation group: 'com.google.protobuf',          name: 'protobuf-java',        version: protobufVersion

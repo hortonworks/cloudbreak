@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
-import com.sequenceiq.cloudbreak.rotation.context.PollerRotationContext;
-import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
+import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.AbstractRotationExecutor;
 
 @Component
 public class CloudbreakPollerRotationExecutor extends AbstractRotationExecutor<PollerRotationContext> {

@@ -52,8 +52,6 @@ configurations {
 
 dependencies {
   implementation project(':secret-rotation')
-  implementation project(':secret-rotation-common')
-  implementation project(':secret-rotation-api')
   implementation project(':authorization-common')
   implementation project(':common')
   implementation project(':flow')

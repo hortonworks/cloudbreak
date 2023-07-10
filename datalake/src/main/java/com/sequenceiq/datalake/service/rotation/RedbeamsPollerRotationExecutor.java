@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
-import com.sequenceiq.cloudbreak.rotation.context.PollerRotationContext;
-import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
+import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.AbstractRotationExecutor;
 import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 
 @Component

@@ -15,8 +15,6 @@ dependencies {
     implementation group: 'net.bytebuddy',                 name: 'byte-buddy',                     version: byteBuddyVersion
     implementation project(':orchestrator-api')
     implementation project(':common')
-    implementation project(':secret-rotation-api')
-    implementation project(':secret-rotation-common')
     implementation project(':cloud-common')
 
     implementation group: 'org.yaml',                      name: 'snakeyaml',                      version: snakeYamlVersion

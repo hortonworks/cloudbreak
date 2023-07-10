@@ -20,11 +20,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.common.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.common.TestSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.TestSecretType;
-import com.sequenceiq.cloudbreak.rotation.service.SecretRotationProgressService;
+import com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgress;
+import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationProgressService;
 
 @ExtendWith(MockitoExtension.class)
 public class AbstractRotationExecutorTest {
@@ -47,45 +49,38 @@ public class AbstractRotationExecutorTest {
         underTest.executeRotate(new RotationContext(""), TestSecretType.TEST);
 
         verify(secretRotationProgressService, times(1)).latestStep(any(), any(), any(), any());
-        verify(secretRotationProgressService, times(0)).isFinished(any());
         verify(secretRotationProgressService, times(0)).finished(any());
     }
 
     @Test
     public void testRotateWhenStepOngoing() {
-        when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.of("anything"));
-        when(secretRotationProgressService.isFinished(any())).thenReturn(Boolean.FALSE);
+        when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.of(new SecretRotationStepProgress()));
         doNothing().when(secretRotationProgressService).finished(any());
 
         underTest.executeRotate(new RotationContext(""), TestSecretType.TEST);
 
         verify(secretRotationProgressService, times(1)).latestStep(any(), any(), any(), any());
-        verify(secretRotationProgressService, times(1)).isFinished(any());
         verify(secretRotationProgressService, times(1)).finished(any());
     }
 
     @Test
     public void testRotateFailureWhenStepOngoing() {
-        when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.of("anything"));
-        when(secretRotationProgressService.isFinished(any())).thenReturn(Boolean.FALSE);
+        when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.of(new SecretRotationStepProgress()));
         doNothing().when(secretRotationProgressService).finished(any());
 
         assertThrows(SecretRotationException.class, () -> underTest.executeRotate(new RotationContext(null), TestSecretType.TEST));
 
         verify(secretRotationProgressService, times(1)).latestStep(any(), any(), any(), any());
-        verify(secretRotationProgressService, times(1)).isFinished(any());
         verify(secretRotationProgressService, times(1)).finished(any());
     }
 
     @Test
     public void testRotateWhenStepAlreadyFinished() {
-        when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.of("anything"));
-        when(secretRotationProgressService.isFinished(any())).thenReturn(Boolean.TRUE);
+        when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.of(new SecretRotationStepProgress()));
 
         underTest.executeRotate(new RotationContext(""), TestSecretType.TEST);
 
         verify(secretRotationProgressService, times(1)).latestStep(any(), any(), any(), any());
-        verify(secretRotationProgressService, times(1)).isFinished(any());
         verify(secretRotationProgressService, times(0)).finished(any());
     }
 

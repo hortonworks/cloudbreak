@@ -103,8 +103,6 @@ dependencies {
   }
 
   implementation project(':secret-rotation')
-  implementation project(':secret-rotation-common')
-  implementation project(':secret-rotation-api')
   implementation project(':authorization-common')
   implementation project(':flow')
   implementation project(':cloud-reactor')

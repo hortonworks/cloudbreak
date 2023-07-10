@@ -9,8 +9,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.util.Optional;
-
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,11 +22,12 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
-import com.sequenceiq.cloudbreak.rotation.flow.event.ExecuteRotationFailedEvent;
-import com.sequenceiq.cloudbreak.rotation.flow.event.ExecuteRotationFinishedEvent;
-import com.sequenceiq.cloudbreak.rotation.flow.event.ExecuteRotationTriggerEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRotationFailedEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRotationFinishedEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRotationTriggerEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.rotation.handler.ExecuteRotationHandler;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationService;
-import com.sequenceiq.cloudbreak.rotation.usage.SecretRotationUsageProcessor;
+import com.sequenceiq.cloudbreak.rotation.service.usage.SecretRotationUsageService;
 
 @ExtendWith(MockitoExtension.class)
 public class ExecuteRotationHandlerTest {
@@ -41,7 +40,7 @@ public class ExecuteRotationHandlerTest {
     private SecretRotationService secretRotationService;
 
     @Mock
-    private SecretRotationUsageProcessor secretRotationUsageProcessor;
+    private SecretRotationUsageService secretRotationUsageService;
 
     @InjectMocks
     private ExecuteRotationHandler underTest;
@@ -52,7 +51,6 @@ public class ExecuteRotationHandlerTest {
         EventBus eventBus = mock(EventBus.class);
         doNothing().when(eventBus).notify(anyString(), argumentCaptor.capture());
         FieldUtils.writeField(underTest, "eventBus", eventBus, true);
-        FieldUtils.writeField(underTest, "secretRotationUsageProcessor", Optional.of(secretRotationUsageProcessor), true);
     }
 
     @Test
@@ -62,7 +60,7 @@ public class ExecuteRotationHandlerTest {
         underTest.accept(Event.wrap(getTriggerEvent()));
 
         assertEquals(ExecuteRotationFinishedEvent.class, argumentCaptor.getValue().getData().getClass());
-        verify(secretRotationUsageProcessor, times(1)).rotationStarted(any(), any(), any());
+        verify(secretRotationUsageService, times(1)).rotationStarted(any(), any(), any());
     }
 
     @Test
@@ -72,7 +70,7 @@ public class ExecuteRotationHandlerTest {
         underTest.accept(Event.wrap(getTriggerEvent()));
 
         assertEquals(ExecuteRotationFailedEvent.class, argumentCaptor.getValue().getData().getClass());
-        verify(secretRotationUsageProcessor, times(1)).rotationStarted(any(), any(), any());
+        verify(secretRotationUsageService, times(1)).rotationStarted(any(), any(), any());
     }
 
     private static ExecuteRotationTriggerEvent getTriggerEvent() {

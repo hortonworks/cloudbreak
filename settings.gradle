@@ -84,5 +84,4 @@ include 'sdx-connector'
 include 'wiam-connector'
 include 'secret-rotation-api'
 include 'secret-rotation'
-include 'secret-rotation-common'
 

@@ -25,9 +25,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
-import com.sequenceiq.cloudbreak.rotation.service.SecretRotationProgressService;
-import com.sequenceiq.cloudbreak.rotation.userdata.UserDataRotationContext;
-import com.sequenceiq.cloudbreak.rotation.userdata.UserDataSecretModifier;
+import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationProgressService;
+import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataSecretModifier;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.util.UserDataReplacer;

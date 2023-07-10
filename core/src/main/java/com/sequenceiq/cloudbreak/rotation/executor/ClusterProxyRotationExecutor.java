@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterPro
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.common.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.context.ClusterProxyRotationContext;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 

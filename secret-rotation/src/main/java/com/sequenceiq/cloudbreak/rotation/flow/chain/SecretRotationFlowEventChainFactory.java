@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.rotation.flow.event.SecretRotationTriggerEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.SecretRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.status.event.RotationStatusChangeTriggerEvent;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
