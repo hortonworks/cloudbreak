@@ -105,6 +105,9 @@ public class ImageCatalogServiceDefaultTest {
     @Mock
     private ImageComparator imageComparator;
 
+    @Mock
+    private ImageOsService imageOsService;
+
     @InjectMocks
     private ImageCatalogServiceProxy imageCatalogServiceProxy;
 
@@ -141,6 +144,7 @@ public class ImageCatalogServiceDefaultTest {
         when(providerSpecificImageFilter.filterImages(any(), anyList())).then(returnsSecondArg());
 
         lenient().when(imageComparator.compare(any(), any())).thenReturn(1);
+        lenient().when(imageOsService.isSupported(any())).thenReturn(true);
 
         ReflectionTestUtils.setField(underTest, "imageCatalogServiceProxy", imageCatalogServiceProxy);
         ReflectionTestUtils.setField(imageCatalogServiceProxy, "advertisedImageCatalogService", advertisedImageCatalogService);

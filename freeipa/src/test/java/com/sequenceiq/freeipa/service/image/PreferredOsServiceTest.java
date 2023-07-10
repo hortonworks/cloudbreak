@@ -46,7 +46,7 @@ public class PreferredOsServiceTest {
 
     @Test
     public void shouldPreferTheDefaultOsInCaseOfMissingRequestedOsAndNotGrantedRhel8Support() {
-        when(entitlementService.isRhel8ImageSupportEnabled(ACCOUNT_ID)).thenReturn(false);
+        when(entitlementService.isRhel8ImagePreferred(ACCOUNT_ID)).thenReturn(false);
 
         String actual = victim.getPreferredOs(ACCOUNT_ID, null);
         assertEquals(CENTOS7, actual);
@@ -55,7 +55,6 @@ public class PreferredOsServiceTest {
 
     @Test
     public void shouldPreferTheDefaultOsInCaseOfMissingRequestedOsAndNotGrantedRhel8Preference() {
-        when(entitlementService.isRhel8ImageSupportEnabled(ACCOUNT_ID)).thenReturn(true);
         when(entitlementService.isRhel8ImagePreferred(ACCOUNT_ID)).thenReturn(false);
 
         String actual = victim.getPreferredOs(ACCOUNT_ID, null);
@@ -65,7 +64,6 @@ public class PreferredOsServiceTest {
 
     @Test
     public void shouldPreferRhel8InCaseOfMissingRequestedOsAndGrantedRhel8SupportAndPreference() {
-        when(entitlementService.isRhel8ImageSupportEnabled(ACCOUNT_ID)).thenReturn(true);
         when(entitlementService.isRhel8ImagePreferred(ACCOUNT_ID)).thenReturn(true);
 
         String actual = victim.getPreferredOs(ACCOUNT_ID, null);

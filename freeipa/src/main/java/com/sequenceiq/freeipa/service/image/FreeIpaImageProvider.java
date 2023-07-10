@@ -107,7 +107,7 @@ public class FreeIpaImageProvider implements ImageProvider {
                 .findFirst();
             if (result.isPresent() && !supportedOsService.isSupported(accountId, result.get().getOs())) {
                 throw new IllegalArgumentException(String.format("The OS '%s' of the selected image '%s' is not supported.",
-                        result.map(Image::getOs).get(), imageId));
+                        result.get().getOs(), imageId));
             }
             return result.stream().collect(Collectors.toList());
         } else {

@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.saas.sdx.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.saas.sdx.status.StatusCheckResult;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
+import com.sequenceiq.cloudbreak.service.image.ImageOsService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
@@ -83,6 +84,9 @@ class DistroXServiceTest {
     @Mock
     private PlatformAwareSdxConnector platformAwareSdxConnector;
 
+    @Mock
+    private ImageOsService imageOsService;
+
     @InjectMocks
     private DistroXService underTest;
 
@@ -93,6 +97,7 @@ class DistroXServiceTest {
         Tenant tenant = new Tenant();
         tenant.setName("test");
         workspace.setTenant(tenant);
+        lenient().when(imageOsService.isSupported(any())).thenReturn(true);
         lenient().when(workspaceService.getForCurrentUser()).thenReturn(workspace);
     }
 
@@ -369,6 +374,40 @@ class DistroXServiceTest {
         assertThatThrownBy(() -> underTest.post(request))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Image request can not have both image id and os parameters set.");
+
+        verify(platformAwareSdxConnector).listSdxCrns(any(), any());
+        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any(), any(), any());
+    }
+
+    @Test
+    void testIfImageOsIsNotSupported() {
+        String envName = "someAwesomeEnvironment";
+        DistroXV1Request request = new DistroXV1Request();
+        request.setEnvironmentName(envName);
+        DistroXImageV1Request imageRequest = new DistroXImageV1Request();
+        imageRequest.setOs("os");
+        request.setImage(imageRequest);
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setEnvironmentStatus(AVAILABLE);
+        envResponse.setCrn("crn");
+        DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
+        freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+        freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
+        Workspace workspace = new Workspace();
+        Tenant tenant = new Tenant();
+        tenant.setName("test");
+        workspace.setTenant(tenant);
+        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
+        when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
+        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
+        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any(), any(), any()))
+                .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
+        when(imageOsService.isSupported(any())).thenReturn(false);
+
+        assertThatThrownBy(() -> underTest.post(request))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Image os 'os' is not supported in your account.");
 
         verify(platformAwareSdxConnector).listSdxCrns(any(), any());
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any(), any(), any());

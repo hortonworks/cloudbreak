@@ -22,8 +22,7 @@ public class PreferredOsService {
     public String getPreferredOs(String accountId, String requestedOs) {
         if (StringUtils.isNotBlank(requestedOs)) {
             return requestedOs;
-        } else if (entitlementService.isRhel8ImageSupportEnabled(accountId)
-                && entitlementService.isRhel8ImagePreferred(accountId)) {
+        } else if (entitlementService.isRhel8ImagePreferred(accountId)) {
             return REDHAT8;
         } else {
             return defaultOs;

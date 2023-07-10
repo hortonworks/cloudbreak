@@ -560,7 +560,7 @@ public class EntitlementService {
     }
 
     public boolean isRhel8ImagePreferred(String accountId) {
-        return isEntitlementRegistered(accountId, PREFER_RHEL8_IMAGES);
+        return isRhel8ImageSupportEnabled(accountId) && isEntitlementRegistered(accountId, PREFER_RHEL8_IMAGES);
     }
 
     public List<String> getEntitlements(String accountId) {

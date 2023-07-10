@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.saas.sdx.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.saas.sdx.status.StatusCheckResult;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
+import com.sequenceiq.cloudbreak.service.image.ImageOsService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -56,6 +57,9 @@ public class DistroXService {
     @Inject
     private FedRampModificationService fedRampModificationService;
 
+    @Inject
+    private ImageOsService imageOsService;
+
     public StackV4Response post(DistroXV1Request request) {
         Workspace workspace = workspaceService.getForCurrentUser();
         validate(request);
@@ -89,8 +93,13 @@ public class DistroXService {
             throw new BadRequestException("Data Lake stacks of environment should be available.");
         }
         DistroXImageV1Request imageRequest = request.getImage();
-        if (imageRequest != null && StringUtils.isNoneBlank(imageRequest.getId(), imageRequest.getOs())) {
-            throw new BadRequestException("Image request can not have both image id and os parameters set.");
+        if (imageRequest != null) {
+            if (!imageOsService.isSupported(imageRequest.getOs())) {
+                throw new BadRequestException(String.format("Image os '%s' is not supported in your account.", imageRequest.getOs()));
+            }
+            if (StringUtils.isNoneBlank(imageRequest.getId(), imageRequest.getOs())) {
+                throw new BadRequestException("Image request can not have both image id and os parameters set.");
+            }
         }
     }
 

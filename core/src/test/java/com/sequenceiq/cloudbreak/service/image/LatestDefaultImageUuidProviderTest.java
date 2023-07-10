@@ -15,17 +15,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
-@RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 public class LatestDefaultImageUuidProviderTest {
 
@@ -46,14 +46,24 @@ public class LatestDefaultImageUuidProviderTest {
     private static final Map<String, Map<String, String>> YARN_IMAGE_SET_BY_PROVIDER =
             Map.of("yarn", Map.of("default", "registry.eng.hortonworks.com/cloudbreak/centos-76:2020-05-18-17-16-16"));
 
-    private static LatestDefaultImageUuidProvider underTest;
-
     private static List<Image> defaultImages;
 
-    @BeforeClass
+    @Mock
+    private ImageOsService imageOsService;
+
+    private LatestDefaultImageUuidProvider underTest;
+
+    @BeforeAll
     public static void beforeClass() {
-        underTest = new LatestDefaultImageUuidProvider(new ImageComparator("redhat8"));
         defaultImages = createTestImageList();
+    }
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(imageOsService.getPreferredOs()).thenReturn("centos7");
+        ImageComparator comparator = new ImageComparator();
+        ReflectionTestUtils.setField(comparator, "imageOsService", imageOsService);
+        underTest = new LatestDefaultImageUuidProvider(comparator);
     }
 
     @Test
