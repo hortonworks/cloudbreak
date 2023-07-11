@@ -21,6 +21,9 @@ public class DistroXImageV1Request implements Serializable {
     @ApiModelProperty(StackModelDescription.IMAGE_ID)
     private String id;
 
+    @ApiModelProperty(StackModelDescription.IMAGE_OS)
+    private String os;
+
     public String getCatalog() {
         return catalog;
     }
@@ -35,5 +38,13 @@ public class DistroXImageV1Request implements Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getOs() {
+        return os;
+    }
+
+    public void setOs(String os) {
+        this.os = os;
     }
 }

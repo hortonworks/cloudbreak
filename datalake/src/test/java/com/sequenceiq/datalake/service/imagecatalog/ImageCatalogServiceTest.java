@@ -132,6 +132,15 @@ public class ImageCatalogServiceTest {
     }
 
     @Test
+    void testGetImageResponseFromImageRequestWithOsImageSettingsRequest() {
+        ImageSettingsV4Request imageSettingsV4Request = new ImageSettingsV4Request();
+        imageSettingsV4Request.setOs("os");
+        ImageV4Response actual = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> victim.getImageResponseFromImageRequest(imageSettingsV4Request, IMAGE_CATALOG_PLATFORM_AWS));
+        assertNull(actual);
+    }
+
+    @Test
     void testGetImageResponseFromImageRequestWithImageSettingsRequestNotResultingInImages() throws Exception {
         ImageSettingsV4Request imageSettingsV4Request = new ImageSettingsV4Request();
         imageSettingsV4Request.setCatalog(IMAGE_CATALOG_NAME);
@@ -146,10 +155,12 @@ public class ImageCatalogServiceTest {
 
     @Test
     void testGetImageResponseFromImageRequestWhenEndpointFails() throws Exception {
+        ImageSettingsV4Request imageSettingsV4Request = new ImageSettingsV4Request();
+        imageSettingsV4Request.setId(IMAGE_ID);
         doThrow(new Exception()).when(imageCatalogV4Endpoint).getImageByImageId(any(), any(), any());
 
         ImageV4Response actual = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> victim.getImageResponseFromImageRequest(new ImageSettingsV4Request(), IMAGE_CATALOG_PLATFORM_AWS));
+                () -> victim.getImageResponseFromImageRequest(imageSettingsV4Request, IMAGE_CATALOG_PLATFORM_AWS));
         assertNull(actual);
         verify(imageCatalogV4Endpoint).getImageByImageId(any(), any(), any());
     }

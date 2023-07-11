@@ -16,6 +16,9 @@ public class SdxClusterRequest extends SdxClusterRequestBase {
     @ApiModelProperty(ModelDescriptions.RUNTIME_VERSION)
     private String runtime;
 
+    @ApiModelProperty(ModelDescriptions.OS)
+    private String os;
+
     @ApiModelProperty(ModelDescriptions.RECIPES)
     private Set<SdxRecipe> recipes;
 
@@ -25,6 +28,14 @@ public class SdxClusterRequest extends SdxClusterRequestBase {
 
     public void setRuntime(String runtime) {
         this.runtime = runtime;
+    }
+
+    public String getOs() {
+        return os;
+    }
+
+    public void setOs(String os) {
+        this.os = os;
     }
 
     public Set<SdxRecipe> getRecipes() {
@@ -39,6 +50,7 @@ public class SdxClusterRequest extends SdxClusterRequestBase {
     public String toString() {
         return "SdxClusterRequest{" +
                 "runtime='" + runtime + '\'' +
+                ", os='" + os + '\'' +
                 ", recipes=" + recipes +
                 "} " + super.toString();
     }
