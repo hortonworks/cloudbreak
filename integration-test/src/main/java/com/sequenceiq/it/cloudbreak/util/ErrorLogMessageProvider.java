@@ -95,13 +95,17 @@ public class ErrorLogMessageProvider {
             clues.forEach(clue -> {
                 appendLine(builder, "");
                 appendLine(builder, clue.getName() + " - " + clue.getCrn());
-                appendLine(builder, "<br>");
                 appendLine(builder, "Cluster logs: ");
-                appendLine(builder, "<a href=\"" + clue.getStorageUrl() + "\" target=\"_blank\">" + clue.getStorageUrl() + "</a>");
-                appendLine(builder, "<br>");
+                if (StringUtils.contains(clue.getStorageUrl(), "blob.core.windows.net")) {
+                    appendLine(builder, "1. Sign in with Azure CLI on your machine: " +
+                            "az login --service-principal -u <app-id> -p <password-or-cert> --tenant <tenant>");
+                    appendLine(builder, "2. download cluster logs: " +
+                            "az storage copy -s " + clue.getStorageUrl() + " -d /path/to/destionation_dir --recursive");
+                } else {
+                    appendLine(builder, "<a href=\"" + clue.getStorageUrl() + "\" target=\"_blank\">" + clue.getStorageUrl() + "</a>");
+                }
                 appendLine(builder, "Kibana query: ");
                 appendLine(builder, "<a href=\"" + clue.getSearchUrl() + "\" target=\"_blank\">" + clue.getSearchUrl() + "</a>");
-                appendLine(builder, "<br>");
                 if (clue.getAuditEvents() != null && CollectionUtils.isNotEmpty(clue.getAuditEvents().getResponses())) {
                     appendLine(builder, "Audit events:");
                     appendLine(builder, formatAuditEvents(clue.getAuditEvents().getResponses()));
