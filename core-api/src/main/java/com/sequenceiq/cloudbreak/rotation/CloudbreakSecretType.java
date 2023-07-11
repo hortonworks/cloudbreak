@@ -22,12 +22,21 @@ public enum CloudbreakSecretType implements SecretType {
     CLUSTER_CM_DB_PASSWORD(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CUSTOM_JOB)),
     USER_KEYPAIR(List.of(SALT_STATE_RUN, CUSTOM_JOB)),
     CLUSTER_CM_SERVICES_DB_PASSWORD(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE)),
-    SALT_BOOT_SECRETS(List.of(VAULT, CUSTOM_JOB, SALTBOOT_CONFIG, USER_DATA));
+    SALT_BOOT_SECRETS(List.of(VAULT, CUSTOM_JOB, SALTBOOT_CONFIG, USER_DATA)),
+    CLUSTER_CM_SERVICES_SHARED_DB_PASSWORD(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE), true);
 
     private final List<SecretRotationStep> steps;
 
+    private final boolean multiCluster;
+
     CloudbreakSecretType(List<SecretRotationStep> steps) {
         this.steps = steps;
+        this.multiCluster = false;
+    }
+
+    CloudbreakSecretType(List<SecretRotationStep> steps, boolean multiCluster) {
+        this.steps = steps;
+        this.multiCluster = multiCluster;
     }
 
     @Override
@@ -43,5 +52,10 @@ public enum CloudbreakSecretType implements SecretType {
     @Override
     public String value() {
         return name();
+    }
+
+    @Override
+    public boolean multiCluster() {
+        return multiCluster;
     }
 }

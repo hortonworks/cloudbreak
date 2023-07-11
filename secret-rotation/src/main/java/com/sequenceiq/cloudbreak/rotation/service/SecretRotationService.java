@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
+import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationOrchestrationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.vault.ThreadBasedVaultReadFieldProvider;
 
@@ -38,6 +39,9 @@ public class SecretRotationService {
 
     @Inject
     private SecretRotationStepProgressService secretRotationProgressService;
+
+    @Inject
+    private MultiClusterRotationOrchestrationService multiClusterOrchestrationService;
 
     public void executePreValidation(SecretType secretType, String resourceId, RotationFlowExecutionType executionType) {
         if (executionNeeded(executionType, RotationFlowExecutionType.ROTATE, resourceId, secretType)) {
@@ -65,28 +69,14 @@ public class SecretRotationService {
         if (executionNeeded(executionType, RotationFlowExecutionType.ROLLBACK, resourceId, secretType)) {
             Map<SecretRotationStep, ? extends RotationContext> contexts = getContexts(secretType, resourceId);
             LOGGER.info("Contexts generation for secret rotation's rollback of {} regarding resource {} is finished.", secretType, resourceId);
-            Set<String> affectedSecrets = contexts.entrySet().stream()
-                    .filter(entry -> CommonSecretRotationStep.VAULT.equals(entry.getKey()))
-                    .map(Map.Entry::getValue)
-                    .map(context -> ((VaultRotationContext) context).getVaultPathSecretMap().keySet())
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toSet());
-            List<SecretRotationStep> steps = secretType.getSteps();
-            List<SecretRotationStep> reversedSteps;
-            if (failedStep != null) {
-                LOGGER.info("Rollback of secret rotation is starting from step {}, since rotation is failed there (secret is {}, resource is {})",
-                        failedStep, secretType, resourceId);
-                reversedSteps = Lists.reverse(steps.subList(0, steps.indexOf(failedStep) + 1));
-            } else {
-                reversedSteps = Lists.reverse(steps);
-            }
+            Set<String> affectedSecrets = getAffectedSecrets(contexts);
+            List<SecretRotationStep> rollbackSteps = getRollbackSteps(secretType, resourceId, failedStep);
 
-            reversedSteps.forEach(step -> {
+            rollbackSteps.forEach(step -> {
                 RotationContext rotationContext = contexts.get(step);
                 LOGGER.info("Rolling back rotation step {} for secret {} regarding resource {}.", step, secretType, resourceId);
                 LOGGER.trace("Affected secrets of rotation's rollback: {}", Joiner.on(",").join(affectedSecrets));
-                ThreadBasedVaultReadFieldProvider.doRollback(affectedSecrets, () ->
-                        rotationExecutorMap.get(step).executeRollback(rotationContext, secretType));
+                ThreadBasedVaultReadFieldProvider.doRollback(affectedSecrets, () -> rotationExecutorMap.get(step).executeRollback(rotationContext, secretType));
             });
         }
     }
@@ -96,16 +86,39 @@ public class SecretRotationService {
             Map<SecretRotationStep, ? extends RotationContext> contexts = getContexts(secretType, resourceId);
             LOGGER.info("Contexts generation for secret rotation's post validation and finalization of {} regarding resource {} is finished.",
                     secretType, resourceId);
-            Lists.reverse(secretType.getSteps()).forEach(step -> {
+            List<SecretRotationStep> finalizationSteps = Lists.reverse(secretType.getSteps());
+            finalizationSteps.forEach(step -> {
                 LOGGER.info("Post validating rotation step {} for secret {} regarding resource {}.", step, secretType, resourceId);
                 rotationExecutorMap.get(step).executePostValidation(contexts.get(step));
             });
-            Lists.reverse(secretType.getSteps()).forEach(step -> {
+            finalizationSteps.forEach(step -> {
                 LOGGER.info("Finalizing rotation step {} for secret {} regarding resource {}.", step, secretType, resourceId);
                 rotationExecutorMap.get(step).executeFinalize(contexts.get(step), secretType);
             });
             secretRotationProgressService.deleteAll(resourceId, secretType);
         }
+    }
+
+    private List<SecretRotationStep> getRollbackSteps(SecretType secretType, String resourceId, SecretRotationStep failedStep) {
+        List<SecretRotationStep> steps = secretType.getSteps();
+        List<SecretRotationStep> reversedSteps;
+        if (failedStep != null) {
+            LOGGER.info("Rollback of secret rotation is starting from step {}, since rotation is failed there (secret is {}, resource is {})",
+                    failedStep, secretType, resourceId);
+            reversedSteps = Lists.reverse(steps.subList(0, steps.indexOf(failedStep) + 1));
+        } else {
+            reversedSteps = Lists.reverse(steps);
+        }
+        return reversedSteps;
+    }
+
+    private Set<String> getAffectedSecrets(Map<SecretRotationStep, ? extends RotationContext> contexts) {
+        return contexts.entrySet().stream()
+                .filter(entry -> CommonSecretRotationStep.VAULT.equals(entry.getKey()))
+                .map(Map.Entry::getValue)
+                .map(context -> ((VaultRotationContext) context).getVaultPathSecretMap().keySet())
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
     }
 
     private Map<SecretRotationStep, ? extends RotationContext> getContexts(SecretType secretType, String resourceId) {
