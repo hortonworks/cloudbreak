@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
@@ -37,9 +36,7 @@ class DatabaseRootPasswordSaltPillarGeneratorTest {
     @Test
     void testGenerateSaltPillarForDatabaseRootPassword() {
         StackDto stackDto = new StackDto();
-        when(stackDtoService.getByCrn(eq(RESOURCE_CRN))).thenReturn(stackDto);
-        Map<String, SaltPillarProperties> servicePillar = underTest.apply(RESOURCE_CRN);
-        verify(stackDtoService, times(1)).getByCrn(eq(RESOURCE_CRN));
+        Map<String, SaltPillarProperties> servicePillar = underTest.apply(stackDto);
         verify(postgresConfigService, times(1)).decorateServicePillarWithPostgresIfNeeded(anyMap(), eq(stackDto));
     }
 

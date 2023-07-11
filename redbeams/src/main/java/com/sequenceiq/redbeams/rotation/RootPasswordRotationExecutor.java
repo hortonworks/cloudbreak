@@ -61,24 +61,24 @@ public class RootPasswordRotationExecutor extends AbstractRotationExecutor<Rotat
     private DatabaseServerConfigService databaseServerConfigService;
 
     @Override
-    public void rotate(RotationContext rotationContext) {
+    protected void rotate(RotationContext rotationContext) {
         LOGGER.info("Rotate database root password.");
         updateRootPasswordOnProvider(rotationContext, false);
     }
 
     @Override
-    public void rollback(RotationContext rotationContext) {
+    protected void rollback(RotationContext rotationContext) {
         LOGGER.info("Rollback database root password.");
         updateRootPasswordOnProvider(rotationContext, true);
     }
 
     @Override
-    public void finalize(RotationContext rotationContext) {
+    protected void finalize(RotationContext rotationContext) {
         LOGGER.info("Finalize database root password rotation, nothing to do.");
     }
 
     @Override
-    public void preValidate(RotationContext rotationContext) throws Exception {
+    protected void preValidate(RotationContext rotationContext) throws Exception {
         ExternalDatabaseStatus databaseServerStatus = getExternalDatabaseStatus(rotationContext);
         if (!ExternalDatabaseStatus.STARTED.equals(databaseServerStatus)) {
             throw new SecretRotationException("Database is not running or transition is in progress, thus rotation is not possible!", getType());
@@ -86,7 +86,7 @@ public class RootPasswordRotationExecutor extends AbstractRotationExecutor<Rotat
     }
 
     @Override
-    public void postValidate(RotationContext rotationContext) throws Exception {
+    protected void postValidate(RotationContext rotationContext) throws Exception {
         ExternalDatabaseStatus databaseServerStatus = getExternalDatabaseStatus(rotationContext);
         if (!ExternalDatabaseStatus.STARTED.equals(databaseServerStatus)) {
             throw new SecretRotationException("Database is not running or transition is in progress, thus rotation has been failed!", getType());
@@ -110,7 +110,7 @@ public class RootPasswordRotationExecutor extends AbstractRotationExecutor<Rotat
     }
 
     @Override
-    public Class<RotationContext> getContextClass() {
+    protected Class<RotationContext> getContextClass() {
         return RotationContext.class;
     }
 

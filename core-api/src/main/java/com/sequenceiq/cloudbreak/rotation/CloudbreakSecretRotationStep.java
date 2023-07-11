@@ -6,5 +6,15 @@ public enum CloudbreakSecretRotationStep implements SecretRotationStep {
     SALT_STATE_APPLY,
     SALT_STATE_RUN,
     CLUSTER_PROXY,
-    CM_SERVICE
+    CM_SERVICE;
+
+    @Override
+    public Class<? extends Enum<?>> getClazz() {
+        return CloudbreakSecretRotationStep.class;
+    }
+
+    @Override
+    public String value() {
+        return name();
+    }
 }

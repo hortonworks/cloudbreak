@@ -22,4 +22,14 @@ public enum RedbeamsSecretType implements SecretType {
     public List<SecretRotationStep> getSteps() {
         return steps;
     }
+
+    @Override
+    public Class<? extends Enum<?>> getClazz() {
+        return RedbeamsSecretType.class;
+    }
+
+    @Override
+    public String value() {
+        return name();
+    }
 }

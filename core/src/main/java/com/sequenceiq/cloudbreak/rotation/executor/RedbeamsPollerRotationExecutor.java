@@ -30,7 +30,7 @@ public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<Pol
     private StackDtoService stackDtoService;
 
     @Override
-    public void rotate(PollerRotationContext rotationContext) {
+    protected void rotate(PollerRotationContext rotationContext) {
         LOGGER.info("Rotate redbeams secret: {}", rotationContext.getSecretType());
         StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
         externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(),
@@ -38,7 +38,7 @@ public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<Pol
     }
 
     @Override
-    public void rollback(PollerRotationContext rotationContext) {
+    protected void rollback(PollerRotationContext rotationContext) {
         LOGGER.info("Rollback redbeams secret: {}", rotationContext.getSecretType());
         StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
         externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(),
@@ -46,7 +46,7 @@ public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<Pol
     }
 
     @Override
-    public void finalize(PollerRotationContext rotationContext) {
+    protected void finalize(PollerRotationContext rotationContext) {
         LOGGER.info("Finalize redbeams secret: {}", rotationContext.getSecretType());
         StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
         externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(),
@@ -54,14 +54,14 @@ public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<Pol
     }
 
     @Override
-    public void preValidate(PollerRotationContext rotationContext) {
+    protected void preValidate(PollerRotationContext rotationContext) {
         LOGGER.info("Pre validate redbeams secret rotation: {}", rotationContext.getSecretType());
         StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
         externalDatabaseService.preValidateDatabaseSecretRotation(stackDto.getCluster().getDatabaseServerCrn());
     }
 
     @Override
-    public void postValidate(PollerRotationContext rotationContext) {
+    protected void postValidate(PollerRotationContext rotationContext) {
     }
 
     @Override
@@ -70,7 +70,7 @@ public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<Pol
     }
 
     @Override
-    public Class<PollerRotationContext> getContextClass() {
+    protected Class<PollerRotationContext> getContextClass() {
         return PollerRotationContext.class;
     }
 

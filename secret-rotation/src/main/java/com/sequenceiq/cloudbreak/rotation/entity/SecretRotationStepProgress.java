@@ -21,10 +21,10 @@ public class SecretRotationStepProgress {
 
     private String resourceCrn;
 
-    @Convert(converter = SecretTypeConverter.class)
+    @Convert(converter = RotationEnumConverter.class)
     private SecretType secretType;
 
-    @Convert(converter = SecretRotationStepConverter.class)
+    @Convert(converter = RotationEnumConverter.class)
     private SecretRotationStep secretRotationStep;
 
     @Convert(converter = RotationFlowExecutionTypeConverter.class)

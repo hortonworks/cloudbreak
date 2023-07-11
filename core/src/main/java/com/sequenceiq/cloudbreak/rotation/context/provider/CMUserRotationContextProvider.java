@@ -31,9 +31,9 @@ public abstract class CMUserRotationContextProvider implements RotationContextPr
     private StackDtoService stackService;
 
     @Override
-    public Map<SecretRotationStep, RotationContext> getContexts(String resource) {
+    public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         Map<SecretRotationStep, RotationContext> result = Maps.newHashMap();
-        StackDto stack = stackService.getByCrn(resource);
+        StackDto stack = stackService.getByCrn(resourceCrn);
         ClusterView cluster = stack.getCluster();
 
         Secret userSecret = getUserSecret(cluster);

@@ -142,7 +142,7 @@ class RootPasswordRotationExecutorTest {
         when(secretService.getRotation(eq(ROOT_PASSWORD))).thenReturn(new RotationSecret(ROOT_PASSWORD, ROOT_PASSWORD_BACKUP));
         when(secretService.getRotation(eq(CONNECTION_PASSWORD))).thenReturn(new RotationSecret(CONNECTION_PASSWORD, CONNECTION_PASSWORD_BACKUP));
         ResourceConnector resourceConnector = mockResourceConnector(dbStack);
-        underTest.rotate(new RotationContext(RESOURCE_CRN));
+        underTest.executeRotate(new RotationContext(RESOURCE_CRN), null);
 
         verify(dbStackService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(databaseServerConfigService, times(1)).getByCrn(eq(RESOURCE_CRN));
@@ -165,9 +165,10 @@ class RootPasswordRotationExecutorTest {
         when(secretService.getRotation(eq(CONNECTION_PASSWORD))).thenReturn(new RotationSecret(CONNECTION_PASSWORD, null));
 
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
-                () -> underTest.rotate(new RotationContext(RESOURCE_CRN)));
+                () -> underTest.executeRotate(new RotationContext(RESOURCE_CRN), null));
 
-        assertEquals("Root password is not in rotation state in Vault, rotation is not possible.", secretRotationException.getMessage());
+        assertEquals("Execution of rotation failed at PROVIDER_DATABASE_ROOT_PASSWORD step for resourceCrn regarding secret null.",
+                secretRotationException.getMessage());
         assertEquals(RedbeamsSecretRotationStep.PROVIDER_DATABASE_ROOT_PASSWORD, secretRotationException.getFailedRotationStep());
         verify(dbStackService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(databaseServerConfigService, times(1)).getByCrn(eq(RESOURCE_CRN));
@@ -188,7 +189,7 @@ class RootPasswordRotationExecutorTest {
         when(secretService.getRotation(eq(ROOT_PASSWORD))).thenReturn(new RotationSecret(ROOT_PASSWORD, ROOT_PASSWORD_BACKUP));
         when(secretService.getRotation(eq(CONNECTION_PASSWORD))).thenReturn(new RotationSecret(CONNECTION_PASSWORD, CONNECTION_PASSWORD_BACKUP));
         ResourceConnector resourceConnector = mockResourceConnector(dbStack);
-        underTest.rollback(new RotationContext(RESOURCE_CRN));
+        underTest.executeRollback(new RotationContext(RESOURCE_CRN), null);
 
         verify(dbStackService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(databaseServerConfigService, times(1)).getByCrn(eq(RESOURCE_CRN));
@@ -215,7 +216,7 @@ class RootPasswordRotationExecutorTest {
         when(databaseServerConfigService.getByCrn(RESOURCE_CRN)).thenReturn(databaseServerConfig);
         when(secretService.getRotation(eq(ROOT_PASSWORD))).thenReturn(new RotationSecret(ROOT_PASSWORD, null));
         when(secretService.getRotation(eq(CONNECTION_PASSWORD))).thenReturn(new RotationSecret(CONNECTION_PASSWORD, null));
-        underTest.rollback(new RotationContext(RESOURCE_CRN));
+        underTest.executeRollback(new RotationContext(RESOURCE_CRN), null);
 
         verify(dbStackService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(databaseServerConfigService, times(1)).getByCrn(eq(RESOURCE_CRN));

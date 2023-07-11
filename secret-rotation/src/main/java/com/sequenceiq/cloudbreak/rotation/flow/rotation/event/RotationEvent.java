@@ -12,14 +12,14 @@ import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.RotationFlowContext;
-import com.sequenceiq.cloudbreak.rotation.flow.serialization.SecretTypeDeserializer;
-import com.sequenceiq.cloudbreak.rotation.flow.serialization.SecretTypeSerializer;
+import com.sequenceiq.cloudbreak.rotation.flow.serialization.RotationEnumDeserializer;
+import com.sequenceiq.cloudbreak.rotation.flow.serialization.RotationEnumSerializer;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 
 public class RotationEvent extends BaseFlowEvent {
 
-    @JsonSerialize(using = SecretTypeSerializer.class)
-    @JsonDeserialize(using = SecretTypeDeserializer.class)
+    @JsonSerialize(using = RotationEnumSerializer.class)
+    @JsonDeserialize(using = RotationEnumDeserializer.class)
     private final SecretType secretType;
 
     private final RotationFlowExecutionType executionType;

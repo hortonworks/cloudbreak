@@ -9,14 +9,14 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
-import com.sequenceiq.cloudbreak.rotation.flow.serialization.SecretTypeListDeserializer;
-import com.sequenceiq.cloudbreak.rotation.flow.serialization.SecretTypeListSerializer;
+import com.sequenceiq.cloudbreak.rotation.flow.serialization.RotationEnumListDeserializer;
+import com.sequenceiq.cloudbreak.rotation.flow.serialization.RotationEnumListSerializer;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 
 public class SecretRotationFlowChainTriggerEvent extends BaseFlowEvent {
 
-    @JsonSerialize(using = SecretTypeListSerializer.class)
-    @JsonDeserialize(using = SecretTypeListDeserializer.class)
+    @JsonSerialize(using = RotationEnumListSerializer.class)
+    @JsonDeserialize(using = RotationEnumListDeserializer.class)
     private final List<SecretType> secretTypes;
 
     private final RotationFlowExecutionType executionType;

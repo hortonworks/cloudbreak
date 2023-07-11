@@ -21,28 +21,28 @@ public class SaltRunOrchestratorStateRotationExecutor extends AbstractRotationEx
     private HostOrchestrator hostOrchestrator;
 
     @Override
-    public void rotate(SaltRunOrchestratorStateRotationContext context) throws Exception {
+    protected void rotate(SaltRunOrchestratorStateRotationContext context) throws Exception {
         if (context.stateRunNeeded()) {
             hostOrchestrator.runOrchestratorState(getStateParams(Optional.of(context.getRotateParams()), Optional.of(context.getStates()), context));
         }
     }
 
     @Override
-    public void rollback(SaltRunOrchestratorStateRotationContext context) throws Exception {
+    protected void rollback(SaltRunOrchestratorStateRotationContext context) throws Exception {
         if (context.stateRunNeeded() && context.rollbackStateExists()) {
             hostOrchestrator.runOrchestratorState(getStateParams(context.getRollbackParams(), context.getRollBackStates(), context));
         }
     }
 
     @Override
-    public void finalize(SaltRunOrchestratorStateRotationContext context) throws Exception {
+    protected void finalize(SaltRunOrchestratorStateRotationContext context) throws Exception {
         if (context.stateRunNeeded() && context.cleanupStateExists()) {
             hostOrchestrator.runOrchestratorState(getStateParams(context.getCleanupParams(), context.getCleanupStates(), context));
         }
     }
 
     @Override
-    public void preValidate(SaltRunOrchestratorStateRotationContext context) throws Exception {
+    protected void preValidate(SaltRunOrchestratorStateRotationContext context) throws Exception {
         hostOrchestrator.ping(context.getTargets(), context.getGatewayConfig());
         if (context.stateRunNeeded() && context.preValidateStateExists()) {
             hostOrchestrator.runOrchestratorState(getStateParams(context.getPrevalidateParams(), context.getPreValidateStates(), context));
@@ -50,7 +50,7 @@ public class SaltRunOrchestratorStateRotationExecutor extends AbstractRotationEx
     }
 
     @Override
-    public void postValidate(SaltRunOrchestratorStateRotationContext context) throws Exception {
+    protected void postValidate(SaltRunOrchestratorStateRotationContext context) throws Exception {
         if (context.stateRunNeeded() && context.postValidateStateExists()) {
             hostOrchestrator.runOrchestratorState(getStateParams(context.getPostValidateParams(), context.getPostValidateStates(), context));
         }
@@ -70,7 +70,7 @@ public class SaltRunOrchestratorStateRotationExecutor extends AbstractRotationEx
     }
 
     @Override
-    public Class<SaltRunOrchestratorStateRotationContext> getContextClass() {
+    protected Class<SaltRunOrchestratorStateRotationContext> getContextClass() {
         return SaltRunOrchestratorStateRotationContext.class;
     }
 }

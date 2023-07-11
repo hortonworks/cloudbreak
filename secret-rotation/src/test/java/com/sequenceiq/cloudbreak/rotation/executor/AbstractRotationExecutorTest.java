@@ -113,27 +113,27 @@ public class AbstractRotationExecutorTest {
     private static class TestExecutor extends AbstractRotationExecutor<RotationContext> {
 
         @Override
-        public void rotate(RotationContext rotationContext) throws Exception {
+        protected void rotate(RotationContext rotationContext) throws Exception {
             simulateFailure(rotationContext);
         }
 
         @Override
-        public void rollback(RotationContext rotationContext) throws Exception {
+        protected void rollback(RotationContext rotationContext) throws Exception {
             simulateFailure(rotationContext);
         }
 
         @Override
-        public void finalize(RotationContext rotationContext) throws Exception {
+        protected void finalize(RotationContext rotationContext) throws Exception {
             simulateFailure(rotationContext);
         }
 
         @Override
-        public void preValidate(RotationContext rotationContext) throws Exception {
+        protected void preValidate(RotationContext rotationContext) throws Exception {
             simulateFailure(rotationContext);
         }
 
         @Override
-        public void postValidate(RotationContext rotationContext) throws Exception {
+        protected void postValidate(RotationContext rotationContext) throws Exception {
             simulateFailure(rotationContext);
         }
 

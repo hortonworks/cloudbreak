@@ -24,4 +24,14 @@ public enum FreeIpaSecretType implements SecretType {
     public List<SecretRotationStep> getSteps() {
         return steps;
     }
+
+    @Override
+    public Class<? extends Enum<?>> getClazz() {
+        return FreeIpaSecretType.class;
+    }
+
+    @Override
+    public String value() {
+        return name();
+    }
 }

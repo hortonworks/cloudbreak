@@ -25,31 +25,31 @@ public class ClusterProxyRotationExecutor extends AbstractRotationExecutor<Clust
     private ClusterProxyService clusterProxyService;
 
     @Override
-    public void rotate(ClusterProxyRotationContext rotationContext) {
+    protected void rotate(ClusterProxyRotationContext rotationContext) {
         LOGGER.info("Reregistring stack in cluster proxy for secret rotation.");
         StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
         clusterProxyService.reRegisterCluster(stackDto.getId());
     }
 
     @Override
-    public void rollback(ClusterProxyRotationContext rotationContext) {
+    protected void rollback(ClusterProxyRotationContext rotationContext) {
         LOGGER.info("Reregistring stack in cluster proxy for rollback of secret rotation.");
         StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
         clusterProxyService.reRegisterCluster(stackDto.getId());
     }
 
     @Override
-    public void finalize(ClusterProxyRotationContext rotationContext) {
+    protected void finalize(ClusterProxyRotationContext rotationContext) {
     }
 
     @Override
-    public void preValidate(ClusterProxyRotationContext rotationContext) throws Exception {
+    protected void preValidate(ClusterProxyRotationContext rotationContext) throws Exception {
         // if CP reregistration needed, then it means there is some communication with some component (CM, IPA, etc)
         // prevalidation of the given component should validate the CP connectivity itself too, thus we can skip this
     }
 
     @Override
-    public void postValidate(ClusterProxyRotationContext rotationContext) throws Exception {
+    protected void postValidate(ClusterProxyRotationContext rotationContext) throws Exception {
 
     }
 
@@ -59,7 +59,7 @@ public class ClusterProxyRotationExecutor extends AbstractRotationExecutor<Clust
     }
 
     @Override
-    public Class<ClusterProxyRotationContext> getContextClass() {
+    protected Class<ClusterProxyRotationContext> getContextClass() {
         return ClusterProxyRotationContext.class;
     }
 }

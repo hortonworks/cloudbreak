@@ -15,4 +15,14 @@ public enum TestSecretType implements SecretType {
     public List<SecretRotationStep> getSteps() {
         return List.of(STEP);
     }
+
+    @Override
+    public Class<? extends Enum<?>> getClazz() {
+        return TestSecretType.class;
+    }
+
+    @Override
+    public String value() {
+        return name();
+    }
 }

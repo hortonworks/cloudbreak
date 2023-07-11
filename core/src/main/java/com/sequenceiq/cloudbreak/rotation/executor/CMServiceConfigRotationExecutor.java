@@ -30,17 +30,17 @@ public class CMServiceConfigRotationExecutor extends AbstractRotationExecutor<CM
     private StackDtoService stackService;
 
     @Override
-    public void rotate(CMServiceConfigRotationContext rotationContext) throws Exception {
+    protected void rotate(CMServiceConfigRotationContext rotationContext) throws Exception {
         updateCMConfigByContext(rotationContext);
     }
 
     @Override
-    public void rollback(CMServiceConfigRotationContext rotationContext) throws Exception {
+    protected void rollback(CMServiceConfigRotationContext rotationContext) throws Exception {
         updateCMConfigByContext(rotationContext);
     }
 
     @Override
-    public void finalize(CMServiceConfigRotationContext rotationContext) {
+    protected void finalize(CMServiceConfigRotationContext rotationContext) {
 
     }
 
@@ -50,12 +50,12 @@ public class CMServiceConfigRotationExecutor extends AbstractRotationExecutor<CM
     }
 
     @Override
-    public void preValidate(CMServiceConfigRotationContext rotationContext) throws Exception {
+    protected void preValidate(CMServiceConfigRotationContext rotationContext) throws Exception {
         LOGGER.trace("CM Service config rotation will be validated during rotation to reduce CM API calls.");
     }
 
     @Override
-    public void postValidate(CMServiceConfigRotationContext rotationContext) throws Exception {
+    protected void postValidate(CMServiceConfigRotationContext rotationContext) throws Exception {
 
     }
 
@@ -65,7 +65,7 @@ public class CMServiceConfigRotationExecutor extends AbstractRotationExecutor<CM
     }
 
     @Override
-    public Class<CMServiceConfigRotationContext> getContextClass() {
+    protected Class<CMServiceConfigRotationContext> getContextClass() {
         return CMServiceConfigRotationContext.class;
     }
 }

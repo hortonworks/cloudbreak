@@ -6,7 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Set;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,23 +31,23 @@ public class SecretRotationStepProgressServiceTest {
 
     @Test
     public void testWhenNoProgress() {
-        when(repository.findAllByResourceCrnAndExecutionType(any(), any())).thenReturn(Set.of());
+        when(repository.findByResourceCrnAndExecutionTypeAndSecretTypeAndSecretRotationStep(any(), any(), any(), any())).thenReturn(Optional.empty());
         when(repository.save(any())).thenReturn(new SecretRotationStepProgress());
 
         assertTrue(underTest.latestStep("", TestSecretType.TEST, TestSecretRotationStep.STEP, RotationFlowExecutionType.ROTATE).isPresent());
 
-        verify(repository, times(1)).findAllByResourceCrnAndExecutionType(any(), any());
+        verify(repository, times(1)).findByResourceCrnAndExecutionTypeAndSecretTypeAndSecretRotationStep(any(), any(), any(), any());
         verify(repository, times(1)).save(any());
     }
 
     @Test
     public void testWhenProgressPresent() {
-        when(repository.findAllByResourceCrnAndExecutionType(any(), any())).thenReturn(Set.of(
+        when(repository.findByResourceCrnAndExecutionTypeAndSecretTypeAndSecretRotationStep(any(), any(), any(), any())).thenReturn(Optional.of(
                 new SecretRotationStepProgress("", TestSecretType.TEST, TestSecretRotationStep.STEP, RotationFlowExecutionType.ROTATE, null)));
 
         assertTrue(underTest.latestStep("", TestSecretType.TEST, TestSecretRotationStep.STEP, RotationFlowExecutionType.ROTATE).isPresent());
 
-        verify(repository, times(1)).findAllByResourceCrnAndExecutionType(any(), any());
+        verify(repository, times(1)).findByResourceCrnAndExecutionTypeAndSecretTypeAndSecretRotationStep(any(), any(), any(), any());
         verify(repository, times(0)).save(any());
     }
 }

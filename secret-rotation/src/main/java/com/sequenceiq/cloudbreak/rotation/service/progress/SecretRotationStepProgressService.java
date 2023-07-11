@@ -25,10 +25,8 @@ public class SecretRotationStepProgressService {
 
     public Optional<SecretRotationStepProgress> latestStep(String resourceCrn, SecretType secretType,
             SecretRotationStep step, RotationFlowExecutionType executionType) {
-        Optional<SecretRotationStepProgress> latestStepProgress = repository.findAllByResourceCrnAndExecutionType(resourceCrn, executionType)
-                .stream()
-                .filter(progress -> secretType.equals(progress.getSecretType()) && step.equals(progress.getSecretRotationStep()))
-                .findFirst();
+        Optional<SecretRotationStepProgress> latestStepProgress = repository.findByResourceCrnAndExecutionTypeAndSecretTypeAndSecretRotationStep(
+                resourceCrn, executionType, secretType, step);
         if (latestStepProgress.isEmpty()) {
             SecretRotationStepProgress progress = new SecretRotationStepProgress(resourceCrn, secretType, step, executionType, System.currentTimeMillis());
             return Optional.of(repository.save(progress));

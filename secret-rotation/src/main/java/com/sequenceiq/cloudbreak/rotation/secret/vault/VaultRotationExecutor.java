@@ -24,7 +24,7 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
     private SecretService secretService;
 
     @Override
-    public void rotate(VaultRotationContext rotationContext) throws Exception {
+    protected void rotate(VaultRotationContext rotationContext) throws Exception {
         for (Map.Entry<String, String> entry : rotationContext.getVaultPathSecretMap().entrySet()) {
             String vaultPath = entry.getKey();
             String newSecret = entry.getValue();
@@ -36,7 +36,7 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
     }
 
     @Override
-    public void rollback(VaultRotationContext rotationContext) throws Exception {
+    protected void rollback(VaultRotationContext rotationContext) throws Exception {
         for (Map.Entry<String, String> entry : rotationContext.getVaultPathSecretMap().entrySet()) {
             String vaultPath = entry.getKey();
             RotationSecret rotationSecret = secretService.getRotation(vaultPath);
@@ -48,7 +48,7 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
     }
 
     @Override
-    public void finalize(VaultRotationContext rotationContext) throws Exception {
+    protected void finalize(VaultRotationContext rotationContext) throws Exception {
         for (Map.Entry<String, String> entry : rotationContext.getVaultPathSecretMap().entrySet()) {
             String vaultPath = entry.getKey();
             RotationSecret rotationSecret = secretService.getRotation(vaultPath);
@@ -60,7 +60,7 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
     }
 
     @Override
-    public void preValidate(VaultRotationContext rotationContext) throws Exception {
+    protected void preValidate(VaultRotationContext rotationContext) throws Exception {
         for (Map.Entry<String, String> entry : rotationContext.getVaultPathSecretMap().entrySet()) {
             String vaultPath = entry.getKey();
             if (!secretService.isSecret(vaultPath)) {
@@ -70,7 +70,7 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
     }
 
     @Override
-    public void postValidate(VaultRotationContext rotationContext) throws Exception {
+    protected void postValidate(VaultRotationContext rotationContext) throws Exception {
         for (Map.Entry<String, String> entry : rotationContext.getVaultPathSecretMap().entrySet()) {
             String vaultPath = entry.getKey();
             if (!secretService.getRotation(vaultPath).isRotation()) {
@@ -86,7 +86,7 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
     }
 
     @Override
-    public Class<VaultRotationContext> getContextClass() {
+    protected Class<VaultRotationContext> getContextClass() {
         return VaultRotationContext.class;
     }
 }
