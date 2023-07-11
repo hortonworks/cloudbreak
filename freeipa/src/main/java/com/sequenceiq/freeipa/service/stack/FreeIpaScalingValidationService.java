@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,9 @@ public class FreeIpaScalingValidationService {
         validateScalingIsDownscale(scalingPath);
         validateInstanceIdsToDelete(allInstances, instanceIdsToDelete);
         executeCommonValidations(allInstances, stack, scalingPath, OperationType.DOWNSCALE);
+        if (stack.isMultiAz()) {
+            validateDownScaleForMultiAz(scalingPath, allInstances, instanceIdsToDelete);
+        }
     }
 
     private void validateInstanceIdsToDelete(Set<InstanceMetaData> allInstances, Set<String> instanceIdsToDelete) {
@@ -124,6 +128,22 @@ public class FreeIpaScalingValidationService {
     private boolean scalingPathDisabled(ScalingPath scalingPath) {
         List<AvailabilityType> targetAvailabilityTypes = allowedScalingPaths.getPaths().get(scalingPath.getOriginalAvailabilityType());
         return Objects.isNull(targetAvailabilityTypes) || !targetAvailabilityTypes.contains(scalingPath.getTargetAvailabilityType());
+    }
+
+    private void validateDownScaleForMultiAz(ScalingPath scalingPath, Set<InstanceMetaData> allInstances, Set<String> instanceIdsToDelete) {
+        long numZones = scalingPath.getTargetAvailabilityType().getInstanceCount();
+        if (CollectionUtils.isNotEmpty(instanceIdsToDelete)) {
+            numZones = allInstances.stream().filter(instance -> !instanceIdsToDelete.contains(instance.getInstanceId()))
+                    .map(instance -> instance.getAvailabilityZone())
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .count();
+        }
+        if (numZones < 2) {
+            throw new BadRequestException(String.format("%s will result in number of availability zones less than minimum number of availability zones needed " +
+                    "for Multi AZ deployment. Number of zones after %s: %d. Minimum zones needed: %d", OperationType.DOWNSCALE.getLowerCaseName(),
+                    OperationType.DOWNSCALE.getLowerCaseName(), numZones, 2));
+        }
     }
 
     private boolean nodeCountAlreadyMatchesTarget(Set<InstanceMetaData> allInstances, ScalingPath scalingPath) {

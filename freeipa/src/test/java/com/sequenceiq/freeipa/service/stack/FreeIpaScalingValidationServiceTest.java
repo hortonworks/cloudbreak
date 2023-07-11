@@ -243,6 +243,39 @@ class FreeIpaScalingValidationServiceTest {
         underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, TWO_NODE_BASED), Set.of("im2"));
     }
 
+    @Test
+    void testValidateStackForDownscaleForMultiAzSuccess() {
+        Stack stack = getStack(true);
+        when(stack.isMultiAz()).thenReturn(true);
+        Set<InstanceMetaData> validImSet = createValidImSet(3, true);
+        when(this.allowedScalingPaths.getPaths()).thenReturn(Map.of(HA, List.of(TWO_NODE_BASED, NON_HA)));
+        underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA), Set.of("im2"));
+    }
+
+    @Test
+    void testValidateStackForDownscaleForMultiAzFailedWithInstances() {
+        Stack stack = getStack(true);
+        when(stack.isMultiAz()).thenReturn(true);
+        Set<InstanceMetaData> validImSet = createValidImSet(3, true);
+        when(this.allowedScalingPaths.getPaths()).thenReturn(Map.of(HA, List.of(TWO_NODE_BASED, NON_HA)));
+        assertThatCode(() -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA), Set.of("im2", "im3")))
+                .isExactlyInstanceOf(BadRequestException.class)
+                .hasMessage("downscale will result in number of availability zones less than minimum number of availability zones " +
+                        "needed for Multi AZ deployment. Number of zones after downscale: 1. Minimum zones needed: 2");
+    }
+
+    @Test
+    void testValidateStackForDownscaleForMultiAzFailedWithTargetAvailabilityType() {
+        Stack stack = getStack(true);
+        when(stack.isMultiAz()).thenReturn(true);
+        Set<InstanceMetaData> validImSet = createValidImSet(3, true);
+        when(this.allowedScalingPaths.getPaths()).thenReturn(Map.of(HA, List.of(TWO_NODE_BASED, NON_HA)));
+        assertThatCode(() -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA), null))
+                .isExactlyInstanceOf(BadRequestException.class)
+                .hasMessage("downscale will result in number of availability zones less than minimum number of availability zones " +
+                        "needed for Multi AZ deployment. Number of zones after downscale: 1. Minimum zones needed: 2");
+    }
+
     private Stack getStack(boolean available) {
         Stack stack = mock(Stack.class);
         when(stack.isAvailable()).thenReturn(available);
@@ -280,6 +313,10 @@ class FreeIpaScalingValidationServiceTest {
     }
 
     private Set<InstanceMetaData> createValidImSet(int instanceCount) {
+        return createValidImSet(instanceCount, false);
+    }
+
+    private Set<InstanceMetaData> createValidImSet(int instanceCount, boolean multiAz) {
         Set<InstanceMetaData> set = new HashSet<>();
         for (int i = 1; i <= instanceCount; i++) {
             InstanceMetaData im = new InstanceMetaData();
@@ -291,6 +328,9 @@ class FreeIpaScalingValidationServiceTest {
                 im.setInstanceId("im" + i);
             }
             im.setInstanceStatus(InstanceStatus.CREATED);
+            if (multiAz) {
+                im.setAvailabilityZone(String.valueOf(i));
+            }
             set.add(im);
         }
         return set;

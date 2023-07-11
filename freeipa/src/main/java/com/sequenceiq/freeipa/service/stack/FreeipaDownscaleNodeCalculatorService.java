@@ -1,8 +1,13 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -35,11 +40,34 @@ public class FreeipaDownscaleNodeCalculatorService {
         Set<InstanceMetaData> notDeletedInstanceMetadataSet = stack.getNotDeletedInstanceMetaDataSet();
         LOGGER.debug("Calculating nodes to remove during freeipa downscale. Number of nodes to remove: {}, not deleted instanceMetaData: {}",
                 instancesToRemove, notDeletedInstanceMetadataSet);
-        return notDeletedInstanceMetadataSet.stream()
-                .filter(imd -> imd.getInstanceMetadataType() != InstanceMetadataType.GATEWAY_PRIMARY)
-                .limit(instancesToRemove)
-                .map(InstanceMetaData::getInstanceId)
-                .collect(Collectors.toCollection(ArrayList::new));
+        Set<InstanceMetaData> nonPrimaryGatewayInstances = notDeletedInstanceMetadataSet.stream()
+                .filter(imd -> imd.getInstanceMetadataType() != InstanceMetadataType.GATEWAY_PRIMARY).collect(Collectors.toSet());
+        if (stack.isMultiAz()) {
+            return new ArrayList<>(calculateDownscaleCandidatesForMultiAz(nonPrimaryGatewayInstances, instancesToRemove));
+        } else {
+            return nonPrimaryGatewayInstances.stream().limit(instancesToRemove)
+                    .map(InstanceMetaData::getInstanceId)
+                    .collect(Collectors.toCollection(ArrayList::new));
+        }
+    }
+
+    private List<String> calculateDownscaleCandidatesForMultiAz(Set<InstanceMetaData> instances, int numInstancesToRemove) {
+        Map<String, List<String>> availabilityZoneToNodesMap = instances.stream().collect(Collectors.toMap(instance -> instance.getAvailabilityZone(),
+                instance -> Stream.of(instance.getInstanceId()).collect(Collectors.toList()), (first, second) -> {
+            first.addAll(second);
+            return first;
+            }));
+        List<String> instancesToRemove = new ArrayList<>();
+        while (!availabilityZoneToNodesMap.isEmpty() && numInstancesToRemove-- > 0) {
+            String availabilityZone = Collections.max(availabilityZoneToNodesMap.entrySet(),
+                    Map.Entry.comparingByValue(Comparator.comparingInt(List::size))).getKey();
+            List<String> selectedInstances = availabilityZoneToNodesMap.get(availabilityZone);
+            instancesToRemove.add(selectedInstances.remove(selectedInstances.size() - 1));
+            if (CollectionUtils.isEmpty(selectedInstances)) {
+                availabilityZoneToNodesMap.remove(availabilityZone);
+            }
+        }
+        return instancesToRemove;
     }
 
     public AvailabilityType calculateTargetAvailabilityType(DownscaleRequest request, int currentNodeCount) {
