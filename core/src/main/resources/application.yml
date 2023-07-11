@@ -488,9 +488,13 @@ cb:
           7.2.17 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas, Profiler Manager=cdp-sdx-medium-ha-profiler;
           7.2.17 - SDX Enterprise: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-enterprise;
           7.2.17 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
+          7.2.17 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie (Managed Datalake)=cdp-data-engineering-saas;
           7.2.17 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha;
+          7.2.17 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie (Managed Datalake)=cdp-data-engineering-ha-saas;
           7.2.17 - Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3-ha;
+          7.2.17 - Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie (Managed Datalake)=cdp-data-engineering-spark3-ha-saas;
           7.2.17 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3;
+          7.2.17 - Data Engineering: Apache Spark3 (Managed Datalake)=cdp-data-engineering-spark3-saas;
           7.2.17 - Data Mart: Apache Impala, Hue=cdp-data-mart;
           7.2.17 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart;
           7.2.17 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark3=cdp-rt-data-mart-spark3;
@@ -512,9 +516,13 @@ cb:
           7.2.18 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas, Profiler Manager=cdp-sdx-medium-ha-profiler;
           7.2.18 - SDX Enterprise: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-enterprise;
           7.2.18 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
+          7.2.18 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie (Managed Datalake)=cdp-data-engineering-saas;
           7.2.18 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha;
+          7.2.18 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie (Managed Datalake)=cdp-data-engineering-ha-saas;
           7.2.18 - Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3-ha;
+          7.2.18 - Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie (Managed Datalake)=cdp-data-engineering-spark3-ha-saas;
           7.2.18 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3;
+          7.2.18 - Data Engineering: Apache Spark3 (Managed Datalake)=cdp-data-engineering-spark3-saas;
           7.2.18 - Data Mart: Apache Impala, Hue=cdp-data-mart;
           7.2.18 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart;
           7.2.18 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark3=cdp-rt-data-mart-spark3;
