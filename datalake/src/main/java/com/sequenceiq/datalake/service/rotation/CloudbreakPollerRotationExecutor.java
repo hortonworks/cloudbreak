@@ -25,30 +25,30 @@ public class CloudbreakPollerRotationExecutor extends AbstractRotationExecutor<P
     private SdxRotationService sdxRotationService;
 
     @Override
-    public void rotate(PollerRotationContext rotationContext) {
+    protected void rotate(PollerRotationContext rotationContext) {
         LOGGER.info("Rotate cloudbreak secret: {}", rotationContext.getSecretType());
         sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), (CloudbreakSecretType) rotationContext.getSecretType(), ROTATE);
     }
 
     @Override
-    public void rollback(PollerRotationContext rotationContext) {
+    protected void rollback(PollerRotationContext rotationContext) {
         LOGGER.info("Rollback cloudbreak secret: {}", rotationContext.getSecretType());
         sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), (CloudbreakSecretType) rotationContext.getSecretType(), ROLLBACK);
     }
 
     @Override
-    public void finalize(PollerRotationContext rotationContext) {
+    protected void finalize(PollerRotationContext rotationContext) {
         LOGGER.info("Finalize cloudbreak secret: {}", rotationContext.getSecretType());
         sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), (CloudbreakSecretType) rotationContext.getSecretType(), FINALIZE);
     }
 
     @Override
-    public void preValidate(PollerRotationContext rotationContext) {
+    protected void preValidate(PollerRotationContext rotationContext) {
         sdxRotationService.preValidateCloudbreakRotation(rotationContext.getResourceCrn());
     }
 
     @Override
-    public void postValidate(PollerRotationContext rotationContext) {
+    protected void postValidate(PollerRotationContext rotationContext) {
     }
 
     @Override
@@ -57,7 +57,7 @@ public class CloudbreakPollerRotationExecutor extends AbstractRotationExecutor<P
     }
 
     @Override
-    public Class<PollerRotationContext> getContextClass() {
+    protected Class<PollerRotationContext> getContextClass() {
         return PollerRotationContext.class;
     }
 }

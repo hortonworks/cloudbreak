@@ -32,7 +32,7 @@ public class SaltBootConfigRotationExecutor extends AbstractRotationExecutor<Sal
     private HostOrchestrator hostOrchestrator;
 
     @Override
-    public void rotate(SaltBootConfigRotationContext rotationContext) {
+    protected void rotate(SaltBootConfigRotationContext rotationContext) {
         SaltBootUpdateConfiguration saltBootUpdateConfiguration = rotationContext.getServiceUpdateConfiguration();
         GatewayConfig gatewayConfig = getUsableGatewayConfig(saltBootUpdateConfiguration);
         uploadFile(saltBootUpdateConfiguration, gatewayConfig, saltBootUpdateConfiguration.newConfig());
@@ -40,7 +40,7 @@ public class SaltBootConfigRotationExecutor extends AbstractRotationExecutor<Sal
     }
 
     @Override
-    public void rollback(SaltBootConfigRotationContext rotationContext) {
+    protected void rollback(SaltBootConfigRotationContext rotationContext) {
         SaltBootUpdateConfiguration saltBootUpdateConfiguration = rotationContext.getServiceUpdateConfiguration();
         GatewayConfig gatewayConfig = getUsableGatewayConfig(saltBootUpdateConfiguration);
         uploadFile(saltBootUpdateConfiguration, gatewayConfig, saltBootUpdateConfiguration.oldConfig());
@@ -48,17 +48,17 @@ public class SaltBootConfigRotationExecutor extends AbstractRotationExecutor<Sal
     }
 
     @Override
-    public void finalize(SaltBootConfigRotationContext rotationContext) {
+    protected void finalize(SaltBootConfigRotationContext rotationContext) {
 
     }
 
     @Override
-    public void preValidate(SaltBootConfigRotationContext rotationContext) throws Exception {
+    protected void preValidate(SaltBootConfigRotationContext rotationContext) throws Exception {
 
     }
 
     @Override
-    public void postValidate(SaltBootConfigRotationContext rotationContext) throws Exception {
+    protected void postValidate(SaltBootConfigRotationContext rotationContext) throws Exception {
 
     }
 
@@ -68,7 +68,7 @@ public class SaltBootConfigRotationExecutor extends AbstractRotationExecutor<Sal
     }
 
     @Override
-    public Class<SaltBootConfigRotationContext> getContextClass() {
+    protected Class<SaltBootConfigRotationContext> getContextClass() {
         return SaltBootConfigRotationContext.class;
     }
 

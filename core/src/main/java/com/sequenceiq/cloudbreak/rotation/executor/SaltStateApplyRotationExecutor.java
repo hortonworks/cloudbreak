@@ -26,14 +26,14 @@ public class SaltStateApplyRotationExecutor extends AbstractRotationExecutor<Sal
     private HostOrchestrator hostOrchestrator;
 
     @Override
-    public void rotate(SaltStateApplyRotationContext context) throws Exception {
+    protected void rotate(SaltStateApplyRotationContext context) throws Exception {
         LOGGER.info("Executing salt states [{}] regarding secret rotation.", Joiner.on(",").join(context.getStates()));
         hostOrchestrator.executeSaltState(context.getGatewayConfig(), context.getTargets(), context.getStates(), context.getExitCriteriaModel(),
                 context.getMaxRetry(), context.getMaxRetryOnError());
     }
 
     @Override
-    public void rollback(SaltStateApplyRotationContext context) throws Exception {
+    protected void rollback(SaltStateApplyRotationContext context) throws Exception {
         List<String> rollbackStates = context.getStates();
         if (context.getRollBackStates().isPresent()) {
             rollbackStates = context.getRollBackStates().get();
@@ -44,18 +44,18 @@ public class SaltStateApplyRotationExecutor extends AbstractRotationExecutor<Sal
     }
 
     @Override
-    public void finalize(SaltStateApplyRotationContext context) throws Exception {
+    protected void finalize(SaltStateApplyRotationContext context) throws Exception {
         executeStatesIfPresent(context.getCleanupStates(), "finalization", context);
     }
 
     @Override
-    public void preValidate(SaltStateApplyRotationContext context) throws Exception {
+    protected void preValidate(SaltStateApplyRotationContext context) throws Exception {
         hostOrchestrator.ping(context.getTargets(), context.getGatewayConfig());
         executeStatesIfPresent(context.getPreValidateStates(), "pre validation", context);
     }
 
     @Override
-    public void postValidate(SaltStateApplyRotationContext context) throws Exception {
+    protected void postValidate(SaltStateApplyRotationContext context) throws Exception {
         executeStatesIfPresent(context.getPostValidateStates(), "post validation", context);
     }
 
@@ -75,7 +75,7 @@ public class SaltStateApplyRotationExecutor extends AbstractRotationExecutor<Sal
     }
 
     @Override
-    public Class<SaltStateApplyRotationContext> getContextClass() {
+    protected Class<SaltStateApplyRotationContext> getContextClass() {
         return SaltStateApplyRotationContext.class;
     }
 }

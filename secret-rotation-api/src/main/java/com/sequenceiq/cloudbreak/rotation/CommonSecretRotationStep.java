@@ -6,5 +6,15 @@ public enum CommonSecretRotationStep implements SecretRotationStep {
     REDBEAMS_ROTATE_POLLING,
     CLOUDBREAK_ROTATE_POLLING,
     SALTBOOT_CONFIG,
-    USER_DATA
+    USER_DATA;
+
+    @Override
+    public Class<? extends Enum<?>> getClazz() {
+        return CommonSecretRotationStep.class;
+    }
+
+    @Override
+    public String value() {
+        return name();
+    }
 }

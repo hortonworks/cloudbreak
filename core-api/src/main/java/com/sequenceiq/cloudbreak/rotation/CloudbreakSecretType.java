@@ -34,4 +34,14 @@ public enum CloudbreakSecretType implements SecretType {
     public List<SecretRotationStep> getSteps() {
         return steps;
     }
+
+    @Override
+    public Class<? extends Enum<?>> getClazz() {
+        return CloudbreakSecretType.class;
+    }
+
+    @Override
+    public String value() {
+        return name();
+    }
 }

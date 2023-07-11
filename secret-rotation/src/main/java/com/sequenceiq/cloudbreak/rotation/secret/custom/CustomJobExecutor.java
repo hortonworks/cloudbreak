@@ -10,27 +10,27 @@ import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
 public class CustomJobExecutor extends AbstractRotationExecutor<CustomJobRotationContext> {
 
     @Override
-    public void rotate(CustomJobRotationContext rotationContext) throws Exception {
+    protected void rotate(CustomJobRotationContext rotationContext) throws Exception {
         rotationContext.getRotationJob().stream().forEach(Runnable::run);
     }
 
     @Override
-    public void rollback(CustomJobRotationContext rotationContext) throws Exception {
+    protected void rollback(CustomJobRotationContext rotationContext) throws Exception {
         rotationContext.getRollbackJob().stream().forEach(Runnable::run);
     }
 
     @Override
-    public void finalize(CustomJobRotationContext rotationContext) throws Exception {
+    protected void finalize(CustomJobRotationContext rotationContext) throws Exception {
         rotationContext.getFinalizeJob().stream().forEach(Runnable::run);
     }
 
     @Override
-    public void preValidate(CustomJobRotationContext rotationContext) throws Exception {
+    protected void preValidate(CustomJobRotationContext rotationContext) throws Exception {
 
     }
 
     @Override
-    public void postValidate(CustomJobRotationContext rotationContext) throws Exception {
+    protected void postValidate(CustomJobRotationContext rotationContext) throws Exception {
 
     }
 
@@ -40,7 +40,7 @@ public class CustomJobExecutor extends AbstractRotationExecutor<CustomJobRotatio
     }
 
     @Override
-    public Class<CustomJobRotationContext> getContextClass() {
+    protected Class<CustomJobRotationContext> getContextClass() {
         return CustomJobRotationContext.class;
     }
 }

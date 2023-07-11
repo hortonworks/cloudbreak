@@ -9,20 +9,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.common.RotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgress;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.util.CheckedConsumer;
 
-public abstract class AbstractRotationExecutor<C extends RotationContext> implements RotationExecutor<C> {
+public abstract class AbstractRotationExecutor<C extends RotationContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRotationExecutor.class);
 
     @Inject
     private SecretRotationStepProgressService progressService;
+
+    protected abstract void rotate(C rotationContext) throws Exception;
+
+    protected abstract void rollback(C rotationContext) throws Exception;
+
+    protected abstract void finalize(C rotationContext) throws Exception;
+
+    protected abstract void preValidate(C rotationContext) throws Exception;
+
+    protected abstract void postValidate(C rotationContext) throws Exception;
+
+    protected abstract Class<C> getContextClass();
+
+    public abstract SecretRotationStep getType();
 
     public final void executeRotate(RotationContext context, SecretType secretType) {
         invokeRotationPhaseWithProgressCheck(context, secretType, RotationFlowExecutionType.ROTATE, this::rotate,

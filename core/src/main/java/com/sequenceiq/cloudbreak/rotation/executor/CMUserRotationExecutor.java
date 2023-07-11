@@ -34,7 +34,7 @@ public class CMUserRotationExecutor extends AbstractRotationExecutor<CMUserRotat
     private SecretService secretService;
 
     @Override
-    public void rotate(CMUserRotationContext rotationContext) throws Exception {
+    protected void rotate(CMUserRotationContext rotationContext) throws Exception {
         LOGGER.info("Starting rotation of CM user by creating a new user.");
         RotationSecret userRotationSecret = secretService.getRotation(rotationContext.getUserSecret());
         RotationSecret passwordRotationSecret = secretService.getRotation(rotationContext.getPasswordSecret());
@@ -54,7 +54,7 @@ public class CMUserRotationExecutor extends AbstractRotationExecutor<CMUserRotat
     }
 
     @Override
-    public void rollback(CMUserRotationContext rotationContext) {
+    protected void rollback(CMUserRotationContext rotationContext) {
         LOGGER.info("Starting to rollback rotation of CM user by deleting the new user");
         RotationSecret userRotationSecret = secretService.getRotation(rotationContext.getUserSecret());
         if (userRotationSecret.isRotation()) {
@@ -65,7 +65,7 @@ public class CMUserRotationExecutor extends AbstractRotationExecutor<CMUserRotat
     }
 
     @Override
-    public void finalize(CMUserRotationContext rotationContext) throws Exception {
+    protected void finalize(CMUserRotationContext rotationContext) throws Exception {
         LOGGER.info("Finalizing rotation of CM user by deleting the old user");
         RotationSecret userRotationSecret = secretService.getRotation(rotationContext.getUserSecret());
         if (userRotationSecret.isRotation()) {
@@ -76,13 +76,13 @@ public class CMUserRotationExecutor extends AbstractRotationExecutor<CMUserRotat
     }
 
     @Override
-    public void preValidate(CMUserRotationContext rotationContext) throws Exception {
+    protected void preValidate(CMUserRotationContext rotationContext) throws Exception {
         String user = secretService.get(rotationContext.getUserSecret());
         checkUser(rotationContext, user);
     }
 
     @Override
-    public void postValidate(CMUserRotationContext rotationContext) throws Exception {
+    protected void postValidate(CMUserRotationContext rotationContext) throws Exception {
         RotationSecret userRotationSecret = secretService.getRotation(rotationContext.getUserSecret());
         RotationSecret passwordRotationSecret = secretService.getRotation(rotationContext.getPasswordSecret());
         if (userRotationSecret.isRotation() && passwordRotationSecret.isRotation()) {
@@ -128,7 +128,7 @@ public class CMUserRotationExecutor extends AbstractRotationExecutor<CMUserRotat
     }
 
     @Override
-    public Class<CMUserRotationContext> getContextClass() {
+    protected Class<CMUserRotationContext> getContextClass() {
         return CMUserRotationContext.class;
     }
 }

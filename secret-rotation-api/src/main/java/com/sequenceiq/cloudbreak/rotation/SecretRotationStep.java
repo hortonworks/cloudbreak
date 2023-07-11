@@ -1,5 +1,5 @@
 package com.sequenceiq.cloudbreak.rotation;
 
-public interface SecretRotationStep {
+public interface SecretRotationStep extends SerializableRotationEnum {
 
 }

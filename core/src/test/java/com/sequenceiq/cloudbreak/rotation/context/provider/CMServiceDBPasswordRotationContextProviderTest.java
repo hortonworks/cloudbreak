@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.rotation.context.provider;
 
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.CM_SERVICE;
+import static com.sequenceiq.cloudbreak.rotation.context.provider.CMDBContextProviderTestUtil.mockCluster;
+import static com.sequenceiq.cloudbreak.rotation.context.provider.CMDBContextProviderTestUtil.mockGwConfig;
+import static com.sequenceiq.cloudbreak.rotation.context.provider.CMDBContextProviderTestUtil.mockRdsConfig;
+import static com.sequenceiq.cloudbreak.rotation.context.provider.CMDBContextProviderTestUtil.mockStack;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -21,7 +24,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -50,9 +52,6 @@ public class CMServiceDBPasswordRotationContextProviderTest {
     private GatewayConfigService gatewayConfigService;
 
     @Mock
-    private PostgresConfigService postgresConfigService;
-
-    @Mock
     private AbstractRdsRoleConfigProvider rdsRoleConfigProvider;
 
     @Mock
@@ -67,11 +66,11 @@ public class CMServiceDBPasswordRotationContextProviderTest {
     @Test
     public void testGetContext() throws IllegalAccessException {
         when(exitCriteriaProvider.get(any())).thenReturn(ClusterDeletionBasedExitCriteriaModel.nonCancellableModel());
-        FieldUtils.writeDeclaredField(underTest, "rdsRoleConfigProviders", List.of(rdsRoleConfigProvider), true);
-        FieldUtils.writeDeclaredField(underTest, "rdsConfigProviders", List.of(rdsConfigProvider), true);
-        Cluster cluster = mockCluster();
-        StackDto stackDto = mockStack(cluster);
-        RDSConfig rdsConfig = mockRdsConfig();
+        FieldUtils.writeField(underTest, "rdsRoleConfigProviders", List.of(rdsRoleConfigProvider), true);
+        FieldUtils.writeField(underTest, "rdsConfigProviders", List.of(rdsConfigProvider), true);
+        Cluster cluster = mockCluster(1L);
+        StackDto stackDto = mockStack(cluster, "resource");
+        RDSConfig rdsConfig = mockRdsConfig(TEST_DB_TYPE);
         GatewayConfig gatewayConfig = mockGwConfig();
         when(rdsConfigProvider.getRdsType()).thenReturn(TEST_DB_TYPE);
         when(rdsRoleConfigProvider.dbType()).thenReturn(TEST_DB_TYPE);
@@ -87,32 +86,5 @@ public class CMServiceDBPasswordRotationContextProviderTest {
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts("resource");
 
         assertEquals(2, ((CMServiceConfigRotationContext) contexts.get(CM_SERVICE)).getCmServiceConfigTable().cellSet().size());
-    }
-
-    private static StackDto mockStack(Cluster cluster) {
-        StackDto stackDto = mock(StackDto.class);
-        when(stackDto.getCluster()).thenReturn(cluster);
-        when(stackDto.getResourceCrn()).thenReturn("resource");
-        return stackDto;
-    }
-
-    private static GatewayConfig mockGwConfig() {
-        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
-        when(gatewayConfig.getHostname()).thenReturn("host");
-        return gatewayConfig;
-    }
-
-    private static Cluster mockCluster() {
-        Cluster cluster = mock(Cluster.class);
-        when(cluster.getId()).thenReturn(1L);
-        return cluster;
-    }
-
-    private static RDSConfig mockRdsConfig() {
-        RDSConfig rdsConfig = mock(RDSConfig.class);
-        when(rdsConfig.getConnectionUserNameSecret()).thenReturn("userpath");
-        when(rdsConfig.getConnectionPasswordSecret()).thenReturn("passpath");
-        when(rdsConfig.getType()).thenReturn(TEST_DB_TYPE.name());
-        return rdsConfig;
     }
 }

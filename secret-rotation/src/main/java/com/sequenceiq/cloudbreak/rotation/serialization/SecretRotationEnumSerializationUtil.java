@@ -3,75 +3,66 @@ package com.sequenceiq.cloudbreak.rotation.serialization;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.rotation.SerializableRotationEnum;
 
 public class SecretRotationEnumSerializationUtil {
 
-    protected static final String CLASS_KEY = "clazz";
+    private static final String CLASS_VALUE_SEPARATOR = ".";
 
-    protected static final String VALUE_KEY = "value";
-
-    private static final String KEYVALUE_SEPARATOR = "=";
-
-    private static final String FIELD_SEPARATOR = ",";
-
-    private static final String OBJECT_SEPARATOR = ";";
+    private static final String LIST_SEPARATOR = ",";
 
     private SecretRotationEnumSerializationUtil() {
 
     }
 
-    public static void serialize(Enum value, JsonGenerator gen) throws IOException {
+    public static void serialize(SerializableRotationEnum value, JsonGenerator gen) throws IOException {
         if (value != null) {
-            gen.writeString(enumToMapString(value));
+            gen.writeString(serialize(value));
         } else {
             gen.writeNull();
         }
     }
 
-    public static String enumToMapString(Enum value) {
-        return mapToString(Map.of(CLASS_KEY, value.getClass().getName(), VALUE_KEY, value.name()));
+    public static String serialize(SerializableRotationEnum value) {
+        return value.getClass().getName() + CLASS_VALUE_SEPARATOR + value.value();
     }
 
-    public static Enum deserialize(String text) throws IOException {
+    public static String serializeList(List<SerializableRotationEnum> value) {
+        List<String> stringList = value.stream().map(SecretRotationEnumSerializationUtil::serialize).collect(Collectors.toList());
+        return Joiner.on(LIST_SEPARATOR).join(stringList);
+    }
+
+    public static List<SerializableRotationEnum> deserializeList(String input) throws IOException {
+        List<SerializableRotationEnum> result = Lists.newArrayList();
+        for (String enumString : input.split(LIST_SEPARATOR)) {
+            result.add(SecretRotationEnumSerializationUtil.deserialize(enumString));
+        }
+        return result;
+    }
+
+    public static SerializableRotationEnum deserialize(String text) throws IOException {
         try {
-            Map<String, String> enumMap = mapStringToMap(text);
-            return getEnum(enumMap);
+            String className = text.substring(0, text.lastIndexOf(CLASS_VALUE_SEPARATOR));
+            String value = text.substring(text.lastIndexOf(CLASS_VALUE_SEPARATOR) + 1);
+            return getEnum(className, value);
         } catch (Exception e) {
             throw new IOException(String.format("Cannot deserialize from [%s] to an instance of enum.", text), e);
         }
     }
 
-    public static Enum getEnum(Map<String, String> rotationEnumMap) throws ClassNotFoundException {
-        Class<Enum> enumClass = (Class<Enum>) Class.forName(rotationEnumMap.get(CLASS_KEY));
-        String enumValue = rotationEnumMap.get(VALUE_KEY);
+    private static SerializableRotationEnum getEnum(String className, String value) throws ClassNotFoundException {
+        Class<SerializableRotationEnum> enumClass = (Class<SerializableRotationEnum>) Class.forName(className);
         return Arrays.stream(enumClass.getEnumConstants())
-                .filter(enumConstant -> StringUtils.equals(enumConstant.name(), enumValue))
+                .filter(enumConstant -> StringUtils.equals(enumConstant.value(), value))
                 .findFirst()
-                .orElseThrow(() -> new CloudbreakServiceException(String.format("There is no enum for value %s", enumValue)));
-    }
-
-    public static String mapToString(Map<String, String> map) {
-        return Joiner.on(FIELD_SEPARATOR).withKeyValueSeparator(KEYVALUE_SEPARATOR).join(map);
-    }
-
-    public static Map<String, String> mapStringToMap(String mapAsString) {
-        return Splitter.on(FIELD_SEPARATOR).withKeyValueSeparator(KEYVALUE_SEPARATOR).split(mapAsString);
-    }
-
-    public static String listToString(List<String> list) {
-        return Joiner.on(OBJECT_SEPARATOR).join(list);
-    }
-
-    public static List<String> listStringToList(String listAsString) {
-        return Lists.newArrayList(Splitter.on(OBJECT_SEPARATOR).split(listAsString));
+                .orElseThrow(() -> new CloudbreakServiceException(String.format("There is no enum for value %s", value)));
     }
 }

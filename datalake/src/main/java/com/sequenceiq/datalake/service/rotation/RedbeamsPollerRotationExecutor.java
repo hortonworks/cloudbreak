@@ -26,30 +26,30 @@ public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<Pol
     private SdxRotationService sdxRotationService;
 
     @Override
-    public void rotate(PollerRotationContext rotationContext) {
+    protected void rotate(PollerRotationContext rotationContext) {
         LOGGER.info("Rotate redbeams secret: {}", rotationContext.getSecretType());
         sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), (RedbeamsSecretType) rotationContext.getSecretType(), ROTATE);
     }
 
     @Override
-    public void rollback(PollerRotationContext rotationContext) {
+    protected void rollback(PollerRotationContext rotationContext) {
         LOGGER.info("Rollback redbeams secret: {}", rotationContext.getSecretType());
         sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), (RedbeamsSecretType) rotationContext.getSecretType(), ROLLBACK);
     }
 
     @Override
-    public void finalize(PollerRotationContext rotationContext) {
+    protected void finalize(PollerRotationContext rotationContext) {
         LOGGER.info("Finalize redbeams secret: {}", rotationContext.getSecretType());
         sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), (RedbeamsSecretType) rotationContext.getSecretType(), FINALIZE);
     }
 
     @Override
-    public void preValidate(PollerRotationContext rotationContext) {
+    protected void preValidate(PollerRotationContext rotationContext) {
         sdxRotationService.preValidateRedbeamsRotation(rotationContext.getResourceCrn());
     }
 
     @Override
-    public void postValidate(PollerRotationContext rotationContext) {
+    protected void postValidate(PollerRotationContext rotationContext) {
     }
 
     @Override
@@ -58,7 +58,7 @@ public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<Pol
     }
 
     @Override
-    public Class<PollerRotationContext> getContextClass() {
+    protected Class<PollerRotationContext> getContextClass() {
         return PollerRotationContext.class;
     }
 }

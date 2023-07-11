@@ -43,12 +43,12 @@ public class SaltPillarRotationExecutor extends AbstractRotationExecutor<SaltPil
     private ExitCriteriaProvider exitCriteriaProvider;
 
     @Override
-    public void rotate(SaltPillarRotationContext rotationContext) throws Exception {
+    protected void rotate(SaltPillarRotationContext rotationContext) throws Exception {
         updateSaltPillar(rotationContext, "rotation");
     }
 
     @Override
-    public void rollback(SaltPillarRotationContext rotationContext) throws Exception {
+    protected void rollback(SaltPillarRotationContext rotationContext) throws Exception {
         updateSaltPillar(rotationContext, "rollback");
     }
 
@@ -61,12 +61,12 @@ public class SaltPillarRotationExecutor extends AbstractRotationExecutor<SaltPil
     }
 
     @Override
-    public void finalize(SaltPillarRotationContext rotationContext) {
+    protected void finalize(SaltPillarRotationContext rotationContext) {
         LOGGER.info("Finalize salt pillar rotation, nothing to do.");
     }
 
     @Override
-    public void preValidate(SaltPillarRotationContext rotationContext) throws Exception {
+    protected void preValidate(SaltPillarRotationContext rotationContext) throws Exception {
         StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
         OrchestratorStateParams stateParams =
                 saltStateParamsService.createStateParams(stackDto, null, true, MAX_RETRY, MAX_RETRY_ON_ERROR);
@@ -74,7 +74,7 @@ public class SaltPillarRotationExecutor extends AbstractRotationExecutor<SaltPil
     }
 
     @Override
-    public void postValidate(SaltPillarRotationContext rotationContext) throws Exception {
+    protected void postValidate(SaltPillarRotationContext rotationContext) throws Exception {
 
     }
 
@@ -84,7 +84,7 @@ public class SaltPillarRotationExecutor extends AbstractRotationExecutor<SaltPil
     }
 
     @Override
-    public Class<SaltPillarRotationContext> getContextClass() {
+    protected Class<SaltPillarRotationContext> getContextClass() {
         return SaltPillarRotationContext.class;
     }
 }

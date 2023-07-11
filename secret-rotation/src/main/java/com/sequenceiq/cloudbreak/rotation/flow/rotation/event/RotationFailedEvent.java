@@ -7,15 +7,15 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
-import com.sequenceiq.cloudbreak.rotation.serialization.SecretRotationStepDeserializer;
-import com.sequenceiq.cloudbreak.rotation.serialization.SecretRotationStepSerializer;
+import com.sequenceiq.cloudbreak.rotation.flow.serialization.RotationEnumDeserializer;
+import com.sequenceiq.cloudbreak.rotation.flow.serialization.RotationEnumSerializer;
 
 public class RotationFailedEvent extends RotationEvent {
 
     private final Exception exception;
 
-    @JsonSerialize(using = SecretRotationStepSerializer.class)
-    @JsonDeserialize(using = SecretRotationStepDeserializer.class)
+    @JsonSerialize(using = RotationEnumSerializer.class)
+    @JsonDeserialize(using = RotationEnumDeserializer.class)
     private final SecretRotationStep failedStep;
 
     @JsonCreator

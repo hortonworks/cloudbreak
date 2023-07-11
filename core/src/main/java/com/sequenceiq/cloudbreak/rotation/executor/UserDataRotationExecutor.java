@@ -74,7 +74,7 @@ public class UserDataRotationExecutor extends AbstractRotationExecutor<UserDataR
     private StackToCloudStackConverter cloudStackConverter;
 
     @Override
-    public void rotate(UserDataRotationContext rotationContext) {
+    protected void rotate(UserDataRotationContext rotationContext) {
         LOGGER.info("Userdata rotation is requested {}", rotationContext);
         modifyUserData(rotationContext, useNewSecret());
         updateLaunchTemplateIfNeeded(rotationContext.getResourceCrn());
@@ -82,7 +82,7 @@ public class UserDataRotationExecutor extends AbstractRotationExecutor<UserDataR
     }
 
     @Override
-    public void rollback(UserDataRotationContext rotationContext) {
+    protected void rollback(UserDataRotationContext rotationContext) {
         LOGGER.info("Userdata rollback is requested {}", rotationContext);
         modifyUserData(rotationContext, useOldSecret());
         updateLaunchTemplateIfNeeded(rotationContext.getResourceCrn());
@@ -90,17 +90,17 @@ public class UserDataRotationExecutor extends AbstractRotationExecutor<UserDataR
     }
 
     @Override
-    public void finalize(UserDataRotationContext rotationContext) {
+    protected void finalize(UserDataRotationContext rotationContext) {
 
     }
 
     @Override
-    public void preValidate(UserDataRotationContext rotationContext) throws Exception {
+    protected void preValidate(UserDataRotationContext rotationContext) throws Exception {
 
     }
 
     @Override
-    public void postValidate(UserDataRotationContext rotationContext) throws Exception {
+    protected void postValidate(UserDataRotationContext rotationContext) throws Exception {
 
     }
 
@@ -110,7 +110,7 @@ public class UserDataRotationExecutor extends AbstractRotationExecutor<UserDataR
     }
 
     @Override
-    public Class<UserDataRotationContext> getContextClass() {
+    protected Class<UserDataRotationContext> getContextClass() {
         return UserDataRotationContext.class;
     }
 
