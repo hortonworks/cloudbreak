@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.event.ClusterServicesRestartEventClass;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.restart.ClusterServic
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.restart.ClusterServicesRestartResult;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 
 @Configuration
 public class ClusterServicesRestartActions {
@@ -32,16 +34,14 @@ public class ClusterServicesRestartActions {
 
     @Bean(name = "CLUSTER_SERVICE_RESTARTING_STATE")
     public Action<?, ?> startingCluster() {
-        return new AbstractClusterAction<>(StackEvent.class) {
+        return new AbstractClusterAction<>(ClusterServicesRestartEventClass.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterViewContext context, ClusterServicesRestartEventClass payload, Map<Object, Object> variables) {
                 stackUpdater.updateStackStatus(context.getStackId(), DetailedStackStatus.CLUSTER_RESTART_IN_PROGRESS);
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(ClusterViewContext context) {
-                return new ClusterServicesRestartRequest(context.getStackId());
+                ClusterServicesRestartRequest request = new ClusterServicesRestartRequest(context.getStackId());
+                request.setDatahubRefreshNeeded(payload.isRefreshNeeded());
+                String selector = EventSelectorUtil.selector(ClusterServicesRestartRequest.class);
+                sendEvent(context, selector, request);
             }
         };
     }

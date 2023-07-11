@@ -7,6 +7,8 @@ public abstract class ClusterPlatformRequest implements Selectable {
 
     private final Long stackId;
 
+    private boolean datahubRefreshNeeded;
+
     protected ClusterPlatformRequest(Long stackId) {
         this.stackId = stackId;
     }
@@ -18,6 +20,14 @@ public abstract class ClusterPlatformRequest implements Selectable {
 
     public Long getStackId() {
         return stackId;
+    }
+
+    public boolean isDatahubRefreshNeeded() {
+        return datahubRefreshNeeded;
+    }
+
+    public void setDatahubRefreshNeeded(boolean datahubRefreshNeeded) {
+        this.datahubRefreshNeeded = datahubRefreshNeeded;
     }
 
     @Override

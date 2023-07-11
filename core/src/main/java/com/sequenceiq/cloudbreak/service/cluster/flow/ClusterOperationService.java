@@ -550,7 +550,7 @@ public class ClusterOperationService {
                     "Stack '%s' has state '%s' which is not supported for restarting the cluster services.", stack.getName(), stack.getStatus()
             ));
         }
-        return flowManager.triggerClusterServicesRestart(stack.getId());
+        return flowManager.triggerClusterServicesRestart(stack.getId(), true);
     }
 
     private FlowIdentifier triggerClusterInstall(Long stackId) {

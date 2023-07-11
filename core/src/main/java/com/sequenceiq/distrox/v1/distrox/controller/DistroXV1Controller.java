@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.controller;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DATALAKE_HORIZONTAL_SCALING;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DELETE_DATAHUB;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATAHUB;
@@ -73,6 +74,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.diagnostics.DiagnosticsService;
 import com.sequenceiq.cloudbreak.service.operation.OperationService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
@@ -170,6 +172,9 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private ClusterOperationService clusterOperationService;
 
     @Override
     @FilterListBasedOnPermissions
@@ -749,5 +754,12 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = UPGRADE_DATAHUB)
     public FlowIdentifier rotateSecrets(@RequestObject DistroXSecretRotationRequest request) {
         return stackOperationService.rotateSecrets(request.getCrn(), request.getSecrets(), request.getExecutionType());
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DATALAKE_HORIZONTAL_SCALING)
+    public FlowIdentifier refreshDatalakeConfig(@ResourceCrn String crn) {
+        Stack stack = stackOperations.getStackByCrn(crn);
+        return clusterOperationService.restartClusterServices(stack);
     }
 }

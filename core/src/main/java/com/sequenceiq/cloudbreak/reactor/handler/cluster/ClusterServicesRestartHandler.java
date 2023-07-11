@@ -59,7 +59,8 @@ public class ClusterServicesRestartHandler implements EventHandler<ClusterServic
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             Optional<Stack> datalakeStack = datalakeService.getDatalakeStackByDatahubStack(stack);
             CmTemplateProcessor blueprintProcessor = getCmTemplateProcessor(stack.getCluster());
-            if (datalakeStack.isPresent() && clusterServicesRestartService.isRDCRefreshNeeded(stack, datalakeStack.get())) {
+            if ((datalakeStack.isPresent() && clusterServicesRestartService.isRemoteDataContextRefreshNeeded(stack, datalakeStack.get()))
+                    || request.isDatahubRefreshNeeded()) {
                 LOGGER.info("Deploying client config and restarting services");
                 clusterServicesRestartService.refreshClusterOnRestart(stack, datalakeStack.get(), blueprintProcessor);
             } else {
