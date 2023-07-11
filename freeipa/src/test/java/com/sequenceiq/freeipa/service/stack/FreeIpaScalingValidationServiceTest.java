@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -34,12 +35,16 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequ
 import com.sequenceiq.freeipa.configuration.AllowedScalingPaths;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaScalingValidationServiceTest {
 
     @Mock
     private AllowedScalingPaths allowedScalingPaths;
+
+    @Mock
+    private MultiAzCalculatorService multiAzCalculatorService;
 
     @InjectMocks
     private FreeIpaScalingValidationService underTest;
@@ -243,6 +248,59 @@ class FreeIpaScalingValidationServiceTest {
         underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, TWO_NODE_BASED), Set.of("im2"));
     }
 
+    @Test
+    void testValidateStackForDownscaleForMultiAzSuccess() {
+        Stack stack = getStack(true);
+        AvailabilityZoneConnector availabilityZoneConnector = mock(AvailabilityZoneConnector.class);
+        setupMockForMultiAz(stack, availabilityZoneConnector);
+        Set<InstanceMetaData> validImSet = createValidImSet(3, true);
+        when(this.allowedScalingPaths.getPaths()).thenReturn(Map.of(HA, List.of(TWO_NODE_BASED, NON_HA)));
+        underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA), Set.of("im2"));
+    }
+
+    @Test
+    void testValidateStackForDownscaleForMultiAzFailedWithInstances() {
+        Stack stack = getStack(true);
+        AvailabilityZoneConnector availabilityZoneConnector = mock(AvailabilityZoneConnector.class);
+        setupMockForMultiAz(stack, availabilityZoneConnector);
+        Set<InstanceMetaData> validImSet = createValidImSet(3, true);
+        when(this.allowedScalingPaths.getPaths()).thenReturn(Map.of(HA, List.of(TWO_NODE_BASED, NON_HA)));
+        assertThatCode(() -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA), Set.of("im2", "im3")))
+                .isExactlyInstanceOf(BadRequestException.class)
+                .hasMessage("downscale will result in number of availability zones less than minimum number of availability zones " +
+                        "needed for Multi AZ deployment. Number of zones after downscale: 1. Minimum zones needed: 2");
+    }
+
+    @Test
+    void testValidateStackForDownscaleForMultiAzWithValidationsSkipped() {
+        Stack stack = getStack(true);
+        setupMockForMultiAz(stack, null);
+        Set<InstanceMetaData> validImSet = createValidImSet(3, true);
+        when(this.allowedScalingPaths.getPaths()).thenReturn(Map.of(HA, List.of(TWO_NODE_BASED, NON_HA)));
+        underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA), Set.of("im2", "im3"));
+    }
+
+    @Test
+    void testValidateStackForDownscaleForMultiAzFailedWithTargetAvailabilityType() {
+        Stack stack = getStack(true);
+        AvailabilityZoneConnector availabilityZoneConnector = mock(AvailabilityZoneConnector.class);
+        setupMockForMultiAz(stack, availabilityZoneConnector);
+        Set<InstanceMetaData> validImSet = createValidImSet(3, true);
+        when(this.allowedScalingPaths.getPaths()).thenReturn(Map.of(HA, List.of(TWO_NODE_BASED, NON_HA)));
+        assertThatCode(() -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA), null))
+                .isExactlyInstanceOf(BadRequestException.class)
+                .hasMessage("downscale will result in number of availability zones less than minimum number of availability zones " +
+                        "needed for Multi AZ deployment. Number of zones after downscale: 1. Minimum zones needed: 2");
+    }
+
+    private void setupMockForMultiAz(Stack stack, AvailabilityZoneConnector availabilityZoneConnector)  {
+        when(stack.isMultiAz()).thenReturn(true);
+        if (availabilityZoneConnector != null) {
+            when(availabilityZoneConnector.getMinZonesForFreeIpa()).thenReturn(2);
+        }
+        when(multiAzCalculatorService.getAvailabilityZoneConnector(stack)).thenReturn(availabilityZoneConnector);
+    }
+
     private Stack getStack(boolean available) {
         Stack stack = mock(Stack.class);
         when(stack.isAvailable()).thenReturn(available);
@@ -280,6 +338,10 @@ class FreeIpaScalingValidationServiceTest {
     }
 
     private Set<InstanceMetaData> createValidImSet(int instanceCount) {
+        return createValidImSet(instanceCount, false);
+    }
+
+    private Set<InstanceMetaData> createValidImSet(int instanceCount, boolean multiAz) {
         Set<InstanceMetaData> set = new HashSet<>();
         for (int i = 1; i <= instanceCount; i++) {
             InstanceMetaData im = new InstanceMetaData();
@@ -291,6 +353,9 @@ class FreeIpaScalingValidationServiceTest {
                 im.setInstanceId("im" + i);
             }
             im.setInstanceStatus(InstanceStatus.CREATED);
+            if (multiAz) {
+                im.setAvailabilityZone(String.valueOf(i));
+            }
             set.add(im);
         }
         return set;

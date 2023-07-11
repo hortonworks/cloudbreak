@@ -273,7 +273,7 @@ public class MultiAzCalculatorService {
         }
     }
 
-    private AvailabilityZoneConnector getAvailabilityZoneConnector(Stack stack) {
+    public AvailabilityZoneConnector getAvailabilityZoneConnector(Stack stack) {
         LOGGER.debug("CloudPlatform is {} PlatformVariant is {}", stack.getCloudPlatform(), stack.getPlatformvariant());
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
                 Platform.platform(stack.getCloudPlatform()),

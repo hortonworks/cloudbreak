@@ -9,11 +9,13 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
@@ -23,6 +25,7 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.configuration.AllowedScalingPaths;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
 
 @Service
 public class FreeIpaScalingValidationService {
@@ -34,6 +37,9 @@ public class FreeIpaScalingValidationService {
 
     @Inject
     private VerticalScalingValidatorService verticalScalingValidatorService;
+
+    @Inject
+    private MultiAzCalculatorService multiAzCalculatorService;
 
     public void validateStackForUpscale(Set<InstanceMetaData> allInstances, Stack stack, ScalingPath scalingPath) {
         validateScalingIsUpscale(scalingPath);
@@ -48,6 +54,9 @@ public class FreeIpaScalingValidationService {
         validateScalingIsDownscale(scalingPath);
         validateInstanceIdsToDelete(allInstances, instanceIdsToDelete);
         executeCommonValidations(allInstances, stack, scalingPath, OperationType.DOWNSCALE);
+        if (stack.isMultiAz()) {
+            validateDownScaleForMultiAz(stack, scalingPath, allInstances, instanceIdsToDelete);
+        }
     }
 
     private void validateInstanceIdsToDelete(Set<InstanceMetaData> allInstances, Set<String> instanceIdsToDelete) {
@@ -126,6 +135,24 @@ public class FreeIpaScalingValidationService {
         return Objects.isNull(targetAvailabilityTypes) || !targetAvailabilityTypes.contains(scalingPath.getTargetAvailabilityType());
     }
 
+    private void validateDownScaleForMultiAz(Stack stack, ScalingPath scalingPath, Set<InstanceMetaData> allInstances, Set<String> instanceIdsToDelete) {
+        AvailabilityZoneConnector availabilityZoneConnector = multiAzCalculatorService.getAvailabilityZoneConnector(stack);
+        if (availabilityZoneConnector != null) {
+            long numberOfZonesAfterDownscale = calculateNumberOfZonesAfterDownscale(scalingPath, allInstances, instanceIdsToDelete);
+            LOGGER.debug("Number of zones after downscale will be {}", numberOfZonesAfterDownscale);
+            if (numberOfZonesAfterDownscale < availabilityZoneConnector.getMinZonesForFreeIpa()) {
+                throw new BadRequestException(String.format("%s will result in number of availability zones less than minimum number of availability zones " +
+                                "needed for Multi AZ deployment. Number of zones after %s: %d. Minimum zones needed: %d",
+                        OperationType.DOWNSCALE.getLowerCaseName(), OperationType.DOWNSCALE.getLowerCaseName(), numberOfZonesAfterDownscale,
+                        availabilityZoneConnector.getMinZonesForFreeIpa()));
+            }
+        } else {
+            LOGGER.info("Implementation for AvailabilityZoneConnector is not present for CloudPlatform {} and PlatformVariant {}." +
+                            "Skipping MultiAz validations for {}",
+                    stack.getCloudPlatform(), stack.getPlatformvariant(), OperationType.DOWNSCALE.getLowerCaseName());
+        }
+    }
+
     private boolean nodeCountAlreadyMatchesTarget(Set<InstanceMetaData> allInstances, ScalingPath scalingPath) {
         return allInstances.size() == scalingPath.getTargetAvailabilityType().getInstanceCount();
     }
@@ -190,6 +217,20 @@ public class FreeIpaScalingValidationService {
 
     private String generateAlternativeTargetString(String scaleType, List<AvailabilityType> targets) {
         return Objects.isNull(targets) ? "" : String.format(" Supported %s targets: %s", scaleType, targets);
+    }
+
+    private long calculateNumberOfZonesAfterDownscale(ScalingPath scalingPath, Set<InstanceMetaData> allInstances, Set<String> instanceIdsToDelete) {
+        if (CollectionUtils.isNotEmpty(instanceIdsToDelete)) {
+            LOGGER.debug("Counting number of nodes after downscale based on instance ids");
+            return allInstances.stream().filter(instance -> !instanceIdsToDelete.contains(instance.getInstanceId()))
+                    .map(InstanceMetaData::getAvailabilityZone)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .count();
+        } else {
+            LOGGER.debug("Counting number of nodes after downscale based on target availability type");
+            return scalingPath.getTargetAvailabilityType().getInstanceCount();
+        }
     }
 }
 
