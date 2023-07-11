@@ -12,6 +12,7 @@ grpc-common/                                                                    
 # Raven and Armadillo teams should review datalake and datalake-api modules
 datalake/                                                                       @hortonworks/cloudbreak-raven @hortonworks/cloudbreak-armadillo
 datalake-api/                                                                   @hortonworks/cloudbreak-raven @hortonworks/cloudbreak-armadillo
+sdx-connector/                                                                  @hortonworks/cloudbreak-raven
 
 # Raven and Armadillo team should review datalake blueprint changes
 core/src/main/resources/defaults/blueprints/*/cdp-sdx*.bp                       @hortonworks/cloudbreak-raven @hortonworks/cloudbreak-armadillo
