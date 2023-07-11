@@ -60,7 +60,8 @@
         "refName":"auxiliary",
         "roleConfigGroupsRefNames":[
           "zookeeper-SERVER-BASE",
-          "hdfs-JOURNALNODE-BASE"
+          "hdfs-JOURNALNODE-BASE",
+          "cruise_control-CRUISE_CONTROL_SERVER-BASE"
         ]
       },
       {
@@ -621,6 +622,17 @@
           }
         ],
         "serviceType":"HIVE"
+      },
+      {
+        "refName": "cruise_control",
+        "serviceType": "CRUISE_CONTROL",
+        "roleConfigGroups": [
+          {
+            "refName": "cruise_control-CRUISE_CONTROL_SERVER-BASE",
+            "roleType": "CRUISE_CONTROL_SERVER",
+            "base": true
+          }
+        ]
       }
     ]
   }
