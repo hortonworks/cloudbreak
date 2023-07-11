@@ -268,6 +268,9 @@ public class EnvironmentValidatorService {
             validationResultBuilder.error(
                     String.format("Single instance FreeIpa spot percentage must be either %d or %d.", ALL_ON_DEMAND_PERCENTAGE, ALL_SPOT_PERCENTAGE));
         }
+        if (StringUtils.isNoneBlank(freeIpaCreation.getImageId(), freeIpaCreation.getImageOs())) {
+            validationResultBuilder.error("FreeIpa deployment requests can not have both image id and image os parameters set.");
+        }
         return validationResultBuilder.build();
     }
 

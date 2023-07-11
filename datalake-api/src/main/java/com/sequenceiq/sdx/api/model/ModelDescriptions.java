@@ -92,6 +92,8 @@ public class ModelDescriptions {
 
     public static final String RUNTIME_VERSION = "Runtime version.";
 
+    public static final String OS = "Operating system.";
+
     public static final String DEFAULT_RUNTIME_VERSION = "Default runtime version.";
 
     public static final String LOCK_COMPONENTS = "Option to lock components during the upgrade.";

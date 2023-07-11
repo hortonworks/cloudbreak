@@ -219,7 +219,7 @@ public class ModelDescriptions {
         public static final String IMAGE_SETTINGS = "settings for custom images";
         public static final String IMAGE_CATALOG = "custom image catalog URL";
         public static final String IMAGE_ID = "virtual machine image id from ImageCatalog, machines of the cluster will be started from this image";
-        public static final String OS_TYPE = "os type of the image, this property is only considered when no specific image id is provided";
+        public static final String IMAGE_OS = "os of the image, this property is only considered when no specific image id is provided";
         public static final String INSTANCE_GROUP_ADJUSTMENT = "instance group adjustment";
         public static final String TAGS = "stack related tags";
         public static final String APPLICATION_TAGS = "stack related application tags";

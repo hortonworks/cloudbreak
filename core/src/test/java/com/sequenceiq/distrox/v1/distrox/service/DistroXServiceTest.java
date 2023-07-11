@@ -2,6 +2,7 @@ package com.sequenceiq.distrox.v1.distrox.service;
 
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.AVAILABLE;
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_DATAHUB_STARTED;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLoca
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.image.DistroXImageV1Request;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.fedramp.FedRampModificationService;
@@ -239,6 +241,7 @@ class DistroXServiceTest {
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setEnvironmentStatus(AVAILABLE);
         envResponse.setCrn("crn");
+        envResponse.setName(envName);
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
@@ -246,7 +249,9 @@ class DistroXServiceTest {
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
         when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of());
 
-        assertThrows(BadRequestException.class, () -> underTest.post(request));
+        assertThatThrownBy(() -> underTest.post(request))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Data Lake stack cannot be found for environment CRN: %s (%s)", envName, envResponse.getCrn());
 
         verify(platformAwareSdxConnector).listSdxCrns(any(), any());
         verifyNoMoreInteractions(platformAwareSdxConnector);
@@ -269,7 +274,9 @@ class DistroXServiceTest {
         when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any(), any(), any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.NOT_AVAILABLE)));
 
-        assertThrows(BadRequestException.class, () -> underTest.post(request));
+        assertThatThrownBy(() -> underTest.post(request))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Data Lake stacks of environment should be available.");
 
         verify(platformAwareSdxConnector).listSdxCrns(any(), any());
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any(), any(), any());
@@ -328,6 +335,40 @@ class DistroXServiceTest {
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.ROLLING_UPGRADE_IN_PROGRESS)));
 
         underTest.post(request);
+
+        verify(platformAwareSdxConnector).listSdxCrns(any(), any());
+        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any(), any(), any());
+    }
+
+    @Test
+    void testIfImageIdAndOsBothSet() {
+        String envName = "someAwesomeEnvironment";
+        DistroXV1Request request = new DistroXV1Request();
+        request.setEnvironmentName(envName);
+        DistroXImageV1Request imageRequest = new DistroXImageV1Request();
+        imageRequest.setId("id");
+        imageRequest.setOs("os");
+        request.setImage(imageRequest);
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setEnvironmentStatus(AVAILABLE);
+        envResponse.setCrn("crn");
+        DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
+        freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+        freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
+        Workspace workspace = new Workspace();
+        Tenant tenant = new Tenant();
+        tenant.setName("test");
+        workspace.setTenant(tenant);
+        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
+        when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
+        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
+        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any(), any(), any()))
+                .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
+
+        assertThatThrownBy(() -> underTest.post(request))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Image request can not have both image id and os parameters set.");
 
         verify(platformAwareSdxConnector).listSdxCrns(any(), any());
         verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any(), any(), any());

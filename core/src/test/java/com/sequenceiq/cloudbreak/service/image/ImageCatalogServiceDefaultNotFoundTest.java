@@ -111,7 +111,8 @@ public class ImageCatalogServiceDefaultNotFoundTest {
         try {
             underTest.getImagePrewarmedDefaultPreferred(imageFilter, image -> true);
         } catch (CloudbreakImageNotFoundException exception) {
-            Assertions.assertEquals("Could not find any image for platform 'gcp', runtime 'null' and Cloudbreak version '5.0.0' in 'null' image catalog.",
+            Assertions.assertEquals(
+                    "Could not find any image for platform 'gcp', os 'notimportant', runtime 'null' and Cloudbreak version '5.0.0' in 'null' image catalog.",
                     exception.getMessage());
         }
         verify(providerSpecificImageFilter, never()).filterImages(any(), anyList());
@@ -126,11 +127,13 @@ public class ImageCatalogServiceDefaultNotFoundTest {
         when(cloudbreakVersionListProvider.getVersions(any())).thenReturn(catalog.getVersions().getCloudbreakVersions());
         when(imageCatalog.getImageCatalogUrl()).thenReturn(DEFAULT_CDH_IMAGE_CATALOG);
 
-        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(imageCatalogPlatform("aws")), "2.6", true, Set.of("centos7", "amazonlinux2"), null);
+        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(imageCatalogPlatform("aws")), "2.6", true, Set.of("centos7"), null);
         try {
             underTest.getImagePrewarmedDefaultPreferred(imageFilter, image -> true);
         } catch (CloudbreakImageNotFoundException exception) {
-            Assertions.assertEquals("Could not find any image for platform 'aws', runtime 'null' and Cloudbreak version '5.0.0' in 'null' image catalog.",
+            Assertions.assertEquals(
+                    "Could not find any image for platform 'aws', os 'centos7', runtime 'null' " +
+                            "and Cloudbreak version '5.0.0' in 'null' image catalog.",
                     exception.getMessage());
         }
         verify(providerSpecificImageFilter, times(3)).filterImages(eq(Set.of(imageCatalogPlatform(PROVIDERS[0]))), anyList());

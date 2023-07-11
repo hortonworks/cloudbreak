@@ -418,7 +418,13 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     public Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest,
             final StackV4Request internalStackV4Request) {
-        ImageSettingsV4Request imageSettingsV4Request = Optional.ofNullable(internalStackV4Request).map(StackV4Request::getImage).orElse(null);
+        ImageSettingsV4Request imageSettingsV4Request = null;
+        if (internalStackV4Request != null && internalStackV4Request.getImage() != null) {
+            imageSettingsV4Request = internalStackV4Request.getImage();
+        } else if (StringUtils.isNotBlank(sdxClusterRequest.getOs())) {
+            imageSettingsV4Request = new ImageSettingsV4Request();
+            imageSettingsV4Request.setOs(sdxClusterRequest.getOs());
+        }
         return createSdx(userCrn, name, sdxClusterRequest, internalStackV4Request, imageSettingsV4Request);
     }
 
@@ -448,15 +454,17 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), accountId);
         validateJavaVersion(sdxClusterRequest.getJavaVersion(), accountId);
         DetailedEnvironmentResponse environment = validateAndGetEnvironment(sdxClusterRequest.getEnvironment());
+        validateImageRequest(imageSettingsV4Request);
         ImageCatalogPlatform imageCatalogPlatform = platformStringTransformer
                 .getPlatformStringForImageCatalog(environment.getCloudPlatform(), isGovCloudEnvironment(environment));
         ImageV4Response imageV4Response = imageCatalogService.getImageResponseFromImageRequest(imageSettingsV4Request, imageCatalogPlatform);
         validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest);
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
         String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response);
-        String os = Optional.ofNullable(imageV4Response).map(ImageV4Response::getOs)
-                .or(() -> Optional.ofNullable(internalStackV4Request).map(StackV4Request::getImage).map(ImageSettingsV4Request::getOs))
-                .orElse(null);
+        String os = Optional.ofNullable(sdxClusterRequest.getOs())
+                        .or(() -> Optional.ofNullable(imageV4Response).map(ImageV4Response::getOs))
+                        .or(() -> Optional.ofNullable(internalStackV4Request).map(StackV4Request::getImage).map(ImageSettingsV4Request::getOs))
+                        .orElse(null);
 
         validateCcmV2Requirement(environment, runtimeVersion);
 
@@ -1098,6 +1106,12 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
+    private void validateImageRequest(ImageSettingsV4Request imageSettingsV4Request) {
+        if (imageSettingsV4Request != null && StringUtils.isNoneBlank(imageSettingsV4Request.getId(), imageSettingsV4Request.getOs())) {
+            throw new BadRequestException("Image request can not have both image id and os parameters set.");
+        }
+    }
+
     @VisibleForTesting
     void validateRuntimeAndImage(SdxClusterRequest clusterRequest, DetailedEnvironmentResponse environment,
             ImageSettingsV4Request imageSettingsV4Request, ImageV4Response imageV4Response) {
@@ -1110,7 +1124,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 validationBuilder.error("SDX cluster request must not specify both runtime version and image at the same time because image " +
                         "decides runtime version.");
             }
-        } else if (imageSettingsV4Request != null && StringUtils.isBlank(clusterRequest.getRuntime())) {
+        } else if (isImageSpecified(imageSettingsV4Request) && StringUtils.isBlank(clusterRequest.getRuntime())) {
             if (cloudPlatform.equals(MOCK)) {
                 clusterRequest.setRuntime(MEDIUM_DUTY_REQUIRED_VERSION);
             } else {
@@ -1123,6 +1137,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
+    }
+
+    private boolean isImageSpecified(ImageSettingsV4Request imageSettingsV4Request) {
+        return imageSettingsV4Request != null && !StringUtils.isBlank(imageSettingsV4Request.getId());
     }
 
     private void validateInternalSdxRequest(StackV4Request stackv4Request, SdxClusterRequest sdxClusterRequest) {

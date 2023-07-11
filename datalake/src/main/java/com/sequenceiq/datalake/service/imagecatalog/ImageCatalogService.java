@@ -46,7 +46,7 @@ public class ImageCatalogService implements AuthorizationResourceCrnProvider {
     }
 
     public ImageV4Response getImageResponseFromImageRequest(ImageSettingsV4Request imageSettingsV4Request, ImageCatalogPlatform imageCatalogPlatform) {
-        if (imageSettingsV4Request != null) {
+        if (imageSettingsV4Request != null && !StringUtils.isBlank(imageSettingsV4Request.getId())) {
             List<ImageV4Response> images = getImagesMatchingRequest(imageSettingsV4Request);
             if (images != null) {
                 String providerName = imageCatalogPlatform.nameToLowerCase();

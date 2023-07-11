@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.image.DistroXImageV1Request;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.fedramp.FedRampModificationService;
@@ -85,6 +87,10 @@ public class DistroXService {
                 environment.getCrn(), sdxCrns);
         if (!sdxCrnsWithAvailability.stream().map(Pair::getValue).allMatch(isSdxAvailable())) {
             throw new BadRequestException("Data Lake stacks of environment should be available.");
+        }
+        DistroXImageV1Request imageRequest = request.getImage();
+        if (imageRequest != null && StringUtils.isNoneBlank(imageRequest.getId(), imageRequest.getOs())) {
+            throw new BadRequestException("Image request can not have both image id and os parameters set.");
         }
     }
 

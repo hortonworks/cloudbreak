@@ -33,6 +33,7 @@ public class SdxServiceValidateRuntimeAndImageTest {
         environment = new DetailedEnvironmentResponse();
         environment.setCloudPlatform("AWS");
         imageSettingsV4Request = new ImageSettingsV4Request();
+        imageSettingsV4Request.setId("image-id");
         imageV4Response = new ImageV4Response();
     }
 
