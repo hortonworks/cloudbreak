@@ -19,8 +19,6 @@ public class ImageFilter {
 
     private String clusterVersion;
 
-    private String runtimeVersion;
-
     public ImageFilter(ImageCatalog imageCatalog, Set<ImageCatalogPlatform> platforms, String cbVersion) {
         this.imageCatalog = imageCatalog;
         this.platforms = platforms;

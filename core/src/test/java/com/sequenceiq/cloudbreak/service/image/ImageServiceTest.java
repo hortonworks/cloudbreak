@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.REGION;
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,6 +27,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -102,6 +105,9 @@ public class ImageServiceTest {
 
     @InjectMocks
     private ImageService underTest;
+
+    @Captor
+    private ArgumentCaptor<ImageFilter> imageFilterCaptor;
 
     private ImageSettingsV4Request imageSettingsV4Request;
 
@@ -285,7 +291,7 @@ public class ImageServiceTest {
     @Test
     public void testUseBaseImageAndEnabledBaseImageShouldReturnCorrectImage() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         imageSettingsV4Request.setId(null);
-        when(imageCatalogService.getLatestBaseImageDefaultPreferred(any(), any()))
+        when(imageCatalogService.getLatestBaseImageDefaultPreferred(imageFilterCaptor.capture(), any()))
                 .thenReturn(ImageTestUtil.getImageFromCatalog(false, "uuid", STACK_VERSION));
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform(PLATFORM));
         StatedImage statedImage = underTest.determineImageFromCatalog(
@@ -300,12 +306,13 @@ public class ImageServiceTest {
                 image -> true);
         assertEquals("uuid", statedImage.getImage().getUuid());
         assertFalse(statedImage.getImage().isPrewarmed());
+        assertNull(imageFilterCaptor.getValue().getClusterVersion());
     }
 
     @Test
     public void testNoUseBaseImageAndEnabledBaseImageShouldReturnCorrectImage() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         imageSettingsV4Request.setId(null);
-        when(imageCatalogService.getImagePrewarmedDefaultPreferred(any(), any()))
+        when(imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilterCaptor.capture(), any()))
                 .thenReturn(ImageTestUtil.getImageFromCatalog(false, "uuid", STACK_VERSION));
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform(PLATFORM));
         StatedImage statedImage = underTest.determineImageFromCatalog(
@@ -320,12 +327,13 @@ public class ImageServiceTest {
                 image -> true);
         assertEquals("uuid", statedImage.getImage().getUuid());
         assertFalse(statedImage.getImage().isPrewarmed());
+        assertEquals(STACK_VERSION, imageFilterCaptor.getValue().getClusterVersion());
     }
 
     @Test
     public void testDisabledBaseImageShouldReturnCorrectImage() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         imageSettingsV4Request.setId(null);
-        when(imageCatalogService.getImagePrewarmedDefaultPreferred(any(), any()))
+        when(imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilterCaptor.capture(), any()))
                 .thenReturn(ImageTestUtil.getImageFromCatalog(true, "uuid", STACK_VERSION));
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform(PLATFORM));
         StatedImage statedImage = underTest.determineImageFromCatalog(
@@ -340,6 +348,7 @@ public class ImageServiceTest {
                 image -> true);
         assertEquals("uuid", statedImage.getImage().getUuid());
         assertTrue(statedImage.getImage().isPrewarmed());
+        assertEquals(STACK_VERSION, imageFilterCaptor.getValue().getClusterVersion());
     }
 
     @Test

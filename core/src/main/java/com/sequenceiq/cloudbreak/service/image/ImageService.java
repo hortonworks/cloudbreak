@@ -160,21 +160,22 @@ public class ImageService {
         }
 
         ImageCatalog imageCatalog = getImageCatalogFromRequestOrDefault(workspaceId, imageSettings, user);
+        boolean selectBaseImage = baseImageEnabled && useBaseImage;
         ImageFilter imageFilter = new ImageFilter(
                 imageCatalog,
                 Set.of(platform),
                 null,
                 baseImageEnabled,
                 operatingSystems,
-                clusterVersion);
+                selectBaseImage ? null : clusterVersion);
         LOGGER.info("Image id is not specified for the stack.");
-        if (baseImageEnabled && useBaseImage) {
+        if (selectBaseImage) {
             LOGGER.info("Trying to select a base image.");
             return imageCatalogService.getLatestBaseImageDefaultPreferred(imageFilter, imagePredicate);
+        } else {
+            LOGGER.info("Trying to select a prewarmed image.");
+            return imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilter, imagePredicate);
         }
-
-        LOGGER.info("Trying to select a prewarmed image.");
-        return imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilter, imagePredicate);
     }
 
     private String getClusterVersion(Blueprint blueprint) {
