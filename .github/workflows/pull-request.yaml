@@ -1,0 +1,185 @@
+name: cloudbreak-pull-request-test
+
+env:
+  APP_NAME: cloudbreak
+  namespace: cloudbreak-pr-${{github.event.number}}
+  serviceversion: ${{github.sha}}
+  PROJECT: cloudbreak/cloudbreak
+  BRANCH: ${{github.base_ref}}
+  PULL_REQUEST_NUMBER: ${{ github.event.number }}
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  unit-test:
+    name: Unit Test
+    runs-on: [cb-ubi8]
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup secrets
+        id: build_secrets
+        uses: Kitchen/RE-thirdparty-actions/actions/vault@main
+        with:
+          tlsSkipVerify: true
+          url: https://re-vault.infra.cloudera.com/
+          method: kubernetes
+          path: rke_re_jenkins
+          role: cb
+          secrets: |
+              cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+              cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+              cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+              cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+              cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+      - name: Gradle build
+        run: |-
+          #!/bin/bash -x
+          export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
+          export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
+          export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
+          export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
+          export CIRCLECI=true
+          ./gradlew -Penv=jenkins -b build.gradle check test jacocoTestReport -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+
+  checkstyle-main:
+    name: Checkstyle Main
+    runs-on: [cb-ubi8]
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup secrets
+        id: build_secrets
+        uses: Kitchen/RE-thirdparty-actions/actions/vault@main
+        with:
+          tlsSkipVerify: true
+          url: https://re-vault.infra.cloudera.com/
+          method: kubernetes
+          path: rke_re_jenkins
+          role: cb
+          secrets: |
+              cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+              cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+              cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+              cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+      - name: Gradle build
+        run: |-
+          #!/bin/bash -x
+          export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
+          export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
+          export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
+          export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
+          export CIRCLECI=true
+          ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleTest -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+
+  checkstyle-test:
+    name: Checkstyle Test
+    runs-on: [cb-ubi8]
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup secrets
+        id: build_secrets
+        uses: Kitchen/RE-thirdparty-actions/actions/vault@main
+        with:
+          tlsSkipVerify: true
+          url: https://re-vault.infra.cloudera.com/
+          method: kubernetes
+          path: rke_re_jenkins
+          role: cb
+          secrets: |
+              cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+              cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+              cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+              cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+      - name: Gradle build
+        run: |-
+          #!/bin/bash -x
+          export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
+          export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
+          export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
+          export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
+          export CIRCLECI=true
+          ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleMain -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+
+  spotbugs-test:
+    name: Spotbugs Test
+    runs-on: [cb-ubi8]
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup secrets
+        id: build_secrets
+        uses: Kitchen/RE-thirdparty-actions/actions/vault@main
+        with:
+          tlsSkipVerify: true
+          url: https://re-vault.infra.cloudera.com/
+          method: kubernetes
+          path: rke_re_jenkins
+          role: cb
+          secrets: |
+              cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+              cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+              cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+              cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+      - name: Gradle build
+        run: |-
+          #!/bin/bash -x
+          export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
+          export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
+          export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
+          export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
+          export CIRCLECI=true
+          ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x checkstyleTest -x checkstyleMain -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+
+  spotbugs-main:
+    name: Spotbugs Main
+    runs-on: [cb-ubi8]
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup secrets
+        id: build_secrets
+        uses: Kitchen/RE-thirdparty-actions/actions/vault@main
+        with:
+          tlsSkipVerify: true
+          url: https://re-vault.infra.cloudera.com/
+          method: kubernetes
+          path: rke_re_jenkins
+          role: cb
+          secrets: |
+              cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+              cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+              cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+              cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+      - name: Gradle build
+        run: |-
+          #!/bin/bash -x
+          export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
+          export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
+          export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
+          export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
+          export CIRCLECI=true
+          ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsTest -x checkstyleTest -x checkstyleMain -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
