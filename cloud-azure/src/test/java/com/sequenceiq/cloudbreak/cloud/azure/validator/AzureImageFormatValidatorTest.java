@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImage
 import static com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImageTermStatus.NOT_ACCEPTED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudPlatformValidationWarningException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureImageFormatValidatorTest {
@@ -187,33 +189,25 @@ public class AzureImageFormatValidatorTest {
         RuntimeException exception;
 
         switch (expectedResult) {
-            case FAIL:
+            case FAIL -> {
                 exception = Assertions.assertThrows(CloudConnectorException.class,
                         () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack)));
-
                 assertEquals(FAIL, exception.getMessage());
-                break;
-
-            case WARN_NON_ACCEPTED:
+            }
+            case WARN_NON_ACCEPTED -> {
                 exception = Assertions.assertThrows(CloudPlatformValidationWarningException.class,
                         () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack)));
-
                 assertEquals(WARN_NON_ACCEPTED, exception.getMessage());
-                break;
-
-            case WARN_NON_READABLE:
+            }
+            case WARN_NON_READABLE -> {
                 exception = Assertions.assertThrows(CloudPlatformValidationWarningException.class,
                         () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack)));
-
                 assertEquals(WARN_NON_READABLE, exception.getMessage());
-                break;
-
-            case PASS:
-                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack));
-                break;
-
-            default:
-                // no-op, needed for checkstyle
+            }
+            case PASS -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack));
+            default -> {
+            }
+            // no-op, needed for checkstyle
         }
 
         verify(entitlementService, times(1)).azureMarketplaceImagesEnabled(any());
@@ -294,6 +288,33 @@ public class AzureImageFormatValidatorTest {
                 "default-id", new HashMap<>());
         boolean actualResult = underTest.isVhdImageFormat(image);
         assertFalse(actualResult);
+    }
+
+    @ParameterizedTest
+    @MethodSource("sourceImagePlanDataProvider")
+    void testSourceImagePlan(String urn, Boolean result) {
+        Map<String, String> packageVersions = new HashMap<>();
+        packageVersions.put(ImagePackageVersion.SOURCE_IMAGE.getKey(), urn);
+        Image image = new Image(INVALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
+                "default-id", packageVersions);
+        try {
+            boolean actualResult = underTest.hasSourceImagePlan(image);
+            assertEquals(result, actualResult);
+        } catch (CloudConnectorException e) {
+            assertNull(result);
+            assertEquals("Your image name cloudera:cloudera-data-platform-cdp-7_2:runtime-7_2_15 is invalid. "
+                            + "Please check the desired format in the documentation!", e.getMessage());
+        }
+    }
+
+    static Object[][] sourceImagePlanDataProvider() {
+        return new Object[][]{
+                // source-image,                                                                 expected result
+                {"cloudera:cloudera-data-platform-cdp-7_2:runtime-7_2_15:0.26459873.1652167162", Boolean.TRUE},
+                {"cloudera:cloudera-data-platform-cdp-7_2:runtime-7_2_15",                       null},
+                {"",                                                                             Boolean.FALSE},
+                {null,                                                                           Boolean.FALSE},
+        };
     }
 
     private void setupAuthenticatedContext() {

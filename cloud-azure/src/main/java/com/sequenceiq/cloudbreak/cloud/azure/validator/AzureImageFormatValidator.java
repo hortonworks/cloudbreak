@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudPlatformValidationWarningException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 
 @Component
 public class AzureImageFormatValidator implements Validator {
@@ -65,16 +67,9 @@ public class AzureImageFormatValidator implements Validator {
             AzureImageTermStatus termsStatus = getTermsStatus(ac, azureMarketplaceImage);
             if (isAutomaticTermsSignerDisabled() || !isAutomaticTermsSignerAccepted(cloudStack)) {
                 switch (termsStatus) {
-                    case NOT_ACCEPTED:
-                        handleTermsNotAccepted(imageUri, onlyMarketplaceImagesEnabled);
-                        break;
-
-                    case NON_READABLE:
-                        handleTermsNonReadable(imageUri, onlyMarketplaceImagesEnabled);
-                        break;
-
-                    default:
-                        LOGGER.debug("Image terms are already accepted for image {}, there is nothing to do here", imageUri);
+                    case NOT_ACCEPTED -> handleTermsNotAccepted(imageUri, onlyMarketplaceImagesEnabled);
+                    case NON_READABLE -> handleTermsNonReadable(imageUri, onlyMarketplaceImagesEnabled);
+                    default -> LOGGER.debug("Image terms are already accepted for image {}, there is nothing to do here", imageUri);
                 }
 
             } else {
@@ -156,6 +151,19 @@ public class AzureImageFormatValidator implements Validator {
 
     public boolean isMarketplaceImageFormat(Image image) {
         return isMarketplaceImageFormat(image.getImageName());
+    }
+
+    public boolean hasSourceImagePlan(Image image) {
+        String planUrn = image.getPackageVersions().get(ImagePackageVersion.SOURCE_IMAGE.getKey());
+        if (StringUtils.isNotBlank(planUrn)) {
+            if (isMarketplaceImageFormat(planUrn)) {
+                LOGGER.debug("Plan with URN {} is a valid marketplace image plan", planUrn);
+                return true;
+            } else {
+                handleUnknownFormat(planUrn);
+            }
+        }
+        return false;
     }
 
     public boolean isMarketplaceImageFormat(String imageUri) {

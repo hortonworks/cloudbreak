@@ -64,6 +64,8 @@ public class ImageEntity implements AccountIdAwareResource {
 
     private String accountId;
 
+    private String sourceImage;
+
     public String getImageName() {
         return imageName;
     }
@@ -179,6 +181,14 @@ public class ImageEntity implements AccountIdAwareResource {
         this.accountId = accountId;
     }
 
+    public String getSourceImage() {
+        return sourceImage;
+    }
+
+    public void setSourceImage(String sourceImage) {
+        this.sourceImage = sourceImage;
+    }
+
     @Override
     public String toString() {
         return "ImageEntity{" +
@@ -193,6 +203,7 @@ public class ImageEntity implements AccountIdAwareResource {
                 ", date='" + date + '\'' +
                 ", ldapAgentVersion='" + ldapAgentVersion + '\'' +
                 ", accountId='" + accountId + '\'' +
+                ", sourceImage='" + sourceImage + '\'' +
                 '}';
     }
 
@@ -220,12 +231,13 @@ public class ImageEntity implements AccountIdAwareResource {
                 && Objects.equals(imageCatalogName, that.imageCatalogName)
                 && Objects.equals(ldapAgentVersion, that.ldapAgentVersion)
                 && Objects.equals(accountId, that.accountId)
+                && Objects.equals(sourceImage, that.sourceImage)
                 && Objects.equals(date, that.date);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, imageName, userdata, os, osType, imageCatalogUrl, imageId,
-                imageCatalogName, date, ldapAgentVersion, accountId);
+                imageCatalogName, date, ldapAgentVersion, accountId, sourceImage);
     }
 }

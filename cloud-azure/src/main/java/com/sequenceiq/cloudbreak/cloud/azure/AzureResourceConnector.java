@@ -137,7 +137,8 @@ public class AzureResourceConnector extends AbstractResourceConnector {
             }
             String customImageId = image.getId();
             template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
-                    cloudContext, stack, AzureInstanceTemplateOperation.PROVISION, null);
+                    cloudContext, stack, AzureInstanceTemplateOperation.PROVISION, azureImageFormatValidator.hasSourceImagePlan(stackImage) ?
+                            azureMarketplaceImageProviderService.getSourceImage(stackImage) : null);
         }
 
 
@@ -197,8 +198,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
-            throws Exception {
+    public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier) {
         // todo: we're implementing this method as part of the work to add LBs to an existing environment. See CB-11647
         return ImmutableList.of();
     }

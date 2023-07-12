@@ -11,11 +11,16 @@ import com.sequenceiq.freeipa.entity.ImageEntity;
 
 class ImageToImageEntityConverterTest {
 
-    private ImageToImageEntityConverter underTest = new ImageToImageEntityConverter();
+    private static final String SOURCE_IMAGE = "cloudera:offer:sku:vesion";
+
+    private final ImageToImageEntityConverter underTest = new ImageToImageEntityConverter();
 
     @Test
     void testConversion() {
-        Image source = new Image(1L, "date", "", "arch", "1-2-a-b", Map.of(), "manjaro", Map.of("freeipa-ldap-agent", "1.2.3"), false);
+        Image source = new Image(1L, "date", "", "arch", "1-2-a-b", Map.of(), "manjaro",
+                Map.of("freeipa-ldap-agent", "1.2.3",
+                        "source-image", SOURCE_IMAGE),
+                false);
 
         ImageEntity result = underTest.convert("accountId", source);
 
@@ -24,6 +29,7 @@ class ImageToImageEntityConverterTest {
         assertEquals(source.getOsType(), result.getOsType());
         assertEquals(source.getDate(), result.getDate());
         assertEquals("1.2.3", result.getLdapAgentVersion());
+        assertEquals(SOURCE_IMAGE, result.getSourceImage());
     }
 
     @Test
@@ -43,5 +49,24 @@ class ImageToImageEntityConverterTest {
         String result = underTest.extractLdapAgentVersion(source);
 
         assertEquals("1.2.3", result);
+    }
+
+    @Test
+    void testExtractSourceImageFromCloudImage() {
+        com.sequenceiq.cloudbreak.cloud.model.Image source =
+                new com.sequenceiq.cloudbreak.cloud.model.Image("asd", Map.of(), "osss", "type", "url", "name", "imid", Map.of("source-image", SOURCE_IMAGE));
+
+        String result = underTest.extractSourceImage(source);
+
+        assertEquals(SOURCE_IMAGE, result);
+    }
+
+    @Test
+    void testExtractSourceImage() {
+        Image source = new Image(1L, "date", "", "arch", "1-2-a-b", Map.of(), "manjaro", Map.of("source-image", SOURCE_IMAGE), false);
+
+        String result = underTest.extractSourceImage(source);
+
+        assertEquals(SOURCE_IMAGE, result);
     }
 }

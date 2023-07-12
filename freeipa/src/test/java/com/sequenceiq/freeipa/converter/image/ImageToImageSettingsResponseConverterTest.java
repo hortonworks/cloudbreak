@@ -19,6 +19,8 @@ import com.sequenceiq.freeipa.entity.ImageEntity;
 @ExtendWith(MockitoExtension.class)
 class ImageToImageSettingsResponseConverterTest {
 
+    private static final String SOURCE_IMAGE = "cloudera:cdp-7_2_9:runtime-7_2_9:11.33159397.1688602524";
+
     @Mock
     private ImageToImageEntityConverter imageEntityConverter;
 
@@ -32,6 +34,7 @@ class ImageToImageSettingsResponseConverterTest {
         source.setImageCatalogUrl("caturl");
         source.setOs("manjaro");
         source.setLdapAgentVersion("1.2.3");
+        source.setSourceImage(SOURCE_IMAGE);
 
         ImageSettingsResponse result = underTest.convert(source);
 
@@ -39,13 +42,17 @@ class ImageToImageSettingsResponseConverterTest {
         assertEquals(source.getImageCatalogUrl(), result.getCatalog());
         assertEquals(source.getOs(), result.getOs());
         assertEquals(source.getLdapAgentVersion(), result.getLdapAgentVersion());
+        assertEquals(source.getSourceImage(), result.getSourceImage());
     }
 
     @Test
     void testCloudImageConversion() {
         com.sequenceiq.cloudbreak.cloud.model.Image source =
-                new Image("imgname", Map.of(), "alma", "rocky", "url", "name", "imgid", Map.of("freeipa-ldap-agent", "1.2.3"));
+                new Image("imgname", Map.of(), "alma", "rocky", "url", "name", "imgid",
+                        Map.of("freeipa-ldap-agent", "1.2.3",
+                                "source-image", SOURCE_IMAGE));
         when(imageEntityConverter.extractLdapAgentVersion(source)).thenReturn("1.2.3");
+        when(imageEntityConverter.extractSourceImage(source)).thenReturn(SOURCE_IMAGE);
 
         ImageSettingsResponse result = underTest.convert(source);
 
@@ -53,6 +60,7 @@ class ImageToImageSettingsResponseConverterTest {
         assertEquals(source.getImageCatalogUrl(), result.getCatalog());
         assertEquals(source.getOs(), result.getOs());
         assertEquals("1.2.3", result.getLdapAgentVersion());
+        assertEquals(SOURCE_IMAGE, result.getSourceImage());
     }
 
     @Test

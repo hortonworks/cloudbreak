@@ -79,13 +79,14 @@ public class AzureTemplateDeploymentService {
         String template;
         Image stackImage = stack.getImage();
         if (azureImageFormatValidator.isMarketplaceImageFormat(stackImage)) {
-            AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(stack.getImage());
+            AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(stackImage);
             template = azureTemplateBuilder.build(stackName, null, createCredential(ac), azureStackView, cloudContext, stack, azureInstanceTemplateOperation,
                     azureMarketplaceImage);
         } else {
             String customImageId = azureStorage.getCustomImage(client, ac, stack).getId();
             template = azureTemplateBuilder
-                    .build(stackName, customImageId, createCredential(ac), azureStackView, cloudContext, stack, azureInstanceTemplateOperation, null);
+                    .build(stackName, customImageId, createCredential(ac), azureStackView, cloudContext, stack, azureInstanceTemplateOperation,
+                            azureImageFormatValidator.hasSourceImagePlan(stackImage) ? azureMarketplaceImageProviderService.getSourceImage(stackImage) : null);
         }
         return template;
     }

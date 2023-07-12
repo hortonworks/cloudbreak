@@ -4,13 +4,12 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 
 @Component
 public class ImageToImageEntityConverter {
-
-    private static final String FREEIPA_LDAP_AGENT = "freeipa-ldap-agent";
 
     public ImageEntity convert(String accountId, Image source) {
         ImageEntity imageEntity = new ImageEntity();
@@ -20,6 +19,7 @@ public class ImageToImageEntityConverter {
         imageEntity.setOsType(source.getOsType());
         imageEntity.setDate(source.getDate());
         imageEntity.setLdapAgentVersion(extractLdapAgentVersion(source));
+        imageEntity.setSourceImage(extractSourceImage(source));
         return imageEntity;
     }
 
@@ -32,6 +32,18 @@ public class ImageToImageEntityConverter {
     }
 
     private String extractLdapAgentVersion(Map<String, String> packageVersions) {
-        return packageVersions == null ? null : packageVersions.get(FREEIPA_LDAP_AGENT);
+        return packageVersions == null ? null : packageVersions.get(ImagePackageVersion.FREEIPA_LDAP_AGENT.getKey());
+    }
+
+    public String extractSourceImage(Image image) {
+        return extractSourceImage(image.getPackageVersions());
+    }
+
+    public String extractSourceImage(com.sequenceiq.cloudbreak.cloud.model.Image image) {
+        return extractSourceImage(image.getPackageVersions());
+    }
+
+    private String extractSourceImage(Map<String, String> packageVersions) {
+        return packageVersions == null ? null : packageVersions.get(ImagePackageVersion.SOURCE_IMAGE.getKey());
     }
 }

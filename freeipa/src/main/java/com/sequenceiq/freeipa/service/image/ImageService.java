@@ -120,11 +120,13 @@ public class ImageService {
         ImageEntity imageEntity = imageRepository.getByStack(stack);
         imageEntity.setImageName(imageName);
         imageEntity.setAccountId(stack.getAccountId());
-        imageEntity.setImageId(imageWrapper.getImage().getUuid());
+        Image image = imageWrapper.getImage();
+        imageEntity.setImageId(image.getUuid());
         imageEntity.setImageCatalogUrl(imageWrapper.getCatalogUrl());
         imageEntity.setImageCatalogName(imageWrapper.getCatalogName());
-        imageEntity.setDate(imageWrapper.getImage().getDate());
-        imageEntity.setLdapAgentVersion(imageConverter.extractLdapAgentVersion(imageWrapper.getImage()));
+        imageEntity.setDate(image.getDate());
+        imageEntity.setLdapAgentVersion(imageConverter.extractLdapAgentVersion(image));
+        imageEntity.setSourceImage(imageConverter.extractSourceImage(image));
         return imageEntity;
     }
 

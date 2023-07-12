@@ -21,13 +21,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImageProviderService;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
@@ -55,8 +56,11 @@ class AzureImageFilterTest {
     @Mock
     private EntitlementService entitlementService;
 
-    @Spy
-    private AzureMarketplaceImageProviderService azureMarketplaceImageProviderService;
+    @Mock
+    private AzureImageFormatValidator azureImageFormatValidator;
+
+    @InjectMocks
+    private AzureMarketplaceImageProviderService azureMarketplaceImageProviderService = Mockito.spy(new AzureMarketplaceImageProviderService());
 
     @InjectMocks
     private AzureImageFilter underTest;

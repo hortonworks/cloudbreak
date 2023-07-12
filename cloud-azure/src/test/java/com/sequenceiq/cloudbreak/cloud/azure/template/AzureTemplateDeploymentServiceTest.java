@@ -4,16 +4,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -67,14 +70,19 @@ class AzureTemplateDeploymentServiceTest {
     @InjectMocks
     private AzureTemplateDeploymentService underTest;
 
-    @Test
-    public void testGetTemplateDeploymentWhenFailed() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testGetTemplateDeploymentWhenFailed(boolean hasSourceImagePlan) {
         CloudStack stack = mock(CloudStack.class);
+        Image image = mock(Image.class);
         CloudContext cloudContext = CloudContext.Builder.builder().withId(1L).build();
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, new CloudCredential());
         AzureStackView stackView = mock(AzureStackView.class);
+
+        when(stack.getImage()).thenReturn(image);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), any(CloudStack.class))).thenReturn("rg1");
-        when(azureImageFormatValidator.isMarketplaceImageFormat(isNull(Image.class))).thenReturn(false);
+        when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(false);
+        when(azureImageFormatValidator.hasSourceImagePlan(any(Image.class))).thenReturn(hasSourceImagePlan);
         when(azureStorage.getCustomImage(any(), any(), any())).thenReturn(new AzureImage("1", "image1", true));
         when(azureTemplateBuilder.build(eq("stack1"), eq("1"), any(), any(), any(), any(), any(), any())).thenReturn("template");
         when(retry.testWith1SecDelayMax5Times(any(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
@@ -91,6 +99,7 @@ class AzureTemplateDeploymentServiceTest {
         Retry.ActionFailedException actionFailedException = assertThrows(Retry.ActionFailedException.class,
                 () -> underTest.getTemplateDeployment(client, stack, ac, stackView, AzureInstanceTemplateOperation.PROVISION));
 
+        verify(azureMarketplaceImageProviderService, hasSourceImagePlan ? times(1) : never()).getSourceImage(eq(image));
         assertEquals("VMs not started in time.", actionFailedException.getMessage());
     }
 

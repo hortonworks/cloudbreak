@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureDatabaseResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImageTermsSignerService;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImageProviderService;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
@@ -174,6 +175,7 @@ public class AzureResourceConnectorTest {
         verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
         verify(azureUtils, times(1)).getCustomNetworkId(network);
         verify(azureUtils, times(1)).getCustomSubnetIds(network);
+        verify(azureMarketplaceImageProviderService, never()).getSourceImage(eq(imageModel));
         verify(azureMarketplaceImageProviderService, times(0)).get(imageModel);
     }
 
@@ -193,6 +195,7 @@ public class AzureResourceConnectorTest {
         verify(azureUtils, times(1)).getCustomNetworkId(network);
         verify(client, never()).createTemplateDeployment(any(), any(), any(), any());
         verify(client, times(2)).getTemplateDeployment(any(), any());
+        verify(azureMarketplaceImageProviderService, never()).getSourceImage(eq(imageModel));
         verify(azureMarketplaceImageProviderService, times(0)).get(imageModel);
     }
 
@@ -212,6 +215,7 @@ public class AzureResourceConnectorTest {
         verify(azureUtils, times(1)).getCustomNetworkId(network);
         verify(client, times(1)).createTemplateDeployment(any(), any(), any(), any());
         verify(client, times(1)).getTemplateDeployment(any(), any());
+        verify(azureMarketplaceImageProviderService, never()).getSourceImage(eq(imageModel));
         verify(azureMarketplaceImageProviderService, times(0)).get(imageModel);
     }
 
@@ -227,6 +231,7 @@ public class AzureResourceConnectorTest {
         underTest.launch(ac, stack, notifier, adjustmentTypeWithThreshold);
 
         verify(azureMarketplaceImageProviderService, times(1)).get(imageModel);
+        verify(azureMarketplaceImageProviderService, never()).getSourceImage(eq(imageModel));
         verify(azureImageTermsSignerService, times(1)).sign(eq(null), eq(null), any());
     }
 
@@ -242,7 +247,33 @@ public class AzureResourceConnectorTest {
         underTest.launch(ac, stack, notifier, adjustmentTypeWithThreshold);
 
         verify(azureMarketplaceImageProviderService, times(1)).get(imageModel);
+        verify(azureMarketplaceImageProviderService, never()).getSourceImage(eq(imageModel));
         verify(azureImageTermsSignerService, never()).sign(eq(null), eq(null), any());
+    }
+
+    @Test
+    public void testWhenSourceImageExistsThenComputeResourceServiceBuildsTheResources() {
+
+        AzureMarketplaceImage azureMarketplaceImage = new AzureMarketplaceImage("cloudera", "my-offer", "my-plan", "my-version");
+
+        when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
+        when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
+        when(azureImageFormatValidator.isMarketplaceImageFormat(any(Image.class))).thenReturn(false);
+        when(azureImageFormatValidator.hasSourceImagePlan(any(Image.class))).thenReturn(true);
+        when(azureMarketplaceImageProviderService.getSourceImage(imageModel)).thenReturn(azureMarketplaceImage);
+
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(ADJUSTMENT_TYPE, THRESHOLD);
+        underTest.launch(ac, stack, notifier, adjustmentTypeWithThreshold);
+
+        verify(azureComputeResourceService, times(1)).buildComputeResourcesForLaunch(eq(ac), eq(stack), eq(adjustmentTypeWithThreshold),
+                eq(instances), any());
+        verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
+        verify(azureUtils, times(1)).getCustomNetworkId(network);
+        verify(azureUtils, times(1)).getCustomSubnetIds(network);
+        verify(azureMarketplaceImageProviderService, times(0)).get(imageModel);
+        verify(azureMarketplaceImageProviderService).getSourceImage(eq(imageModel));
+        verify(azureTemplateBuilder).build(eq(STACK_NAME), any(), any(), any(), any(), eq(stack), eq(AzureInstanceTemplateOperation.PROVISION),
+                eq(azureMarketplaceImage));
     }
 
     @Test

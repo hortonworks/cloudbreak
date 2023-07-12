@@ -88,6 +88,7 @@ public class FreeIpaModelDescriptions {
         public static final String IMAGE_ID = "virtual machine image id from ImageCatalog, machines of the cluster will be started from this image";
         public static final String OS_TYPE = "os type of the image, this property is only considered when no specific image id is provided";
         public static final String LDAP_AGENT_VERSION = "LDAP agent version present on the image, if the image contains LDAP agent.";
+        public static final String SOURCE_IMAGE = "Parent image based on which the current image has been created.";
     }
 
     public static class NetworkModelDescription {

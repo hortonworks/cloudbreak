@@ -6,18 +6,20 @@ import java.util.Optional;
 public enum ImagePackageVersion {
 
     CDH_BUILD_NUMBER("cdh-build-number"),
+    CDP_LOGGING_AGENT("cdp-logging-agent"),
     CFM("cfm", "Cloudera Flow Management"),
     CM("cm", "Cloudera Manager"),
     CM_BUILD_NUMBER("cm-build-number"),
     CSA("csa", "Cloudera Streaming Analytics with Apache Flink"),
     CSA_DH("csa-dh", "Cloudera Streaming Analytics with Apache Flink"),
+    FREEIPA_LDAP_AGENT("freeipa-ldap-agent"),
     PROFILER("profiler", "Profiler Scheduler + Manager"),
+    PYTHON38("python38", "Python 3.8"),
     SALT("salt"),
     SALT_BOOTSTRAP("salt-bootstrap"),
+    SOURCE_IMAGE("source-image"),
     SPARK3("spark3", "Spark 3"),
-    STACK("stack"),
-    CDP_LOGGING_AGENT("cdp-logging-agent"),
-    PYTHON38("python38", "Python 3.8");
+    STACK("stack");
 
     private final String key;
 
