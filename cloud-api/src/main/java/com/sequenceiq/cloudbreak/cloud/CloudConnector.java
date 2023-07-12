@@ -162,6 +162,16 @@ public interface CloudConnector extends CloudPlatformAware {
     }
 
     /**
+     * Access to the {@link AvailabilityZoneConnector} object.
+     *
+     * @return the {@link AvailabilityZoneConnector} object
+     */
+
+    default AvailabilityZoneConnector availabilityZoneConnector() {
+        return null;
+    }
+
+    /**
      * Access to the {@link ResourceVolumeConnector} object.
      *
      * @return the {@link ResourceVolumeConnector} object

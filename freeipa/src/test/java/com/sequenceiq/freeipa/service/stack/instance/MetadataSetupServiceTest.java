@@ -7,7 +7,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,10 +19,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.image.ImageService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MetadataSetupServiceTest {
@@ -54,6 +64,9 @@ public class MetadataSetupServiceTest {
     @Mock
     private Clock clock;
 
+    @Mock
+    private ImageService imageService;
+
     @InjectMocks
     private MetadataSetupService underTest;
 
@@ -78,5 +91,42 @@ public class MetadataSetupServiceTest {
         verify(instanceMetaData2, never()).setTerminationDate(any());
         verify(instanceMetaData2, never()).setInstanceStatus(InstanceStatus.TERMINATED);
         verify(instanceMetaDataService, times(1)).saveAll(any());
+    }
+
+    @Test
+    public void testSaveInstanceMetaData() {
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        Map<String, String> data = Map.of("1", "instance1", "2", "instance2", "3", "instance3");
+
+        Map<String, InstanceMetaData> instances = data.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(), entry -> {
+            InstanceMetaData instanceMetaData = mock(InstanceMetaData.class);
+            when(instanceMetaData.getInstanceId()).thenReturn(entry.getValue());
+            if (entry.getKey().equals("3")) {
+                when(instanceMetaData.getAvailabilityZone()).thenReturn(entry.getKey());
+            }
+            return instanceMetaData;
+        }));
+        List<CloudVmMetaDataStatus> cloudVmMetaDataStatusList = data.entrySet().stream().map(entry -> {
+            CloudVmMetaDataStatus cloudVmMetaDataStatus = mock(CloudVmMetaDataStatus.class);
+            CloudVmInstanceStatus cloudVmInstanceStatus = mock(CloudVmInstanceStatus.class);
+            CloudInstanceMetaData cloudInstanceMetaData = mock(CloudInstanceMetaData.class);
+            when(cloudVmMetaDataStatus.getCloudVmInstanceStatus()).thenReturn(cloudVmInstanceStatus);
+            when(cloudVmMetaDataStatus.getMetaData()).thenReturn(cloudInstanceMetaData);
+            CloudInstance cloudInstance = mock(CloudInstance.class);
+            when(cloudVmInstanceStatus.getCloudInstance()).thenReturn(cloudInstance);
+            InstanceTemplate instanceTemplate = mock(InstanceTemplate.class);
+            when(instanceTemplate.getPrivateId()).thenReturn(null);
+            when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
+            when(cloudInstance.getInstanceId()).thenReturn(entry.getValue());
+            when(cloudInstance.getAvailabilityZone()).thenReturn(entry.getKey());
+            return cloudVmMetaDataStatus;
+        }).collect(Collectors.toList());
+
+        when(instanceMetaDataService.findNotTerminatedForStack(any())).thenReturn(new HashSet<>(instances.values()));
+        underTest.saveInstanceMetaData(stack, cloudVmMetaDataStatusList, null);
+        instances.entrySet().stream().forEach(entry -> {
+            verify(entry.getValue(), times(entry.getValue().getAvailabilityZone() != null ? 0 : 1)).setAvailabilityZone(entry.getKey());
+        });
     }
 }

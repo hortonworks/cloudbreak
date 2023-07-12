@@ -34,6 +34,7 @@ import com.sequenceiq.freeipa.converter.instance.template.InstanceTemplateReques
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceGroupProvider;
 import com.sequenceiq.freeipa.util.CloudArgsForIgConverter;
 
@@ -51,6 +52,9 @@ public class InstanceGroupRequestToInstanceGroupConverter {
 
     @Inject
     private DefaultInstanceGroupProvider defaultInstanceGroupProvider;
+
+    @Inject
+    private MultiAzCalculatorService multiAzCalculatorService;
 
     public InstanceGroup convert(InstanceGroupRequest source, NetworkRequest networkRequest, String accountId, Stack stack,
             FreeIpaServerRequest ipaServerRequest, DetailedEnvironmentResponse environment, EnumMap<CloudArgsForIgConverter, String> cloudArgsForIgConverter) {
@@ -76,6 +80,7 @@ public class InstanceGroupRequestToInstanceGroupConverter {
             addInstanceMetadatas(source, instanceGroup, ipaServerRequest.getHostname(), ipaServerRequest.getDomain(), stack.getPlatformvariant());
         }
         instanceGroup.setNodeCount(source.getNodeCount());
+        multiAzCalculatorService.populateAvailabilityZones(stack, environment, instanceGroup);
         return instanceGroup;
     }
 

@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.converter.AvailabilityZoneConverter;
 import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
@@ -34,10 +35,13 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
 
     private final AzureRegistrationTypeResolver azureRegistrationTypeResolver;
 
+    private final AvailabilityZoneConverter availabilityZoneConverter;
+
     public AzureEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter, EntitlementService entitlementService,
-        AzureRegistrationTypeResolver azureRegistrationTypeResolver) {
+        AzureRegistrationTypeResolver azureRegistrationTypeResolver, AvailabilityZoneConverter availabilityZoneConverter) {
         super(environmentViewConverter, entitlementService);
         this.azureRegistrationTypeResolver = azureRegistrationTypeResolver;
+        this.availabilityZoneConverter = availabilityZoneConverter;
     }
 
     @Override
@@ -53,7 +57,8 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
             if (ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT.equals(network.getServiceEndpointCreation())) {
                 azureNetwork.setDatabasePrivateDnsZoneId(azureParams.getDatabasePrivateDnsZoneId());
             }
-            azureNetwork.setAvailabilityZones(azureParams.getAvailabilityZones());
+            azureNetwork.setZoneMetas(availabilityZoneConverter.getJsonAttributesWithAvailabilityZones(azureParams.getAvailabilityZones(),
+                    azureNetwork.getZoneMetas()));
         }
         return azureNetwork;
     }
@@ -106,7 +111,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
                                 .withDatabasePrivateDnsZoneId(azureNetwork.getDatabasePrivateDnsZoneId())
                                 .withAksPrivateDnsZoneId(azureNetwork.getAksPrivateDnsZoneId())
                                 .withNoOutboundLoadBalancer(azureNetwork.isNoOutboundLoadBalancer())
-                                .withAvailabilityZones(azureNetwork.getAvailabilityZones())
+                                .withAvailabilityZones(availabilityZoneConverter.getAvailabilityZonesFromJsonAttributes(azureNetwork.getZoneMetas()))
                                 .build())
                 .build();
     }

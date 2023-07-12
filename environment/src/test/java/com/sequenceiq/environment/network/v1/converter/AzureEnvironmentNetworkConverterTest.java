@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Map;
@@ -23,6 +24,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
+import com.sequenceiq.cloudbreak.converter.AvailabilityZoneConverter;
 import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -91,22 +95,31 @@ class AzureEnvironmentNetworkConverterTest {
     @Spy
     private AzureRegistrationTypeResolver azureRegistrationTypeResolver;
 
+    @Mock
+    private AvailabilityZoneConverter availabilityZoneConverter;
+
     @InjectMocks
     private AzureEnvironmentNetworkConverter underTest;
 
     @Test
     void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDto() {
         Environment environment = createEnvironment();
+        Set<String> availabilityZones = Set.of("1", "2");
+        Map<String, Set<String>> availabilityZonesMap = Map.of(NetworkConstants.AVAILABILITY_ZONES, availabilityZones);
         NetworkDto networkDto = NetworkDto.builder()
                 .withAzure(AzureParams.builder()
                         .withNetworkId(NETWORK_ID)
                         .withResourceGroupName(RESOURCE_GROUP_NAME)
                         .withNoPublicIp(true)
+                        .withAvailabilityZones(availabilityZones)
                         .build())
                 .withName(NETWORK_NAME)
                 .withNetworkCidr(NETWORK_CIDR)
                 .withSubnetMetas(createSubnetMetas())
                 .build();
+
+        when(availabilityZoneConverter.getJsonAttributesWithAvailabilityZones(availabilityZones, null))
+                .thenReturn(new Json(availabilityZonesMap));
 
         AzureNetwork actual = (AzureNetwork) underTest.convert(environment, networkDto, Map.of(), Map.of());
 
@@ -117,7 +130,7 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
         assertEquals(RegistrationType.EXISTING, actual.getRegistrationType());
         assertTrue(SUBNET_IDS.containsAll(actual.getSubnetMetas().keySet()));
-        assertEquals(Collections.emptySet(), actual.getAvailabilityZones());
+        assertEquals(new Json(availabilityZonesMap), actual.getZoneMetas());
         verify(environmentViewConverter).convert(environment);
     }
 
@@ -166,7 +179,8 @@ class AzureEnvironmentNetworkConverterTest {
         AzureNetwork azureNetwork = createAzureNetwork();
         azureNetwork.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
         azureNetwork.setEndpointGatewaySubnetMetas(createEndpointSubnetMetas());
-        azureNetwork.setAvailabilityZones(Set.of("1", "2"));
+        Set<String> availabilityZones = Set.of("1", "2");
+        when(availabilityZoneConverter.getAvailabilityZonesFromJsonAttributes(null)).thenReturn(availabilityZones);
 
         NetworkDto actual = underTest.convertToDto(azureNetwork);
 
@@ -184,7 +198,7 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(azureNetwork.getNetworkCidr(), actual.getNetworkCidr());
         assertEquals(azureNetwork.getResourceCrn(), actual.getResourceCrn());
         assertEquals(azureNetwork.getNetworkId(), actual.getAzure().getNetworkId());
-        assertEquals(azureNetwork.getAvailabilityZones(), actual.getAzure().getAvailabilityZones());
+        assertEquals(availabilityZones, actual.getAzure().getAvailabilityZones());
     }
 
     @Test
@@ -269,7 +283,6 @@ class AzureEnvironmentNetworkConverterTest {
         azureNetwork.setNetworkId(NETWORK_ID);
         azureNetwork.setResourceGroupName(RESOURCE_GROUP_NAME);
         azureNetwork.setNoPublicIp(true);
-        azureNetwork.setAvailabilityZones(Collections.emptySet());
         return azureNetwork;
     }
 

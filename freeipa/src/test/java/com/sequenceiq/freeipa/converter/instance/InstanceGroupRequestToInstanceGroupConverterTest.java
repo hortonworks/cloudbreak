@@ -10,6 +10,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.EnumMap;
@@ -39,6 +41,7 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.SecurityGroup;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.Template;
+import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceGroupProvider;
 import com.sequenceiq.freeipa.util.CloudArgsForIgConverter;
 
@@ -64,6 +67,9 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
 
     @Mock
     private DefaultInstanceGroupProvider defaultInstanceGroupProvider;
+
+    @Mock
+    private MultiAzCalculatorService multiAzCalculatorService;
 
     @Test
     public void testConvertWithNullTemplate() {
@@ -111,6 +117,7 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
             assertThat(instanceMetaData.getDiscoveryFQDN()).startsWith(HOSTNAME + i);
             i++;
         }
+        verify(multiAzCalculatorService, times(1)).populateAvailabilityZones(stack, detailedEnvironmentResponse, result);
     }
 
     @Test
@@ -147,6 +154,7 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getTemplate()).isSameAs(template);
+        verify(multiAzCalculatorService, times(1)).populateAvailabilityZones(stack, detailedEnvironmentResponse, result);
     }
 
     @Test
@@ -186,6 +194,7 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getTemplate()).isSameAs(template);
+        verify(multiAzCalculatorService, times(1)).populateAvailabilityZones(stack, detailedEnvironmentResponse, result);
     }
 
     @Test
@@ -223,6 +232,7 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getTemplate()).isSameAs(template);
+        verify(multiAzCalculatorService, times(1)).populateAvailabilityZones(stack, detailedEnvironmentResponse, result);
     }
 
     @Test
@@ -259,6 +269,8 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getTemplate()).isSameAs(template);
+
+        verify(multiAzCalculatorService, times(1)).populateAvailabilityZones(stack, detailedEnvironmentResponse, result);
     }
 
     @Test
@@ -295,6 +307,8 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getTemplate()).isSameAs(template);
+
+        verify(multiAzCalculatorService, times(1)).populateAvailabilityZones(stack, detailedEnvironmentResponse, result);
     }
 
     @Test
@@ -335,6 +349,8 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
         assertThat(result).isNotNull();
         assertThat(result.getTemplate()).isSameAs(template);
 
+        verify(multiAzCalculatorService, times(1)).populateAvailabilityZones(stack, detailedEnvironmentResponse, result);
+
     }
 
     @Test
@@ -372,6 +388,8 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getTemplate()).isSameAs(template);
+
+        verify(multiAzCalculatorService, times(1)).populateAvailabilityZones(stack, detailedEnvironmentResponse, result);
     }
 
     EnumMap<CloudArgsForIgConverter, String> createAndGetCloudArgsForIgCoverterMap(String diskEncryptionSetId,
