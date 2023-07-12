@@ -675,7 +675,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private void restartServices(boolean rollingRestartEnabled) throws ApiException, CloudbreakException {
-        clouderaManagerRestartService.doRestartServicesIfNeeded(v31Client, stack, rollingRestartEnabled);
+        clouderaManagerRestartService.doRestartServicesIfNeeded(v31Client, stack, rollingRestartEnabled, Optional.empty());
+    }
+
+    private void restartGivenServices(List<String> serviceNames) throws ApiException, CloudbreakException {
+        clouderaManagerRestartService.doRestartServicesIfNeeded(v31Client, stack, false, Optional.ofNullable(serviceNames));
     }
 
     private void restartClouderaManagementServices(MgmtServiceResourceApi mgmtServiceResourceApi) throws ApiException, CloudbreakException {
@@ -1142,9 +1146,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     public void updateConfig(Table<String, String, String> configTable) throws Exception {
         clouderaManagerConfigModificationService.updateConfig(configTable, v31Client, stack);
         LOGGER.info("Updating relevant configs finished for cluster {} in CM, deploying client configs and restarting services.", stack.getName());
-        deployClientConfig(clouderaManagerApiFactory.getClustersResourceApi(v31Client), stack);
         clouderaManagerRoleRefreshService.refreshClusterRoles(v31Client, stack);
-        restartServices(false);
+        List<String> serviceNames = clouderaManagerConfigModificationService.serviceNames(configTable, v31Client, stack);
+        restartGivenServices(serviceNames);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cm;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.cm.DataView.SUMMARY;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_RESTARTING;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyString;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -83,7 +85,7 @@ class ClouderaManagerRestartServiceTest {
         when(clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY.name(), null)).thenReturn(activeCommands);
         when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClient, COMMAND_ID)).thenReturn(pollingResult);
 
-        underTest.doRestartServicesIfNeeded(apiClient, stack, false);
+        underTest.doRestartServicesIfNeeded(apiClient, stack, false, Optional.empty());
 
         verify(pollingResultErrorHandler).handlePollingResult(eq(pollingResult), anyString(), anyString());
         verifyNoInteractions(eventService);
@@ -108,10 +110,26 @@ class ClouderaManagerRestartServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClient, COMMAND_ID)).thenReturn(pollingResult);
         when(clustersResourceApi.restartCommand(eq(stack.getName()), any(ApiRestartClusterArgs.class))).thenReturn(new ApiCommand().id(COMMAND_ID));
 
-        underTest.doRestartServicesIfNeeded(apiClient, stack, false);
+        underTest.doRestartServicesIfNeeded(apiClient, stack, false, Optional.empty());
 
         verify(pollingResultErrorHandler).handlePollingResult(eq(pollingResult), anyString(), anyString());
         verify(eventService).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_RESTARTING);
+    }
+
+    @Test
+    void testRestartWhenTriggerRestartCommandWithServices() throws CloudbreakException, ApiException {
+        when(clouderaManagerApiFactory.getClustersResourceApi(apiClient)).thenReturn(clustersResourceApi);
+        when(clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY.name(), null)).thenReturn(new ApiCommandList().items(Collections.emptyList()));
+        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClient, COMMAND_ID)).thenReturn(pollingResult);
+        when(clustersResourceApi.restartCommand(eq(stack.getName()), any(ApiRestartClusterArgs.class))).thenReturn(new ApiCommand().id(COMMAND_ID));
+
+        underTest.doRestartServicesIfNeeded(apiClient, stack, false, Optional.of(List.of("test")));
+
+        verify(pollingResultErrorHandler).handlePollingResult(eq(pollingResult), anyString(), anyString());
+        verify(eventService).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_RESTARTING);
+        ArgumentCaptor<ApiRestartClusterArgs> restartArgsCaptor = ArgumentCaptor.forClass(ApiRestartClusterArgs.class);
+        verify(clustersResourceApi).restartCommand(eq(stack.getName()), restartArgsCaptor.capture());
+        assertEquals(List.of("test"), restartArgsCaptor.getValue().getRestartServiceNames());
     }
 
     @Test
@@ -120,7 +138,7 @@ class ClouderaManagerRestartServiceTest {
         when(clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY.name(), null)).thenReturn(new ApiCommandList().items(Collections.emptyList()));
         when(clustersResourceApi.restartCommand(eq(stack.getName()), any(ApiRestartClusterArgs.class))).thenReturn(null);
 
-        underTest.doRestartServicesIfNeeded(apiClient, stack, false);
+        underTest.doRestartServicesIfNeeded(apiClient, stack, false, Optional.empty());
 
         verify(eventService).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_RESTARTING);
         verifyNoInteractions(pollingResultErrorHandler);
@@ -136,7 +154,7 @@ class ClouderaManagerRestartServiceTest {
         when(clustersResourceApi.rollingRestart(eq(stack.getName()), any(ApiRollingRestartClusterArgs.class))).thenReturn(new ApiCommand().id(COMMAND_ID));
         when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClient, COMMAND_ID)).thenReturn(pollingResult);
 
-        underTest.doRestartServicesIfNeeded(apiClient, stack, true);
+        underTest.doRestartServicesIfNeeded(apiClient, stack, true, Optional.empty());
 
         ArgumentCaptor<ApiRollingRestartClusterArgs> argumentCaptor = ArgumentCaptor.forClass(ApiRollingRestartClusterArgs.class);
         verify(clustersResourceApi).rollingRestart(eq(stack.getName()), argumentCaptor.capture());

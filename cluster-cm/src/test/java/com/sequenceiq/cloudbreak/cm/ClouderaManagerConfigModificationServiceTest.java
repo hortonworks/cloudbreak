@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,14 +42,20 @@ public class ClouderaManagerConfigModificationServiceTest {
     private ClouderaManagerConfigModificationService underTest;
 
     @Test
+    void testServiceNames() {
+        mockReadServices();
+
+        Table<String, String, String> configTable = getConfigTable();
+        List<String> result = underTest.serviceNames(configTable, null, new Stack());
+
+        assertTrue(result.containsAll(List.of("service1", "service2", "service3")));
+    }
+
+    @Test
     void testUpdateConfig() throws Exception {
         mockConfigServiceCalls();
 
-        Table<String, String, String> configTable = HashBasedTable.create();
-        configTable.put("serviceType1", "serviceConfig1", "newValue1");
-        configTable.put("serviceType2", "serviceConfig2", "newValue2");
-        configTable.put("serviceType2", "roleConfigGroupConfig2", "newValue3");
-        configTable.put("serviceType3", "roleConfigGroupConfig3", "newValue4");
+        Table<String, String, String> configTable = getConfigTable();
         underTest.updateConfig(configTable, null, new Stack());
 
         verify(configService, times(3)).readServiceConfig(any(), any(), any());
@@ -71,11 +78,7 @@ public class ClouderaManagerConfigModificationServiceTest {
         when(configService.readServiceConfig(any(), any(), eq("service2"))).thenReturn(new ApiServiceConfig()
                 .addItemsItem(apiConfig("other", "old")));
 
-        Table<String, String, String> configTable = HashBasedTable.create();
-        configTable.put("serviceType1", "serviceConfig1", "newValue1");
-        configTable.put("serviceType2", "serviceConfig2", "newValue2");
-        configTable.put("serviceType2", "roleConfigGroupConfig2", "newValue3");
-        configTable.put("serviceType3", "roleConfigGroupConfig3", "newValue4");
+        Table<String, String, String> configTable = getConfigTable();
         assertThrows(CloudbreakServiceException.class, () -> underTest.updateConfig(configTable, null, new Stack()));
 
         verify(configService, times(3)).readServiceConfig(any(), any(), any());
@@ -85,10 +88,7 @@ public class ClouderaManagerConfigModificationServiceTest {
     }
 
     private void mockConfigServiceCalls() {
-        when(configService.readServices(any(), any())).thenReturn(new ApiServiceList()
-                .addItemsItem(apiService("service1", "serviceType1"))
-                .addItemsItem(apiService("service2", "serviceType2"))
-                .addItemsItem(apiService("service3", "serviceType3")));
+        mockReadServices();
         when(configService.readServiceConfig(any(), any(), eq("service1"))).thenReturn(new ApiServiceConfig()
                 .addItemsItem(apiConfig("serviceConfig1", "old")));
         lenient().when(configService.readServiceConfig(any(), any(), eq("service2"))).thenReturn(new ApiServiceConfig()
@@ -103,11 +103,27 @@ public class ClouderaManagerConfigModificationServiceTest {
         lenient().doNothing().when(configService).modifyRoleConfigGroups(any(), any(), any(), any(), any());
     }
 
+    private void mockReadServices() {
+        when(configService.readServices(any(), any())).thenReturn(new ApiServiceList()
+                .addItemsItem(apiService("service1", "serviceType1"))
+                .addItemsItem(apiService("service2", "serviceType2"))
+                .addItemsItem(apiService("service3", "serviceType3")));
+    }
+
     private ApiService apiService(String name, String type) {
         return new ApiService().name(name).type(type);
     }
 
     private ApiConfig apiConfig(String key, String value) {
         return new ApiConfig().name(key).value(value);
+    }
+
+    private Table<String, String, String> getConfigTable() {
+        Table<String, String, String> configTable = HashBasedTable.create();
+        configTable.put("serviceType1", "serviceConfig1", "newValue1");
+        configTable.put("serviceType2", "serviceConfig2", "newValue2");
+        configTable.put("serviceType2", "roleConfigGroupConfig2", "newValue3");
+        configTable.put("serviceType3", "roleConfigGroupConfig3", "newValue4");
+        return configTable;
     }
 }

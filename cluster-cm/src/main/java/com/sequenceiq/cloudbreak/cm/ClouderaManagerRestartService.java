@@ -52,7 +52,8 @@ public class ClouderaManagerRestartService {
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
-    public void doRestartServicesIfNeeded(ApiClient apiClient, StackDtoDelegate stack, boolean rollingRestartEnabled) throws ApiException, CloudbreakException {
+    public void doRestartServicesIfNeeded(ApiClient apiClient, StackDtoDelegate stack, boolean rollingRestartEnabled, Optional<List<String>> serviceNames)
+            throws ApiException, CloudbreakException {
         LOGGER.debug("Restarting Cloudera Manager services, rollingRestartEnabled: {}", rollingRestartEnabled);
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
         Optional<ApiCommand> optionalActiveRestartCommand = findActiveRestartCommand(stack, clustersResourceApi, rollingRestartEnabled);
@@ -63,7 +64,7 @@ public class ClouderaManagerRestartService {
             LOGGER.info("Calling restart command. rollingRestartEnabled {}", rollingRestartEnabled);
             ApiCommand restartCommand = rollingRestartEnabled ?
                     executeRollingRestartCommand(apiClient, stack, clustersResourceApi) :
-                    executeRestartCommand(stack, clustersResourceApi);
+                    executeRestartCommand(stack, clustersResourceApi, serviceNames);
             eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_RESTARTING);
             waitForRestartExecution(apiClient, stack, restartCommand);
         }
@@ -96,9 +97,11 @@ public class ClouderaManagerRestartService {
         return clustersResourceApi.rollingRestart(stack.getName(), rollingRestartClusterArgs);
     }
 
-    private ApiCommand executeRestartCommand(StackDtoDelegate stack, ClustersResourceApi clustersResourceApi) throws ApiException {
+    private ApiCommand executeRestartCommand(StackDtoDelegate stack, ClustersResourceApi clustersResourceApi, Optional<List<String>> serviceNames)
+            throws ApiException {
         ApiRestartClusterArgs restartClusterArgs = new ApiRestartClusterArgs();
         restartClusterArgs.setRedeployClientConfiguration(true);
+        serviceNames.ifPresent(restartClusterArgs::setRestartServiceNames);
         return clustersResourceApi.restartCommand(stack.getName(), restartClusterArgs);
     }
 
