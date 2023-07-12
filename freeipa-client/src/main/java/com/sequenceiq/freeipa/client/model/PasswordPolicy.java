@@ -19,6 +19,9 @@ public class PasswordPolicy {
     private Integer krbmaxpwdlife;
 
     @JsonDeserialize(using = ListFlatteningDeserializer.class)
+    private Integer krbminpwdlife;
+
+    @JsonDeserialize(using = ListFlatteningDeserializer.class)
     private Integer krbpwdmaxfailure;
 
     @JsonDeserialize(using = ListFlatteningDeserializer.class)
@@ -51,6 +54,14 @@ public class PasswordPolicy {
         this.krbmaxpwdlife = krbmaxpwdlife;
     }
 
+    public Integer getKrbminpwdlife() {
+        return krbminpwdlife;
+    }
+
+    public void setKrbminpwdlife(Integer krbminpwdlife) {
+        this.krbminpwdlife = krbminpwdlife;
+    }
+
     public Integer getKrbpwdmaxfailure() {
         return krbpwdmaxfailure;
     }
@@ -81,6 +92,7 @@ public class PasswordPolicy {
                 .add("krbpwdminlength=" + krbpwdminlength)
                 .add("krbpwdmindiffchars=" + krbpwdmindiffchars)
                 .add("krbmaxpwdlife=" + krbmaxpwdlife)
+                .add("krbminpwdlife=" + krbminpwdlife)
                 .add("krbpwdmaxfailure=" + krbpwdmaxfailure)
                 .add("krbpwdfailurecountinterval=" + krbpwdfailurecountinterval)
                 .add("krbpwdlockoutduration=" + krbpwdlockoutduration)

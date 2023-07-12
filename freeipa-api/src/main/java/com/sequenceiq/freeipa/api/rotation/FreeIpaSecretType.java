@@ -4,6 +4,9 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.SALTBOOT_CONFIG;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.USER_DATA;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.FREEIPA_ADMIN_USER_PASSWORD;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.FREEIPA_DIRECTORY_MANAGER_PASSWORD;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.FREEIPA_PILLAR_UPDATE;
 
 import java.util.List;
 
@@ -12,6 +15,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 
 public enum FreeIpaSecretType implements SecretType {
 
+    FREEIPA_ADMIN_PASSWORD(List.of(VAULT, FREEIPA_ADMIN_USER_PASSWORD, FREEIPA_DIRECTORY_MANAGER_PASSWORD, FREEIPA_PILLAR_UPDATE)),
     FREEIPA_SALT_BOOT_SECRETS(List.of(VAULT, CUSTOM_JOB, SALTBOOT_CONFIG, USER_DATA));
 
     private final List<SecretRotationStep> steps;

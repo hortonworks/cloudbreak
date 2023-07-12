@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -246,6 +248,7 @@ public class ImageServiceTest {
         Stack stack = new Stack();
         stack.setRegion(REGION);
         stack.setCloudPlatform(DEFAULT_PLATFORM);
+        stack.setAccountId("account");
         ImageEntity imageEntity = new ImageEntity();
         imageEntity.setImageId(IMAGE_UUID);
         imageEntity.setOs(DEFAULT_OS);
@@ -256,12 +259,12 @@ public class ImageServiceTest {
         when(imageProviderFactory.getImageProvider(IMAGE_CATALOG)).thenReturn(imageProvider);
         Image image = new Image(123L, "now", "desc", DEFAULT_OS, IMAGE_UUID, Map.of(), "os", Map.of(), true);
         ImageWrapper imageWrapper = new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG);
-        when(imageProvider.getImage(any())).thenReturn(Optional.of(imageWrapper));
+        when(imageProvider.getImage(any(), anyString())).thenReturn(Optional.of(imageWrapper));
         when(platformStringTransformer.getPlatformString(stack)).thenReturn("aws");
 
         ImageCatalog result = underTest.generateImageCatalogForStack(stack);
 
-        verify(imageProvider).getImage(imageFilterSettingsCaptor.capture());
+        verify(imageProvider).getImage(imageFilterSettingsCaptor.capture(), eq("account"));
         assertThat(imageFilterSettingsCaptor.getValue())
                 .returns(IMAGE_CATALOG, FreeIpaImageFilterSettings::catalog)
                 .returns(IMAGE_UUID, FreeIpaImageFilterSettings::currentImageId)

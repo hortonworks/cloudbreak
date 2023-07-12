@@ -38,6 +38,8 @@ class PasswordPolicyServiceTest {
 
     private static final Integer MAX_PASSWORD_LIFETIME_DAYS_VALUE = 90;
 
+    private static final Integer MIN_PASSWORD_LIFETIME_HOURS_VALUE = 0;
+
     private static final String MAX_FAILURES_BEFORE_LOCK = "krbpwdmaxfailure";
 
     private static final Integer MAX_FAILURES_BEFORE_LOCK_VALUE = 10;
@@ -60,6 +62,7 @@ class PasswordPolicyServiceTest {
     void before() {
         ReflectionTestUtils.setField(underTest, "minPasswordLength", MIN_PASSWORD_LENGTH_VALUE);
         ReflectionTestUtils.setField(underTest, "minCharacterClasses", MIN_CHARACTER_CLASSES_VALUE);
+        ReflectionTestUtils.setField(underTest, "minPasswordLife", MIN_PASSWORD_LIFETIME_HOURS_VALUE);
         ReflectionTestUtils.setField(underTest, "maxPasswordLife", MAX_PASSWORD_LIFETIME_DAYS_VALUE);
         ReflectionTestUtils.setField(underTest, "maxFailuresBeforeLock", MAX_FAILURES_BEFORE_LOCK_VALUE);
         ReflectionTestUtils.setField(underTest, "failureResetInterval", FAILURE_RESET_INTERVALL_SECONDS_VALUE);
@@ -135,6 +138,7 @@ class PasswordPolicyServiceTest {
     void testUpdatePasswordPolicyShouldNotUpdateAllPropertyWhenAllExistingPropertyCorrect() throws FreeIpaClientException {
         PasswordPolicy passwordPolicy = new PasswordPolicy();
         passwordPolicy.setKrbmaxpwdlife(MAX_PASSWORD_LIFETIME_DAYS_VALUE);
+        passwordPolicy.setKrbminpwdlife(MIN_PASSWORD_LIFETIME_HOURS_VALUE);
         passwordPolicy.setKrbpwdfailurecountinterval(FAILURE_RESET_INTERVALL_SECONDS_VALUE);
         passwordPolicy.setKrbpwdlockoutduration(LOCKOUT_DURATION_SECONDS_VALUE);
         passwordPolicy.setKrbpwdmaxfailure(MAX_FAILURES_BEFORE_LOCK_VALUE);

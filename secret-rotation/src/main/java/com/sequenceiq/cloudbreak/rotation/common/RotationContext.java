@@ -11,4 +11,11 @@ public class RotationContext {
     public String getResourceCrn() {
         return resourceCrn;
     }
+
+    @Override
+    public String toString() {
+        return "RotationContext{" +
+                "resourceCrn='" + resourceCrn + '\'' +
+                '}';
+    }
 }

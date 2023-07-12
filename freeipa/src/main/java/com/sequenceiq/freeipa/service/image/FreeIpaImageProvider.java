@@ -58,6 +58,10 @@ public class FreeIpaImageProvider implements ImageProvider {
     }
 
     @Override
+    public Optional<ImageWrapper> getImage(FreeIpaImageFilterSettings freeIpaImageFilterSettings, String accountId) {
+        return getImage(freeIpaImageFilterSettings);
+    }
+
     public List<ImageWrapper> getImages(FreeIpaImageFilterSettings freeIpaImageFilterSettings) {
         FreeIpaImageFilterSettings imageFilterSettings = populateImageFilterSettings(freeIpaImageFilterSettings);
         ImageCatalog cachedImageCatalog = imageCatalogProvider.getImageCatalog(imageFilterSettings.catalog());

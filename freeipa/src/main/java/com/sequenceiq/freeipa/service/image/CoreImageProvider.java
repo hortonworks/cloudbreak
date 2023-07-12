@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
@@ -35,6 +37,9 @@ public class CoreImageProvider implements ImageProvider {
     @Inject
     private WebApplicationExceptionMessageExtractor messageExtractor;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     @Override
     public Optional<ImageWrapper> getImage(FreeIpaImageFilterSettings imageFilterSettings) {
         try {
@@ -48,6 +53,21 @@ public class CoreImageProvider implements ImageProvider {
             LOGGER.warn("Image lookup failed: {}", ex.getMessage());
             return Optional.empty();
         }
+    }
+
+    @Override
+    public Optional<ImageWrapper> getImage(FreeIpaImageFilterSettings imageFilterSettings, String accountId) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(), () -> {
+            try {
+                ImageV4Response imageV4Response = imageCatalogV4Endpoint.getSingleImageByCatalogNameAndImageIdInternal(
+                        WORKSPACE_ID_DEFAULT, imageFilterSettings.catalog(), imageFilterSettings.currentImageId(), accountId);
+                Optional<Image> image = convert(imageV4Response);
+                return image.map(i -> new ImageWrapper(i, defaultCatalogUrl, imageFilterSettings.catalog()));
+            } catch (Exception ex) {
+                LOGGER.warn("Image lookup failed: {}", ex.getMessage());
+                return Optional.empty();
+            }
+        });
     }
 
     @Override

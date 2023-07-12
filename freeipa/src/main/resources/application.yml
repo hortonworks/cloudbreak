@@ -102,6 +102,7 @@ freeipa:
     max-password-lenght: 64
     min-character-classes: 4
     max-password-life: 1826
+    min-password-life: 0
     max-failures-before-lock: 10
     failure-reset-interval: 3
     lockout-duration: 10

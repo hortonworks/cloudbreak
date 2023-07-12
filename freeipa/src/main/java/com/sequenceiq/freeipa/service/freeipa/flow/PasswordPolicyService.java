@@ -11,7 +11,9 @@ import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.PasswordPolicy;
 
 @Service
-class PasswordPolicyService {
+public class PasswordPolicyService {
+
+    public static final String MIN_PASSWORD_LIFETIME_HOURS = "krbminpwdlife";
 
     private static final String MIN_PASSWORD_LENGTH = "krbpwdminlength";
 
@@ -33,6 +35,9 @@ class PasswordPolicyService {
 
     @Value("${freeipa.passwordpolicy.max-password-life}")
     private Integer maxPasswordLife;
+
+    @Value("${freeipa.passwordpolicy.min-password-life}")
+    private Integer minPasswordLife;
 
     @Value("${freeipa.passwordpolicy.max-failures-before-lock}")
     private Integer maxFailuresBeforeLock;
@@ -58,6 +63,9 @@ class PasswordPolicyService {
         }
         if (!minCharacterClasses.equals(passwordPolicy.getKrbpwdmindiffchars())) {
             params.put(MIN_CHARACTER_CLASSES, minCharacterClasses);
+        }
+        if (!minPasswordLife.equals(passwordPolicy.getKrbminpwdlife())) {
+            params.put(MIN_PASSWORD_LIFETIME_HOURS, minPasswordLife);
         }
         if (!maxPasswordLife.equals(passwordPolicy.getKrbmaxpwdlife())) {
             params.put(MAX_PASSWORD_LIFETIME_DAYS, maxPasswordLife);

@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestrationNode;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -421,6 +422,10 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
                 .flatMap(instanceGroup -> instanceGroup.getAllInstanceMetaData().stream())
                 .filter(instanceMetaData -> InstanceMetadataType.GATEWAY_PRIMARY.equals(instanceMetaData.getInstanceMetadataType()))
                 .findFirst();
+    }
+
+    public InstanceMetaData getPrimaryGatewayAndThrowExceptionIfEmpty() {
+        return getPrimaryGateway().orElseThrow(() -> new CloudbreakRuntimeException("Can't find any primary GW"));
     }
 
     public String getEnvironmentCrn() {
