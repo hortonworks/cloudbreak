@@ -3,79 +3,79 @@
 # At some point in the future they might be "required"
 
 # Raven team should review authorization framework related changes
-auth-internal/                                                                  @hortonworks/cloudbreak-raven
-auth-internal-api/                                                              @hortonworks/cloudbreak-raven
-authorization-common/                                                           @hortonworks/cloudbreak-raven
-authorization-common-api/                                                       @hortonworks/cloudbreak-raven
-grpc-common/                                                                    @hortonworks/cloudbreak-raven
+auth-internal/                                                                  @cloudbreak/cloudbreak-raven
+auth-internal-api/                                                              @cloudbreak/cloudbreak-raven
+authorization-common/                                                           @cloudbreak/cloudbreak-raven
+authorization-common-api/                                                       @cloudbreak/cloudbreak-raven
+grpc-common/                                                                    @cloudbreak/cloudbreak-raven
 
 # Raven and Armadillo teams should review datalake and datalake-api modules
-datalake/                                                                       @hortonworks/cloudbreak-raven @hortonworks/cloudbreak-armadillo
-datalake-api/                                                                   @hortonworks/cloudbreak-raven @hortonworks/cloudbreak-armadillo
+datalake/                                                                       @cloudbreak/cloudbreak-raven @cloudbreak/cloudbreak-armadillo
+datalake-api/                                                                   @cloudbreak/cloudbreak-raven @cloudbreak/cloudbreak-armadillo
 
 # Raven and Armadillo team should review datalake blueprint changes
-core/src/main/resources/defaults/blueprints/*/cdp-sdx*.bp                       @hortonworks/cloudbreak-raven @hortonworks/cloudbreak-armadillo
+core/src/main/resources/defaults/blueprints/*/cdp-sdx*.bp                       @cloudbreak/cloudbreak-raven @cloudbreak/cloudbreak-armadillo
 
 # Raven team should review quartz and sync job related PRs
-common/src/java/com/sequenceiq/cloudbreak/quartz/*StatusCheckerJob.java         @hortonworks/cloudbreak-raven
+common/src/java/com/sequenceiq/cloudbreak/quartz/*StatusCheckerJob.java         @cloudbreak/cloudbreak-raven
 
 # Raven team should review how Controllers are authorized
-*Controller.java                                                                @hortonworks/cloudbreak-raven
+*Controller.java                                                                @cloudbreak/cloudbreak-raven
 
 # Wolf team should review environment and environment-api modules
-environment/                                                                    @hortonworks/cloudbreak-wolf
-environment-api/                                                                @hortonworks/cloudbreak-wolf
-environment-common/                                                             @hortonworks/cloudbreak-wolf
+environment/                                                                    @cloudbreak/cloudbreak-wolf
+environment-api/                                                                @cloudbreak/cloudbreak-wolf
+environment-common/                                                             @cloudbreak/cloudbreak-wolf
 
 # By default, unless overridden later,
 # Wolf should review every policy change:
-cloud-aws-cloudformation/src/main/resources/definitions/                        @hortonworks/cloudbreak-wolf
-cloud-aws-common/src/main/resources/definitions/                                @hortonworks/cloudbreak-wolf
-cloud-azure/src/main/resources/definitions/                                     @hortonworks/cloudbreak-wolf
+cloud-aws-cloudformation/src/main/resources/definitions/                        @cloudbreak/cloudbreak-wolf
+cloud-aws-common/src/main/resources/definitions/                                @cloudbreak/cloudbreak-wolf
+cloud-azure/src/main/resources/definitions/                                     @cloudbreak/cloudbreak-wolf
 
 # Wolf team should review data hub blueprint changes
-core/src/main/resources/defaults/blueprints/*/cdp-cod*.bp                       @hortonworks/cloudbreak-wolf
-core/src/main/resources/defaults/blueprints/*/cdp-data*.bp                      @hortonworks/cloudbreak-wolf
-core/src/main/resources/defaults/blueprints/*/cdp-dde*.bp                       @hortonworks/cloudbreak-wolf
-core/src/main/resources/defaults/blueprints/*/cdp-flink*.bp                     @hortonworks/cloudbreak-wolf
-core/src/main/resources/defaults/blueprints/*/cdp-flow*.bp                      @hortonworks/cloudbreak-wolf
-core/src/main/resources/defaults/blueprints/*/cdp-opdb*.bp                      @hortonworks/cloudbreak-wolf
-core/src/main/resources/defaults/blueprints/*/cdp-rt*.bp                        @hortonworks/cloudbreak-wolf
-core/src/main/resources/defaults/blueprints/*/cdp-streaming*.bp                 @hortonworks/cloudbreak-wolf
+core/src/main/resources/defaults/blueprints/*/cdp-cod*.bp                       @cloudbreak/cloudbreak-wolf
+core/src/main/resources/defaults/blueprints/*/cdp-data*.bp                      @cloudbreak/cloudbreak-wolf
+core/src/main/resources/defaults/blueprints/*/cdp-dde*.bp                       @cloudbreak/cloudbreak-wolf
+core/src/main/resources/defaults/blueprints/*/cdp-flink*.bp                     @cloudbreak/cloudbreak-wolf
+core/src/main/resources/defaults/blueprints/*/cdp-flow*.bp                      @cloudbreak/cloudbreak-wolf
+core/src/main/resources/defaults/blueprints/*/cdp-opdb*.bp                      @cloudbreak/cloudbreak-wolf
+core/src/main/resources/defaults/blueprints/*/cdp-rt*.bp                        @cloudbreak/cloudbreak-wolf
+core/src/main/resources/defaults/blueprints/*/cdp-streaming*.bp                 @cloudbreak/cloudbreak-wolf
 
 # Wolf team should review data hub template changes
-core/src/main/resources/defaults/clustertemplates/                              @hortonworks/cloudbreak-wolf
+core/src/main/resources/defaults/clustertemplates/                              @cloudbreak/cloudbreak-wolf
 
 # Wolf team should review the network usage in IT
-integration-test/scripts/check-results.sh                                       @hortonworks/cloudbreak-wolf
+integration-test/scripts/check-results.sh                                       @cloudbreak/cloudbreak-wolf
 
 # Wolf team should review template generation related changes
-template-manager-blueprint/                                                     @hortonworks/cloudbreak-wolf
-template-manager-cmtemplate/                                                    @hortonworks/cloudbreak-wolf
-template-manager-tag/                                                           @hortonworks/cloudbreak-wolf
-template-manager-recipe/                                                        @hortonworks/cloudbreak-wolf
-template-manager-core/                                                          @hortonworks/cloudbreak-wolf
+template-manager-blueprint/                                                     @cloudbreak/cloudbreak-wolf
+template-manager-cmtemplate/                                                    @cloudbreak/cloudbreak-wolf
+template-manager-tag/                                                           @cloudbreak/cloudbreak-wolf
+template-manager-recipe/                                                        @cloudbreak/cloudbreak-wolf
+template-manager-core/                                                          @cloudbreak/cloudbreak-wolf
 
 # Wolf team should review audit related changes
-audit-connector/                                                                @hortonworks/cloudbreak-wolf
+audit-connector/                                                                @cloudbreak/cloudbreak-wolf
 
 # Bobcat team should review dataengineering related changes
-core/src/main/resources/defaults/blueprints/*/cdp-data-engineering*.bp          @hortonworks/cloudbreak-bobcat
-core/src/main/resources/defaults/clustertemplates/*/*/dataengineering*.json     @hortonworks/cloudbreak-bobcat
+core/src/main/resources/defaults/blueprints/*/cdp-data-engineering*.bp          @cloudbreak/cloudbreak-bobcat
+core/src/main/resources/defaults/clustertemplates/*/*/dataengineering*.json     @cloudbreak/cloudbreak-bobcat
 
 # Bobcat team should review autoscale related changes
-autoscale/                                                                      @hortonworks/cloudbreak-bobcat
-autoscale-api/                                                                  @hortonworks/cloudbreak-bobcat
+autoscale/                                                                      @cloudbreak/cloudbreak-bobcat
+autoscale-api/                                                                  @cloudbreak/cloudbreak-bobcat
 
 # Duck team should review freeipa related changes
-freeipa/                                                                        @hortonworks/cloudbreak-duck
-freeipa-api/                                                                    @hortonworks/cloudbreak-duck
-freeipa-client/                                                                 @hortonworks/cloudbreak-duck
+freeipa/                                                                        @cloudbreak/cloudbreak-duck
+freeipa-api/                                                                    @cloudbreak/cloudbreak-duck
+freeipa-client/                                                                 @cloudbreak/cloudbreak-duck
 
 # Duck team should review redbeams related changes
-redbeams/                                                                       @hortonworks/cloudbreak-duck
-redbeams-api/                                                                   @hortonworks/cloudbreak-duck
+redbeams/                                                                       @cloudbreak/cloudbreak-duck
+redbeams-api/                                                                   @cloudbreak/cloudbreak-duck
 
 # Armadillo team should review changes to datalake related scripts
-orchestrator-salt/src/main/resources/salt/salt/postgresql/disaster_recovery     @hortonworks/cloudbreak-armadillo
-orchestrator-salt/src/main/resources/salt/salt/datalake_metrics                 @hortonworks/cloudbreak-armadillo
+orchestrator-salt/src/main/resources/salt/salt/postgresql/disaster_recovery     @cloudbreak/cloudbreak-armadillo
+orchestrator-salt/src/main/resources/salt/salt/datalake_metrics                 @cloudbreak/cloudbreak-armadillo
