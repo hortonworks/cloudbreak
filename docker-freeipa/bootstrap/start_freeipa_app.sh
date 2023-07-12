@@ -41,6 +41,6 @@ if [ "$SECURE_RANDOM" == "false" ]; then
   FREEIPA_JAVA_OPTS="$FREEIPA_JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
 fi
 
-FREEIPA_JAVA_OPTS="$FREEIPA_JAVA_OPTS -Djavax.net.ssl.keyStore=NONE -Djavax.net.ssl.keyStoreType=PKCS11 -Djavax.net.ssl.trustStore=NONE -Djavax.net.ssl.trustStoreType=PKCS11"
+FREEIPA_JAVA_OPTS="$FREEIPA_JAVA_OPTS -Djavax.net.ssl.keyStore=NONE -Djavax.net.ssl.keyStoreType=pkcs11 -Djavax.net.ssl.trustStore=NONE -Djavax.net.ssl.trustStoreType=pkcs11"
 
 eval "(java $FREEIPA_JAVA_OPTS -jar /freeipa.jar) & JAVAPID=\$!; trap \"kill \$JAVAPID; wait \$JAVAPID\" SIGINT SIGTERM; wait \$JAVAPID"
