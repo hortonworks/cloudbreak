@@ -88,7 +88,6 @@ import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
-import com.sequenceiq.distrox.v1.distrox.service.SdxServiceDecorator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.RetryableFlow;
@@ -124,9 +123,6 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
 
     @Inject
     private EnvironmentServiceDecorator environmentServiceDecorator;
-
-    @Inject
-    private SdxServiceDecorator sdxServiceDecorator;
 
     @Inject
     private ClusterRecoveryService recoveryService;
@@ -177,8 +173,6 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         LOGGER.info("Adding environment name and credential to the responses.");
         NameOrCrn nameOrCrn = StringUtils.isEmpty(environmentName) ? NameOrCrn.empty() : NameOrCrn.ofName(environmentName);
         environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses, nameOrCrn);
-        LOGGER.info("Adding SDX CRN and name to the responses.");
-        sdxServiceDecorator.prepareMultipleSdxAttributes(stackViewResponses);
         return new StackViewV4Responses(stackViewResponses);
     }
 
@@ -192,8 +186,6 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         LOGGER.info("Adding environment name and credential to the responses.");
         NameOrCrn nameOrCrn = StringUtils.isEmpty(environmentCrn) ? NameOrCrn.empty() : NameOrCrn.ofCrn(environmentCrn);
         environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses, nameOrCrn);
-        LOGGER.info("Adding SDX CRN and name to the responses.");
-        sdxServiceDecorator.prepareMultipleSdxAttributes(stackViewResponses);
         return new StackViewV4Responses(stackViewResponses);
     }
 
@@ -206,8 +198,6 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         LOGGER.info("Adding environment name and credential to the responses.");
         NameOrCrn nameOrCrn = Strings.isNullOrEmpty(environmentCrn) ? NameOrCrn.empty() : NameOrCrn.ofCrn(environmentCrn);
         environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses, nameOrCrn);
-        LOGGER.info("Adding SDX CRN and name to the responses.");
-        sdxServiceDecorator.prepareMultipleSdxAttributes(stackViewResponses);
         return new StackViewV4Responses(stackViewResponses);
     }
 
@@ -219,8 +209,6 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         StackV4Response stackV4Response = stackCommonService.createInWorkspace(request, user, workspace, distroxRequest);
         LOGGER.info("Adding environment name and credential to the response.");
         environmentServiceDecorator.prepareEnvironmentAndCredentialName(stackV4Response);
-        LOGGER.info("Adding SDX CRN and name to the response.");
-        sdxServiceDecorator.prepareSdxAttributes(stackV4Response);
         return stackV4Response;
     }
 
@@ -229,8 +217,6 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         StackV4Response stackResponse = stackCommonService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, accountId, entries, stackType);
         LOGGER.info("Adding environment name and credential to the response.");
         environmentServiceDecorator.prepareEnvironmentAndCredentialName(stackResponse);
-        LOGGER.info("Adding SDX CRN and name to the response.");
-        sdxServiceDecorator.prepareSdxAttributes(stackResponse);
         LOGGER.info("Query Stack successfully decorated.");
         return stackResponse;
     }

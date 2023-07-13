@@ -54,7 +54,6 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
-import com.sequenceiq.distrox.v1.distrox.service.SdxServiceDecorator;
 import com.sequenceiq.flow.core.FlowLogService;
 
 public class StackOperationsTest {
@@ -93,9 +92,6 @@ public class StackOperationsTest {
 
     @Mock
     private CloudbreakUser cloudbreakUser;
-
-    @Mock
-    private SdxServiceDecorator sdxServiceDecorator;
 
     @Mock
     private StackApiViewToStackViewV4ResponseConverter stackApiViewToStackViewV4ResponseConverter;

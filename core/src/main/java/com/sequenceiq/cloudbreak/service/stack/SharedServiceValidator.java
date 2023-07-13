@@ -7,10 +7,8 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -52,35 +50,5 @@ public class SharedServiceValidator {
                         + " cluser's cloud platform [%s].", requestedCloudPlatform, datalakeCloudPlatform));
             }
         }
-    }
-
-    private void checkSharedServiceRequirements(StackV4Request request, Workspace workspace, ValidationResultBuilder resultBuilder) {
-        if (!hasConfiguredLdap(request)) {
-            resultBuilder.error("Shared service stack should have LDAP configured.");
-        }
-        if (!hasConfiguredRdsByType(request, workspace, DatabaseType.HIVE)) {
-            resultBuilder.error("Shared service stack should have HIVE database configured.");
-        }
-        if (!hasConfiguredRdsByType(request, workspace, DatabaseType.RANGER)) {
-            resultBuilder.error("Shared service stack should have RANGER database configured.");
-        }
-    }
-
-    private boolean hasConfiguredLdap(StackV4Request request) {
-        return ldapConfigService.isLdapConfigExistsForEnvironment(request.getEnvironmentCrn(), request.getName());
-    }
-
-    private boolean hasConfiguredRdsByType(StackV4Request request, Workspace workspace, DatabaseType rdsType) {
-        boolean hasConfiguredRds = false;
-        if (!request.getCluster().getDatabases().isEmpty()) {
-            for (String rds : request.getCluster().getDatabases()) {
-                RDSConfig database = rdsConfigService.getByNameForWorkspace(rds, workspace);
-                if (database != null && rdsType.name().equalsIgnoreCase(database.getType())) {
-                    hasConfiguredRds = true;
-                    break;
-                }
-            }
-        }
-        return hasConfiguredRds;
     }
 }

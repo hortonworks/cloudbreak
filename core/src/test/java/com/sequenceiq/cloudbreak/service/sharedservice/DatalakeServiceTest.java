@@ -89,12 +89,15 @@ public class DatalakeServiceTest {
         ResourceBasicView resourceBasicView = mock(ResourceBasicView.class);
         when(resourceBasicView.getId()).thenReturn(1L);
         when(resourceBasicView.getName()).thenReturn("teststack");
+        when(resourceBasicView.getResourceCrn()).thenReturn("resourcecrn");
         lenient().when(stackService.getResourceBasicViewByResourceCrn(anyString())).thenReturn(Optional.of(resourceBasicView));
         StackV4Response x = new StackV4Response();
         underTest.addSharedServiceResponse("crn", x);
         verify(stackService, times(1)).getResourceBasicViewByResourceCrn("crn");
         assertEquals(1L, x.getSharedService().getSharedClusterId());
         assertEquals("teststack", x.getSharedService().getSharedClusterName());
+        assertEquals("teststack", x.getSharedService().getSdxName());
+        assertEquals("resourcecrn", x.getSharedService().getSdxCrn());
     }
 
     @Test
@@ -105,6 +108,8 @@ public class DatalakeServiceTest {
         verify(stackService, times(1)).getResourceBasicViewByResourceCrn("crn");
         assertNull(x.getSharedService().getSharedClusterId());
         assertNull(x.getSharedService().getSharedClusterName());
+        assertNull(x.getSharedService().getSdxCrn());
+        assertNull(x.getSharedService().getSdxName());
     }
 
     @Test

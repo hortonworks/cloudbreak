@@ -83,9 +83,11 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
         if (cluster.getStack().getDatalakeCrn() != null) {
             LOGGER.debug("Add shared service response by datalakeCrn");
             Optional<ResourceBasicView> datalakeStack = stackService.getResourceBasicViewByResourceCrn(cluster.getStack().getDatalakeCrn());
-            datalakeStack.ifPresent(s -> {
-                sharedServiceResponse.setSharedClusterId(s.getId());
-                sharedServiceResponse.setSharedClusterName(s.getName());
+            datalakeStack.ifPresent(datalake -> {
+                sharedServiceResponse.setSharedClusterId(datalake.getId());
+                sharedServiceResponse.setSharedClusterName(datalake.getName());
+                sharedServiceResponse.setSdxCrn(datalake.getResourceCrn());
+                sharedServiceResponse.setSdxName(datalake.getName());
             });
         }
         clusterResponse.setSharedServiceResponse(sharedServiceResponse);
@@ -97,9 +99,11 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
             LOGGER.debug("Checking datalake through the datalakeCrn.");
             Optional<ResourceBasicView> resourceBasicView = stackService.getResourceBasicViewByResourceCrn(datalakeCrn);
             if (resourceBasicView.isPresent()) {
-                ResourceBasicView s = resourceBasicView.get();
-                sharedServiceResponse.setSharedClusterId(s.getId());
-                sharedServiceResponse.setSharedClusterName(s.getName());
+                ResourceBasicView datalake = resourceBasicView.get();
+                sharedServiceResponse.setSharedClusterId(datalake.getId());
+                sharedServiceResponse.setSharedClusterName(datalake.getName());
+                sharedServiceResponse.setSdxCrn(datalake.getResourceCrn());
+                sharedServiceResponse.setSdxName(datalake.getName());
             } else {
                 LOGGER.debug("Unable to find datalake with CRN {}", datalakeCrn);
             }
