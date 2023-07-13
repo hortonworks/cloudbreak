@@ -63,7 +63,7 @@ getDataSizesForDatabases() {
       CUR_DB_SIZE=$(runPSQLCommand "select sum(pg_table_size(quote_ident(tablename)::regclass)) from pg_tables where schemaname not in ('pg_catalog','information_schema');" "$TRIMMED_DB")
       if [ -z "$CUR_DB_SIZE" ]; then
         doLog "Unable to get size of database ${DB}, trying to use an alternative method"
-        CUR_DB_SIZE=$(runPSQLCommand "SELECT pg_database_size('${TRIMMED_DB}');")
+        CUR_DB_SIZE=$(runPSQLCommand "SELECT pg_database_size('${TRIMMED_DB}');" "postgres")
       fi
       if [ -z "$CUR_DB_SIZE" ]; then
         doLog "Unable to get size of database ${DB} even though it seems to exist..."
