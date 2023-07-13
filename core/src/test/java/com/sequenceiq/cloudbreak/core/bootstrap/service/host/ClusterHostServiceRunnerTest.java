@@ -845,6 +845,7 @@ class ClusterHostServiceRunnerTest {
         Map<String, List<String>> location = (HashMap<String, List<String>>) props.get("location");
         List<String> ranger = location.get("RANGER");
         assertTrue(ranger.contains("master1"));
+        assertTrue(ranger.contains("master2"));
     }
 
     private void createInstanceGroup(Template template, List<InstanceGroupDto> instanceGroups, String fqdn1, String fqdn2,

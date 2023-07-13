@@ -907,7 +907,7 @@ public class ClusterHostServiceRunner {
                     .collect(Collectors.toList());
             // If the ranger is not on Gateway node we have to expose other node.
             if (CollectionUtils.isEmpty(hosts)) {
-                return asList(rangerLocations.iterator().next());
+                return rangerLocations;
             }
             return hosts;
         }
