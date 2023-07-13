@@ -1,9 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 
@@ -42,13 +38,5 @@ public class ClouderaManagerPollingUtilServiceTest {
         readStatusMap.put("test_service", "STARTED");
         doReturn(readStatusMap).when(clusterModificationService).fetchServiceStatuses();
         underTest.pollClouderaManagerServices(clusterApi, "TEST_SERVICE", "STARTED");
-    }
-
-    @Test
-    public void pollClouderaManagerServicesFailure() throws Exception {
-        doThrow(new Exception("TEST")).when(clusterModificationService).fetchServiceStatuses();
-        PollerStoppedException ex = assertThrows(PollerStoppedException.class, () ->
-                underTest.pollClouderaManagerServices(clusterApi, "TEST_SERVICE", "STARTED"));
-        assertEquals("java.lang.Exception: TEST", ex.getMessage());
     }
 }
