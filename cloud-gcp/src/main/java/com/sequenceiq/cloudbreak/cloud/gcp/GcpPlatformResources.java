@@ -201,7 +201,7 @@ public class GcpPlatformResources implements PlatformResources {
                 .orElse(null);
         LOGGER.debug("Zone chosen for the subnets is {}", zone);
 
-        if (networkList != null) {
+        if (isNetworkListNotNull(networkList)) {
             for (Network network : networkList.getItems()) {
                 Map<String, Object> properties = new HashMap<>();
                 properties.put("gatewayIPv4", Strings.nullToEmpty(network.getGatewayIPv4()));
@@ -235,6 +235,10 @@ public class GcpPlatformResources implements PlatformResources {
         result.put(region.value(), cloudNetworks);
 
         return new CloudNetworks(result);
+    }
+
+    private static boolean isNetworkListNotNull(NetworkList networkList) {
+        return networkList != null && networkList.getItems() != null;
     }
 
     public List<String> getSubnetIds(Map<String, String> filters) {

@@ -135,7 +135,7 @@ public class GcpPlatformParameters implements PlatformParameters {
         Map<DiskType, DisplayName> map = new HashMap<>();
         map.put(diskType(GcpDiskType.HDD.value()), displayName(GcpDiskType.HDD.displayName()));
         map.put(diskType(GcpDiskType.SSD.value()), displayName(GcpDiskType.SSD.displayName()));
-
+        map.put(diskType(GcpDiskType.LOCAL_SSD.value()), displayName(GcpDiskType.LOCAL_SSD.displayName()));
         return map;
     }
 

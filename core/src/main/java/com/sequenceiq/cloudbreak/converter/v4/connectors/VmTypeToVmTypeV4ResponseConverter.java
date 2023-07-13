@@ -23,6 +23,7 @@ public class VmTypeToVmTypeV4ResponseConverter {
         convertVolumeConfig(configs, source.getMetaData().getMagneticConfig());
         convertVolumeConfig(configs, source.getMetaData().getSsdConfig());
         convertVolumeConfig(configs, source.getMetaData().getSt1Config());
+        convertVolumeConfig(configs, source.getMetaData().getLocalSsdConfig());
 
         VmTypeMetaJson vmTypeMetaJson = new VmTypeMetaJson();
         vmTypeMetaJson.setProperties(source.getMetaData().getProperties());
@@ -41,6 +42,8 @@ public class VmTypeToVmTypeV4ResponseConverter {
             config.setMinimumNumber(source.minimumNumber());
             config.setMinimumSize(source.minimumSize());
             config.setVolumeParameterType(source.volumeParameterType().name());
+            config.setPossibleNumberValues(source.possibleNumberValues());
+            config.setPossibleSizeValues(source.possibleSizeValues());
             configs.add(config);
         }
     }

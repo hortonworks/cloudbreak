@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
 
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -18,6 +20,10 @@ public class VolumeParameterConfigV4Response implements JsonEntity {
     private Integer minimumNumber;
 
     private Integer maximumNumber;
+
+    private Set<Integer> possibleSizeValues;
+
+    private Set<Integer> possibleNumberValues;
 
     public String getVolumeParameterType() {
         return volumeParameterType;
@@ -57,5 +63,21 @@ public class VolumeParameterConfigV4Response implements JsonEntity {
 
     public void setMaximumNumber(Integer maximumNumber) {
         this.maximumNumber = maximumNumber;
+    }
+
+    public Set<Integer> getPossibleSizeValues() {
+        return possibleSizeValues;
+    }
+
+    public void setPossibleSizeValues(Set<Integer> possibleSizeValues) {
+        this.possibleSizeValues = possibleSizeValues;
+    }
+
+    public Set<Integer> getPossibleNumberValues() {
+        return possibleNumberValues;
+    }
+
+    public void setPossibleNumberValues(Set<Integer> possibleNumberValues) {
+        this.possibleNumberValues = possibleNumberValues;
     }
 }
