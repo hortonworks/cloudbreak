@@ -27,6 +27,7 @@ public class PreconditionSdxE2ETest extends AbstractE2ETest {
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
+        initalizeAzureMarketplaceTermsPolicy(testContext);
         createEnvironmentWithFreeIpa(testContext);
     }
 

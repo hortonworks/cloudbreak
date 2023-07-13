@@ -1,14 +1,17 @@
 package com.sequenceiq.cloudbreak.cloud.azure.image.marketplace;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
@@ -23,12 +26,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestClientException;
 
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestOperationsService;
 import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestResponseException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureImageTermsSignerServiceTest {
@@ -200,4 +205,39 @@ public class AzureImageTermsSignerServiceTest {
         return azureImageTerms;
     }
 
+    @Test
+    void testSignImageTermsIfAllowed() {
+        CloudStack stack = mock(CloudStack.class);
+        when(azureClient.getAccessToken()).thenReturn(Optional.of(ACCESS_TOKEN));
+        AzureImageTerms azureImageTerms = setupAzureImageTerms();
+        when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenReturn(azureImageTerms);
+        when(azureRestOperationsService.httpPut(any(), any(), any(), anyString())).thenReturn(azureImageTerms);
+        when(stack.getParameters()).thenReturn(Map.of(ACCEPTANCE_POLICY_PARAMETER, Boolean.TRUE.toString()));
+        ReflectionTestUtils.setField(underTest, "enableAzureImageTermsAutomaticSigner", true);
+
+        underTest.signImageTermsIfAllowed(stack, azureClient, azureMarketplaceImage, AZURE_SUBSCRIPTION_ID);
+
+        verify(azureClient).getAccessToken();
+        ArgumentCaptor<URI> argumentCaptor = ArgumentCaptor.forClass(URI.class);
+        InOrder inOrder = Mockito.inOrder(azureRestOperationsService);
+        inOrder.verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
+        inOrder.verify(azureRestOperationsService).httpPut(argumentCaptor.capture(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
+        URI signURI = argumentCaptor.getValue();
+        assertEquals(signURI.toString(), "https://management.azure.com/subscriptions/azureSubscriptionId/providers/Microsoft.MarketplaceOrdering/" +
+                "offerTypes/virtualmachine/publishers/cloudera/offers/my-offer/plans/my-plan/agreements/current?api-version=2015-06-01");
+    }
+
+    @Test
+    void testSignImageTermsIfAllowedButPolicyOff() {
+        CloudStack stack = mock(CloudStack.class);
+        when(stack.getParameters()).thenReturn(Map.of(ACCEPTANCE_POLICY_PARAMETER, Boolean.TRUE.toString()));
+        ReflectionTestUtils.setField(underTest, "enableAzureImageTermsAutomaticSigner", false);
+
+        underTest.signImageTermsIfAllowed(stack, azureClient, azureMarketplaceImage, AZURE_SUBSCRIPTION_ID);
+
+        verify(azureClient, never()).getAccessToken();
+        InOrder inOrder = Mockito.inOrder(azureRestOperationsService);
+        inOrder.verify(azureRestOperationsService, never()).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
+        inOrder.verify(azureRestOperationsService, never()).httpPut(any(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
+    }
 }

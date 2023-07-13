@@ -44,18 +44,24 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureTestUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImageTermsSignerService;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImageProviderService;
 import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTemplateDeploymentService;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
@@ -126,18 +132,35 @@ public class AzureUpscaleServiceTest {
     @Mock
     private AzureScaleUtilService azureScaleUtilService;
 
+    @Mock
+    private AzureImageFormatValidator azureImageFormatValidator;
+
+    @Mock
+    private AzureMarketplaceImageProviderService azureMarketplaceImageProviderService;
+
+    @Mock
+    private AzureImageTermsSignerService azureImageTermsSignerService;
+
     @BeforeEach
     public void before() {
         when(azureUtils.getStackName(any(CloudContext.class))).thenReturn(STACK_NAME);
         when(azureUtils.getFullInstanceId(nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class)))
                 .thenReturn("instanceid");
         when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), eq(stack))).thenReturn(RESOURCE_GROUP);
+
+        Image image = new Image("azureImage.vhd", null, null, null, null, null, null, null);
+        when(stack.getImage()).thenReturn(image);
+        AzureMarketplaceImage azureMpImage = new AzureMarketplaceImage("", "", "", "");
+        when(azureMarketplaceImageProviderService.get(eq(image))).thenReturn(azureMpImage);
+        when(azureImageFormatValidator.isMarketplaceImageFormat(eq(image))).thenReturn(true);
     }
 
     @Test
     public void testUpscaleThenThereAreNewInstancesRequired() throws QuotaExceededException {
         CloudContext cloudContext = createCloudContext();
-        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, null);
+        CloudCredential cloudCredential = mock(CloudCredential.class);
+        when(cloudCredential.getParameters()).thenReturn(Map.of("subscriptionId", "subscriptionId"));
+        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
         CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
         List<CloudResource> resources = List.of(createCloudResource("volumes", ResourceType.AZURE_VOLUMESET), template);
         InstanceTemplate instanceTemplate = mock(InstanceTemplate.class);
@@ -193,7 +216,9 @@ public class AzureUpscaleServiceTest {
     @Test
     public void testUpscaleButQuotaIssueHappen() throws QuotaExceededException {
         CloudContext cloudContext = createCloudContext();
-        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, null);
+        CloudCredential cloudCredential = mock(CloudCredential.class);
+        when(cloudCredential.getParameters()).thenReturn(Map.of("subscriptionId", "subscriptionId"));
+        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
         CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
         List<CloudResource> resources = List.of(createCloudResource("volumes", ResourceType.AZURE_VOLUMESET), template);
         InstanceTemplate instanceTemplate = mock(InstanceTemplate.class);
@@ -240,7 +265,9 @@ public class AzureUpscaleServiceTest {
     @Test
     public void testUpscaleWhenThereAreReattachableVolumeSets() throws QuotaExceededException {
         CloudContext cloudContext = createCloudContext();
-        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, null);
+        CloudCredential cloudCredential = mock(CloudCredential.class);
+        when(cloudCredential.getParameters()).thenReturn(Map.of("subscriptionId", "subscriptionId"));
+        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
         CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
         CloudResource notReattachableVolumeSet = createCloudResource("volumes", ResourceType.AZURE_VOLUMESET);
         CloudResource detachedVolumeSet = createCloudResource("detachedvolumes", ResourceType.AZURE_VOLUMESET, CommonStatus.DETACHED, null);
@@ -291,7 +318,9 @@ public class AzureUpscaleServiceTest {
     @Test
     public void testUpscaleWhenVmsNotStartedInTime() {
         CloudContext cloudContext = createCloudContext();
-        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, null);
+        CloudCredential cloudCredential = mock(CloudCredential.class);
+        when(cloudCredential.getParameters()).thenReturn(Map.of("subscriptionId", "subscriptionId"));
+        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
         CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
         List<CloudResource> resources = List.of(createCloudResource("volumes", ResourceType.AZURE_VOLUMESET), template);
         InstanceTemplate instanceTemplate = mock(InstanceTemplate.class);
