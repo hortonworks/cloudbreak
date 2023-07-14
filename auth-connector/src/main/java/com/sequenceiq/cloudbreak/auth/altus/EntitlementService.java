@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.AUDIT_ARCHIVING_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
@@ -141,10 +140,6 @@ public class EntitlementService {
 
     public boolean listFilteringEnabled(String accountId) {
         return isEntitlementRegistered(accountId, PERSONAL_VIEW_CB_BY_RIGHT);
-    }
-
-    public boolean gcpAuditEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, AUDIT_ARCHIVING_GCP);
     }
 
     public boolean enforceAwsNativeForSingleAzFreeipaEnabled(String accountId) {

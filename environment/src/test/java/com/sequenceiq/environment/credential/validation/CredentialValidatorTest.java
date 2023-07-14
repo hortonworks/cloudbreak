@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Set;
@@ -77,16 +76,12 @@ class CredentialValidatorTest {
     // CHECKSTYLE:OFF
     static Object[][] validateCredentialCloudPlatformDataProvider() {
         return new Object[][]{
-                //testCaseName             cloudPlatform   azureEnabled    gcpAuditEnabled  validExpected   credentialType
-                {AWS + AZURE_DISABLED,      AWS,            false,          false,              true,           ENVIRONMENT},
-                {AZURE + AZURE_DISABLED,    AZURE,          false,          false,              true,          ENVIRONMENT},
-                {FOO + AZURE_DISABLED,      FOO,            false,          false,              false,          ENVIRONMENT},
-                {AWS + AZURE_ENABLED,       AWS,            true,           false,              true,           ENVIRONMENT},
-                {AZURE + AZURE_ENABLED,     AZURE,          true,           false,              true,           ENVIRONMENT},
-                {FOO + AZURE_ENABLED,       FOO,            true,           false,              false,          ENVIRONMENT},
-                {FOO + AZURE_ENABLED,       FOO,            true,           false,              false,          ENVIRONMENT},
-                {GCP + GCP_AUDIT_ENABLED,   GCP,            true,           true,               true,           AUDIT},
-                {GCP + GCP_AUDIT_DISABLED,  GCP,            true,           false,              false,          AUDIT},
+                //testCaseName             cloudPlatform    validExpected   credentialType
+                {AWS + AZURE_DISABLED,      AWS,               true,           ENVIRONMENT},
+                {AZURE + AZURE_DISABLED,    AZURE,             true,           ENVIRONMENT},
+                {FOO + AZURE_DISABLED,      FOO,               false,          ENVIRONMENT},
+                {FOO + AZURE_ENABLED,       FOO,               false,          ENVIRONMENT},
+                {GCP + GCP_AUDIT_ENABLED,   GCP,               true,           AUDIT},
         };
     }
     // CHECKSTYLE:ON
@@ -96,13 +91,8 @@ class CredentialValidatorTest {
     @MethodSource("validateCredentialCloudPlatformDataProvider")
     void testValidateCredentialCloudPlatform(String testCaseName,
             String cloudPlatform,
-            boolean azureEnabled,
-            boolean gcpAuditEnabled,
             boolean validExpected,
             CredentialType credentialType) {
-        if (CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform) && credentialType.equals(AUDIT)) {
-            when(entitlementService.gcpAuditEnabled(ACCOUNT_ID)).thenReturn(gcpAuditEnabled);
-        }
         if (validExpected) {
             underTest.validateCredentialCloudPlatform(cloudPlatform, USER_CRN, credentialType);
         } else {
@@ -114,13 +104,8 @@ class CredentialValidatorTest {
     @MethodSource("validateCredentialCloudPlatformDataProvider")
     void testIsCredentialCloudPlatformValid(String testCaseName,
             String cloudPlatform,
-            boolean azureEnabled,
-            boolean gcpAuditEnabled,
             boolean validExpected,
             CredentialType credentialType) {
-        if (CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform) && credentialType.equals(AUDIT)) {
-            when(entitlementService.gcpAuditEnabled(ACCOUNT_ID)).thenReturn(gcpAuditEnabled);
-        }
         assertThat(underTest.isCredentialCloudPlatformValid(cloudPlatform, ACCOUNT_ID, credentialType)).isEqualTo(validExpected);
     }
 
