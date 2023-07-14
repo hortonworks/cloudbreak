@@ -1,15 +1,18 @@
 package com.sequenceiq.freeipa.service.image;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,7 +36,16 @@ class FreeIpaImageFilterTest {
     private FreeIpaImageFilter underTest;
 
     @Mock
+    private SupportedOsService supportedOsService;
+
+    @Mock
     private ProviderSpecificImageFilter providerSpecificImageFilter;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(supportedOsService.isSupported(any())).thenReturn(true);
+        lenient().when(providerSpecificImageFilter.filterImages(any(), any())).thenAnswer(invocation -> invocation.getArgument(1));
+    }
 
     @Test
     void setUnderTestFilterImagesShouldReturnAllImageWhenMajorOsUpgradeIsEnabled() {
@@ -42,8 +54,6 @@ class FreeIpaImageFilterTest {
                 createImage("image-2", CENTOS_7, AWS, REGION_1)
         );
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(CENTOS_7, REGION_1, AWS, true);
-
-        when(providerSpecificImageFilter.filterImages(any(), any())).thenAnswer(invocation -> invocation.getArgument(1));
 
         List<Image> actual = underTest.filterImages(candidateImages, imageFilterSettings);
 
@@ -57,8 +67,6 @@ class FreeIpaImageFilterTest {
         Image image2 = createImage("image-2", CENTOS_7, AWS, REGION_1);
         List<Image> candidateImages = List.of(image1, image2);
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(CENTOS_7, REGION_1, AWS, false);
-
-        when(providerSpecificImageFilter.filterImages(any(), any())).thenAnswer(invocation -> invocation.getArgument(1));
 
         List<Image> actual = underTest.filterImages(candidateImages, imageFilterSettings);
 
@@ -74,8 +82,6 @@ class FreeIpaImageFilterTest {
         List<Image> candidateImages = List.of(image1, image2);
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(CENTOS_7, REGION_1, AWS, true);
 
-        when(providerSpecificImageFilter.filterImages(any(), any())).thenAnswer(invocation -> invocation.getArgument(1));
-
         List<Image> actual = underTest.filterImages(candidateImages, imageFilterSettings);
 
         assertTrue(actual.contains(image2));
@@ -89,8 +95,6 @@ class FreeIpaImageFilterTest {
         Image image2 = createImage("image-2", CENTOS_7, AWS, REGION_1);
         List<Image> candidateImages = List.of(image1, image2);
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(CENTOS_7, REGION_1, AWS, false);
-
-        when(providerSpecificImageFilter.filterImages(any(), any())).thenAnswer(invocation -> invocation.getArgument(1));
 
         List<Image> actual = underTest.filterImages(candidateImages, imageFilterSettings);
 
@@ -106,8 +110,6 @@ class FreeIpaImageFilterTest {
         List<Image> candidateImages = List.of(image1, image2);
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(CENTOS_7, REGION_1, AWS, false);
 
-        when(providerSpecificImageFilter.filterImages(any(), any())).thenAnswer(invocation -> invocation.getArgument(1));
-
         List<Image> actual = underTest.filterImages(candidateImages, imageFilterSettings);
 
         assertTrue(actual.contains(image2));
@@ -122,10 +124,24 @@ class FreeIpaImageFilterTest {
         List<Image> candidateImages = List.of(image1, image2);
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(REDHAT_8, "other-region", "azure", false);
 
-        List<Image> actual = underTest.filterImages(candidateImages, imageFilterSettings);
+        Assertions.assertThatThrownBy(() -> underTest.filterImages(candidateImages, imageFilterSettings))
+                .isInstanceOf(ImageNotFoundException.class)
+                .hasMessageStartingWith("Could not find any FreeIPA image");
+    }
 
-        assertTrue(actual.containsAll(candidateImages));
-        verifyNoInteractions(providerSpecificImageFilter);
+    @Test
+    public void testGetImageWithoutOsRedhat8() {
+        Image image1 = createImage("image-1", CENTOS_7, AWS, REGION_1);
+        Image image2 = createImage("image-2", REDHAT_8, AWS, REGION_1);
+        List<Image> candidateImages = List.of(image1, image2);
+
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(REDHAT_8, REGION_1, AWS, false);
+
+        Optional<Image> image = underTest.filterImages(candidateImages, imageFilterSettings).stream().findFirst();
+
+        assertTrue(image.isPresent());
+        assertEquals(REDHAT_8, image.get().getOs());
+        assertEquals("image-2", image.get().getUuid());
     }
 
     private FreeIpaImageFilterSettings createImageFilterSettings(String os, String region, String platform, boolean allowMajorOsUpgrade) {

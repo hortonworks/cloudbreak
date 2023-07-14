@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.metrics.MetricsClient;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
@@ -67,7 +67,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private FreeipaStatusInfoLogger freeipaStatusInfoLogger;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+    private InternalCrnModifier internalCrnModifier;
 
     @Inject
     private MetricsClient metricsClient;
@@ -132,7 +132,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     public void syncAStack(Stack stack, boolean updateStatusFromFlow) {
         try {
             checkedMeasure(() -> {
-                ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(), () -> {
+                ThreadBasedUserCrnProvider.doAsInternalActor(internalCrnModifier.getInternalCrnWithAccountId(stack.getAccountId()), () -> {
                     Set<InstanceMetaData> notTerminatedForStack = stack.getAllInstanceMetaDataList().stream()
                             .filter(Predicate.not(InstanceMetaData::isTerminated))
                             .collect(Collectors.toSet());

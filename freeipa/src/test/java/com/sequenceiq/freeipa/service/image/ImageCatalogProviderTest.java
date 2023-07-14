@@ -74,14 +74,14 @@ public class ImageCatalogProviderTest {
 
         ImageCatalog catalog = underTest.getImageCatalog(IMAGE_CATALOG_JSON);
         List<com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image> images = catalog.getImages().getFreeipaImages();
-        assertEquals(5, images.size());
+        assertEquals(6, images.size());
         assertEquals("61851893-8340-411d-afb7-e1b55107fb10", images.get(0).getUuid());
 
         FreeIpaVersions freeIpaVersions = catalog.getVersions().getFreeIpaVersions().get(0);
         assertEquals(3, freeIpaVersions.getImageIds().size());
         assertEquals("61851893-8340-411d-afb7-e1b55107fb10", freeIpaVersions.getImageIds().get(0));
-        assertEquals(1, freeIpaVersions.getDefaults().size());
-        assertEquals(List.of("71851893-8340-411d-afb7-e1b55107fb10"), freeIpaVersions.getDefaults());
+        assertEquals(2, freeIpaVersions.getDefaults().size());
+        assertEquals(List.of("71851893-8340-411d-afb7-e1b55107fb10", "b465c893-fe04-44b1-ae8e-0452bbb39c99"), freeIpaVersions.getDefaults());
         assertEquals(4, freeIpaVersions.getVersions().size());
     }
 
@@ -146,7 +146,8 @@ public class ImageCatalogProviderTest {
         assertEquals(IMAGE_CATALOG_OS_TYPES, actualOsTypes);
 
         List<String> expectedIds = List.of("61851893-8340-411d-afb7-e1b55107fb10", "71851893-8340-411d-afb7-e1b55107fb10",
-                "81851893-8340-411d-afb7-e1b55107fb10", "91851893-8340-411d-afb7-e1b55107fb10", "b465c893-fe04-44b1-ae8e-0452bbb39c99");
+                "81851893-8340-411d-afb7-e1b55107fb10", "91851893-8340-411d-afb7-e1b55107fb10", "b465c893-fe04-44b1-ae8e-0452bbb39c99",
+                "b465c893-fe04-44b1-ae8e-0452bbb39c99");
         assertEquals(expectedIds, mapToUuid(actualCatalog.getImages().getFreeipaImages()));
         assertEquals(List.of("61851893-8340-411d-afb7-e1b55107fb10", "71851893-8340-411d-afb7-e1b55107fb10", "b465c893-fe04-44b1-ae8e-0452bbb39c99"),
                 actualCatalog.getVersions().getFreeIpaVersions().get(0).getImageIds());
