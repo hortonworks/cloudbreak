@@ -3,13 +3,11 @@ package com.sequenceiq.environment.environment.service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
@@ -46,11 +44,7 @@ public class LoadBalancerPollerService {
 
     private final FlowEndpoint flowEndpoint;
 
-    @Value("${env.loadbalancer.update.polling.maximum.seconds:7200}")
-    private Integer maxTime;
-
-    @Value("${env.loadbalancer.update.polling.sleep.time.seconds:30}")
-    private Integer sleepTime;
+    private final PollingConfig lbPollingConfig;
 
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
@@ -62,13 +56,15 @@ public class LoadBalancerPollerService {
             StackService stackService,
             FlowEndpoint flowEndpoint,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory,
-            EntitlementService entitlementService) {
+            EntitlementService entitlementService,
+            LoadBalancerPollerConfig config) {
         this.datahubService = datahubService;
         this.sdxService = sdxService;
         this.stackService = stackService;
         this.flowEndpoint = flowEndpoint;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
         this.entitlementService = entitlementService;
+        this.lbPollingConfig = config.getConfig();
     }
 
     public void updateStackWithLoadBalancer(String accountId, String environmentCrn, String environmentName,
@@ -87,7 +83,7 @@ public class LoadBalancerPollerService {
             LOGGER.debug("No Data Lake or Data Hub clusters found for environment.");
         } else {
             try {
-                List<FlowIdentifier> failedFlows = waitStackLoadBalancerUpdate(getPollingConfig(), stackNames, environmentName);
+                List<FlowIdentifier> failedFlows = waitStackLoadBalancerUpdate(lbPollingConfig, stackNames, environmentName);
                 LOGGER.debug("Data Lake and Data Hub load balancer update finished.");
                 if (!failedFlows.isEmpty()) {
                     LOGGER.error("Found failed flows for Data Lake or Data Hub load balancer updates: " + failedFlows);
@@ -147,16 +143,6 @@ public class LoadBalancerPollerService {
                 e.getMessage());
             return AttemptResults.breakFor(e);
         }
-    }
-
-    private PollingConfig getPollingConfig() {
-        return PollingConfig.builder()
-            .withStopPollingIfExceptionOccured(true)
-            .withSleepTime(sleepTime)
-            .withSleepTimeUnit(TimeUnit.SECONDS)
-            .withTimeout(maxTime)
-            .withTimeoutTimeUnit(TimeUnit.SECONDS)
-            .build();
     }
 
     private Set<String> getDataLakeAndDataHubNames(String environmentCrn, String environmentName) {

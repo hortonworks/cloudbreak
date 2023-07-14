@@ -99,7 +99,9 @@ public class AwsInstanceConnector implements InstanceConnector {
     @Retryable(
             value = SdkClientException.class,
             maxAttempts = 3,
-            backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 5000)
+            backoff = @Backoff(delayExpression = "#{${cb.vm.retry.backoff.delay:1000}}",
+                    multiplierExpression = "#{${cb.vm.retry.backoff.multiplier:2}}",
+                    maxDelayExpression = "#{${cb.vm.retry.backoff.maxdelay:10000}}")
     )
     @Override
     public List<CloudVmInstanceStatus> startWithLimitedRetry(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms,
@@ -137,7 +139,9 @@ public class AwsInstanceConnector implements InstanceConnector {
     @Retryable(
             value = SdkClientException.class,
             maxAttempts = 3,
-            backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 5000)
+            backoff = @Backoff(delayExpression = "#{${cb.vm.retry.backoff.delay:1000}}",
+                    multiplierExpression = "#{${cb.vm.retry.backoff.multiplier:2}}",
+                    maxDelayExpression = "#{${cb.vm.retry.backoff.maxdelay:10000}}")
     )
     @Override
     public List<CloudVmInstanceStatus> stopWithLimitedRetry(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms,

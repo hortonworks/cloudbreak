@@ -17,14 +17,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
@@ -36,6 +35,7 @@ import com.sequenceiq.environment.environment.service.datahub.DatahubService;
 import com.sequenceiq.environment.environment.service.sdx.SdxService;
 import com.sequenceiq.environment.environment.service.stack.StackService;
 import com.sequenceiq.environment.exception.UpdateFailedException;
+import com.sequenceiq.environment.util.PollingConfig;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -76,18 +76,21 @@ class LoadBalancerPollerServiceTest {
     private EntitlementService entitlementService;
 
     @Mock
+    private LoadBalancerPollerConfig lbPollConfig;
+
+    @Mock
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
-    @InjectMocks
     private LoadBalancerPollerService underTest;
 
     @BeforeEach
-    void before() {
-        ReflectionTestUtils.setField(underTest, "sleepTime", 1);
-        ReflectionTestUtils.setField(underTest, "maxTime", 1);
+    void setUp() {
+        mockShortPollConfig();
+        underTest = new LoadBalancerPollerService(datahubService, sdxService, stackService, flowEndpoint,
+                regionAwareInternalCrnGeneratorFactory, entitlementService, lbPollConfig);
     }
 
     @Test
@@ -101,6 +104,7 @@ class LoadBalancerPollerServiceTest {
 
     @Test
     void testPollingForSingleDatalake() {
+        mockShortPollConfig();
         setupDatalakeResponse();
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
@@ -118,6 +122,7 @@ class LoadBalancerPollerServiceTest {
 
     @Test
     void testPollingForDatalakeAndDatahubs() {
+        mockShortPollConfig();
         setupDatalakeResponse();
         setupDatahubResponse();
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
@@ -135,6 +140,7 @@ class LoadBalancerPollerServiceTest {
 
     @Test
     void testPollingForDatalakeAndDatahubsTargeting() {
+        mockShortPollConfig();
         setupDatalakeResponse();
         setupDatahubResponse();
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
@@ -152,6 +158,7 @@ class LoadBalancerPollerServiceTest {
 
     @Test
     void testPollingForDatalakeOnly() {
+        mockShortPollConfig();
         setupDatalakeResponse();
         setupDatahubResponse();
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
@@ -197,7 +204,6 @@ class LoadBalancerPollerServiceTest {
 
     @Test
     void testPollingTimeout() {
-        ReflectionTestUtils.setField(underTest, "maxTime", 5);
         setupDatalakeResponse();
         setupDatahubResponse();
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
@@ -210,7 +216,7 @@ class LoadBalancerPollerServiceTest {
             assertThrows(UpdateFailedException.class, () ->
                 underTest.updateStackWithLoadBalancer(ACCOUNT_ID, ENV_CRN, ENV_NAME, PublicEndpointAccessGateway.ENABLED, false));
 
-        verify(flowEndpoint, times(18)).hasFlowRunningByFlowId(anyString());
+        verify(flowEndpoint, times(6)).hasFlowRunningByFlowId(anyString());
         assertEquals(expectedError, exception.getMessage());
     }
 
@@ -258,5 +264,16 @@ class LoadBalancerPollerServiceTest {
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
         flowCheckResponse.setHasActiveFlow(true);
         return flowCheckResponse;
+    }
+
+    private void mockShortPollConfig() {
+        PollingConfig config = PollingConfig.builder()
+                .withSleepTime(10)
+                .withSleepTimeUnit(TimeUnit.MILLISECONDS)
+                .withTimeout(10)
+                .withTimeoutTimeUnit(TimeUnit.MILLISECONDS)
+                .withStopPollingIfExceptionOccured(false)
+                .build();
+        lenient().when(lbPollConfig.getConfig()).thenReturn(config);
     }
 }

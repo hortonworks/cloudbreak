@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
@@ -44,6 +45,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.dyngr.core.AttemptResults;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
@@ -61,6 +63,7 @@ import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseOperation;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseServerParameterDecorator;
+import com.sequenceiq.cloudbreak.service.externaldatabase.PollingConfig;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseServerParameter;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfig;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfigKey;
@@ -136,6 +139,12 @@ class ExternalDatabaseServiceTest {
     private DatabaseServerParameterDecorator dbServerParameterDecorator;
 
     @Mock
+    private EntitlementService entitlementService;
+
+    @Mock
+    private ExternalDatabasePollingConfig dbPollConfig;
+
+    @Mock
     private ExternalDatabaseConfig externalDatabaseConfig;
 
     @Mock
@@ -152,8 +161,9 @@ class ExternalDatabaseServiceTest {
 
     @BeforeEach
     void setUp() {
+        mockShortPollConfig();
         underTest = new ExternalDatabaseService(redbeamsClient, clusterRepository, dbConfigs, parameterDecoratorMap, databaseObtainerService,
-                externalDatabaseConfig, cmTemplateProcessorFactory);
+                externalDatabaseConfig, cmTemplateProcessorFactory, dbPollConfig);
         environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCloudPlatform(CLOUD_PLATFORM.name());
         environmentResponse.setCrn(ENV_CRN);
@@ -701,6 +711,17 @@ class ExternalDatabaseServiceTest {
         underTest.upgradeDatabase(cluster, targetMajorVersion, databaseServerV4StackRequest);
 
         verify(redbeamsClient, never()).upgradeByCrn(anyString(), any());
+    }
+
+    private void mockShortPollConfig() {
+        PollingConfig config = PollingConfig.builder()
+                .withSleepTime(10)
+                .withSleepTimeUnit(TimeUnit.MILLISECONDS)
+                .withTimeout(10)
+                .withTimeoutTimeUnit(TimeUnit.MILLISECONDS)
+                .withStopPollingIfExceptionOccured(false)
+                .build();
+        when(dbPollConfig.getConfig()).thenReturn(config);
     }
 
     private Database createDatabase(DatabaseAvailabilityType databaseAvailabilityType) {

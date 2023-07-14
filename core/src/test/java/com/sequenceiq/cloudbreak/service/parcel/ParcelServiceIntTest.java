@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.sync.component.ImageReaderServi
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {ParcelService.class})
-@TestPropertySource(properties = {"cb.parcel.retry.maxAttempts=5", "cb.parcel.retry.backOffDelay=500",
+@TestPropertySource(properties = {"cb.parcel.retry.maxAttempts=5", "cb.parcel.retry.backOffDelay=5",
         "cb.parcel.retry.backOffMultiplier=2"})
 public class ParcelServiceIntTest {
 

@@ -6,7 +6,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
@@ -69,21 +68,11 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackReque
 @Service
 public class ExternalDatabaseService {
 
-    public static final int SLEEP_TIME_IN_SEC_FOR_DB_POLLING = 10;
-
-    public static final int DURATION_IN_MINUTES_FOR_DB_POLLING = 60;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalDatabaseService.class);
 
     private static final String SSL_ENFORCEMENT_MIN_RUNTIME_VERSION = "7.2.2";
 
-    private static final PollingConfig DB_POLLING_CONFIG = PollingConfig.builder()
-            .withSleepTime(SLEEP_TIME_IN_SEC_FOR_DB_POLLING)
-            .withSleepTimeUnit(TimeUnit.SECONDS)
-            .withTimeout(DURATION_IN_MINUTES_FOR_DB_POLLING)
-            .withTimeoutTimeUnit(TimeUnit.MINUTES)
-            .withStopPollingIfExceptionOccured(false)
-            .build();
+    private final PollingConfig dbPollingConfig;
 
     private final RedbeamsClientService redbeamsClient;
 
@@ -102,7 +91,7 @@ public class ExternalDatabaseService {
     public ExternalDatabaseService(RedbeamsClientService redbeamsClient, ClusterRepository clusterRepository,
             Map<DatabaseStackConfigKey, DatabaseStackConfig> dbConfigs, Map<CloudPlatform, DatabaseServerParameterDecorator> parameterDecoratorMap,
             DatabaseObtainerService databaseObtainerService, ExternalDatabaseConfig externalDatabaseConfig,
-            CmTemplateProcessorFactory cmTemplateProcessorFactory) {
+            CmTemplateProcessorFactory cmTemplateProcessorFactory, ExternalDatabasePollingConfig config) {
         this.redbeamsClient = redbeamsClient;
         this.clusterRepository = clusterRepository;
         this.dbConfigs = dbConfigs;
@@ -110,6 +99,7 @@ public class ExternalDatabaseService {
         this.databaseObtainerService = databaseObtainerService;
         this.externalDatabaseConfig = externalDatabaseConfig;
         this.cmTemplateProcessorFactory = cmTemplateProcessorFactory;
+        this.dbPollingConfig = config.getConfig();
     }
 
     public void provisionDatabase(Stack stack, DetailedEnvironmentResponse environment) {
@@ -234,9 +224,9 @@ public class ExternalDatabaseService {
 
     private void pollUntilFlowFinished(String databaseCrn, FlowIdentifier flowIdentifier) {
         try {
-            Boolean success = Polling.waitPeriodly(DB_POLLING_CONFIG.getSleepTime(), DB_POLLING_CONFIG.getSleepTimeUnit())
-                    .stopIfException(DB_POLLING_CONFIG.getStopPollingIfExceptionOccured())
-                    .stopAfterDelay(DB_POLLING_CONFIG.getTimeout(), DB_POLLING_CONFIG.getTimeoutTimeUnit())
+            Boolean success = Polling.waitPeriodly(dbPollingConfig.getSleepTime(), dbPollingConfig.getSleepTimeUnit())
+                    .stopIfException(dbPollingConfig.getStopPollingIfExceptionOccured())
+                    .stopAfterDelay(dbPollingConfig.getTimeout(), dbPollingConfig.getTimeoutTimeUnit())
                     .run(() -> pollFlowState(flowIdentifier));
             if (success == null || !success) {
                 String errorDescription;
@@ -396,7 +386,7 @@ public class ExternalDatabaseService {
 
     private void waitAndGetDatabase(ClusterView cluster, String databaseCrn,
             DatabaseOperation databaseOperation, boolean cancellable) {
-        waitAndGetDatabase(cluster, databaseCrn, DB_POLLING_CONFIG, databaseOperation, cancellable);
+        waitAndGetDatabase(cluster, databaseCrn, dbPollingConfig, databaseOperation, cancellable);
     }
 
     private void waitAndGetDatabase(ClusterView cluster, String databaseCrn, PollingConfig pollingConfig, DatabaseOperation databaseOperation,
