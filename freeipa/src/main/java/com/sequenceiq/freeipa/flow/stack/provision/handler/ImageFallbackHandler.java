@@ -78,7 +78,7 @@ public class ImageFallbackHandler extends ExceptionCatcherEventHandler<ImageFall
             imageSettings.setId(currentImage.getImageId());
             String imgNotFoundMsg = String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
                     imageSettings.getCatalog(), stack.getCloudPlatform(), stack.getRegion());
-            ImageWrapper imageWrapper = imageProvider.getImage(imageSettings, stack.getRegion(), stack.getCloudPlatform())
+            ImageWrapper imageWrapper = imageProvider.getImage(accountId, imageSettings, stack.getRegion(), stack.getCloudPlatform())
                     .orElseThrow(() -> new ImageNotFoundException(imgNotFoundMsg));
             String newImageName = imageService.determineImageNameByRegion(stack.getCloudPlatform(), stack.getRegion(), imageWrapper.getImage());
             currentImage.setImageName(newImageName);

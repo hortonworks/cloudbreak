@@ -8,7 +8,7 @@ import com.sequenceiq.freeipa.dto.ImageWrapper;
 
 public interface ImageProvider {
 
-    Optional<ImageWrapper> getImage(ImageSettingsRequest imageSettings, String region, String platformString);
+    Optional<ImageWrapper> getImage(String accountId, ImageSettingsRequest imageSettings, String region, String platformString);
 
-    List<ImageWrapper> getImages(ImageSettingsRequest imageSettings, String region, String platformString);
+    List<ImageWrapper> getImages(String accountId, ImageSettingsRequest imageSettings, String region, String platformString);
 }

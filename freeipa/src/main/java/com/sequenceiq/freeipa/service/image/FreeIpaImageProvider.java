@@ -43,34 +43,37 @@ public class FreeIpaImageProvider implements ImageProvider {
     @Value("${freeipa.image.catalog.url}")
     private String defaultCatalogUrl;
 
-    @Value("${freeipa.image.catalog.default.os}")
-    private String defaultOs;
-
     @Value("${info.app.version:}")
     private String freeIpaVersion;
 
     @Inject
     private ProviderSpecificImageFilter providerSpecificImageFilter;
 
+    @Inject
+    private PreferredOsService preferredOsService;
+
+    @Inject
+    private SupportedOsService supportedOsService;
+
     @Override
-    public Optional<ImageWrapper> getImage(ImageSettingsRequest imageSettings, String region, String platform) {
+    public Optional<ImageWrapper> getImage(String accountId, ImageSettingsRequest imageSettings, String region, String platform) {
         String imageId = imageSettings.getId();
         String catalogUrl = StringUtils.isNotBlank(imageSettings.getCatalog()) ? imageSettings.getCatalog() : defaultCatalogUrl;
-        String imageOs = StringUtils.isNotBlank(imageSettings.getOs()) ? imageSettings.getOs() : defaultOs;
+        String imageOs = preferredOsService.getPreferredOs(accountId, imageSettings.getOs());
 
         ImageCatalog cachedImageCatalog = imageCatalogProvider.getImageCatalog(catalogUrl);
-        return findImageForAppVersion(region, platform, imageId, imageOs, cachedImageCatalog)
-                .or(() -> retryAfterEvictingCache(region, platform, imageId, catalogUrl, imageOs))
+        return findImageForAppVersion(accountId, region, platform, imageId, imageOs, cachedImageCatalog)
+                .or(() -> retryAfterEvictingCache(accountId, region, platform, imageId, catalogUrl, imageOs))
                 .map(i -> new ImageWrapper(i, catalogUrl, null));
     }
 
-    public List<ImageWrapper> getImages(ImageSettingsRequest imageSettings, String region, String platform) {
+    public List<ImageWrapper> getImages(String accountId, ImageSettingsRequest imageSettings, String region, String platform) {
         String imageId = imageSettings.getId();
         String catalogUrl = StringUtils.isNotBlank(imageSettings.getCatalog()) ? imageSettings.getCatalog() : defaultCatalogUrl;
-        String imageOs = StringUtils.isNotBlank(imageSettings.getOs()) ? imageSettings.getOs() : defaultOs;
+        String imageOs = preferredOsService.getPreferredOs(accountId, imageSettings.getOs());
 
         ImageCatalog cachedImageCatalog = imageCatalogProvider.getImageCatalog(catalogUrl);
-        List<Image> compatibleImages = findImage(imageId, imageOs, cachedImageCatalog.getImages().getFreeipaImages(), region, platform);
+        List<Image> compatibleImages = findImage(accountId, imageId, imageOs, cachedImageCatalog.getImages().getFreeipaImages(), region, platform);
         List<String> imagesInVersions = filterFreeIpaVersionsByAppVersion(cachedImageCatalog.getVersions().getFreeIpaVersions()).stream()
                 .map(FreeIpaVersions::getImageIds)
                 .flatMap(Collection::stream)
@@ -83,9 +86,9 @@ public class FreeIpaImageProvider implements ImageProvider {
                 .collect(Collectors.toList());
     }
 
-    private Optional<Image> findImageForAppVersion(String region, String platform, String imageId, String imageOs, ImageCatalog catalog) {
+    private Optional<Image> findImageForAppVersion(String accountId, String region, String platform, String imageId, String imageOs, ImageCatalog catalog) {
         List<FreeIpaVersions> versions = filterFreeIpaVersionsByAppVersion(catalog.getVersions().getFreeIpaVersions());
-        List<Image> compatibleImages = findImage(imageId, imageOs, catalog.getImages().getFreeipaImages(), region, platform);
+        List<Image> compatibleImages = findImage(accountId, imageId, imageOs, catalog.getImages().getFreeipaImages(), region, platform);
         LOGGER.debug("[{}] compatible images found, by the following parameters: imageId: {}, imageOs: {}, region: {}, platform: {}",
                 compatibleImages.size(), imageId, imageOs, region, platform);
 
@@ -94,17 +97,23 @@ public class FreeIpaImageProvider implements ImageProvider {
                 .or(() -> findMostRecentImage(compatibleImages));
     }
 
-    private List<Image> findImage(String imageId, String imageOs, List<Image> images, String region, String platform) {
+    private List<Image> findImage(String accountId, String imageId, String imageOs, List<Image> images, String region, String platform) {
         if (StringUtils.isNotBlank(imageId)) {
-            return images.stream()
-                    .filter(img -> img.getImageSetsByProvider().containsKey(platform) && filterRegion(region, platform, img))
-                    //It's not clear why we check the provider image reference (eg. the AMI in case of AWS) as imageId here.
-                    //For safety and backward compatibility reasons the check remains here but should be checked if it really needed.
-                    .filter(img -> hasSameUuid(imageId, img) || isMatchingImageIdInRegion(imageId, region, platform, img))
-                    .collect(Collectors.toList());
+            Optional<Image> result = images.stream()
+                .filter(img -> img.getImageSetsByProvider().containsKey(platform) && filterRegion(region, platform, img))
+                //It's not clear why we check the provider image reference (eg. the AMI in case of AWS) as imageId here.
+                //For safety and backward compatibility reasons the check remains here but should be checked if it really needed.
+                .filter(img -> hasSameUuid(imageId, img) || isMatchingImageIdInRegion(imageId, region, platform, img))
+                .findFirst();
+            if (result.isPresent() && !supportedOsService.isSupported(accountId, result.get().getOs())) {
+                throw new IllegalArgumentException(String.format("The OS '%s' of the selected image '%s' is not supported.",
+                        result.get().getOs(), imageId));
+            }
+            return result.stream().collect(Collectors.toList());
         } else {
             return filterImages(images, imageOs, platform, region).stream()
                     .filter(image -> image.getImageSetsByProvider().containsKey(platform))
+                    .filter(image -> supportedOsService.isSupported(accountId, image.getOs()))
                     .collect(Collectors.toList());
         }
     }
@@ -149,12 +158,12 @@ public class FreeIpaImageProvider implements ImageProvider {
         return !partitioned.get(true).isEmpty();
     }
 
-    private Optional<Image> retryAfterEvictingCache(String region, String platform, String imageId, String catalogUrl, String imageOs) {
+    private Optional<Image> retryAfterEvictingCache(String accountId, String region, String platform, String imageId, String catalogUrl, String imageOs) {
         LOGGER.debug("Image not found with the parameters: imageId: {}, imageOs: {}, region: {}, platform: {}", imageId, imageOs, region, platform);
         LOGGER.debug("Evicting image catalog cache to retry.");
         imageCatalogProvider.evictImageCatalogCache(catalogUrl);
         ImageCatalog renewedImageCatalog = imageCatalogProvider.getImageCatalog(catalogUrl);
-        return findImageForAppVersion(region, platform, imageId, imageOs, renewedImageCatalog);
+        return findImageForAppVersion(accountId, region, platform, imageId, imageOs, renewedImageCatalog);
     }
 
     private Optional<Image> findMostRecentImage(List<Image> compatibleImages) {

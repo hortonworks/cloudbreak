@@ -3,7 +3,8 @@ package com.sequenceiq.cloudbreak.service.image;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import org.springframework.beans.factory.annotation.Value;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -11,11 +12,8 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 @Component
 public class ImageComparator implements Comparator<Image>, Serializable {
 
-    private final String defaultOs;
-
-    public ImageComparator(@Value("${cb.image.catalog.default.os}") String defaultOs) {
-        this.defaultOs = defaultOs;
-    }
+    @Inject
+    private ImageOsService imageOsService;
 
     @Override
     public int compare(Image image1, Image image2) {
@@ -25,7 +23,7 @@ public class ImageComparator implements Comparator<Image>, Serializable {
     }
 
     private Comparator<String> osComparator() {
-        return Comparator.comparing(defaultOs::equalsIgnoreCase);
+        return Comparator.comparing(imageOsService.getPreferredOs()::equalsIgnoreCase);
     }
 
     private Comparator<Image> imageDateComparator() {

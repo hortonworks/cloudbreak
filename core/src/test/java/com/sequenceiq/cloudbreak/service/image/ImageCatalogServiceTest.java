@@ -136,8 +136,6 @@ public class ImageCatalogServiceTest {
 
     private static final ImageCatalogPlatform IMAGE_CATALOG_PLATFORM = imageCatalogPlatform("aws");
 
-    private static final ImageComparator IMAGE_COMPARATOR = new ImageComparator("amazonlinux");
-
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
 
@@ -237,6 +235,9 @@ public class ImageCatalogServiceTest {
     @Mock
     private ProviderSpecificImageFilter providerSpecificImageFilter;
 
+    @Mock
+    private ImageOsService imageOsService;
+
     @BeforeEach
     public void beforeTest() throws Exception {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
@@ -246,6 +247,7 @@ public class ImageCatalogServiceTest {
         lenient().when(user.getUserCrn()).thenReturn(TestConstants.CRN);
         lenient().when(userService.getOrCreate(any())).thenReturn(user);
         lenient().when(entitlementService.baseImageEnabled(anyString())).thenReturn(true);
+        lenient().when(imageOsService.isSupported(any())).thenReturn(true);
 
         constants.add(new AwsCloudConstant());
 
@@ -260,9 +262,12 @@ public class ImageCatalogServiceTest {
 
         ReflectionTestUtils.setField(versionBasedImageCatalogService, "versionBasedImageProvider", versionBasedImageProvider);
 
-        CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
+        lenient().when(imageOsService.getPreferredOs()).thenReturn("centos7");
+        ImageComparator comparator = new ImageComparator();
+        ReflectionTestUtils.setField(comparator, "imageOsService", imageOsService);
+        ReflectionTestUtils.setField(underTest, "imageComparator", comparator);
 
-        ReflectionTestUtils.setField(underTest, "imageComparator", IMAGE_COMPARATOR);
+        CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
     }
 
     private void setMockedCbVersion(String cbVersion, String versionValue) {

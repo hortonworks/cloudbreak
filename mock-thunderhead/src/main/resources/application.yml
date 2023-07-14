@@ -97,6 +97,9 @@ auth:
     enforce.aws.native.single.az.enabled: false
     azure.database.flexibleserver.enabled: true
     secret.rotation.enabled: true
+    rhel8:
+      enabled: true
+      preferred: true
 crn:
   partition: cdp
   region: us-west-1

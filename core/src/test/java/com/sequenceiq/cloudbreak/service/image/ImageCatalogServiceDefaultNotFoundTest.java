@@ -84,6 +84,9 @@ public class ImageCatalogServiceDefaultNotFoundTest {
     @Mock
     private CloudbreakVersionListProvider cloudbreakVersionListProvider;
 
+    @Mock
+    private ImageOsService imageOsService;
+
     @InjectMocks
     private ImageCatalogServiceProxy imageCatalogServiceProxy;
 
@@ -103,6 +106,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
         ReflectionTestUtils.setField(versionBasedImageCatalogService, "versionBasedImageProvider", versionBasedImageProvider);
 
         when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
+        when(imageOsService.isSupported(any())).thenReturn(true);
     }
 
     @Test

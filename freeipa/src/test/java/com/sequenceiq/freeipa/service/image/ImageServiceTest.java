@@ -63,6 +63,8 @@ public class ImageServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
+    private static final String ACCOUNT_ID = "cloudera";
+
     private static final LocalDateTime MOCK_NOW = LocalDateTime.of(1969, 4, 1, 4, 20);
 
     @Mock
@@ -154,10 +156,10 @@ public class ImageServiceTest {
         imageSettings.setOs(DEFAULT_OS);
 
         when(imageProviderFactory.getImageProvider(IMAGE_CATALOG)).thenReturn(imageProvider);
-        when(imageProvider.getImage(imageSettings, REGION, DEFAULT_PLATFORM)).thenReturn(Optional.empty());
+        when(imageProvider.getImage(ACCOUNT_ID, imageSettings, REGION, DEFAULT_PLATFORM)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(RuntimeException.class, () ->
-                underTest.getImage(imageSettings, REGION, DEFAULT_PLATFORM));
+                underTest.getImage(ACCOUNT_ID, imageSettings, REGION, DEFAULT_PLATFORM));
         String exceptionMessage = "Could not find any image with id: 'fake-ami-0a6931aea1415eb0e' in region 'eu-west-1' with OS 'redhat7'.";
         assertEquals(exceptionMessage, exception.getMessage());
     }
@@ -167,9 +169,10 @@ public class ImageServiceTest {
         Stack stack = new Stack();
         stack.setCloudPlatform(DEFAULT_PLATFORM);
         stack.setRegion(REGION);
+        stack.setAccountId(ACCOUNT_ID);
         ImageSettingsRequest imageRequest = new ImageSettingsRequest();
         when(imageProviderFactory.getImageProvider(any())).thenReturn(imageProvider);
-        when(imageProvider.getImage(imageRequest, stack.getRegion(), stack.getCloudPlatform()))
+        when(imageProvider.getImage(ACCOUNT_ID, imageRequest, stack.getRegion(), stack.getCloudPlatform()))
                 .thenReturn(Optional.of(new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG)));
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
         when(imageRepository.getByStack(stack)).thenReturn(new ImageEntity());
@@ -191,9 +194,10 @@ public class ImageServiceTest {
         Stack stack = new Stack();
         stack.setCloudPlatform(DEFAULT_PLATFORM);
         stack.setRegion(DEFAULT_REGION);
+        stack.setAccountId(ACCOUNT_ID);
         ImageSettingsRequest imageRequest = new ImageSettingsRequest();
         when(imageProviderFactory.getImageProvider(any())).thenReturn(imageProvider);
-        when(imageProvider.getImage(imageRequest, stack.getRegion(), stack.getCloudPlatform()))
+        when(imageProvider.getImage(ACCOUNT_ID, imageRequest, stack.getRegion(), stack.getCloudPlatform()))
                 .thenReturn(Optional.of(new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG)));
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(DEFAULT_REGION, EXISTING_ID)));
         when(imageRepository.save(any(ImageEntity.class))).thenAnswer(invocation -> invocation.getArgument(0, ImageEntity.class));
@@ -246,11 +250,11 @@ public class ImageServiceTest {
         when(imageProviderFactory.getImageProvider(IMAGE_CATALOG)).thenReturn(imageProvider);
         Image image = new Image(123L, "now", "desc", DEFAULT_OS, IMAGE_UUID, Map.of(), "os", Map.of(), true);
         ImageWrapper imageWrapper = new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG);
-        when(imageProvider.getImage(any(), any(), any())).thenReturn(Optional.of(imageWrapper));
+        when(imageProvider.getImage(any(), any(), any(), any())).thenReturn(Optional.of(imageWrapper));
 
         ImageCatalog result = underTest.generateImageCatalogForStack(stack);
 
-        verify(imageProvider).getImage(imageSettingsRequestCaptor.capture(), eq(REGION), eq(DEFAULT_PLATFORM));
+        verify(imageProvider).getImage(any(), imageSettingsRequestCaptor.capture(), eq(REGION), eq(DEFAULT_PLATFORM));
         assertThat(imageSettingsRequestCaptor.getValue())
                 .returns(IMAGE_CATALOG, ImageSettingsBase::getCatalog)
                 .returns(IMAGE_UUID, ImageSettingsBase::getId);

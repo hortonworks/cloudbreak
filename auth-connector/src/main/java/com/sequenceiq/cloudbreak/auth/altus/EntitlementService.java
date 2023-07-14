@@ -94,11 +94,13 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATALAKE_HORIZONTAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_RHEL8_IMAGES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH_ONE_HOUR_TOKEN;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.PERSONAL_VIEW_CB_BY_RIGHT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.PREFER_RHEL8_IMAGES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.SDX_CONFIGURATION_OPTIMIZATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
@@ -551,6 +553,14 @@ public class EntitlementService {
 
     public boolean isDatalakeHorizontalScaleEnabled(String accountId) {
         return isEntitlementRegistered(accountId, DATALAKE_HORIZONTAL_SCALE);
+    }
+
+    public boolean isRhel8ImageSupportEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, ENABLE_RHEL8_IMAGES);
+    }
+
+    public boolean isRhel8ImagePreferred(String accountId) {
+        return isRhel8ImageSupportEnabled(accountId) && isEntitlementRegistered(accountId, PREFER_RHEL8_IMAGES);
     }
 
     public List<String> getEntitlements(String accountId) {

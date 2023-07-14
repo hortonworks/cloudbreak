@@ -103,7 +103,7 @@ public class UpgradeImageService {
             imageSettings.setCatalog(catalog);
             imageSettings.setId(currentImage.getId());
             imageSettings.setOs(currentImage.getOs());
-            ImageWrapper image = imageService.getImage(imageSettings, stack.getRegion(), stack.getCloudPlatform().toLowerCase());
+            ImageWrapper image = imageService.getImage(stack.getAccountId(), imageSettings, stack.getRegion(), stack.getCloudPlatform().toLowerCase());
             LOGGER.debug("Image date from catalog: {}", image.getImage().getDate());
             return Optional.ofNullable(image.getImage().getDate());
         } catch (ImageNotFoundException e) {

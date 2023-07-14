@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.upgrade;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -142,7 +143,7 @@ class UpgradeImageServiceTest {
         ArgumentCaptor<ImageSettingsRequest> captor = ArgumentCaptor.forClass(ImageSettingsRequest.class);
         Image currentImageFromCatalog = createImage("2021-08-01");
         ImageWrapper currentImageWrapperFromCatalog = new ImageWrapper(currentImageFromCatalog, "asdf", "Asdf");
-        when(imageService.getImage(captor.capture(), eq(stack.getRegion()), eq(stack.getCloudPlatform().toLowerCase())))
+        when(imageService.getImage(any(), captor.capture(), eq(stack.getRegion()), eq(stack.getCloudPlatform().toLowerCase())))
                 .thenReturn(currentImageWrapperFromCatalog);
 
         ImageInfoResponse currentImage = new ImageInfoResponse();
@@ -178,7 +179,7 @@ class UpgradeImageServiceTest {
         ArgumentCaptor<ImageSettingsRequest> captor = ArgumentCaptor.forClass(ImageSettingsRequest.class);
         Image currentImageFromCatalog = createImage(null);
         ImageWrapper currentImageWrapperFromCatalog = new ImageWrapper(currentImageFromCatalog, "asdf", "Asdf");
-        when(imageService.getImage(captor.capture(), eq(stack.getRegion()), eq(stack.getCloudPlatform().toLowerCase())))
+        when(imageService.getImage(any(), captor.capture(), eq(stack.getRegion()), eq(stack.getCloudPlatform().toLowerCase())))
                 .thenReturn(currentImageWrapperFromCatalog);
 
         ImageInfoResponse currentImage = new ImageInfoResponse();
@@ -205,7 +206,7 @@ class UpgradeImageServiceTest {
         ImageWrapper imageWrapper = new ImageWrapper(image, "catalogURL", "catalogName");
         when(imageService.fetchImagesWrapperAndName(stack, imageSettingsRequest)).thenReturn(List.of(Pair.of(imageWrapper, "imageName")));
         ArgumentCaptor<ImageSettingsRequest> captor = ArgumentCaptor.forClass(ImageSettingsRequest.class);
-        when(imageService.getImage(captor.capture(), eq(stack.getRegion()), eq(stack.getCloudPlatform().toLowerCase())))
+        when(imageService.getImage(any(), captor.capture(), eq(stack.getRegion()), eq(stack.getCloudPlatform().toLowerCase())))
                 .thenThrow(new ImageNotFoundException("Image not found"));
 
         ImageInfoResponse currentImage = new ImageInfoResponse();
