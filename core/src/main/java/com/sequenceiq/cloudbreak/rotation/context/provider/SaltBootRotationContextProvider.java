@@ -19,10 +19,10 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
+import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
@@ -74,6 +74,9 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
 
     @Inject
     private SaltSecurityConfigService securityConfigService;
+
+    @Inject
+    private ExitCriteriaProvider exitCriteriaProvider;
 
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
@@ -149,8 +152,7 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
                                 .collect(Collectors.toSet()),
                         List.of("saltboot.stop-saltboot", "saltboot.start-saltboot"),
                         SALT_STATE_MAX_RETRY,
-                        new ClusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId())
-                );
+                        exitCriteriaProvider.get(stack));
             }
         };
     }

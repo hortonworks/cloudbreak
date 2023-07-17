@@ -36,9 +36,9 @@ import com.sequenceiq.freeipa.api.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
+import com.sequenceiq.freeipa.service.rotation.ExitCriteriaProvider;
 import com.sequenceiq.freeipa.service.rotation.context.saltboot.SaltBootConfigRotationContext;
 import com.sequenceiq.freeipa.service.rotation.context.saltboot.SaltBootUpdateConfiguration;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -74,6 +74,9 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
 
     @Inject
     private SaltBootSignKeyUserDataModifier saltBootSignKeyUserDataModifier;
+
+    @Inject
+    private ExitCriteriaProvider exitCriteriaProvider;
 
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
@@ -127,7 +130,7 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
 
     @Override
     public SecretType getSecret() {
-        return FreeIpaSecretType.SALT_BOOT_SECRETS;
+        return FreeIpaSecretType.FREEIPA_SALT_BOOT_SECRETS;
     }
 
     private SaltBootConfigRotationContext getServiceConfigRotationContext(Stack stack, String saltBootPasswordSecret, String saltBootPrivateKeySecret) {
@@ -163,8 +166,7 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
                                 .collect(Collectors.toSet()),
                         List.of("saltboot.stop-saltboot", "saltboot.start-saltboot"),
                         SALT_STATE_MAX_RETRY,
-                        StackBasedExitCriteriaModel.nonCancellableModel()
-                );
+                        exitCriteriaProvider.get(stack));
             }
         };
     }

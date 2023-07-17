@@ -464,7 +464,8 @@ public class ReactorFlowManager {
 
     public FlowIdentifier triggerSecretRotation(Long stackId, String crn, List<SecretType> secretTypes, RotationFlowExecutionType executionType) {
         String selector = EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class);
-        return reactorNotifier.notify(stackId, selector, new SecretRotationFlowChainTriggerEvent(selector, stackId, crn, secretTypes, executionType));
+        Acceptable triggerEvent = new SecretRotationFlowChainTriggerEvent(selector, stackId, crn, secretTypes, executionType);
+        return reactorNotifier.notify(stackId, selector, triggerEvent);
     }
 
     private NetworkScaleDetails getStackNetworkScaleDetails(InstanceGroupAdjustmentV4Request instanceGroupAdjustment) {

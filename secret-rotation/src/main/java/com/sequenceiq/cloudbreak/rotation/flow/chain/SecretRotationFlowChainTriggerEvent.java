@@ -22,7 +22,8 @@ public class SecretRotationFlowChainTriggerEvent extends BaseFlowEvent {
     private final RotationFlowExecutionType executionType;
 
     @JsonCreator
-    public SecretRotationFlowChainTriggerEvent(@JsonProperty("selector") String selector,
+    public SecretRotationFlowChainTriggerEvent(
+            @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("secretTypes") List<SecretType> secretTypes,

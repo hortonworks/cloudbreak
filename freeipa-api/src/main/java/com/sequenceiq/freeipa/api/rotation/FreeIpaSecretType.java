@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 
 public enum FreeIpaSecretType implements SecretType {
 
-    SALT_BOOT_SECRETS(List.of(VAULT, CUSTOM_JOB, SALTBOOT_CONFIG, USER_DATA));
+    FREEIPA_SALT_BOOT_SECRETS(List.of(VAULT, CUSTOM_JOB, SALTBOOT_CONFIG, USER_DATA));
 
     private final List<SecretRotationStep> steps;
 
