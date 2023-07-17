@@ -12,7 +12,7 @@ public enum DatalakeInstanceGroupScalingDetails {
     STORAGEHG("storagehg", true, 0),
     KAFKAHG("kafkahg", true, 0),
     RAZHG("razhg", true, 0),
-    ATLASHG("atlashg", true, 0),
+    ATLASHG("atlashg", false, 0),
     HMSHG("hmshg", true, 0);
 
     private final String name;

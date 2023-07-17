@@ -122,6 +122,20 @@ public class SdxHorizontalScalingServiceTest {
         underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest);
     }
 
+    @Test
+    void testDatalakeHorizontalScaleValidationNotAllowedGroups() {
+        SdxCluster sdxCluster = getSdxCluster();
+        DatalakeHorizontalScaleRequest scaleRequest = new DatalakeHorizontalScaleRequest();
+        sdxCluster.setClusterShape(ENTERPRISE);
+        sdxCluster.setStackId(1L);
+        scaleRequest.setGroup("atlas");
+        scaleRequest.setDesiredCount(1);
+        assertThrows(IllegalArgumentException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
+        scaleRequest.setGroup("master");
+        scaleRequest.setDesiredCount(4);
+        assertThrows(BadRequestException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
+    }
+
     private StackV4Response getStackV4Response() {
         StackV4Response stackV4Response = new StackV4Response();
         ClusterV4Response clusterV4Response = new ClusterV4Response();
