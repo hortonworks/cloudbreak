@@ -46,7 +46,32 @@ jobs:
           export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
           export CIRCLECI=true
-          ./gradlew -Penv=jenkins -b build.gradle check test jacocoTestReport -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+          ./gradlew -Penv=jenkins -b build.gradle check test \
+            core:jacocoTestReport \
+            freeipa:jacocoTestReport \
+            autoscale:jacocoTestReport \
+            datalake:jacocoTestReport \
+            environment:jacocoTestReport \
+            redbeams:jacocoTestReport \
+            -x checkstyleMain -x checkstyleTest \
+            -x spotbugsMain -x spotbugsTest \
+            --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+      - name: Add coverage to PR
+        id: jacoco
+        uses: Kitchen/RE-thirdparty-actions/actions/jacoco-report@main
+        with:
+          paths: |
+            core/build/reports/jacoco/test/jacocoTestReport.xml,
+            freeipa/build/reports/jacoco/test/jacocoTestReport.xml,
+            autoscale/build/reports/jacoco/test/jacocoTestReport.xml,
+            datalake/build/reports/jacoco/test/jacocoTestReport.xml,
+            environment/build/reports/jacoco/test/jacocoTestReport.xml,
+            redbeams/build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ steps.build_secrets.outputs.GITHUB_TOKEN}}
+          min-coverage-overall: 55
+          min-coverage-changed-files: 55
+          title: Cloudbreak code coverage report
+          update-comment: true
 
   checkstyle-main:
     name: Checkstyle Main
