@@ -36,7 +36,6 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.util.ResourceCreator;
-import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class ChangeImageCatalogTest extends AbstractIntegrationTest {
 
@@ -148,7 +147,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .await(Status.AVAILABLE)
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
-                .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForFlow()
                 .when(sdxTestClient.detailedDescribeInternal())
                 .given(SdxChangeImageCatalogTestDto.class)
                 .withImageCatalog(imageCatalog1.getName())
@@ -200,7 +199,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .await(Status.AVAILABLE)
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
-                .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForFlow()
                 .when(sdxTestClient.detailedDescribeInternal())
                 .validate();
 
@@ -255,7 +254,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .await(Status.AVAILABLE)
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
-                .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForFlow()
                 .when(sdxTestClient.detailedDescribeInternal())
                 .given(DistroXTestDto.class)
                 .when(distroXClient.create())
@@ -310,7 +309,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .await(Status.AVAILABLE)
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
-                .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForFlow()
                 .when(sdxTestClient.detailedDescribeInternal())
                 .given(DistroXTestDto.class)
                 .when(distroXClient.create())
