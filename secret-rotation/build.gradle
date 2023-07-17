@@ -39,7 +39,7 @@ dependencies {
 
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',             version: springBootVersion
   testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',        version: springBootVersion
-
+  testImplementation project(path: ':secret-rotation-api', configuration: 'tests')
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

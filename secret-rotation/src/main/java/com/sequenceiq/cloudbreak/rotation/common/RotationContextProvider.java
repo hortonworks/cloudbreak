@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 
 public interface RotationContextProvider {
 
-    <C extends RotationContext> Map<SecretRotationStep, C> getContexts(String resourceId);
+    <C extends RotationContext> Map<SecretRotationStep, C> getContexts(String resourceCrn);
 
     SecretType getSecret();
 }

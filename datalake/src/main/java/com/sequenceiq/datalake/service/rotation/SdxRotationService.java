@@ -18,11 +18,10 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
-import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidator;
+import com.sequenceiq.cloudbreak.rotation.validation.SecretTypeConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
@@ -36,8 +35,6 @@ import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.StateStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
-import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
-import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 @Service
 public class SdxRotationService {
@@ -73,20 +70,17 @@ public class SdxRotationService {
     private EntitlementService entitlementService;
 
     @Inject
-    private SecretRotationValidator secretRotationValidator;
-
-    @Inject
     private RedbeamsFlowService redbeamsFlowService;
 
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
 
-    public void rotateCloudbreakSecret(String datalakeCrn, CloudbreakSecretType secretType, RotationFlowExecutionType executionType) {
+    public void rotateCloudbreakSecret(String datalakeCrn, SecretType secretType, RotationFlowExecutionType executionType) {
         SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn)
                 .orElseThrow(notFound("SdxCluster", datalakeCrn));
         StackV4SecretRotationRequest request = new StackV4SecretRotationRequest();
         request.setCrn(datalakeCrn);
-        request.setSecret(secretType.name());
+        request.setSecret(secretType.value());
         request.setExecutionType(executionType);
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
@@ -98,7 +92,7 @@ public class SdxRotationService {
         cloudbreakPoller.pollFlowStateByFlowIdentifierUntilComplete("secret rotation", flowIdentifier, sdxCluster.getId(), pollingConfig);
     }
 
-    public void rotateRedbeamsSecret(String datalakeCrn, RedbeamsSecretType secretType, RotationFlowExecutionType executionType) {
+    public void rotateRedbeamsSecret(String datalakeCrn, SecretType secretType, RotationFlowExecutionType executionType) {
         SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn)
                 .orElseThrow(notFound("SdxCluster", datalakeCrn));
         if (sdxCluster.getDatabaseCrn() == null) {
@@ -107,7 +101,7 @@ public class SdxRotationService {
 
         RotateDatabaseServerSecretV4Request request = new RotateDatabaseServerSecretV4Request();
         request.setCrn(sdxCluster.getDatabaseCrn());
-        request.setSecret(secretType.name());
+        request.setSecret(secretType.value());
         request.setExecutionType(executionType);
 
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
@@ -126,7 +120,7 @@ public class SdxRotationService {
             if (sdxCluster.isEmpty()) {
                 throw new CloudbreakServiceException("No sdx cluster found with crn: " + datalakeCrn);
             } else {
-                List<SecretType> secretTypes = secretRotationValidator.mapSecretTypes(secrets, DatalakeSecretType.class);
+                List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
                 return sdxReactorFlowManager.triggerSecretRotation(sdxCluster.get(), secretTypes, executionType);
             }
         } else {

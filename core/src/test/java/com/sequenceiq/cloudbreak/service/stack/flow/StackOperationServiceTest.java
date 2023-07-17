@@ -14,7 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -69,7 +68,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidator;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
@@ -158,9 +156,6 @@ public class StackOperationServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
-
-    @Mock
-    private SecretRotationValidator secretRotationValidator;
 
     @Test
     public void testStartWhenStackAvailable() {
@@ -540,7 +535,6 @@ public class StackOperationServiceTest {
     public void testRotateSecrets() {
         Stack stack = new Stack();
         stack.setId(1L);
-        when(secretRotationValidator.mapSecretTypes(anyList(), any())).thenReturn(List.of(CLUSTER_CB_CM_ADMIN_PASSWORD));
         when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
         when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stack);
         when(flowManager.triggerSecretRotation(anyLong(), anyString(), any(), any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, "flowchain"));
@@ -548,20 +542,6 @@ public class StackOperationServiceTest {
         underTest.rotateSecrets(CRN, List.of(CLUSTER_CB_CM_ADMIN_PASSWORD.name()), null);
 
         verify(flowManager).triggerSecretRotation(anyLong(), anyString(), any(), any());
-    }
-
-    @Test
-    public void testRotateSecretsWhenSecretsDuplicated() {
-        Stack stack = new Stack();
-        stack.setId(1L);
-        when(secretRotationValidator.mapSecretTypes(anyList(), any())).thenThrow(new CloudbreakServiceException("validation failed"));
-        when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
-        when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stack);
-
-        assertThrows(CloudbreakServiceException.class, () -> underTest.rotateSecrets(CRN,
-                List.of(CLUSTER_CB_CM_ADMIN_PASSWORD.name(), CLUSTER_CB_CM_ADMIN_PASSWORD.name()), null));
-
-        verifyNoInteractions(flowManager);
     }
 
     @Test

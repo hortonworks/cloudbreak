@@ -18,12 +18,10 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
+import com.sequenceiq.cloudbreak.rotation.validation.SecretTypeConverter;
 
 @Configuration
 public class SecretRotationConfig {
-
-    @Inject
-    private Optional<ApplicationSecretRotationInformation> applicationSecretRotationInformation;
 
     @Inject
     private Optional<List<RotationContextProvider>> rotationContextProviders;
@@ -33,11 +31,11 @@ public class SecretRotationConfig {
 
     @Bean
     public Map<SecretType, RotationContextProvider> rotationContextProviderMap() {
-        if (applicationSecretRotationInformation.isPresent() && rotationContextProviders.isPresent()) {
+        if (rotationContextProviders.isPresent()) {
             Map<SecretType, RotationContextProvider> beans = Maps.newHashMap();
             for (RotationContextProvider rotationContextProvider : rotationContextProviders.get()) {
-                Class<? extends SecretType> supportedSecretType = applicationSecretRotationInformation.get().supportedSecretType();
-                if (rotationContextProvider.getSecret().getClass().isAssignableFrom(supportedSecretType)) {
+                Set<Class<? extends SecretType>> supportedSecretTypes = SecretTypeConverter.AVAILABLE_SECRET_TYPES;
+                if (supportedSecretTypes.stream().anyMatch(secretType -> rotationContextProvider.getSecret().getClass().isAssignableFrom(secretType))) {
                     beans.put(rotationContextProvider.getSecret(), rotationContextProvider);
                 }
             }
@@ -49,10 +47,13 @@ public class SecretRotationConfig {
 
     @Bean
     public Map<SecretRotationStep, AbstractRotationExecutor<? extends RotationContext>> rotationExecutorMap() {
-        if (applicationSecretRotationInformation.isPresent() && rotationExecutors.isPresent()) {
-            Class<? extends SecretType> supportedSecretType = applicationSecretRotationInformation.get().supportedSecretType();
-            Set<SecretRotationStep> supportedSteps = Arrays.stream(supportedSecretType.getEnumConstants())
-                    .flatMap(secretType -> secretType.getSteps().stream())
+        if (rotationExecutors.isPresent()) {
+            Set<Class<? extends SecretType>> supportedSecretTypes = SecretTypeConverter.AVAILABLE_SECRET_TYPES;
+            Set<SecretRotationStep> supportedSteps = supportedSecretTypes.stream()
+                    .map(secretType -> Arrays.stream(secretType.getEnumConstants())
+                            .flatMap(secretTypeConstant -> secretTypeConstant.getSteps().stream())
+                            .collect(Collectors.toSet()))
+                    .flatMap(Set::stream)
                     .collect(Collectors.toSet());
             Map<SecretRotationStep, AbstractRotationExecutor<? extends RotationContext>> beans = Maps.newHashMap();
             for (AbstractRotationExecutor<? extends RotationContext> rotationExecutor : rotationExecutors.get()) {
