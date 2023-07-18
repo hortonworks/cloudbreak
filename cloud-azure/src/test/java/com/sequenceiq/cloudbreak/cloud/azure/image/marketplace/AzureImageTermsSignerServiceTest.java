@@ -26,7 +26,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestClientException;
 
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -213,7 +212,6 @@ public class AzureImageTermsSignerServiceTest {
         when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenReturn(azureImageTerms);
         when(azureRestOperationsService.httpPut(any(), any(), any(), anyString())).thenReturn(azureImageTerms);
         when(stack.getParameters()).thenReturn(Map.of(ACCEPTANCE_POLICY_PARAMETER, Boolean.TRUE.toString()));
-        ReflectionTestUtils.setField(underTest, "enableAzureImageTermsAutomaticSigner", true);
 
         underTest.signImageTermsIfAllowed(stack, azureClient, azureMarketplaceImage, AZURE_SUBSCRIPTION_ID);
 
@@ -225,19 +223,5 @@ public class AzureImageTermsSignerServiceTest {
         URI signURI = argumentCaptor.getValue();
         assertEquals(signURI.toString(), "https://management.azure.com/subscriptions/azureSubscriptionId/providers/Microsoft.MarketplaceOrdering/" +
                 "offerTypes/virtualmachine/publishers/cloudera/offers/my-offer/plans/my-plan/agreements/current?api-version=2015-06-01");
-    }
-
-    @Test
-    void testSignImageTermsIfAllowedButPolicyOff() {
-        CloudStack stack = mock(CloudStack.class);
-        when(stack.getParameters()).thenReturn(Map.of(ACCEPTANCE_POLICY_PARAMETER, Boolean.TRUE.toString()));
-        ReflectionTestUtils.setField(underTest, "enableAzureImageTermsAutomaticSigner", false);
-
-        underTest.signImageTermsIfAllowed(stack, azureClient, azureMarketplaceImage, AZURE_SUBSCRIPTION_ID);
-
-        verify(azureClient, never()).getAccessToken();
-        InOrder inOrder = Mockito.inOrder(azureRestOperationsService);
-        inOrder.verify(azureRestOperationsService, never()).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
-        inOrder.verify(azureRestOperationsService, never()).httpPut(any(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
     }
 }

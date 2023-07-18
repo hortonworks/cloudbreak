@@ -9,7 +9,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -35,12 +34,6 @@ public class AzureImageTermsSignerService {
 
     private static final String AGREEMENTS_URL_AZ_TEMPLATE = "https://management.azure.com/subscriptions/%s/providers/Microsoft.MarketplaceOrdering/" +
             "offerTypes/virtualmachine/publishers/%s/offers/%s/plans/%s/agreements/current?api-version=2015-06-01";
-
-    private static final String READ_PROBLEM_MESSAGE_TEMPLATE = "Failed to get the status of the Terms and Conditions for image %s. " +
-            "Please make sure that Azure Marketplace Terms and Conditions have been accepted for your subscription before proceeding with CDP deployment.";
-
-    @Value("${cb.arm.marketplace.image.automatic.signer:false}")
-    private boolean enableAzureImageTermsAutomaticSigner;
 
     @Inject
     private AzureRestOperationsService azureRestOperationsService;
@@ -111,11 +104,10 @@ public class AzureImageTermsSignerService {
 
     public void signImageTermsIfAllowed(CloudStack stack, AzureClient client, AzureMarketplaceImage azureMarketplaceImage, String subscriptionId) {
         Boolean automaticTermsAcceptance = Boolean.valueOf(stack.getParameters().get(ACCEPTANCE_POLICY_PARAMETER));
-        if (enableAzureImageTermsAutomaticSigner && automaticTermsAcceptance) {
+        if (automaticTermsAcceptance) {
             sign(subscriptionId, azureMarketplaceImage, client);
         } else {
-            LOGGER.debug("Azure automatic image term signing skipped: [cb.arm.marketplace.image.automatic.signer={}], [automaticTermsAcceptancePolicy={}]",
-                    enableAzureImageTermsAutomaticSigner, automaticTermsAcceptance);
+            LOGGER.debug("Azure automatic image term signing skipped: [automaticTermsAcceptancePolicy={}]", automaticTermsAcceptance);
         }
     }
 

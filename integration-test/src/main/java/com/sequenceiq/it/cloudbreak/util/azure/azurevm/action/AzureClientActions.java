@@ -52,7 +52,7 @@ public class AzureClientActions {
             VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
             Map<Integer, VirtualMachineDataDisk> dataDiskMap = vm.dataDisks();
             if (dataDiskMap != null && !dataDiskMap.isEmpty()) {
-                diskIds.addAll(dataDiskMap.values().stream().map(HasId::id).collect(Collectors.toList()));
+                diskIds.addAll(dataDiskMap.values().stream().map(HasId::id).toList());
                 LOGGER.info("Instance '{}' has attached volumes [{}].", id, diskIds);
             }
         });

@@ -150,7 +150,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .validate();
     }
 
-    protected void initalizeAzureMarketplaceTermsPolicy(TestContext testContext) {
+    protected void initializeAzureMarketplaceTermsPolicy(TestContext testContext) {
         testContext.init(TermsPolicyDto.class)
                 .withAccepted(Boolean.TRUE)
                 .when(azureMarketplaceTermsClient.put())
