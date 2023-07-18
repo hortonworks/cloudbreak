@@ -407,6 +407,34 @@
               {
                 "name":"hbase_regionserver_java_heapsize",
                 "value":8589934592
+              },
+              {
+                "name": "regionserver_truststore_password",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "regionserver_tls_server_enabled",
+                "value": "true"
+              },
+              {
+                "name": "regionserver_truststore_file",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "regionserver_tls_plaintext_enabled",
+                "value": "true"
+              },
+              {
+                "name": "regionserver_tls_truststore_file",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "regionserver_tls_truststore_password",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "regionserver_tls_keystore_password",
+                "value": "{{CM_AUTO_TLS}}"
               }
             ]
           },
@@ -548,6 +576,26 @@
               {
                 "name": "ssl_enabled",
                 "value": "true"
+              },
+              {
+                "name": "ssl_server_keystore_location",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "ssl_server_keystore_password",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "ssl_server_keystore_keypassword",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "ssl_client_truststore_location",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "ssl_client_truststore_password",
+                "value": "{{CM_AUTO_TLS}}"
               }
             ]
           }
