@@ -233,8 +233,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
         String telemetry = "telemetry";
 
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-        sdxDatabaseRequest.setCreate(false);
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        sdxDatabaseRequest.setCreate(true);
 
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();
