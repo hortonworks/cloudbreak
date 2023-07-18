@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.rotation.validation;
+package com.sequenceiq.cloudbreak.rotation.validator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -18,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class SecretTypeValidatorTest {
+public class SingleSecretTypeValidatorTest {
 
     @Captor
     private ArgumentCaptor<String> errorMessageCaptor;
@@ -35,20 +35,20 @@ public class SecretTypeValidatorTest {
     }
 
     @Test
-    void testValidateIfDuplication() {
-        assertFalse(new SecretTypesValidator().isValid(List.of("TEST", "TEST"), context));
+    void testDuplication() {
+        assertFalse(new SingleSecretTypesValidator().isValid(List.of("TEST", "TEST"), context));
         assertEquals("There is at least one duplication in the request!", errorMessageCaptor.getValue());
     }
 
     @Test
-    void testValidateIfInvalidType() {
-        assertFalse(new SecretTypesValidator().isValid(List.of("TEST", "INVALID"), context));
-        assertEquals("Invalid secret type, cannot map secrets [TEST, INVALID].", errorMessageCaptor.getValue());
+    void testMultiSecretValidation() {
+        assertFalse(new SingleSecretTypesValidator().isValid(List.of("TEST_2", "TEST"), context));
+        assertEquals("Only single secret types allowed!", errorMessageCaptor.getValue());
     }
 
     @Test
-    void testValidate() {
-        assertTrue(new SecretTypesValidator().isValid(List.of("TEST", "TEST_2"), context));
+    void testValidation() {
+        assertTrue(new SingleSecretTypesValidator().isValid(List.of("TEST"), context));
     }
 
     private void setupContext() {

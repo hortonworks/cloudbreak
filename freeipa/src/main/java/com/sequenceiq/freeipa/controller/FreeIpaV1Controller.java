@@ -5,6 +5,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_ENVIRONMENT;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ENVIRONMENT_CHANGE_FREEIPA_IMAGE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.REPAIR_FREEIPA;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ROTATE_ENV_SECRETS;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.SCALE_FREEIPA;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME_LIST;
@@ -63,6 +64,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaRespons
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaMultiSecretRotationRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleResponse;
@@ -493,11 +495,17 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
+    @CheckPermissionByResourceCrn(action = ROTATE_ENV_SECRETS)
     public FlowIdentifier rotateSecretsByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn,
             @Valid @NotNull FreeIpaSecretRotationRequest request) {
         String accountId = Crn.safeFromString(environmentCrn).getAccountId();
         return freeIpaSecretRotationService.rotateSecretsByCrn(accountId, environmentCrn, request);
+    }
+
+    @Override
+    @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_ENV_SECRETS)
+    public FlowIdentifier rotateMultiSecretsByCrn(@RequestObject @Valid @NotNull FreeIpaMultiSecretRotationRequest request) {
+        return null;
     }
 }

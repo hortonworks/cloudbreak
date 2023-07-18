@@ -9,11 +9,22 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 
 public enum TestSecretType implements SecretType {
     TEST,
-    TEST_2;
+    TEST_2,
+    TEST_3;
 
     @Override
     public List<SecretRotationStep> getSteps() {
         return List.of(STEP);
+    }
+
+    @Override
+    public boolean internal() {
+        return value().equals(TEST_3.value());
+    }
+
+    @Override
+    public boolean multiSecret() {
+        return value().equals(TEST_2.value());
     }
 
     @Override

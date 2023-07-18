@@ -1,28 +1,29 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests;
+package com.sequenceiq.sdx.api.model;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
-import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretType;
+import com.sequenceiq.cloudbreak.rotation.annotation.OnlyMultiSecretType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StackV4SecretRotationRequest {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class SdxMultiSecretRotationRequest {
 
     @ValidCrn(resource = { CrnResourceDescriptor.DATALAKE, CrnResourceDescriptor.DATAHUB })
+    @ApiModelProperty(ModelDescriptions.DATA_LAKE_CRN)
     private String crn;
 
-    @ValidSecretType
-    @NotNull
+    @OnlyMultiSecretType
+    @NotEmpty
+    @ApiModelProperty("Secret to be rotated")
     private String secret;
-
-    @NotNull
-    private RotationFlowExecutionType executionType;
 
     public String getCrn() {
         return crn;
@@ -38,13 +39,5 @@ public class StackV4SecretRotationRequest {
 
     public void setSecret(String secret) {
         this.secret = secret;
-    }
-
-    public RotationFlowExecutionType getExecutionType() {
-        return executionType;
-    }
-
-    public void setExecutionType(RotationFlowExecutionType executionType) {
-        this.executionType = executionType;
     }
 }

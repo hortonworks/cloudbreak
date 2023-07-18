@@ -110,6 +110,9 @@ public enum AuthorizationResourceAction {
     DESCRIBE_PROXY("environments/useSharedResource", AuthorizationResourceType.PROXY),
     DELETE_PROXY("environments/deleteProxyConfig", AuthorizationResourceType.PROXY),
     CREATE_PROXY("environments/createProxyConfig", AuthorizationResourceType.PROXY),
+    ROTATE_DL_SECRETS("environments/rotateSecrets", AuthorizationResourceType.DATALAKE),
+    ROTATE_DH_SECRETS("environments/rotateSecrets", AuthorizationResourceType.DATAHUB),
+    ROTATE_ENV_SECRETS("environments/rotateSecrets", AuthorizationResourceType.ENVIRONMENT),
     // deprecated actions, please do not use them
     ENVIRONMENT_READ("environments/read", AuthorizationResourceType.ENVIRONMENT),
     ENVIRONMENT_WRITE("environments/write", AuthorizationResourceType.ENVIRONMENT),

@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.rotation;
 
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakInternalSecretType.DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,7 +31,6 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
@@ -100,7 +100,7 @@ class SdxRotationServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internalCrn");
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_CHAIN_ID);
         when(stackV4Endpoint.rotateSecrets(eq(1L), any(), any())).thenReturn(flowIdentifier);
-        underTest.rotateCloudbreakSecret(RESOURCE_CRN, CloudbreakSecretType.DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE);
+        underTest.rotateCloudbreakSecret(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE);
         verify(sdxClusterRepository, times(1)).findByCrnAndDeletedIsNull(eq(RESOURCE_CRN));
         verify(regionAwareInternalCrnGeneratorFactory, times(1)).iam();
         verify(stackV4Endpoint, times(1)).rotateSecrets(eq(1L), any(), any());

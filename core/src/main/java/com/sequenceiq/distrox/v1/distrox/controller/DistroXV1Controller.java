@@ -8,7 +8,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_RECIPE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ENVIRONMENT_CREATE_DATAHUB;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.RECOVER_DATAHUB;
-import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.UPGRADE_DATAHUB;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ROTATE_DH_SECRETS;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN_LIST;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
@@ -747,7 +747,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = UPGRADE_DATAHUB)
+    @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_DH_SECRETS)
     public FlowIdentifier rotateSecrets(@RequestObject DistroXSecretRotationRequest request) {
         return stackOperationService.rotateSecrets(request.getCrn(), request.getSecrets(), request.getExecutionType());
     }

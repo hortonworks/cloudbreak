@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.rotation.context.provider;
 
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakInternalSecretType.DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.rotation.context.provider;
 
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakInternalSecretType.DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
@@ -39,7 +39,7 @@ class DatalakeExternalDatabaseRootPasswordRotationContextProviderTest {
         PollerRotationContext pollerRotationContext =
                 (PollerRotationContext) contexts.get(CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING);
         assertEquals(RESOURCE_CRN, pollerRotationContext.getResourceCrn());
-        assertEquals(CloudbreakSecretType.DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD, pollerRotationContext.getSecretType());
+        assertEquals(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD, pollerRotationContext.getSecretType());
     }
 
 }

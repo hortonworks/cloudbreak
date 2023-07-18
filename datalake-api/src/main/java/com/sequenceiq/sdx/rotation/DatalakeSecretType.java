@@ -17,17 +17,32 @@ public enum DatalakeSecretType implements SecretType {
 
     DATALAKE_USER_KEYPAIR(List.of(CLOUDBREAK_ROTATE_POLLING)),
     DATALAKE_CM_SERVICE_DB_PASSWORD(List.of(CLOUDBREAK_ROTATE_POLLING)),
-    SALT_BOOT_SECRETS(List.of(CLOUDBREAK_ROTATE_POLLING));
+    SALT_BOOT_SECRETS(List.of(CLOUDBREAK_ROTATE_POLLING)),
+    DL_CM_SERVICE_SHARED_DB(List.of(CLOUDBREAK_ROTATE_POLLING), true),
+    DH_CM_SERVICE_SHARED_DB(List.of(CLOUDBREAK_ROTATE_POLLING), true);
 
     private final List<SecretRotationStep> steps;
 
+    private final boolean multiCluster;
+
     DatalakeSecretType(List<SecretRotationStep> steps) {
         this.steps = steps;
+        this.multiCluster = false;
+    }
+
+    DatalakeSecretType(List<SecretRotationStep> steps, boolean multiCluster) {
+        this.steps = steps;
+        this.multiCluster = multiCluster;
     }
 
     @Override
     public List<SecretRotationStep> getSteps() {
         return steps;
+    }
+
+    @Override
+    public boolean multiSecret() {
+        return multiCluster;
     }
 
     @Override

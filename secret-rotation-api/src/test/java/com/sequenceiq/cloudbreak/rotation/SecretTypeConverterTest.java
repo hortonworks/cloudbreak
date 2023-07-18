@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.rotation.validation;
+package com.sequenceiq.cloudbreak.rotation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,7 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.TestSecretType;
 
 @ExtendWith(MockitoExtension.class)

@@ -7,7 +7,8 @@ import javax.validation.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
-import com.sequenceiq.cloudbreak.rotation.validation.ValidSecretTypes;
+import com.sequenceiq.cloudbreak.rotation.annotation.OnlyPublicSecretTypes;
+import com.sequenceiq.cloudbreak.rotation.annotation.OnlySingleSecretTypes;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 
 import io.swagger.annotations.ApiModel;
@@ -19,7 +20,8 @@ public class DistroXSecretRotationRequest {
     @ValidCrn(resource = CrnResourceDescriptor.DATAHUB)
     private String crn;
 
-    @ValidSecretTypes
+    @OnlyPublicSecretTypes
+    @OnlySingleSecretTypes
     @NotEmpty
     private List<String> secrets;
 

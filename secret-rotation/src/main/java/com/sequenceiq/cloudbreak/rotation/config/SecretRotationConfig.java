@@ -15,10 +15,10 @@ import org.springframework.context.annotation.Configuration;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
+import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
-import com.sequenceiq.cloudbreak.rotation.validation.SecretTypeConverter;
 
 @Configuration
 public class SecretRotationConfig {

@@ -49,6 +49,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
+import com.sequenceiq.sdx.api.model.SdxMultiSecretRotationRequest;
 import com.sequenceiq.sdx.api.model.SdxRecommendationResponse;
 import com.sequenceiq.sdx.api.model.SdxRefreshDatahubResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
@@ -380,6 +381,12 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Rotate SDX secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateSDXSecrets")
     FlowIdentifier rotateSecrets(@Valid @NotNull SdxSecretRotationRequest request);
+
+    @PUT
+    @Path("rotate_multi_secret")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Rotate SDX multi secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateSDXMultiSecrets")
+    FlowIdentifier rotateMultiSecrets(@Valid @NotNull SdxMultiSecretRotationRequest request);
 
     @PUT
     @Path("name/{name}/horizontal_scale")

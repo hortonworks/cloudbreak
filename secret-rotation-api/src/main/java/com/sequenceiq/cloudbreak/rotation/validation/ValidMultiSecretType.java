@@ -11,12 +11,12 @@ import javax.validation.Constraint;
 import javax.validation.Payload;
 
 @Documented
-@Constraint(validatedBy = SecretTypesValidator.class)
+@Constraint(validatedBy = MultiSecretTypeValidator.class)
 @Target({ FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidSecretTypes {
+public @interface ValidMultiSecretType {
 
-    String message() default "Only valid secret rotation types allowed!";
+    String message() default "Not a multi secret rotation!";
 
     Class<?>[] groups() default {};
 

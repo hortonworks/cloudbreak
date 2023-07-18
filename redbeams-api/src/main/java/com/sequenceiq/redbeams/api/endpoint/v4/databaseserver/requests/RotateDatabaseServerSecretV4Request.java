@@ -5,6 +5,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
+import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 
@@ -17,6 +18,7 @@ public class RotateDatabaseServerSecretV4Request {
     @ValidCrn(resource = { CrnResourceDescriptor.DATABASE_SERVER })
     private String crn;
 
+    @ValidSecretType
     @NotNull
     private String secret;
 
