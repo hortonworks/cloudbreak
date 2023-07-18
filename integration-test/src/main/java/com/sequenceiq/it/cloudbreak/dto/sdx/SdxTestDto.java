@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
@@ -407,6 +408,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         StorageUrl storageUrl = new ClusterLogsStorageUrl();
         SearchUrl searchUrl = new KibanaSearchUrl();
         String datalakeCloudStorageUrl = null;
+        String datalakeKibanaUrl = null;
 
         if (getResponse() == null || getResponse().getCrn() == null) {
             return null;
@@ -428,12 +430,15 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
                     getTestContext().getMicroserviceClient(SdxClient.class).getDefaultClient().structuredEventsV1Endpoint();
             structuredEvents = StructuredEventUtil.getStructuredEvents(cdpStructuredEventV1Endpoint, resourceCrn);
         }
-        if (getTestContext().get(EnvironmentTestDto.class) != null || getTestContext().get(EnvironmentTestDto.class).getResponse() != null) {
-            String baseLocation = getTestContext().get(EnvironmentTestDto.class).getResponse().getTelemetry().getLogging().getStorageLocation();
-            datalakeCloudStorageUrl = storageUrl.getDatalakeStorageUrl(resourceName, resourceCrn, baseLocation, cloudProvider);
+        if (!CloudPlatform.MOCK.equalsIgnoreCase(cloudProvider.getCloudPlatform().name())) {
+            if (getTestContext().get(EnvironmentTestDto.class) != null
+                    || getTestContext().get(EnvironmentTestDto.class).getResponse().getTelemetry() != null) {
+                String baseLocation = getTestContext().get(EnvironmentTestDto.class).getResponse().getTelemetry().getLogging().getStorageLocation();
+                datalakeCloudStorageUrl = storageUrl.getDatalakeStorageUrl(resourceName, resourceCrn, baseLocation, cloudProvider);
+            }
+            List<Searchable> listOfSearchables = List.of(this);
+            datalakeKibanaUrl = searchUrl.getSearchUrl(listOfSearchables, getTestContext().getTestStartTime(), getTestContext().getTestEndTime());
         }
-        List<Searchable> listOfSearchables = List.of(this);
-        String datalakeKibanaUrl = searchUrl.getSearchUrl(listOfSearchables, getTestContext().getTestStartTime(), getTestContext().getTestEndTime());
         return new Clue(
                 resourceName,
                 resourceCrn,

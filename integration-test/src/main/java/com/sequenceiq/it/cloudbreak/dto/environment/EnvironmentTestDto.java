@@ -19,6 +19,7 @@ import javax.ws.rs.NotFoundException;
 
 import org.testng.util.Strings;
 
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.common.api.backup.request.BackupRequest;
@@ -46,6 +47,7 @@ import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.assign.Assignable;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.Clue;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -81,6 +83,9 @@ public class EnvironmentTestDto
     private EnvironmentChangeCredentialRequest enviornmentChangeCredentialRequest;
 
     private int order = ORDER;
+
+    @Inject
+    private CommonCloudProperties commonCloudProperties;
 
     public EnvironmentTestDto(TestContext testContext) {
         super(new EnvironmentRequest(), testContext);
@@ -457,6 +462,7 @@ public class EnvironmentTestDto
     public Clue investigate() {
         StorageUrl storageUrl = new ClusterLogsStorageUrl();
         SearchUrl searchUrl = new KibanaSearchUrl();
+        String environmentKibanaUrl = null;
 
         if (getResponse() == null) {
             return null;
@@ -467,8 +473,10 @@ public class EnvironmentTestDto
                     getTestContext().getMicroserviceClient(EnvironmentClient.class).getDefaultClient().structuredEventsV1Endpoint();
             structuredEvents = StructuredEventUtil.getStructuredEvents(cdpStructuredEventV1Endpoint, getResponse().getCrn());
         }
-        List<Searchable> listOfSearchables = List.of(this);
-        String environmentKibanaUrl = searchUrl.getSearchUrl(listOfSearchables, getTestContext().getTestStartTime(), getTestContext().getTestEndTime());
+        if (!CloudPlatform.MOCK.equalsIgnoreCase(commonCloudProperties.getCloudProvider())) {
+            List<Searchable> listOfSearchables = List.of(this);
+            environmentKibanaUrl = searchUrl.getSearchUrl(listOfSearchables, getTestContext().getTestStartTime(), getTestContext().getTestEndTime());
+        }
         return new Clue(
                 getResponse().getName(),
                 getResponse().getCrn(),

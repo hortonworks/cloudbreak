@@ -343,6 +343,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         StorageUrl storageUrl = new ClusterLogsStorageUrl();
         SearchUrl searchUrl = new KibanaSearchUrl();
         String datahubCloudStorageUrl = null;
+        String datahubKibanaUrl = null;
 
         if (getResponse() == null || getResponse().getId() == null) {
             return null;
@@ -358,13 +359,14 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         boolean hasSpotTermination = (getResponse().getInstanceGroups() == null) ? false : getResponse().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetadata().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
-
-        if (getResponse().getTelemetry() != null) {
-            String baseLocation = getResponse().getTelemetry().getLogging().getStorageLocation();
-            datahubCloudStorageUrl = storageUrl.getDataHubStorageUrl(resourceName, resourceCrn, baseLocation, cloudProvider);
+        if (!CloudPlatform.MOCK.equalsIgnoreCase(cloudProvider.getCloudPlatform().name())) {
+            if (getResponse().getTelemetry() != null) {
+                String baseLocation = getResponse().getTelemetry().getLogging().getStorageLocation();
+                datahubCloudStorageUrl = storageUrl.getDataHubStorageUrl(resourceName, resourceCrn, baseLocation, cloudProvider);
+            }
+            List<Searchable> listOfSearchables = List.of(this);
+            datahubKibanaUrl = searchUrl.getSearchUrl(listOfSearchables, getTestContext().getTestStartTime(), getTestContext().getTestEndTime());
         }
-        List<Searchable> listOfSearchables = List.of(this);
-        String datahubKibanaUrl = searchUrl.getSearchUrl(listOfSearchables, getTestContext().getTestStartTime(), getTestContext().getTestEndTime());
         return new Clue(
                 resourceName,
                 resourceCrn,
