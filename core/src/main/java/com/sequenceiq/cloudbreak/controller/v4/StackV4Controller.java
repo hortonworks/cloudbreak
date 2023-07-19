@@ -72,6 +72,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
+import com.sequenceiq.cloudbreak.service.stack.flow.StackRotationService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -106,6 +107,9 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private StackRotationService stackRotationService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
@@ -642,7 +646,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @InternalOnly
     public FlowIdentifier rotateSecrets(Long workspaceId, StackV4SecretRotationRequest request, @InitiatorUserCrn String initiatorUserCrn) {
-        return stackOperationService.rotateSecrets(request.getCrn(), List.of(request.getSecret()), request.getExecutionType());
+        return stackRotationService.rotateSecrets(request.getCrn(), List.of(request.getSecret()), request.getExecutionType());
     }
 
     @Override

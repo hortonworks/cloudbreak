@@ -3,11 +3,13 @@ package com.sequenceiq.datalake.service.rotation;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -18,10 +20,13 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
+import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationValidationService;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
@@ -75,6 +80,23 @@ public class SdxRotationService {
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
 
+    @Inject
+    private MultiClusterRotationValidationService multiClusterRotationValidationService;
+
+    @Inject
+    private MultiClusterRotationService multiClusterRotationService;
+
+    public boolean checkOngoingMultiSecretChildrenRotations(String parentCrn, String secret) {
+        MultiSecretType multiSecretType = SecretTypeConverter.mapMultiSecretType(secret);
+        Set<String> crnsByEnvironmentCrn = getSdxCrnsByEnvironmentCrn(parentCrn);
+        return CollectionUtils.isNotEmpty(multiClusterRotationService.getMultiRotationEntriesForSecretAndResources(multiSecretType, crnsByEnvironmentCrn));
+    }
+
+    public void markMultiClusterChildrenResources(String parentCrn, String secret) {
+        Set<String> crnsByEnvironmentCrn = getSdxCrnsByEnvironmentCrn(parentCrn);
+        multiClusterRotationService.markChildrenMultiRotationEntriesLocally(crnsByEnvironmentCrn, secret);
+    }
+
     public void rotateCloudbreakSecret(String datalakeCrn, SecretType secretType, RotationFlowExecutionType executionType) {
         SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn)
                 .orElseThrow(notFound("SdxCluster", datalakeCrn));
@@ -116,13 +138,20 @@ public class SdxRotationService {
 
     public FlowIdentifier triggerSecretRotation(String datalakeCrn, List<String> secrets, RotationFlowExecutionType executionType) {
         if (entitlementService.isSecretRotationEnabled(Crn.fromString(datalakeCrn).getAccountId())) {
-            Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn);
-            if (sdxCluster.isEmpty()) {
-                throw new CloudbreakServiceException("No sdx cluster found with crn: " + datalakeCrn);
-            } else {
-                List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
-                return sdxReactorFlowManager.triggerSecretRotation(sdxCluster.get(), secretTypes, executionType);
-            }
+            SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn).orElseThrow(notFound("SDX cluster", datalakeCrn));
+            List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
+            return sdxReactorFlowManager.triggerSecretRotation(sdxCluster, secretTypes, executionType);
+        } else {
+            throw new CloudbreakServiceException("Account is not entitled to execute any secret rotation!");
+        }
+    }
+
+    public FlowIdentifier triggerMultiSecretRotation(String datalakeCrn, String secret) {
+        if (entitlementService.isSecretRotationEnabled(Crn.safeFromString(datalakeCrn).getAccountId())) {
+            MultiSecretType multiSecretType = SecretTypeConverter.mapMultiSecretType(secret);
+            SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn).orElseThrow(notFound("SDX cluster", datalakeCrn));
+            multiClusterRotationValidationService.validateMultiRotationRequest(datalakeCrn, multiSecretType);
+            return sdxReactorFlowManager.triggerSecretRotation(sdxCluster, List.of(multiSecretType.getSecretTypeByResourceCrn(datalakeCrn)), null);
         } else {
             throw new CloudbreakServiceException("Account is not entitled to execute any secret rotation!");
         }
@@ -148,5 +177,10 @@ public class SdxRotationService {
             String message = String.format("Polling in CB is not possible since last known state of flow for cluster is %s", lastFlow.getCurrentState());
             throw new SecretRotationException(message, null);
         }
+    }
+
+    private Set<String> getSdxCrnsByEnvironmentCrn(String parentCrn) {
+        return sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsFalse(
+                Crn.safeFromString(parentCrn).getAccountId(), parentCrn).stream().map(SdxCluster::getCrn).collect(Collectors.toSet());
     }
 }

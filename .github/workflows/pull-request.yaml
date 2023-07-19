@@ -53,6 +53,7 @@ jobs:
             datalake:jacocoTestReport \
             environment:jacocoTestReport \
             redbeams:jacocoTestReport \
+            secret-rotation:jacocoTestReport \
             -x checkstyleMain -x checkstyleTest \
             -x spotbugsMain -x spotbugsTest \
             --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
@@ -66,7 +67,8 @@ jobs:
             autoscale/build/reports/jacoco/test/jacocoTestReport.xml,
             datalake/build/reports/jacoco/test/jacocoTestReport.xml,
             environment/build/reports/jacoco/test/jacocoTestReport.xml,
-            redbeams/build/reports/jacoco/test/jacocoTestReport.xml
+            redbeams/build/reports/jacoco/test/jacocoTestReport.xml,
+            secret-rotation/build/reports/jacoco/test/jacocoTestReport.xml
           token: ${{ steps.build_secrets.outputs.GITHUB_TOKEN}}
           min-coverage-overall: 55
           min-coverage-changed-files: 55

@@ -2,16 +2,16 @@ package com.sequenceiq.cloudbreak.rotation.service;
 
 import java.util.Optional;
 
+import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
-import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationMetadata;
 
 public record RotationMetadata(
         SecretType secretType,
         RotationFlowExecutionType currentExecution,
         RotationFlowExecutionType requestedExecutionType,
         String resourceCrn,
-        Optional<MultiClusterRotationMetadata> multiClusterRotationMetadata
+        Optional<MultiSecretType> multiSecretType
 ) {
 
     public static Builder builder() {
@@ -28,7 +28,7 @@ public record RotationMetadata(
 
         private String resourceCrn;
 
-        private Optional<MultiClusterRotationMetadata> multiClusterRotationMetadata = Optional.empty();
+        private Optional<MultiSecretType> multiSecretType = Optional.empty();
 
         public Builder secretType(SecretType secretType) {
             this.secretType = secretType;
@@ -50,13 +50,13 @@ public record RotationMetadata(
             return this;
         }
 
-        public Builder multiClusterRotationMetadata(MultiClusterRotationMetadata multiClusterRotationMetadata) {
-            this.multiClusterRotationMetadata = Optional.of(multiClusterRotationMetadata);
+        public Builder multiSecretType(MultiSecretType multiSecretType) {
+            this.multiSecretType = Optional.of(multiSecretType);
             return this;
         }
 
         public RotationMetadata build() {
-            return new RotationMetadata(secretType, currentExecution, requestedExecutionType, resourceCrn, multiClusterRotationMetadata);
+            return new RotationMetadata(secretType, currentExecution, requestedExecutionType, resourceCrn, multiSecretType);
         }
     }
 }

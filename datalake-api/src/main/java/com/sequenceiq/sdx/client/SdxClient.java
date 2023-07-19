@@ -14,6 +14,7 @@ import com.sequenceiq.sdx.api.endpoint.SdxEventEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxRecoveryEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxRestoreEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SdxRotationEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
 
 public interface SdxClient {
@@ -21,6 +22,8 @@ public interface SdxClient {
     SdxInternalEndpoint sdxInternalEndpoint();
 
     SdxEndpoint sdxEndpoint();
+
+    SdxRotationEndpoint sdxRotationEndpoint();
 
     SdxUpgradeEndpoint sdxUpgradeEndpoint();
 

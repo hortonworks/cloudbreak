@@ -38,10 +38,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -51,9 +48,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
-import com.sequenceiq.cloudbreak.rotation.SecretType;
-import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
@@ -131,9 +125,6 @@ public class StackOperationService {
 
     @Inject
     private SaltPasswordStatusService saltPasswordStatusService;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     public FlowIdentifier removeInstance(StackDto stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
@@ -486,18 +477,6 @@ public class StackOperationService {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         return flowManager.triggerModifyProxyConfig(stack.getId(), previousProxyConfigCrn);
-    }
-
-    public FlowIdentifier rotateSecrets(String crn, List<String> secrets, RotationFlowExecutionType executionType) {
-        if (entitlementService.isSecretRotationEnabled(Crn.fromString(crn).getAccountId())) {
-            StackView viewByCrn = stackDtoService.getStackViewByCrn(crn);
-            Long stackId = viewByCrn.getId();
-            List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
-            return flowManager.triggerSecretRotation(stackId, crn, secretTypes, executionType);
-        } else {
-            throw new CloudbreakServiceException("Account is not entitled to execute any secret rotation!");
-        }
-
     }
 
     public FlowIdentifier triggerServicesRollingRestart(String crn) {

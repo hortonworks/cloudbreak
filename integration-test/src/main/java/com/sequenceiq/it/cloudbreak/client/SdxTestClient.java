@@ -38,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxResizeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRestoreAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRestoreInternalAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxRotateMultiSecretAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRotateSaltPasswordAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRotateSecretAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStartAction;
@@ -60,6 +61,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.RenewDatalakeCertificateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.SdxEventTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
+import com.sequenceiq.sdx.rotation.DatalakeMultiSecretType;
 import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 @Service
@@ -247,6 +249,10 @@ public class SdxTestClient {
 
     public Action<SdxInternalTestDto, SdxClient> rotateSecret(Set<DatalakeSecretType> secretTypes) {
         return new SdxRotateSecretAction(secretTypes);
+    }
+
+    public Action<SdxInternalTestDto, SdxClient> rotateMultiSecret(DatalakeMultiSecretType multiSecretType) {
+        return new SdxRotateMultiSecretAction(multiSecretType);
     }
 
 }

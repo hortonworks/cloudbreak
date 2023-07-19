@@ -17,6 +17,7 @@ import com.sequenceiq.sdx.api.endpoint.SdxEventEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxRecoveryEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxRestoreEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SdxRotationEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
 
 public class SdxServiceCrnEndpoints extends AbstractUserCrnServiceEndpoint implements SdxClient {
@@ -33,6 +34,11 @@ public class SdxServiceCrnEndpoints extends AbstractUserCrnServiceEndpoint imple
     @Override
     public SdxEndpoint sdxEndpoint() {
         return getEndpoint(SdxEndpoint.class);
+    }
+
+    @Override
+    public SdxRotationEndpoint sdxRotationEndpoint() {
+        return getEndpoint(SdxRotationEndpoint.class);
     }
 
     @Override

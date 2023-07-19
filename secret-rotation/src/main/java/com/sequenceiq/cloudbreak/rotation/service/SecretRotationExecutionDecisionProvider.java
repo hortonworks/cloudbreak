@@ -4,22 +4,23 @@ import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.FINAL
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.PREVALIDATE;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
-import static com.sequenceiq.cloudbreak.rotation.entity.multicluster.MultiClusterRotationResourceType.CHILD;
-import static com.sequenceiq.cloudbreak.rotation.entity.multicluster.MultiClusterRotationResourceType.PARENT_FINAL;
-import static com.sequenceiq.cloudbreak.rotation.entity.multicluster.MultiClusterRotationResourceType.PARENT_INITIAL;
+import static com.sequenceiq.cloudbreak.rotation.entity.multicluster.MultiClusterRotationResourceType.INITIATED_PARENT;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.entity.multicluster.MultiClusterRotationResourceType;
-import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationTrackingService;
+import com.sequenceiq.cloudbreak.rotation.service.multicluster.InterServiceMultiClusterRotationService;
+import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
 
 @Service
 public class SecretRotationExecutionDecisionProvider {
@@ -27,7 +28,10 @@ public class SecretRotationExecutionDecisionProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretRotationExecutionDecisionProvider.class);
 
     @Inject
-    private MultiClusterRotationTrackingService multiClusterRotationTrackingService;
+    private MultiClusterRotationService multiClusterRotationService;
+
+    @Inject
+    private Optional<InterServiceMultiClusterRotationService> interServiceMultiClusterRotationTrackingService;
 
     public boolean executionRequired(RotationMetadata metadata) {
         Predicate<RotationMetadata> executionTypeCorrect = emptyExecution().or(explicitExecution());
@@ -61,36 +65,27 @@ public class SecretRotationExecutionDecisionProvider {
     }
 
     private Predicate<RotationMetadata> childClusterExecution() {
-        return rotationMetadata -> rotationMetadata.multiClusterRotationMetadata()
-                .map(multiClusterRotationMetadata ->
-                        multiClusterRotationMetadata.childResourceCrns().contains(rotationMetadata.resourceCrn()) &&
-                                resourcePresentInDb(rotationMetadata, CHILD))
-                .orElseThrow(() -> new RuntimeException("Missing metadata for multi cluster rotation!"));
+        return metadata -> metadata.multiSecretType().orElseThrow().childSecretTypesByDescriptor().containsKey(
+                CrnResourceDescriptor.getByCrnString(metadata.resourceCrn()));
     }
 
     private Predicate<RotationMetadata> parentClusterInitialExecution() {
-        return rotationMetadata -> rotationMetadata.multiClusterRotationMetadata()
-                .map(multiClusterRotationMetadata ->
-                        parentAndResourceMatches(rotationMetadata) &&
-                                resourcePresentInDb(rotationMetadata, PARENT_INITIAL) &&
-                                List.of(PREVALIDATE, ROTATE, ROLLBACK).contains(rotationMetadata.currentExecution()))
-                .orElseThrow(() -> new RuntimeException("Missing metadata for multi cluster rotation!"));
+        return metadata -> metadata.multiSecretType().orElseThrow().parentSecretType().equals(metadata.secretType())
+                && !resourcePresentInDb(metadata, INITIATED_PARENT) && List.of(PREVALIDATE, ROTATE, ROLLBACK).contains(metadata.currentExecution());
     }
 
     private Predicate<RotationMetadata> parentClusterFinalExecution() {
-        return rotationMetadata -> rotationMetadata.multiClusterRotationMetadata()
-                .map(multiClusterRotationMetadata ->
-                        parentAndResourceMatches(rotationMetadata) &&
-                                resourcePresentInDb(rotationMetadata, PARENT_FINAL) &&
-                                rotationMetadata.currentExecution().equals(FINALIZE))
-                .orElseThrow(() -> new RuntimeException("Missing metadata for multi cluster rotation!"));
+        return metadata -> metadata.multiSecretType().orElseThrow().parentSecretType().equals(metadata.secretType())
+                && resourcePresentInDb(metadata, INITIATED_PARENT) && !childPresent(metadata) && metadata.currentExecution().equals(FINALIZE);
     }
 
-    private boolean resourcePresentInDb(RotationMetadata rotationMetadata, MultiClusterRotationResourceType type) {
-        return multiClusterRotationTrackingService.multiRotationNeededForResource(rotationMetadata, type);
+    private boolean resourcePresentInDb(RotationMetadata metadata, MultiClusterRotationResourceType type) {
+        return multiClusterRotationService.getMultiRotationEntryForMetadata(metadata, type).isPresent();
     }
 
-    private boolean parentAndResourceMatches(RotationMetadata rotationMetadata) {
-        return StringUtils.equals(rotationMetadata.multiClusterRotationMetadata().orElseThrow().parentResourceCrn(), rotationMetadata.resourceCrn());
+    private boolean childPresent(RotationMetadata metadata) {
+        MultiSecretType multiSecretType = metadata.multiSecretType().orElseThrow();
+        return interServiceMultiClusterRotationTrackingService.map(interServiceMultiClusterRotationService ->
+                interServiceMultiClusterRotationService.checkOngoingChildrenMultiSecretRotations(metadata.resourceCrn(), multiSecretType)).orElse(false);
     }
 }

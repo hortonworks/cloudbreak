@@ -27,6 +27,7 @@ import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXDatabaseServerV1End
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXInternalV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXUpgradeV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1RotationEndpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 
@@ -98,6 +99,10 @@ public class CloudbreakServiceCrnEndpoints extends AbstractUserCrnServiceEndpoin
 
     public DistroXV1Endpoint distroXV1Endpoint() {
         return getEndpoint(DistroXV1Endpoint.class);
+    }
+
+    public DistroXV1RotationEndpoint distroXV1RotationEndpoint() {
+        return getEndpoint(DistroXV1RotationEndpoint.class);
     }
 
     public DistroXUpgradeV1Endpoint distroXUpgradeV1Endpoint() {

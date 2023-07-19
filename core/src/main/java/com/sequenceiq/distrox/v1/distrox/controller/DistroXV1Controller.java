@@ -8,7 +8,6 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_RECIPE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ENVIRONMENT_CREATE_DATAHUB;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.RECOVER_DATAHUB;
-import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ROTATE_DH_SECRETS;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN_LIST;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
@@ -89,7 +88,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXGenerateImageCatalogV1
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
-import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretRotationRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXVerticalScaleV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.MultipleInstanceDeleteRequest;
@@ -744,12 +742,6 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @InternalOnly
     public FlowIdentifier modifyProxyInternal(@TenantAwareParam String crn, String previousProxyConfigCrn, @InitiatorUserCrn String initiatorUserCrn) {
         return stackOperationService.modifyProxyConfig(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(), previousProxyConfigCrn);
-    }
-
-    @Override
-    @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_DH_SECRETS)
-    public FlowIdentifier rotateSecrets(@RequestObject DistroXSecretRotationRequest request) {
-        return stackOperationService.rotateSecrets(request.getCrn(), request.getSecrets(), request.getExecutionType());
     }
 
     @Override

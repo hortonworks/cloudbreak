@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.stack;
+package com.sequenceiq.freeipa.service.rotation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -28,6 +28,7 @@ import com.sequenceiq.freeipa.api.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaSecretRotationServiceTest {

@@ -1,13 +1,13 @@
 package com.sequenceiq.sdx.api.model;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidMultiSecretType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
-import com.sequenceiq.sdx.rotation.DatalakeMultiSecretType;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -17,11 +17,12 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxMultiSecretRotationRequest {
 
-    @ValidCrn(resource = { CrnResourceDescriptor.DATALAKE, CrnResourceDescriptor.DATAHUB })
+    @ValidCrn(resource = CrnResourceDescriptor.DATALAKE)
     @ApiModelProperty(ModelDescriptions.DATA_LAKE_CRN)
+    @NotNull
     private String crn;
 
-    @ValidMultiSecretType(allowedTypes = { DatalakeMultiSecretType.class })
+    @ValidMultiSecretType
     @NotEmpty
     @ApiModelProperty("Secret to be rotated")
     private String secret;

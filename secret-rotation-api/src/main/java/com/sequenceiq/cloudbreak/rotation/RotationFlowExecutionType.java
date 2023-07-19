@@ -1,18 +1,18 @@
 package com.sequenceiq.cloudbreak.rotation;
 
-public enum RotationFlowExecutionType {
-    PREVALIDATE("Pre validate"),
-    ROLLBACK("Rollback"),
-    FINALIZE("Finalization"),
-    ROTATE("Rotation");
+public enum RotationFlowExecutionType implements SerializableRotationEnum {
+    PREVALIDATE,
+    ROLLBACK,
+    FINALIZE,
+    ROTATE;
 
-    private final String displayName;
-
-    RotationFlowExecutionType(String displayName) {
-        this.displayName = displayName;
+    @Override
+    public Class<? extends Enum<?>> getClazz() {
+        return RotationFlowExecutionType.class;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    @Override
+    public String value() {
+        return name();
     }
 }

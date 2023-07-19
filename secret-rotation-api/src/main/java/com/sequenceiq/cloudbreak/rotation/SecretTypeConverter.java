@@ -64,24 +64,9 @@ public class SecretTypeConverter {
         }
     }
 
-    public static <T extends Enum<T> & SecretType> SecretType mapSecretType(String secret) {
-        return mapSecretType(secret, AVAILABLE_SECRET_TYPES);
-    }
-
     public static <T extends Enum<T> & MultiSecretType> MultiSecretType mapMultiSecretType(String secret) {
         try {
             return getMultiSecretType(secret, AVAILABLE_MULTI_SECRET_TYPES).orElseThrow();
-        } catch (Exception e) {
-            String message = String.format("Invalid secret type, cannot map secret %s.", secret);
-            LOGGER.warn(message);
-            throw new CloudbreakServiceException(message, e);
-        }
-    }
-
-    public static <T extends Enum<T> & MultiSecretType> MultiSecretType mapMultiSecretType(String secret,
-            Set<Class<? extends MultiSecretType>> allowedSecretTypes) {
-        try {
-            return getMultiSecretType(secret, allowedSecretTypes).orElseThrow();
         } catch (Exception e) {
             String message = String.format("Invalid secret type, cannot map secret %s.", secret);
             LOGGER.warn(message);

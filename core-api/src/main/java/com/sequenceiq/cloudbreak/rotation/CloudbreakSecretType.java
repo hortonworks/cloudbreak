@@ -13,6 +13,8 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.REDBEA
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.SALTBOOT_CONFIG;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.USER_DATA;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
+import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.INTERNAL;
+import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.MULTI_SECRET;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_UPDATE;
 
 import java.util.List;
@@ -27,7 +29,12 @@ public enum CloudbreakSecretType implements SecretType {
     USER_KEYPAIR(List.of(SALT_STATE_RUN, CUSTOM_JOB)),
     IDBROKER_CERT(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE_ROLE_RESTART, CUSTOM_JOB)),
     CLUSTER_CM_SERVICES_DB_PASSWORD(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE)),
-    SALT_BOOT_SECRETS(List.of(VAULT, CUSTOM_JOB, SALTBOOT_CONFIG, USER_DATA));
+    SALT_BOOT_SECRETS(List.of(VAULT, CUSTOM_JOB, SALTBOOT_CONFIG, USER_DATA)),
+    DATAHUB_CM_SERVICE_SHARED_DB(List.of(SALT_PILLAR, CM_SERVICE), Set.of(MULTI_SECRET)),
+    DATAHUB_DEMO_SECRET(List.of(CUSTOM_JOB), Set.of(SKIP_SALT_UPDATE, MULTI_SECRET)),
+    DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD(List.of(SALT_PILLAR), Set.of(INTERNAL)),
+    INTERNAL_DATALAKE_CM_SERVICE_SHARED_DB(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE), Set.of(INTERNAL)),
+    INTERNAL_DATALAKE_DEMO_SECRET(List.of(CUSTOM_JOB), Set.of(SKIP_SALT_UPDATE, INTERNAL));
 
     private final List<SecretRotationStep> steps;
 

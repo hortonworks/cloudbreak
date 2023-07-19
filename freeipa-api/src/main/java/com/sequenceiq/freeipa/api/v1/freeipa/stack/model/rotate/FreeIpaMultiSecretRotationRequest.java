@@ -20,7 +20,7 @@ public class FreeIpaMultiSecretRotationRequest {
     @NotNull
     private String crn;
 
-    @ValidMultiSecretType(allowedTypes = {})
+    @ValidMultiSecretType
     @NotEmpty
     private String secret;
 

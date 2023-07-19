@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.AbstractRdsConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -62,11 +63,6 @@ public abstract class AbstractCMRelatedDatabasePasswordContextProvider {
 
     protected abstract Predicate<RDSConfig> getRDSConfigTypePredicate();
 
-    // if false, then only pillars and cm configs are updated, vault and postgres are already updated, only relevant for shared db secrets
-    protected boolean fullRotation(String resourceCrn) {
-        return true;
-    }
-
     protected Predicate<RDSConfig> getRDSConfigCountPredicate() {
         return rdsConfig -> rdsConfigService.getClustersUsingResource(rdsConfig).size() == 1;
     }
@@ -75,9 +71,7 @@ public abstract class AbstractCMRelatedDatabasePasswordContextProvider {
         try {
             Map<String, SaltPillarProperties> pillarPropertiesSet = Maps.newHashMap();
             pillarPropertiesSet.put(PostgresConfigService.POSTGRESQL_SERVER, postgresConfigService.getPostgreSQLServerPropertiesForRotation(stack));
-            if (fullRotation(stack.getResourceCrn())) {
-                pillarPropertiesSet.put(PostgresConfigService.POSTGRES_ROTATION, postgresConfigService.getPillarPropertiesForRotation(stack));
-            }
+            pillarPropertiesSet.put(PostgresConfigService.POSTGRES_ROTATION, postgresConfigService.getPillarPropertiesForRotation(stack));
             return pillarPropertiesSet;
         } catch (Exception e) {
             throw new CloudbreakServiceException("Failed to generate pillar properties for DB username/password rotation.", e);
@@ -102,13 +96,11 @@ public abstract class AbstractCMRelatedDatabasePasswordContextProvider {
         }
     }
 
-    protected VaultRotationContext getVaultRotationContext(Map<RDSConfig, Pair<String, String>> newUserPassPairs, StackDto stack, String resourceCrn) {
+    protected VaultRotationContext getVaultRotationContext(Map<RDSConfig, Pair<String, String>> userPassPairs, StackDto stack) {
         Map<String, String> secretMap = Maps.newHashMap();
-        newUserPassPairs.forEach((rdsConfig, userPassPair) -> {
-            if (fullRotation(resourceCrn)) {
-                secretMap.put(rdsConfig.getConnectionUserNameSecret(), userPassPair.getKey());
-                secretMap.put(rdsConfig.getConnectionPasswordSecret(), userPassPair.getValue());
-            }
+        userPassPairs.forEach((rdsConfig, userPassPair) -> {
+            secretMap.put(rdsConfig.getConnectionUserNameSecret(), userPassPair.getKey());
+            secretMap.put(rdsConfig.getConnectionPasswordSecret(), userPassPair.getValue());
         });
         return VaultRotationContext.builder()
                 .withVaultPathSecretMap(secretMap)
@@ -127,22 +119,14 @@ public abstract class AbstractCMRelatedDatabasePasswordContextProvider {
                 .withMaxRetryOnError(SALT_STATE_MAX_RETRY);
     }
 
-    protected Map<RDSConfig, Pair<String, String>> getUserPassPairs(StackDto stack, String resourceCrn) {
+    protected Map<RDSConfig, Pair<String, String>> getUserPassPairs(StackDto stack) {
         ClusterView cluster = stack.getCluster();
         return rdsConfigService.findByClusterId(cluster.getId())
                 .stream()
                 .filter(getRDSConfigTypePredicate())
                 .filter(getRDSConfigCountPredicate())
                 .filter(rdsConfig -> rdsConfigProviders.stream().anyMatch(configProvider -> matchRdsTypeWithString(configProvider.getRdsType(), rdsConfig)))
-                .collect(Collectors.toMap(rdsConfig -> rdsConfig, rdsConfig -> getUserPassPairs(rdsConfig, resourceCrn)));
-    }
-
-    private Pair<String, String> getUserPassPairs(RDSConfig rdsConfig, String resourceCrn) {
-        if (fullRotation(resourceCrn)) {
-            return getNewUserPassPair(getDefaultUserName(rdsConfig));
-        } else {
-            return getExistingUserPassPair(rdsConfig);
-        }
+                .collect(Collectors.toMap(rdsConfig -> rdsConfig, this::getUserPassPairs));
     }
 
     private boolean matchRdsTypeWithString(DatabaseType rdsType, RDSConfig rdsConfig) {
@@ -154,18 +138,20 @@ public abstract class AbstractCMRelatedDatabasePasswordContextProvider {
                 .filter(configProvider -> matchRdsTypeWithString(configProvider.getRdsType(), rdsConfig))
                 .map(AbstractRdsConfigProvider::getDbUser)
                 .findFirst()
-                .get();
+                .orElseThrow();
     }
 
-    private Pair<String, String> getNewUserPassPair(String defaultUserName) {
-        String newUser = defaultUserName + new SimpleDateFormat("ddMMyyHHmmss").format(new Date());
-        String newPassword = PasswordUtil.generatePassword();
-        return Pair.of(newUser, newPassword);
-    }
-
-    private Pair<String, String> getExistingUserPassPair(RDSConfig rdsConfig) {
-        String user = secretService.get(rdsConfig.getConnectionUserNameSecret());
-        String password = secretService.get(rdsConfig.getConnectionPasswordSecret());
-        return Pair.of(user, password);
+    private Pair<String, String> getUserPassPairs(RDSConfig rdsConfig) {
+        RotationSecret user = secretService.getRotation(rdsConfig.getConnectionUserNameSecret());
+        RotationSecret password = secretService.getRotation(rdsConfig.getConnectionPasswordSecret());
+        if (user.isRotation() && password.isRotation()) {
+            return Pair.of(user.getSecret(), password.getSecret());
+        } else if (!user.isRotation() && !password.isRotation()) {
+            String newUser = getDefaultUserName(rdsConfig) + new SimpleDateFormat("ddMMyyHHmmss").format(new Date());
+            String newPassword = PasswordUtil.generatePassword();
+            return Pair.of(newUser, newPassword);
+        } else {
+            throw new CloudbreakServiceException("Only one of secret is under rotation from user and password, which is unexpected.");
+        }
     }
 }

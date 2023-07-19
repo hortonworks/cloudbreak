@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
+import com.sequenceiq.cloudbreak.rotation.SerializableRotationEnum;
 
 @Component
 public class SecretRotationNotificationService {
@@ -33,19 +34,19 @@ public class SecretRotationNotificationService {
         if (step.skipNotification() || !NOTIFIABLE_EXECUTION_TYPES.contains(executionType)) {
             return Optional.empty();
         }
-        return Optional.of(executionType.getDisplayName() + "(" + getMessage(secretType) + ") " + getMessage(step));
+        return Optional.of(getMessage(executionType) + " secret [" + getMessage(secretType) + "]: " + getMessage(step));
     }
 
     protected void send(String resourceCrn, String message) {
     }
 
-    private String getMessage(Object value) {
-        String code = value.getClass().getSimpleName() + "." + ((Enum<?>) value).name();
+    private String getMessage(SerializableRotationEnum rotationEnum) {
+        String code = rotationEnum.getClazz().getSimpleName() + "." + rotationEnum.value();
         try {
             return cloudbreakMessagesService.getMessage(code);
         } catch (Exception e) {
             LOGGER.error("Failed to get message for property: {}", code, e);
-            return ((Enum<?>) value).name();
+            return rotationEnum.value();
         }
     }
 }

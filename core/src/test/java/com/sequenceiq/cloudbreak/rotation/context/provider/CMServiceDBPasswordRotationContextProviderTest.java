@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.rotation.context.provider.CMDBContextPro
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -35,6 +36,8 @@ import com.sequenceiq.cloudbreak.rotation.context.CMServiceConfigRotationContext
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.AbstractRdsConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,6 +63,9 @@ public class CMServiceDBPasswordRotationContextProviderTest {
     @Mock
     private ExitCriteriaProvider exitCriteriaProvider;
 
+    @Mock
+    private SecretService secretService;
+
     @InjectMocks
     private CMServiceDBPasswordRotationContextProvider underTest;
 
@@ -74,7 +80,7 @@ public class CMServiceDBPasswordRotationContextProviderTest {
         GatewayConfig gatewayConfig = mockGwConfig();
         when(rdsConfigProvider.getRdsType()).thenReturn(TEST_DB_TYPE);
         when(rdsRoleConfigProvider.dbType()).thenReturn(TEST_DB_TYPE);
-        when(rdsConfigProvider.getDbUser()).thenReturn("user");
+        lenient().when(rdsConfigProvider.getDbUser()).thenReturn("user");
         when(rdsRoleConfigProvider.dbUserKey()).thenReturn("userconfig");
         when(rdsRoleConfigProvider.dbPasswordKey()).thenReturn("passwordconfig");
         when(rdsRoleConfigProvider.getServiceType()).thenReturn(TEST_DB_TYPE.name());
@@ -82,6 +88,7 @@ public class CMServiceDBPasswordRotationContextProviderTest {
         when(rdsConfigService.getClustersUsingResource(any())).thenReturn(Set.of(cluster));
         when(stackService.getByCrn(anyString())).thenReturn(stackDto);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
+        when(secretService.getRotation(any())).thenReturn(new RotationSecret("new", "old"));
 
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts("resource");
 

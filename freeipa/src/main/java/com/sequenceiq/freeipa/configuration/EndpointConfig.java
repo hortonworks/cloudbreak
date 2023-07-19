@@ -23,6 +23,7 @@ import com.sequenceiq.freeipa.controller.DiagnosticsV1Controller;
 import com.sequenceiq.freeipa.controller.DnsV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaCO2V1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaCostV1Controller;
+import com.sequenceiq.freeipa.controller.FreeIpaRotationV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaUpgradeV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaV1FlowController;
@@ -63,7 +64,8 @@ public class EndpointConfig extends ResourceConfig {
             FreeIpaUpgradeV1Controller.class,
             RecipeV1Controller.class,
             FreeIpaCostV1Controller.class,
-            FreeIpaCO2V1Controller.class);
+            FreeIpaCO2V1Controller.class,
+            FreeIpaRotationV1Controller.class);
 
     @Value("${info.app.version:unspecified}")
     private String applicationVersion;

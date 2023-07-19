@@ -30,7 +30,7 @@ public class SecretRotationFlowEventChainFactory implements FlowEventChainFactor
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         if (saltUpdateFlowEventProvider.isPresent()) {
             SaltUpdateFlowEventProvider eventProvider = saltUpdateFlowEventProvider.get();
-            if (eventProvider.saltUpdateNeeded(event.getSecretTypes(), event.getExecutionType())) {
+            if (eventProvider.saltUpdateNeeded(event)) {
                 flowEventChain.add(eventProvider.getSaltUpdateTriggerEvent(event));
             }
         }

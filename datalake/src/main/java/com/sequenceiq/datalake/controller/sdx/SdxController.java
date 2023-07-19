@@ -3,7 +3,6 @@ package com.sequenceiq.datalake.controller.sdx;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_CREDENTIAL;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATALAKE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG;
-import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ROTATE_DL_SECRETS;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 
@@ -54,7 +53,6 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.SdxDeleteService;
-import com.sequenceiq.datalake.service.rotation.SdxRotationService;
 import com.sequenceiq.datalake.service.sdx.SdxHorizontalScalingService;
 import com.sequenceiq.datalake.service.sdx.SdxImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.SdxRecommendationService;
@@ -83,11 +81,9 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
-import com.sequenceiq.sdx.api.model.SdxMultiSecretRotationRequest;
 import com.sequenceiq.sdx.api.model.SdxRecommendationResponse;
 import com.sequenceiq.sdx.api.model.SdxRefreshDatahubResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
-import com.sequenceiq.sdx.api.model.SdxSecretRotationRequest;
 import com.sequenceiq.sdx.api.model.SdxStopValidationResponse;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
@@ -150,9 +146,6 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private SdxBackupRestoreService sdxBackupRestoreService;
-
-    @Inject
-    private SdxRotationService sdxRotationService;
 
     @Inject
     private SdxHorizontalScalingService sdxHorizontalScalingService;
@@ -512,18 +505,6 @@ public class SdxController implements SdxEndpoint {
             @InitiatorUserCrn String initiatorUserCrn) {
         SdxCluster sdxCluster = sdxService.getByCrn(crn);
         sdxBackupRestoreService.submitDatalakeDataInfo(operationId, dataSizesJson, ThreadBasedUserCrnProvider.getUserCrn());
-    }
-
-    @Override
-    @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_DL_SECRETS)
-    public FlowIdentifier rotateSecrets(@RequestObject SdxSecretRotationRequest request) {
-        return sdxRotationService.triggerSecretRotation(request.getCrn(), request.getSecrets(), request.getExecutionType());
-    }
-
-    @Override
-    @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_DL_SECRETS)
-    public FlowIdentifier rotateMultiSecrets(@RequestObject SdxMultiSecretRotationRequest request) {
-        return null;
     }
 
     @Override

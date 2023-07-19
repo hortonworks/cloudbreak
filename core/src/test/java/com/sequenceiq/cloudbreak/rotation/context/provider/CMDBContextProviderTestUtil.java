@@ -25,7 +25,7 @@ public class CMDBContextProviderTestUtil {
 
     public static GatewayConfig mockGwConfig() {
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
-        when(gatewayConfig.getHostname()).thenReturn("host");
+        lenient().when(gatewayConfig.getHostname()).thenReturn("host");
         return gatewayConfig;
     }
 

@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.api.client;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.test.ClientTestV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
@@ -14,6 +15,8 @@ import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
 
 public interface FreeIpaApiEndpoint {
     FreeIpaV1Endpoint getFreeIpaV1Endpoint();
+
+    FreeIpaRotationV1Endpoint getFreeipaRotationV1Endpoint();
 
     LdapConfigV1Endpoint getLdapConfigV1Endpoint();
 

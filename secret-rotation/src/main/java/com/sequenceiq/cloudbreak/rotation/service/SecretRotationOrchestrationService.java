@@ -16,9 +16,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
-import com.sequenceiq.cloudbreak.rotation.common.MultiClusterRotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
-import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationCleanupService;
+import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationFinalizeService;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationPreValidateService;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationRollbackService;
@@ -48,9 +47,6 @@ public class SecretRotationOrchestrationService {
     private SecretRotationExecutionDecisionProvider executionDecisionProvider;
 
     @Inject
-    private MultiClusterRotationCleanupService multiClusterRotationCleanupService;
-
-    @Inject
     private SecretRotationPreValidateService preValidateService;
 
     @Inject
@@ -61,6 +57,9 @@ public class SecretRotationOrchestrationService {
 
     @Inject
     private SecretRotationFinalizeService finalizeService;
+
+    @Inject
+    private MultiClusterRotationService multiClusterRotationService;
 
     public void preValidateIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType) {
         RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, PREVALIDATE);
@@ -77,6 +76,7 @@ public class SecretRotationOrchestrationService {
             rotationService.rotate(rotationMetadata);
             secretRotationStatusService.rotationFinished(resourceCrn, secretType);
             secretRotationProgressService.deleteAllForCurrentExecution(rotationMetadata);
+            multiClusterRotationService.updateMultiRotationEntriesAfterRotate(rotationMetadata);
         }
     }
 
@@ -90,8 +90,6 @@ public class SecretRotationOrchestrationService {
                 secretRotationStatusService.rollbackFinished(resourceCrn, secretType);
                 secretRotationUsageService.rollbackFinished(secretType, resourceCrn, executionType);
                 secretRotationProgressService.deleteAllForCurrentExecution(rotationMetadata);
-                rotationMetadata.multiClusterRotationMetadata().ifPresent(multiSecretRotationMetadata ->
-                        multiClusterRotationCleanupService.cleanupAfterRollback(resourceCrn, multiSecretRotationMetadata));
             } catch (Exception e) {
                 secretRotationStatusService.rollbackFailed(resourceCrn, secretType, e.getMessage());
                 secretRotationUsageService.rollbackFailed(secretType, resourceCrn, e.getMessage(), executionType);
@@ -110,14 +108,13 @@ public class SecretRotationOrchestrationService {
                 secretRotationStatusService.finalizeFinished(resourceCrn, secretType);
                 secretRotationUsageService.rotationFinished(secretType, resourceCrn, executionType);
                 secretRotationProgressService.deleteAllForCurrentExecution(rotationMetadata);
+                multiClusterRotationService.updateMultiRotationEntriesAfterFinalize(rotationMetadata);
             } catch (Exception e) {
                 secretRotationStatusService.finalizeFailed(resourceCrn, secretType, e.getMessage());
                 secretRotationProgressService.deleteAllForCurrentExecution(rotationMetadata);
                 throw e;
             }
         }
-        rotationMetadata.multiClusterRotationMetadata().ifPresent(multiSecretRotationMetadata ->
-                multiClusterRotationCleanupService.cleanupAfterFinalize(resourceCrn, multiSecretRotationMetadata));
     }
 
     private RotationMetadata getRotationMetadata(SecretType secretType, String resourceCrn, RotationFlowExecutionType requestedExecutionType,
@@ -134,16 +131,8 @@ public class SecretRotationOrchestrationService {
                 .requestedExecutionType(requestExecutionType)
                 .resourceCrn(resourceCrn);
         if (secretType.multiSecret()) {
-            builder.multiClusterRotationMetadata(getMultiClusterRotationContextProvider(rotationContextProvider).getMultiClusterRotationMetadata(resourceCrn));
+            rotationContextProvider.getMultiSecret().ifPresent(builder::multiSecretType);
         }
         return builder.build();
-    }
-
-    public static MultiClusterRotationContextProvider getMultiClusterRotationContextProvider(RotationContextProvider rotationContextProvider) {
-        if (rotationContextProvider instanceof MultiClusterRotationContextProvider) {
-            return (MultiClusterRotationContextProvider) rotationContextProvider;
-        } else {
-            throw new RuntimeException("There is no metadata for multi cluster secret rotation!");
-        }
     }
 }

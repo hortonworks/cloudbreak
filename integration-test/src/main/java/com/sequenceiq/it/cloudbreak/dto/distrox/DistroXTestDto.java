@@ -366,7 +366,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     @Override
     public String getCloudStorageUrl(String resourceName, String resourceCrn) {
         CloudProviderProxy cloudProviderProxy = getTestContext().getCloudProvider();
-        String baseLocation = (getResponse().getTelemetry() != null)
+        String baseLocation = getResponse().getTelemetry() != null && getResponse().getTelemetry().getLogging() != null
                 ? getResponse().getTelemetry().getLogging().getStorageLocation()
                 : null;
         StorageUrl storageUrl = new ClusterLogsStorageUrl();

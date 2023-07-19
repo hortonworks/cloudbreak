@@ -28,7 +28,7 @@ public class DistroXRotateSecretAction implements Action<DistroXTestDto, Cloudbr
         DistroXSecretRotationRequest request = new DistroXSecretRotationRequest();
         request.setSecrets(secretTypes.stream().map(Enum::name).collect(Collectors.toList()));
         request.setCrn(testDto.getCrn());
-        testDto.setFlow("secret rotation", client.getDefaultClient().distroXV1Endpoint().rotateSecrets(request));
+        testDto.setFlow("secret rotation", client.getDefaultClient().distroXV1RotationEndpoint().rotateSecrets(request));
         return testDto;
     }
 }

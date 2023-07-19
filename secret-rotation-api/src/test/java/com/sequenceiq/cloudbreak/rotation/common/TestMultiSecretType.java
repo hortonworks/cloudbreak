@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.rotation.common;
 
-import static com.sequenceiq.cloudbreak.rotation.common.TestSecretType.TEST_2;
-import static com.sequenceiq.cloudbreak.rotation.common.TestSecretType.TEST_4;
+import java.util.Map;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
@@ -12,13 +11,18 @@ public enum TestMultiSecretType implements MultiSecretType {
     MULTI_TEST_2;
 
     @Override
-    public SecretType parentSecretType() {
-        return TEST_2;
+    public Class<? extends Enum<?>> getClazz() {
+        return TestMultiSecretType.class;
     }
 
     @Override
-    public SecretType childSecretType() {
-        return TEST_4;
+    public String value() {
+        return name();
+    }
+
+    @Override
+    public SecretType parentSecretType() {
+        return TestSecretType.TEST_2;
     }
 
     @Override
@@ -27,17 +31,7 @@ public enum TestMultiSecretType implements MultiSecretType {
     }
 
     @Override
-    public CrnResourceDescriptor childCrnDescriptor() {
-        return CrnResourceDescriptor.DATAHUB;
-    }
-
-    @Override
-    public Class<? extends Enum<?>> getClazz() {
-        return TestMultiSecretType.class;
-    }
-
-    @Override
-    public String value() {
-        return name();
+    public Map<CrnResourceDescriptor, SecretType> childSecretTypesByDescriptor() {
+        return Map.of(CrnResourceDescriptor.DATAHUB, TestSecretType.TEST_4);
     }
 }

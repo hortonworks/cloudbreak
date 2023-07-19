@@ -18,6 +18,7 @@ import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxFlowEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxRestoreEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SdxRotationEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
 
 @Configuration
@@ -42,6 +43,12 @@ public class SdxApiClientConfig {
     @ConditionalOnBean(name = "sdxApiClientWebTarget")
     SdxEndpoint createSdxV1Endpoint(WebTarget sdxApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(sdxApiClientWebTarget, SdxEndpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "sdxApiClientWebTarget")
+    SdxRotationEndpoint createSdxRotationEndpoint(WebTarget sdxApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(sdxApiClientWebTarget, SdxRotationEndpoint.class);
     }
 
     @Bean

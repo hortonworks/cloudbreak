@@ -52,6 +52,7 @@ import com.sequenceiq.distrox.v1.distrox.controller.DistroXInternalV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXUpgradeV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1EventController;
+import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1RotationController;
 import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.flow.controller.FlowPublicController;
 
@@ -84,6 +85,7 @@ public class EndpointConfig extends ResourceConfig {
             StackV4Controller.class,
             CloudbreakInfoV4Controller.class,
             DistroXV1Controller.class,
+            DistroXV1RotationController.class,
             DistroXInternalV1Controller.class,
             DatalakeV4Controller.class,
             DiagnosticsV4Controller.class,

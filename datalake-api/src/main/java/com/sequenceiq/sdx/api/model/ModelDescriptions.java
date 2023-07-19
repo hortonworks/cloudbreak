@@ -78,6 +78,8 @@ public class ModelDescriptions {
 
     public static final String DATA_LAKE_CRN = "Data Lake crn.";
 
+    public static final String DATA_HUB_CRN = "Child data Hub crn.";
+
     public static final String DATA_LAKE_NAME = "Data Lake name.";
 
     public static final String DATA_LAKE_STATUS = "Data Lake status.";

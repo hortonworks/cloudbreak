@@ -49,8 +49,8 @@ public class CMDBPasswordRotationContextProvider extends AbstractCMRelatedDataba
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         StackDto stack = stackService.getByCrn(resourceCrn);
-        Map<RDSConfig, Pair<String, String>> newUserPassPairs = getUserPassPairs(stack, resourceCrn);
-        VaultRotationContext vaultRotationContext = getVaultRotationContext(newUserPassPairs, stack, resourceCrn);
+        Map<RDSConfig, Pair<String, String>> userPassPairs = getUserPassPairs(stack);
+        VaultRotationContext vaultRotationContext = getVaultRotationContext(userPassPairs, stack);
 
         SaltPillarRotationContext pillarUpdateRotationContext = new SaltPillarRotationContext(stack.getResourceCrn(), this::getPillarProperties);
         SaltStateApplyRotationContext stateApplyRotationContext = getSaltStateApplyRotationContextBuilder(stack)

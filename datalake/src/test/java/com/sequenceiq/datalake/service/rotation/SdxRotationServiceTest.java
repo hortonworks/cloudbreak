@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.service.rotation;
 
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakInternalSecretType.DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -50,7 +49,7 @@ import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 @ExtendWith(MockitoExtension.class)
 class SdxRotationServiceTest {
 
-    private static final String RESOURCE_CRN = "crn:cdp:datalake:us-west-1:1234:environment:1";
+    private static final String RESOURCE_CRN = "crn:cdp:datalake:us-west-1:1234:datalake:1";
 
     private static final String FLOW_CHAIN_ID = "flowChainId";
 
@@ -163,9 +162,9 @@ class SdxRotationServiceTest {
     void triggerSecretRotationShouldFailIfSdxClusterNotFound() {
         when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.empty());
-        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
+        NotFoundException notFoundException = assertThrows(NotFoundException.class,
                 () -> underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null));
-        assertEquals("No sdx cluster found with crn: " + RESOURCE_CRN, cloudbreakServiceException.getMessage());
+        assertEquals("SDX cluster '" + RESOURCE_CRN + "' not found.", notFoundException.getMessage());
     }
 
     @Test
@@ -173,7 +172,7 @@ class SdxRotationServiceTest {
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.empty());
         NotFoundException notFoundException = assertThrows(NotFoundException.class,
                 () -> underTest.preValidateRedbeamsRotation(RESOURCE_CRN));
-        assertEquals("SdxCluster 'crn:cdp:datalake:us-west-1:1234:environment:1' not found.", notFoundException.getMessage());
+        assertEquals("SdxCluster 'crn:cdp:datalake:us-west-1:1234:datalake:1' not found.", notFoundException.getMessage());
         verify(redbeamsFlowService, never()).getLastFlowId(anyString());
     }
 

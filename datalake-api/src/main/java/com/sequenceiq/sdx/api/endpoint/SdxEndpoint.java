@@ -49,11 +49,9 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
-import com.sequenceiq.sdx.api.model.SdxMultiSecretRotationRequest;
 import com.sequenceiq.sdx.api.model.SdxRecommendationResponse;
 import com.sequenceiq.sdx.api.model.SdxRefreshDatahubResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
-import com.sequenceiq.sdx.api.model.SdxSecretRotationRequest;
 import com.sequenceiq.sdx.api.model.SdxStopValidationResponse;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
@@ -375,18 +373,6 @@ public interface SdxEndpoint {
             @NotNull(message = "The 'operationId' query parameter must be specified.") @QueryParam("operationId") String operationId,
             @NotNull(message = "The 'dataSizesJson' parameter must be specified.") String dataSizesJson,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
-
-    @PUT
-    @Path("rotate_secret")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Rotate SDX secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateSDXSecrets")
-    FlowIdentifier rotateSecrets(@Valid @NotNull SdxSecretRotationRequest request);
-
-    @PUT
-    @Path("rotate_multi_secret")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Rotate SDX multi secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateSDXMultiSecrets")
-    FlowIdentifier rotateMultiSecrets(@Valid @NotNull SdxMultiSecretRotationRequest request);
 
     @PUT
     @Path("name/{name}/horizontal_scale")

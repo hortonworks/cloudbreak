@@ -14,6 +14,7 @@ plugins {
 }
 
 apply plugin: 'java'
+apply plugin: "jacoco"
 apply plugin: 'io.spring.dependency-management'
 
 jar {
@@ -33,6 +34,8 @@ dependencies {
   implementation group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
   implementation group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
   implementation project(path: ':secret-rotation-api')
+  implementation project(path: ':authorization-common-api')
+  implementation project(path: ':auth-internal-api')
 
   testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
   testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion

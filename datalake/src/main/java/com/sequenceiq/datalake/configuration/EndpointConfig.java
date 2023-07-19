@@ -33,6 +33,7 @@ import com.sequenceiq.datalake.controller.sdx.SdxInternalController;
 import com.sequenceiq.datalake.controller.sdx.SdxRecipeController;
 import com.sequenceiq.datalake.controller.sdx.SdxRecoveryController;
 import com.sequenceiq.datalake.controller.sdx.SdxRestoreController;
+import com.sequenceiq.datalake.controller.sdx.SdxRotationController;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeController;
 import com.sequenceiq.datalake.controller.util.UtilController;
 import com.sequenceiq.flow.controller.FlowPublicController;
@@ -48,6 +49,7 @@ public class EndpointConfig extends ResourceConfig {
 
     private static final List<Class<?>> CONTROLLERS = Arrays.asList(
             SdxController.class,
+            SdxRotationController.class,
             SdxUpgradeController.class,
             SdxInternalController.class,
             DatabaseConfigController.class,

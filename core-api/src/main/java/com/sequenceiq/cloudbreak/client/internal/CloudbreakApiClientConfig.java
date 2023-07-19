@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
 import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXUpgradeV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1RotationEndpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
 
 @Configuration
@@ -54,6 +55,12 @@ public class CloudbreakApiClientConfig {
     @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
     DistroXV1Endpoint distroXV1Endpoint(WebTarget cloudbreakApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, DistroXV1Endpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
+    DistroXV1RotationEndpoint distroXV1RotationEndpoint(WebTarget cloudbreakApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, DistroXV1RotationEndpoint.class);
     }
 
     @Bean

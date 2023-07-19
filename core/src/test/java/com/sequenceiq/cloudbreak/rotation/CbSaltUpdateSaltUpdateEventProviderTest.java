@@ -33,16 +33,19 @@ class CbSaltUpdateSaltUpdateEventProviderTest {
 
     @Test
     public void testSaltUpdateCheckIfExecutionSpecified() {
-        assertFalse(underTest.saltUpdateNeeded(List.of(SALT_BOOT_SECRETS), ROTATE));
+        assertFalse(underTest.saltUpdateNeeded(
+                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(SALT_BOOT_SECRETS), ROTATE)));
     }
 
     @Test
     public void testSaltUpdateCheckIfSecretNotRequires() {
-        assertFalse(underTest.saltUpdateNeeded(List.of(CLUSTER_CB_CM_ADMIN_PASSWORD), null));
+        assertFalse(underTest.saltUpdateNeeded(
+                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(CLUSTER_CB_CM_ADMIN_PASSWORD), ROTATE)));
     }
 
     @Test
     public void testSaltUpdateCheck() {
-        assertTrue(underTest.saltUpdateNeeded(List.of(SALT_BOOT_SECRETS), null));
+        assertTrue(underTest.saltUpdateNeeded(
+                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(SALT_BOOT_SECRETS), null)));
     }
 }

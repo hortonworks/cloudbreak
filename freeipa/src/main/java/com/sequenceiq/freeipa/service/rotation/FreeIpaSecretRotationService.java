@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.stack;
+package com.sequenceiq.freeipa.service.rotation;
 
 import java.util.List;
 
@@ -22,6 +22,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRot
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateTriggerEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
 public class FreeIpaSecretRotationService implements SaltUpdateFlowEventProvider {

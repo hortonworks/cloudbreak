@@ -17,14 +17,10 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 @Transactional(TxType.REQUIRED)
 public interface MultiClusterRotationResourceRepository extends CrudRepository<MultiClusterRotationResource, Long> {
 
-    Optional<MultiClusterRotationResource> findByResourceCrnAndSecretType(String resourceCrn, MultiSecretType secretType);
-
     Optional<MultiClusterRotationResource> findByResourceCrnAndSecretTypeAndType(String resourceCrn, MultiSecretType secretType,
             MultiClusterRotationResourceType type);
 
-    Set<MultiClusterRotationResource> findAllByResourceCrnInAndSecretType(Set<String> resourceCrns, MultiSecretType secretType);
+    Set<MultiClusterRotationResource> findAllByResourceCrn(String resourceCrn);
 
-    void deleteByResourceCrnAndSecretType(String resourceCrn, MultiSecretType secretType);
-
-    void deleteAllByResourceCrnInAndSecretType(Set<String> resourceCrns, MultiSecretType secretType);
+    Set<MultiClusterRotationResource> findAllBySecretTypeAndResourceCrnIn(MultiSecretType secretType, Set<String> crns);
 }

@@ -147,6 +147,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     }
 
     @Override
+    @Retryable(value = UnauthorizedException.class, maxAttempts = TEST_MAX_ATTEMPTS, backoff = @Backoff(delay = TEST_BACKOFF))
     public void checkUser(String userName, String clientUser, String clientPassword) throws Exception {
         ApiClient client = getClient(stack.getGatewayPort(), clientUser, clientPassword, clientConfig);
         UsersResourceApi usersResourceApi = clouderaManagerApiFactory.getUserResourceApi(client);

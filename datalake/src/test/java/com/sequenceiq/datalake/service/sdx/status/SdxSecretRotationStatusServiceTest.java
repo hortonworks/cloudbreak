@@ -34,7 +34,7 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 @ExtendWith(MockitoExtension.class)
 class SdxSecretRotationStatusServiceTest {
 
-    private static final String RESOURCE_CRN = "resourceCrn";
+    private static final String RESOURCE_CRN = "crn:cdp:datalake:us-west-1:acc1:datalake:cluster1";
 
     private static final SecretType SECRET_TYPE = mock(SecretType.class);
 

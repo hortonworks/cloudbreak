@@ -45,8 +45,9 @@ class StackSecretRotationNotificationServiceTest {
     public void setUp() {
         when(stackView.getId()).thenReturn(STACK_ID);
         when(cloudbreakMessagesService.getMessage(anyString()))
-                .thenReturn("Secret type")
-                .thenReturn("Secret step");
+                .thenReturn("Execute")
+                .thenReturn("random secret")
+                .thenReturn("small step for a secret, big step for the customer");
     }
 
     @Test
@@ -56,7 +57,7 @@ class StackSecretRotationNotificationServiceTest {
         underTest.sendNotification("crn", DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS, CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING,
                 RotationFlowExecutionType.ROTATE);
 
-        verifyEventIsSent("Rotation(Secret type) Secret step");
+        verifyEventIsSent("Execute secret [random secret]: small step for a secret, big step for the customer");
         verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS");
     }
 
@@ -67,7 +68,7 @@ class StackSecretRotationNotificationServiceTest {
         underTest.sendNotification("crn", DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS, CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING,
                 RotationFlowExecutionType.ROLLBACK);
 
-        verifyEventIsSent("Rollback(Secret type) Secret step");
+        verifyEventIsSent("Execute secret [random secret]: small step for a secret, big step for the customer");
         verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS");
     }
 
@@ -78,7 +79,7 @@ class StackSecretRotationNotificationServiceTest {
         underTest.sendNotification("crn", DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS, CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING,
                 RotationFlowExecutionType.FINALIZE);
 
-        verifyEventIsSent("Finalization(Secret type) Secret step");
+        verifyEventIsSent("Execute secret [random secret]: small step for a secret, big step for the customer");
         verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS");
     }
 

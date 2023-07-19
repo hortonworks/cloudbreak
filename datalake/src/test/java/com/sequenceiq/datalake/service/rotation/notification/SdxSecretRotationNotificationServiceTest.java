@@ -41,8 +41,9 @@ class SdxSecretRotationNotificationServiceTest {
     @BeforeEach
     public void setUp() {
         when(cloudbreakMessagesService.getMessage(anyString()))
-                .thenReturn("Secret type")
-                .thenReturn("Secret step");
+                .thenReturn("Execute")
+                .thenReturn("random secret")
+                .thenReturn("small step for a secret, big step for the customer");
     }
 
     @Test
@@ -53,7 +54,8 @@ class SdxSecretRotationNotificationServiceTest {
         underTest.sendNotification("crn", DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS, CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING,
                 RotationFlowExecutionType.ROTATE);
 
-        verify(sdxNotificationService).send(ResourceEvent.SECRET_ROTATION_STEP, List.of("Rotation(Secret type) Secret step"), cluster);
+        verify(sdxNotificationService).send(ResourceEvent.SECRET_ROTATION_STEP,
+                List.of("Execute secret [random secret]: small step for a secret, big step for the customer"), cluster);
         verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS");
     }
 
@@ -65,7 +67,8 @@ class SdxSecretRotationNotificationServiceTest {
         underTest.sendNotification("crn", DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS, CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING,
                 RotationFlowExecutionType.ROLLBACK);
 
-        verify(sdxNotificationService).send(ResourceEvent.SECRET_ROTATION_STEP, List.of("Rollback(Secret type) Secret step"), cluster);
+        verify(sdxNotificationService).send(ResourceEvent.SECRET_ROTATION_STEP,
+                List.of("Execute secret [random secret]: small step for a secret, big step for the customer"), cluster);
         verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS");
     }
 
@@ -77,7 +80,8 @@ class SdxSecretRotationNotificationServiceTest {
         underTest.sendNotification("crn", DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS, CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING,
                 RotationFlowExecutionType.FINALIZE);
 
-        verify(sdxNotificationService).send(ResourceEvent.SECRET_ROTATION_STEP, List.of("Finalization(Secret type) Secret step"), cluster);
+        verify(sdxNotificationService).send(ResourceEvent.SECRET_ROTATION_STEP,
+                List.of("Execute secret [random secret]: small step for a secret, big step for the customer"), cluster);
         verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS");
     }
 }

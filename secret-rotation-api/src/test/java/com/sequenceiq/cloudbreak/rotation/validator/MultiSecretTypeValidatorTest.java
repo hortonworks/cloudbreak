@@ -17,9 +17,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidMultiSecretType;
-import com.sequenceiq.cloudbreak.rotation.common.TestMultiSecretType;
 
 @ExtendWith(MockitoExtension.class)
 public class MultiSecretTypeValidatorTest {
@@ -50,11 +48,6 @@ public class MultiSecretTypeValidatorTest {
             @Override
             public Class<? extends Annotation> annotationType() {
                 return null;
-            }
-
-            @Override
-            public Class<? extends MultiSecretType>[] allowedTypes() {
-                return new Class[] { TestMultiSecretType.class };
             }
 
             @Override

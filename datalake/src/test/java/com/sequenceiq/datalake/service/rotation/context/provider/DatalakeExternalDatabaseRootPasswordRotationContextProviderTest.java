@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.service.rotation.context.provider;
 
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakInternalSecretType.DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
