@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.FinalizeRotationSuccessEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.FinalizeRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RotationFailedEvent;
-import com.sequenceiq.cloudbreak.rotation.service.SecretRotationService;
+import com.sequenceiq.cloudbreak.rotation.service.SecretRotationOrchestrationService;
 
 @ExtendWith(MockitoExtension.class)
 public class FinalizeRotationHandlerTest {
@@ -33,7 +33,7 @@ public class FinalizeRotationHandlerTest {
     private ArgumentCaptor<Event> argumentCaptor;
 
     @Mock
-    private SecretRotationService secretRotationService;
+    private SecretRotationOrchestrationService secretRotationOrchestrationService;
 
     @InjectMocks
     private FinalizeRotationHandler underTest;
@@ -48,7 +48,7 @@ public class FinalizeRotationHandlerTest {
 
     @Test
     public void testHandler() {
-        doNothing().when(secretRotationService).finalizeRotationIfNeeded(any(), any(), any());
+        doNothing().when(secretRotationOrchestrationService).finalizeIfNeeded(any(), any(), any());
 
         underTest.accept(Event.wrap(getTriggerEvent()));
 
@@ -57,7 +57,7 @@ public class FinalizeRotationHandlerTest {
 
     @Test
     public void testHandlerFailure() {
-        doThrow(new CloudbreakServiceException("anything")).when(secretRotationService).finalizeRotationIfNeeded(any(), any(), any());
+        doThrow(new CloudbreakServiceException("anything")).when(secretRotationOrchestrationService).finalizeIfNeeded(any(), any(), any());
 
         underTest.accept(Event.wrap(getTriggerEvent()));
 

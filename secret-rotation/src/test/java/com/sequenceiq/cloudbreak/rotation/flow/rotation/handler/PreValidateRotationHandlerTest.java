@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.PreValidateRotationFinishedEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.PreValidateRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RotationFailedEvent;
-import com.sequenceiq.cloudbreak.rotation.service.SecretRotationService;
+import com.sequenceiq.cloudbreak.rotation.service.SecretRotationOrchestrationService;
 
 @ExtendWith(MockitoExtension.class)
 public class PreValidateRotationHandlerTest {
@@ -30,7 +30,7 @@ public class PreValidateRotationHandlerTest {
     private ArgumentCaptor<Event> argumentCaptor;
 
     @Mock
-    private SecretRotationService secretRotationService;
+    private SecretRotationOrchestrationService secretRotationOrchestrationService;
 
     @InjectMocks
     private PreValidateRotationHandler underTest;
@@ -45,7 +45,7 @@ public class PreValidateRotationHandlerTest {
 
     @Test
     public void testHandler() {
-        doNothing().when(secretRotationService).executePreValidationIfNeeded(any(), any(), any());
+        doNothing().when(secretRotationOrchestrationService).preValidateIfNeeded(any(), any(), any());
 
         underTest.accept(Event.wrap(getTriggerEvent()));
 
@@ -54,7 +54,7 @@ public class PreValidateRotationHandlerTest {
 
     @Test
     public void testHandlerFailure() {
-        doThrow(new CloudbreakServiceException("anything")).when(secretRotationService).executePreValidationIfNeeded(any(), any(), any());
+        doThrow(new CloudbreakServiceException("anything")).when(secretRotationOrchestrationService).preValidateIfNeeded(any(), any(), any());
 
         underTest.accept(Event.wrap(getTriggerEvent()));
 

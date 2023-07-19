@@ -50,7 +50,7 @@ public class SecretRotationActions {
     private SecretRotationUsageService secretRotationUsageService;
 
     @Inject
-    private SecretRotationStepProgressService secretRotationProgressService;
+    private SecretRotationStepProgressService secretRotationStepProgressService;
 
     @Bean(name = "PRE_VALIDATE_ROTATION_STATE")
     public Action<?, ?> executePreValidationAction() {
@@ -176,14 +176,14 @@ public class SecretRotationActions {
                 String resourceCrn = context.getResourceCrn();
                 LOGGER.debug("Secret rotation failed, for: {}, secreType: {}", resourceCrn, context.getSecretType(), exception);
                 if (RotationFlowExecutionType.ROLLBACK == payload.getExecutionType() && EXPLICIT_ROLLBACK_EXECUTION.equals(message)) {
-                    // if the execution tpye is ROLLBACK, we need to know from the calling service wheter it was successful or not
-                    LOGGER.debug("Explicit rollback, doesnt set flow failed.");
+                    // if the execution type is ROLLBACK, we need to know from the calling service whether it was successful or not
+                    LOGGER.debug("Explicit rollback, doesn't set flow failed.");
                 } else {
                     LOGGER.debug("Execution type is not set or not explicit ROLLBACK, set flow failed for: {}", context.getResourceCrn());
                     Flow flow = getFlow(context.getFlowId());
                     flow.setFlowFailed(exception);
                 }
-                secretRotationProgressService.deleteAll(context.getResourceCrn(), payload.getSecretType());
+                secretRotationStepProgressService.deleteAllForSecretType(context.getResourceCrn(), context.getSecretType());
                 secretRotationUsageService.rotationFailed(context.getSecretType(), resourceCrn, message, context.getExecutionType());
                 secretRotationStatusService.rotationFailed(resourceCrn, payload.getSecretType(), message);
                 sendEvent(context, RotationEvent.fromContext(SecretRotationEvent.ROTATION_FAILURE_HANDLED_EVENT.event(), context));

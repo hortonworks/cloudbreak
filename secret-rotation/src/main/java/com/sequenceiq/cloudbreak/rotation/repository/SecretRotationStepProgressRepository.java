@@ -20,5 +20,7 @@ public interface SecretRotationStepProgressRepository extends CrudRepository<Sec
     Optional<SecretRotationStepProgress> findByResourceCrnAndExecutionTypeAndSecretTypeAndSecretRotationStep(
             String resourceCrn, RotationFlowExecutionType executionType, SecretType secretType, SecretRotationStep secretRotationStep);
 
+    void deleteByResourceCrnAndSecretTypeAndExecutionType(String resourceCrn, SecretType secretType, RotationFlowExecutionType executionType);
+
     void deleteByResourceCrnAndSecretType(String resourceCrn, SecretType secretType);
 }

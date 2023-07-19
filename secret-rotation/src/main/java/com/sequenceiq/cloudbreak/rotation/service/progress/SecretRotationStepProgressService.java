@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgress;
 import com.sequenceiq.cloudbreak.rotation.repository.SecretRotationStepProgressRepository;
+import com.sequenceiq.cloudbreak.rotation.service.RotationMetadata;
 
 @Service
 public class SecretRotationStepProgressService {
@@ -34,7 +35,11 @@ public class SecretRotationStepProgressService {
         return latestStepProgress;
     }
 
-    public void deleteAll(String resourceCrn, SecretType secretType) {
+    public void deleteAllForCurrentExecution(RotationMetadata metadata) {
+        repository.deleteByResourceCrnAndSecretTypeAndExecutionType(metadata.resourceCrn(), metadata.secretType(), metadata.currentExecution());
+    }
+
+    public void deleteAllForSecretType(String resourceCrn, SecretType secretType) {
         repository.deleteByResourceCrnAndSecretType(resourceCrn, secretType);
     }
 }

@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.rotation.flow.rotation.config.SecretRotationEve
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.PreValidateRotationFinishedEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.PreValidateRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RotationFailedEvent;
-import com.sequenceiq.cloudbreak.rotation.service.SecretRotationService;
+import com.sequenceiq.cloudbreak.rotation.service.SecretRotationOrchestrationService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -20,7 +20,7 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 public class PreValidateRotationHandler extends ExceptionCatcherEventHandler<PreValidateRotationTriggerEvent> {
 
     @Inject
-    private SecretRotationService secretRotationService;
+    private SecretRotationOrchestrationService secretRotationOrchestrationService;
 
     @Override
     public String selector() {
@@ -35,7 +35,7 @@ public class PreValidateRotationHandler extends ExceptionCatcherEventHandler<Pre
 
     @Override
     protected Selectable doAccept(HandlerEvent<PreValidateRotationTriggerEvent> event) {
-        secretRotationService.executePreValidationIfNeeded(event.getData().getSecretType(), event.getData().getResourceCrn(),
+        secretRotationOrchestrationService.preValidateIfNeeded(event.getData().getSecretType(), event.getData().getResourceCrn(),
                 event.getData().getExecutionType());
         return PreValidateRotationFinishedEvent.fromPayload(event.getData());
     }

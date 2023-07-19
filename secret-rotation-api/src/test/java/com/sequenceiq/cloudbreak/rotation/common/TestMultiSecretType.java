@@ -1,13 +1,15 @@
 package com.sequenceiq.cloudbreak.rotation.common;
 
 import static com.sequenceiq.cloudbreak.rotation.common.TestSecretType.TEST_2;
+import static com.sequenceiq.cloudbreak.rotation.common.TestSecretType.TEST_4;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 
 public enum TestMultiSecretType implements MultiSecretType {
-    MULTI_TEST;
+    MULTI_TEST,
+    MULTI_TEST_2;
 
     @Override
     public SecretType parentSecretType() {
@@ -16,7 +18,7 @@ public enum TestMultiSecretType implements MultiSecretType {
 
     @Override
     public SecretType childSecretType() {
-        return TEST_2;
+        return TEST_4;
     }
 
     @Override

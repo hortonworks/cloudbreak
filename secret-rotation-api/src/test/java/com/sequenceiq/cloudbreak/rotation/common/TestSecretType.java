@@ -10,7 +10,8 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 public enum TestSecretType implements SecretType {
     TEST,
     TEST_2,
-    TEST_3;
+    TEST_3,
+    TEST_4;
 
     @Override
     public List<SecretRotationStep> getSteps() {
@@ -24,7 +25,7 @@ public enum TestSecretType implements SecretType {
 
     @Override
     public boolean multiSecret() {
-        return value().equals(TEST_2.value());
+        return List.of(TEST_2.value(), TEST_4.value()).contains(value());
     }
 
     @Override

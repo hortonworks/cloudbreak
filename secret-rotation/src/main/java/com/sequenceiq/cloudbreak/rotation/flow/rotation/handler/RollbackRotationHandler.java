@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.config.SecretRotationEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RollbackRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RotationFailedEvent;
-import com.sequenceiq.cloudbreak.rotation.service.SecretRotationService;
+import com.sequenceiq.cloudbreak.rotation.service.SecretRotationOrchestrationService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -18,7 +18,7 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 public class RollbackRotationHandler extends ExceptionCatcherEventHandler<RollbackRotationTriggerEvent> {
 
     @Inject
-    private SecretRotationService secretRotationService;
+    private SecretRotationOrchestrationService secretRotationOrchestrationService;
 
     @Override
     public String selector() {
@@ -33,7 +33,7 @@ public class RollbackRotationHandler extends ExceptionCatcherEventHandler<Rollba
     @Override
     protected Selectable doAccept(HandlerEvent<RollbackRotationTriggerEvent> event) {
         RollbackRotationTriggerEvent rollbackEvent = event.getData();
-        secretRotationService.rollbackRotationIfNeeded(rollbackEvent.getSecretType(), rollbackEvent.getResourceCrn(), rollbackEvent.getExecutionType(),
+        secretRotationOrchestrationService.rollbackIfNeeded(rollbackEvent.getSecretType(), rollbackEvent.getResourceCrn(), rollbackEvent.getExecutionType(),
                 rollbackEvent.getFailedStep());
         return RotationFailedEvent.fromPayload(SecretRotationEvent.ROTATION_FAILED_EVENT.event(), rollbackEvent, rollbackEvent.getException(),
                 rollbackEvent.getFailedStep());
