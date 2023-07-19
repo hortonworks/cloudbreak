@@ -10,13 +10,19 @@ import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
+import com.sequenceiq.it.cloudbreak.search.ClusterLogsStorageUrl;
+import com.sequenceiq.it.cloudbreak.search.StorageUrl;
 import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
 
 public abstract class AbstractSdxTestDto<R, S, T extends CloudbreakTestDto> extends AbstractTestDto<R, S, T, SdxClient> {
@@ -119,5 +125,23 @@ public abstract class AbstractSdxTestDto<R, S, T extends CloudbreakTestDto> exte
 
     public T awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
         return getTestContext().awaitForInstance((T) this, statuses, runningParameter);
+    }
+
+    public String getSdxBaseLocation() {
+        TelemetryResponse telemetryResponse = (getTestContext().get(EnvironmentTestDto.class) != null)
+                ? getTestContext().get(EnvironmentTestDto.class).getResponse().getTelemetry()
+                : null;
+        return (telemetryResponse != null)
+                ? telemetryResponse.getLogging().getStorageLocation()
+                : null;
+    }
+
+    @Override
+    public String getCloudStorageUrl(String resourceName, String resourceCrn) {
+        CloudProviderProxy cloudProviderProxy = getTestContext().getCloudProvider();
+        StorageUrl storageUrl = new ClusterLogsStorageUrl();
+        return (isCloudProvider(cloudProviderProxy) && StringUtils.isNotBlank(getSdxBaseLocation()))
+                ? storageUrl.getDatalakeStorageUrl(resourceName, resourceCrn, getSdxBaseLocation(), cloudProviderProxy)
+                : null;
     }
 }

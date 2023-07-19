@@ -155,25 +155,29 @@ public class S3ClientActions extends S3Client {
     }
 
     public String getLoggingUrl(String baseLocation, String clusterLogPath) {
-        URI baseLocationUri = getBaseLocationUri(baseLocation);
-        String bucketName = getBucketName(baseLocation);
-        String logPath = baseLocationUri.getPath();
-        String deploymentS3Console = "https://s3.console.aws.amazon.com/s3/buckets/";
+        if (StringUtils.isNotBlank((baseLocation))) {
+            URI baseLocationUri = getBaseLocationUri(baseLocation);
+            String bucketName = getBucketName(baseLocation);
+            String logPath = baseLocationUri.getPath();
+            String deploymentS3Console = "https://s3.console.aws.amazon.com/s3/buckets/";
 
-        Log.log(LOGGER, format(" Amazon S3 URI: %s", baseLocationUri));
-        Log.log(LOGGER, format(" Amazon S3 Bucket: %s", bucketName));
-        Log.log(LOGGER, format(" Amazon S3 Log Path: %s", logPath));
-        Log.log(LOGGER, format(" Amazon S3 Cluster Logs: %s", clusterLogPath));
+            Log.log(LOGGER, format(" Amazon S3 URI: %s", baseLocationUri));
+            Log.log(LOGGER, format(" Amazon S3 Bucket: %s", bucketName));
+            Log.log(LOGGER, format(" Amazon S3 Log Path: %s", logPath));
+            Log.log(LOGGER, format(" Amazon S3 Cluster Logs: %s", clusterLogPath));
 
-        if (StringUtils.containsIgnoreCase(getAwsProperties().getRegion(), "us-gov")) {
-            deploymentS3Console = "https://console.amazonaws-us-gov.com/s3/buckets/";
-        }
-        if (StringUtils.contains(getKeyPrefix(baseLocation), clusterLogPath)) {
-            return format("%s%s?region=%s&prefix=%s/&showversions=false",
-                    deploymentS3Console, bucketName, getAwsProperties().getRegion(), getKeyPrefix(baseLocation));
+            if (StringUtils.containsIgnoreCase(getAwsProperties().getRegion(), "us-gov")) {
+                deploymentS3Console = "https://console.amazonaws-us-gov.com/s3/buckets/";
+            }
+            if (StringUtils.contains(getKeyPrefix(baseLocation), clusterLogPath)) {
+                return format("%s%s?region=%s&prefix=%s/&showversions=false",
+                        deploymentS3Console, bucketName, getAwsProperties().getRegion(), getKeyPrefix(baseLocation));
+            } else {
+                return format("%s%s?region=%s&prefix=%s%s/&showversions=false",
+                        deploymentS3Console, bucketName, getAwsProperties().getRegion(), getKeyPrefix(baseLocation), clusterLogPath);
+            }
         } else {
-            return format("%s%s?region=%s&prefix=%s%s/&showversions=false",
-                    deploymentS3Console, bucketName, getAwsProperties().getRegion(), getKeyPrefix(baseLocation), clusterLogPath);
+            return null;
         }
     }
 }

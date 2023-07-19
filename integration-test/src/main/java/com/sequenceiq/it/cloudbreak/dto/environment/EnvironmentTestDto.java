@@ -19,7 +19,6 @@ import javax.ws.rs.NotFoundException;
 
 import org.testng.util.Strings;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.common.api.backup.request.BackupRequest;
@@ -57,11 +56,7 @@ import com.sequenceiq.it.cloudbreak.dto.DeletableEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
-import com.sequenceiq.it.cloudbreak.search.ClusterLogsStorageUrl;
-import com.sequenceiq.it.cloudbreak.search.KibanaSearchUrl;
-import com.sequenceiq.it.cloudbreak.search.SearchUrl;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
-import com.sequenceiq.it.cloudbreak.search.StorageUrl;
 import com.sequenceiq.it.cloudbreak.util.StructuredEventUtil;
 
 @Prototype
@@ -465,10 +460,6 @@ public class EnvironmentTestDto
 
     @Override
     public Clue investigate() {
-        StorageUrl storageUrl = new ClusterLogsStorageUrl();
-        SearchUrl searchUrl = new KibanaSearchUrl();
-        String environmentKibanaUrl = null;
-
         if (getResponse() == null) {
             return null;
         }
@@ -478,15 +469,12 @@ public class EnvironmentTestDto
                     getTestContext().getMicroserviceClient(EnvironmentClient.class).getDefaultClient().structuredEventsV1Endpoint();
             structuredEvents = StructuredEventUtil.getStructuredEvents(cdpStructuredEventV1Endpoint, getResponse().getCrn());
         }
-        if (!CloudPlatform.MOCK.equalsIgnoreCase(commonCloudProperties.getCloudProvider())) {
-            List<Searchable> listOfSearchables = List.of(this);
-            environmentKibanaUrl = searchUrl.getSearchUrl(listOfSearchables, getTestContext().getTestStartTime(), getTestContext().getTestEndTime());
-        }
+        List<Searchable> listOfSearchables = List.of(this);
         return new Clue(
                 getResponse().getName(),
                 getResponse().getCrn(),
                 null,
-                environmentKibanaUrl,
+                getKibanaUrl(listOfSearchables),
                 null,
                 structuredEvents,
                 getResponse(),

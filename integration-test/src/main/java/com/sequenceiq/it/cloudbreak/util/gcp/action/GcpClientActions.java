@@ -391,21 +391,25 @@ public class GcpClientActions extends GcpClient {
     }
 
     public String getLoggingUrl(String baseLocation, String clusterLogPath) {
-        URI baseLocationUri = getBaseLocationUri(baseLocation);
-        String bucketName = getBucketName(baseLocation);
-        String logPath = baseLocationUri.getPath();
+        if (StringUtils.isNotBlank((baseLocation))) {
+            URI baseLocationUri = getBaseLocationUri(baseLocation);
+            String bucketName = getBucketName(baseLocation);
+            String logPath = baseLocationUri.getPath();
 
-        Log.log(LOGGER, format(" Google GCS URI: %s", baseLocationUri));
-        Log.log(LOGGER, format(" Google GCS Bucket: %s", bucketName));
-        Log.log(LOGGER, format(" Google GCS Log Path: %s", logPath));
-        Log.log(LOGGER, format(" Google GCS Cluster Logs: %s", clusterLogPath));
+            Log.log(LOGGER, format(" Google GCS URI: %s", baseLocationUri));
+            Log.log(LOGGER, format(" Google GCS Bucket: %s", bucketName));
+            Log.log(LOGGER, format(" Google GCS Log Path: %s", logPath));
+            Log.log(LOGGER, format(" Google GCS Cluster Logs: %s", clusterLogPath));
 
-        if (StringUtils.contains(getKeyPrefix(baseLocation), clusterLogPath)) {
-            return format("https://console.cloud.google.com/storage/browser/%s/%s?project=gcp-dev-cloudbreak",
-                    bucketName, getKeyPrefix(baseLocation));
+            if (StringUtils.contains(getKeyPrefix(baseLocation), clusterLogPath)) {
+                return format("https://console.cloud.google.com/storage/browser/%s/%s?project=gcp-dev-cloudbreak",
+                        bucketName, getKeyPrefix(baseLocation));
+            } else {
+                return format("https://console.cloud.google.com/storage/browser/%s/%s%s?project=gcp-dev-cloudbreak",
+                        bucketName, getKeyPrefix(baseLocation), clusterLogPath);
+            }
         } else {
-            return format("https://console.cloud.google.com/storage/browser/%s/%s%s?project=gcp-dev-cloudbreak",
-                    bucketName, getKeyPrefix(baseLocation), clusterLogPath);
+            return null;
         }
     }
 }

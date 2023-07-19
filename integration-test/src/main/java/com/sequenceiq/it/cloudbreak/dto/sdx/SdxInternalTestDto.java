@@ -38,13 +38,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
-import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Clue;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
@@ -65,11 +63,7 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
-import com.sequenceiq.it.cloudbreak.search.ClusterLogsStorageUrl;
-import com.sequenceiq.it.cloudbreak.search.KibanaSearchUrl;
-import com.sequenceiq.it.cloudbreak.search.SearchUrl;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
-import com.sequenceiq.it.cloudbreak.search.StorageUrl;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
@@ -582,16 +576,9 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     @Override
     public Clue investigate() {
-        CloudProviderProxy cloudProvider = getTestContext().getCloudProvider();
-        StorageUrl storageUrl = new ClusterLogsStorageUrl();
-        SearchUrl searchUrl = new KibanaSearchUrl();
-        String datalakeCloudStorageUrl = null;
-        String datalakeKibanaUrl = null;
-
         if (getResponse() == null || getResponse().getCrn() == null) {
             return null;
         }
-
         String resourceName = getResponse().getName();
         String resourceCrn = getResponse().getCrn();
         AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
@@ -608,20 +595,12 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                     getTestContext().getMicroserviceClient(SdxClient.class).getDefaultClient().structuredEventsV1Endpoint();
             structuredEvents = StructuredEventUtil.getStructuredEvents(cdpStructuredEventV1Endpoint, resourceCrn);
         }
-        if (!CloudPlatform.MOCK.equalsIgnoreCase(cloudProvider.getCloudPlatform().name())) {
-            if (getTestContext().get(EnvironmentTestDto.class) != null
-                    || getTestContext().get(EnvironmentTestDto.class).getResponse().getTelemetry() != null) {
-                String baseLocation = getTestContext().get(EnvironmentTestDto.class).getResponse().getTelemetry().getLogging().getStorageLocation();
-                datalakeCloudStorageUrl = storageUrl.getDatalakeStorageUrl(resourceName, resourceCrn, baseLocation, cloudProvider);
-            }
-            List<Searchable> listOfSearchables = List.of(this);
-            datalakeKibanaUrl = searchUrl.getSearchUrl(listOfSearchables, getTestContext().getTestStartTime(), getTestContext().getTestEndTime());
-        }
+        List<Searchable> listOfSearchables = List.of(this);
         return new Clue(
                 resourceName,
                 resourceCrn,
-                datalakeCloudStorageUrl,
-                datalakeKibanaUrl,
+                getCloudStorageUrl(resourceName, resourceCrn),
+                getKibanaUrl(listOfSearchables),
                 auditEvents,
                 structuredEvents,
                 getResponse(),
