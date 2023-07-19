@@ -11,8 +11,10 @@ import static com.sequenceiq.freeipa.service.config.LdapConfigRegisterService.US
 import static com.sequenceiq.freeipa.service.config.LdapConfigRegisterService.USER_NAME_ATTRIBUTE;
 import static com.sequenceiq.freeipa.service.config.LdapConfigRegisterService.USER_OBJECT_CLASS;
 import static com.sequenceiq.freeipa.service.config.LdapConfigRegisterService.USER_SEARCH_BASE;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +27,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
 import com.sequenceiq.freeipa.entity.FreeIpa;
@@ -39,6 +42,8 @@ import com.sequenceiq.freeipa.util.BalancedDnsAvailabilityChecker;
 
 @ExtendWith(MockitoExtension.class)
 class LdapConfigRegisterServiceTest {
+
+    private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:accountId:environment:e438a2db-d650-4132-ae62-242c5ba2f784";
 
     @InjectMocks
     private LdapConfigRegisterService underTest;
@@ -75,6 +80,7 @@ class LdapConfigRegisterServiceTest {
         freeIpa.setAdminPassword("asdf");
         when(freeIpaService.findByStackId(anyLong())).thenReturn(freeIpa);
         when(balancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)).thenReturn(true);
+        when(underTest.getEnvironmentCrnByStackId(1L)).thenReturn(ENVIRONMENT_CRN);
 
         underTest.register(1L);
 
@@ -104,6 +110,17 @@ class LdapConfigRegisterServiceTest {
         assertEquals(ldapConfig.getGroupMemberAttribute(), GROUP_MEMBER_ATTRIBUTE);
         assertEquals(ldapConfig.getGroupNameAttribute(), GROUP_NAME_ATTRIBUTE);
         assertEquals(ldapConfig.getGroupObjectClass(), GROUP_OBJECT_CLASS);
+    }
+
+    @Test
+    void testAlreadyExists() {
+        when(underTest.getEnvironmentCrnByStackId(1L)).thenReturn(ENVIRONMENT_CRN);
+        when(ldapConfigService.doesEnvironmentLevelLdapConfigExists(Crn.safeFromString(ENVIRONMENT_CRN))).thenReturn(Boolean.TRUE);
+
+        underTest.register(1L);
+
+        verify(ldapConfigService, never()).createLdapConfig(any(), any());
+        verify(ldapConfigService, never()).createLdapConfig(any());
     }
 
     @Test

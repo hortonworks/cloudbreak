@@ -1,7 +1,10 @@
 package com.sequenceiq.freeipa.kerberos;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -23,7 +27,7 @@ import com.sequenceiq.freeipa.util.CrnService;
 
 @ExtendWith(MockitoExtension.class)
 public class KerberosConfigServiceTest {
-    private static final String ENVIRONMENT_ID = "environmentId";
+    private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:accountId:environment:e438a2db-d650-4132-ae62-242c5ba2f784";
 
     private static final String RESOURCE_CRN = "crn:cdp:environments:us-west-1:accountId:kerberosconfig:4c5ba74b-c35e-45e9-9f47-123456789876";
 
@@ -56,7 +60,7 @@ public class KerberosConfigServiceTest {
     public void testCreateKerberosConfig() {
         // GIVEN
         KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setEnvironmentCrn(ENVIRONMENT_ID);
+        kerberosConfig.setEnvironmentCrn(ENVIRONMENT_CRN);
         Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         Mockito.when(crnService.createCrn(ACCOUNT_ID, CrnResourceDescriptor.KERBEROS)).thenReturn(RESOURCE_CRN);
         Mockito.when(kerberosConfigRepository.save(kerberosConfig)).thenReturn(kerberosConfig);
@@ -70,15 +74,16 @@ public class KerberosConfigServiceTest {
     public void testCreateKerberosConfigWhenThereIsAlreadyExisted() {
         // GIVEN
         KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setEnvironmentCrn(ENVIRONMENT_ID);
+        kerberosConfig.setEnvironmentCrn(ENVIRONMENT_CRN);
         Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_ID))
+        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_CRN))
                 .thenReturn(Optional.of(new KerberosConfig()));
         BadRequestException ex = Assertions.assertThrows(BadRequestException.class, () -> {
             // WHEN
             underTest.createKerberosConfig(kerberosConfig);
         });
-        assertEquals("KerberosConfig in the [accountId] account's [environmentId] environment is already exists", ex.getMessage());
+        assertEquals("KerberosConfig in the [accountId] account's "
+                + "[crn:cdp:environments:us-west-1:accountId:environment:e438a2db-d650-4132-ae62-242c5ba2f784] environment is already exists", ex.getMessage());
     }
 
     @Test
@@ -86,10 +91,10 @@ public class KerberosConfigServiceTest {
         // GIVEN
         KerberosConfig expectedKerberosConfig = new KerberosConfig();
         Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_ID))
+        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_CRN))
                 .thenReturn(Optional.of(expectedKerberosConfig));
         // WHEN
-        KerberosConfig actualResult = underTest.get(ENVIRONMENT_ID);
+        KerberosConfig actualResult = underTest.get(ENVIRONMENT_CRN);
         // THEN
         assertEquals(expectedKerberosConfig, actualResult);
     }
@@ -100,10 +105,10 @@ public class KerberosConfigServiceTest {
         KerberosConfig expectedKerberosConfig1 = new KerberosConfig();
         KerberosConfig expectedKerberosConfig2 = new KerberosConfig();
         Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_ID))
+        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_CRN))
                 .thenReturn(List.of(expectedKerberosConfig1, expectedKerberosConfig2));
         // WHEN
-        List<KerberosConfig> actualResults = underTest.findAllInEnvironment(ENVIRONMENT_ID);
+        List<KerberosConfig> actualResults = underTest.findAllInEnvironment(ENVIRONMENT_CRN);
         // THEN
         assertEquals(List.of(expectedKerberosConfig1, expectedKerberosConfig2), actualResults);
     }
@@ -127,11 +132,11 @@ public class KerberosConfigServiceTest {
         Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         NotFoundException ex = Assertions.assertThrows(NotFoundException.class, () -> {
             // WHEN
-            underTest.get(ENVIRONMENT_ID);
+            underTest.get(ENVIRONMENT_CRN);
             // THEN NotFoundException has to be thrown
         });
-        assertEquals("KerberosConfig for environment 'environmentId' not found.", ex.getMessage());
-
+        assertEquals("KerberosConfig for environment "
+                + "'crn:cdp:environments:us-west-1:accountId:environment:e438a2db-d650-4132-ae62-242c5ba2f784' not found.", ex.getMessage());
     }
 
     @Test
@@ -139,10 +144,10 @@ public class KerberosConfigServiceTest {
         // GIVEN
         KerberosConfig expectedKerberosConfig = new KerberosConfig();
         Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_ID))
+        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_CRN))
                 .thenReturn(Optional.of(expectedKerberosConfig));
         // WHEN
-        underTest.delete(ENVIRONMENT_ID);
+        underTest.delete(ENVIRONMENT_CRN);
         // THEN
         Mockito.verify(kerberosConfigRepository).save(expectedKerberosConfig);
     }
@@ -153,8 +158,29 @@ public class KerberosConfigServiceTest {
         Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         NotFoundException ex = Assertions.assertThrows(NotFoundException.class, () -> {
             // WHEN
-            underTest.delete(ENVIRONMENT_ID);
+            underTest.delete(ENVIRONMENT_CRN);
         });
-        assertEquals("KerberosConfig for environment 'environmentId' not found.", ex.getMessage());
+        assertEquals("KerberosConfig for environment "
+                + "'crn:cdp:environments:us-west-1:accountId:environment:e438a2db-d650-4132-ae62-242c5ba2f784' not found.", ex.getMessage());
+    }
+
+    @Test
+    void testEnvironmentLevelLdapConfigExists() {
+        when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_CRN))
+                .thenReturn(Optional.of(new KerberosConfig()));
+
+        boolean result = underTest.doesEnvironmentLevelKerberosConfigExists(Crn.safeFromString(ENVIRONMENT_CRN));
+
+        assertTrue(result);
+    }
+
+    @Test
+    void testEnvironmentLevelLdapConfigNotExists() {
+        when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_CRN))
+                .thenReturn(Optional.empty());
+
+        boolean result = underTest.doesEnvironmentLevelKerberosConfigExists(Crn.safeFromString(ENVIRONMENT_CRN));
+
+        assertFalse(result);
     }
 }

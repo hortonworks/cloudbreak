@@ -1,7 +1,9 @@
 package com.sequenceiq.freeipa.service.config;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -14,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.KerberosType;
 import com.sequenceiq.freeipa.entity.FreeIpa;
@@ -28,6 +31,8 @@ import com.sequenceiq.freeipa.util.BalancedDnsAvailabilityChecker;
 
 @ExtendWith(MockitoExtension.class)
 class KerberosConfigRegisterServiceTest {
+
+    private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:accountId:environment:e438a2db-d650-4132-ae62-242c5ba2f784";
 
     @InjectMocks
     private KerberosConfigRegisterService underTest;
@@ -64,6 +69,7 @@ class KerberosConfigRegisterServiceTest {
         freeIpa.setAdminPassword("asdf");
         when(freeIpaService.findByStackId(anyLong())).thenReturn(freeIpa);
         when(balancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)).thenReturn(true);
+        when(underTest.getEnvironmentCrnByStackId(1L)).thenReturn(ENVIRONMENT_CRN);
 
         underTest.register(1L);
 
@@ -83,6 +89,17 @@ class KerberosConfigRegisterServiceTest {
         assertEquals(freeIpa.getDomain().toUpperCase(), kerberosConfig.getRealm());
         assertEquals(KerberosType.FREEIPA, kerberosConfig.getType());
         assertEquals(KerberosConfigRegisterService.FREEIPA_DEFAULT_ADMIN, kerberosConfig.getPrincipal());
+    }
+
+    @Test
+    void testAlreadyExists() {
+        when(underTest.getEnvironmentCrnByStackId(1L)).thenReturn(ENVIRONMENT_CRN);
+        when(kerberosConfigService.doesEnvironmentLevelKerberosConfigExists(Crn.safeFromString(ENVIRONMENT_CRN))).thenReturn(Boolean.TRUE);
+
+        underTest.register(1L);
+
+        verify(kerberosConfigService, never()).createKerberosConfig(any(), any());
+        verify(kerberosConfigService, never()).createKerberosConfig(any());
     }
 
     @Test

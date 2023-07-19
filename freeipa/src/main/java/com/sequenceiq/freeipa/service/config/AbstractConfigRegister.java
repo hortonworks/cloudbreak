@@ -26,6 +26,10 @@ public abstract class AbstractConfigRegister {
         return stackService.getByIdWithListsInTransaction(stackId);
     }
 
+    protected String getEnvironmentCrnByStackId(Long stackId) {
+        return stackService.getEnvironmentCrnByStackId(stackId);
+    }
+
     public abstract void register(Long stackId);
 
     protected InstanceMetaData getMasterInstance(Stack stack) {

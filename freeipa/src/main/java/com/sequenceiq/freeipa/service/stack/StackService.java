@@ -190,6 +190,11 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
         return stackRepository.findMultipleResourceBasicViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(environmentCrns, accountId);
     }
 
+    public String getEnvironmentCrnByStackId(Long stackId) {
+        return stackRepository.findEnvironmentCrnByStackId(stackId)
+                .orElseThrow(() -> new NotFoundException(String.format("FreeIPA stack [%s] not found", stackId)));
+    }
+
     public List<StackIdWithStatus> getStatuses(Set<Long> stackIds) {
         return stackRepository.findStackStatusesWithoutAuth(stackIds);
     }

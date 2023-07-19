@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -97,6 +98,11 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
     @Override
     public JpaRepository<KerberosConfig, Long> repository() {
         return kerberosConfigRepository;
+    }
+
+    public boolean doesEnvironmentLevelKerberosConfigExists(Crn environmentCrn) {
+        return kerberosConfigRepository
+                .findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(environmentCrn.getAccountId(), environmentCrn.toString()).isPresent();
     }
 
     private void checkIfExists(KerberosConfig resource) {

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -102,6 +103,11 @@ public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
     @Override
     public JpaRepository<LdapConfig, Long> repository() {
         return ldapConfigRepository;
+    }
+
+    public boolean doesEnvironmentLevelLdapConfigExists(Crn environmentCrn) {
+        return ldapConfigRepository
+                .findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(environmentCrn.getAccountId(), environmentCrn.toString()).isPresent();
     }
 
     private void checkIfExists(LdapConfig resource) {

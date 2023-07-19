@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -52,19 +53,22 @@ public class LdapConfigRegisterService extends AbstractConfigRegister {
 
     @Override
     public void register(Long stackId) {
-        createLdapConfig(stackId, null, null, null, null);
+        Crn environmentCrn = Crn.safeFromString(getEnvironmentCrnByStackId(stackId));
+        if (ldapConfigService.doesEnvironmentLevelLdapConfigExists(environmentCrn)) {
+            LOGGER.info("LdapConfig already exists for environment [{}]", environmentCrn);
+        } else {
+            createLdapConfig(stackId, null, null, null, null);
+        }
     }
 
     public LdapConfig createLdapConfig(Long stackId, String bindDn, String bindPassword, String clusterName, String environmentCrn) {
         Stack stack = getStackWithInstanceMetadata(stackId);
-        if (StringUtils.isEmpty(environmentCrn)) {
-            environmentCrn = stack.getEnvironmentCrn();
-        }
+        String envCrn = StringUtils.isEmpty(environmentCrn) ? stack.getEnvironmentCrn() : environmentCrn;
         FreeIpa freeIpa = getFreeIpaService().findByStackId(stackId);
         String adminGroupName = StringUtils.isNotEmpty(freeIpa.getAdminGroupName()) ? freeIpa.getAdminGroupName() : "";
         LdapConfig ldapConfig = new LdapConfig();
         ldapConfig.setName(stack.getName());
-        ldapConfig.setEnvironmentCrn(environmentCrn);
+        ldapConfig.setEnvironmentCrn(envCrn);
         ldapConfig.setAdminGroup(adminGroupName);
         ldapConfig.setUserGroup(USER_GROUP);
         String domainComponent = generateDomainComponent(freeIpa);

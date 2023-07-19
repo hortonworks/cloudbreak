@@ -179,4 +179,7 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     @Query("SELECT s.accountId FROM Stack s WHERE s.id = :id")
     Optional<String> findAccountIdByStackId(@Param("id") Long id);
 
+    @Query("SELECT s.environmentCrn FROM Stack s WHERE s.id = :id")
+    Optional<String> findEnvironmentCrnByStackId(@Param("id") Long id);
+
 }

@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.KerberosType;
 import com.sequenceiq.freeipa.entity.FreeIpa;
@@ -34,18 +35,21 @@ public class KerberosConfigRegisterService extends AbstractConfigRegister {
 
     @Override
     public void register(Long stackId) {
-        createKerberosConfig(stackId, FREEIPA_DEFAULT_ADMIN, null, null, null);
+        Crn environmentCrn = Crn.safeFromString(getEnvironmentCrnByStackId(stackId));
+        if (kerberosConfigService.doesEnvironmentLevelKerberosConfigExists(environmentCrn)) {
+            LOGGER.info("KerberosConfig already exists for environment [{}]", environmentCrn);
+        } else {
+            createKerberosConfig(stackId, FREEIPA_DEFAULT_ADMIN, null, null, null);
+        }
     }
 
     public KerberosConfig createKerberosConfig(Long stackId, String dn, String password, String clusterName, String environmentCrn) {
         FreeIpa freeIpa = getFreeIpaService().findByStackId(stackId);
         Stack stack = getStackWithInstanceMetadata(stackId);
-        if (StringUtils.isEmpty(environmentCrn)) {
-            environmentCrn = stack.getEnvironmentCrn();
-        }
+        String envCrn = StringUtils.isEmpty(environmentCrn) ? stack.getEnvironmentCrn() : environmentCrn;
         KerberosConfig kerberosConfig = new KerberosConfig();
         kerberosConfig.setDomain(freeIpa.getDomain());
-        kerberosConfig.setEnvironmentCrn(environmentCrn);
+        kerberosConfig.setEnvironmentCrn(envCrn);
         kerberosConfig.setName(stack.getName());
         kerberosConfig.setPrincipal(dn);
         kerberosConfig.setRealm(freeIpa.getDomain().toUpperCase());
