@@ -35,7 +35,8 @@ public class PreValidateRotationHandler extends ExceptionCatcherEventHandler<Pre
 
     @Override
     protected Selectable doAccept(HandlerEvent<PreValidateRotationTriggerEvent> event) {
-        secretRotationService.executePreValidation(event.getData().getSecretType(), event.getData().getResourceCrn(), event.getData().getExecutionType());
+        secretRotationService.executePreValidationIfNeeded(event.getData().getSecretType(), event.getData().getResourceCrn(),
+                event.getData().getExecutionType());
         return PreValidateRotationFinishedEvent.fromPayload(event.getData());
     }
 }

@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRotationFai
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRotationFinishedEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationService;
-import com.sequenceiq.cloudbreak.rotation.service.usage.SecretRotationUsageService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -21,9 +20,6 @@ public class ExecuteRotationHandler extends ExceptionCatcherEventHandler<Execute
 
     @Inject
     private SecretRotationService secretRotationService;
-
-    @Inject
-    private SecretRotationUsageService secretRotationUsageService;
 
     @Override
     public String selector() {
@@ -38,8 +34,7 @@ public class ExecuteRotationHandler extends ExceptionCatcherEventHandler<Execute
     @Override
     protected Selectable doAccept(HandlerEvent<ExecuteRotationTriggerEvent> event) {
         ExecuteRotationTriggerEvent rotationEvent = event.getData();
-        secretRotationUsageService.rotationStarted(rotationEvent.getSecretType(), rotationEvent.getResourceCrn(), rotationEvent.getExecutionType());
-        secretRotationService.executeRotation(rotationEvent.getSecretType(), rotationEvent.getResourceCrn(), rotationEvent.getExecutionType());
+        secretRotationService.executeRotationIfNeeded(rotationEvent.getSecretType(), rotationEvent.getResourceCrn(), rotationEvent.getExecutionType());
         return ExecuteRotationFinishedEvent.fromPayload(rotationEvent);
     }
 }

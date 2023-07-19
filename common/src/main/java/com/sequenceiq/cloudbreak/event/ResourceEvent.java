@@ -618,10 +618,15 @@ public enum ResourceEvent {
     DATALAKE_HORIZONTAL_SCALE_FINISHED("datalake.horizontalscale.finished"),
     DATALAKE_HORIZONTAL_SCALE_FAILED("datalake.horizontalscale.failed"),
 
-
     DATALAKE_SECRET_ROTATION_IN_PROGRESS("datalake.secret.rotation.in.progress"),
     DATALAKE_SECRET_ROTATION_FINISHED("datalake.secret.rotation.finished"),
     DATALAKE_SECRET_ROTATION_FAILED("datalake.secret.rotation.failed"),
+    DATALAKE_SECRET_ROTATION_ROLLBACK_IN_PROGRESS("datalake.secret.rotation.rollback.in.progress"),
+    DATALAKE_SECRET_ROTATION_ROLLBACK_FINISHED("datalake.secret.rotation.rollback.finished"),
+    DATALAKE_SECRET_ROTATION_ROLLBACK_FAILED("datalake.secret.rotation.rollback.failed"),
+    DATALAKE_SECRET_ROTATION_FINALIZE_IN_PROGRESS("datalake.secret.rotation.finalize.in.progress"),
+    DATALAKE_SECRET_ROTATION_FINALIZE_FINISHED("datalake.secret.rotation.finalize.finished"),
+    DATALAKE_SECRET_ROTATION_FINALIZE_FAILED("datalake.secret.rotation.finalize.failed"),
 
     // deprecated
     STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.skipped"),

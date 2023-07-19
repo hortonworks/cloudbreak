@@ -1,11 +1,19 @@
 package com.sequenceiq.datalake.service.sdx.status;
 
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_FAILED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_FINALIZE_FAILED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_FINALIZE_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_FINISHED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_IN_PROGRESS;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_ROLLBACK_FAILED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_ROLLBACK_FINISHED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_ROLLBACK_IN_PROGRESS;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.RUNNING;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -17,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
@@ -27,7 +36,9 @@ class SdxSecretRotationStatusServiceTest {
 
     private static final String RESOURCE_CRN = "resourceCrn";
 
-    private static final String STATUS_REASON = "statusReason";
+    private static final SecretType SECRET_TYPE = mock(SecretType.class);
+
+    private static final String REASON = "reason";
 
     @Mock
     private SdxStatusService sdxStatusService;
@@ -39,31 +50,75 @@ class SdxSecretRotationStatusServiceTest {
     private SdxSecretRotationStatusService underTest;
 
     @Test
-    void testRotationStarted() {
-        underTest.rotationStarted(RESOURCE_CRN);
-        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DATALAKE_SECRET_ROTATION_IN_PROGRESS), isNull(), eq(RESOURCE_CRN));
+    void rotationStartedShouldSucceed() {
+        underTest.rotationStarted(RESOURCE_CRN, SECRET_TYPE);
+        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DATALAKE_SECRET_ROTATION_IN_PROGRESS), anyString(), eq(RESOURCE_CRN));
     }
 
     @Test
-    void testRotationFinished() {
+    void rotationFinishedShouldSucceed() {
+        underTest.rotationFinished(RESOURCE_CRN, SECRET_TYPE);
+        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DATALAKE_SECRET_ROTATION_FINISHED), anyString(), eq(RESOURCE_CRN));
+    }
+
+    @Test
+    void rotationFailedShouldSucceed() {
         when(sdxService.getByCrn(eq(RESOURCE_CRN))).thenReturn(new SdxCluster());
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(sdxStatusEntity(DATALAKE_SECRET_ROTATION_IN_PROGRESS));
-        underTest.rotationFinished(RESOURCE_CRN);
-        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DATALAKE_SECRET_ROTATION_FINISHED), isNull(), eq(RESOURCE_CRN));
+        underTest.rotationFailed(RESOURCE_CRN, SECRET_TYPE, REASON);
+        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DATALAKE_SECRET_ROTATION_FAILED), contains(REASON), eq(RESOURCE_CRN));
     }
 
     @Test
-    void testRotationFinishedShouldSkipStatusUpdateWhenStatusIsAlreadySecretRotationFailed() {
+    void rotationFailedShouldSkipStatusUpdateWhenStatusIsAlreadySecretRotationRollbackFailed() {
         when(sdxService.getByCrn(eq(RESOURCE_CRN))).thenReturn(new SdxCluster());
-        when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(sdxStatusEntity(DATALAKE_SECRET_ROTATION_FAILED));
-        underTest.rotationFinished(RESOURCE_CRN);
-        verify(sdxStatusService, never()).setStatusForDatalakeAndNotify(eq(DATALAKE_SECRET_ROTATION_FINISHED), isNull(), eq(RESOURCE_CRN));
+        when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(sdxStatusEntity(DATALAKE_SECRET_ROTATION_ROLLBACK_FAILED));
+        underTest.rotationFailed(RESOURCE_CRN, SECRET_TYPE, REASON);
+        verify(sdxStatusService, never()).setStatusForDatalakeAndNotify(eq(DATALAKE_SECRET_ROTATION_FAILED), contains(REASON), eq(RESOURCE_CRN));
     }
 
     @Test
-    void testRotationFailed() {
-        underTest.rotationFailed(RESOURCE_CRN, STATUS_REASON);
-        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DATALAKE_SECRET_ROTATION_FAILED), eq(STATUS_REASON), eq(RESOURCE_CRN));
+    void rotationFailedShouldSkipStatusUpdateWhenStatusIsAlreadySecretRotationFinalizeFailed() {
+        when(sdxService.getByCrn(eq(RESOURCE_CRN))).thenReturn(new SdxCluster());
+        when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(sdxStatusEntity(DATALAKE_SECRET_ROTATION_FINALIZE_FAILED));
+        underTest.rotationFailed(RESOURCE_CRN, SECRET_TYPE, REASON);
+        verify(sdxStatusService, never()).setStatusForDatalakeAndNotify(eq(DATALAKE_SECRET_ROTATION_FAILED), contains(REASON), eq(RESOURCE_CRN));
+    }
+
+    @Test
+    void rollbackStartedShouldSucceed() {
+        underTest.rollbackStarted(RESOURCE_CRN, SECRET_TYPE);
+        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DATALAKE_SECRET_ROTATION_ROLLBACK_IN_PROGRESS), anyString(), eq(RESOURCE_CRN));
+    }
+
+    @Test
+    void rollbackFinishedShouldSucceed() {
+        underTest.rollbackFinished(RESOURCE_CRN, SECRET_TYPE);
+        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DATALAKE_SECRET_ROTATION_ROLLBACK_FINISHED), anyString(), eq(RESOURCE_CRN));
+    }
+
+    @Test
+    void rollbackFailedShouldSucceed() {
+        underTest.rollbackFailed(RESOURCE_CRN, SECRET_TYPE, REASON);
+        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DATALAKE_SECRET_ROTATION_ROLLBACK_FAILED), contains(REASON), eq(RESOURCE_CRN));
+    }
+
+    @Test
+    void finalizeStartedShouldSucceed() {
+        underTest.finalizeStarted(RESOURCE_CRN, SECRET_TYPE);
+        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DATALAKE_SECRET_ROTATION_FINALIZE_IN_PROGRESS), anyString(), eq(RESOURCE_CRN));
+    }
+
+    @Test
+    void finalizeFinishedShouldSucceed() {
+        underTest.finalizeFinished(RESOURCE_CRN, SECRET_TYPE);
+        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(RUNNING), anyString(), eq(RESOURCE_CRN));
+    }
+
+    @Test
+    void finalizeFailedShouldSucceed() {
+        underTest.finalizeFailed(RESOURCE_CRN, SECRET_TYPE, REASON);
+        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DATALAKE_SECRET_ROTATION_FINALIZE_FAILED), contains(REASON), eq(RESOURCE_CRN));
     }
 
     private SdxStatusEntity sdxStatusEntity(DatalakeStatusEnum datalakeStatusEnum) {

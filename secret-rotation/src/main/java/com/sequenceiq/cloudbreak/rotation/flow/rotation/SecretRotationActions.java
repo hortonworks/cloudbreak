@@ -170,22 +170,22 @@ public class SecretRotationActions {
             }
 
             @Override
-            protected void doExecute(RotationFlowContext context, RotationFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                Flow flow = getFlow(context.getFlowId());
+            protected void doExecute(RotationFlowContext context, RotationFailedEvent payload, Map<Object, Object> variables) {
+                Exception exception = payload.getException();
+                String message = exception.getMessage();
                 String resourceCrn = context.getResourceCrn();
-                String message = payload.getException().getMessage();
+                LOGGER.debug("Secret rotation failed, for: {}, secreType: {}", resourceCrn, context.getSecretType(), exception);
                 if (RotationFlowExecutionType.ROLLBACK == payload.getExecutionType() && EXPLICIT_ROLLBACK_EXECUTION.equals(message)) {
                     // if the execution tpye is ROLLBACK, we need to know from the calling service wheter it was successful or not
                     LOGGER.debug("Explicit rollback, doesnt set flow failed.");
                 } else {
                     LOGGER.debug("Execution type is not set or not explicit ROLLBACK, set flow failed for: {}", context.getResourceCrn());
-                    flow.setFlowFailed(payload.getException());
+                    Flow flow = getFlow(context.getFlowId());
+                    flow.setFlowFailed(exception);
                 }
                 secretRotationProgressService.deleteAll(context.getResourceCrn(), payload.getSecretType());
                 secretRotationUsageService.rotationFailed(context.getSecretType(), resourceCrn, message, context.getExecutionType());
-                LOGGER.debug("Secret rotation failed, change resource status for {}", resourceCrn);
-                secretRotationStatusService.rotationFailed(resourceCrn, message);
-                LOGGER.debug("Secret rotation failed, resource status changed for {}", resourceCrn);
+                secretRotationStatusService.rotationFailed(resourceCrn, payload.getSecretType(), message);
                 sendEvent(context, RotationEvent.fromContext(SecretRotationEvent.ROTATION_FAILURE_HANDLED_EVENT.event(), context));
             }
 

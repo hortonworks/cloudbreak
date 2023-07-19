@@ -4,9 +4,12 @@ import static com.sequenceiq.cloudbreak.rotation.common.TestSecretRotationStep.S
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -31,6 +34,8 @@ import com.sequenceiq.cloudbreak.rotation.common.TestRotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.TestSecretType;
 import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
+import com.sequenceiq.cloudbreak.rotation.service.status.SecretRotationStatusService;
+import com.sequenceiq.cloudbreak.rotation.service.usage.SecretRotationUsageService;
 
 @ExtendWith(MockitoExtension.class)
 public class SecretRotationServiceTest {
@@ -43,6 +48,12 @@ public class SecretRotationServiceTest {
 
     @Mock
     private SecretRotationStepProgressService secretRotationStepProgressService;
+
+    @Mock
+    private SecretRotationStatusService secretRotationStatusService;
+
+    @Mock
+    private SecretRotationUsageService secretRotationUsageService;
 
     @InjectMocks
     private SecretRotationService underTest;
@@ -58,9 +69,9 @@ public class SecretRotationServiceTest {
 
     @Test
     public void testRotateWhenNotNeeded() {
-        underTest.executeRotation(TestSecretType.TEST, "resource", RotationFlowExecutionType.FINALIZE);
+        underTest.executeRotationIfNeeded(TestSecretType.TEST, "resource", RotationFlowExecutionType.FINALIZE);
 
-        verifyNoInteractions(executor, contextProvider);
+        verifyNoInteractions(executor, contextProvider, secretRotationStatusService, secretRotationUsageService);
     }
 
     @Test
@@ -68,9 +79,12 @@ public class SecretRotationServiceTest {
         when(contextProvider.getContexts(anyString())).thenReturn(Map.of());
 
         assertThrows(RuntimeException.class, () ->
-                underTest.executeRotation(TestSecretType.TEST, "resource", null));
+                underTest.executeRotationIfNeeded(TestSecretType.TEST, "resource", null));
 
         verify(contextProvider).getContexts(anyString());
+        verify(secretRotationStatusService, times(1)).rotationStarted(eq("resource"), eq(TestSecretType.TEST));
+        verify(secretRotationUsageService, times(1)).rotationStarted(eq(TestSecretType.TEST), eq("resource"), isNull());
+        verify(secretRotationStatusService, never()).rotationFinished(anyString(), any());
         verifyNoInteractions(executor);
     }
 
@@ -78,20 +92,24 @@ public class SecretRotationServiceTest {
     public void testRotate() {
         doNothing().when(executor).executeRotate(any(), any());
 
-        underTest.executeRotation(TestSecretType.TEST, "resource", null);
+        underTest.executeRotationIfNeeded(TestSecretType.TEST, "resource", null);
 
         verify(contextProvider).getContexts(anyString());
         verify(executor, times(1)).executeRotate(any(), any());
+        verify(secretRotationStatusService, times(1)).rotationStarted(eq("resource"), eq(TestSecretType.TEST));
+        verify(secretRotationUsageService, times(1)).rotationStarted(eq(TestSecretType.TEST), eq("resource"), isNull());
+        verify(secretRotationStatusService, times(1)).rotationFinished(eq("resource"), eq(TestSecretType.TEST));
     }
 
     @Test
     public void testPreValidate() {
         doNothing().when(executor).executePreValidation(any());
 
-        underTest.executePreValidation(TestSecretType.TEST, "resource", null);
+        underTest.executePreValidationIfNeeded(TestSecretType.TEST, "resource", null);
 
         verify(contextProvider).getContexts(anyString());
         verify(executor, times(1)).executePreValidation(any());
+        verifyNoInteractions(secretRotationUsageService, secretRotationStatusService);
     }
 
     @Test
@@ -99,10 +117,13 @@ public class SecretRotationServiceTest {
         doNothing().when(secretRotationStepProgressService).deleteAll(any(), any());
         doNothing().when(executor).executeFinalize(any(), any());
 
-        underTest.finalizeRotation(TestSecretType.TEST, "resource", null);
+        underTest.finalizeRotationIfNeeded(TestSecretType.TEST, "resource", null);
 
         verify(contextProvider).getContexts(anyString());
         verify(executor, times(1)).executeFinalize(any(), any());
+        verify(secretRotationStatusService, times(1)).finalizeStarted(eq("resource"), eq(TestSecretType.TEST));
+        verify(secretRotationStatusService, times(1)).finalizeFinished(eq("resource"), eq(TestSecretType.TEST));
+        verify(secretRotationUsageService, times(1)).rotationFinished(eq(TestSecretType.TEST), eq("resource"), isNull());
     }
 
     @Test
@@ -110,21 +131,29 @@ public class SecretRotationServiceTest {
         doThrow(new SecretRotationException("anything", null)).when(executor).executePostValidation(any());
 
         assertThrows(SecretRotationException.class, () ->
-                underTest.finalizeRotation(TestSecretType.TEST, "resource", null));
+                underTest.finalizeRotationIfNeeded(TestSecretType.TEST, "resource", null));
 
         verify(contextProvider).getContexts(anyString());
         verify(executor, times(0)).executeFinalize(any(), any());
         verify(executor, times(1)).executePostValidation(any());
+        verify(secretRotationStatusService, times(1)).finalizeStarted(eq("resource"), eq(TestSecretType.TEST));
+        verify(secretRotationStatusService, never()).finalizeFinished(anyString(), any());
+        verify(secretRotationUsageService, never()).rotationFinished(any(), anyString(), isNull());
+        verify(secretRotationStatusService, times(1)).finalizeFailed(eq("resource"), eq(TestSecretType.TEST), eq("anything"));
     }
 
     @Test
     public void testRollback() {
         doNothing().when(executor).executeRollback(any(), any());
 
-        underTest.rollbackRotation(TestSecretType.TEST, "resource", null, STEP);
+        underTest.rollbackRotationIfNeeded(TestSecretType.TEST, "resource", null, STEP);
 
         verify(contextProvider).getContexts(anyString());
         verify(executor).executeRollback(any(), any());
+        verify(secretRotationStatusService, times(1)).rollbackStarted(eq("resource"), eq(TestSecretType.TEST));
+        verify(secretRotationUsageService, times(1)).rollbackStarted(eq(TestSecretType.TEST), eq("resource"), isNull());
+        verify(secretRotationStatusService, times(1)).rollbackFinished(eq("resource"), eq(TestSecretType.TEST));
+        verify(secretRotationUsageService, times(1)).rollbackFinished(eq(TestSecretType.TEST), eq("resource"), isNull());
     }
 
     private void generateTestContexts() {

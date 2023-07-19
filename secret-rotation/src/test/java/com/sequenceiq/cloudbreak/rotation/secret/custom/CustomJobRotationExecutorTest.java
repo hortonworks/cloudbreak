@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 
 @ExtendWith(MockitoExtension.class)
-class CustomJobExecutorTest {
+class CustomJobRotationExecutorTest {
 
     @Mock
     private Runnable rotateCustomJob;
@@ -36,7 +36,7 @@ class CustomJobExecutorTest {
     private SecretRotationStepProgressService secretRotationProgressService;
 
     @InjectMocks
-    private CustomJobExecutor underTest;
+    private CustomJobRotationExecutor underTest;
 
     @BeforeEach
     public void mockProgressService() {

@@ -5,7 +5,11 @@ import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CERT_ROTATION_IN
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CHANGE_IMAGE_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ROLLING_UPGRADE_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_FAILED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_FINALIZE_FAILED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_FINALIZE_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_IN_PROGRESS;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_ROLLBACK_FAILED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_ROLLBACK_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_CCM_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_CCM_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_FAILED;
@@ -59,7 +63,9 @@ class DatalakeStatusEnumTest {
                     entry(DATALAKE_UPGRADE_IN_PROGRESS, DATALAKE_UPGRADE_FAILED), entry(CERT_ROTATION_IN_PROGRESS, CERT_ROTATION_FAILED),
                     entry(RECOVERY_IN_PROGRESS, RECOVERY_FAILED), entry(DATALAKE_UPGRADE_CCM_IN_PROGRESS, DATALAKE_UPGRADE_CCM_FAILED),
                     entry(SALT_PASSWORD_ROTATION_IN_PROGRESS, SALT_PASSWORD_ROTATION_FAILED),
-                    entry(DATALAKE_SECRET_ROTATION_IN_PROGRESS, DATALAKE_SECRET_ROTATION_FAILED))
+                    entry(DATALAKE_SECRET_ROTATION_IN_PROGRESS, DATALAKE_SECRET_ROTATION_FAILED),
+                    entry(DATALAKE_SECRET_ROTATION_ROLLBACK_IN_PROGRESS, DATALAKE_SECRET_ROTATION_ROLLBACK_FAILED),
+                    entry(DATALAKE_SECRET_ROTATION_FINALIZE_IN_PROGRESS, DATALAKE_SECRET_ROTATION_FINALIZE_FAILED))
     );
 
     private static final Set<DatalakeStatusEnum> STOP_STATE_SET = EnumSet.of(STOPPED, STOP_IN_PROGRESS);

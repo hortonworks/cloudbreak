@@ -6,8 +6,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +24,6 @@ import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRotationFai
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRotationFinishedEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationService;
-import com.sequenceiq.cloudbreak.rotation.service.usage.SecretRotationUsageService;
 
 @ExtendWith(MockitoExtension.class)
 public class ExecuteRotationHandlerTest {
@@ -37,9 +34,6 @@ public class ExecuteRotationHandlerTest {
 
     @Mock
     private SecretRotationService secretRotationService;
-
-    @Mock
-    private SecretRotationUsageService secretRotationUsageService;
 
     @InjectMocks
     private ExecuteRotationHandler underTest;
@@ -54,22 +48,20 @@ public class ExecuteRotationHandlerTest {
 
     @Test
     public void testHandler() {
-        doNothing().when(secretRotationService).executeRotation(any(), any(), any());
+        doNothing().when(secretRotationService).executeRotationIfNeeded(any(), any(), any());
 
         underTest.accept(Event.wrap(getTriggerEvent()));
 
         assertEquals(ExecuteRotationFinishedEvent.class, argumentCaptor.getValue().getData().getClass());
-        verify(secretRotationUsageService, times(1)).rotationStarted(any(), any(), any());
     }
 
     @Test
     public void testHandlerFailure() {
-        doThrow(new CloudbreakServiceException("anything")).when(secretRotationService).executeRotation(any(), any(), any());
+        doThrow(new CloudbreakServiceException("anything")).when(secretRotationService).executeRotationIfNeeded(any(), any(), any());
 
         underTest.accept(Event.wrap(getTriggerEvent()));
 
         assertEquals(ExecuteRotationFailedEvent.class, argumentCaptor.getValue().getData().getClass());
-        verify(secretRotationUsageService, times(1)).rotationStarted(any(), any(), any());
     }
 
     private static ExecuteRotationTriggerEvent getTriggerEvent() {

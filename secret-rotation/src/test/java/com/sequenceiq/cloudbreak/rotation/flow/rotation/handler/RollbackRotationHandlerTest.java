@@ -6,8 +6,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +23,6 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RollbackRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RotationFailedEvent;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationService;
-import com.sequenceiq.cloudbreak.rotation.service.usage.SecretRotationUsageService;
 
 @ExtendWith(MockitoExtension.class)
 public class RollbackRotationHandlerTest {
@@ -36,9 +33,6 @@ public class RollbackRotationHandlerTest {
 
     @Mock
     private SecretRotationService secretRotationService;
-
-    @Mock
-    private SecretRotationUsageService secretRotationUsageService;
 
     @InjectMocks
     private RollbackRotationHandler underTest;
@@ -53,24 +47,20 @@ public class RollbackRotationHandlerTest {
 
     @Test
     public void testHandler() {
-        doNothing().when(secretRotationService).rollbackRotation(any(), any(), any(), any());
+        doNothing().when(secretRotationService).rollbackRotationIfNeeded(any(), any(), any(), any());
 
         underTest.accept(Event.wrap(getTriggerEvent()));
 
         assertEquals(RotationFailedEvent.class, argumentCaptor.getValue().getData().getClass());
-        verify(secretRotationUsageService, times(1)).rollbackStarted(any(), any(), any());
-        verify(secretRotationUsageService, times(1)).rollbackFinished(any(), any(), any());
     }
 
     @Test
     public void testHandlerFailure() {
-        doThrow(new CloudbreakServiceException("anything")).when(secretRotationService).rollbackRotation(any(), any(), any(), any());
+        doThrow(new CloudbreakServiceException("anything")).when(secretRotationService).rollbackRotationIfNeeded(any(), any(), any(), any());
 
         underTest.accept(Event.wrap(getTriggerEvent()));
 
         assertEquals(RotationFailedEvent.class, argumentCaptor.getValue().getData().getClass());
-        verify(secretRotationUsageService, times(1)).rollbackStarted(any(), any(), any());
-        verify(secretRotationUsageService, times(1)).rollbackFailed(any(), any(), any(), any());
     }
 
     private static RollbackRotationTriggerEvent getTriggerEvent() {
