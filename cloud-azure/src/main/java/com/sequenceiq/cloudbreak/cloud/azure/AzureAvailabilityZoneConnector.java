@@ -40,7 +40,7 @@ public class AzureAvailabilityZoneConnector implements AvailabilityZoneConnector
                     .findFirst().orElse(List.of());
             LOGGER.debug("Availability Zones for Instance Type {} are {} ", instanceType,
                     availabilityZonesForInstanceType);
-            return emptyIfNull(environmentZones).stream().filter(az -> availabilityZonesForInstanceType.contains(az)).collect(Collectors.toSet());
+            return emptyIfNull(environmentZones).stream().filter(availabilityZonesForInstanceType::contains).collect(Collectors.toSet());
         } else {
             return Set.of();
         }

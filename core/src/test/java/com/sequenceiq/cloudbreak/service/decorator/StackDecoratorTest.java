@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
 import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,20 +16,22 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.assertj.core.util.Maps;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
@@ -42,12 +46,15 @@ import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroupToInstanceGroupParameterRequestConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.AvailabilityZone;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -67,6 +74,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegio
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
+@ExtendWith(MockitoExtension.class)
 public class StackDecoratorTest {
     private static final String ACCOUNT_ID = "cloudera";
 
@@ -74,10 +82,7 @@ public class StackDecoratorTest {
 
     private static final String MISCONFIGURED_STACK_FOR_SHARED_SERVICE = "Shared service stack configuration contains some errors";
 
-    private static final long CREDENTIAL_ID = 1L;
-
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
+    private static final Set<String> EXPECTED_AZS = Set.of("availabilityZone1", "availabilityZone2");
 
     @InjectMocks
     private StackDecorator underTest;
@@ -156,10 +161,12 @@ public class StackDecoratorTest {
     @Mock
     private InstanceGroupToInstanceGroupParameterRequestConverter instanceGroupToInstanceGroupParameterRequestConverter;
 
-    @Before
+    @Captor
+    private ArgumentCaptor<Set<AvailabilityZone>> azSetCaptor;
+
+    @BeforeEach
     public void setUp() {
         String credentialName = "credentialName";
-        MockitoAnnotations.initMocks(this);
         subject = new Stack();
         subject.setEnvironmentCrn("envCrn");
         Set<InstanceGroup> instanceGroups = createInstanceGroups(GATEWAY);
@@ -177,9 +184,10 @@ public class StackDecoratorTest {
         when(platformOrchestrators.getDefaults()).thenReturn(defaultOrchestrator);
         when(defaultOrchestrator.get(any(Platform.class))).thenReturn(orchestrator);
         when(instanceGroupToInstanceGroupParameterRequestConverter.convert(any(InstanceGroup.class))).thenReturn(instanceGroupParameterRequest);
-        when(request.getCluster()).thenReturn(clusterRequest);
-        when(environmentSettingsRequest.getCredentialName()).thenReturn(credentialName);
-        when(sharedServiceValidator.checkSharedServiceStackRequirements(any(StackV4Request.class), any(Workspace.class))).thenReturn(validationResult);
+        lenient().when(request.getCluster()).thenReturn(clusterRequest);
+        lenient().when(environmentSettingsRequest.getCredentialName()).thenReturn(credentialName);
+        lenient().when(sharedServiceValidator.checkSharedServiceStackRequirements(any(StackV4Request.class), any(Workspace.class)))
+                .thenReturn(validationResult);
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCredential(credentialResponse);
         CompactRegionResponse crr = new CompactRegionResponse();
@@ -192,12 +200,12 @@ public class StackDecoratorTest {
         environmentResponse.setAzure(AzureEnvironmentParameters
                 .builder().withAzureResourceGroup(AzureResourceGroup
                         .builder().withResourceGroupUsage(ResourceGroupUsage.SINGLE).withName("resource-group").build()).build());
-        when(request.getCloudPlatform()).thenReturn(CloudPlatform.AZURE);
-        when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
+        lenient().when(request.getCloudPlatform()).thenReturn(CloudPlatform.AZURE);
+        lenient().when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         Credential credential = Credential.builder().cloudPlatform(CloudPlatform.MOCK.name()).build();
-        when(credentialClientService.getByCrn(anyString())).thenReturn(credential);
-        when(credentialClientService.getByName(anyString())).thenReturn(credential);
+        lenient().when(credentialClientService.getByCrn(anyString())).thenReturn(credential);
+        lenient().when(credentialClientService.getByName(anyString())).thenReturn(credential);
         when(credentialConverter.convert(credentialResponse)).thenReturn(credential);
         ExtendedCloudCredential extendedCloudCredential = mock(ExtendedCloudCredential.class);
         when(extendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential);
@@ -223,25 +231,27 @@ public class StackDecoratorTest {
         verify(sharedServiceValidator, times(1)).checkSharedServiceStackRequirements(any(StackV4Request.class), any(Workspace.class));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testDecorateWhenMethodCalledWithMultipleGatewayGroupThenShouldThrowBadRequestException() {
         Set<InstanceGroup> instanceGroups = createInstanceGroups(GATEWAY, GATEWAY);
         subject.setInstanceGroups(instanceGroups);
-        ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.decorate(subject, request, user, workspace));
+        assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.decorate(subject, request, user, workspace)));
     }
 
     @Test
     public void testDecoratorWhenClusterToAttachIsNotNullAndAllSharedServiceRequirementMeetsThenEverythingShouldGoFine() {
-        SharedServiceV4Request sharedServiceV4Request = new SharedServiceV4Request();
-        sharedServiceV4Request.setDatalakeName("dlname");
-        when(request.getSharedService()).thenReturn(sharedServiceV4Request);
-        when(clusterRequest.getDatabases()).thenReturn(Set.of("db1", "db2"));
-
         ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.decorate(subject, request, user, workspace));
         assertEquals("resource-group", subject.getParameters().get(PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER));
         assertEquals("SINGLE", subject.getParameters().get(PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER));
+
+        for (InstanceGroup group : subject.getInstanceGroups()) {
+            verify(group).setAvailabilityZones(azSetCaptor.capture());
+            Set<String> capturedAzSet = azSetCaptor.getValue().stream().map(AvailabilityZone::getAvailabilityZone).collect(Collectors.toSet());
+            assertEquals(EXPECTED_AZS, capturedAzSet);
+        }
+
     }
 
     @Test
@@ -249,21 +259,22 @@ public class StackDecoratorTest {
         when(validationResult.hasError()).thenReturn(Boolean.TRUE);
         when(validationResult.getFormattedErrors()).thenReturn(MISCONFIGURED_STACK_FOR_SHARED_SERVICE);
 
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(MISCONFIGURED_STACK_FOR_SHARED_SERVICE);
-
-        ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.decorate(subject, request, user, workspace));
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.decorate(subject, request, user, workspace)));
+        assertEquals(MISCONFIGURED_STACK_FOR_SHARED_SERVICE, badRequestException.getMessage());
     }
 
     private Set<InstanceGroup> createInstanceGroups(InstanceGroupType... types) {
         Set<InstanceGroup> groups = new LinkedHashSet<>(types.length);
         int i = 0;
         for (InstanceGroupType type : types) {
-            InstanceGroup group = mock(InstanceGroup.class);
+            InstanceGroup group = mock(InstanceGroup.class, Answers.RETURNS_DEEP_STUBS);
             when(group.getInstanceGroupType()).thenReturn(type);
+            when(group.getAvailabilityZones()).thenReturn(null);
             when(group.getGroupName()).thenReturn("name" + i);
-            when(group.getNodeCount()).thenReturn(2);
+            lenient().when(group.getNodeCount()).thenReturn(2);
+            Json instanceGroupNetworkAttributes = new Json(Map.of(NetworkConstants.AVAILABILITY_ZONES, EXPECTED_AZS));
+            when(group.getInstanceGroupNetwork().getAttributes()).thenReturn(instanceGroupNetworkAttributes);
             groups.add(group);
         }
         return groups;

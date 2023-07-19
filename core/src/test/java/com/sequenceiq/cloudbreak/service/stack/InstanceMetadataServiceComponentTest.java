@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValidator;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
@@ -57,6 +58,9 @@ public class InstanceMetadataServiceComponentTest {
 
     @Inject
     private InstanceMetaDataRepository repository;
+
+    @Inject
+    private StackService stackService;
 
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
@@ -190,9 +194,15 @@ public class InstanceMetadataServiceComponentTest {
         private ResourceRetriever resourceRetriever;
 
         @MockBean
+        private StackService stackService;
+
+        @MockBean
         private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
         @MockBean
         private BlueprintUtils blueprintUtils;
+
+        @MockBean
+        private ProviderBasedMultiAzSetupValidator providerBasedMultiAzSetupValidator;
     }
 }

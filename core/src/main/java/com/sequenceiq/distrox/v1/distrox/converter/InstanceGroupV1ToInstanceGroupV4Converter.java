@@ -52,12 +52,12 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
     private InstanceGroupNetworkV1ToInstanceGroupNetworkV4Converter networkConverter;
 
     public List<InstanceGroupV4Request> convertTo(NetworkV4Request network, Set<InstanceGroupV1Request> instanceGroups,
-        DetailedEnvironmentResponse environment) {
+            DetailedEnvironmentResponse environment) {
         return instanceGroups.stream().map(ig -> convert(network, ig, environment)).collect(Collectors.toList());
     }
 
     public Set<InstanceGroupV1Request> convertFrom(NetworkV4Request network, List<InstanceGroupV4Request> instanceGroups,
-        DetailedEnvironmentResponse environment) {
+            DetailedEnvironmentResponse environment) {
         return instanceGroups.stream().map(ig -> convert(network, ig, environment)).collect(Collectors.toSet());
     }
 
@@ -165,7 +165,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
     }
 
     private InstanceGroupNetworkV4Request getInstanceGroupNetworkV4Request(NetworkV4Request distroxNetwork, InstanceGroupV1Request instanceGroupV1Request,
-        DetailedEnvironmentResponse environment) {
+            DetailedEnvironmentResponse environment) {
         if (!instanceGroupRequestHasSubnet(instanceGroupV1Request, environment) || distroxNetwork == null) {
             instanceGroupV1Request.setNetwork(getInstanceGroupNetworkV1Request(distroxNetwork, environment));
         }
@@ -188,7 +188,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
     }
 
     private InstanceGroupNetworkV1Request getInstanceGroupNetworkV1RequestByProvider(NetworkV4Request distroxNetwork,
-        DetailedEnvironmentResponse environment) {
+            DetailedEnvironmentResponse environment) {
         InstanceGroupNetworkV1Request request = null;
         switch (environment.getCloudPlatform()) {
             case "AWS":
@@ -280,7 +280,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         boolean instanceGroupRequestHasSubnet = false;
         InstanceGroupAzureNetworkV1Parameters azure = instanceGroupV1Request.getNetwork().getAzure();
         if (azure != null) {
-            instanceGroupRequestHasSubnet = isNotEmptyOrNull(azure.getSubnetIds());
+            instanceGroupRequestHasSubnet = isNotEmptyOrNull(azure.getSubnetIds()) || isNotEmptyOrNull(azure.getAvailabilityZones());
         }
         return instanceGroupRequestHasSubnet;
     }

@@ -17,11 +17,14 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
+import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValidator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,6 +35,9 @@ public class MultiAzValidatorTest {
 
     @Mock
     private ValidationResult.ValidationResultBuilder builder;
+
+    @Mock
+    private ProviderBasedMultiAzSetupValidator providerBasedMultiAzSetupValidator;
 
     @BeforeEach
     void setUp() {
@@ -47,7 +53,12 @@ public class MultiAzValidatorTest {
                 instanceGroup(Set.of("subnet-123")),
                 instanceGroup(Set.of("subnet-123"))
         );
-        underTest.validateMultiAzForStack(variant, instanceGroups, builder);
+        Stack stack = TestUtil.stack();
+        stack.setPlatformVariant(variant);
+        stack.setInstanceGroups(instanceGroups);
+
+        underTest.validateMultiAzForStack(stack, builder);
+
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
     }
 
@@ -70,7 +81,12 @@ public class MultiAzValidatorTest {
                 instanceGroup(Set.of("subnet-123", "subnet-145")),
                 instanceGroup(Set.of("subnet-123"))
         );
-        underTest.validateMultiAzForStack(variant, instanceGroups, builder);
+        Stack stack = TestUtil.stack();
+        stack.setPlatformVariant(variant);
+        stack.setInstanceGroups(instanceGroups);
+
+        underTest.validateMultiAzForStack(stack, builder);
+
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
     }
 
@@ -81,7 +97,12 @@ public class MultiAzValidatorTest {
                 instanceGroup(Set.of("subnet-123")),
                 instanceGroup(Set.of("subnet-123"))
         );
-        underTest.validateMultiAzForStack(variant, instanceGroups, builder);
+        Stack stack = TestUtil.stack();
+        stack.setPlatformVariant(variant);
+        stack.setInstanceGroups(instanceGroups);
+
+        underTest.validateMultiAzForStack(stack, builder);
+
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
     }
 
@@ -92,7 +113,12 @@ public class MultiAzValidatorTest {
                 instanceGroup(Set.of("subnet-123", "subnet-145")),
                 instanceGroup(Set.of("subnet-123"))
         );
-        underTest.validateMultiAzForStack(variant, instanceGroups, builder);
+        Stack stack = TestUtil.stack();
+        stack.setPlatformVariant(variant);
+        stack.setInstanceGroups(instanceGroups);
+
+        underTest.validateMultiAzForStack(stack, builder);
+
         Mockito.verify(builder, Mockito.times(1)).error(anyString());
     }
 

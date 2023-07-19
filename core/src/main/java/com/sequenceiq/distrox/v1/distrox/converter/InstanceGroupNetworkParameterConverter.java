@@ -1,7 +1,9 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
 import java.util.List;
+import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
@@ -100,19 +102,25 @@ public class InstanceGroupNetworkParameterConverter {
 
     private InstanceGroupAzureNetworkV4Parameters convertToAzureNetworkParams(Pair<InstanceGroupAzureNetworkV1Parameters,
             EnvironmentNetworkResponse> source) {
-        InstanceGroupAzureNetworkV1Parameters key = source.getKey();
+        InstanceGroupAzureNetworkV1Parameters instanceGroupAzureNetworkV1Parameters = source.getKey();
+        EnvironmentNetworkResponse environmentNetworkResponse = source.getValue();
 
         InstanceGroupAzureNetworkV4Parameters response = new InstanceGroupAzureNetworkV4Parameters();
 
-        if (key != null) {
-            List<String> subnetIds = key.getSubnetIds();
+        if (instanceGroupAzureNetworkV1Parameters != null) {
+            List<String> subnetIds = instanceGroupAzureNetworkV1Parameters.getSubnetIds();
             if (subnetIdsDefined(subnetIds)) {
                 response.setSubnetIds(subnetIds);
-            } else if (source.getValue() != null) {
-                response.setSubnetIds(List.of(source.getValue().getPreferedSubnetId()));
+            } else {
+                if (environmentNetworkResponse != null) {
+                    response.setSubnetIds(List.of(environmentNetworkResponse.getPreferedSubnetId()));
+                }
+            }
+            Set<String> availabilityZones = instanceGroupAzureNetworkV1Parameters.getAvailabilityZones();
+            if (CollectionUtils.isNotEmpty(availabilityZones)) {
+                response.setAvailabilityZones(availabilityZones);
             }
         }
-
         return response;
     }
 
@@ -166,5 +174,4 @@ public class InstanceGroupNetworkParameterConverter {
     private boolean subnetIdsDefined(List<String> subnetIds) {
         return subnetIds != null && !subnetIds.isEmpty();
     }
-
 }

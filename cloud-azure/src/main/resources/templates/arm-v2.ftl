@@ -83,7 +83,7 @@
       </#if>
       <#list igs as group>
       "${group.compressedName}secGroupName": "${group.compressedName}${stackname}sg",
-          <#if group.availabilitySetName?? && group.availabilitySetName?has_content>
+          <#if !multiAz && group.availabilitySetName?? && group.availabilitySetName?has_content>
           "${group.compressedName}AsName": "${group.availabilitySetName}",
           "${group.compressedName}AsFaultDomainCount": ${group.platformFaultDomainCount},
           "${group.compressedName}AsUpdateDomainCount": ${group.platformUpdateDomainCount},
@@ -93,7 +93,7 @@
   	},
     "resources": [
             <#list igs as group>
-                <#if !isUpscale && group.availabilitySetName?? && group.availabilitySetName?has_content>
+                <#if !multiAz && !isUpscale && group.availabilitySetName?? && group.availabilitySetName?has_content>
             {
                 "type": "Microsoft.Compute/availabilitySets",
                 "name": "[variables('${group.compressedName}AsName')]",
@@ -156,7 +156,7 @@
              <#list igs as group>
              <#if !isUpscale && (! securityGroups[group.name]?? || ! securityGroups[group.name]?has_content)>
              {
-               "apiVersion": "2015-05-01-preview",
+               "apiVersion": "2016-11-01",
                "type": "Microsoft.Network/networkSecurityGroups",
                "name": "[variables('${group.compressedName}secGroupName')]",
                "location": "[parameters('region')]",
@@ -219,14 +219,19 @@
                         </#list>
                      </#if>
                      },
-                   <#if loadBalancerMapping[instance.groupName]?? && (loadBalancers?filter(loadBalancer -> loadBalancer.sku == "STANDARD")?size > 0)>
+                   <#if multiAz && instance.instance.availabilityZone?? && instance.instance.availabilityZone?has_content>
+                     "zones": [
+                       "${instance.instance.availabilityZone}"
+                     ],
+                   </#if>
+                   <#if (loadBalancerMapping[instance.groupName]?? && (loadBalancers?filter(loadBalancer -> loadBalancer.sku == "STANDARD")?size > 0)) || (multiAz && instance.instance.availabilityZone?? && instance.instance.availabilityZone?has_content)>
                      "sku": {
                          "name": "Standard",
                          "tier": "Regional"
                      },
                    </#if>
                    "properties": {
-                       <#if instanceGroup == "GATEWAY" || (instance.availabilitySetName?? && instance.availabilitySetName?has_content)>
+                       <#if multiAz || instanceGroup == "GATEWAY" || (instance.availabilitySetName?? && instance.availabilitySetName?has_content)>
                        "publicIPAllocationMethod": "Static"
                        <#else>
                        "publicIPAllocationMethod": "Dynamic"
@@ -348,7 +353,7 @@
                      },
                     </#if>
                    "dependsOn": [
-                    <#if !isUpscale && instance.availabilitySetName?? && instance.availabilitySetName?has_content>
+                    <#if !multiAz && !isUpscale && instance.availabilitySetName?? && instance.availabilitySetName?has_content>
                        "[concat('Microsoft.Compute/availabilitySets/', '${instance.availabilitySetName}')]",
                     </#if>
                        "[concat('Microsoft.Network/networkInterfaces/', parameters('nicNamePrefix'), '${instance.instanceId}')]"
@@ -361,8 +366,13 @@
                         </#list>
                     </#if>
                     },
+                   <#if multiAz && instance.instance.availabilityZone?? && instance.instance.availabilityZone?has_content>
+                   "zones": [
+                     "${instance.instance.availabilityZone}"
+                   ],
+                   </#if>
                    "properties": {
-                        <#if instance.availabilitySetName?? && instance.availabilitySetName?has_content>
+                        <#if !multiAz && instance.availabilitySetName?? && instance.availabilitySetName?has_content>
                         "availabilitySet": {
                             "id": "[resourceId('Microsoft.Compute/availabilitySets', '${instance.availabilitySetName}')]"
                         },

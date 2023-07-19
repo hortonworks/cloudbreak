@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.common.mappable;
 
 import static java.util.Objects.isNull;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -79,7 +81,7 @@ public interface Mappable {
         if (value == null) {
             return null;
         }
-        return (Set<E>) value;
+        return new HashSet<>((Collection<? extends E>) value);
     }
 
     default <E> List<E> getParameterListOrNull(Map<String, Object> parameters, String key) {

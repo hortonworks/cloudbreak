@@ -740,6 +740,14 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return stackRepository.save(stack);
     }
 
+    public void updateMultiAzFlag(Long id, boolean multiAz) {
+        try {
+            transactionService.required(() -> stackRepository.setMultiAzFlag(id, multiAz));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
     public List<StackTtlView> getAllAlive() {
         return stackRepository.findAllAlive();
     }

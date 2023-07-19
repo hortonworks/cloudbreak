@@ -186,7 +186,7 @@ public class StackToCloudStackConverter {
         return new CloudStack(instanceGroups, network, image, parameters, getUserDefinedTags(stack.getStack()), template,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
                 cloudFileSystem, cloudLoadBalancers, additionalCloudFileSystem,
-                userData.get(InstanceGroupType.GATEWAY), userData.get(InstanceGroupType.CORE), false);
+                userData.get(InstanceGroupType.GATEWAY), userData.get(InstanceGroupType.CORE), stack.getStack().isMultiAz());
     }
 
     public List<CloudInstance> buildInstances(StackDtoDelegate stack, DetailedEnvironmentResponse environment) {

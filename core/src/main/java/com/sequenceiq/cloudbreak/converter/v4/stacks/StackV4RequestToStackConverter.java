@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -254,6 +255,7 @@ public class StackV4RequestToStackConverter {
         stack.setName(source.getName());
         stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
         stack.setOrchestrator(getOrchestrator());
+        stack.setMultiAz(source.isMultiAz());
         updateCustomDomainOrKerberos(source, stack);
     }
 
@@ -450,16 +452,14 @@ public class StackV4RequestToStackConverter {
         String subnetId = getStackSubnetIdIfExists(stack);
         List<InstanceGroupV4Request> instanceGroups = source.getInstanceGroups();
         for (InstanceGroupV4Request instanceGroup : instanceGroups) {
-            if (instanceGroup.getNetwork() == null) {
-                InstanceGroupNetworkV4Request instanceGroupNetworkV4Request = new InstanceGroupNetworkV4Request();
-                setNetworkByProvider(source, instanceGroup, instanceGroupNetworkV4Request, subnetId);
-            }
+            InstanceGroupNetworkV4Request instanceGroupNetworkV4Request = new InstanceGroupNetworkV4Request();
+            setNetworkByProvider(source, instanceGroup, instanceGroupNetworkV4Request, subnetId);
             setupEndpointGatewayNetwork(instanceGroup.getNetwork(), stack, instanceGroup.getName(), environment);
         }
     }
 
-    private void setNetworkByProvider(StackV4Request source, InstanceGroupV4Request instanceGroup,
-            InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
+    private void setNetworkByProvider(StackV4Request source, InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request,
+            String subnetId) {
         switch (source.getCloudPlatform()) {
             case AWS -> setUpAws(instanceGroup, instanceGroupNetworkV4Request, subnetId);
             case AZURE -> setUpAzure(instanceGroup, instanceGroupNetworkV4Request, subnetId);
@@ -472,7 +472,7 @@ public class StackV4RequestToStackConverter {
     }
 
     private void setUpMock(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
-        if (!isEmpty(subnetId)) {
+        if (!isEmpty(subnetId) && instanceGroup.getNetwork() == null) {
             InstanceGroupMockNetworkV4Parameters mock = new InstanceGroupMockNetworkV4Parameters();
             mock.setSubnetIds(List.of(subnetId));
             instanceGroupNetworkV4Request.setMock(mock);
@@ -481,13 +481,15 @@ public class StackV4RequestToStackConverter {
     }
 
     private void setUpYarn(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request) {
-        InstanceGroupYarnNetworkV4Parameters yarn = new InstanceGroupYarnNetworkV4Parameters();
-        instanceGroupNetworkV4Request.setYarn(yarn);
-        instanceGroup.setNetwork(instanceGroupNetworkV4Request);
+        if (instanceGroup.getNetwork() == null) {
+            InstanceGroupYarnNetworkV4Parameters yarn = new InstanceGroupYarnNetworkV4Parameters();
+            instanceGroupNetworkV4Request.setYarn(yarn);
+            instanceGroup.setNetwork(instanceGroupNetworkV4Request);
+        }
     }
 
     private void setUpGcp(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
-        if (!isEmpty(subnetId)) {
+        if (!isEmpty(subnetId) && instanceGroup.getNetwork() == null) {
             InstanceGroupGcpNetworkV4Parameters gcp = new InstanceGroupGcpNetworkV4Parameters();
             gcp.setSubnetIds(List.of(subnetId));
             instanceGroupNetworkV4Request.setGcp(gcp);
@@ -496,16 +498,25 @@ public class StackV4RequestToStackConverter {
     }
 
     private void setUpAzure(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
-        if (!com.google.common.base.Strings.isNullOrEmpty(subnetId)) {
-            InstanceGroupAzureNetworkV4Parameters azure = new InstanceGroupAzureNetworkV4Parameters();
-            azure.setSubnetIds(List.of(subnetId));
+        InstanceGroupNetworkV4Request network = instanceGroup.getNetwork();
+        if (StringUtils.isNotEmpty(subnetId)) {
+            InstanceGroupAzureNetworkV4Parameters azure;
+            if (network != null && network.getAzure() != null) {
+                azure = network.getAzure();
+            } else {
+                azure = new InstanceGroupAzureNetworkV4Parameters();
+            }
+            if (CollectionUtils.isEmpty(azure.getSubnetIds())) {
+                azure.setSubnetIds(List.of(subnetId));
+            }
             instanceGroupNetworkV4Request.setAzure(azure);
             instanceGroup.setNetwork(instanceGroupNetworkV4Request);
         }
+
     }
 
     private void setUpAws(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
-        if (!isEmpty(subnetId)) {
+        if (!isEmpty(subnetId) && instanceGroup.getNetwork() == null) {
             InstanceGroupAwsNetworkV4Parameters aws = new InstanceGroupAwsNetworkV4Parameters();
             aws.setSubnetIds(List.of(subnetId));
             instanceGroupNetworkV4Request.setAws(aws);

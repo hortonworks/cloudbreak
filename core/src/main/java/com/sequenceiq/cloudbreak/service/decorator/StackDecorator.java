@@ -2,17 +2,18 @@ package com.sequenceiq.cloudbreak.service.decorator;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -187,7 +188,7 @@ public class StackDecorator {
     private void preparePlacement(Stack subject, StackV4Request request, DetailedEnvironmentResponse environment) {
         if (request.getPlacement() == null && !CloudPlatform.YARN.name().equals(environment.getCloudPlatform())) {
             subject.setRegion(getRegionFromEnv(environment));
-            subject.setAvailabilityZone(getAvailabilityZoneFromEnv(environment));
+            subject.setAvailabilityZone(getAvailabilityZonesFromEnv(environment));
         }
     }
 
@@ -218,58 +219,83 @@ public class StackDecorator {
         }
     }
 
-    private String getAvailabilityZoneFromEnv(DetailedEnvironmentResponse environment) {
+    private String getAvailabilityZonesFromEnv(DetailedEnvironmentResponse environment) {
         if (environment.getNetwork() != null && environment.getNetwork().getSubnetMetas() != null) {
-            String preferedSubnet = environment.getNetwork().getPreferedSubnetId();
-            if (StringUtils.isNotEmpty(preferedSubnet)) {
-                Optional<String> availabilityZone = environment.getNetwork().getSubnetMetas().entrySet().stream()
-                        .filter(subnetMeta -> subnetMeta.getValue().getId().equals(preferedSubnet) && subnetMeta.getValue().getAvailabilityZone() != null)
-                        .map(subnetMeta -> subnetMeta.getValue().getAvailabilityZone()).findFirst();
+            String preferredSubnet = environment.getNetwork().getPreferedSubnetId();
+            if (StringUtils.isNotEmpty(preferredSubnet)) {
+                Optional<String> availabilityZone = environment.getNetwork().getSubnetMetas().values().stream()
+                        .filter(cloudSubnet -> cloudSubnet.getId().equals(preferredSubnet) && cloudSubnet.getAvailabilityZone() != null)
+                        .map(CloudSubnet::getAvailabilityZone).findFirst();
                 if (availabilityZone.isPresent()) {
-                    LOGGER.debug("Availablity zone is updated - based on prefered subnet ({})- to {}", preferedSubnet, availabilityZone.get());
+                    LOGGER.debug("Availability zone is updated - based on preferred subnet ({})- to {}", preferredSubnet, availabilityZone.get());
                     return availabilityZone.get();
                 }
             }
-            String availablityZone = environment.getNetwork().getSubnetMetas().entrySet().stream()
+            String availabilityZone = environment.getNetwork().getSubnetMetas().values().stream()
                     .findFirst()
-                    .map(Map.Entry::getValue)
                     .map(CloudSubnet::getAvailabilityZone)
                     .orElse(null);
-            LOGGER.debug("Availability zone is updated by the first subnet's availability zone: {}", availablityZone);
-            return availablityZone;
+            LOGGER.debug("Availability zone is updated by the first subnet's availability zone: {}", availabilityZone);
+            return availabilityZone;
         } else {
             return null;
         }
     }
 
-    private Set<AvailabilityZone> getAvailabilityZoneFromEnv(InstanceGroup group, DetailedEnvironmentResponse environment) {
+    private Set<AvailabilityZone> getAvailabilityZonesFromEnvAndGroup(InstanceGroup group, DetailedEnvironmentResponse environment) {
         if (environment.getNetwork() != null
                 && environment.getNetwork().getSubnetMetas() != null
                 && (group.getAvailabilityZones() == null || group.getAvailabilityZones().isEmpty())) {
-            return getAvailabilityZones(environment, group, group.getInstanceGroupNetwork().getAttributes());
+            return getAvailabilityZonesFromEnvOrGroupNetworkAttributes(environment, group, group.getInstanceGroupNetwork().getAttributes());
         } else {
             return Set.of();
         }
     }
 
-    private Set<AvailabilityZone> getAvailabilityZones(DetailedEnvironmentResponse environment, InstanceGroup group, Json attributes) {
+    private Set<AvailabilityZone> getAvailabilityZonesFromEnvOrGroupNetworkAttributes(DetailedEnvironmentResponse environment, InstanceGroup group,
+            Json instanceGroupNetworkAttributes) {
         Set<AvailabilityZone> azs = new HashSet<>();
-        if (attributes != null) {
-            List<String> subnetIds = (List<String>) attributes.getMap().getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>());
-            for (String subnetId : subnetIds) {
-                for (Map.Entry<String, CloudSubnet> cloudSubnetEntry : environment.getNetwork().getSubnetMetas().entrySet()) {
-                    CloudSubnet value = cloudSubnetEntry.getValue();
-                    if (subnetId.equals(value.getId()) || subnetId.equals(value.getName())) {
-                        AvailabilityZone az = new AvailabilityZone();
-                        az.setAvailabilityZone(value.getAvailabilityZone());
-                        az.setInstanceGroup(group);
-                        azs.add(az);
-                        break;
-                    }
+        if (instanceGroupNetworkAttributes != null && MapUtils.isNotEmpty(instanceGroupNetworkAttributes.getMap())) {
+            Map<String, Object> instanceGroupNetworkAttributesMap = instanceGroupNetworkAttributes.getMap();
+            if (instanceGroupNetworkAttributesMap.containsKey(NetworkConstants.AVAILABILITY_ZONES)) {
+                azs.addAll(getAvailabilityZonesFromInstanceGroupNetworkAttributes(group, instanceGroupNetworkAttributes));
+            } else if (instanceGroupNetworkAttributesMap.containsKey(NetworkConstants.SUBNET_IDS)) {
+                azs.addAll(getAvailabilityZonesFromEnvironmentBasedOnSubnetIdsOfAttributes(environment, group, instanceGroupNetworkAttributes));
+            }
+        }
+        LOGGER.info("Gathered availability zones: '{}'", azs);
+        return azs;
+    }
+
+    private Set<AvailabilityZone> getAvailabilityZonesFromInstanceGroupNetworkAttributes(InstanceGroup group, Json attributes) {
+        List<String> zones = (List<String>) attributes.getMap().get(NetworkConstants.AVAILABILITY_ZONES);
+        return zones
+                .stream()
+                .map(zone -> createAvailabilityZone(group, zone))
+                .collect(Collectors.toSet());
+    }
+
+    private Set<AvailabilityZone> getAvailabilityZonesFromEnvironmentBasedOnSubnetIdsOfAttributes(DetailedEnvironmentResponse environment, InstanceGroup group,
+            Json instanceGroupNetworkAttributes) {
+        Set<AvailabilityZone> azs = new HashSet<>();
+        List<String> subnetIds = (List<String>) instanceGroupNetworkAttributes.getMap().get(NetworkConstants.SUBNET_IDS);
+        for (String subnetId : subnetIds) {
+            for (CloudSubnet cloudSubnet : environment.getNetwork().getSubnetMetas().values()) {
+                if (subnetId.equals(cloudSubnet.getId()) || subnetId.equals(cloudSubnet.getName())) {
+                    AvailabilityZone az = createAvailabilityZone(group, cloudSubnet.getAvailabilityZone());
+                    azs.add(az);
+                    break;
                 }
             }
         }
         return azs;
+    }
+
+    private static AvailabilityZone createAvailabilityZone(InstanceGroup group, String zone) {
+        AvailabilityZone az = new AvailabilityZone();
+        az.setAvailabilityZone(zone);
+        az.setInstanceGroup(group);
+        return az;
     }
 
     private Credential prepareCredential(DetailedEnvironmentResponse environment) {
@@ -315,7 +341,7 @@ public class StackDecorator {
             }
             if (instanceGroup.getInstanceGroupNetwork() != null) {
                 InstanceGroupNetwork ign = instanceGroup.getInstanceGroupNetwork();
-                instanceGroup.setAvailabilityZones(getAvailabilityZoneFromEnv(instanceGroup, environment));
+                instanceGroup.setAvailabilityZones(getAvailabilityZonesFromEnvAndGroup(instanceGroup, environment));
                 if (ign.getId() == null) {
                     ign.setCloudPlatform(credential.cloudPlatform());
                     ign = instanceGroupNetworkService.create(ign);

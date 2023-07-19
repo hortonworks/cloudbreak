@@ -49,4 +49,12 @@ public class AvailabilityZone implements ProvisionEntity {
     public void setAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
     }
+
+    @Override
+    public String toString() {
+        return "AvailabilityZone{" +
+                "instanceGroupName=" + instanceGroup.getGroupName() +
+                ", availabilityZone='" + availabilityZone + '\'' +
+                '}';
+    }
 }

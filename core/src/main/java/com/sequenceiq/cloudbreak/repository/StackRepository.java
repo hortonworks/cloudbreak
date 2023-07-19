@@ -102,7 +102,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             @Param("showTerminated") Boolean showTerminated, @Param("terminatedAfter") Long terminatedAfter);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData LEFT JOIN FETCH ig.template " +
-            "LEFT JOIN FETCH ig.securityGroup LEFT JOIN FETCH ig.instanceGroupNetwork " +
+            "LEFT JOIN FETCH ig.securityGroup LEFT JOIN FETCH ig.instanceGroupNetwork LEFT JOIN FETCH ig.availabilityZones " +
             "WHERE s.id= :id AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Optional<Stack> findOneWithLists(@Param("id") Long id);
 
@@ -207,6 +207,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "ig.instanceGroupType, "
             + "im.instanceMetadataType, "
             + "im.publicIp as publicIp, "
+            + "s.multiAz as multiAz, "
             + "im.privateIp as privateIp, "
             + "sc.usePrivateIpToTls as usePrivateIpToTls, "
             + "w.id as workspaceId, "
@@ -286,6 +287,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "s.resourceCrn as resourceCrn, "
             + "s.name as name, "
             + "s.tunnel as tunnel, "
+            + "s.multiAz as multiAz, "
             + "s.environmentCrn as environmentCrn, "
             + "s.type as type, "
             + "b.resourceCrn as blueprintCrn, "
@@ -328,6 +330,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "s.resourceCrn as resourceCrn, "
             + "s.name as name, "
             + "s.tunnel as tunnel, "
+            + "s.multiAz as multiAz, "
             + "s.environmentCrn as environmentCrn, "
             + "s.type as type, "
             + "b.resourceCrn as blueprintCrn, "
@@ -397,6 +400,10 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Modifying
     @Query("UPDATE Stack s SET s.ccmV2AgentCrn = :ccmV2AgentCrn WHERE s.id = :id")
     int setCcmV2AgentCrnByStackId(@Param("id") Long id, @Param("ccmV2AgentCrn") String ccmV2AgentCrn);
+
+    @Modifying
+    @Query("UPDATE Stack s SET s.multiAz = :multiAz WHERE s.id = :id")
+    void setMultiAzFlag(@Param("id") Long id, @Param("multiAz") boolean multiAz);
 
     StackPlatformVariantView findPlatformVariantAndCloudPlatformById(Long id);
 

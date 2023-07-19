@@ -104,7 +104,7 @@ public class ValidateCloudConfigHandler extends ExceptionCatcherEventHandler<Val
 
             }
         }, LOGGER, "Stack's instance templates have been validated in {} ms for stack {}", name);
-        multiAzValidator.validateMultiAzForStack(stack.getPlatformVariant(), instanceGroups, validationBuilder);
+        multiAzValidator.validateMultiAzForStack(stack, validationBuilder);
 
         ParametersValidationRequest parametersValidationRequest = parametersValidator.validate(
                 stack.getCloudPlatform(),

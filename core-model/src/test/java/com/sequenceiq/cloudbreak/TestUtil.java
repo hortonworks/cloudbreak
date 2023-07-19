@@ -150,6 +150,15 @@ public class TestUtil {
                 .build();
     }
 
+    public static Credential azureCredential() {
+        return Credential.builder()
+                .azure(AzureCredentialAttributes.builder().build())
+                .description(DUMMY_DESCRIPTION)
+                .name(DUMMY_NAME)
+                .cloudPlatform(CloudPlatform.AZURE.name())
+                .build();
+    }
+
     public static Stack setEphemeral(Stack stack) {
         if (stack.cloudPlatform().equals(AWS)) {
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {

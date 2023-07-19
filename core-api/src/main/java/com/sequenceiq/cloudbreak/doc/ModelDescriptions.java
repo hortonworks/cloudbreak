@@ -288,6 +288,8 @@ public class ModelDescriptions {
         public static final String GCP_LB_INSTANCE_GROUP = "The instances listed belong to any group receiving traffic from the loadbalancer for this port";
         public static final String GCP_LB_BACKEND_SERVICE = "The backend service that assigns this instance group to the load balancer";
         public static final String JAVA_VERSION = "Java version to be forced on virtual machines";
+
+        public static final String MULTIPLE_AVAILABILITY_ZONES = "Indicates the enablement of the multiple availability zones functionality on the stack level";
     }
 
     public static class ClusterModelDescription {

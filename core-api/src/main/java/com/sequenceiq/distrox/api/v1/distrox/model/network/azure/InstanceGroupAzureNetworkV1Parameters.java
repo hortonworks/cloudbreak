@@ -2,8 +2,10 @@ package com.sequenceiq.distrox.api.v1.distrox.model.network.azure;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -24,12 +26,23 @@ public class InstanceGroupAzureNetworkV1Parameters extends MappableBase implemen
     @ApiModelProperty
     private List<String> subnetIds = new ArrayList<>();
 
+    @ApiModelProperty
+    private Set<String> availabilityZones = new HashSet<>();
+
     public List<String> getSubnetIds() {
         return subnetIds;
     }
 
     public void setSubnetIds(List<String> subnetIds) {
         this.subnetIds = subnetIds;
+    }
+
+    public Set<String> getAvailabilityZones() {
+        return availabilityZones;
+    }
+
+    public void setAvailabilityZones(Set<String> availabilityZones) {
+        this.availabilityZones = availabilityZones;
     }
 
     @Override
@@ -42,12 +55,14 @@ public class InstanceGroupAzureNetworkV1Parameters extends MappableBase implemen
     @Override
     public void parse(Map<String, Object> parameters) {
         subnetIds = getStringList(parameters, NetworkConstants.SUBNET_IDS);
+        availabilityZones = getStringSet(parameters, NetworkConstants.AVAILABILITY_ZONES);
     }
 
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
         map.put(NetworkConstants.SUBNET_IDS, subnetIds);
+        map.put(NetworkConstants.AVAILABILITY_ZONES, availabilityZones);
         return map;
     }
 }

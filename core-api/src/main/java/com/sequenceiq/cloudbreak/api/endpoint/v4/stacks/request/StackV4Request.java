@@ -109,6 +109,9 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
     @ApiModelProperty(value = StackModelDescription.JAVA_VERSION)
     private Integer javaVersion;
 
+    @ApiModelProperty(value = StackModelDescription.MULTIPLE_AVAILABILITY_ZONES)
+    private boolean multiAz;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -271,5 +274,13 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
 
     public void setJavaVersion(Integer javaVersion) {
         this.javaVersion = javaVersion;
+    }
+
+    public boolean isMultiAz() {
+        return multiAz;
+    }
+
+    public void setMultiAz(boolean multiAz) {
+        this.multiAz = multiAz;
     }
 }
