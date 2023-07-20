@@ -40,6 +40,7 @@ public class FreeIpaModelDescriptions {
         public static final String SECURITYGROUP = "instancegroup related securitygroup";
         public static final String NETWORK = "referenced network";
         public static final String AVAILABILITY_ZONE = "availability zone of instance";
+        public static final String AVAILABILITY_ZONES = "availability zones of instance group";
         public static final String SUBNET_ID = "subnet ID of instance";
         public static final String AWS_PARAMETERS = "provider specific parameters of the specified network";
         public static final String STATUS = "status of the instance";

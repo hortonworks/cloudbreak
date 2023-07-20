@@ -16,10 +16,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 
 @ExtendWith(MockitoExtension.class)
 class AzurePlatformResourcesTest {
@@ -124,6 +128,107 @@ class AzurePlatformResourcesTest {
                     .get(region.value())
                     .stream()
                     .filter(vmType -> virtualMachineSize.name().equals(vmType.value()))
+                    .findFirst()
+                    .orElse(null);
+            if (matchingVm == null) {
+                fail("VM from input is not present in response");
+            }
+            assertEquals(zoneInfo.get(matchingVm.value()), matchingVm.getMetaData().getAvailabilityZones());
+        });
+    }
+
+    static Object []  [] dataForFilterVirtualMachines() {
+        return new Object [][] {
+                {Map.of("Standard_D2s_v4", List.of("1", "2"), "Standard_E64s_v4", List.of(), "Standard_DS2_v2", List.of("1"),
+                        "Standard_E64ds_v4", List.of("1", "2", "3")),
+                        List.of("1"),
+                        Set.of("Standard_DS2_v2", "Standard_D2s_v4", "Standard_E64ds_v4")},
+                {Map.of("Standard_D2s_v4", List.of("1", "2"), "Standard_E64s_v4", List.of("2", "3"), "Standard_DS2_v2", List.of("1"),
+                        "Standard_E64ds_v4", List.of("1", "2", "3")),
+                        List.of("3", "1", "2"),
+                        Set.of("Standard_E64ds_v4")},
+                {Map.of("Standard_D2s_v4", List.of("1", "2"), "Standard_E64s_v4", List.of("1", "2"), "Standard_DS2_v2", List.of("1"),
+                        "Standard_E64ds_v4", List.of("1", "2", "3")),
+                        List.of("1", "2"),
+                        Set.of("Standard_D2s_v4", "Standard_E64s_v4", "Standard_E64ds_v4")},
+                {Map.of("Standard_D2s_v4", List.of("1", "2"), "Standard_E64s_v4", List.of("1", "2"), "Standard_DS2_v2", List.of("1"),
+                        "Standard_E64ds_v4", List.of("1", "2", "3")),
+                        null,
+                        Set.of("Standard_D2s_v4", "Standard_E64s_v4", "Standard_DS2_v2", "Standard_E64ds_v4")},
+                {Map.of("Standard_D2s_v4", List.of("1", "2"), "Standard_E64s_v4", List.of("1", "2"), "Standard_DS2_v2", List.of("1"),
+                        "Standard_E64ds_v4", List.of("1", "2", "3")),
+                        List.of(),
+                        Set.of("Standard_D2s_v4", "Standard_E64s_v4", "Standard_DS2_v2", "Standard_E64ds_v4")},
+                {Map.of("Standard_D2s_v4", List.of("1", "2"), "Standard_E64s_v4", List.of("1", "2"), "Standard_DS2_v2", List.of("1"),
+                        "Standard_E64ds_v4", List.of("1", "2", "3")),
+                        List.of("4"),
+                        Set.of()}
+        };
+    }
+
+    @ParameterizedTest
+    @MethodSource("dataForFilterVirtualMachines")
+    void testVirtualMachinesForFilters(Map<String, List<String>> zoneInfo, List<String> availabilityZones, Set<String> expectedVirtualMachines) {
+        Region region = Region.region("westus2");
+
+        Set<VirtualMachineSize> virtualMachineSizes = zoneInfo.keySet().stream().map(vname -> createVirtualMachineSize(vname, 0))
+                .collect(Collectors.toSet());
+
+        when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
+
+        when(azureClient.getAvailabilityZones(region.value())).thenReturn(zoneInfo);
+
+        CloudVmTypes actual = underTest.virtualMachines(cloudCredential, region, availabilityZones != null ? Map.of(NetworkConstants.AVAILABILITY_ZONES,
+                String.join(",", availabilityZones)) : null);
+
+        assertNotNull(actual);
+        assertNotNull(actual.getCloudVmResponses());
+        Set<VmType> vmTypes = actual.getCloudVmResponses().get(region.value());
+        assertNotNull(vmTypes);
+        assertEquals(expectedVirtualMachines.size(), vmTypes.size());
+        expectedVirtualMachines.forEach(virtualMachineSize -> {
+            VmType matchingVm = vmTypes
+                    .stream()
+                    .filter(vmType -> virtualMachineSize.equals(vmType.value()))
+                    .findFirst()
+                    .orElse(null);
+            if (matchingVm == null) {
+                fail("VM from input is not present in response");
+            }
+            assertEquals(zoneInfo.get(matchingVm.value()), matchingVm.getMetaData().getAvailabilityZones());
+        });
+    }
+
+    @Test
+    void testVirtualMachinesForFiltersAzForInstanceIsNull() {
+        Map<String, List<String>> zoneInfo = new HashMap<>();
+        zoneInfo.put("Standard_D2s_v4", List.of("1", "2"));
+        zoneInfo.put("Standard_DS2_v2", List.of("1"));
+        zoneInfo.put("Standard_E64ds_v4", List.of("1", "2", "3"));
+        zoneInfo.put("Standard_E64s_v4", null);
+        List<String> availabilityZones = List.of("1");
+        Set<String> expectedVirtualMachines = Set.of("Standard_DS2_v2", "Standard_D2s_v4", "Standard_E64ds_v4");
+        Region region = Region.region("westus2");
+
+        Set<VirtualMachineSize> virtualMachineSizes = zoneInfo.keySet().stream().map(vname -> createVirtualMachineSize(vname, 0))
+                .collect(Collectors.toSet());
+
+        when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
+
+        when(azureClient.getAvailabilityZones(region.value())).thenReturn(zoneInfo);
+
+        CloudVmTypes actual = underTest.virtualMachines(cloudCredential, region, availabilityZones != null ? Map.of(NetworkConstants.AVAILABILITY_ZONES,
+                String.join(",", availabilityZones)) : null);
+
+        assertNotNull(actual);
+        assertNotNull(actual.getCloudVmResponses());
+        Set<VmType> vmTypes = actual.getCloudVmResponses().get(region.value());
+        assertNotNull(vmTypes);
+        assertEquals(expectedVirtualMachines.size(), vmTypes.size());
+        expectedVirtualMachines.forEach(virtualMachineSize -> {
+            VmType matchingVm = vmTypes
+                    .stream()
+                    .filter(vmType -> virtualMachineSize.equals(vmType.value()))
                     .findFirst()
                     .orElse(null);
             if (matchingVm == null) {

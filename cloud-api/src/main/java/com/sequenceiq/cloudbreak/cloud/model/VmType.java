@@ -53,7 +53,8 @@ public class VmType extends StringType {
     @Override
     public String toString() {
         return "VmType{"
-                + "metaData=" + metaData
+                + "name=" + getValue()
+                + ", metaData=" + metaData
                 + ", extended=" + extended
                 + '}';
     }

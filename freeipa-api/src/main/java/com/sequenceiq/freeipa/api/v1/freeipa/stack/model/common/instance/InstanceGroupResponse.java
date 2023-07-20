@@ -32,6 +32,9 @@ public class InstanceGroupResponse extends InstanceGroupBase {
 
     private Set<InstanceMetaDataResponse> metaData = new HashSet<>();
 
+    @ApiModelProperty(InstanceGroupModelDescription.AVAILABILITY_ZONES)
+    private Set<String> availabilityZones;
+
     public InstanceTemplateResponse getInstanceTemplate() {
         return instanceTemplate;
     }
@@ -64,6 +67,14 @@ public class InstanceGroupResponse extends InstanceGroupBase {
         this.network = network;
     }
 
+    public Set<String> getAvailabilityZones() {
+        return availabilityZones;
+    }
+
+    public void setAvailabilityZones(Set<String> availabilityZones) {
+        this.availabilityZones = availabilityZones;
+    }
+
     @Override
     public String toString() {
         return "InstanceGroupResponse{" +
@@ -72,6 +83,7 @@ public class InstanceGroupResponse extends InstanceGroupBase {
                 ", securityGroup=" + securityGroup +
                 ", network=" + network +
                 ", metaData=" + metaData +
+                ", availabilityZones=" + availabilityZones +
                 '}';
     }
 }

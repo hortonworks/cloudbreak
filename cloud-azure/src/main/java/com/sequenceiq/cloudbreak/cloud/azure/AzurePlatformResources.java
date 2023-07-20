@@ -6,6 +6,8 @@ import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.SSD;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.NETWORK_ID;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_NAME;
+import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
+
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +41,7 @@ import com.azure.resourcemanager.network.models.NetworkSecurityGroup;
 import com.azure.resourcemanager.network.models.Subnet;
 import com.azure.resourcemanager.privatedns.models.PrivateDnsZone;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
+import com.google.common.base.Splitter;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
@@ -70,6 +74,7 @@ import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSecurityGroupFilterView;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
 
@@ -230,7 +235,7 @@ public class AzurePlatformResources implements PlatformResources {
     }
 
     @Override
-    @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
+    @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + #filters")
     public CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Set<VirtualMachineSize> vmTypes = client.getVmTypes(region.value());
@@ -242,29 +247,32 @@ public class AzurePlatformResources implements PlatformResources {
         Set<VmType> types = new HashSet<>();
         VmType defaultVmType = null;
         Set<String> vmTypesWithoutResourceDisks = new HashSet<>();
+        LOGGER.debug("Requested Filters are {}", filters);
         for (VirtualMachineSize virtualMachineSize : vmTypes) {
-            float memoryInGB = virtualMachineSize.memoryInMB() / NO_MB_PER_GB;
-            VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder().withCpuAndMemory(virtualMachineSize.numberOfCores(), memoryInGB);
-            for (VolumeParameterType volumeParameterType : VolumeParameterType.values()) {
-                if (volumeParameterType.in(MAGNETIC, SSD)) {
-                    volumeParameterType.buildForVmTypeMetaBuilder(builder, virtualMachineSize.maxDataDiskCount(), maxDiskSize);
+            List<String> availabilityZonesForVm = availabilityZones.getOrDefault(virtualMachineSize.name(), new ArrayList<>());
+            LOGGER.debug("Availability Zones for VM type {} are {}", virtualMachineSize.name(), availabilityZonesForVm);
+            if (matchAvailabilityZones(filters, availabilityZonesForVm)) {
+                float memoryInGB = virtualMachineSize.memoryInMB() / NO_MB_PER_GB;
+                VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder().withCpuAndMemory(virtualMachineSize.numberOfCores(), memoryInGB);
+                for (VolumeParameterType volumeParameterType : VolumeParameterType.values()) {
+                    if (volumeParameterType.in(MAGNETIC, SSD)) {
+                        volumeParameterType.buildForVmTypeMetaBuilder(builder, virtualMachineSize.maxDataDiskCount(), maxDiskSize);
+                    }
                 }
-            }
-            if (virtualMachineSize.resourceDiskSizeInMB() != NO_RESOURCE_DISK_ATTACHED_TO_INSTANCE) {
-                builder.withResourceDiskAttached(true);
+                if (virtualMachineSize.resourceDiskSizeInMB() != NO_RESOURCE_DISK_ATTACHED_TO_INSTANCE) {
+                    builder.withResourceDiskAttached(true);
+                } else {
+                    builder.withResourceDiskAttached(false);
+                }
+                builder.withAvailabilityZones(availabilityZonesForVm);
+                VmType vmType = VmType.vmTypeWithMeta(virtualMachineSize.name(), builder.create(), true);
+                types.add(vmType);
+                if (virtualMachineSize.name().equals(armVmDefault)) {
+                    defaultVmType = vmType;
+                }
             } else {
-                builder.withResourceDiskAttached(false);
-            }
-
-            List<String> azs = availabilityZones.getOrDefault(virtualMachineSize.name(), new ArrayList<>());
-            LOGGER.debug("Availability Zones for VM type {} are {}", virtualMachineSize.name(), azs);
-
-            builder.withAvailabilityZones(azs);
-
-            VmType vmType = VmType.vmTypeWithMeta(virtualMachineSize.name(), builder.create(), true);
-            types.add(vmType);
-            if (virtualMachineSize.name().equals(armVmDefault)) {
-                defaultVmType = vmType;
+                LOGGER.debug("{} with Availability Zones {} is not supported in requested Availability Zones. Do not add it to the result",
+                        virtualMachineSize.name(), availabilityZonesForVm);
             }
         }
         LOGGER.debug("The following Azure VM types have been filtered out, because there is no resource disk available with them: {}",
@@ -378,5 +386,12 @@ public class AzurePlatformResources implements PlatformResources {
             LOGGER.warn("Failed to get vm type data: {}", instanceTypes, e);
             throw new CloudConnectorException(e.getMessage(), e);
         }
+    }
+
+    private boolean matchAvailabilityZones(Map<String, String> filters, List<String> availabilityZones) {
+        return filters == null || StringUtils.isEmpty(filters.get(NetworkConstants.AVAILABILITY_ZONES)) ||
+                CollectionUtils.containsAll(emptyIfNull(availabilityZones),
+                        Splitter.on(",").splitToList(filters.get(NetworkConstants.AVAILABILITY_ZONES))
+                );
     }
 }

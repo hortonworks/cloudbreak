@@ -2,6 +2,8 @@ package com.sequenceiq.environment.api.v1.platformresource;
 
 import static com.sequenceiq.environment.api.doc.ModelDescriptions.CONNECTOR_NOTES;
 
+import java.util.List;
+
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -58,7 +60,8 @@ public interface EnvironmentPlatformResourceEndpoint {
     PlatformVmtypesResponse getVmTypesForVerticalScaling(
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("instanceType") String instanceType,
-            @QueryParam("resourceType") CdpResourceType resourceType);
+            @QueryParam("resourceType") CdpResourceType resourceType,
+            @QueryParam("availabilityZones") List<String> availabilityZones);
 
     @GET
     @Path("regions")

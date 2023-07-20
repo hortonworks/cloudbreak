@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.platformresource.v1;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -8,6 +9,7 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.dns.CloudPrivateDnsZones;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.api.v1.platformresource.EnvironmentPlatformResourceEndpoint;
@@ -139,7 +142,8 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
     public PlatformVmtypesResponse getVmTypesForVerticalScaling(
             @ResourceCrn String environmentCrn,
             String instanceType,
-            CdpResourceType cdpResourceType) {
+            CdpResourceType cdpResourceType,
+            List<String> availabilityZones) {
         String accountId = getAccountId();
         validateEnvironmentCrnPattern(environmentCrn);
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(environmentCrn, accountId);
@@ -148,6 +152,10 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 environmentCrn,
                 environmentDto.getRegions().stream().findFirst().get().getName(),
                 cdpResourceType);
+        if (CollectionUtils.isNotEmpty(availabilityZones)) {
+            LOGGER.debug("Setting filter for Availability Zones {}", availabilityZones);
+            request.setFilters(Map.of(NetworkConstants.AVAILABILITY_ZONES, String.join(",", availabilityZones)));
+        }
         LOGGER.debug("Get /platform_resources/machine_types_for_vertical_scaling, request: {}", request);
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(request);
         cloudVmTypes = verticalScaleInstanceProvider.listInstanceTypes(null, instanceType, cloudVmTypes);
