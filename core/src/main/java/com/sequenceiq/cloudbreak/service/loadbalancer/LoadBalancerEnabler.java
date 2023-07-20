@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.loadbalancer;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -81,11 +80,7 @@ public class LoadBalancerEnabler {
     }
 
     private boolean isDatalakeLoadBalancerEntitlementEnabled(String accountId, String cloudPlatform) {
-        if (AZURE.equalsIgnoreCase(cloudPlatform)) {
-            return entitlementService.azureDatalakeLoadBalancerEnabled(accountId);
-        } else {
             return entitlementService.datalakeLoadBalancerEnabled(accountId);
-        }
     }
 
     private boolean isLoadBalancerEntitlementRequiredForCloudProvider(String cloudPlatform) {

@@ -43,7 +43,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAK
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_BACKUP_RESTORE_PERMISSION_CHECKS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_MEDIUM_DUTY_WITH_PROFILER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DISABLE_ENTERPRISE_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
@@ -318,10 +317,6 @@ public class EntitlementService {
 
     public boolean datalakeLoadBalancerEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_DATA_LAKE_LOAD_BALANCER);
-    }
-
-    public boolean azureDatalakeLoadBalancerEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_DATA_LAKE_LOAD_BALANCER_AZURE);
     }
 
     public boolean azureEndpointGatewayEnabled(String accountId) {
