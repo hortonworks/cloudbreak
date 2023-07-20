@@ -61,6 +61,8 @@ public class ImageServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
+    private static final String ACCOUNT_ID = "cloudera";
+
     private static final LocalDateTime MOCK_NOW = LocalDateTime.of(1969, 4, 1, 4, 20);
 
     @Mock
@@ -165,6 +167,7 @@ public class ImageServiceTest {
         Stack stack = new Stack();
         stack.setCloudPlatform(DEFAULT_PLATFORM);
         stack.setRegion(REGION);
+        stack.setAccountId(ACCOUNT_ID);
         ImageSettingsRequest imageRequest = new ImageSettingsRequest();
         when(imageProviderFactory.getImageProvider(any())).thenReturn(imageProvider);
         when(imageProvider.getImage(any())).thenReturn(Optional.of(new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG)));
@@ -191,6 +194,7 @@ public class ImageServiceTest {
         Stack stack = new Stack();
         stack.setCloudPlatform(DEFAULT_PLATFORM);
         stack.setRegion(DEFAULT_REGION);
+        stack.setAccountId(ACCOUNT_ID);
         ImageSettingsRequest imageRequest = new ImageSettingsRequest();
         when(imageProviderFactory.getImageProvider(any())).thenReturn(imageProvider);
         when(imageProvider.getImage(any())).thenReturn(Optional.of(new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG)));

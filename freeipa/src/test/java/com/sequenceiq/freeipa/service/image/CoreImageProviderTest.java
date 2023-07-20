@@ -48,6 +48,8 @@ public class CoreImageProviderTest {
 
     private static final String VM_IMAGE_REFERENCE = "vm image";
 
+    private static final String ACCOUNT_ID = "cloudera";
+
     private static final Map<String, Map<String, String>> VM_IMAGES = Collections.singletonMap(PLATFORM, Collections.singletonMap(REGION, VM_IMAGE_REFERENCE));
 
     @Mock

@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.service.image.CloudbreakVersionListProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogVersionFilter;
 import com.sequenceiq.cloudbreak.service.image.ImageFilter;
+import com.sequenceiq.cloudbreak.service.image.ImageOsService;
 import com.sequenceiq.cloudbreak.service.image.LatestDefaultImageUuidProvider;
 import com.sequenceiq.cloudbreak.service.image.PrefixMatchImages;
 import com.sequenceiq.cloudbreak.service.image.PrefixMatcherService;
@@ -52,6 +53,9 @@ public class VersionBasedImageProvider {
 
     @Inject
     private ProviderSpecificImageFilter providerSpecificImageFilter;
+
+    @Inject
+    private ImageOsService imageOsService;
 
     public StatedImages getImages(CloudbreakImageCatalogV3 imageCatalogV3, ImageFilter imageFilter) {
         Set<String> supportedVersions;
@@ -128,6 +132,7 @@ public class VersionBasedImageProvider {
         List<Image> imageList = images.stream()
                 .filter(isPlatformMatching(platforms, vMImageUUIDs))
                 .filter(img -> isRuntimeVersionMatching(img, runtimeVersion))
+                .filter(img -> imageOsService.isSupported(img.getOs()))
                 .collect(toList());
         return providerSpecificImageFilter.filterImages(platforms, imageList);
     }
