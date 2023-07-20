@@ -15,6 +15,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +23,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,9 +33,15 @@ import org.springframework.data.util.Pair;
 
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
+import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
+import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupStep;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientRunnable;
@@ -41,13 +49,20 @@ import com.sequenceiq.freeipa.client.FreeIpaErrorCodes;
 import com.sequenceiq.freeipa.client.model.Cert;
 import com.sequenceiq.freeipa.client.model.DnsRecord;
 import com.sequenceiq.freeipa.client.model.DnsZone;
+import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
+import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
 import com.sequenceiq.freeipa.ldap.LdapConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientRetryService;
+import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.freeipa.host.HostDeletionService;
+import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.util.FreeIpaStatusValidator;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -55,10 +70,12 @@ public class CleanupServiceTest {
 
     private static final long STACK_ID = 1L;
 
-    private static final String ENV_CRN = "envCrn";
+    private static final String ENVIRONMENT_CRN = "envCrn";
+
+    private static final String ACCOUNT_ID = "accountId";
 
     @InjectMocks
-    private CleanupService cleanupService;
+    private CleanupService underTest;
 
     @Mock
     private FreeIpaClientFactory freeIpaClientFactory;
@@ -80,6 +97,21 @@ public class CleanupServiceTest {
 
     @Mock
     private FreeIpaClientRetryService retryService;
+
+    @Mock
+    private FreeIpaStatusValidator statusValidator;
+
+    @Mock
+    private OperationService operationService;
+
+    @Mock
+    private CleanupStepToStateNameConverter cleanupStepToStateNameConverter;
+
+    @Mock
+    private FreeIpaFlowManager flowManager;
+
+    @Mock
+    private OperationToOperationStatusConverter operationToOperationStatusConverter;
 
     @BeforeEach
     void init() throws FreeIpaClientException {
@@ -108,7 +140,7 @@ public class CleanupServiceTest {
         when(freeIpaClient.findAllCert()).thenReturn(certs);
         when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.revokeCerts(STACK_ID, hosts);
+        Pair<Set<String>, Map<String, String>> result = underTest.revokeCerts(STACK_ID, hosts);
 
         verify(freeIpaClient, times(1)).revokeCert(2);
         verifyRevokeNotInvoked(freeIpaClient, 1, 3, 4, 50);
@@ -136,7 +168,7 @@ public class CleanupServiceTest {
         when(freeIpaClient.findAllCert()).thenReturn(certs);
         when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.revokeCerts(STACK_ID, hosts);
+        Pair<Set<String>, Map<String, String>> result = underTest.revokeCerts(STACK_ID, hosts);
 
         verify(freeIpaClient, times(1)).revokeCert(2);
         verifyRevokeNotInvoked(freeIpaClient, 1, 3, 4, 50);
@@ -164,7 +196,7 @@ public class CleanupServiceTest {
         when(freeIpaClient.findAllCert()).thenReturn(certs);
         when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.revokeCerts(STACK_ID, hosts);
+        Pair<Set<String>, Map<String, String>> result = underTest.revokeCerts(STACK_ID, hosts);
 
         verify(freeIpaClient, times(1)).revokeCert(2);
         verifyRevokeNotInvoked(freeIpaClient, 1, 3, 4, 50);
@@ -192,7 +224,7 @@ public class CleanupServiceTest {
         when(freeIpaClient.findAllCert()).thenReturn(certs);
         when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.revokeCerts(STACK_ID, hosts);
+        Pair<Set<String>, Map<String, String>> result = underTest.revokeCerts(STACK_ID, hosts);
 
         verifyRevokeNotInvoked(freeIpaClient, 1, 2, 3, 4, 50);
         assertEquals(0, result.getFirst().size());
@@ -220,7 +252,7 @@ public class CleanupServiceTest {
         when(freeIpaClient.findAllCert()).thenReturn(certs);
         when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.revokeCerts(STACK_ID, hosts);
+        Pair<Set<String>, Map<String, String>> result = underTest.revokeCerts(STACK_ID, hosts);
 
         verify(freeIpaClient, times(1)).revokeCert(21);
         verifyRevokeNotInvoked(freeIpaClient, 1, 2, 20, 3, 4, 50);
@@ -248,7 +280,7 @@ public class CleanupServiceTest {
         when(freeIpaClient.findAllCert()).thenReturn(certs);
         when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.revokeCerts(STACK_ID, hosts);
+        Pair<Set<String>, Map<String, String>> result = underTest.revokeCerts(STACK_ID, hosts);
 
         verify(freeIpaClient, times(1)).revokeCert(2);
         verifyRevokeNotInvoked(freeIpaClient, 1, 3, 4, 50);
@@ -276,7 +308,7 @@ public class CleanupServiceTest {
         when(freeIpaClient.findAllCert()).thenReturn(certs);
         when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.revokeCerts(STACK_ID, hosts);
+        Pair<Set<String>, Map<String, String>> result = underTest.revokeCerts(STACK_ID, hosts);
 
         verify(freeIpaClient, times(1)).revokeCert(2);
         verifyRevokeNotInvoked(freeIpaClient, 1, 3, 4, 50);
@@ -304,7 +336,7 @@ public class CleanupServiceTest {
         when(freeIpaClient.findAllCert()).thenReturn(certs);
         when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.revokeCerts(STACK_ID, hosts);
+        Pair<Set<String>, Map<String, String>> result = underTest.revokeCerts(STACK_ID, hosts);
 
         verifyRevokeNotInvoked(freeIpaClient, 1, 2, 3, 4, 50);
         assertEquals(0, result.getFirst().size());
@@ -331,7 +363,7 @@ public class CleanupServiceTest {
         doThrow(new FreeIpaClientException("Cannot connect to FreeIPA")).when(freeIpaClient).revokeCert(2);
         when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.revokeCerts(STACK_ID, hosts);
+        Pair<Set<String>, Map<String, String>> result = underTest.revokeCerts(STACK_ID, hosts);
 
         verifyRevokeNotInvoked(freeIpaClient, 1, 3, 4, 50);
         assertEquals(0, result.getFirst().size());
@@ -357,7 +389,7 @@ public class CleanupServiceTest {
         when(freeIpaClient.userListAllUids()).thenReturn(ipaUserUids);
         when(stackService.getStackById(anyLong())).thenReturn(createStack());
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.removeUsers(STACK_ID, usersNames, "test-wl-1", ENV_CRN);
+        Pair<Set<String>, Map<String, String>> result = underTest.removeUsers(STACK_ID, usersNames, "test-wl-1", ENVIRONMENT_CRN);
 
         verify(freeIpaClient, times(1)).deleteUser("ldapbind-test-wl-1");
         verify(freeIpaClient, times(1)).deleteUser("kerberosbind-test-wl-1");
@@ -365,8 +397,8 @@ public class CleanupServiceTest {
         assertEquals(2, result.getFirst().size());
         assertTrue(result.getFirst().stream().anyMatch("ldapbind-test-wl-1"::equals));
         assertTrue(result.getFirst().stream().anyMatch("kerberosbind-test-wl-1"::equals));
-        verify(kerberosConfigService, times(1)).delete("envCrn", "accountId", "test-wl-1");
-        verify(ldapConfigService, times(1)).delete("envCrn", "accountId", "test-wl-1");
+        verify(kerberosConfigService, times(1)).delete(ENVIRONMENT_CRN, ACCOUNT_ID, "test-wl-1");
+        verify(ldapConfigService, times(1)).delete(ENVIRONMENT_CRN, ACCOUNT_ID, "test-wl-1");
     }
 
     @Test
@@ -386,7 +418,7 @@ public class CleanupServiceTest {
         when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
         when(freeIpaClient.userListAllUids()).thenReturn(ipaUserUids);
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.removeUsers(STACK_ID, usersNames, "", ENV_CRN);
+        Pair<Set<String>, Map<String, String>> result = underTest.removeUsers(STACK_ID, usersNames, "", ENVIRONMENT_CRN);
 
         verify(freeIpaClient, times(1)).deleteUser("ldapbind-test-wl-1");
         verify(freeIpaClient, times(1)).deleteUser("kerberosbind-test-wl-1");
@@ -394,8 +426,8 @@ public class CleanupServiceTest {
         assertEquals(2, result.getFirst().size());
         assertTrue(result.getFirst().stream().anyMatch("ldapbind-test-wl-1"::equals));
         assertTrue(result.getFirst().stream().anyMatch("kerberosbind-test-wl-1"::equals));
-        verify(kerberosConfigService, times(0)).delete("envCrn", "accountId", "test-wl-1");
-        verify(ldapConfigService, times(0)).delete("envCrn", "accountId", "test-wl-1");
+        verify(kerberosConfigService, times(0)).delete(ENVIRONMENT_CRN, ACCOUNT_ID, "test-wl-1");
+        verify(ldapConfigService, times(0)).delete(ENVIRONMENT_CRN, ACCOUNT_ID, "test-wl-1");
     }
 
     @Test
@@ -416,7 +448,7 @@ public class CleanupServiceTest {
         when(freeIpaClient.userListAllUids()).thenReturn(ipaUserUids);
         doThrow(new FreeIpaClientException("Connection failed")).when(freeIpaClient).deleteUser(anyString());
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.removeUsers(STACK_ID, usersNames, "", ENV_CRN);
+        Pair<Set<String>, Map<String, String>> result = underTest.removeUsers(STACK_ID, usersNames, "", ENVIRONMENT_CRN);
 
         verify(freeIpaClient, times(1)).deleteUser("ldapbind-test-wl-1");
         verify(freeIpaClient, times(1)).deleteUser("kerberosbind-test-wl-1");
@@ -425,8 +457,8 @@ public class CleanupServiceTest {
         assertEquals(2, result.getSecond().size());
         assertEquals("Connection failed", result.getSecond().get("ldapbind-test-wl-1"));
         assertEquals("Connection failed", result.getSecond().get("kerberosbind-test-wl-1"));
-        verify(kerberosConfigService, times(0)).delete("envCrn", "accountId", "test-wl-1");
-        verify(ldapConfigService, times(0)).delete("envCrn", "accountId", "test-wl-1");
+        verify(kerberosConfigService, times(0)).delete(ENVIRONMENT_CRN, ACCOUNT_ID, "test-wl-1");
+        verify(ldapConfigService, times(0)).delete(ENVIRONMENT_CRN, ACCOUNT_ID, "test-wl-1");
     }
 
     @Test
@@ -446,9 +478,9 @@ public class CleanupServiceTest {
         when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
         when(freeIpaClient.userListAllUids()).thenReturn(ipaUserUids);
         when(stackService.getStackById(anyLong())).thenReturn(createStack());
-        doThrow(new NotFoundException("Kerberos config not found")).when(kerberosConfigService).delete("envCrn", "accountId", "test-wl-1");
+        doThrow(new NotFoundException("Kerberos config not found")).when(kerberosConfigService).delete(ENVIRONMENT_CRN, ACCOUNT_ID, "test-wl-1");
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.removeUsers(STACK_ID, usersNames, "test-wl-1", ENV_CRN);
+        Pair<Set<String>, Map<String, String>> result = underTest.removeUsers(STACK_ID, usersNames, "test-wl-1", ENVIRONMENT_CRN);
 
         verify(freeIpaClient, times(1)).deleteUser("ldapbind-test-wl-1");
         verify(freeIpaClient, times(1)).deleteUser("kerberosbind-test-wl-1");
@@ -456,8 +488,8 @@ public class CleanupServiceTest {
         assertEquals(2, result.getFirst().size());
         assertTrue(result.getFirst().stream().anyMatch("ldapbind-test-wl-1"::equals));
         assertTrue(result.getFirst().stream().anyMatch("kerberosbind-test-wl-1"::equals));
-        verify(kerberosConfigService, times(1)).delete("envCrn", "accountId", "test-wl-1");
-        verify(ldapConfigService, times(1)).delete("envCrn", "accountId", "test-wl-1");
+        verify(kerberosConfigService, times(1)).delete(ENVIRONMENT_CRN, ACCOUNT_ID, "test-wl-1");
+        verify(ldapConfigService, times(1)).delete(ENVIRONMENT_CRN, ACCOUNT_ID, "test-wl-1");
     }
 
     @Test
@@ -477,9 +509,9 @@ public class CleanupServiceTest {
         when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
         when(freeIpaClient.userListAllUids()).thenReturn(ipaUserUids);
         when(stackService.getStackById(anyLong())).thenReturn(createStack());
-        doThrow(new NotFoundException("Ldap config not found")).when(ldapConfigService).delete("envCrn", "accountId", "test-wl-1");
+        doThrow(new NotFoundException("Ldap config not found")).when(ldapConfigService).delete(ENVIRONMENT_CRN, ACCOUNT_ID, "test-wl-1");
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.removeUsers(STACK_ID, usersNames, "test-wl-1", ENV_CRN);
+        Pair<Set<String>, Map<String, String>> result = underTest.removeUsers(STACK_ID, usersNames, "test-wl-1", ENVIRONMENT_CRN);
 
         verify(freeIpaClient, times(1)).deleteUser("ldapbind-test-wl-1");
         verify(freeIpaClient, times(1)).deleteUser("kerberosbind-test-wl-1");
@@ -487,8 +519,8 @@ public class CleanupServiceTest {
         assertEquals(2, result.getFirst().size());
         assertTrue(result.getFirst().stream().anyMatch("ldapbind-test-wl-1"::equals));
         assertTrue(result.getFirst().stream().anyMatch("kerberosbind-test-wl-1"::equals));
-        verify(kerberosConfigService, times(1)).delete("envCrn", "accountId", "test-wl-1");
-        verify(ldapConfigService, times(1)).delete("envCrn", "accountId", "test-wl-1");
+        verify(kerberosConfigService, times(1)).delete(ENVIRONMENT_CRN, ACCOUNT_ID, "test-wl-1");
+        verify(ldapConfigService, times(1)).delete(ENVIRONMENT_CRN, ACCOUNT_ID, "test-wl-1");
     }
 
     @Test
@@ -504,7 +536,7 @@ public class CleanupServiceTest {
         when(freeIpaDeletionPollerService.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt()))
                 .thenReturn(extendedPollingResult);
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.removeServers(STACK_ID, hosts);
+        Pair<Set<String>, Map<String, String>> result = underTest.removeServers(STACK_ID, hosts);
 
         assertEquals(hosts, result.getFirst());
         assertTrue(result.getSecond().isEmpty());
@@ -545,7 +577,7 @@ public class CleanupServiceTest {
         doThrow(new FreeIpaClientException("Not found zone", new JsonRpcClientException(FreeIpaErrorCodes.NOT_FOUND.getValue(), "Not found", null)))
                 .when(client).findAllDnsRecordInZone(eq(disappearingZone.getIdnsname()));
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.removeDnsEntries(STACK_ID,
+        Pair<Set<String>, Map<String, String>> result = underTest.removeDnsEntries(STACK_ID,
                 Set.of(deleteMe.getIdnsname(), notFound.getIdnsname(), failed.getIdnsname(), "ptrRecord"),
                 Set.of("10.0.0.1", "10.1.0.1"), domain);
 
@@ -555,6 +587,96 @@ public class CleanupServiceTest {
         assertEquals("delete failed", result.getSecond().get(failed.getIdnsname()));
         assertEquals(1, result.getSecond().size());
         assertEquals(3, result.getFirst().size());
+    }
+
+    @Test
+    void testTriggerCleanup() {
+        CleanupRequest request = new CleanupRequest();
+        request.setEnvironmentCrn(ENVIRONMENT_CRN);
+        request.setCleanupStepsToSkip(Set.of(CleanupStep.REMOVE_HOSTS));
+        request.setUsers(Set.of("u1", "u2"));
+        request.setHosts(Set.of("h1", "h2"));
+        request.setRoles(Set.of("r1", "r2"));
+        request.setIps(Set.of("i1", "i2"));
+        request.setClusterName("cname");
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        when(stackService.getFreeIpaStackWithMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        Operation operation = new Operation();
+        operation.setStatus(OperationState.RUNNING);
+        operation.setOperationId("asdf");
+        when(operationService.startOperation(ACCOUNT_ID, OperationType.CLEANUP, Set.of(ENVIRONMENT_CRN), Collections.emptySet())).thenReturn(operation);
+        Set<String> skip = Set.of("skip");
+        when(cleanupStepToStateNameConverter.convert(request.getCleanupStepsToSkip())).thenReturn(skip);
+        OperationStatus operationStatus = new OperationStatus();
+        operationStatus.setStatus(OperationState.COMPLETED);
+        when(operationToOperationStatusConverter.convert(operation)).thenReturn(operationStatus);
+
+        OperationStatus result = underTest.cleanup(ACCOUNT_ID, request);
+
+        verify(statusValidator).throwBadRequestIfFreeIpaIsUnreachable(stack);
+        ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
+        verify(flowManager).notify(eq(FreeIpaCleanupEvent.CLEANUP_EVENT.event()), captor.capture());
+        CleanupEvent cleanupEvent = (CleanupEvent) captor.getValue();
+        assertEquals(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), cleanupEvent.selector());
+        assertEquals(STACK_ID, cleanupEvent.getResourceId());
+        assertEquals(operation.getOperationId(), cleanupEvent.getOperationId());
+        assertEquals(ACCOUNT_ID, cleanupEvent.getAccountId());
+        assertEquals(ENVIRONMENT_CRN, cleanupEvent.getEnvironmentCrn());
+        assertEquals(request.getClusterName(), cleanupEvent.getClusterName());
+        assertEquals(request.getUsers(), cleanupEvent.getUsers());
+        assertEquals(request.getHosts(), cleanupEvent.getHosts());
+        assertEquals(request.getRoles(), cleanupEvent.getRoles());
+        assertEquals(request.getIps(), cleanupEvent.getIps());
+        assertEquals(skip, cleanupEvent.getStatesToSkip());
+        assertEquals(operationStatus, result);
+    }
+
+    @Test
+    void testTriggerCleanupFailed() {
+        CleanupRequest request = new CleanupRequest();
+        request.setEnvironmentCrn(ENVIRONMENT_CRN);
+        request.setCleanupStepsToSkip(Set.of(CleanupStep.REMOVE_HOSTS));
+        request.setUsers(Set.of("u1", "u2"));
+        request.setHosts(Set.of("h1", "h2"));
+        request.setRoles(Set.of("r1", "r2"));
+        request.setIps(Set.of("i1", "i2"));
+        request.setClusterName("cname");
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        when(stackService.getFreeIpaStackWithMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        Operation operation = new Operation();
+        operation.setStatus(OperationState.RUNNING);
+        operation.setOperationId("asdf");
+        when(operationService.startOperation(ACCOUNT_ID, OperationType.CLEANUP, Set.of(ENVIRONMENT_CRN), Collections.emptySet())).thenReturn(operation);
+        Set<String> skip = Set.of("skip");
+        when(cleanupStepToStateNameConverter.convert(request.getCleanupStepsToSkip())).thenReturn(skip);
+        ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
+        when(flowManager.notify(eq(FreeIpaCleanupEvent.CLEANUP_EVENT.event()), captor.capture())).thenThrow(new RuntimeException("bumm"));
+        Operation failedOp = new Operation();
+        failedOp.setOperationId(operation.getOperationId());
+        failedOp.setStatus(OperationState.FAILED);
+        when(operationService.failOperation(ACCOUNT_ID, operation.getOperationId(), "Couldn't start cleanup flow: bumm")).thenReturn(failedOp);
+        OperationStatus operationStatus = new OperationStatus();
+        operationStatus.setStatus(OperationState.FAILED);
+        when(operationToOperationStatusConverter.convert(failedOp)).thenReturn(operationStatus);
+
+        OperationStatus result = underTest.cleanup(ACCOUNT_ID, request);
+
+        verify(statusValidator).throwBadRequestIfFreeIpaIsUnreachable(stack);
+        CleanupEvent cleanupEvent = (CleanupEvent) captor.getValue();
+        assertEquals(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), cleanupEvent.selector());
+        assertEquals(STACK_ID, cleanupEvent.getResourceId());
+        assertEquals(operation.getOperationId(), cleanupEvent.getOperationId());
+        assertEquals(ACCOUNT_ID, cleanupEvent.getAccountId());
+        assertEquals(ENVIRONMENT_CRN, cleanupEvent.getEnvironmentCrn());
+        assertEquals(request.getClusterName(), cleanupEvent.getClusterName());
+        assertEquals(request.getUsers(), cleanupEvent.getUsers());
+        assertEquals(request.getHosts(), cleanupEvent.getHosts());
+        assertEquals(request.getRoles(), cleanupEvent.getRoles());
+        assertEquals(request.getIps(), cleanupEvent.getIps());
+        assertEquals(skip, cleanupEvent.getStatesToSkip());
+        assertEquals(operationStatus, result);
     }
 
     private Cert createCert(String subject, long serialNumber, boolean revoked) {
@@ -579,8 +701,8 @@ public class CleanupServiceTest {
 
     private Stack createStack() {
         Stack stack = new Stack();
-        stack.setEnvironmentCrn(ENV_CRN);
-        stack.setAccountId("accountId");
+        stack.setEnvironmentCrn(ENVIRONMENT_CRN);
+        stack.setAccountId(ACCOUNT_ID);
         return stack;
     }
 }

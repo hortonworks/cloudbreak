@@ -151,8 +151,9 @@ class RepairInstancesServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(healthDetailsService.getHealthDetails(ENVIRONMENT_ID1, ACCOUNT_ID))
                 .thenReturn(createHealthDetails(InstanceStatus.CREATED, InstanceStatus.UNREACHABLE));
-        when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
-        when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
+        Operation operation = createOperation();
+        when(operationService.startOperation(any(), any(), any(), any())).thenReturn(operation);
+        when(operationToOperationStatusConverter.convert(operation)).thenReturn(operationStatus);
         when(stackUpdater.updateStackStatus(anyLong(), any(), any())).thenReturn(stack);
 
         RepairInstancesRequest request = new RepairInstancesRequest();
@@ -163,6 +164,37 @@ class RepairInstancesServiceTest {
 
         ArgumentCaptor acAcceptable = ArgumentCaptor.forClass(Acceptable.class);
         verify(flowManager).notify(eq("REPAIR_TRIGGER_EVENT"), (Acceptable) acAcceptable.capture());
+        assertTrue(acAcceptable.getValue() instanceof RepairEvent);
+        RepairEvent repairEvent = (RepairEvent) acAcceptable.getValue();
+        assertEquals(instanceIds, repairEvent.getRepairInstanceIds());
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.REPAIR_REQUESTED), any());
+    }
+
+    @Test
+    void testRepairInstancesWithBadHealthInstanceTriggerFailure() {
+        Stack stack = createStack(Status.UNHEALTHY, List.of(InstanceStatus.CREATED, InstanceStatus.UNREACHABLE));
+        List<String> instanceIds = List.of("i-2");
+        OperationStatus operationStatus = new OperationStatus();
+
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
+        when(healthDetailsService.getHealthDetails(ENVIRONMENT_ID1, ACCOUNT_ID))
+                .thenReturn(createHealthDetails(InstanceStatus.CREATED, InstanceStatus.UNREACHABLE));
+        Operation operation = createOperation();
+        when(operationService.startOperation(any(), any(), any(), any())).thenReturn(operation);
+        Operation failedOp = createOperation();
+        failedOp.setStatus(OperationState.FAILED);
+        when(operationService.failOperation(ACCOUNT_ID, operation.getOperationId(), "Couldn't start Freeipa repair flow: bumm"))
+                .thenReturn(failedOp);
+        when(operationToOperationStatusConverter.convert(failedOp)).thenReturn(operationStatus);
+        when(stackUpdater.updateStackStatus(anyLong(), any(), any())).thenReturn(stack);
+        ArgumentCaptor acAcceptable = ArgumentCaptor.forClass(Acceptable.class);
+        when(flowManager.notify(eq("REPAIR_TRIGGER_EVENT"), (Acceptable) acAcceptable.capture())).thenThrow(new RuntimeException("bumm"));
+
+        RepairInstancesRequest request = new RepairInstancesRequest();
+        request.setForceRepair(false);
+        request.setInstanceIds(instanceIds);
+        request.setEnvironmentCrn(ENVIRONMENT_ID1);
+        assertEquals(operationStatus, underTest.repairInstances(ACCOUNT_ID, request));
         assertTrue(acAcceptable.getValue() instanceof RepairEvent);
         RepairEvent repairEvent = (RepairEvent) acAcceptable.getValue();
         assertEquals(instanceIds, repairEvent.getRepairInstanceIds());
@@ -332,6 +364,27 @@ class RepairInstancesServiceTest {
 
         ArgumentCaptor<InstanceEvent> terminationEventArgumentCaptor = ArgumentCaptor.forClass(InstanceEvent.class);
         verify(flowManager, times(1)).notify(eq(REBOOT_EVENT.event()), terminationEventArgumentCaptor.capture());
+    }
+
+    @Test
+    public void testBasicSuccessRebootTriggerFailed() throws Exception {
+        OperationStatus operationStatus = new OperationStatus();
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(stack1);
+        Mockito.when(healthDetailsService.getHealthDetails(any(), any())).thenReturn(getMockDetails1());
+        Operation operation = createOperation();
+        Mockito.when(operationService.startOperation(any(), any(), any(), any())).thenReturn(operation);
+        Operation failedOp = createOperation();
+        failedOp.setStatus(OperationState.FAILED);
+        when(operationService.failOperation(ACCOUNT_ID, operation.getOperationId(), "Couldn't start Freeipa reboot flow: bumm"))
+                .thenReturn(failedOp);
+        when(operationToOperationStatusConverter.convert(failedOp)).thenReturn(operationStatus);
+        RebootInstancesRequest rebootInstancesRequest = new RebootInstancesRequest();
+        rebootInstancesRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
+        ArgumentCaptor<InstanceEvent> terminationEventArgumentCaptor = ArgumentCaptor.forClass(InstanceEvent.class);
+        when(flowManager.notify(eq(REBOOT_EVENT.event()), terminationEventArgumentCaptor.capture()))
+                .thenThrow(new RuntimeException("bumm"));
+
+        assertEquals(operationStatus, underTest.rebootInstances(ACCOUNT_ID, rebootInstancesRequest));
     }
 
     @Test

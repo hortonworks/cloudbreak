@@ -125,8 +125,14 @@ public class CleanupService {
         CleanupEvent cleanupEvent = new CleanupEvent(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), stack.getId(), request.getUsers(),
                 request.getHosts(), request.getRoles(), request.getIps(), statesToSkip, accountId, operation.getOperationId(),
                 request.getClusterName(), environmentCrn);
-        flowManager.notify(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), cleanupEvent);
-        return operationToOperationStatusConverter.convert(operation);
+        try {
+            flowManager.notify(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), cleanupEvent);
+            return operationToOperationStatusConverter.convert(operation);
+        } catch (Exception e) {
+            LOGGER.error("Couldn't start cleanup flow with request: {}", request, e);
+            Operation failedOperation = operationService.failOperation(accountId, operation.getOperationId(), "Couldn't start cleanup flow: " + e.getMessage());
+            return operationToOperationStatusConverter.convert(failedOperation);
+        }
     }
 
     @Retryable(value = RetryableFreeIpaClientException.class,

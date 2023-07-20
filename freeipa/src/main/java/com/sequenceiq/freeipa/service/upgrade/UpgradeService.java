@@ -135,8 +135,15 @@ public class UpgradeService {
                 operation.getOperationId(), imageSettingsRequest, Objects.nonNull(stack.getBackup()), needMigration, triggeredVariant,
                 verticalScaleRequests.isEmpty() ? null : verticalScaleRequests.get(0), instancesOnOldImage);
         LOGGER.info("Trigger upgrade flow with event: {}", upgradeEvent);
-        FlowIdentifier flowIdentifier = flowManager.notify(FlowChainTriggers.UPGRADE_TRIGGER_EVENT, upgradeEvent);
-        return new FreeIpaUpgradeResponse(flowIdentifier, selectedImage, currentImage, operation.getOperationId());
+        try {
+            FlowIdentifier flowIdentifier = flowManager.notify(FlowChainTriggers.UPGRADE_TRIGGER_EVENT, upgradeEvent);
+            return new FreeIpaUpgradeResponse(flowIdentifier, selectedImage, currentImage, operation.getOperationId());
+        } catch (Exception e) {
+            LOGGER.error("Couldn't start Freeipa upgrade flow", e);
+            operationService.failOperation(accountId, operation.getOperationId(),
+                    "Couldn't start Freeipa upgrade flow: " + e.getMessage());
+            throw e;
+        }
     }
 
     @SuppressWarnings("IllegalType")

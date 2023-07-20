@@ -144,6 +144,49 @@ class UpgradeServiceTest {
     }
 
     @Test
+    public void testUpgradeTriggerFailed() {
+        FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
+        request.setImage(new ImageSettingsRequest());
+        request.setEnvironmentCrn(ENVIRONMENT_CRN);
+        String triggeredVariant = "triggeredVariant";
+
+        Stack stack = mock(Stack.class);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        Set<InstanceMetaData> allInstances = createValidImSet();
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
+        ImageInfoResponse selectedImage = mockSelectedImage();
+        ImageInfoResponse currentImage = mockCurrentImage(stack);
+        Operation operation = mockOperation(OperationState.RUNNING);
+        ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
+        when(flowManager.notify(eq(FlowChainTriggers.UPGRADE_TRIGGER_EVENT), eventCaptor.capture())).thenThrow(new RuntimeException("bumm"));
+        when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenReturn(createPgwIm());
+        when(instanceMetaDataService.getNonPrimaryGwInstances(allInstances)).thenReturn(createGwImSet());
+        when(awsMigrationUtil.calculateUpgradeVariant(stack, ACCOUNT_ID)).thenReturn(triggeredVariant);
+        when(awsMigrationUtil.isAwsVariantMigrationIsFeasible(stack, triggeredVariant)).thenReturn(true);
+        when(rootVolumeSizeProvider.getForPlatform(CloudPlatform.MOCK.name())).thenReturn(100);
+
+        assertThrows(RuntimeException.class, () -> underTest.upgradeFreeIpa(ACCOUNT_ID, request));
+
+        UpgradeEvent upgradeEvent = (UpgradeEvent) eventCaptor.getValue();
+        assertEquals(request.getImage(), upgradeEvent.getImageSettingsRequest());
+        assertEquals(operation.getOperationId(), upgradeEvent.getOperationId());
+        assertEquals("pgw", upgradeEvent.getPrimareGwInstanceId());
+        assertEquals(2, upgradeEvent.getInstanceIds().size());
+        assertTrue(Set.of("im2", "im3").containsAll(upgradeEvent.getInstanceIds()));
+        assertFalse(upgradeEvent.isBackupSet());
+        assertTrue(upgradeEvent.isNeedMigration());
+        assertEquals(triggeredVariant, upgradeEvent.getTriggeredVariant());
+        assertNull(upgradeEvent.getVerticalScaleRequest());
+        assertEquals(3, upgradeEvent.getInstancesOnOldImage().size());
+        assertTrue(upgradeEvent.getInstancesOnOldImage().containsAll(Set.of("pgw", "im2", "im3")));
+
+        verify(validationService).validateStackForUpgrade(allInstances, stack);
+        verify(validationService).validateSelectedImageDifferentFromCurrent(eq(currentImage), eq(selectedImage), anySet());
+        verify(operationService).failOperation(ACCOUNT_ID, operation.getOperationId(), "Couldn't start Freeipa upgrade flow: bumm");
+    }
+
+    @Test
     public void testUpgradeTriggeredWithInstancesOnOldImage() {
         FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
         request.setImage(new ImageSettingsRequest());

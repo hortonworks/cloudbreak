@@ -199,8 +199,15 @@ public class RepairInstancesService {
         Operation operation = operationService.startOperation(accountId, OperationType.REPAIR, Set.of(stack.getEnvironmentCrn()), Collections.emptySet());
         if (operation.getStatus() == OperationState.RUNNING) {
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_REQUESTED, "Repair requested");
-            flowManager.notify(FlowChainTriggers.REPAIR_TRIGGER_EVENT, new RepairEvent(FlowChainTriggers.REPAIR_TRIGGER_EVENT, stack.getId(),
-                    operation.getOperationId(), nodeCount, new ArrayList<>(instancesToRepair.keySet()), additionalTerminatedInstanceIds));
+            try {
+                flowManager.notify(FlowChainTriggers.REPAIR_TRIGGER_EVENT, new RepairEvent(FlowChainTriggers.REPAIR_TRIGGER_EVENT, stack.getId(),
+                        operation.getOperationId(), nodeCount, new ArrayList<>(instancesToRepair.keySet()), additionalTerminatedInstanceIds));
+            } catch (Exception e) {
+                LOGGER.error("Couldn't start Freeipa repair flow", e);
+                Operation failedOperation = operationService.failOperation(accountId, operation.getOperationId(),
+                        "Couldn't start Freeipa repair flow: " + e.getMessage());
+                return operationToOperationStatusConverter.convert(failedOperation);
+            }
         }
         return operationToOperationStatusConverter.convert(operation);
     }
@@ -269,8 +276,15 @@ public class RepairInstancesService {
         Operation operation = operationService.startOperation(accountId, OperationType.REBOOT, Set.of(stack.getEnvironmentCrn()), Collections.emptySet());
         if (operation.getStatus() == OperationState.RUNNING) {
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_REQUESTED, "Reboot requested");
-            flowManager.notify(REBOOT_EVENT.event(), new RebootInstanceEvent(REBOOT_EVENT.event(), stack.getId(),
-                    new ArrayList<>(instancesToReboot.keySet()), operation.getOperationId()));
+            try {
+                flowManager.notify(REBOOT_EVENT.event(), new RebootInstanceEvent(REBOOT_EVENT.event(), stack.getId(),
+                        new ArrayList<>(instancesToReboot.keySet()), operation.getOperationId()));
+            } catch (Exception e) {
+                LOGGER.error("Couldn't start Freeipa reboot flow", e);
+                Operation failedOperation = operationService.failOperation(accountId, operation.getOperationId(),
+                        "Couldn't start Freeipa reboot flow: " + e.getMessage());
+                return operationToOperationStatusConverter.convert(failedOperation);
+            }
         }
         return operationToOperationStatusConverter.convert(operation);
     }
