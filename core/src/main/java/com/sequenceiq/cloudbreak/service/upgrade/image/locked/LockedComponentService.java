@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -34,13 +35,10 @@ public class LockedComponentService {
         try {
             Long workspaceId = stack.getWorkspaceId();
             Image currentImage = componentConfigProviderService.getImage(stack.getId());
-            com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentCatalogImage = imageCatalogService
-                    .getImage(workspaceId, currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), currentImage.getImageId())
-                    .getImage();
             com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage = imageCatalogService
                     .getImage(workspaceId, currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), targetImageId)
                     .getImage();
-            return isComponentsLocked(stack, currentCatalogImage, targetCatalogImage);
+            return isComponentsLocked(stack, currentImage, targetCatalogImage);
         } catch (Exception ex) {
             String msg = "Exception during determining the lockComponents parameter.";
             LOGGER.warn(msg, ex);
@@ -48,10 +46,10 @@ public class LockedComponentService {
         }
     }
 
-    public boolean isComponentsLocked(StackDto stack, com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentCatalogImage,
-            com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage) {
+    public boolean isComponentsLocked(StackDto stack, Image currentImage, com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage) {
         LOGGER.debug("Determining that the stack {} component versions are the same on the current image {} and the target image {}", stack.getName(),
-                currentCatalogImage.getUuid(), targetCatalogImage.getUuid());
-        return lockedComponentChecker.isUpgradePermitted(currentCatalogImage, targetCatalogImage, imageFilterParamsFactory.getStackRelatedParcels(stack));
+                currentImage.getImageId(), targetCatalogImage.getUuid());
+        return lockedComponentChecker.isUpgradePermitted(targetCatalogImage, imageFilterParamsFactory.getStackRelatedParcels(stack),
+                currentImage.getPackageVersion(ImagePackageVersion.CM_BUILD_NUMBER));
     }
 }

@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -122,9 +123,14 @@ public class StackImageServiceTest {
     @Test
     public void testStoreNewImageComponent() throws CloudbreakImageNotFoundException, IOException {
 
-        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
-                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), image.getOs(), image.getOsType(),
-                        statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent = ModelImageTestBuilder.builder()
+                .withImageName("imageOldName")
+                .withOs(image.getOs())
+                .withOsType(image.getOsType())
+                .withImageCatalogUrl(statedImage.getImageCatalogUrl())
+                .withImageCatalogName(statedImage.getImageCatalogName())
+                .withImageId("uuid2").withPackageVersions(packageVersions)
+                .build();
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(imageInComponent);
         when(platformStringTransformer.getPlatformStringForImageCatalog(stack.getCloudPlatform(), stack.getPlatformVariant()))
                 .thenReturn(imageCatalogPlatform(stack.getCloudPlatform()));
@@ -303,6 +309,6 @@ public class StackImageServiceTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image anImageComponent() {
-        return new com.sequenceiq.cloudbreak.cloud.model.Image("imagename", null, null, null, null, SOURCE_IMAGE_CATALOG, IMAGE_ID, null);
+        return ModelImageTestBuilder.builder().withImageName("imagename").withImageCatalogName(SOURCE_IMAGE_CATALOG).withImageId(IMAGE_ID).build();
     }
 }

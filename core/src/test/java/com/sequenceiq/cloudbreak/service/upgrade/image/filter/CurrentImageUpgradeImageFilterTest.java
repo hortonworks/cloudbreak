@@ -17,6 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
+import com.sequenceiq.cloudbreak.service.image.ImageTestBuilder;
+import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 
@@ -73,11 +75,15 @@ class CurrentImageUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams() {
-        return new ImageFilterParams(createImage(CURRENT_IMAGE_ID), null, false, null, null, null, CURRENT_STACK_ID, null, null, null, null, false);
+        return new ImageFilterParams(createCurrentImage(), null, false, null, null, null, CURRENT_STACK_ID, null, null, null, null, false);
     }
 
     private Image createImage(String imageId) {
-        return new Image(null, null, null, null, null, imageId, null, null, null, null, null, null, null, null, null, false, null, null);
+        return ImageTestBuilder.builder().withUuid(imageId).build();
+    }
+
+    private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImage() {
+        return ModelImageTestBuilder.builder().withImageId(CURRENT_IMAGE_ID).build();
     }
 
     private ImageFilterResult createImageFilterResult(List<Image> images) {

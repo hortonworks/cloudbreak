@@ -28,13 +28,24 @@ public class CurrentImagePackageProvider {
     private ImageConverter imageConverter;
 
     public boolean currentInstancesContainsPackage(Long stackId, List<Image> cdhImagesFromCatalog, ImagePackageVersion packageVersion) {
-        Map<String, String> imagesByInstance = getImagesByInstance(stackId);
+        Map<String, com.sequenceiq.cloudbreak.cloud.model.Image> imagesByInstance = getImagesByInstance(stackId);
         LOGGER.debug("The available packages on instances: {}", imagesByInstance);
-        return imagesByInstance.entrySet().stream().allMatch(entry -> cdhImagesFromCatalog.stream().anyMatch(
-                imageFromCatalog -> currentImageContainsPackage(packageVersion, entry, imageFromCatalog)));
+        return imagesByInstance.entrySet().stream()
+                .allMatch(entry ->
+                        modelImageContainsPackage(entry.getValue(), packageVersion) ||
+                        catalogImageContainsPackage(cdhImagesFromCatalog, packageVersion, entry));
     }
 
-    private Map<String, String> getImagesByInstance(Long stackId) {
+    private boolean catalogImageContainsPackage(List<Image> cdhImagesFromCatalog, ImagePackageVersion packageVersion,
+            Map.Entry<String, com.sequenceiq.cloudbreak.cloud.model.Image> entry) {
+        return cdhImagesFromCatalog.stream().anyMatch(imageFromCatalog -> currentImageContainsPackage(packageVersion, entry, imageFromCatalog));
+    }
+
+    private boolean modelImageContainsPackage(com.sequenceiq.cloudbreak.cloud.model.Image image, ImagePackageVersion packageVersion) {
+        return image.getPackageVersions() != null && image.getPackageVersions().containsKey(packageVersion.getKey());
+    }
+
+    private Map<String, com.sequenceiq.cloudbreak.cloud.model.Image> getImagesByInstance(Long stackId) {
         return instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(stackId)
                 .stream()
                 .filter(instanceMetaData -> !instanceMetaData.getImage().getMap().isEmpty())
@@ -42,11 +53,12 @@ public class CurrentImagePackageProvider {
                         instanceMetaData -> convertJsonToImage(instanceMetaData.getImage())));
     }
 
-    private String convertJsonToImage(Json image) {
-        return imageConverter.convertJsonToImage(image).getImageId();
+    private com.sequenceiq.cloudbreak.cloud.model.Image convertJsonToImage(Json image) {
+        return imageConverter.convertJsonToImage(image);
     }
 
-    private boolean currentImageContainsPackage(ImagePackageVersion packageVersion, Map.Entry<String, String> entry, Image imageFromCatalog) {
-        return imageFromCatalog.getUuid().equals(entry.getValue()) && imageFromCatalog.getPackageVersions().containsKey(packageVersion.getKey());
+    private boolean currentImageContainsPackage(ImagePackageVersion packageVersion, Map.Entry<String, com.sequenceiq.cloudbreak.cloud.model.Image> entry,
+            Image imageFromCatalog) {
+        return imageFromCatalog.getUuid().equals(entry.getValue().getImageId()) && imageFromCatalog.getPackageVersions().containsKey(packageVersion.getKey());
     }
 }

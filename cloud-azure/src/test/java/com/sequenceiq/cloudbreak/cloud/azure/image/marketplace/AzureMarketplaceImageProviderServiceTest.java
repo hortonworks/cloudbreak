@@ -34,7 +34,8 @@ public class AzureMarketplaceImageProviderServiceTest {
     @Test
     void testImageHasValidFormat() {
 
-        Image image = new Image(VALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>());
+        Image image = new Image(VALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>(), "2019-10-24",
+                1571884856L);
         when(azureImageFormatValidator.isMarketplaceImageFormat(VALID_IMAGE_NAME)).thenReturn(true);
         AzureMarketplaceImage azureMarketplaceImage = underTest.get(image);
 
@@ -47,7 +48,8 @@ public class AzureMarketplaceImageProviderServiceTest {
     @Test
     void testImageHasInvalidFormat() {
 
-        Image image = new Image(INVALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>());
+        Image image = new Image(INVALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>(), "2019-10-24",
+                1571884856L);
         when(azureImageFormatValidator.isMarketplaceImageFormat(INVALID_IMAGE_NAME)).thenReturn(false);
         Assertions.assertThrows(CloudConnectorException.class, () -> underTest.get(image));
     }
@@ -57,7 +59,7 @@ public class AzureMarketplaceImageProviderServiceTest {
 
         Map<String, String> packageVersions = new HashMap<>();
         packageVersions.put(ImagePackageVersion.SOURCE_IMAGE.getKey(), VALID_IMAGE_NAME);
-        Image image = new Image("imageName", new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", packageVersions);
+        Image image = new Image("imageName", new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", packageVersions, "2019-10-24", 1571884856L);
         when(azureImageFormatValidator.isMarketplaceImageFormat(VALID_IMAGE_NAME)).thenReturn(true);
         AzureMarketplaceImage azureMarketplaceImage = underTest.getSourceImage(image);
 
@@ -72,7 +74,7 @@ public class AzureMarketplaceImageProviderServiceTest {
 
         Map<String, String> packageVersions = new HashMap<>();
         packageVersions.put(ImagePackageVersion.SOURCE_IMAGE.getKey(), INVALID_IMAGE_NAME);
-        Image image = new Image("imageName", new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", packageVersions);
+        Image image = new Image("imageName", new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", packageVersions, "2019-10-24", 1571884856L);
 
         CloudConnectorException exception = Assertions.assertThrows(CloudConnectorException.class, () -> underTest.getSourceImage(image));
         assertEquals("Invalid Marketplace image URN in the image catalog! Please specify the image in an URN format, 4 segments separated by a colon "
@@ -85,7 +87,7 @@ public class AzureMarketplaceImageProviderServiceTest {
 
         Map<String, String> packageVersions = new HashMap<>();
         packageVersions.put(ImagePackageVersion.SOURCE_IMAGE.getKey(), "");
-        Image image = new Image("imageName", new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", packageVersions);
+        Image image = new Image("imageName", new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", packageVersions, "2019-10-24", 1571884856L);
 
         CloudConnectorException exception = Assertions.assertThrows(CloudConnectorException.class, () -> underTest.getSourceImage(image));
         assertEquals("Missing Marketplace image URN! Please specify the image in an URN format, "
@@ -96,7 +98,7 @@ public class AzureMarketplaceImageProviderServiceTest {
     @Test
     void testSourceImageIsMissing() {
 
-        Image image = new Image("imageName", new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>());
+        Image image = new Image("imageName", new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>(), "2019-10-24", 1571884856L);
 
         CloudConnectorException exception = Assertions.assertThrows(CloudConnectorException.class, () -> underTest.getSourceImage(image));
         assertEquals("Missing Marketplace image URN! Please specify the image in an URN format, "

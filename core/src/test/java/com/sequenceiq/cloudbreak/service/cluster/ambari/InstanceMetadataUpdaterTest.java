@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,11 +19,12 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Lists;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Maps;
@@ -51,6 +53,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
+@ExtendWith(MockitoExtension.class)
 public class InstanceMetadataUpdaterTest {
 
     @Mock
@@ -77,9 +80,8 @@ public class InstanceMetadataUpdaterTest {
     @InjectMocks
     private InstanceMetadataUpdater underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() throws CloudbreakException, JsonProcessingException, CloudbreakOrchestratorFailedException {
-        MockitoAnnotations.openMocks(this);
         when(gatewayConfigService.getPrimaryGatewayConfig(any(Stack.class))).thenReturn(gatewayConfig);
         when(userDataService.createOrUpdateUserData(anyLong(), any())).thenReturn(new Userdata());
 
@@ -95,10 +97,10 @@ public class InstanceMetadataUpdaterTest {
         Map<String, Map<String, String>> hostPackageMap = Maps.newHashMap();
         hostPackageMap.put("instanceId", packageMap());
         hostPackageMap.put("hostByCmd", packageMap());
-        when(hostOrchestrator.getPackageVersionsFromAllHosts(any(GatewayConfig.class), any())).thenReturn(hostPackageMap);
+        lenient().when(hostOrchestrator.getPackageVersionsFromAllHosts(any(GatewayConfig.class), any())).thenReturn(hostPackageMap);
     }
 
-    private Stack createStack() throws JsonProcessingException {
+    private Stack createStack() {
         Stack stack = new Stack();
         stack.setId(1L);
         stack.setCluster(new Cluster());
@@ -138,9 +140,7 @@ public class InstanceMetadataUpdaterTest {
                 any(ResourceEvent.class), anyCollection());
         assertEquals(SERVICES_UNHEALTHY, stack.getInstanceGroups().stream()
                 .filter(instanceGroup -> instanceGroup.getInstanceMetaData().stream()
-                        .filter(instanceMetaData -> StringUtils.equals(instanceMetaData.getDiscoveryFQDN(), "hostByCmd"))
-                        .findFirst()
-                        .isPresent())
+                        .anyMatch(instanceMetaData -> StringUtils.equals(instanceMetaData.getDiscoveryFQDN(), "hostByCmd")))
                 .findFirst()
                 .get().getInstanceMetaData().iterator().next().getInstanceStatus());
     }
@@ -191,14 +191,14 @@ public class InstanceMetadataUpdaterTest {
         return packageMap;
     }
 
-    private InstanceGroup createInstanceGroup(String instanceId, InstanceGroupType instanceGroupType) throws JsonProcessingException {
+    private InstanceGroup createInstanceGroup(String instanceId, InstanceGroupType instanceGroupType) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceGroupType(instanceGroupType);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
         instanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         Image image = new Image("imagename", null, "os", "ostype", "catalogurl",
-                "catalogname", "iamgeid", packageMap());
+                "catalogname", "iamgeid", packageMap(), null, null);
         instanceMetaData.setImage(new Json(image));
         instanceMetaData.setInstanceId(instanceId);
         instanceMetaData.setDiscoveryFQDN(instanceId);

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,8 +27,6 @@ public class UpgradeImageInfoFactoryTest {
     private static final long STACK_ID = 1L;
 
     private static final long WORKSPACE_ID = 2L;
-
-    private static final String CURRENT_IMAGE_ID = "currentImageId";
 
     private static final String TARGET_IMAGE_ID = "targetImageId";
 
@@ -58,24 +55,19 @@ public class UpgradeImageInfoFactoryTest {
         Workspace workspace = mock(Workspace.class);
         when(stack.getWorkspace()).thenReturn(workspace);
         when(workspace.getId()).thenReturn(WORKSPACE_ID);
-        StatedImage currentStatedImage = StatedImage.statedImage(getCatalogImage(), IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID);
-        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID)).thenReturn(currentStatedImage);
         StatedImage targetStatedImage = StatedImage.statedImage(getCatalogImage(), IMAGE_CATALOG_NAME, TARGET_IMAGE_ID);
         when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID)).thenReturn(targetStatedImage);
 
         UpgradeImageInfo upgradeImageInfo = underTest.create(TARGET_IMAGE_ID, STACK_ID);
 
-        assertEquals(image, upgradeImageInfo.getCurrentImage());
-        assertEquals(currentStatedImage, upgradeImageInfo.getCurrentStatedImage());
-        assertEquals(targetStatedImage, upgradeImageInfo.getTargetStatedImage());
-        verify(image).getImageId();
-        verify(image, times(2)).getImageCatalogName();
-        verify(image, times(2)).getImageCatalogUrl();
+        assertEquals(image, upgradeImageInfo.currentImage());
+        assertEquals(targetStatedImage, upgradeImageInfo.targetStatedImage());
+        verify(image).getImageCatalogName();
+        verify(image).getImageCatalogUrl();
     }
 
     private Image getImage() {
         Image image = mock(Image.class);
-        when(image.getImageId()).thenReturn(CURRENT_IMAGE_ID);
         when(image.getImageCatalogName()).thenReturn(IMAGE_CATALOG_NAME);
         when(image.getImageCatalogUrl()).thenReturn(IMAGE_CATALOG_URL);
         return image;

@@ -6,26 +6,38 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
+import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 
+@ExtendWith(MockitoExtension.class)
 class ImageCreationBasedUpgradeImageFilterTest {
 
-    private final ImageCreationBasedUpgradeImageFilter underTest = new ImageCreationBasedUpgradeImageFilter();
+    @InjectMocks
+    private ImageCreationBasedUpgradeImageFilter underTest;
+
+    @Mock
+    private Image candidate;
+
+    private com.sequenceiq.cloudbreak.cloud.model.Image current;
 
     @Test
     public void testImageIsNewer() {
-        Image current = mock(Image.class);
-        Image candidate = mock(Image.class);
-        when(current.getCreated()).thenReturn(1L);
+        current = createCurrentImage(1L);
         when(candidate.getCreated()).thenReturn(2L);
 
-        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams(current));
+        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams());
 
         assertFalse(actual.getImages().isEmpty());
         assertTrue(actual.getReason().isEmpty());
@@ -33,12 +45,10 @@ class ImageCreationBasedUpgradeImageFilterTest {
 
     @Test
     public void testImageSameCreation() {
-        Image current = mock(Image.class);
-        Image candidate = mock(Image.class);
-        when(current.getCreated()).thenReturn(1L);
+        current = createCurrentImage(1L);
         when(candidate.getCreated()).thenReturn(1L);
 
-        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams(current));
+        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams());
 
         assertFalse(actual.getImages().isEmpty());
         assertTrue(actual.getReason().isEmpty());
@@ -46,12 +56,10 @@ class ImageCreationBasedUpgradeImageFilterTest {
 
     @Test
     public void testImageOlder() {
-        Image current = mock(Image.class);
-        Image candidate = mock(Image.class);
-        when(current.getCreated()).thenReturn(2L);
+        current = createCurrentImage(2L);
         when(candidate.getCreated()).thenReturn(1L);
 
-        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams(current));
+        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams());
 
         assertTrue(actual.getImages().isEmpty());
         assertReason(actual.getReason());
@@ -59,12 +67,10 @@ class ImageCreationBasedUpgradeImageFilterTest {
 
     @Test
     public void testCurrentImageCreationNull() {
-        Image current = mock(Image.class);
-        Image candidate = mock(Image.class);
-        when(current.getCreated()).thenReturn(null);
+        current = createCurrentImage(null);
         when(candidate.getCreated()).thenReturn(1L);
 
-        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams(current));
+        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams());
 
         assertTrue(actual.getImages().isEmpty());
         assertReason(actual.getReason());
@@ -72,12 +78,10 @@ class ImageCreationBasedUpgradeImageFilterTest {
 
     @Test
     public void testCandidateImageCreationNull() {
-        Image current = mock(Image.class);
-        Image candidate = mock(Image.class);
-        when(current.getCreated()).thenReturn(1L);
+        current = createCurrentImage(1L);
         when(candidate.getCreated()).thenReturn(null);
 
-        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams(current));
+        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams());
 
         assertTrue(actual.getImages().isEmpty());
         assertReason(actual.getReason());
@@ -85,13 +89,10 @@ class ImageCreationBasedUpgradeImageFilterTest {
 
     @Test
     public void testVersionDiffersOlder() {
-        Image current = mock(Image.class);
-        Image candidate = mock(Image.class);
-        when(current.getCreated()).thenReturn(2L);
-        when(candidate.getCreated()).thenReturn(1L);
-        mockDifferentVersion(current, candidate);
+        current = createCurrentImage(2L);
+        mockDifferentVersion();
 
-        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams(current));
+        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams());
 
         assertFalse(actual.getImages().isEmpty());
         assertTrue(actual.getReason().isEmpty());
@@ -99,13 +100,10 @@ class ImageCreationBasedUpgradeImageFilterTest {
 
     @Test
     public void testVersionDiffersNewer() {
-        Image current = mock(Image.class);
-        Image candidate = mock(Image.class);
-        when(current.getCreated()).thenReturn(1L);
-        when(candidate.getCreated()).thenReturn(2L);
-        mockDifferentVersion(current, candidate);
+        current = createCurrentImage(1L);
+        mockDifferentVersion();
 
-        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams(current));
+        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams());
 
         assertFalse(actual.getImages().isEmpty());
         assertTrue(actual.getReason().isEmpty());
@@ -113,13 +111,10 @@ class ImageCreationBasedUpgradeImageFilterTest {
 
     @Test
     public void testVersionDiffersSameOld() {
-        Image current = mock(Image.class);
-        Image candidate = mock(Image.class);
-        when(current.getCreated()).thenReturn(1L);
-        when(candidate.getCreated()).thenReturn(1L);
-        mockDifferentVersion(current, candidate);
+        current = createCurrentImage(1L);
+        mockDifferentVersion();
 
-        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams(current));
+        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams());
 
         assertFalse(actual.getImages().isEmpty());
         assertTrue(actual.getReason().isEmpty());
@@ -127,13 +122,11 @@ class ImageCreationBasedUpgradeImageFilterTest {
 
     @Test
     public void testImageIsNewerWithSameVersion() {
-        Image current = mock(Image.class);
-        Image candidate = mock(Image.class);
-        when(current.getCreated()).thenReturn(1L);
+        current = createCurrentImage(1L);
         when(candidate.getCreated()).thenReturn(2L);
-        mockSameVersion(current, candidate);
+        mockSameVersion();
 
-        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams(current));
+        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams());
 
         assertFalse(actual.getImages().isEmpty());
         assertTrue(actual.getReason().isEmpty());
@@ -141,13 +134,11 @@ class ImageCreationBasedUpgradeImageFilterTest {
 
     @Test
     public void testImageSameCreationWithSameVersion() {
-        Image current = mock(Image.class);
-        Image candidate = mock(Image.class);
-        when(current.getCreated()).thenReturn(1L);
+        current = createCurrentImage(1L);
         when(candidate.getCreated()).thenReturn(1L);
-        mockSameVersion(current, candidate);
+        mockSameVersion();
 
-        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams(current));
+        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams());
 
         assertFalse(actual.getImages().isEmpty());
         assertTrue(actual.getReason().isEmpty());
@@ -155,43 +146,37 @@ class ImageCreationBasedUpgradeImageFilterTest {
 
     @Test
     public void testImageOlderWithSameVersion() {
-        Image current = mock(Image.class);
-        Image candidate = mock(Image.class);
-        when(current.getCreated()).thenReturn(2L);
+        current = createCurrentImage(2L);
         when(candidate.getCreated()).thenReturn(1L);
-        mockSameVersion(current, candidate);
+        mockSameVersion();
 
-        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams(current));
+        ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidate)), createImageFilterParams());
 
         assertTrue(actual.getImages().isEmpty());
         assertReason(actual.getReason());
     }
 
-    private void mockSameVersion(Image current, Image candidate) {
-        ImageStackDetails currentStackDetails = mock(ImageStackDetails.class);
+    private void mockSameVersion() {
         ImageStackDetails candidateStackDetails = mock(ImageStackDetails.class);
-
-        when(current.getStackDetails()).thenReturn(currentStackDetails);
-        when(candidate.getStackDetails()).thenReturn(candidateStackDetails);
-        when(currentStackDetails.getVersion()).thenReturn("a");
         when(candidateStackDetails.getVersion()).thenReturn("a");
+        when(candidate.getStackDetails()).thenReturn(candidateStackDetails);
     }
 
-    private void mockDifferentVersion(Image current, Image candidate) {
-        ImageStackDetails currentStackDetails = mock(ImageStackDetails.class);
+    private void mockDifferentVersion() {
         ImageStackDetails candidateStackDetails = mock(ImageStackDetails.class);
-
-        when(current.getStackDetails()).thenReturn(currentStackDetails);
-        when(candidate.getStackDetails()).thenReturn(candidateStackDetails);
-        when(currentStackDetails.getVersion()).thenReturn("a");
         when(candidateStackDetails.getVersion()).thenReturn("b");
+        when(candidate.getStackDetails()).thenReturn(candidateStackDetails);
     }
 
     private void assertReason(String reason) {
         assertTrue(reason.contains("There are no newer images available than"));
     }
 
-    private ImageFilterParams createImageFilterParams(Image currentImage) {
-        return new ImageFilterParams(currentImage, null, false, null, null, null, null, null, null, null, null, false);
+    private ImageFilterParams createImageFilterParams() {
+        return new ImageFilterParams(current, null, false, null, null, null, null, null, null, null, null, false);
+    }
+
+    private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImage(Long created) {
+        return ModelImageTestBuilder.builder().withPackageVersions(Map.of(ImagePackageVersion.STACK.getKey(), "a")).withCreated(created).build();
     }
 }

@@ -140,7 +140,7 @@ class StackRepositoryTest {
     }
 
     private Json createImage(String imageId) {
-        final Image image = new Image("imageName", Map.of(), "os", "osType", "imageCatalogUrl", "imageCatalogName", imageId, null);
+        final Image image = new Image("imageName", Map.of(), "os", "osType", "imageCatalogUrl", "imageCatalogName", imageId, null, null, null);
         return new Json(image);
     }
 

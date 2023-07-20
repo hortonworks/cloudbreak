@@ -172,7 +172,9 @@ public class MaintenanceModeValidationServiceTest {
                         statedImage.getImageCatalogUrl(),
                         statedImage.getImageCatalogName(),
                         "uuid",
-                        packageVersions);
+                        packageVersions,
+                        null,
+                        null);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
         when(imageUpdateService.checkPackageVersions(any(Stack.class), any(StatedImage.class))).thenReturn(CheckResult.ok());
@@ -193,7 +195,9 @@ public class MaintenanceModeValidationServiceTest {
                         statedImage.getImageCatalogUrl(),
                         statedImage.getImageCatalogName(),
                         "uuid",
-                        packageVersions);
+                        packageVersions,
+                        null,
+                        null);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
         when(imageUpdateService.checkPackageVersions(any(Stack.class), any(StatedImage.class))).thenReturn(CheckResult.failed("Failure"));

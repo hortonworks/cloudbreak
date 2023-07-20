@@ -4,7 +4,6 @@ package com.sequenceiq.cloudbreak.service.upgrade.sync.component;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -31,7 +30,6 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
@@ -116,10 +114,13 @@ public class ImageReaderServiceTest {
     }
 
     @Test
-    public void testGetPreWarmParcelNamesFromImageShouldThrowException() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    public void testGetPreWarmParcelNamesFromImageShouldReturnEmptySetWhenTheCurrentImageNotFound() throws CloudbreakImageNotFoundException,
+            CloudbreakImageCatalogException {
         when(imageService.getCurrentImage(WORKSPACE_ID, STACK_ID)).thenThrow(new CloudbreakImageCatalogException("error"));
 
-        assertThrows(CloudbreakRuntimeException.class, () -> underTest.getParcelNames(WORKSPACE_ID, STACK_ID));
+        Set<String> actual = underTest.getParcelNames(WORKSPACE_ID, STACK_ID);
+
+        assertTrue(actual.isEmpty());
         verify(imageService).getCurrentImage(WORKSPACE_ID, STACK_ID);
         verifyNoInteractions(clouderaManagerProductTransformer);
     }

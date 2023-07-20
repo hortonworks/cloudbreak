@@ -30,81 +30,81 @@ public class CsdLocationFilterTest {
 
     @Test
     public void testFilterImageShouldReturnTrueWhenTheStackTypeIsNotWorkload() {
-        assertTrue(underTest.filterImage(null, null, new ImageFilterParams(null, null, false, null, StackType.DATALAKE, null, STACK_ID,
+        assertTrue(underTest.filterImage(null, new ImageFilterParams(null, null, false, null, StackType.DATALAKE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM), CLOUD_PLATFORM, REGION, false)));
     }
 
     @Test
     public void testFilterImageShouldReturnFalseWhenTheImageIsNull() {
-        assertFalse(underTest.filterImage(null, null, createImageFilterParams(null)));
+        assertFalse(underTest.filterImage(null, createImageFilterParams(null)));
     }
 
     @Test
     public void testFilterImageShouldReturnFalseWhenThePreWarmCsdIsNull() {
         Image image = createImage(null);
-        assertFalse(underTest.filterImage(image, null, createImageFilterParams(null)));
+        assertFalse(underTest.filterImage(image, createImageFilterParams(null)));
     }
 
     @Test
     public void testFilterImageShouldReturnFalseWhenThePreWarmCsdListIsEmpty() {
         Image image = createImage(Collections.emptyList());
-        assertFalse(underTest.filterImage(image, null, createImageFilterParams(null)));
+        assertFalse(underTest.filterImage(image, createImageFilterParams(null)));
     }
 
     @Test
     public void testFilterImageShouldReturnTrueWhenTheCsdParcelsAreEligibleForUpgrade() {
         List<String> preWarmCsd = List.of(ARCHIVE_URL);
         Image image = createImage(preWarmCsd);
-        assertTrue(underTest.filterImage(image, null, createImageFilterParams(Map.of("parcel1", ""))));
+        assertTrue(underTest.filterImage(image, createImageFilterParams(Map.of("parcel1", ""))));
     }
 
     @Test
     public void testFilterImageShouldReturnFalseWhenTheCsdParcelsAreNotEligibleForUpgrade() {
         List<String> preWarmCsd = List.of(RANDOM_URL);
         Image image = createImage(preWarmCsd);
-        assertFalse(underTest.filterImage(image, null, createImageFilterParams(Map.of("parcel1", ""))));
+        assertFalse(underTest.filterImage(image, createImageFilterParams(Map.of("parcel1", ""))));
     }
 
     @Test
     public void testFilterImageShouldReturnFalseWhenOnlyOneCsdIsNotEligibleForUpgrade() {
         List<String> preWarmCsd = List.of(ARCHIVE_URL, RANDOM_URL);
         Image image = createImage(preWarmCsd);
-        assertFalse(underTest.filterImage(image, null, createImageFilterParams(Map.of("parcel1", ""))));
+        assertFalse(underTest.filterImage(image, createImageFilterParams(Map.of("parcel1", ""))));
     }
 
     @Test
     public void testFilterImageShouldReturnTrueWhenTheImageDoesNotContainsCsdFromTheStackRelatedParcels() {
         List<String> preWarmCsd = List.of(ARCHIVE_URL);
         Image image = createImage(preWarmCsd);
-        assertTrue(underTest.filterImage(image, null, createImageFilterParams(Map.of("spark", ""))));
+        assertTrue(underTest.filterImage(image, createImageFilterParams(Map.of("spark", ""))));
     }
 
     @Test
     public void testFilterImageShouldReturnTrueWhenTheStackRelatedParcelsAreNull() {
         List<String> preWarmCsd = List.of(ARCHIVE_URL);
         Image image = createImage(preWarmCsd);
-        assertTrue(underTest.filterImage(image, null, createImageFilterParams(null)));
+        assertTrue(underTest.filterImage(image, createImageFilterParams(null)));
     }
 
     @Test
     public void testFilterImageShouldReturnTrueWhenTheStackRelatedParcelsAreEmpty() {
         List<String> preWarmCsd = List.of(ARCHIVE_URL);
         Image image = createImage(preWarmCsd);
-        assertTrue(underTest.filterImage(image, null, createImageFilterParams(Collections.emptyMap())));
+        assertTrue(underTest.filterImage(image, createImageFilterParams(Collections.emptyMap())));
     }
 
     @Test
     public void testFilterImageShouldReturnTrueWhenTheStackRelatedParcelsContainsOnlyTheIgnoredParcel() {
         List<String> preWarmCsd = List.of(ARCHIVE_URL);
         Image image = createImage(preWarmCsd);
-        assertTrue(underTest.filterImage(image, null, createImageFilterParams(Map.of("CDH", ""))));
+        assertTrue(underTest.filterImage(image, createImageFilterParams(Map.of("CDH", ""))));
     }
 
     @Test
     public void testFilterImageShouldReturnTrueWhenThereAreNoCsdAvailableForAllRequiresParcels() {
         List<String> preWarmCsd = List.of(ARCHIVE_URL);
         Image image = createImage(preWarmCsd);
-        assertTrue(underTest.filterImage(image, null, createImageFilterParams(Map.of("parcel1", "", "spark", ""))));
+        assertTrue(underTest.filterImage(image, createImageFilterParams(Map.of("parcel1", "", "spark", ""))));
     }
 
     private Image createImage(List<String> preWarmCsd) {

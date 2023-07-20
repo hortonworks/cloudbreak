@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.template.loadbalancer;
 
 import static com.sequenceiq.common.api.type.ResourceType.GCP_HEALTH_CHECK;
 import static java.util.Collections.emptyMap;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -10,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,7 +80,7 @@ public class LoadBalancerResourceServiceTest {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
         image = new Image("cb-centos66-amb200-2015-05-25",
-                userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
+                userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>(), null, null);
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withId(privateId)
                 .withName("testname")
@@ -105,7 +106,7 @@ public class LoadBalancerResourceServiceTest {
     public void variantHasNoBuilders() throws Exception {
         when(resourceBuilders.loadBalancer(any())).thenReturn(List.of());
         List<CloudResourceStatus> statuses = underTest.buildResources(context, authenticatedContext, cloudStack);
-        Assert.assertTrue(statuses.isEmpty());
+        assertTrue(statuses.isEmpty());
     }
 
     @Test
@@ -117,7 +118,7 @@ public class LoadBalancerResourceServiceTest {
                 .build();
         when(resourceBuilders.loadBalancer(any())).thenReturn(List.of());
         List<CloudResourceStatus> statuses = underTest.deleteResources(context, authenticatedContext, List.of(instance), false);
-        Assert.assertTrue(statuses.isEmpty());
+        assertTrue(statuses.isEmpty());
 
     }
 
@@ -141,7 +142,7 @@ public class LoadBalancerResourceServiceTest {
         };
         when(resourceBuilders.loadBalancer(any())).thenReturn(List.of(mockLoadBalancerResourceBuilder));
         List<CloudResourceStatus> statuses = underTest.deleteResources(context, authenticatedContext, List.of(instance), false);
-        Assert.assertTrue(statuses.isEmpty());
+        assertTrue(statuses.isEmpty());
 
     }
 
@@ -161,7 +162,7 @@ public class LoadBalancerResourceServiceTest {
         };
         when(resourceBuilders.loadBalancer(any())).thenReturn(List.of(mockLoadBalancerResourceBuilder));
         List<CloudResourceStatus> statuses = underTest.buildResources(context, authenticatedContext, cloudStack);
-        Assert.assertTrue(statuses.isEmpty());
+        assertTrue(statuses.isEmpty());
 
     }
 
@@ -184,7 +185,7 @@ public class LoadBalancerResourceServiceTest {
             }
         };
         when(resourceBuilders.loadBalancer(any())).thenReturn(List.of(mockLoadBalancerResourceBuilder));
-        Assert.assertThrows(RuntimeException.class, () ->
+        assertThrows(RuntimeException.class, () ->
                 underTest.deleteResources(context, authenticatedContext, List.of(instance), false));
     }
 
@@ -205,6 +206,6 @@ public class LoadBalancerResourceServiceTest {
         };
         when(resourceBuilders.loadBalancer(any())).thenReturn(List.of(mockLoadBalancerResourceBuilder));
         List<CloudResourceStatus> statuses = underTest.buildResources(context, authenticatedContext, cloudStack);
-        Assert.assertTrue(statuses.isEmpty());
+        assertTrue(statuses.isEmpty());
     }
 }

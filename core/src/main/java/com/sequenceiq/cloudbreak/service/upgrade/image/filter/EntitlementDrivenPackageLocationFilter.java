@@ -63,7 +63,7 @@ public class EntitlementDrivenPackageLocationFilter implements UpgradeImageFilte
             LOGGER.debug("Skipping image filtering based on repository url");
             return image -> true;
         } else {
-            return image -> filters.stream().allMatch(filter -> filter.filterImage(image, imageFilterParams.getCurrentImage(), imageFilterParams));
+            return image -> filters.stream().allMatch(filter -> filter.filterImage(image, imageFilterParams));
         }
     }
 }

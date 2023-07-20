@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -67,8 +66,8 @@ public class RuntimeDependencyBasedUpgradeImageFilter implements UpgradeImageFil
 
     private List<Image> getAllCdhImagesFromCatalog(ImageFilterParams imageFilterParams, StackDto stack) {
         try {
-            return imageCatalogService.getAllCdhImages(ThreadBasedUserCrnProvider.getUserCrn(), stack.getWorkspaceId(),
-                    imageFilterParams.getImageCatalogName(), Set.of(imageFilterParams.getImageCatalogPlatform()));
+            return imageCatalogService.getAllCdhImages(stack.getWorkspaceId(), imageFilterParams.getImageCatalogName(),
+                    Set.of(imageFilterParams.getImageCatalogPlatform()));
         } catch (CloudbreakImageCatalogException e) {
             LOGGER.error("Failed to retrieve images from catalog {}", imageFilterParams.getImageCatalogName(), e);
             throw new CloudbreakServiceException(e);

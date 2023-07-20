@@ -32,11 +32,9 @@ public class UpgradeImageInfoFactory {
     public UpgradeImageInfo create(String targetImageId, Long stackId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image currentImage = componentConfigProviderService.getImage(stackId);
         Stack stack = stackService.get(stackId);
-        StatedImage currentStatedImage = imageCatalogService.getImage(stack.getWorkspace().getId(), currentImage.getImageCatalogUrl(),
-                currentImage.getImageCatalogName(), currentImage.getImageId());
         StatedImage targetStatedImage = imageCatalogService
                 .getImage(stack.getWorkspace().getId(), currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), targetImageId);
-        UpgradeImageInfo upgradeImageInfo = new UpgradeImageInfo(currentImage, currentStatedImage, targetStatedImage);
+        UpgradeImageInfo upgradeImageInfo = new UpgradeImageInfo(currentImage, targetStatedImage);
         LOGGER.debug("Provided upgradeImageInfo values to create UpgradeImageInfo: {}", upgradeImageInfo);
         return upgradeImageInfo;
     }

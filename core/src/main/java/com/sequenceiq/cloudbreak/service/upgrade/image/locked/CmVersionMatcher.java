@@ -8,10 +8,9 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 @Component
 public class CmVersionMatcher {
 
-    public boolean isCmVersionMatching(Image current, Image candidate) {
-        String currentCmBuildNumber = current.getCmBuildNumber();
+    public boolean isCmVersionMatching(String cmBuildNumber, Image candidate) {
         String candidateCmBuildNumber = candidate.getCmBuildNumber();
-        return StringUtils.isNoneBlank(currentCmBuildNumber, candidateCmBuildNumber)
-                && currentCmBuildNumber.equals(candidateCmBuildNumber);
+        return StringUtils.isNoneBlank(cmBuildNumber, candidateCmBuildNumber)
+                && cmBuildNumber.equals(candidateCmBuildNumber);
     }
 }

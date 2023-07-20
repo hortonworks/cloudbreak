@@ -55,12 +55,12 @@ class SdxUpgradeFilterTest {
     public void testDryRunShouldReturnOneUpgradeCandidate() {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
-        imageInfo.setCreated(1);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setCreated(1L);
+        imageInfo.setComponentVersions(crateExpectedPackageVersions());
         ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
         lastImageInfo.setImageId(IMAGE_ID_LAST);
-        lastImageInfo.setCreated(2);
-        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        lastImageInfo.setCreated(2L);
+        lastImageInfo.setComponentVersions(crateExpectedPackageVersions());
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
         upgradeV4Response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
         sdxUpgradeRequest.setDryRun(true);
@@ -84,17 +84,17 @@ class SdxUpgradeFilterTest {
 
         ImageInfoV4Response imageInfo1 = new ImageInfoV4Response();
         imageInfo1.setImageId(IMAGE_ID + 1);
-        imageInfo1.setCreated(1);
+        imageInfo1.setCreated(1L);
         imageInfo1.setComponentVersions(imageComponentVersionsFor702);
 
         ImageInfoV4Response imageInfo2 = new ImageInfoV4Response();
         imageInfo2.setImageId(IMAGE_ID + 2);
-        imageInfo2.setCreated(2);
+        imageInfo2.setCreated(2L);
         imageInfo2.setComponentVersions(imageComponentVersionsFor702);
 
         ImageInfoV4Response imageInfo3 = new ImageInfoV4Response();
         imageInfo3.setImageId(IMAGE_ID + 3);
-        imageInfo3.setCreated(3);
+        imageInfo3.setCreated(3L);
         imageInfo3.setComponentVersions(imageComponentVersionsFor703);
 
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
@@ -122,17 +122,17 @@ class SdxUpgradeFilterTest {
 
         ImageInfoV4Response imageInfo1 = new ImageInfoV4Response();
         imageInfo1.setImageId(IMAGE_ID + 1);
-        imageInfo1.setCreated(1);
+        imageInfo1.setCreated(1L);
         imageInfo1.setComponentVersions(imageComponentVersionsFor702);
 
         ImageInfoV4Response imageInfo2 = new ImageInfoV4Response();
         imageInfo2.setImageId(IMAGE_ID + 2);
-        imageInfo2.setCreated(2);
+        imageInfo2.setCreated(2L);
         imageInfo2.setComponentVersions(imageComponentVersionsFor702);
 
         ImageInfoV4Response imageInfo3 = new ImageInfoV4Response();
         imageInfo3.setImageId(IMAGE_ID + 3);
-        imageInfo3.setCreated(3);
+        imageInfo3.setCreated(3L);
         imageInfo3.setComponentVersions(imageComponentVersionsFor703);
 
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
@@ -154,7 +154,7 @@ class SdxUpgradeFilterTest {
         return sdxUpgradeRequest;
     }
 
-    private ImageComponentVersions creatExpectedPackageVersions() {
+    private ImageComponentVersions crateExpectedPackageVersions() {
         ImageComponentVersions imageComponentVersions = new ImageComponentVersions();
         imageComponentVersions.setCm(V_7_0_3);
         imageComponentVersions.setCdp(V_7_0_2);

@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -13,16 +13,16 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
@@ -30,11 +30,11 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
-import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ImageFilterParamsFactoryTest {
 
     private static final Long STACK_ID = 1L;
@@ -60,7 +60,7 @@ public class ImageFilterParamsFactoryTest {
 
     @Test
     public void testCreateShouldReturnsANewImageFilterParamsInstanceWhenTheStackTypeIsDataLake() {
-        StatedImage statedImage = StatedImage.statedImage(mock(Image.class), null, IMAGE_CATALOG_NAME);
+        Image currentImage = ModelImageTestBuilder.builder().withImageCatalogName(IMAGE_CATALOG_NAME).build();
         Stack stack = createStack(StackType.DATALAKE);
         Set<ClusterComponentView> clusterComponents = createCdhClusterComponent();
         String cdhName = com.sequenceiq.cloudbreak.cloud.model.component.StackType.CDH.name();
@@ -69,9 +69,9 @@ public class ImageFilterParamsFactoryTest {
         when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(clusterComponents);
         when(clouderaManagerProductsProvider.findCdhProduct(clusterComponents)).thenReturn(Optional.of(createCMProduct(cdhName, cdhVersion)));
 
-        ImageFilterParams actual = underTest.create(statedImage, true, stack, new InternalUpgradeSettings(false, true, true), false);
+        ImageFilterParams actual = underTest.create(currentImage, true, stack, new InternalUpgradeSettings(false, true, true), false);
 
-        assertEquals(statedImage.getImage(), actual.getCurrentImage());
+        assertEquals(currentImage, actual.getCurrentImage());
         assertEquals(IMAGE_CATALOG_NAME, actual.getImageCatalogName());
         assertTrue(actual.isLockComponents());
         assertEquals(cdhVersion, actual.getStackRelatedParcels().get(cdhName));
@@ -86,7 +86,7 @@ public class ImageFilterParamsFactoryTest {
 
     @Test
     public void testCreateShouldReturnsANewImageFilterParamsInstanceWhenTheStackTypeIsDataHub() {
-        StatedImage statedImage = StatedImage.statedImage(mock(Image.class), null, IMAGE_CATALOG_NAME);
+        Image currentImage = ModelImageTestBuilder.builder().withImageCatalogName(IMAGE_CATALOG_NAME).build();
         Stack stack = createStack(StackType.WORKLOAD);
         Set<ClusterComponentView> cdhClusterComponent = createCdhClusterComponent();
         String sparkName = "Spark";
@@ -99,9 +99,9 @@ public class ImageFilterParamsFactoryTest {
         when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(cdhClusterComponent);
         when(clouderaManagerProductsProvider.getProducts(cdhClusterComponent)).thenReturn(Set.of(spark, nifi));
 
-        ImageFilterParams actual = underTest.create(statedImage, true, stack, new InternalUpgradeSettings(true, true, true), false);
+        ImageFilterParams actual = underTest.create(currentImage, true, stack, new InternalUpgradeSettings(true, true, true), false);
 
-        assertEquals(statedImage.getImage(), actual.getCurrentImage());
+        assertEquals(currentImage, actual.getCurrentImage());
         assertEquals(IMAGE_CATALOG_NAME, actual.getImageCatalogName());
         assertTrue(actual.isLockComponents());
         assertTrue(actual.isSkipValidations());
@@ -116,16 +116,16 @@ public class ImageFilterParamsFactoryTest {
         verify(clouderaManagerProductsProvider).getProducts(cdhClusterComponent);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void testCreateShouldThrowExceptionThenThereIsNoCdhComponentAvailable() {
-        StatedImage statedImage = StatedImage.statedImage(mock(Image.class), null, IMAGE_CATALOG_NAME);
+        Image currentImage = ModelImageTestBuilder.builder().withImageCatalogName(IMAGE_CATALOG_NAME).build();
         Stack stack = createStack(StackType.DATALAKE);
         ClusterComponentView clusterComponent = new ClusterComponentView();
         clusterComponent.setName("CM");
 
         when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(Collections.singleton(clusterComponent));
 
-        underTest.create(statedImage, true, stack, new InternalUpgradeSettings(false, true, true), false);
+        assertThrows(NotFoundException.class, () -> underTest.create(currentImage, true, stack, new InternalUpgradeSettings(false, true, true), false));
 
         verify(parcelService).getParcelComponentsByBlueprint(stack);
     }

@@ -29,6 +29,8 @@ public class ImageConverter implements Converter<ImageEntity, Image> {
                 source.getImageCatalogName(),
                 source.getImageId(),
                 StringUtils.isNotBlank(source.getSourceImage()) ? Map.of(ImagePackageVersion.SOURCE_IMAGE.getKey(), source.getSourceImage()) :
-                        Collections.emptyMap());
+                        Collections.emptyMap(),
+                source.getDate(),
+                null);
     }
 }

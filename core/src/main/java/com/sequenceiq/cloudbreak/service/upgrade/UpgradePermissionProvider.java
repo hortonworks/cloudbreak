@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -41,11 +43,12 @@ public class UpgradePermissionProvider {
 
     private boolean permitUpgrade(ImageFilterParams imageFilterParams, Image image, ImagePackageVersion version, ImagePackageVersion buildNumber,
             boolean checkUpgradeMatrix) {
-        String currentVersion = imageFilterParams.getCurrentImage().getPackageVersion(version);
+        com.sequenceiq.cloudbreak.cloud.model.Image currentImage = imageFilterParams.getCurrentImage();
+        String currentVersion = currentImage.getPackageVersion(version);
         String newVersion = image.getPackageVersion(version);
         return versionsArePresent(currentVersion, newVersion)
                 && currentVersion.equals(newVersion)
-                ? permitCmAndStackUpgradeByBuildNumber(imageFilterParams.getCurrentImage(), image, buildNumber.getKey())
+                ? permitCmAndStackUpgradeByBuildNumber(currentImage.getPackageVersions(), image.getPackageVersions(), buildNumber.getKey())
                 : permitCmAndStackUpgradeByComponentVersion(currentVersion, newVersion, checkUpgradeMatrix);
     }
 
@@ -53,8 +56,8 @@ public class UpgradePermissionProvider {
         return currentVersion != null && newVersion != null;
     }
 
-    private boolean permitCmAndStackUpgradeByBuildNumber(Image currentImage, Image image, String buildNumberKey) {
-        return componentBuildNumberComparator.compare(currentImage, image, buildNumberKey);
+    private boolean permitCmAndStackUpgradeByBuildNumber(Map<String, String> currentImagePackages, Map<String, String> newImagePackages, String buildNumberKey) {
+        return componentBuildNumberComparator.compare(currentImagePackages, newImagePackages, buildNumberKey);
     }
 
     boolean permitCmAndStackUpgradeByComponentVersion(String currentVersion, String newVersion, boolean checkUpgradeMatrix) {

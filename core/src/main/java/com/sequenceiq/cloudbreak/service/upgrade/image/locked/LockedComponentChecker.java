@@ -20,10 +20,10 @@ public class LockedComponentChecker {
     @Inject
     private CmVersionMatcher cmVersionMatcher;
 
-    public boolean isUpgradePermitted(Image currentImage, Image candidateImage, Map<String, String> activatedParcels) {
+    public boolean isUpgradePermitted(Image candidateImage, Map<String, String> activatedParcels, String cmBuildNumber) {
         boolean parcelsMatch = parcelMatcher.isMatchingNonCdhParcels(candidateImage, activatedParcels);
         boolean stackVersionMatches = stackVersionMatcher.isMatchingStackVersion(candidateImage, activatedParcels);
-        boolean cmVersionMatches = cmVersionMatcher.isCmVersionMatching(currentImage, candidateImage);
+        boolean cmVersionMatches = cmVersionMatcher.isCmVersionMatching(cmBuildNumber, candidateImage);
 
         return parcelsMatch && stackVersionMatches && cmVersionMatches;
     }

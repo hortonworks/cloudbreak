@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +54,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelFilterService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -128,10 +128,15 @@ class ClouderaManagerClusterCreationSetupServiceTest {
         stack.setPlatformVariant("AWS");
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText("{}");
-        Map<InstanceGroupType, String> userData = new HashMap<>();
-        userData.put(InstanceGroupType.CORE, "userdata");
-        Image image = new Image("imagename", userData, CENTOS_7, REDHAT_7, "url", IMAGE_CATALOG_NAME,
-                "id", Collections.emptyMap());
+        Image image = ModelImageTestBuilder.builder()
+                .withImageName("imagename")
+                .withUserData(Map.of(InstanceGroupType.CORE, "userdata"))
+                .withOs(CENTOS_7)
+                .withOsType(REDHAT_7)
+                .withImageCatalogUrl("url")
+                .withImageCatalogName(IMAGE_CATALOG_NAME)
+                .withImageId("id")
+                .build();
         imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
 
         cluster = new Cluster();

@@ -13,7 +13,8 @@ public class ClouderaManagerPackageLocationFilter implements PackageLocationFilt
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerPackageLocationFilter.class);
 
     @Override
-    public boolean filterImage(Image image, Image currentImage, ImageFilterParams imageFilterParams) {
+    public boolean filterImage(Image image, ImageFilterParams imageFilterParams) {
+        com.sequenceiq.cloudbreak.cloud.model.Image currentImage = imageFilterParams.getCurrentImage();
         if (image == null || image.getRepo() == null || currentImage == null || StringUtils.isBlank(currentImage.getOsType())) {
             LOGGER.debug("Image or repo is null: {}", image);
             return false;

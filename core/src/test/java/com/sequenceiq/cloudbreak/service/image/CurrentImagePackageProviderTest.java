@@ -84,6 +84,6 @@ class CurrentImagePackageProviderTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createImage(String imageId) {
-        return new com.sequenceiq.cloudbreak.cloud.model.Image(null, null, null, null, null, null, imageId, null);
+        return ModelImageTestBuilder.builder().withImageId(imageId).build();
     }
 }

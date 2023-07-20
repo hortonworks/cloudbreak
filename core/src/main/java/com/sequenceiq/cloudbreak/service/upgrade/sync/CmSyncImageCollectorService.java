@@ -38,17 +38,16 @@ public class CmSyncImageCollectorService {
      * Will collect all images using the stack's image catalog.
      * If the candidateImageUuids are empty, all images for the given cloud platform are returned.
      * TODO: Currently, however, if no candidateImageUuids are supplied, only the last patch for every line is returned. This needs to be fixed
-     * @param userCrn The user who executes
      * @param stack The stack for which the image uuid are to be resolved
      * @param candidateImageUuids A set of image uuids that are resolved to images. If empty, all applicable images are returned
      * @return A set of found images
      */
-    public Set<Image> collectImages(String userCrn, Stack stack, Set<String> candidateImageUuids) {
+    public Set<Image> collectImages(Stack stack, Set<String> candidateImageUuids) {
         try {
             String imageCatalogName = imageService.getCurrentImageCatalogName(stack.getId());
             Long workspaceId = stack.getWorkspaceId();
             return candidateImageUuids.isEmpty()
-                    ? getAllImagesFromCatalog(userCrn, stack, imageCatalogName, workspaceId)
+                    ? getAllImagesFromCatalog(stack, imageCatalogName, workspaceId)
                     : getCurrentAndSelectedImagesFromCatalog(stack, candidateImageUuids, imageCatalogName, workspaceId);
         } catch (Exception e) {
             LOGGER.warn("It is not possible to collect images for CM sync, returning empty collection: ", e);
@@ -65,8 +64,8 @@ public class CmSyncImageCollectorService {
         return candidateImages;
     }
 
-    private Set<Image> getAllImagesFromCatalog(String userCrn, Stack stack, String imageCatalogName, Long workspaceId) throws CloudbreakImageCatalogException {
-        List<Image> allCdhImages = imageCatalogService.getAllCdhImages(userCrn, workspaceId, imageCatalogName,
+    private Set<Image> getAllImagesFromCatalog(Stack stack, String imageCatalogName, Long workspaceId) throws CloudbreakImageCatalogException {
+        List<Image> allCdhImages = imageCatalogService.getAllCdhImages(workspaceId, imageCatalogName,
                 platformStringTransformer.getPlatformStringForImageCatalogSet(stack.getCloudPlatform(), stack.getPlatformVariant()));
         return new HashSet<>(allCdhImages);
     }

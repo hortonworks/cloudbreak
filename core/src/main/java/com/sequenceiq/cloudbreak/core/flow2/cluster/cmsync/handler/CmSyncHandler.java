@@ -59,7 +59,7 @@ public class CmSyncHandler extends ExceptionCatcherEventHandler<CmSyncRequest> {
         CmSyncRequest request = event.getData();
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-            Set<Image> candidateImages = cmSyncImageCollectorService.collectImages(request.getFlowTriggerUserCrn(), stack, request.getCandidateImageUuids());
+            Set<Image> candidateImages = cmSyncImageCollectorService.collectImages(stack, request.getCandidateImageUuids());
             CmSyncOperationSummary cmSyncOperationSummary = cmSyncerService.syncFromCmToDb(stack, candidateImages);
             CmSyncOperationStatus cmSyncOperationStatus = cmSyncOperationSummary.getSyncOperationStatus();
             if (!cmSyncOperationStatus.hasSucceeded()) {

@@ -55,6 +55,9 @@ class RuntimeDependencyBasedUpgradeImageFilterTest {
     @Mock
     private StackDto stack;
 
+    @Mock
+    private com.sequenceiq.cloudbreak.cloud.model.Image currentImage;
+
     @Test
     void testFilterShouldReturnTheImagesWithTheCorrectPythonVersion() throws CloudbreakImageCatalogException {
         Image image1 = ImageTestBuilder.builder().withUuid("image1").build();
@@ -63,7 +66,7 @@ class RuntimeDependencyBasedUpgradeImageFilterTest {
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
         when(stack.getWorkspaceId()).thenReturn(WORKSPACE_ID);
-        when(imageCatalogService.getAllCdhImages(any(), eq(WORKSPACE_ID), eq(IMAGE_CATALOG_NAME), any())).thenReturn(IMAGES);
+        when(imageCatalogService.getAllCdhImages(eq(WORKSPACE_ID), eq(IMAGE_CATALOG_NAME), any())).thenReturn(IMAGES);
         when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, IMAGES, imageFilterParams.getCurrentImage(), image1))
                 .thenReturn(true);
         when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, IMAGES, imageFilterParams.getCurrentImage(), image2))
@@ -84,7 +87,7 @@ class RuntimeDependencyBasedUpgradeImageFilterTest {
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
         when(stack.getWorkspaceId()).thenReturn(WORKSPACE_ID);
-        when(imageCatalogService.getAllCdhImages(any(), eq(WORKSPACE_ID), eq(IMAGE_CATALOG_NAME), any())).thenReturn(IMAGES);
+        when(imageCatalogService.getAllCdhImages(eq(WORKSPACE_ID), eq(IMAGE_CATALOG_NAME), any())).thenReturn(IMAGES);
         when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, IMAGES, imageFilterParams.getCurrentImage(), image1))
                 .thenReturn(false);
         when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, IMAGES, imageFilterParams.getCurrentImage(), image2))
@@ -97,7 +100,7 @@ class RuntimeDependencyBasedUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams() {
-        return new ImageFilterParams(ImageTestBuilder.builder().withUuid("current").build(), IMAGE_CATALOG_NAME, false, null, null, null, STACK_ID, null,
+        return new ImageFilterParams(currentImage, IMAGE_CATALOG_NAME, false, null, null, null, STACK_ID, null,
                 new ImageCatalogPlatform(CloudPlatform.AWS.name()), null, null, false);
     }
 }

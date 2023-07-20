@@ -29,7 +29,7 @@ public class PreWarmParcelLocationFilter implements PackageLocationFilter {
     private static final String IGNORED_PARCEL_NAME = "CDH";
 
     @Override
-    public boolean filterImage(Image image, Image currentImage, ImageFilterParams imageFilterParams) {
+    public boolean filterImage(Image image, ImageFilterParams imageFilterParams) {
         if (StackType.WORKLOAD.equals(imageFilterParams.getStackType())) {
             if (isInvalidImage(image)) {
                 LOGGER.debug("Image or some part of it is null or not contains the parcel urls: {}", image);

@@ -30,7 +30,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.ForwardingRule;
 import com.google.api.services.compute.model.Operation;
-import com.google.api.services.compute.model.Subnetwork;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
@@ -114,7 +113,8 @@ class GcpForwardingRuleResourceBuilderTest {
     @BeforeEach
     void setup() {
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
-        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
+        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>(), "2019-10-24",
+                1571884856L);
         GcpResourceNameService resourceNameService = new GcpResourceNameService();
         ReflectionTestUtils.setField(resourceNameService, "maxResourceNameLength", 50);
         ReflectionTestUtils.setField(underTest, "resourceNameService", resourceNameService);
@@ -271,8 +271,6 @@ class GcpForwardingRuleResourceBuilderTest {
 
     private void mockCalls(LoadBalancerType lbType) throws IOException {
         Compute.ForwardingRules.Insert forwardingRulesInsert = mock(Compute.ForwardingRules.Insert.class);
-        Compute.Subnetworks.Get subnetworkGet = mock(Compute.Subnetworks.Get.class);
-        Subnetwork subnetwork = mock(Subnetwork.class);
 
         when(gcpContext.getCompute()).thenReturn(compute);
         when(gcpContext.getProjectId()).thenReturn("id");

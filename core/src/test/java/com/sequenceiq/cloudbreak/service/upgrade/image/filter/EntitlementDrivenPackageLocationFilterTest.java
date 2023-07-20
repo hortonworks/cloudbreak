@@ -40,7 +40,7 @@ class EntitlementDrivenPackageLocationFilterTest {
     private ImageFilterParams imageFilterParams;
 
     @Mock
-    private Image currentImage;
+    private com.sequenceiq.cloudbreak.cloud.model.Image currentImage;
 
     @Mock
     private Image image1;
@@ -51,7 +51,6 @@ class EntitlementDrivenPackageLocationFilterTest {
     @BeforeEach
     public void init() {
         when(entitlementService.isInternalRepositoryForUpgradeAllowed(anyString())).thenReturn(Boolean.FALSE);
-        when(imageFilterParams.getCurrentImage()).thenReturn(currentImage);
     }
 
     @AfterEach
@@ -71,7 +70,7 @@ class EntitlementDrivenPackageLocationFilterTest {
 
         assertEquals(images, actual.getImages());
         assertTrue(actual.getReason().isEmpty());
-        verify(filter, never()).filterImage(any(Image.class), any(Image.class), any(ImageFilterParams.class));
+        verify(filter, never()).filterImage(any(Image.class), any(ImageFilterParams.class));
     }
 
     @Test
@@ -85,7 +84,7 @@ class EntitlementDrivenPackageLocationFilterTest {
 
         assertEquals(images, actual.getImages());
         assertTrue(actual.getReason().isEmpty());
-        filters.forEach(filter -> verify(filter, times(2)).filterImage(any(Image.class), any(Image.class), any(ImageFilterParams.class)));
+        filters.forEach(filter -> verify(filter, times(2)).filterImage(any(Image.class), any(ImageFilterParams.class)));
     }
 
     @Test
@@ -116,13 +115,13 @@ class EntitlementDrivenPackageLocationFilterTest {
 
     private PackageLocationFilter createAcceptingFilter() {
         PackageLocationFilter filter = mock(PackageLocationFilter.class);
-        lenient().when(filter.filterImage(any(Image.class), any(Image.class), any(ImageFilterParams.class))).thenReturn(Boolean.TRUE);
+        lenient().when(filter.filterImage(any(Image.class), any(ImageFilterParams.class))).thenReturn(Boolean.TRUE);
         return filter;
     }
 
     private PackageLocationFilter createRejectingFilter() {
         PackageLocationFilter filter = mock(PackageLocationFilter.class);
-        lenient().when(filter.filterImage(any(Image.class), any(Image.class), any(ImageFilterParams.class))).thenReturn(Boolean.FALSE);
+        lenient().when(filter.filterImage(any(Image.class), any(ImageFilterParams.class))).thenReturn(Boolean.FALSE);
         return filter;
     }
 }

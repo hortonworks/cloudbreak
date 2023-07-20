@@ -13,18 +13,18 @@ public class CdhPackageLocationFilter implements PackageLocationFilter {
     private static final Logger LOGGER = LoggerFactory.getLogger(CdhPackageLocationFilter.class);
 
     @Override
-    public boolean filterImage(Image image, Image currentImage, ImageFilterParams imageFilterParams) {
-        if (isRelevantFieldNull(image, currentImage)) {
+    public boolean filterImage(Image image, ImageFilterParams imageFilterParams) {
+        if (isRelevantFieldNull(image, imageFilterParams.getCurrentImage())) {
             LOGGER.debug("Image or some part of it is null: {}", image);
             return false;
         } else {
-            String repoUrl = image.getStackDetails().getRepo().getStack().getOrDefault(currentImage.getOsType(), "");
+            String repoUrl = image.getStackDetails().getRepo().getStack().getOrDefault(imageFilterParams.getCurrentImage().getOsType(), "");
             LOGGER.debug("Matching URL: [{}]", repoUrl);
             return URL_PATTERN.matcher(repoUrl).find();
         }
     }
 
-    private boolean isRelevantFieldNull(Image image, Image currentImage) {
+    private boolean isRelevantFieldNull(Image image, com.sequenceiq.cloudbreak.cloud.model.Image currentImage) {
         return image == null
                 || image.getStackDetails() == null
                 || image.getStackDetails().getRepo() == null

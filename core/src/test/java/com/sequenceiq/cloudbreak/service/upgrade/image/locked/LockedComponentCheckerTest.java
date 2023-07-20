@@ -20,9 +20,9 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 @ExtendWith(MockitoExtension.class)
 class LockedComponentCheckerTest {
 
-    private final Image candidateImage = mock(Image.class);
+    private static final String CM_BUILD_NUMBER = "12345";
 
-    private final Image currentImage = mock(Image.class);
+    private final Image candidateImage = mock(Image.class);
 
     private final Map<String, String> activatedParcels = Map.of();
 
@@ -56,13 +56,13 @@ class LockedComponentCheckerTest {
     public void testResult(Boolean expectedResult, Boolean parcelMatching, Boolean stackVersionMatching, Boolean cmVersionMatching) {
         when(parcelMatcher.isMatchingNonCdhParcels(candidateImage, activatedParcels)).thenReturn(parcelMatching);
         when(stackVersionMatcher.isMatchingStackVersion(candidateImage, activatedParcels)).thenReturn(stackVersionMatching);
-        when(cmVersionMatcher.isCmVersionMatching(currentImage, candidateImage)).thenReturn(cmVersionMatching);
+        when(cmVersionMatcher.isCmVersionMatching(CM_BUILD_NUMBER, candidateImage)).thenReturn(cmVersionMatching);
 
-        boolean result = underTest.isUpgradePermitted(currentImage, candidateImage, activatedParcels);
+        boolean result = underTest.isUpgradePermitted(candidateImage, activatedParcels, CM_BUILD_NUMBER);
 
         assertEquals(expectedResult, result);
         verify(parcelMatcher, times(1)).isMatchingNonCdhParcels(candidateImage, activatedParcels);
         verify(stackVersionMatcher, times(1)).isMatchingStackVersion(candidateImage, activatedParcels);
-        verify(cmVersionMatcher, times(1)).isCmVersionMatching(currentImage, candidateImage);
+        verify(cmVersionMatcher, times(1)).isCmVersionMatching(CM_BUILD_NUMBER, candidateImage);
     }
 }

@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.ImageTestUtil;
@@ -38,21 +37,6 @@ class StackComponentUpdaterTest {
     private static final String TARGET_STACK_VERSION = "7.2.0";
 
     private static final String STACK_VERSION = "7.1.0";
-
-    private static final String CDH = "CDH";
-
-    private static final String CDH_VERSION = "7.0.0-1.cdh7.0.0.p0.1376867";
-
-    private static final Long STACK_ID = 1L;
-
-    private static final String PARCEL_TEMPLATE = "{\"name\":\"%s\",\"version\":\"%s\","
-            + "\"parcel\":\"https://archive.cloudera.com/cdh7/7.0.0/parcels/\"}";
-
-    private static final String CDH_ATTRIBUTES = String.format(PARCEL_TEMPLATE, CDH, CDH_VERSION);
-
-    private static final String CM_ATTRIBUTES = "{\"predefined\":false,\"version\":\"7.0.0\","
-            + "\"baseUrl\":\"https://archive.cloudera.com/cm7/7.0.0/redhat7/yum/\","
-            + "\"gpgKeyUrl\":\"https://archive.cloudera.com/cm7/7.0.0/redhat7/yum/RPM-GPG-KEY-cloudera\"}";
 
     @Mock
     private ImageService imageService;
@@ -112,7 +96,7 @@ class StackComponentUpdaterTest {
                 Map.of(InstanceGroupType.GATEWAY, "gw user data"),
                 statedImage.getImage().getOs(), statedImage.getImage().getOsType(),
                 statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), statedImage.getImage().getUuid(),
-                statedImage.getImage().getPackageVersions());
+                statedImage.getImage().getPackageVersions(), null, null);
         return new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
     }
 
@@ -122,17 +106,6 @@ class StackComponentUpdaterTest {
 
     private Component createCMComponennt(Stack stack) {
         return new Component(ComponentType.CM_REPO_DETAILS, ComponentType.CM_REPO_DETAILS.name(), new Json(getClouderaManagerRepo()), stack);
-    }
-
-    private Set<ClusterComponent> clusterComponentSet(Cluster cluster) {
-        ClusterComponent cdhComponent = createClusterComponent(CDH_ATTRIBUTES, CDH, ComponentType.CDH_PRODUCT_DETAILS, cluster);
-        ClusterComponent cmComponent = createClusterComponent(CM_ATTRIBUTES, ComponentType.CM_REPO_DETAILS.name(), ComponentType.CM_REPO_DETAILS, cluster);
-        return Set.of(cdhComponent, cmComponent);
-    }
-
-    private ClusterComponent createClusterComponent(String attributeString, String name, ComponentType componentType, Cluster cluster) {
-        Json attributes = new Json(attributeString);
-        return new ClusterComponent(componentType, name, attributes, cluster);
     }
 
     private ClouderaManagerRepo getClouderaManagerRepo() {

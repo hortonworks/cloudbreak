@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.setup;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -14,8 +15,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -117,16 +116,7 @@ public class GcpProvisionSetupTest {
         Image imageGoogle = mock(Image.class);
         Compute.Images.Get imagesGet = mock(Compute.Images.Get.class);
         CloudCredential cloudCredential = mock(CloudCredential.class);
-        com.sequenceiq.cloudbreak.cloud.model.Image image = new com.sequenceiq.cloudbreak.cloud.model.Image(
-                "super-image",
-                Map.of(),
-                "centos",
-                "redhat",
-                "http://url",
-                "default",
-                "1234-1234-123-123",
-                Map.of()
-        );
+        com.sequenceiq.cloudbreak.cloud.model.Image image = createImage();
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
@@ -141,8 +131,8 @@ public class GcpProvisionSetupTest {
                 cloudStack,
                 image
         );
-        Assert.assertEquals(ImageStatus.CREATE_FINISHED, imageStatusResult.getImageStatus());
-        Assert.assertEquals(Integer.valueOf(100), imageStatusResult.getStatusProgressValue());
+        assertEquals(ImageStatus.CREATE_FINISHED, imageStatusResult.getImageStatus());
+        assertEquals(Integer.valueOf(100), imageStatusResult.getStatusProgressValue());
     }
 
     @Test
@@ -154,16 +144,7 @@ public class GcpProvisionSetupTest {
         Image imageGoogle = mock(Image.class);
         Compute.Images.Get imagesGet = mock(Compute.Images.Get.class);
         CloudCredential cloudCredential = mock(CloudCredential.class);
-        com.sequenceiq.cloudbreak.cloud.model.Image image = new com.sequenceiq.cloudbreak.cloud.model.Image(
-                "super-image",
-                Map.of(),
-                "centos",
-                "redhat",
-                "http://url",
-                "default",
-                "1234-1234-123-123",
-                Map.of()
-        );
+        com.sequenceiq.cloudbreak.cloud.model.Image image = createImage();
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
@@ -178,8 +159,8 @@ public class GcpProvisionSetupTest {
                 cloudStack,
                 image
         );
-        Assert.assertEquals(ImageStatus.IN_PROGRESS, imageStatusResult.getImageStatus());
-        Assert.assertEquals(Integer.valueOf(50), imageStatusResult.getStatusProgressValue());
+        assertEquals(ImageStatus.IN_PROGRESS, imageStatusResult.getImageStatus());
+        assertEquals(Integer.valueOf(50), imageStatusResult.getStatusProgressValue());
     }
 
     @Test
@@ -190,16 +171,7 @@ public class GcpProvisionSetupTest {
         Compute.Images images = mock(Compute.Images.class);
         Compute.Images.Get imagesGet = mock(Compute.Images.Get.class);
         CloudCredential cloudCredential = mock(CloudCredential.class);
-        com.sequenceiq.cloudbreak.cloud.model.Image image = new com.sequenceiq.cloudbreak.cloud.model.Image(
-                "super-image",
-                Map.of(),
-                "centos",
-                "redhat",
-                "http://url",
-                "default",
-                "1234-1234-123-123",
-                Map.of()
-        );
+        com.sequenceiq.cloudbreak.cloud.model.Image image = createImage();
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
@@ -211,7 +183,7 @@ public class GcpProvisionSetupTest {
         when(gcpStackUtil.getMissingServiceAccountKeyError(any(TokenResponseException.class), anyString()))
                 .thenThrow(new GcpResourceException("error"));
 
-        Assertions.assertThrows(GcpResourceException.class, () -> underTest.checkImageStatus(
+        assertThrows(GcpResourceException.class, () -> underTest.checkImageStatus(
                 authenticatedContext,
                 cloudStack,
                 image
@@ -226,16 +198,7 @@ public class GcpProvisionSetupTest {
         Compute.Images images = mock(Compute.Images.class);
         Compute.Images.Get imagesGet = mock(Compute.Images.Get.class);
         CloudCredential cloudCredential = mock(CloudCredential.class);
-        com.sequenceiq.cloudbreak.cloud.model.Image image = new com.sequenceiq.cloudbreak.cloud.model.Image(
-                "super-image",
-                Map.of(),
-                "centos",
-                "redhat",
-                "http://url",
-                "default",
-                "1234-1234-123-123",
-                Map.of()
-        );
+        com.sequenceiq.cloudbreak.cloud.model.Image image = createImage();
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
@@ -250,8 +213,8 @@ public class GcpProvisionSetupTest {
                 cloudStack,
                 image
         );
-        Assert.assertEquals(ImageStatus.CREATE_FAILED, imageStatusResult.getImageStatus());
-        Assert.assertEquals(Integer.valueOf(0), imageStatusResult.getStatusProgressValue());
+        assertEquals(ImageStatus.CREATE_FAILED, imageStatusResult.getImageStatus());
+        assertEquals(Integer.valueOf(0), imageStatusResult.getStatusProgressValue());
     }
 
     @Test
@@ -263,16 +226,7 @@ public class GcpProvisionSetupTest {
         CloudContext cloudContext = mock(CloudContext.class);
         Compute.Images images = mock(Compute.Images.class);
         Compute.Images.Get imagesGet = mock(Compute.Images.Get.class);
-        com.sequenceiq.cloudbreak.cloud.model.Image image = new com.sequenceiq.cloudbreak.cloud.model.Image(
-                "super-image",
-                Map.of(),
-                "centos",
-                "redhat",
-                "http://url",
-                "default",
-                "1234-1234-123-123",
-                Map.of()
-        );
+        com.sequenceiq.cloudbreak.cloud.model.Image image = createImage();
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
@@ -303,16 +257,7 @@ public class GcpProvisionSetupTest {
         Compute.Images images = mock(Compute.Images.class);
         Compute.Images.Get imagesGet = mock(Compute.Images.Get.class);
         Image imageGoogle = mock(Image.class);
-        com.sequenceiq.cloudbreak.cloud.model.Image image = new com.sequenceiq.cloudbreak.cloud.model.Image(
-                "super-image",
-                Map.of(),
-                "centos",
-                "redhat",
-                "http://url",
-                "default",
-                "1234-1234-123-123",
-                Map.of()
-        );
+        com.sequenceiq.cloudbreak.cloud.model.Image image = createImage();
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(gcpStackUtil.getProjectId(any(CloudCredential.class))).thenReturn("project-id");
@@ -339,16 +284,7 @@ public class GcpProvisionSetupTest {
         Storage.Objects storageObjects = mock(Storage.Objects.class);
         Storage.Objects.Rewrite storageObjectsRewrite = mock(Storage.Objects.Rewrite.class);
         RewriteResponse rewriteResponse = mock(RewriteResponse.class);
-        com.sequenceiq.cloudbreak.cloud.model.Image image = new com.sequenceiq.cloudbreak.cloud.model.Image(
-                "super-image",
-                Map.of(),
-                "centos",
-                "redhat",
-                "http://url",
-                "default",
-                "1234-1234-123-123",
-                Map.of()
-        );
+        com.sequenceiq.cloudbreak.cloud.model.Image image = createImage();
         GoogleJsonResponseException notFoundImageException = mock(GoogleJsonResponseException.class);
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
@@ -396,16 +332,7 @@ public class GcpProvisionSetupTest {
         Storage.Objects storageObjects = mock(Storage.Objects.class);
         Storage.Objects.Rewrite storageObjectsRewrite = mock(Storage.Objects.Rewrite.class);
         RewriteResponse rewriteResponse = mock(RewriteResponse.class);
-        com.sequenceiq.cloudbreak.cloud.model.Image image = new com.sequenceiq.cloudbreak.cloud.model.Image(
-                "super-image",
-                Map.of(),
-                "centos",
-                "redhat",
-                "http://url",
-                "default",
-                "1234-1234-123-123",
-                Map.of()
-        );
+        com.sequenceiq.cloudbreak.cloud.model.Image image = createImage();
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(authenticatedContext.getCloudContext()).thenReturn(context);
@@ -435,7 +362,7 @@ public class GcpProvisionSetupTest {
                 .create(anyString(), anyString(), anyString(), anyString(), anyString(), any(Storage.class));
         verify(gcpBucketRegisterService, times(1)).register(any(AuthenticatedContext.class));
         verify(gcpImageRegisterService, times(0)).register(any(AuthenticatedContext.class), anyString(), anyString());
-        Assert.assertTrue(cloudConnectorException.getMessage().contains("Image copy failed because the copy take too long time"));
+        assertTrue(cloudConnectorException.getMessage().contains("Image copy failed because the copy take too long time"));
     }
 
     @Test
@@ -452,16 +379,7 @@ public class GcpProvisionSetupTest {
         Storage.Objects storageObjects = mock(Storage.Objects.class);
         Storage.Objects.Rewrite storageObjectsRewrite = mock(Storage.Objects.Rewrite.class);
         RewriteResponse rewriteResponse = mock(RewriteResponse.class);
-        com.sequenceiq.cloudbreak.cloud.model.Image image = new com.sequenceiq.cloudbreak.cloud.model.Image(
-                "super-image",
-                Map.of(),
-                "centos",
-                "redhat",
-                "http://url",
-                "default",
-                "1234-1234-123-123",
-                Map.of()
-        );
+        com.sequenceiq.cloudbreak.cloud.model.Image image = createImage();
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(authenticatedContext.getCloudContext()).thenReturn(context);
@@ -491,7 +409,7 @@ public class GcpProvisionSetupTest {
                 .create(anyString(), anyString(), anyString(), anyString(), anyString(), any(Storage.class));
         verify(gcpBucketRegisterService, times(1)).register(any(AuthenticatedContext.class));
         verify(gcpImageRegisterService, times(0)).register(any(AuthenticatedContext.class), anyString(), anyString());
-        Assert.assertTrue(cloudConnectorException.getMessage().contains("Image copy failed because"));
+        assertTrue(cloudConnectorException.getMessage().contains("Image copy failed because"));
     }
 
     @Test
@@ -506,16 +424,7 @@ public class GcpProvisionSetupTest {
         Storage storage = mock(Storage.class);
         Storage.Objects storageObjects = mock(Storage.Objects.class);
         Storage.Objects.Rewrite storageObjectsRewrite = mock(Storage.Objects.Rewrite.class);
-        com.sequenceiq.cloudbreak.cloud.model.Image image = new com.sequenceiq.cloudbreak.cloud.model.Image(
-                "super-image",
-                Map.of(),
-                "centos",
-                "redhat",
-                "http://url",
-                "default",
-                "1234-1234-123-123",
-                Map.of()
-        );
+        com.sequenceiq.cloudbreak.cloud.model.Image image = createImage();
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(authenticatedContext.getCloudContext()).thenReturn(context);
@@ -537,12 +446,27 @@ public class GcpProvisionSetupTest {
         CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
                 () -> underTest.prepareImage(authenticatedContext, cloudStack, image));
 
-        Assert.assertTrue(cloudConnectorException.getMessage().contains("Copying the image could not be started, " +
+        assertTrue(cloudConnectorException.getMessage().contains("Copying the image could not be started, " +
                 "please check whether you have given access to CDP for storage API."));
         verify(gcpImageAttemptMakerFactory, times(0))
                 .create(anyString(), anyString(), anyString(), anyString(), anyString(), any(Storage.class));
         verify(gcpBucketRegisterService, times(1)).register(any(AuthenticatedContext.class));
         verify(gcpImageRegisterService, times(0)).register(any(AuthenticatedContext.class), anyString(), anyString());
+    }
+
+    private com.sequenceiq.cloudbreak.cloud.model.Image createImage() {
+        return new com.sequenceiq.cloudbreak.cloud.model.Image(
+                "super-image",
+                Map.of(),
+                "centos",
+                "redhat",
+                "http://url",
+                "default",
+                "1234-1234-123-123",
+                Map.of(),
+                "2019-10-24",
+                1571884856L
+        );
     }
 
 }

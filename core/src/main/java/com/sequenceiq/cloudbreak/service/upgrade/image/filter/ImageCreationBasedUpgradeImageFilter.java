@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 
@@ -22,7 +23,7 @@ public class ImageCreationBasedUpgradeImageFilter implements UpgradeImageFilter 
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
-        Image currentImage = imageFilterParams.getCurrentImage();
+        com.sequenceiq.cloudbreak.cloud.model.Image currentImage = imageFilterParams.getCurrentImage();
         List<Image> filteredImages = filterImages(imageFilterResult, currentImage);
         LOGGER.debug("After the filtering {} image left with proper creation date.", filteredImages.size());
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
@@ -38,22 +39,22 @@ public class ImageCreationBasedUpgradeImageFilter implements UpgradeImageFilter 
         return ORDER_NUMBER;
     }
 
-    private List<Image> filterImages(ImageFilterResult imageFilterResult, Image currentImage) {
+    private List<Image> filterImages(ImageFilterResult imageFilterResult, com.sequenceiq.cloudbreak.cloud.model.Image currentImage) {
         return imageFilterResult.getImages()
                 .stream()
                 .filter(candidate -> isDifferentVersion(currentImage, candidate) || isNewerOrSameCreationImage(currentImage, candidate))
                 .collect(Collectors.toList());
     }
 
-    private boolean isDifferentVersion(Image currentImage, Image candidate) {
-        return Objects.nonNull(currentImage.getStackDetails())
-                && StringUtils.isNotBlank(currentImage.getStackDetails().getVersion())
+    private boolean isDifferentVersion(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image candidate) {
+        return Objects.nonNull(currentImage.getPackageVersions())
+                && StringUtils.isNotBlank(currentImage.getPackageVersion(ImagePackageVersion.STACK))
                 && Objects.nonNull(candidate.getStackDetails())
                 && StringUtils.isNotBlank(candidate.getStackDetails().getVersion())
-                && !candidate.getStackDetails().getVersion().equalsIgnoreCase(currentImage.getStackDetails().getVersion());
+                && !candidate.getStackDetails().getVersion().equalsIgnoreCase(currentImage.getPackageVersion(ImagePackageVersion.STACK));
     }
 
-    private boolean isNewerOrSameCreationImage(Image currentImage, Image candidate) {
+    private boolean isNewerOrSameCreationImage(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image candidate) {
         return Objects.nonNull(candidate.getCreated())
                 && Objects.nonNull(currentImage.getCreated())
                 && candidate.getCreated() >= currentImage.getCreated();

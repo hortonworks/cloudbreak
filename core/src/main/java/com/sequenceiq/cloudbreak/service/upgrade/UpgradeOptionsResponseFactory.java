@@ -31,16 +31,16 @@ public class UpgradeOptionsResponseFactory {
     @Inject
     private PlatformStringTransformer platformStringTransformer;
 
-    public UpgradeV4Response createV4Response(Image currentImage, ImageFilterResult filteredImages, String cloudPlatform, String region,
-            String imageCatalogName) {
+    public UpgradeV4Response createV4Response(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, ImageFilterResult filteredImages, String cloudPlatform,
+            String region, String imageCatalogName) {
         return new UpgradeV4Response(
-                createImageInfoFromCurrentImage(currentImage, cloudPlatform, region, imageCatalogName),
+                createImageInfoFromCurrentImage(currentImage, imageCatalogName),
                 createImageInfoFromFilteredImages(filteredImages.getImages(), imageCatalogName, cloudPlatform, region),
                 filteredImages.getReason());
     }
 
-    private ImageInfoV4Response createImageInfoFromCurrentImage(Image currentImage, String cloudPlatform, String region, String imageCatalogName) {
-        return new ImageInfoV4Response(getImageName(currentImage, cloudPlatform, region), currentImage.getUuid(), imageCatalogName, currentImage.getCreated(),
+    private ImageInfoV4Response createImageInfoFromCurrentImage(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, String imageCatalogName) {
+        return new ImageInfoV4Response(currentImage.getImageName(), currentImage.getImageId(), imageCatalogName, currentImage.getCreated(),
                 currentImage.getDate(), getComponentVersions(currentImage.getPackageVersions(), currentImage.getOs(), currentImage.getDate()));
     }
 

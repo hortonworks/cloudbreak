@@ -7,5 +7,5 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 public interface PackageLocationFilter {
     Pattern URL_PATTERN = Pattern.compile("http[s]?://archive\\.cloudera\\.com.+");
 
-    boolean filterImage(Image image, Image currentImage, ImageFilterParams imageFilterParams);
+    boolean filterImage(Image image, ImageFilterParams imageFilterParams);
 }

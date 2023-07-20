@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade;
 
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CDH_BUILD_NUMBER;
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM;
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM_BUILD_NUMBER;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_UPGRADE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_UPGRADE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_UPGRADE_FINISHED;
@@ -11,6 +14,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_NOT_
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_ROLLING_UPGRADE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_UPGRADE;
 
+import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -23,7 +27,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -56,14 +59,14 @@ public class ClusterUpgradeService {
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE);
     }
 
-    public boolean upgradeCluster(long stackId, Image currentImage, Image targetImage) {
-        String currentRuntimeBuildNumber = NullUtil.getIfNotNull(currentImage.getStackDetails(), ImageStackDetails::getStackBuildNumber);
-        boolean clusterManagerUpdateNeeded = isUpdateNeeded(currentImage.getCmBuildNumber(), targetImage.getCmBuildNumber());
+    public boolean upgradeCluster(long stackId, Map<String, String> currentImagePackages, Image targetImage) {
+        String currentRuntimeBuildNumber = getCurrentStackBuildNumber(currentImagePackages);
+        boolean clusterManagerUpdateNeeded = isUpdateNeeded(currentImagePackages.get(CM_BUILD_NUMBER.getKey()), targetImage.getCmBuildNumber());
         boolean clusterRuntimeUpgradeNeeded =
                 isUpdateNeeded(currentRuntimeBuildNumber, NullUtil.getIfNotNull(targetImage.getStackDetails(), ImageStackDetails::getStackBuildNumber));
 
         if (clusterManagerUpdateNeeded) {
-            String cmVersion = targetImage.getPackageVersion(ImagePackageVersion.CM);
+            String cmVersion = targetImage.getPackageVersion(CM);
             flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE_FINISHED, cmVersion);
         }
         clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_UPGRADE_IN_PROGRESS);
@@ -75,11 +78,10 @@ public class ClusterUpgradeService {
         return clusterRuntimeUpgradeNeeded;
     }
 
-    public void clusterUpgradeFinished(long stackId, StatedImage currentImage, StatedImage targetImage) {
+    public void clusterUpgradeFinished(long stackId, Map<String, String> currentImagePackages, StatedImage targetImage) {
         Image targetIm = targetImage.getImage();
-        Image currentIm = currentImage.getImage();
         String clusterStackVersion = NullUtil.getIfNotNull(targetIm.getStackDetails(), ImageStackDetails::getVersion);
-        String currentRuntimeBuildNumber = NullUtil.getIfNotNull(currentIm.getStackDetails(), ImageStackDetails::getStackBuildNumber);
+        String currentRuntimeBuildNumber = getCurrentStackBuildNumber(currentImagePackages);
         boolean clusterRuntimeUpgradeNeeded =
                 isUpdateNeeded(currentRuntimeBuildNumber, NullUtil.getIfNotNull(targetIm.getStackDetails(), ImageStackDetails::getStackBuildNumber));
 
@@ -112,9 +114,13 @@ public class ClusterUpgradeService {
         }
     }
 
-    public boolean isClusterRuntimeUpgradeNeeded(Image currentImage, Image targetImage) {
-        return isUpdateNeeded(NullUtil.getIfNotNull(currentImage.getStackDetails(), ImageStackDetails::getStackBuildNumber),
+    public boolean isClusterRuntimeUpgradeNeeded(Map<String, String> currentImagePackages, Image targetImage) {
+        return isUpdateNeeded(getCurrentStackBuildNumber(currentImagePackages),
                 NullUtil.getIfNotNull(targetImage.getStackDetails(), ImageStackDetails::getStackBuildNumber));
+    }
+
+    private String getCurrentStackBuildNumber(Map<String, String> currentImagePackages) {
+        return currentImagePackages.get(CDH_BUILD_NUMBER.getKey());
     }
 
     private boolean isUpdateNeeded(String currentBuildNumber, String targetBuildNumber) {

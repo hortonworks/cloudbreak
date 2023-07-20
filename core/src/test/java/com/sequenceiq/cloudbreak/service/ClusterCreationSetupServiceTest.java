@@ -8,8 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +35,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
+import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -93,10 +92,15 @@ class ClusterCreationSetupServiceTest {
         blueprint = new Blueprint();
         blueprint.setBlueprintText("{}");
         user = new User();
-        Map<InstanceGroupType, String> userData = new HashMap<>();
-        userData.put(InstanceGroupType.CORE, "userdata");
-        Image image = new Image("imagename", userData, "centos7", REDHAT_7, "url", "imgcatname",
-                "id", Collections.emptyMap());
+        Image image = ModelImageTestBuilder.builder()
+                .withImageName("imagename")
+                .withUserData(Map.of(InstanceGroupType.CORE, "userdata"))
+                .withOs("centos7")
+                .withOsType(REDHAT_7)
+                .withImageCatalogUrl("url")
+                .withImageCatalogName("imgcatname")
+                .withImageId("id")
+                .build();
         Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
 
         Cluster cluster = new Cluster();

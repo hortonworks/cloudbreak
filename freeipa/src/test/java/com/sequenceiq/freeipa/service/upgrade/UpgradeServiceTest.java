@@ -197,8 +197,8 @@ class UpgradeServiceTest {
         when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = createValidImSet();
-        Image oldImage = new Image("name", Map.of(), "alma", "rocky", null, null, "111-222", Map.of());
-        Image newImage = new Image("name", Map.of(), "alma", "rocky", null, null, "333-444", Map.of());
+        Image oldImage = new Image("name", Map.of(), "alma", "rocky", null, null, "111-222", Map.of(), "2019-10-24", 1571884856L);
+        Image newImage = new Image("name", Map.of(), "alma", "rocky", null, null, "333-444", Map.of(), "2019-10-24", 1571884856L);
         allInstances.stream().filter(im -> "pgw".equalsIgnoreCase(im.getInstanceId())).forEach(im -> im.setImage(new Json(oldImage)));
         allInstances.stream().filter(im -> !"pgw".equalsIgnoreCase(im.getInstanceId())).forEach(im -> im.setImage(new Json(newImage)));
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);

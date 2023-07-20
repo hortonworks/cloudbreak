@@ -1,22 +1,23 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.service.cluster.Package;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
+@ExtendWith(MockitoExtension.class)
 public class PackageVersionCheckerTest {
 
     @Mock
@@ -46,14 +48,13 @@ public class PackageVersionCheckerTest {
     @InjectMocks
     private PackageVersionChecker underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        when(messagesService.getMessage(anyString(), anyCollection())).thenReturn("message");
+        lenient().when(messagesService.getMessage(anyString(), anyCollection())).thenReturn("message");
     }
 
     @Test
-    public void compareImageAndInstancesMandatoryPackageVersionBaseOk() throws JsonProcessingException {
+    public void compareImageAndInstancesMandatoryPackageVersionBaseOk() {
         String packageName = "package";
         Map<String, String> packageVersions = Collections.singletonMap(packageName, "1");
         when(statedImage.getImage()).thenReturn(image);
@@ -70,7 +71,7 @@ public class PackageVersionCheckerTest {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setImage(new Json(new com.sequenceiq.cloudbreak.cloud.model.Image(
                 "image", Collections.emptyMap(), "os", "ostype", "catalogn", "catalogu", "id",
-                packageVersions)));
+                packageVersions, null, null)));
         Set<InstanceMetadataView> instanceMetaDataSet = Collections.singleton(instanceMetaData);
 
         CheckResult result = underTest.compareImageAndInstancesMandatoryPackageVersion(statedImage, instanceMetaDataSet);
@@ -79,7 +80,7 @@ public class PackageVersionCheckerTest {
     }
 
     @Test
-    public void compareImageAndInstancesMandatoryPackageVersionPrewarmedOk() throws JsonProcessingException {
+    public void compareImageAndInstancesMandatoryPackageVersionPrewarmedOk() {
         String packageName = "package";
         Map<String, String> packageVersions = Collections.singletonMap(packageName, "1");
         when(statedImage.getImage()).thenReturn(image);
@@ -93,7 +94,7 @@ public class PackageVersionCheckerTest {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setImage(new Json(new com.sequenceiq.cloudbreak.cloud.model.Image(
                 "image", Collections.emptyMap(), "os", "ostype", "catalogn", "catalogu", "id",
-                packageVersions)));
+                packageVersions, null, null)));
         Set<InstanceMetadataView> instanceMetaDataSet = Collections.singleton(instanceMetaData);
 
         CheckResult result = underTest.compareImageAndInstancesMandatoryPackageVersion(statedImage, instanceMetaDataSet);
@@ -102,7 +103,7 @@ public class PackageVersionCheckerTest {
     }
 
     @Test
-    public void compareImageAndInstancesMandatoryPackageVersionMissingPackageInImage() throws JsonProcessingException {
+    public void compareImageAndInstancesMandatoryPackageVersionMissingPackageInImage() {
         String packageName = "package";
         Map<String, String> packageVersions = Collections.singletonMap(packageName, "1");
         when(statedImage.getImage()).thenReturn(image);
@@ -115,7 +116,7 @@ public class PackageVersionCheckerTest {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setImage(new Json(new com.sequenceiq.cloudbreak.cloud.model.Image(
                 "image", Collections.emptyMap(), "os", "ostype", "catalogn", "catalogu", "id",
-                packageVersions)));
+                packageVersions, null, null)));
         Set<InstanceMetadataView> instanceMetaDataSet = Collections.singleton(instanceMetaData);
 
         CheckResult result = underTest.compareImageAndInstancesMandatoryPackageVersion(statedImage, instanceMetaDataSet);
@@ -124,7 +125,7 @@ public class PackageVersionCheckerTest {
     }
 
     @Test
-    public void compareImageAndInstancesMandatoryPackageVersionDifferentPackageVersionInImage() throws JsonProcessingException {
+    public void compareImageAndInstancesMandatoryPackageVersionDifferentPackageVersionInImage() {
         String packageName = "package";
         Map<String, String> packageVersions = Collections.singletonMap(packageName, "1");
         when(statedImage.getImage()).thenReturn(image);
@@ -137,7 +138,7 @@ public class PackageVersionCheckerTest {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setImage(new Json(new com.sequenceiq.cloudbreak.cloud.model.Image(
                 "image", Collections.emptyMap(), "os", "ostype", "catalogn", "catalogu", "id",
-                packageVersions)));
+                packageVersions, null, null)));
         Set<InstanceMetadataView> instanceMetaDataSet = Collections.singleton(instanceMetaData);
 
         CheckResult result = underTest.compareImageAndInstancesMandatoryPackageVersion(statedImage, instanceMetaDataSet);

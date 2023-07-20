@@ -325,7 +325,7 @@ public class InstanceMetadataUpdater {
     private Image updatePackageVersions(Long stackId, Image image, Map<String, String> packageVersionsOnHost) {
         userDataService.createOrUpdateUserData(stackId, image.getUserdata());
         return new Image(image.getImageName(), new HashMap<>(), image.getOs(), image.getOsType(), image.getImageCatalogUrl(),
-                image.getImageCatalogName(), image.getImageId(), packageVersionsOnHost);
+                image.getImageCatalogName(), image.getImageId(), packageVersionsOnHost, image.getDate(), image.getCreated());
     }
 
 }

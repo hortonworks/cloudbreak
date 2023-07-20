@@ -148,7 +148,7 @@ public class AzureUpscaleServiceTest {
                 .thenReturn("instanceid");
         when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), eq(stack))).thenReturn(RESOURCE_GROUP);
 
-        Image image = new Image("azureImage.vhd", null, null, null, null, null, null, null);
+        Image image = new Image("azureImage.vhd", null, null, null, null, null, null, null, null, null);
         when(stack.getImage()).thenReturn(image);
         AzureMarketplaceImage azureMpImage = new AzureMarketplaceImage("", "", "", "");
         when(azureMarketplaceImageProviderService.get(eq(image))).thenReturn(azureMpImage);

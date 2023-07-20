@@ -8,106 +8,92 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 
+@ExtendWith(MockitoExtension.class)
 class CdhPackageLocationFilterTest {
 
-    private final CdhPackageLocationFilter underTest = new CdhPackageLocationFilter();
+    @InjectMocks
+    private CdhPackageLocationFilter underTest;
+
+    @Mock
+    private ImageFilterParams imageFilterParams;
+
+    @Mock
+    private Image image;
 
     @Test
     public void testImageNull() {
-        boolean result = underTest.filterImage(null, mock(Image.class), null);
-
-        assertFalse(result);
+        assertFalse(underTest.filterImage(null, imageFilterParams));
     }
 
     @Test
     public void testStackDetailIsNull() {
-        boolean result = underTest.filterImage(mock(Image.class), mock(Image.class), null);
-
-        assertFalse(result);
+        assertFalse(underTest.filterImage(mock(Image.class), imageFilterParams));
     }
 
     @Test
     public void testRepoIsNull() {
-        Image image = mock(Image.class);
         when(image.getStackDetails()).thenReturn(new ImageStackDetails("1", null, "1"));
 
-        boolean result = underTest.filterImage(image, mock(Image.class), null);
-
-        assertFalse(result);
+        assertFalse(underTest.filterImage(image, imageFilterParams));
     }
 
     @Test
     public void testStackIsNull() {
-        Image image = mock(Image.class);
         when(image.getStackDetails()).thenReturn(new ImageStackDetails("1", new StackRepoDetails(null, null), "1"));
 
-        boolean result = underTest.filterImage(image, mock(Image.class), null);
-
-        assertFalse(result);
+        assertFalse(underTest.filterImage(image, imageFilterParams));
     }
 
     @Test
     public void testCurrentImageNull() {
-        Image image = mock(Image.class);
         when(image.getStackDetails()).thenReturn(new ImageStackDetails("1", new StackRepoDetails(Map.of(), Map.of()), "1"));
 
-        boolean result = underTest.filterImage(image, null, null);
-
-        assertFalse(result);
+        assertFalse(underTest.filterImage(image, imageFilterParams));
     }
 
     @Test
     public void testCurrentImageOsTypeEmpty() {
-        Image image = mock(Image.class);
         when(image.getStackDetails()).thenReturn(new ImageStackDetails("1", new StackRepoDetails(Map.of(), Map.of()), "1"));
-        Image currentImage = mock(Image.class);
-        when(currentImage.getOsType()).thenReturn(" ");
+        when(imageFilterParams.getCurrentImage()).thenReturn(createModelImage(" "));
 
-        boolean result = underTest.filterImage(image, currentImage, null);
-
-        assertFalse(result);
+        assertFalse(underTest.filterImage(image, imageFilterParams));
     }
 
     @Test
     public void testOsTypeMissing() {
-        Image image = mock(Image.class);
         when(image.getStackDetails()).thenReturn(new ImageStackDetails("1", new StackRepoDetails(Map.of(), Map.of()), "1"));
-        Image currentImage = mock(Image.class);
-        when(currentImage.getOsType()).thenReturn("redhat7");
+        when(imageFilterParams.getCurrentImage()).thenReturn(createModelImage("redhat7"));
 
-        boolean result = underTest.filterImage(image, currentImage, null);
-
-        assertFalse(result);
+        assertFalse(underTest.filterImage(image, imageFilterParams));
     }
 
     @Test
     public void testNotMatching() {
-        Image image = mock(Image.class);
         when(image.getStackDetails()).thenReturn(new ImageStackDetails("1", new StackRepoDetails(Map.of("redhat7", "http://random.org/asdf/"), Map.of()), "1"));
-        Image currentImage = mock(Image.class);
-        when(currentImage.getOsType()).thenReturn("redhat7");
+        when(imageFilterParams.getCurrentImage()).thenReturn(createModelImage("redhat7"));
 
-        boolean result = underTest.filterImage(image, currentImage, null);
-
-        assertFalse(result);
+        assertFalse(underTest.filterImage(image, imageFilterParams));
     }
 
     @Test
     public void testMatching() {
-        Image image = mock(Image.class);
-        when(image.getStackDetails()).thenReturn(new ImageStackDetails("1", new StackRepoDetails(Map.of("redhat7", "http://archive.cloudera.com/asdf/"),
-                Map.of()), "1"));
-        Image currentImage = mock(Image.class);
-        when(currentImage.getOsType()).thenReturn("redhat7");
+        when(image.getStackDetails())
+                .thenReturn(new ImageStackDetails("1", new StackRepoDetails(Map.of("redhat7", "http://archive.cloudera.com/asdf/"), Map.of()), "1"));
+        when(imageFilterParams.getCurrentImage()).thenReturn(createModelImage("redhat7"));
 
-        boolean result = underTest.filterImage(image, currentImage, null);
-
-        assertTrue(result);
+        assertTrue(underTest.filterImage(image, imageFilterParams));
     }
 
+    private com.sequenceiq.cloudbreak.cloud.model.Image createModelImage(String osType) {
+        return new com.sequenceiq.cloudbreak.cloud.model.Image(null, null, null, osType, null, null, null, null, null, null);
+    }
 }

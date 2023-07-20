@@ -122,7 +122,7 @@ public class ClusterUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams() {
-        return new ImageFilterParams(image, null, false, Collections.emptyMap(), StackType.DATALAKE, new Blueprint(), STACK_ID,
+        return new ImageFilterParams(null, null, false, Collections.emptyMap(), StackType.DATALAKE, new Blueprint(), STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
     }

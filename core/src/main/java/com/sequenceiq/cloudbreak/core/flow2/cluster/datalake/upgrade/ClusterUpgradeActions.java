@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade;
 
-import java.util.HashSet;
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.STACK;
+
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +17,6 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.service.ClusterComponentUpdateService;
 import com.sequenceiq.cloudbreak.service.image.ClusterUpgradeTargetImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ImageComponentUpdaterService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
 import com.sequenceiq.flow.core.Flow;
@@ -47,9 +46,6 @@ import com.sequenceiq.flow.core.FlowState;
 public class ClusterUpgradeActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeActions.class);
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private ClusterUpgradeService clusterUpgradeService;
@@ -71,13 +67,13 @@ public class ClusterUpgradeActions {
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeTriggerEvent payload, Map<Object, Object> variables) {
                 try {
                     UpgradeImageInfo images = imageComponentUpdaterService.updateComponentsForUpgrade(payload.getImageId(), payload.getResourceId());
-                    variables.put(CURRENT_IMAGE, images.getCurrentStatedImage());
-                    variables.put(TARGET_IMAGE, images.getTargetStatedImage());
+                    variables.put(CURRENT_MODEL_IMAGE, images.currentImage());
+                    variables.put(TARGET_IMAGE, images.targetStatedImage());
                     variables.put(ROLLING_UPGRADE_ENABLED, payload.isRollingUpgradeEnabled());
-                    clusterUpgradeTargetImageService.saveImage(context.getStackId(), images.getTargetStatedImage());
+                    clusterUpgradeTargetImageService.saveImage(context.getStackId(), images.targetStatedImage());
                     clusterUpgradeService.initUpgradeCluster(context.getStackId(), getTargetImage(variables), payload.isRollingUpgradeEnabled());
-                    Selectable event = new ClusterUpgradeInitRequest(context.getStackId(), isPatchUpgrade(images.getCurrentStatedImage().getImage(),
-                            images.getTargetStatedImage().getImage()));
+                    Selectable event = new ClusterUpgradeInitRequest(context.getStackId(), isPatchUpgrade(images.currentImage(),
+                            images.targetStatedImage().getImage()));
                     sendEvent(context, event.selector(), event);
                 } catch (Exception e) {
                     LOGGER.error("Error during updating cluster components with image id: [{}]", payload.getImageId(), e);
@@ -112,13 +108,13 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeInitSuccess payload, Map<Object, Object> variables) {
-                Image currentImage = getCurrentImage(variables).getImage();
+                com.sequenceiq.cloudbreak.cloud.model.Image currentImage = retrieveCurrentImageFromVariables(variables, payload.getResourceId());
                 StatedImage targetStatedImage = getTargetImage(variables);
                 Image targetImage = targetStatedImage.getImage();
                 imageComponentUpdaterService.updateComponentsForUpgrade(targetStatedImage, payload.getResourceId());
                 boolean rollingUpgradeEnabled = (boolean) variables.get(ROLLING_UPGRADE_ENABLED);
                 Selectable event = new ClusterManagerUpgradeRequest(context.getStackId(),
-                        !clusterUpgradeService.isClusterRuntimeUpgradeNeeded(currentImage, targetImage), rollingUpgradeEnabled);
+                        !clusterUpgradeService.isClusterRuntimeUpgradeNeeded(currentImage.getPackageVersions(), targetImage), rollingUpgradeEnabled);
                 sendEvent(context, event.selector(), event);
             }
 
@@ -141,11 +137,11 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterManagerUpgradeSuccess payload, Map<Object, Object> variables) {
-                Image currentImage = getCurrentImage(variables).getImage();
+                com.sequenceiq.cloudbreak.cloud.model.Image currentImage = retrieveCurrentImageFromVariables(variables, payload.getResourceId());
                 StatedImage targetStatedImage = getTargetImage(variables);
                 Image targetImage = targetStatedImage.getImage();
                 imageComponentUpdaterService.updateComponentsForUpgrade(targetStatedImage, payload.getResourceId());
-                boolean clusterRuntimeUpgradeNeeded = clusterUpgradeService.upgradeCluster(context.getStackId(), currentImage, targetImage);
+                boolean clusterRuntimeUpgradeNeeded = clusterUpgradeService.upgradeCluster(context.getStackId(), currentImage.getPackageVersions(), targetImage);
                 Selectable event;
                 if (clusterRuntimeUpgradeNeeded) {
                     boolean rollingUpgradeEnabled = (boolean) variables.get(ROLLING_UPGRADE_ENABLED);
@@ -178,9 +174,9 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeSuccess payload, Map<Object, Object> variables) {
-                StatedImage currentImage = getCurrentImage(variables);
+                com.sequenceiq.cloudbreak.cloud.model.Image currentImage = retrieveCurrentImageFromVariables(variables, payload.getResourceId());
                 StatedImage targetImage = getTargetImage(variables);
-                clusterUpgradeService.clusterUpgradeFinished(context.getStackId(), currentImage, targetImage);
+                clusterUpgradeService.clusterUpgradeFinished(context.getStackId(), currentImage.getPackageVersions(), targetImage);
                 stackImageService.removeImageByComponentName(context.getStackId(), TARGET_IMAGE);
                 clusterComponentUpdateService.deleteClusterComponentByComponentTypeAndStackId(context.getStackId(),
                         ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES);
@@ -207,7 +203,7 @@ public class ClusterUpgradeActions {
             protected ClusterUpgradeContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     ClusterUpgradeFailedEvent payload) {
                 Flow flow = getFlow(flowParameters.getFlowId());
-                Stack stack = stackService.getById(payload.getResourceId());
+                Stack stack = getStackService().getById(payload.getResourceId());
                 MDCBuilder.buildMdcContext(stack);
                 flow.setFlowFailed(payload.getException());
                 return ClusterUpgradeContext.from(flowParameters, payload);
@@ -216,13 +212,10 @@ public class ClusterUpgradeActions {
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeFailedEvent payload, Map<Object, Object> variables) {
                 LOGGER.error("Cluster upgrade failed: {}", payload);
-                Set<Image> candidateImages = new HashSet<>();
-                Optional.ofNullable(getCurrentImage(variables)).ifPresent(si -> candidateImages.add(si.getImage()));
-                Optional.ofNullable(getTargetImage(variables)).ifPresent(si -> candidateImages.add(si.getImage()));
                 String exceptionMessage = Optional.ofNullable(payload.getException()).map(Throwable::getMessage).orElse("");
                 clusterUpgradeService.handleUpgradeClusterFailure(payload.getResourceId(), exceptionMessage, payload.getDetailedStatus());
                 ClusterUpgradeFailedRequest cmSyncRequest = new ClusterUpgradeFailedRequest(payload.getResourceId(), payload.getException(),
-                        payload.getDetailedStatus(), candidateImages);
+                        payload.getDetailedStatus());
                 sendEvent(context, cmSyncRequest);
             }
 
@@ -233,10 +226,12 @@ public class ClusterUpgradeActions {
         };
     }
 
-    private boolean isPatchUpgrade(Image currentImage, Image targetImage) {
-        ImageStackDetails currentImageStackDetails = currentImage.getStackDetails();
-        ImageStackDetails targetImageStackDetails = targetImage.getStackDetails();
-        return currentImageStackDetails != null && targetImageStackDetails != null
-                && currentImageStackDetails.getVersion().equals(targetImageStackDetails.getVersion());
+    private boolean isPatchUpgrade(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image targetImage) {
+        Map<String, String> currentImagePackages = currentImage.getPackageVersions();
+        Map<String, String> targetImagePackages = targetImage.getPackageVersions();
+        return currentImagePackages != null && targetImagePackages != null
+                && StringUtils.isNoneBlank(currentImagePackages.get(STACK.getKey()), targetImagePackages.get(STACK.getKey()))
+                && currentImagePackages.get(STACK.getKey()).equals(targetImagePackages.get(STACK.getKey()));
     }
+
 }

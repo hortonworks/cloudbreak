@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -391,11 +392,21 @@ public class ClusterRepairService {
     }
 
     private boolean isCreatedFromBaseImage(StackView stack) {
+        Image modelImage = getImageFromDatabase(stack);
         try {
-            Image image = componentConfigProviderService.getImage(stack.getId());
-            return !imageCatalogService.getImage(stack.getWorkspaceId(), image.getImageCatalogUrl(), image.getImageCatalogName(),
-                    image.getImageId()).getImage().isPrewarmed();
+            return !imageCatalogService.getImage(stack.getWorkspaceId(), modelImage.getImageCatalogUrl(), modelImage.getImageCatalogName(),
+                    modelImage.getImageId()).getImage().isPrewarmed();
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
+            LOGGER.warn("Image not found with id: {} in catalog: {}", modelImage.getImageId(), modelImage.getImageCatalogUrl());
+            return !(modelImage.getPackageVersions() != null && modelImage.getPackageVersions().containsKey(ImagePackageVersion.STACK.getKey()));
+        }
+    }
+
+    private Image getImageFromDatabase(StackView stack) {
+        try {
+            return componentConfigProviderService.getImage(stack.getId());
+        } catch (CloudbreakImageNotFoundException e) {
+            LOGGER.debug("Image not found in database.");
             throw new BadRequestException(e.getMessage(), e);
         }
     }

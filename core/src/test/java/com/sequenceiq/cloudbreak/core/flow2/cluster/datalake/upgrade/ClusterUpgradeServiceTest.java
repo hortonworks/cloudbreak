@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade;
 
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CDH_BUILD_NUMBER;
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CFM;
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM;
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM_BUILD_NUMBER;
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.SALT;
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.STACK;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_UPGRADE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_UPGRADE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_UPGRADE_FINISHED;
@@ -15,19 +21,21 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -40,6 +48,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 
+@ExtendWith(MockitoExtension.class)
 public class ClusterUpgradeServiceTest {
     private static final String ERROR_MESSAGE = "error message";
 
@@ -77,11 +86,6 @@ public class ClusterUpgradeServiceTest {
     @InjectMocks
     private ClusterUpgradeService underTest;
 
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
     public void testClusterManagerUpgrade() {
         // GIVEN
@@ -97,10 +101,11 @@ public class ClusterUpgradeServiceTest {
     @MethodSource("upgradeNeededVersions")
     public void testClusterUpgradeNeededButCMNot(String currentStackVersion, String targetStackVersion) {
         // GIVEN
-        Image currentImage = createImage(CURRENT_BUILD_NUMBER, currentStackVersion);
+        Map<String, String> currentImagePackages = createPackageVersions(CURRENT_BUILD_NUMBER,
+                currentStackVersion);
         Image targetImage = createImage(CURRENT_BUILD_NUMBER, targetStackVersion);
         // WHEN
-        boolean actualResult = underTest.upgradeCluster(STACK_ID, currentImage, targetImage);
+        boolean actualResult = underTest.upgradeCluster(STACK_ID, currentImagePackages, targetImage);
         // THEN
         Assertions.assertTrue(actualResult);
         verify(flowMessageService, times(0))
@@ -110,9 +115,9 @@ public class ClusterUpgradeServiceTest {
 
     @ParameterizedTest
     @MethodSource("upgradeNeededImages")
-    public void testClusterUpgradeNeededButCMNotNoStackDetails(Image currentImage, Image targetImage) {
+    public void testClusterUpgradeNeededButCMNotNoStackDetails(Map<String, String> currentImagePackages, Image targetImage) {
         // WHEN
-        boolean actualResult = underTest.upgradeCluster(STACK_ID, currentImage, targetImage);
+        boolean actualResult = underTest.upgradeCluster(STACK_ID, currentImagePackages, targetImage);
         // THEN
         Assertions.assertTrue(actualResult);
         verify(flowMessageService, times(0))
@@ -124,10 +129,11 @@ public class ClusterUpgradeServiceTest {
     @MethodSource("upgradeNeededVersions")
     public void testClusterAndCMUpgradeNeeded(String currentStackVersion, String targetStackVersion) {
         // GIVEN
-        Image currentImage = createImage(currentStackVersion, currentStackVersion);
+        Map<String, String> currentImagePackages = createPackageVersions(currentStackVersion, currentStackVersion);
+
         Image targetImage = createImage(targetStackVersion, targetStackVersion);
         // WHEN
-        boolean actualResult = underTest.upgradeCluster(STACK_ID, currentImage, targetImage);
+        boolean actualResult = underTest.upgradeCluster(STACK_ID, currentImagePackages, targetImage);
         // THEN
         Assertions.assertTrue(actualResult);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE_FINISHED, V_7_0_2);
@@ -138,10 +144,10 @@ public class ClusterUpgradeServiceTest {
     @MethodSource("upgradeNeededVersions")
     public void testClusterUpgradeNotNeededButCMNeeded(String currentStackVersion, String targetStackVersion) {
         // GIVEN
-        Image currentImage = createImage(currentStackVersion, CURRENT_BUILD_NUMBER);
+        Map<String, String> currentImagePackages = createPackageVersions(currentStackVersion, CURRENT_BUILD_NUMBER);
         Image targetImage = createImage(targetStackVersion, CURRENT_BUILD_NUMBER);
         // WHEN
-        boolean actualResult = underTest.upgradeCluster(STACK_ID, currentImage, targetImage);
+        boolean actualResult = underTest.upgradeCluster(STACK_ID, currentImagePackages, targetImage);
         // THEN
         Assertions.assertFalse(actualResult);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE_FINISHED, V_7_0_2);
@@ -151,10 +157,11 @@ public class ClusterUpgradeServiceTest {
     @Test
     public void testNeitherClusterNorCMUpgradeNeeded() {
         // GIVEN
-        Image currentImage = createImage(CURRENT_BUILD_NUMBER, CURRENT_BUILD_NUMBER);
+        Map<String, String> currentImagePackages = createPackageVersions(CURRENT_BUILD_NUMBER,
+                CURRENT_BUILD_NUMBER);
         Image targetImage = createImage(CURRENT_BUILD_NUMBER, CURRENT_BUILD_NUMBER);
         // WHEN
-        boolean actualResult = underTest.upgradeCluster(STACK_ID, currentImage, targetImage);
+        boolean actualResult = underTest.upgradeCluster(STACK_ID, currentImagePackages, targetImage);
         // THEN
         Assertions.assertFalse(actualResult);
         verify(flowMessageService, times(0))
@@ -166,24 +173,22 @@ public class ClusterUpgradeServiceTest {
     @MethodSource("upgradeNeededVersions")
     public void testClusterUpgradeFinishedWhenNeeded(String currentStackVersion, String targetStackVersion) {
         // GIVEN
-        Image currentImmage = createImage(CURRENT_BUILD_NUMBER, currentStackVersion);
-        StatedImage currentImage = StatedImage.statedImage(currentImmage, null, null);
-        Image targetImmage = createImage(CURRENT_BUILD_NUMBER, targetStackVersion);
-        StatedImage targetImage = StatedImage.statedImage(targetImmage, null, null);
+        Map<String, String> currentImagePackages = createPackageVersions(CURRENT_BUILD_NUMBER,
+                currentStackVersion);
+        StatedImage targetImage = StatedImage.statedImage(createImage(CURRENT_BUILD_NUMBER, targetStackVersion), null, null);
         // WHEN
-        underTest.clusterUpgradeFinished(STACK_ID, currentImage, targetImage);
+        underTest.clusterUpgradeFinished(STACK_ID, currentImagePackages, targetImage);
         // THEN
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED, V_7_0_2);
     }
 
     @ParameterizedTest
     @MethodSource("upgradeNeededImages")
-    public void testClusterUpgradeFinishedWhenNeededNoStackDetails(Image currentIm, Image targetIm) {
+    public void testClusterUpgradeFinishedWhenNeededNoStackDetails(Map<String, String> currentImagePackages, Image targetIm) {
         // GIVEN
-        StatedImage currentImage = StatedImage.statedImage(currentIm, null, null);
         StatedImage targetImage = StatedImage.statedImage(targetIm, null, null);
         // WHEN
-        underTest.clusterUpgradeFinished(STACK_ID, currentImage, targetImage);
+        underTest.clusterUpgradeFinished(STACK_ID, currentImagePackages, targetImage);
         // THEN
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED,
                 NullUtil.getIfNotNull(targetIm.getStackDetails(), ImageStackDetails::getVersion));
@@ -192,12 +197,12 @@ public class ClusterUpgradeServiceTest {
     @Test
     public void testClusterUpgradeFinishedWhenNotNeeded() {
         // GIVEN
-        Image currentImmage = createImage(CURRENT_BUILD_NUMBER, CURRENT_BUILD_NUMBER);
-        StatedImage currentImage = StatedImage.statedImage(currentImmage, null, null);
+        Map<String, String> currentImagePackages = createPackageVersions(CURRENT_BUILD_NUMBER,
+                CURRENT_BUILD_NUMBER);
         Image targetImmage = createImage(CURRENT_BUILD_NUMBER, CURRENT_BUILD_NUMBER);
         StatedImage targetImage = StatedImage.statedImage(targetImmage, null, null);
         // WHEN
-        underTest.clusterUpgradeFinished(STACK_ID, currentImage, targetImage);
+        underTest.clusterUpgradeFinished(STACK_ID, currentImagePackages, targetImage);
         // THEN
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED_NOVERSION);
     }
@@ -221,24 +226,27 @@ public class ClusterUpgradeServiceTest {
     private static Image createImage(String cmBuildNumber, String stackBuildNumber) {
         return new Image(null, null, null, null, OS, CURRENT_IMAGE_ID, V_7_0_2, null,
                 Map.of(CLOUD_PLATFORM, Collections.emptyMap()), new ImageStackDetails(V_7_0_2, null, stackBuildNumber), OS_TYPE,
-                createPackageVersions(V_7_0_2, V_7_0_2, CMF_VERSION, CSP_VERSION, SALT_VERSION),
+                createPackageVersions(cmBuildNumber, stackBuildNumber),
                 null, null, cmBuildNumber, true, null, null);
     }
 
     private static Image createImage(String cmBuildNumber) {
         return new Image(null, null, null, null, OS, CURRENT_IMAGE_ID, V_7_0_2, null,
                 Map.of(CLOUD_PLATFORM, Collections.emptyMap()), null, OS_TYPE,
-                createPackageVersions(V_7_0_2, V_7_0_2, CMF_VERSION, CSP_VERSION, SALT_VERSION),
+                createPackageVersions(cmBuildNumber, ""),
                 null, null, cmBuildNumber, true, null, null);
     }
 
-    private static Map<String, String> createPackageVersions(String cmVersion, String cdhVersion, String cfmVersion, String cspVersion, String saltVersion) {
-        return Map.of(
-                "cm", cmVersion,
-                "stack", cdhVersion,
-                "cfm", cfmVersion,
-                "csp", cspVersion,
-                "salt", saltVersion);
+    private static Map<String, String> createPackageVersions(String cmBuildNumber, String stackBuildNumber) {
+        Map<String, String> packageVersions = new HashMap<>();
+        packageVersions.put(CM.getKey(), V_7_0_2);
+        packageVersions.put(STACK.getKey(), V_7_0_2);
+        packageVersions.put(CFM.getKey(), CMF_VERSION);
+        packageVersions.put("csp", CSP_VERSION);
+        packageVersions.put(SALT.getKey(), SALT_VERSION);
+        Optional.ofNullable(cmBuildNumber).ifPresent(buildNumber -> packageVersions.put(CM_BUILD_NUMBER.getKey(), cmBuildNumber));
+        Optional.ofNullable(stackBuildNumber).ifPresent(buildNumber -> packageVersions.put(CDH_BUILD_NUMBER.getKey(), stackBuildNumber));
+        return packageVersions;
     }
 
     private static Stream<Arguments> upgradeNeededVersions() {
@@ -257,9 +265,10 @@ public class ClusterUpgradeServiceTest {
 
     private static Stream<Arguments> upgradeNeededImages() {
         return Stream.of(
-                Arguments.of(createImage(CURRENT_BUILD_NUMBER), createImage(CURRENT_BUILD_NUMBER)),
-                Arguments.of(createImage(CURRENT_BUILD_NUMBER, CURRENT_BUILD_NUMBER), createImage(CURRENT_BUILD_NUMBER)),
-                Arguments.of(createImage(CURRENT_BUILD_NUMBER), createImage(CURRENT_BUILD_NUMBER, CURRENT_BUILD_NUMBER))
+                Arguments.of(Map.of(CM_BUILD_NUMBER.getKey(), CURRENT_BUILD_NUMBER), createImage(CURRENT_BUILD_NUMBER)),
+                Arguments.of(Map.of(CM_BUILD_NUMBER.getKey(), CURRENT_BUILD_NUMBER, CDH_BUILD_NUMBER.getKey(), CURRENT_BUILD_NUMBER),
+                        createImage(CURRENT_BUILD_NUMBER)),
+                Arguments.of(Map.of(CM_BUILD_NUMBER.getKey(), CURRENT_BUILD_NUMBER), createImage(CURRENT_BUILD_NUMBER, CURRENT_BUILD_NUMBER))
         );
     }
 }

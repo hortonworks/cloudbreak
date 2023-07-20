@@ -270,7 +270,7 @@ class UpgradeCcmFlowChainIntegrationTest {
     @BeforeEach
     public void setup() throws CloudbreakImageNotFoundException {
         mockStackService();
-        Image image = new Image("alma", USER_DATA_MAP, "", "", "", "", "", null);
+        Image image = new Image("alma", USER_DATA_MAP, "", "", "", "", "", null, null, null);
         when(imageService.getImage(STACK_ID)).thenReturn(image);
         when(userDataService.getUserData(anyLong())).thenReturn(Map.of(
                 InstanceGroupType.CORE, "core",
@@ -354,7 +354,7 @@ class UpgradeCcmFlowChainIntegrationTest {
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
                 () -> reactorNotifier.notify(STACK_ID, selector,
-                        new UpgradeCcmFlowChainTriggerEvent(selector.toString(), STACK_ID, 1L, CCM)));
+                        new UpgradeCcmFlowChainTriggerEvent(selector, STACK_ID, 1L, CCM)));
     }
 
     private void letItFlow() {

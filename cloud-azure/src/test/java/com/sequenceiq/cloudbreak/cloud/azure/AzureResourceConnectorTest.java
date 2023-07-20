@@ -141,7 +141,7 @@ public class AzureResourceConnectorTest {
         instances = List.of(cloudResource);
         network = new Network(new Subnet("0.0.0.0/16"));
         AzureImage image = new AzureImage("id", "name", true);
-        imageModel = new Image(IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>());
+        imageModel = new Image(IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>(), "2019-10-24", 1571884856L);
 
         lenient().when(stack.getGroups()).thenReturn(groups);
         lenient().when(stack.getNetwork()).thenReturn(network);

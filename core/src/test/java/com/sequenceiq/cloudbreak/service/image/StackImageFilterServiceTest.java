@@ -200,7 +200,7 @@ public class StackImageFilterServiceTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image getImage(String id) {
-        return new com.sequenceiq.cloudbreak.cloud.model.Image("", Collections.emptyMap(), "", "", "", "", id, Collections.emptyMap());
+        return ModelImageTestBuilder.builder().withImageId(id).build();
     }
 
     private Stack getStack(DetailedStackStatus detailedStackStatus) {

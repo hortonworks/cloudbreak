@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,7 +64,14 @@ class UsedImagesProviderTest {
     }
 
     private Image createImage(String imageId) {
-        return new Image("imageName", Map.of(), "os", "osType", "imageCatalogUrl", "imageCatalogName", imageId, null);
+        return ModelImageTestBuilder.builder()
+                .withImageName("imageName")
+                .withOs("os")
+                .withOsType("osType")
+                .withImageCatalogUrl("imageCatalogUrl")
+                .withImageCatalogName("imageCatalogName")
+                .withImageId(imageId)
+                .build();
     }
 
 }

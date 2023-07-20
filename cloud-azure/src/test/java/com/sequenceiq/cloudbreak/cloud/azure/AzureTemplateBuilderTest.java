@@ -236,7 +236,8 @@ public class AzureTemplateBuilderTest {
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         security = new Security(rules, emptyList());
-        image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
+        image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>(), "2019-10-24",
+                1571884856L);
         cloudContext = CloudContext.Builder.builder()
                 .withId(7899L)
                 .withName("thisisaverylongazureresourcenamewhichneedstobeshortened")

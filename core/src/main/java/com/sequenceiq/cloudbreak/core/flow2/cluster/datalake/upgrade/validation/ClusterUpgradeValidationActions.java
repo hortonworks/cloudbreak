@@ -141,8 +141,8 @@ public class ClusterUpgradeValidationActions {
                 LOGGER.info("Starting S3guard validation. Target image: {}", payload.getImageId());
                 UpgradeImageInfo upgradeImageInfo = upgradeImageInfoFactory.create(payload.getImageId(), payload.getResourceId());
                 Image targetImage = stackImageService
-                        .getImageModelFromStatedImage(context.getStack().getStack(), upgradeImageInfo.getCurrentImage(),
-                                upgradeImageInfo.getTargetStatedImage());
+                        .getImageModelFromStatedImage(context.getStack().getStack(), upgradeImageInfo.currentImage(),
+                                upgradeImageInfo.targetStatedImage());
                 variables.put(TARGET_IMAGE, targetImage);
                 variables.put(UPGRADE_IMAGE_INFO, upgradeImageInfo);
                 String targetVersion = targetImage.getPackageVersions().getOrDefault(ImagePackageVersion.STACK.getDisplayName(), "");
@@ -176,7 +176,7 @@ public class ClusterUpgradeValidationActions {
                 Image targetImage = (Image) variables.get(TARGET_IMAGE);
                 CloudStack cloudStack = context.getCloudStack().replaceImage(targetImage);
                 ClusterUpgradeImageValidationEvent event = new ClusterUpgradeImageValidationEvent(payload.getResourceId(), payload.getImageId(), cloudStack,
-                        context.getCloudCredential(), context.getCloudContext(), upgradeImageInfo.getTargetStatedImage().getImage());
+                        context.getCloudCredential(), context.getCloudContext(), upgradeImageInfo.targetStatedImage().getImage());
                 sendEvent(context, event.selector(), event);
             }
 

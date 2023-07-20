@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
@@ -417,16 +418,13 @@ public class UpgradeServiceTest {
     }
 
     private Image getImage(String imageName) {
-        return new Image(
-                imageName,
-                null,
-                "os",
-                null,
-                "catalogUrl",
-                "catalogName",
-                "id-1",
-                Map.of()
-        );
+        return ModelImageTestBuilder.builder()
+                .withImageName(imageName)
+                .withOs("os")
+                .withImageCatalogName("catalogName")
+                .withImageCatalogUrl("catalogUrl")
+                .withImageId("id-1")
+                .build();
     }
 
     private StatedImage imageFromCatalog(boolean prewarmed, String imageName) {
@@ -434,8 +432,7 @@ public class UpgradeServiceTest {
         lenient().when(image.isPrewarmed()).thenReturn(prewarmed);
         lenient().when(image.getUuid()).thenReturn("uuid");
         lenient().when(image.getImageSetsByProvider()).thenReturn(Map.of("aws", Map.of("eu-central-1", imageName)));
-        StatedImage statedImage = StatedImage.statedImage(image, null, null);
-        return statedImage;
+        return StatedImage.statedImage(image, null, null);
     }
 
     private StackDto getStackDto() {

@@ -57,7 +57,6 @@ import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
 import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @Service
@@ -125,7 +124,7 @@ public class ImageService {
         LOGGER.debug("Selected VM image for CloudPlatform '{}' and region '{}' is: {} from: {} image catalog",
                 platformString, region, imageName, imgFromCatalog.getImageCatalogUrl());
 
-        Set<Component> components = getComponents(stack, Map.of(), imgFromCatalog, EnumSet.of(IMAGE, CDH_PRODUCT_DETAILS, CM_REPO_DETAILS));
+        Set<Component> components = getComponents(stack, imgFromCatalog, EnumSet.of(IMAGE, CDH_PRODUCT_DETAILS, CM_REPO_DETAILS));
         componentConfigProviderService.store(components);
         return components;
     }
@@ -313,11 +312,10 @@ public class ImageService {
 
     public Set<Component> getComponentsWithoutUserData(Stack stack, StatedImage statedImage)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        return getComponents(stack, null, statedImage, EnumSet.of(CDH_PRODUCT_DETAILS, CM_REPO_DETAILS));
+        return getComponents(stack, statedImage, EnumSet.of(CDH_PRODUCT_DETAILS, CM_REPO_DETAILS));
     }
 
-    public Set<Component> getComponents(Stack stack, Map<InstanceGroupType, String> userData, StatedImage statedImage,
-            EnumSet<ComponentType> requestedComponents)
+    public Set<Component> getComponents(Stack stack, StatedImage statedImage, EnumSet<ComponentType> requestedComponents)
             throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         Set<Component> components = new HashSet<>();
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogBasedImage = statedImage.getImage();
@@ -329,7 +327,7 @@ public class ImageService {
                     stack.getRegion(),
                     statedImage.getImage()
             );
-            addImage(stack, userData, statedImage, imageName, catalogBasedImage, components);
+            addImage(stack, statedImage, imageName, catalogBasedImage, components);
         }
         if (requestedComponents.contains(CDH_PRODUCT_DETAILS)) {
             addStackRepo(stack, components, catalogBasedImage);
@@ -368,11 +366,11 @@ public class ImageService {
         }
     }
 
-    private void addImage(Stack stack, Map<InstanceGroupType, String> userData, StatedImage statedImage, String imageName,
-            com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogBasedImage, Set<Component> components) {
+    private void addImage(Stack stack, StatedImage statedImage, String imageName, com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogBasedImage,
+            Set<Component> components) {
         Image image = new Image(imageName, new HashMap<>(), catalogBasedImage.getOs(), catalogBasedImage.getOsType(),
                 statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), catalogBasedImage.getUuid(),
-                catalogBasedImage.getPackageVersions());
+                catalogBasedImage.getPackageVersions(), catalogBasedImage.getDate(), catalogBasedImage.getCreated());
         components.add(new Component(IMAGE, IMAGE.name(), new Json(image), stack));
     }
 

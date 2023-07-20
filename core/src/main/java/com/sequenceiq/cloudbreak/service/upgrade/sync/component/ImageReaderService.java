@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.sync.component;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,7 +18,6 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
@@ -58,9 +58,8 @@ public class ImageReaderService {
                     .map(ClouderaManagerProduct::getName)
                     .collect(Collectors.toSet());
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
-            String msg = "Failed to get the current image for the cluster.";
-            LOGGER.error(msg, e);
-            throw new CloudbreakRuntimeException(msg, e);
+            LOGGER.error("Failed to get the current image for the cluster.", e);
+            return Collections.emptySet();
         }
     }
 

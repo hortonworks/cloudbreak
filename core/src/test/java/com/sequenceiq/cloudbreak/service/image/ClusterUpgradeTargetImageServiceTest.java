@@ -6,8 +6,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -167,7 +165,7 @@ public class ClusterUpgradeTargetImageServiceTest {
     }
 
     private Image createTargetModelImage(String imageId, String imageCatalogUrl, String imageCatalogName) {
-        return new Image(null, Collections.emptyMap(), null, null, imageCatalogUrl, imageCatalogName, imageId, new HashMap<>());
+        return ModelImageTestBuilder.builder().withImageId(imageId).withImageCatalogUrl(imageCatalogUrl).withImageCatalogName(imageCatalogName).build();
     }
 
 }

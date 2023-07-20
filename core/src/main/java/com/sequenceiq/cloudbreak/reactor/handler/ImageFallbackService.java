@@ -74,7 +74,9 @@ public class ImageFallbackService {
                 currentImage.getImageCatalogUrl(),
                 currentImage.getImageCatalogName(),
                 currentImage.getImageId(),
-                currentImage.getPackageVersions())));
+                currentImage.getPackageVersions(),
+                currentImage.getDate(),
+                currentImage.getCreated())));
 
         userDataService.createOrUpdateUserData(stackId, userData);
         componentConfigProviderService.store(component);

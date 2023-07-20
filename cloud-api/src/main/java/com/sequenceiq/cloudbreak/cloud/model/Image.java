@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableMap;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
@@ -35,6 +36,10 @@ public class Image {
 
     private final Map<String, String> packageVersions;
 
+    private final String date;
+
+    private final Long created;
+
     @JsonCreator
     public Image(@JsonProperty("imageName") String imageName,
             @JsonProperty("userdata") Map<InstanceGroupType, String> userdata,
@@ -43,7 +48,9 @@ public class Image {
             @JsonProperty("imageCatalogUrl") String imageCatalogUrl,
             @JsonProperty("imageCatalogName") String imageCatalogName,
             @JsonProperty("imageId") String imageId,
-            @JsonProperty("packageVersions") Map<String, String> packageVersions) {
+            @JsonProperty("packageVersions") Map<String, String> packageVersions,
+            @JsonProperty("date") String date,
+            @JsonProperty("created") Long created) {
         this.imageName = imageName;
         this.userdata = userdata != null ? ImmutableMap.copyOf(userdata) : null;
         this.imageCatalogUrl = imageCatalogUrl;
@@ -52,6 +59,8 @@ public class Image {
         this.imageCatalogName = imageCatalogName;
         this.imageId = imageId;
         this.packageVersions = packageVersions;
+        this.date = date;
+        this.created = created;
     }
 
     public String getImageName() {
@@ -91,6 +100,18 @@ public class Image {
         return packageVersions == null ? new HashMap<>() : packageVersions;
     }
 
+    public String getPackageVersion(ImagePackageVersion packageVersion) {
+        return getPackageVersions().get(packageVersion.getKey());
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
     @Override
     public boolean equals(Object o) {
@@ -107,13 +128,15 @@ public class Image {
                     && Objects.equals(imageCatalogUrl, image.imageCatalogUrl)
                     && Objects.equals(imageId, image.imageId)
                     && Objects.equals(imageCatalogName, image.imageCatalogName)
-                    && Objects.equals(packageVersions, image.packageVersions);
+                    && Objects.equals(packageVersions, image.packageVersions)
+                    && Objects.equals(date, image.date)
+                    && Objects.equals(created, image.created);
         }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(imageName, userdata, os, osType, imageCatalogUrl, imageId, imageCatalogName, packageVersions);
+        return Objects.hash(imageName, userdata, os, osType, imageCatalogUrl, imageId, imageCatalogName, packageVersions, date, created);
     }
 
     @Override
@@ -125,6 +148,8 @@ public class Image {
                 + ", imageCatalogUrl='" + imageCatalogUrl + '\''
                 + ", imageId='" + imageId + '\''
                 + ", imageCatalogName='" + imageCatalogName + '\''
-                + ", packageVersions=" + packageVersions + '}';
+                + ", packageVersions=" + packageVersions + '\''
+                + ", date=" + date + '\''
+                + ", created=" + created + '}';
     }
 }

@@ -1,22 +1,21 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-
 @Component
 class ComponentBuildNumberComparator {
 
-    boolean compare(Image currentImage, Image newImage, String buildNumberKey) {
-        Optional<String> currentVersion = getBuildVersion(currentImage, buildNumberKey);
-        Optional<String> newVersion = getBuildVersion(newImage, buildNumberKey);
+    boolean compare(Map<String, String> currentImagePackages, Map<String, String> newImagePackages, String buildNumberKey) {
+        Optional<String> currentVersion = getBuildVersion(currentImagePackages, buildNumberKey);
+        Optional<String> newVersion = getBuildVersion(newImagePackages, buildNumberKey);
         return currentVersion.isPresent() && newVersion.isPresent() && compare(currentVersion, newVersion);
     }
 
-    private Optional<String> getBuildVersion(Image image, String key) {
-        return Optional.ofNullable(image.getPackageVersions()).map(map -> map.get(key));
+    private Optional<String> getBuildVersion(Map<String, String> image, String key) {
+        return Optional.ofNullable(image).map(map -> map.get(key));
     }
 
     private boolean compare(Optional<String> currentVersion, Optional<String> newVersion) {

@@ -70,17 +70,18 @@ public class StackImageService {
         }
     }
 
-    public Image getImageModelFromStatedImage(StackView stack, Image currentImage, StatedImage targetImage) {
+    public Image getImageModelFromStatedImage(StackView stack, Image currentImage, StatedImage targetStatedImage) {
         try {
             ImageCatalogPlatform platformString = platformStringTransformer.getPlatformStringForImageCatalog(
                     stack.getCloudPlatform(),
                     stack.getPlatformVariant());
             String cloudPlatform = platform(stack.getCloudPlatform()).value().toLowerCase();
-            String newImageName = imageService.determineImageName(cloudPlatform, platformString, stack.getRegion(), targetImage.getImage());
+            com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetImage = targetStatedImage.getImage();
+            String newImageName = imageService.determineImageName(cloudPlatform, platformString, stack.getRegion(), targetImage);
             userDataService.createOrUpdateUserData(stack.getId(), currentImage.getUserdata());
-            return new Image(newImageName, new HashMap<>(), targetImage.getImage().getOs(), targetImage.getImage().getOsType(),
-                    targetImage.getImageCatalogUrl(), targetImage.getImageCatalogName(), targetImage.getImage().getUuid(),
-                    targetImage.getImage().getPackageVersions());
+            return new Image(newImageName, new HashMap<>(), targetImage.getOs(), targetImage.getOsType(), targetStatedImage.getImageCatalogUrl(),
+                    targetStatedImage.getImageCatalogName(), targetImage.getUuid(), targetImage.getPackageVersions(), targetImage.getDate(),
+                    targetImage.getCreated());
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Could not find image", e);
             throw new CloudbreakServiceException("Could not find image", e);

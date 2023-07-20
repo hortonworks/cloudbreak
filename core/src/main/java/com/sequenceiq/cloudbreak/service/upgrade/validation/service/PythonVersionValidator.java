@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
@@ -42,25 +41,25 @@ public class PythonVersionValidator implements ServiceUpgradeValidator {
     @Override
     public void validate(ServiceUpgradeValidationRequest validationRequest) {
         UpgradeImageInfo upgradeImageInfo = validationRequest.getUpgradeImageInfo();
-        Image currentImage = upgradeImageInfo.getCurrentStatedImage().getImage();
-        Image targetImage = upgradeImageInfo.getTargetStatedImage().getImage();
-        if (isUpgradeDeniedForRuntime(validationRequest.getStack(), validationRequest.getUpgradeImageInfo().getCurrentStatedImage().getImageCatalogName(),
-                currentImage, targetImage)) {
+        com.sequenceiq.cloudbreak.cloud.model.Image currentImage = upgradeImageInfo.currentImage();
+        Image targetImage = upgradeImageInfo.targetStatedImage().getImage();
+        if (isUpgradeDeniedForRuntime(validationRequest.getStack(), upgradeImageInfo.currentImage().getImageCatalogName(), currentImage, targetImage)) {
             LOGGER.debug("Upgrade validation failed because the current image {} does not contains Python 3.8 and it's required for upgrade to the target"
-                    + "image {}", currentImage.getUuid(), targetImage.getUuid());
+                    + "image {}", currentImage.getImageId(), targetImage.getUuid());
             throw new UpgradeValidationFailedException(ERROR_MESSAGE);
         }
     }
 
-    private boolean isUpgradeDeniedForRuntime(StackDto stack, String imageCatalogName, Image currentImage, Image targetImage) {
+    private boolean isUpgradeDeniedForRuntime(StackDto stack, String imageCatalogName, com.sequenceiq.cloudbreak.cloud.model.Image currentImage,
+            Image targetImage) {
         List<Image> cdhImagesFromCatalog = getAllCdhImagesFromCatalog(stack, imageCatalogName);
         return !pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, cdhImagesFromCatalog, currentImage, targetImage);
     }
 
     private List<Image> getAllCdhImagesFromCatalog(StackDto stack, String imageCatalogName) {
         try {
-            return imageCatalogService.getAllCdhImages(ThreadBasedUserCrnProvider.getUserCrn(), stack.getWorkspaceId(),
-                    imageCatalogName, platformStringTransformer.getPlatformStringForImageCatalogSet(stack.getCloudPlatform(), stack.getPlatformVariant()));
+            return imageCatalogService.getAllCdhImages(stack.getWorkspaceId(), imageCatalogName,
+                    platformStringTransformer.getPlatformStringForImageCatalogSet(stack.getCloudPlatform(), stack.getPlatformVariant()));
         } catch (CloudbreakImageCatalogException e) {
             LOGGER.error("Failed to retrieve images from catalog {}", imageCatalogName, e);
             throw new CloudbreakServiceException(e);

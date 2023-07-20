@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
@@ -64,6 +64,6 @@ public class ImageToStackImageV4ResponseConverterTest {
     }
 
     private Image anImageWithoutImageCatalogUrl() {
-        return new Image(IMAGE_NAME, null, OS, OS_TYPE, null, IMAGE_CATALOG_NAME, IMAGE_ID, null);
+        return new Image(IMAGE_NAME, null, OS, OS_TYPE, null, IMAGE_CATALOG_NAME, IMAGE_ID, null, null, null);
     }
 }

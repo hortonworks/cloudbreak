@@ -181,7 +181,7 @@ public class ImageComponentUpdaterServiceTest {
 
     private UpgradeImageInfo setupUpgradeImageInfo() {
         UpgradeImageInfo upgradeImageInfo = mock(UpgradeImageInfo.class);
-        when(upgradeImageInfo.getTargetStatedImage()).thenReturn(targetStatedImage);
+        when(upgradeImageInfo.targetStatedImage()).thenReturn(targetStatedImage);
         return upgradeImageInfo;
     }
 

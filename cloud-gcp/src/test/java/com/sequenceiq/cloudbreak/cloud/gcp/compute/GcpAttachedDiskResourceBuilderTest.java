@@ -99,8 +99,6 @@ public class GcpAttachedDiskResourceBuilderTest {
 
     private long privateId;
 
-    private String privateCrn;
-
     private AuthenticatedContext auth;
 
     private Group group;
@@ -111,23 +109,11 @@ public class GcpAttachedDiskResourceBuilderTest {
 
     private CloudStack cloudStack;
 
-    private String name;
-
-    private String flavor;
-
     private String instanceId;
-
-    private List<Volume> volumes;
-
-    private Security security;
-
-    private Map<String, Object> params;
-
-    private Operation operation;
 
     @BeforeEach
     void setUpBuild() throws Exception {
-        privateCrn = "crn";
+        String privateCrn = "crn";
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withId(privateId)
                 .withName("testname")
@@ -151,22 +137,22 @@ public class GcpAttachedDiskResourceBuilderTest {
         context.addNetworkResources(networkResources);
 
         privateId = 1L;
-        name = "master";
-        flavor = "m1.medium";
+        String name = "master";
+        String flavor = "m1.medium";
         instanceId = "SOME_ID";
 
         auth = new AuthenticatedContext(cloudContext, cloudCredential);
 
-        params = Map.of();
-        volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1, CloudVolumeUsageType.GENERAL),
+        Map<String, Object> params1 = Map.of();
+        List<Volume> volumes1 = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1, CloudVolumeUsageType.GENERAL),
                 new Volume("/hadoop/fs2", "HDD", 1, CloudVolumeUsageType.GENERAL));
 
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
-        security = new Security(rules, emptyList());
+        Security security = new Security(rules, emptyList());
 
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
-        InstanceTemplate instanceTemplate = new InstanceTemplate(flavor, name, privateId, volumes, InstanceStatus.CREATE_REQUESTED, params,
+        InstanceTemplate instanceTemplate = new InstanceTemplate(flavor, name, privateId, volumes1, InstanceStatus.CREATE_REQUESTED, params1,
                 0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         CloudInstance cloudInstance =  new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, "subnet-1", "az1");
         group = new Group(name, InstanceGroupType.CORE, Collections.singletonList(cloudInstance), security, null,
@@ -188,7 +174,7 @@ public class GcpAttachedDiskResourceBuilderTest {
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
         Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default",
-                "default-id", new HashMap<>());
+                "default-id", new HashMap<>(), "2019-10-24", 1571884856L);
         cloudStack = new CloudStack(Collections.emptyList(), null, image, emptyMap(), emptyMap(), null,
                 null, null, null, null, null, null);
 
@@ -197,7 +183,7 @@ public class GcpAttachedDiskResourceBuilderTest {
             return new MockFuture(callable);
         });
 
-        operation = new Operation();
+        Operation operation = new Operation();
         operation.setName("operation");
         operation.setHttpErrorStatusCode(null);
 

@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -21,6 +20,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
@@ -31,6 +32,8 @@ class CmAndStackVersionUpgradeImageFilterTest {
 
     private static final String V_7_0_3 = "7.0.3";
 
+    private static final String BUILD_NUMBER = "12345";
+
     @Mock
     private LockedComponentChecker lockedComponentChecker;
 
@@ -40,9 +43,8 @@ class CmAndStackVersionUpgradeImageFilterTest {
     @InjectMocks
     private CmAndStackVersionUpgradeImageFilter underTest;
 
-    private final Image currentImage = mock(Image.class);
-
-    private final Image candidateImage = mock(Image.class);
+    @Mock
+    private Image candidateImage;
 
     private final Map<String, String> activatedParcels = Map.of("stack", V_7_0_3);
 
@@ -58,7 +60,7 @@ class CmAndStackVersionUpgradeImageFilterTest {
     }
 
     @Test
-    public void testFilterShouldReturnErrorMessageWhenNotLockedAndCMPermitcheckIsFalse() {
+    public void testFilterShouldReturnErrorMessageWhenNotLockedAndCMPermitCheckIsFalse() {
         ImageFilterParams imageFilterParams = createImageFilterParams(false);
         lenient().when(upgradePermissionProvider.permitStackUpgrade(imageFilterParams, candidateImage)).thenReturn(Boolean.TRUE);
         when(upgradePermissionProvider.permitCmUpgrade(imageFilterParams, candidateImage)).thenReturn(Boolean.FALSE);
@@ -69,7 +71,7 @@ class CmAndStackVersionUpgradeImageFilterTest {
     }
 
     @Test
-    public void testFilterShouldReturnFalseWhenNotLockedAndCMAndStackPermitcheckIsFalse() {
+    public void testFilterShouldReturnFalseWhenNotLockedAndCMAndStackPermitCheckIsFalse() {
         ImageFilterParams imageFilterParams = createImageFilterParams(false);
         lenient().when(upgradePermissionProvider.permitStackUpgrade(imageFilterParams, candidateImage)).thenReturn(Boolean.FALSE);
         when(upgradePermissionProvider.permitCmUpgrade(imageFilterParams, candidateImage)).thenReturn(Boolean.FALSE);
@@ -80,7 +82,7 @@ class CmAndStackVersionUpgradeImageFilterTest {
     }
 
     @Test
-    public void testFilterShouldReturnTrueWhenNotLockedAndCMAndStackPermitcheckIsTrue() {
+    public void testFilterShouldReturnTrueWhenNotLockedAndCMAndStackPermitCheckIsTrue() {
         ImageFilterParams imageFilterParams = createImageFilterParams(false);
         when(upgradePermissionProvider.permitStackUpgrade(imageFilterParams, candidateImage)).thenReturn(Boolean.TRUE);
         when(upgradePermissionProvider.permitCmUpgrade(imageFilterParams, candidateImage)).thenReturn(Boolean.TRUE);
@@ -94,7 +96,7 @@ class CmAndStackVersionUpgradeImageFilterTest {
     @Test
     public void testFilterShouldReturnFalseIfLockedAndCheckerReturnsFalse() {
         ImageFilterParams imageFilterParams = createImageFilterParams(true);
-        when(lockedComponentChecker.isUpgradePermitted(currentImage, candidateImage, activatedParcels)).thenReturn(Boolean.FALSE);
+        when(lockedComponentChecker.isUpgradePermitted(candidateImage, activatedParcels, BUILD_NUMBER)).thenReturn(Boolean.FALSE);
 
         ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidateImage)), imageFilterParams);
 
@@ -104,7 +106,7 @@ class CmAndStackVersionUpgradeImageFilterTest {
     @Test
     public void testFilterShouldReturnTrueIfLockedAndCheckerReturnsTrue() {
         ImageFilterParams imageFilterParams = createImageFilterParams(true);
-        when(lockedComponentChecker.isUpgradePermitted(currentImage, candidateImage, activatedParcels)).thenReturn(Boolean.TRUE);
+        when(lockedComponentChecker.isUpgradePermitted(candidateImage, activatedParcels, BUILD_NUMBER)).thenReturn(Boolean.TRUE);
 
         ImageFilterResult actual = underTest.filter(new ImageFilterResult(List.of(candidateImage)), imageFilterParams);
 
@@ -113,7 +115,9 @@ class CmAndStackVersionUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams(boolean lockComponents) {
-        return new ImageFilterParams(currentImage, null, lockComponents, activatedParcels, StackType.DATALAKE, null, 1L,
+        com.sequenceiq.cloudbreak.cloud.model.Image currentImage1 = ModelImageTestBuilder.builder()
+                .withPackageVersions(Map.of(ImagePackageVersion.CM_BUILD_NUMBER.getKey(), BUILD_NUMBER)).build();
+        return new ImageFilterParams(currentImage1, null, lockComponents, activatedParcels, StackType.DATALAKE, null, 1L,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform("AWS"), null, null, false);
     }
 

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
@@ -57,8 +58,12 @@ public class CmAndStackVersionUpgradeImageFilter implements UpgradeImageFilter {
 
     private boolean isUpgradePermitted(ImageFilterParams imageFilterParams, Image candidateImage) {
         return imageFilterParams.isLockComponents()
-                ? lockedComponentChecker.isUpgradePermitted(imageFilterParams.getCurrentImage(), candidateImage, imageFilterParams.getStackRelatedParcels())
+                ? lockedComponentChecker.isUpgradePermitted(candidateImage, imageFilterParams.getStackRelatedParcels(), getCmBuildNumber(imageFilterParams))
                 : isUnlockedCmAndStackUpgradePermitted(imageFilterParams, candidateImage);
+    }
+
+    private String getCmBuildNumber(ImageFilterParams imageFilterParams) {
+        return imageFilterParams.getCurrentImage().getPackageVersion(ImagePackageVersion.CM_BUILD_NUMBER);
     }
 
     private boolean isUnlockedCmAndStackUpgradePermitted(ImageFilterParams imageFilterParams, Image candidateImage) {

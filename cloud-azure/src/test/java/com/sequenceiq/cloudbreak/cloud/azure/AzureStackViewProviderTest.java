@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +33,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -98,7 +96,6 @@ public class AzureStackViewProviderTest {
         CloudCredential cloudCredential = createCloudCredential();
         AzureCredentialView azureCredentialView = new AzureCredentialView(cloudCredential);
         AuthenticatedContext ac = new AuthenticatedContext(createCloudContext(), cloudCredential);
-        Image imageModel = new Image(IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>());
 
         Network network = mock(Network.class);
         List<Group> groups = createScaledGroups();
@@ -131,11 +128,10 @@ public class AzureStackViewProviderTest {
 
     private CloudContext createCloudContext() {
         Location location = Location.location(Region.region("us-west-1"), AvailabilityZone.availabilityZone("us-west-1"));
-        CloudContext cloudContext = CloudContext.Builder.builder()
+        return CloudContext.Builder.builder()
                 .withName(STACK_NAME)
                 .withLocation(location)
                 .build();
-        return cloudContext;
     }
 
     private List<Group> createScaledGroups() {

@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigConverter;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
@@ -629,7 +630,7 @@ class MetadataSetupServiceTest {
     }
 
     private Image createImage() {
-        return new Image(null, null, null, null, null, null, "image-id", null);
+        return ModelImageTestBuilder.builder().withImageId("image-id").build();
     }
 
     private Iterable<CloudVmMetaDataStatus> getCloudVmMetaDataStatuses(InstanceStatus instanceStatus) {

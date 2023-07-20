@@ -11,7 +11,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -83,7 +82,6 @@ import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class StackToStackV4ResponseConverterTest extends AbstractEntityConverterTest<Stack> {
@@ -157,12 +155,10 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
     @Mock
     private HostGroupService hostGroupService;
 
-    private CredentialResponse credentialResponse;
-
     @BeforeEach
     public void setUp() throws CloudbreakImageNotFoundException {
         lenient().when(imageService.getImage(anyLong())).thenReturn(new Image("cb-centos66-amb200-2015-05-25", Collections.emptyMap(), "redhat6",
-                "redhat6", "", "default", "default-id", new HashMap<>()));
+                "redhat6", "", "default", "default-id", new HashMap<>(), null, null));
         lenient().when(componentConfigProviderService.getCloudbreakDetails(anyLong())).thenReturn(new CloudbreakDetails("version"));
         lenient().when(componentConfigProviderService.getStackTemplate(anyLong())).thenReturn(new StackTemplate("{}", "version"));
         lenient().when(componentConfigProviderService.getTelemetry(anyLong())).thenReturn(new Telemetry());
@@ -171,10 +167,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
             result.setSharedService(new SharedServiceV4Response());
             return null;
         }).when(datalakeService).addSharedServiceResponse(anyString(), any(StackV4Response.class));
-        lenient().when(serviceEndpointCollector.filterByStackType(any(StackType.class), any(List.class))).thenReturn(new ArrayList());
-        credentialResponse = new CredentialResponse();
-        credentialResponse.setName("cred-name");
-        credentialResponse.setCrn("crn");
+        lenient().when(serviceEndpointCollector.filterByStackType(any(StackType.class), any(List.class))).thenReturn(Collections.emptyList());
         lenient().when(loadBalancerService.findByStackId(any())).thenReturn(Set.of());
     }
 

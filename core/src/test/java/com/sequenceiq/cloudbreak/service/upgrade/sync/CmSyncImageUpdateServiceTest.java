@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.image.ImageTestBuilder;
+import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummary;
@@ -118,7 +119,11 @@ class CmSyncImageUpdateServiceTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImage() {
-        return new com.sequenceiq.cloudbreak.cloud.model.Image(null, null, null, null, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID, null);
+        return ModelImageTestBuilder.builder()
+                .withImageId(CURRENT_IMAGE_ID)
+                .withImageCatalogUrl(IMAGE_CATALOG_URL)
+                .withImageCatalogName(IMAGE_CATALOG_NAME)
+                .build();
     }
 
     private Stack createStack() {

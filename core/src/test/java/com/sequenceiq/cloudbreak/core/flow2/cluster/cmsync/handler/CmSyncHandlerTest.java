@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -63,7 +62,7 @@ public class CmSyncHandlerTest {
         Stack stack = new Stack();
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         Set<Image> foundImages = Set.of(mock(Image.class));
-        when(cmSyncImageCollectorService.collectImages(USER_CRN, stack, candidateImageUuids)).thenReturn(foundImages);
+        when(cmSyncImageCollectorService.collectImages(stack, candidateImageUuids)).thenReturn(foundImages);
         CmSyncOperationStatus cmSyncOperationStatus = CmSyncOperationStatus.builder().withSuccess("").build();
         CmSyncOperationSummary cmSyncOperationSummary = new CmSyncOperationSummary(cmSyncOperationStatus);
         when(cmSyncerService.syncFromCmToDb(stack, foundImages)).thenReturn(cmSyncOperationSummary);
@@ -72,7 +71,7 @@ public class CmSyncHandlerTest {
 
         assertEquals("CMSYNCRESULT", result.selector());
         verify(stackService).getByIdWithListsInTransaction(STACK_ID);
-        verify(cmSyncImageCollectorService).collectImages(USER_CRN, stack, candidateImageUuids);
+        verify(cmSyncImageCollectorService).collectImages(stack, candidateImageUuids);
         verify(cmSyncerService).syncFromCmToDb(stack, foundImages);
     }
 
@@ -90,7 +89,7 @@ public class CmSyncHandlerTest {
         assertEquals("unexpected error: errordetail", result.getErrorDetails().getMessage());
         assertEquals("unexpected error: errordetail", result.getStatusReason());
         verify(stackService).getByIdWithListsInTransaction(STACK_ID);
-        verify(cmSyncImageCollectorService, never()).collectImages(anyString(), any(), any());
+        verify(cmSyncImageCollectorService, never()).collectImages(any(), any());
         verify(cmSyncerService, never()).syncFromCmToDb(any(), any());
     }
 
@@ -101,7 +100,7 @@ public class CmSyncHandlerTest {
         Stack stack = new Stack();
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         Set<Image> foundImages = Set.of(mock(Image.class));
-        when(cmSyncImageCollectorService.collectImages(USER_CRN, stack, candidateImageUuids)).thenReturn(foundImages);
+        when(cmSyncImageCollectorService.collectImages(stack, candidateImageUuids)).thenReturn(foundImages);
         CmSyncOperationStatus cmSyncOperationStatus = CmSyncOperationStatus.builder().withError("My error description").build();
         CmSyncOperationSummary cmSyncOperationSummary = new CmSyncOperationSummary(cmSyncOperationStatus);
         when(cmSyncerService.syncFromCmToDb(stack, foundImages)).thenReturn(cmSyncOperationSummary);

@@ -11,8 +11,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 
 class CmVersionMatcherTest {
 
-    private final Image current = mock(Image.class);
-
     private final Image candidate = mock(Image.class);
 
     private final CmVersionMatcher underTest = new CmVersionMatcher();
@@ -34,10 +32,9 @@ class CmVersionMatcherTest {
     @ParameterizedTest
     @MethodSource("parameters")
     public void testVersionMatcher(String name, Boolean expectedResult, String currentVersion, String candidateVersion) {
-        when(current.getCmBuildNumber()).thenReturn(currentVersion);
         when(candidate.getCmBuildNumber()).thenReturn(candidateVersion);
 
-        boolean result = underTest.isCmVersionMatching(current, candidate);
+        boolean result = underTest.isCmVersionMatching(currentVersion, candidate);
 
         assertEquals(expectedResult, result);
     }

@@ -9,6 +9,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.service.image.ImageTestBuilder;
+import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 
@@ -77,12 +79,15 @@ class OsVersionBasedUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams() {
-        return new ImageFilterParams(
-                createImage("current-image", CURRENT_OS, CURRENT_OS_TYPE), null, false, null, null, null, null, null, null, null, null, false);
+        return new ImageFilterParams(createCurrentImage(), null, false, null, null, null, null, null, null, null, null, false);
     }
 
     private Image createImage(String imageId, String os, String osType) {
-        return new Image(null, null, null, null, os, imageId, null, null, null, null, osType, null, null, null, null, false, null, null);
+        return ImageTestBuilder.builder().withUuid(imageId).withOs(os).withOsType(osType).build();
+    }
+
+    private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImage() {
+        return ModelImageTestBuilder.builder().withImageId("current-image").withOs(CURRENT_OS).withOsType(CURRENT_OS_TYPE).build();
     }
 
     private ImageFilterResult createImageFilterResult(List<Image> images) {

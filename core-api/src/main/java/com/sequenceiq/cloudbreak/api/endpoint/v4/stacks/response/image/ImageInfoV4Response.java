@@ -11,7 +11,7 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
 
     private String imageCatalogName;
 
-    private long created;
+    private Long created;
 
     private String date;
 
@@ -22,7 +22,7 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
     public ImageInfoV4Response() {
     }
 
-    public ImageInfoV4Response(String imageName, String imageId, String imageCatalogName, long created, String date) {
+    public ImageInfoV4Response(String imageName, String imageId, String imageCatalogName, Long created, String date) {
         this.imageName = imageName;
         this.imageId = imageId;
         this.imageCatalogName = imageCatalogName;
@@ -31,7 +31,7 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
         this.prepared = false;
     }
 
-    public ImageInfoV4Response(String imageName, String imageId, String imageCatalogName, long created, String date,
+    public ImageInfoV4Response(String imageName, String imageId, String imageCatalogName, Long created, String date,
             ImageComponentVersions componentVersions) {
         this.imageName = imageName;
         this.imageId = imageId;
@@ -66,11 +66,11 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
         this.imageCatalogName = imageCatalogName;
     }
 
-    public long getCreated() {
+    public Long getCreated() {
         return created;
     }
 
-    public void setCreated(long created) {
+    public void setCreated(Long created) {
         this.created = created;
     }
 
