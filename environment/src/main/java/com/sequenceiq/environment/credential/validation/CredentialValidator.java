@@ -1,7 +1,5 @@
 package com.sequenceiq.environment.credential.validation;
 
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,10 +69,6 @@ public class CredentialValidator {
     private void validateCredentialCloudPlatformInternal(String cloudPlatform, String accountId, CredentialType type) {
         if (!enabledPlatforms.contains(cloudPlatform)) {
             throw new BadRequestException(String.format("There is no such cloud platform as '%s'", cloudPlatform));
-        }
-        if (GCP.name().equalsIgnoreCase(cloudPlatform) && CredentialType.AUDIT.equals(type)
-                && !entitlementService.gcpAuditEnabled(accountId)) {
-            throw new BadRequestException("Auditing in Google Cloud is not enabled for this account.");
         }
     }
 

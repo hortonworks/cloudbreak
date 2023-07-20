@@ -11,10 +11,9 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
-import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidator;
+import com.sequenceiq.cloudbreak.rotation.validation.SecretTypeConverter;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
-import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 @Service
@@ -27,16 +26,13 @@ public class RedbeamsRotationService {
     private EntitlementService entitlementService;
 
     @Inject
-    private SecretRotationValidator secretRotationValidator;
-
-    @Inject
     private DBStackService dbStackService;
 
     public FlowIdentifier rotateSecrets(String resourceCrn, List<String> secrets, RotationFlowExecutionType executionType) {
         if (entitlementService.isSecretRotationEnabled(Crn.fromString(resourceCrn).getAccountId())) {
             Long resourceIdByResourceCrn = dbStackService.getResourceIdByResourceCrn(resourceCrn);
             if (resourceIdByResourceCrn != null) {
-                List<SecretType> secretTypes = secretRotationValidator.mapSecretTypes(secrets, RedbeamsSecretType.class);
+                List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
                 return redbeamsFlowManager.triggerSecretRotation(resourceIdByResourceCrn, resourceCrn, secretTypes, executionType);
             } else {
                 throw new CloudbreakServiceException("No db stack found with crn: " + resourceCrn);

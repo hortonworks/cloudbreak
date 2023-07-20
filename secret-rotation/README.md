@@ -14,7 +14,6 @@ Rotation framework has been created based on this idea.
   - finalize: cleans up the leftover after the successful execution of rotation
 - `RotationContext`: Used to hold relevant data for the rotation of the given `SecretRotationStep`
 - `RotationContextProvider`: This class assembles the payloads for the various rotation steps.
-- `ApplicationSecretRotationInformation`: Each service defines the secret type that it handles via this interface.
 
 ## Secret rotation flow
 - during secret rotation we are creating a flowchain and every secret will have an own flow in the flowchain

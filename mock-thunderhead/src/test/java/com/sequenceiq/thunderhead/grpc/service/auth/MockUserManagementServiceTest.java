@@ -213,9 +213,6 @@ public class MockUserManagementServiceTest {
                 {"enableDataLakeEfs false", "enableDataLakeEfs", false, "CDP_DATA_LAKE_AWS_EFS", false},
                 {"enableDataLakeEfs true", "enableDataLakeEfs", true, "CDP_DATA_LAKE_AWS_EFS", true},
 
-                {"enableDatabaseWireEncryptionDatahub false", "enableDatabaseWireEncryptionDatahub", false, "CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB", false},
-                {"enableDatabaseWireEncryptionDatahub true", "enableDatabaseWireEncryptionDatahub", true, "CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB", true},
-
                 {"datalakeLoadBalancerEnabled false", "datalakeLoadBalancerEnabled", false, "CDP_DATA_LAKE_LOAD_BALANCER", false},
                 {"datalakeLoadBalancerEnabled true", "datalakeLoadBalancerEnabled", true, "CDP_DATA_LAKE_LOAD_BALANCER", true},
 

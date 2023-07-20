@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.plac
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -527,6 +528,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         StorageUrl storageUrl = new ClusterLogsStorageUrl();
         SearchUrl searchUrl = new KibanaSearchUrl();
         String freeIpaCloudStorageUrl = null;
+        String freeIpaKibanaUrl = null;
 
         if (getResponse() == null) {
             return null;
@@ -543,12 +545,14 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
                     getTestContext().getMicroserviceClient(FreeIpaClient.class).getDefaultClient().structuredEventsV1Endpoint();
             structuredEvents = StructuredEventUtil.getStructuredEvents(cdpStructuredEventV1Endpoint, resourceCrn);
         }
-        if (getResponse().getTelemetry() != null) {
-            String baseLocation = getResponse().getTelemetry().getLogging().getStorageLocation();
-            freeIpaCloudStorageUrl = storageUrl.getFreeIpaStorageUrl(resourceName, resourceCrn, baseLocation, cloudProvider);
+        if (!CloudPlatform.MOCK.equalsIgnoreCase(cloudProvider.getCloudPlatform().name())) {
+            if (getResponse().getTelemetry() != null) {
+                String baseLocation = getResponse().getTelemetry().getLogging().getStorageLocation();
+                freeIpaCloudStorageUrl = storageUrl.getFreeIpaStorageUrl(resourceName, resourceCrn, baseLocation, cloudProvider);
+            }
+            List<Searchable> listOfSearchables = List.of(this);
+            freeIpaKibanaUrl = searchUrl.getSearchUrl(listOfSearchables, getTestContext().getTestStartTime(), getTestContext().getTestEndTime());
         }
-        List<Searchable> listOfSearchables = List.of(this);
-        String freeIpaKibanaUrl = searchUrl.getSearchUrl(listOfSearchables, getTestContext().getTestStartTime(), getTestContext().getTestEndTime());
         return new Clue(
                 resourceName,
                 resourceCrn,

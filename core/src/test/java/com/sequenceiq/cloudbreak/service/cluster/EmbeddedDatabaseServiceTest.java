@@ -254,22 +254,20 @@ public class EmbeddedDatabaseServiceTest {
 
     static Object[][] isSslEnforcementForEmbeddedDatabaseEnabledDataProvider() {
         return new Object[][]{
-                // stackType, dhEntitlementEnabled, embeddedDatabaseOnAttachedDiskEnabled, resultExpected
-                {StackType.DATALAKE, false, false, false},
-                {StackType.DATALAKE, false, true, true},
-                {StackType.WORKLOAD, false, false, false},
-                {StackType.WORKLOAD, false, true, false},
-                {StackType.WORKLOAD, true, false, false},
-                {StackType.WORKLOAD, true, true, true},
-                {StackType.TEMPLATE, true, true, false},
-                {StackType.LEGACY, true, true, false},
+                // stackType, embeddedDatabaseOnAttachedDiskEnabled, resultExpected
+                {StackType.DATALAKE, false, false},
+                {StackType.DATALAKE, true, true},
+                {StackType.WORKLOAD, false, false},
+                {StackType.WORKLOAD, true, true},
+                {StackType.TEMPLATE, true, false},
+                {StackType.LEGACY, true, false},
         };
     }
 
     @ParameterizedTest()
     @MethodSource("isSslEnforcementForEmbeddedDatabaseEnabledDataProvider")
     void isSslEnforcementForEmbeddedDatabaseEnabledTestWhenPrerequisitesWithGoodRuntime(StackType stackType,
-            boolean dhEntitlementEnabled, boolean embeddedDatabaseOnAttachedDiskEnabled, boolean resultExpected) {
+            boolean embeddedDatabaseOnAttachedDiskEnabled, boolean resultExpected) {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(BLUEPRINT_TEXT);
         Optional<Blueprint> blueprintOptional = Optional.of(blueprint);
@@ -277,13 +275,12 @@ public class EmbeddedDatabaseServiceTest {
         when(cmTemplateProcessor.getStackVersion()).thenReturn(STACK_VERSION_GOOD);
 
         isSslEnforcementForEmbeddedDatabaseEnabledTestInternal(stackType,
-                dhEntitlementEnabled,
                 embeddedDatabaseOnAttachedDiskEnabled,
                 blueprintOptional,
                 resultExpected);
     }
 
-    private void isSslEnforcementForEmbeddedDatabaseEnabledTestInternal(StackType stackType, boolean dhEntitlementEnabled,
+    private void isSslEnforcementForEmbeddedDatabaseEnabledTestInternal(StackType stackType,
             boolean embeddedDatabaseOnAttachedDiskEnabled, Optional<Blueprint> blueprintOptional, boolean resultExpected) {
         StackView stackView;
         if (embeddedDatabaseOnAttachedDiskEnabled) {
@@ -293,21 +290,17 @@ public class EmbeddedDatabaseServiceTest {
             stackView = createStackView(0);
             lenient().when(cloudParameterCache.isVolumeAttachmentSupported(CLOUDPLATFORM)).thenReturn(false);
         }
-        when(stackView.getResourceCrn()).thenReturn(STACK_CRN);
         when(stackView.getType()).thenReturn(stackType);
-
         when(clusterView.getId()).thenReturn(CLUSTER_ID);
         lenient().when(clusterView.getDatabaseServerCrn()).thenReturn(null);
 
         when(blueprintService.getByClusterId(CLUSTER_ID)).thenReturn(blueprintOptional);
 
-        lenient().when(entitlementService.databaseWireEncryptionDatahubEnabled(ACCOUNT_ID)).thenReturn(dhEntitlementEnabled);
-
         assertThat(underTest.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView, null)).isEqualTo(resultExpected);
     }
 
     private void isSslEnforcementForEmbeddedDatabaseEnabledTestInternalBlueprintOnly(Optional<Blueprint> blueprintOptional, boolean resultExpected) {
-        isSslEnforcementForEmbeddedDatabaseEnabledTestInternal(StackType.DATALAKE, false, true, blueprintOptional, resultExpected);
+        isSslEnforcementForEmbeddedDatabaseEnabledTestInternal(StackType.DATALAKE, true, blueprintOptional, resultExpected);
     }
 
     @Test

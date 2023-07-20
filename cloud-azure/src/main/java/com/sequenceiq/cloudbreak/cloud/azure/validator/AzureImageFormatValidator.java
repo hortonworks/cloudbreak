@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -47,9 +46,6 @@ public class AzureImageFormatValidator implements Validator {
     @Inject
     private AzureImageTermsSignerService azureImageTermsSignerService;
 
-    @Value("${cb.arm.marketplace.image.automatic.signer:false}")
-    private boolean enableAzureImageTermsAutomaticSigner;
-
     @Override
     public void validate(AuthenticatedContext ac, CloudStack cloudStack) {
         Image image = cloudStack.getImage();
@@ -65,7 +61,7 @@ public class AzureImageFormatValidator implements Validator {
             validateMarketplacePermitted(imageUri, marketplaceImagesEnabled);
             AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(image);
             AzureImageTermStatus termsStatus = getTermsStatus(ac, azureMarketplaceImage);
-            if (isAutomaticTermsSignerDisabled() || !isAutomaticTermsSignerAccepted(cloudStack)) {
+            if (!isAutomaticTermsSignerAccepted(cloudStack)) {
                 switch (termsStatus) {
                     case NOT_ACCEPTED -> handleTermsNotAccepted(imageUri, onlyMarketplaceImagesEnabled);
                     case NON_READABLE -> handleTermsNonReadable(imageUri, onlyMarketplaceImagesEnabled);
@@ -139,10 +135,6 @@ public class AzureImageFormatValidator implements Validator {
             LOGGER.warn(errorMessage);
             throw new CloudConnectorException(errorMessage);
         }
-    }
-
-    private boolean isAutomaticTermsSignerDisabled() {
-        return !enableAzureImageTermsAutomaticSigner;
     }
 
     private boolean isAutomaticTermsSignerAccepted(CloudStack stack) {

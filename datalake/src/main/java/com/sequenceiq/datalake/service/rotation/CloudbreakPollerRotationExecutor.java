@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
@@ -27,19 +26,19 @@ public class CloudbreakPollerRotationExecutor extends AbstractRotationExecutor<P
     @Override
     protected void rotate(PollerRotationContext rotationContext) {
         LOGGER.info("Rotate cloudbreak secret: {}", rotationContext.getSecretType());
-        sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), (CloudbreakSecretType) rotationContext.getSecretType(), ROTATE);
+        sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), ROTATE);
     }
 
     @Override
     protected void rollback(PollerRotationContext rotationContext) {
         LOGGER.info("Rollback cloudbreak secret: {}", rotationContext.getSecretType());
-        sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), (CloudbreakSecretType) rotationContext.getSecretType(), ROLLBACK);
+        sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), ROLLBACK);
     }
 
     @Override
     protected void finalize(PollerRotationContext rotationContext) {
         LOGGER.info("Finalize cloudbreak secret: {}", rotationContext.getSecretType());
-        sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), (CloudbreakSecretType) rotationContext.getSecretType(), FINALIZE);
+        sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), FINALIZE);
     }
 
     @Override

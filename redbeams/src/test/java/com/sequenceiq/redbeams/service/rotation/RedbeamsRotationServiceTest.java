@@ -4,8 +4,6 @@ import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTAT
 import static com.sequenceiq.redbeams.rotation.RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -23,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidator;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
@@ -43,15 +40,11 @@ class RedbeamsRotationServiceTest {
     @Mock
     private DBStackService dbStackService;
 
-    @Mock
-    private SecretRotationValidator secretRotationValidator;
-
     @InjectMocks
     private RedbeamsRotationService underTest;
 
     @Test
     void rotateSecretsShouldSucceed() {
-        when(secretRotationValidator.mapSecretTypes(anyList(), any())).thenReturn(List.of(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD));
         when(dbStackService.getResourceIdByResourceCrn(eq(RESOURCE_CRN))).thenReturn(RESOURCE_ID);
         when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
         underTest.rotateSecrets(RESOURCE_CRN, List.of(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD.name()), ROTATE);

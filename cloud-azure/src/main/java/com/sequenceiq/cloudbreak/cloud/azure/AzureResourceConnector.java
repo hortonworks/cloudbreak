@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,7 +11,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.azure.core.management.exception.ManagementException;
@@ -105,9 +102,6 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     @Inject
     private AzureExceptionHandler azureExceptionHandler;
 
-    @Value("${cb.arm.marketplace.image.automatic.signer:false}")
-    private boolean enableAzureImageTermsAutomaticSigner;
-
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier notifier,
             AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
@@ -123,7 +117,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         if (azureImageFormatValidator.isMarketplaceImageFormat(stackImage)) {
             LOGGER.debug("Launching with Azure Marketplace image {}", stackImage);
             AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(stackImage);
-            signImageTermsIfAllowed(stack, azureCredentialView, client, azureMarketplaceImage);
+            azureImageTermsSignerService.signImageTermsIfAllowed(stack, client, azureMarketplaceImage, azureCredentialView.getSubscriptionId());
             template = azureTemplateBuilder.build(stackName, null, azureCredentialView, azureStackView,
                     cloudContext, stack, AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         } else {
@@ -184,17 +178,6 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         List<CloudResourceStatus> resources = check(ac, Collections.singletonList(cloudResource));
         LOGGER.debug("Launched resources: {}", resources);
         return resources;
-    }
-
-    private void signImageTermsIfAllowed(CloudStack stack, AzureCredentialView azureCredentialView, AzureClient client,
-            AzureMarketplaceImage azureMarketplaceImage) {
-        Boolean automaticTermsAcceptance = Boolean.valueOf(stack.getParameters().get(ACCEPTANCE_POLICY_PARAMETER));
-        if (enableAzureImageTermsAutomaticSigner && automaticTermsAcceptance) {
-            azureImageTermsSignerService.sign(azureCredentialView.getSubscriptionId(), azureMarketplaceImage, client);
-        } else {
-            LOGGER.debug("Azure automatic image term signing skipped: [cb.arm.marketplace.image.automatic.signer={}], [automaticTermsAcceptancePolicy={}]",
-                    enableAzureImageTermsAutomaticSigner, automaticTermsAcceptance);
-        }
     }
 
     @Override

@@ -23,11 +23,17 @@ altus:
     endpoint:
     grpc-timeout-sec: 60
 telemetry:
-  repo:
-    name: cdp-infra-tools
-    base-url: https://archive.cloudera.com/cdp-infra-tools/latest/redhat7/yum
-    gpg-key: https://archive.cloudera.com/cdp-infra-tools/latest/redhat7/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
-    gpg-check: 1
+  repos:
+    rhel7:
+      name: cdp-infra-tools-rhel7
+      base-url: https://archive.cloudera.com/cdp-infra-tools/latest/redhat7/yum
+      gpg-key: https://archive.cloudera.com/cdp-infra-tools/latest/redhat7/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+      gpg-check: 1
+    rhel8:
+      name: cdp-infra-tools-rhel8
+      base-url: https://archive.cloudera.com/cdp-infra-tools/latest/redhat8/yum
+      gpg-key: https://archive.cloudera.com/cdp-infra-tools/latest/redhat8/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+      gpg-check: 1
   monitoring:
     remote-write-url: ""
     remote-write-internal-url: ""

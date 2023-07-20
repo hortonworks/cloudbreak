@@ -29,7 +29,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.azure.resourcemanager.resources.models.Subscription;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -182,7 +181,6 @@ public class AzureImageFormatValidatorTest {
                 null, null, null, null);
         setupAuthenticatedContext();
 
-        ReflectionTestUtils.setField(underTest, "enableAzureImageTermsAutomaticSigner", true);
         when(entitlementService.azureMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(true);
         when(entitlementService.azureOnlyMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(marketplaceOnly);
         when(azureImageTermsSignerService.getImageTermStatus(anyString(), any(), any())).thenReturn(termStatus);

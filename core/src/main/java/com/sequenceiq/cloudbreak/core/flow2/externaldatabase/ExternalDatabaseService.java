@@ -23,7 +23,6 @@ import com.dyngr.exception.UserBreakException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -322,8 +321,7 @@ public class ExternalDatabaseService {
 
     private void configureSslEnforcement(AllocateDatabaseServerV4Request req, CloudPlatform cloudPlatform, Cluster cluster) {
         String runtime = getRuntime(cluster);
-        if (externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(cloudPlatform) && isSslEnforcementSupportedForRuntime(runtime)
-                && entitlementService.databaseWireEncryptionDatahubEnabled(Crn.safeFromString(cluster.getEnvironmentCrn()).getAccountId())) {
+        if (externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(cloudPlatform) && isSslEnforcementSupportedForRuntime(runtime)) {
             LOGGER.info("Applying external DB SSL enforcement for cloud platform {} and runtime version {}", cloudPlatform, runtime);
             SslConfigV4Request sslConfigV4Request = new SslConfigV4Request();
             sslConfigV4Request.setSslMode(SslMode.ENABLED);

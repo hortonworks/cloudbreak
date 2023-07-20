@@ -275,7 +275,6 @@ cb:
     template.path: templates/arm-v2-freeipa.ftl
     parameter.path: templates/parameters-freeipa.ftl
     storageaccount.template.path: templates/arm-storageaccount.ftl
-    marketplace.image.automatic.signer: false
 
   max:
     azure.resource.name.length: 120

@@ -41,7 +41,7 @@ public class AzureMarketplaceTermsController extends NotificationController impl
     @InternalOnly
     public AzureMarketplaceTermsResponse getInAccount(String accountId) {
         Boolean accepted = azureMarketplaceTermsService.get(accountId);
-        LOGGER.debug("Automatic image terms acceptance setting in account: {}", accepted);
+        LOGGER.debug("Automatic image terms acceptance setting in account {}: {}", accountId, accepted);
         return new AzureMarketplaceTermsResponse(accepted);
     }
 
@@ -49,7 +49,7 @@ public class AzureMarketplaceTermsController extends NotificationController impl
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
     public AzureMarketplaceTermsResponse put(@Valid AzureMarketplaceTermsRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        LOGGER.debug("New automatic image terms acceptance setting in account: {}", request.getAccepted());
+        LOGGER.debug("New automatic image terms acceptance setting in account {} : {}", accountId, request.getAccepted());
         azureMarketplaceTermsService.updateOrCreate(request.getAccepted(), accountId);
         return new AzureMarketplaceTermsResponse(request.getAccepted());
     }

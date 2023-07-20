@@ -40,8 +40,6 @@ class EntitlementServiceTest {
         return new Object[][]{
 
                 // entitlementName, function, enabled
-                {"AUDIT_ARCHIVING_GCP", (EntitlementCheckFunction) EntitlementService::gcpAuditEnabled, false},
-                {"AUDIT_ARCHIVING_GCP", (EntitlementCheckFunction) EntitlementService::gcpAuditEnabled, true},
 
                 {"CDP_CB_AWS_NATIVE", (EntitlementCheckFunction) EntitlementService::awsNativeEnabled, false},
                 {"CDP_CB_AWS_NATIVE", (EntitlementCheckFunction) EntitlementService::awsNativeEnabled, true},
@@ -114,9 +112,6 @@ class EntitlementServiceTest {
                         (EntitlementCheckFunction) EntitlementService::stopStartScalingFailureRecoveryEnabled, false},
                 {"DATAHUB_STOP_START_SCALING_FAILURE_RECOVERY",
                         (EntitlementCheckFunction) EntitlementService::stopStartScalingFailureRecoveryEnabled, true},
-
-                {"CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionDatahubEnabled, false},
-                {"CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionDatahubEnabled, true},
 
                 {"CDP_DATA_LAKE_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::datalakeLoadBalancerEnabled, false},
                 {"CDP_DATA_LAKE_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::datalakeLoadBalancerEnabled, true},

@@ -51,10 +51,9 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
-import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidator;
+import com.sequenceiq.cloudbreak.rotation.validation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
@@ -135,9 +134,6 @@ public class StackOperationService {
 
     @Inject
     private EntitlementService entitlementService;
-
-    @Inject
-    private SecretRotationValidator secretRotationValidator;
 
     public FlowIdentifier removeInstance(StackDto stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
@@ -496,7 +492,7 @@ public class StackOperationService {
         if (entitlementService.isSecretRotationEnabled(Crn.fromString(crn).getAccountId())) {
             StackView viewByCrn = stackDtoService.getStackViewByCrn(crn);
             Long stackId = viewByCrn.getId();
-            List<SecretType> secretTypes = secretRotationValidator.mapSecretTypes(secrets, CloudbreakSecretType.class);
+            List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
             return flowManager.triggerSecretRotation(stackId, crn, secretTypes, executionType);
         } else {
             throw new CloudbreakServiceException("Account is not entitled to execute any secret rotation!");

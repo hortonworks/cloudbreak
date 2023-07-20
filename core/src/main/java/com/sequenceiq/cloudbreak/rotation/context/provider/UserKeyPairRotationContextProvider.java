@@ -48,9 +48,9 @@ public class UserKeyPairRotationContextProvider implements RotationContextProvid
     private UserKeyPairSaltStateRunRotationContextGenerator userKeyPairSaltStateRunRotationContextGenerator;
 
     @Override
-    public Map<SecretRotationStep, RotationContext> getContexts(String resourceId) {
+    public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         Map<SecretRotationStep, RotationContext> result = Maps.newHashMap();
-        StackDto stack = stackService.getByCrn(resourceId);
+        StackDto stack = stackService.getByCrn(resourceCrn);
         DetailedEnvironmentResponse environment = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> environmentClientService.getByCrn(stack.getEnvironmentCrn()));

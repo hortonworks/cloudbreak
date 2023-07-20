@@ -26,7 +26,12 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImageTermsSignerService;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImageProviderService;
 import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTemplateDeploymentService;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureInstanceView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -38,6 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
@@ -80,6 +86,15 @@ public class AzureUpscaleService {
     @Inject
     private ResourceRetriever resourceRetriever;
 
+    @Inject
+    private AzureMarketplaceImageProviderService azureMarketplaceImageProviderService;
+
+    @Inject
+    private AzureImageFormatValidator azureImageFormatValidator;
+
+    @Inject
+    private AzureImageTermsSignerService azureImageTermsSignerService;
+
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources, AzureStackView azureStackView,
             AzureClient client, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) throws QuotaExceededException {
         CloudContext cloudContext = ac.getCloudContext();
@@ -91,7 +106,13 @@ public class AzureUpscaleService {
         List<CloudResource> osDiskResources = new ArrayList<>();
 
         OffsetDateTime preDeploymentTime = OffsetDateTime.now();
-
+        Image stackImage = stack.getImage();
+        if (azureImageFormatValidator.isMarketplaceImageFormat(stackImage)) {
+            LOGGER.debug("Attempt to sign Azure Marketplace image {}", stackImage);
+            AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(stackImage);
+            AzureCredentialView azureCredentialView = new AzureCredentialView(ac.getCloudCredential());
+            azureImageTermsSignerService.signImageTermsIfAllowed(stack, client, azureMarketplaceImage, azureCredentialView.getSubscriptionId());
+        }
         List<CloudResource> createdCloudInstances =
                 resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, AZURE_INSTANCE, cloudContext.getId());
         LOGGER.debug("Created cloud instances: {}", createdCloudInstances);

@@ -21,9 +21,11 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
@@ -107,6 +109,14 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         TelemetryContext telemetryContext = new TelemetryContext();
         telemetryContext.setClusterType(mapToFluentClusterType(stack.getType()));
         telemetryContext.setTelemetry(telemetry);
+
+        try {
+            Image image = componentConfigProviderService.getImage(stack.getId());
+            telemetryContext.setOsType(image.getOsType());
+        } catch (CloudbreakImageNotFoundException e) {
+            LOGGER.warn("Not able to get Image info from Component info for stack {}", stack.getId(), e);
+        }
+
         if (telemetry != null) {
             CdpAccessKeyType cdpAccessKeyType = altusMachineUserService.getCdpAccessKeyType(stackDto);
             DatabusContext databusContext = createDatabusContext(stack, telemetry, dataBusCredential, accountId, cdpAccessKeyType);

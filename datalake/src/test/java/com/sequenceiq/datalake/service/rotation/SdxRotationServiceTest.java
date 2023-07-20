@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
-import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidator;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
@@ -81,9 +80,6 @@ class SdxRotationServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
-
-    @Mock
-    private SecretRotationValidator secretRotationValidator;
 
     @Mock
     private RedbeamsFlowService redbeamsFlowService;
@@ -151,7 +147,6 @@ class SdxRotationServiceTest {
 
     @Test
     void triggerSecretRotationShouldSucceed() {
-        when(secretRotationValidator.mapSecretTypes(anyList(), any())).thenReturn(List.of(DATALAKE_DATABASE_ROOT_PASSWORD));
         when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
         SdxCluster sdxCluster = new SdxCluster();
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(sdxCluster));

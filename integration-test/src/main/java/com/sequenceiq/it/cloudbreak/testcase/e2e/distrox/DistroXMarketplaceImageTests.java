@@ -56,16 +56,6 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
     @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
 
-    @Override
-    protected void setupTest(TestContext testContext) {
-        testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
-        createDefaultUser(testContext);
-        initializeDefaultBlueprints(testContext);
-        createDefaultCredential(testContext);
-        initalizeAzureMarketplaceTermsPolicy(testContext);
-        createEnvironmentWithFreeIpa(testContext);
-    }
-
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(

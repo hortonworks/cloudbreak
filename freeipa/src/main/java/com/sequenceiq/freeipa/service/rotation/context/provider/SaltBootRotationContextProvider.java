@@ -76,17 +76,17 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
     private SaltBootSignKeyUserDataModifier saltBootSignKeyUserDataModifier;
 
     @Override
-    public Map<SecretRotationStep, RotationContext> getContexts(String resourceId) {
-        Crn environmentCrn = Crn.safeFromString(resourceId);
-        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceId, environmentCrn.getAccountId());
+    public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
+        Crn environmentCrn = Crn.safeFromString(resourceCrn);
+        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceCrn, environmentCrn.getAccountId());
         SecurityConfig securityConfig = securityConfigService.findOneByStack(stack);
         String saltBootPasswordSecret = securityConfig.getSaltSecurityConfig().getSaltBootPasswordVaultSecret();
         String saltBootPrivateKeySecret = securityConfig.getSaltSecurityConfig().getSaltBootSignPrivateKeyVaultSecret();
         return ImmutableMap.<SecretRotationStep, RotationContext>builder()
-                .put(VAULT, getVaultRotationContext(resourceId, saltBootPasswordSecret, saltBootPrivateKeySecret))
-                .put(CUSTOM_JOB, getUpdateDatabaseJob(resourceId, environmentCrn.getAccountId(), saltBootPasswordSecret, saltBootPrivateKeySecret))
+                .put(VAULT, getVaultRotationContext(resourceCrn, saltBootPasswordSecret, saltBootPrivateKeySecret))
+                .put(CUSTOM_JOB, getUpdateDatabaseJob(resourceCrn, environmentCrn.getAccountId(), saltBootPasswordSecret, saltBootPrivateKeySecret))
                 .put(SALTBOOT_CONFIG, getServiceConfigRotationContext(stack, saltBootPasswordSecret, saltBootPrivateKeySecret))
-                .put(USER_DATA, new UserDataRotationContext(resourceId,
+                .put(USER_DATA, new UserDataRotationContext(resourceCrn,
                         List.of(Pair.of(saltBootPasswordUserDataModifier, saltBootPasswordSecret),
                                 Pair.of(saltBootSignKeyUserDataModifier, saltBootPrivateKeySecret))))
                 .build();
@@ -106,9 +106,9 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
                 .build();
     }
 
-    private void updateSaltSecurityConfigColumns(String resourceId, String accountId, String saltBootPasswordSecret, String saltBootPrivateKeySecret,
+    private void updateSaltSecurityConfigColumns(String resourceCrn, String accountId, String saltBootPasswordSecret, String saltBootPrivateKeySecret,
             Function<RotationSecret, String> mapper) {
-        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceId, accountId);
+        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceCrn, accountId);
         SecurityConfig securityConfig = securityConfigService.findOneByStack(stack);
         RotationSecret saltBootPassword = secretService.getRotation(saltBootPasswordSecret);
         securityConfig.getSaltSecurityConfig().setSaltBootPassword(mapper.apply(saltBootPassword));

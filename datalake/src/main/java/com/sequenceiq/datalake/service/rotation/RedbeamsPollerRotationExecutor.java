@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
-import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 
 @Component
 public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<PollerRotationContext> {
@@ -28,19 +27,19 @@ public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<Pol
     @Override
     protected void rotate(PollerRotationContext rotationContext) {
         LOGGER.info("Rotate redbeams secret: {}", rotationContext.getSecretType());
-        sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), (RedbeamsSecretType) rotationContext.getSecretType(), ROTATE);
+        sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), ROTATE);
     }
 
     @Override
     protected void rollback(PollerRotationContext rotationContext) {
         LOGGER.info("Rollback redbeams secret: {}", rotationContext.getSecretType());
-        sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), (RedbeamsSecretType) rotationContext.getSecretType(), ROLLBACK);
+        sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), ROLLBACK);
     }
 
     @Override
     protected void finalize(PollerRotationContext rotationContext) {
         LOGGER.info("Finalize redbeams secret: {}", rotationContext.getSecretType());
-        sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), (RedbeamsSecretType) rotationContext.getSecretType(), FINALIZE);
+        sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), FINALIZE);
     }
 
     @Override

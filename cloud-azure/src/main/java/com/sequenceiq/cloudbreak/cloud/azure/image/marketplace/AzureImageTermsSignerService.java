@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.image.marketplace;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
+
 import java.net.URI;
 import java.util.Optional;
 
@@ -16,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestOperationsService;
 import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestResponseException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudImageException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 @Service
 public class AzureImageTermsSignerService {
@@ -31,9 +34,6 @@ public class AzureImageTermsSignerService {
 
     private static final String AGREEMENTS_URL_AZ_TEMPLATE = "https://management.azure.com/subscriptions/%s/providers/Microsoft.MarketplaceOrdering/" +
             "offerTypes/virtualmachine/publishers/%s/offers/%s/plans/%s/agreements/current?api-version=2015-06-01";
-
-    private static final String READ_PROBLEM_MESSAGE_TEMPLATE = "Failed to get the status of the Terms and Conditions for image %s. " +
-            "Please make sure that Azure Marketplace Terms and Conditions have been accepted for your subscription before proceeding with CDP deployment.";
 
     @Inject
     private AzureRestOperationsService azureRestOperationsService;
@@ -100,6 +100,15 @@ public class AzureImageTermsSignerService {
         String signUrl = String.format(AGREEMENTS_URL_AZ_TEMPLATE,
                 subscriptionId, azureMarketplaceImage.getPublisherId(), azureMarketplaceImage.getOfferId(), azureMarketplaceImage.getPlanId());
         return URI.create(signUrl);
+    }
+
+    public void signImageTermsIfAllowed(CloudStack stack, AzureClient client, AzureMarketplaceImage azureMarketplaceImage, String subscriptionId) {
+        Boolean automaticTermsAcceptance = Boolean.valueOf(stack.getParameters().get(ACCEPTANCE_POLICY_PARAMETER));
+        if (automaticTermsAcceptance) {
+            sign(subscriptionId, azureMarketplaceImage, client);
+        } else {
+            LOGGER.debug("Azure automatic image term signing skipped: [automaticTermsAcceptancePolicy={}]", automaticTermsAcceptance);
+        }
     }
 
     private static class ErrorMessageBuilder {

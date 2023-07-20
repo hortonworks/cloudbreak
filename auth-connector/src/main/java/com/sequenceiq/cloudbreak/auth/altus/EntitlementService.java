@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.AUDIT_ARCHIVING_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
@@ -18,7 +17,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ENCRYPTION_AT_HOST;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CO2_CALCULATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_COST_CALCULATION;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA;
@@ -144,10 +142,6 @@ public class EntitlementService {
 
     public boolean listFilteringEnabled(String accountId) {
         return isEntitlementRegistered(accountId, PERSONAL_VIEW_CB_BY_RIGHT);
-    }
-
-    public boolean gcpAuditEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, AUDIT_ARCHIVING_GCP);
     }
 
     public boolean enforceAwsNativeForSingleAzFreeipaEnabled(String accountId) {
@@ -320,10 +314,6 @@ public class EntitlementService {
 
     public boolean gcpStopStartScalingEnabled(String accountId) {
         return isEntitlementRegistered(accountId, DATAHUB_GCP_STOP_START_SCALING);
-    }
-
-    public boolean databaseWireEncryptionDatahubEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_CB_DATABASE_WIRE_ENCRYPTION_DATAHUB);
     }
 
     public boolean datalakeLoadBalancerEnabled(String accountId) {
