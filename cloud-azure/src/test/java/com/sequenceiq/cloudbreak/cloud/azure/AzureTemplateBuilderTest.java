@@ -247,6 +247,7 @@ public class AzureTemplateBuilderTest {
                 .build();
         azureCredentialView = new AzureCredentialView(cloudCredential());
         azureStorageView = new AzureStorageView(azureCredentialView, cloudContext, azureStorage, null);
+        azureMarketplaceImage = new AzureMarketplaceImage("cloudera", "my-offer", "my-plan", "my-version", false);
 
         azureSubnetStrategy = AzureSubnetStrategy.getAzureSubnetStrategy(FILL, Collections.singletonList("existingSubnet"),
                 ImmutableMap.of("existingSubnet", 100L));
@@ -1540,6 +1541,136 @@ public class AzureTemplateBuilderTest {
                 "                            \"myIdentity\": {\n" +
                 "                            }\n" +
                 "                        }\n");
+    }
+
+    @ParameterizedTest(name = "buildTestWithMarketplaceRegularImage {0}")
+    @MethodSource("templatesPathDataProvider")
+    @SuppressWarnings("checkstyle:RegexpSingleline")
+    public void buildTestWithMarketplaceRegularImage(String templatePath) {
+        setupMarketplaceTests(templatePath);
+
+        //when regular MP image is passed
+        azureMarketplaceImage = new AzureMarketplaceImage("cloudera", "my-offer", "my-plan", "my-version", false);
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertThat(templateString).contains("""
+                                   "imageReference": {
+                                            "publisher": "cloudera",
+                                            "offer": "my-offer",
+                                            "sku": "my-plan",
+                                            "version": "my-version"
+                                   }
+        """);
+        assertThat(templateString).contains("""
+                                           "plan": {
+                                                "name": "my-plan",
+                                                "product": "my-offer",
+                                                "publisher": "cloudera"
+                                           },
+                        """);
+    }
+
+    @ParameterizedTest(name = "buildTestWithMarketplaceNullImage {0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildTestWithMarketplaceNullImage(String templatePath) {
+        setupMarketplaceTests(templatePath);
+
+        //WHEN no MP image is passed
+        azureMarketplaceImage = null;
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertThat(templateString).doesNotContain("\"plan\": {");
+    }
+
+    @ParameterizedTest(name = "buildTestWithMarketplaceCentosSourceImage {0}")
+    @MethodSource("templatesPathDataProvider")
+    @SuppressWarnings("checkstyle:RegexpSingleline")
+    public void buildTestWithMarketplaceCentosSourceImage(String templatePath) {
+        setupMarketplaceTests(templatePath);
+
+        //WHEN Centos based MP image is passed as source image
+        azureMarketplaceImage = new AzureMarketplaceImage("centos", "centos-byos", "centos-lvm88", "8.8.2023053015", true);
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertThat(templateString).doesNotContain("""
+                                   "imageReference": {
+                                            "publisher": "redhat",
+        """);
+        assertThat(templateString).contains("""
+                                   "imageReference": {
+                                           "id": "cloudbreak-image.vhd"
+                                   }
+        """);
+        assertThat(templateString).doesNotContain("""
+                           "plan": {
+        """);
+    }
+
+    @ParameterizedTest(name = "buildTestWithMarketplaceCentosSourceImage {0}")
+    @MethodSource("templatesPathDataProvider")
+    @SuppressWarnings("checkstyle:RegexpSingleline")
+    public void buildTestWithMarketplaceRhelSourceImage(String templatePath) {
+        setupMarketplaceTests(templatePath);
+
+        //WHEN RHEL based MP image is passed as source image
+        azureMarketplaceImage = new AzureMarketplaceImage("redhat", "rhel-byos", "rhel-lvm88", "8.8.2023053015", true);
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertThat(templateString).doesNotContain("""
+                                   "imageReference": {
+                                            "publisher": "redhat",
+        """);
+        assertThat(templateString).contains("""
+                                   "imageReference": {
+                                           "id": "cloudbreak-image.vhd"
+                                   }
+        """);
+        assertThat(templateString).contains("""
+                           "plan": {
+                                "name": "rhel-lvm88",
+                                "product": "rhel-byos",
+                                "publisher": "redhat"
+                           },
+        """);
+    }
+
+    private void setupMarketplaceTests(String templatePath) {
+        //GIVEN
+        assumeTrue(isTemplateVersionGreaterOrEqualThan2100(templatePath));
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
+        Network network = new Network(new Subnet("testSubnet"));
+        when(azureUtils.isPrivateIp(any())).thenReturn(false);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
+                null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+
+        //WHEN
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
+        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
     }
 
     @ParameterizedTest(name = "buildTestWithNoDiskEncryptionSetId {0}")
