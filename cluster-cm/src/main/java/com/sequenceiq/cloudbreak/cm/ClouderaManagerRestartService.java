@@ -18,15 +18,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.ClustersResourceApi;
+import com.cloudera.api.swagger.RoleCommandsResourceApi;
+import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
+import com.cloudera.api.swagger.model.ApiBulkCommandList;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
+import com.cloudera.api.swagger.model.ApiRoleList;
+import com.cloudera.api.swagger.model.ApiRoleNameList;
 import com.cloudera.api.swagger.model.ApiRolesToInclude;
 import com.cloudera.api.swagger.model.ApiRollingRestartClusterArgs;
 import com.cloudera.api.swagger.model.ApiService;
+import com.cloudera.api.swagger.model.ApiServiceList;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
@@ -75,6 +81,39 @@ public class ClouderaManagerRestartService {
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
         Optional<ApiCommand> optionalRestartCommand = findActiveRestartCommand(stack, clustersResourceApi, rollingRestartEnabled);
         waitForRestartExecution(apiClient, stack, optionalRestartCommand.orElse(null));
+    }
+
+    public void restartServiceRoleByType(StackDtoDelegate stack, ApiClient apiClient, String serviceType, String roleType) {
+        try {
+            RolesResourceApi rolesResourceApi = clouderaManagerApiFactory.getRolesResourceApi(apiClient);
+            String serviceName = getServiceNameByType(apiClient, stack.getName(), serviceType)
+                    .orElseThrow(() -> new ClouderaManagerOperationFailedException(String.format("Cannot find CM service by role '%s' in cluster '%s'.",
+                            serviceType, stack.getName())));
+            ApiRoleList apiRoleList = rolesResourceApi.readRoles(stack.getName(), serviceName, String.format("type==%s", roleType), SUMMARY.name());
+            if (apiRoleList.getItems() == null || apiRoleList.getItems().isEmpty()) {
+                throw new ClouderaManagerOperationFailedException(String.format("Cannot find CM service role by type '%s' in cluster '%s'.",
+                        roleType, stack.getName()));
+            }
+            ApiRoleNameList apiRoleNameList = new ApiRoleNameList();
+            RoleCommandsResourceApi roleCommandsResourceApi = clouderaManagerApiFactory.getRoleCommandsResourceApi(apiClient);
+            apiRoleNameList.addItemsItem(apiRoleList.getItems().get(0).getName());
+            ApiBulkCommandList apiCommands = roleCommandsResourceApi.restartCommand(stack.getName(), serviceName, apiRoleNameList);
+            for (ApiCommand apiCommand : apiCommands.getItems()) {
+                waitForRestartExecution(apiClient, stack, apiCommand);
+            }
+        } catch (ApiException | CloudbreakException e) {
+            LOGGER.info("Could not restart services", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    private Optional<String> getServiceNameByType(ApiClient apiClient, String clusterName, String serviceType) throws ApiException {
+        ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(apiClient);
+        ApiServiceList apiServiceList = servicesResourceApi.readServices(clusterName, SUMMARY.name());
+        return apiServiceList.getItems().stream()
+                .filter(apiService -> serviceType.equals(apiService.getType()))
+                .map(ApiService::getName)
+                .findFirst();
     }
 
     private void waitForRestartExecution(ApiClient apiClient, StackDtoDelegate stack, ApiCommand restartCommand) throws CloudbreakException {

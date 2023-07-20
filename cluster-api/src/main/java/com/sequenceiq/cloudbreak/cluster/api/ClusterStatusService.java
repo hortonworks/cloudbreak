@@ -28,6 +28,8 @@ public interface ClusterStatusService {
 
     boolean isClusterManagerRunningQuickCheck();
 
+    boolean isServiceRunningByType(String clusterName, String serviceType);
+
     Optional<String> getClusterManagerVersion();
 
     List<ClusterManagerCommand> getActiveCommandsList();

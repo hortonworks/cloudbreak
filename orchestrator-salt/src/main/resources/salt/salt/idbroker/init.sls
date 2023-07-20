@@ -6,12 +6,14 @@
     - contents_pillar: idbroker:signkey
     - makedirs: True
     - mode: 644
+    - replace: True
 
 {{ idbroker.knox_data_root }}/security/keystores/signcert.pem:
   file.managed:
     - contents_pillar: idbroker:signcert
     - makedirs: True
     - mode: 644
+    - replace: True
 
 # openssl pkcs12 -export -in cert.pem -inkey key.pem -out signing.p12 -name signing-identity -password pass:admin
 # keytool -importkeystore -deststorepass admin1 -destkeypass admin1 -destkeystore signing.jks -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass admin -alias signing-identity
@@ -25,7 +27,7 @@ idbroker-create-sign-pkcs12:
 {{ idbroker.knox_data_root }}/security/keystores/signing.p12:
   file.managed:
     - mode: 644
-    - replace: False
+    - replace: True
 
 idbroker-create-sign-{{ idbroker.keystore_type }}:
   cmd.run:
@@ -36,5 +38,5 @@ idbroker-create-sign-{{ idbroker.keystore_type }}:
 {{ idbroker.knox_data_root }}/security/keystores/signing.{{ idbroker.keystore_type }}:
   file.managed:
     - mode: 644
-    - replace: False
+    - replace: True
 {% endif %}

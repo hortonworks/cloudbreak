@@ -49,6 +49,7 @@ import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleRef;
 import com.cloudera.api.swagger.model.ApiRoleState;
 import com.cloudera.api.swagger.model.ApiService;
+import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiServiceState;
 import com.cloudera.api.swagger.model.ApiVersionInfo;
 import com.google.common.base.Joiner;
@@ -444,6 +445,22 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
             return true;
         } catch (ApiException e) {
             LOGGER.info("Failed to get version from CM", e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isServiceRunningByType(String clusterName, String serviceType) {
+        try {
+            ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
+            ApiServiceList apiServiceList = servicesResourceApi.readServices(clusterName, SUMMARY);
+            return apiServiceList.getItems().stream()
+                    .filter(apiService -> serviceType.equals(apiService.getType()))
+                    .filter(apiService -> apiService.getServiceState() == ApiServiceState.STARTED)
+                    .findFirst()
+                    .isPresent();
+        } catch (ApiException e) {
+            LOGGER.info(String.format("Failed to get the service state from CM for service type '%s' in cluster '%s'", serviceType, clusterName), e);
             return false;
         }
     }

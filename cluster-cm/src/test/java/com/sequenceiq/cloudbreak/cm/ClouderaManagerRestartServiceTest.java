@@ -4,10 +4,13 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_
 import static com.sequenceiq.cloudbreak.cm.DataView.SUMMARY;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_RESTARTING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -27,12 +30,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.ClustersResourceApi;
+import com.cloudera.api.swagger.RoleCommandsResourceApi;
+import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
+import com.cloudera.api.swagger.model.ApiBulkCommandList;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
+import com.cloudera.api.swagger.model.ApiRole;
+import com.cloudera.api.swagger.model.ApiRoleList;
+import com.cloudera.api.swagger.model.ApiRoleNameList;
 import com.cloudera.api.swagger.model.ApiRollingRestartClusterArgs;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
@@ -72,6 +81,12 @@ class ClouderaManagerRestartServiceTest {
 
     @Mock
     private ServicesResourceApi servicesResourceApi;
+
+    @Mock
+    private RolesResourceApi rolesResourceApi;
+
+    @Mock
+    private RoleCommandsResourceApi roleCommandsResourceApi;
 
     @Mock
     private ExtendedPollingResult pollingResult;
@@ -161,6 +176,65 @@ class ClouderaManagerRestartServiceTest {
         assertTrue(CollectionUtils.isEqualCollection(serviceNames, argumentCaptor.getValue().getRestartServiceNames()));
         verify(pollingResultErrorHandler).handlePollingResult(eq(pollingResult), anyString(), anyString());
         verify(eventService).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_RESTARTING);
+    }
+
+    @Test
+    void testRestartServiceRoleByType() throws ApiException, CloudbreakException {
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        when(clouderaManagerApiFactory.getRolesResourceApi(any())).thenReturn(rolesResourceApi);
+        when(clouderaManagerApiFactory.getRoleCommandsResourceApi(any())).thenReturn(roleCommandsResourceApi);
+        ApiServiceList apiServiceList = mock(ApiServiceList.class);
+        ApiService apiService = mock(ApiService.class);
+        when(apiServiceList.getItems()).thenReturn(List.of(apiService));
+        when(apiService.getType()).thenReturn("KNOX");
+        when(apiService.getName()).thenReturn("knox");
+        when(servicesResourceApi.readServices(any(), any())).thenReturn(apiServiceList);
+        ApiRoleList apiRoleList = mock(ApiRoleList.class);
+        ApiRole apiRole = mock(ApiRole.class);
+        when(apiRoleList.getItems()).thenReturn(List.of(apiRole));
+        when(apiRole.getName()).thenReturn("knoxRoleName");
+        when(rolesResourceApi.readRoles(any(), any(), any(), any())).thenReturn(apiRoleList);
+        ApiBulkCommandList apiBulkCommandList = mock(ApiBulkCommandList.class);
+        when(apiBulkCommandList.getItems()).thenReturn(List.of(mock(ApiCommand.class)));
+        when(roleCommandsResourceApi.restartCommand(any(), any(), any())).thenReturn(apiBulkCommandList);
+
+        underTest.restartServiceRoleByType(stack, apiClient, "KNOX", "IDBROKER");
+
+        ApiRoleNameList apiRoleNameList = new ApiRoleNameList();
+        apiRoleNameList.addItemsItem("knoxRoleName");
+
+        verify(roleCommandsResourceApi, times(1)).restartCommand("stack-name", "knox", apiRoleNameList);
+    }
+
+    @Test
+    void testRestartServiceRoleByTypeEmptyRoleListException() throws ApiException {
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        when(clouderaManagerApiFactory.getRolesResourceApi(any())).thenReturn(rolesResourceApi);
+        ApiServiceList apiServiceList = mock(ApiServiceList.class);
+        ApiService apiService = mock(ApiService.class);
+        when(apiServiceList.getItems()).thenReturn(List.of(apiService));
+        when(apiService.getType()).thenReturn("KNOX");
+        when(apiService.getName()).thenReturn("knox");
+        when(servicesResourceApi.readServices(any(), any())).thenReturn(apiServiceList);
+        ApiRoleList apiRoleList = mock(ApiRoleList.class);
+        when(apiRoleList.getItems()).thenReturn(List.of());
+        when(rolesResourceApi.readRoles(any(), any(), any(), any())).thenReturn(apiRoleList);
+
+        ClouderaManagerOperationFailedException e = assertThrows(ClouderaManagerOperationFailedException.class, () ->
+                underTest.restartServiceRoleByType(stack, apiClient, "KNOX", "IDBROKER"));
+        assertEquals("Cannot find CM service role by type 'IDBROKER' in cluster 'stack-name'.", e.getMessage());
+    }
+
+    @Test
+    void testRestartServiceRoleByTypeEmptyServiceListException() throws ApiException {
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        ApiServiceList apiServiceList = mock(ApiServiceList.class);
+        when(apiServiceList.getItems()).thenReturn(List.of());
+        when(servicesResourceApi.readServices(any(), any())).thenReturn(apiServiceList);
+
+        ClouderaManagerOperationFailedException e = assertThrows(ClouderaManagerOperationFailedException.class, () ->
+                underTest.restartServiceRoleByType(stack, apiClient, "KNOX", "IDBROKER"));
+        assertEquals("Cannot find CM service by role 'KNOX' in cluster 'stack-name'.", e.getMessage());
     }
 
     private ApiServiceList createApiServiceList(List<String> serviceNames) {

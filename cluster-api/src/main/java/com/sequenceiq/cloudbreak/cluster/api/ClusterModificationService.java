@@ -106,4 +106,6 @@ public interface ClusterModificationService {
     void startClouderaManagerService(String serviceType) throws Exception;
 
     Map<String, String> fetchServiceStatuses() throws Exception;
+
+    void restartServiceRoleByType(String serviceType, String roleType);
 }

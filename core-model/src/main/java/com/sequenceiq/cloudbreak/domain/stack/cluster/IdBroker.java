@@ -98,6 +98,10 @@ public class IdBroker implements ProvisionEntity, WorkspaceAwareResource {
         return signKey.getRaw();
     }
 
+    public Secret getSignKeySecret() {
+        return signKey;
+    }
+
     public void setSignKey(String signKey) {
         this.signKey = new Secret(signKey);
     }

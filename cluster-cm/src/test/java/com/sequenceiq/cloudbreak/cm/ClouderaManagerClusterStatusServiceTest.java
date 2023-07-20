@@ -13,11 +13,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -456,6 +461,58 @@ public class ClouderaManagerClusterStatusServiceTest {
 
         assertThrows(ClouderaManagerOperationFailedException.class, () -> subject.getActiveCommandsList());
         // THEN ClouderaManagerOperationFailedException is thrown
+    }
+
+    @Test
+    void testIsServiceRunningByType() throws ApiException {
+        ApiServiceList apiServiceList = mock(ApiServiceList.class);
+        ApiService apiService = mock(ApiService.class);
+        when(apiService.getType()).thenReturn("serviceType");
+        when(apiService.getServiceState()).thenReturn(ApiServiceState.STARTED);
+        when(apiServiceList.getItems()).thenReturn(List.of(apiService));
+        when(servicesApi.readServices(any(), any())).thenReturn(apiServiceList);
+
+        boolean result = subject.isServiceRunningByType("clusterName", "serviceType");
+
+        assertTrue(result);
+        verify(servicesApi, times(1)).readServices("clusterName", "summary");
+    }
+
+    @Test
+    void testIsServiceRunningByTypeServiceInBadState() throws ApiException {
+        ApiServiceList apiServiceList = mock(ApiServiceList.class);
+        ApiService apiService = mock(ApiService.class);
+        when(apiService.getType()).thenReturn("serviceType");
+        when(apiService.getServiceState()).thenReturn(ApiServiceState.STOPPED);
+        when(apiServiceList.getItems()).thenReturn(List.of(apiService));
+        when(servicesApi.readServices(any(), any())).thenReturn(apiServiceList);
+
+        boolean result = subject.isServiceRunningByType("clusterName", "serviceType");
+
+        assertFalse(result);
+        verify(servicesApi, times(1)).readServices("clusterName", "summary");
+    }
+
+    @Test
+    void testIsServiceRunningByTypeEmptyServiceList() throws ApiException {
+        ApiServiceList apiServiceList = mock(ApiServiceList.class);
+        when(apiServiceList.getItems()).thenReturn(Collections.emptyList());
+        when(servicesApi.readServices(any(), any())).thenReturn(apiServiceList);
+
+        boolean result = subject.isServiceRunningByType("clusterName", "serviceType");
+
+        assertFalse(result);
+        verify(servicesApi, times(1)).readServices("clusterName", "summary");
+    }
+
+    @Test
+    void testIsServiceRunningByTypeThrowApiException() throws ApiException {
+        doThrow(ApiException.class).when(servicesApi).readServices(any(), any());
+
+        boolean result = subject.isServiceRunningByType("clusterName", "serviceType");
+
+        assertFalse(result);
+        verify(servicesApi, times(1)).readServices("clusterName", "summary");
     }
 
     private ApiRoleRef roleRef(String serviceName, ApiHealthSummary apiHealthSummary) {

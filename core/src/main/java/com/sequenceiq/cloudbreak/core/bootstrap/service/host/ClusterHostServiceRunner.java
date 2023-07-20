@@ -143,6 +143,8 @@ public class ClusterHostServiceRunner {
 
     public static final String CM_DATABASE_PILLAR_KEY = "cloudera-manager-database";
 
+    public static final String IDBROKER_PILLAR_KEY = "idbroker";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterHostServiceRunner.class);
 
     private static final int CM_HTTP_PORT = 7180;
@@ -849,16 +851,19 @@ public class ClusterHostServiceRunner {
 
     private void saveIdBrokerPillar(ClusterView cluster, Map<String, SaltPillarProperties> servicePillar) {
         IdBroker clusterIdBroker = idBrokerService.getByCluster(cluster.getId());
-        Map<String, Object> idbroker = new HashMap<>();
+        LOGGER.info("Put idbroker keys/secrets to salt pillar for cluster: " + cluster.getName());
+        servicePillar.put(IDBROKER_PILLAR_KEY, getIdBrokerPillarProperties(clusterIdBroker));
+    }
 
+    public SaltPillarProperties getIdBrokerPillarProperties(IdBroker clusterIdBroker) {
+        Map<String, Object> idbroker = new HashMap<>();
         if (clusterIdBroker != null) {
-            LOGGER.info("Put idbroker keys/secrets to salt pillar for cluster: " + cluster.getName());
             idbroker.put("signpub", clusterIdBroker.getSignPub());
             idbroker.put("signcert", clusterIdBroker.getSignCert());
             idbroker.put("signkey", clusterIdBroker.getSignKey());
             idbroker.put("mastersecret", clusterIdBroker.getMasterSecret());
         }
-        servicePillar.put("idbroker", new SaltPillarProperties("/idbroker/init.sls", singletonMap("idbroker", idbroker)));
+        return new SaltPillarProperties("/idbroker/init.sls", singletonMap("idbroker", idbroker));
     }
 
     private Map<String, Object> createGatewayUserFacingCertAndFqdn(GatewayConfig gatewayConfig, StackDto stackDto) {

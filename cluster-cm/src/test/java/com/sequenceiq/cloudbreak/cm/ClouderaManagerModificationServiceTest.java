@@ -573,12 +573,12 @@ class ClouderaManagerModificationServiceTest {
     }
 
     static Object[][] upscaleClusterTestWhenRackIdBatchExecutionFailureDataProvider() {
-        return new Object[][] {
+        return new Object[][]{
                 // testCaseName batchResponseFactory
-                { "response=null", (Supplier<ApiBatchResponse>) () -> null },
-                { "success=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(null).items(List.of()) },
-                { "items=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(true).items(null) },
-                { "success=false", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(false).items(List.of()) },
+                {"response=null", (Supplier<ApiBatchResponse>) () -> null},
+                {"success=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(null).items(List.of())},
+                {"items=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(true).items(null)},
+                {"success=false", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(false).items(List.of())},
         };
     }
 
@@ -603,7 +603,7 @@ class ClouderaManagerModificationServiceTest {
         verify(clustersResourceApi, never()).addHosts(anyString(), any(ApiHostRefList.class));
         verify(clouderaManagerRoleRefreshService, never()).refreshClusterRoles(any(ApiClient.class), any(Stack.class));
 
-        verify(hostTemplatesResourceApi, never()).applyHostTemplate(anyString(), anyString(), anyBoolean(),  anyBoolean(), any(ApiHostRefList.class));
+        verify(hostTemplatesResourceApi, never()).applyHostTemplate(anyString(), anyString(), anyBoolean(), anyBoolean(), any(ApiHostRefList.class));
 
         ArgumentCaptor<ApiBatchRequest> batchRequestCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
         verify(batchResourceApi).execute(batchRequestCaptor.capture());
@@ -1284,10 +1284,10 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerApiFactory.getParcelResourceApi(v31Client)).thenReturn(parcelResourceApi);
         when(clouderaManagerParcelDecommissionService.deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, STACK_NAME, usedParcelComponentNames,
                 parcelNamesFromImage))
-                        .thenReturn(new ParcelOperationStatus(Map.of("spark3", "version3", "product5", "version5"), Map.of("product4", "version4")));
+                .thenReturn(new ParcelOperationStatus(Map.of("spark3", "version3", "product5", "version5"), Map.of("product4", "version4")));
         when(clouderaManagerParcelDecommissionService.undistributeUnusedParcels(v31Client, parcelsResourceApi, parcelResourceApi, stack,
                 usedParcelComponentNames, parcelNamesFromImage))
-                        .thenReturn(new ParcelOperationStatus(Map.of("product5", "version5"), Map.of("spark3", "version3")));
+                .thenReturn(new ParcelOperationStatus(Map.of("product5", "version5"), Map.of("spark3", "version3")));
         when(clouderaManagerParcelDecommissionService.removeUnusedParcels(v31Client, parcelsResourceApi, parcelResourceApi, stack, usedParcelComponentNames,
                 parcelNamesFromImage)).thenReturn(new ParcelOperationStatus(Map.of("product5", "version5"), Map.of()));
 
@@ -1383,7 +1383,7 @@ class ClouderaManagerModificationServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true, false })
+    @ValueSource(booleans = {true, false})
     void testStopClusterWhenCmIsNotStoppedAndNotStoppedServicesExistThenTheyAreStopped(boolean disableKnoxAutorestart) throws CloudbreakException, ApiException {
 
         ApiCommand apiCommand = new ApiCommand();
@@ -1412,7 +1412,7 @@ class ClouderaManagerModificationServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true, false })
+    @ValueSource(booleans = {true, false})
     void testStopClusterWhenCmIsNotStoppedAndAllServicesStoppedThenTheyAreNotStopped(boolean disableKnoxAutorestart) throws CloudbreakException, ApiException {
 
         ApiCommand apiCommand = new ApiCommand();
