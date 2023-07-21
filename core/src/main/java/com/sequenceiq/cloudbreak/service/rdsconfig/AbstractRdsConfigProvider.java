@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
-import com.sequenceiq.cloudbreak.util.DatabaseParameterFallbackUtil;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -150,7 +149,7 @@ public abstract class AbstractRdsConfigProvider {
             } else {
                 LOGGER.debug("Creating postgres Database for {}", getRdsType().name());
                 String databaseHost = stack.getPrimaryGatewayInstance().getDiscoveryFQDN();
-                newRdsConfig = createNewRdsConfigForEmbeddedDatabase(stack, cluster, DatabaseParameterFallbackUtil.getOrCreateDatabase(stack), databaseHost,
+                newRdsConfig = createNewRdsConfigForEmbeddedDatabase(stack, cluster, stack.getDatabase(), databaseHost,
                         getDb(), getDbUser(), getDbPort());
             }
             populateNewRdsConfig(stack, cluster, newRdsConfig);

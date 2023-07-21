@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -104,10 +103,6 @@ public interface StackView extends MdcContextInfoProvider {
     Json getInputs();
 
     User getCreator();
-
-    DatabaseAvailabilityType getExternalDatabaseCreationType();
-
-    String getExternalDatabaseEngineVersion();
 
     Long getWorkspaceId();
 

@@ -294,7 +294,7 @@ class StackServiceTest {
 
         verify(stack).setStackVersion(stackVersion);
         verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion);
-        verify(stack).setExternalDatabaseEngineVersion(calculatedDbVersion);
+//        verify(stack).setExternalDatabaseEngineVersion(calculatedDbVersion);
         verify(stackRepository, times(2)).save(stack);
         assertEquals(calculatedDbVersion, database.getExternalDatabaseEngineVersion());
     }
@@ -315,7 +315,7 @@ class StackServiceTest {
 
         verify(stack, never()).setStackVersion(any());
         verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing(null, os, dbVersion);
-        verify(stack).setExternalDatabaseEngineVersion(calculatedDbVersion);
+//        verify(stack).setExternalDatabaseEngineVersion(calculatedDbVersion);
         verify(stackRepository, times(2)).save(stack);
         verify(databaseService, never()).save(any());
     }
@@ -635,24 +635,15 @@ class StackServiceTest {
 
     @Test
     void updateExternalDatabaseEngineVersionWhenNoDBEntity() {
-        when(stackRepository.updateExternalDatabaseEngineVersion(1L, "11")).thenReturn(1);
         when(stackRepository.findDatabaseIdByStackId(1L)).thenReturn(Optional.empty());
-        underTest.updateExternalDatabaseEngineVersion(1L, "11");
+        assertThrows(NotFoundException.class, () -> underTest.updateExternalDatabaseEngineVersion(1L, "11"));
         verify(databaseService, never()).updateExternalDatabaseEngineVersion(anyLong(), anyString());
     }
 
     @Test
     void updateExternalDatabaseEngineVersion() {
-        when(stackRepository.updateExternalDatabaseEngineVersion(1L, "11")).thenReturn(1);
         when(stackRepository.findDatabaseIdByStackId(1L)).thenReturn(Optional.of(2L));
         underTest.updateExternalDatabaseEngineVersion(1L, "11");
         verify(databaseService, times(1)).updateExternalDatabaseEngineVersion(2L, "11");
     }
-
-    @Test
-    void updateExternalDatabaseEngineVersionStackNotFound() {
-        when(stackRepository.updateExternalDatabaseEngineVersion(1L, "11")).thenReturn(0);
-        assertThrows(NotFoundException.class, () -> underTest.updateExternalDatabaseEngineVersion(1L, "11"));
-    }
-
 }

@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
-import com.sequenceiq.cloudbreak.util.DatabaseParameterFallbackUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 
@@ -125,8 +124,7 @@ public class DatabaseSslService {
                 Stack datalakeStack = datalakeStackOpt.get();
                 Cluster datalakeCluster = datalakeStack.getCluster();
                 if (isEmbeddedDatabase(datalakeCluster)) {
-                    response = isSslEnforcementForEmbeddedDatabaseEnabled(datalakeStack, datalakeCluster,
-                            DatabaseParameterFallbackUtil.getOrCreateDatabase(datalakeStack), creation);
+                    response = isSslEnforcementForEmbeddedDatabaseEnabled(datalakeStack, datalakeCluster, datalakeStack.getDatabase(), creation);
                     LOGGER.info("SSL enforcement is {} for the parent datalake stack embedded DB", response ? ENABLED : DISABLED);
                 } else {
                     LOGGER.info("The parent datalake stack uses an external DB");

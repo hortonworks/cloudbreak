@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.util.DatabaseParameterFallbackUtil;
 import com.sequenceiq.common.model.AzureDatabaseType;
 
 @Component
@@ -33,8 +32,9 @@ public class DatabaseRequestToDatabaseConverter {
     public Database convert(Stack stack, CloudPlatform cloudPlatform, DatabaseRequest source) {
         Database database = new Database();
         if (source != null) {
-            database = DatabaseParameterFallbackUtil.setupDatabaseInitParams(
-                    stack, source.getAvailabilityType(), source.getDatabaseEngineVersion(), configureAzureDatabaseIfNeeded(cloudPlatform, source).orElse(null));
+            database.setExternalDatabaseAvailabilityType(source.getAvailabilityType());
+            database.setExternalDatabaseEngineVersion(source.getDatabaseEngineVersion());
+            database.setAttributes(configureAzureDatabaseIfNeeded(cloudPlatform, source).orElse(null));
         }
         return database;
     }
