@@ -39,7 +39,8 @@ public class OozieRoleConfigProviderTest {
     public void testGetRoleConfigsWithSingleRolesPerHostGroup() {
         String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 1, false);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor,
+                1, false, "7.2.2");
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
         List<ApiClusterTemplateConfig> oozieServer = roleConfigs.get("oozie-OOZIE_SERVER-BASE");
@@ -65,7 +66,8 @@ public class OozieRoleConfigProviderTest {
     public void testGetRoleConfigsWithSingleRolesPerHostGroupWhenSSLIsTrue() {
         String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 1, true);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor,
+                1, true, "7.2.2");
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
         List<ApiClusterTemplateConfig> oozieServer = roleConfigs.get("oozie-OOZIE_SERVER-BASE");
@@ -88,10 +90,44 @@ public class OozieRoleConfigProviderTest {
     }
 
     @Test
+    public void testGetRoleConfigsWithSingleRolesPerHostGroupWhenSSLIsTrueAndVersionHigherThan7112() {
+        String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor,
+                1, true, "7.11.2");
+
+        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
+        List<ApiClusterTemplateConfig> oozieServer = roleConfigs.get("oozie-OOZIE_SERVER-BASE");
+
+        assertEquals(6, oozieServer.size());
+
+        assertEquals("oozie_database_host", oozieServer.get(0).getName());
+        assertEquals("testhost", oozieServer.get(0).getValue());
+
+        assertEquals("oozie_database_is_secure", oozieServer.get(1).getName());
+        assertEquals("true", oozieServer.get(1).getValue());
+
+        assertEquals("oozie_database_connection_properties", oozieServer.get(2).getName());
+        assertEquals("<property><name>sslmode</name><value>verify-full</value></property>" +
+                        "<property><name>sslrootcert</name><value>/hadoopfs/fs/cert</value></property>",
+                oozieServer.get(2).getValue());
+
+        assertEquals("oozie_database_type", oozieServer.get(3).getName());
+        assertEquals("postgresql", oozieServer.get(3).getValue());
+
+        assertEquals("oozie_database_user", oozieServer.get(4).getName());
+        assertEquals("testuser", oozieServer.get(4).getValue());
+
+        assertEquals("oozie_database_password", oozieServer.get(5).getName());
+        assertEquals("testpassword", oozieServer.get(5).getValue());
+    }
+
+    @Test
     public void testGetRoleConfigsWithOozieHA() {
         String inputJson = getBlueprintText("input/de-ha.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 2, false);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor,
+                2, false, "7.2.2");
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
         List<ApiClusterTemplateConfig> oozieServer = roleConfigs.get("oozie-OOZIE_SERVER-BASE");
@@ -117,7 +153,7 @@ public class OozieRoleConfigProviderTest {
     public void testGetRoleConfigsWithNoOozie() {
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 1, false);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 1, false, "7.2.2");
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
         List<ApiClusterTemplateConfig> oozieServer = roleConfigs.get("oozie-OOZIE_SERVER-BASE");
@@ -126,7 +162,7 @@ public class OozieRoleConfigProviderTest {
     }
 
     static TemplatePreparationObject getTemplatePreparationObject(String inputJson,
-            CmTemplateProcessor cmTemplateProcessor, int numMasters, boolean ssl) {
+            CmTemplateProcessor cmTemplateProcessor, int numMasters, boolean ssl, String version) {
         List<String> hosts = new ArrayList<>();
         for (int i = 0; i < numMasters; i++) {
             hosts.add("master" + i + ".blah.timbuk2.dev.cldr.");
@@ -142,6 +178,7 @@ public class OozieRoleConfigProviderTest {
             lenient().when(rdsConfig.getSslMode()).thenReturn(RdsSslMode.ENABLED);
         }
         return Builder.builder()
+                .withRdsSslCertificateFilePath("/hadoopfs/fs/cert")
                 .withHostgroupViews(Set.of(master, worker))
                 .withRdsViews(Set.of(rdsConfig)
                         .stream()
@@ -149,7 +186,7 @@ public class OozieRoleConfigProviderTest {
                         .collect(Collectors.toSet()))
                 .withBlueprintView(new BlueprintView(inputJson, "CDP", "1.0", cmTemplateProcessor))
                 .withProductDetails(new ClouderaManagerRepo()
-                        .withVersion("7.2.2")
+                        .withVersion(version)
                         .withBaseUrl("url"), new ArrayList<>())
                 .withCloudPlatform(CloudPlatform.GCP)
                 .build();
