@@ -30,7 +30,7 @@ public class SecretRotationFlowEventChainFactory implements FlowEventChainFactor
     public FlowTriggerEventQueue createFlowTriggerEventQueue(SecretRotationFlowChainTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         if (beforeRotationFlowEventProvider.isPresent() && isRotationOrAllExecution(event)) {
-            flowEventChain.add(beforeRotationFlowEventProvider.get().getTriggerEvent(event.getResourceId()));
+            flowEventChain.add(beforeRotationFlowEventProvider.get().getTriggerEvent(event));
         }
         event.getSecretTypes().forEach(secretType -> {
             flowEventChain.add(SecretRotationTriggerEvent.fromChainTrigger(event, secretType));

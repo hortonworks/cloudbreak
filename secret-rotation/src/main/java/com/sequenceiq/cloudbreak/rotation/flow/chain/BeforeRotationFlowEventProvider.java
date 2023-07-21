@@ -4,5 +4,5 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 
 public interface BeforeRotationFlowEventProvider {
 
-    Selectable getTriggerEvent(Long id);
+    Selectable getTriggerEvent(SecretRotationFlowChainTriggerEvent event);
 }

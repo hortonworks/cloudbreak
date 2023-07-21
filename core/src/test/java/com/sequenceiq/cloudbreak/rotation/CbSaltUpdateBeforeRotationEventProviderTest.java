@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 
 class CbSaltUpdateBeforeRotationEventProviderTest {
 
@@ -14,7 +15,8 @@ class CbSaltUpdateBeforeRotationEventProviderTest {
 
     @Test
     public void testTriggerEventProvided() {
-        Selectable triggerEvent = underTest.getTriggerEvent(1L);
+        Selectable triggerEvent = underTest.getTriggerEvent(
+                new SecretRotationFlowChainTriggerEvent(null, 1L, null, null, null));
 
         assertInstanceOf(StackEvent.class, triggerEvent);
         StackEvent stackEvent = (StackEvent) triggerEvent;

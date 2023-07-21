@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.BeforeRotationFlowEventProvider;
@@ -52,7 +51,7 @@ public class FreeIpaSecretRotationService implements BeforeRotationFlowEventProv
     }
 
     @Override
-    public Selectable getTriggerEvent(Long stackId) {
-        return new SaltUpdateTriggerEvent(stackId, new Promise<>(), true, false, null);
+    public Selectable getTriggerEvent(SecretRotationFlowChainTriggerEvent event) {
+        return new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true, false, null);
     }
 }
