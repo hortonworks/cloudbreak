@@ -230,7 +230,7 @@ public class DatabaseService {
         req.setInstanceType(databaseConfig.getInstanceType());
         req.setDatabaseVendor(databaseConfig.getVendor());
         req.setStorageSize(databaseConfig.getVolumeSize());
-        databaseServerParameterSetterMap.get(cloudPlatform).setParameters(req, sdxCluster);
+        databaseServerParameterSetterMap.get(cloudPlatform).setParameters(req, sdxCluster.getSdxDatabase());
         return req;
     }
 

@@ -38,6 +38,7 @@ import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.converter.DatabaseServerConverter;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.SdxNotificationService;
@@ -137,6 +138,7 @@ public class DatabaseServiceTest {
         cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
         cluster.setCrn(CLUSTER_CRN);
         cluster.setRuntime(runtime);
+        cluster.setSdxDatabase(new SdxDatabase());
         DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
         env.setName("ENV");
         env.setCloudPlatform("aws");
@@ -183,6 +185,7 @@ public class DatabaseServiceTest {
         cluster.setClusterName("NAME");
         cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
         cluster.setCrn(CLUSTER_CRN);
+        cluster.setSdxDatabase(new SdxDatabase());
         DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
         env.setName("ENV");
         env.setCloudPlatform("aws");
@@ -198,8 +201,7 @@ public class DatabaseServiceTest {
 
     @Test
     public void shouldCallStartAndWaitForAvailableStatus() {
-        SdxCluster cluster = new SdxCluster();
-        cluster.setDatabaseCrn(DATABASE_CRN);
+        SdxCluster cluster = getSdxCluster();
 
         DatabaseServerV4Response databaseServerV4Response = mock(DatabaseServerV4Response.class);
 
@@ -214,8 +216,7 @@ public class DatabaseServiceTest {
 
     @Test
     public void shouldCallStopAndWaitForStoppedStatus() {
-        SdxCluster cluster = new SdxCluster();
-        cluster.setDatabaseCrn(DATABASE_CRN);
+        SdxCluster cluster = getSdxCluster();
 
         DatabaseServerV4Response databaseServerV4Response = mock(DatabaseServerV4Response.class);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
@@ -230,8 +231,7 @@ public class DatabaseServiceTest {
 
     @Test
     public void testGetDatabaseServerShouldReturnDatabaseServer() {
-        SdxCluster cluster = new SdxCluster();
-        cluster.setDatabaseCrn(DATABASE_CRN);
+        SdxCluster cluster = getSdxCluster();
         when(sdxService.getByCrn(USER_CRN, CLUSTER_CRN)).thenReturn(cluster);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
@@ -250,7 +250,9 @@ public class DatabaseServiceTest {
 
     @Test
     public void testGetDatabaseServerWhenNoDatabaseCrnShouldThrowNotFoundException() {
-        when(sdxService.getByCrn(USER_CRN, CLUSTER_CRN)).thenReturn(new SdxCluster());
+        SdxCluster cluster = new SdxCluster();
+        cluster.setSdxDatabase(new SdxDatabase());
+        when(sdxService.getByCrn(USER_CRN, CLUSTER_CRN)).thenReturn(cluster);
 
         NotFoundException exception = assertThrows(NotFoundException.class,
                 () -> underTest.getDatabaseServer(USER_CRN, CLUSTER_CRN));
@@ -266,7 +268,7 @@ public class DatabaseServiceTest {
     private DatabaseServerParameterSetter getDatabaseParameterSetter() {
         return new DatabaseServerParameterSetter() {
             @Override
-            public void setParameters(DatabaseServerV4StackRequest request, SdxCluster sdxCluster) {
+            public void setParameters(DatabaseServerV4StackRequest request, SdxDatabase sdxDatabase) {
                 request.setAws(new AwsDatabaseServerV4Parameters());
             }
 
@@ -277,4 +279,11 @@ public class DatabaseServiceTest {
         };
     }
 
+    private SdxCluster getSdxCluster() {
+        SdxCluster cluster = new SdxCluster();
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseCrn(DATABASE_CRN);
+        cluster.setSdxDatabase(sdxDatabase);
+        return cluster;
+    }
 }

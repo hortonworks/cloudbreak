@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
@@ -106,7 +107,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(status);
-        sdxCluster.setDatabaseCrn(DB_CRN);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(DB_CRN);
         when(databaseService.getDatabaseServer(DB_CRN)).thenReturn(databaseResponse);
         when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(databaseResponse, targetMajorVersion)).thenReturn(true);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
@@ -127,7 +128,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(status);
-        sdxCluster.setDatabaseCrn(DB_CRN);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(DB_CRN);
         when(databaseService.getDatabaseServer(DB_CRN)).thenReturn(databaseResponse);
         when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(databaseResponse, TargetMajorVersion.VERSION_11)).thenReturn(true);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
@@ -148,7 +149,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.DATALAKE_UPGRADE_DATABASE_SERVER_FAILED);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(status);
-        sdxCluster.setDatabaseCrn(DB_CRN);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(DB_CRN);
         when(databaseService.getDatabaseServer(DB_CRN)).thenReturn(databaseResponse);
         when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(databaseResponse, targetMajorVersion)).thenReturn(true);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
@@ -241,7 +242,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(status);
-        sdxCluster.setDatabaseCrn(DB_CRN);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(DB_CRN);
         when(databaseService.getDatabaseServer(DB_CRN)).thenReturn(databaseResponse);
         when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(databaseResponse, targetMajorVersion)).thenReturn(true);
         when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any())).thenReturn(true);
@@ -319,7 +320,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(status);
-        sdxCluster.setDatabaseCrn(DB_CRN);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(DB_CRN);
         when(databaseService.getDatabaseServer(DB_CRN)).thenReturn(databaseResponse);
         when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(databaseResponse, targetMajorVersion)).thenReturn(true);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
@@ -340,7 +341,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(status);
-        sdxCluster.setDatabaseCrn(DB_CRN);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(DB_CRN);
         when(databaseService.getDatabaseServer(DB_CRN)).thenReturn(databaseResponse);
         when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(databaseResponse, targetMajorVersion)).thenReturn(true);
         when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any())).thenReturn(true);
@@ -361,7 +362,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(status);
-        sdxCluster.setDatabaseCrn(DB_CRN);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(DB_CRN);
         when(databaseService.getDatabaseServer(DB_CRN)).thenReturn(databaseResponse);
         when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(databaseResponse, targetMajorVersion)).thenReturn(true);
         when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any())).thenReturn(true);
@@ -396,6 +397,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         if (runtimeVersion != null) {
             sdxCluster.setRuntime(runtimeVersion);
         }
+        sdxCluster.setSdxDatabase(new SdxDatabase());
         return sdxCluster;
     }
 

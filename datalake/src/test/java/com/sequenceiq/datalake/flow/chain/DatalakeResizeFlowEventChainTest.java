@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -75,8 +76,10 @@ public class DatalakeResizeFlowEventChainTest {
         sdxCluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
         sdxCluster.setEnvName("test-env");
         sdxCluster.setCrn("crn:sdxcluster");
-        sdxCluster.setDatabaseCrn("crn:sdxcluster");
         sdxCluster.setId(1L);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseCrn("crn:sdxcluster");
+        sdxCluster.setSdxDatabase(sdxDatabase);
         return sdxCluster;
     }
 
@@ -86,9 +89,11 @@ public class DatalakeResizeFlowEventChainTest {
         sdxCluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
         sdxCluster.setEnvName("test-env");
         sdxCluster.setCrn("crn:sdxcluster");
-        sdxCluster.setDatabaseCrn("crn:sdxcluster");
         sdxCluster.setRangerRazEnabled(true);
         sdxCluster.setId(1L);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseCrn("crn:sdxcluster");
+        sdxCluster.setSdxDatabase(sdxDatabase);
         return sdxCluster;
     }
 }

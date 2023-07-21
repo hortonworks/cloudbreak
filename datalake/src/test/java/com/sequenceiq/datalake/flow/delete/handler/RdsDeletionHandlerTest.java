@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionWaitRequest;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeletionFailedEvent;
@@ -276,9 +277,11 @@ class RdsDeletionHandlerTest {
     private SdxCluster sdxCluster(SdxDatabaseAvailabilityType databaseAvailabilityType, boolean createDatabase, String databaseCrn) {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setCrn(DATALAKE_CRN);
-        sdxCluster.setDatabaseAvailabilityType(databaseAvailabilityType);
-        sdxCluster.setCreateDatabase(createDatabase);
-        sdxCluster.setDatabaseCrn(databaseCrn);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseAvailabilityType(databaseAvailabilityType);
+        sdxDatabase.setCreateDatabase(createDatabase);
+        sdxDatabase.setDatabaseCrn(databaseCrn);
+        sdxCluster.setSdxDatabase(sdxDatabase);
         return sdxCluster;
     }
 

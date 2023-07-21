@@ -1359,19 +1359,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public SdxCluster save(SdxCluster sdxCluster) {
-        try {
-            return transactionService.required(() -> {
-                SdxCluster created = sdxClusterRepository.save(sdxCluster);
-                if (sdxCluster.getSdxDatabase() != null && sdxCluster.getSdxDatabase().getId() == null) {
-                    SdxDatabase sdxDatabase = sdxCluster.getSdxDatabase();
-                    sdxDatabase.setSdxClusterId(created.getId());
-                    created.setSdxDatabase(sdxDatabaseRepository.save(sdxDatabase));
-                }
-                return created;
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
+        return sdxClusterRepository.save(sdxCluster);
     }
 
     public void updateCertExpirationState(Long id, CertExpirationState state) {
@@ -1426,14 +1414,11 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public void updateDatabaseEngineVersion(String crn, String databaseEngineVersion) {
-        int updatedCount = sdxClusterRepository.updateDatabaseEngineVersion(crn, databaseEngineVersion);
-        if (updatedCount < 1) {
+        Optional<Long> databaseId = sdxClusterRepository.findDatabaseIdByCrn(crn);
+        databaseId.ifPresentOrElse(id -> sdxDatabaseRepository.updateDatabaseEngineVersion(id, databaseEngineVersion), () -> {
             throw notFoundException("SdxCluster with", crn + " crn");
-        } else {
-            Optional<Long> databaseId = sdxClusterRepository.findDatabaseIdByCrn(crn);
-            databaseId.ifPresent(id -> sdxDatabaseRepository.updateDatabaseEngineVersion(id, databaseEngineVersion));
-            LOGGER.info("Updated database engine version for [{}] with [{}]", crn, databaseEngineVersion);
-        }
+        });
+        LOGGER.info("Updated database engine version for [{}] with [{}]", crn, databaseEngineVersion);
     }
 
     public FlowIdentifier updateSalt(SdxCluster sdxCluster) {

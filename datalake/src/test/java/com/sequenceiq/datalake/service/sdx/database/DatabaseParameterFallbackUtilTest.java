@@ -16,6 +16,7 @@ public class DatabaseParameterFallbackUtilTest {
     public void testSetupDatabaseInitParams() {
         SdxCluster sdxCluster = new SdxCluster();
         SdxDatabase sdxDatabase = DatabaseParameterFallbackUtil.setupDatabaseInitParams(sdxCluster, SdxDatabaseAvailabilityType.HA, "1.0");
+        sdxCluster.setSdxDatabase(sdxDatabase);
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("1.0", sdxDatabase.getDatabaseEngineVersion());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxCluster.getDatabaseAvailabilityType());
@@ -25,6 +26,7 @@ public class DatabaseParameterFallbackUtilTest {
     @Test
     public void testSetDatabaseCrn() {
         SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setSdxDatabase(new SdxDatabase());
         DatabaseParameterFallbackUtil.setDatabaseCrn(sdxCluster, "crn123");
         assertEquals("crn123", sdxCluster.getSdxDatabase().getDatabaseCrn());
         assertEquals("crn123", sdxCluster.getDatabaseCrn());
