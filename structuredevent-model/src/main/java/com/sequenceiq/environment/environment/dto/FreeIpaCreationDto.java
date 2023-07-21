@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.dto;
 
+import java.util.Collections;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -148,7 +149,7 @@ public class FreeIpaCreationDto {
 
         private String instanceType;
 
-        private Set<String> recipes;
+        private Set<String> recipes = Collections.emptySet();
 
         private Builder(int instanceCountByGroup) {
             this.instanceCountByGroup = instanceCountByGroup;

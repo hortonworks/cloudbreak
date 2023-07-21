@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
@@ -25,6 +27,9 @@ public class FreeIpaResponse implements Serializable {
 
     @ApiModelProperty(value = EnvironmentModelDescription.MULTIAZ_FREEIPA)
     private boolean enableMultiAz;
+
+    @ApiModelProperty(value = EnvironmentModelDescription.FREEIPA_RECIPES)
+    private Set<String> recipes = new HashSet<>();
 
     public Integer getInstanceCountByGroup() {
         return instanceCountByGroup;
@@ -66,6 +71,14 @@ public class FreeIpaResponse implements Serializable {
         this.enableMultiAz = enableMultiAz;
     }
 
+    public Set<String> getRecipes() {
+        return recipes;
+    }
+
+    public void setRecipes(Set<String> recipes) {
+        this.recipes = recipes;
+    }
+
     @Override
     public String toString() {
         return "FreeIpaResponse{" +
@@ -74,6 +87,7 @@ public class FreeIpaResponse implements Serializable {
                 ", aws=" + aws +
                 ", image=" + image +
                 ", enableMultiAz=" + enableMultiAz +
+                ", recipes=" + recipes +
                 '}';
     }
 }

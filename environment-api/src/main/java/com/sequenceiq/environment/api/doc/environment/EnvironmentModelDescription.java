@@ -51,6 +51,8 @@ public class EnvironmentModelDescription {
     public static final String FREEIPA_INSTANCE_COUNT_BY_GROUP = "The number of FreeIPA instances to create per group when creating FreeIPA in environment";
     public static final String FREEIPA_INSTANCE_TYPE = "Override default FreeIPA instance type";
     public static final String MULTIAZ_FREEIPA = "The FreeIPA multi-AZ enabled or not";
+
+    public static final String FREEIPA_RECIPES = "The recipe names that are applied for the FreeIPA";
     public static final String YARN_QUEUE = "Queue for Yarn deployments";
     public static final String YARN_LIFETIME = "Lifetime for Yarn deployments in seconds";
 

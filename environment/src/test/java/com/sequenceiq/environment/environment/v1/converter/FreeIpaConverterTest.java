@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -282,6 +283,25 @@ public class FreeIpaConverterTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.convert(request, "id", CloudConstants.AZURE));
         assertEquals("You need to be entitled for CDP_CB_AZURE_MULTIAZ to provision FreeIPA in Multi Availability Zone", badRequestException.getMessage());
+    }
+
+    @Test
+    void testFreeIpaCreationDtoToFreeIpaResponseWithRecipe() {
+        Set<String> recipes = Set.of("recipe-1", "recipe-2");
+        FreeIpaResponse result = underTest.convert(FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP).withRecipes(recipes).build());
+
+        assertNotNull(result);
+        assertNotNull(result.getRecipes());
+        recipes.forEach(recipe -> assertTrue(result.getRecipes().contains(recipe)));
+    }
+
+    @Test
+    void testFreeIpaCreationDtoToFreeIpaResponseWithRecipeDefaultValue() {
+        FreeIpaResponse result = underTest.convert(FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP).build());
+
+        assertNotNull(result);
+        assertNotNull(result.getRecipes());
+        assertTrue(result.getRecipes().isEmpty());
     }
 
     private FreeIpaImageRequest aFreeIpaImage(String catalog, String id) {
