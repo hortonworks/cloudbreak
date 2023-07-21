@@ -30,7 +30,7 @@ public class UpgradeValidationService {
     private SupportedOsService supportedOsService;
 
     public void validateUpgradeRequest(FreeIpaUpgradeRequest request) {
-        if (request.getAllowMajorOsUpgrade() && !supportedOsService.isRhel8Supported()) {
+        if (Boolean.TRUE.equals(request.getAllowMajorOsUpgrade()) && !supportedOsService.isRhel8Supported()) {
             LOGGER.warn("Major OS upgrade is not supported");
             throw new BadRequestException("Major OS upgrade is not supported");
         }
