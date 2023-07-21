@@ -247,7 +247,7 @@ public class AzureResourceConnectorTest {
     @Test
     public void testWhenSourceImageExistsThenComputeResourceServiceBuildsTheResources() {
 
-        AzureMarketplaceImage azureMarketplaceImage = new AzureMarketplaceImage("cloudera", "my-offer", "my-plan", "my-version");
+        AzureMarketplaceImage azureMarketplaceImage = new AzureMarketplaceImage("cloudera", "my-offer", "my-plan", "my-version", true);
 
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
         when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);

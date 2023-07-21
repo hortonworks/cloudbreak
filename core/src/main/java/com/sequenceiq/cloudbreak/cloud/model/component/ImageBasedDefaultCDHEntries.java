@@ -15,7 +15,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
@@ -25,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.ImageOsService;
 import com.sequenceiq.cloudbreak.service.image.PreWarmParcelParser;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
@@ -37,14 +37,14 @@ public class ImageBasedDefaultCDHEntries {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageBasedDefaultCDHEntries.class);
 
-    @Value("${cb.image.catalog.default.os}")
-    private String defaultOs;
-
     @Inject
     private ImageCatalogService imageCatalogService;
 
     @Inject
     private PreWarmParcelParser preWarmParcelParser;
+
+    @Inject
+    private ImageOsService imageOsService;
 
     public Map<String, ImageBasedDefaultCDHInfo> getEntries(Long workspaceId, ImageCatalogPlatform platform, String os, String imageCatalogName)
             throws CloudbreakImageCatalogException {
@@ -65,8 +65,9 @@ public class ImageBasedDefaultCDHEntries {
     public Map<String, ImageBasedDefaultCDHInfo> getEntries(Images images, String os) {
         return images.getCdhImages().stream()
                 .filter(Image::isDefaultImage)
+                .filter(image -> imageOsService.isSupported(image.getOs()))
                 .filter(image -> ObjectUtils.isEmpty(os) || os.equalsIgnoreCase(image.getOs()))
-                .collect(Collectors.toMap(Image::getVersion, this::createImageBasedDefaultCDHInfo, preferDefaultOs()));
+                .collect(Collectors.toMap(Image::getVersion, this::createImageBasedDefaultCDHInfo, preferOs()));
     }
 
     private ImageBasedDefaultCDHInfo createImageBasedDefaultCDHInfo(Image image) {
@@ -95,9 +96,9 @@ public class ImageBasedDefaultCDHEntries {
         return repoDetails;
     }
 
-    private BinaryOperator<ImageBasedDefaultCDHInfo> preferDefaultOs() {
+    private BinaryOperator<ImageBasedDefaultCDHInfo> preferOs() {
         return (i1, i2) -> Stream.of(i1, i2)
-                .filter(i -> defaultOs.equalsIgnoreCase(i.getImage().getOs()))
+                .filter(i -> imageOsService.getPreferredOs().equalsIgnoreCase(i.getImage().getOs()))
                 .findFirst()
                 .orElse(i1);
     }

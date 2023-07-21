@@ -3,13 +3,17 @@ package com.sequenceiq.cloudbreak.service.image;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 
+@ExtendWith(MockitoExtension.class)
 public class ImageComparatorTest {
 
     private static final String OS_REDHAT8 = "redhat8";
@@ -22,9 +26,14 @@ public class ImageComparatorTest {
 
     private ImageComparator underTest;
 
-    @Before
+    @Mock
+    private ImageOsService imageOsService;
+
+    @BeforeEach
     public void setup() {
-        underTest = new ImageComparator(OS_CENTOS7);
+        underTest = new ImageComparator();
+        ReflectionTestUtils.setField(underTest, "imageOsService", imageOsService);
+        lenient().when(imageOsService.getPreferredOs()).thenReturn(OS_CENTOS7);
     }
 
     @Test
@@ -92,10 +101,10 @@ public class ImageComparatorTest {
 
     private static Image createMockImage(String os, String osType, String date, Long created) {
         Image image = mock(Image.class);
-        when(image.getOs()).thenReturn(os);
-        when(image.getOsType()).thenReturn(osType);
+        lenient().when(image.getOs()).thenReturn(os);
+        lenient().when(image.getOsType()).thenReturn(osType);
         lenient().when(image.getDate()).thenReturn(date);
-        when(image.getCreated()).thenReturn(created);
+        lenient().when(image.getCreated()).thenReturn(created);
         return image;
     }
 }

@@ -31,15 +31,15 @@ public class AzureMarketplaceImageProviderService {
     private AzureImageFormatValidator azureImageFormatValidator;
 
     public AzureMarketplaceImage get(Image image) {
-        return get(image.getImageName());
+        return get(image.getImageName(), false);
     }
 
     public AzureMarketplaceImage getSourceImage(Image image) {
         String imageUrn = image.getPackageVersions().get(ImagePackageVersion.SOURCE_IMAGE.getKey());
-        return get(imageUrn);
+        return get(imageUrn, true);
     }
 
-    private AzureMarketplaceImage get(String imageUrn) {
+    private AzureMarketplaceImage get(String imageUrn, boolean useAsSourceImage) {
         if (StringUtils.isBlank(imageUrn)) {
             String errorMessage = "Missing Marketplace image URN! "
                     + "Please specify the image in an URN format, 4 segments separated by a colon in the image catalog";
@@ -57,7 +57,8 @@ public class AzureMarketplaceImageProviderService {
                 splitUri[INDEX_MARKETPLACE_PUBLISHER_ID],
                 splitUri[INDER_MARKETPLACE_OFFER_ID],
                 splitUri[INDEX_MARKETPLACE_PLAN_ID],
-                splitUri[INDEX_MARKETPLACE_VERSION]
+                splitUri[INDEX_MARKETPLACE_VERSION],
+                useAsSourceImage
         );
     }
 

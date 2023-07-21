@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.controller.validation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -15,10 +16,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
+import com.sequenceiq.freeipa.service.image.SupportedOsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -43,11 +45,12 @@ class CreateFreeIpaRequestValidatorTest {
     private CrnService crnService;
 
     @MockBean
-    private EntitlementService entitlementService;
+    private SupportedOsService supportedOsService;
 
     @BeforeEach
     void setUp() {
         when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        when(supportedOsService.isSupported(any())).thenReturn(true);
     }
 
     @Test
@@ -117,5 +120,19 @@ class CreateFreeIpaRequestValidatorTest {
         ValidationResult result = underTest.validate(request);
 
         assertThat(result.hasError()).isTrue();
+    }
+
+    @Test
+    void validateSupportedOs() {
+        CreateFreeIpaRequest request = new CreateFreeIpaRequest();
+        ImageSettingsRequest image = new ImageSettingsRequest();
+        image.setOs("redhat8");
+        request.setImage(image);
+        when(supportedOsService.isSupported(image.getOs())).thenReturn(false);
+
+        ValidationResult result = underTest.validate(request);
+
+        assertThat(result.hasError()).isTrue();
+        assertThat(result.getFormattedErrors()).contains("Requested FreeIPA os 'redhat8' is not supported");
     }
 }

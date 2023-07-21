@@ -4,9 +4,11 @@ import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatf
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.ImageOsService;
 import com.sequenceiq.cloudbreak.service.image.PreWarmParcelParser;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
@@ -60,18 +62,22 @@ public class ImageBasedDefaultCDHEntriesTest {
     @Mock
     private PreWarmParcelParser preWarmParcelParser;
 
+    @Mock
+    private ImageOsService imageOsService;
+
     @InjectMocks
     private ImageBasedDefaultCDHEntries victim;
 
     @BeforeEach
     public void initTests() {
         MockitoAnnotations.initMocks(this);
-        ReflectionTestUtils.setField(victim, "defaultOs", OS);
+        when(imageOsService.isSupported(any())).thenReturn(true);
+        when(imageOsService.getPreferredOs()).thenReturn(OS);
     }
 
     @Test
     public void shouldReturnImageBasedDefaultCDHInfoMapByDefaultCdhImages() {
-        List<Image> imageList = getImages();
+        List<Image> imageList = getImages(OS);
         when(images.getCdhImages()).thenReturn(imageList);
 
         Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(images);
@@ -81,8 +87,33 @@ public class ImageBasedDefaultCDHEntriesTest {
     }
 
     @Test
+    public void shouldFilterByOs() {
+        String os = "redhat8";
+        when(imageOsService.isSupported(os)).thenReturn(false);
+        List<Image> imageList = getImages(os);
+        when(images.getCdhImages()).thenReturn(imageList);
+
+        Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(images);
+
+        assertEquals(0, actual.size());
+    }
+
+    @Test
+    public void shouldPreferOs() {
+        List<Image> imageList = new ArrayList<>(getImages("redhat8"));
+        List<Image> defaultOsImages = getImages(OS);
+        imageList.addAll(defaultOsImages);
+        when(images.getCdhImages()).thenReturn(imageList);
+
+        Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(images);
+        Image image = defaultOsImages.stream().filter(Image::isDefaultImage).findFirst().get();
+
+        verify(image, actual.get(IMAGE_VERSION));
+    }
+
+    @Test
     public void shouldReturnImageBasedDefaultCDHInfoMapByPlatformAndImageCatalog() throws CloudbreakImageCatalogException {
-        List<Image> imageList = getImages();
+        List<Image> imageList = getImages(OS);
         when(images.getCdhImages()).thenReturn(imageList);
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
 
@@ -99,7 +130,7 @@ public class ImageBasedDefaultCDHEntriesTest {
     @Test
     public void shouldFallBackToAwsInCaseOfMissingCdhImages() throws CloudbreakImageCatalogException {
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(CloudPlatform.YARN.name());
-        List<Image> imageList = getImages();
+        List<Image> imageList = getImages(OS);
         when(images.getCdhImages()).thenReturn(imageList);
         when(emptyImages.getCdhImages()).thenReturn(Collections.emptyList());
 
@@ -116,7 +147,7 @@ public class ImageBasedDefaultCDHEntriesTest {
         verify(image, actual.get(IMAGE_VERSION));
     }
 
-    private List<Image> getImages() {
+    private List<Image> getImages(String os) {
         StackRepoDetails stackRepoDetails = new StackRepoDetails(getRepo(), null);
         ImageStackDetails stackDetails = new ImageStackDetails(null, stackRepoDetails, null);
         List<List<String>> parcels = getParcels();
@@ -126,9 +157,11 @@ public class ImageBasedDefaultCDHEntriesTest {
         when(defaultImage.getStackDetails()).thenReturn(stackDetails);
         when(defaultImage.getPreWarmParcels()).thenReturn(parcels);
         when(defaultImage.getPreWarmCsd()).thenReturn(PRE_WARM_CSD);
+        when(defaultImage.getOs()).thenReturn(os);
 
         Image nonDefaultImage = mock(Image.class);
         when(nonDefaultImage.isDefaultImage()).thenReturn(false);
+        when(nonDefaultImage.getOs()).thenReturn(os);
 
         //Default image added double times to test
         //the algorithm is not failing on multiple default images for the same version

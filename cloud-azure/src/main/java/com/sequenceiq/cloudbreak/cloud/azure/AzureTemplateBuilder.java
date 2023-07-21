@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureInstanceTemplateOperation.UPSCALE;
+import static com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage.REDHAT;
+import static com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage.RHEL_BYOS;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -99,8 +102,12 @@ public class AzureTemplateBuilder {
             // needed for pre 1.16.5 templates and Load balancer setup on Medium duty datalakes.
             model.put("existingSubnetName", azureUtils.getCustomSubnetIds(network).stream().findFirst().orElse(""));
             model.put("endpointGwSubnet", azureUtils.getCustomEndpointGatewaySubnetIds(network).stream().findFirst().orElse(""));
-            model.put("usePartnerCenter", Objects.nonNull(azureMarketplaceImage));
+            model.put("usePartnerCenter", Objects.nonNull(azureMarketplaceImage)
+                    && !azureMarketplaceImage.isUsedAsSourceImage());
             model.put("marketplaceImageDetails", azureMarketplaceImage);
+            model.put("useSourceImagePlan", Objects.nonNull(azureMarketplaceImage)
+                    && isRedHatByos(azureMarketplaceImage)
+                    && azureMarketplaceImage.isUsedAsSourceImage());
             model.put("customImageId", customImageId);
             model.put("storage_account_name", rootDiskStorage);
             model.put("image_storage_container_name", AzureStorage.IMAGES_CONTAINER);
@@ -132,6 +139,11 @@ public class AzureTemplateBuilder {
         } catch (IOException | TemplateException e) {
             throw new CloudConnectorException("Failed to process the ARM TemplateBuilder", e);
         }
+    }
+
+    private boolean isRedHatByos(AzureMarketplaceImage azureMarketplaceImage) {
+        return Optional.ofNullable(azureMarketplaceImage).map(AzureMarketplaceImage::getPublisherId).orElse("").equalsIgnoreCase(REDHAT)
+                && Optional.ofNullable(azureMarketplaceImage.getOfferId()).orElse("").equalsIgnoreCase(RHEL_BYOS);
     }
 
     public String buildParameters(CloudCredential credential, Network network, Image image) {
