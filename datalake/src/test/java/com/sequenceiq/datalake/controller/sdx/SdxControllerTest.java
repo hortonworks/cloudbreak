@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
@@ -258,6 +259,7 @@ class SdxControllerTest {
         sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         sdxCluster.setEnvName("test-env");
         sdxCluster.setCrn("crn:sdxcluster");
+        sdxCluster.setSdxDatabase(new SdxDatabase());
         return sdxCluster;
     }
 

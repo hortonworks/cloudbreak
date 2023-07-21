@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobSe
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.CloudbreakStackService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -101,7 +102,9 @@ public class SdxAttachServiceTest {
         testCluster.setOriginalCrn(ORIGINAL_TEST_CLUSTER_CRN);
         testCluster.setAccountId(TEST_CLUSTER_ACCOUNT_ID);
         testCluster.setDetached(true);
-        testCluster.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        testCluster.setSdxDatabase(sdxDatabase);
         MockitoAnnotations.openMocks(this);
     }
 
@@ -211,7 +214,7 @@ public class SdxAttachServiceTest {
 
     @Test
     void testReRegisterClusterProxyConfig() {
-        testCluster.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+        testCluster.getSdxDatabase().setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         when(mockRegionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(mockRegionAwareInternalCrnGeneratorFactory.iam()).thenReturn(mockRegionAwareInternalCrnGenerator);
         when(mockSdxDetachNameGenerator.generateOriginalNameFromDetached(any())).thenReturn(ORIGINAL_TEST_CLUSTER_NAME);
@@ -229,7 +232,7 @@ public class SdxAttachServiceTest {
 
     @Test
     void testReRegisterClusterProxyConfigCCMv1() {
-        testCluster.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+        testCluster.getSdxDatabase().setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         when(mockRegionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(mockRegionAwareInternalCrnGeneratorFactory.iam()).thenReturn(mockRegionAwareInternalCrnGenerator);
         when(mockSdxDetachNameGenerator.generateOriginalNameFromDetached(any())).thenReturn(ORIGINAL_TEST_CLUSTER_NAME);

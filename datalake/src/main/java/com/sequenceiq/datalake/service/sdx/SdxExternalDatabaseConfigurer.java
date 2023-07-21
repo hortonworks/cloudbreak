@@ -61,9 +61,9 @@ public class SdxExternalDatabaseConfigurer {
                 databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(sdxCluster.getRuntime(), os, requestedDbEngineVersion);
         SdxDatabase sdxDatabase = DatabaseParameterFallbackUtil.setupDatabaseInitParams(sdxCluster, databaseAvailabilityType, dbEngineVersion);
         configureAzureDatabase(cloudPlatform, internalDatabaseRequest, databaseRequest, sdxDatabase);
-        LOGGER.debug("Set database availability type to {}, and engine version to {}", sdxCluster.getDatabaseAvailabilityType(),
-                sdxCluster.getDatabaseEngineVersion());
-        validate(cloudPlatform, sdxCluster);
+        LOGGER.debug("Set database availability type to {}, and engine version to {}", sdxDatabase.getDatabaseAvailabilityType(),
+                sdxDatabase.getDatabaseEngineVersion());
+        validate(cloudPlatform, sdxCluster.getClusterName(), sdxDatabase);
         return sdxDatabase;
     }
 
@@ -123,10 +123,10 @@ public class SdxExternalDatabaseConfigurer {
         return versionComparator.compare(currentVersion, baseVersion) > -1;
     }
 
-    private void validate(CloudPlatform cloudPlatform, SdxCluster sdxCluster) {
-        if (sdxCluster.hasExternalDatabase()
+    private void validate(CloudPlatform cloudPlatform, String clusterName, SdxDatabase sdxDatabase) {
+        if (sdxDatabase.hasExternalDatabase()
                 && !platformConfig.isExternalDatabaseSupportedOrExperimental(cloudPlatform)) {
-            String message = String.format("Cannot create external database for sdx: %s, for now only %s is/are supported", sdxCluster.getClusterName(),
+            String message = String.format("Cannot create external database for sdx: %s, for now only %s is/are supported", clusterName,
                     platformConfig.getSupportedExternalDatabasePlatforms());
             LOGGER.debug(message);
             throw new BadRequestException(message);
