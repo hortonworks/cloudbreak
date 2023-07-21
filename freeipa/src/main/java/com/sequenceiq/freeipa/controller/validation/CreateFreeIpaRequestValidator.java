@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.validation.Validator;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
+import com.sequenceiq.freeipa.service.image.SupportedOsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -21,6 +22,9 @@ public class CreateFreeIpaRequestValidator implements Validator<CreateFreeIpaReq
 
     @Inject
     private CrnService crnService;
+
+    @Inject
+    private SupportedOsService supportedOsService;
 
     @Value("${freeipa.max.instances}")
     private int maxInstances;
@@ -50,6 +54,10 @@ public class CreateFreeIpaRequestValidator implements Validator<CreateFreeIpaReq
 
         if (!stackService.findAllByEnvironmentCrnAndAccountId(subject.getEnvironmentCrn(), accountId).isEmpty()) {
             validationBuilder.error("FreeIPA already exists in environment");
+        }
+
+        if (subject.getImage() != null && !supportedOsService.isSupported(subject.getImage().getOs())) {
+            validationBuilder.error(String.format("Requested FreeIPA os '%s' is not supported", subject.getImage().getOs()));
         }
 
         return validationBuilder.build();

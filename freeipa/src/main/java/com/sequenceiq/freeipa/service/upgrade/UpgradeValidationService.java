@@ -5,15 +5,19 @@ import static java.util.function.Predicate.not;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.ImageInfoResponse;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.image.SupportedOsService;
 
 @Service
 public class UpgradeValidationService {
@@ -21,6 +25,20 @@ public class UpgradeValidationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeValidationService.class);
 
     private static final int MAX_NUMBER_OF_INSTANCES_FOR_UPGRADE = 3;
+
+    @Inject
+    private SupportedOsService supportedOsService;
+
+    public void validateUpgradeRequest(FreeIpaUpgradeRequest request) {
+        if (request.getAllowMajorOsUpgrade() && !supportedOsService.isRhel8Supported()) {
+            LOGGER.warn("Major OS upgrade is not supported");
+            throw new BadRequestException("Major OS upgrade is not supported");
+        }
+        if (request.getImage() != null && !supportedOsService.isSupported(request.getImage().getOs())) {
+            LOGGER.warn("Selected os '{}' is not supported", request.getImage().getOs());
+            throw new BadRequestException(String.format("Selected os '%s' is not supported", request.getImage().getOs()));
+        }
+    }
 
     public void validateStackForUpgrade(Set<InstanceMetaData> allInstances, Stack stack) {
         if (allInstances.isEmpty()) {

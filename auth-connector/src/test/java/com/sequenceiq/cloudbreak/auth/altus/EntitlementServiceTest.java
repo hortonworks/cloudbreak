@@ -194,14 +194,35 @@ class EntitlementServiceTest {
 
                 {"CDP_AZURE_DATABASE_FLEXIBLE_SERVER", (EntitlementCheckFunction) EntitlementService::isAzureDatabaseFlexibleServerEnabled, false},
                 {"CDP_AZURE_DATABASE_FLEXIBLE_SERVER", (EntitlementCheckFunction) EntitlementService::isAzureDatabaseFlexibleServerEnabled, true},
+
+                {"ENABLE_RHEL8_IMAGES", (EntitlementCheckFunction) EntitlementService::isRhel8ImageSupportEnabled, false},
+                {"ENABLE_RHEL8_IMAGES", (EntitlementCheckFunction) EntitlementService::isRhel8ImageSupportEnabled, true},
         };
     }
 
     @ParameterizedTest(name = "{0} == {2}")
     @MethodSource("entitlementCheckDataProvider")
     void entitlementEnabledTestWhenNoOtherEntitlementsAreGranted(String entitlementName, EntitlementCheckFunction function, boolean enabled) {
-        setUpUmsClient(entitlementName, enabled);
+        setUpUmsClient(enabled, entitlementName);
         assertThat(function.entitlementEnabled(underTest, ACCOUNT_ID)).isEqualTo(enabled);
+    }
+
+    @Test
+    void isRhel8ImagePreferredWhenOnlyEnabled() {
+        setUpUmsClient(true, "ENABLE_RHEL8_IMAGES");
+        assertThat(underTest.isRhel8ImagePreferred(ACCOUNT_ID)).isFalse();
+    }
+
+    @Test
+    void isRhel8ImagePreferredWhenOnlyPreferredButNotEnabled() {
+        setUpUmsClient(true, "PREFER_RHEL8_IMAGES");
+        assertThat(underTest.isRhel8ImagePreferred(ACCOUNT_ID)).isFalse();
+    }
+
+    @Test
+    void isRhel8ImagePreferredWhenEnabledAndPreferred() {
+        setUpUmsClient(true, "ENABLE_RHEL8_IMAGES", "PREFER_RHEL8_IMAGES");
+        assertThat(underTest.isRhel8ImagePreferred(ACCOUNT_ID)).isTrue();
     }
 
     @Test
@@ -211,13 +232,12 @@ class EntitlementServiceTest {
         assertThat(underTest.getEntitlements(ACCOUNT_ID)).containsExactly(ENTITLEMENT_FOO, ENTITLEMENT_BAR);
     }
 
-    private void setUpUmsClient(String entitlement, boolean entitled) {
+    private void setUpUmsClient(boolean entitled, String... entitlements) {
         Account.Builder builder = Account.newBuilder();
         if (entitled) {
-            builder.addEntitlements(
-                    Entitlement.newBuilder()
-                            .setEntitlementName(entitlement)
-                            .build());
+            Arrays.stream(entitlements)
+                    .map(EntitlementServiceTest::createEntitlement)
+                    .forEach(builder::addEntitlements);
         }
         when(umsClient.getAccountDetails(eq(ACCOUNT_ID), any()))
                 .thenReturn(builder.build());

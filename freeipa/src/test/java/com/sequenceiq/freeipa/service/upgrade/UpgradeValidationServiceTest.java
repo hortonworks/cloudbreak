@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.upgrade;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -9,15 +10,19 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.ImageInfoResponse;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
+import com.sequenceiq.freeipa.service.image.SupportedOsService;
 
 @ExtendWith(MockitoExtension.class)
 class UpgradeValidationServiceTest {
@@ -26,6 +31,33 @@ class UpgradeValidationServiceTest {
 
     @InjectMocks
     private UpgradeValidationService underTest;
+
+    @Mock
+    private SupportedOsService supportedOsService;
+
+    @Test
+    void testMajorOsUpgradeNotSupported() {
+        FreeIpaUpgradeRequest upgradeRequest = new FreeIpaUpgradeRequest();
+        upgradeRequest.setAllowMajorOsUpgrade(true);
+        when(supportedOsService.isRhel8Supported()).thenReturn(false);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.validateUpgradeRequest(upgradeRequest));
+        assertEquals("Major OS upgrade is not supported", exception.getMessage());
+    }
+
+    @Test
+    void testOsNotSupported() {
+        FreeIpaUpgradeRequest upgradeRequest = new FreeIpaUpgradeRequest();
+        upgradeRequest.setAllowMajorOsUpgrade(true);
+        ImageSettingsRequest image = new ImageSettingsRequest();
+        image.setOs("redhat8");
+        upgradeRequest.setImage(image);
+        when(supportedOsService.isRhel8Supported()).thenReturn(true);
+        when(supportedOsService.isSupported(image.getOs())).thenReturn(false);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.validateUpgradeRequest(upgradeRequest));
+        assertEquals("Selected os 'redhat8' is not supported", exception.getMessage());
+    }
 
     @Test
     public void testStackValidationOk() {

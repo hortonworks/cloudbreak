@@ -331,7 +331,7 @@
                    "type": "Microsoft.Compute/virtualMachines",
                    "name": "[concat(parameters('vmNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
-                   <#if usePartnerCenter>
+                   <#if usePartnerCenter || useSourceImagePlan>
                    "plan": {
                         "name": "${marketplaceImageDetails.planId}",
                         "product": "${marketplaceImageDetails.offerId}",

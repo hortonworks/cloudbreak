@@ -2,9 +2,7 @@ package com.sequenceiq.freeipa.service.image;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -27,37 +25,43 @@ public class FreeIpaImageFilter {
     @Inject
     private ProviderSpecificImageFilter providerSpecificImageFilter;
 
+    @Inject
+    private SupportedOsService supportedOsService;
+
     List<Image> filterImages(List<Image> candidateImages, FreeIpaImageFilterSettings imageFilterSettings) {
         LOGGER.debug("Filtering images with the following parameters: {}", imageFilterSettings);
         String platform = imageFilterSettings.platform();
-        List<Image> filteredImages = candidateImages.stream().filter(filterImagesPredicate(imageFilterSettings)).toList();
+        List<Image> filteredImages = candidateImages.stream()
+                .filter(img -> filterPlatformAndRegion(imageFilterSettings, img))
+                .filter(img -> filterOs(imageFilterSettings, img))
+                .toList();
         if (!filteredImages.isEmpty()) {
             List<Image> notApplicableImages = new ArrayList<>(candidateImages);
             notApplicableImages.removeAll(filteredImages);
-            LOGGER.debug("Used filter for: | {} | Images filtered: {}", imageFilterSettings.os(),
-                    notApplicableImages.stream().map(Image::toString).collect(Collectors.joining(", ")));
+            LOGGER.debug("Used filter: {} | Images filtered: {}", imageFilterSettings, notApplicableImages);
             return providerSpecificImageFilter.filterImages(platform, filteredImages);
         } else {
-            LOGGER.warn("No FreeIPA image found with OS {}, falling back to the latest available one if such exists!", imageFilterSettings.os());
-            return candidateImages;
+            LOGGER.warn("Could not find any FreeIPA image matching {} in {}", imageFilterSettings, candidateImages);
+            throw new ImageNotFoundException(String.format("Could not find any FreeIPA image on platform '%s' in region '%s' with os '%s' in catalog '%s'",
+                    imageFilterSettings.platform(), imageFilterSettings.region(), imageFilterSettings.os(), imageFilterSettings.catalog()));
         }
     }
 
-    private Predicate<Image> filterImagesPredicate(FreeIpaImageFilterSettings imageFilterSettings) {
-        return image -> {
-            String targetOs = image.getOs();
-            return (majorOsUpgradeAllowed(imageFilterSettings, targetOs) || targetOs.equalsIgnoreCase(imageFilterSettings.os())) &&
-                    image.getImageSetsByProvider().containsKey(imageFilterSettings.platform()) &&
-                    filterRegion(imageFilterSettings, image);
-        };
+    boolean filterPlatformAndRegion(FreeIpaImageFilterSettings imageFilterSettings, Image image) {
+        Map<String, Map<String, String>> imageSetsByProvider = image.getImageSetsByProvider();
+        return imageSetsByProvider.containsKey(imageFilterSettings.platform())
+                && CollectionUtils.containsAny(imageSetsByProvider.get(imageFilterSettings.platform()).keySet(), imageFilterSettings.region(), DEFAULT_REGION);
+    }
+
+    private boolean filterOs(FreeIpaImageFilterSettings imageFilterSettings, Image image) {
+        String targetOs = image.getOs();
+        return supportedOsService.isSupported(targetOs) &&
+                (imageFilterSettings.os() == null
+                        || majorOsUpgradeAllowed(imageFilterSettings, targetOs)
+                        || targetOs.equalsIgnoreCase(imageFilterSettings.os()));
     }
 
     private boolean majorOsUpgradeAllowed(FreeIpaImageFilterSettings imageFilterSettings, String targetOs) {
         return imageFilterSettings.allowMajorOsUpgrade() && MAJOR_OS_UPGRADE_TARGET.equals(targetOs);
-    }
-
-    boolean filterRegion(FreeIpaImageFilterSettings imageFilterSettings, Image img) {
-        Set<String> regionSet = img.getImageSetsByProvider().get(imageFilterSettings.platform()).keySet();
-        return CollectionUtils.containsAny(regionSet, imageFilterSettings.region(), DEFAULT_REGION);
     }
 }

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.ImageFilter;
+import com.sequenceiq.cloudbreak.service.image.ImageOsService;
 import com.sequenceiq.cloudbreak.service.image.LatestDefaultImageUuidProvider;
 import com.sequenceiq.cloudbreak.service.image.ProviderSpecificImageFilter;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
@@ -44,6 +45,8 @@ public class AdvertisedImageProviderTest {
 
     private static final String PLATFORM_AZURE = "Azure";
 
+    private static final String CENTOS_7 = "centos7";
+
     private static final String BASE_IMAGE_ID_AWS_ADVERTISED = "Base image AWS advertised";
 
     private static final String BASE_IMAGE_ID_AWS_NON_ADVERTISED = "Base image AWS non advertised";
@@ -57,6 +60,8 @@ public class AdvertisedImageProviderTest {
     private static final String BASE_IMAGE_ID_AWS_AZURE_NON_ADVERTISED = "Base image AWS & Azure non advertised";
 
     private static final String CDH_IMAGE_ID_AWS_ADVERTISED = "CDH image AWS advertised";
+
+    private static final String CDH_IMAGE_ID_AWS_RHEL8_ADVERTISED = "CDH image AWS rhel8 advertised";
 
     private static final String CDH_IMAGE_ID_AWS_NON_ADVERTISED = "CDH image AWS non advertised";
 
@@ -74,12 +79,16 @@ public class AdvertisedImageProviderTest {
     @Mock
     private ProviderSpecificImageFilter providerSpecificImageFilter;
 
+    @Mock
+    private ImageOsService imageOsService;
+
     @InjectMocks
     private AdvertisedImageProvider victim;
 
     @BeforeEach
     public void initTests() {
         when(latestDefaultImageUuidProvider.getLatestDefaultImageUuids(any(), any())).thenReturn(emptySet());
+        when(imageOsService.isSupported(CENTOS_7)).thenReturn(true);
     }
 
     @Test
@@ -125,6 +134,7 @@ public class AdvertisedImageProviderTest {
         assertFalse(imageAvailableWithId(actual.getImages().getBaseImages(), BASE_IMAGE_ID_AZURE_NON_ADVERTISED));
 
         assertTrue(imageAvailableWithId(actual.getImages().getCdhImages(), CDH_IMAGE_ID_AWS_ADVERTISED));
+        assertFalse(imageAvailableWithId(actual.getImages().getCdhImages(), CDH_IMAGE_ID_AWS_RHEL8_ADVERTISED));
         assertTrue(imageAvailableWithId(actual.getImages().getCdhImages(), CDH_IMAGE_ID_AWS_AZURE_ADVERTISED));
         assertFalse(imageAvailableWithId(actual.getImages().getCdhImages(), CDH_IMAGE_ID_AWS_NON_ADVERTISED));
         assertFalse(imageAvailableWithId(actual.getImages().getCdhImages(), CDH_IMAGE_ID_AWS_AZURE_NON_ADVERTISED));
@@ -166,6 +176,7 @@ public class AdvertisedImageProviderTest {
     private List<Image> cdhImages() {
         return asList(
                 createImage(CDH_IMAGE_ID_AWS_ADVERTISED, true, PLATFORM_AWS),
+                createImage(CDH_IMAGE_ID_AWS_RHEL8_ADVERTISED, "redhat8", true, PLATFORM_AWS),
                 createImage(CDH_IMAGE_ID_AWS_NON_ADVERTISED, false, PLATFORM_AWS),
                 createImage(CDH_IMAGE_ID_AZURE_ADVERTISED, true, PLATFORM_AZURE),
                 createImage(CDH_IMAGE_ID_AZURE_NON_ADVERTISED, false, PLATFORM_AZURE),
@@ -175,7 +186,11 @@ public class AdvertisedImageProviderTest {
     }
 
     private Image createImage(String uuid, boolean advertised, String... platforms) {
-        return new Image(null, null, null, null, null, uuid, null, null,
+        return createImage(uuid, CENTOS_7, advertised, platforms);
+    }
+
+    private Image createImage(String uuid, String os, boolean advertised, String... platforms) {
+        return new Image(null, null, null, null, os, uuid, null, null,
                 Arrays.stream(platforms).collect(Collectors.toMap(p -> p, p -> Collections.emptyMap())), null, null, null, null, null, null, advertised,
                 null, null);
     }
