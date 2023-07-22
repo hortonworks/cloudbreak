@@ -60,6 +60,18 @@ class UpgradeValidationServiceTest {
     }
 
     @Test
+    void testOsNotSupportedWhenTheAllowMajorOsUpgradeFlagIsNull() {
+        FreeIpaUpgradeRequest upgradeRequest = new FreeIpaUpgradeRequest();
+        ImageSettingsRequest image = new ImageSettingsRequest();
+        image.setOs("redhat8");
+        upgradeRequest.setImage(image);
+        when(supportedOsService.isSupported(image.getOs())).thenReturn(false);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.validateUpgradeRequest(upgradeRequest));
+        assertEquals("Selected os 'redhat8' is not supported", exception.getMessage());
+    }
+
+    @Test
     public void testStackValidationOk() {
         Stack stack = mock(Stack.class);
         when(stack.isAvailable()).thenReturn(Boolean.TRUE);
