@@ -9,8 +9,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,15 +17,11 @@ import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
-import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsCommonDiskUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 import software.amazon.awssdk.services.ec2.model.DeleteVolumeRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesRequest;
@@ -43,9 +37,6 @@ public class AwsResourceVolumeConnector implements ResourceVolumeConnector {
     private static final int MAX_READ_COUNT = 15;
 
     private static final int SLEEP_INTERVAL = 2;
-
-    @Inject
-    AwsCommonDiskUpdateService awsCommonDiskUpdateService;
 
     @Override
     public void detachVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources) throws Exception {
@@ -81,12 +72,6 @@ public class AwsResourceVolumeConnector implements ResourceVolumeConnector {
                 amazonEC2Client.deleteVolume(deleteVolumeRequest);
             });
         }
-    }
-
-    @Override
-    public List<CloudResource> createAndAttachVolumes(AuthenticatedContext authenticatedContext, Group group, Volume volumeRequest, CloudStack cloudStack,
-            int volToAddPerInstance, List<CloudResource> cloudResources) throws CloudbreakServiceException {
-        return awsCommonDiskUpdateService.createAndAttachVolumes(authenticatedContext, group, volumeRequest, cloudStack, volToAddPerInstance, cloudResources);
     }
 
     protected AmazonEc2Client getEc2Client(AuthenticatedContext authenticatedContext) {
