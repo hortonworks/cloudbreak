@@ -16,8 +16,6 @@ public class TelemetryContext {
 
     private FluentClusterType clusterType;
 
-    private String osType;
-
     private DatabusContext databusContext;
 
     private MonitoringContext monitoringContext;
@@ -46,14 +44,6 @@ public class TelemetryContext {
 
     public void setTelemetry(Telemetry telemetry) {
         this.telemetry = telemetry;
-    }
-
-    public String getOsType() {
-        return osType;
-    }
-
-    public void setOsType(String osType) {
-        this.osType = osType;
     }
 
     public DatabusContext getDatabusContext() {

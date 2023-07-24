@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.altus.AltusDatabusConnectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentUpgradeConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryRepoConfiguration;
-import com.sequenceiq.cloudbreak.telemetry.TelemetryRepoConfigurationHolder;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryUpgradeConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.context.LogShipperContext;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
@@ -46,16 +45,13 @@ public class TelemetryCommonConfigServiceTest {
     private TelemetryRepoConfiguration telemetryRepoConfiguration;
 
     @Mock
-    private TelemetryRepoConfigurationHolder telemetryRepoConfigurationHolder;
-
-    @Mock
     private AltusDatabusConnectionConfiguration altusDatabusConnectionConfiguration;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         underTest = new TelemetryCommonConfigService(anonymizationRuleResolver, telemetryUpgradeConfiguration,
-                telemetryRepoConfigurationHolder, altusDatabusConnectionConfiguration);
+                telemetryRepoConfiguration, altusDatabusConnectionConfiguration);
     }
 
     @Test
@@ -119,50 +115,17 @@ public class TelemetryCommonConfigServiceTest {
     @Test
     public void testCreateTelemetryCommonConfigs() {
         // GIVEN
-        TelemetryContext context = new TelemetryContext();
-        List<VmLog> vmLogs = generateSimpleVmLogs();
-        mockTelemetryComponentUpgradeConfig();
-        createTelemetryModel(context, vmLogs);
-
         given(telemetryUpgradeConfiguration.isEnabled()).willReturn(true);
-        given(telemetryRepoConfiguration.name()).willReturn("cdp-infra-tools-rhel7");
+        TelemetryComponentUpgradeConfiguration cdpTelemetryConfig = new TelemetryComponentUpgradeConfiguration();
+        cdpTelemetryConfig.setDesiredVersion("0.0.1");
+        given(telemetryUpgradeConfiguration.getCdpTelemetry()).willReturn(cdpTelemetryConfig);
         given(altusDatabusConnectionConfiguration.getMaxTimeSeconds()).willReturn(1);
-        given(telemetryRepoConfigurationHolder.selectCorrectRepoConfig(context)).willReturn(telemetryRepoConfiguration);
-        // WHEN
-        Map<String, Object> result = underTest.createConfigs(context).toMap();
-        // THEN
-        assertEquals("/var/log/mylog.log", vmLogs.get(0).getPath());
-        assertEquals("/grid/0/log/*", vmLogs.get(1).getPath());
-        assertEquals("/my/path/custom/log/*", vmLogs.get(2).getPath());
-        assertEquals("0.0.1", result.get("desiredCdpTelemetryVersion").toString());
-        assertEquals(1, result.get("databusConnectMaxTime"));
-        assertEquals("cdp-infra-tools-rhel7", result.get("repoName"));
-    }
-
-    private static void createTelemetryModel(TelemetryContext context, List<VmLog> vmLogs) {
         Telemetry telemetry = new Telemetry();
         Map<String, Object> fluentAttributes = new HashMap<>();
         fluentAttributes.put(SERVICE_LOG_FOLDER_PREFIX, "/var/log");
         fluentAttributes.put(SERVER_LOG_FOLDER_PREFIX, "/custom/log");
         fluentAttributes.put(AGENT_LOG_FOLDER_PREFIX, "/grid/0/log");
         telemetry.setFluentAttributes(fluentAttributes);
-        TelemetryClusterDetails telemetryClusterDetails = TelemetryClusterDetails.Builder.builder()
-                .build();
-        LogShipperContext logShipperContext = LogShipperContext.builder()
-                .withVmLogs(vmLogs)
-                .build();
-        context.setTelemetry(telemetry);
-        context.setClusterDetails(telemetryClusterDetails);
-        context.setLogShipperContext(logShipperContext);
-    }
-
-    private void mockTelemetryComponentUpgradeConfig() {
-        TelemetryComponentUpgradeConfiguration cdpTelemetryConfig = new TelemetryComponentUpgradeConfiguration();
-        cdpTelemetryConfig.setDesiredVersion("0.0.1");
-        given(telemetryUpgradeConfiguration.getCdpTelemetry()).willReturn(cdpTelemetryConfig);
-    }
-
-    private static List<VmLog> generateSimpleVmLogs() {
         List<VmLog> vmLogs = new ArrayList<>();
         VmLog log1 = new VmLog();
         log1.setPath("${serviceLogFolderPrefix}/mylog.log");
@@ -173,6 +136,22 @@ public class TelemetryCommonConfigServiceTest {
         vmLogs.add(log1);
         vmLogs.add(log2);
         vmLogs.add(log3);
-        return vmLogs;
+        TelemetryClusterDetails telemetryClusterDetails = TelemetryClusterDetails.Builder.builder()
+                .build();
+        LogShipperContext logShipperContext = LogShipperContext.builder()
+                .withVmLogs(vmLogs)
+                .build();
+        TelemetryContext context = new TelemetryContext();
+        context.setTelemetry(telemetry);
+        context.setClusterDetails(telemetryClusterDetails);
+        context.setLogShipperContext(logShipperContext);
+        // WHEN
+        Map<String, Object> result = underTest.createConfigs(context).toMap();
+        // THEN
+        assertEquals("/var/log/mylog.log", vmLogs.get(0).getPath());
+        assertEquals("/grid/0/log/*", vmLogs.get(1).getPath());
+        assertEquals("/my/path/custom/log/*", vmLogs.get(2).getPath());
+        assertEquals("0.0.1", result.get("desiredCdpTelemetryVersion").toString());
+        assertEquals(1, result.get("databusConnectMaxTime"));
     }
 }
