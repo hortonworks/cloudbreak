@@ -93,7 +93,7 @@ public class SdxHorizontalScalingServiceTest {
         when(stackV4Endpoint.putScaling(any(), anyString(), any(), anyString())).thenReturn(new FlowIdentifier(FlowType.FLOW, "flowId"));
         SdxCluster sdxCluster = getSdxCluster();
         StackScaleV4Request scaleRequest = new StackScaleV4Request();
-        scaleRequest.setGroup("solrhg");
+        scaleRequest.setGroup("solr_scale_out");
         scaleRequest.setDesiredCount(1);
         String flowId = underTest.triggerScalingFlow(sdxCluster, scaleRequest);
         assertEquals("flowId", flowId);
@@ -115,9 +115,6 @@ public class SdxHorizontalScalingServiceTest {
         scaleRequest.setDesiredCount(0);
         assertThrows(BadRequestException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
         scaleRequest.setGroup("core");
-        scaleRequest.setDesiredCount(3);
-        assertThrows(BadRequestException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
-        scaleRequest.setGroup("solrhg");
         scaleRequest.setDesiredCount(3);
         underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest);
     }

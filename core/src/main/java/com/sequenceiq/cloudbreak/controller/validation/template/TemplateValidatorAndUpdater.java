@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.api.type.InstanceGroupName;
 import com.sequenceiq.common.model.AwsDiskType;
 
 @Component
@@ -58,7 +59,8 @@ public class TemplateValidatorAndUpdater {
 
     public static final String ROLE_IMPALAD = "IMPALAD";
 
-    private static final Set<String> SDX_COMPUTE_INSTANCES = Set.of("hmshg", "razhg", "atlashg");
+    private static final Set<String> SDX_COMPUTE_INSTANCES = Set.of(InstanceGroupName.HMS_SCALE_OUT.getName(), InstanceGroupName.RAZ_SCALE_OUT.getName(),
+            InstanceGroupName.ATLAS_SCALE_OUT.getName());
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TemplateValidatorAndUpdater.class);
 
