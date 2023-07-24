@@ -10,7 +10,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -30,10 +29,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -87,7 +84,7 @@ public class TelemetryDecoratorTest {
     private Monitoring monitoring = new Monitoring();
 
     @Before
-    public void setUp() throws CloudbreakImageNotFoundException {
+    public void setUp() {
         initMocks();
         underTest = new TelemetryDecorator(
                 altusMachineUserService,
@@ -293,18 +290,16 @@ public class TelemetryDecoratorTest {
         assertEquals(FluentClusterType.DATAHUB, result.getClusterType());
     }
 
-    private void initMocks() throws CloudbreakImageNotFoundException {
+    private void initMocks() {
         MockitoAnnotations.openMocks(this);
         AltusCredential altusCredential = new AltusCredential("myAccessKey", "mySecretKey".toCharArray());
         DataBusCredential dataBusCredential = new DataBusCredential();
-        Image image = mock(Image.class);
         dataBusCredential.setAccessKey("myAccessKey");
         dataBusCredential.setPrivateKey("mySecretKey");
         MonitoringCredential monitoringCredential = new MonitoringCredential();
         monitoringCredential.setAccessKey("myAccessKey");
         monitoringCredential.setPrivateKey("mySecretKey");
         given(componentConfigProviderService.getTelemetry(anyLong())).willReturn(telemetry);
-        given(componentConfigProviderService.getImage(anyLong())).willReturn(image);
         given(telemetry.getDatabusEndpoint()).willReturn("https://dbus-dev.com");
         given(altusMachineUserService.isAnyDataBusBasedFeatureSupported(any(Telemetry.class))).willReturn(true);
         given(altusMachineUserService.isAnyMonitoringFeatureSupported(any(Telemetry.class))).willReturn(true);
