@@ -90,7 +90,7 @@ class AwsParameterValidatorTest {
         assertEquals(1L, validationResult.getErrors().size());
         assertEquals("S3Guard Dynamo table 'tablename' is already attached to another active environment. "
                 + "Please select another unattached table or specify a non-existing name to create it. Refer to "
-                + "Cloudera documentation at https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-dynamodb.html " +
+                + "Cloudera documentation at https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-aws/topics/mc-aws-req-s3.html " +
                 "for the required setup.", validationResult.getErrors().get(0));
         verify(noSqlTableCreationModeDeterminerService, never()).determineCreationMode(any(), any());
     }
@@ -139,7 +139,7 @@ class AwsParameterValidatorTest {
         assertEquals(1L, validationResult.getErrors().size());
         assertEquals("S3Guard Dynamo table 'tablename' is already attached to another active environment. "
                 + "Please select another unattached table or specify a non-existing name to create it. Refer to "
-                + "Cloudera documentation at https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-dynamodb.html " +
+                + "Cloudera documentation at https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-aws/topics/mc-aws-req-s3.html " +
                 "for the required setup.", validationResult.getErrors().get(0));
     }
 

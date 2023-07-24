@@ -215,63 +215,6 @@ public class NetworkServiceTest {
         return cloudSubnet;
     }
 
-    // TODO: 2020. 01. 31. move these tests to the new CloudNetworkServiceTest class
-    /*@Test
-    public void testRetrieveSubnetMetadataIfNetworkNull() {
-        Map<String, CloudSubnet> actual = underTest.retrieveSubnetMetadata(null, null);
-        Assertions.assertTrue(actual.isEmpty());
-    }
-
-    @Test
-    public void testRetrieveSubnetMetadataWhenAwsAndNoExistedSubnetOnProvider() {
-        Environment environment = new Environment();
-        environment.setCloudPlatform("AWS");
-        Region region = new Region();
-        region.setName("region1");
-        environment.setRegions(Set.of(region));
-        NetworkDto networkDto = NetworkDto.builder().withSubnetMetas(Map.of("sub", new CloudSubnet())).build();
-        when(cloudNetworkService.getCloudNetworks(any(PlatformResourceRequest.class))).thenReturn(new CloudNetworks(Map.of("region1", Set.of())));
-        Map<String, CloudSubnet> actual = underTest.retrieveSubnetMetadata(environment, networkDto);
-        Assertions.assertTrue(actual.isEmpty());
-    }
-
-    @Test
-    public void testRetrieveSubnetMetadataWhenAwsAndHasSubnetOnProviderAndMatch() {
-        Environment environment = new Environment();
-        environment.setCloudPlatform("AWS");
-        Region region = new Region();
-        region.setName("region1");
-        environment.setRegions(Set.of(region));
-        CloudSubnet editSubnet = new CloudSubnet();
-        NetworkDto networkDto = NetworkDto.builder().withSubnetMetas(Map.of("sub", editSubnet)).build();
-        CloudSubnet providerSubnet = new CloudSubnet();
-        providerSubnet.setId("sub");
-        CloudNetwork cloudNetwork = new CloudNetwork("network", "network", Set.of(providerSubnet), Collections.emptyMap());
-        when(cloudNetworkService.getCloudNetworks(any(PlatformResourceRequest.class))).thenReturn(new CloudNetworks(Map.of("region1",
-                Set.of(cloudNetwork))));
-        Map<String, CloudSubnet> actual = underTest.retrieveSubnetMetadata(environment, networkDto);
-        Assertions.assertEquals(1, actual.size());
-        Assertions.assertEquals(actual.get("sub"), providerSubnet);
-    }
-
-    @Test
-    public void testRetrieveSubnetMetadataWhenAwsAndHasSubnetOnProviderAndNotMatch() {
-        Environment environment = new Environment();
-        environment.setCloudPlatform("AWS");
-        Region region = new Region();
-        region.setName("region1");
-        environment.setRegions(Set.of(region));
-        CloudSubnet editSubnet = new CloudSubnet();
-        NetworkDto networkDto = NetworkDto.builder().withSubnetMetas(Map.of("sub", editSubnet)).build();
-        CloudSubnet providerSubnet = new CloudSubnet();
-        providerSubnet.setId("diff-sub");
-        CloudNetwork cloudNetwork = new CloudNetwork("network", "network", Set.of(providerSubnet), Collections.emptyMap());
-        when(cloudNetworkService.getCloudNetworks(any(PlatformResourceRequest.class))).thenReturn(new CloudNetworks(Map.of("region1",
-                Set.of(cloudNetwork))));
-        Map<String, CloudSubnet> actual = underTest.retrieveSubnetMetadata(environment, networkDto);
-        Assertions.assertEquals(0, actual.size());
-    }*/
-
     @ParameterizedTest
     @EnumSource(CloudPlatform.class)
     public void testMergeNetworkDtoWithNetworkIfNetworkCreateNew(CloudPlatform cloudPlatform) {
@@ -297,11 +240,11 @@ public class NetworkServiceTest {
         switch (cloudPlatform) {
             case AWS:
                 providerSpecificLink = " Refer to Cloudera documentation at "
-                        + "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-subnet-adding-azure.html for more information.";
+                        + "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-aws/topics/mc-aws-req-vpc.html for more information.";
                 break;
             case AZURE:
                 providerSpecificLink = " Refer to Cloudera documentation at "
-                        + "https://docs.cloudera.com/management-console/cloud/environments-azure/topics/mc-subnet-adding-azure.html for more information.";
+                        + "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-azure/topics/mc-azure-vnet-and-subnets.html for more information.";
                 break;
             default:
                 break;

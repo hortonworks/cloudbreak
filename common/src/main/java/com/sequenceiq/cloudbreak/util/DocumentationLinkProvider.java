@@ -7,31 +7,34 @@ public class DocumentationLinkProvider {
     }
 
     public static String awsCloudStorageSetupLink() {
-        return "https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-idbroker-minimum-setup.html";
+        return "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-aws/topics/" +
+                "mc-idbroker-minimum-setup.html#mc-idbroker-minimum-setup";
     }
 
     public static String awsSshKeySetupLink() {
-        return "https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-ssh.html";
+        return "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-aws/topics/mc-aws-req-ssh.html";
     }
 
     public static String awsDynamoDbSetupLink() {
-        return "https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-dynamodb.html";
+        return "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-aws/topics/mc-aws-req-s3.html";
     }
 
     public static String googleCloudStorageSetupLink() {
-        return "https://docs.cloudera.com/cdp/latest/requirements-gcp/topics/mc-gcp_minimum_setup_for_cloud_storage.html";
+        return "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-gcp/topics/" +
+                "mc-gcp_minimum_setup_for_cloud_storage.html#mc-gcp_minimum_setup_for_cloud_storage";
     }
 
     public static String azureCloudStorageSetupLink() {
-        return "https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-az-minimal-setup-for-cloud-storage.html";
+        return "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-azure/topics/" +
+                "mc-az-minimal-setup-for-cloud-storage.html#mc-az-minimal-setup-for-cloud-storage";
     }
 
     public static String azureAddSubnetLink() {
-        return "https://docs.cloudera.com/management-console/cloud/environments-azure/topics/mc-subnet-adding-azure.html";
+        return "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-azure/topics/mc-azure-vnet-and-subnets.html";
     }
 
     public static String awsAddSubnetLink() {
-        return "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-subnet-adding-azure.html";
+        return "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-aws/topics/mc-aws-req-vpc.html";
     }
 
     public static String awsS3guardDisableDocumentationLink() {

@@ -151,7 +151,8 @@ class ClouderaManagerStorageErrorMapperTest {
 
         assertThat(result).isEqualTo("Serious problem. Services running on the cluster were unable to write to the cloud storage. " +
                 "Please refer to Cloudera documentation at " +
-                "https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-idbroker-minimum-setup.html for the required rights.");
+                "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-aws/topics/mc-idbroker-minimum-setup.html#mc-idbroker-minimum-setup" +
+                " for the required rights.");
     }
 
     @Test
@@ -160,7 +161,8 @@ class ClouderaManagerStorageErrorMapperTest {
 
         assertThat(result).isEqualTo("Serious problem. Services running on the cluster were unable to write to the cloud storage. " +
                 "Please refer to Cloudera documentation at " +
-                "https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-az-minimal-setup-for-cloud-storage.html for the required rights.");
+                "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-azure/topics/" +
+                "mc-az-minimal-setup-for-cloud-storage.html#mc-az-minimal-setup-for-cloud-storage for the required rights.");
     }
 
     @Test
@@ -168,7 +170,8 @@ class ClouderaManagerStorageErrorMapperTest {
         String result = underTest.map(exception, CloudPlatform.GCP.name(), cluster);
 
         assertThat(result).isEqualTo("Serious problem. Services running on the cluster were unable to write to the cloud storage. Please refer to Cloudera " +
-                "documentation at https://docs.cloudera.com/cdp/latest/requirements-gcp/topics/mc-gcp_minimum_setup_for_cloud_storage.html " +
+                "documentation at https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-gcp/topics/" +
+                "mc-gcp_minimum_setup_for_cloud_storage.html#mc-gcp_minimum_setup_for_cloud_storage " +
                 "for the required rights.");
     }
 
