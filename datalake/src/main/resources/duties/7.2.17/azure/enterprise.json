@@ -77,7 +77,7 @@
       "recipeNames": []
     },
     {
-      "name": "solrHG",
+      "name": "solr_scale_out",
       "template": {
         "instanceType": "Standard_D4s_v3",
         "attachedVolumes": [
@@ -94,7 +94,7 @@
       "recipeNames": []
     },
     {
-      "name": "storageHG",
+      "name": "storage_scale_out",
       "template": {
         "instanceType": "Standard_D4s_v3",
         "attachedVolumes": [
@@ -111,7 +111,7 @@
       "recipeNames": []
     },
     {
-      "name": "kafkaHG",
+      "name": "kafka_scale_out",
       "template": {
         "instanceType": "Standard_F2s_v2",
         "attachedVolumes": [
@@ -128,7 +128,7 @@
       "recipeNames": []
     },
     {
-      "name": "razHG",
+      "name": "raz_scale_out",
       "template": {
         "instanceType": "Standard_F4s_v2",
         "attachedVolumes": [
@@ -145,7 +145,7 @@
       "recipeNames": []
     },
     {
-      "name": "atlasHG",
+      "name": "atlas_scale_out",
       "template": {
         "instanceType": "Standard_D4s_v3",
         "attachedVolumes": [
@@ -162,7 +162,7 @@
       "recipeNames": []
     },
     {
-      "name": "hmsHG",
+      "name": "hms_scale_out",
       "template": {
         "instanceType": "Standard_D4s_v3",
         "attachedVolumes": [

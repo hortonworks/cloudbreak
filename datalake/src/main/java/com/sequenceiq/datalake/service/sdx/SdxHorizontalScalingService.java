@@ -187,7 +187,7 @@ public class SdxHorizontalScalingService {
 
     private boolean isDownscaleBlocked(DatalakeInstanceGroupScalingDetails targetInstanceGroupName) {
         return switch (targetInstanceGroupName) {
-            case STORAGEHG, KAFKAHG, SOLRHG -> false;
+            case STORAGE_SCALE_OUT, KAFKA_SCALE_OUT, SOLR_SCALE_OUT -> false;
             default -> true;
         };
     }
