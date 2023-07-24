@@ -332,19 +332,19 @@ public class TemplateValidatorTest {
         services.add(service);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
 
-        instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("c5.xlarge", "hmsHG");
+        instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("c5.xlarge", "hms_scale_out");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, never()).error(anyString());
 
-        instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("c5.xlarge", "atlasHG");
+        instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("c5.xlarge", "atlas_scale_out");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, never()).error(anyString());
 
-        instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("m5.xlarge", "razHG");
+        instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("m5.xlarge", "raz_scale_out");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, never()).error(anyString());
 
-        instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("m5.xlarge", "storageHG");
+        instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("m5.xlarge", "storage_scale_out");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, times(2)).error(anyString());
     }

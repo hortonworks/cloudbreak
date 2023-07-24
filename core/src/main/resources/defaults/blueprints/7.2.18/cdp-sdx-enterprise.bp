@@ -73,7 +73,7 @@
       },
       {
         "cardinality":0,
-        "refName":"solrHG",
+        "refName":"solr_scale_out",
         "roleConfigGroupsRefNames":[
           "solr-SOLR_SERVER-EXTERNAL",
           "solr-GATEWAY-BASE"
@@ -81,7 +81,7 @@
       },
       {
         "cardinality":0,
-        "refName":"storageHG",
+        "refName":"storage_scale_out",
         "roleConfigGroupsRefNames":[
           "hbase-REGIONSERVER-EXTERNAL",
           "hdfs-DATANODE-EXTERNAL",
@@ -91,7 +91,7 @@
       },
       {
         "cardinality":0,
-        "refName":"kafkaHG",
+        "refName":"kafka_scale_out",
         "roleConfigGroupsRefNames":[
           "kafka-KAFKA_BROKER-EXTERNAL",
           "kafka-GATEWAY-BASE"
@@ -99,13 +99,13 @@
       },
       {
         "cardinality":0,
-        "refName":"razHG",
+        "refName":"raz_scale_out",
         "roleConfigGroupsRefNames":[
         ]
       },
       {
         "cardinality":0,
-        "refName":"atlasHG",
+        "refName":"atlas_scale_out",
         "roleConfigGroupsRefNames":[
           "atlas-ATLAS_SERVER-EXTERNAL",
           "hdfs-GATEWAY-BASE",
@@ -114,7 +114,7 @@
       },
       {
         "cardinality":0,
-        "refName":"hmsHG",
+        "refName":"hms_scale_out",
         "roleConfigGroupsRefNames":[
           "hive-HIVEMETASTORE-EXTERNAL",
           "hive-GATEWAY-BASE"
@@ -408,6 +408,34 @@
               {
                 "name":"hbase_regionserver_java_heapsize",
                 "value":8589934592
+              },
+              {
+                "name": "regionserver_truststore_password",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "regionserver_tls_server_enabled",
+                "value": "true"
+              },
+              {
+                "name": "regionserver_truststore_file",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "regionserver_tls_plaintext_enabled",
+                "value": "true"
+              },
+              {
+                "name": "regionserver_tls_truststore_file",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "regionserver_tls_truststore_password",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "regionserver_tls_keystore_password",
+                "value": "{{CM_AUTO_TLS}}"
               }
             ]
           },
@@ -549,6 +577,26 @@
               {
                 "name": "ssl_enabled",
                 "value": "true"
+              },
+              {
+                "name": "ssl_server_keystore_location",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "ssl_server_keystore_password",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "ssl_server_keystore_keypassword",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "ssl_client_truststore_location",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "ssl_client_truststore_password",
+                "value": "{{CM_AUTO_TLS}}"
               }
             ]
           }
