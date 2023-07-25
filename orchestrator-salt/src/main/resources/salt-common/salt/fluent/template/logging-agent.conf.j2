@@ -3,7 +3,8 @@
 <system>
   workers {{ numberOfWorkers }}
   <log>
-    rotate_size 1048576
+    rotate_size 209715
+    rotate_age 3
   </log>
 </system>
 {% if fluent.dbusClusterLogsCollection %}# DATABUS - CLUSTER BUNDLE LOGS ENABLED - do not edit{% endif %}
