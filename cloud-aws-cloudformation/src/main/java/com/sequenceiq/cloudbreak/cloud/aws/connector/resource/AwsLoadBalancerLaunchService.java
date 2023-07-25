@@ -48,6 +48,7 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.cloudformation.model.DescribeStacksRequest;
 import software.amazon.awssdk.services.cloudformation.model.ListStackResourcesResponse;
 import software.amazon.awssdk.services.cloudformation.model.ResourceStatus;
@@ -195,10 +196,8 @@ public class AwsLoadBalancerLaunchService {
         try {
             cfClient.updateStack(awsStackRequestHelper.createUpdateStackRequest(ac, stack, cFStackName, cfTemplate));
         } catch (AwsServiceException e) {
-            if (VALIDATION_ERROR.equalsIgnoreCase(e.awsErrorDetails().errorCode())) {
-                ValidateTemplateResponse result = cfClient.validateTemplate(awsStackRequestHelper.createValidateTemplateRequest(cfTemplate));
-                LOGGER.debug("Validation result for the CloudFormationTemplate: {}", result);
-            }
+            LOGGER.info("CloudFormation template update failed. ", e);
+            logTemplateValidationResultIfPossible(cfClient, cfTemplate, e);
             throw e;
         }
         StackCancellationCheck cancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
@@ -210,6 +209,17 @@ public class AwsLoadBalancerLaunchService {
                     () -> awsCloudFormationErrorMessageProvider.getErrorReason(ac, cFStackName, ResourceStatus.UPDATE_FAILED, ResourceStatus.CREATE_FAILED), e);
         }
         return cfClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
+    }
+
+    private void logTemplateValidationResultIfPossible(AmazonCloudFormationClient cfClient, String cfTemplate, AwsServiceException exception) {
+        try {
+            if (VALIDATION_ERROR.equalsIgnoreCase(exception.awsErrorDetails().errorCode())) {
+                ValidateTemplateResponse result = cfClient.validateTemplate(awsStackRequestHelper.createValidateTemplateRequest(cfTemplate));
+                LOGGER.debug("Validation result for the CloudFormationTemplate: {}", result);
+            }
+        } catch (AwsServiceException | SdkClientException e) {
+            LOGGER.info("Validating CloudFormationTemplate with the provider was not successful. ", e);
+        }
     }
 
     private CloudResourceStatus createLoadBalancerStatus(AuthenticatedContext ac, AwsLoadBalancer loadBalancer, ListStackResourcesResponse result) {
@@ -226,11 +236,11 @@ public class AwsLoadBalancerLaunchService {
         Map<String, Object> params = Map.of(CloudResource.ATTRIBUTES,
                 Enum.valueOf(LoadBalancerTypeAttribute.class, loadBalancer.getScheme().getLoadBalancerType().name()));
         CloudResource.Builder cloudResource = CloudResource.builder()
-            .withStatus(createSuccess ? CommonStatus.CREATED : CommonStatus.FAILED)
-            .withType(ELASTIC_LOAD_BALANCER)
-            .withAvailabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
-            .withParameters(params)
-            .withName(loadBalancer.getName());
+                .withStatus(createSuccess ? CommonStatus.CREATED : CommonStatus.FAILED)
+                .withType(ELASTIC_LOAD_BALANCER)
+                .withAvailabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
+                .withParameters(params)
+                .withName(loadBalancer.getName());
 
         return new CloudResourceStatus(cloudResource.build(),
                 createSuccess ? com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.CREATED :
