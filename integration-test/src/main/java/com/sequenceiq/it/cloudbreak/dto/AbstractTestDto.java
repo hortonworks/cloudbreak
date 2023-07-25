@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.finder.Finders.same;
 import static java.lang.String.format;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -39,6 +41,9 @@ import com.sequenceiq.it.cloudbreak.finder.Finder;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
+import com.sequenceiq.it.cloudbreak.search.KibanaSearchUrl;
+import com.sequenceiq.it.cloudbreak.search.SearchUrl;
+import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.util.TestParameter;
 
 public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U extends MicroserviceClient> implements CloudbreakTestDto {
@@ -415,5 +420,26 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
         }
         String accountId = Crn.safeFromString(crn).getAccountId();
         return getTestContext().getAdminMicroserviceClient(getClass(), accountId);
+    }
+
+    public boolean isCloudProvider(CloudProviderProxy cloudProvider) {
+        return !CloudPlatform.MOCK.equalsIgnoreCase(cloudProvider.getCloudPlatform().name());
+    }
+
+    public String getCloudStorageUrl(String resourceName, String resourceCrn) {
+        throw new NotImplementedException(
+                String.format("The entity(%s) must be implement the getCloudStorageUrl(String resourceName, String resourceCrn) method.", getClass()));
+    }
+
+    public String getKibanaUrl(List<Searchable> searchables) {
+        Date testStartDate = getTestContext().getTestStartTime();
+        Date testStopDate = getTestContext().getTestEndTime();
+        CloudProviderProxy cloudProviderProxy = getTestContext().getCloudProvider();
+        if (CloudPlatform.MOCK.equalsIgnoreCase(cloudProviderProxy.getCloudPlatform().name())) {
+            return null;
+        } else {
+            SearchUrl searchUrl = new KibanaSearchUrl();
+            return searchUrl.getSearchUrl(searchables, testStartDate, testStopDate);
+        }
     }
 }

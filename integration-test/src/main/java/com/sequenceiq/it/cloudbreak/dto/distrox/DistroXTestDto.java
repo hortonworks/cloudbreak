@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,8 +56,6 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.search.ClusterLogsStorageUrl;
-import com.sequenceiq.it.cloudbreak.search.KibanaSearchUrl;
-import com.sequenceiq.it.cloudbreak.search.SearchUrl;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.search.StorageUrl;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
@@ -339,16 +338,9 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Override
     public Clue investigate() {
-        CloudProviderProxy cloudProvider = getTestContext().getCloudProvider();
-        StorageUrl storageUrl = new ClusterLogsStorageUrl();
-        SearchUrl searchUrl = new KibanaSearchUrl();
-        String datahubCloudStorageUrl = null;
-        String datahubKibanaUrl = null;
-
         if (getResponse() == null || getResponse().getId() == null) {
             return null;
         }
-
         String resourceName = getResponse().getName();
         String resourceCrn = getResponse().getCrn();
         AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
@@ -359,23 +351,28 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         boolean hasSpotTermination = (getResponse().getInstanceGroups() == null) ? false : getResponse().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetadata().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
-        if (!CloudPlatform.MOCK.equalsIgnoreCase(cloudProvider.getCloudPlatform().name())) {
-            if (getResponse().getTelemetry() != null) {
-                String baseLocation = getResponse().getTelemetry().getLogging().getStorageLocation();
-                datahubCloudStorageUrl = storageUrl.getDataHubStorageUrl(resourceName, resourceCrn, baseLocation, cloudProvider);
-            }
-            List<Searchable> listOfSearchables = List.of(this);
-            datahubKibanaUrl = searchUrl.getSearchUrl(listOfSearchables, getTestContext().getTestStartTime(), getTestContext().getTestEndTime());
-        }
+        List<Searchable> listOfSearchables = List.of(this);
         return new Clue(
                 resourceName,
                 resourceCrn,
-                datahubCloudStorageUrl,
-                datahubKibanaUrl,
+                getCloudStorageUrl(resourceName, resourceCrn),
+                getKibanaUrl(listOfSearchables),
                 auditEvents,
                 List.of(),
                 getResponse(),
                 hasSpotTermination);
+    }
+
+    @Override
+    public String getCloudStorageUrl(String resourceName, String resourceCrn) {
+        CloudProviderProxy cloudProviderProxy = getTestContext().getCloudProvider();
+        String baseLocation = (getResponse().getTelemetry() != null)
+                ? getResponse().getTelemetry().getLogging().getStorageLocation()
+                : null;
+        StorageUrl storageUrl = new ClusterLogsStorageUrl();
+        return (isCloudProvider(cloudProviderProxy) && StringUtils.isNotBlank(baseLocation))
+                ? storageUrl.getDataHubStorageUrl(resourceName, resourceCrn, baseLocation, cloudProviderProxy)
+                : null;
     }
 
     public InstanceGroupV4Response findInstanceGroupByName(String name) {
