@@ -1,8 +1,16 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_CM_CONFIG_HANDLER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_HANDLER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_ORCHESTRATION_HANDLER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_HANDLER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.FINALIZED_EVENT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +20,8 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -35,6 +45,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.event.DeleteVolumesTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesFinishedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -114,6 +125,9 @@ public class DeleteVolumesActionsTest {
     @Mock
     private AuthenticatedContext authenticatedContext;
 
+    @Captor
+    private ArgumentCaptor<String> captor;
+
     @BeforeEach
     void setUp() {
         context = new ClusterViewContext(flowParameters, stackView, clusterView);
@@ -125,6 +139,8 @@ public class DeleteVolumesActionsTest {
         DeleteVolumesTriggerEvent event = new DeleteVolumesTriggerEvent(selector, 1L, stackDeleteVolumesRequest);
         Map<Object, Object> variables = new HashMap<>();
         new AbstractActionTestSupport<>(getTriggerAction()).doExecute(context, event, variables);
+        verify(eventBus).notify(captor.capture(), any());
+        assertEquals(DELETE_VOLUMES_VALIDATION_HANDLER_EVENT.event(), captor.getValue());
     }
 
     @Test
@@ -134,15 +150,45 @@ public class DeleteVolumesActionsTest {
         DeleteVolumesRequest event = new DeleteVolumesRequest(List.of(resource), stackDeleteVolumesRequest, "MOCK", Set.of());
         Map<Object, Object> variables = new HashMap<>();
         new AbstractActionTestSupport<>(getDetachAndDeleteAction()).doExecute(context, event, variables);
+        verify(eventBus).notify(captor.capture(), any());
+        assertEquals(DELETE_VOLUMES_HANDLER_EVENT.event(), captor.getValue());
     }
 
     @Test
     public void testDeleteVolumesFinishedAction() throws Exception {
         doReturn(1L).when(stackDeleteVolumesRequest).getStackId();
-        CloudResource resource = mock(CloudResource.class);
-        DeleteVolumesRequest event = new DeleteVolumesRequest(List.of(resource), stackDeleteVolumesRequest, "MOCK", Set.of());
+        doReturn("Test").when(stackDeleteVolumesRequest).getGroup();
+        DeleteVolumesFinishedEvent event = new DeleteVolumesFinishedEvent(stackDeleteVolumesRequest);
+        AbstractClusterAction<DeleteVolumesFinishedEvent> action = (AbstractClusterAction<DeleteVolumesFinishedEvent>) underTest.deleteVolumesFinishedAction();
+        initActionPrivateFields(action);
         Map<Object, Object> variables = new HashMap<>();
-        new AbstractActionTestSupport<>(getDetachAndDeleteAction()).doExecute(context, event, variables);
+        new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
+        verify(eventBus).notify(captor.capture(), any());
+        assertEquals(DELETE_VOLUMES_ORCHESTRATION_HANDLER_EVENT.event(), captor.getValue());
+    }
+
+    @Test
+    public void testDeleteVolumesOrchestrationFinishedAction() throws Exception {
+        DeleteVolumesOrchestrationFinishedEvent event = new DeleteVolumesOrchestrationFinishedEvent(1L, "Test");
+        AbstractClusterAction<DeleteVolumesOrchestrationFinishedEvent> action =
+                (AbstractClusterAction<DeleteVolumesOrchestrationFinishedEvent>) underTest.deleteVolumesOrchestrationFinishedAction();
+        initActionPrivateFields(action);
+        Map<Object, Object> variables = new HashMap<>();
+        new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
+        verify(eventBus).notify(captor.capture(), any());
+        assertEquals(DELETE_VOLUMES_CM_CONFIG_HANDLER_EVENT.event(), captor.getValue());
+    }
+
+    @Test
+    public void testDeleteVolumesCMConfigFinishedAction() throws Exception {
+        DeleteVolumesCMConfigFinishedEvent event = new DeleteVolumesCMConfigFinishedEvent(1L, "Test");
+        AbstractClusterAction<DeleteVolumesCMConfigFinishedEvent> action =
+                (AbstractClusterAction<DeleteVolumesCMConfigFinishedEvent>) underTest.deleteVolumesCMConfigFinishedAction();
+        initActionPrivateFields(action);
+        Map<Object, Object> variables = new HashMap<>();
+        new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
+        verify(eventBus).notify(captor.capture(), any());
+        assertEquals(FINALIZED_EVENT.event(), captor.getValue());
     }
 
     private AbstractClusterAction<DeleteVolumesTriggerEvent> getTriggerAction() {

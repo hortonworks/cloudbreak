@@ -1817,4 +1817,64 @@ public class SaltOrchestrator implements HostOrchestrator {
             })
             .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
+
+    @Override
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public Map<String, Map<String, String>> formatAndMountDisksAfterModifyingVolumesOnNodes(OrchestratorAware stack, List<GatewayConfig> allGateway,
+            Set<Node> nodesWithDiskData, Set<Node> allNodes, ExitCriteriaModel exitModel, String platformVariant) throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
+        Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGateway);
+        Target<String> allHosts = new HostList(nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toSet()));
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            saveHostsPillar(stack, exitModel, gatewayTargetIpAddresses, sc);
+            Callable<Boolean> saltPillarRunner;
+
+            Map<String, String> fstabMap = nodesWithDiskData.stream()
+                    .collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getFstab()));
+            Map<String, String> temporaryStorageMap = nodesWithDiskData.stream()
+                    .collect(Collectors.toMap(Node::getHostname, node -> node.getTemporaryStorage().name()));
+            Map<String, Integer> dataBaseVolumeIndexMap =
+                    nodesWithDiskData.stream().collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getDatabaseVolumeIndex()));
+
+            Map<String, Object> hostnameDiskMountMap = nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toMap(hn -> hn, hn -> Map.of(
+                    "cloud_platform", platformVariant,
+                    "previous_fstab", fstabMap.getOrDefault(hn, ""),
+                    "database_volume_index", dataBaseVolumeIndexMap.getOrDefault(hn, -1),
+                    "temporary_storage", temporaryStorageMap.getOrDefault(hn, TemporaryStorage.ATTACHED_VOLUMES.name())
+            )));
+
+            SaltPillarProperties mounDiskProperties =
+                    new SaltPillarProperties("/mount/disk.sls", Collections.singletonMap("mount_data", hostnameDiskMountMap));
+
+            OrchestratorBootstrap pillarSave = PillarSave.createCustomPillar(sc, gatewayTargetIpAddresses, mounDiskProperties);
+            saltPillarRunner = saltRunner.runnerWithConfiguredErrorCount(pillarSave, exitCriteria, exitModel);
+            saltPillarRunner.call();
+
+            saltCommandRunner.runModifyGrainCommand(sc,
+                    new GrainAddRunner(saltStateService, hostnameDiskMountMap.keySet(), allNodes, "mount_disks_after_modify_volumes"),
+                    exitModel, exitCriteria);
+
+            StateAllRunner stateAllRunner = new StateAllRunner(saltStateService, gatewayTargetIpAddresses, allNodes, "disks.mount-disks-after-modify-volumes");
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateAllRunner);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel);
+            saltJobRunBootstrapRunner.call();
+
+            Map<String, String> uuidResponse = saltStateService.getUuidList(sc);
+
+            saltCommandRunner.runModifyGrainCommand(sc,
+                    new GrainRemoveRunner(saltStateService, hostnameDiskMountMap.keySet(), allNodes, "mount_disks_after_modify_volumes"),
+                    exitModel, exitCriteria);
+            Map<String, String> fstabResponse = saltStateService.runCommandOnHosts(retry, sc, allHosts, "cat /etc/fstab");
+            return nodesWithDiskData.stream()
+                    .map(node -> {
+                        String fstab = fstabResponse.getOrDefault(node.getHostname(), "");
+                        String uuidList = uuidResponse.getOrDefault(node.getHostname(), "");
+                        return new SimpleImmutableEntry<>(node.getHostname(), Map.of("uuids", uuidList, "fstab", fstab));
+                    })
+                    .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+        } catch (Exception e) {
+            LOGGER.warn("Error occurred during the salt bootstrap of formatAndMountDisksAfterModifyingVolumesOnNodes. Exception is : {}", e.getMessage());
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
 }

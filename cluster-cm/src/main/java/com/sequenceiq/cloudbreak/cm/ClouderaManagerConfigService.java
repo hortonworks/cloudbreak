@@ -337,7 +337,7 @@ public class ClouderaManagerConfigService {
                 .ifPresentOrElse(
                         modifyRoleBasedConfig(stackName, roleConfigGroupsResourceApi, config, roleConfigGroupName),
                         () -> {
-                            LOGGER.error("{} service name is missing.", serviceType);
+                            LOGGER.warn("{} service name is missing.", serviceType);
                             throw new ClouderaManagerOperationFailedException(String.format("Service of type: %s is not found", serviceType));
                         });
     }
@@ -350,8 +350,9 @@ public class ClouderaManagerConfigService {
                 try {
                     roleConfigGroupsResourceApi.updateConfig(stackName, role, serviceName, "Modifying role based config for service " + serviceName,
                             apiConfigList);
+                    LOGGER.info("Successfully set configs {} for service {}", Arrays.asList(config), serviceName);
                 } catch (ApiException e) {
-                    LOGGER.error("Failed to set configs {} for service {}", Arrays.asList(config), serviceName, e);
+                    LOGGER.warn("Failed to set configs {} for service {}", Arrays.asList(config), serviceName, e);
                     throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
                 }
             });

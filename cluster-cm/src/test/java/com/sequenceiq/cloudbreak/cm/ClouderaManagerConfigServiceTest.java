@@ -566,7 +566,6 @@ public class ClouderaManagerConfigServiceTest {
         ServicesResourceApi serviceResourceApi = mock(ServicesResourceApi.class);
         RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = mock(RoleConfigGroupsResourceApi.class);
         ApiServiceList apiServiceList = new ApiServiceList().addItemsItem(new ApiService().name(yarnName).type(serviceType));
-        StackDtoDelegate stack = mock(StackDtoDelegate.class);
         when(serviceResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
         when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(serviceResourceApi);
         when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(any())).thenReturn(roleConfigGroupsResourceApi);
@@ -599,11 +598,11 @@ public class ClouderaManagerConfigServiceTest {
         doThrow(new ApiException("Test")).when(roleConfigGroupsResourceApi).updateConfig(eq(TEST_CLUSTER_NAME), eq(roleName),
                 eq(yarnName), eq("Modifying role based config for service yarn-1"), eq(apiConfigList));
 
-
         ClouderaManagerOperationFailedException exception = assertThrows(ClouderaManagerOperationFailedException.class,
                 () -> underTest.modifyRoleBasedConfig(new ApiClient(), TEST_CLUSTER_NAME, serviceType, config, List.of(roleName)));
 
         verify(roleConfigGroupsResourceApi, times(1)).updateConfig(eq(TEST_CLUSTER_NAME), eq(roleName),
                 eq(yarnName), eq("Modifying role based config for service yarn-1"), eq(apiConfigList));
+        assertEquals("Test", exception.getMessage());
     }
 }

@@ -1,0 +1,244 @@
+#!/usr/bin/env bash
+set -ex
+
+DATABASE_VOLUME_INDEX="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['database_volume_index'] }}"
+TEMPORARY_STORAGE="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['temporary_storage'] }}"
+CLOUD_PLATFORM="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['cloud_platform'] }}"
+PREVIOUS_FSTAB="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['previous_fstab'] }}"
+
+source /opt/salt/scripts/format-and-mount-common.sh
+
+LOG_FILE=/var/log/mount-disks-after-modify-volumes.log
+VERSION="V1.0"
+
+# OUTPUT
+#   happy path:
+#       exit code: 0
+#
+#   error:
+#       exit code: not 0
+#       stderr: a one line info. Details are in the log
+format_disks_if_unformatted() {
+    local device_name=$1
+    local iter=$2
+    log $LOG_FILE "format disk arguments: ${device_name}"
+    local return_value=0
+    log $LOG_FILE device: device_name
+    if [ -z "$(blkid device_name)" ]; then
+        if [[ "$CLOUD_PLATFORM" == "GCP" ]]; then
+          device_name=/dev/disk/by-id/google-local-nvme-ssd-${iter}
+        fi
+        log $LOG_FILE "formatting: ${device_name}"
+        $(mkfs -E lazy_itable_init=1 -O uninit_bg -F -t $FS_TYPE ${device_name} >> $LOG_FILE 2>&1)
+        if [ ! $? -eq 0 ]; then
+        log $LOG_FILE "formatting of device ${device_name} failed"
+        return_value=1
+        fi
+        log $LOG_FILE $format_result
+    fi
+    return $((return_value))
+}
+
+mount_all_attached_disks() {
+      local hadoop_fs_dir_counter=1
+      local hadoop_ephfs_dir_counter=1
+      local return_value=0
+      local increased_fs_counter=false
+      if [[ "$CLOUD_PLATFORM" == "AZURE" ]]; then
+        not_mounted_volume_names=$(lsblk_command --noheadings --raw -o NAME,MOUNTPOINT | awk '$1~/[[:digit:]]/ && $2 == ""')
+      else
+        not_mounted_volume_names=$(lsblk_command | grep -v part | grep ^[a-z] | cut -f1 -d' ')
+      fi
+      log $LOG_FILE remaining not mounted volumes: $not_mounted_volume_names
+      root_disk=$(get_root_disk)
+      local counter=$(get_mounted_instance_storage_count)
+      log $LOG_FILE number of ephemeral disks mounted under fs path: "$counter"
+      while [[ counter -gt 0 ]]; do
+          log $LOG_FILE unmounting ephemeral volume mounted under /fs"$counter"
+          umount "/hadoopfs/fs${counter}" >> $LOG_FILE 2>&1
+          log $LOG_FILE removing from fstab /hadoopfs/fs"$counter"
+          sed -i -E "/hadoopfs\/fs${counter}/d" /etc/fstab
+          ((counter--))
+      done
+      for volume in $not_mounted_volume_names; do
+          uuid=$(get_disk_uuid "/dev/$volume")
+          if [[ $root_disk != "/dev/$volume" && "$uuid" != ""  ]] && not_elastic_block_store "/dev/$volume" $LOG_FILE; then
+            if umount "/hadoopfs/ephfs${hadoop_ephfs_dir_counter}" >> $LOG_FILE 2>&1; then
+              sed -i -E "/hadoopfs\/ephfs${hadoop_ephfs_dir_counter}/d" /etc/fstab
+            fi
+            if [[ "$TEMPORARY_STORAGE" == "EPHEMERAL_VOLUMES" ]]; then
+                mount_one "UUID=$uuid /hadoopfs/ephfs${hadoop_ephfs_dir_counter} $FS_TYPE defaults,noatime,nofail 0 2"
+                return_value=$(($? || return_value ))
+                log $LOG_FILE result of all mounting: $return_value
+                ((hadoop_ephfs_dir_counter++))
+            else
+                mount_one "UUID=$uuid /hadoopfs/fs${hadoop_fs_dir_counter} $FS_TYPE defaults,noatime,nofail 0 2"
+                return_value=$(($? || return_value ))
+                log $LOG_FILE result of all mounting: $return_value
+                ((hadoop_fs_dir_counter++))
+            fi
+           elif [[ "$root_disk" == "/dev/$volume" ]]; then
+                log $LOG_FILE volume $volume is the root volume, skipping it
+           elif ! not_elastic_block_store "/dev/$volume" $LOG_FILE ; then
+                if umount "/hadoopfs/fs${hadoop_fs_dir_counter}" >> $LOG_FILE 2>&1; then
+                  sed -i -E "/hadoopfs\/fs${hadoop_fs_dir_counter}/d" /etc/fstab
+                fi
+                format_disks_if_unformatted "/dev/$volume" hadoop_fs_dir_counter
+                uuid=$(get_disk_uuid "/dev/$volume")
+                log $LOG_FILE "mounting volume $volume with uuid ${uuid} to path /hadoopfs/fs${hadoop_fs_dir_counter}"
+                if [[ $uuid == $DATABASE_VOLUME_UUID ]]; then
+                    mount_one "UUID=$uuid /dbfs $FS_TYPE defaults,noatime,nofail 0 2"
+                else
+                    mount_one "UUID=$uuid /hadoopfs/fs${hadoop_fs_dir_counter} $FS_TYPE defaults,noatime,nofail 0 2"
+                    ((hadoop_fs_dir_counter++))
+                fi
+           else
+                log $LOG_FILE volume $volume has still no uuid, skipping it
+                return_value=1
+           fi
+      done
+
+    return $((return_value))
+}
+
+mount_one() {
+      local return_value=0
+      local success=0
+      local fstab_line=$1
+      local path=$(echo $fstab_line | cut -d' ' -f2)
+
+      log $LOG_FILE mounting to path $path, line in fstab: $fstab_line
+      mkdir $path >> $LOG_FILE 2>&1
+      echo $fstab_line >> /etc/fstab
+      log $LOG_FILE result of editing fstab: $?
+      mount $path >> $LOG_FILE 2>&1
+      if [ ! $? -eq 0 ]; then
+        log $LOG_FILE error mounting device on $path
+        return_value=1
+      fi
+      log $LOG_FILE result of mounting $path: $?
+      chmod 1777 $path >> $LOG_FILE 2>&1
+      return $((return_value))
+}
+
+demount_tempstorage_azure() {
+      local return_value=0
+      local waagent_conf="/etc/waagent.conf"
+      local original_path="/mnt/resource"
+      local device=$(df | grep $original_path | awk '{print $1}')
+
+      log $LOG_FILE demounting $device temporary storage device from path $original_path
+      umount $original_path >> $LOG_FILE 2>&1
+      if [ ! $? -eq 0 ]; then
+        log $LOG_FILE error demounting temporary storage device on $original_path
+        return_value=1
+      fi
+      log $LOG_FILE result of demounting $original_path: $?
+      sed -i 's/ResourceDisk\.Format=y/ResourceDisk\.Format=n/' $waagent_conf >> $LOG_FILE 2>&1
+      if [ ! $? -eq 0 ]; then
+        log $LOG_FILE error changing temporary disk mounting in $waagent_conf
+        return_value=1
+      fi
+      log $LOG_FILE result of changing temporary disk mounting in $waagent_conf: $?
+      return $((return_value))
+}
+
+mount_common() {
+    local return_value
+    mkdir /hadoopfs
+    if [[ $DATABASE_VOLUME_INDEX != -1 ]]; then
+      mkdir /dbfs
+    fi
+    mount_all_attached_disks
+    return_value=$?
+    return $((return_value))
+}
+
+create_directories() {
+    if [ ! -d "/hadoopfs/fs1" ]; then
+      log $LOG_FILE directory /hadoopfs/fs1 does not exists. Skipping log directory creation
+      return 0
+    fi
+
+    cd /hadoopfs/fs1 && mkdir logs >> $LOG_FILE 2>&1
+
+    fs1_logs_dir=/hadoopfs/fs1/logs
+    [[ -d $fs1_logs_dir  ]] && return 0
+
+    log $LOG_FILE there was an error creating log directories in /hadoopfs/fs1
+    return 1
+}
+
+grow_mount_partition() {
+    if growpart -N $(get_root_disk) $(get_root_disk_partition_number) ; then
+        log $LOG_FILE Before growing: $(df -h)
+        growpart $(get_root_disk) $(get_root_disk_partition_number)
+        if [ ! $? -eq 0 ]; then
+          log $LOG_FILE error growing partition
+          return 1
+        fi
+        if [ "$(get_root_disk_type)" == "xfs" ]; then
+            log $LOG_FILE "Using xfs_growfs to grow partition"
+            xfs_growfs /
+            return_value=$?
+        elif [[ "$(get_root_disk_type)" =~ "ext" ]]; then
+            log $LOG_FILE "Using resize2fs to grow partition on: $(get_root_disk)$(get_root_disk_partition_number)"
+            resize2fs  $(get_root_disk)$(get_root_disk_partition_number)
+            return_value=$?
+        fi
+        log $LOG_FILE After growing: $(df -h)
+        return $((return_value))
+    else
+        log $LOG_FILE Growpart indicates that there is no need for growing root partition
+    fi
+}
+
+save_env_vars_to_log_file() {
+    log $LOG_FILE environment variables:
+    log $LOG_FILE ATTACHED_VOLUME_UUID_LIST=$ATTACHED_VOLUME_UUID_LIST
+    log $LOG_FILE DATABASE_VOLUME_UUID=$DATABASE_VOLUME_UUID
+    log $LOG_FILE CLOUD_PLATFORM=$CLOUD_PLATFORM
+    log $LOG_FILE PREVIOUS_FSTAB=$PREVIOUS_FSTAB
+}
+
+main() {
+    log $LOG_FILE "started, version: $VERSION"
+    log $LOG_FILE We will calculate the device names and not using the ATTACHED_VOLUME_UUID_LIST which is $ATTACHED_VOLUME_UUID_LIST
+    device_name_list=$(get_device_names $LOG_FILE)
+    log $LOG_FILE The calculate device name list is $device_name_list
+    export ATTACHED_VOLUME_UUID_LIST=$(get_uuid_list $LOG_FILE "$device_name_list") # ephemeral devices' uuid should not be returned
+    log $LOG_FILE The calculated ATTACHED_VOLUME_UUID_LIST is $ATTACHED_VOLUME_UUID_LIST
+
+    local attached_volume_uuid_array=($ATTACHED_VOLUME_UUID_LIST)
+    if [[ $DATABASE_VOLUME_INDEX != -1 ]]; then
+        export DATABASE_VOLUME_UUID=${attached_volume_uuid_array[DATABASE_VOLUME_INDEX]}
+        log $LOG_FILE "database volume index is: $DATABASE_VOLUME_INDEX"
+        log $LOG_FILE "database volume uuid based on its index: $DATABASE_VOLUME_UUID"
+    else
+        log $LOG_FILE "database volume uuid is not set as its index is -1."
+    fi
+    save_env_vars_to_log_file
+    local script_name="mount-disk"
+
+    mount_common
+    return_code=$?
+    [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Not all devices were mounted"
+
+    grow_mount_partition
+    return_code=$?
+    [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error growing root partition"
+
+    create_directories
+    return_code=$?
+    [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error creating directories on /hadoopfs/fs1"
+
+    if [[ "$CLOUD_PLATFORM" == "AZURE" && "$TEMPORARY_STORAGE" == "EPHEMERAL_VOLUMES" ]]; then
+        demount_tempstorage_azure
+        return_code=$?
+        [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error demounting Azure temporary storage"
+    fi
+
+    exit_with_code $LOG_FILE 0 "Script $script_name ended"
+}
+
+[[ "$0" == "$BASH_SOURCE" ]] && main "$@"

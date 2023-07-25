@@ -197,3 +197,7 @@ get_uuid_list() {
   done
   echo $uuid_list
 }
+
+get_mounted_instance_storage_count() {
+  df -h | grep -E "$(nvme list | grep "Instance Storage" | awk '{printf "%s%s", NR==1? "" : "|", $1} END{print ""}')" | grep -c "/hadoopfs/fs"
+}

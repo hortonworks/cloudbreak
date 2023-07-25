@@ -80,8 +80,33 @@ public class DeleteVolumesActions {
             @Override
             protected void doExecute(ClusterViewContext context, DeleteVolumesFinishedEvent payload, Map<Object, Object> variables) {
                 StackDeleteVolumesRequest stackDeleteVolumesRequest = payload.getStackDeleteVolumesRequest();
-                flowMessageService.fireEventAndLog(stackDeleteVolumesRequest.getStackId(), Status.AVAILABLE.name(), CLUSTER_DELETEDVOLUMES,
-                        stackDeleteVolumesRequest.getGroup(), stackDeleteVolumesRequest.getStackId().toString());
+                DeleteVolumesOrchestrationEvent deleteVolumesOrchestrationEvent = new DeleteVolumesOrchestrationEvent(payload.getResourceId(),
+                        stackDeleteVolumesRequest.getGroup());
+                sendEvent(context, deleteVolumesOrchestrationEvent);
+            }
+        };
+    }
+
+    @Bean(name = "DELETE_VOLUMES_ORCHESTRATION_FINISHED_STATE")
+    public Action<?, ?> deleteVolumesOrchestrationFinishedAction() {
+        return new AbstractClusterAction<>(DeleteVolumesOrchestrationFinishedEvent.class) {
+
+            @Override
+            protected void doExecute(ClusterViewContext context, DeleteVolumesOrchestrationFinishedEvent payload, Map<Object, Object> variables) {
+                DeleteVolumesCMConfigEvent deleteVolumesCMConfigEvent = new DeleteVolumesCMConfigEvent(payload.getResourceId(), payload.getRequestGroup());
+                sendEvent(context, deleteVolumesCMConfigEvent);
+            }
+        };
+    }
+
+    @Bean(name = "DELETE_VOLUMES_CM_CONFIG_FINISHED_STATE")
+    public Action<?, ?> deleteVolumesCMConfigFinishedAction() {
+        return new AbstractClusterAction<>(DeleteVolumesCMConfigFinishedEvent.class) {
+
+            @Override
+            protected void doExecute(ClusterViewContext context, DeleteVolumesCMConfigFinishedEvent payload, Map<Object, Object> variables) {
+                flowMessageService.fireEventAndLog(payload.getResourceId(), Status.AVAILABLE.name(), CLUSTER_DELETEDVOLUMES,
+                        payload.getRequestGroup(), payload.getResourceId().toString());
                 DeleteVolumesFinalizedEvent deleteVolumesHandlerRequest = new DeleteVolumesFinalizedEvent(payload.getResourceId());
                 sendEvent(context, deleteVolumesHandlerRequest);
             }

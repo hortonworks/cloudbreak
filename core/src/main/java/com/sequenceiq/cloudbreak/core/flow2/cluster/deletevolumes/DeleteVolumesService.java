@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes;
 
+import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
+
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,19 +20,34 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClouderaManagerPollingUtilService;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesHandlerRequest;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -55,6 +73,27 @@ public class DeleteVolumesService {
 
     @Inject
     private InstanceGroupService instanceGroupService;
+
+    @Inject
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
+    @Inject
+    private StackUtil stackUtil;
+
+    @Inject
+    private ClusterProxyService clusterProxyService;
+
+    @Inject
+    private ClusterBootstrapper clusterBootstrapper;
+
+    @Inject
+    private HostOrchestrator hostOrchestrator;
+
+    @Inject
+    private GatewayConfigService gatewayConfigService;
+
+    @Inject
+    private StackDtoService stackDtoService;
 
     public void detachResources(List<CloudResource> cloudResourcesToBeDetached, CloudPlatformVariant cloudPlatformVariant, AuthenticatedContext ac)
             throws Exception {
@@ -117,10 +156,33 @@ public class DeleteVolumesService {
         if (optionalGroup.isPresent()) {
             InstanceGroupView instanceGroup = optionalGroup.get();
             Template template = templateService.get(instanceGroup.getTemplate().getId());
+            template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES_ONLY);
             for (VolumeTemplate volumeTemplateInTheDatabase : template.getVolumeTemplates()) {
                 volumeTemplateInTheDatabase.setVolumeCount(0);
             }
             templateService.savePure(template);
         }
+    }
+
+    public Map<String, Map<String, String>> redeployStatesAndMountDisks(Stack stack, String requestGroup) throws Exception {
+        String blueprintText = stack.getBlueprint().getBlueprintText();
+        CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
+        Set<ServiceComponent> hostTemplateServiceComponents = processor.getServiceComponentsByHostGroup().get(requestGroup);
+        StackDto stackDto = stackDtoService.getById(stack.getId());
+        stopClouderaManagerService(stackDto, hostTemplateServiceComponents);
+        Set<Node> allNodes = stackUtil.collectNodes(stack);
+        InMemoryStateStore.putStack(stack.getId(), PollGroup.POLLABLE);
+        LOGGER.info("RE-Bootstrap machines");
+        clusterBootstrapper.reBootstrapMachines(stack.getId());
+        clusterProxyService.reRegisterCluster(stack.getId());
+        Set<Node> nodesWithDiskData = stackUtil.collectNodesWithDiskData(stack);
+        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+        ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId());
+        LOGGER.debug("Formatting and mounting disks.");
+        Map<String, Map<String, String>> fstabInformation = hostOrchestrator.formatAndMountDisksAfterModifyingVolumesOnNodes(stack, gatewayConfigs,
+                nodesWithDiskData, allNodes, exitCriteriaModel, stack.getPlatformVariant());
+
+        InMemoryStateStore.deleteStack(stack.getId());
+        return fstabInformation;
     }
 }
