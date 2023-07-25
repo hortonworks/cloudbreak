@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +22,9 @@ import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.NetworkV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AvailabilitySetNameService;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceGroupParameters;
-import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -42,7 +39,6 @@ import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
-import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.TargetGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -76,7 +72,7 @@ public class LoadBalancerConfigService {
     private OozieTargetGroupProvisioner oozieTargetGroupProvisioner;
 
     @Inject
-    private EntitlementService entitlementService;
+    private LoadBalancerTypeDeterminer loadBalancerTypeDeterminer;
 
     public Optional<LoadBalancer> selectLoadBalancerForFrontend(Set<LoadBalancer> loadBalancers, LoadBalancerType preferredType) {
         Preconditions.checkNotNull(preferredType);
@@ -246,7 +242,7 @@ public class LoadBalancerConfigService {
                 LOGGER.debug("Private subnet is not available. The internal load balancer will not be created.");
             }
             if (createExternalLb) {
-                LoadBalancerType loadBalancerType = isPrivateEndpointGatewayNetwork(environment) ? LoadBalancerType.GATEWAY_PRIVATE : LoadBalancerType.PUBLIC;
+                LoadBalancerType loadBalancerType = loadBalancerTypeDeterminer.getType(environment);
                 LOGGER.debug("{} Endpoint Access Gateway is selected", loadBalancerType);
                 setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), loadBalancerType);
             } else {
@@ -255,15 +251,6 @@ public class LoadBalancerConfigService {
         } else {
             LOGGER.debug("No Knox instance groups found. If load balancer creation is enabled, Knox routing in the load balancer will be skipped.");
         }
-    }
-
-    private boolean isPrivateEndpointGatewayNetwork(DetailedEnvironmentResponse environment) {
-        Map<String, CloudSubnet> gatewayEndpointSubnetMetas = environment.getNetwork().getGatewayEndpointSubnetMetas();
-        return entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(environment.getAccountId())
-                && (MapUtils.isNotEmpty(gatewayEndpointSubnetMetas)
-                && gatewayEndpointSubnetMetas.entrySet().stream()
-                .allMatch(e -> e.getValue().getType() == SubnetType.PRIVATE)
-                || PublicEndpointAccessGateway.ENABLED != environment.getNetwork().getPublicEndpointAccessGateway());
     }
 
     private boolean shouldCreateOutboundLoadBalancer(boolean createExternalLb, Stack stack, LoadBalancerSku sku, EnvironmentNetworkResponse network) {
