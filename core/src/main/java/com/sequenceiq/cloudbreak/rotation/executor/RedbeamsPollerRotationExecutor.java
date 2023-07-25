@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.rotation.executor;
 
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.FINALIZE;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.PREVALIDATE;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 
@@ -16,7 +17,6 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 
 @Component
 public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<PollerRotationContext> {
@@ -33,24 +33,21 @@ public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<Pol
     protected void rotate(PollerRotationContext rotationContext) {
         LOGGER.info("Rotate redbeams secret: {}", rotationContext.getSecretType());
         StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
-        externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(),
-                (RedbeamsSecretType) rotationContext.getSecretType(), ROTATE);
+        externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(), rotationContext.getSecretType(), ROTATE);
     }
 
     @Override
     protected void rollback(PollerRotationContext rotationContext) {
         LOGGER.info("Rollback redbeams secret: {}", rotationContext.getSecretType());
         StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
-        externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(),
-                (RedbeamsSecretType) rotationContext.getSecretType(), ROLLBACK);
+        externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(), rotationContext.getSecretType(), ROLLBACK);
     }
 
     @Override
     protected void finalize(PollerRotationContext rotationContext) {
         LOGGER.info("Finalize redbeams secret: {}", rotationContext.getSecretType());
         StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
-        externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(),
-                (RedbeamsSecretType) rotationContext.getSecretType(), FINALIZE);
+        externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(), rotationContext.getSecretType(), FINALIZE);
     }
 
     @Override
@@ -58,6 +55,7 @@ public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<Pol
         LOGGER.info("Pre validate redbeams secret rotation: {}", rotationContext.getSecretType());
         StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
         externalDatabaseService.preValidateDatabaseSecretRotation(stackDto.getCluster().getDatabaseServerCrn());
+        externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(), rotationContext.getSecretType(), PREVALIDATE);
     }
 
     @Override

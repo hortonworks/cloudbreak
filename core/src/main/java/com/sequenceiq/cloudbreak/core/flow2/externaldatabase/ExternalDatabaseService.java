@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
+import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseOperation;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseServerParameterDecorator;
@@ -61,7 +62,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeTa
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.UpgradeDatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
-import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 
 @Service
 public class ExternalDatabaseService {
@@ -205,11 +205,11 @@ public class ExternalDatabaseService {
         }
     }
 
-    public void rotateDatabaseSecret(String databaseServerCrn, RedbeamsSecretType secretType, RotationFlowExecutionType executionType) {
+    public void rotateDatabaseSecret(String databaseServerCrn, SecretType secretType, RotationFlowExecutionType executionType) {
         LOGGER.info("Rotating external database server secret: {} for database server {}", secretType, databaseServerCrn);
         RotateDatabaseServerSecretV4Request request = new RotateDatabaseServerSecretV4Request();
         request.setCrn(databaseServerCrn);
-        request.setSecret(secretType.name());
+        request.setSecret(secretType.value());
         request.setExecutionType(executionType);
         FlowIdentifier flowIdentifier = redbeamsClient.rotateSecret(request);
         if (flowIdentifier == null) {

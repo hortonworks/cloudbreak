@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.rotation;
 
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.FINALIZE;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.PREVALIDATE;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 
@@ -45,6 +46,7 @@ public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<Pol
     @Override
     protected void preValidate(PollerRotationContext rotationContext) {
         sdxRotationService.preValidateRedbeamsRotation(rotationContext.getResourceCrn());
+        sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), PREVALIDATE);
     }
 
     @Override

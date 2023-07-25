@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.service;
 
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.FINALIZE;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.PREVALIDATE;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -103,15 +104,23 @@ public class SecretRotationExecutionDecisionProviderTest {
 
     static Stream<Arguments> singleRotationRequests() {
         return Stream.of(
+                Arguments.of(PREVALIDATE, null, true),
                 Arguments.of(ROTATE, null, true),
                 Arguments.of(ROLLBACK, null, true),
                 Arguments.of(FINALIZE, null, true),
+                Arguments.of(PREVALIDATE, PREVALIDATE, true),
+                Arguments.of(ROTATE, PREVALIDATE, false),
+                Arguments.of(ROLLBACK, PREVALIDATE, false),
+                Arguments.of(FINALIZE, PREVALIDATE, false),
+                Arguments.of(PREVALIDATE, ROTATE, false),
                 Arguments.of(ROTATE, ROTATE, true),
                 Arguments.of(ROLLBACK, ROTATE, false),
                 Arguments.of(FINALIZE, ROTATE, false),
+                Arguments.of(PREVALIDATE, ROLLBACK, false),
                 Arguments.of(ROTATE, ROLLBACK, false),
                 Arguments.of(ROLLBACK, ROLLBACK, true),
                 Arguments.of(FINALIZE, ROLLBACK, false),
+                Arguments.of(PREVALIDATE, FINALIZE, false),
                 Arguments.of(ROTATE, FINALIZE, false),
                 Arguments.of(ROLLBACK, FINALIZE, false),
                 Arguments.of(FINALIZE, FINALIZE, true)
@@ -120,15 +129,23 @@ public class SecretRotationExecutionDecisionProviderTest {
 
     static Stream<Arguments> multiChildRotationRequests() {
         return Stream.of(
+                Arguments.of(PREVALIDATE, null, true),
                 Arguments.of(ROTATE, null, true),
                 Arguments.of(ROLLBACK, null, true),
                 Arguments.of(FINALIZE, null, true),
+                Arguments.of(PREVALIDATE, PREVALIDATE, true),
+                Arguments.of(ROTATE, PREVALIDATE, false),
+                Arguments.of(ROLLBACK, PREVALIDATE, false),
+                Arguments.of(FINALIZE, PREVALIDATE, false),
+                Arguments.of(PREVALIDATE, ROTATE, false),
                 Arguments.of(ROTATE, ROTATE, true),
                 Arguments.of(ROLLBACK, ROTATE, false),
                 Arguments.of(FINALIZE, ROTATE, false),
+                Arguments.of(PREVALIDATE, ROLLBACK, false),
                 Arguments.of(ROTATE, ROLLBACK, false),
                 Arguments.of(ROLLBACK, ROLLBACK, true),
                 Arguments.of(FINALIZE, ROLLBACK, false),
+                Arguments.of(PREVALIDATE, FINALIZE, false),
                 Arguments.of(ROTATE, FINALIZE, false),
                 Arguments.of(ROLLBACK, FINALIZE, false),
                 Arguments.of(FINALIZE, FINALIZE, true)
@@ -137,15 +154,23 @@ public class SecretRotationExecutionDecisionProviderTest {
 
     static Stream<Arguments> multiParentInitialRotationRequests() {
         return Stream.of(
+                Arguments.of(PREVALIDATE, null, true),
                 Arguments.of(ROTATE, null, true),
                 Arguments.of(ROLLBACK, null, true),
                 Arguments.of(FINALIZE, null, false),
+                Arguments.of(PREVALIDATE, PREVALIDATE, true),
+                Arguments.of(ROTATE, PREVALIDATE, false),
+                Arguments.of(ROLLBACK, PREVALIDATE, false),
+                Arguments.of(FINALIZE, PREVALIDATE, false),
+                Arguments.of(PREVALIDATE, ROTATE, false),
                 Arguments.of(ROTATE, ROTATE, true),
                 Arguments.of(ROLLBACK, ROTATE, false),
                 Arguments.of(FINALIZE, ROTATE, false),
+                Arguments.of(PREVALIDATE, ROLLBACK, false),
                 Arguments.of(ROTATE, ROLLBACK, false),
                 Arguments.of(ROLLBACK, ROLLBACK, true),
                 Arguments.of(FINALIZE, ROLLBACK, false),
+                Arguments.of(PREVALIDATE, FINALIZE, false),
                 Arguments.of(ROTATE, FINALIZE, false),
                 Arguments.of(ROLLBACK, FINALIZE, false),
                 Arguments.of(FINALIZE, FINALIZE, false)
@@ -154,15 +179,23 @@ public class SecretRotationExecutionDecisionProviderTest {
 
     static Stream<Arguments> multiParentFinalRotationRequests() {
         return Stream.of(
+                Arguments.of(PREVALIDATE, null, false),
                 Arguments.of(ROTATE, null, false),
                 Arguments.of(ROLLBACK, null, false),
                 Arguments.of(FINALIZE, null, true),
+                Arguments.of(PREVALIDATE, PREVALIDATE, false),
+                Arguments.of(ROTATE, PREVALIDATE, false),
+                Arguments.of(ROLLBACK, PREVALIDATE, false),
+                Arguments.of(FINALIZE, PREVALIDATE, false),
+                Arguments.of(PREVALIDATE, ROTATE, false),
                 Arguments.of(ROTATE, ROTATE, false),
                 Arguments.of(ROLLBACK, ROTATE, false),
                 Arguments.of(FINALIZE, ROTATE, false),
+                Arguments.of(PREVALIDATE, ROLLBACK, false),
                 Arguments.of(ROTATE, ROLLBACK, false),
                 Arguments.of(ROLLBACK, ROLLBACK, false),
                 Arguments.of(FINALIZE, ROLLBACK, false),
+                Arguments.of(PREVALIDATE, FINALIZE, false),
                 Arguments.of(ROTATE, FINALIZE, false),
                 Arguments.of(ROLLBACK, FINALIZE, false),
                 Arguments.of(FINALIZE, FINALIZE, true)

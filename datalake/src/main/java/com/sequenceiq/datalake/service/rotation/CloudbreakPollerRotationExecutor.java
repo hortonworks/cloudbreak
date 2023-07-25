@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.service.rotation;
 
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.FINALIZE;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.PREVALIDATE;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 
@@ -44,6 +45,7 @@ public class CloudbreakPollerRotationExecutor extends AbstractRotationExecutor<P
     @Override
     protected void preValidate(PollerRotationContext rotationContext) {
         sdxRotationService.preValidateCloudbreakRotation(rotationContext.getResourceCrn());
+        sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), PREVALIDATE);
     }
 
     @Override

@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.rotation.service;
 
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.FINALIZE;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.PREVALIDATE;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 import static com.sequenceiq.cloudbreak.rotation.entity.multicluster.MultiClusterRotationResourceType.CHILD;
 import static com.sequenceiq.cloudbreak.rotation.entity.multicluster.MultiClusterRotationResourceType.PARENT_FINAL;
 import static com.sequenceiq.cloudbreak.rotation.entity.multicluster.MultiClusterRotationResourceType.PARENT_INITIAL;
@@ -14,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.entity.multicluster.MultiClusterRotationResourceType;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationTrackingService;
 
@@ -70,7 +73,7 @@ public class SecretRotationExecutionDecisionProvider {
                 .map(multiClusterRotationMetadata ->
                         parentAndResourceMatches(rotationMetadata) &&
                                 resourcePresentInDb(rotationMetadata, PARENT_INITIAL) &&
-                                List.of(RotationFlowExecutionType.ROTATE, RotationFlowExecutionType.ROLLBACK).contains(rotationMetadata.currentExecution()))
+                                List.of(PREVALIDATE, ROTATE, ROLLBACK).contains(rotationMetadata.currentExecution()))
                 .orElseThrow(() -> new RuntimeException("Missing metadata for multi cluster rotation!"));
     }
 
@@ -79,7 +82,7 @@ public class SecretRotationExecutionDecisionProvider {
                 .map(multiClusterRotationMetadata ->
                         parentAndResourceMatches(rotationMetadata) &&
                                 resourcePresentInDb(rotationMetadata, PARENT_FINAL) &&
-                                rotationMetadata.currentExecution().equals(RotationFlowExecutionType.FINALIZE))
+                                rotationMetadata.currentExecution().equals(FINALIZE))
                 .orElseThrow(() -> new RuntimeException("Missing metadata for multi cluster rotation!"));
     }
 

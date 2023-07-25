@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.service;
 
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.FINALIZE;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.PREVALIDATE;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 
@@ -62,7 +63,7 @@ public class SecretRotationOrchestrationService {
     private SecretRotationFinalizeService finalizeService;
 
     public void preValidateIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType) {
-        RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, ROTATE);
+        RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, PREVALIDATE);
         if (executionDecisionProvider.executionRequired(rotationMetadata)) {
             preValidateService.preValidate(rotationMetadata);
         }
