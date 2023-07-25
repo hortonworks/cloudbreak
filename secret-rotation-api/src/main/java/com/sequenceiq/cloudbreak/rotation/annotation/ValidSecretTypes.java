@@ -10,15 +10,22 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import com.sequenceiq.cloudbreak.rotation.validator.PublicSecretTypesValidator;
+import com.sequenceiq.cloudbreak.rotation.SecretType;
+import com.sequenceiq.cloudbreak.rotation.validator.SecretTypesValidator;
 
 @Documented
-@Constraint(validatedBy = PublicSecretTypesValidator.class)
+@Constraint(validatedBy = SecretTypesValidator.class)
 @Target({ FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface OnlyPublicSecretTypes {
+public @interface ValidSecretTypes {
 
-    String message() default "Only public secret rotation types allowed!";
+    Class<? extends SecretType>[] allowedTypes();
+
+    boolean internalOnlyAllowed() default false;
+
+    boolean multiAllowed() default false;
+
+    String message() default "Only valid secret rotation types are allowed!";
 
     Class<?>[] groups() default {};
 

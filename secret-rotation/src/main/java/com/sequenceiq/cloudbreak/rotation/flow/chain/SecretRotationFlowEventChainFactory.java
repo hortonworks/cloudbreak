@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.SecretRotationTriggerEvent;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -29,8 +28,9 @@ public class SecretRotationFlowEventChainFactory implements FlowEventChainFactor
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(SecretRotationFlowChainTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        if (beforeRotationFlowEventProvider.isPresent() && isRotationOrAllExecution(event)) {
-            flowEventChain.add(beforeRotationFlowEventProvider.get().getTriggerEvent(event));
+        if (saltUpdateNeeded(event)) {
+            beforeRotationFlowEventProvider.ifPresent(beforeFlowEventProvider ->
+                    flowEventChain.add(beforeFlowEventProvider.getTriggerEvent(event)));
         }
         event.getSecretTypes().forEach(secretType -> {
             flowEventChain.add(SecretRotationTriggerEvent.fromChainTrigger(event, secretType));
@@ -38,7 +38,7 @@ public class SecretRotationFlowEventChainFactory implements FlowEventChainFactor
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 
-    private boolean isRotationOrAllExecution(SecretRotationFlowChainTriggerEvent event) {
-        return event.getExecutionType() == null || RotationFlowExecutionType.ROTATE.equals(event.getExecutionType());
+    private boolean saltUpdateNeeded(SecretRotationFlowChainTriggerEvent event) {
+        return event.getExecutionType() == null;
     }
 }

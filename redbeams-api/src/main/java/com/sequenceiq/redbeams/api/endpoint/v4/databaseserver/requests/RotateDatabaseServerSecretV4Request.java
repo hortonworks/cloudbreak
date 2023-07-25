@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
+import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 
 import io.swagger.annotations.ApiModel;
 
@@ -18,7 +19,7 @@ public class RotateDatabaseServerSecretV4Request {
     @ValidCrn(resource = { CrnResourceDescriptor.DATABASE_SERVER })
     private String crn;
 
-    @ValidSecretType
+    @ValidSecretType(allowedTypes = { RedbeamsSecretType.class })
     @NotNull
     private String secret;
 

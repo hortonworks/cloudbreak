@@ -10,6 +10,7 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
+import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.validator.SecretTypeValidator;
 
 @Documented
@@ -18,7 +19,11 @@ import com.sequenceiq.cloudbreak.rotation.validator.SecretTypeValidator;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidSecretType {
 
-    String message() default "Only valid secret rotation types allowed!";
+    Class<? extends SecretType>[] allowedTypes();
+
+    boolean internalOnlyAllowed() default false;
+
+    String message() default "Only valid secret rotation type is allowed!";
 
     Class<?>[] groups() default {};
 

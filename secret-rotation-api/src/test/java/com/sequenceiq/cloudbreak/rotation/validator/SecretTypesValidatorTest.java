@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 
 import java.lang.annotation.Annotation;
+import java.util.List;
 
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
@@ -19,11 +20,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.rotation.SecretType;
-import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretType;
+import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretTypes;
 import com.sequenceiq.cloudbreak.rotation.common.TestSecretType;
 
 @ExtendWith(MockitoExtension.class)
-public class SecretTypeValidatorTest {
+public class SecretTypesValidatorTest {
 
     @Captor
     private ArgumentCaptor<String> errorMessageCaptor;
@@ -41,24 +42,36 @@ public class SecretTypeValidatorTest {
 
     @Test
     void testValidateIfInvalidType() {
-        assertFalse(validator(false).isValid("INVALID", context));
-        assertEquals("Invalid secret type, cannot map secret INVALID.", errorMessageCaptor.getValue());
+        assertFalse(validator(false, true).isValid(List.of("INVALID"), context));
+        assertEquals("Invalid secret type, cannot map secrets [INVALID].", errorMessageCaptor.getValue());
     }
 
     @Test
     void testValidateIfOnlyInternalAllowed() {
-        assertFalse(validator(true).isValid("TEST", context));
+        assertFalse(validator(true, true).isValid(List.of("TEST"), context));
         assertEquals("Only internal secret type is allowed!", errorMessageCaptor.getValue());
     }
 
     @Test
-    void testValidate() {
-        assertTrue(validator(true).isValid("TEST_3", context));
+    void testValidateIfMultiNotAllowed() {
+        assertFalse(validator(false, false).isValid(List.of("TEST_2"), context));
+        assertEquals("Only single secret type is allowed!", errorMessageCaptor.getValue());
     }
 
-    private SecretTypeValidator validator(boolean internalOnlyAllowed) {
-        SecretTypeValidator validator = new SecretTypeValidator();
-        validator.initialize(new ValidSecretType() {
+    @Test
+    void testValidateIfMDuplicated() {
+        assertFalse(validator(false, true).isValid(List.of("TEST_2", "TEST_2"), context));
+        assertEquals("There is at least one duplication in the request!", errorMessageCaptor.getValue());
+    }
+
+    @Test
+    void testValidate() {
+        assertTrue(validator(false, true).isValid(List.of("TEST_3"), context));
+    }
+
+    private SecretTypesValidator validator(boolean internalOnlyAllowed, boolean multiAllowed) {
+        SecretTypesValidator validator = new SecretTypesValidator();
+        validator.initialize(new ValidSecretTypes() {
 
             @Override
             public Class<? extends Annotation> annotationType() {
@@ -73,6 +86,11 @@ public class SecretTypeValidatorTest {
             @Override
             public boolean internalOnlyAllowed() {
                 return internalOnlyAllowed;
+            }
+
+            @Override
+            public boolean multiAllowed() {
+                return multiAllowed;
             }
 
             @Override

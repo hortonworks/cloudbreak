@@ -8,9 +8,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
-import com.sequenceiq.cloudbreak.rotation.annotation.OnlyPublicSecretTypes;
-import com.sequenceiq.cloudbreak.rotation.annotation.OnlySingleSecretTypes;
+import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretTypes;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -24,8 +24,7 @@ public class SdxSecretRotationRequest {
     @ApiModelProperty(ModelDescriptions.DATA_LAKE_CRN)
     private String crn;
 
-    @OnlyPublicSecretTypes
-    @OnlySingleSecretTypes
+    @ValidSecretTypes(allowedTypes = { DatalakeSecretType.class })
     @NotEmpty
     @ApiModelProperty("Secrets to be rotated")
     private List<String> secrets;

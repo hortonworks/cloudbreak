@@ -8,8 +8,8 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
-import com.sequenceiq.cloudbreak.rotation.annotation.OnlyPublicSecretTypes;
-import com.sequenceiq.cloudbreak.rotation.annotation.OnlySingleSecretTypes;
+import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretTypes;
+import com.sequenceiq.freeipa.api.rotation.FreeIpaSecretType;
 
 import io.swagger.annotations.ApiModel;
 
@@ -18,8 +18,7 @@ import io.swagger.annotations.ApiModel;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FreeIpaSecretRotationRequest {
 
-    @OnlyPublicSecretTypes
-    @OnlySingleSecretTypes
+    @ValidSecretTypes(allowedTypes = { FreeIpaSecretType.class })
     @NotEmpty
     private List<String> secrets;
 

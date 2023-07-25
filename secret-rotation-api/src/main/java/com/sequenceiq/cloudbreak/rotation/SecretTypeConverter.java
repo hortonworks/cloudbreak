@@ -37,9 +37,14 @@ public class SecretTypeConverter {
     }
 
     public static <T extends Enum<T> & SecretType> List<SecretType> mapSecretTypes(List<String> secrets) {
+        return mapSecretTypes(secrets, AVAILABLE_SECRET_TYPES);
+    }
+
+    public static <T extends Enum<T> & SecretType> List<SecretType> mapSecretTypes(List<String> secrets,
+            Set<Class<? extends SecretType>> allowedSecretTypes) {
         try {
             return secrets.stream()
-                    .map(secretString -> getSecretType(secretString).orElseThrow())
+                    .map(secretString -> getSecretType(secretString, allowedSecretTypes).orElseThrow())
                     .toList();
         } catch (Exception e) {
             String message = String.format("Invalid secret type, cannot map secrets %s.", secrets);
@@ -48,19 +53,24 @@ public class SecretTypeConverter {
         }
     }
 
-    public static <T extends Enum<T> & SecretType> SecretType mapSecretType(String secret) {
+    public static <T extends Enum<T> & SecretType> SecretType mapSecretType(String secret,
+            Set<Class<? extends SecretType>> allowedSecretTypes) {
         try {
-            return getSecretType(secret).orElseThrow();
+            return getSecretType(secret, allowedSecretTypes).orElseThrow();
         } catch (Exception e) {
             String message = String.format("Invalid secret type, cannot map secret %s.", secret);
             LOGGER.warn(message);
             throw new CloudbreakServiceException(message, e);
         }
+    }
+
+    public static <T extends Enum<T> & SecretType> SecretType mapSecretType(String secret) {
+        return mapSecretType(secret, AVAILABLE_SECRET_TYPES);
     }
 
     public static <T extends Enum<T> & MultiSecretType> MultiSecretType mapMultiSecretType(String secret) {
         try {
-            return getMultiSecretType(secret).orElseThrow();
+            return getMultiSecretType(secret, AVAILABLE_MULTI_SECRET_TYPES).orElseThrow();
         } catch (Exception e) {
             String message = String.format("Invalid secret type, cannot map secret %s.", secret);
             LOGGER.warn(message);
@@ -68,16 +78,27 @@ public class SecretTypeConverter {
         }
     }
 
-    private static Optional<SecretType> getSecretType(String secret) {
-        return AVAILABLE_SECRET_TYPES
+    public static <T extends Enum<T> & MultiSecretType> MultiSecretType mapMultiSecretType(String secret,
+            Set<Class<? extends MultiSecretType>> allowedSecretTypes) {
+        try {
+            return getMultiSecretType(secret, allowedSecretTypes).orElseThrow();
+        } catch (Exception e) {
+            String message = String.format("Invalid secret type, cannot map secret %s.", secret);
+            LOGGER.warn(message);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    private static Optional<SecretType> getSecretType(String secret, Set<Class<? extends SecretType>> allowedSecretTypes) {
+        return allowedSecretTypes
                 .stream()
                 .filter(supportedSecretType -> secretStringMatches(secret, supportedSecretType))
                 .map(supportedSecretType -> getSecretTypeByClass(secret, supportedSecretType))
                 .findFirst();
     }
 
-    private static Optional<MultiSecretType> getMultiSecretType(String secret) {
-        return AVAILABLE_MULTI_SECRET_TYPES
+    private static Optional<MultiSecretType> getMultiSecretType(String secret, Set<Class<? extends MultiSecretType>> allowedSecretTypes) {
+        return allowedSecretTypes
                 .stream()
                 .filter(supportedSecretType -> multiSecretStringMatches(secret, supportedSecretType))
                 .map(supportedSecretType -> getMultiSecretTypeByClass(secret, supportedSecretType))
