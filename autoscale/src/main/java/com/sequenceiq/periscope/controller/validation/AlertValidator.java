@@ -126,13 +126,9 @@ public class AlertValidator {
         }
     }
 
-    public void validateScheduleWithStopStart(Cluster cluster, DistroXAutoscaleClusterRequest autoscaleClusterRequest) {
-        if (autoscaleClusterRequest.getUseStopStartMechanism() == null) {
-            if (newOrPreExistingTimeAlerts(cluster, autoscaleClusterRequest) && Boolean.TRUE.equals(cluster.isStopStartScalingEnabled())) {
-                throw new BadRequestException(messagesService.getMessage(MessageCode.VALIDATION_TIME_STOP_START_UNSUPPORTED));
-            }
-        } else if (Boolean.TRUE.equals(autoscaleClusterRequest.getUseStopStartMechanism())
-                && newOrPreExistingTimeAlerts(cluster, autoscaleClusterRequest)) {
+    public void validateScheduleWithStopStart(DistroXAutoscaleClusterRequest autoscaleClusterRequest) {
+        if (Boolean.TRUE.equals(autoscaleClusterRequest.getUseStopStartMechanism())
+                && !autoscaleClusterRequest.getTimeAlertRequests().isEmpty()) {
             throw new BadRequestException(messagesService.getMessage(MessageCode.VALIDATION_TIME_STOP_START_UNSUPPORTED));
         }
     }
@@ -150,13 +146,6 @@ public class AlertValidator {
         } catch (ParseException parseException) {
             throw new BadRequestException(parseException.getMessage(), parseException);
         }
-    }
-
-    private boolean newOrPreExistingTimeAlerts(Cluster cluster, DistroXAutoscaleClusterRequest distroXAutoscaleClusterRequest) {
-        if (distroXAutoscaleClusterRequest.getTimeAlertRequests().isEmpty()) {
-            return false;
-        }
-        return !(cluster.getTimeAlerts().isEmpty() && distroXAutoscaleClusterRequest.getTimeAlertRequests().isEmpty());
     }
 
     @VisibleForTesting

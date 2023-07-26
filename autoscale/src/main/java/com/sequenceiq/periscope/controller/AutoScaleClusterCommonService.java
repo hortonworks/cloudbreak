@@ -111,7 +111,7 @@ public class AutoScaleClusterCommonService implements AuthorizationResourceCrnPr
     public Cluster setAutoscaleState(Long clusterId, AutoscaleClusterState autoscaleState) {
         Cluster cluster = setAutoscaleState(clusterId, autoscaleState.isEnableAutoscaling());
         return setStopStartScalingState(cluster.getId(), autoscaleState.getUseStopStartMechanism(),
-                !ObjectUtils.isEmpty(cluster.getTimeAlerts()));
+                !ObjectUtils.isEmpty(cluster.getTimeAlerts()), !ObjectUtils.isEmpty(cluster.getLoadAlerts()));
     }
 
     public Cluster setAutoscaleState(Long clusterId, Boolean enableAutoScaling) {
@@ -122,12 +122,12 @@ public class AutoScaleClusterCommonService implements AuthorizationResourceCrnPr
         return cluster;
     }
 
-    public Cluster setStopStartScalingState(Long clusterId, Boolean requestedState, boolean hasTimeAlerts) {
+    public Cluster setStopStartScalingState(Long clusterId, Boolean requestedState, boolean hasTimeAlerts, boolean hasLoadAlerts) {
         Cluster cluster = clusterService.findById(clusterId);
         boolean allowedPerEntitlement = canEnableStopStartBasedOnEntitlement(cluster);
 
         boolean targetState = false;
-        if (allowedPerEntitlement && !hasTimeAlerts) {
+        if (allowedPerEntitlement && !hasTimeAlerts && hasLoadAlerts) {
             if (requestedState == null || requestedState) {
                 targetState = true;
             }
