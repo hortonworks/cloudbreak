@@ -179,6 +179,7 @@ class MultiAzCalculatorServiceTest {
         verify(availabilityZoneConverter, times(0)).getAvailabilityZonesFromJsonAttributes(any());
 
         assertNull(instanceGroup.getInstanceGroupNetwork().getAttributes());
+        assertEquals(Set.of(), instanceGroup.getAvailabilityZones());
     }
 
     @Test
@@ -211,6 +212,7 @@ class MultiAzCalculatorServiceTest {
         underTest.populateAvailabilityZones(stack, detailedEnvironmentResponse, instanceGroup);
 
         assertNull(instanceGroup.getInstanceGroupNetwork().getAttributes());
+        assertEquals(Set.of(), instanceGroup.getAvailabilityZones());
     }
 
     @Test
@@ -246,6 +248,7 @@ class MultiAzCalculatorServiceTest {
         verify(availabilityZoneConnector).getAvailabilityZones(any(), any(), any(), any());
 
         assertEquals(expectedAttribute.getMap(), instanceGroup.getInstanceGroupNetwork().getAttributes().getMap());
+        assertEquals(Set.of("1", "2", "3"), instanceGroup.getAvailabilityZones());
     }
 
     @Test

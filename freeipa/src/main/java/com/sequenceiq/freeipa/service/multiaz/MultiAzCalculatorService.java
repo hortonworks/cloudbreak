@@ -233,6 +233,7 @@ public class MultiAzCalculatorService {
                     LOGGER.debug("Availability Zones for instance group are  {}", availabilityZones);
                     instanceGroup.getInstanceGroupNetwork().setAttributes(availabilityZoneConverter.getJsonAttributesWithAvailabilityZones(availabilityZones,
                             instanceGroup.getInstanceGroupNetwork().getAttributes()));
+                    instanceGroup.setAvailabilityZones(availabilityZones);
                 } else {
                     LOGGER.debug("Implementation for AvailabilityZoneConnector is not present for CloudPlatform {} and PlatformVariant {}",
                             stack.getCloudPlatform(), stack.getPlatformvariant());

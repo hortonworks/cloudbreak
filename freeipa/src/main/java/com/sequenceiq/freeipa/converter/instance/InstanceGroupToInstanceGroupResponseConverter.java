@@ -45,6 +45,7 @@ public class InstanceGroupToInstanceGroupResponseConverter {
         }
         instanceGroupResponse.setNodeCount(source.getNodeCount());
         instanceGroupResponse.setName(source.getGroupName());
+        instanceGroupResponse.setAvailabilityZones(source.getAvailabilityZones());
         return instanceGroupResponse;
     }
 
