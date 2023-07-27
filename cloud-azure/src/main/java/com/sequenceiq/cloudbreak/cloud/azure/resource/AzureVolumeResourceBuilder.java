@@ -172,7 +172,10 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         LOGGER.debug("Fetching availability zone for vm {}", vm.getName());
         AzureClient client = getAzureClient(auth);
         String vmName = vm.getName();
-        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(auth.getCloudContext(), vm);
+        CloudResource resourceGroup = resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.AZURE_RESOURCE_GROUP,
+                        auth.getCloudContext().getId()).stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("Can't find the resource group for the stack"));
+        String resourceGroupName = resourceGroup.getName();
 
         // Azure Java client returns a Set, but VM can only have at most 1 AZ
         return client.getAvailabilityZone(resourceGroupName, vmName).stream()
