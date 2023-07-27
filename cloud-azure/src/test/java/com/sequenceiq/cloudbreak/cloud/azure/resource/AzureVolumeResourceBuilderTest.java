@@ -241,6 +241,10 @@ public class AzureVolumeResourceBuilderTest {
         CloudResource newInstance = CloudResource.builder().withInstanceId("instanceid").withType(ResourceType.AZURE_INSTANCE).withStatus(CommonStatus.CREATED)
                 .withName("instance").withParameters(Map.of()).build();
         when(context.getComputeResources(PRIVATE_ID)).thenReturn(List.of(volumeSetResource, newInstance));
+        CloudResource resourceGroupResource = mock(CloudResource.class);
+        when(resourceGroupResource.getName()).thenReturn("resourcegroup");
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(eq(CommonStatus.CREATED), eq(ResourceType.AZURE_RESOURCE_GROUP), anyLong()))
+                .thenReturn(List.of(resourceGroupResource));
 
         List<CloudResource> result = underTest.create(context, cloudInstance, PRIVATE_ID, auth, group, image);
 
