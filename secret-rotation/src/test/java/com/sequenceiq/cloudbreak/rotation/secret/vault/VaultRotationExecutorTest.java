@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
@@ -32,6 +33,9 @@ public class VaultRotationExecutorTest {
 
     @Mock
     private SecretRotationStepProgressService secretRotationProgressService;
+
+    @Mock
+    private SecretRotationNotificationService secretRotationNotificationService;
 
     @InjectMocks
     private VaultRotationExecutor underTest;

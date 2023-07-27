@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.ClusterProxyRotationContext;
+import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
@@ -39,6 +40,9 @@ public class ClusterProxyRotationExecutorTest {
 
     @Mock
     private SecretRotationStepProgressService secretRotationProgressService;
+
+    @Mock
+    private SecretRotationNotificationService secretRotationNotificationService;
 
     @InjectMocks
     private ClusterProxyRotationExecutor underTest;

@@ -14,5 +14,4 @@ public enum TestSecretRotationStep implements SecretRotationStep {
     public String value() {
         return name();
     }
-
 }

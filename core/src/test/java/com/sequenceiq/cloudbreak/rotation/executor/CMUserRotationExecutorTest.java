@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.CMUserRotationContext;
+import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -54,6 +55,9 @@ public class CMUserRotationExecutorTest {
 
     @Mock
     private SecretService secretService;
+
+    @Mock
+    private SecretRotationNotificationService secretRotationNotificationService;
 
     @Mock
     private SecretRotationStepProgressService secretRotationProgressService;

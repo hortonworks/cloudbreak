@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
@@ -84,6 +85,9 @@ class RootPasswordRotationExecutorTest {
 
     @Mock
     private SecretRotationStepProgressService secretRotationProgressService;
+
+    @Mock
+    private SecretRotationNotificationService secretRotationNotificationService;
 
     @InjectMocks
     private RootPasswordRotationExecutor underTest;

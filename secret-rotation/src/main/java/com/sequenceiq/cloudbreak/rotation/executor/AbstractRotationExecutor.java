@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgress;
+import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.util.CheckedConsumer;
 
@@ -23,6 +24,9 @@ public abstract class AbstractRotationExecutor<C extends RotationContext> {
 
     @Inject
     private SecretRotationStepProgressService progressService;
+
+    @Inject
+    private SecretRotationNotificationService secretRotationNotificationService;
 
     protected abstract void rotate(C rotationContext) throws Exception;
 
@@ -73,6 +77,7 @@ public abstract class AbstractRotationExecutor<C extends RotationContext> {
         Optional<SecretRotationStepProgress> latestStepProgress = progressService.latestStep(context.getResourceCrn(), secretType, getType(), executionType);
         if (latestStepProgress.isEmpty() || latestStepProgress.get().getFinished() == null) {
             try {
+                secretRotationNotificationService.sendNotification(context.getResourceCrn(), secretType, getType(), executionType);
                 rotationPhaseLogic.accept(castContext(context));
             } catch (Exception e) {
                 logAndThrow(e, errorMessageSupplier.get());

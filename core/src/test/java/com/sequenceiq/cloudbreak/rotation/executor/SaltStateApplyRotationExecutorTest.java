@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext.SaltStateApplyRotationContextBuilder;
+import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,6 +36,9 @@ public class SaltStateApplyRotationExecutorTest {
 
     @Mock
     private SecretRotationStepProgressService secretRotationProgressService;
+
+    @Mock
+    private SecretRotationNotificationService secretRotationNotificationService;
 
     @InjectMocks
     private SaltStateApplyRotationExecutor underTest;

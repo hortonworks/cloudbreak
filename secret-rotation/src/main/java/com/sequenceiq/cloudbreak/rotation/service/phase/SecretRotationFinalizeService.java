@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.service.RotationMetadata;
 
 @Service
-public class SecretRotationFinalizeService  extends AbstractSecretRotationService {
+public class SecretRotationFinalizeService extends AbstractSecretRotationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretRotationFinalizeService.class);
 

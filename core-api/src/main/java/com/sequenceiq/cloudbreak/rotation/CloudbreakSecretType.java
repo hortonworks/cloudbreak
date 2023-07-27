@@ -17,6 +17,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 import java.util.List;
 
 public enum CloudbreakSecretType implements SecretType {
+
     CLUSTER_CB_CM_ADMIN_PASSWORD(List.of(VAULT, CM_USER, CLUSTER_PROXY)),
     CLUSTER_MGMT_CM_ADMIN_PASSWORD(List.of(VAULT, CM_USER, CLUSTER_PROXY)),
     DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD(List.of(REDBEAMS_ROTATE_POLLING, SALT_PILLAR)),

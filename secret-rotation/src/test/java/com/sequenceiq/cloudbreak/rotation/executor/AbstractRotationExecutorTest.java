@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.common.TestSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.TestSecretType;
 import com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgress;
+import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,6 +32,9 @@ public class AbstractRotationExecutorTest {
 
     @Mock
     private SecretRotationStepProgressService secretRotationProgressService;
+
+    @Mock
+    private SecretRotationNotificationService secretRotationNotificationService;
 
     @InjectMocks
     private TestExecutor underTest;
@@ -43,6 +47,8 @@ public class AbstractRotationExecutorTest {
 
         verify(secretRotationProgressService, times(1)).latestStep(any(), any(), any(), any());
         verify(secretRotationProgressService, times(0)).finished(any());
+        verify(secretRotationNotificationService, times(1))
+                .sendNotification("", TestSecretType.TEST, TestSecretRotationStep.STEP, RotationFlowExecutionType.ROTATE);
     }
 
     @Test
@@ -55,6 +61,8 @@ public class AbstractRotationExecutorTest {
 
         verify(secretRotationProgressService, times(1)).latestStep(any(), any(), any(), any());
         verify(secretRotationProgressService, times(1)).finished(any());
+        verify(secretRotationNotificationService, times(1))
+                .sendNotification("", TestSecretType.TEST, TestSecretRotationStep.STEP, RotationFlowExecutionType.ROTATE);
     }
 
     @Test
@@ -67,6 +75,8 @@ public class AbstractRotationExecutorTest {
 
         verify(secretRotationProgressService, times(1)).latestStep(any(), any(), any(), any());
         verify(secretRotationProgressService, times(1)).finished(any());
+        verify(secretRotationNotificationService, times(1))
+                .sendNotification(null, TestSecretType.TEST, TestSecretRotationStep.STEP, RotationFlowExecutionType.ROTATE);
     }
 
     @Test
@@ -80,6 +90,7 @@ public class AbstractRotationExecutorTest {
 
         verify(secretRotationProgressService, times(1)).latestStep(any(), any(), any(), any());
         verify(secretRotationProgressService, times(0)).finished(any());
+        verify(secretRotationNotificationService, times(0)).sendNotification(any(), any(), any(), any());
     }
 
     @Test

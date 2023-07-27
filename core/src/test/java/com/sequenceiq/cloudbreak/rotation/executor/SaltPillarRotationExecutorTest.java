@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
+import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -62,6 +63,9 @@ class SaltPillarRotationExecutorTest {
 
     @Mock
     private SecretRotationStepProgressService secretRotationProgressService;
+
+    @Mock
+    private SecretRotationNotificationService secretRotationNotificationService;
 
     @InjectMocks
     private SaltPillarRotationExecutor underTest;
