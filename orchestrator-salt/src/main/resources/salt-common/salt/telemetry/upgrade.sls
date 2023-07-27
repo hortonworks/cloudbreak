@@ -1,6 +1,5 @@
 {%- from 'telemetry/settings.sls' import telemetry with context %}
 {% set test_cmd = 'test -f /etc/yum.repos.d/cdp-infra-tools.repo && (' + telemetry.testInfraRepoCurlCmd + ')' %}
-{% set test_delete_cmd = 'test -f /etc/yum.repos.d/cdp-infra-tools.repo && ! (' + telemetry.testInfraRepoCurlCmd + ')' %}
 /opt/cdp-telemetry/conf/proxy.env:
   file.managed:
     - source: salt://telemetry/template/proxy.env.j2
@@ -20,10 +19,6 @@
          repoGpgKey: "{{ telemetry.repoGpgKey }}"
          repoGpgCheck: {{ telemetry.repoGpgCheck }}
 {%- endif %}
-delete_repo_file:
-  file.absent:
-    - name: /etc/yum.repos.d/cdp-infra-tools.repo
-    - onlyif: source /opt/cdp-telemetry/conf/proxy.env; {{ test_delete_cmd }}
 
 /opt/salt/scripts/cdp-telemetry-deployer.sh:
     file.managed:
