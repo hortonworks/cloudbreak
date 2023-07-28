@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.template.group.GroupResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.loadbalancer.LoadBalancerResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
+import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -85,6 +86,9 @@ public class GcpResourceConnectorTest {
 
     @Mock
     private ContextBuilders contextBuilders;
+
+    @Mock
+    private CloudResourceHelper cloudResourceHelper;
 
     @Test
     public void testGetDBStackTemplateWhenEverythingIsFine() throws TemplatingNotSupportedException {

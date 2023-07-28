@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.cloud.template.group.GroupResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.loadbalancer.LoadBalancerResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
+import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -95,6 +96,9 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
 
     @Inject
     private ContextBuilders contextBuilders;
+
+    @Inject
+    private CloudResourceHelper cloudResourceHelper;
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext auth, CloudStack stack, PersistenceNotifier notifier,
@@ -208,17 +212,22 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
 
         Set<Group> scalingGroups = getScalingGroups(getGroups(stack.getGroups(), getGroupNames(stack)));
 
+        List<CloudResource> reattachableVolumeSets = new ArrayList<>();
         //group
         for (Group scalingGroup : scalingGroups) {
             context.addGroupResources(scalingGroup.getName(), groupResourceService.getGroupResources(variant, resources));
-            diskReattachment(resources, scalingGroup, context);
+            reattachableVolumeSets = diskReattachment(resources, scalingGroup, context);
         }
 
+        cloudResourceHelper.updateDeleteOnTerminationFlag(reattachableVolumeSets, false, cloudContext);
         //compute
-        return computeResourceService.buildResourcesForUpscale(context, auth, stack, scalingGroups, adjustmentTypeWithThreshold);
+        List<CloudResourceStatus> cloudResourceStatuses = computeResourceService.buildResourcesForUpscale(context, auth, stack,
+                scalingGroups, adjustmentTypeWithThreshold);
+        cloudResourceHelper.updateDeleteOnTerminationFlag(reattachableVolumeSets, true, cloudContext);
+        return cloudResourceStatuses;
     }
 
-    protected void diskReattachment(List<CloudResource> resources, Group scalingGroup, ResourceBuilderContext context) {
+    protected List<CloudResource> diskReattachment(List<CloudResource> resources, Group scalingGroup, ResourceBuilderContext context) {
         LOGGER.info("Disk reattachment with resources: {} for group: {}", resources, scalingGroup);
         List<CloudResource> diskSets = resources.stream()
                 .filter(cloudResource -> scalingGroup.getName().equalsIgnoreCase(cloudResource.getGroup()))
@@ -237,6 +246,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
                         .ifPresent(privateId -> context.addComputeResources(privateId, List.of(cloudResource)));
             }
         }
+        return diskSets;
     }
 
     protected ResourceType getDiskResourceType() {
