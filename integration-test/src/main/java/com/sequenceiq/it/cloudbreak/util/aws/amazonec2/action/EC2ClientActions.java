@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -66,10 +67,27 @@ public class EC2ClientActions extends EC2Client {
     private CfClientActions cfClientActions;
 
     public List<String> getInstanceVolumeIds(List<String> instanceIds, boolean rootVolumes) {
+        String centosRootVolume = "/dev/xvda";
+        String rhelRootVolume = "/dev/sda1";
+        String deviceName;
         DescribeInstancesResponse describeInstancesResponse;
+
         try (Ec2Client ec2Client = buildEC2Client()) {
             describeInstancesResponse = ec2Client.describeInstances(DescribeInstancesRequest.builder().instanceIds(instanceIds).build());
         }
+
+        Map<String, String> platformDetails = describeInstancesResponse.reservations().stream()
+                .map(Reservation::instances)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toMap(Instance::instanceId, Instance::platformDetails));
+        List<String> usedPlatforms = platformDetails.values()
+                .stream()
+                .distinct()
+                .toList();
+        deviceName = (usedPlatforms.stream().anyMatch(platform -> StringUtils.containsIgnoreCase(platform, "Red Hat")))
+                ? rhelRootVolume
+                : centosRootVolume;
+        LOGGER.info("Used AWS Platform on instances: {}. So the root volume Device Name: {}.", usedPlatforms, deviceName);
 
         Map<String, Set<String>> instanceIdVolumeIdMap = describeInstancesResponse.reservations()
                 .stream()
@@ -80,9 +98,9 @@ public class EC2ClientActions extends EC2Client {
                                 .stream()
                                 .filter(dev -> {
                                     if (BooleanUtils.isTrue(rootVolumes)) {
-                                        return "/dev/xvda".equals(dev.deviceName());
+                                        return deviceName.equals(dev.deviceName());
                                     } else {
-                                        return !"/dev/xvda".equals(dev.deviceName());
+                                        return !deviceName.equals(dev.deviceName());
                                     }
                                 })
                                 .map(InstanceBlockDeviceMapping::ebs)
