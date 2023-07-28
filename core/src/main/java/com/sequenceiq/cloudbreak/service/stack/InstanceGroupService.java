@@ -12,13 +12,18 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.converter.AvailabilityZoneConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.AvailabilityZone;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupViewRepository;
@@ -31,6 +36,7 @@ import com.sequenceiq.common.model.CloudIdentityType;
 
 @Service
 public class InstanceGroupService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceGroupService.class);
 
     @Inject
     private InstanceGroupRepository repository;
@@ -53,30 +59,15 @@ public class InstanceGroupService {
     @Inject
     private TransactionService transactionService;
 
+    @Inject
+    private AvailabilityZoneConverter availabilityZoneConverter;
+
     public Set<InstanceGroup> findByStackId(Long stackId) {
         return repository.findByStackId(stackId);
     }
 
     public Set<InstanceGroupView> findViewByStackId(Long stackId) {
         return viewRepository.findInstanceGroupsInStack(stackId);
-    }
-
-    public Optional<InstanceGroup> getByStackIdAndInstanceGroupNameWithFetchTemplate(Long stackId, String groupName) {
-        return repository.getByStackIdAndInstanceGroupNameWithFetchTemplate(stackId, groupName);
-    }
-
-    public Set<InstanceGroup> findNotTerminatedAndNotZombieByStackId(Long stackId) {
-        try {
-            return transactionService.required(() -> {
-                Set<InstanceGroup> instanceGroups = repository.findByStackId(stackId);
-                instanceGroups.forEach(
-                        ig -> ig.replaceInstanceMetadata(ig.getNotTerminatedAndNotZombieInstanceMetaDataSet())
-                );
-                return instanceGroups;
-            });
-        } catch (TransactionService.TransactionExecutionException e) {
-            throw new CloudbreakServiceException("Can't load instance groups for stack ID.", e);
-        }
     }
 
     public Set<InstanceGroup> findNotTerminatedByStackId(Long stackId) {
@@ -112,10 +103,6 @@ public class InstanceGroupService {
 
     public Optional<InstanceGroup> findOneWithInstanceMetadataByGroupNameInStack(Long stackId, String groupName) {
         return repository.findOneWithInstanceMetadataByGroupNameInStack(stackId, groupName);
-    }
-
-    public List<InstanceGroup> findByStackIdAndInstanceGroupNames(Long stackId, Collection<String> groupNames) {
-        return repository.findByStackIdAndInstanceGroupNames(stackId, groupNames);
     }
 
     public Optional<InstanceGroup> findOneByStackIdAndGroupName(Long stackId, String groupName) {
@@ -167,12 +154,30 @@ public class InstanceGroupService {
         return new ArrayList<>(repository.findInstanceGroupViewByStackId(stackId));
     }
 
-    public void terminateInstanceGroupByIds(List<Long> instanceGroupIds) {
-        repository.updateToNullForTermination(instanceGroupIds);
-    }
-
     public Map<Long, List<AvailabilityZoneView>> getAvailabilityZonesByStackId(Long stackId) {
         List<AvailabilityZoneView> availabilityZones = repository.findAvailabilityZonesByStackId(stackId);
         return availabilityZones.stream().collect(Collectors.groupingBy(AvailabilityZoneView::getInstanceGroupId));
+    }
+
+    public InstanceGroup saveEnvironmentAvailabilityZones(InstanceGroup instanceGroup, Set<String> environmentZones) {
+        LOGGER.info("Saving availability zones '{}' on group('{}') and instance group network level.", environmentZones, instanceGroup.getGroupName());
+        InstanceGroupNetwork instanceGroupNetwork = instanceGroup.getInstanceGroupNetwork();
+        if (instanceGroupNetwork == null) {
+            instanceGroupNetwork = new InstanceGroupNetwork();
+            instanceGroup.setInstanceGroupNetwork(instanceGroupNetwork);
+        }
+        Json extendedGroupNetworkAttributes = availabilityZoneConverter.getJsonAttributesWithAvailabilityZones(environmentZones,
+                instanceGroupNetwork.getAttributes());
+        instanceGroupNetwork.setAttributes(extendedGroupNetworkAttributes);
+        instanceGroupNetworkService.savePure(instanceGroupNetwork);
+
+        Set<AvailabilityZone> availabilityZones = environmentZones.stream().map(zone -> {
+            AvailabilityZone availabilityZone = new AvailabilityZone();
+            availabilityZone.setAvailabilityZone(zone);
+            availabilityZone.setInstanceGroup(instanceGroup);
+            return availabilityZone;
+        }).collect(Collectors.toSet());
+        instanceGroup.setAvailabilityZones(availabilityZones);
+        return repository.save(instanceGroup);
     }
 }

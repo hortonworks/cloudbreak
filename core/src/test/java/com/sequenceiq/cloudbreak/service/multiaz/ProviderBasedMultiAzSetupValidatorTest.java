@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.multiaz;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -42,8 +44,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.LocationResp
 @ExtendWith(MockitoExtension.class)
 class ProviderBasedMultiAzSetupValidatorTest {
 
-    private static final String INVALID_NUMBER_OF_ZONES_PATTERN = "Based on the configured availability zones and instance type, number of available zones " +
-            "for instance group %s are %d. Please configure at least %d zones for Multi Az deployment";
+    private static final String INVALID_NUMBER_OF_ZONES_PATTERN = "Based on the configured availability zones and instance type('%s'), number of available " +
+            "zones for instance group %s are %d. Please configure at least %d zones for Multi Az deployment";
 
     private static final String NO_AVAILABILITY_ZONE_CONFIGURED_ON_ENV = "No availability zone configured on the environment, " +
             "multi/targeted availability zone could not be requested.";
@@ -68,6 +70,9 @@ class ProviderBasedMultiAzSetupValidatorTest {
 
     @Mock
     private ValidationResult.ValidationResultBuilder resultBuilder;
+
+    @Mock
+    private InstanceGroupService instanceGroupService;
 
     @InjectMocks
     private ProviderBasedMultiAzSetupValidator underTest;
@@ -109,7 +114,19 @@ class ProviderBasedMultiAzSetupValidatorTest {
     }
 
     @Test
-    void testValidateWhenMultiAzRequestedOnSomeOfTheGroupButTheFlagIsOnStackDisabled() {
+    void testValidateWhenMultiAzRequestedForStackAndZonesConfiguredOnEnvironmentShouldSaveZonesToGroup() {
+        Set<String> environmentZones = Set.of("1", "2");
+        mockCredentialConversionFromEnvironmentWith(environmentZones);
+        Stack stack = TestUtil.stack(Status.REQUESTED, TestUtil.azureCredential());
+        stack.setMultiAz(Boolean.TRUE);
+
+        underTest.validate(resultBuilder, stack);
+
+        verify(instanceGroupService, times(stack.getInstanceGroups().size())).saveEnvironmentAvailabilityZones(any(), eq(environmentZones));
+    }
+
+    @Test
+    void testValidateWhenMultiAzRequestedOnSomeOfTheGroupsButTheFlagOnStackIsDisabled() {
         Stack stack = TestUtil.stack();
         stack.getInstanceGroups().forEach(ig -> {
             AvailabilityZone availabilityZone = new AvailabilityZone();
@@ -141,7 +158,8 @@ class ProviderBasedMultiAzSetupValidatorTest {
         underTest.validate(resultBuilder, stack);
 
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            verify(resultBuilder).error(String.format(INVALID_NUMBER_OF_ZONES_PATTERN, instanceGroup.getGroupName(), 1, 2));
+            verify(resultBuilder).error(String.format(INVALID_NUMBER_OF_ZONES_PATTERN, instanceGroup.getTemplate().getInstanceType(),
+                    instanceGroup.getGroupName(), 1, 2));
         }
     }
 

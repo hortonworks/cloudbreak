@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
+import com.sequenceiq.cloudbreak.service.multiaz.InstanceMetadataAvailabilityZoneCalculator;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -114,6 +115,9 @@ class StackCreationActionsTest {
 
     @Mock
     private Event<?> event;
+
+    @Mock
+    private InstanceMetadataAvailabilityZoneCalculator instanceMetadataAvailabilityZoneCalculator;
 
     @Captor
     private ArgumentCaptor<Map<String, Object>> headersCaptor;

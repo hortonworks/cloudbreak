@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -50,6 +51,9 @@ public class ProviderBasedMultiAzSetupValidator {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private InstanceGroupService instanceGroupService;
 
     public void validate(ValidationResultBuilder validationBuilder, Stack stack) {
         updateMultiAzFlagOnStackIfNecessary(stack, validationBuilder);
@@ -89,46 +93,51 @@ public class ProviderBasedMultiAzSetupValidator {
         Optional<User> creator = Optional.of(stack.getCreator());
         Credential credential = credentialConverter.convert(environment.getCredential());
         ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(credential, creator);
-        Integer minZones = getMinZonesForStack(stack.getType(), azConnector);
         Set<String> environmentZones = environment.getNetwork()
                 .getAvailabilityZones(CloudPlatform.valueOf(stack.getCloudPlatform()));
-        Region region = Region.region(environment.getLocation().getName());
         if (CollectionUtils.isEmpty(environmentZones) && stack.isMultiAz()) {
             String msg = "No availability zone configured on the environment, multi/targeted availability zone could not be requested.";
             LOGGER.info(msg);
             validationBuilder.error(msg);
         } else {
-            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                String groupName = instanceGroup.getGroupName();
-                String instanceType = instanceGroup.getTemplate().getInstanceType();
-                Set<String> zonesToCheckOnProviderSide = getZonesToCheckWithValidationWithEnvironment(validationBuilder, environmentZones, instanceGroup);
-                if (stack.isMultiAz() && CollectionUtils.isNotEmpty(zonesToCheckOnProviderSide)) {
-                    LOGGER.debug("Validating zones('{}') on provider side for group: '{}' and instance type: '{}'",
-                            String.join(",", zonesToCheckOnProviderSide), groupName, instanceType);
-                    Set<String> availabilityZones = azConnector.getAvailabilityZones(cloudCredential, zonesToCheckOnProviderSide, instanceType, region);
-                    LOGGER.info("Availability zones for instance group '{}' with instance type: '{}' in region '{}' for environment are: '{}'", groupName,
-                            instanceType, region.getRegionName(), availabilityZones);
-                    validateTheMinimumNumberOfZones(validationBuilder, minZones, groupName, availabilityZones);
-                } else {
-                    LOGGER.debug("Validation is disabled because either the stack is not multi-AZ: '{}' or the zones set to check is empty: '{}'",
-                            stack.isMultiAz(), CollectionUtils.isEmpty(zonesToCheckOnProviderSide));
-                }
+            Region region = Region.region(environment.getLocation().getName());
+            validateInstanceGroups(validationBuilder, stack, azConnector, cloudCredential, environmentZones, region);
+        }
+    }
+
+    private void validateInstanceGroups(ValidationResultBuilder validationBuilder, Stack stack, AvailabilityZoneConnector azConnector,
+            ExtendedCloudCredential cloudCredential, Set<String> environmentZones, Region region) {
+        Integer minZones = getMinZonesForStack(stack.getType(), azConnector);
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            String groupName = instanceGroup.getGroupName();
+            String instanceType = instanceGroup.getTemplate().getInstanceType();
+            Set<String> zonesToCheckOnProviderSide = getZonesToCheckWithEnvironmentValidation(validationBuilder, environmentZones, instanceGroup);
+            if (stack.isMultiAz() && CollectionUtils.isNotEmpty(zonesToCheckOnProviderSide)) {
+                LOGGER.debug("Validating zones('{}') on provider side for group: '{}' and instance type: '{}'",
+                        String.join(",", zonesToCheckOnProviderSide), groupName, instanceType);
+                Set<String> availabilityZones = azConnector.getAvailabilityZones(cloudCredential, zonesToCheckOnProviderSide, instanceType, region);
+                LOGGER.info("Availability zones for instance group '{}' with instance type: '{}' in region '{}' for environment are: '{}'", groupName,
+                        instanceType, region.getRegionName(), availabilityZones);
+                validateTheMinimumNumberOfZones(validationBuilder, minZones, groupName, availabilityZones, instanceType);
+            } else {
+                LOGGER.debug("Validation is disabled because either the stack is not multi-AZ: '{}' or the zones set to check is empty: '{}'",
+                        stack.isMultiAz(), CollectionUtils.isEmpty(zonesToCheckOnProviderSide));
             }
         }
     }
 
     private static void validateTheMinimumNumberOfZones(ValidationResultBuilder validationBuilder, Integer minZones, String groupName,
-            Set<String> availabilityZones) {
+            Set<String> availabilityZones, String instanceType) {
         int requestedNumberOfZones = availabilityZones.size();
         if (requestedNumberOfZones < minZones) {
             LOGGER.warn("Number of zones are less than the allowed minimum number of Zones");
-            validationBuilder.error(String.format("Based on the configured availability zones and instance type, number of available zones " +
-                            "for instance group %s are %d. Please configure at least %d zones for Multi Az deployment", groupName,
+            validationBuilder.error(String.format("Based on the configured availability zones and instance type('%s'), number of available zones " +
+                            "for instance group %s are %d. Please configure at least %d zones for Multi Az deployment", instanceType, groupName,
                     requestedNumberOfZones, minZones));
         }
     }
 
-    private Set<String> getZonesToCheckWithValidationWithEnvironment(ValidationResultBuilder validationBuilder, Set<String> environmentZones,
+    private Set<String> getZonesToCheckWithEnvironmentValidation(ValidationResultBuilder validationBuilder, Set<String> environmentZones,
             InstanceGroup instanceGroup) {
         Set<String> zonesToCheckOnProviderSide;
         Set<String> zonesConfiguredOnGroup = instanceGroup.getAvailabilityZones();
@@ -146,6 +155,7 @@ public class ProviderBasedMultiAzSetupValidator {
             }
         } else {
             zonesToCheckOnProviderSide = environmentZones;
+            instanceGroupService.saveEnvironmentAvailabilityZones(instanceGroup, environmentZones);
         }
         return zonesToCheckOnProviderSide;
     }

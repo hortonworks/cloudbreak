@@ -72,6 +72,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserData
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
+import com.sequenceiq.cloudbreak.service.multiaz.InstanceMetadataAvailabilityZoneCalculator;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -115,6 +116,9 @@ public class StackCreationActions {
 
     @Inject
     private CloudbreakEventService eventService;
+
+    @Inject
+    private InstanceMetadataAvailabilityZoneCalculator instanceMetadataAvailabilityZoneCalculator;
 
     @Bean(name = "VALIDATION_STATE")
     public Action<?, ?> provisioningValidationAction() {
@@ -163,6 +167,7 @@ public class StackCreationActions {
             protected void doExecute(StackCreationContext context, CreateUserDataSuccess payload, Map<Object, Object> variables) {
                 stackCreationService.setupProvision(context.getStackId());
                 stackCreationService.setInstanceStoreCount(context);
+                instanceMetadataAvailabilityZoneCalculator.populate(context.getStackId());
                 sendEvent(context);
             }
 
