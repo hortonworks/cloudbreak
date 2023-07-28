@@ -53,7 +53,7 @@ class FreeIpaImageFilterTest {
                 createImage("image-1", REDHAT_8, AWS, REGION_1),
                 createImage("image-2", CENTOS_7, AWS, REGION_1)
         );
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(CENTOS_7, REGION_1, AWS, true);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(CENTOS_7, null, REGION_1, AWS, true);
 
         List<Image> actual = underTest.filterImages(candidateImages, imageFilterSettings);
 
@@ -66,7 +66,7 @@ class FreeIpaImageFilterTest {
         Image image1 = createImage("image-1", REDHAT_8, AWS, REGION_1);
         Image image2 = createImage("image-2", CENTOS_7, AWS, REGION_1);
         List<Image> candidateImages = List.of(image1, image2);
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(CENTOS_7, REGION_1, AWS, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(CENTOS_7, null, REGION_1, AWS, false);
 
         List<Image> actual = underTest.filterImages(candidateImages, imageFilterSettings);
 
@@ -80,7 +80,7 @@ class FreeIpaImageFilterTest {
         Image image1 = createImage("image-1", "amazonlinux", AWS, REGION_1);
         Image image2 = createImage("image-2", CENTOS_7, AWS, REGION_1);
         List<Image> candidateImages = List.of(image1, image2);
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(CENTOS_7, REGION_1, AWS, true);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(CENTOS_7, null, REGION_1, AWS, true);
 
         List<Image> actual = underTest.filterImages(candidateImages, imageFilterSettings);
 
@@ -94,7 +94,7 @@ class FreeIpaImageFilterTest {
         Image image1 = createImage("image-1", CENTOS_7, "azure", REGION_1);
         Image image2 = createImage("image-2", CENTOS_7, AWS, REGION_1);
         List<Image> candidateImages = List.of(image1, image2);
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(CENTOS_7, REGION_1, AWS, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(CENTOS_7, null, REGION_1, AWS, false);
 
         List<Image> actual = underTest.filterImages(candidateImages, imageFilterSettings);
 
@@ -108,7 +108,7 @@ class FreeIpaImageFilterTest {
         Image image1 = createImage("image-1", CENTOS_7, AWS, "other-region");
         Image image2 = createImage("image-2", CENTOS_7, AWS, REGION_1);
         List<Image> candidateImages = List.of(image1, image2);
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(CENTOS_7, REGION_1, AWS, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(CENTOS_7, CENTOS_7, REGION_1, AWS, false);
 
         List<Image> actual = underTest.filterImages(candidateImages, imageFilterSettings);
 
@@ -122,7 +122,7 @@ class FreeIpaImageFilterTest {
         Image image1 = createImage("image-1", CENTOS_7, AWS, REGION_1);
         Image image2 = createImage("image-2", CENTOS_7, AWS, REGION_1);
         List<Image> candidateImages = List.of(image1, image2);
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(REDHAT_8, "other-region", "azure", false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(REDHAT_8, null, "other-region", "azure", false);
 
         Assertions.assertThatThrownBy(() -> underTest.filterImages(candidateImages, imageFilterSettings))
                 .isInstanceOf(ImageNotFoundException.class)
@@ -135,7 +135,7 @@ class FreeIpaImageFilterTest {
         Image image2 = createImage("image-2", REDHAT_8, AWS, REGION_1);
         List<Image> candidateImages = List.of(image1, image2);
 
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(REDHAT_8, REGION_1, AWS, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(REDHAT_8, REDHAT_8, REGION_1, AWS, false);
 
         Optional<Image> image = underTest.filterImages(candidateImages, imageFilterSettings).stream().findFirst();
 
@@ -144,8 +144,9 @@ class FreeIpaImageFilterTest {
         assertEquals("image-2", image.get().getUuid());
     }
 
-    private FreeIpaImageFilterSettings createImageFilterSettings(String os, String region, String platform, boolean allowMajorOsUpgrade) {
-        return new FreeIpaImageFilterSettings(null, null, os, region, platform, allowMajorOsUpgrade);
+    private FreeIpaImageFilterSettings createImageFilterSettings(String currentOs, String targetOs, String region, String platform,
+            boolean allowMajorOsUpgrade) {
+        return new FreeIpaImageFilterSettings(null, null, currentOs,  targetOs, region, platform, allowMajorOsUpgrade);
     }
 
     private Image createImage(String imageId, String os, String platform, String region) {

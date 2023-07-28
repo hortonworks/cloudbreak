@@ -127,7 +127,9 @@ class UpgradeServiceTest {
         assertEquals(selectedImage, response.getTargetImage());
 
         UpgradeEvent upgradeEvent = (UpgradeEvent) eventCaptor.getValue();
-        assertEquals(request.getImage(), upgradeEvent.getImageSettingsRequest());
+        assertEquals(selectedImage.getId(), upgradeEvent.getImageSettingsRequest().getId());
+        assertEquals(selectedImage.getOs(), upgradeEvent.getImageSettingsRequest().getOs());
+        assertEquals(selectedImage.getCatalog(), upgradeEvent.getImageSettingsRequest().getCatalog());
         assertEquals(operation.getOperationId(), upgradeEvent.getOperationId());
         assertEquals("pgw", upgradeEvent.getPrimareGwInstanceId());
         assertEquals(2, upgradeEvent.getInstanceIds().size());
@@ -154,8 +156,8 @@ class UpgradeServiceTest {
         when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = createValidImSet();
-        Image oldImage = new Image("name", Map.of(), "alma", "rocky", null, null, "111-222", Map.of());
-        Image newImage = new Image("name", Map.of(), "alma", "rocky", null, null, "333-444", Map.of());
+        Image oldImage = new Image("name", Map.of(), "alma", "rocky", null, "mockcatalog", "111-222", Map.of());
+        Image newImage = new Image("name", Map.of(), "alma", "rocky", null, "mockcatalog", "333-444", Map.of());
         allInstances.stream().filter(im -> "pgw".equalsIgnoreCase(im.getInstanceId())).forEach(im -> im.setImage(new Json(oldImage)));
         allInstances.stream().filter(im -> !"pgw".equalsIgnoreCase(im.getInstanceId())).forEach(im -> im.setImage(new Json(newImage)));
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
@@ -179,7 +181,9 @@ class UpgradeServiceTest {
         assertEquals(selectedImage, response.getTargetImage());
 
         UpgradeEvent upgradeEvent = (UpgradeEvent) eventCaptor.getValue();
-        assertEquals(request.getImage(), upgradeEvent.getImageSettingsRequest());
+        assertEquals(selectedImage.getId(), upgradeEvent.getImageSettingsRequest().getId());
+        assertEquals(selectedImage.getOs(), upgradeEvent.getImageSettingsRequest().getOs());
+        assertEquals(selectedImage.getCatalog(), upgradeEvent.getImageSettingsRequest().getCatalog());
         assertEquals(operation.getOperationId(), upgradeEvent.getOperationId());
         assertEquals("pgw", upgradeEvent.getPrimareGwInstanceId());
         assertEquals(2, upgradeEvent.getInstanceIds().size());
@@ -233,7 +237,9 @@ class UpgradeServiceTest {
         assertEquals(selectedImage, response.getTargetImage());
 
         UpgradeEvent upgradeEvent = (UpgradeEvent) eventCaptor.getValue();
-        assertEquals(request.getImage(), upgradeEvent.getImageSettingsRequest());
+        assertEquals(selectedImage.getId(), upgradeEvent.getImageSettingsRequest().getId());
+        assertEquals(selectedImage.getOs(), upgradeEvent.getImageSettingsRequest().getOs());
+        assertEquals(selectedImage.getCatalog(), upgradeEvent.getImageSettingsRequest().getCatalog());
         assertEquals(operation.getOperationId(), upgradeEvent.getOperationId());
         assertEquals("pgw", upgradeEvent.getPrimareGwInstanceId());
         assertEquals(2, upgradeEvent.getInstanceIds().size());
@@ -280,7 +286,9 @@ class UpgradeServiceTest {
         assertEquals(selectedImage, response.getTargetImage());
 
         UpgradeEvent upgradeEvent = (UpgradeEvent) eventCaptor.getValue();
-        assertEquals(request.getImage(), upgradeEvent.getImageSettingsRequest());
+        assertEquals(selectedImage.getId(), upgradeEvent.getImageSettingsRequest().getId());
+        assertEquals(selectedImage.getOs(), upgradeEvent.getImageSettingsRequest().getOs());
+        assertEquals(selectedImage.getCatalog(), upgradeEvent.getImageSettingsRequest().getCatalog());
         assertEquals(operation.getOperationId(), upgradeEvent.getOperationId());
         assertEquals("pgw", upgradeEvent.getPrimareGwInstanceId());
         assertEquals(2, upgradeEvent.getInstanceIds().size());
@@ -309,6 +317,8 @@ class UpgradeServiceTest {
     private ImageInfoResponse mockSelectedImage() {
         ImageInfoResponse selectedImage = new ImageInfoResponse();
         selectedImage.setId("333-444");
+        selectedImage.setOs("alma");
+        selectedImage.setCatalog("mockcatalog");
         when(imageService.selectImage(any(FreeIpaImageFilterSettings.class))).thenReturn(selectedImage);
         return selectedImage;
     }
