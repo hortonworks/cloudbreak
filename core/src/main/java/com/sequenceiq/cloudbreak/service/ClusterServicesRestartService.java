@@ -68,7 +68,7 @@ public class ClusterServicesRestartService {
     @Inject
     private RdsViewProvider rdsViewProvider;
 
-    public boolean isRDCRefreshNeeded(Stack stack, Stack datalakeStack) {
+    public boolean isRemoteDataContextRefreshNeeded(Stack stack, Stack datalakeStack) {
         // Re-configuring DH using the Remote Data Context of Data lake.
         boolean clusterDataHub = stack.getType().equals(StackType.WORKLOAD);
         boolean dlIsRebuild = isDatalakeCreatedAfterDataHub(datalakeStack, stack);

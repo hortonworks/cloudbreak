@@ -259,7 +259,8 @@ public interface DistroXV1Endpoint {
     @Path("crn/restartCluster")
     @ApiOperation(value = RESTART_CLUSTER_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "restartDistroXClusterByCrns")
-    void restartClusterServicesByCrns(@QueryParam("crns") List<String> crns);
+    void restartClusterServicesByCrns(@QueryParam("crns") List<String> crns,
+            @QueryParam("refreshRemoteDataContext") @DefaultValue("false") Boolean refreshRemoteDataContext);
 
     @POST
     @Path("crn/{crn}/rotate_salt_password")

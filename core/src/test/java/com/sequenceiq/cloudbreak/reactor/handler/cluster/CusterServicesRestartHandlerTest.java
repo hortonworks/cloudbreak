@@ -85,7 +85,7 @@ public class CusterServicesRestartHandlerTest {
 
     @Test
     public void testRefreshNeeded() throws Exception {
-        when(clusterServicesRestartService.isRDCRefreshNeeded(any(), any())).thenReturn(true);
+        when(clusterServicesRestartService.isRemoteDataContextRefreshNeeded(any(), any())).thenReturn(true);
         underTest.accept(new Event(new ClusterServicesRestartRequest(stack.getId())));
 
         verify(clusterServicesRestartService).refreshClusterOnRestart(any(), any(), any());
@@ -96,7 +96,7 @@ public class CusterServicesRestartHandlerTest {
     public void testRefreshNotNeeded() throws Exception {
         when(apiConnectors.getConnector(any(Stack.class))).thenReturn(connector);
         when(connector.clusterModificationService()).thenReturn(clusterModificationService);
-        when(clusterServicesRestartService.isRDCRefreshNeeded(any(), any())).thenReturn(false);
+        when(clusterServicesRestartService.isRemoteDataContextRefreshNeeded(any(), any())).thenReturn(false);
         underTest.accept(new Event(new ClusterServicesRestartRequest(stack.getId())));
 
         verify(clusterServicesRestartService, times(0)).refreshClusterOnRestart(any(), any(), any());

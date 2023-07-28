@@ -71,7 +71,7 @@ public class DistroxService {
                 .collect(Collectors.toList());
         ArrayList<String> pollingCrnList = availableClusters.stream().map(StackViewV4Response::getCrn).collect(Collectors.toCollection(ArrayList::new));
         if (!pollingCrnList.isEmpty()) {
-            distroXV1Endpoint.restartClusterServicesByCrns(pollingCrnList);
+            distroXV1Endpoint.restartClusterServicesByCrns(pollingCrnList, false);
             Polling.stopAfterAttempt(attempt)
                     .stopIfException(true)
                     .waitPeriodly(sleeptime, TimeUnit.SECONDS)
@@ -80,7 +80,7 @@ public class DistroxService {
     }
 
     public void restartDistroxByCrns(List<String> crns) {
-        distroXV1Endpoint.restartClusterServicesByCrns(crns);
+        distroXV1Endpoint.restartClusterServicesByCrns(crns, false);
     }
 
     public void stopAttachedDistrox(String envCrn) {

@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.scale.ServicesRollingRestartEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.rotatepassword.RotateSaltPasswordEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.event.ClusterServicesRestartTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCertificatesRotationTriggerEvent;
@@ -315,9 +316,9 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
-    public FlowIdentifier triggerClusterServicesRestart(Long stackId) {
+    public FlowIdentifier triggerClusterServicesRestart(Long stackId, boolean refreshNeeded) {
         String selector = CLUSTER_SERVICES_RESTART_TRIGGER_EVENT.event();
-        return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
+        return reactorNotifier.notify(stackId, selector, new ClusterServicesRestartTriggerEvent(selector, stackId, refreshNeeded));
     }
 
     public FlowIdentifier triggerClusterStop(Long stackId) {

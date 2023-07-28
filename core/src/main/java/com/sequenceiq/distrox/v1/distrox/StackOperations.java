@@ -495,12 +495,12 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return generateImageCatalogService.generateImageCatalogForStack(stack);
     }
 
-    public FlowIdentifier restartClusterServices(NameOrCrn nameOrCrn, Long workspaceId) {
+    public FlowIdentifier restartClusterServices(NameOrCrn nameOrCrn, Long workspaceId, boolean refreshRemoteDataContext) {
         if (nameOrCrn == null) {
             throw new IllegalArgumentException("Crn must be provided.");
         }
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
-        return clusterOperationService.restartClusterServices(stack);
+        return clusterOperationService.restartClusterServices(stack, refreshRemoteDataContext);
     }
 
     public void updateLoadBalancerDNS(Long workspaceId, NameOrCrn nameOrCrn) {

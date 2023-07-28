@@ -69,7 +69,8 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             Optional<Stack> datalakeStack = datalakeService.getDatalakeStackByDatahubStack(stack);
             CmTemplateProcessor blueprintProcessor = getCmTemplateProcessor(stack.getCluster());
-            if (datalakeStack.isPresent() && clusterServicesRestartService.isRDCRefreshNeeded(stack, datalakeStack.get())) {
+            if (datalakeStack.isPresent() && (clusterServicesRestartService.isRemoteDataContextRefreshNeeded(stack, datalakeStack.get())
+                    || request.isDatahubRefreshNeeded())) {
                 clusterServicesRestartService.refreshClusterOnStart(stack, datalakeStack.get(), blueprintProcessor);
             } else {
                 apiConnectors.getConnector(stack).startCluster();
