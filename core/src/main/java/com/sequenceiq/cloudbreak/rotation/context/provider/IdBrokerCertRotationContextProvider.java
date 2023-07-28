@@ -63,7 +63,7 @@ public class IdBrokerCertRotationContextProvider extends AbstractKnoxCertRotatio
         //not yet supported in CM - OPSAPS-65182
         newIdBroker.setMasterSecret(idBroker.getMasterSecret());
 
-        result.put(VAULT, getVaultRotationContext(stack.getResourceCrn(), idBroker.getSignKeySecret().getSecret(), newIdBroker.getSignKey()));
+        result.put(VAULT, getVaultRotationContext(stack.getResourceCrn(), Map.of(idBroker.getSignKeySecret().getSecret(), newIdBroker.getSignKey())));
         result.put(SALT_PILLAR, getSaltPillarRotationContext(stack.getResourceCrn(), clusterHostServiceRunner.getIdBrokerPillarProperties(newIdBroker)));
         result.put(SALT_STATE_APPLY, getSaltStateApplyRotationContext(stack, gatewayConfigService, exitCriteriaProvider.get(stack)));
         result.put(CM_SERVICE_ROLE_RESTART, getCMServiceRoleRestartRotationContext(stack.getResourceCrn()));

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.view;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
+import java.util.Optional;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
@@ -23,11 +24,13 @@ public interface GatewayView {
 
     Secret getSignKeySecret();
 
-    String getSignCert();
+    Secret getSignCertSecret();
 
-    String getSignPub();
+    Secret getSignPubSecret();
 
-    String getTokenCert();
+    String getSignCertDeprecated();
+
+    String getSignPubDeprecated();
 
     Secret getKnoxMasterSecret();
 
@@ -35,8 +38,18 @@ public interface GatewayView {
 
     Integer getGatewayPort();
 
+    String getTokenCert();
+
     default String getSignKey() {
         return getIfNotNull(getSignKeySecret(), Secret::getRaw);
+    }
+
+    default String getSignCert() {
+        return Optional.ofNullable(getIfNotNull(getSignCertSecret(), Secret::getRaw)).orElse(getSignCertDeprecated());
+    }
+
+    default String getSignPub() {
+        return Optional.ofNullable(getIfNotNull(getSignPubSecret(), Secret::getRaw)).orElse(getSignPubDeprecated());
     }
 
     default String getKnoxMaster() {

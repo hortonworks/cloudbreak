@@ -40,19 +40,46 @@ public class GatewayService {
     public void generateAndUpdateSignKeys(GatewayView gateway) {
         if (gateway != null) {
             if (gateway.getSignCert() == null) {
-                KeyPair identityKey = PkiUtil.generateKeypair();
-                KeyPair signKeyPair = PkiUtil.generateKeypair();
-                X509Certificate cert = PkiUtil.cert(identityKey, "signing", signKeyPair);
-
-                String signKey = PkiUtil.convert(identityKey.getPrivate());
-                String signPub = PkiUtil.convert(identityKey.getPublic());
-                String signCert = PkiUtil.convert(cert);
-                Gateway existed = repository.findById(gateway.getId()).orElseThrow(NotFoundException.notFound("Gateway should be exist"));
-                existed.setSignKey(signKey);
-                existed.setSignPub(signPub);
-                existed.setSignCert(signCert);
+                Gateway existed = repository.findById(gateway.getId())
+                        .map(this::generateSignKeys)
+                        .orElseThrow(NotFoundException.notFound("Gateway should be exist"));
                 save(existed);
             }
         }
+    }
+
+    public Gateway generateSignKeys(Gateway gateway) {
+        KeyPair identityKey = PkiUtil.generateKeypair();
+        KeyPair signKeyPair = PkiUtil.generateKeypair();
+        X509Certificate cert = PkiUtil.cert(identityKey, "signing", signKeyPair);
+
+        String signKey = PkiUtil.convert(identityKey.getPrivate());
+        String signPub = PkiUtil.convert(identityKey.getPublic());
+        String signCert = PkiUtil.convert(cert);
+        gateway.setSignKey(signKey);
+        gateway.setSignPub(signPub);
+        gateway.setSignCert(signCert);
+        //in case of service rollback we need this for another release
+        gateway.setSignPubDeprecated(signPub);
+        gateway.setSignCertDeprecated(signCert);
+        return gateway;
+    }
+
+    public GatewayView putLegacyFieldsIntoVaultIfNecessary(GatewayView gatewayView) {
+        Gateway gateway = repository.findById(gatewayView.getId()).orElseThrow(NotFoundException.notFound("Gateway should exist"));
+        if (gateway.getSignCertSecret() == null || gateway.getSignCertSecret().getRaw() == null) {
+            gateway.setSignCert(gateway.getSignCertDeprecated());
+        }
+        if (gateway.getSignPubSecret() == null || gateway.getSignPubSecret().getRaw() == null) {
+            gateway.setSignPub(gateway.getSignPubDeprecated());
+        }
+        return save(gateway);
+    }
+
+    public void setLegacyFieldsForServiceRollback(GatewayView gatewayView) {
+        Gateway gateway = repository.findById(gatewayView.getId()).orElseThrow(NotFoundException.notFound("Gateway should exist"));
+        gateway.setSignCertDeprecated(gatewayView.getSignCert());
+        gateway.setSignPubDeprecated(gatewayView.getSignPub());
+        save(gateway);
     }
 }

@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.rotation.flow.rotation;
 
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.FINALIZE;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
+
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
 
@@ -12,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.config.SecretRotationEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.config.SecretRotationState;
@@ -85,7 +88,7 @@ public class SecretRotationActions {
 
             @Override
             protected void doExecute(RotationFlowContext context, PreValidateRotationFinishedEvent payload, Map<Object, Object> variables) throws Exception {
-                if (RotationFlowExecutionType.ROLLBACK.equals(payload.getExecutionType())) {
+                if (ROLLBACK.equals(payload.getExecutionType())) {
                     LOGGER.info("Routing execution of rotation flow to rollback state, since execution type is specified for secret {} and resource {}",
                             payload.getSecretType(), payload.getResourceCrn());
                     sendEvent(context, ExecuteRotationFailedEvent.fromPayload(payload, new SecretRotationException(EXPLICIT_ROLLBACK_EXECUTION)));
@@ -138,7 +141,7 @@ public class SecretRotationActions {
             @Override
             protected void doExecute(RotationFlowContext context, ExecuteRotationFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 Flow flow = getFlow(context.getFlowId());
-                if (RotationFlowExecutionType.ROLLBACK != payload.getExecutionType()) {
+                if (ROLLBACK != payload.getExecutionType()) {
                     LOGGER.debug("Execution type is not set or not explicit ROLLBACK, set flow failed for: {}", context.getResourceCrn());
                     flow.setFlowFailed(payload.getException());
                 }
@@ -169,7 +172,7 @@ public class SecretRotationActions {
                 String message = exception.getMessage();
                 String resourceCrn = context.getResourceCrn();
                 LOGGER.debug("Secret rotation failed, for: {}, secreType: {}", resourceCrn, context.getSecretType(), exception);
-                if (RotationFlowExecutionType.ROLLBACK == payload.getExecutionType() && EXPLICIT_ROLLBACK_EXECUTION.equals(message)) {
+                if (ROLLBACK == payload.getExecutionType() && EXPLICIT_ROLLBACK_EXECUTION.equals(message)) {
                     // if the execution type is ROLLBACK, we need to know from the calling service whether it was successful or not
                     LOGGER.debug("Explicit rollback, doesn't set flow failed.");
                 } else {
@@ -177,7 +180,9 @@ public class SecretRotationActions {
                     Flow flow = getFlow(context.getFlowId());
                     flow.setFlowFailed(exception);
                 }
-                secretRotationStepProgressService.deleteAllForCurrentRotation(context.getResourceCrn(), context.getSecretType());
+                if (payload.getExecutionType() == null || EnumSet.of(ROLLBACK, FINALIZE).contains(payload.getExecutionType())) {
+                    secretRotationStepProgressService.deleteAllForCurrentRotation(context.getResourceCrn(), context.getSecretType());
+                }
                 secretRotationUsageService.rotationFailed(context.getSecretType(), resourceCrn, message, context.getExecutionType());
                 secretRotationStatusService.rotationFailed(resourceCrn, payload.getSecretType(), message);
                 sendEvent(context, RotationEvent.fromContext(SecretRotationEvent.ROTATION_FAILURE_HANDLED_EVENT.event(), context));

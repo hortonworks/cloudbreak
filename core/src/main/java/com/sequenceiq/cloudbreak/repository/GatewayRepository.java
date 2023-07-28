@@ -23,8 +23,10 @@ public interface GatewayRepository extends CrudRepository<Gateway, Long> {
             "g.ssoType as ssoType, " +
             "g.ssoProvider as ssoProvider, " +
             "g.signKey as signKeySecret, " +
-            "g.signCert as signCert, " +
-            "g.signPub as signPub, " +
+            "g.signCert as signCertDeprecated, " +
+            "g.signCertSecret as signCertSecret, " +
+            "g.signPub as signPubDeprecated, " +
+            "g.signPubSecret as signPubSecret, " +
             "g.tokenCert as tokenCert, " +
             "g.knoxMasterSecret as knoxMasterSecret, " +
             "gt as topologies, " +

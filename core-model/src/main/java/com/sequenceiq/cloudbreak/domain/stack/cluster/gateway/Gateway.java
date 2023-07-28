@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.stack.cluster.gateway;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -68,9 +69,19 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
     @SecretValue
     private Secret signKey = Secret.EMPTY;
 
+    @Deprecated
     private String signPub;
 
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret signPubSecret = Secret.EMPTY;
+
+    @Deprecated
     private String signCert;
+
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret signCertSecret = Secret.EMPTY;
 
     private String tokenCert;
 
@@ -84,6 +95,7 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         gateway.topologies = topologies.stream().map(GatewayTopology::copy).collect(Collectors.toSet());
         gateway.tokenCert = tokenCert;
         gateway.signCert = signCert;
+        gateway.signCertSecret = signCertSecret;
         gateway.signKey = signKey;
         gateway.path = path;
         gateway.gatewayType = gatewayType;
@@ -91,6 +103,7 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         gateway.cluster = cluster;
         gateway.id = id;
         gateway.signPub = signPub;
+        gateway.signPubSecret = signPubSecret;
         gateway.ssoProvider = ssoProvider;
         gateway.workspace = workspace;
         gateway.gatewayPort = gatewayPort;
@@ -161,6 +174,38 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         return signKey;
     }
 
+    @Override
+    public Secret getSignCertSecret() {
+        return signCertSecret;
+    }
+
+    @Override
+    public Secret getSignPubSecret() {
+        return signPubSecret;
+    }
+
+    @Deprecated
+    @Override
+    public String getSignCertDeprecated() {
+        return signCert;
+    }
+
+    @Deprecated
+    public void setSignCertDeprecated(String signCert) {
+        this.signCert = signCert;
+    }
+
+    @Deprecated
+    @Override
+    public String getSignPubDeprecated() {
+        return signPub;
+    }
+
+    @Deprecated
+    public void setSignPubDeprecated(String signPub) {
+        this.signPub = signPub;
+    }
+
     public void setSsoProvider(String ssoProvider) {
         this.ssoProvider = ssoProvider;
     }
@@ -174,32 +219,40 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
     }
 
     public String getSignCert() {
-        return signCert;
+        return Optional.ofNullable(signCertSecret)
+                .map(Secret::getRaw)
+                .orElse(signCert);
     }
 
     public void setSignCert(String signCert) {
-        this.signCert = signCert;
+        if (signCert != null) {
+            this.signCertSecret = new Secret(signCert);
+        }
     }
 
     public String getSignPub() {
-        return signPub;
+        return Optional.ofNullable(signPubSecret)
+                .map(Secret::getRaw)
+                .orElse(signPub);
     }
 
     public void setSignPub(String signPub) {
-        this.signPub = signPub;
+        if (signPub != null) {
+            this.signPubSecret = new Secret(signPub);
+        }
     }
 
     public String getTokenCert() {
         return tokenCert;
     }
 
+    public void setTokenCert(String tokenCert) {
+        this.tokenCert = tokenCert;
+    }
+
     @Override
     public Secret getKnoxMasterSecret() {
         return knoxMasterSecret;
-    }
-
-    public void setTokenCert(String tokenCert) {
-        this.tokenCert = tokenCert;
     }
 
     public String getKnoxMaster() {

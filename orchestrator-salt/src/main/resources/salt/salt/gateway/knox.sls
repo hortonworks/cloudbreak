@@ -77,6 +77,7 @@
 {{ gateway.knox_data_root }}/security/keystores/signkey.pem:
   file.managed:
     - contents_pillar: gateway:signkey
+    - replace: True
     - makedirs: True
 {% if salt['pillar.get']('cloudera-manager:settings:deterministic_uid_gid') == True %}
     - user: knox
@@ -89,6 +90,7 @@
 {{ gateway.knox_data_root }}/security/keystores/signcert.pem:
   file.managed:
     - contents_pillar: gateway:signcert
+    - replace: True
     - makedirs: True
 {% if salt['pillar.get']('cloudera-manager:settings:deterministic_uid_gid') == True %}
     - user: knox
@@ -116,7 +118,7 @@ knox-create-sign-pkcs12:
 {% else %}
     - mode: 644
 {% endif %}
-    - replace: False
+    - replace: True
 
 knox-create-sign-{{ gateway.keystore_type }}:
   cmd.run:
@@ -133,7 +135,7 @@ knox-create-sign-{{ gateway.keystore_type }}:
 {% else %}
     - mode: 644
 {% endif %}
-    - replace: False
+    - replace: True
 
 {% if salt['pillar.get']('gateway:saml') %}
 
@@ -141,6 +143,6 @@ knox-create-sign-{{ gateway.keystore_type }}:
   file.managed:
     - contents_pillar: gateway:saml
     - mode: 644
-    - replace: False
+    - replace: True
 
 {% endif %}

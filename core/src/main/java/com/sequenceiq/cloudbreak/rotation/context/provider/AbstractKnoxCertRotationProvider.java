@@ -51,10 +51,9 @@ public abstract class AbstractKnoxCertRotationProvider implements RotationContex
         return stack.getRunningInstanceMetaDataSet().stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toSet());
     }
 
-    protected RotationContext getVaultRotationContext(String resourceCrn, String secret, String signKey) {
-        Map<String, String> secretMap = Map.of(secret, signKey);
+    protected RotationContext getVaultRotationContext(String resourceCrn, Map<String, String> secrets) {
         return VaultRotationContext.builder()
-                .withVaultPathSecretMap(secretMap)
+                .withVaultPathSecretMap(secrets)
                 .withResourceCrn(resourceCrn)
                 .build();
     }
