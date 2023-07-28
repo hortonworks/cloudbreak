@@ -18,7 +18,7 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 public class SecretRotationFlowEventChainFactory implements FlowEventChainFactory<SecretRotationFlowChainTriggerEvent> {
 
     @Inject
-    private Optional<BeforeRotationFlowEventProvider> beforeRotationFlowEventProvider;
+    private Optional<SaltUpdateFlowEventProvider> saltUpdateFlowEventProvider;
 
     @Override
     public String initEvent() {
@@ -28,17 +28,15 @@ public class SecretRotationFlowEventChainFactory implements FlowEventChainFactor
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(SecretRotationFlowChainTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        if (saltUpdateNeeded(event)) {
-            beforeRotationFlowEventProvider.ifPresent(beforeFlowEventProvider ->
-                    flowEventChain.add(beforeFlowEventProvider.getTriggerEvent(event)));
+        if (saltUpdateFlowEventProvider.isPresent()) {
+            SaltUpdateFlowEventProvider eventProvider = saltUpdateFlowEventProvider.get();
+            if (eventProvider.saltUpdateNeeded(event.getSecretTypes(), event.getExecutionType())) {
+                flowEventChain.add(eventProvider.getSaltUpdateTriggerEvent(event));
+            }
         }
         event.getSecretTypes().forEach(secretType -> {
             flowEventChain.add(SecretRotationTriggerEvent.fromChainTrigger(event, secretType));
         });
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
-    }
-
-    private boolean saltUpdateNeeded(SecretRotationFlowChainTriggerEvent event) {
-        return event.getExecutionType() == null;
     }
 }

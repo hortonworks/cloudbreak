@@ -24,6 +24,11 @@ public enum RedbeamsSecretType implements SecretType {
     }
 
     @Override
+    public boolean saltUpdateNeeded() {
+        return false;
+    }
+
+    @Override
     public Class<? extends Enum<?>> getClazz() {
         return RedbeamsSecretType.class;
     }

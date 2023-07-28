@@ -46,9 +46,8 @@ public class SecretTypeValidatorTest {
     }
 
     @Test
-    void testValidateIfOnlyInternalAllowed() {
-        assertFalse(validator(true).isValid("TEST", context));
-        assertEquals("Only internal secret type is allowed!", errorMessageCaptor.getValue());
+    void testValidateIfInternalNotAllowed() {
+        assertFalse(validator(false).isValid("TEST_3", context));
     }
 
     @Test
@@ -56,7 +55,7 @@ public class SecretTypeValidatorTest {
         assertTrue(validator(true).isValid("TEST_3", context));
     }
 
-    private SecretTypeValidator validator(boolean internalOnlyAllowed) {
+    private SecretTypeValidator validator(boolean internalAllowed) {
         SecretTypeValidator validator = new SecretTypeValidator();
         validator.initialize(new ValidSecretType() {
 
@@ -71,8 +70,8 @@ public class SecretTypeValidatorTest {
             }
 
             @Override
-            public boolean internalOnlyAllowed() {
-                return internalOnlyAllowed;
+            public boolean internalAllowed() {
+                return internalAllowed;
             }
 
             @Override

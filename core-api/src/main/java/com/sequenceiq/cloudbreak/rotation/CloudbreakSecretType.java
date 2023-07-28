@@ -13,13 +13,15 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.REDBEA
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.SALTBOOT_CONFIG;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.USER_DATA;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
+import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_UPDATE;
 
 import java.util.List;
+import java.util.Set;
 
 public enum CloudbreakSecretType implements SecretType {
 
-    CLUSTER_CB_CM_ADMIN_PASSWORD(List.of(VAULT, CM_USER, CLUSTER_PROXY)),
-    CLUSTER_MGMT_CM_ADMIN_PASSWORD(List.of(VAULT, CM_USER, CLUSTER_PROXY)),
+    CLUSTER_CB_CM_ADMIN_PASSWORD(List.of(VAULT, CM_USER, CLUSTER_PROXY), Set.of(SKIP_SALT_UPDATE)),
+    CLUSTER_MGMT_CM_ADMIN_PASSWORD(List.of(VAULT, CM_USER, CLUSTER_PROXY), Set.of(SKIP_SALT_UPDATE)),
     DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD(List.of(REDBEAMS_ROTATE_POLLING, SALT_PILLAR)),
     CLUSTER_CM_DB_PASSWORD(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CUSTOM_JOB)),
     USER_KEYPAIR(List.of(SALT_STATE_RUN, CUSTOM_JOB)),
@@ -29,13 +31,26 @@ public enum CloudbreakSecretType implements SecretType {
 
     private final List<SecretRotationStep> steps;
 
+    private final Set<SecretTypeFlag> flags;
+
+    CloudbreakSecretType(List<SecretRotationStep> steps, Set<SecretTypeFlag> flags) {
+        this.steps = steps;
+        this.flags = flags;
+    }
+
     CloudbreakSecretType(List<SecretRotationStep> steps) {
         this.steps = steps;
+        this.flags = Set.of();
     }
 
     @Override
     public List<SecretRotationStep> getSteps() {
         return steps;
+    }
+
+    @Override
+    public Set<SecretTypeFlag> getFlags() {
+        return flags;
     }
 
     @Override

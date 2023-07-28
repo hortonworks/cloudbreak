@@ -13,20 +13,19 @@ public class SecretTypeValidator implements ConstraintValidator<ValidSecretType,
 
     private Class<? extends SecretType>[] allowedTypes;
 
-    private boolean internalOnlyAllowed;
+    private boolean internalAllowed;
 
     @Override
     public void initialize(ValidSecretType constraintAnnotation) {
         allowedTypes = constraintAnnotation.allowedTypes();
-        internalOnlyAllowed = constraintAnnotation.internalOnlyAllowed();
+        internalAllowed = constraintAnnotation.internalAllowed();
     }
 
     @Override
     public boolean isValid(String secret, ConstraintValidatorContext context) {
         try {
             SecretType secretType = SecretTypeConverter.mapSecretType(secret, Sets.newHashSet(allowedTypes));
-            if (internalOnlyAllowed && !secretType.internal()) {
-                ValidatorUtil.addConstraintViolation(context, "Only internal secret type is allowed!");
+            if (!internalAllowed && secretType.internal()) {
                 return false;
             }
         } catch (Exception e) {

@@ -16,15 +16,12 @@ public class SecretTypesValidator implements ConstraintValidator<ValidSecretType
 
     private Class<? extends SecretType>[] allowedTypes;
 
-    private boolean internalOnlyAllowed;
-
-    private boolean multiAllowed;
+    private boolean internalAllowed;
 
     @Override
     public void initialize(ValidSecretTypes constraintAnnotation) {
         allowedTypes = constraintAnnotation.allowedTypes();
-        internalOnlyAllowed = constraintAnnotation.internalOnlyAllowed();
-        multiAllowed = constraintAnnotation.multiAllowed();
+        internalAllowed = constraintAnnotation.internalAllowed();
     }
 
     @Override
@@ -35,12 +32,11 @@ public class SecretTypesValidator implements ConstraintValidator<ValidSecretType
                 return false;
             }
             List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets, Sets.newHashSet(allowedTypes));
-            if (internalOnlyAllowed && !secretTypes.stream().allMatch(SecretType::internal)) {
-                ValidatorUtil.addConstraintViolation(context, "Only internal secret type is allowed!");
+            if (!internalAllowed && secretTypes.stream().anyMatch(SecretType::internal)) {
                 return false;
             }
-            if (!multiAllowed && secretTypes.stream().anyMatch(SecretType::multiSecret)) {
-                ValidatorUtil.addConstraintViolation(context, "Only single secret type is allowed!");
+            if (secretTypes.stream().anyMatch(SecretType::multiSecret)) {
+                ValidatorUtil.addConstraintViolation(context, "Request should contain secret types which affects only one resource!");
                 return false;
             }
         } catch (Exception e) {

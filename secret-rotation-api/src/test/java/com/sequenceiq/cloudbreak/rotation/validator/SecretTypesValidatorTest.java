@@ -42,34 +42,33 @@ public class SecretTypesValidatorTest {
 
     @Test
     void testValidateIfInvalidType() {
-        assertFalse(validator(false, true).isValid(List.of("INVALID"), context));
+        assertFalse(validator(false).isValid(List.of("INVALID"), context));
         assertEquals("Invalid secret type, cannot map secrets [INVALID].", errorMessageCaptor.getValue());
     }
 
     @Test
-    void testValidateIfOnlyInternalAllowed() {
-        assertFalse(validator(true, true).isValid(List.of("TEST"), context));
-        assertEquals("Only internal secret type is allowed!", errorMessageCaptor.getValue());
+    void testValidateIfInternalNotAllowed() {
+        assertFalse(validator(false).isValid(List.of("TEST", "TEST_3"), context));
     }
 
     @Test
-    void testValidateIfMultiNotAllowed() {
-        assertFalse(validator(false, false).isValid(List.of("TEST_2"), context));
-        assertEquals("Only single secret type is allowed!", errorMessageCaptor.getValue());
+    void testValidateIfMultiSecretProvided() {
+        assertFalse(validator(false).isValid(List.of("TEST_2"), context));
+        assertEquals("Request should contain secret types which affects only one resource!", errorMessageCaptor.getValue());
     }
 
     @Test
-    void testValidateIfMDuplicated() {
-        assertFalse(validator(false, true).isValid(List.of("TEST_2", "TEST_2"), context));
+    void testValidateIfDuplicated() {
+        assertFalse(validator(false).isValid(List.of("TEST_2", "TEST_2"), context));
         assertEquals("There is at least one duplication in the request!", errorMessageCaptor.getValue());
     }
 
     @Test
     void testValidate() {
-        assertTrue(validator(false, true).isValid(List.of("TEST_3"), context));
+        assertTrue(validator(true).isValid(List.of("TEST_3"), context));
     }
 
-    private SecretTypesValidator validator(boolean internalOnlyAllowed, boolean multiAllowed) {
+    private SecretTypesValidator validator(boolean internalAllowed) {
         SecretTypesValidator validator = new SecretTypesValidator();
         validator.initialize(new ValidSecretTypes() {
 
@@ -84,13 +83,8 @@ public class SecretTypesValidatorTest {
             }
 
             @Override
-            public boolean internalOnlyAllowed() {
-                return internalOnlyAllowed;
-            }
-
-            @Override
-            public boolean multiAllowed() {
-                return multiAllowed;
+            public boolean internalAllowed() {
+                return internalAllowed;
             }
 
             @Override

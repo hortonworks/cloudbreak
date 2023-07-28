@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
-import com.sequenceiq.cloudbreak.rotation.flow.chain.BeforeRotationFlowEventProvider;
+import com.sequenceiq.cloudbreak.rotation.flow.chain.SaltUpdateFlowEventProvider;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -24,7 +24,7 @@ import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateTriggerEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 
 @Service
-public class FreeIpaSecretRotationService implements BeforeRotationFlowEventProvider {
+public class FreeIpaSecretRotationService implements SaltUpdateFlowEventProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaSecretRotationService.class);
 
@@ -51,7 +51,7 @@ public class FreeIpaSecretRotationService implements BeforeRotationFlowEventProv
     }
 
     @Override
-    public Selectable getTriggerEvent(SecretRotationFlowChainTriggerEvent event) {
+    public Selectable getSaltUpdateTriggerEvent(SecretRotationFlowChainTriggerEvent event) {
         return new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true, false, null);
     }
 }

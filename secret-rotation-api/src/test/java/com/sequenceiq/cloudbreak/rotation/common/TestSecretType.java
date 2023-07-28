@@ -1,17 +1,28 @@
 package com.sequenceiq.cloudbreak.rotation.common;
 
+import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.INTERNAL;
+import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.MULTI_SECRET;
+import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_UPDATE;
 import static com.sequenceiq.cloudbreak.rotation.common.TestSecretRotationStep.STEP;
 
 import java.util.List;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
+import com.sequenceiq.cloudbreak.rotation.SecretTypeFlag;
 
 public enum TestSecretType implements SecretType {
-    TEST,
-    TEST_2,
-    TEST_3,
-    TEST_4;
+    TEST(Set.of(SKIP_SALT_UPDATE)),
+    TEST_2(Set.of(MULTI_SECRET)),
+    TEST_3(Set.of(INTERNAL)),
+    TEST_4(Set.of(MULTI_SECRET));
+
+    private final Set<SecretTypeFlag> flags;
+
+    TestSecretType(Set<SecretTypeFlag> flags) {
+        this.flags = flags;
+    }
 
     @Override
     public List<SecretRotationStep> getSteps() {
@@ -19,13 +30,8 @@ public enum TestSecretType implements SecretType {
     }
 
     @Override
-    public boolean internal() {
-        return value().equals(TEST_3.value());
-    }
-
-    @Override
-    public boolean multiSecret() {
-        return List.of(TEST_2.value(), TEST_4.value()).contains(value());
+    public Set<SecretTypeFlag> getFlags() {
+        return flags;
     }
 
     @Override
