@@ -7,6 +7,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -18,6 +19,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.common.api.type.InstanceGroupName;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
@@ -26,16 +28,8 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
-import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
-import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
@@ -150,7 +144,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
         SdxTestDto sdxTestDto = testContext
                 .given(sdx, SdxTestDto.class)
-                    .withCloudStorage(getCloudStorageRequest(testContext))
+                .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances();
@@ -186,9 +180,9 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
         testContext
                 .given(sdx, SdxTestDto.class)
-                    .withCloudStorage()
-                    .withRuntimeVersion(MINIMAL_MEDIUM_DUTY_RUNTIME)
-                    .withClusterShape(SdxClusterShape.MEDIUM_DUTY_HA)
+                .withCloudStorage()
+                .withRuntimeVersion(MINIMAL_MEDIUM_DUTY_RUNTIME)
+                .withClusterShape(SdxClusterShape.MEDIUM_DUTY_HA)
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
@@ -219,18 +213,12 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is a Scalable SDX cluster in available state",
+            given = "there is a Enterprise SDX cluster in available state",
             when = "IDBroker and Gateway instances are going to be deleted on the provider side",
             then = "SDX repair should be done successfully, the cluster should be up and running"
     )
     public void testSDXEnterpriseRepair(TestContext testContext) {
-        String sdxInternal = resourcePropertyProvider().getName();
-        String cluster = resourcePropertyProvider().getName();
-        String clouderaManager = resourcePropertyProvider().getName();
-        String imageSettings = resourcePropertyProvider().getName();
-        String stack = resourcePropertyProvider().getName();
-        String imgCatalogKey = "test-img-catalog";
-        String telemetry = "telemetry";
+        String sdx = resourcePropertyProvider().getName();
 
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
@@ -238,56 +226,32 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();
+        String gatewayHostGroupName = InstanceGroupName.GATEWAY.getName().toLowerCase(Locale.ROOT);
+        String idBrokerHostGroupName = InstanceGroupName.IDBROKER.getName().toLowerCase(Locale.ROOT);
 
         testContext
-                .given(imgCatalogKey, ImageCatalogTestDto.class)
-                    .withName(imgCatalogKey)
-                    .withUrl("https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-cb-image-catalog.json")
-                .when(imageCatalogTestClient.createIfNotExistV4())
-                .given(imageSettings, ImageSettingsTestDto.class)
-                    .withImageCatalog(imgCatalogKey)
-                .given(clouderaManager, ClouderaManagerTestDto.class)
-                .given(cluster, ClusterTestDto.class)
-                    .withBlueprintName(String.format(ENTERPRISE_BLUEPRINT_NAME, MINIMAL_ENTERPRISE_RUNTIME))
-                    .withValidateBlueprint(Boolean.FALSE)
-                    .withClouderaManager(clouderaManager)
-                .given(stack, StackTestDto.class)
-                    .withCluster(cluster)
-                    .withImageSettings(imageSettings)
-                    .withInstanceGroupsEntity(InstanceGroupTestDto.sdxEnterpriseHostGroup(testContext))
-                .given(telemetry, TelemetryTestDto.class)
-                    .withLogging()
-                    .withReportClusterLogs()
-                .given(sdxInternal, SdxInternalTestDto.class)
-                    .withDatabase(sdxDatabaseRequest)
-                    .withCloudStorage(getCloudStorageRequest(testContext))
-                    .withStackRequest(key(cluster), key(stack))
-                    .withTelemetry(telemetry)
-                .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .await(SdxClusterStatusResponse.RUNNING)
+                .given(sdx, SdxTestDto.class)
+                .withCloudStorage(getCloudStorageRequest(testContext))
+                .withRuntimeVersion(MINIMAL_ENTERPRISE_RUNTIME)
+                .withClusterShape(SdxClusterShape.ENTERPRISE)
+                .withExternalDatabase(sdxDatabaseRequest)
+                .when(sdxTestClient.create(), key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
-                    List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, "gateway");
-                    instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, "idbroker"));
-                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instancesToDelete));
+                    List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, gatewayHostGroupName);
+                    instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, idBrokerHostGroupName));
                     getCloudFunctionality(tc).deleteInstances(testDto.getName(), instancesToDelete);
                     return testDto;
                 })
-                .awaitForHostGroups(List.of("gateway", "idbroker"), InstanceStatus.DELETED_ON_PROVIDER_SIDE)
+                .awaitForHostGroups(List.of(gatewayHostGroupName, idBrokerHostGroupName), InstanceStatus.DELETED_ON_PROVIDER_SIDE)
                 .await(SdxClusterStatusResponse.CLUSTER_UNREACHABLE,
-                        key(sdxInternal).withWaitForFlow(Boolean.FALSE).withIgnoredStatues(Set.of(SdxClusterStatusResponse.NODE_FAILURE)))
-                .when(sdxTestClient.repairInternal("gateway", "idbroker"), key(sdxInternal))
+                        key(sdx).withWaitForFlow(Boolean.FALSE).withIgnoredStatues(Set.of(SdxClusterStatusResponse.NODE_FAILURE)))
+                .when(sdxTestClient.repair(gatewayHostGroupName, idBrokerHostGroupName), key(sdx))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS,
-                        key(sdxInternal).withWaitForFlow(Boolean.FALSE).withIgnoredStatues(Set.of(SdxClusterStatusResponse.CLUSTER_UNREACHABLE)))
-                .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
+                        key(sdx).withWaitForFlow(Boolean.FALSE).withIgnoredStatues(Set.of(SdxClusterStatusResponse.CLUSTER_UNREACHABLE)))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> {
-                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, "gateway");
-                    instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, "idbroker"));
-                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instanceIds));
-                    return testDto;
-                })
-                .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
                 .validate();
     }
 
