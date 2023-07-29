@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.validation.network.azure;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -313,6 +314,19 @@ class AzureEnvironmentNetworkValidatorTest {
     }
 
     @Test
+    void testValidateDuringRequestWhenOnlyOneAvailabilityZoneIsGiven() {
+        AzureParams azureParams = NetworkTestUtils.getAzureParams(true, false, false);
+        azureParams.setAvailabilityZones(Set.of("1"));
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, null, "0.0.0.0/0", null);
+
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateDuringRequest(networkDto, resultBuilder);
+
+        NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of(
+                "There should be more than one Availability Zone configured for environment"));
+    }
+
+    @Test
     void testValidateDuringRequestWhenOneAvailabilityZonesIsInvalid() {
         AzureParams azureParams = NetworkTestUtils.getAzureParams(true, false, false);
         azureParams.setAvailabilityZones(Set.of("1", "Invalid1"));
@@ -336,6 +350,41 @@ class AzureEnvironmentNetworkValidatorTest {
 
         NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of(
                 "Availability zones Invalid1,Invalid2 are not valid. Valid availability zones are 1,2,3."));
+    }
+
+    @Test
+    void testValidateDuringRequestWhenExistingZonesAreEmpty() {
+        AzureParams azureParams = NetworkTestUtils.getAzureParams(true, false, false);
+        azureParams.setAvailabilityZones(Set.of("1", "2", "3"));
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, null, "0.0.0.0/0", null);
+
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateDuringRequest(null, networkDto, resultBuilder);
+
+        assertFalse(resultBuilder.build().hasError());
+
+    }
+
+    @Test
+    void testValidateDuringRequestWhenExistingZonesAreContained() {
+        AzureParams azureParams = NetworkTestUtils.getAzureParams(true, false, false);
+        azureParams.setAvailabilityZones(Set.of("1", "2", "3"));
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, null, "0.0.0.0/0", null);
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateDuringRequest(setUpExistingEnvironment(Set.of("1", "2")), networkDto, resultBuilder);
+        assertFalse(resultBuilder.build().hasError());
+    }
+
+    @Test
+    void testValidateDuringRequestWhenExistingZonesAreNotContained() {
+        AzureParams azureParams = NetworkTestUtils.getAzureParams(true, false, false);
+        azureParams.setAvailabilityZones(Set.of("2", "3"));
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, null, "0.0.0.0/0", null);
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateDuringRequest(setUpExistingEnvironment(Set.of("1", "3")), networkDto, resultBuilder);
+        NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of(
+                "Provided Availability Zones for environment do not contain the existing Availability Zones. " +
+                        "Provided Availability Zones : 2,3. Existing Availability Zones : 1,3"));
     }
 
     private Map<String, CloudSubnet> getCloudSubnets(boolean privateEndpointNetworkPoliciesEnabled) {
@@ -381,5 +430,17 @@ class AzureEnvironmentNetworkValidatorTest {
                 .withRegions(Set.of(usWestRegion))
                 .build();
         return environmentDto;
+    }
+
+    private EnvironmentValidationDto setUpExistingEnvironment(Set<String> availabilityZones) {
+        AzureParams azureParams = mock(AzureParams.class);
+        when(azureParams.getAvailabilityZones()).thenReturn(availabilityZones);
+        NetworkDto networkDto = mock(NetworkDto.class);
+        when(networkDto.getAzure()).thenReturn(azureParams);
+        EnvironmentDto environmentDto = mock(EnvironmentDto.class);
+        when(environmentDto.getNetwork()).thenReturn(networkDto);
+        EnvironmentValidationDto environmentValidationDto = mock(EnvironmentValidationDto.class);
+        when(environmentValidationDto.getEnvironmentDto()).thenReturn(environmentDto);
+        return environmentValidationDto;
     }
 }

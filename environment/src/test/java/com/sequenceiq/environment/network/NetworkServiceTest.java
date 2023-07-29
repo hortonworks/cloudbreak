@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
@@ -41,10 +42,12 @@ import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.validation.validators.NetworkValidator;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
+import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.GcpNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dao.repository.BaseNetworkRepository;
+import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -250,6 +253,28 @@ public class NetworkServiceTest {
                 break;
         }
         Assertions.assertEquals(String.format("%s%s", baseMessage, providerSpecificLink), exception.getMessage());
+    }
+
+    @Test
+    public void testMergeNetworkDtoWithNetworkForAvailabilityZonesInAzure() {
+        BaseNetwork baseNetwork = new AzureNetwork();
+        baseNetwork.setSubnetMetas(Collections.emptyMap());
+        Environment environment = new Environment();
+        environment.setCloudPlatform(CloudPlatform.AZURE.name());
+        environment.setNetwork(baseNetwork);
+        Set<String> availabilityZones = Set.of("1", "2");
+        NetworkDto networkDto = NetworkDto.builder()
+                .withAzure(AzureParams.builder()
+                        .withAvailabilityZones(availabilityZones)
+                        .build())
+                .build();
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder().withNetwork(networkDto).build();
+        when(environmentNetworkConverterMap.get(CloudPlatform.AZURE)).thenReturn(environmentNetworkConverter);
+        when(environmentNetworkConverter.convertToDto(baseNetwork)).thenReturn(networkDto);
+        when(networkCreationValidator.validateNetworkEdit(eq(environment), any(NetworkDto.class)))
+                .thenReturn(new ValidationResult.ValidationResultBuilder());
+        underTest.validate(baseNetwork, environmentEditDto, environment);
+        verify(environmentNetworkConverter, times(1)).updateAvailabilityZones(baseNetwork, availabilityZones);
     }
 
     @Test

@@ -24,11 +24,15 @@ public interface EnvironmentNetworkValidator {
 
     void validateDuringRequest(NetworkDto networkDto, ValidationResultBuilder resultBuilder);
 
+    default void validateDuringRequest(EnvironmentValidationDto environmentValidationDto, NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
+        validateDuringRequest(networkDto, resultBuilder);
+    }
+
     default void validateForNetworkEdit(EnvironmentValidationDto environmentValidationDto, NetworkDto networkDto,
             @NotNull ValidationResultBuilder resultBuilder) {
         NullUtil.throwIfNull(resultBuilder, () -> new IllegalArgumentException("ValidationResultBuilder should not be null"));
         LOGGER.debug("About to validate request time network parameters");
-        validateDuringRequest(networkDto, resultBuilder);
+        validateDuringRequest(environmentValidationDto, networkDto, resultBuilder);
         if (resultBuilder.build().hasError()) {
             LOGGER.info("Network validation has found some issues in request time parameters, hence no further validation will be executed at this point");
             return;

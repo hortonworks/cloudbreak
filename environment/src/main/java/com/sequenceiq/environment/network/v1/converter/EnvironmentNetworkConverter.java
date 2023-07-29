@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.network.v1.converter;
 
 import java.util.Map;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -22,4 +23,8 @@ public interface EnvironmentNetworkConverter {
     NetworkDto convertToDto(BaseNetwork source);
 
     Network convertToNetwork(BaseNetwork baseNetwork);
+
+    default void updateAvailabilityZones(BaseNetwork baseNetwork, Set<String> availabilityZones) {
+
+    }
 }

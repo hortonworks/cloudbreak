@@ -147,7 +147,11 @@ public class EnvironmentApiConverter {
                 .withParentEnvironmentName(request.getParentEnvironmentName())
                 .withProxyConfigName(request.getProxyConfigName());
 
-        NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
+        NullUtil.doIfNotNull(request.getNetwork(), network -> {
+            NetworkDto networkDto = networkRequestToDto(network);
+            networkRequestToDtoConverter.setDefaultAvailabilityZonesIfNeeded(networkDto);
+            builder.withNetwork(networkDto);
+        });
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
 
         // TODO temporary until CCM not really integrated

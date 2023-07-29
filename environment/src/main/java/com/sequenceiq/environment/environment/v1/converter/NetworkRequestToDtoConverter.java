@@ -54,8 +54,7 @@ public class NetworkRequestToDtoConverter {
                     .withDatabasePrivateDnsZoneId(network.getAzure().getDatabasePrivateDnsZoneId())
                     .withAksPrivateDnsZoneId(network.getAzure().getAksPrivateDnsZoneId())
                     .withNoOutboundLoadBalancer(isNoOutboundLoadBalancer(network.getAzure()))
-                    .withAvailabilityZones(!CollectionUtils.isEmpty(network.getAzure().getAvailabilityZones()) ?
-                            network.getAzure().getAvailabilityZones() : azureAvailabilityZones)
+                    .withAvailabilityZones(network.getAzure().getAvailabilityZones())
                     .build();
             builder.withAzure(azureParams);
             builder.withNetworkId(network.getAzure().getNetworkId());
@@ -106,6 +105,12 @@ public class NetworkRequestToDtoConverter {
                 .withPublicEndpointAccessGateway(getUsePublicEndpointAccessGateway(network))
                 .withLoadBalancerCreation(getLoadBalancerCreation(network))
                 .build();
+    }
+
+    public void setDefaultAvailabilityZonesIfNeeded(NetworkDto networkDto) {
+        if (networkDto.getAzure() != null && CollectionUtils.isEmpty(networkDto.getAzure().getAvailabilityZones())) {
+            networkDto.getAzure().setAvailabilityZones(azureAvailabilityZones);
+        }
     }
 
     private Set<String> getNetworkCidrs(EnvironmentNetworkRequest network) {

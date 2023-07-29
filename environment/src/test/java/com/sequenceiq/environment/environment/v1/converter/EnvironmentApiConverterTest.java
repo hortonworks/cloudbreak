@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -174,6 +175,7 @@ public class EnvironmentApiConverterTest {
         verify(telemetryApiConverter).convert(eq(request.getTelemetry()), any(), anyString());
         verify(tunnelConverter).convert(request.getTunnel());
         verify(networkRequestToDtoConverter).convert(request.getNetwork());
+        verify(networkRequestToDtoConverter).setDefaultAvailabilityZonesIfNeeded(actual.getNetwork());
     }
 
     @Test
@@ -205,6 +207,7 @@ public class EnvironmentApiConverterTest {
         verify(accountTelemetryService).getOrDefault(any());
         verify(telemetryApiConverter).convert(eq(request.getTelemetry()), any(), anyString());
         verify(networkRequestToDtoConverter).convert(request.getNetwork());
+        verify(networkRequestToDtoConverter, times(0)).setDefaultAvailabilityZonesIfNeeded(any());
     }
 
     @Test
@@ -228,6 +231,7 @@ public class EnvironmentApiConverterTest {
 
         assertEquals(ResourceGroupUsagePattern.USE_MULTIPLE,
                 actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getResourceGroupUsagePattern());
+        verify(networkRequestToDtoConverter).setDefaultAvailabilityZonesIfNeeded(actual.getNetwork());
     }
 
     @Test
@@ -259,6 +263,7 @@ public class EnvironmentApiConverterTest {
                 actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getResourceGroupUsagePattern());
         assertEquals("myResourceGroup",
                 actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getName());
+        verify(networkRequestToDtoConverter).setDefaultAvailabilityZonesIfNeeded(actual.getNetwork());
     }
 
     @Test
@@ -290,6 +295,7 @@ public class EnvironmentApiConverterTest {
         assertNull(actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getResourceGroupUsagePattern());
         assertEquals("myResourceGroup",
                 actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getName());
+        verify(networkRequestToDtoConverter).setDefaultAvailabilityZonesIfNeeded(actual.getNetwork());
     }
 
     @Test
@@ -326,6 +332,7 @@ public class EnvironmentApiConverterTest {
         EnvironmentCreationDto actual = testInitCreationDto(request);
         assertEquals(ENCRYPTION_KEY_ARN,
                 actual.getParameters().getAwsParametersDto().getAwsDiskEncryptionParametersDto().getEncryptionKeyArn());
+        verify(networkRequestToDtoConverter).setDefaultAvailabilityZonesIfNeeded(actual.getNetwork());
     }
 
     @Test
@@ -359,6 +366,7 @@ public class EnvironmentApiConverterTest {
                 actual.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl());
         assertEquals(KEY_URL_RESOURCE_GROUP,
                 actual.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyResourceGroupName());
+        verify(networkRequestToDtoConverter).setDefaultAvailabilityZonesIfNeeded(actual.getNetwork());
     }
 
     @Test
@@ -389,6 +397,7 @@ public class EnvironmentApiConverterTest {
 
         assertEquals("dummy-encryption-key",
                 actual.getParameters().getGcpParametersDto().getGcpResourceEncryptionParametersDto().getEncryptionKey());
+        verify(networkRequestToDtoConverter).setDefaultAvailabilityZonesIfNeeded(actual.getNetwork());
     }
 
     private EnvironmentCreationDto testInitCreationDto(EnvironmentRequest request) {

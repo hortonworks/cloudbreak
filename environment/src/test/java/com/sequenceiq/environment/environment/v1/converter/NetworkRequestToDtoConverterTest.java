@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.v1.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Set;
@@ -19,6 +20,8 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMoc
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
+import com.sequenceiq.environment.network.dto.AwsParams;
+import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @ExtendWith(SpringExtension.class)
@@ -88,22 +91,34 @@ public class NetworkRequestToDtoConverterTest {
     }
 
     @Test
-    void testConvertAzureWithDefaultAvailabilityZones() {
+    void testSetDefaultAvailabilityZonesIfNeededAzIsNull() {
         ReflectionTestUtils.setField(underTest, "azureAvailabilityZones", Set.of("1", "2", "3"));
-        EnvironmentNetworkRequest network = createNetworkRequest();
-        network.setAzure(createAzureParams());
-        network.getAzure().setAvailabilityZones(null);
+        NetworkDto networkDto = NetworkDto.builder().withAzure(AzureParams.builder().build()).build();
 
-        NetworkDto actual = underTest.convert(network);
+        underTest.setDefaultAvailabilityZonesIfNeeded(networkDto);
 
-        assertEquals(network.getAzure().getNetworkId(), actual.getAzure().getNetworkId());
-        assertEquals(network.getAzure().getResourceGroupName(), actual.getAzure().getResourceGroupName());
-        assertEquals(network.getAzure().getNoPublicIp(), actual.getAzure().isNoPublicIp());
-        assertEquals(network.getAzure().getDatabasePrivateDnsZoneId(), actual.getAzure().getDatabasePrivateDnsZoneId());
-        assertEquals(network.getAzure().getAksPrivateDnsZoneId(), actual.getAzure().getAksPrivateDnsZoneId());
-        assertEquals(network.getAzure().getNoOutboundLoadBalancer(), actual.getAzure().isNoOutboundLoadBalancer());
-        assertEquals(Set.of("1", "2", "3"), actual.getAzure().getAvailabilityZones());
-        assertCommonFields(network, actual);
+        assertEquals(networkDto.getAvailabilityZones(), Set.of("1", "2", "3"));
+    }
+
+    @Test
+    void testSetDefaultAvailabilityZonesIfNeededAzIsNotNull() {
+        ReflectionTestUtils.setField(underTest, "azureAvailabilityZones", Set.of("1", "2", "3"));
+        NetworkDto networkDto = NetworkDto.builder().withAzure(AzureParams.builder()
+                .withAvailabilityZones(Set.of("1", "2"))
+                .build())
+                .build();
+
+        underTest.setDefaultAvailabilityZonesIfNeeded(networkDto);
+
+        assertEquals(networkDto.getAvailabilityZones(), Set.of("1", "2"));
+    }
+
+    @Test
+    void testSetDefaultAvailabilityZonesIfNeededCloudProviderOtherThanAzure() {
+        ReflectionTestUtils.setField(underTest, "azureAvailabilityZones", Set.of("1", "2", "3"));
+        NetworkDto networkDto = NetworkDto.builder().withAws(AwsParams.builder().build()).build();
+        underTest.setDefaultAvailabilityZonesIfNeeded(networkDto);
+        assertNull(networkDto.getAzure());
     }
 
     @Test

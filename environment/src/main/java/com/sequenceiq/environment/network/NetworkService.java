@@ -87,12 +87,14 @@ public class NetworkService {
         NetworkDto originalNetworkDto = environmentNetworkConverter.convertToDto(originalNetwork);
         NetworkDto cloneNetworkDto = NetworkDto.builder(originalNetworkDto)
                 .withSubnetMetas(editDto.getNetworkDto().getSubnetMetas())
+                .withAvailabilityZones(editDto.getNetworkDto().getAvailabilityZones())
                 .build();
         ValidationResultBuilder validationResultBuilder = networkValidator.validateNetworkEdit(environment, cloneNetworkDto);
         ValidationResult validationResult = validationResultBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
+        environmentNetworkConverter.updateAvailabilityZones(originalNetwork, editDto.getNetworkDto().getAvailabilityZones());
         return originalNetwork;
     }
 

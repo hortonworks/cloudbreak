@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -250,6 +252,23 @@ class AzureEnvironmentNetworkConverterTest {
 
         assertEquals(RESOURCE_GROUP_NAME, network.getStringParameter(RESOURCE_GROUP_NAME_KEY));
         assertEquals(NETWORK_ID, network.getStringParameter(NETWORK_ID_KEY));
+    }
+
+    @Test
+    void testUpdateAvailabilityZonesWithEmptyZones() {
+        AzureNetwork azureNetwork = new AzureNetwork();
+        underTest.updateAvailabilityZones(azureNetwork, null);
+        verify(availabilityZoneConverter, times(0)).getJsonAttributesWithAvailabilityZones(any(), any());
+    }
+
+    @Test
+    void testUpdateAvailabilityZonesWithNonEmptyZones() {
+        AzureNetwork azureNetwork = new AzureNetwork();
+        Set<String> availabilityZones = Set.of("1", "2", "3");
+        Json expectedAttributes = new Json(Map.of(NetworkConstants.AVAILABILITY_ZONES, availabilityZones));
+        when(availabilityZoneConverter.getJsonAttributesWithAvailabilityZones(availabilityZones, null)).thenReturn(expectedAttributes);
+        underTest.updateAvailabilityZones(azureNetwork, availabilityZones);
+        assertEquals(azureNetwork.getZoneMetas().getMap(), expectedAttributes.getMap());
     }
 
     private Set<CreatedSubnet> createCreatedSubnets() {

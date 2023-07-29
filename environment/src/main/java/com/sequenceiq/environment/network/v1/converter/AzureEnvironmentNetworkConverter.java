@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -146,5 +147,13 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
         param.put(AKS_PRIVATE_DNS_ZONE_ID, azureNetwork.getAksPrivateDnsZoneId());
         param.put(NO_OUTBOUND_LOAD_BALANCER, azureNetwork.isNoOutboundLoadBalancer());
         return new Network(null, param);
+    }
+
+    @Override
+    public void updateAvailabilityZones(BaseNetwork baseNetwork, Set<String> availabilityZones) {
+        if (CollectionUtils.isNotEmpty(availabilityZones)) {
+            AzureNetwork azureNetwork = (AzureNetwork) baseNetwork;
+            azureNetwork.setZoneMetas(availabilityZoneConverter.getJsonAttributesWithAvailabilityZones(availabilityZones, azureNetwork.getZoneMetas()));
+        }
     }
 }

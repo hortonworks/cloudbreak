@@ -2,11 +2,13 @@ package com.sequenceiq.environment.network.dto;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -245,6 +247,10 @@ public class NetworkDto {
         return loadBalancerCreation;
     }
 
+    public Set<String> getAvailabilityZones() {
+        return azure != null && CollectionUtils.isNotEmpty(azure.getAvailabilityZones()) ? azure.getAvailabilityZones() : Collections.emptySet();
+    }
+
     @Override
     public String toString() {
         return "NetworkDto{" +
@@ -478,6 +484,13 @@ public class NetworkDto {
 
         public Builder withLoadBalancerCreation(LoadBalancerCreation loadBalancerCreation) {
             this.loadBalancerCreation = loadBalancerCreation;
+            return this;
+        }
+
+        public Builder withAvailabilityZones(Set<String> availabilityZones) {
+            if (azure != null) {
+                azure.setAvailabilityZones(availabilityZones);
+            }
             return this;
         }
 

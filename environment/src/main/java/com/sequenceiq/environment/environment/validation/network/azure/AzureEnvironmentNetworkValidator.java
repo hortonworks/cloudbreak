@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.validation.network.azure;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.environment.environment.validation.ValidationType.ENVIRONMENT_CREATION;
 
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +21,6 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
-import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.dto.AzureParams;
@@ -57,7 +57,7 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
                 .stream().findFirst()
                 .orElseThrow();
         checkSubnetsProvidedWhenExistingNetwork(resultBuilder, networkDto, networkDto.getAzure(), cloudNetworks, region);
-        if (environmentValidationDto.getValidationType() == ValidationType.ENVIRONMENT_CREATION) {
+        if (environmentValidationDto.getValidationType() == ENVIRONMENT_CREATION) {
             azurePrivateEndpointValidator.checkNetworkPoliciesWhenExistingNetwork(networkDto, cloudNetworks, resultBuilder);
             azurePrivateEndpointValidator.checkMultipleResourceGroup(resultBuilder, environmentDto, networkDto);
             azurePrivateEndpointValidator.checkExistingManagedPrivateDnsZone(resultBuilder, environmentDto, networkDto);
@@ -69,13 +69,11 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
     }
 
     @Override
-    public void validateDuringRequest(NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
+    public void validateDuringRequest(EnvironmentValidationDto environmentValidationDto, NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
         if (networkDto == null) {
             return;
         }
-
         checkEitherNetworkCidrOrNetworkIdIsPresent(networkDto, resultBuilder);
-
         AzureParams azureParams = networkDto.getAzure();
         if (azureParams != null) {
             checkSubnetsProvidedWhenExistingNetwork(resultBuilder, azureParams, networkDto.getSubnetMetas());
@@ -83,10 +81,15 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
             checkResourceGroupNameWhenExistingNetwork(resultBuilder, azureParams);
             checkNetworkIdWhenExistingNetwork(resultBuilder, azureParams);
             checkNetworkIdIsSpecifiedWhenSubnetIdsArePresent(resultBuilder, azureParams, networkDto);
-            validateAvailabilityZones(resultBuilder, azureParams);
+            validateAvailabilityZones(environmentValidationDto, resultBuilder, azureParams);
         } else if (StringUtils.isEmpty(networkDto.getNetworkCidr())) {
             resultBuilder.error(missingParamsErrorMsg(AZURE));
         }
+    }
+
+    @Override
+    public void validateDuringRequest(NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
+        validateDuringRequest(null, networkDto, resultBuilder);
     }
 
     private void checkEitherNetworkCidrOrNetworkIdIsPresent(NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
@@ -157,17 +160,54 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         }
     }
 
-    private void validateAvailabilityZones(ValidationResultBuilder resultBuilder, AzureParams azureParams) {
+    private void validateAvailabilityZones(EnvironmentValidationDto environmentValidationDto, ValidationResultBuilder resultBuilder, AzureParams azureParams) {
         if (CollectionUtils.isNotEmpty(azureParams.getAvailabilityZones())) {
-            Set<String> invalidAvailabilityZones = azureParams.getAvailabilityZones().stream().filter(az -> !azureAvailabilityZones.contains(az))
-                    .collect(Collectors.toSet());
-            if (CollectionUtils.isNotEmpty(invalidAvailabilityZones)) {
-                String message = String.format("Availability zones %s are not valid. Valid availability zones are %s.",
-                        invalidAvailabilityZones.stream().sorted().collect(Collectors.joining(",")),
-                        azureAvailabilityZones.stream().sorted().collect(Collectors.joining(",")));
-                LOGGER.error(message);
+            LOGGER.debug("Availability zones are {}", azureParams.getAvailabilityZones());
+            if (azureParams.getAvailabilityZones().size() == 1) {
+                String message = "There should be more than one Availability Zone configured for environment";
+                LOGGER.info(message);
                 resultBuilder.error(message);
+            } else {
+                boolean allZonesValid = checkInvalidAvailabilityZones(azureParams, resultBuilder);
+                if (allZonesValid) {
+                    Set<String> existingAvailabilityZones = getAvailabilityZones(environmentValidationDto);
+                    if (CollectionUtils.isNotEmpty(existingAvailabilityZones)) {
+                        if (!CollectionUtils.containsAll(azureParams.getAvailabilityZones(), existingAvailabilityZones)) {
+                            String message = String.format("Provided Availability Zones for environment do not contain the existing Availability Zones. " +
+                                            "Provided Availability Zones : %s. Existing Availability Zones : %s", azureParams.getAvailabilityZones()
+                                            .stream().sorted().collect(Collectors.joining(",")),
+                                    existingAvailabilityZones.stream().sorted().collect(Collectors.joining(",")));
+                            LOGGER.info(message);
+                            resultBuilder.error(message);
+                        }
+                    }
+                }
             }
+        }
+    }
+
+    private Set<String> getAvailabilityZones(EnvironmentValidationDto environmentValidationDto) {
+        Set<String> availabilityZones = null;
+        if (environmentValidationDto != null && environmentValidationDto.getEnvironmentDto() != null
+                && environmentValidationDto.getEnvironmentDto().getNetwork() != null
+                && environmentValidationDto.getEnvironmentDto().getNetwork().getAzure() != null) {
+            availabilityZones = environmentValidationDto.getEnvironmentDto().getNetwork().getAzure().getAvailabilityZones();
+        }
+        return  availabilityZones;
+    }
+
+    private boolean checkInvalidAvailabilityZones(AzureParams azureParams, ValidationResultBuilder resultBuilder) {
+        Set<String> invalidAvailabilityZones = azureParams.getAvailabilityZones().stream().filter(az -> !azureAvailabilityZones.contains(az))
+                .collect(Collectors.toSet());
+        if (CollectionUtils.isNotEmpty(invalidAvailabilityZones)) {
+            String message = String.format("Availability zones %s are not valid. Valid availability zones are %s.",
+                    invalidAvailabilityZones.stream().sorted().collect(Collectors.joining(",")),
+                    azureAvailabilityZones.stream().sorted().collect(Collectors.joining(",")));
+            LOGGER.info(message);
+            resultBuilder.error(message);
+            return false;
+        } else {
+            return true;
         }
     }
 
