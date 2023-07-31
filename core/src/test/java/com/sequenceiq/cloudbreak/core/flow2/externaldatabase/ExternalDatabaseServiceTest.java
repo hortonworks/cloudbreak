@@ -159,7 +159,7 @@ class ExternalDatabaseServiceTest {
     @Test
     void provisionDatabaseBadRequest() {
         Stack stack = new Stack();
-        stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.HA);
+        stack.setDatabase(createDatabase(DatabaseAvailabilityType.HA));
         stack.setCluster(new Cluster());
         when(redbeamsClient.create(any())).thenThrow(BadRequestException.class);
 
@@ -177,7 +177,7 @@ class ExternalDatabaseServiceTest {
         Cluster cluster = spy(new Cluster());
         Stack stack = new Stack();
         stack.setResourceCrn(CLUSTER_CRN);
-        stack.setExternalDatabaseCreationType(availability);
+        stack.setDatabase(createDatabase(availability));
         stack.setCluster(cluster);
         when(redbeamsClient.getByClusterCrn(nullable(String.class), nullable(String.class))).thenReturn(null);
         when(redbeamsClient.create(any())).thenReturn(createResponse);
@@ -249,7 +249,7 @@ class ExternalDatabaseServiceTest {
         Stack stack = new Stack();
         stack.setResourceCrn(CLUSTER_CRN);
         stack.setCluster(cluster);
-        stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.NON_HA);
+        stack.setDatabase(createDatabase(DatabaseAvailabilityType.NON_HA));
         DatabaseServerV4Response dbServerResponse = new DatabaseServerV4Response();
         dbServerResponse.setCrn(RDBMS_CRN);
         when(redbeamsClient.getByClusterCrn(nullable(String.class), nullable(String.class))).thenReturn(dbServerResponse);
@@ -282,7 +282,7 @@ class ExternalDatabaseServiceTest {
         Cluster cluster = new Cluster();
         Stack stack = new Stack();
         stack.setResourceCrn(CLUSTER_CRN);
-        stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.HA);
+        stack.setDatabase(createDatabase(DatabaseAvailabilityType.HA));
         Map<String, String> userDefinedTags = Map.ofEntries(entry("key1", "value1"), entry("key2", "value2"));
         StackTags stackTags = new StackTags(userDefinedTags, Map.of(), Map.of());
         stack.setTags(new Json(stackTags));
@@ -657,5 +657,11 @@ class ExternalDatabaseServiceTest {
         underTest.upgradeDatabase(cluster, targetMajorVersion);
 
         verify(redbeamsClient, never()).upgradeByCrn(anyString(), any());
+    }
+
+    private Database createDatabase(DatabaseAvailabilityType databaseAvailabilityType) {
+        Database database = new Database();
+        database.setExternalDatabaseAvailabilityType(databaseAvailabilityType);
+        return database;
     }
 }

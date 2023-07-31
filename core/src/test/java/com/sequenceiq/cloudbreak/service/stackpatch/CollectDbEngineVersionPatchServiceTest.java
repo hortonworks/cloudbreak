@@ -25,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -75,8 +76,10 @@ class CollectDbEngineVersionPatchServiceTest {
     @Test
     public void testAffected() {
         Stack stack = new Stack();
+        Database database = new Database();
+        stack.setDatabase(database);
         assertTrue(underTest.isAffected(stack));
-        stack.setExternalDatabaseEngineVersion("asdf");
+        database.setExternalDatabaseEngineVersion("asdf");
         assertFalse(underTest.isAffected(stack));
     }
 

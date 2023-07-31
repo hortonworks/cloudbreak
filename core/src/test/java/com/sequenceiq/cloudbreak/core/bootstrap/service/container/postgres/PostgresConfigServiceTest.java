@@ -219,7 +219,6 @@ class PostgresConfigServiceTest {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
 
         Stack stackView = new Stack();
-        stackView.setExternalDatabaseEngineVersion(DBVERSION);
         Cluster cluster = new Cluster();
         cluster.setDbSslEnabled(sslEnabledForStack);
         cluster.setDbSslRootCertBundle("cert1");
@@ -327,7 +326,6 @@ class PostgresConfigServiceTest {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
 
         Stack stackView = new Stack();
-        stackView.setExternalDatabaseEngineVersion(DBVERSION);
         Cluster cluster = new Cluster();
         cluster.setDbSslEnabled(true);
         cluster.setDbSslRootCertBundle("cert1");

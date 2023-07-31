@@ -640,11 +640,14 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         }
         String dbEngineVersion = databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(
                 stackVersion, os, stack.getExternalDatabaseEngineVersion());
-        stack.setExternalDatabaseEngineVersion(dbEngineVersion);
         if (stack.getDatabase() != null) {
             stack.getDatabase().setExternalDatabaseEngineVersion(dbEngineVersion);
         }
         stackRepository.save(stack);
+    }
+
+    public StackViewService getStackViewService() {
+        return stackViewService;
     }
 
     private void setDefaultTags(Stack stack) {
@@ -1050,15 +1053,12 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     public void updateExternalDatabaseEngineVersion(Long stackId, String databaseVersion) {
         LOGGER.info("Updating DB engine version for [{}] to [{}]", stackId, databaseVersion);
-        int updatedCount = stackRepository.updateExternalDatabaseEngineVersion(stackId, databaseVersion);
-        if (updatedCount < 1) {
+        Optional<Long> databaseId = stackRepository.findDatabaseIdByStackId(stackId);
+        databaseId.ifPresentOrElse(id -> databaseService.updateExternalDatabaseEngineVersion(id, databaseVersion), () -> {
             LOGGER.warn("Stack with id [{}] is not found, update database engine version to [{}] is not possible", stackId, databaseVersion);
             throw notFoundException("Stack with", stackId + " id");
-        } else {
-            Optional<Long> databaseId = stackRepository.findDatabaseIdByStackId(stackId);
-            databaseId.ifPresent(id -> databaseService.updateExternalDatabaseEngineVersion(id, databaseVersion));
-            LOGGER.info("Updated database engine version for [{}] with [{}]", stackId, databaseVersion);
-        }
+        });
+        LOGGER.info("Updated database engine version for [{}] with [{}]", stackId, databaseVersion);
     }
 
     public void updateDomainDnsResolverByStackId(Long stackId, DnsResolverType actualDnsResolverType) {

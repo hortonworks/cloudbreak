@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.projection.StackImageView;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -117,6 +118,7 @@ class StackRepositoryTest {
 
     private Stack createStack(String imageId) {
         final Stack stack = new Stack();
+        stack.setDatabase(new Database());
         if (imageId != null) {
             final InstanceGroup ig1 = new InstanceGroup();
             ig1.setStack(stack);

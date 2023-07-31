@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.Databas
 import com.sequenceiq.cloudbreak.conf.ExternalDatabaseConfig;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseService;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -225,9 +226,11 @@ class StopExternalDatabaseHandlerTest {
         stack.setStackStatus(status);
         stack.setId(STACK_ID);
         stack.setName(STACK_NAME);
-        stack.setExternalDatabaseCreationType(databaseAvailabilityType);
         stack.setEnvironmentCrn("envCrn");
         stack.setCluster(cluster);
+        Database database = new Database();
+        database.setExternalDatabaseAvailabilityType(databaseAvailabilityType);
+        stack.setDatabase(database);
         return stack;
     }
 

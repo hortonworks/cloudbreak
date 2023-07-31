@@ -46,8 +46,6 @@ public interface StackDtoRepository extends Repository<Stack, Long> {
             + "s.clusterNameAsSubdomain as clusterNameAsSubdomain, "
             + "s.displayName as displayName, "
             + "s.description as description, "
-            + "s.externalDatabaseCreationType as externalDatabaseCreationType, "
-            + "s.externalDatabaseEngineVersion as externalDatabaseEngineVersion, "
             + "s.uuid as uuid, "
             + "s.availabilityZone as availabilityZone, "
             + "s.inputs as inputs, "

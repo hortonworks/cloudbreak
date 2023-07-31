@@ -68,6 +68,7 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
@@ -284,9 +285,11 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         stack.setResources(Collections.singleton(s3ArnResource));
         stack.setEnvironmentCrn("");
         stack.setTerminated(100L);
-        stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.HA);
         stack.setDatalakeCrn("");
         stack.setJavaVersion(11);
+        Database database = new Database();
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.HA);
+        stack.setDatabase(database);
         return stack;
     }
 }

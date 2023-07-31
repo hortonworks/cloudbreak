@@ -313,9 +313,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "u.userId as userId, "
             + "u.userName as username, "
             + "u.userCrn as usercrn, "
-            + "c.certExpirationState as certExpirationState, "
-            + "s.externalDatabaseCreationType as externalDatabaseCreationType, "
-            + "s.externalDatabaseEngineVersion as externalDatabaseEngineVersion "
+            + "c.certExpirationState as certExpirationState "
             + "FROM Stack s "
             + "LEFT JOIN s.cluster c "
             + "LEFT JOIN c.blueprint b "
@@ -356,9 +354,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "u.userId as userId, "
             + "u.userName as username, "
             + "u.userCrn as usercrn, "
-            + "c.certExpirationState as certExpirationState, "
-            + "s.externalDatabaseCreationType as externalDatabaseCreationType, "
-            + "s.externalDatabaseEngineVersion as externalDatabaseEngineVersion "
+            + "c.certExpirationState as certExpirationState "
             + "FROM Stack s "
             + "LEFT JOIN s.cluster c "
             + "LEFT JOIN c.blueprint b "
@@ -480,10 +476,6 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Modifying
     @Query("UPDATE Stack s SET s.customDomain = :customDomain WHERE s.id = :stackId")
     void updateCustomDomainByStackId(@Param("stackId") Long stackId, @Param("customDomain") String customDomain);
-
-    @Modifying
-    @Query("UPDATE Stack s SET s.externalDatabaseEngineVersion = :externalDatabaseEngineVersion WHERE s.id = :stackId")
-    int updateExternalDatabaseEngineVersion(@Param("stackId") Long stackId, @Param("externalDatabaseEngineVersion") String externalDatabaseEngineVersion);
 
     @Modifying
     @Query("UPDATE Stack s SET s.stackVersion = :stackVersion WHERE s.id = :stackId")

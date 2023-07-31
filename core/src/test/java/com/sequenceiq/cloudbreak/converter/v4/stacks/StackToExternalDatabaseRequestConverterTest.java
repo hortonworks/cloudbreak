@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 class StackToExternalDatabaseRequestConverterTest {
@@ -30,8 +31,7 @@ class StackToExternalDatabaseRequestConverterTest {
 
     @Test
     void testWhenOnlyEngineVersionFilledThenOnlyThatFieldShouldBeFilledInTheResult() {
-        Stack stack = new Stack();
-        stack.setExternalDatabaseEngineVersion(TEST_DB_ENGINE_VERSION);
+        Stack stack = getStack(TEST_DB_ENGINE_VERSION, null);
 
         DatabaseRequest result = underTest.convert(stack);
 
@@ -41,8 +41,7 @@ class StackToExternalDatabaseRequestConverterTest {
 
     @Test
     void testWhenOnlyCreationTypeFilledThenOnlyAvailabilityTypeFieldShouldBeFilledInTheResult() {
-        Stack stack = new Stack();
-        stack.setExternalDatabaseCreationType(TEST_EXTERNAL_DB_CREATION_TYPE);
+        Stack stack = getStack(null, TEST_EXTERNAL_DB_CREATION_TYPE);
 
         DatabaseRequest result = underTest.convert(stack);
 
@@ -52,9 +51,7 @@ class StackToExternalDatabaseRequestConverterTest {
 
     @Test
     void testWhenBothFieldsAreFilledThenBothFieldsShouldBeFilledInTheResult() {
-        Stack stack = new Stack();
-        stack.setExternalDatabaseCreationType(TEST_EXTERNAL_DB_CREATION_TYPE);
-        stack.setExternalDatabaseEngineVersion(TEST_DB_ENGINE_VERSION);
+        Stack stack = getStack(TEST_DB_ENGINE_VERSION, TEST_EXTERNAL_DB_CREATION_TYPE);
 
         DatabaseRequest result = underTest.convert(stack);
 
@@ -62,4 +59,12 @@ class StackToExternalDatabaseRequestConverterTest {
         assertEquals(TEST_DB_ENGINE_VERSION, result.getDatabaseEngineVersion());
     }
 
+    private Stack getStack(String dbEngineVersion, DatabaseAvailabilityType dbAvailabilityType) {
+        Stack stack = new Stack();
+        Database database = new Database();
+        database.setExternalDatabaseEngineVersion(dbEngineVersion);
+        database.setExternalDatabaseAvailabilityType(dbAvailabilityType);
+        stack.setDatabase(database);
+        return stack;
+    }
 }

@@ -49,6 +49,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -75,7 +76,6 @@ import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
-import com.sequenceiq.cloudbreak.domain.converter.DatabaseAvailabilityTypeConverter;
 import com.sequenceiq.cloudbreak.domain.converter.DnsResolverTypeConverter;
 import com.sequenceiq.cloudbreak.domain.converter.StackTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -86,7 +86,6 @@ import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
-import com.sequenceiq.cloudbreak.util.DatabaseParameterFallbackUtil;
 import com.sequenceiq.cloudbreak.view.GatewayView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -232,13 +231,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
 
     private String ccmV2AgentCrn;
 
-    @Convert(converter = DatabaseAvailabilityTypeConverter.class)
-    private DatabaseAvailabilityType externalDatabaseCreationType;
-
     @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<LoadBalancer> loadBalancers = new HashSet<>();
-
-    private String externalDatabaseEngineVersion;
 
     @Convert(converter = DnsResolverTypeConverter.class)
     private DnsResolverType domainDnsResolver;
@@ -252,6 +246,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
      */
     private String originalName;
 
+    @NotNull
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "database_id")
     private Database database;
@@ -990,11 +985,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     }
 
     public DatabaseAvailabilityType getExternalDatabaseCreationType() {
-        return DatabaseParameterFallbackUtil.getExternalDatabaseCreationType(database, externalDatabaseCreationType);
-    }
-
-    public void setExternalDatabaseCreationType(DatabaseAvailabilityType externalDatabaseCreationType) {
-        this.externalDatabaseCreationType = externalDatabaseCreationType;
+        return database.getExternalDatabaseAvailabilityType();
     }
 
     public Set<LoadBalancer> getLoadBalancers() {
@@ -1027,12 +1018,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.stackVersion = stackVersion;
     }
 
-    public void setExternalDatabaseEngineVersion(String externalDatabaseEngineVersion) {
-        this.externalDatabaseEngineVersion = externalDatabaseEngineVersion;
-    }
-
     public String getExternalDatabaseEngineVersion() {
-        return DatabaseParameterFallbackUtil.getExternalDatabaseEngineVersion(database, externalDatabaseEngineVersion);
+        return database.getExternalDatabaseEngineVersion();
     }
 
     @Override
@@ -1151,8 +1138,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 ", clusterProxyRegistered=" + clusterProxyRegistered +
                 ", minaSshdServiceId='" + minaSshdServiceId + '\'' +
                 ", ccmV2AgentCrn='" + ccmV2AgentCrn + '\'' +
-                ", externalDatabaseCreationType=" + externalDatabaseCreationType +
-                ", externalDatabaseEngineVersion=" + externalDatabaseEngineVersion +
                 ", originalName=" + originalName +
                 ", javaVersion=" + javaVersion +
                 ", database=" + database +

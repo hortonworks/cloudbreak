@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Component
@@ -15,7 +16,8 @@ public class StackToExternalDatabaseRequestConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackToExternalDatabaseRequestConverter.class);
 
     public DatabaseRequest convert(Stack source) {
-        if (allNull(source.getExternalDatabaseCreationType(), source.getExternalDatabaseEngineVersion())) {
+        Database database = source.getDatabase();
+        if (database == null || allNull(database.getExternalDatabaseAvailabilityType(), database.getExternalDatabaseEngineVersion())) {
             return null;
         }
         DatabaseRequest databaseRequest = new DatabaseRequest();
