@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -43,7 +44,7 @@ public class FreeIpaImageFilter {
         } else {
             LOGGER.warn("Could not find any FreeIPA image matching {} in {}", imageFilterSettings, candidateImages);
             throw new ImageNotFoundException(String.format("Could not find any FreeIPA image on platform '%s' in region '%s' with os '%s' in catalog '%s'",
-                    imageFilterSettings.platform(), imageFilterSettings.region(), imageFilterSettings.os(), imageFilterSettings.catalog()));
+                    imageFilterSettings.platform(), imageFilterSettings.region(), imageFilterSettings.targetOs(), imageFilterSettings.catalog()));
         }
     }
 
@@ -54,11 +55,11 @@ public class FreeIpaImageFilter {
     }
 
     private boolean filterOs(FreeIpaImageFilterSettings imageFilterSettings, Image image) {
-        String targetOs = image.getOs();
-        return supportedOsService.isSupported(targetOs) &&
-                (imageFilterSettings.os() == null
-                        || majorOsUpgradeAllowed(imageFilterSettings, targetOs)
-                        || targetOs.equalsIgnoreCase(imageFilterSettings.os()));
+        String candidateImageOs = image.getOs();
+        return supportedOsService.isSupported(candidateImageOs) &&
+                (StringUtils.isBlank(imageFilterSettings.targetOs()) || imageFilterSettings.targetOs().equalsIgnoreCase(candidateImageOs))
+                && (majorOsUpgradeAllowed(imageFilterSettings, candidateImageOs)
+                    || (candidateImageOs.equalsIgnoreCase(imageFilterSettings.currentOs()) || StringUtils.isBlank(imageFilterSettings.currentOs())));
     }
 
     private boolean majorOsUpgradeAllowed(FreeIpaImageFilterSettings imageFilterSettings, String targetOs) {

@@ -77,7 +77,7 @@ public class FreeIpaImageProvider implements ImageProvider {
     private FreeIpaImageFilterSettings populateImageFilterSettings(FreeIpaImageFilterSettings imageFilterSettings) {
         return new FreeIpaImageFilterSettings(imageFilterSettings.currentImageId(),
                 StringUtils.isNotBlank(imageFilterSettings.catalog()) ? imageFilterSettings.catalog() : defaultCatalogUrl,
-                imageFilterSettings.os(),
+                imageFilterSettings.currentOs(), imageFilterSettings.targetOs(),
                 imageFilterSettings.region(), imageFilterSettings.platform(), imageFilterSettings.allowMajorOsUpgrade());
     }
 
@@ -85,7 +85,7 @@ public class FreeIpaImageProvider implements ImageProvider {
         List<FreeIpaVersions> versions = filterFreeIpaVersionsByAppVersion(catalog.getVersions().getFreeIpaVersions());
         List<Image> compatibleImages = findImages(catalog.getImages().getFreeipaImages(), freeIpaImageFilterSettings);
         LOGGER.debug("[{}] compatible images found, by the following parameters: imageId: {}, imageOs: {}, region: {}, platform: {}",
-                compatibleImages.size(), freeIpaImageFilterSettings.currentImageId(), freeIpaImageFilterSettings.os(), freeIpaImageFilterSettings.region(),
+                compatibleImages.size(), freeIpaImageFilterSettings.currentImageId(), freeIpaImageFilterSettings.targetOs(), freeIpaImageFilterSettings.region(),
                 freeIpaImageFilterSettings.region());
 
         return findImageInDefaults(versions, compatibleImages)
@@ -119,7 +119,7 @@ public class FreeIpaImageProvider implements ImageProvider {
 
     private Optional<Image> retryAfterEvictingCache(FreeIpaImageFilterSettings imageFilterSettings) {
         LOGGER.debug("Image not found with the parameters: imageId: {}, imageOs: {}, region: {}, platform: {}", imageFilterSettings.currentImageId(),
-                imageFilterSettings.os(), imageFilterSettings.region(), imageFilterSettings.platform());
+                imageFilterSettings.targetOs(), imageFilterSettings.region(), imageFilterSettings.platform());
         LOGGER.debug("Evicting image catalog cache to retry.");
         imageCatalogProvider.evictImageCatalogCache(imageFilterSettings.catalog());
         ImageCatalog renewedImageCatalog = imageCatalogProvider.getImageCatalog(imageFilterSettings.catalog());

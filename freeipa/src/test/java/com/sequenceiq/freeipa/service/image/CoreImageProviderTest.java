@@ -145,7 +145,7 @@ public class CoreImageProviderTest {
     }
 
     private FreeIpaImageFilterSettings createImageFilterSettings() {
-        return new FreeIpaImageFilterSettings(IMAGE_ID, CATALOG_NAME, null, REGION, PLATFORM, false);
+        return new FreeIpaImageFilterSettings(IMAGE_ID, CATALOG_NAME, null, null, REGION, PLATFORM, false);
     }
 
     private ImageV4Response anImageResponse() {

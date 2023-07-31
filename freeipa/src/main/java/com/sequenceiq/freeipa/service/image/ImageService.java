@@ -104,15 +104,15 @@ public class ImageService {
     public List<Pair<ImageWrapper, String>> fetchImagesWrapperAndName(Stack stack, String catalog, String currentImageOs, Boolean allowMajorOsUpgrade) {
         String region = stack.getRegion();
         String platformString = platformStringTransformer.getPlatformString(stack);
-        List<ImageWrapper> imageWrappers = getImages(new FreeIpaImageFilterSettings(null, catalog, currentImageOs, stack.getRegion(), platformString,
+        List<ImageWrapper> imageWrappers = getImages(new FreeIpaImageFilterSettings(null, catalog, currentImageOs, null, stack.getRegion(), platformString,
                 Boolean.TRUE.equals(allowMajorOsUpgrade)));
         LOGGER.debug("Images found: {}", imageWrappers);
         return imageWrappers.stream().map(imgw -> Pair.of(imgw, determineImageName(platformString, region, imgw.getImage()))).collect(Collectors.toList());
     }
 
     private Pair<ImageWrapper, String> fetchImageWrapperAndName(Stack stack, ImageSettingsRequest imageRequest) {
-        FreeIpaImageFilterSettings imageFilterSettings = new FreeIpaImageFilterSettings(imageRequest.getId(), imageRequest.getCatalog(), imageRequest.getOs(),
-                stack.getRegion(), platformStringTransformer.getPlatformString(stack), false);
+        FreeIpaImageFilterSettings imageFilterSettings = new FreeIpaImageFilterSettings(imageRequest.getId(), imageRequest.getCatalog(), null,
+                imageRequest.getOs(), stack.getRegion(), platformStringTransformer.getPlatformString(stack), false);
         return fetchImageWrapperAndName(imageFilterSettings);
     }
 
@@ -127,6 +127,8 @@ public class ImageService {
         imageEntity.setDate(image.getDate());
         imageEntity.setLdapAgentVersion(imageConverter.extractLdapAgentVersion(image));
         imageEntity.setSourceImage(imageConverter.extractSourceImage(image));
+        imageEntity.setOs(imageWrapper.getImage().getOs());
+        imageEntity.setOsType(imageWrapper.getImage().getOsType());
         return imageEntity;
     }
 
@@ -159,7 +161,7 @@ public class ImageService {
         return imageProviderFactory.getImageProvider(imageFilterParams.catalog())
                 .getImage(imageFilterParams)
                 .orElseThrow(() -> throwImageNotFoundException(imageFilterParams.region(), imageFilterParams.currentImageId(),
-                        Optional.ofNullable(imageFilterParams.os()).orElse(defaultOs)));
+                        Optional.ofNullable(imageFilterParams.targetOs()).orElse(defaultOs)));
 
     }
 
@@ -265,8 +267,8 @@ public class ImageService {
     private FreeIpaImageFilterSettings createImageFilterSettingsFromImageEntity(Stack stack) {
         ImageEntity imageEntity = getByStack(stack);
         return new FreeIpaImageFilterSettings(imageEntity.getImageId(),
-                Objects.requireNonNullElse(imageEntity.getImageCatalogName(), imageEntity.getImageCatalogUrl()), imageEntity.getOs(), stack.getRegion(),
-                platformStringTransformer.getPlatformString(stack), false);
+                Objects.requireNonNullElse(imageEntity.getImageCatalogName(), imageEntity.getImageCatalogUrl()), imageEntity.getOs(), imageEntity.getOs(),
+                stack.getRegion(), platformStringTransformer.getPlatformString(stack), false);
     }
 
     private Image copyImageWithAdvertisedFlag(Image source) {
