@@ -91,8 +91,8 @@ public class ImageFallbackHandler extends ExceptionCatcherEventHandler<ImageFall
     }
 
     private FreeIpaImageFilterSettings createFreeIpaImageFilterSettings(Stack stack, ImageEntity currentImage) {
-        return new FreeIpaImageFilterSettings(currentImage.getImageId(), currentImage.getImageCatalogUrl(), currentImage.getOs(), stack.getRegion(),
-                stack.getCloudPlatform().toLowerCase(), false);
+        return new FreeIpaImageFilterSettings(currentImage.getImageId(), currentImage.getImageCatalogUrl(), currentImage.getOs(), currentImage.getOs(),
+                stack.getRegion(), stack.getCloudPlatform().toLowerCase(), false);
     }
 
 }

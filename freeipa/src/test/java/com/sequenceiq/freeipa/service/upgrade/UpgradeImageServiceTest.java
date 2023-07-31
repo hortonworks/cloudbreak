@@ -162,7 +162,7 @@ class UpgradeImageServiceTest {
         FreeIpaImageFilterSettings settingsRequest = captor.getValue();
         assertEquals(currentImage.getCatalog(), settingsRequest.catalog());
         assertEquals(currentImage.getId(), settingsRequest.currentImageId());
-        assertEquals(currentImage.getOs(), settingsRequest.os());
+        assertEquals(currentImage.getOs(), settingsRequest.currentOs());
         assertEquals(stack.getRegion(), settingsRequest.region());
         assertEquals(stack.getCloudPlatform().toLowerCase(), settingsRequest.platform());
     }
@@ -191,7 +191,7 @@ class UpgradeImageServiceTest {
         FreeIpaImageFilterSettings settingsRequest = captor.getValue();
         assertEquals(currentImage.getCatalogName(), settingsRequest.catalog());
         assertEquals(currentImage.getId(), settingsRequest.currentImageId());
-        assertEquals(currentImage.getOs(), settingsRequest.os());
+        assertEquals(currentImage.getOs(), settingsRequest.currentOs());
         assertEquals(stack.getRegion(), settingsRequest.region());
         assertEquals(stack.getCloudPlatform().toLowerCase(), settingsRequest.platform());
     }
@@ -218,7 +218,7 @@ class UpgradeImageServiceTest {
         FreeIpaImageFilterSettings settingsRequest = captor.getValue();
         assertEquals(currentImage.getCatalogName(), settingsRequest.catalog());
         assertEquals(currentImage.getId(), settingsRequest.currentImageId());
-        assertEquals(currentImage.getOs(), settingsRequest.os());
+        assertEquals(currentImage.getOs(), settingsRequest.currentOs());
         assertEquals(stack.getRegion(), settingsRequest.region());
         assertEquals(stack.getCloudPlatform().toLowerCase(), settingsRequest.platform());
     }

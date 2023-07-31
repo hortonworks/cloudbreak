@@ -111,7 +111,7 @@ public class UpgradeImageService {
     }
 
     private FreeIpaImageFilterSettings createFreeIpaImageFilterSettings(Stack stack, ImageInfoResponse currentImage, String catalog) {
-        return new FreeIpaImageFilterSettings(currentImage.getId(), catalog, currentImage.getOs(), stack.getRegion(), stack.getCloudPlatform().toLowerCase(),
-                false);
+        return new FreeIpaImageFilterSettings(currentImage.getId(), catalog, currentImage.getOs(), currentImage.getOs(), stack.getRegion(),
+                stack.getCloudPlatform().toLowerCase(), false);
     }
 }

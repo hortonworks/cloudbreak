@@ -151,7 +151,8 @@ public class ImageServiceTest {
 
     @Test
     public void testGetImageGivenIdInputNotFound() {
-        FreeIpaImageFilterSettings imageSettings = new FreeIpaImageFilterSettings(FAKE_ID, IMAGE_CATALOG, DEFAULT_OS, REGION, DEFAULT_PLATFORM, false);
+        FreeIpaImageFilterSettings imageSettings = new FreeIpaImageFilterSettings(FAKE_ID, IMAGE_CATALOG, DEFAULT_OS, DEFAULT_OS, REGION, DEFAULT_PLATFORM,
+                false);
 
         when(imageProviderFactory.getImageProvider(IMAGE_CATALOG)).thenReturn(imageProvider);
         when(imageProvider.getImage(imageSettings)).thenReturn(Optional.empty());
@@ -174,6 +175,9 @@ public class ImageServiceTest {
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
         when(imageRepository.getByStack(stack)).thenReturn(new ImageEntity());
         when(image.getUuid()).thenReturn(IMAGE_UUID);
+        when(image.getOs()).thenReturn("rh8");
+        when(image.getOsType()).thenReturn("rhel8");
+        when(image.getUuid()).thenReturn(IMAGE_UUID);
         when(imageRepository.save(any(ImageEntity.class))).thenAnswer(invocation -> invocation.getArgument(0, ImageEntity.class));
         when(imageConverter.extractLdapAgentVersion(image)).thenReturn("1.2.3");
         when(imageConverter.extractSourceImage(image)).thenReturn("source-image");
@@ -187,6 +191,8 @@ public class ImageServiceTest {
         assertEquals(IMAGE_UUID, imageEntity.getImageId());
         assertEquals("1.2.3", imageEntity.getLdapAgentVersion());
         assertEquals("source-image", imageEntity.getSourceImage());
+        assertEquals("rh8", imageEntity.getOs());
+        assertEquals("rhel8", imageEntity.getOsType());
     }
 
     @Test
@@ -261,7 +267,7 @@ public class ImageServiceTest {
                 .returns(IMAGE_UUID, FreeIpaImageFilterSettings::currentImageId)
                 .returns(REGION, FreeIpaImageFilterSettings::region)
                 .returns(DEFAULT_PLATFORM, FreeIpaImageFilterSettings::platform)
-                .returns(DEFAULT_OS, FreeIpaImageFilterSettings::os);
+                .returns(DEFAULT_OS, FreeIpaImageFilterSettings::currentOs);
 
         assertThat(result.getImages().getFreeipaImages())
                 .containsExactly(image);

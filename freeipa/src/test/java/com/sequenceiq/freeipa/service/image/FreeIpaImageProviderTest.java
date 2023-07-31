@@ -116,7 +116,7 @@ public class FreeIpaImageProviderTest {
     @Test
     public void testGetImageGivenNoInputWithInvalidAppVersion() {
         ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "freeIpaVersion", "2.21.0-dcv.1", null);
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, CENTOS7, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, CENTOS7, false);
 
         Optional<ImageWrapper> image = underTest.getImage(imageFilterSettings);
 
@@ -126,7 +126,7 @@ public class FreeIpaImageProviderTest {
     @Test
     public void testGetImagePreferNewerImageWithOs() {
         when(preferredOsService.getPreferredOs()).thenReturn(REDHAT8);
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, null, false);
 
         Image image = underTest.getImage(imageFilterSettings).get().getImage();
 
@@ -149,7 +149,7 @@ public class FreeIpaImageProviderTest {
     @Test
     public void testGetImagesGivenNoInputWithInvalidAppVersion() {
         ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "freeIpaVersion", "2.21.0-dcv.1", null);
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, CENTOS7, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, CENTOS7, false);
         when(freeIpaImageFilter.filterImages(any(), any())).thenReturn(Collections.emptyList());
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
@@ -158,7 +158,7 @@ public class FreeIpaImageProviderTest {
     }
 
     private void doTestGetImageGivenNoInput() {
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, null, false);
 
         Image image = underTest.getImage(imageFilterSettings).get().getImage();
 
@@ -169,7 +169,7 @@ public class FreeIpaImageProviderTest {
 
     @Test
     public void testGetImageGivenAllInput() {
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, DEFAULT_OS, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, null, DEFAULT_OS, false);
         //when(freeIpaImageFilter.filterRegion(any(), any())).thenReturn(true);
 
         Image image = underTest.getImage(imageFilterSettings).get().getImage();
@@ -181,7 +181,7 @@ public class FreeIpaImageProviderTest {
 
     @Test
     public void testGetImagesGivenAllInput() {
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, DEFAULT_OS, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, null, DEFAULT_OS, false);
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
 
@@ -197,7 +197,7 @@ public class FreeIpaImageProviderTest {
 
     @Test
     public void testGetImagesWhenMajorOsUpgradeIsEnabled() {
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, CUSTOM_IMAGE_CATALOG_URL, DEFAULT_OS, true);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, CUSTOM_IMAGE_CATALOG_URL, DEFAULT_OS, REDHAT8, true);
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
 
@@ -206,7 +206,7 @@ public class FreeIpaImageProviderTest {
 
     @Test
     public void testGetImageGivenAllInputNonExistentOS() {
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, NON_EXISTING_OS, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, DEFAULT_OS, NON_EXISTING_OS, false);
 
         Image image = underTest.getImage(imageFilterSettings).get().getImage();
 
@@ -217,7 +217,7 @@ public class FreeIpaImageProviderTest {
 
     @Test
     public void testGetImagesGivenAllInputNonExistentOS() {
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, NON_EXISTING_OS, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, DEFAULT_OS, NON_EXISTING_OS, false);
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
 
@@ -233,7 +233,7 @@ public class FreeIpaImageProviderTest {
 
     @Test
     public void testGetImageGivenIdInputFound() {
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, null, null, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, null, null, null, false);
 
         Image image = underTest.getImage(imageFilterSettings).get().getImage();
 
@@ -244,7 +244,7 @@ public class FreeIpaImageProviderTest {
 
     @Test
     public void testGetImagesGivenIdInputFound() {
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, null, null, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, null, null, null, false);
         //when(freeIpaImageFilter.filterImages())
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
@@ -261,7 +261,7 @@ public class FreeIpaImageProviderTest {
 
     @Test
     public void testGetImageGivenUuidInputFound() {
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(IMAGE_UUID, null, null, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(IMAGE_UUID, null, null, null, false);
 
         Image image = underTest.getImage(imageFilterSettings).get().getImage();
 
@@ -270,7 +270,7 @@ public class FreeIpaImageProviderTest {
 
     @Test
     public void testGetImagesGivenUuidInputFound() {
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(IMAGE_UUID, null, null, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(IMAGE_UUID, null, null, null, false);
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
 
@@ -286,7 +286,7 @@ public class FreeIpaImageProviderTest {
 
     @Test
     public void testGetImageGivenIdInputNotFound() {
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(NON_EXISTING_ID, null, null, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(NON_EXISTING_ID, null, null, null, false);
 
         Optional<ImageWrapper> result = underTest.getImage(imageFilterSettings);
 
@@ -295,7 +295,7 @@ public class FreeIpaImageProviderTest {
 
     @Test
     public void testGetImagesGivenIdInputNotFound() {
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(NON_EXISTING_ID, null, null, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(NON_EXISTING_ID, null, null, null, false);
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
 
@@ -304,7 +304,7 @@ public class FreeIpaImageProviderTest {
 
     @Test
     public void testGetImageGivenUuidInputFoundWithNotDefaultOs() {
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(NON_DEFAULT_OS_IMAGE_UUID, null, null, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(NON_DEFAULT_OS_IMAGE_UUID, null, null, null, false);
 
         Image image = underTest.getImage(imageFilterSettings).get().getImage();
 
@@ -313,7 +313,7 @@ public class FreeIpaImageProviderTest {
 
     @Test
     public void testGetImagesGivenUuidInputNotFoundWithNotDefaultOs() {
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(NON_DEFAULT_OS_IMAGE_UUID, null, null, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(NON_DEFAULT_OS_IMAGE_UUID, null, null, null, false);
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
 
@@ -322,7 +322,7 @@ public class FreeIpaImageProviderTest {
 
     @Test
     public void testGetImagesNoInput() {
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, false);
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, null, false);
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
 
@@ -350,7 +350,7 @@ public class FreeIpaImageProviderTest {
         lenient().when(imageCatalogProvider.getImageCatalog(DEFAULT_CATALOG_URL)).thenReturn(catalog);
     }
 
-    private FreeIpaImageFilterSettings createImageFilterSettings(String id, String catalog, String os, boolean allowMajorOsUpgrade) {
-        return new FreeIpaImageFilterSettings(id, catalog, os, DEFAULT_REGION, DEFAULT_PLATFORM, allowMajorOsUpgrade);
+    private FreeIpaImageFilterSettings createImageFilterSettings(String id, String catalog, String currentOs, String targetOs, boolean allowMajorOsUpgrade) {
+        return new FreeIpaImageFilterSettings(id, catalog, currentOs, targetOs, DEFAULT_REGION, DEFAULT_PLATFORM, allowMajorOsUpgrade);
     }
 }

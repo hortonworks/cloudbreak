@@ -82,16 +82,17 @@ public class UpgradeService {
         validationService.validateStackForUpgrade(allInstances, stack);
         ImageInfoResponse currentImage = imageService.fetchCurrentImage(stack);
         ImageSettingsRequest imageSettingsRequest = assembleImageSettingsRequest(request, currentImage);
-        FreeIpaImageFilterSettings freeIpaImageFilterSettings = createFreeIpaImageFilterSettings(stack, request, imageSettingsRequest);
+        FreeIpaImageFilterSettings freeIpaImageFilterSettings = createFreeIpaImageFilterSettings(stack, request, imageSettingsRequest, currentImage.getOs());
         ImageInfoResponse selectedImage = imageService.selectImage(freeIpaImageFilterSettings);
         HashSet<String> instancesOnOldImage = selectInstancesWithOldImage(allInstances, selectedImage);
         validationService.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage, instancesOnOldImage);
-        return triggerUpgrade(request, stack, allInstances, imageSettingsRequest, selectedImage, currentImage, accountId);
+        return triggerUpgrade(request, stack, allInstances, selectedImage, currentImage, accountId);
     }
 
-    private FreeIpaImageFilterSettings createFreeIpaImageFilterSettings(Stack stack, FreeIpaUpgradeRequest request, ImageSettingsRequest imageSettingsRequest) {
-        return new FreeIpaImageFilterSettings(imageSettingsRequest.getId(), imageSettingsRequest.getCatalog(), imageSettingsRequest.getOs(), stack.getRegion(),
-                platformStringTransformer.getPlatformString(stack), Boolean.TRUE.equals(request.getAllowMajorOsUpgrade()));
+    private FreeIpaImageFilterSettings createFreeIpaImageFilterSettings(Stack stack, FreeIpaUpgradeRequest request, ImageSettingsRequest imageSettingsRequest,
+            String currentOs) {
+        return new FreeIpaImageFilterSettings(imageSettingsRequest.getId(), imageSettingsRequest.getCatalog(), currentOs, imageSettingsRequest.getOs(),
+                stack.getRegion(), platformStringTransformer.getPlatformString(stack), Boolean.TRUE.equals(request.getAllowMajorOsUpgrade()));
     }
 
     @SuppressWarnings("IllegalType")
@@ -111,7 +112,7 @@ public class UpgradeService {
 
     @SuppressWarnings("IllegalType")
     private FreeIpaUpgradeResponse triggerUpgrade(FreeIpaUpgradeRequest request, Stack stack, Set<InstanceMetaData> allInstances,
-            ImageSettingsRequest imageSettingsRequest, ImageInfoResponse selectedImage, ImageInfoResponse currentImage, String accountId) {
+            ImageInfoResponse selectedImage, ImageInfoResponse currentImage, String accountId) {
         String pgwInstanceId = instanceMetaDataService.getPrimaryGwInstance(allInstances).getInstanceId();
         HashSet<String> nonPgwInstanceIds = selectNonPgwInstanceIds(allInstances);
         Operation operation = startUpgradeOperation(stack.getAccountId(), request);
@@ -131,6 +132,10 @@ public class UpgradeService {
                     return verticalScaleRequest;
                 }).toList();
         HashSet<String> instancesOnOldImage = selectInstancesWithOldImage(allInstances, selectedImage);
+        ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
+        imageSettingsRequest.setId(selectedImage.getId());
+        imageSettingsRequest.setOs(selectedImage.getOs());
+        imageSettingsRequest.setCatalog(Optional.ofNullable(selectedImage.getCatalog()).orElse(selectedImage.getCatalogName()));
         UpgradeEvent upgradeEvent = new UpgradeEvent(FlowChainTriggers.UPGRADE_TRIGGER_EVENT, stack.getId(), nonPgwInstanceIds, pgwInstanceId,
                 operation.getOperationId(), imageSettingsRequest, Objects.nonNull(stack.getBackup()), needMigration, triggeredVariant,
                 verticalScaleRequests.isEmpty() ? null : verticalScaleRequests.get(0), instancesOnOldImage);
