@@ -64,7 +64,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.altus.CallingServiceNameInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
@@ -923,7 +923,7 @@ public class UmsClient {
      * @return the stub
      */
     private UserManagementBlockingStub newStub() {
-        String requestId = RequestIdUtil.getOrGenerate(MDCUtils.getRequestId());
+        String requestId = MDCBuilder.getOrGenerateRequestId();
         return UserManagementGrpc.newBlockingStub(channel)
                 .withInterceptors(
                         GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcTimeoutSec()),

@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.altus.CallingServiceNameInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
@@ -77,17 +77,17 @@ public class AuthorizationClient {
             return response.getResultList();
         } catch (StatusRuntimeException statusRuntimeException) {
             if (Status.Code.DEADLINE_EXCEEDED.equals(statusRuntimeException.getStatus().getCode())) {
-                LOGGER.error("Deadline exceeded for hasRights {} for actor {} and rights {}", actorCrn, rightChecks, statusRuntimeException);
+                LOGGER.error("Deadline exceeded for hasRights for actor {} and rights {}", actorCrn, rightChecks, statusRuntimeException);
                 throw new CloudbreakServiceException("Authorization failed due to user management service call timed out.");
             } else if (Status.Code.NOT_FOUND.equals(statusRuntimeException.getStatus().getCode())) {
-                LOGGER.error("NOT_FOUND for hasRights for actor {} and rights {}, cause: {}", actorCrn, rightChecks, statusRuntimeException);
+                LOGGER.error("NOT_FOUND for hasRights for actor {} and rights {}", actorCrn, rightChecks, statusRuntimeException);
                 throw new UnauthorizedException("Authorization failed for user: " + actorCrn);
             } else {
-                LOGGER.error("Status runtime exception while checking hasRights {} for actor {} and rights {}", actorCrn, rightChecks, statusRuntimeException);
+                LOGGER.error("Status runtime exception while checking hasRights for actor {} and rights {}", actorCrn, rightChecks, statusRuntimeException);
                 throw new CloudbreakServiceException("Authorization failed due to user management service call failed.");
             }
         } catch (Exception e) {
-            LOGGER.error("Unknown error while checking hasRights {} for actor {} and rights {}", actorCrn, rightChecks, e);
+            LOGGER.error("Unknown error while checking hasRights for actor {} and rights {}", actorCrn, rightChecks, e);
             throw new CloudbreakServiceException("Authorization failed due to user management service call failed with error.");
         }
     }
@@ -98,7 +98,7 @@ public class AuthorizationClient {
      * @return the stub
      */
     private AuthorizationGrpc.AuthorizationBlockingStub newStub() {
-        String requestId = RequestIdUtil.getOrGenerate(MDCUtils.getRequestId());
+        String requestId = MDCBuilder.getOrGenerateRequestId();
         return AuthorizationGrpc.newBlockingStub(channel).withInterceptors(
                 GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcShortTimeoutSec()),
                 new AltusMetadataInterceptor(requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()),

@@ -20,7 +20,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.freeipa.configuration.UsersyncConfigTest.UsersyncConfigTestConfig;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -50,7 +49,7 @@ class UsersyncConfigTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             try {
                 Future<?> future = usersyncTaskExecutor.submit(() -> {
-                    assertEquals(expectedRequestId, MDCUtils.getRequestId().get());
+                    assertEquals(expectedRequestId, MDCBuilder.getOrGenerateRequestId());
                     assertEquals(USER_CRN, ThreadBasedUserCrnProvider.getUserCrn());
                 });
                 future.get(1L, TimeUnit.SECONDS);

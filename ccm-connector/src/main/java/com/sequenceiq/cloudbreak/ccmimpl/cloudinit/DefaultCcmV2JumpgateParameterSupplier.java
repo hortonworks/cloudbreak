@@ -25,7 +25,8 @@ public class DefaultCcmV2JumpgateParameterSupplier extends DefaultCcmV2Parameter
     public CcmV2JumpgateParameters getCcmV2JumpgateParameters(@Nonnull String accountId, @Nonnull Optional<String> environmentCrnOpt,
         @Nonnull String clusterGatewayDomain, @Nonnull String agentKeyId, @Nonnull Optional<String> hmacKeyOpt) {
 
-        InvertingProxyAndAgent invertingProxyAndAgent = getInvertingProxyAndAgent(accountId, environmentCrnOpt, clusterGatewayDomain, agentKeyId, hmacKeyOpt);
+        InvertingProxyAndAgent invertingProxyAndAgent = registerAndGetInvertingProxyAndAgent(accountId, environmentCrnOpt, clusterGatewayDomain,
+                agentKeyId, hmacKeyOpt);
         InvertingProxy invertingProxy = invertingProxyAndAgent.getInvertingProxy();
         InvertingProxyAgent invertingProxyAgent = invertingProxyAndAgent.getInvertingProxyAgent();
 

@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.altus.CallingServiceNameInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
@@ -61,11 +61,11 @@ public class PersonalResourceViewClient {
                     .getResultList();
         } catch (StatusRuntimeException statusRuntimeException) {
             if (Status.Code.DEADLINE_EXCEEDED.equals(statusRuntimeException.getStatus().getCode())) {
-                LOGGER.error("Deadline exceeded for hasRightOnResources {} for actor {} and right {} and resources {}", actorCrn, right, resources,
+                LOGGER.error("Deadline exceeded for hasRightOnResources for actor {} and right {} and resources {}", actorCrn, right, resources,
                         statusRuntimeException);
                 throw new CloudbreakServiceException("Authorization failed due to user management service call timed out.");
             } else {
-                LOGGER.error("Status runtime exception while checking hasRightOnResources {} for actor {} and right {} and resources {}", actorCrn, right,
+                LOGGER.error("Status runtime exception while checking hasRightOnResources for actor {} and right {} and resources {}", actorCrn, right,
                         resources, statusRuntimeException);
                 throw new CloudbreakServiceException("Authorization failed due to user management service call failed.");
             }
@@ -81,7 +81,7 @@ public class PersonalResourceViewClient {
      * @return the stub
      */
     private PersonalResourceViewGrpc.PersonalResourceViewBlockingStub newStub() {
-        String requestId = RequestIdUtil.getOrGenerate(MDCUtils.getRequestId());
+        String requestId = MDCBuilder.getOrGenerateRequestId();
         return PersonalResourceViewGrpc.newBlockingStub(channel).withInterceptors(
                 GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcShortTimeoutSec()),
                 new AltusMetadataInterceptor(requestId, actorCrn),

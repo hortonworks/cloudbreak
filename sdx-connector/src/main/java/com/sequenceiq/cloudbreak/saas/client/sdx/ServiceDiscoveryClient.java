@@ -7,10 +7,9 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudera.cdp.servicediscovery.ServiceDiscoveryGrpc;
 import com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto;
-import com.sequenceiq.cloudbreak.auth.altus.RequestIdUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 import io.grpc.ManagedChannel;
 
@@ -29,7 +28,7 @@ public class ServiceDiscoveryClient {
     }
 
     private ServiceDiscoveryGrpc.ServiceDiscoveryBlockingStub newStub() {
-        String requestId = RequestIdUtil.getOrGenerate(MDCUtils.getRequestId());
+        String requestId = MDCBuilder.getOrGenerateRequestId();
         return ServiceDiscoveryGrpc.newBlockingStub(channel)
                 .withInterceptors(new AltusMetadataInterceptor(requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()));
     }

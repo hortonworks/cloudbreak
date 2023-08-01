@@ -57,16 +57,16 @@ class DefaultCcmV2ParameterSupplierTest {
         CcmV2Parameters resultParameters = underTest.getCcmV2Parameters(TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), TEST_GATEWAY_DOMAIN,
                 Crn.fromString(TEST_CLUSTER_CRN).getResource());
         assertResult(resultParameters);
-        verify(ccmV2Client).listInvertingProxyAgents(anyString(), eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)));
-        verify(ccmV2Client).registerInvertingProxyAgent(anyString(), eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)),
+        verify(ccmV2Client).listInvertingProxyAgents(eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)));
+        verify(ccmV2Client).registerInvertingProxyAgent(eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)),
                 eq(TEST_GATEWAY_DOMAIN), eq(TEST_RESOURCE_ID), eq(Optional.empty()));
-        verify(ccmV2Client, never()).deregisterInvertingProxyAgent(any(), any());
+        verify(ccmV2Client, never()).deregisterInvertingProxyAgent(any());
     }
 
     @Test
     void unregisterAgentIsCalledWhenExisted() {
         setupRegisterInvertingProxyDetails();
-        when(ccmV2Client.listInvertingProxyAgents(any(), any(), any()))
+        when(ccmV2Client.listInvertingProxyAgents(any(), any()))
                 .thenReturn(List.of(InvertingProxyAgent.newBuilder().setAgentCrn(TEST_AGENT_CRN).build()));
 
         CcmV2Parameters resultParameters = underTest.getCcmV2Parameters(TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), TEST_GATEWAY_DOMAIN,
@@ -74,25 +74,25 @@ class DefaultCcmV2ParameterSupplierTest {
 
         assertResult(resultParameters);
 
-        verify(ccmV2Client).listInvertingProxyAgents(anyString(), eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)));
-        verify(ccmV2Client).registerInvertingProxyAgent(anyString(), eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)),
+        verify(ccmV2Client).listInvertingProxyAgents(eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)));
+        verify(ccmV2Client).registerInvertingProxyAgent(eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)),
                 eq(TEST_GATEWAY_DOMAIN), eq(TEST_RESOURCE_ID), eq(Optional.empty()));
-        verify(ccmV2Client).deregisterInvertingProxyAgent(any(), eq(TEST_AGENT_CRN));
+        verify(ccmV2Client).deregisterInvertingProxyAgent(eq(TEST_AGENT_CRN));
     }
 
     @Test
     void unregisterAgentRethrows() {
         setupRegisterInvertingProxyDetails();
-        when(ccmV2Client.listInvertingProxyAgents(any(), any(), any()))
+        when(ccmV2Client.listInvertingProxyAgents(any(), any()))
                 .thenThrow(new CcmV2Exception("internal error"));
 
         assertThatThrownBy(() -> underTest.getCcmV2Parameters(TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), TEST_GATEWAY_DOMAIN,
                 Crn.fromString(TEST_CLUSTER_CRN).getResource())).hasMessageNotContaining("internal error").isInstanceOf(CcmV2Exception.class);
 
-        verify(ccmV2Client).listInvertingProxyAgents(anyString(), eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)));
-        verify(ccmV2Client, never()).registerInvertingProxyAgent(anyString(), eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)),
+        verify(ccmV2Client).listInvertingProxyAgents(eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)));
+        verify(ccmV2Client, never()).registerInvertingProxyAgent(eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)),
                 eq(TEST_GATEWAY_DOMAIN), eq(TEST_RESOURCE_ID), eq(Optional.empty()));
-        verify(ccmV2Client, never()).deregisterInvertingProxyAgent(any(), eq(TEST_AGENT_CRN));
+        verify(ccmV2Client, never()).deregisterInvertingProxyAgent(eq(TEST_AGENT_CRN));
     }
 
     private void setupRegisterInvertingProxyDetails() {
@@ -106,8 +106,8 @@ class DefaultCcmV2ParameterSupplierTest {
                 .setCertificate("invertingProxyAgentCertificate")
                 .setEncipheredPrivateKey("invertingProxyAgentEncipheredKey")
                 .build();
-        when(ccmV2Client.awaitReadyInvertingProxyForAccount(anyString(), anyString())).thenReturn(mockInvertingProxy);
-        lenient().when(ccmV2Client.registerInvertingProxyAgent(anyString(), anyString(), any(Optional.class), anyString(), anyString(), any(Optional.class)))
+        when(ccmV2Client.awaitReadyInvertingProxyForAccount(anyString())).thenReturn(mockInvertingProxy);
+        lenient().when(ccmV2Client.registerInvertingProxyAgent(anyString(), any(Optional.class), anyString(), anyString(), any(Optional.class)))
                 .thenReturn(mockInvertingProxyAgent);
     }
 

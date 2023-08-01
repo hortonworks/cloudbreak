@@ -15,7 +15,6 @@ import com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.Use
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component
 public class GrpcAuthDistributorClient {
@@ -42,21 +41,21 @@ public class GrpcAuthDistributorClient {
     public void updateAuthViewForEnvironment(String environmentCrn, UserState userState) {
         LOGGER.debug("Updating auth view for environment: {}", environmentCrn);
         AuthDistributorClient authDistributorClient = makeClient(channelWrapper, regionAwareInternalCrnGeneratorFactory);
-        authDistributorClient.updateAuthViewForEnvironment(MDCBuilder.getOrGenerateRequestId(), environmentCrn, userState);
+        authDistributorClient.updateAuthViewForEnvironment(environmentCrn, userState);
     }
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 20000))
     public void removeAuthViewForEnvironment(String environmentCrn) {
         LOGGER.debug("Remove auth view for environment: {}", environmentCrn);
         AuthDistributorClient authDistributorClient = makeClient(channelWrapper, regionAwareInternalCrnGeneratorFactory);
-        authDistributorClient.removeAuthViewForEnvironment(MDCBuilder.getOrGenerateRequestId(), environmentCrn);
+        authDistributorClient.removeAuthViewForEnvironment(environmentCrn);
     }
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 20000))
     public Optional<UserState> fetchAuthViewForEnvironment(String environmentCrn) {
         LOGGER.debug("Fetch auth view for environment: {}", environmentCrn);
         AuthDistributorClient authDistributorClient = makeClient(channelWrapper, regionAwareInternalCrnGeneratorFactory);
-        return authDistributorClient.fetchAuthViewForEnvironment(MDCBuilder.getOrGenerateRequestId(), environmentCrn);
+        return authDistributorClient.fetchAuthViewForEnvironment(environmentCrn);
     }
 
     private AuthDistributorClient makeClient(ManagedChannelWrapper channelWrapper,

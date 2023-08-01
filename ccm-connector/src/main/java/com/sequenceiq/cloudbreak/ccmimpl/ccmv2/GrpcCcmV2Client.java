@@ -14,8 +14,12 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Grpc;
 import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Grpc.ClusterConnectivityManagementV2BlockingStub;
 import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters;
+import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest;
+import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairResponse;
 import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateOrGetInvertingProxyRequest;
 import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateOrGetInvertingProxyResponse;
+import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairRequest;
+import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairResponse;
 import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy;
 import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent;
 import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest;
@@ -28,6 +32,7 @@ import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterC
 import com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 import io.grpc.ManagedChannel;
 
@@ -40,8 +45,8 @@ public class GrpcCcmV2Client {
     @Inject
     private ManagedChannelWrapper channelWrapper;
 
-    public InvertingProxy getOrCreateInvertingProxy(String requestId, String accountId, String actorCrn) {
-        ClusterConnectivityManagementV2BlockingStub client = makeClient(channelWrapper.getChannel(), requestId, actorCrn);
+    public InvertingProxy getOrCreateInvertingProxy(String accountId, String actorCrn) {
+        ClusterConnectivityManagementV2BlockingStub client = makeClient(channelWrapper.getChannel(), actorCrn);
         CreateOrGetInvertingProxyRequest invertingProxyRequest = CreateOrGetInvertingProxyRequest.newBuilder()
                 .setAccountId(accountId)
                 .build();
@@ -51,9 +56,9 @@ public class GrpcCcmV2Client {
         return invertingProxyRequestResponse.getInvertingProxy();
     }
 
-    public InvertingProxyAgent registerAgent(String requestId, String accountId, Optional<String> environmentCrnOpt, String domainName,
+    public InvertingProxyAgent registerAgent(String accountId, Optional<String> environmentCrnOpt, String domainName,
             String keyId, String actorCrn, Optional<String> hmacKeyOpt) {
-        ClusterConnectivityManagementV2BlockingStub client = makeClient(channelWrapper.getChannel(), requestId, actorCrn);
+        ClusterConnectivityManagementV2BlockingStub client = makeClient(channelWrapper.getChannel(), actorCrn);
         RegisterAgentRequest.Builder registerAgentRequestBuilder = RegisterAgentRequest.newBuilder()
                 .setAccountId(accountId)
                 .setDomainName(domainName)
@@ -70,8 +75,8 @@ public class GrpcCcmV2Client {
         return registerAgentResponse.getInvertingProxyAgent();
     }
 
-    public UnregisterAgentResponse unRegisterAgent(String requestId, String agentCrn, String actorCrn) {
-        ClusterConnectivityManagementV2BlockingStub client = makeClient(channelWrapper.getChannel(), requestId, actorCrn);
+    public UnregisterAgentResponse unRegisterAgent(String agentCrn, String actorCrn) {
+        ClusterConnectivityManagementV2BlockingStub client = makeClient(channelWrapper.getChannel(), actorCrn);
         UnregisterAgentRequest unregisterAgentRequest = UnregisterAgentRequest.newBuilder()
                 .setAgentCrn(agentCrn)
                 .build();
@@ -80,9 +85,9 @@ public class GrpcCcmV2Client {
         return client.unregisterAgent(unregisterAgentRequest);
     }
 
-    public List<InvertingProxyAgent> listAgents(String requestId, String actorCrn, String accountId, Optional<String> environmentCrnOpt) {
+    public List<InvertingProxyAgent> listAgents(String actorCrn, String accountId, Optional<String> environmentCrnOpt) {
         List<InvertingProxyAgent> result = new ArrayList<>();
-        ClusterConnectivityManagementV2BlockingStub client = makeClient(channelWrapper.getChannel(), requestId, actorCrn);
+        ClusterConnectivityManagementV2BlockingStub client = makeClient(channelWrapper.getChannel(), actorCrn);
         Builder listAgentsRequestBuilder = ListAgentsRequest.newBuilder();
         environmentCrnOpt.ifPresentOrElse(listAgentsRequestBuilder::setEnvironmentCrn, () -> listAgentsRequestBuilder.setAccountId(accountId));
         ListAgentsRequest listAgentsRequest = listAgentsRequestBuilder.build();
@@ -102,7 +107,29 @@ public class GrpcCcmV2Client {
         return result;
     }
 
-    private ClusterConnectivityManagementV2BlockingStub makeClient(ManagedChannel channel, String requestId, String actorCrn) {
+    public InvertingProxyAgent createAgentAccessKeyPair(String actorCrn, String accountId, String agentCrn) {
+        ClusterConnectivityManagementV2BlockingStub client = makeClient(channelWrapper.getChannel(), actorCrn);
+        CreateAgentAccessKeyPairRequest request = CreateAgentAccessKeyPairRequest.newBuilder()
+                .setAccountId(accountId)
+                .setAgentCrn(agentCrn)
+                .build();
+        CreateAgentAccessKeyPairResponse agentAccessKeyPair = client.createAgentAccessKeyPair(request);
+        LOGGER.debug("Calling createAgentAccessKeyPair with params accountId: {}, agentCrn: '{}'", accountId, agentCrn);
+        return agentAccessKeyPair.getInvertingProxyAgent();
+    }
+
+    public DeactivateAgentAccessKeyPairResponse deactivateAgentAccessKeyPair(String actorCrn, String accountId, String accessKeyId) {
+        ClusterConnectivityManagementV2BlockingStub client = makeClient(channelWrapper.getChannel(), actorCrn);
+        DeactivateAgentAccessKeyPairRequest request = DeactivateAgentAccessKeyPairRequest.newBuilder()
+                .setAccountId(accountId)
+                .setAccessKeyId(accessKeyId)
+                .build();
+        LOGGER.debug("Calling deactivateAgentAccessKeyPair with params accountId: {}, accessKeyId: '{}'", accountId, accessKeyId);
+        return client.deactivateAgentAccessKeyPair(request);
+    }
+
+    private ClusterConnectivityManagementV2BlockingStub makeClient(ManagedChannel channel, String actorCrn) {
+        String requestId = MDCBuilder.getOrGenerateRequestId();
         return ClusterConnectivityManagementV2Grpc.newBlockingStub(channel)
                 .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
     }

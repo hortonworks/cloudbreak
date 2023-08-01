@@ -46,6 +46,13 @@ service ClusterConnectivityManagementV2 {
   rpc RotateAgentAccessKey(RotateAgentAccessKeyRequest)
       returns (RotateAgentAccessKeyResponse) {}
 
+  // DeactivateAgentAccessKeyPair for deleting an existing pair of access key and key id for an agent.
+  rpc DeactivateAgentAccessKeyPair(DeactivateAgentAccessKeyPairRequest)
+      returns (DeactivateAgentAccessKeyPairResponse) {}
+
+  // CreateAgentAccessKeyPair for creating a new pair of access key and key id for an agent.
+  rpc CreateAgentAccessKeyPair(CreateAgentAccessKeyPairRequest)
+      returns (CreateAgentAccessKeyPairResponse) {}
 }
 
 message CreateOrGetInvertingProxyRequest {
@@ -170,6 +177,9 @@ message InvertingProxyAgent {
   // The mac calculated for the encrypted access key.
   // Only available for AES256 algorithm.
   string hmacForPrivateKey = 9 [(options.FieldExtension.sensitive) = true];
+  // Expiry date of the access-key private-key pair generated for the
+  // machine user associated with the inverting proxy agent
+  string expiryDate = 10;
 }
 
 message ListAgentsRequest {
@@ -198,5 +208,25 @@ message RotateAgentAccessKeyRequest {
 }
 
 message RotateAgentAccessKeyResponse {
+  InvertingProxyAgent invertingProxyAgent = 1;
+}
+
+message DeactivateAgentAccessKeyPairRequest {
+  // The account id associated with the agent
+  string accountId = 1;
+  // the access key id which needs to be deactivated
+  string accessKeyId = 2;
+}
+
+message DeactivateAgentAccessKeyPairResponse {}
+
+message CreateAgentAccessKeyPairRequest {
+  // The account id of the inverting proxy agent
+  string accountId = 1;
+  // The agentCrn of the agent
+  string agentCrn = 2;
+}
+
+message CreateAgentAccessKeyPairResponse {
   InvertingProxyAgent invertingProxyAgent = 1;
 }

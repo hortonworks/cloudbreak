@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate;
 import java.util.List;
 
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -22,7 +21,6 @@ public class FreeIpaSecretRotationRequest {
     @NotEmpty
     private List<String> secrets;
 
-    @NotNull
     private RotationFlowExecutionType executionType;
 
     public List<String> getSecrets() {

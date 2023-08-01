@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.ccm.termination.CcmV2AgentTerminationListener;
 import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2RetryingClient;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component
 public class DefaultCcmV2AgentTerminationListener implements CcmV2AgentTerminationListener {
@@ -21,7 +20,7 @@ public class DefaultCcmV2AgentTerminationListener implements CcmV2AgentTerminati
     @Override
     public void deregisterInvertingProxyAgent(String ccmV2AgentCrn) {
         if (ccmV2AgentCrn != null) {
-            ccmV2Client.deregisterInvertingProxyAgent(MDCBuilder.getOrGenerateRequestId(), ccmV2AgentCrn);
+            ccmV2Client.deregisterInvertingProxyAgent(ccmV2AgentCrn);
         } else {
             LOGGER.info("Cluster ccmV2AgentCrn is not initialized, nothing to unregister.");
         }

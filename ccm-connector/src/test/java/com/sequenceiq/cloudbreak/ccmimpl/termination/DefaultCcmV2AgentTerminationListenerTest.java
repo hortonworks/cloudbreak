@@ -27,12 +27,12 @@ public class DefaultCcmV2AgentTerminationListenerTest {
     public void testDeregisterInvertingProxyAgent() {
         String testAgentCrn = "testAgentCrn";
         underTest.deregisterInvertingProxyAgent(testAgentCrn);
-        verify(ccmV2Client, times(1)).deregisterInvertingProxyAgent(anyString(), eq(testAgentCrn));
+        verify(ccmV2Client, times(1)).deregisterInvertingProxyAgent(eq(testAgentCrn));
     }
 
     @Test
     public void testDeregisterInvertingProxyAgentWhenCcmVNotConfigured() {
         underTest.deregisterInvertingProxyAgent(null);
-        verify(ccmV2Client, never()).deregisterInvertingProxyAgent(anyString(), anyString());
+        verify(ccmV2Client, never()).deregisterInvertingProxyAgent(anyString());
     }
 }

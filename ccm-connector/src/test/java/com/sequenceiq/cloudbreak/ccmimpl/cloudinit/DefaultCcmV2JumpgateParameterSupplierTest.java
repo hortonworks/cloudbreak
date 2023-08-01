@@ -58,8 +58,8 @@ class DefaultCcmV2JumpgateParameterSupplierTest {
                 .build();
         InvertingProxyAgent mockInvertingProxyAgent = getInvertingProxyAgent(singleWayTls, useHmac);
 
-        when(ccmV2Client.awaitReadyInvertingProxyForAccount(anyString(), anyString())).thenReturn(mockInvertingProxy);
-        when(ccmV2Client.registerInvertingProxyAgent(anyString(), anyString(), any(Optional.class), anyString(), anyString(), any(Optional.class)))
+        when(ccmV2Client.awaitReadyInvertingProxyForAccount(anyString())).thenReturn(mockInvertingProxy);
+        when(ccmV2Client.registerInvertingProxyAgent(anyString(), any(Optional.class), anyString(), anyString(), any(Optional.class)))
                 .thenReturn(mockInvertingProxyAgent);
 
         CcmV2JumpgateParameters resultParameters = underTest.getCcmV2JumpgateParameters(TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), gatewayDomain,
@@ -174,8 +174,8 @@ class DefaultCcmV2JumpgateParameterSupplierTest {
                 .setHmacForPrivateKey(hmac)
                 .build();
 
-        when(ccmV2Client.awaitReadyInvertingProxyForAccount(anyString(), anyString())).thenReturn(mockInvertingProxy);
-        when(ccmV2Client.registerInvertingProxyAgent(anyString(), anyString(), any(Optional.class), eq(gatewayDomain), anyString(), any(Optional.class)))
+        when(ccmV2Client.awaitReadyInvertingProxyForAccount(anyString())).thenReturn(mockInvertingProxy);
+        when(ccmV2Client.registerInvertingProxyAgent(anyString(), any(Optional.class), eq(gatewayDomain), anyString(), any(Optional.class)))
                 .thenReturn(mockInvertingProxyAgent);
 
         assertThatThrownBy(() -> underTest.getCcmV2JumpgateParameters(TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), gatewayDomain,

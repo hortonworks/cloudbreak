@@ -12,10 +12,9 @@ import com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminGrpc;
 import com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto;
 import com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.auth.altus.RequestIdUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 import io.grpc.ManagedChannel;
 
@@ -34,7 +33,7 @@ public class SdxSaasClient {
     }
 
     private SDXSvcAdminGrpc.SDXSvcAdminBlockingStub newStub() {
-        String requestId = RequestIdUtil.getOrGenerate(MDCUtils.getRequestId());
+        String requestId = MDCBuilder.getOrGenerateRequestId();
         return SDXSvcAdminGrpc.newBlockingStub(channel)
                 .withInterceptors(new AltusMetadataInterceptor(requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()));
     }

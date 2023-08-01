@@ -266,6 +266,68 @@ public final class ClusterConnectivityManagementV2Grpc {
     return getRotateAgentAccessKeyMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairRequest,
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairResponse> getDeactivateAgentAccessKeyPairMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeactivateAgentAccessKeyPair",
+      requestType = com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairRequest.class,
+      responseType = com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairRequest,
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairResponse> getDeactivateAgentAccessKeyPairMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairRequest, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairResponse> getDeactivateAgentAccessKeyPairMethod;
+    if ((getDeactivateAgentAccessKeyPairMethod = ClusterConnectivityManagementV2Grpc.getDeactivateAgentAccessKeyPairMethod) == null) {
+      synchronized (ClusterConnectivityManagementV2Grpc.class) {
+        if ((getDeactivateAgentAccessKeyPairMethod = ClusterConnectivityManagementV2Grpc.getDeactivateAgentAccessKeyPairMethod) == null) {
+          ClusterConnectivityManagementV2Grpc.getDeactivateAgentAccessKeyPairMethod = getDeactivateAgentAccessKeyPairMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairRequest, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeactivateAgentAccessKeyPair"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new ClusterConnectivityManagementV2MethodDescriptorSupplier("DeactivateAgentAccessKeyPair"))
+              .build();
+        }
+      }
+    }
+    return getDeactivateAgentAccessKeyPairMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest,
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairResponse> getCreateAgentAccessKeyPairMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreateAgentAccessKeyPair",
+      requestType = com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest.class,
+      responseType = com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest,
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairResponse> getCreateAgentAccessKeyPairMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairResponse> getCreateAgentAccessKeyPairMethod;
+    if ((getCreateAgentAccessKeyPairMethod = ClusterConnectivityManagementV2Grpc.getCreateAgentAccessKeyPairMethod) == null) {
+      synchronized (ClusterConnectivityManagementV2Grpc.class) {
+        if ((getCreateAgentAccessKeyPairMethod = ClusterConnectivityManagementV2Grpc.getCreateAgentAccessKeyPairMethod) == null) {
+          ClusterConnectivityManagementV2Grpc.getCreateAgentAccessKeyPairMethod = getCreateAgentAccessKeyPairMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreateAgentAccessKeyPair"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new ClusterConnectivityManagementV2MethodDescriptorSupplier("CreateAgentAccessKeyPair"))
+              .build();
+        }
+      }
+    }
+    return getCreateAgentAccessKeyPairMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -399,6 +461,26 @@ public final class ClusterConnectivityManagementV2Grpc {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRotateAgentAccessKeyMethod(), responseObserver);
     }
 
+    /**
+     * <pre>
+     * DeactivateAgentAccessKeyPair for deleting an existing pair of access key and key id for an agent.
+     * </pre>
+     */
+    public void deactivateAgentAccessKeyPair(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeactivateAgentAccessKeyPairMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * CreateAgentAccessKeyPair for creating a new pair of access key and key id for an agent.
+     * </pre>
+     */
+    public void createAgentAccessKeyPair(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateAgentAccessKeyPairMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -457,6 +539,20 @@ public final class ClusterConnectivityManagementV2Grpc {
                 com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest,
                 com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse>(
                   this, METHODID_ROTATE_AGENT_ACCESS_KEY)))
+          .addMethod(
+            getDeactivateAgentAccessKeyPairMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairRequest,
+                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairResponse>(
+                  this, METHODID_DEACTIVATE_AGENT_ACCESS_KEY_PAIR)))
+          .addMethod(
+            getCreateAgentAccessKeyPairMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest,
+                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairResponse>(
+                  this, METHODID_CREATE_AGENT_ACCESS_KEY_PAIR)))
           .build();
     }
   }
@@ -567,6 +663,28 @@ public final class ClusterConnectivityManagementV2Grpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getRotateAgentAccessKeyMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * DeactivateAgentAccessKeyPair for deleting an existing pair of access key and key id for an agent.
+     * </pre>
+     */
+    public void deactivateAgentAccessKeyPair(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDeactivateAgentAccessKeyPairMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * CreateAgentAccessKeyPair for creating a new pair of access key and key id for an agent.
+     * </pre>
+     */
+    public void createAgentAccessKeyPair(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateAgentAccessKeyPairMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -666,6 +784,26 @@ public final class ClusterConnectivityManagementV2Grpc {
     public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse rotateAgentAccessKey(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getRotateAgentAccessKeyMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * DeactivateAgentAccessKeyPair for deleting an existing pair of access key and key id for an agent.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairResponse deactivateAgentAccessKeyPair(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDeactivateAgentAccessKeyPairMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * CreateAgentAccessKeyPair for creating a new pair of access key and key id for an agent.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairResponse createAgentAccessKeyPair(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateAgentAccessKeyPairMethod(), getCallOptions(), request);
     }
   }
 
@@ -775,6 +913,28 @@ public final class ClusterConnectivityManagementV2Grpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getRotateAgentAccessKeyMethod(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * DeactivateAgentAccessKeyPair for deleting an existing pair of access key and key id for an agent.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairResponse> deactivateAgentAccessKeyPair(
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDeactivateAgentAccessKeyPairMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * CreateAgentAccessKeyPair for creating a new pair of access key and key id for an agent.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairResponse> createAgentAccessKeyPair(
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateAgentAccessKeyPairMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_VERSION = 0;
@@ -785,6 +945,8 @@ public final class ClusterConnectivityManagementV2Grpc {
   private static final int METHODID_LIST_AGENTS = 5;
   private static final int METHODID_GET_ALL_AGENTS_CERTIFICATES = 6;
   private static final int METHODID_ROTATE_AGENT_ACCESS_KEY = 7;
+  private static final int METHODID_DEACTIVATE_AGENT_ACCESS_KEY_PAIR = 8;
+  private static final int METHODID_CREATE_AGENT_ACCESS_KEY_PAIR = 9;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -834,6 +996,14 @@ public final class ClusterConnectivityManagementV2Grpc {
         case METHODID_ROTATE_AGENT_ACCESS_KEY:
           serviceImpl.rotateAgentAccessKey((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse>) responseObserver);
+          break;
+        case METHODID_DEACTIVATE_AGENT_ACCESS_KEY_PAIR:
+          serviceImpl.deactivateAgentAccessKeyPair((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairResponse>) responseObserver);
+          break;
+        case METHODID_CREATE_AGENT_ACCESS_KEY_PAIR:
+          serviceImpl.createAgentAccessKeyPair((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -904,6 +1074,8 @@ public final class ClusterConnectivityManagementV2Grpc {
               .addMethod(getListAgentsMethod())
               .addMethod(getGetAllAgentsCertificatesMethod())
               .addMethod(getRotateAgentAccessKeyMethod())
+              .addMethod(getDeactivateAgentAccessKeyPairMethod())
+              .addMethod(getCreateAgentAccessKeyPairMethod())
               .build();
         }
       }
