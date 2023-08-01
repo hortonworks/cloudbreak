@@ -24,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaGetLastSyncOperationSt
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRebuildAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRepairAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRotateSecretAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaSetPasswordAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaStartAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaStopAction;
@@ -36,6 +37,7 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeipaUsedImagesAction;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaChildEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDownscaleTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaRotationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUpscaleTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
@@ -148,6 +150,10 @@ public class FreeIpaTestClient {
 
     public Action<FreeIpaTestDto, FreeIpaClient> rotateSaltPassword() {
         return new FreeipaRotateSaltPasswordAction();
+    }
+
+    public Action<FreeIpaRotationTestDto, FreeIpaClient> rotateSecret() {
+        return new FreeIpaRotateSecretAction();
     }
 
 }

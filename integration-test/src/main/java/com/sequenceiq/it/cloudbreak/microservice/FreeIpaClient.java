@@ -25,6 +25,7 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.EnvironmentAware;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaChildEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDownscaleTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaOperationStatusTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaRotationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUpscaleTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncStatusDto;
@@ -116,6 +117,7 @@ public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.seq
                 FreeIpaOperationStatusTestDto.class.getSimpleName(),
                 FreeipaChangeImageCatalogTestDto.class.getSimpleName(),
                 FreeIpaUpscaleTestDto.class.getSimpleName(),
+                FreeIpaRotationTestDto.class.getSimpleName(),
                 FreeIpaDownscaleTestDto.class.getSimpleName());
     }
 

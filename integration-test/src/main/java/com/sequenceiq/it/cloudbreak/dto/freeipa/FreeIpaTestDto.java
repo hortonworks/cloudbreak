@@ -374,6 +374,17 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         return withEnvironment(environment);
     }
 
+    public FreeIpaTestDto withOsType(String osType) {
+        if (getRequest().getImage() != null) {
+            getRequest().getImage().setOs(osType);
+        } else {
+            ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
+            imageSettingsRequest.setOs(osType);
+            getRequest().setImage(imageSettingsRequest);
+        }
+        return this;
+    }
+
     public FreeIpaTestDto withCatalog(String catalog) {
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
         imageSettingsRequest.setCatalog(catalog);

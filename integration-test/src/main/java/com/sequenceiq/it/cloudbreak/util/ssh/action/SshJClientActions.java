@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
@@ -48,6 +49,16 @@ import net.schmizz.sshj.SSHClient;
 @Component
 public class SshJClientActions extends SshJClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(SshJClientActions.class);
+
+    private List<String> getInstanceMetadataIps(Set<InstanceMetaDataResponse> instanceMetaDatas, boolean publicIp) {
+        return instanceMetaDatas.stream().map(instanceMetaDataResponse -> {
+            if (publicIp) {
+                return instanceMetaDataResponse.getPublicIp();
+            } else {
+                return instanceMetaDataResponse.getPrivateIp();
+            }
+        }).collect(Collectors.toList());
+    }
 
     private List<String> getFreeIpaInstanceGroupIps(InstanceMetadataType istanceMetadataType, String environmentCrn, FreeIpaClient freeipaClient,
             boolean publicIp) {
@@ -225,6 +236,11 @@ public class SshJClientActions extends SshJClient {
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, sshCommand)));
     }
 
+    public Map<String, Pair<Integer, String>> executeSshCommandOnHost(Set<InstanceMetaDataResponse> instanceMetaDatas, String sshCommand, boolean publicIp) {
+        return getInstanceMetadataIps(instanceMetaDatas, publicIp).stream()
+                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, sshCommand)));
+    }
+
     public Map<String, Pair<Integer, String>> executeSshCommandOnPrimaryGateways(List<InstanceGroupV4Response> instanceGroups, String sshCommand,
             boolean publicIp) {
         return getPrimaryGatewayIps(instanceGroups, publicIp).stream()
@@ -311,7 +327,7 @@ public class SshJClientActions extends SshJClient {
         return quantity.get();
     }
 
-    private  <T extends CloudbreakTestDto> T eventCountsValidation(T testDto, Map<String, Pair<Integer, String>> statusReportByIp, String eventName) {
+    private <T extends CloudbreakTestDto> T eventCountsValidation(T testDto, Map<String, Pair<Integer, String>> statusReportByIp, String eventName) {
         for (Entry<String, Pair<Integer, String>> statusReport : statusReportByIp.entrySet()) {
             List<Integer> eventCounts = new Json(statusReport.getValue().getValue()).getMap().entrySet().stream()
                     .filter(status -> String.valueOf(status.getKey()).contains(eventName))
@@ -328,7 +344,7 @@ public class SshJClientActions extends SshJClient {
         return testDto;
     }
 
-    private  <T extends CloudbreakTestDto> T eventStatusesNotOkValidation(T testDto, Map<String, Pair<Integer, String>> statusReportByIp,
+    private <T extends CloudbreakTestDto> T eventStatusesNotOkValidation(T testDto, Map<String, Pair<Integer, String>> statusReportByIp,
             String acceptableNokEventName) {
         for (Entry<String, Pair<Integer, String>> statusReport : statusReportByIp.entrySet()) {
             List<String> statusesNotOk = new Json(statusReport.getValue().getValue()).getMap().entrySet().stream()
@@ -383,12 +399,13 @@ public class SshJClientActions extends SshJClient {
             try {
                 List<String> statusCategories = List.of("services", "scrapping", "metrics");
                 Map<String, Map<String, String>> fetchedMonitoringStatus = JsonUtil.readValue(monitoringStatusReport.getValue().getValue(),
-                        new TypeReference<Map<String, Map<String, String>>>() { });
+                        new TypeReference<Map<String, Map<String, String>>>() {
+                        });
                 statusCategories.forEach(statusCategory -> {
                     Map<String, String> statusesNotOkInCategory = fetchedMonitoringStatus.entrySet().stream()
                             .filter(categories -> statusCategory.equalsIgnoreCase(categories.getKey()))
                             .flatMap(selectedCategory -> selectedCategory.getValue().entrySet().stream()
-                                            .filter(servicesInCategory -> "NOK".equalsIgnoreCase(servicesInCategory.getValue())))
+                                    .filter(servicesInCategory -> "NOK".equalsIgnoreCase(servicesInCategory.getValue())))
                             .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
                     if (MapUtils.isNotEmpty(statusesNotOkInCategory)) {
                         statusesNotOkInCategory.forEach((service, status) -> {
@@ -466,7 +483,8 @@ public class SshJClientActions extends SshJClient {
             try {
                 String requestSignerCategory = "request-signer";
                 Map<String, Map<String, String>> fetchedMonitoringStatus = JsonUtil.readValue(monitoringStatusReport.getValue().getValue(),
-                        new TypeReference<Map<String, Map<String, String>>>() { });
+                        new TypeReference<Map<String, Map<String, String>>>() {
+                        });
                 List<String> successCount = fetchedMonitoringStatus.entrySet().stream()
                         .filter(categories -> requestSignerCategory.equalsIgnoreCase(categories.getKey()))
                         .flatMap(selectedCategory -> selectedCategory.getValue().entrySet().stream()
