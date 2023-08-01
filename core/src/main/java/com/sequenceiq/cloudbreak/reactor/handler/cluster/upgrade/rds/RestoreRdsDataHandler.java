@@ -43,7 +43,7 @@ public class RestoreRdsDataHandler extends ExceptionCatcherEventHandler<UpgradeR
         Long stackId = request.getResourceId();
         LOGGER.info("Starting restore for RDS upgrade...");
         try {
-            upgradeRdsService.restoreRds(stackId);
+            upgradeRdsService.restoreRds(stackId, request.getVersion().getMajorVersion());
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.warn("RDS restore failed due to {}", e.getMessage());
             return new UpgradeRdsFailedEvent(stackId, e, DetailedStackStatus.DATABASE_UPGRADE_FAILED);

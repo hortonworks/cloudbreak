@@ -50,6 +50,7 @@ import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseRequest;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseResponse;
 import com.sequenceiq.redbeams.dto.Credential;
+import com.sequenceiq.redbeams.dto.UpgradeDatabaseMigrationParams;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.RedbeamsUpgradeEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsStartUpgradeRequest;
@@ -115,7 +116,8 @@ public class RedbeamsUpgradeServiceTest {
         UpgradeDatabaseRequest upgradeDatabaseRequest = getUpgradeDatabaseRequest();
 
         RedbeamsStartUpgradeRequest redbeamsStartUpgradeRequest = new RedbeamsStartUpgradeRequest(dbStack.getId(),
-                upgradeDatabaseRequest.getTargetMajorVersion());
+                upgradeDatabaseRequest.getTargetMajorVersion(), UpgradeDatabaseMigrationParams
+                .fromDatabaseServer(upgradeDatabaseRequest.getMigratedDatabaseServer()));
 
         when(flowManager.notify(RedbeamsUpgradeEvent.REDBEAMS_START_UPGRADE_EVENT.selector(), redbeamsStartUpgradeRequest)).
                 thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));
@@ -195,7 +197,8 @@ public class RedbeamsUpgradeServiceTest {
         when(operationService.getOperationProgressByResourceCrn(SERVER_CRN_STRING, false)).
                 thenReturn(getOperationViewWithStatus(OperationProgressStatus.FINISHED));
         RedbeamsStartUpgradeRequest redbeamsStartUpgradeRequest = new RedbeamsStartUpgradeRequest(dbStack.getId(),
-                upgradeDatabaseRequest.getTargetMajorVersion());
+                upgradeDatabaseRequest.getTargetMajorVersion(), UpgradeDatabaseMigrationParams
+                .fromDatabaseServer(upgradeDatabaseRequest.getMigratedDatabaseServer()));
 
         when(flowManager.notify(RedbeamsUpgradeEvent.REDBEAMS_START_UPGRADE_EVENT.selector(), redbeamsStartUpgradeRequest)).
                 thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));

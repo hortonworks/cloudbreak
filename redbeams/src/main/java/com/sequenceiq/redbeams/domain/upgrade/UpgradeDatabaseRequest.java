@@ -3,10 +3,13 @@ package com.sequenceiq.redbeams.domain.upgrade;
 import java.util.Objects;
 
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 
 public class UpgradeDatabaseRequest {
 
     private TargetMajorVersion targetMajorVersion;
+
+    private DatabaseServer migratedDatabaseServer;
 
     public TargetMajorVersion getTargetMajorVersion() {
         return targetMajorVersion;
@@ -16,10 +19,19 @@ public class UpgradeDatabaseRequest {
         this.targetMajorVersion = targetMajorVersion;
     }
 
+    public DatabaseServer getMigratedDatabaseServer() {
+        return migratedDatabaseServer;
+    }
+
+    public void setMigratedDatabaseServer(DatabaseServer migratedDatabaseServer) {
+        this.migratedDatabaseServer = migratedDatabaseServer;
+    }
+
     @Override
     public String toString() {
         return "UpgradeDatabaseRequest{" +
                 "targetMajorVersion=" + targetMajorVersion +
+                ", migratedDatabaseServer=" + migratedDatabaseServer +
                 '}';
     }
 
@@ -32,11 +44,16 @@ public class UpgradeDatabaseRequest {
             return false;
         }
         UpgradeDatabaseRequest that = (UpgradeDatabaseRequest) o;
-        return targetMajorVersion == that.targetMajorVersion;
+        if (targetMajorVersion != that.targetMajorVersion) {
+            return false;
+        }
+        return Objects.equals(migratedDatabaseServer, that.migratedDatabaseServer);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(targetMajorVersion);
+        int result = targetMajorVersion.hashCode();
+        result = 31 * result + (migratedDatabaseServer != null ? migratedDatabaseServer.hashCode() : 0);
+        return result;
     }
 }

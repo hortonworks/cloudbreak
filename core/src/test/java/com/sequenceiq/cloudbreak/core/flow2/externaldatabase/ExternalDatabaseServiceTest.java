@@ -6,6 +6,8 @@ import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -13,6 +15,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -31,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
@@ -40,10 +44,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.dyngr.core.AttemptResults;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -52,6 +56,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseOperation;
@@ -60,6 +65,7 @@ import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseServerPa
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfig;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfigKey;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
+import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -130,9 +136,6 @@ class ExternalDatabaseServiceTest {
     private DatabaseServerParameterDecorator dbServerParameterDecorator;
 
     @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
     private ExternalDatabaseConfig externalDatabaseConfig;
 
     @Mock
@@ -142,13 +145,15 @@ class ExternalDatabaseServiceTest {
 
     private DetailedEnvironmentResponse environmentResponse;
 
+    private DatabaseServerV4StackRequest databaseServerV4StackRequest;
+
     @Mock
     private CmTemplateProcessor cmTemplateProcessor;
 
     @BeforeEach
     void setUp() {
         underTest = new ExternalDatabaseService(redbeamsClient, clusterRepository, dbConfigs, parameterDecoratorMap, databaseObtainerService,
-                entitlementService, externalDatabaseConfig, cmTemplateProcessorFactory);
+                externalDatabaseConfig, cmTemplateProcessorFactory);
         environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCloudPlatform(CLOUD_PLATFORM.name());
         environmentResponse.setCrn(ENV_CRN);
@@ -457,7 +462,7 @@ class ExternalDatabaseServiceTest {
                 createFlowCheckResponse(Boolean.TRUE, Boolean.FALSE),
                 createFlowCheckResponse(Boolean.FALSE, Boolean.FALSE));
 
-        underTest.upgradeDatabase(cluster, targetMajorVersion);
+        underTest.upgradeDatabase(cluster, targetMajorVersion, databaseServerV4StackRequest);
 
         ArgumentCaptor<UpgradeDatabaseServerV4Request> argumentCaptor = ArgumentCaptor.forClass(UpgradeDatabaseServerV4Request.class);
         verify(redbeamsClient).upgradeByCrn(eq(RDBMS_CRN), argumentCaptor.capture());
@@ -474,7 +479,7 @@ class ExternalDatabaseServiceTest {
 
         when(redbeamsClient.upgradeByCrn(eq(RDBMS_CRN), any())).thenThrow(new NotFoundException("Not found"));
 
-        underTest.upgradeDatabase(cluster, targetMajorVersion);
+        underTest.upgradeDatabase(cluster, targetMajorVersion, databaseServerV4StackRequest);
 
         ArgumentCaptor<UpgradeDatabaseServerV4Request> argumentCaptor = ArgumentCaptor.forClass(UpgradeDatabaseServerV4Request.class);
         verify(redbeamsClient).upgradeByCrn(eq(RDBMS_CRN), argumentCaptor.capture());
@@ -500,7 +505,7 @@ class ExternalDatabaseServiceTest {
         when(redbeamsClient.hasFlowRunningByFlowId(RDBMS_FLOW_ID)).thenReturn(createFlowCheckResponse(Boolean.FALSE, Boolean.TRUE));
 
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.upgradeDatabase(cluster, targetMajorVersion));
+                () -> underTest.upgradeDatabase(cluster, targetMajorVersion, databaseServerV4StackRequest));
         String expected = String.format("Database flow failed in Redbeams with error: 'upgrade error happened'. "
                         + "Database crn: %s, flow: FlowIdentifier{type=FLOW, pollableId='%s'}",
                 RDBMS_CRN, RDBMS_FLOW_ID);
@@ -523,12 +528,51 @@ class ExternalDatabaseServiceTest {
         response.setFlowIdentifier(null);
         when(redbeamsClient.upgradeByCrn(eq(RDBMS_CRN), any())).thenReturn(response);
 
-        underTest.upgradeDatabase(cluster, targetMajorVersion);
+        underTest.upgradeDatabase(cluster, targetMajorVersion, databaseServerV4StackRequest);
 
         ArgumentCaptor<UpgradeDatabaseServerV4Request> argumentCaptor = ArgumentCaptor.forClass(UpgradeDatabaseServerV4Request.class);
         verify(redbeamsClient).upgradeByCrn(eq(RDBMS_CRN), argumentCaptor.capture());
         verify(redbeamsClient, never()).hasFlowRunningByFlowId(any());
         assertEquals(targetMajorVersion, argumentCaptor.getValue().getUpgradeTargetMajorVersion());
+    }
+
+    @ParameterizedTest
+    @MethodSource("dbUpgradeMigrationScenarios")
+    void testMigrateDatabaseSettingsAzureBothConditionsMetThenMigration(String platform, String current, String target, boolean migrationRequired) {
+        StackDto stack = mock(StackDto.class);
+        TargetMajorVersion majorVersion = mock(TargetMajorVersion.class);
+
+        when(stack.getCloudPlatform()).thenReturn(platform);
+        when(majorVersion.getMajorVersion()).thenReturn(target);
+        when(stack.getExternalDatabaseEngineVersion()).thenReturn(current);
+
+        DatabaseServerV4StackRequest result = underTest.migrateDatabaseSettingsIfNeeded(stack, majorVersion);
+
+        if (migrationRequired) {
+            DatabaseServerParameter serverParameter = DatabaseServerParameter.builder()
+                    .withEngineVersion(target)
+                    .withAttributes(Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name()))
+                    .build();
+            assertNotNull(result);
+            verify(dbServerParameterDecorator).setParameters(eq(result), eq(serverParameter));
+        } else {
+            assertNull(result);
+            verify(dbServerParameterDecorator, never()).setParameters(any(), any());
+        }
+    }
+
+    private static Object[][] dbUpgradeMigrationScenarios() {
+        return new Object[][] {
+                // Platform, currentVersion, targetVersion, migrationRequired
+                {"AZURE", "10", "11", false},
+                {"AZURE", "10", "14", true},
+                {"AZURE", "14", "14", false},
+                {"AZURE", "14", "11", false},
+                {"AWS", "10", "11", false},
+                {"AWS", "10", "14", false},
+                {"AWS", "14", "14", false},
+                {"AWS", "14", "11", false},
+        };
     }
 
     @Test
@@ -628,7 +672,7 @@ class ExternalDatabaseServiceTest {
                 createFlowCheckResponse(Boolean.FALSE, Boolean.TRUE));
 
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.upgradeDatabase(cluster, targetMajorVersion));
+                () -> underTest.upgradeDatabase(cluster, targetMajorVersion, databaseServerV4StackRequest));
         String expected = String.format("Database flow failed in Redbeams with error: '%s'. Database crn: %s, flow: "
                         + "FlowIdentifier{type=%s, pollableId='%s'}",
                 DATABASE_NOT_FOUND, RDBMS_CRN, FlowType.FLOW, RDBMS_FLOW_ID);
@@ -654,7 +698,7 @@ class ExternalDatabaseServiceTest {
         cluster.setDatabaseServerCrn(null);
         UpgradeTargetMajorVersion targetMajorVersion = UpgradeTargetMajorVersion.VERSION_11;
 
-        underTest.upgradeDatabase(cluster, targetMajorVersion);
+        underTest.upgradeDatabase(cluster, targetMajorVersion, databaseServerV4StackRequest);
 
         verify(redbeamsClient, never()).upgradeByCrn(anyString(), any());
     }

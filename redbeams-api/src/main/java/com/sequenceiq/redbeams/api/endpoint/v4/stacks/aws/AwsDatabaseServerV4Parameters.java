@@ -89,4 +89,14 @@ public class AwsDatabaseServerV4Parameters extends MappableBase {
         multiAZ = getParameterOrNull(parameters, MULTI_AZ);
         storageType = getParameterOrNull(parameters, "storageType");
     }
+
+    @Override
+    public String toString() {
+        return "AwsDatabaseServerV4Parameters{" +
+                "backupRetentionPeriod=" + backupRetentionPeriod +
+                ", engineVersion='" + engineVersion + '\'' +
+                ", multiAZ='" + multiAZ + '\'' +
+                ", storageType='" + storageType + '\'' +
+                "} " + super.toString();
+    }
 }

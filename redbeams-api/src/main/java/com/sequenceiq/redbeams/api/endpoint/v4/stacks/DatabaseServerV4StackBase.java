@@ -167,4 +167,19 @@ public class DatabaseServerV4StackBase extends ProviderParametersBase {
     public void setGcp(GcpDatabaseServerV4Parameters gcp) {
         this.gcp = gcp;
     }
+
+    @Override
+    public String toString() {
+        return "DatabaseServerV4StackBase{" +
+                "instanceType='" + instanceType + '\'' +
+                ", databaseVendor='" + databaseVendor + '\'' +
+                ", connectionDriver='" + connectionDriver + '\'' +
+                ", storageSize=" + storageSize +
+                ", rootUserName='" + rootUserName + '\'' +
+                ", port=" + port +
+                ", aws=" + aws +
+                ", azure=" + azure +
+                ", gcp=" + gcp +
+                "} " + super.toString();
+    }
 }

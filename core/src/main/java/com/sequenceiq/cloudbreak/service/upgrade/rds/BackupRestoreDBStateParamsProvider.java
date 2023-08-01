@@ -37,10 +37,16 @@ public class BackupRestoreDBStateParamsProvider {
 
     private static final String ABFS_FILE_SYSTEM_FOLDER_KEY = "abfs_file_system_folder";
 
+    private static final String TARGET_VERSION = "target_version";
+
     @Inject
     private AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
 
     public Map<String, Object> createParamsForBackupRestore(String backupLocation, String backupInstanceProfile) {
+        return createParamsForBackupRestore(backupLocation, backupInstanceProfile, null);
+    }
+
+    public Map<String, Object> createParamsForBackupRestore(String backupLocation, String backupInstanceProfile, String targetVersion) {
         Map<String, Object> params = new HashMap<>();
         Map<String, Object> postgresParams = new HashMap<>();
         params.put("postgres", postgresParams);
@@ -50,6 +56,9 @@ public class BackupRestoreDBStateParamsProvider {
         upgradeParams.put(EMBEDDED_DB_PORT_KEY, "5432");
         upgradeParams.put(EMBEDDED_DB_USER_KEY, "postgres");
         upgradeParams.put(EMBEDDED_DB_PASSWORD_KEY, "postgres");
+        if (StringUtils.isNotBlank(targetVersion)) {
+            upgradeParams.put(TARGET_VERSION, targetVersion);
+        }
         setCloudStorageBackupParameters(backupLocation, upgradeParams, backupInstanceProfile);
         LOGGER.debug("Created parameters for RDS upgrade backup and restore: {}", upgradeParams);
         return params;

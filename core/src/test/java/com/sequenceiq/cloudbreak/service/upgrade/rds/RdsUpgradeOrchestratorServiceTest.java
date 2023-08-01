@@ -140,7 +140,7 @@ class RdsUpgradeOrchestratorServiceTest {
     @Test
     void testRestoreRdsData() throws CloudbreakOrchestratorException {
         mockCreateStateParams();
-        underTest.restoreRdsData(STACK_ID);
+        underTest.restoreRdsData(STACK_ID, DATABASE_ENGINE_VERSION);
         verify(hostOrchestrator).runOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
         assertThat(params.getState()).isEqualTo("postgresql/upgrade/restore");

@@ -34,6 +34,10 @@ while getopts ":h:p:u:" OPTION; do
         ;;
     u  )
         USERNAME="$OPTARG"
+        if [ -n "$VERSION" ] && [ $VERSION -eq 14 ] && [ "$IS_REMOTE_DB" != "None" ]; then
+          USERNAME=$(cut -d @ -f 1 <<< "$USERNAME")
+          doLog "INFO Set USERNAME to $USERNAME, original is $OPTARG"
+        fi
         ;;
     \? ) echo "Unknown option: -$OPTARG" >&2;
          print_usage

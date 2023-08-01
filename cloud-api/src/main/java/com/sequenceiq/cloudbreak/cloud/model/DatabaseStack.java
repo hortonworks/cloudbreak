@@ -47,11 +47,11 @@ public class DatabaseStack {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("DatabaseStack{");
-        sb.append("network=").append(network);
-        sb.append(", databaseServer=").append(databaseServer);
-        sb.append('}');
-        return sb.toString();
+        return "DatabaseStack{" +
+                "network=" + network +
+                ", databaseServer=" + databaseServer +
+                ", template='" + template + '\'' +
+                ", tags=" + tags +
+                '}';
     }
-
 }

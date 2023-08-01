@@ -37,6 +37,7 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseRequest;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseResponse;
 import com.sequenceiq.redbeams.dto.Credential;
+import com.sequenceiq.redbeams.dto.UpgradeDatabaseMigrationParams;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.RedbeamsUpgradeEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsStartUpgradeRequest;
@@ -139,7 +140,7 @@ public class RedbeamsUpgradeService {
         networkBuilderService.updateNetworkSubnets(dbStack);
         dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.UPGRADE_REQUESTED);
         RedbeamsStartUpgradeRequest redbeamsStartUpgradeRequest = new RedbeamsStartUpgradeRequest(dbStack.getId(),
-                targetVersion);
+                targetVersion, UpgradeDatabaseMigrationParams.fromDatabaseServer(upgradeDatabaseRequest.getMigratedDatabaseServer()));
         FlowIdentifier flowId = flowManager.notify(RedbeamsUpgradeEvent.REDBEAMS_START_UPGRADE_EVENT.selector(), redbeamsStartUpgradeRequest);
         return new UpgradeDatabaseResponse(flowId, currentVersion);
     }

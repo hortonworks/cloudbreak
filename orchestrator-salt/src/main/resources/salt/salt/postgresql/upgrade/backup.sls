@@ -11,4 +11,4 @@ backup_postgresql_db:
     - name: /opt/salt/scripts/backup_db.sh -h {{salt['pillar.get']('postgres:upgrade:embeddeddb_host')}} -p {{salt['pillar.get']('postgres:upgrade:embeddeddb_port')}} -u {{salt['pillar.get']('postgres:upgrade:embeddeddb_user')}}
 {%- endif %}
     - require:
-        - sls: postgresql.upgrade
+      - sls: postgresql.upgrade

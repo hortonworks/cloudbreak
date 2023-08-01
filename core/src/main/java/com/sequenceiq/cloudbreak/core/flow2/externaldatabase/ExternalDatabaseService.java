@@ -22,19 +22,21 @@ import com.dyngr.core.AttemptResults;
 import com.dyngr.exception.UserBreakException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.conf.ExternalDatabaseConfig;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
@@ -47,6 +49,7 @@ import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackCon
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfigKey;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -92,22 +95,19 @@ public class ExternalDatabaseService {
 
     private final DatabaseObtainerService databaseObtainerService;
 
-    private final EntitlementService entitlementService;
-
     private final ExternalDatabaseConfig externalDatabaseConfig;
 
     private final CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     public ExternalDatabaseService(RedbeamsClientService redbeamsClient, ClusterRepository clusterRepository,
             Map<DatabaseStackConfigKey, DatabaseStackConfig> dbConfigs, Map<CloudPlatform, DatabaseServerParameterDecorator> parameterDecoratorMap,
-            DatabaseObtainerService databaseObtainerService, EntitlementService entitlementService, ExternalDatabaseConfig externalDatabaseConfig,
+            DatabaseObtainerService databaseObtainerService, ExternalDatabaseConfig externalDatabaseConfig,
             CmTemplateProcessorFactory cmTemplateProcessorFactory) {
         this.redbeamsClient = redbeamsClient;
         this.clusterRepository = clusterRepository;
         this.dbConfigs = dbConfigs;
         this.parameterDecoratorMap = parameterDecoratorMap;
         this.databaseObtainerService = databaseObtainerService;
-        this.entitlementService = entitlementService;
         this.externalDatabaseConfig = externalDatabaseConfig;
         this.cmTemplateProcessorFactory = cmTemplateProcessorFactory;
     }
@@ -182,7 +182,7 @@ public class ExternalDatabaseService {
         }
     }
 
-    public void upgradeDatabase(ClusterView cluster, UpgradeTargetMajorVersion targetMajorVersion) {
+    public void upgradeDatabase(ClusterView cluster, UpgradeTargetMajorVersion targetMajorVersion, DatabaseServerV4StackRequest newSettings) {
         LOGGER.info("Upgrading external database server to version {} for DataHub {}",
                 targetMajorVersion.name(), cluster.getName());
         String databaseCrn = cluster.getDatabaseServerCrn();
@@ -190,6 +190,7 @@ public class ExternalDatabaseService {
         if (externalDatabaseReferenceExist(databaseCrn)) {
             try {
                 UpgradeDatabaseServerV4Request request = new UpgradeDatabaseServerV4Request();
+                request.setUpgradedDatabaseSettings(newSettings);
                 request.setUpgradeTargetMajorVersion(targetMajorVersion);
                 UpgradeDatabaseServerV4Response response = redbeamsClient.upgradeByCrn(databaseCrn, request);
                 if (null == response.getFlowIdentifier()) {
@@ -387,6 +388,9 @@ public class ExternalDatabaseService {
                 .withAttributes(attributes)
                 .build();
         parameterDecoratorMap.get(cloudPlatform).setParameters(request, serverParameter);
+        if (Objects.isNull(request.getCloudPlatform())) {
+            request.setCloudPlatform(cloudPlatform);
+        }
         return request;
     }
 
@@ -403,4 +407,34 @@ public class ExternalDatabaseService {
                 .run(() -> databaseObtainerService.obtainAttemptResult(cluster, databaseOperation, databaseCrn, cancellable));
     }
 
+    public DatabaseServerV4StackRequest migrateDatabaseSettingsIfNeeded(StackDto stack, TargetMajorVersion majorVersion) {
+
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(stack.getCloudPlatform());
+        Versioned currentVersion = stack::getExternalDatabaseEngineVersion;
+        Versioned targetVersion = majorVersion::getMajorVersion;
+        boolean upgradeTargetVersionImpliesFlexibleServerMigration = CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(targetVersion,
+                TargetMajorVersion.VERSION_14::getMajorVersion);
+        boolean currentVersionImpliesFlexibleServerMigration = CMRepositoryVersionUtil.isVersionOlderThanLimited(currentVersion,
+                TargetMajorVersion.VERSION_14::getMajorVersion);
+
+        if (cloudPlatform == CloudPlatform.AZURE
+                && upgradeTargetVersionImpliesFlexibleServerMigration
+                && currentVersionImpliesFlexibleServerMigration) {
+
+            Map<String, Object> attributes = getAttributes(stack.getDatabase());
+            attributes.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name());
+            DatabaseServerV4StackRequest modifiedRequest = getDatabaseServerStackRequest(
+                    cloudPlatform,
+                    stack.getExternalDatabaseCreationType(),
+                    majorVersion.getMajorVersion(),
+                    attributes);
+            LOGGER.debug("Migration resulted in request: {}", modifiedRequest);
+            return modifiedRequest;
+        }
+        LOGGER.debug("Migration was not needed, original version: {}, target version: {}, cloud platform: {}",
+                currentVersion,
+                targetVersion,
+                cloudPlatform);
+        return null;
+    }
 }

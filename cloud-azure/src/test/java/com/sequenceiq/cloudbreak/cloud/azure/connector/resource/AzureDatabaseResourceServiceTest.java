@@ -446,20 +446,26 @@ class AzureDatabaseResourceServiceTest {
     }
 
     @Test
-    void shouldReturnExceptionWhenUpgradeDatabaseServerDbResourceIsNotFound() {
+    void shouldNotReturnExceptionWhenUpgradeDatabaseServerDbResourceIsNotFound() {
         CloudResource peResource = buildResource(AZURE_PRIVATE_ENDPOINT);
         CloudResource dzgResource = buildResource(AZURE_DNS_ZONE_GROUP);
+        DatabaseServer databaseServer = buildDatabaseServer();
+
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         List<CloudResource> cloudResourceList = List.of(peResource, dzgResource);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(List.of(mock(CloudResource.class)));
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+        when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
 
-        CloudConnectorException exception = assertThrows(CloudConnectorException.class,
-                () -> underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList));
+        underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList);
 
-        assertEquals("Azure database server cloud resource does not exist for stack, please contact Cloudera support!", exception.getMessage());
         verify(azureUtils).getStackName(eq(cloudContext));
         verify(azureUtils, never()).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
         verify(azureUtils, never()).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_ENDPOINT);
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
-        verify(azureDatabaseTemplateBuilder, never()).build(eq(cloudContext), any(DatabaseStack.class));
+        verify(azureDatabaseTemplateBuilder).build(eq(cloudContext), any(DatabaseStack.class));
     }
 
     @Test

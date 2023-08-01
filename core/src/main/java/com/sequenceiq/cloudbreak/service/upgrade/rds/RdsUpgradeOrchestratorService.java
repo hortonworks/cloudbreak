@@ -101,9 +101,9 @@ public class RdsUpgradeOrchestratorService {
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
-    public void restoreRdsData(Long stackId) throws CloudbreakOrchestratorException {
+    public void restoreRdsData(Long stackId, String targetVersion) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = createStateParams(stackId, RESTORE_STATE, true);
-        stateParams.setStateParams(backupRestoreDBStateParamsProvider.createParamsForBackupRestore(null, null));
+        stateParams.setStateParams(backupRestoreDBStateParamsProvider.createParamsForBackupRestore(null, null, targetVersion));
         LOGGER.debug("Calling restoreRdsData with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }

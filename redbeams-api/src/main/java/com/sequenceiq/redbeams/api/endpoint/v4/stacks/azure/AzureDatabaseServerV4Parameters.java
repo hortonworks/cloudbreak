@@ -178,4 +178,19 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
         azureDatabaseType = AzureDatabaseType.safeValueOf(getParameterOrNull(parameters, AZURE_DATABASE_TYPE));
         highAvailabilityMode = AzureHighAvailabiltyMode.safeValueOf(getParameterOrNull(parameters, HIGH_AVAILABILITY));
     }
+
+    @Override
+    public String toString() {
+        return "AzureDatabaseServerV4Parameters{" +
+                "backupRetentionDays=" + backupRetentionDays +
+                ", dbVersion='" + dbVersion + '\'' +
+                ", geoRedundantBackup=" + geoRedundantBackup +
+                ", skuCapacity=" + skuCapacity +
+                ", skuFamily='" + skuFamily + '\'' +
+                ", skuTier='" + skuTier + '\'' +
+                ", storageAutoGrow=" + storageAutoGrow +
+                ", azureDatabaseType=" + azureDatabaseType +
+                ", highAvailabilityMode=" + highAvailabilityMode +
+                "} " + super.toString();
+    }
 }

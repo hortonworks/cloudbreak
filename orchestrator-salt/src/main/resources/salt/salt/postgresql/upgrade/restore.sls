@@ -10,5 +10,8 @@ restore_postgresql_db:
 {%- else %}
     - name: /opt/salt/scripts/restore_db.sh -h {{salt['pillar.get']('postgres:upgrade:embeddeddb_host')}} -p {{salt['pillar.get']('postgres:upgrade:embeddeddb_port')}} -u {{salt['pillar.get']('postgres:upgrade:embeddeddb_user')}}
 {%- endif %}
+    - env:
+      - VERSION: {{salt['pillar.get']('postgres:upgrade:target_version')}}
+      - IS_REMOTE_DB: {{ configure_remote_db }}
     - require:
-        - sls: postgresql.upgrade
+      - sls: postgresql.upgrade

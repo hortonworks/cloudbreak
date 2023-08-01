@@ -31,7 +31,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -61,11 +60,11 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsNetworkV4Parameters
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
 import com.sequenceiq.redbeams.service.AccountTagService;
 import com.sequenceiq.redbeams.service.EnvironmentService;
-import com.sequenceiq.redbeams.service.PasswordGeneratorService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.UuidGeneratorService;
 import com.sequenceiq.redbeams.service.crn.CrnService;
@@ -106,11 +105,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     private static final String DATABASE_VENDOR = "postgres";
 
-    private static final String REDBEAMS_DB_MAJOR_VERSION = "10";
-
     private static final String FIELD_DB_SERVICE_SUPPORTED_PLATFORMS = "dbServiceSupportedPlatforms";
-
-    private static final String FIELD_REDBEAMS_DB_MAJOR_VERSION = "redbeamsDbMajorVersion";
 
     private static final Long NETWORK_ID = 12L;
 
@@ -125,9 +120,6 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     @Mock
     private UserGeneratorService userGeneratorService;
-
-    @Mock
-    private PasswordGeneratorService passwordGeneratorService;
 
     @Mock
     private UuidGeneratorService uuidGeneratorService;
@@ -153,6 +145,12 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     @Mock
     private SslConfigService sslConfigService;
 
+    @Mock
+    private DatabaseServer databaseServer;
+
+    @Mock
+    private DatabaseServerV4StackRequestToDatabaseServerConverter databaseServerV4StackRequestToDatabaseServerConverter;
+
     @InjectMocks
     private AllocateDatabaseServerV4RequestToDBStackConverter underTest;
 
@@ -167,7 +165,6 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     @BeforeEach
     public void setUp() {
         ReflectionTestUtils.setField(underTest, FIELD_DB_SERVICE_SUPPORTED_PLATFORMS, Set.of("AWS", "AZURE"));
-        ReflectionTestUtils.setField(underTest, FIELD_REDBEAMS_DB_MAJOR_VERSION, REDBEAMS_DB_MAJOR_VERSION);
 
         allocateRequest = new AllocateDatabaseServerV4Request();
 
@@ -212,6 +209,10 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         SslConfig sslConfig = new SslConfig();
         sslConfig.setId(16L);
         when(sslConfigService.createSslConfig(eq(allocateRequest), any(DBStack.class))).thenReturn(sslConfig);
+        when(databaseServerV4StackRequestToDatabaseServerConverter.buildDatabaseServer(any(DatabaseServerV4StackRequest.class),
+                any(CloudPlatform.class),
+                any(Crn.class),
+                any())).thenReturn(databaseServer);
 
         DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
 
@@ -227,17 +228,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals(Status.REQUESTED, dbStack.getStatus());
         assertEquals(DetailedDBStackStatus.PROVISION_REQUESTED, dbStack.getDbStackStatus().getDetailedDBStackStatus());
         assertEquals(NOW.toEpochMilli(), dbStack.getDbStackStatus().getCreated().longValue());
-        assertEquals("dbsvr-uuid", dbStack.getDatabaseServer().getName());
-        assertEquals(databaseServerRequest.getInstanceType(), dbStack.getDatabaseServer().getInstanceType());
-        assertEquals(DatabaseVendor.fromValue(databaseServerRequest.getDatabaseVendor()), dbStack.getDatabaseServer().getDatabaseVendor());
-        assertEquals("org.postgresql.Driver", dbStack.getDatabaseServer().getConnectionDriver());
-        assertEquals(databaseServerRequest.getStorageSize(), dbStack.getDatabaseServer().getStorageSize());
-        assertEquals(databaseServerRequest.getRootUserName(), dbStack.getDatabaseServer().getRootUserName());
-        assertEquals(databaseServerRequest.getRootUserPassword(), dbStack.getDatabaseServer().getRootPassword());
-        assertEquals(2, dbStack.getDatabaseServer().getAttributes().getMap().size());
-        assertEquals("dbvalue", dbStack.getDatabaseServer().getAttributes().getMap().get("dbkey"));
-        assertEquals(REDBEAMS_DB_MAJOR_VERSION, dbStack.getDatabaseServer().getAttributes().getMap().get("engineVersion"));
-        assertEquals(securityGroupRequest.getSecurityGroupIds(), dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds());
+        assertEquals(databaseServer, dbStack.getDatabaseServer());
         assertEquals(NETWORK_ID, dbStack.getNetwork());
         assertEquals(dbStack.getTags().get(StackTags.class).getUserDefinedTags().get("DistroXKey1"), "DistroXValue1");
 
@@ -245,7 +236,6 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
         verify(providerParameterCalculator).get(allocateRequest);
         verify(userGeneratorService, never()).generateUserName();
-        verify(passwordGeneratorService, never()).generatePassword(any());
     }
 
     private CrnUser getCrnUser() {
@@ -278,29 +268,27 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                 .build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         when(userGeneratorService.generateUserName()).thenReturn(USERNAME);
-        when(passwordGeneratorService.generatePassword(any())).thenReturn(PASSWORD);
         Network network = new Network();
         network.setId(NETWORK_ID);
         when(networkBuilderService.buildNetwork(isNull(), eq(environment), eq(AWS_CLOUD_PLATFORM), any(DBStack.class))).thenReturn(network);
         SslConfig sslConfig = new SslConfig();
         sslConfig.setId(16L);
         when(sslConfigService.createSslConfig(eq(allocateRequest), any(DBStack.class))).thenReturn(sslConfig);
+        when(databaseServerV4StackRequestToDatabaseServerConverter.buildDatabaseServer(any(DatabaseServerV4StackRequest.class),
+                any(CloudPlatform.class),
+                any(Crn.class),
+                any(SecurityAccessResponse.class))).thenReturn(databaseServer);
 
         DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
 
         assertEquals(ENVIRONMENT_NAME + "-dbstck-parts", dbStack.getName());
-        assertEquals(PASSWORD, dbStack.getDatabaseServer().getRootPassword());
-        assertEquals(USERNAME, dbStack.getDatabaseServer().getRootUserName());
-        assertThat(dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds()).hasSize(1);
-        assertEquals(dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds().iterator().next(), DEFAULT_SECURITY_GROUP_ID);
+        assertEquals(databaseServer, dbStack.getDatabaseServer());
         assertEquals(dbStack.getTags().get(StackTags.class).getUserDefinedTags().get("DistroXKey1"), "DistroXValue1");
 
         verifySsl(dbStack, sslConfig.getId());
 
         verify(providerParameterCalculator).get(allocateRequest);
         verify(providerParameterCalculator, never()).get(networkRequest);
-        verify(userGeneratorService).generateUserName();
-        verify(passwordGeneratorService).generatePassword(any());
     }
 
     @Test

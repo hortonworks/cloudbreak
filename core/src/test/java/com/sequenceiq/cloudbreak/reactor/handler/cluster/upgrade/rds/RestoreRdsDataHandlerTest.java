@@ -48,7 +48,7 @@ class RestoreRdsDataHandlerTest {
         when(event.getData()).thenReturn(request);
 
         Selectable result = underTest.doAccept(event);
-        verify(upgradeRdsService).restoreRds(STACK_ID);
+        verify(upgradeRdsService).restoreRds(STACK_ID, request.getVersion().getMajorVersion());
         assertThat(result.selector()).isEqualTo("UPGRADERDSDATARESTORERESULT");
     }
 
@@ -56,10 +56,11 @@ class RestoreRdsDataHandlerTest {
     void orchestrationException() throws CloudbreakOrchestratorException {
         UpgradeRdsDataRestoreRequest request = new UpgradeRdsDataRestoreRequest(STACK_ID, TARGET_MAJOR_VERSION);
         when(event.getData()).thenReturn(request);
-        doThrow(new CloudbreakOrchestratorFailedException("salt error")).when(upgradeRdsService).restoreRds(eq(STACK_ID));
+        doThrow(new CloudbreakOrchestratorFailedException("salt error")).when(upgradeRdsService).restoreRds(
+                eq(STACK_ID), eq(request.getVersion().getMajorVersion()));
 
         Selectable result = underTest.doAccept(event);
-        verify(upgradeRdsService).restoreRds(STACK_ID);
+        verify(upgradeRdsService).restoreRds(STACK_ID, request.getVersion().getMajorVersion());
         assertThat(result.selector()).isEqualTo("UPGRADERDSFAILEDEVENT");
         assertThat(result).isInstanceOf(UpgradeRdsFailedEvent.class);
         UpgradeRdsFailedEvent failedEvent = (UpgradeRdsFailedEvent) result;

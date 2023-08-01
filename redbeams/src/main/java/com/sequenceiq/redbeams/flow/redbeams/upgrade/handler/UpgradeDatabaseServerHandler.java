@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -15,20 +16,24 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.dto.UpgradeDatabaseMigrationParams;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsUpgradeFailedEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.UpgradeDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.UpgradeDatabaseServerSuccess;
 import com.sequenceiq.redbeams.service.stack.DBResourceService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
+import com.sequenceiq.redbeams.service.upgrade.DBUpgradeMigrationService;
 
 @Component
 public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<UpgradeDatabaseServerRequest> {
@@ -46,6 +51,9 @@ public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<U
 
     @Inject
     private DBResourceService dbResourceService;
+
+    @Inject
+    private DBUpgradeMigrationService upgradeMigrationService;
 
     @Override
     public String selector() {
@@ -65,18 +73,29 @@ public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<U
         LOGGER.debug("Received event: {}", event);
         UpgradeDatabaseServerRequest request = event.getData();
         DatabaseStack databaseStack = request.getDatabaseStack();
+        TargetMajorVersion targetMajorVersion = request.getTargetMajorVersion();
         CloudCredential cloudCredential = request.getCloudCredential();
         CloudContext cloudContext = request.getCloudContext();
         CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
-        AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
-        List<CloudResource> cloudResources = dbResourceService.getAllAsCloudResource(request.getResourceId());
+        UpgradeDatabaseMigrationParams migrationParams = request.getUpgradeDatabaseMigrationParams();
+        boolean databaseMigrationRequired = (migrationParams != null);
         Selectable response;
+        DBStack dbStack = dbStackService.getById(request.getResourceId());
         try {
-            TargetMajorVersion targetMajorVersion = request.getTargetMajorVersion();
-            connector.resources().upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, targetMajorVersion, cloudResources);
-            DBStack dbStack = dbStackService.getById(request.getResourceId());
-            dbStack.setMajorVersion(targetMajorVersion.convertToMajorVersion());
-            dbStackService.save(dbStack);
+            if (databaseMigrationRequired) {
+                LOGGER.debug("Migration is required, new database server attributes: {}", migrationParams.getAttributes());
+                databaseStack = upgradeMigrationService.mergeDatabaseStacks(dbStack, migrationParams, connector);
+
+            } else {
+                LOGGER.debug("Migration was not needed, progressing with original databaseStack..");
+            }
+            performDbUpgrade(request, databaseStack, targetMajorVersion, cloudCredential, cloudContext, connector);
+
+            if (databaseMigrationRequired) {
+                updateDbStack(dbStack, targetMajorVersion, databaseStack);
+            } else {
+                updateDbVersionOnly(dbStack, targetMajorVersion);
+            }
             response = new UpgradeDatabaseServerSuccess(request.getResourceId());
             LOGGER.debug("Successfully upgraded the database server {}", databaseStack);
         } catch (Exception e) {
@@ -86,4 +105,32 @@ public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<U
         return response;
     }
 
+    private void performDbUpgrade(UpgradeDatabaseServerRequest request, DatabaseStack databaseStack, TargetMajorVersion targetMajorVersion,
+            CloudCredential cloudCredential, CloudContext cloudContext, CloudConnector connector) throws Exception {
+        AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
+        List<CloudResource> cloudResources = dbResourceService.getAllAsCloudResource(request.getResourceId());
+        connector.resources().upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, targetMajorVersion, cloudResources);
+    }
+
+    private void updateDbStack(DBStack dbStack, TargetMajorVersion targetMajorVersion, DatabaseStack mergedDatabaseStack) {
+        String originalTemplate = dbStack.getTemplate();
+        String templateForUpgrade = mergedDatabaseStack.getTemplate();
+        if (!StringUtils.equals(originalTemplate, templateForUpgrade)) {
+            LOGGER.debug("There was a difference between the upgraded template and the original one, saving it now..");
+            dbStack.setTemplate(templateForUpgrade);
+        }
+        dbStack.setMajorVersion(targetMajorVersion.convertToMajorVersion());
+        DatabaseServer migratedDbServer = mergedDatabaseStack.getDatabaseServer();
+        com.sequenceiq.redbeams.domain.stack.DatabaseServer persistedDatabaseServer = dbStack.getDatabaseServer();
+        // CB-22658 is filed to make this more generic
+        persistedDatabaseServer.setAttributes(new Json(migratedDbServer.getParameters()));
+        persistedDatabaseServer.setInstanceType(migratedDbServer.getFlavor());
+        persistedDatabaseServer.setStorageSize(migratedDbServer.getStorageSize());
+        dbStackService.save(dbStack);
+    }
+
+    private void updateDbVersionOnly(DBStack dbStack, TargetMajorVersion targetMajorVersion) {
+        dbStack.setMajorVersion(targetMajorVersion.convertToMajorVersion());
+        dbStackService.save(dbStack);
+    }
 }

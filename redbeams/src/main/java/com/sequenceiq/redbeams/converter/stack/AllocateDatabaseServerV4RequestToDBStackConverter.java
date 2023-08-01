@@ -1,13 +1,11 @@
 package com.sequenceiq.redbeams.converter.stack;
 
-import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityGroupIds;
 import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request.RDS_NAME_MAX_LENGTH;
 
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -18,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -32,20 +29,13 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4StackRequest;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
-import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
-import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.service.AccountTagService;
 import com.sequenceiq.redbeams.service.EnvironmentService;
-import com.sequenceiq.redbeams.service.PasswordGeneratorService;
-import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.UuidGeneratorService;
 import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
@@ -61,9 +51,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     @Value("${cb.enabledplatforms:}")
     private Set<String> dbServiceSupportedPlatforms;
 
-    @Value("${redbeams.db.postgres.major.version:}")
-    private String redbeamsDbMajorVersion;
-
     @Inject
     private EnvironmentService environmentService;
 
@@ -72,15 +59,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     @Inject
     private Clock clock;
-
-    @Inject
-    private UserGeneratorService userGeneratorService;
-
-    @Inject
-    private PasswordGeneratorService passwordGeneratorService;
-
-    @Inject
-    private UuidGeneratorService uuidGeneratorService;
 
     @Inject
     private CrnUserDetailsService crnUserDetailsService;
@@ -103,6 +81,12 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     @Inject
     private SslConfigService sslConfigService;
 
+    @Inject
+    private UuidGeneratorService uuidGeneratorService;
+
+    @Inject
+    private DatabaseServerV4StackRequestToDatabaseServerConverter databaseServerV4StackRequestToDatabaseServerConverter;
+
     @PostConstruct
     public void initSupportedPlatforms() {
         if (dbServiceSupportedPlatforms.isEmpty()) {
@@ -124,7 +108,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         setRegion(dbStack, environment);
 
         if (source.getDatabaseServer() != null) {
-            dbStack.setDatabaseServer(buildDatabaseServer(source.getDatabaseServer(), cloudPlatform, ownerCrn,
+            dbStack.setDatabaseServer(databaseServerV4StackRequestToDatabaseServerConverter.buildDatabaseServer(source.getDatabaseServer(),
+                    cloudPlatform,
+                    ownerCrn,
                     environment.getSecurityAccess()));
         }
 
@@ -219,75 +205,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
             throw new BadRequestException(String.format(
                     "Cloud platform of the request %s and the environment %s do not match.", cloudPlatformRequest, cloudPlatformEnvironment));
         }
-    }
-
-    private DatabaseServer buildDatabaseServer(DatabaseServerV4StackRequest source, CloudPlatform cloudPlatform, Crn ownerCrn,
-            SecurityAccessResponse securityAccessResponse) {
-        DatabaseServer server = new DatabaseServer();
-        server.setAccountId(ownerCrn.getAccountId());
-        server.setName(generateDatabaseServerName());
-        server.setInstanceType(source.getInstanceType());
-        DatabaseVendor databaseVendor = DatabaseVendor.fromValue(source.getDatabaseVendor());
-        server.setDatabaseVendor(databaseVendor);
-        server.setConnectionDriver(source.getConnectionDriver());
-        server.setStorageSize(source.getStorageSize());
-        server.setRootUserName(source.getRootUserName() != null ? source.getRootUserName() : userGeneratorService.generateUserName());
-        server.setRootPassword(source.getRootUserPassword() != null ?
-                source.getRootUserPassword() : passwordGeneratorService.generatePassword(Optional.of(cloudPlatform)));
-        server.setPort(source.getPort());
-        server.setSecurityGroup(buildExistingSecurityGroup(source.getSecurityGroup(), securityAccessResponse));
-
-        Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
-        if (parameters != null) {
-            try {
-                setDbVersion(parameters, cloudPlatform);
-                server.setAttributes(new Json(parameters));
-            } catch (IllegalArgumentException e) {
-                throw new BadRequestException("Invalid database server parameters", e);
-            }
-        }
-
-        return server;
-    }
-
-    private void setDbVersion(Map<String, Object> parameters, CloudPlatform cloudPlatform) {
-        String dbVersionKey = getDbVersionKey(cloudPlatform);
-        parameters.computeIfAbsent(dbVersionKey, k -> redbeamsDbMajorVersion);
-    }
-
-    private String getDbVersionKey(CloudPlatform cloudPlatform) {
-        switch (cloudPlatform) {
-            case AZURE:
-                return "dbVersion";
-            default:
-                return "engineVersion";
-        }
-    }
-
-    /**
-     * Redbeams saves security group id if it is provided in the request or if the environment provides a default security group.
-     * If none of them are filled in, then a custom security group is created later in spi.
-     *
-     * @param source                 - the request
-     * @param securityAccessResponse - environment data
-     * @return returns the saved security groups. If none is specified, then an empty security group is returned.
-     */
-    private SecurityGroup buildExistingSecurityGroup(SecurityGroupV4StackRequest source, SecurityAccessResponse securityAccessResponse) {
-        SecurityGroup securityGroup = new SecurityGroup();
-        if (source != null) {
-            securityGroup.setSecurityGroupIds(source.getSecurityGroupIds());
-        } else if (securityAccessResponse.getDefaultSecurityGroupId() != null) {
-            securityGroup.setSecurityGroupIds(getSecurityGroupIds(securityAccessResponse.getDefaultSecurityGroupId()));
-        }
-
-        return securityGroup;
-    }
-
-    // Sorry, MissingResourceNameGenerator seems like overkill. Unlike other
-    // converters, this converter generates names internally in the same format.
-
-    private String generateDatabaseServerName() {
-        return String.format("dbsvr-%s", uuidGeneratorService.randomUuid());
     }
 
     private String generateDatabaseServerStackName(String environmentName) {

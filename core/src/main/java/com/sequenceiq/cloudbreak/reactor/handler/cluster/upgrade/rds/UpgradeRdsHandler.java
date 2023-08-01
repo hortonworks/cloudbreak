@@ -30,6 +30,7 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeTargetMajorVersion;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 
 @Component
 public class UpgradeRdsHandler extends ExceptionCatcherEventHandler<UpgradeRdsUpgradeDatabaseServerRequest> {
@@ -97,7 +98,8 @@ public class UpgradeRdsHandler extends ExceptionCatcherEventHandler<UpgradeRdsUp
     private UpgradeRdsUpgradeDatabaseServerResult upgradeExternalDatabase(UpgradeRdsUpgradeDatabaseServerRequest request, Long stackId, StackDto stackDto) {
         TargetMajorVersion targetMajorVersion = request.getVersion();
         UpgradeTargetMajorVersion upgradeTargetMajorVersion = targetMajorVersionToUpgradeTargetVersionConverter.convert(targetMajorVersion);
-        databaseService.upgradeDatabase(stackDto.getCluster(), upgradeTargetMajorVersion);
+        DatabaseServerV4StackRequest migratedRequest = databaseService.migrateDatabaseSettingsIfNeeded(stackDto, targetMajorVersion);
+        databaseService.upgradeDatabase(stackDto.getCluster(), upgradeTargetMajorVersion, migratedRequest);
         return new UpgradeRdsUpgradeDatabaseServerResult(stackId, request.getVersion());
     }
 

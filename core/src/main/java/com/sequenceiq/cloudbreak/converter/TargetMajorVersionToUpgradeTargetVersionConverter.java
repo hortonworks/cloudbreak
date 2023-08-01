@@ -9,11 +9,9 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeTa
 public class TargetMajorVersionToUpgradeTargetVersionConverter {
 
     public UpgradeTargetMajorVersion convert(TargetMajorVersion sourceTargetVersion) {
-        switch (sourceTargetVersion) {
-            case VERSION_11:
-                return UpgradeTargetMajorVersion.VERSION_11;
-            default:
-                throw new RuntimeException("Unknown upgrade target version: %s" + sourceTargetVersion);
-        }
+        return switch (sourceTargetVersion) {
+            case VERSION_11 -> UpgradeTargetMajorVersion.VERSION_11;
+            case VERSION_14 -> UpgradeTargetMajorVersion.VERSION_14;
+        };
     }
 }

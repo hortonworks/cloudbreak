@@ -21,20 +21,14 @@ public class ProviderParameterCalculator {
     }
 
     private Mappable getMappable(ProviderParametersBase source, CloudPlatform cloudPlatform) {
-        switch (cloudPlatform) {
-            case AWS:
-                return source.createAws();
-            case GCP:
-                return source.createGcp();
-            case MOCK:
-                return source.createMock();
-            case YARN:
-                return source.createYarn();
-            case AZURE:
-                return source.createAzure();
-            default:
-                throw new BadRequestException(format("No mappable for cloudplatform [%s] and source [%s]", cloudPlatform, source.getClass()));
-        }
+        return switch (cloudPlatform) {
+            case AWS -> source.createAws();
+            case GCP -> source.createGcp();
+            case MOCK -> source.createMock();
+            case YARN -> source.createYarn();
+            case AZURE -> source.createAzure();
+            default -> throw new BadRequestException(format("No mappable for cloudplatform [%s] and source [%s]", cloudPlatform, source.getClass()));
+        };
     }
 
     public void parse(Map<String, Object> parameters, ProviderParametersBase base) {

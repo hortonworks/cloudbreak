@@ -93,8 +93,8 @@ public class UpgradeRdsService {
         rdsUpgradeOrchestratorService.backupRdsData(stackId, backupLocation, backupInstanceProfile);
     }
 
-    public void restoreRds(Long stackId) throws CloudbreakOrchestratorException {
-        rdsUpgradeOrchestratorService.restoreRdsData(stackId);
+    public void restoreRds(Long stackId, String targetVersion) throws CloudbreakOrchestratorException {
+        rdsUpgradeOrchestratorService.restoreRdsData(stackId, targetVersion);
     }
 
     public void installPostgresPackages(Long stackId) throws CloudbreakOrchestratorException {

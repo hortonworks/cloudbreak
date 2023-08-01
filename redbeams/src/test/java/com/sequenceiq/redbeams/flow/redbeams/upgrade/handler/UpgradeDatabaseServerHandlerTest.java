@@ -1,9 +1,15 @@
 package com.sequenceiq.redbeams.flow.redbeams.upgrade.handler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,16 +26,20 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
+import com.sequenceiq.redbeams.dto.UpgradeDatabaseMigrationParams;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.UpgradeDatabaseServerRequest;
 import com.sequenceiq.redbeams.service.stack.DBResourceService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
+import com.sequenceiq.redbeams.service.upgrade.DBUpgradeMigrationService;
 
 @ExtendWith(MockitoExtension.class)
 public class UpgradeDatabaseServerHandlerTest {
@@ -64,6 +74,9 @@ public class UpgradeDatabaseServerHandlerTest {
     @Mock
     private DBResourceService dbResourceService;
 
+    @Mock
+    private DBUpgradeMigrationService dbUpgradeMigrationService;
+
     @InjectMocks
     private UpgradeDatabaseServerHandler underTest;
 
@@ -74,7 +87,7 @@ public class UpgradeDatabaseServerHandlerTest {
 
     @Test
     void testDoAccept() {
-        HandlerEvent<UpgradeDatabaseServerRequest> event = getHandlerEvent();
+        HandlerEvent<UpgradeDatabaseServerRequest> event = getHandlerEvent(false);
         DBStack dbStack = new DBStack();
         DatabaseServer databaseServer = new DatabaseServer();
         dbStack.setDatabaseServer(databaseServer);
@@ -92,26 +105,93 @@ public class UpgradeDatabaseServerHandlerTest {
 
         verify(dbStackService).getById(event.getData().getResourceId());
         verify(dbStackService).save(dbStackArgumentCaptor.capture());
+        verify(dbUpgradeMigrationService, never()).mergeDatabaseStacks(eq(dbStack), any(), eq(cloudConnector));
 
         assertEquals("UPGRADEDATABASESERVERSUCCESS", nextFlowStepSelector.selector());
         assertEquals(event.getData().getTargetMajorVersion().getMajorVersion(), dbStackArgumentCaptor.getValue().getMajorVersion().getMajorVersion());
     }
 
     @Test
+    void testDoAcceptWithMigrationRequest() {
+        HandlerEvent<UpgradeDatabaseServerRequest> event = getHandlerEvent(true);
+        DBStack dbStack = new DBStack();
+        DatabaseServer databaseServer = new DatabaseServer();
+        dbStack.setDatabaseServer(databaseServer);
+        dbStack.setCloudPlatform(CloudPlatform.AZURE.name());
+        DatabaseStack databaseStack = generateDatabaseStack();
+        UpgradeDatabaseMigrationParams migrationParams = getMigrationParams();
+
+        when(cloudContext.getPlatformVariant()).thenReturn(cloudPlatformVariant);
+        when(cloudPlatformConnectors.get(cloudPlatformVariant)).thenReturn(cloudConnector);
+        when(cloudConnector.authentication()).thenReturn(authenticator);
+        when(authenticator.authenticate(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
+        when(cloudConnector.resources()).thenReturn(resourceConnector);
+        when(dbStackService.getById(event.getData().getResourceId())).thenReturn(dbStack);
+        when(dbUpgradeMigrationService.mergeDatabaseStacks(any(DBStack.class), any(), any())).thenReturn(databaseStack);
+        ArgumentCaptor<DBStack> dbStackArgumentCaptor = ArgumentCaptor.forClass(DBStack.class);
+
+        Selectable nextFlowStepSelector = underTest.doAccept(event);
+
+        verify(dbStackService).getById(event.getData().getResourceId());
+        verify(dbStackService).save(dbStackArgumentCaptor.capture());
+        verify(dbUpgradeMigrationService).mergeDatabaseStacks(any(DBStack.class), eq(migrationParams), eq(cloudConnector));
+
+        assertEquals("UPGRADEDATABASESERVERSUCCESS", nextFlowStepSelector.selector());
+        DBStack actualDbStack = dbStackArgumentCaptor.getValue();
+        DatabaseServer actualDbServer = actualDbStack.getDatabaseServer();
+        assertEquals(migrationParams.getAttributes(), actualDbServer.getAttributes());
+        assertEquals(migrationParams.getInstanceType(), actualDbServer.getInstanceType());
+        assertEquals(migrationParams.getRootUserName(), actualDbServer.getRootUserName());
+        assertEquals(migrationParams.getStorageSize(), actualDbServer.getStorageSize());
+        assertNull(actualDbServer.getSecurityGroup());
+        assertNull(actualDbServer.getDatabaseVendor());
+        assertNull(actualDbServer.getAccountId());
+        assertNull(actualDbServer.getConnectionDriver());
+        assertNull(actualDbServer.getName());
+        assertNull(actualDbServer.getDescription());
+        assertNull(actualDbServer.getRootPassword());
+        assertNull(actualDbServer.getPort());
+    }
+
+    @Test
     void testDefaultFailureEvent() {
-        UpgradeDatabaseServerRequest upgradeDatabaseServerRequest = new UpgradeDatabaseServerRequest(null, null, null, null);
+        UpgradeDatabaseServerRequest upgradeDatabaseServerRequest = new UpgradeDatabaseServerRequest(null, null, null, null, null);
 
         Selectable defaultFailureEvent = underTest.defaultFailureEvent(1L, new RuntimeException(), Event.wrap(upgradeDatabaseServerRequest));
 
         assertEquals("REDBEAMSUPGRADEFAILEDEVENT", defaultFailureEvent.selector());
     }
 
-    private HandlerEvent<UpgradeDatabaseServerRequest> getHandlerEvent() {
+    private HandlerEvent<UpgradeDatabaseServerRequest> getHandlerEvent(boolean includeMigrationParams) {
         UpgradeDatabaseServerRequest upgradeDatabaseServerRequest = new UpgradeDatabaseServerRequest(cloudContext, cloudCredential, null,
-                TargetMajorVersion.VERSION_11);
+                TargetMajorVersion.VERSION_11, includeMigrationParams ? getMigrationParams() : null);
         HandlerEvent<UpgradeDatabaseServerRequest> handlerEvent = mock(HandlerEvent.class);
         when(handlerEvent.getEvent()).thenReturn(Event.wrap(upgradeDatabaseServerRequest));
         when(handlerEvent.getData()).thenReturn(upgradeDatabaseServerRequest);
         return handlerEvent;
+    }
+
+    private UpgradeDatabaseMigrationParams getMigrationParams() {
+        UpgradeDatabaseMigrationParams migrationParams = new UpgradeDatabaseMigrationParams();
+        migrationParams.setStorageSize(128L);
+        migrationParams.setInstanceType("Standard_E4ds_v4");
+        Map<String, Object> parameters = Map.of("key", "test");
+        Json attributes = new Json(parameters);
+        migrationParams.setAttributes(attributes);
+        return migrationParams;
+    }
+
+    private DatabaseStack generateDatabaseStack() {
+        UpgradeDatabaseMigrationParams migrationParams = getMigrationParams();
+        com.sequenceiq.cloudbreak.cloud.model.DatabaseServer databaseServerModel = com.sequenceiq.cloudbreak.cloud.model.DatabaseServer.builder()
+                .withServerId("dbname")
+                .withFlavor(migrationParams.getInstanceType())
+                .withStorageSize(migrationParams.getStorageSize())
+                .withRootUserName("root")
+                .withRootPassword("pwd")
+                .withLocation("location")
+                .withParams(migrationParams.getAttributes().getMap())
+                .build();
+        return new DatabaseStack(null, databaseServerModel, Map.of("tag1", "tag1"), "");
     }
 }

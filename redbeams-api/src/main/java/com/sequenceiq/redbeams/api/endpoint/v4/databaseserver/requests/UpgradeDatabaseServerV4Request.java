@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
@@ -16,6 +17,9 @@ public class UpgradeDatabaseServerV4Request {
     @ApiModelProperty(value = ModelDescriptions.UpgradeModelDescriptions.MAJOR_VERSION, required = true)
     private UpgradeTargetMajorVersion upgradeTargetMajorVersion;
 
+    @ApiModelProperty(value = ModelDescriptions.UpgradeModelDescriptions.UPGRADED_DATABASE_SETTINGS)
+    private DatabaseServerV4StackRequest upgradedDatabaseSettings;
+
     public UpgradeTargetMajorVersion getUpgradeTargetMajorVersion() {
         return upgradeTargetMajorVersion;
     }
@@ -24,10 +28,19 @@ public class UpgradeDatabaseServerV4Request {
         this.upgradeTargetMajorVersion = upgradeTargetMajorVersion;
     }
 
+    public DatabaseServerV4StackRequest getUpgradedDatabaseSettings() {
+        return upgradedDatabaseSettings;
+    }
+
+    public void setUpgradedDatabaseSettings(DatabaseServerV4StackRequest upgradedDatabaseSettings) {
+        this.upgradedDatabaseSettings = upgradedDatabaseSettings;
+    }
+
     @Override
     public String toString() {
         return "UpgradeDatabaseServerV4Request{" +
-                "majorVersion=" + upgradeTargetMajorVersion +
+                "upgradeTargetMajorVersion=" + upgradeTargetMajorVersion +
+                ", upgradedDatabaseSettings=" + upgradedDatabaseSettings +
                 '}';
     }
 }

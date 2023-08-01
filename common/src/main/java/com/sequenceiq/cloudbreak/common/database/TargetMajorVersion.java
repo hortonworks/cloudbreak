@@ -5,7 +5,8 @@ package com.sequenceiq.cloudbreak.common.database;
  */
 public enum TargetMajorVersion implements Version {
 
-    VERSION_11("11");
+    VERSION_11("11"),
+    VERSION_14("14");
 
     private final String version;
 

@@ -294,7 +294,6 @@ public class AzureDatabaseResourceService {
         String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         AzureClient client = authenticatedContext.getParameter(AzureClient.class);
-
         try {
             deleteDatabaseServer(persistenceNotifier, cloudContext, resources, client);
             deleteAllPrivateEndpointResources(persistenceNotifier, cloudContext, resources, client);
@@ -332,9 +331,8 @@ public class AzureDatabaseResourceService {
         databaseServer.ifPresentOrElse(
                 databaseServerResource -> deleteDatabaseServer(client, databaseServerResource, persistenceNotifier, cloudContext),
                 () -> {
-                    String message = "Azure database server cloud resource does not exist for stack, please contact Cloudera support!";
+                    String message = "Azure database server cloud resource does not exist for stack, ignoring it now";
                     LOGGER.warn(message);
-                    throw new CloudConnectorException(message);
                 });
     }
 

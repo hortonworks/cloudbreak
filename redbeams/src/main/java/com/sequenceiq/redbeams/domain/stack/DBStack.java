@@ -189,46 +189,51 @@ public class DBStack {
     public MajorVersion getMajorVersion() {
         Map<String, Object> attributes = databaseServer.getAttributes().getMap();
         switch (CloudPlatform.valueOf(cloudPlatform)) {
-            case AZURE:
+            case AZURE -> {
                 AzureDatabaseServerV4Parameters azure = new AzureDatabaseServerV4Parameters();
                 azure.parse(attributes);
                 return MajorVersion.get(azure.getDbVersion()).orElse(MajorVersion.VERSION_10);
-            case AWS:
+            }
+            case AWS -> {
                 AwsDatabaseServerV4Parameters aws = new AwsDatabaseServerV4Parameters();
                 aws.parse(attributes);
                 return MajorVersion.get(aws.getEngineVersion()).orElse(MajorVersion.VERSION_10);
-            case GCP:
+            }
+            case GCP -> {
                 GcpDatabaseServerV4Parameters gcp = new GcpDatabaseServerV4Parameters();
                 gcp.parse(attributes);
                 return MajorVersion.get(gcp.getEngineVersion()).orElse(MajorVersion.VERSION_10);
-            default:
+            }
+            default -> {
                 return MajorVersion.VERSION_10;
+            }
         }
     }
 
     public void setMajorVersion(MajorVersion version) {
         Map<String, Object> attributes = NullUtil.getIfNotNullOtherwise(databaseServer.getAttributes(), Json::getMap, new HashMap<>());
         switch (CloudPlatform.valueOf(cloudPlatform)) {
-            case AZURE:
+            case AZURE -> {
                 AzureDatabaseServerV4Parameters azure = new AzureDatabaseServerV4Parameters();
                 azure.parse(attributes);
                 azure.setDbVersion(version.getMajorVersion());
                 databaseServer.setAttributes(new Json(azure.asMap()));
-                break;
-            case AWS:
+            }
+            case AWS -> {
                 AwsDatabaseServerV4Parameters aws = new AwsDatabaseServerV4Parameters();
                 aws.parse(attributes);
                 aws.setEngineVersion(version.getMajorVersion());
                 databaseServer.setAttributes(new Json(aws.asMap()));
-                break;
-            case GCP:
+            }
+            case GCP -> {
                 GcpDatabaseServerV4Parameters gcp = new GcpDatabaseServerV4Parameters();
                 gcp.parse(attributes);
                 gcp.setEngineVersion(version.getMajorVersion());
                 databaseServer.setAttributes(new Json(gcp.asMap()));
-                break;
-            default:
-                // This is needed for checkstyle and spotbugs
+            }
+            default -> {
+            }
+            // This is needed for checkstyle and spotbugs
         }
     }
 

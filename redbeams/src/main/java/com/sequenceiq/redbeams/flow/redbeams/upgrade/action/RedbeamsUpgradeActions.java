@@ -37,8 +37,6 @@ import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
 public class RedbeamsUpgradeActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsUpgradeActions.class);
 
-    private static final String TARGET_MAJOR_VERSION = "TARGET_MAJOR_VERSION";
-
     @Inject
     private DBStackStatusUpdater dbStackStatusUpdater;
 
@@ -57,11 +55,11 @@ public class RedbeamsUpgradeActions {
                                 context.getCloudContext(),
                                 context.getCloudCredential(),
                                 context.getDatabaseStack(),
-                                targetMajorVersion
+                                targetMajorVersion,
+                                payload.getMigrationParams()
                         )
                 );
             }
-
         };
     }
 

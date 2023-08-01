@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceI
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.azure.task.AzurePollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.azure.task.networkinterface.NetworkInterfaceDetachCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.azure.util.ReactiveUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.util.SchedulerProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzurePremiumValidatorService;
@@ -124,6 +125,9 @@ public class AzureUtils {
 
     @Inject
     private SchedulerProvider schedulerProvider;
+
+    @Inject
+    private AzureExceptionHandler azureExceptionHandler;
 
     public CloudResource getTemplateResource(Iterable<CloudResource> resourceList) {
         for (CloudResource resource : resourceList) {
@@ -682,7 +686,7 @@ public class AzureUtils {
     }
 
     private Optional<String> getDeletionErrorMessage(String resourceType, String resourceId, ManagementException e) {
-        if (e.getValue() != null && "ResourceGroupNotFound".equals(e.getValue().getCode())) {
+        if (e.getValue() != null && azureExceptionHandler.isNotFound(e)) {
             LOGGER.warn("{} {} does not exist, assuming that it has already been deleted", resourceType, resourceId);
             return Optional.empty();
             // leave errorMessage null => do not throw exception

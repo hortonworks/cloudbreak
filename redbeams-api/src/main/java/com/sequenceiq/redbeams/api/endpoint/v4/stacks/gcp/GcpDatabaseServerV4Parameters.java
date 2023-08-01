@@ -69,4 +69,12 @@ public class GcpDatabaseServerV4Parameters extends MappableBase {
         backupRetentionDays = getInt(parameters, BACKUP_RETENTION_DAYS);
         engineVersion = getParameterOrNull(parameters, ENGINE_VERSION);
     }
+
+    @Override
+    public String toString() {
+        return "GcpDatabaseServerV4Parameters{" +
+                "backupRetentionDays=" + backupRetentionDays +
+                ", engineVersion='" + engineVersion + '\'' +
+                "} " + super.toString();
+    }
 }

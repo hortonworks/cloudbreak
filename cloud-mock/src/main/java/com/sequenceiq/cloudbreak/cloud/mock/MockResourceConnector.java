@@ -291,7 +291,7 @@ public class MockResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public String getDBStackTemplate(DatabaseStack databaseStack) throws TemplatingNotSupportedException {
+    public String getDBStackTemplate(DatabaseStack databaseStack) {
         return "BestDbStackTemplateInTheWorld";
     }
 

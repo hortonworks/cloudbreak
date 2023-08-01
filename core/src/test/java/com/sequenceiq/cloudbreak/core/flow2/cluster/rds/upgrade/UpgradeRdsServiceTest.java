@@ -109,9 +109,9 @@ class UpgradeRdsServiceTest {
 
     @Test
     public void testRestoreRds() throws CloudbreakOrchestratorException {
-        underTest.restoreRds(STACK_ID);
+        underTest.restoreRds(STACK_ID, TARGET_VERSION);
 
-        verify(rdsUpgradeOrchestratorService).restoreRdsData(eq(STACK_ID));
+        verify(rdsUpgradeOrchestratorService).restoreRdsData(eq(STACK_ID), eq(TARGET_VERSION));
     }
 
     @Test

@@ -101,7 +101,7 @@ public class SdxDatabaseServerUpgradeService {
             throwAlreadyOnLatestError(cluster);
         }
 
-        if (!isDatabaseAvailableForUpgade(databaseResponse)) {
+        if (!isDatabaseAvailableForUpgrade(databaseResponse)) {
             throwDatabaseNotAvailableForUpgradeError(cluster, databaseResponse);
         }
 
@@ -125,7 +125,7 @@ public class SdxDatabaseServerUpgradeService {
         return RUNNING == status || DATALAKE_UPGRADE_DATABASE_SERVER_FAILED == status;
     }
 
-    private boolean isDatabaseAvailableForUpgade(StackDatabaseServerResponse databaseResponse) {
+    private boolean isDatabaseAvailableForUpgrade(StackDatabaseServerResponse databaseResponse) {
         DatabaseServerStatus status = databaseResponse.getStatus();
         return status != null && status.isAvailableForUpgrade();
     }

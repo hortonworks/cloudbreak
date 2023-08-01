@@ -32,13 +32,12 @@ import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeOrchestratorServi
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeTargetMajorVersion;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 
 @ExtendWith(MockitoExtension.class)
 class UpgradeRdsHandlerTest {
 
     private static final Long STACK_ID = 12L;
-
-    private static final String STACK_NAME = "aStack";
 
     private static final TargetMajorVersion TARGET_MAJOR_VERSION = TargetMajorVersion.VERSION_11;
 
@@ -67,6 +66,8 @@ class UpgradeRdsHandlerTest {
     @Mock
     private Stack stack;
 
+    private DatabaseServerV4StackRequest databaseServerV4StackRequest;
+
     @InjectMocks
     private UpgradeRdsHandler underTest;
 
@@ -81,8 +82,6 @@ class UpgradeRdsHandlerTest {
         StackDto stackDto = spy(StackDto.class);
         ClusterView cluster = mock(ClusterView.class);
         when(stackDto.getCluster()).thenReturn(cluster);
-//        when(stackDto.getStack()).thenReturn(stack);
-//        when(stackDto.getName()).thenReturn(STACK_NAME);
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(stackDto.getCluster()).thenReturn(cluster);
         when(cluster.getDatabaseServerCrn()).thenReturn(DB_CRN);
@@ -92,7 +91,7 @@ class UpgradeRdsHandlerTest {
         Selectable result = underTest.doAccept(event);
 
         verify(targetMajorVersionToUpgradeTargetVersionConverter).convert(TARGET_MAJOR_VERSION);
-        verify(databaseService).upgradeDatabase(cluster, UpgradeTargetMajorVersion.VERSION_11);
+        verify(databaseService).upgradeDatabase(cluster, UpgradeTargetMajorVersion.VERSION_11, databaseServerV4StackRequest);
         verify(rdsUpgradeOrchestratorService, never()).upgradeEmbeddedDatabase(stackDto);
         verify(embeddedDatabaseService, never()).isAttachedDiskForEmbeddedDatabaseCreated(stackDto);
         assertThat(result.selector()).isEqualTo("UPGRADERDSUPGRADEDATABASESERVERRESULT");
@@ -113,7 +112,7 @@ class UpgradeRdsHandlerTest {
         Selectable result = underTest.doAccept(event);
 
         verify(targetMajorVersionToUpgradeTargetVersionConverter, never()).convert(TARGET_MAJOR_VERSION);
-        verify(databaseService, never()).upgradeDatabase(any(ClusterView.class), eq(UpgradeTargetMajorVersion.VERSION_11));
+        verify(databaseService, never()).upgradeDatabase(any(ClusterView.class), eq(UpgradeTargetMajorVersion.VERSION_11), eq(databaseServerV4StackRequest));
         verify(rdsUpgradeOrchestratorService).upgradeEmbeddedDatabase(stackDto);
         assertThat(result.selector()).isEqualTo("UPGRADERDSUPGRADEDATABASESERVERRESULT");
     }
@@ -133,7 +132,7 @@ class UpgradeRdsHandlerTest {
         Selectable result = underTest.doAccept(event);
 
         verify(targetMajorVersionToUpgradeTargetVersionConverter, never()).convert(TARGET_MAJOR_VERSION);
-        verify(databaseService, never()).upgradeDatabase(any(ClusterView.class), eq(UpgradeTargetMajorVersion.VERSION_11));
+        verify(databaseService, never()).upgradeDatabase(any(ClusterView.class), eq(UpgradeTargetMajorVersion.VERSION_11), eq(databaseServerV4StackRequest));
         verify(rdsUpgradeOrchestratorService, never()).upgradeEmbeddedDatabase(stackDto);
         assertThat(result.selector()).isEqualTo("UPGRADERDSFAILEDEVENT");
         assertThat(result).isInstanceOf(UpgradeRdsFailedEvent.class);
