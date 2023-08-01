@@ -194,6 +194,9 @@ class EntitlementServiceTest {
 
                 {"ENABLE_RHEL8_IMAGES", (EntitlementCheckFunction) EntitlementService::isRhel8ImageSupportEnabled, false},
                 {"ENABLE_RHEL8_IMAGES", (EntitlementCheckFunction) EntitlementService::isRhel8ImageSupportEnabled, true},
+
+                {"CDP_CB_AZURE_MULTIAZ", (EntitlementCheckFunction) EntitlementService::isAzureMultiAzEnabled, false},
+                {"CDP_CB_AZURE_MULTIAZ", (EntitlementCheckFunction) EntitlementService::isAzureMultiAzEnabled, true},
         };
     }
 
@@ -201,7 +204,7 @@ class EntitlementServiceTest {
     @MethodSource("entitlementCheckDataProvider")
     void entitlementEnabledTestWhenNoOtherEntitlementsAreGranted(String entitlementName, EntitlementCheckFunction function, boolean enabled) {
         setUpUmsClient(enabled, entitlementName);
-        assertThat(function.entitlementEnabled(underTest, ACCOUNT_ID)).isEqualTo(enabled);
+        assertThat(function.isEntitlementEnabled(underTest, ACCOUNT_ID)).isEqualTo(enabled);
     }
 
     @Test
@@ -253,7 +256,7 @@ class EntitlementServiceTest {
 
     @FunctionalInterface
     private interface EntitlementCheckFunction {
-        boolean entitlementEnabled(EntitlementService service, String accountId);
+        boolean isEntitlementEnabled(EntitlementService service, String accountId);
     }
 
 }

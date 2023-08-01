@@ -140,7 +140,7 @@ public class StackRequestManifester {
                 TagsV4Request tags = new TagsV4Request();
                 try {
                     Map<String, String> sdxUserDefined = new HashMap<>();
-                    // TODO currently the sdx app is putting 'null' if the user send us a null this is now fixed but we need to support old DL's
+                    // TODO Currently the sdx app is putting 'null' if the user send us a null. This is now fixed, but we need to support old DL's.
                     if (sdxCluster.getTags() != null
                             && !Strings.isNullOrEmpty(sdxCluster.getTags().getValue())
                             && !"null".equals(sdxCluster.getTags().getValue())) {
@@ -168,7 +168,7 @@ public class StackRequestManifester {
             validateCloudStorage(sdxCluster, environment, stackRequest);
             setupInstanceVolumeEncryption(stackRequest, environment);
             setupMultiAz(sdxCluster, environment, stackRequest);
-            setupGovCloud(sdxCluster, environment, stackRequest);
+            setupGovCloud(environment, stackRequest);
             stackRequest.setExternalDatabase(databaseRequestConverter.createExternalDbRequest(sdxCluster));
             if (CloudPlatform.AWS.name().equals(environment.getCloudPlatform()) &&
                     entitlementService.enforceAwsNativeForSingleAzDatalakeEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
@@ -338,7 +338,7 @@ public class StackRequestManifester {
                 LOGGER.info("Fetching account mappings from IDBMMS associated with environment {} for stack {}.", environmentCrn, stackName);
                 MappingsConfig mappingsConfig;
                 try {
-                    // Must pass the internal actor here as this operation is internal-use only; requests with other actors will be always rejected.
+                    // Must pass the internal actor here as this operation is internal-use only; requests with other actors will always be rejected.
                     mappingsConfig = idbmmsClient.getMappingsConfig(
                             regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                             environmentCrn, Optional.empty());
@@ -396,8 +396,7 @@ public class StackRequestManifester {
         }
     }
 
-    @VisibleForTesting
-    void setupInstanceVolumeEncryptionForAws(StackV4Request stackRequest, DetailedEnvironmentResponse environmentResponse) {
+    private void setupInstanceVolumeEncryptionForAws(StackV4Request stackRequest, DetailedEnvironmentResponse environmentResponse) {
         String encryptionKeyArn = Optional.of(environmentResponse)
                 .map(DetailedEnvironmentResponse::getAws)
                 .map(AwsEnvironmentParameters::getAwsDiskEncryptionParameters)
@@ -421,8 +420,7 @@ public class StackRequestManifester {
         });
     }
 
-    @VisibleForTesting
-    void setupInstanceVolumeEncryptionForAzure(StackV4Request stackRequest, DetailedEnvironmentResponse environmentResponse) {
+    private void setupInstanceVolumeEncryptionForAzure(StackV4Request stackRequest, DetailedEnvironmentResponse environmentResponse) {
         Optional<String> encryptionKeyUrl = Optional.of(environmentResponse)
                 .map(DetailedEnvironmentResponse::getAzure)
                 .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
@@ -449,39 +447,37 @@ public class StackRequestManifester {
         });
     }
 
-    @VisibleForTesting
-    void setupInstanceVolumeEncryptionForGcp(StackV4Request stackRequest, DetailedEnvironmentResponse environmentResponse) {
-        String encryptionKey = Optional.of(environmentResponse)
+    private void setupInstanceVolumeEncryptionForGcp(StackV4Request stackRequest, DetailedEnvironmentResponse environmentResponse) {
+        Optional.of(environmentResponse)
                 .map(DetailedEnvironmentResponse::getGcp)
                 .map(GcpEnvironmentParameters::getGcpResourceEncryptionParameters)
                 .map(GcpResourceEncryptionParameters::getEncryptionKey)
-                .orElse(null);
-        if (encryptionKey != null) {
-            stackRequest.getInstanceGroups().forEach(ig -> {
-                GcpInstanceTemplateV4Parameters gcp = ig.getTemplate().createGcp();
-                GcpEncryptionV4Parameters encryption = gcp.getEncryption();
-                if (encryption == null) {
-                    encryption = new GcpEncryptionV4Parameters();
-                    gcp.setEncryption(encryption);
-                }
-                gcp.getEncryption().setType(EncryptionType.CUSTOM);
-                gcp.getEncryption().setKey(encryptionKey);
-                gcp.getEncryption().setKeyEncryptionMethod(KeyEncryptionMethod.KMS);
-            });
-        }
+                .ifPresent(encryptionKey -> stackRequest.getInstanceGroups().forEach(ig -> {
+                    GcpInstanceTemplateV4Parameters gcp = ig.getTemplate().createGcp();
+                    GcpEncryptionV4Parameters encryption = gcp.getEncryption();
+                    if (encryption == null) {
+                        encryption = new GcpEncryptionV4Parameters();
+                        gcp.setEncryption(encryption);
+                    }
+                    gcp.getEncryption().setType(EncryptionType.CUSTOM);
+                    gcp.getEncryption().setKey(encryptionKey);
+                    gcp.getEncryption().setKeyEncryptionMethod(KeyEncryptionMethod.KMS);
+                }));
     }
 
-    private void setupGovCloud(SdxCluster sdxCluster, DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
+    private void setupGovCloud(DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
         if (environment.getCredential().getGovCloud()) {
             stackRequest.setVariant("AWS_NATIVE_GOV");
         }
     }
 
     private void setupMultiAz(SdxCluster sdxCluster, DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
-        if (entitlementService.awsNativeDataLakeEnabled(environment.getAccountId()) && sdxCluster.isEnableMultiAz()) {
-            multiAzDecorator.decorateStackRequestWithAwsNative(stackRequest, environment);
+        if (sdxCluster.isEnableMultiAz()) {
+            if (environment.getCloudPlatform().equals(CloudPlatform.AWS.name()) && entitlementService.awsNativeDataLakeEnabled(environment.getAccountId())) {
+                multiAzDecorator.decorateStackRequestWithAwsNative(stackRequest);
+            }
             multiAzDecorator.decorateStackRequestWithMultiAz(stackRequest, environment, sdxCluster.getClusterShape());
         }
     }
-}
 
+}

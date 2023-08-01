@@ -152,7 +152,7 @@ public class StackRequestManifesterTest {
     }
 
     @Test
-    public void testSetupStackRequestForCloudbreakWhenAWSNativeAndNotGovCloudThenVariantMustBeAwsNative() throws IOException {
+    public void testSetupStackRequestForCloudbreakWhenMultiAzAndAWSNativeAndNotGovCloudThenVariantMustBeAwsNative() throws IOException {
         SdxCluster sdxCluster = getSdxCluster(true);
         StackV4Request stackV4Request = getStackV4Request(sdxCluster, true);
         DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse(false);
@@ -161,17 +161,17 @@ public class StackRequestManifesterTest {
         doNothing().when(cloudStorageValidator).validate(any(), any(), any());
         when(entitlementService.awsNativeDataLakeEnabled(any())).thenReturn(true);
         when(databaseRequestConverter.createExternalDbRequest(sdxCluster)).thenReturn(new DatabaseRequest());
-        doNothing().when(multiAzDecorator).decorateStackRequestWithAwsNative(any(), any());
-        doNothing().when(multiAzDecorator).decorateStackRequestWithMultiAz(any(), any(), any());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse));
 
         String variant = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class).getVariant();
         assertThat(variant).isEqualTo("AWS_NATIVE");
+        verify(multiAzDecorator).decorateStackRequestWithAwsNative(any());
+        verify(multiAzDecorator).decorateStackRequestWithMultiAz(any(), any(), any());
     }
 
     @Test
-    public void testSetupStackRequestForCloudbreakWhenAWSNativeAndNotGovCloudThenVariantMustBeAwsGovNative() throws IOException {
+    public void testSetupStackRequestForCloudbreakWhenMultiAzAndAWSNativeAndGovCloudThenVariantMustBeAwsGovNative() throws IOException {
         SdxCluster sdxCluster = getSdxCluster(true);
         StackV4Request stackV4Request = getStackV4Request(sdxCluster, true);
         DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse(true);
@@ -180,13 +180,13 @@ public class StackRequestManifesterTest {
         doNothing().when(cloudStorageValidator).validate(any(), any(), any());
         when(entitlementService.awsNativeDataLakeEnabled(any())).thenReturn(true);
         when(databaseRequestConverter.createExternalDbRequest(sdxCluster)).thenReturn(new DatabaseRequest());
-        doNothing().when(multiAzDecorator).decorateStackRequestWithAwsNative(any(), any());
-        doNothing().when(multiAzDecorator).decorateStackRequestWithMultiAz(any(), any(), any());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse));
 
         String variant = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class).getVariant();
         assertThat(variant).isEqualTo("AWS_NATIVE_GOV");
+        verify(multiAzDecorator).decorateStackRequestWithAwsNative(any());
+        verify(multiAzDecorator).decorateStackRequestWithMultiAz(any(), any(), any());
     }
 
     @Test
@@ -205,6 +205,8 @@ public class StackRequestManifesterTest {
 
         String variant = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class).getVariant();
         assertThat(variant).isEqualTo("AWS_NATIVE");
+        verify(multiAzDecorator, never()).decorateStackRequestWithAwsNative(any());
+        verify(multiAzDecorator, never()).decorateStackRequestWithMultiAz(any(), any(), any());
     }
 
     @Test
@@ -222,6 +224,8 @@ public class StackRequestManifesterTest {
 
         String variant = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class).getVariant();
         assertThat(variant).isNotEqualTo("AWS_NATIVE");
+        verify(multiAzDecorator, never()).decorateStackRequestWithAwsNative(any());
+        verify(multiAzDecorator, never()).decorateStackRequestWithMultiAz(any(), any(), any());
     }
 
     @Test
@@ -229,7 +233,7 @@ public class StackRequestManifesterTest {
         SdxCluster sdxCluster = getSdxCluster(false);
         StackV4Request stackV4Request = getStackV4Request(sdxCluster, false);
         DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse(false);
-        detailedEnvironmentResponse.setCloudPlatform("AZURE");
+        detailedEnvironmentResponse.setCloudPlatform(CloudPlatform.AZURE.name());
 
         when(gatewayManifester.configureGatewayForSdxCluster(any())).thenReturn(stackV4Request);
         doNothing().when(cloudStorageValidator).validate(any(), any(), any());
@@ -240,6 +244,43 @@ public class StackRequestManifesterTest {
 
         String variant = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class).getVariant();
         assertThat(variant).isNotEqualTo("AWS_NATIVE");
+        verify(multiAzDecorator, never()).decorateStackRequestWithAwsNative(any());
+        verify(multiAzDecorator, never()).decorateStackRequestWithMultiAz(any(), any(), any());
+    }
+
+    @Test
+    public void configureStackForSdxClusterTestWhenMultiAzAndAwsAndNotEntitled() {
+        SdxCluster sdxCluster = getSdxCluster(true);
+        StackV4Request stackV4Request = getStackV4Request(sdxCluster, false);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse(false);
+
+        when(gatewayManifester.configureGatewayForSdxCluster(any())).thenReturn(stackV4Request);
+        doNothing().when(cloudStorageValidator).validate(any(), any(), any());
+        when(entitlementService.awsNativeDataLakeEnabled(any())).thenReturn(false);
+        when(databaseRequestConverter.createExternalDbRequest(sdxCluster)).thenReturn(new DatabaseRequest());
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse));
+
+        verify(multiAzDecorator, never()).decorateStackRequestWithAwsNative(any());
+        verify(multiAzDecorator).decorateStackRequestWithMultiAz(any(), any(), any());
+    }
+
+    @Test
+    public void configureStackForSdxClusterTestWhenMultiAzAndAzure() {
+        SdxCluster sdxCluster = getSdxCluster(true);
+        StackV4Request stackV4Request = getStackV4Request(sdxCluster, false);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse(false);
+        detailedEnvironmentResponse.setCloudPlatform(CloudPlatform.AZURE.name());
+
+        when(gatewayManifester.configureGatewayForSdxCluster(any())).thenReturn(stackV4Request);
+        doNothing().when(cloudStorageValidator).validate(any(), any(), any());
+        when(databaseRequestConverter.createExternalDbRequest(sdxCluster)).thenReturn(new DatabaseRequest());
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse));
+
+        verify(entitlementService, never()).awsNativeDataLakeEnabled(any());
+        verify(multiAzDecorator, never()).decorateStackRequestWithAwsNative(any());
+        verify(multiAzDecorator).decorateStackRequestWithMultiAz(any(), any(), any());
     }
 
     @Test
@@ -861,15 +902,15 @@ public class StackRequestManifesterTest {
         return sdxCluster;
     }
 
-    private static DetailedEnvironmentResponse getDetailedEnvironmentResponse(Boolean govCloud) {
+    private DetailedEnvironmentResponse getDetailedEnvironmentResponse(Boolean govCloud) {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         EnvironmentAuthenticationResponse environmentAuthenticationResponse = new EnvironmentAuthenticationResponse();
         environmentAuthenticationResponse.setLoginUserName("cb");
         environmentAuthenticationResponse.setPublicKey("pubkey");
         detailedEnvironmentResponse.setAuthentication(environmentAuthenticationResponse);
         detailedEnvironmentResponse.setTags(new TagResponse());
-        detailedEnvironmentResponse.setCloudPlatform("AWS");
-        detailedEnvironmentResponse.setAccountId("accountId");
+        detailedEnvironmentResponse.setCloudPlatform(CloudPlatform.AWS.name());
+        detailedEnvironmentResponse.setAccountId(ACCOUNT_ID);
         CredentialResponse credentialResponse = new CredentialResponse();
         credentialResponse.setGovCloud(govCloud);
         detailedEnvironmentResponse.setCredential(credentialResponse);

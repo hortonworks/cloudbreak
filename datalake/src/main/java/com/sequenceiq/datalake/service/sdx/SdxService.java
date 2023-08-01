@@ -42,6 +42,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.HierarchyAuthResourcePropertyProvider;
@@ -82,6 +83,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Req
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
@@ -678,7 +680,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             DetailedEnvironmentResponse environmentResponse) {
         validateShape(shape, runtime, environmentResponse);
         validateRazEnablement(runtime, razEnabled, environmentResponse);
-        validateMultiAz(enableMultiAz, environmentResponse);
+        validateMultiAz(enableMultiAz, environmentResponse, shape);
         SdxCluster newSdxCluster = new SdxCluster();
         newSdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
         newSdxCluster.setClusterName(clusterName);
@@ -694,18 +696,28 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return newSdxCluster;
     }
 
-    private void validateMultiAz(boolean enableMultiAz, DetailedEnvironmentResponse environmentResponse) {
+    private void validateMultiAz(boolean enableMultiAz, DetailedEnvironmentResponse environmentResponse, SdxClusterShape clusterShape) {
         ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
         if (enableMultiAz) {
-            if (!environmentResponse.getCloudPlatform().equals(AWS.name())) {
-                validationBuilder.error("Provisioning a multi AZ cluster is only enabled for AWS.");
+            CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentResponse.getCloudPlatform());
+            Set<CloudPlatform> multiAzSupportedPlatforms = platformConfig.getMultiAzSupportedPlatforms();
+            if (!multiAzSupportedPlatforms.contains(cloudPlatform)) {
+                validationBuilder.error(String.format("Provisioning a multi AZ cluster is only enabled for the following cloud platforms: %s.",
+                        Joiner.on(", ").join(multiAzSupportedPlatforms)));
+            }
+            if (AZURE.equals(cloudPlatform) && !entitlementService.isAzureMultiAzEnabled(environmentResponse.getAccountId())) {
+                validationBuilder.error(String.format("Provisioning a multi AZ cluster on Azure requires entitlement %s.",
+                        Entitlement.CDP_CB_AZURE_MULTIAZ.name()));
+            }
+            if (AZURE.equals(cloudPlatform) && !clusterShape.isMultiAzEnabledByDefault()) {
+                validationBuilder.error(String.format("Provisioning a multi AZ cluster on Azure is not supported for cluster shape %s.",
+                        clusterShape.name()));
             }
         }
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
-
     }
 
     private void validateEnv(DetailedEnvironmentResponse environment) {

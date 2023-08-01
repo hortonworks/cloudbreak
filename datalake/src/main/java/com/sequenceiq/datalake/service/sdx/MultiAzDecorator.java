@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -24,11 +25,20 @@ public class MultiAzDecorator {
 
     private static final Set<Tunnel> PUBLIC_SUBNET_SUPPORTED_TUNNEL = Set.of(Tunnel.DIRECT, Tunnel.CLUSTER_PROXY);
 
-    public void decorateStackRequestWithAwsNative(StackV4Request stackV4Request, DetailedEnvironmentResponse environment) {
+    public void decorateStackRequestWithAwsNative(StackV4Request stackV4Request) {
         stackV4Request.setVariant("AWS_NATIVE");
     }
 
     public void decorateStackRequestWithMultiAz(StackV4Request stackV4Request, DetailedEnvironmentResponse environment, SdxClusterShape clusterShape) {
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
+        switch (cloudPlatform) {
+            case AWS -> decorateStackRequestWithMultiAzAws(stackV4Request, environment, clusterShape);
+            case AZURE -> decorateStackRequestWithMultiAzAzure(stackV4Request, clusterShape);
+            default -> throw new IllegalStateException("Encountered enableMultiAz==true for unsupported cloud platform " + cloudPlatform);
+        }
+    }
+
+    private void decorateStackRequestWithMultiAzAws(StackV4Request stackV4Request, DetailedEnvironmentResponse environment, SdxClusterShape clusterShape) {
         stackV4Request.getInstanceGroups().forEach(ig -> {
             if (ig.getNetwork() == null) {
                 ig.setNetwork(new InstanceGroupNetworkV4Request());
@@ -42,6 +52,16 @@ public class MultiAzDecorator {
                 networkParameter.setSubnetIds(subnetIds);
             }
         });
+        stackV4Request.setMultiAz(true);
+    }
+
+    private void decorateStackRequestWithMultiAzAzure(StackV4Request stackV4Request, SdxClusterShape clusterShape) {
+        if (!clusterShape.isMultiAzEnabledByDefault()) {
+            throw new IllegalStateException(
+                    String.format("Encountered clusterShape=%s with isMultiAzEnabledByDefault()==false. Azure multi AZ is unsupported for such shapes.",
+                            clusterShape));
+        }
+        stackV4Request.setMultiAz(true);
     }
 
     private List<String> collectMultiAzSubnetIdsForGroup(DetailedEnvironmentResponse environment, InstanceGroupV4Request ig) {
@@ -74,4 +94,5 @@ public class MultiAzDecorator {
         });
         return new ArrayList<>(distinctedSubnetByAz.values());
     }
+
 }

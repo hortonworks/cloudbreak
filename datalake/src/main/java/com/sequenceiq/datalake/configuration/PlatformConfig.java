@@ -2,7 +2,6 @@ package com.sequenceiq.datalake.configuration;
 
 import java.io.IOException;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -17,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -49,6 +49,9 @@ public class PlatformConfig {
     @Value("${datalake.supported.raz.platform:AWS,AZURE,GCP}")
     private List<CloudPlatform> razSupportedPlatforms;
 
+    @Value("${datalake.supported.multiaz.platform:AWS,AZURE}")
+    private Set<CloudPlatform> multiAzSupportedPlatforms;
+
     private final Map<CloudPlatform, Set<? extends DatabaseType>> databaseTypeMap = Map.of(CloudPlatform.AZURE, EnumSet.allOf(AzureDatabaseType.class));
 
     @Inject
@@ -72,6 +75,10 @@ public class PlatformConfig {
         return razSupportedPlatforms;
     }
 
+    public Set<CloudPlatform> getMultiAzSupportedPlatforms() {
+        return multiAzSupportedPlatforms;
+    }
+
     public Set<CloudPlatform> getSupportedExternalDatabasePlatforms() {
         return dbServiceSupportedPlatforms;
     }
@@ -85,10 +92,13 @@ public class PlatformConfig {
     }
 
     @PostConstruct
-    public void createAllPossibleDatabasePlatform() {
-        allPossibleExternalDbPlatforms = new HashSet<>();
-        allPossibleExternalDbPlatforms.addAll(dbServiceSupportedPlatforms);
+    public void initPlatforms() {
+        allPossibleExternalDbPlatforms = EnumSet.copyOf(dbServiceSupportedPlatforms);
         allPossibleExternalDbPlatforms.addAll(dbServiceExperimentalPlatforms);
+
+        if (CollectionUtils.isEmpty(multiAzSupportedPlatforms)) {
+            multiAzSupportedPlatforms = EnumSet.of(CloudPlatform.AWS, CloudPlatform.AZURE);
+        }
     }
 
     @Bean
