@@ -6,8 +6,8 @@ import static java.lang.String.format;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
@@ -83,7 +83,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
             if (blobsWithZeroLength.size() >= zeroBlobLengthToleration) {
                 LOGGER.error("Zero blob length toleration limit ({}) reached! The following blobs has 0 bytes content: {}",
                         zeroBlobLengthToleration, StringUtils.join(blobsWithZeroLength, ", "));
-                throw new TestFailException(String.format("Azure Adls Gen 2 Blob: %s has 0 bytes of content!", itemName));
+                throw new TestFailException(format("Azure Adls Gen 2 Blob: %s has 0 bytes of content!", itemName));
             } else {
                 LOGGER.warn(" Azure Adls Gen 2 Blob: {} has 0 bytes of content! (blobs with no content - occurrence: {}, limit: {})",
                         itemName, blobsWithZeroLength.size(), zeroBlobLengthToleration);
@@ -129,7 +129,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
             cloudBlobContainer.deleteIfExists();
             Log.log(LOGGER, format(" Azure Adls Gen 2 Blob Container: %s delete has been initiated. ", containerName));
         } catch (DataLakeStorageException e) {
-            if (BlobErrorCode.fromString(e.getErrorCode()) == BlobErrorCode.CONTAINER_NOT_FOUND) {
+            if (Objects.equals(BlobErrorCode.fromString(e.getErrorCode()), BlobErrorCode.CONTAINER_NOT_FOUND)) {
                 LOGGER.error("Azure Adls Gen2 Blob Container does not present with name: {} at Base Location: {}", containerName, baseLocation);
                 throw new TestFailException("Azure Adls Gen2 Blob Container does not present with name: " +  containerName
                         + " at Base Location: " + baseLocation);
@@ -158,7 +158,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
             PagedIterable<PathItem> blobListing = selectedBlobDirectory.listPaths(true, false, null, null);
             List<PathItem> listBlobItems = StreamSupport
                     .stream(blobListing.spliterator(), false)
-                    .collect(Collectors.toList());
+                    .toList();
             Log.log(LOGGER, format(" Azure Blob: %s contains %d sub-objects or present with occurrences.",
                     selectedDirectory, listBlobItems.size()));
 
@@ -210,16 +210,16 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
                     return format("https://autotestingapi.blob.core.windows.net/%s/%s%s",
                             containerName, keyPrefix, clusterLogPath);
                 } else {
-                    LOGGER.error("Azure Adls Gen 2 Blob is NOT present at '{}' container in '{}' storage directory with path: [{}]", containerName, keyPrefix,
+                    LOGGER.warn("Azure Adls Gen 2 Blob is NOT present at '{}' container in '{}' storage directory with path: [{}]", containerName, keyPrefix,
                             clusterLogPath);
-                    throw new TestFailException(format("Azure Adls Gen 2 Blob is NOT present at '%s' container in '%s' storage directory with path: [%s]",
-                            containerName, keyPrefix, clusterLogPath));
+                    return null;
                 }
-            } catch (TestFailException testFail) {
-                throw testFail;
             } catch (Exception e) {
-                LOGGER.error("Azure Adls Gen 2 Blob couldn't process the call. So returning with error!", e);
-                throw new TestFailException("Azure Adls Gen 2 Blob couldn't process the call.", e);
+                String testFailureType = e.getCause() != null
+                        ? e.getCause().getClass().getName()
+                        : e.getClass().getName();
+                LOGGER.warn("Exception [{}] has been occurred while Azure Adls Gen 2 Blob tried to process the get directory call!", testFailureType, e);
+                return null;
             }
         } else {
             return null;
