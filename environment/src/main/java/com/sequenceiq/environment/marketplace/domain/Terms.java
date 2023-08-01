@@ -11,12 +11,11 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 
 @Entity
 @Table
-public class Terms implements Serializable, AuthResource, AccountIdAwareResource {
+public class Terms implements Serializable, AccountIdAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "terms_generator")
@@ -28,27 +27,13 @@ public class Terms implements Serializable, AuthResource, AccountIdAwareResource
     @Column(nullable = false)
     private String accountId;
 
-    @Column(nullable = false)
-    private String resourceCrn;
-
     @Override
     public String getAccountId() {
         return accountId;
     }
 
-    @Override
     public void setAccountId(String accountId) {
         this.accountId = accountId;
-    }
-
-    @Override
-    public String getResourceCrn() {
-        return resourceCrn;
-    }
-
-    @Override
-    public void setResourceCrn(String resourceCrn) {
-        this.resourceCrn = resourceCrn;
     }
 
     public Long getId() {
@@ -73,7 +58,6 @@ public class Terms implements Serializable, AuthResource, AccountIdAwareResource
                 "id=" + id +
                 ", accepted=" + accepted +
                 ", accountId='" + accountId + '\'' +
-                ", resourceCrn='" + resourceCrn + '\'' +
                 '}';
     }
 

@@ -14,5 +14,5 @@ import com.sequenceiq.environment.marketplace.domain.Terms;
 @Transactional(Transactional.TxType.REQUIRED)
 public interface TermsRepository extends JpaRepository<Terms, Long> {
 
-    Optional<Terms> findFirstByAccountId(@Param("accountId") String accountId);
+    Optional<Terms> findByAccountId(@Param("accountId") String accountId);
 }
