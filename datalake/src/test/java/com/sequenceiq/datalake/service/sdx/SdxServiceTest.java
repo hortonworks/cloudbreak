@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.datalake.service.sdx.SdxService.MEDIUM_DUTY_REQUIRED_VERSION;
 import static com.sequenceiq.datalake.service.sdx.SdxService.WORKSPACE_ID_DEFAULT;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.MEDIUM_DUTY_HA;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -30,7 +31,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -57,7 +57,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
@@ -80,8 +79,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
-import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
@@ -104,15 +101,12 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.SdxAwsRequest;
 import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
-import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
-import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequestBase;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
-import com.sequenceiq.sdx.api.model.SdxRecipe;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("SDX service tests")
@@ -516,17 +510,6 @@ class SdxServiceTest {
         when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
     }
 
-    private void mockEnvironmentCall(SdxClusterRequestBase sdxClusterRequest, CloudPlatform cloudPlatform, Tunnel tunnel) {
-        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
-        detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
-        detailedEnvironmentResponse.setCloudPlatform(cloudPlatform.name());
-        detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
-        detailedEnvironmentResponse.setCrn(getCrn());
-        detailedEnvironmentResponse.setCreator(detailedEnvironmentResponse.getCrn());
-        detailedEnvironmentResponse.setTunnel(tunnel);
-        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
-    }
-
     private String getCrn() {
         return CrnTestUtil.getEnvironmentCrnBuilder()
                 .setResource(UUID.randomUUID().toString())
@@ -543,45 +526,6 @@ class SdxServiceTest {
         sdxCluster.setClusterName("sdx-cluster-name");
         sdxCluster.setSdxDatabase(new SdxDatabase());
         return sdxCluster;
-    }
-
-    private InstanceGroupV4Request getGroup(StackV4Request stack, com.sequenceiq.common.api.type.InstanceGroupType type) {
-        for (InstanceGroupV4Request instanceGroup : stack.getInstanceGroups()) {
-            if (instanceGroup.getType().equals(type)) {
-                return instanceGroup;
-            }
-        }
-        return null;
-    }
-
-    private SdxClusterRequest createSdxClusterRequest(String runtime, SdxClusterShape shape) {
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setRuntime(runtime);
-        sdxClusterRequest.setClusterShape(shape);
-        sdxClusterRequest.addTags(TAGS);
-        sdxClusterRequest.setEnvironment("envir");
-        sdxClusterRequest.setExternalDatabase(new SdxDatabaseRequest());
-        return sdxClusterRequest;
-    }
-
-    private void withRecipe(SdxClusterRequest sdxClusterRequest) {
-        SdxRecipe recipe = new SdxRecipe();
-        recipe.setHostGroup("master");
-        recipe.setName("post-service-deployment");
-        sdxClusterRequest.setRecipes(Set.of(recipe));
-    }
-
-    private void withCloudStorage(SdxClusterRequestBase sdxClusterRequest) {
-        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
-        cloudStorage.setFileSystemType(FileSystemType.S3);
-        cloudStorage.setBaseLocation("s3a://some/dir/");
-        cloudStorage.setS3(new S3CloudStorageV1Parameters());
-        sdxClusterRequest.setCloudStorage(cloudStorage);
-    }
-
-    private void withCustomInstanceGroups(SdxClusterRequestBase sdxClusterRequest) {
-        sdxClusterRequest.setCustomInstanceGroups(List.of(withInstanceGroup("master", "verylarge"),
-                withInstanceGroup("idbroker", "notverylarge")));
     }
 
     private SdxInstanceGroupRequest withInstanceGroup(String name, String instanceType) {
@@ -603,6 +547,46 @@ class SdxServiceTest {
         sdxClusterRequest.setImageSettingsV4Request(imageSettingsV4Request);
         sdxClusterRequest.setExternalDatabase(new SdxDatabaseRequest());
         return sdxClusterRequest;
+    }
+
+    @Test
+    void testSdxResizeToEDL() throws IOException {
+        SdxClusterResizeRequest resizeRequest = new SdxClusterResizeRequest();
+        resizeRequest.setEnvironment("environment");
+        resizeRequest.setClusterShape(ENTERPRISE);
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setId(1L);
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
+        sdxCluster.setRuntime("7.2.17");
+        sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString()))
+                .thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
+
+        mockEnvironmentCall(resizeRequest, AWS);
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class)))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.STOPPED);
+        when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
+
+        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.resizeSdx(USER_CRN, sdxCluster.getClusterName(), resizeRequest));
+        SdxCluster createdSdxCluster = result.getLeft();
+        assertEquals(sdxCluster.getClusterName(), createdSdxCluster.getClusterName());
+        assertEquals("7.2.17", createdSdxCluster.getRuntime());
+        assertEquals("s3a://some/dir/", createdSdxCluster.getCloudStorageBaseLocation());
+        assertEquals("envir", createdSdxCluster.getEnvName());
     }
 
     @Test

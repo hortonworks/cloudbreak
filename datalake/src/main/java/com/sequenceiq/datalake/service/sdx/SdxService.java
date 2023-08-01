@@ -462,9 +462,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
         String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response);
         String os = Optional.ofNullable(sdxClusterRequest.getOs())
-                        .or(() -> Optional.ofNullable(imageV4Response).map(ImageV4Response::getOs))
-                        .or(() -> Optional.ofNullable(internalStackV4Request).map(StackV4Request::getImage).map(ImageSettingsV4Request::getOs))
-                        .orElse(null);
+                .or(() -> Optional.ofNullable(imageV4Response).map(ImageV4Response::getOs))
+                .or(() -> Optional.ofNullable(internalStackV4Request).map(StackV4Request::getImage).map(ImageSettingsV4Request::getOs))
+                .orElse(null);
 
         validateCcmV2Requirement(environment, runtimeVersion);
 
@@ -630,12 +630,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 sdxCluster.getDatabaseEngineVersion(), Optional.ofNullable(sdxCluster.getSdxDatabase()).map(SdxDatabase::getAttributes).orElse(null)));
         StackV4Request stackRequest = getStackRequest(shape, sdxCluster.isRangerRazEnabled(), null, cloudPlatform, sdxCluster.getRuntime(), null,
                 stackV4Response.getJavaVersion());
-        if (shape == SdxClusterShape.MEDIUM_DUTY_HA) {
-            // This is added to make sure the host name used by Light and Medium duty are not the same.
-            CustomDomainSettingsV4Request customDomainSettingsV4Request = new CustomDomainSettingsV4Request();
-            customDomainSettingsV4Request.setHostname(sdxCluster.getClusterName() + SDX_RESIZE_NAME_SUFFIX);
-            stackRequest.setCustomDomain(customDomainSettingsV4Request);
-        }
+        CustomDomainSettingsV4Request customDomainSettingsV4Request = new CustomDomainSettingsV4Request();
+        customDomainSettingsV4Request.setHostname(sdxCluster.getClusterName() + SDX_RESIZE_NAME_SUFFIX);
+        stackRequest.setCustomDomain(customDomainSettingsV4Request);
 
         prepareCloudStorageForStack(stackRequest, stackV4Response, newSdxCluster, environment);
         prepareDefaultSecurityConfigs(null, stackRequest, cloudPlatform);
