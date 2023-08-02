@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
@@ -317,6 +318,23 @@ public class ClusterOperationServiceTest {
         StackDeleteVolumesRequest request = captor.getValue();
         assertEquals("COMPUTE", request.getGroup());
         assertEquals(STACK_ID, request.getStackId());
+    }
+
+    @Test
+    public void shouldTriggerAddVolumes() {
+        StackAddVolumesRequest stackAddVolumesRequest = new StackAddVolumesRequest();
+        stackAddVolumesRequest.setInstanceGroup("COMPUTE");
+        stackAddVolumesRequest.setCloudVolumeUsageType("GENERAL");
+        stackAddVolumesRequest.setSize(200L);
+        stackAddVolumesRequest.setType("gp2");
+        stackAddVolumesRequest.setNumberOfDisks(2L);
+
+        underTest.addVolumes(STACK_ID, stackAddVolumesRequest);
+
+        ArgumentCaptor<StackAddVolumesRequest> captor = ArgumentCaptor.forClass(StackAddVolumesRequest.class);
+        verify(flowManager).triggerAddVolumes(eq(STACK_ID), captor.capture());
+        StackAddVolumesRequest request = captor.getValue();
+        assertEquals("COMPUTE", request.getInstanceGroup());
     }
 
     private InstanceMetaData getHost(String hostName, String groupName, InstanceStatus instanceStatus, InstanceGroupType instanceGroupType) {

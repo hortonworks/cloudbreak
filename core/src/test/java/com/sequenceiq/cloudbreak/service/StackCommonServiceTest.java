@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
@@ -552,4 +554,48 @@ class StackCommonServiceTest {
                 "Its type is 'template', whereas the operation is permitted only for the following types: datalake, datahub.");
     }
 
+    @Test
+    public void testPutAddVolumesInWorkspaceSuccess() {
+        StackView stackDto = mock(StackView.class);
+        doReturn(STACK_ID).when(stackDto).getId();
+        doReturn(stackDto).when(stackDtoService).getStackViewByNameOrCrn(STACK_NAME, "accid");
+        Stack stack = mock(Stack.class);
+        when(stack.getResourceCrn()).thenReturn("CRN");
+        when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stack);
+
+        StackAddVolumesRequest stackAddVolumesRequest = new StackAddVolumesRequest();
+        stackAddVolumesRequest.setInstanceGroup("COMPUTE");
+        stackAddVolumesRequest.setCloudVolumeUsageType("GENERAL");
+        stackAddVolumesRequest.setSize(200L);
+        stackAddVolumesRequest.setType("gp2");
+        stackAddVolumesRequest.setNumberOfDisks(2L);
+
+        underTest.putAddVolumesInWorkspace(STACK_NAME, "accid", stackAddVolumesRequest);
+
+        verify(clusterCommonService).putAddVolumes("CRN", stackAddVolumesRequest);
+    }
+
+    @Test
+    public void testPutAddVolumesInWorkspaceFailure() {
+        StackView stackDto = mock(StackView.class);
+        doReturn(STACK_ID).when(stackDto).getId();
+        doReturn(stackDto).when(stackDtoService).getStackViewByNameOrCrn(STACK_CRN, "accid");
+        Stack stack = mock(Stack.class);
+        when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stack);
+
+        StackAddVolumesRequest stackAddVolumesRequest = new StackAddVolumesRequest();
+        stackAddVolumesRequest.setInstanceGroup("COMPUTE");
+        stackAddVolumesRequest.setCloudVolumeUsageType("GENERAL");
+        stackAddVolumesRequest.setSize(200L);
+        stackAddVolumesRequest.setType("gp2");
+        stackAddVolumesRequest.setNumberOfDisks(2L);
+
+        doThrow(new BadRequestException("Adding volumes is not supported on MOCK cloudplatform")).when(verticalScalingValidatorService)
+                .validateProviderForAddVolumes(any(), anyString());
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.putAddVolumesInWorkspace(STACK_CRN, "accid",
+                stackAddVolumesRequest));
+
+        assertEquals("Adding volumes is not supported on MOCK cloudplatform", exception.getMessage());
+    }
 }

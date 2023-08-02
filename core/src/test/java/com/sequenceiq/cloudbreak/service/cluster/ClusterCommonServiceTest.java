@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -294,6 +295,36 @@ public class ClusterCommonServiceTest {
         when(stackDtoService.getByCrn(eq("CRN"))).thenReturn(stack);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.putDeleteVolumes("CRN", null));
+
+        assertEquals("Invalid update cluster request!", exception.getMessage());
+    }
+
+    @Test
+    public void testPutAddVolumes() {
+        StackAddVolumesRequest stackAddVolumesRequest = new StackAddVolumesRequest();
+        stackAddVolumesRequest.setInstanceGroup("COMPUTE");
+        stackAddVolumesRequest.setCloudVolumeUsageType("GENERAL");
+        stackAddVolumesRequest.setSize(200L);
+        stackAddVolumesRequest.setType("gp2");
+        stackAddVolumesRequest.setNumberOfDisks(2L);
+        StackDto stack = mock(StackDto.class);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stackDtoService.getByCrn(eq("CRN"))).thenReturn(stack);
+        when(clusterOperationService.addVolumes(STACK_ID, stackAddVolumesRequest)).thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));
+
+        FlowIdentifier flowIdentifier = underTest.putAddVolumes("CRN", stackAddVolumesRequest);
+
+        verify(clusterOperationService, times(1)).addVolumes(eq(STACK_ID), eq(stackAddVolumesRequest));
+        assertEquals(FlowType.FLOW, flowIdentifier.getType());
+        assertEquals("1", flowIdentifier.getPollableId());
+    }
+
+    @Test
+    public void testPutAddVolumesBadRequest() {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByCrn(eq("CRN"))).thenReturn(stack);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.putAddVolumes("CRN", null));
 
         assertEquals("Invalid update cluster request!", exception.getMessage());
     }

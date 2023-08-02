@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
@@ -497,5 +498,14 @@ public class StackCommonService {
     private void validateDeleteVolumesRequest(Stack stack, StackDeleteVolumesRequest deleteRequest) {
         verticalScalingValidatorService.validateProviderForDelete(stack, "Deleting volumes", false);
         verticalScalingValidatorService.validateInstanceTypeForDeletingDisks(stack, deleteRequest);
+    }
+
+    public FlowIdentifier putAddVolumesInWorkspace(NameOrCrn nameOrCrn, String accountId, StackAddVolumesRequest addVolumesRequest) {
+        StackView stackView = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
+        Stack stack = stackService.getByIdWithLists(stackView.getId());
+        MDCBuilder.buildMdcContext(stack);
+        LOGGER.debug("Validating Stack Add Volumes Request for Stack ID {}", stack.getId());
+        verticalScalingValidatorService.validateProviderForAddVolumes(stack, "Adding volumes");
+        return clusterCommonService.putAddVolumes(stack.getResourceCrn(), addVolumesRequest);
     }
 }

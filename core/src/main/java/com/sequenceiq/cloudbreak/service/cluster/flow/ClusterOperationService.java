@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
@@ -592,5 +593,9 @@ public class ClusterOperationService {
 
     public FlowIdentifier deleteVolumes(Long stackId, StackDeleteVolumesRequest deleteRequest) {
         return flowManager.triggerDeleteVolumes(stackId, deleteRequest);
+    }
+
+    public FlowIdentifier addVolumes(Long stackId, StackAddVolumesRequest addVolumesRequest) {
+        return flowManager.triggerAddVolumes(stackId, addVolumesRequest);
     }
 }

@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
@@ -202,5 +203,34 @@ class DistroXV1ControllerTest {
         });
 
         verify(stackOperationService).stackUpdateDisks(NameOrCrn.ofCrn(TEST_USER_CRN), diskUpdateRequest, ACCOUNT_ID);
+    }
+
+    @Test
+    void testAddVolumesByStackName() {
+        StackAddVolumesRequest stackAddVolumesRequest = new StackAddVolumesRequest();
+        stackAddVolumesRequest.setInstanceGroup("COMPUTE");
+        stackAddVolumesRequest.setCloudVolumeUsageType("GENERAL");
+        stackAddVolumesRequest.setSize(200L);
+        stackAddVolumesRequest.setType("gp2");
+        stackAddVolumesRequest.setNumberOfDisks(2L);
+        doAs(TEST_USER_CRN, () -> {
+            distroXV1Controller.addVolumesByStackName(NAME, stackAddVolumesRequest);
+        });
+
+        verify(stackOperations).putAddVolumes(NameOrCrn.ofName(NAME), stackAddVolumesRequest, "accountId");
+    }
+
+    @Test
+    void testAddVolumesByStackCrn() {
+        StackAddVolumesRequest stackAddVolumesRequest = new StackAddVolumesRequest();
+        stackAddVolumesRequest.setInstanceGroup("COMPUTE");
+        stackAddVolumesRequest.setCloudVolumeUsageType("GENERAL");
+        stackAddVolumesRequest.setSize(200L);
+        stackAddVolumesRequest.setType("gp2");
+        stackAddVolumesRequest.setNumberOfDisks(2L);
+        doAs(TEST_USER_CRN, () -> {
+            distroXV1Controller.addVolumesByStackCrn(CRN, stackAddVolumesRequest);
+        });
+        verify(stackOperations).putAddVolumes(NameOrCrn.ofCrn(CRN), stackAddVolumesRequest, "accountId");
     }
 }

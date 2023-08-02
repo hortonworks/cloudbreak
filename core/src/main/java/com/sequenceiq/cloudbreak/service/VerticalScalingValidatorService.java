@@ -71,6 +71,12 @@ public class VerticalScalingValidatorService {
         }
     }
 
+    public void validateProviderForAddVolumes(Stack stack, String message) {
+        if (!cloudParameterCache.isAddVolumesSupported(stack.getCloudPlatform())) {
+            throw new BadRequestException(String.format("%s is not supported on %s cloudplatform", message, stack.getCloudPlatform()));
+        }
+    }
+
     public void validateProvider(Stack stack, String message, StackVerticalScaleV4Request verticalScaleV4Request) {
         if (!cloudParameterCache.isVerticalScalingSupported(stack.getCloudPlatform())) {
             throw new BadRequestException(String.format("%s is not supported on %s cloudplatform", message, stack.getCloudPlatform()));

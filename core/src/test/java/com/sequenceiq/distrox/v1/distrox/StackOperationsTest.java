@@ -32,6 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
@@ -325,6 +326,21 @@ public class StackOperationsTest {
         assertEquals(2, deletedStacks.size());
         assertEquals(stackStatusV4Response1, deletedStacks.get(0));
         assertEquals(stackStatusV4Response2, deletedStacks.get(1));
+    }
+
+    @Test
+    void testPutAddVolumes() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
+        StackAddVolumesRequest stackAddVolumesRequest = new StackAddVolumesRequest();
+        stackAddVolumesRequest.setInstanceGroup("COMPUTE");
+        stackAddVolumesRequest.setCloudVolumeUsageType("GENERAL");
+        stackAddVolumesRequest.setSize(200L);
+        stackAddVolumesRequest.setType("gp2");
+        stackAddVolumesRequest.setNumberOfDisks(2L);
+
+        underTest.putAddVolumes(nameOrCrn, stackAddVolumesRequest, ACCOUNT_ID);
+
+        verify(stackCommonService).putAddVolumesInWorkspace(nameOrCrn, ACCOUNT_ID, stackAddVolumesRequest);
     }
 
 }

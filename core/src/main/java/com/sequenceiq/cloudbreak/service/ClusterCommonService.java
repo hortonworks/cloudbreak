@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.MaintenanceModeStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
@@ -378,5 +379,17 @@ public class ClusterCommonService {
             throw new BadRequestException("Invalid update cluster request!");
         }
         return flowIdentifier;
+    }
+
+    public FlowIdentifier putAddVolumes(String crn, StackAddVolumesRequest addVolumesRequest) {
+        StackDto stack = stackDtoService.getByCrn(crn);
+        Long stackId = stack.getId();
+        MDCBuilder.buildMdcContext(stack);
+        if (addVolumesRequest != null) {
+            return clusterOperationService.addVolumes(stackId, addVolumesRequest);
+        } else {
+            LOGGER.info("Invalid cluster update request received. Stack id: {}", stackId);
+            throw new BadRequestException("Invalid update cluster request!");
+        }
     }
 }
