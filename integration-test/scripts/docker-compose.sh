@@ -22,7 +22,7 @@ $INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility down --remove-orphans
 
 date
 echo -e "\n\033[1;96m--- Create docker network\033[0m\n"
-docker network create cbreak_default || true
+docker network create -o "com.docker.network.bridge.name"="docker-cbreak" cbreak_default || true
 
 date
 echo -e "\n\033[1;96m--- Start thunderhead mock\033[0m\n"
