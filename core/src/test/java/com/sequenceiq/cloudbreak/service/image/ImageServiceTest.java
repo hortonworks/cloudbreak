@@ -443,7 +443,7 @@ public class ImageServiceTest {
         Exception exception = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                         () -> assertThrows(CloudbreakImageNotFoundException.class,
                                 () -> underTest.determineImageName(PLATFORM, imageCatalogPlatform, "fake-region", image)));
-        String exceptionMessage = "Virtual machine image couldn't be found in image";
+        String exceptionMessage = "The virtual machine image couldn't be found for azure";
         MatcherAssert.assertThat(exception.getMessage(), CoreMatchers.containsString(exceptionMessage));
     }
 

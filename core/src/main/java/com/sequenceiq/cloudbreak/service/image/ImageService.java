@@ -271,8 +271,8 @@ public class ImageService {
                         return findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion);
                     })
                     .orElseThrow(() -> new CloudbreakImageNotFoundException(
-                            String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
-                                    imagesByRegion, platform, translatedRegion)));
+                            String.format("The virtual machine image couldn't be found for %s in the %s region. Available images are as follows: %s.",
+                                    platform, translatedRegion, imagesByRegion)));
         }
     }
 
@@ -282,8 +282,8 @@ public class ImageService {
         return findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion)
                 .or(() -> supplyAlternativeImageWhenEntitlementAllows(translatedRegion, imagesByRegion, accountId))
                 .orElseThrow(() -> new CloudbreakImageNotFoundException(
-                        String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
-                                imagesByRegion, platform, translatedRegion)));
+                        String.format("The virtual machine image couldn't be found for %s in the %s region. Available images are as follows: %s.",
+                                platform, translatedRegion, imagesByRegion)));
     }
 
     private Optional<String> supplyAlternativeImageWhenEntitlementAllows(String translatedRegion, Map<String, String> imagesByRegion, String accountId) {
@@ -297,10 +297,10 @@ public class ImageService {
     }
 
     private String selectImageByRegion(String translatedRegion, Map<String, String> imagesByRegion, String platform) throws CloudbreakImageNotFoundException {
-            return findStringKeyWithEqualsIgnoreCase(translatedRegion, imagesByRegion)
-                    .orElseThrow(() -> new CloudbreakImageNotFoundException(
-                            String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
-                                    imagesByRegion, platform, translatedRegion)));
+        return findStringKeyWithEqualsIgnoreCase(translatedRegion, imagesByRegion)
+                .orElseThrow(() -> new CloudbreakImageNotFoundException(
+                        String.format("The virtual machine image couldn't be found for %s in the %s region. Available images are as follows: %s.",
+                                platform, translatedRegion, imagesByRegion)));
     }
 
     private <T> Optional<T> findStringKeyWithEqualsIgnoreCase(String key, Map<String, T> map) {
