@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrenew.ClusterCertificateRenewEvent.CLUSTER_CERTIFICATE_REISSUE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.cmsync.CmSyncEvent.CM_SYNC_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigurationUpdateEvent.PILLAR_CONFIG_UPDATE_EVENT;
@@ -39,16 +40,19 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGrou
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesRequest;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.scale.ServicesRollingRestartEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.rotatepassword.RotateSaltPasswordEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.event.ClusterServicesRestartTriggerEvent;
@@ -520,5 +524,12 @@ public class ReactorFlowManager {
                 .build();
         LOGGER.debug("Disk Update flow trigger event sent for datahub {}", stack.getName());
         return reactorNotifier.notify(stackId, selector, datahubDiskUpdateTriggerEvent);
+    }
+
+    public FlowIdentifier triggerAddVolumes(Long stackId, StackAddVolumesRequest addVolumesRequest) {
+        String selector = ADD_VOLUMES_TRIGGER_EVENT.event();
+        AddVolumesRequest event = new AddVolumesRequest(selector, stackId, addVolumesRequest.getNumberOfDisks(), addVolumesRequest.getType(),
+                addVolumesRequest.getSize(), CloudVolumeUsageType.valueOf(addVolumesRequest.getCloudVolumeUsageType()), addVolumesRequest.getInstanceGroup());
+        return reactorNotifier.notify(stackId, selector, event);
     }
 }
