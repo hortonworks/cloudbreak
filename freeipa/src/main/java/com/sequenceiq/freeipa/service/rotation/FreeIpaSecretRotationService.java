@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SaltUpdateFlowEventProvider;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
+import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
@@ -38,6 +39,9 @@ public class FreeIpaSecretRotationService implements SaltUpdateFlowEventProvider
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private SecretRotationValidationService secretRotationValidationService;
+
     public FlowIdentifier rotateSecretsByCrn(String accountId, String environmentCrn, FreeIpaSecretRotationRequest request) {
         LOGGER.info("Requested secret rotation. Account id: {}, environment crn: {}, request: {}", accountId, environmentCrn, request);
         if (!entitlementService.isSecretRotationEnabled(accountId)) {
@@ -45,6 +49,7 @@ public class FreeIpaSecretRotationService implements SaltUpdateFlowEventProvider
         }
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(request.getSecrets());
+        secretRotationValidationService.validateExecutionType(environmentCrn, secretTypes, request.getExecutionType());
         String selector = EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class);
         Acceptable triggerEvent = new SecretRotationFlowChainTriggerEvent(
                 selector, stack.getId(), stack.getEnvironmentCrn(), secretTypes, request.getExecutionType());

@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
@@ -86,6 +88,9 @@ class SdxRotationServiceTest {
 
     @Mock
     private CloudbreakFlowService cloudbreakFlowService;
+
+    @Mock
+    private SecretRotationValidationService secretRotationValidationService;
 
     @InjectMocks
     private SdxRotationService underTest;
@@ -151,6 +156,7 @@ class SdxRotationServiceTest {
 
     @Test
     void triggerSecretRotationShouldSucceed() {
+        doNothing().when(secretRotationValidationService).validateExecutionType(any(), any(), any());
         when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
         SdxCluster sdxCluster = new SdxCluster();
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(sdxCluster));

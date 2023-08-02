@@ -92,7 +92,7 @@ public class CMUserRotationExecutorTest {
         doNothing().when(clusterSecurityService).checkUser(anyString(), anyString(), anyString());
 
         CMUserRotationContext rotationContext = getRotationContext();
-        underTest.executePreValidation(rotationContext);
+        underTest.executePreValidation(rotationContext, null);
 
         verify(clusterSecurityService, times(1)).checkUser(
                 eq(USER),
@@ -106,7 +106,7 @@ public class CMUserRotationExecutorTest {
         doThrow(new CloudbreakException("something")).when(clusterSecurityService).checkUser(anyString(), anyString(), anyString());
 
         CMUserRotationContext rotationContext = getRotationContext();
-        assertThrows(SecretRotationException.class, () -> underTest.executePreValidation(rotationContext));
+        assertThrows(SecretRotationException.class, () -> underTest.executePreValidation(rotationContext, null));
 
         verify(clusterSecurityService, times(1)).checkUser(
                 eq(USER),

@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationValidationService;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -86,6 +87,9 @@ public class SdxRotationService {
     @Inject
     private MultiClusterRotationService multiClusterRotationService;
 
+    @Inject
+    private SecretRotationValidationService secretRotationValidationService;
+
     public boolean checkOngoingMultiSecretChildrenRotations(String parentCrn, String secret) {
         MultiSecretType multiSecretType = SecretTypeConverter.mapMultiSecretType(secret);
         Set<String> crnsByEnvironmentCrn = getSdxCrnsByEnvironmentCrn(parentCrn);
@@ -136,11 +140,12 @@ public class SdxRotationService {
         redbeamsPoller.pollFlowStateByFlowIdentifierUntilComplete("secret rotation", flowIdentifier, sdxCluster.getId(), pollingConfig);
     }
 
-    public FlowIdentifier triggerSecretRotation(String datalakeCrn, List<String> secrets, RotationFlowExecutionType executionType) {
+    public FlowIdentifier triggerSecretRotation(String datalakeCrn, List<String> secrets, RotationFlowExecutionType requestedExecutionType) {
         if (entitlementService.isSecretRotationEnabled(Crn.fromString(datalakeCrn).getAccountId())) {
             SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn).orElseThrow(notFound("SDX cluster", datalakeCrn));
             List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
-            return sdxReactorFlowManager.triggerSecretRotation(sdxCluster, secretTypes, executionType);
+            secretRotationValidationService.validateExecutionType(datalakeCrn, secretTypes, requestedExecutionType);
+            return sdxReactorFlowManager.triggerSecretRotation(sdxCluster, secretTypes, requestedExecutionType);
         } else {
             throw new CloudbreakServiceException("Account is not entitled to execute any secret rotation!");
         }

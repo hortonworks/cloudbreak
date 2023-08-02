@@ -102,7 +102,7 @@ class RootPasswordRotationExecutorTest {
         ResourceConnector resourceConnector = mockResourceConnector(mockDbStack());
         when(resourceConnector.getDatabaseServerStatus(any(), any())).thenReturn(ExternalDatabaseStatus.STARTED);
 
-        underTest.executePreValidation(new RotationContext(RESOURCE_CRN));
+        underTest.executePreValidation(new RotationContext(RESOURCE_CRN), null);
 
         verify(resourceConnector).getDatabaseServerStatus(any(), any());
     }
@@ -112,7 +112,7 @@ class RootPasswordRotationExecutorTest {
         ResourceConnector resourceConnector = mockResourceConnector(mockDbStack());
         when(resourceConnector.getDatabaseServerStatus(any(), any())).thenReturn(ExternalDatabaseStatus.STOPPED);
 
-        assertThrows(SecretRotationException.class, () -> underTest.executePreValidation(new RotationContext(RESOURCE_CRN)));
+        assertThrows(SecretRotationException.class, () -> underTest.executePreValidation(new RotationContext(RESOURCE_CRN), null));
 
         verify(resourceConnector).getDatabaseServerStatus(any(), any());
     }

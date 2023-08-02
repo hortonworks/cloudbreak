@@ -25,12 +25,12 @@ public class SecretRotationPreValidateServiceTest extends AbstractSecretRotation
 
     @Test
     public void testPreValidate() {
-        doNothing().when(executor).executePreValidation(any());
+        doNothing().when(executor).executePreValidation(any(), any());
 
         underTest.preValidate(new RotationMetadata(TEST, ROTATE, null, "resource", Optional.empty()));
 
         verify(contextProvider).getContexts(anyString());
-        verify(executor, times(1)).executePreValidation(any());
+        verify(executor, times(1)).executePreValidation(any(), any());
     }
 
     @Override

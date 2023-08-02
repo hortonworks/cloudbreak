@@ -53,7 +53,7 @@ public class SaltStateApplyRotationExecutorTest {
         doNothing().when(hostOrchestrator).ping(any(), any());
         doNothing().when(hostOrchestrator).executeSaltState(any(), any(), any(), any(), any(), any());
 
-        underTest.executePreValidation(createContext(List.of("state"), Optional.empty(), Optional.empty()));
+        underTest.executePreValidation(createContext(List.of("state"), Optional.empty(), Optional.empty()), null);
 
         verify(hostOrchestrator).ping(any(), any());
         verify(hostOrchestrator).executeSaltState(any(), any(), eq(List.of("preValidate")), any(), any(), any());
@@ -64,7 +64,7 @@ public class SaltStateApplyRotationExecutorTest {
         doThrow(new CloudbreakOrchestratorFailedException("pingpong")).when(hostOrchestrator).ping(any(), any());
 
         assertThrows(SecretRotationException.class, () ->
-                underTest.executePreValidation(createContext(List.of("state"), Optional.empty(), Optional.empty())));
+                underTest.executePreValidation(createContext(List.of("state"), Optional.empty(), Optional.empty()), null));
 
         verify(hostOrchestrator).ping(any(), any());
         verifyNoMoreInteractions(hostOrchestrator);

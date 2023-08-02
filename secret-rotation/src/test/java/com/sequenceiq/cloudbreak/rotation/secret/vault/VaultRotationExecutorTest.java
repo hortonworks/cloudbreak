@@ -52,7 +52,7 @@ public class VaultRotationExecutorTest {
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
-        underTest.executePreValidation(rotationContext);
+        underTest.executePreValidation(rotationContext, null);
 
         verify(secretService).isSecret(any());
     }
@@ -64,7 +64,7 @@ public class VaultRotationExecutorTest {
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
-        assertThrows(SecretRotationException.class, () -> underTest.executePreValidation(rotationContext));
+        assertThrows(SecretRotationException.class, () -> underTest.executePreValidation(rotationContext, null));
 
         verify(secretService).isSecret(any());
     }

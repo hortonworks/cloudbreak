@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
+import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.rotation.FreeIpaSecretType;
@@ -48,6 +50,9 @@ class FreeIpaSecretRotationServiceTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private SecretRotationValidationService secretRotationValidationService;
+
     @InjectMocks
     private FreeIpaSecretRotationService underTest;
 
@@ -56,6 +61,7 @@ class FreeIpaSecretRotationServiceTest {
 
     @Test
     public void testSecretRotationIsTriggered() {
+        doNothing().when(secretRotationValidationService).validateExecutionType(any(), any(), any());
         when(entitlementService.isSecretRotationEnabled(any())).thenReturn(true);
         Stack stack = new Stack();
         stack.setId(STACK_ID);

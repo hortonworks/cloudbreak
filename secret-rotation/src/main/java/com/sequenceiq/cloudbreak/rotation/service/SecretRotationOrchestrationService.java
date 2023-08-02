@@ -13,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
@@ -61,6 +63,9 @@ public class SecretRotationOrchestrationService {
     @Inject
     private MultiClusterRotationService multiClusterRotationService;
 
+    @Inject
+    private TransactionService transactionService;
+
     public void preValidateIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType) {
         RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, PREVALIDATE);
         if (executionDecisionProvider.executionRequired(rotationMetadata)) {
@@ -74,9 +79,8 @@ public class SecretRotationOrchestrationService {
             secretRotationStatusService.rotationStarted(resourceCrn, secretType);
             secretRotationUsageService.rotationStarted(secretType, resourceCrn, executionType);
             rotationService.rotate(rotationMetadata);
-            secretRotationStatusService.rotationFinished(resourceCrn, secretType);
-            secretRotationProgressService.deleteAllForCurrentExecution(rotationMetadata);
             multiClusterRotationService.updateMultiRotationEntriesAfterRotate(rotationMetadata);
+            secretRotationStatusService.rotationFinished(resourceCrn, secretType);
         }
     }
 
@@ -87,13 +91,12 @@ public class SecretRotationOrchestrationService {
                 secretRotationStatusService.rollbackStarted(resourceCrn, secretType);
                 secretRotationUsageService.rollbackStarted(secretType, resourceCrn, executionType);
                 rollbackService.rollback(rotationMetadata, failedStep);
+                secretRotationProgressService.deleteAllForCurrentRotation(resourceCrn, secretType);
                 secretRotationStatusService.rollbackFinished(resourceCrn, secretType);
                 secretRotationUsageService.rollbackFinished(secretType, resourceCrn, executionType);
-                secretRotationProgressService.deleteAllForCurrentExecution(rotationMetadata);
             } catch (Exception e) {
                 secretRotationStatusService.rollbackFailed(resourceCrn, secretType, e.getMessage());
                 secretRotationUsageService.rollbackFailed(secretType, resourceCrn, e.getMessage(), executionType);
-                secretRotationProgressService.deleteAllForCurrentExecution(rotationMetadata);
                 throw e;
             }
         }
@@ -105,13 +108,17 @@ public class SecretRotationOrchestrationService {
             try {
                 secretRotationStatusService.finalizeStarted(resourceCrn, secretType);
                 finalizeService.finalize(rotationMetadata);
+                transactionService.required(() -> {
+                            secretRotationProgressService.deleteAllForCurrentRotation(resourceCrn, secretType);
+                            multiClusterRotationService.updateMultiRotationEntriesAfterFinalize(rotationMetadata);
+                        });
                 secretRotationStatusService.finalizeFinished(resourceCrn, secretType);
                 secretRotationUsageService.rotationFinished(secretType, resourceCrn, executionType);
-                secretRotationProgressService.deleteAllForCurrentExecution(rotationMetadata);
-                multiClusterRotationService.updateMultiRotationEntriesAfterFinalize(rotationMetadata);
+            } catch (TransactionService.TransactionExecutionException te) {
+                secretRotationStatusService.finalizeFailed(resourceCrn, secretType, te.getMessage());
+                throw new CloudbreakServiceException(te);
             } catch (Exception e) {
                 secretRotationStatusService.finalizeFailed(resourceCrn, secretType, e.getMessage());
-                secretRotationProgressService.deleteAllForCurrentExecution(rotationMetadata);
                 throw e;
             }
         }

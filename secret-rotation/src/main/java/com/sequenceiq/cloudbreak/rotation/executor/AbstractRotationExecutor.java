@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.rotation.executor;
 
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.FINALIZE;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.PREVALIDATE;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
+
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -43,22 +48,22 @@ public abstract class AbstractRotationExecutor<C extends RotationContext> {
     public abstract SecretRotationStep getType();
 
     public final void executeRotate(RotationContext context, SecretType secretType) {
-        invokeRotationPhaseWithProgressCheck(context, secretType, RotationFlowExecutionType.ROTATE, this::rotate,
+        invokeRotationPhaseWithProgressCheck(context, secretType, ROTATE, this::rotate,
                 () -> String.format("Execution of rotation failed at %s step for %s regarding secret %s.", getType(), context.getResourceCrn(), secretType));
     }
 
     public final void executeRollback(RotationContext context, SecretType secretType) {
-        invokeRotationPhaseWithProgressCheck(context, secretType, RotationFlowExecutionType.ROLLBACK, this::rollback,
+        invokeRotationPhaseWithProgressCheck(context, secretType, ROLLBACK, this::rollback,
                 () -> String.format("Rollback of rotation failed at %s step for %s regarding secret %s.", getType(), context.getResourceCrn(), secretType));
     }
 
     public final void executeFinalize(RotationContext context, SecretType secretType) {
-        invokeRotationPhaseWithProgressCheck(context, secretType, RotationFlowExecutionType.FINALIZE, this::finalize,
+        invokeRotationPhaseWithProgressCheck(context, secretType, FINALIZE, this::finalize,
                 () -> String.format("Finalization of rotation failed at %s step for %s regarding secret %s.", getType(), context.getResourceCrn(), secretType));
     }
 
-    public final void executePreValidation(RotationContext context) {
-        invokeRotationPhase(context, this::preValidate,
+    public final void executePreValidation(RotationContext context, SecretType secretType) {
+        invokeRotationPhaseWithProgressCheck(context, secretType, PREVALIDATE, this::preValidate,
                 () -> String.format("Pre validation of rotation failed at %s step for %s", getType(), context.getResourceCrn()));
     }
 

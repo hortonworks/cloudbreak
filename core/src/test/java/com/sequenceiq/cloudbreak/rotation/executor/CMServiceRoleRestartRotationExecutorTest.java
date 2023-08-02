@@ -115,7 +115,7 @@ class CMServiceRoleRestartRotationExecutorTest {
     public void testPreValidate() {
         when(clusterStatusService.isServiceRunningByType(any(), any())).thenReturn(true);
 
-        underTest.executePreValidation(createContext());
+        underTest.executePreValidation(createContext(), null);
         verify(clusterStatusService).isServiceRunningByType(any(), any());
     }
 
@@ -123,7 +123,7 @@ class CMServiceRoleRestartRotationExecutorTest {
     public void testPreValidateServiceNotRunning() {
         when(clusterStatusService.isServiceRunningByType(any(), any())).thenReturn(false);
 
-        assertThrows(SecretRotationException.class, () -> underTest.executePreValidation(createContext()));
+        assertThrows(SecretRotationException.class, () -> underTest.executePreValidation(createContext(), null));
         verify(clusterStatusService).isServiceRunningByType(any(), any());
     }
 

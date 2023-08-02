@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
+import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationValidationService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -51,12 +52,16 @@ public class StackRotationService {
     @Inject
     private MultiClusterRotationService multiClusterRotationService;
 
-    public FlowIdentifier rotateSecrets(String crn, List<String> secrets, RotationFlowExecutionType executionType) {
+    @Inject
+    private SecretRotationValidationService secretRotationValidationService;
+
+    public FlowIdentifier rotateSecrets(String crn, List<String> secrets, RotationFlowExecutionType requestedExecutionType) {
         if (entitlementService.isSecretRotationEnabled(Crn.fromString(crn).getAccountId())) {
             StackView viewByCrn = stackDtoService.getStackViewByCrn(crn);
             Long stackId = viewByCrn.getId();
             List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
-            return flowManager.triggerSecretRotation(stackId, crn, secretTypes, executionType);
+            secretRotationValidationService.validateExecutionType(crn, secretTypes, requestedExecutionType);
+            return flowManager.triggerSecretRotation(stackId, crn, secretTypes, requestedExecutionType);
         } else {
             throw new CloudbreakServiceException("Account is not entitled to execute any secret rotation!");
         }

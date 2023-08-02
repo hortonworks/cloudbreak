@@ -82,7 +82,7 @@ class SaltPillarRotationExecutorTest {
         StackDto stackDto = mockStackDto();
         doNothing().when(hostOrchestrator).ping(any(), any());
 
-        underTest.executePreValidation(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()));
+        underTest.executePreValidation(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()), null);
 
         verify(hostOrchestrator).ping(any(), any());
     }
@@ -94,7 +94,7 @@ class SaltPillarRotationExecutorTest {
         doThrow(new CloudbreakOrchestratorFailedException("pingpong")).when(hostOrchestrator).ping(any(), any());
 
         assertThrows(SecretRotationException.class, () ->
-                underTest.executePreValidation(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator())));
+                underTest.executePreValidation(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()), null));
 
         verify(hostOrchestrator).ping(any(), any());
     }

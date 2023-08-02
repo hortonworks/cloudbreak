@@ -183,7 +183,7 @@ public class SecretRotationActions {
                     Flow flow = getFlow(context.getFlowId());
                     flow.setFlowFailed(exception);
                 }
-                secretRotationStepProgressService.deleteAllForSecretType(context.getResourceCrn(), context.getSecretType());
+                secretRotationStepProgressService.deleteAllForCurrentRotation(context.getResourceCrn(), context.getSecretType());
                 secretRotationUsageService.rotationFailed(context.getSecretType(), resourceCrn, message, context.getExecutionType());
                 secretRotationStatusService.rotationFailed(resourceCrn, payload.getSecretType(), message);
                 sendEvent(context, RotationEvent.fromContext(SecretRotationEvent.ROTATION_FAILURE_HANDLED_EVENT.event(), context));

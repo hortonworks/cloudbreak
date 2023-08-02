@@ -95,16 +95,20 @@ public class AbstractRotationExecutorTest {
 
     @Test
     public void testPreValidation() {
-        underTest.executePreValidation(new RotationContext(""));
+        when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
 
-        verifyNoInteractions(secretRotationProgressService);
+        underTest.executePreValidation(new RotationContext(""), TestSecretType.TEST);
+
+        verify(secretRotationProgressService, times(1)).latestStep(any(), any(), any(), any());
     }
 
     @Test
     public void testPreValidationFailure() {
-        assertThrows(SecretRotationException.class, () -> underTest.executePreValidation(new RotationContext(null)));
+        when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
 
-        verifyNoInteractions(secretRotationProgressService);
+        assertThrows(SecretRotationException.class, () -> underTest.executePreValidation(new RotationContext(null), TestSecretType.TEST));
+
+        verify(secretRotationProgressService, times(1)).latestStep(any(), any(), any(), any());
     }
 
     @Test
