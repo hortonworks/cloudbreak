@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
-import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -54,13 +53,13 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
     private AsyncTaskExecutor intermediateBuilderExecutor;
 
     @Inject
-    private CommonAwsClient awsClient;
-
-    @Inject
     private VolumeResourceCollector volumeResourceCollector;
 
     @Inject
     private AwsInstanceFinder awsInstanceFinder;
+
+    @Inject
+    private CommonAwsClient commonAwsClient;
 
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -82,7 +81,7 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
         CloudResource volumeSet = volumeSetOpt.get();
         String instanceId = awsInstanceFinder.getInstanceId(privateId, context.getComputeResources(privateId));
 
-        AmazonEc2Client client = getAmazonEc2Client(auth);
+        AmazonEc2Client client = commonAwsClient.createEc2Client(auth);
 
         VolumeSetAttributes volumeSetAttributes = volumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
         LOGGER.debug("Attach volume set {} to instance {}", volumeSetAttributes, instanceId);
@@ -157,7 +156,7 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Override
     protected List<CloudResourceStatus> checkResources(ResourceType type, AwsContext context, AuthenticatedContext auth, Iterable<CloudResource> resources) {
-        AmazonEc2Client client = getAmazonEc2Client(auth);
+        AmazonEc2Client client = commonAwsClient.createEc2Client(auth);
 
         Pair<List<String>, List<CloudResource>> volumes = volumeResourceCollector.getVolumeIdsByVolumeResources(resources, resourceType(),
                 volumeSetAttributes());
@@ -183,12 +182,6 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
 
     private Function<CloudResource, VolumeSetAttributes> volumeSetAttributes() {
         return volumeSet -> volumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
-    }
-
-    private AmazonEc2Client getAmazonEc2Client(AuthenticatedContext auth) {
-        AwsCredentialView credentialView = new AwsCredentialView(auth.getCloudCredential());
-        String regionName = auth.getCloudContext().getLocation().getRegion().value();
-        return awsClient.createEc2Client(credentialView, regionName);
     }
 
     @Override

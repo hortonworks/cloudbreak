@@ -33,13 +33,11 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
+import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsCommonDiskUtilService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
-import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
-import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -91,12 +89,6 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     private PersistenceNotifier resourceNotifier;
 
     @Inject
-    private AwsTaggingService awsTaggingService;
-
-    @Inject
-    private CommonAwsClient awsClient;
-
-    @Inject
     private VolumeResourceCollector volumeResourceCollector;
 
     @Inject
@@ -113,6 +105,12 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Inject
     private AwsInstanceFinder awsInstanceFinder;
+
+    @Inject
+    private AwsCommonDiskUtilService awsCommonDiskUtilService;
+
+    @Inject
+    private CommonAwsClient commonAwsClient;
 
     private final BiFunction<Volume, Boolean, InstanceBlockDeviceMappingSpecification> toInstanceBlockDeviceMappingSpecification = (volume, flag) -> {
         EbsInstanceBlockDeviceSpecification device = EbsInstanceBlockDeviceSpecification.builder()
@@ -228,7 +226,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             return availabilityZone.get();
         } else {
             String defaultAvailabilityZone = auth.getCloudContext().getLocation().getAvailabilityZone().value();
-            AmazonEc2Client amazonEC2Client = getAmazonEC2Client(auth);
+            AmazonEc2Client amazonEC2Client = commonAwsClient.createEc2Client(auth);
             DescribeSubnetsRequest describeSubnetsRequest = DescribeSubnetsRequest.builder().subnetIds(subnetId).build();
             DescribeSubnetsResponse describeSubnetsResponse = awsMethodExecutor
                     .execute(() -> amazonEC2Client.describeSubnets(describeSubnetsRequest), null);
@@ -255,16 +253,13 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         String instanceId = awsInstanceFinder.getInstanceId(privateId, context.getComputeResources(privateId));
         LOGGER.debug("Create volumes on provider for {}: {}", instanceId, buildableResource.stream().map(CloudResource::getName).collect(Collectors.toList()));
-        AmazonEc2Client client = getAmazonEC2Client(auth);
+        AmazonEc2Client client = commonAwsClient.createEc2Client(auth);
         Map<String, List<Volume>> volumeSetMap = Collections.synchronizedMap(new HashMap<>());
 
         List<Future<?>> futures = new ArrayList<>();
-        boolean encryptedVolume = isEncryptedVolumeRequested(group);
-        String volumeEncryptionKey = getVolumeEncryptionKey(group, encryptedVolume);
-        TagSpecification tagSpecification = TagSpecification.builder()
-                .resourceType(software.amazon.awssdk.services.ec2.model.ResourceType.VOLUME)
-                .tags(awsTaggingService.prepareEc2Tags(cloudStack.getTags()))
-                .build();
+        boolean encryptedVolume = awsCommonDiskUtilService.isEncryptedVolumeRequested(group);
+        String volumeEncryptionKey = awsCommonDiskUtilService.getVolumeEncryptionKey(group, encryptedVolume);
+        TagSpecification tagSpecification = awsCommonDiskUtilService.getTagSpecification(cloudStack);
         List<CloudResource> requestedResources = buildableResource.stream()
                 .filter(cloudResource -> CommonStatus.REQUESTED.equals(cloudResource.getStatus()))
                 .collect(Collectors.toList());
@@ -272,14 +267,15 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         Long ephemeralCount = getEphemeralCount(group);
 
         LOGGER.debug("Start creating data volumes for stack: '{}' group: '{}'", auth.getCloudContext().getName(), group.getName());
-
+        String defaultAvailabilityZone = auth.getCloudContext().getLocation().getAvailabilityZone().value();
         for (CloudResource resource : requestedResources) {
             volumeSetMap.put(resource.getName(), Collections.synchronizedList(new ArrayList<>()));
 
             VolumeSetAttributes volumeSet = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
             DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, ephemeralCount.intValue());
+            String volumeSetAvailabilityZone = volumeSet.getAvailabilityZone() == null ? defaultAvailabilityZone : volumeSet.getAvailabilityZone();
             futures.addAll(volumeSet.getVolumes().stream()
-                    .map(createVolumeRequest(encryptedVolume, volumeEncryptionKey, tagSpecification, volumeSet))
+                    .map(createVolumeRequest(encryptedVolume, volumeEncryptionKey, tagSpecification, volumeSetAvailabilityZone))
                     .map(requestWithUsage -> intermediateBuilderExecutor.submit(() -> {
                         CreateVolumeRequest request = requestWithUsage.getFirst();
                         CreateVolumeResponse response = client.createVolume(request);
@@ -294,7 +290,6 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             future.get();
         }
         LOGGER.debug("Volume creation requests sent");
-        String defaultAvailabilityZone = auth.getCloudContext().getLocation().getAvailabilityZone().value();
         List<CloudResource> previouslyCreatedVolumeSets = buildableResource.stream()
                 .filter(cloudResource -> CommonStatus.CREATED.equals(cloudResource.getStatus()))
                 .collect(Collectors.toList());
@@ -343,29 +338,11 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .build();
     }
 
-    private boolean isEncryptedVolumeRequested(Group group) {
-        return new AwsInstanceView(group.getReferenceInstanceTemplate()).isEncryptedVolumes();
-    }
-
-    private String getVolumeEncryptionKey(Group group, boolean encryptedVolume) {
-        AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceTemplate());
-        return encryptedVolume && awsInstanceView.isKmsCustom() ? awsInstanceView.getKmsKey() : null;
-    }
-
     private Function<Volume, Pair<CreateVolumeRequest, CloudVolumeUsageType>> createVolumeRequest(boolean encryptedVolume,
-            String volumeEncryptionKey, TagSpecification tagSpecification, VolumeSetAttributes volumeSet) {
+            String volumeEncryptionKey, TagSpecification tagSpecification, String volumeSetAvailabilityZone) {
         return volume -> {
-            CreateVolumeRequest createVolumeRequest = CreateVolumeRequest.builder()
-                    .availabilityZone(volumeSet.getAvailabilityZone())
-                    .size(volume.getSize())
-                    .snapshotId(null)
-                    .tagSpecifications(tagSpecification)
-                    .volumeType(volume.getType())
-                    .iops(awsVolumeIopsCalculator.getIops(volume.getType(), volume.getSize()))
-                    .throughput(awsVolumeThroughputCalculator.getThroughput(volume.getType(), volume.getSize()))
-                    .encrypted(encryptedVolume)
-                    .kmsKeyId(volumeEncryptionKey)
-                    .build();
+            CreateVolumeRequest createVolumeRequest = awsCommonDiskUtilService.createVolumeRequest(volume, tagSpecification, volumeEncryptionKey,
+                    encryptedVolume, volumeSetAvailabilityZone);
             return Pair.of(createVolumeRequest, volume.getCloudVolumeUsageType());
         };
     }
@@ -377,7 +354,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         List<CloudResourceStatus> cloudResourceStatuses = checkResources(ResourceType.AWS_VOLUMESET, context, auth, List.of(resource));
 
         boolean anyDeleted = cloudResourceStatuses.stream().map(CloudResourceStatus::getStatus).anyMatch(DELETED::equals);
-        AmazonEc2Client client = getAmazonEC2Client(auth);
+        AmazonEc2Client client = commonAwsClient.createEc2Client(auth);
         if (!volumeSetAttributes.getDeleteOnTermination() && !anyDeleted) {
             LOGGER.debug("Volumes will be preserved.");
             resource.setStatus(CommonStatus.DETACHED);
@@ -477,7 +454,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Override
     protected List<CloudResourceStatus> checkResources(ResourceType type, AwsContext context, AuthenticatedContext auth, Iterable<CloudResource> resources) {
-        AmazonEc2Client client = getAmazonEC2Client(auth);
+        AmazonEc2Client client = commonAwsClient.createEc2Client(auth);
 
         Pair<List<String>, List<CloudResource>> volumes = volumeResourceCollector.getVolumeIdsByVolumeResources(resources, resourceType(),
                 volumeSetAttributes());
@@ -562,12 +539,6 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     private Function<CloudResource, VolumeSetAttributes> volumeSetAttributes() {
         return volumeSet -> volumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
-    }
-
-    private AmazonEc2Client getAmazonEC2Client(AuthenticatedContext auth) {
-        AwsCredentialView credentialView = new AwsCredentialView(auth.getCloudCredential());
-        String regionName = auth.getCloudContext().getLocation().getRegion().value();
-        return awsClient.createEc2Client(credentialView, regionName);
     }
 
     @Override

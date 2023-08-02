@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.service;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.ArrayList;
@@ -16,11 +17,13 @@ import org.springframework.util.CollectionUtils;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
+import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 import software.amazon.awssdk.services.ec2.model.DeleteVolumeRequest;
@@ -29,8 +32,9 @@ import software.amazon.awssdk.services.ec2.model.DescribeVolumesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
 import software.amazon.awssdk.services.ec2.model.DetachVolumeRequest;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
+import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.ModifyVolumeRequest;
-import software.amazon.awssdk.services.ec2.model.Volume;
+import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.ec2.model.VolumeModification;
 import software.amazon.awssdk.services.ec2.model.VolumeModificationState;
 import software.amazon.awssdk.services.ec2.model.VolumeState;
@@ -40,13 +44,13 @@ public class AwsCommonDiskUpdateService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsCommonDiskUpdateService.class);
 
-    private static final int MAX_READ_COUNT = 20;
+    private static final int MAX_READ_MODIFY_COUNT = 20;
 
-    private static final int SLEEP_INTERVAL = 30;
+    private static final int SLEEP_INTERVAL_MODIFY_SECONDS = 30;
 
-    private static final int MAX_READ_COUNT_DELETE = 15;
+    private static final int MAXIMUM_READ_COUNT = 15;
 
-    private static final int SLEEP_INTERVAL_DELETE = 2;
+    private static final int SLEEP_INTERVAL_IN_SECONDS = 2;
 
     public void modifyVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
         AmazonEc2Client amazonEC2Client = getEc2Client(authenticatedContext);
@@ -57,10 +61,10 @@ public class AwsCommonDiskUpdateService {
                 amazonEC2Client.modifyVolume(modifyVolumeRequest);
             } catch (Ec2Exception ex) {
                 LOGGER.error("AWS threw BAD Request exception, while modifying volume: {}, exception: {}", volume, ex.getMessage());
-                throw new CloudbreakException(String.format("Exception while modifying disk volume: %s, exception: %s", volume, ex.getMessage()));
+                throw new CloudbreakException(format("Exception while modifying disk volume: %s, exception: %s", volume, ex.getMessage()));
             }
         }
-        Polling.waitPeriodly(SLEEP_INTERVAL, TimeUnit.SECONDS).stopIfException(false).stopAfterAttempt(MAX_READ_COUNT)
+        Polling.waitPeriodly(SLEEP_INTERVAL_MODIFY_SECONDS, TimeUnit.SECONDS).stopIfException(false).stopAfterAttempt(MAX_READ_MODIFY_COUNT)
             .run(() -> {
                 LOGGER.debug("Getting volume modification states - {}", volumeIds);
                 boolean volumeStateIsNotComplete = getVolumeModificationsState(volumeIds, amazonEC2Client).stream()
@@ -76,12 +80,12 @@ public class AwsCommonDiskUpdateService {
         List<String> failedVolumes = getVolumeModificationsState(volumeIds, amazonEC2Client).stream()
                 .filter(volMod -> volMod.modificationState().equals(VolumeModificationState.FAILED)).map(VolumeModification::volumeId).toList();
         if (!CollectionUtils.isEmpty(failedVolumes)) {
-            throw new CloudbreakException(String.format("Some volumes were not modified: %s, please retry after 6 hours",
+            throw new CloudbreakException(format("Some volumes were not modified: %s, please retry after 6 hours",
                     String.join("'", failedVolumes)));
         }
     }
 
-    protected AmazonEc2Client getEc2Client(AuthenticatedContext authenticatedContext) {
+    private AmazonEc2Client getEc2Client(AuthenticatedContext authenticatedContext) {
         return new AuthenticatedContextView(authenticatedContext).getAmazonEC2Client();
     }
 
@@ -99,7 +103,7 @@ public class AwsCommonDiskUpdateService {
         AmazonEc2Client amazonEC2Client = getEc2Client(authenticatedContext);
         List<String> volumeIdsToPoll = new ArrayList<>();
         Map<String, VolumeState> volumeStatesMap = getVolumeStates(instanceVolumeIdsMap.values().stream().flatMap(Collection::stream)
-                .map(VolumeSetAttributes.Volume::getId).toList(), amazonEC2Client);
+                .map(VolumeSetAttributes.Volume::getId).toList(), amazonEC2Client, Map.of());
         for (Map.Entry<String, List<VolumeSetAttributes.Volume>> entry: instanceVolumeIdsMap.entrySet()) {
             entry.getValue().forEach(volume -> {
                 if (VolumeState.IN_USE.equals(volumeStatesMap.get(volume.getId()))) {
@@ -128,31 +132,74 @@ public class AwsCommonDiskUpdateService {
         }
     }
 
-    protected Map<String, VolumeState> getVolumeStates(List<String> volumeIds, AmazonEc2Client amazonEC2Client) {
+    protected Map<String, VolumeState> getVolumeStates(List<String> volumeIds, AmazonEc2Client amazonEC2Client, Map<String, List<String>> filters) {
+        DescribeVolumesRequest.Builder describeVolumesRequestBuilder = DescribeVolumesRequest.builder();
         if (!volumeIds.isEmpty()) {
-            DescribeVolumesRequest describeVolumesRequest = DescribeVolumesRequest.builder().volumeIds(volumeIds).build();
-            DescribeVolumesResponse volumesResponse = amazonEC2Client.describeVolumes(describeVolumesRequest);
-            if (volumesResponse.hasVolumes()) {
-                return volumesResponse.volumes().stream().collect(Collectors.toMap(Volume::volumeId, Volume::state));
-            }
+            describeVolumesRequestBuilder.volumeIds(volumeIds);
+        } else if (!filters.isEmpty()) {
+            List<Filter> filterRequest = getFiltersForDescribeVolumeRequest(filters);
+            describeVolumesRequestBuilder.filters(filterRequest);
         }
-        return Map.of("", VolumeState.UNKNOWN_TO_SDK_VERSION);
+        try {
+            DescribeVolumesResponse volumesResponse = amazonEC2Client.describeVolumes(describeVolumesRequestBuilder.build());
+            if (volumesResponse.hasVolumes()) {
+                return volumesResponse.volumes().stream().collect(Collectors.toMap(software.amazon.awssdk.services.ec2.model.Volume::volumeId,
+                        software.amazon.awssdk.services.ec2.model.Volume::state));
+            }
+            return Map.of("", VolumeState.UNKNOWN_TO_SDK_VERSION);
+        } catch (Exception ex) {
+            String exceptionMessage = format("Exception while querying the volume states for volumes - %s. returning empty map. Exception - %s",
+                    volumeIds, ex.getMessage());
+            LOGGER.warn(exceptionMessage);
+            throw new CloudbreakServiceException(exceptionMessage);
+        }
+    }
+
+    protected Map<String, List<software.amazon.awssdk.services.ec2.model.Volume>> getVolumesInAvailableStatusByTagsFilter(AmazonEc2Client amazonEC2Client,
+            Map<String, List<String>> tagsFilter) {
+        DescribeVolumesRequest.Builder describeVolumesRequestBuilder = DescribeVolumesRequest.builder();
+        List<Filter> filterRequest = getFiltersForDescribeVolumeRequest(tagsFilter);
+        describeVolumesRequestBuilder.filters(filterRequest);
+        try {
+            DescribeVolumesResponse volumesResponse = amazonEC2Client.describeVolumes(describeVolumesRequestBuilder.build());
+            if (volumesResponse.hasVolumes()) {
+                return volumesResponse.volumes().stream().collect(Collectors.groupingBy(vol -> vol.tags().stream()
+                                .filter(tag -> tag.key().equals("tag:created-for")).map(Tag::value).findAny().orElseThrow()));
+            }
+            return Map.of("", List.of());
+        } catch (Exception ex) {
+            String exceptionMessage = format("Exception while querying the volume for volume filters - %s. returning empty map. Exception - %s",
+                    tagsFilter, ex.getMessage());
+            LOGGER.warn(exceptionMessage);
+            throw new CloudbreakServiceException(exceptionMessage);
+        }
     }
 
     protected void pollVolumeStates(AmazonEc2Client amazonEC2Client, List<String> volumeIdsToPoll) {
         LOGGER.debug("Polling volume states - {}", volumeIdsToPoll);
         if (!volumeIdsToPoll.isEmpty()) {
-            Polling.waitPeriodly(SLEEP_INTERVAL_DELETE, TimeUnit.SECONDS).stopIfException(true).stopAfterAttempt(MAX_READ_COUNT_DELETE)
+            Polling.waitPeriodly(SLEEP_INTERVAL_IN_SECONDS, TimeUnit.SECONDS).stopIfException(true).stopAfterAttempt(MAXIMUM_READ_COUNT)
                 .run(() -> {
                     LOGGER.debug("Getting volume states - {}", volumeIdsToPoll);
-                    boolean volumeStateIsNotAvailable = getVolumeStates(volumeIdsToPoll, amazonEC2Client).values().stream()
-                            .anyMatch(state -> !state.equals(VolumeState.AVAILABLE));
-                    LOGGER.debug("Result of checking all volumes available - {}", volumeStateIsNotAvailable);
+                    Map<String, VolumeState> volumeStateMap = getVolumeStates(volumeIdsToPoll, amazonEC2Client, Map.of());
+                    List<String> volumeIdsNotInAvailable = volumeStateMap.keySet().stream()
+                            .filter(key -> !volumeStateMap.get(key).equals(VolumeState.AVAILABLE)).toList();
+                    boolean volumeStateIsNotAvailable = volumeIdsNotInAvailable.size() > 0;
+                    LOGGER.debug("Result of checking all volumes available - {}", volumeIdsNotInAvailable);
                     if (volumeStateIsNotAvailable) {
                         return AttemptResults.justContinue();
                     }
                     return AttemptResults.justFinish();
                 });
         }
+    }
+
+    protected List<Filter> getFiltersForDescribeVolumeRequest(Map<String, List<String>> filterInputs) {
+        List<Filter> filters = Lists.newArrayList();
+        for (String key : filterInputs.keySet()) {
+            Filter filter = Filter.builder().name(key).values(filterInputs.get(key)).build();
+            filters.add(filter);
+        }
+        return filters;
     }
 }

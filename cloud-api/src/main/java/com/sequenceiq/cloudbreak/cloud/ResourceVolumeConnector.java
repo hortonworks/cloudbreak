@@ -4,6 +4,10 @@ import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 public interface ResourceVolumeConnector {
 
@@ -39,6 +43,33 @@ public interface ResourceVolumeConnector {
      * @throws Exception in case of any error
      */
     default void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    /**
+     * Creates new EBS volumes on cloud provider side.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param group       instance group
+     * @param volumeRequest       contains the volume attributes that need to be created
+     * @param cloudStack       contains the cloud stack object
+     * @param volToAddPerInstance       number of volumes to add per instance in the group
+     * @param cloudResources       resources that are being modified
+     * @throws Exception        in case of any error
+     */
+    default List<CloudResource> createVolumes(AuthenticatedContext authenticatedContext, Group group, VolumeSetAttributes.Volume volumeRequest,
+            CloudStack cloudStack, int volToAddPerInstance, List<CloudResource> cloudResources) throws CloudbreakServiceException {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    /**
+     * Attaches created block storages to instances on cloud provider side.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param cloudResources       resources that are being modified
+     * @throws Exception        in case of any error
+     */
+    default void attachVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources) throws CloudbreakServiceException {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 }

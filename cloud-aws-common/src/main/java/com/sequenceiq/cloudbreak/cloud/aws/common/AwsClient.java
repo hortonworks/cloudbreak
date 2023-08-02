@@ -123,6 +123,12 @@ public abstract class AwsClient {
         return new AmazonEc2Client(ec2Client, retry);
     }
 
+    public AmazonEc2Client createEc2Client(AuthenticatedContext authenticatedContext) {
+        AwsCredentialView credentialView = new AwsCredentialView(authenticatedContext.getCloudCredential());
+        String regionName = authenticatedContext.getCloudContext().getLocation().getRegion().value();
+        return createEc2Client(credentialView, regionName);
+    }
+
     public AmazonEc2Client createEc2Client(AwsCredentialView awsCredential) {
         return createEc2Client(awsCredential, awsDefaultZoneProvider.getDefaultZone(awsCredential));
     }

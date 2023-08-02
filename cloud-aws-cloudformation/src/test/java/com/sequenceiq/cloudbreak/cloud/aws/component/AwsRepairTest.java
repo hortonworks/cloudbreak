@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
@@ -248,6 +249,7 @@ public class AwsRepairTest {
                 .when(poller).runPoller(nullable(Long.class), nullable(Long.class), any());
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(amazonEC2Client);
         when(commonAwsClient.createEc2Client(any(), anyString())).thenReturn(amazonEC2Client);
+        when(commonAwsClient.createEc2Client(isA(AuthenticatedContext.class))).thenReturn(amazonEC2Client);
         when(awsClient.createElasticFileSystemClient(any(), anyString())).thenReturn(amazonEfsClient);
         when(awsClient.createCloudFormationClient(any(), anyString())).thenReturn(amazonCloudFormationClient);
         when(amazonCloudFormationClient.waiters()).thenReturn(cfWaiters);

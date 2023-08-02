@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.component.ComponentTestUtil.AV
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -298,6 +299,7 @@ public class AwsLaunchTest {
         when(awsClient.createElasticFileSystemClient(any(), anyString())).thenReturn(amazonEfsClient);
         when(awsClient.createCloudFormationClient(any(), anyString())).thenReturn(amazonCloudFormationClient);
         when(commonAwsClient.createEc2Client(any(), any())).thenReturn(amazonEc2Client);
+        when(commonAwsClient.createEc2Client(isA(AuthenticatedContext.class))).thenReturn(amazonEc2Client);
         when(amazonCloudFormationClient.waiters()).thenReturn(cfWaiters);
         when(awsClient.createAutoScalingClient(any(), anyString())).thenReturn(amazonAutoScalingClient);
         when(awsClient.createAutoScalingClient(any(), anyString())).thenReturn(amazonAutoScalingClient);

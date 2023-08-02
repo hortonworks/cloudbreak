@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.lenient;
@@ -48,8 +49,8 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
+import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsCommonDiskUtilService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
-import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -127,6 +128,9 @@ class AwsVolumeResourceBuilderTest {
 
     private static final Collection<Tag> EC2_TAGS = List.of(Tag.builder().key("ec2_key").value("ec2_value").build());
 
+    private static final TagSpecification TAG_SPECIFICATION = TagSpecification.builder()
+            .resourceType(software.amazon.awssdk.services.ec2.model.ResourceType.VOLUME).tags(EC2_TAGS).build();
+
     private static final String ENCRYPTION_KEY_ARN = "encryptionKeyArn";
 
     @Mock
@@ -139,7 +143,10 @@ class AwsVolumeResourceBuilderTest {
     private AwsTaggingService awsTaggingService;
 
     @Mock
-    private CommonAwsClient awsClient;
+    private AwsCommonDiskUtilService awsCommonDiskUtilService;
+
+    @Mock
+    private CommonAwsClient commonAwsClient;
 
     @InjectMocks
     private AwsVolumeResourceBuilder underTest;
@@ -174,12 +181,6 @@ class AwsVolumeResourceBuilderTest {
     @Mock
     private VolumeResourceCollector volumeResourceCollector;
 
-    @Mock
-    private AwsVolumeIopsCalculator awsVolumeIopsCalculator;
-
-    @Mock
-    private AwsVolumeThroughputCalculator awsVolumeThroughputCalculator;
-
     @Spy
     private AwsMethodExecutor awsMethodExecutor;
 
@@ -203,9 +204,12 @@ class AwsVolumeResourceBuilderTest {
         lenient().when(location.getRegion()).thenReturn(region);
         lenient().when(location.getAvailabilityZone()).thenReturn(availabilityZone("az1"));
         lenient().when(region.value()).thenReturn(REGION_NAME);
-        lenient().when(awsClient.createEc2Client(isA(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(amazonEC2Client);
         lenient().when(cloudStack.getTags()).thenReturn(TAGS);
         lenient().when(awsTaggingService.prepareEc2Tags(TAGS)).thenReturn(EC2_TAGS);
+        lenient().when(awsCommonDiskUtilService.isEncryptedVolumeRequested(any())).thenCallRealMethod();
+        lenient().when(awsCommonDiskUtilService.getVolumeEncryptionKey(any(), anyBoolean())).thenCallRealMethod();
+        lenient().when(awsCommonDiskUtilService.getTagSpecification(any())).thenReturn(TAG_SPECIFICATION);
+        lenient().when(commonAwsClient.createEc2Client(isA(AuthenticatedContext.class))).thenReturn(amazonEC2Client);
     }
 
     @Test
@@ -231,12 +235,14 @@ class AwsVolumeResourceBuilderTest {
     @Test
     void buildTestWhenAttachedVolumesOnlyAndNoEncryption() throws Exception {
         Group group = createGroup(List.of(createVolume(TYPE_GP2)), Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false), 0L);
-
+        VolumeSetAttributes.Volume volume = createVolumeForVolumeSet(TYPE_GP2);
+        when(awsCommonDiskUtilService.createVolumeRequest(eq(volume), eq(TAG_SPECIFICATION), eq(null), eq(false), eq(AVAILABILITY_ZONE)))
+                .thenReturn(createVolumeRequest(volume, null, false));
         setUpTaskExecutors();
         when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
 
         List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group,
-                List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2)))), cloudStack);
+                List.of(createVolumeSet(List.of(volume))), cloudStack);
 
         List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
         verifyVolumes(volumes, "/dev/xvdb");
@@ -246,12 +252,14 @@ class AwsVolumeResourceBuilderTest {
     @Test
     void buildTestWhenEphemeralAndAttachedVolumesAndNoEncryption() throws Exception {
         Group group = createGroup(List.of(createVolume(TYPE_EPHEMERAL), createVolume(TYPE_GP2)), Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false), 1L);
-
+        VolumeSetAttributes.Volume volume = createVolumeForVolumeSet(TYPE_GP2);
+        when(awsCommonDiskUtilService.createVolumeRequest(eq(volume), eq(TAG_SPECIFICATION), eq(null), eq(false), eq(AVAILABILITY_ZONE)))
+                .thenReturn(createVolumeRequest(volume, null, false));
         setUpTaskExecutors();
         when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
 
         List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group,
-                List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2)))), cloudStack);
+                List.of(createVolumeSet(List.of(volume))), cloudStack);
 
         List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
         verifyVolumes(volumes, "/dev/xvdc");
@@ -263,12 +271,13 @@ class AwsVolumeResourceBuilderTest {
         Group group = createGroup(List.of(createVolume(TYPE_GP2)),
                 Map.ofEntries(entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false),
                         entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name())), 0L);
-
+        VolumeSetAttributes.Volume volume = createVolumeForVolumeSet(TYPE_GP2);
         setUpTaskExecutors();
         when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
-
+        when(awsCommonDiskUtilService.createVolumeRequest(eq(volume), eq(TAG_SPECIFICATION), eq(null), eq(false), eq(AVAILABILITY_ZONE)))
+            .thenReturn(createVolumeRequest(volume, null, false));
         List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group,
-                List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2)))), cloudStack);
+                List.of(createVolumeSet(List.of(volume))), cloudStack);
 
         List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
         verifyVolumes(volumes, "/dev/xvdb");
@@ -280,12 +289,14 @@ class AwsVolumeResourceBuilderTest {
         Group group = createGroup(List.of(createVolume(TYPE_GP2)),
                 Map.ofEntries(entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true),
                         entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name())), 0L);
-
+        VolumeSetAttributes.Volume volume = createVolumeForVolumeSet(TYPE_GP2);
+        when(awsCommonDiskUtilService.createVolumeRequest(eq(volume), eq(TAG_SPECIFICATION), eq(null), eq(true), eq(AVAILABILITY_ZONE)))
+                .thenReturn(createVolumeRequest(volume, null, true));
         setUpTaskExecutors();
         when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
 
         List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group,
-                List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2)))), cloudStack);
+                List.of(createVolumeSet(List.of(volume))), cloudStack);
 
         List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
         verifyVolumes(volumes, "/dev/xvdb");
@@ -298,12 +309,14 @@ class AwsVolumeResourceBuilderTest {
                 Map.ofEntries(entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true),
                         entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name()),
                         entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, ENCRYPTION_KEY_ARN)), 0L);
-
+        VolumeSetAttributes.Volume volume = createVolumeForVolumeSet(TYPE_GP2);
+        when(awsCommonDiskUtilService.createVolumeRequest(eq(volume), eq(TAG_SPECIFICATION), eq(null), eq(true), eq(AVAILABILITY_ZONE)))
+                .thenReturn(createVolumeRequest(volume, null, true));
         setUpTaskExecutors();
         when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
 
         List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group,
-                List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2)))), cloudStack);
+                List.of(createVolumeSet(List.of(volume))), cloudStack);
 
         List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
         verifyVolumes(volumes, "/dev/xvdb");
@@ -316,12 +329,14 @@ class AwsVolumeResourceBuilderTest {
                 Map.ofEntries(entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true),
                         entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name()),
                         entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, ENCRYPTION_KEY_ARN)), 0L);
-
+        VolumeSetAttributes.Volume volume = createVolumeForVolumeSet(TYPE_GP2);
+        when(awsCommonDiskUtilService.createVolumeRequest(eq(volume), eq(TAG_SPECIFICATION), eq(ENCRYPTION_KEY_ARN), eq(true), eq(AVAILABILITY_ZONE)))
+                .thenReturn(createVolumeRequest(volume, ENCRYPTION_KEY_ARN, true));
         setUpTaskExecutors();
         when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
 
         List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group,
-                List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2)))), cloudStack);
+                List.of(createVolumeSet(List.of(volume))), cloudStack);
 
         List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
         verifyVolumes(volumes, "/dev/xvdb");
@@ -648,6 +663,18 @@ class AwsVolumeResourceBuilderTest {
 
     private GroupNetwork createGroupNetwork() {
         return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
+    }
+
+    private CreateVolumeRequest createVolumeRequest(VolumeSetAttributes.Volume volume, String encryptionKey, boolean encryptedVolume) {
+        return CreateVolumeRequest.builder()
+                .availabilityZone(AVAILABILITY_ZONE)
+                .size(volume.getSize())
+                .snapshotId(null)
+                .tagSpecifications(TAG_SPECIFICATION)
+                .volumeType(volume.getType())
+                .encrypted(encryptedVolume)
+                .kmsKeyId(encryptionKey)
+                .build();
     }
 
 }
