@@ -57,3 +57,9 @@ reenable-postgres:
   cmd.run:
     - name: systemctl reenable postgresql-14.service
 {% endif %}
+
+systemctl-reload-on-pg14-unit-change:
+  cmd.run:
+    - name: systemctl --system daemon-reload
+    - onchanges:
+        - file: change-db-location-14
