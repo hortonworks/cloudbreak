@@ -310,7 +310,6 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
 
     @Override
     public void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
-        return;
     }
 
     @Override
