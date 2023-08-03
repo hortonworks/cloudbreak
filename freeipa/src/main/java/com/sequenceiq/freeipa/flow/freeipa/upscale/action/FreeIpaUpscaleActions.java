@@ -81,7 +81,9 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInsta
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesSuccess;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.ImageFallbackSuccessToStackEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleStackResultToStackEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
@@ -98,8 +100,10 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.PostInstallFreeIpaFai
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.UpscaleStackResultToUpscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
+import com.sequenceiq.freeipa.flow.stack.provision.action.AbstractStackProvisionAction;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationRequest;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationSuccess;
+import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackRequest;
 import com.sequenceiq.freeipa.service.TlsSetupService;
 import com.sequenceiq.freeipa.service.config.KerberosConfigUpdateService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
@@ -231,6 +235,30 @@ public class FreeIpaUpscaleActions {
                 return newInstances;
             }
 
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
+                payloadConverters.add(new ImageFallbackSuccessToStackEventConverter());
+            }
+        };
+    }
+
+    @Bean(name = "FREEIPA_UPSCALE_IMAGE_FALLBACK_STATE")
+    public Action<?, ?> imageFallbackAction() {
+        return new AbstractStackProvisionAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new ImageFallbackRequest(context.getStack().getId());
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
+                payloadConverters.add(new UpscaleStackResultToStackEventConverter());
+            }
         };
     }
 

@@ -43,6 +43,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
@@ -54,6 +56,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesRes
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.CleanupFreeIpaEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageFallbackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
@@ -73,6 +76,7 @@ import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
 @Configuration
@@ -206,6 +210,32 @@ public class StackUpscaleActions {
                 UpscaleStackRequest<UpscaleStackResult> request = new UpscaleStackRequest<>(context.getCloudContext(), context.getCloudCredential(),
                         updatedCloudStack, resources, adjustmentTypeWithThreshold, migrationNeed);
                 sendEvent(context, request);
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<UpscaleStackValidationResult>> payloadConverters) {
+                payloadConverters.add(new ImageFallbackSuccessToUpscaleStackValidationResultConverter());
+            }
+        };
+    }
+
+    @Bean(name = "UPSCALE_IMAGE_FALLBACK_STATE")
+    public Action<?, ?> imageFallbackAction() {
+        return new AbstractStackCreationAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) {
+                stackUpscaleService.fireImageFallbackFlowMessage(context.getStackId());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackCreationContext context) {
+                return new ImageFallbackRequest(context.getStackId());
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
+                payloadConverters.add(new UpscaleStackImageFallbackResultToStackEventConverter());
             }
         };
     }

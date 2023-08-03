@@ -19,15 +19,21 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInsta
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesFailed;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackImageFallbackResult;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackResult;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationFailed;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationSuccess;
+import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackFailed;
+import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackSuccess;
 
 public enum UpscaleFlowEvent implements FlowEvent {
     UPSCALE_EVENT("UPSCALE_EVENT"),
     UPSCALE_STARTING_FINISHED_EVENT("UPSCALE_STARTING_FINISHED_EVENT"),
     UPSCALE_ADD_INSTANCES_FINISHED_EVENT(CloudPlatformResult.selector(UpscaleStackResult.class)),
     UPSCALE_ADD_INSTANCES_FAILED_EVENT(CloudPlatformResult.failureSelector(UpscaleStackResult.class)),
+    FREEIPA_UPSCALE_IMAGE_FALLBACK_EVENT(CloudPlatformResult.selector(UpscaleStackImageFallbackResult.class)),
+    FREEIPA_UPSCALE_IMAGE_FALLBACK_FINISHED_EVENT(CloudPlatformResult.selector(ImageFallbackSuccess.class)),
+    FREEIPA_UPSCALE_IMAGE_FALLBACK_FAILED_EVENT(CloudPlatformResult.selector(ImageFallbackFailed.class)),
     UPSCALE_VALIDATE_INSTANCES_FINISHED_EVENT("UPSCALE_VALIDATE_INSTANCES_FINISHED_EVENT"),
     UPSCALE_VALIDATE_INSTANCES_FAILED_EVENT("UPSCALE_VALIDATE_INSTANCES_FAILED_EVENT"),
     UPSCALE_EXTEND_METADATA_FINISHED_EVENT(CloudPlatformResult.selector(CollectMetadataResult.class)),

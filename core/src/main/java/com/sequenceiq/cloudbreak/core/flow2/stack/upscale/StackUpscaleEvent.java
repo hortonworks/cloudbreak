@@ -7,7 +7,10 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationResu
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyReRegistrationResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageFallbackFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageFallbackSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackImageFallbackResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -19,6 +22,10 @@ public enum StackUpscaleEvent implements FlowEvent {
     UPDATE_DOMAIN_DNS_RESOLVER_FINISHED_EVENT(EventSelectorUtil.selector(UpdateDomainDnsResolverResult.class)),
     UPDATE_DOMAIN_DNS_RESOLVER_FAILED_EVENT(EventSelectorUtil.failureSelector(UpdateDomainDnsResolverResult.class)),
     ADD_INSTANCES_FINISHED_EVENT(CloudPlatformResult.selector(UpscaleStackResult.class)),
+
+    UPSCALE_IMAGE_FALLBACK_EVENT(CloudPlatformResult.selector(UpscaleStackImageFallbackResult.class)),
+    UPSCALE_IMAGE_FALLBACK_FINISHED_EVENT(CloudPlatformResult.selector(ImageFallbackSuccess.class)),
+    UPSCALE_IMAGE_FALLBACK_FAILED_EVENT(CloudPlatformResult.selector(ImageFallbackFailed.class)),
     ADD_INSTANCES_FAILURE_EVENT(CloudPlatformResult.failureSelector(UpscaleStackResult.class)),
     ADD_INSTANCES_FINISHED_FAILURE_EVENT("ADD_INSTANCES_FINISHED_FAILURE_EVENT"),
     EXTEND_METADATA_EVENT("EXTEND_METADATA"),

@@ -15,6 +15,9 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEve
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPDATE_DOMAIN_DNS_RESOLVER_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_IMAGE_FALLBACK_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_IMAGE_FALLBACK_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_IMAGE_FALLBACK_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_INVALID_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_VALID_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.ADD_INSTANCES_FINISHED_STATE;
@@ -31,6 +34,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleSta
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.RE_REGISTER_WITH_CLUSTER_PROXY_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPDATE_DOMAIN_DNS_RESOLVER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_FAILED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_IMAGE_FALLBACK_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_PREVALIDATION_STATE;
 
 import java.util.List;
@@ -51,7 +55,12 @@ public class StackUpscaleConfig extends StackStatusFinalizerAbstractFlowConfig<S
                     .failureEvent(UPDATE_DOMAIN_DNS_RESOLVER_FAILED_EVENT)
                     .from(UPSCALE_PREVALIDATION_STATE).to(ADD_INSTANCES_STATE).event(UPSCALE_VALID_EVENT).failureEvent(UPSCALE_INVALID_EVENT)
                     .from(UPSCALE_PREVALIDATION_STATE).to(EXTEND_METADATA_STATE).event(EXTEND_METADATA_EVENT).failureEvent(UPSCALE_INVALID_EVENT)
+
                     .from(ADD_INSTANCES_STATE).to(ADD_INSTANCES_FINISHED_STATE).event(ADD_INSTANCES_FINISHED_EVENT).failureEvent(ADD_INSTANCES_FAILURE_EVENT)
+                    .from(ADD_INSTANCES_STATE).to(UPSCALE_IMAGE_FALLBACK_STATE).event(UPSCALE_IMAGE_FALLBACK_EVENT).failureEvent(ADD_INSTANCES_FAILURE_EVENT)
+                    .from(UPSCALE_IMAGE_FALLBACK_STATE).to(ADD_INSTANCES_STATE).event(UPSCALE_IMAGE_FALLBACK_FINISHED_EVENT)
+                    .failureEvent(UPSCALE_IMAGE_FALLBACK_FAILED_EVENT)
+
                     .from(ADD_INSTANCES_FINISHED_STATE).to(EXTEND_METADATA_STATE).event(EXTEND_METADATA_EVENT)
                     .failureEvent(ADD_INSTANCES_FINISHED_FAILURE_EVENT)
                     .from(EXTEND_METADATA_STATE).to(EXTEND_METADATA_FINISHED_STATE).event(EXTEND_METADATA_FINISHED_EVENT)

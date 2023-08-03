@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_ADDING_INSTANC
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_METADATA_EXTEND_WITH_COUNT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REPAIR_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_IMAGE_FALLBACK;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_QUOTA_ISSUE;
 import static java.lang.String.format;
 
@@ -314,4 +315,7 @@ public class StackUpscaleService {
         }
     }
 
+    public void fireImageFallbackFlowMessage(Long stackId) {
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_IMAGE_FALLBACK);
+    }
 }

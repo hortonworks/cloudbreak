@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
@@ -127,7 +128,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                 fileSystemView);
         Network network = buildNetwork(stack);
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stack.getStackAuthentication());
-        Map<String, String> parameters = buildCloudStackParameters(stack.getEnvironmentCrn());
+        Map<String, String> parameters = buildCloudStackParameters(stack.getCloudPlatform(), stack.getEnvironmentCrn());
 
         return new CloudStack(instanceGroups, network, image, parameters,
                 getUserDefinedTags(stack), stack.getTemplate(), instanceAuthentication, instanceAuthentication.getLoginUserName(),
@@ -491,7 +492,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         return hostName;
     }
 
-    private Map<String, String> buildCloudStackParameters(String environmentCrn) {
+    private Map<String, String> buildCloudStackParameters(String cloudPlatform, String environmentCrn) {
         Map<String, String> params = new HashMap<>();
         params.put(CLOUD_STACK_TYPE_PARAMETER, FREEIPA_STACK_TYPE);
         Optional<AzureResourceGroup> resourceGroupOptional = getAzureResourceGroup(environmentCrn);
@@ -502,14 +503,14 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
             params.put(RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName);
             params.put(RESOURCE_GROUP_USAGE_PARAMETER, resourceGroupUsage.name());
         }
-        Optional<Boolean> acceptancePolicy = getAzureMarketplaceTermsAcceptancePolicy();
+        Optional<Boolean> acceptancePolicy = getAzureMarketplaceTermsAcceptancePolicy(cloudPlatform);
         acceptancePolicy.ifPresent(acceptance -> params.put(ACCEPTANCE_POLICY_PARAMETER, acceptance.toString()));
         return params;
     }
 
-    private Optional<Boolean> getAzureMarketplaceTermsAcceptancePolicy() {
-        return Optional.of(measure(() -> azureMarketplaceTermsClientService.getAccepted(),
-                LOGGER, "Terms setting queried under {} ms"));
+    private Optional<Boolean> getAzureMarketplaceTermsAcceptancePolicy(String cloudPlatform) {
+        return CloudPlatform.AZURE.equals(cloudPlatform) ? Optional.of(measure(() -> azureMarketplaceTermsClientService.getAccepted(),
+                LOGGER, "Terms setting queried under {} ms")) : Optional.empty();
     }
 
     private Optional<AzureResourceGroup> getAzureResourceGroup(String environmentCrn) {

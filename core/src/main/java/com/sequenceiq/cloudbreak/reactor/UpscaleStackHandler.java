@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudImageException;
 import com.sequenceiq.cloudbreak.cloud.handler.CloudPlatformEventHandler;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackImageFallbackResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 
@@ -64,6 +66,11 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(upscaleStackRequestEvent.getHeaders(), result));
             LOGGER.debug("Upscale successfully finished for {}, and the result is: {}", cloudContext, result);
+        } catch (CloudImageException e) {
+            UpscaleStackImageFallbackResult result = new UpscaleStackImageFallbackResult(request.getResourceId(), ResourceStatus.FAILED, List.of());
+            request.getResult().onNext(result);
+            eventBus.notify(result.selector(), new Event<>(upscaleStackRequestEvent.getHeaders(), result));
+            LOGGER.debug("Marketplace image error, attempt to fallback to vhd image {}", cloudContext, e);
         } catch (Exception e) {
             LOGGER.error("Upscaling stack failed", e);
             UpscaleStackResult result = new UpscaleStackResult(e.getMessage(), e, request.getResourceId());

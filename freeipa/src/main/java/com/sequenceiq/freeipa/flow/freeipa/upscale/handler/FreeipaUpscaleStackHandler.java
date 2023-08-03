@@ -12,12 +12,14 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudImageException;
 import com.sequenceiq.cloudbreak.cloud.handler.CloudPlatformEventHandler;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackImageFallbackResult;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackRequest;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackResult;
 
@@ -52,6 +54,11 @@ public class FreeipaUpscaleStackHandler implements CloudPlatformEventHandler<Ups
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(upscaleStackRequestEvent.getHeaders(), result));
             LOGGER.debug("Upscale successfully finished for {}, and the result is: {}", cloudContext, result);
+        } catch (CloudImageException e) {
+            UpscaleStackImageFallbackResult result = new UpscaleStackImageFallbackResult(request.getResourceId(), ResourceStatus.FAILED, List.of());
+            request.getResult().onNext(result);
+            eventBus.notify(result.selector(), new Event<>(upscaleStackRequestEvent.getHeaders(), result));
+            LOGGER.debug("Marketplace image error, attempt to fallback to vhd image {}", cloudContext, e);
         } catch (Exception e) {
             LOGGER.error("Upscaling stack failed", e);
             UpscaleStackResult result = new UpscaleStackResult(e.getMessage(), e, request.getResourceId());
