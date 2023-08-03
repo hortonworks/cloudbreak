@@ -191,4 +191,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     Map<String, Map<String, String>> unmountBlockStorageDisks(List<GatewayConfig> allGateway,
             Set<Node> targets, Set<Node> allNodes, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
+
+    Map<String, Map<String, String>> formatAndMountDisksAfterModifyingVolumesOnNodes(List<GatewayConfig> allGateway,
+            Set<Node> nodesWithDiskData, Set<Node> allNodes, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
 }

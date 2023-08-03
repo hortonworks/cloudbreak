@@ -1886,4 +1886,30 @@ public class SaltOrchestrator implements HostOrchestrator {
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
+
+    @Override
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public Map<String, Map<String, String>> formatAndMountDisksAfterModifyingVolumesOnNodes(List<GatewayConfig> allGateway,
+        Set<Node> nodesWithDiskData, Set<Node> allNodes, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
+        Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGateway);
+        Target<String> allHosts = new HostList(nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toSet()));
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            Set<String> hostnames = nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toSet());
+            LOGGER.info("Running salt grain mount_disks_after_adding_volumes for hosts {}", hostnames);
+            saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(saltStateService, hostnames, allNodes, "mount_disks_after_adding_volumes"),
+                    exitModel, exitCriteria);
+            StateAllRunner stateAllRunner = new StateAllRunner(saltStateService, gatewayTargetIpAddresses, allNodes, "disks.mount-disks-after-adding-volumes");
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateAllRunner);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel);
+            saltJobRunBootstrapRunner.call();
+            Map<String, Map<String, String>> fsTabInfo = getFstabInformation(sc, allHosts, nodesWithDiskData);
+            saltCommandRunner.runModifyGrainCommand(sc, new GrainRemoveRunner(saltStateService, hostnames, allNodes, "mount_disks_after_adding_volumes"),
+                    exitModel, exitCriteria);
+            return fsTabInfo;
+        } catch (Exception e) {
+            LOGGER.warn("Error occurred during the salt bootstrap of formatAndMountDisksAfterModifyingVolumesOnNodes. Exception is : {}", e.getMessage());
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
 }

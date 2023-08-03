@@ -118,6 +118,6 @@ public class ResourceService {
     }
 
     public List<Resource> findAllByStackIdAndInstanceGroupAndResourceTypeIn(Long stackId, String instanceGroup, Collection<ResourceType> resourceTypes) {
-        return repository.findAllByStackIdAndInstanceGroupAndResourceTypeIn(stackId, instanceGroup, resourceTypes);
+        return repository.findAllByStackIdAndInstanceGroupAndResourceTypeInAndInstanceIdIsNotNull(stackId, instanceGroup, resourceTypes);
     }
 }

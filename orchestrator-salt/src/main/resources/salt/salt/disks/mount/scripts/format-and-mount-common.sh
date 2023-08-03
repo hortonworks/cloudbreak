@@ -199,7 +199,20 @@ get_uuid_list() {
 }
 
 get_mounted_instance_storage_count() {
-  df -h | grep -E "$(nvme list | grep "Instance Storage" | awk '{printf "%s%s", NR==1? "" : "|", $1} END{print ""}')" | grep -c "/hadoopfs/fs"
+  if [[ $(nvme list) ]]; then
+    df -h | grep -E "$(nvme list | grep "Instance Storage" | awk '{printf "%s%s", NR==1? "" : "|", $1} END{print ""}')" | grep -c "/hadoopfs/fs"
+  else
+    OSDEVICE=$(lsblk -o NAME -n | grep -v '[[:digit:]]' | sed "s/^sd/xvd/g")
+    # THIS IS BASE DEVICE MAPPING FOR AWS - THE URL WILL NOT CHANGE; THIS IS FOR CHECKING IF AN ATTACHED DEVICE IS AN EPHEMERAL DEVICE
+    BDMURL="http://169.254.169.254/latest/meta-data/block-device-mapping/"
+    df -h | grep -E "$(for bd in $(curl -s ${BDMURL});
+                        do
+                          MAPDEVICE=$(curl -s ${BDMURL}/${bd}/ | sed "s/^sd/xvd/g");
+                          if grep -wq ${MAPDEVICE} <<< "${OSDEVICE}"; then
+                            echo "${MAPDEVICE}"
+                          fi
+                        done)" | grep -c "/hadoopfs/fs"
+  fi
 }
 
 get_all_mount_paths_from_fstab() {

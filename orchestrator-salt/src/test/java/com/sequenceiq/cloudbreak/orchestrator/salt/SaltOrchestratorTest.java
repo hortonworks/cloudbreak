@@ -835,6 +835,25 @@ class SaltOrchestratorTest {
     }
 
     @Test
+    void testFormatAndMountDisksAfterModifyingVolumesOnNodes() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
+        Map<String, String> response = new HashMap<>();
+        response.put("10-0-0-2.example.com", "uuid");
+        Map<String, String> responseFstab = new HashMap<>();
+        responseFstab.put("10-0-0-2.example.com", "fstab");
+        when(saltStateService.runCommandOnHosts(any(), any(), any(), any())).thenReturn(responseFstab);
+        when(saltStateService.getUuidList(eq(saltConnector))).thenReturn(response);
+        OrchestratorAware stack = mock(OrchestratorAware.class);
+        Map<String, Map<String, String>> result = saltOrchestrator.formatAndMountDisksAfterModifyingVolumesOnNodes(allGatewayConfigs,
+                targets, targets, exitCriteriaModel);
+        assertEquals("fstab", result.get("10-0-0-2.example.com").get("fstab"));
+        verify(saltStateService).runCommandOnHosts(any(), any(), targetCaptor.capture(), any());
+        verify(saltStateService).getUuidList(eq(saltConnector));
+        Target<String> target = targetCaptor.getValue();
+        assertEquals("10-0-0-1.example.com,10-0-0-2.example.com,10-0-0-3.example.com", target.getTarget());
+    }
+
+    @Test
     void testGetPasswordExpiryDate() throws Exception {
         List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
         String user = "saltuser";

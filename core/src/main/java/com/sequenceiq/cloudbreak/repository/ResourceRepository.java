@@ -90,5 +90,6 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
 
     List<Resource> findAllByStackIdAndResourceTypeIn(Long stackId, Collection<ResourceType> resourceTypes);
 
-    List<Resource> findAllByStackIdAndInstanceGroupAndResourceTypeIn(Long stackId, String instanceGroup, Collection<ResourceType> resourceTypes);
+    List<Resource> findAllByStackIdAndInstanceGroupAndResourceTypeInAndInstanceIdIsNotNull(Long stackId, String instanceGroup,
+            Collection<ResourceType> resourceTypes);
 }

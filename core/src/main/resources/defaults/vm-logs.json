@@ -384,12 +384,12 @@
     "label": "rotation_db_secrets"
   },
   {
-    "path": "/var/log/mount-disks-after-modify-volumes.log",
-    "label": "mount_disks_after_modify_volumes"
+    "path": "/var/log/mount-disks-after-adding-volumes.log",
+    "label": "mount_disks_after_adding_volumes"
   },
   {
-    "path": "/var/log/mount-disks-after-modify-volumes-allout.log",
-    "label": "mount_disks_after_modify_volumes_allout"
+    "path": "/var/log/mount-disks-after-adding-volumes-allout.log",
+    "label": "mount_disks_after_adding_volumes_allout"
   },
   {
     "path": "/var/log/unmount-block-storages.log",
