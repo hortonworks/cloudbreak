@@ -159,6 +159,7 @@ dependencies {
   runtimeOnly project(':cloud-azure')
   runtimeOnly project(':cloud-gcp')
 
+  testImplementation project(path: ':secret-rotation', configuration: 'tests')
   testImplementation project(path: ':authorization-common', configuration: 'tests')
   testImplementation project(path: ':common', configuration: 'tests')
   testImplementation project(path: ':secret-engine', configuration: 'tests')

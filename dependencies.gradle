@@ -99,6 +99,7 @@ ext {
   openPojoVersion = '0.9.1'
   testContainersVersion = '1.16.0'
   testNgVersion = '7.3.0'
+  podamVersion = '7.2.11.RELEASE'
 
   // Tracing
   micrometerVersion = '1.10.4'

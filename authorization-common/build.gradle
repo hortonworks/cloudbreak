@@ -39,7 +39,7 @@ dependencies {
   testImplementation group: 'org.awaitility',            name: 'awaitility',                     version: awaitilityVersion
 
   //this needs to stay as implementation as other module include EnforceAuthorizationTestUtil
-  implementation(group: 'uk.co.jemos.podam',             name: 'podam',                           version: '7.2.11.RELEASE') {
+  implementation(group: 'uk.co.jemos.podam',             name: 'podam',                           version: podamVersion) {
     exclude group: 'javax.annotation',                   module: 'jsr250-api'
   }
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',             version: springBootVersion

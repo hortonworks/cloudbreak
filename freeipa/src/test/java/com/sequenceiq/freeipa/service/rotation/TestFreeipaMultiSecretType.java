@@ -3,10 +3,8 @@ package com.sequenceiq.freeipa.service.rotation;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
-import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 public enum TestFreeipaMultiSecretType implements MultiSecretType {
     IPA_MULTI_SECRET;
@@ -23,8 +21,8 @@ public enum TestFreeipaMultiSecretType implements MultiSecretType {
 
     @Override
     public Map<CrnResourceDescriptor, SecretType> childSecretTypesByDescriptor() {
-        return Map.of(CrnResourceDescriptor.DATALAKE, DatalakeSecretType.DATALAKE_DEMO_SECRET,
-                CrnResourceDescriptor.DATAHUB, CloudbreakSecretType.DATAHUB_DEMO_SECRET);
+        return Map.of(CrnResourceDescriptor.DATALAKE, TestFreeipaSecretType.IPA_SECRET_2,
+                CrnResourceDescriptor.DATAHUB, TestFreeipaSecretType.IPA_SECRET_3);
     }
 
     @Override

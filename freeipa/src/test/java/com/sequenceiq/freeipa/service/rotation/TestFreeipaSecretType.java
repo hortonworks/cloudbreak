@@ -8,7 +8,9 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 
 public enum TestFreeipaSecretType implements SecretType {
-    IPA_SECRET_1;
+    IPA_SECRET_1,
+    IPA_SECRET_2,
+    IPA_SECRET_3;
 
     @Override
     public List<SecretRotationStep> getSteps() {

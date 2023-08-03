@@ -79,6 +79,7 @@ dependencies {
   testImplementation ('org.springframework.boot:spring-boot-starter-test') {
     exclude group: 'junit'
   }
+  testImplementation project(path: ':secret-rotation', configuration: 'tests')
   testImplementation project(path: ':authorization-common', configuration: 'tests')
   testImplementation group: 'org.mockito',               name: 'mockito-core'
   testImplementation project(path: ':common', configuration: 'tests')

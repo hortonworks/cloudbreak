@@ -97,6 +97,8 @@ dependencies {
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
   implementation group: 'net.bytebuddy',                 name: 'byte-buddy',                      version: byteBuddyVersion
 
+  testImplementation project(path: ':secret-rotation', configuration: 'tests')
+
   testImplementation project(path: ':authorization-common', configuration: 'tests')
   testImplementation project(path: ':common', configuration: 'tests')
   testImplementation project(path: ':flow', configuration: 'tests')

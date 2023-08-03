@@ -43,6 +43,9 @@ dependencies {
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',             version: springBootVersion
   testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',        version: springBootVersion
   testImplementation project(path: ':secret-rotation-api', configuration: 'tests')
+  implementation(group: 'uk.co.jemos.podam',             name: 'podam',                           version: podamVersion) {
+    exclude group: 'javax.annotation',                   module: 'jsr250-api'
+  }
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {
