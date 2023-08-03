@@ -1173,4 +1173,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 .collect(Collectors.toMap(ApiService::getName, item -> item.getServiceState().getValue()));
     }
 
+    @Override
+    public void updateServiceConfig(String serviceType, Map<String, String> config, List<String> roleGroupNames) throws CloudbreakException {
+        configService.modifyRoleBasedConfig(v31Client, stack.getName(), serviceType, config, roleGroupNames);
+    }
+
 }

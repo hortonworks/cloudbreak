@@ -963,4 +963,14 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                         .filter(config -> configName.equals(config.getName()))
                         .findAny());
     }
+
+    public List<String> getHostTemplateRoleNames(String groupName) {
+        return Optional.ofNullable(cmTemplate.getHostTemplates())
+                .orElse(List.of())
+                .stream()
+                .filter(apiTemplate -> apiTemplate.getRefName().equals(groupName))
+                .map(ApiClusterTemplateHostTemplate::getRoleConfigGroupsRefNames)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+    }
 }
