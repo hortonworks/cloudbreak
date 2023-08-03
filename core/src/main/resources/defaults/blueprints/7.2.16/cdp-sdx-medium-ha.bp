@@ -128,10 +128,6 @@
                 "value": "2"
               },
               {
-                "name": "ranger.audit.solr.no.shards",
-                "value": "3"
-              },
-              {
                 "name": "ranger.audit.solr.max.shards.per.node",
                 "value": "2"
               },
