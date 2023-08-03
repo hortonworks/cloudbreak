@@ -158,34 +158,47 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
     public CloudResource update(AwsContext context, CloudResource cloudResource, CloudInstance instance,
             AuthenticatedContext auth, CloudStack cloudStack, Optional<String> targetGroup) throws Exception {
         AmazonEc2Client amazonEc2Client = context.getAmazonEc2Client();
+        if (!isThisGroupApplicable(instance, targetGroup)) {
+            LOGGER.info("The group is {} which is not same as the requested group {}.",
+                    instance.getTemplate().getGroupName(), targetGroup.orElse("unknown"));
+            return null;
+        }
         Optional<Instance> existedOpt = resourceById(amazonEc2Client, instance.getInstanceId());
         Instance awsInstance;
         if (existedOpt.isPresent() && existedOpt.get().state().code() != AWS_INSTANCE_TERMINATED_CODE) {
             awsInstance = existedOpt.get();
-            LOGGER.info("Instance exists with name: {} ({}), check the state: {}", awsInstance.instanceId(), instance.getInstanceId(),
-                    awsInstance.state().name());
             String requestedInstanceType = instance.getTemplate().getFlavor();
-            if (isThisGroupApplicable(instance, targetGroup, awsInstance, requestedInstanceType)) {
+            LOGGER.info("Instance exists with name: {} ({}), check the state: {} and the instance type is: {}. " +
+                            "The user requested {} type.",
+                    awsInstance.instanceId(),
+                    instance.getInstanceId(),
+                    awsInstance.state().name(),
+                    awsInstance.instanceType().toString(),
+                    requestedInstanceType);
+            if (isInstanceApplicable(awsInstance, requestedInstanceType)) {
                 LOGGER.info("Modify group {}, from instance type {}, to instance type {}.",
                         targetGroup.get(),
                         awsInstance.instanceType().name(),
-                        instance.getTemplate().getFlavor());
+                        requestedInstanceType);
                 ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = ModifyInstanceAttributeRequest.builder()
                         .instanceId(awsInstance.instanceId())
-                        .instanceType(AttributeValue.builder().value(instance.getTemplate().getFlavor()).build())
+                        .instanceType(AttributeValue.builder().value(requestedInstanceType).build())
                         .build();
                 amazonEc2Client.modifyInstanceAttribute(modifyInstanceAttributeRequest);
             } else {
-                LOGGER.info("Instance ID {} is using the same type what was requested: {}", awsInstance.instanceId(), requestedInstanceType);
+                LOGGER.info("Instance ID {} is using {} type which is the same type what was requested: {}",
+                        awsInstance.instanceId(), awsInstance.instanceType().toString(), requestedInstanceType);
             }
-
         }
         return null;
     }
 
-    private boolean isThisGroupApplicable(CloudInstance instance, Optional<String> targetGroup, Instance awsInstance, String requestedInstanceType) {
-        return !targetGroup.isEmpty() && targetGroup.equals(instance.getTemplate().getGroupName())
-                && !awsInstance.instanceType().toString().equals(requestedInstanceType);
+    private boolean isThisGroupApplicable(CloudInstance instance, Optional<String> targetGroup) {
+        return targetGroup.isPresent() && targetGroup.get().equals(instance.getTemplate().getGroupName());
+    }
+
+    private boolean isInstanceApplicable(Instance awsInstance, String requestedInstanceType) {
+        return !awsInstance.instanceType().toString().equals(requestedInstanceType);
     }
 
     Collection<BlockDeviceMapping> blocks(Group group, CloudStack cloudStack, AuthenticatedContext ac) {
