@@ -758,7 +758,7 @@ cb:
       backOffDelay: 2000
       backOffMultiplier: 2
   validation:
-    max.content.size: 6291456
+    max.content.size: 8388608
 
 
 cluster:
