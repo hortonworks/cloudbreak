@@ -8,7 +8,20 @@
 {% set postgres_data_on_attached_disk = salt['pillar.get']('postgres:postgres_data_on_attached_disk', 'False') %}
 {% set command = 'systemctl show -p FragmentPath postgresql' %}
 {% set unitFile = salt['cmd.run'](command) | replace("FragmentPath=","") %}
+{% set serviceName = "postgresql" %}
 {% set postgres_version = salt['pillar.get']('postgres:postgres_version', '10') | int %}
+
+{%- if unitFile.strip() == "" %}
+{%- if postgres_version == 11 %}
+  {%- set command = 'systemctl show -p FragmentPath postgresql-11' %}
+  {%- set unitFile = salt['cmd.run'](command) | replace("FragmentPath=","") %}
+  {%- set serviceName = "postgresql-11" %}
+{%- elif postgres_version == 14  %}
+  {%- set command = 'systemctl show -p FragmentPath postgresql-14' %}
+  {%- set unitFile = salt['cmd.run'](command) | replace("FragmentPath=","") %}
+  {%- set serviceName = "postgresql-14" %}
+{%- endif %}
+{%- endif %}
 
 {% if 'None' != configure_remote_db %}
 
@@ -107,7 +120,7 @@ include:
 
 ensure-postgres-stopped-before-initdb:
   service.dead:
-    - name: postgresql
+    - name: {{ serviceName }}
     - unless: grep -q UTF-8 {{ postgres_directory }}/initdb.log && test -f {{ postgres_directory }}/data/PG_VERSION
 
 init-db-with-utf8:
@@ -137,7 +150,7 @@ start-postgresql:
     - enable: True
 {%- if postgres_data_on_attached_disk %}
     - watch:
-        - file: change-db-location
+        - file: {{ unitFile }}
     - require:
         - cmd: systemctl-reload-on-pg-unit-change
 {%- endif %}
