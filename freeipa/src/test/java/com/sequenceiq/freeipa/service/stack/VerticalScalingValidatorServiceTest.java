@@ -25,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.cloud.azure.AzureAvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
@@ -44,6 +45,7 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
 
 @ExtendWith(MockitoExtension.class)
 public class VerticalScalingValidatorServiceTest {
@@ -51,6 +53,8 @@ public class VerticalScalingValidatorServiceTest {
     private static final String AWS = CloudPlatform.AWS.name();
 
     private static final String OPENSTACK = CloudPlatform.OPENSTACK.name();
+
+    private static final String AZURE = CloudPlatform.AZURE.name();
 
     @Mock
     private CloudParameterService cloudParameterService;
@@ -70,6 +74,9 @@ public class VerticalScalingValidatorServiceTest {
     @Mock
     private Stack stack;
 
+    @Mock
+    private MultiAzCalculatorService multiAzCalculatorService;
+
     @BeforeEach
     public void before() {
         ReflectionTestUtils.setField(underTest, "verticalScalingSupported", Set.of(AWS));
@@ -88,6 +95,7 @@ public class VerticalScalingValidatorServiceTest {
 
         assertEquals("Vertical scaling is not supported on OPENSTACK cloud platform",
                 badRequestException.getMessage());
+        verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
     }
 
     @Test
@@ -104,6 +112,7 @@ public class VerticalScalingValidatorServiceTest {
 
         assertEquals("Define an exiting instancetype to vertically scale the AWS FreeIpa.",
                 badRequestException.getMessage());
+        verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
     }
 
     @Test
@@ -130,6 +139,7 @@ public class VerticalScalingValidatorServiceTest {
 
         assertEquals("Define a group which exists in FreeIpa. It can be [master2].",
                 badRequestException.getMessage());
+        verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
     }
 
     @Test
@@ -187,6 +197,7 @@ public class VerticalScalingValidatorServiceTest {
         verify(credentialService, times(1)).getCredentialByEnvCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
         verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
+        verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
     }
 
     @Test
@@ -244,6 +255,7 @@ public class VerticalScalingValidatorServiceTest {
         verify(credentialService, times(1)).getCredentialByEnvCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
         verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
+        verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
     }
 
     @Test
@@ -301,6 +313,7 @@ public class VerticalScalingValidatorServiceTest {
         verify(credentialService, times(1)).getCredentialByEnvCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
         verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
+        verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
     }
 
     @Test
@@ -358,6 +371,7 @@ public class VerticalScalingValidatorServiceTest {
         verify(credentialService, times(1)).getCredentialByEnvCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
         verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
+        verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
     }
 
     @Test
@@ -402,6 +416,103 @@ public class VerticalScalingValidatorServiceTest {
         verify(credentialService, times(1)).getCredentialByEnvCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
         verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
+        verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
+    }
+
+    @Test
+    public void testRequestForMultiAzInstanceTypeSupportsExistingZones() {
+        ReflectionTestUtils.setField(underTest, "verticalScalingSupported", Set.of(AWS, AZURE));
+        String instanceGroupNameInStack = "master";
+        String instanceGroupNameInRequest = "master";
+        String instanceTypeNameInStack = "Standard_D16d_v4";
+        String instanceTypeNameInRequest = "Standard_D16d_v4";
+        Credential credential = credential();
+        ExtendedCloudCredential extendedCloudCredential = extendedCloudCredential();
+        CloudVmTypes cloudVmTypes = cloudVmTypes(
+                "eu1",
+                vmType(
+                        instanceTypeNameInStack,
+                        1,
+                        1,
+                        new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                        new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
+                        List.of("1", "2", "3")
+                )
+        );
+        when(stack.isMultiAz()).thenReturn(true);
+        when(stack.getCloudPlatform()).thenReturn(AZURE);
+        when(stack.getEnvironmentCrn()).thenReturn("crn");
+        when(stack.getRegion()).thenReturn("eu");
+        when(stack.isStopped()).thenReturn(true);
+        when(stack.getAvailabilityZone()).thenReturn("eu1");
+        when(stack.getPlatformvariant()).thenReturn("AZURE");
+        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup(instanceGroupNameInStack, instanceTypeNameInStack, Set.of("1", "2"))));
+        when(credentialService.getCredentialByEnvCrn(anyString())).thenReturn(credential);
+        when(credentialToExtendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential);
+        when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
+        when(multiAzCalculatorService.getAvailabilityZoneConnector(stack)).thenReturn(new AzureAvailabilityZoneConnector());
+        VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
+        InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
+        instanceTemplateRequest.setInstanceType(instanceTypeNameInRequest);
+        verticalScaleRequest.setTemplate(instanceTemplateRequest);
+        verticalScaleRequest.setGroup(instanceGroupNameInRequest);
+
+        underTest.validateRequest(stack, verticalScaleRequest);
+
+        verify(credentialService, times(1)).getCredentialByEnvCrn(anyString());
+        verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
+        verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
+    }
+
+    @Test
+    public void testRequestForMultiAzInstanceTypeDoesNotSupportExistingZones() {
+        ReflectionTestUtils.setField(underTest, "verticalScalingSupported", Set.of(AWS, AZURE));
+        String instanceGroupNameInStack = "master";
+        String instanceGroupNameInRequest = "master";
+        String instanceTypeNameInStack = "Standard_D16d_v4";
+        String instanceTypeNameInRequest = "Standard_D16d_v4";
+        Credential credential = credential();
+        ExtendedCloudCredential extendedCloudCredential = extendedCloudCredential();
+        CloudVmTypes cloudVmTypes = cloudVmTypes(
+                "eu1",
+                vmType(
+                        instanceTypeNameInStack,
+                        1,
+                        1,
+                        new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                        new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
+                        List.of("1", "2")
+                )
+        );
+        when(stack.isMultiAz()).thenReturn(true);
+        when(stack.getCloudPlatform()).thenReturn(AZURE);
+        when(stack.getEnvironmentCrn()).thenReturn("crn");
+        when(stack.getRegion()).thenReturn("eu");
+        when(stack.isStopped()).thenReturn(true);
+        when(stack.getAvailabilityZone()).thenReturn("eu1");
+        when(stack.getPlatformvariant()).thenReturn("AZURE");
+        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup(instanceGroupNameInStack, instanceTypeNameInStack, Set.of("1", "2", "3"))));
+        when(credentialService.getCredentialByEnvCrn(anyString())).thenReturn(credential);
+        when(credentialToExtendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential);
+        when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
+        when(multiAzCalculatorService.getAvailabilityZoneConnector(stack)).thenReturn(new AzureAvailabilityZoneConnector());
+        VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
+        InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
+        instanceTemplateRequest.setInstanceType(instanceTypeNameInRequest);
+        verticalScaleRequest.setTemplate(instanceTemplateRequest);
+        verticalScaleRequest.setGroup(instanceGroupNameInRequest);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
+            underTest.validateRequest(stack, verticalScaleRequest);
+        });
+
+        assertEquals("FreeIpa is MultiAz enabled but requested instance type is not supported in existing Availability Zones for Instance Group. " +
+                        "Supported Availability Zones for Instance type Standard_D16d_v4 : 1,2. Existing Availability Zones for Instance Group : 1,2,3",
+                badRequestException.getMessage());
+
+        verify(credentialService, times(1)).getCredentialByEnvCrn(anyString());
+        verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
+        verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
     }
 
     @Test
@@ -436,21 +547,31 @@ public class VerticalScalingValidatorServiceTest {
     }
 
     public VmType vmType(String name, int memory, int cpu, VolumeParameterConfig autoAttached, VolumeParameterConfig ephemeral) {
+        return vmType(name, memory, cpu, autoAttached, ephemeral, List.of());
+    }
+
+    public VmType vmType(String name, int memory, int cpu, VolumeParameterConfig autoAttached, VolumeParameterConfig ephemeral, List<String> availabilityZones) {
         return vmTypeWithMeta(name,
                 VmTypeMeta.VmTypeMetaBuilder.builder()
                         .withAutoAttachedConfig(autoAttached)
                         .withCpuAndMemory(cpu, memory)
                         .withEphemeralConfig(ephemeral)
+                        .withAvailabilityZones(availabilityZones)
                         .create(),
                 false);
     }
 
     private InstanceGroup instanceGroup(String name, String instanceType) {
+        return instanceGroup(name, instanceType, Set.of());
+    }
+
+    private InstanceGroup instanceGroup(String name, String instanceType, Set<String> availabilityZones) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName(name);
         Template template = new Template();
         template.setInstanceType(instanceType);
         instanceGroup.setTemplate(template);
+        instanceGroup.setAvailabilityZones(availabilityZones);
         return instanceGroup;
     }
 
