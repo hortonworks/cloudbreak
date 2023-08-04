@@ -1,3 +1,4 @@
+{%- from 'postgresql/settings.sls' import postgresql with context %}
 {% set original_postgres_version = salt['pillar.get']('postgres:upgrade:original_postgres_version', '10') %}
 {% set original_postgres_directory = salt['pillar.get']('postgres:upgrade:original_postgres_directory', '/dbfs/pgsql') %}
 {% set original_postgres_binaries = salt['pillar.get']('postgres:upgrade:original_postgres_binaries', '/dbfs/tmp/pgsql-10') %}
@@ -122,6 +123,6 @@ start-postgresql-{{ new_postgres_version }}:
       - cmd: upgrade_postgresql_db
 
 include:
-  - postgresql.pg11
+  - postgresql.pg{{ new_postgres_version }}
 
 {% endif %}
