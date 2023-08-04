@@ -46,4 +46,18 @@ class UserDataReplacerTest {
         assertThat(result).isEqualTo("export PARAM=true\n");
     }
 
+    @Test
+    void extractValueWithQuotes() {
+        String result = new UserDataReplacer("export CCM_V2_AGENT_ACCESS_KEY_ID=\"accessKeyId\"")
+                .extractValue("CCM_V2_AGENT_ACCESS_KEY_ID");
+        assertThat(result).isEqualTo("accessKeyId");
+    }
+
+    @Test
+    void extractValueWithoutQuotes() {
+        String result = new UserDataReplacer("export IS_CCM_V2_JUMPGATE_ENABLED=true")
+                .extractValue("IS_CCM_V2_JUMPGATE_ENABLED");
+        assertThat(result).isEqualTo("true");
+    }
+
 }

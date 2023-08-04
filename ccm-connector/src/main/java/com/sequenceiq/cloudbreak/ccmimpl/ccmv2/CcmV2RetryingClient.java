@@ -65,9 +65,9 @@ public class CcmV2RetryingClient {
                 });
     }
 
-    public InvertingProxyAgent createAgentAccessKeyPair(String accountId, String agentCrn) {
+    public InvertingProxyAgent createAgentAccessKeyPair(String accountId, String agentCrn, Optional<String> hmacKey) {
         return retryTemplateFactory.getRetryTemplate().execute(
-                retryContext -> ccmV2Client.createAgentAccessKeyPair(accountId, agentCrn),
+                retryContext -> ccmV2Client.createAgentAccessKeyPair(accountId, agentCrn, hmacKey),
                 retryExhausted -> {
                     LOGGER.error("Error creating agent access key pair for account '{}' and agentCrn '{}', retryCount '{}'",
                             accountId, agentCrn, retryExhausted.getRetryCount());

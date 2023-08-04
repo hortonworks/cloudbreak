@@ -68,7 +68,7 @@ public class SaltConfigProvider {
                 "gov_cloud", govCloud);
     }
 
-    private Map<String, SaltPillarProperties> getCcmPillarProperties(Stack stack) {
+    public Map<String, SaltPillarProperties> getCcmPillarProperties(Stack stack) {
         CcmConnectivityParameters ccmParameters = stack.getCcmParameters();
         if (ccmParameters != null && ccmParameters.getCcmV2JumpgateParameters() != null) {
             return ccmParametersConfigService.createCcmParametersPillarConfig(stack.getEnvironmentCrn(), ccmParameters.getCcmV2JumpgateParameters());

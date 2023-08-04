@@ -77,7 +77,7 @@ class CcmV2RetryingClientTest {
 
     @Test
     void testCreateAgentAccessKeyPairWhenException() {
-        assertThatThrownBy(() -> underTest.createAgentAccessKeyPair(TEST_ACCOUNT_ID, TEST_AGENT_CRN)).isInstanceOf(CcmV2Exception.class);
+        assertThatThrownBy(() -> underTest.createAgentAccessKeyPair(TEST_ACCOUNT_ID, TEST_AGENT_CRN, Optional.of(HMAC))).isInstanceOf(CcmV2Exception.class);
     }
 
     @Test

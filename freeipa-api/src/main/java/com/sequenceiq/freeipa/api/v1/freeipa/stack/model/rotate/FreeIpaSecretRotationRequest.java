@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretTypes;
-import com.sequenceiq.freeipa.api.rotation.FreeIpaSecretType;
+import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 
 import io.swagger.annotations.ApiModel;
 

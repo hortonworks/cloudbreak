@@ -80,8 +80,6 @@ class UserDataRotationExecutorTest {
     public void rotateUpdatesRequestPropertiesOnly() {
         when(stack.getId()).thenReturn(1L);
         when(stackService.getByEnvironmentCrnAndAccountId(anyString(), anyString())).thenReturn(stack);
-        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(stack);
-
 
         when(secretService.getRotation("path/secretA")).thenReturn(new RotationSecret("A2", "A1"));
         when(secretService.getRotation("path/secretC")).thenReturn(new RotationSecret("C2", "C1"));
@@ -108,7 +106,6 @@ class UserDataRotationExecutorTest {
     public void rollbackUpdatesRequestPropertiesOnly() {
         when(stack.getId()).thenReturn(1L);
         when(stackService.getByEnvironmentCrnAndAccountId(anyString(), anyString())).thenReturn(stack);
-        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(stack);
 
         when(secretService.getRotation("path/secretA")).thenReturn(new RotationSecret("A2", "A1"));
         when(secretService.getRotation("path/secretC")).thenReturn(new RotationSecret("C2", "C1"));

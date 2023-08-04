@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.SALTBOOT_CONFIG;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.USER_DATA;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.LAUNCH_TEMPLATE;
 
 import java.security.PublicKey;
 import java.util.List;
@@ -32,10 +33,10 @@ import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
-import com.sequenceiq.freeipa.api.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.rotation.ExitCriteriaProvider;
@@ -92,6 +93,7 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
                 .put(USER_DATA, new UserDataRotationContext(resourceCrn,
                         List.of(Pair.of(saltBootPasswordUserDataModifier, saltBootPasswordSecret),
                                 Pair.of(saltBootSignKeyUserDataModifier, saltBootPrivateKeySecret))))
+                .put(LAUNCH_TEMPLATE, new RotationContext(resourceCrn))
                 .build();
     }
 

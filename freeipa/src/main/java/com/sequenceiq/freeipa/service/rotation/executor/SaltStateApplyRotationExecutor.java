@@ -1,6 +1,7 @@
-package com.sequenceiq.cloudbreak.rotation.executor;
+package com.sequenceiq.freeipa.service.rotation.executor;
 
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_STATE_APPLY;
+
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.SALT_STATE_APPLY;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,7 +16,8 @@ import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
-import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
+import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
+import com.sequenceiq.freeipa.service.rotation.context.SaltStateApplyRotationContext;
 
 @Component
 public class SaltStateApplyRotationExecutor extends AbstractRotationExecutor<SaltStateApplyRotationContext> {
@@ -56,8 +58,7 @@ public class SaltStateApplyRotationExecutor extends AbstractRotationExecutor<Sal
     private void executeStatesIfPresent(Optional<List<String>> states, String message, SaltStateApplyRotationContext context)
             throws CloudbreakOrchestratorFailedException {
         if (states.isPresent()) {
-            LOGGER.info("Executing salt states [{}] regarding {} of secret rotation.",
-                    Joiner.on(",").join(states.get()), message);
+            LOGGER.info("Executing salt states [{}] regarding {} of secret rotation.", Joiner.on(",").join(states.get()), message);
             hostOrchestrator.executeSaltState(context.getGatewayConfig(), context.getTargets(), states.get(),
                     context.getExitCriteriaModel(), context.getMaxRetry(), context.getMaxRetryOnError());
         }

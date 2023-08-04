@@ -107,15 +107,18 @@ public class GrpcCcmV2Client {
         return result;
     }
 
-    public InvertingProxyAgent createAgentAccessKeyPair(String actorCrn, String accountId, String agentCrn) {
+    public InvertingProxyAgent createAgentAccessKeyPair(String actorCrn, String accountId, String agentCrn, Optional<String> hmacKey) {
         ClusterConnectivityManagementV2BlockingStub client = makeClient(channelWrapper.getChannel(), actorCrn);
-        CreateAgentAccessKeyPairRequest request = CreateAgentAccessKeyPairRequest.newBuilder()
+        CreateAgentAccessKeyPairRequest.Builder builder = CreateAgentAccessKeyPairRequest.newBuilder()
                 .setAccountId(accountId)
-                .setAgentCrn(agentCrn)
-                .build();
-        CreateAgentAccessKeyPairResponse agentAccessKeyPair = client.createAgentAccessKeyPair(request);
+                .setAgentCrn(agentCrn);
+        if (hmacKey.isPresent()) {
+            builder.setAes256Parameters(AES256Parameters.newBuilder().setHmacKey(hmacKey.get()).build());
+        }
+        CreateAgentAccessKeyPairRequest request = builder.build();
         LOGGER.debug("Calling createAgentAccessKeyPair with params accountId: {}, agentCrn: '{}'", accountId, agentCrn);
-        return agentAccessKeyPair.getInvertingProxyAgent();
+        CreateAgentAccessKeyPairResponse response = client.createAgentAccessKeyPair(request);
+        return response.getInvertingProxyAgent();
     }
 
     public DeactivateAgentAccessKeyPairResponse deactivateAgentAccessKeyPair(String actorCrn, String accountId, String accessKeyId) {

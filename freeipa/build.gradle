@@ -153,6 +153,7 @@ dependencies {
   implementation project(':cloud-azure')
   implementation project(':cloud-gcp')
   implementation project(':cloud-template')
+  implementation project(':ccm-connector')
 
   implementation project(':orchestrator-salt')
   runtimeOnly project(':cloud-mock')

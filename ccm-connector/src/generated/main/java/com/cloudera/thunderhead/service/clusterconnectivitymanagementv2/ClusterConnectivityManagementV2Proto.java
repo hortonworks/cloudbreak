@@ -16403,6 +16403,38 @@ public final class ClusterConnectivityManagementV2Proto {
      */
     com.google.protobuf.ByteString
         getAgentCrnBytes();
+
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 3;</code>
+     * @return Whether the aes128Parameters field is set.
+     */
+    boolean hasAes128Parameters();
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 3;</code>
+     * @return The aes128Parameters.
+     */
+    com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters getAes128Parameters();
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 3;</code>
+     */
+    com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128ParametersOrBuilder getAes128ParametersOrBuilder();
+
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 4;</code>
+     * @return Whether the aes256Parameters field is set.
+     */
+    boolean hasAes256Parameters();
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 4;</code>
+     * @return The aes256Parameters.
+     */
+    com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters getAes256Parameters();
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 4;</code>
+     */
+    com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256ParametersOrBuilder getAes256ParametersOrBuilder();
+
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest.FilterOneofCase getFilterOneofCase();
   }
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.CreateAgentAccessKeyPairRequest}
@@ -16444,6 +16476,47 @@ public final class ClusterConnectivityManagementV2Proto {
       return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_CreateAgentAccessKeyPairRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest.class, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest.Builder.class);
+    }
+
+    private int filterOneofCase_ = 0;
+    private java.lang.Object filterOneof_;
+    public enum FilterOneofCase
+        implements com.google.protobuf.Internal.EnumLite,
+            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
+      AES128PARAMETERS(3),
+      AES256PARAMETERS(4),
+      FILTERONEOF_NOT_SET(0);
+      private final int value;
+      private FilterOneofCase(int value) {
+        this.value = value;
+      }
+      /**
+       * @param value The number of the enum to look for.
+       * @return The enum associated with the given number.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static FilterOneofCase valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static FilterOneofCase forNumber(int value) {
+        switch (value) {
+          case 3: return AES128PARAMETERS;
+          case 4: return AES256PARAMETERS;
+          case 0: return FILTERONEOF_NOT_SET;
+          default: return null;
+        }
+      }
+      public int getNumber() {
+        return this.value;
+      }
+    };
+
+    public FilterOneofCase
+    getFilterOneofCase() {
+      return FilterOneofCase.forNumber(
+          filterOneofCase_);
     }
 
     public static final int ACCOUNTID_FIELD_NUMBER = 1;
@@ -16538,6 +16611,68 @@ public final class ClusterConnectivityManagementV2Proto {
       }
     }
 
+    public static final int AES128PARAMETERS_FIELD_NUMBER = 3;
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 3;</code>
+     * @return Whether the aes128Parameters field is set.
+     */
+    @java.lang.Override
+    public boolean hasAes128Parameters() {
+      return filterOneofCase_ == 3;
+    }
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 3;</code>
+     * @return The aes128Parameters.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters getAes128Parameters() {
+      if (filterOneofCase_ == 3) {
+         return (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) filterOneof_;
+      }
+      return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.getDefaultInstance();
+    }
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 3;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128ParametersOrBuilder getAes128ParametersOrBuilder() {
+      if (filterOneofCase_ == 3) {
+         return (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) filterOneof_;
+      }
+      return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.getDefaultInstance();
+    }
+
+    public static final int AES256PARAMETERS_FIELD_NUMBER = 4;
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 4;</code>
+     * @return Whether the aes256Parameters field is set.
+     */
+    @java.lang.Override
+    public boolean hasAes256Parameters() {
+      return filterOneofCase_ == 4;
+    }
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 4;</code>
+     * @return The aes256Parameters.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters getAes256Parameters() {
+      if (filterOneofCase_ == 4) {
+         return (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) filterOneof_;
+      }
+      return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.getDefaultInstance();
+    }
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 4;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256ParametersOrBuilder getAes256ParametersOrBuilder() {
+      if (filterOneofCase_ == 4) {
+         return (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) filterOneof_;
+      }
+      return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.getDefaultInstance();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -16558,6 +16693,12 @@ public final class ClusterConnectivityManagementV2Proto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(agentCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, agentCrn_);
       }
+      if (filterOneofCase_ == 3) {
+        output.writeMessage(3, (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) filterOneof_);
+      }
+      if (filterOneofCase_ == 4) {
+        output.writeMessage(4, (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) filterOneof_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -16572,6 +16713,14 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(agentCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, agentCrn_);
+      }
+      if (filterOneofCase_ == 3) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) filterOneof_);
+      }
+      if (filterOneofCase_ == 4) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) filterOneof_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -16592,6 +16741,19 @@ public final class ClusterConnectivityManagementV2Proto {
           .equals(other.getAccountId())) return false;
       if (!getAgentCrn()
           .equals(other.getAgentCrn())) return false;
+      if (!getFilterOneofCase().equals(other.getFilterOneofCase())) return false;
+      switch (filterOneofCase_) {
+        case 3:
+          if (!getAes128Parameters()
+              .equals(other.getAes128Parameters())) return false;
+          break;
+        case 4:
+          if (!getAes256Parameters()
+              .equals(other.getAes256Parameters())) return false;
+          break;
+        case 0:
+        default:
+      }
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -16607,6 +16769,18 @@ public final class ClusterConnectivityManagementV2Proto {
       hash = (53 * hash) + getAccountId().hashCode();
       hash = (37 * hash) + AGENTCRN_FIELD_NUMBER;
       hash = (53 * hash) + getAgentCrn().hashCode();
+      switch (filterOneofCase_) {
+        case 3:
+          hash = (37 * hash) + AES128PARAMETERS_FIELD_NUMBER;
+          hash = (53 * hash) + getAes128Parameters().hashCode();
+          break;
+        case 4:
+          hash = (37 * hash) + AES256PARAMETERS_FIELD_NUMBER;
+          hash = (53 * hash) + getAes256Parameters().hashCode();
+          break;
+        case 0:
+        default:
+      }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -16739,6 +16913,14 @@ public final class ClusterConnectivityManagementV2Proto {
 
         agentCrn_ = "";
 
+        if (aes128ParametersBuilder_ != null) {
+          aes128ParametersBuilder_.clear();
+        }
+        if (aes256ParametersBuilder_ != null) {
+          aes256ParametersBuilder_.clear();
+        }
+        filterOneofCase_ = 0;
+        filterOneof_ = null;
         return this;
       }
 
@@ -16767,6 +16949,21 @@ public final class ClusterConnectivityManagementV2Proto {
         com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest result = new com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest(this);
         result.accountId_ = accountId_;
         result.agentCrn_ = agentCrn_;
+        if (filterOneofCase_ == 3) {
+          if (aes128ParametersBuilder_ == null) {
+            result.filterOneof_ = filterOneof_;
+          } else {
+            result.filterOneof_ = aes128ParametersBuilder_.build();
+          }
+        }
+        if (filterOneofCase_ == 4) {
+          if (aes256ParametersBuilder_ == null) {
+            result.filterOneof_ = filterOneof_;
+          } else {
+            result.filterOneof_ = aes256ParametersBuilder_.build();
+          }
+        }
+        result.filterOneofCase_ = filterOneofCase_;
         onBuilt();
         return result;
       }
@@ -16823,6 +17020,19 @@ public final class ClusterConnectivityManagementV2Proto {
           agentCrn_ = other.agentCrn_;
           onChanged();
         }
+        switch (other.getFilterOneofCase()) {
+          case AES128PARAMETERS: {
+            mergeAes128Parameters(other.getAes128Parameters());
+            break;
+          }
+          case AES256PARAMETERS: {
+            mergeAes256Parameters(other.getAes256Parameters());
+            break;
+          }
+          case FILTERONEOF_NOT_SET: {
+            break;
+          }
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -16859,6 +17069,20 @@ public final class ClusterConnectivityManagementV2Proto {
 
                 break;
               } // case 18
+              case 26: {
+                input.readMessage(
+                    getAes128ParametersFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                filterOneofCase_ = 3;
+                break;
+              } // case 26
+              case 34: {
+                input.readMessage(
+                    getAes256ParametersFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                filterOneofCase_ = 4;
+                break;
+              } // case 34
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -16874,6 +17098,21 @@ public final class ClusterConnectivityManagementV2Proto {
         } // finally
         return this;
       }
+      private int filterOneofCase_ = 0;
+      private java.lang.Object filterOneof_;
+      public FilterOneofCase
+          getFilterOneofCase() {
+        return FilterOneofCase.forNumber(
+            filterOneofCase_);
+      }
+
+      public Builder clearFilterOneof() {
+        filterOneofCase_ = 0;
+        filterOneof_ = null;
+        onChanged();
+        return this;
+      }
+
 
       private java.lang.Object accountId_ = "";
       /**
@@ -17065,6 +17304,290 @@ public final class ClusterConnectivityManagementV2Proto {
         agentCrn_ = value;
         onChanged();
         return this;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128ParametersOrBuilder> aes128ParametersBuilder_;
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 3;</code>
+       * @return Whether the aes128Parameters field is set.
+       */
+      @java.lang.Override
+      public boolean hasAes128Parameters() {
+        return filterOneofCase_ == 3;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 3;</code>
+       * @return The aes128Parameters.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters getAes128Parameters() {
+        if (aes128ParametersBuilder_ == null) {
+          if (filterOneofCase_ == 3) {
+            return (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) filterOneof_;
+          }
+          return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.getDefaultInstance();
+        } else {
+          if (filterOneofCase_ == 3) {
+            return aes128ParametersBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 3;</code>
+       */
+      public Builder setAes128Parameters(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters value) {
+        if (aes128ParametersBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          filterOneof_ = value;
+          onChanged();
+        } else {
+          aes128ParametersBuilder_.setMessage(value);
+        }
+        filterOneofCase_ = 3;
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 3;</code>
+       */
+      public Builder setAes128Parameters(
+          com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.Builder builderForValue) {
+        if (aes128ParametersBuilder_ == null) {
+          filterOneof_ = builderForValue.build();
+          onChanged();
+        } else {
+          aes128ParametersBuilder_.setMessage(builderForValue.build());
+        }
+        filterOneofCase_ = 3;
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 3;</code>
+       */
+      public Builder mergeAes128Parameters(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters value) {
+        if (aes128ParametersBuilder_ == null) {
+          if (filterOneofCase_ == 3 &&
+              filterOneof_ != com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.getDefaultInstance()) {
+            filterOneof_ = com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.newBuilder((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) filterOneof_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            filterOneof_ = value;
+          }
+          onChanged();
+        } else {
+          if (filterOneofCase_ == 3) {
+            aes128ParametersBuilder_.mergeFrom(value);
+          } else {
+            aes128ParametersBuilder_.setMessage(value);
+          }
+        }
+        filterOneofCase_ = 3;
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 3;</code>
+       */
+      public Builder clearAes128Parameters() {
+        if (aes128ParametersBuilder_ == null) {
+          if (filterOneofCase_ == 3) {
+            filterOneofCase_ = 0;
+            filterOneof_ = null;
+            onChanged();
+          }
+        } else {
+          if (filterOneofCase_ == 3) {
+            filterOneofCase_ = 0;
+            filterOneof_ = null;
+          }
+          aes128ParametersBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.Builder getAes128ParametersBuilder() {
+        return getAes128ParametersFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 3;</code>
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128ParametersOrBuilder getAes128ParametersOrBuilder() {
+        if ((filterOneofCase_ == 3) && (aes128ParametersBuilder_ != null)) {
+          return aes128ParametersBuilder_.getMessageOrBuilder();
+        } else {
+          if (filterOneofCase_ == 3) {
+            return (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) filterOneof_;
+          }
+          return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128ParametersOrBuilder> 
+          getAes128ParametersFieldBuilder() {
+        if (aes128ParametersBuilder_ == null) {
+          if (!(filterOneofCase_ == 3)) {
+            filterOneof_ = com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.getDefaultInstance();
+          }
+          aes128ParametersBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128ParametersOrBuilder>(
+                  (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) filterOneof_,
+                  getParentForChildren(),
+                  isClean());
+          filterOneof_ = null;
+        }
+        filterOneofCase_ = 3;
+        onChanged();;
+        return aes128ParametersBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256ParametersOrBuilder> aes256ParametersBuilder_;
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 4;</code>
+       * @return Whether the aes256Parameters field is set.
+       */
+      @java.lang.Override
+      public boolean hasAes256Parameters() {
+        return filterOneofCase_ == 4;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 4;</code>
+       * @return The aes256Parameters.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters getAes256Parameters() {
+        if (aes256ParametersBuilder_ == null) {
+          if (filterOneofCase_ == 4) {
+            return (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) filterOneof_;
+          }
+          return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.getDefaultInstance();
+        } else {
+          if (filterOneofCase_ == 4) {
+            return aes256ParametersBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 4;</code>
+       */
+      public Builder setAes256Parameters(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters value) {
+        if (aes256ParametersBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          filterOneof_ = value;
+          onChanged();
+        } else {
+          aes256ParametersBuilder_.setMessage(value);
+        }
+        filterOneofCase_ = 4;
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 4;</code>
+       */
+      public Builder setAes256Parameters(
+          com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.Builder builderForValue) {
+        if (aes256ParametersBuilder_ == null) {
+          filterOneof_ = builderForValue.build();
+          onChanged();
+        } else {
+          aes256ParametersBuilder_.setMessage(builderForValue.build());
+        }
+        filterOneofCase_ = 4;
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 4;</code>
+       */
+      public Builder mergeAes256Parameters(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters value) {
+        if (aes256ParametersBuilder_ == null) {
+          if (filterOneofCase_ == 4 &&
+              filterOneof_ != com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.getDefaultInstance()) {
+            filterOneof_ = com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.newBuilder((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) filterOneof_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            filterOneof_ = value;
+          }
+          onChanged();
+        } else {
+          if (filterOneofCase_ == 4) {
+            aes256ParametersBuilder_.mergeFrom(value);
+          } else {
+            aes256ParametersBuilder_.setMessage(value);
+          }
+        }
+        filterOneofCase_ = 4;
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 4;</code>
+       */
+      public Builder clearAes256Parameters() {
+        if (aes256ParametersBuilder_ == null) {
+          if (filterOneofCase_ == 4) {
+            filterOneofCase_ = 0;
+            filterOneof_ = null;
+            onChanged();
+          }
+        } else {
+          if (filterOneofCase_ == 4) {
+            filterOneofCase_ = 0;
+            filterOneof_ = null;
+          }
+          aes256ParametersBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.Builder getAes256ParametersBuilder() {
+        return getAes256ParametersFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 4;</code>
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256ParametersOrBuilder getAes256ParametersOrBuilder() {
+        if ((filterOneofCase_ == 4) && (aes256ParametersBuilder_ != null)) {
+          return aes256ParametersBuilder_.getMessageOrBuilder();
+        } else {
+          if (filterOneofCase_ == 4) {
+            return (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) filterOneof_;
+          }
+          return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256ParametersOrBuilder> 
+          getAes256ParametersFieldBuilder() {
+        if (aes256ParametersBuilder_ == null) {
+          if (!(filterOneofCase_ == 4)) {
+            filterOneof_ = com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.getDefaultInstance();
+          }
+          aes256ParametersBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256ParametersOrBuilder>(
+                  (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) filterOneof_,
+                  getParentForChildren(),
+                  isClean());
+          filterOneof_ = null;
+        }
+        filterOneofCase_ = 4;
+        onChanged();;
+        return aes256ParametersBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -17898,52 +18421,56 @@ public final class ClusterConnectivityManagementV2Proto {
       ".InvertingProxyAgent\"M\n#DeactivateAgentA" +
       "ccessKeyPairRequest\022\021\n\taccountId\030\001 \001(\t\022\023" +
       "\n\013accessKeyId\030\002 \001(\t\"&\n$DeactivateAgentAc" +
-      "cessKeyPairResponse\"F\n\037CreateAgentAccess" +
-      "KeyPairRequest\022\021\n\taccountId\030\001 \001(\t\022\020\n\010age" +
-      "ntCrn\030\002 \001(\t\"u\n CreateAgentAccessKeyPairR" +
-      "esponse\022Q\n\023invertingProxyAgent\030\001 \001(\01324.c" +
-      "lusterconnectivitymanagementv2.Inverting" +
-      "ProxyAgent2\270\013\n\037ClusterConnectivityManage" +
-      "mentV2\022A\n\nGetVersion\022\027.version.VersionRe" +
-      "quest\032\030.version.VersionResponse\"\000\022\244\001\n\031Cr" +
-      "eateOrGetInvertingProxy\022A.clusterconnect" +
-      "ivitymanagementv2.CreateOrGetInvertingPr" +
-      "oxyRequest\032B.clusterconnectivitymanageme" +
-      "ntv2.CreateOrGetInvertingProxyResponse\"\000" +
-      "\022\225\001\n\024RemoveInvertingProxy\022<.clusterconne" +
-      "ctivitymanagementv2.RemoveInvertingProxy" +
+      "cessKeyPairResponse\"\364\001\n\037CreateAgentAcces" +
+      "sKeyPairRequest\022\021\n\taccountId\030\001 \001(\t\022\020\n\010ag" +
+      "entCrn\030\002 \001(\t\022M\n\020aes128Parameters\030\003 \001(\01321" +
+      ".clusterconnectivitymanagementv2.AES128P" +
+      "arametersH\000\022M\n\020aes256Parameters\030\004 \001(\01321." +
+      "clusterconnectivitymanagementv2.AES256Pa" +
+      "rametersH\000B\016\n\014filter_oneof\"u\n CreateAgen" +
+      "tAccessKeyPairResponse\022Q\n\023invertingProxy" +
+      "Agent\030\001 \001(\01324.clusterconnectivitymanagem" +
+      "entv2.InvertingProxyAgent2\270\013\n\037ClusterCon" +
+      "nectivityManagementV2\022A\n\nGetVersion\022\027.ve" +
+      "rsion.VersionRequest\032\030.version.VersionRe" +
+      "sponse\"\000\022\244\001\n\031CreateOrGetInvertingProxy\022A" +
+      ".clusterconnectivitymanagementv2.CreateO" +
+      "rGetInvertingProxyRequest\032B.clusterconne" +
+      "ctivitymanagementv2.CreateOrGetInverting" +
+      "ProxyResponse\"\000\022\225\001\n\024RemoveInvertingProxy" +
+      "\022<.clusterconnectivitymanagementv2.Remov" +
+      "eInvertingProxyRequest\032=.clusterconnecti" +
+      "vitymanagementv2.RemoveInvertingProxyRes" +
+      "ponse\"\000\022\200\001\n\rRegisterAgent\0225.clusterconne" +
+      "ctivitymanagementv2.RegisterAgentRequest" +
+      "\0326.clusterconnectivitymanagementv2.Regis" +
+      "terAgentResponse\"\000\022\206\001\n\017UnregisterAgent\0227" +
+      ".clusterconnectivitymanagementv2.Unregis" +
+      "terAgentRequest\0328.clusterconnectivityman" +
+      "agementv2.UnregisterAgentResponse\"\000\022w\n\nL" +
+      "istAgents\0222.clusterconnectivitymanagemen" +
+      "tv2.ListAgentsRequest\0323.clusterconnectiv" +
+      "itymanagementv2.ListAgentsResponse\"\000\022\241\001\n" +
+      "\030GetAllAgentsCertificates\022@.clusterconne" +
+      "ctivitymanagementv2.GetAllAgentsCertific" +
+      "atesRequest\032A.clusterconnectivitymanagem" +
+      "entv2.GetAllAgentsCertificatesResponse\"\000" +
+      "\022\225\001\n\024RotateAgentAccessKey\022<.clusterconne" +
+      "ctivitymanagementv2.RotateAgentAccessKey" +
       "Request\032=.clusterconnectivitymanagementv" +
-      "2.RemoveInvertingProxyResponse\"\000\022\200\001\n\rReg" +
-      "isterAgent\0225.clusterconnectivitymanageme" +
-      "ntv2.RegisterAgentRequest\0326.clusterconne" +
-      "ctivitymanagementv2.RegisterAgentRespons" +
-      "e\"\000\022\206\001\n\017UnregisterAgent\0227.clusterconnect" +
-      "ivitymanagementv2.UnregisterAgentRequest" +
-      "\0328.clusterconnectivitymanagementv2.Unreg" +
-      "isterAgentResponse\"\000\022w\n\nListAgents\0222.clu" +
-      "sterconnectivitymanagementv2.ListAgentsR" +
-      "equest\0323.clusterconnectivitymanagementv2" +
-      ".ListAgentsResponse\"\000\022\241\001\n\030GetAllAgentsCe" +
-      "rtificates\022@.clusterconnectivitymanageme" +
-      "ntv2.GetAllAgentsCertificatesRequest\032A.c" +
-      "lusterconnectivitymanagementv2.GetAllAge" +
-      "ntsCertificatesResponse\"\000\022\225\001\n\024RotateAgen" +
-      "tAccessKey\022<.clusterconnectivitymanageme" +
-      "ntv2.RotateAgentAccessKeyRequest\032=.clust" +
-      "erconnectivitymanagementv2.RotateAgentAc" +
-      "cessKeyResponse\"\000\022\255\001\n\034DeactivateAgentAcc" +
-      "essKeyPair\022D.clusterconnectivitymanageme" +
-      "ntv2.DeactivateAgentAccessKeyPairRequest" +
-      "\032E.clusterconnectivitymanagementv2.Deact" +
-      "ivateAgentAccessKeyPairResponse\"\000\022\241\001\n\030Cr" +
-      "eateAgentAccessKeyPair\022@.clusterconnecti" +
-      "vitymanagementv2.CreateAgentAccessKeyPai" +
-      "rRequest\032A.clusterconnectivitymanagement" +
-      "v2.CreateAgentAccessKeyPairResponse\"\000B\203\001" +
-      "\n@com.cloudera.thunderhead.service.clust" +
-      "erconnectivitymanagementv2B$ClusterConne" +
-      "ctivityManagementV2ProtoZ\031com/cloudera/c" +
-      "dp/protobufb\006proto3"
+      "2.RotateAgentAccessKeyResponse\"\000\022\255\001\n\034Dea" +
+      "ctivateAgentAccessKeyPair\022D.clusterconne" +
+      "ctivitymanagementv2.DeactivateAgentAcces" +
+      "sKeyPairRequest\032E.clusterconnectivityman" +
+      "agementv2.DeactivateAgentAccessKeyPairRe" +
+      "sponse\"\000\022\241\001\n\030CreateAgentAccessKeyPair\022@." +
+      "clusterconnectivitymanagementv2.CreateAg" +
+      "entAccessKeyPairRequest\032A.clusterconnect" +
+      "ivitymanagementv2.CreateAgentAccessKeyPa" +
+      "irResponse\"\000B\203\001\n@com.cloudera.thunderhea" +
+      "d.service.clusterconnectivitymanagementv" +
+      "2B$ClusterConnectivityManagementV2ProtoZ" +
+      "\031com/cloudera/cdp/protobufb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -18077,7 +18604,7 @@ public final class ClusterConnectivityManagementV2Proto {
     internal_static_clusterconnectivitymanagementv2_CreateAgentAccessKeyPairRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_clusterconnectivitymanagementv2_CreateAgentAccessKeyPairRequest_descriptor,
-        new java.lang.String[] { "AccountId", "AgentCrn", });
+        new java.lang.String[] { "AccountId", "AgentCrn", "Aes128Parameters", "Aes256Parameters", "FilterOneof", });
     internal_static_clusterconnectivitymanagementv2_CreateAgentAccessKeyPairResponse_descriptor =
       getDescriptor().getMessageTypes().get(21);
     internal_static_clusterconnectivitymanagementv2_CreateAgentAccessKeyPairResponse_fieldAccessorTable = new

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.rotation.context;
+package com.sequenceiq.freeipa.service.rotation.context;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +16,6 @@ public class SaltStateApplyRotationContext extends RotationContext {
 
     private final List<String> states;
 
-    // if there is a different state for rollback, we should use it, otherwise the original state should handle the rollback
     private final Optional<List<String>> rollBackStates;
 
     private final Optional<List<String>> cleanupStates;
@@ -31,7 +30,7 @@ public class SaltStateApplyRotationContext extends RotationContext {
 
     private final Optional<Integer> maxRetryOnError;
 
-    protected SaltStateApplyRotationContext(String resourceCrn, GatewayConfig gatewayConfig, Set<String> targets, List<String> states,
+    private SaltStateApplyRotationContext(String resourceCrn, GatewayConfig gatewayConfig, Set<String> targets, List<String> states,
             Optional<List<String>> rollBackStates, Optional<List<String>> cleanupStates, Optional<List<String>> preValidateStates,
             Optional<List<String>> postValidateStates, ExitCriteriaModel exitCriteriaModel, Optional<Integer> maxRetry, Optional<Integer> maxRetryOnError) {
         super(resourceCrn);

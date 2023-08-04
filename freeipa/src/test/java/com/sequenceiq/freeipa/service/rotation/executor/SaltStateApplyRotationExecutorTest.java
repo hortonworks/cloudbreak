@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.rotation.executor;
+package com.sequenceiq.freeipa.service.rotation.executor;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,10 +23,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
-import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
-import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext.SaltStateApplyRotationContextBuilder;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
+import com.sequenceiq.freeipa.service.rotation.context.SaltStateApplyRotationContext;
+import com.sequenceiq.freeipa.service.rotation.context.SaltStateApplyRotationContext.SaltStateApplyRotationContextBuilder;
 
 @ExtendWith(MockitoExtension.class)
 public class SaltStateApplyRotationExecutorTest {

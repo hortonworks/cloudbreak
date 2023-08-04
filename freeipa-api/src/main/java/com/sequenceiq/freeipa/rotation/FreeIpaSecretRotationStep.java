@@ -6,7 +6,10 @@ public enum FreeIpaSecretRotationStep implements SecretRotationStep {
 
     FREEIPA_ADMIN_USER_PASSWORD,
     FREEIPA_DIRECTORY_MANAGER_PASSWORD,
-    FREEIPA_PILLAR_UPDATE;
+    SALT_PILLAR_UPDATE,
+    CCMV2_JUMPGATE,
+    LAUNCH_TEMPLATE,
+    SALT_STATE_APPLY;
 
     @Override
     public Class<? extends Enum<?>> getClazz() {

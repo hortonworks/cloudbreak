@@ -1,5 +1,18 @@
 package com.sequenceiq.freeipa.service.image.userdata;
 
+import static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent;
+import static com.sequenceiq.freeipa.service.rotation.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V2_AGENT_ACCESS_KEY_ID;
+import static com.sequenceiq.freeipa.service.rotation.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V2_AGENT_ENCIPHERED_ACCESS_KEY;
+import static com.sequenceiq.freeipa.service.rotation.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V_2_AGENT_CERTIFICATE;
+import static com.sequenceiq.freeipa.service.rotation.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V_2_AGENT_ENCIPHERED_KEY;
+import static com.sequenceiq.freeipa.service.rotation.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V_2_AGENT_HMAC_FOR_PRIVATE_KEY;
+import static com.sequenceiq.freeipa.service.rotation.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V_2_AGENT_HMAC_KEY;
+import static com.sequenceiq.freeipa.service.rotation.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V_2_AGENT_KEY_ID;
+import static com.sequenceiq.freeipa.service.rotation.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V_2_INVERTING_PROXY_CERTIFICATE;
+import static com.sequenceiq.freeipa.service.rotation.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V_2_INVERTING_PROXY_HOST;
+import static com.sequenceiq.freeipa.service.rotation.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V_2_IV;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
@@ -21,10 +34,12 @@ import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2Parameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2JumpgateParameters;
 import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
 import com.sequenceiq.cloudbreak.ccm.key.CcmResourceUtil;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
+import com.sequenceiq.cloudbreak.util.UserDataReplacer;
 import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.entity.FreeIpa;
@@ -84,7 +99,7 @@ public class CcmUserDataService {
         return ccmConnectivityParameters;
     }
 
-    private Optional<String> getHmacKeyOpt(Stack stack) {
+    public Optional<String> getHmacKeyOpt(Stack stack) {
         DetailedEnvironmentResponse environment = environmentService.getByCrn(stack.getEnvironmentCrn());
         Optional<String> hmacKeyOpt = CcmV2TlsType.ONE_WAY_TLS == ccmV2TlsTypeDecider.decide(environment)
                 ? Optional.of(UUID.randomUUID().toString())
@@ -149,7 +164,55 @@ public class CcmUserDataService {
         CcmV2JumpgateParameters ccmV2JumpgateParameters = ccmV2JumpgateParameterSupplier.getCcmV2JumpgateParameters(stack.getAccountId(),
                 Optional.of(stack.getEnvironmentCrn()), generatedClusterDomain, keyId, hmacKeyOpt);
         saveCcmV2Config(stack.getId(), ccmV2JumpgateParameters);
+        saveCcmV2JumpgateParameters(stack.getId(), ccmV2JumpgateParameters);
         return new CcmConnectivityParameters(ccmV2JumpgateParameters);
     }
 
+    private void saveCcmV2JumpgateParameters(Long stackId, CcmV2JumpgateParameters ccmV2JumpgateParameters) {
+        LOGGER.debug("Adding CcmV2JumpgateParameters to stack");
+        Stack stack = stackService.getStackById(stackId);
+        stack.setCcmParameters(new CcmConnectivityParameters(ccmV2JumpgateParameters));
+        stackService.save(stack);
+    }
+
+    public void saveOrUpdateStackCcmParameters(Stack stack, InvertingProxyAgent updatedInvertingProxyAgent, String modifiedUserData,
+            Optional<String> hmacKey) {
+        if (stack.getCcmParameters() != null && stack.getCcmParameters().getCcmV2JumpgateParameters() != null) {
+            stack.setCcmParameters(updateCcmConnectivityParamsFromStack(stack, updatedInvertingProxyAgent, hmacKey));
+        } else if (stack.getCcmParameters() == null || stack.getCcmParameters().getCcmV2JumpgateParameters() == null) {
+            stack.setCcmParameters(createCcmConnectivityParametersFromUserData(stack, modifiedUserData));
+        }
+        stackService.save(stack);
+    }
+
+    private CcmConnectivityParameters updateCcmConnectivityParamsFromStack(Stack stack, InvertingProxyAgent updatedInvertingProxyAgent,
+            Optional<String> hmacKey) {
+        CcmV2JumpgateParameters ccmV2JumpgateParameters = stack.getCcmParameters().getCcmV2JumpgateParameters();
+        DefaultCcmV2JumpgateParameters modifiedCcmV2JumpgateParameters = new DefaultCcmV2JumpgateParameters(ccmV2JumpgateParameters.getInvertingProxyHost(),
+                ccmV2JumpgateParameters.getInvertingProxyCertificate(), stack.getCcmV2AgentCrn(), ccmV2JumpgateParameters.getAgentKeyId(),
+                ccmV2JumpgateParameters.getAgentEncipheredPrivateKey(), ccmV2JumpgateParameters.getAgentCertificate(), stack.getEnvironmentCrn(),
+                updatedInvertingProxyAgent.getAccessKeyId(), updatedInvertingProxyAgent.getEncipheredAccessKey(), hmacKey.orElse(EMPTY),
+                updatedInvertingProxyAgent.getInitialisationVector(), updatedInvertingProxyAgent.getHmacForPrivateKey());
+        return new CcmConnectivityParameters(modifiedCcmV2JumpgateParameters);
+    }
+
+    private CcmConnectivityParameters createCcmConnectivityParametersFromUserData(Stack stack, String modifiedUserData) {
+        UserDataReplacer userDataReplacer = new UserDataReplacer(modifiedUserData);
+        String invertingProxyHost = userDataReplacer.extractValueOrEmpty(CCM_V_2_INVERTING_PROXY_HOST);
+        String invertingProxyCertificate = userDataReplacer.extractValueOrEmpty(CCM_V_2_INVERTING_PROXY_CERTIFICATE);
+        String agentCrn = stack.getCcmV2AgentCrn();
+        String agentKeyId = userDataReplacer.extractValueOrEmpty(CCM_V_2_AGENT_KEY_ID);
+        String agentEncipheredPrivateKey = userDataReplacer.extractValueOrEmpty(CCM_V_2_AGENT_ENCIPHERED_KEY);
+        String agentCertificate = userDataReplacer.extractValueOrEmpty(CCM_V_2_AGENT_CERTIFICATE);
+        String environmentCrn = stack.getEnvironmentCrn();
+        String agentMachineUserAccessKey = userDataReplacer.extractValueOrEmpty(CCM_V2_AGENT_ACCESS_KEY_ID);
+        String agentMachineUserEncipheredAccessKey = userDataReplacer.extractValueOrEmpty(CCM_V2_AGENT_ENCIPHERED_ACCESS_KEY);
+        String hmacKey = userDataReplacer.extractValueOrEmpty(CCM_V_2_AGENT_HMAC_KEY);
+        String initialisationVector = userDataReplacer.extractValueOrEmpty(CCM_V_2_IV);
+        String hmacForPrivateKey = userDataReplacer.extractValueOrEmpty(CCM_V_2_AGENT_HMAC_FOR_PRIVATE_KEY);
+        DefaultCcmV2JumpgateParameters ccmV2JumpgateParameters = new DefaultCcmV2JumpgateParameters(invertingProxyHost, invertingProxyCertificate, agentCrn,
+                agentKeyId, agentEncipheredPrivateKey, agentCertificate, environmentCrn, agentMachineUserAccessKey, agentMachineUserEncipheredAccessKey,
+                hmacKey, initialisationVector, hmacForPrivateKey);
+        return new CcmConnectivityParameters(ccmV2JumpgateParameters);
+    }
 }

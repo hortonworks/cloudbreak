@@ -1,5 +1,12 @@
 package com.sequenceiq.cloudbreak.util;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+
+import java.util.Arrays;
+import java.util.Iterator;
+
+import org.apache.commons.lang3.StringUtils;
+
 public class UserDataReplacer {
 
     private static final String EXPORT_PREFIX_FORMAT = "export %s=";
@@ -42,5 +49,23 @@ public class UserDataReplacer {
 
     public String getUserData() {
         return userData;
+    }
+
+    public String extractValueOrEmpty(String parameter) {
+        String value = extractValue(parameter);
+        return value == null ? EMPTY : value;
+    }
+
+    public String extractValue(String parameter) {
+        String valueSearchPattern = String.format(EXPORT_PREFIX_FORMAT, parameter);
+        Iterator<String> lines = Arrays.asList(userData.split("\n")).iterator();
+        String value = null;
+        while (lines.hasNext()) {
+            String line = lines.next();
+            if (line.contains(valueSearchPattern)) {
+                value = StringUtils.replaceChars(StringUtils.substringAfter(line, valueSearchPattern), "\"", "");
+            }
+        }
+        return value;
     }
 }

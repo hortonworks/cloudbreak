@@ -85,7 +85,6 @@ import com.sequenceiq.freeipa.service.image.ImageCatalogChangeService;
 import com.sequenceiq.freeipa.service.image.ImageCatalogGeneratorService;
 import com.sequenceiq.freeipa.service.image.ImageChangeService;
 import com.sequenceiq.freeipa.service.operation.FreeIpaRetryService;
-import com.sequenceiq.freeipa.service.rotation.FreeIpaSecretRotationService;
 import com.sequenceiq.freeipa.service.stack.ChildEnvironmentService;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
@@ -191,9 +190,6 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private FreeIpaRecommendationService freeIpaRecommendationService;
-
-    @Inject
-    private FreeIpaSecretRotationService freeIpaSecretRotationService;
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)

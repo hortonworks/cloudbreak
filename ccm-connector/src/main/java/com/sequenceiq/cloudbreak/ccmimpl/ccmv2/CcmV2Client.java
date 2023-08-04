@@ -61,9 +61,10 @@ class CcmV2Client {
         return agentList;
     }
 
-    public InvertingProxyAgent createAgentAccessKeyPair(String accountId, String agentCrn) {
+    public InvertingProxyAgent createAgentAccessKeyPair(String accountId, String agentCrn, Optional<String> hmacKey) {
         LOGGER.debug("Create agent access key pair for agentCrn '{}'", agentCrn);
-        InvertingProxyAgent invertingProxyAgent = grpcCcmV2Client.createAgentAccessKeyPair(ThreadBasedUserCrnProvider.getUserCrn(), accountId, agentCrn);
+        InvertingProxyAgent invertingProxyAgent = grpcCcmV2Client.createAgentAccessKeyPair(ThreadBasedUserCrnProvider.getUserCrn(),
+                accountId, agentCrn, hmacKey);
         LOGGER.debug("Created agent access key pair for agentCrn '{}'", agentCrn);
         return invertingProxyAgent;
     }

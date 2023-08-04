@@ -4,7 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -18,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2JumpgateParameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2Parameters;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -107,5 +112,29 @@ class SaltConfigProviderTest {
 
         SaltPillarProperties ldapProperties = servicePillarConfig.get("ldap");
         assertEquals("ldappath", ldapProperties.getPath());
+    }
+
+    @Test
+    void getCcmPillarPropertiesWhenCcmParametersIsEmpty() {
+        underTest.getCcmPillarProperties(new Stack());
+        verify(ccmParametersConfigService, never()).createCcmParametersPillarConfig(eq(ENV_CRN), notNull());
+    }
+
+    @Test
+    void getCcmPillarPropertiesWhenNotCcmV2JumpgateParameters() {
+        Stack stack = new Stack();
+        stack.setCcmParameters(new CcmConnectivityParameters(new DefaultCcmV2Parameters(null, null, null, null, null, null)));
+        underTest.getCcmPillarProperties(stack);
+        verify(ccmParametersConfigService, never()).createCcmParametersPillarConfig(eq(ENV_CRN), notNull());
+    }
+
+    @Test
+    void getCcmPillarPropertiesWhenCcmV2JumpgateParameters() {
+        Stack stack = new Stack();
+        stack.setEnvironmentCrn(ENV_CRN);
+        stack.setCcmParameters(new CcmConnectivityParameters(new DefaultCcmV2JumpgateParameters(null, null, null,
+                null, null, null, null, null, null, null, null, null)));
+        underTest.getCcmPillarProperties(stack);
+        verify(ccmParametersConfigService, times(1)).createCcmParametersPillarConfig(eq(ENV_CRN), notNull());
     }
 }

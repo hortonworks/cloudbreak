@@ -225,6 +225,13 @@ message CreateAgentAccessKeyPairRequest {
   string accountId = 1;
   // The agentCrn of the agent
   string agentCrn = 2;
+  // Specify if aes-128 should be used for encryption or aes-256 with hmac calculation.
+  // This is done as part of supporting aes-128 encryption while also introducing aes-256 way of encryption
+  // along with calculating the MAC of the encrypted private key.
+  oneof filter_oneof {
+    AES128Parameters aes128Parameters = 3;
+    AES256Parameters aes256Parameters = 4;
+  }
 }
 
 message CreateAgentAccessKeyPairResponse {

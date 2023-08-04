@@ -96,9 +96,9 @@ class CcmV2ClientTest {
     @Test
     void createAgentAccessKeyPair() {
         InvertingProxyAgent mockResponse = InvertingProxyAgent.newBuilder().build();
-        when(grpcCcmV2Client.createAgentAccessKeyPair(TEST_USER_CRN, TEST_ACCOUNT_ID, TEST_AGENT_CRN)).thenReturn(mockResponse);
+        when(grpcCcmV2Client.createAgentAccessKeyPair(TEST_USER_CRN, TEST_ACCOUNT_ID, TEST_AGENT_CRN, Optional.of(TEST_HMAC_KEY))).thenReturn(mockResponse);
         InvertingProxyAgent updatedInvertingProxyAgent = ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
-                underTest.createAgentAccessKeyPair(TEST_ACCOUNT_ID, TEST_AGENT_CRN));
+                underTest.createAgentAccessKeyPair(TEST_ACCOUNT_ID, TEST_AGENT_CRN, Optional.of(TEST_HMAC_KEY)));
         assertEquals(updatedInvertingProxyAgent, mockResponse, "InvertingProxyAgent should match.");
     }
 

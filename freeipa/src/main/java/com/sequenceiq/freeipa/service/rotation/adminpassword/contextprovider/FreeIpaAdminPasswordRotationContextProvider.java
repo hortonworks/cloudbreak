@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.service.rotation.adminpassword.contextprovider;
 
-import static com.sequenceiq.freeipa.api.rotation.FreeIpaSecretType.FREEIPA_ADMIN_PASSWORD;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_ADMIN_PASSWORD;
 
 import java.util.Map;
 
@@ -22,8 +22,9 @@ import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.service.rotation.FreeIpaDefaultPillarGenerator;
 import com.sequenceiq.freeipa.service.rotation.adminpassword.context.FreeIpaAdminPasswordRotationContext;
-import com.sequenceiq.freeipa.service.rotation.pillar.context.FreeIpaPillarRotationContext;
+import com.sequenceiq.freeipa.service.rotation.pillar.context.SaltPillarUpdateRotationContext;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component
@@ -34,6 +35,9 @@ public class FreeIpaAdminPasswordRotationContextProvider implements RotationCont
 
     @Inject
     private FreeIpaService freeIpaService;
+
+    @Inject
+    private FreeIpaDefaultPillarGenerator freeIpaDefaultPillarGenerator;
 
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String environmentCrnAsString) {
@@ -54,13 +58,16 @@ public class FreeIpaAdminPasswordRotationContextProvider implements RotationCont
                 .withAdminPasswordSecret(adminPasswordSecret.getSecret())
                 .build();
 
-        FreeIpaPillarRotationContext freeipaPillarRotationContext = FreeIpaPillarRotationContext.builder().withEnvCrn(environmentCrnAsString).build();
+        SaltPillarUpdateRotationContext freeipaPillarRotationContext = SaltPillarUpdateRotationContext.builder()
+                .withEnvironmentCrn(environmentCrnAsString)
+                .withServicePillarGenerator(freeIpaDefaultPillarGenerator)
+                .build();
 
         Map<SecretRotationStep, RotationContext> result = Maps.newHashMap();
         result.put(CommonSecretRotationStep.VAULT, vaultRotationContext);
         result.put(FreeIpaSecretRotationStep.FREEIPA_ADMIN_USER_PASSWORD, freeipaAdminPasswordRotationContext);
         result.put(FreeIpaSecretRotationStep.FREEIPA_DIRECTORY_MANAGER_PASSWORD, freeipaAdminPasswordRotationContext);
-        result.put(FreeIpaSecretRotationStep.FREEIPA_PILLAR_UPDATE, freeipaPillarRotationContext);
+        result.put(FreeIpaSecretRotationStep.SALT_PILLAR_UPDATE, freeipaPillarRotationContext);
         return result;
     }
 
