@@ -16,7 +16,10 @@ public class TermsPutAction implements Action<TermsPolicyDto, EnvironmentClient>
 
     @Override
     public TermsPolicyDto action(TestContext testContext, TermsPolicyDto testDto, EnvironmentClient client) throws Exception {
-        AzureMarketplaceTermsResponse response = client.getDefaultClient().azureMarketplaceTermsEndpoint().put(testDto.getRequest());
+        AzureMarketplaceTermsResponse response = client.getDefaultClient().azureMarketplaceTermsEndpoint().get();
+        if (!response.getAccepted().equals(testDto.getRequest().getAccepted())) {
+            response = client.getDefaultClient().azureMarketplaceTermsEndpoint().put(testDto.getRequest());
+        }
         testDto.setResponse(response);
         Log.whenJson(LOGGER, " Terms setting updated successfully:\n", testDto.getResponse());
         return testDto;
