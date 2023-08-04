@@ -5,7 +5,6 @@ import static java.lang.String.format;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -296,6 +295,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     public String getLatestPreWarmedImageByRuntimeVersion(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform,
             boolean govCloud, String runtimeVersion) {
+        String osType = govCloud ? "redhat8" : "redhat7";
         try {
             List<ImageV4Response> prewarmedImagesForRuntime = cloudbreakClient
                     .getDefaultClient()
@@ -303,24 +303,26 @@ public abstract class AbstractCloudProvider implements CloudProvider {
                     .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
                             platform, null, null, govCloud)
                     .getCdhImages().stream()
-                    .filter(image -> StringUtils.equalsIgnoreCase(image.getStackDetails().getVersion(),
-                            runtimeVersion))
+                    .filter(image -> StringUtils.equalsIgnoreCase(image.getStackDetails().getVersion(), runtimeVersion))
+                    .filter(imageV4Response -> StringUtils.equalsIgnoreCase(imageV4Response.getOsType(), osType))
                     .sorted(Comparator.comparing(ImageV4Response::getPublished))
-                    .collect(Collectors.toList());
+                    .toList();
 
             if (prewarmedImagesForRuntime.isEmpty()) {
-                throw new IllegalStateException(format("Cannot find pre-warmed images at '%s' provider for '%s' runtime version!", platform,
+                throw new TestFailException(format("Cannot find pre-warmed images at '%s' provider for '%s' runtime version!", platform,
                         runtimeVersion));
             }
             ImageV4Response latestPrewarmedImage = prewarmedImagesForRuntime.get(prewarmedImagesForRuntime.size() - 1);
             Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
             Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
-            Log.log(LOGGER, format(" Selected Pre-warmed Image Date: %s | ID: %s | Description: %s ", latestPrewarmedImage.getDate(),
-                    latestPrewarmedImage.getUuid(), latestPrewarmedImage.getDescription()));
+            Log.log(LOGGER, format(" Selected Pre-warmed Image Date: %s | ID: %s | OS: %s | Description: %s ", latestPrewarmedImage.getDate(),
+                    latestPrewarmedImage.getUuid(), latestPrewarmedImage.getOs(), latestPrewarmedImage.getDescription()));
             return latestPrewarmedImage.getUuid();
+        } catch (TestFailException e) {
+            throw e;
         } catch (Exception e) {
-            LOGGER.error("Cannot fetch pre-warmed images from '{}' image catalog, because of: {}", imageCatalogTestDto.getRequest().getName(), e);
-            throw new TestFailException(format("Cannot fetch pre-warmed images from '%s' image catalog!", imageCatalogTestDto.getRequest().getName(), e));
+            LOGGER.error("Cannot fetch pre-warmed images from '{}' image catalog, because of: ", imageCatalogTestDto.getRequest().getName(), e);
+            throw new TestFailException(format("Cannot fetch pre-warmed images from '%s' image catalog!", imageCatalogTestDto.getRequest().getName()), e);
         }
     }
 
@@ -332,8 +334,8 @@ public abstract class AbstractCloudProvider implements CloudProvider {
                     .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
                             platform, null, null, govCloud).getBaseImages();
 
-            if (images.size() == 0) {
-                throw new IllegalStateException("Images are empty, there is not any base image on provider " + platform);
+            if (images.isEmpty()) {
+                throw new TestFailException("Images are empty, there is not any base image on provider " + platform);
             }
             BaseImageV4Response baseImage = images.get(images.size() - 1);
             Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
@@ -342,8 +344,10 @@ public abstract class AbstractCloudProvider implements CloudProvider {
                     baseImage.getUuid(), baseImage.getDescription()));
 
             return baseImage.getUuid();
+        } catch (TestFailException e) {
+            throw e;
         } catch (Exception e) {
-            LOGGER.error("Cannot fetch base images of {} image catalog, because of {}", imageCatalogTestDto.getRequest().getName(), e);
+            LOGGER.error("Cannot fetch base images of {} image catalog, because of ", imageCatalogTestDto.getRequest().getName(), e);
             throw new TestFailException(" Cannot fetch base images of " + imageCatalogTestDto.getRequest().getName() + " image catalog", e);
         }
     }
