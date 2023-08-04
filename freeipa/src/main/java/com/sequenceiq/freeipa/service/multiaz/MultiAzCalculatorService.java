@@ -225,9 +225,8 @@ public class MultiAzCalculatorService {
             if (CollectionUtils.isEmpty(availabilityZonesForInstanceGroup)) {
                 AvailabilityZoneConnector availabilityZoneConnector = getAvailabilityZoneConnector(stack);
                 if (availabilityZoneConnector != null) {
-                    Set<String> availabilityZones = availabilityZoneConnector.getAvailabilityZones(getExtendedCloudCredential(stack),
-                            environment.getNetwork()
-                                    .getAvailabilityZones(CloudPlatform.valueOf(stack.getCloudPlatform())),
+                    Set<String> environmentZones = validateAndGetEnvironmentZones(environment, stack);
+                    Set<String> availabilityZones = availabilityZoneConnector.getAvailabilityZones(getExtendedCloudCredential(stack), environmentZones,
                             instanceGroup.getTemplate().getInstanceType(), Region.region(environment.getLocation().getName()));
                     validateMinimumZones(instanceGroup.getGroupName(), availabilityZones.size(), availabilityZoneConnector.getMinZonesForFreeIpa());
                     LOGGER.debug("Availability Zones for instance group are  {}", availabilityZones);
@@ -298,5 +297,15 @@ public class MultiAzCalculatorService {
 
     private long countInstancesForAvailabilityZone(Set<InstanceMetaData> instanceMetaDataSets, String availabilityZone) {
         return instanceMetaDataSets.stream().filter(instance -> availabilityZone.equals(instance.getAvailabilityZone())).count();
+    }
+
+    private Set<String> validateAndGetEnvironmentZones(DetailedEnvironmentResponse detailedEnvironmentResponse, Stack stack) {
+        Set<String> environmentZones = detailedEnvironmentResponse.getNetwork().getAvailabilityZones(CloudPlatform.valueOf(stack.getCloudPlatform()));
+        if (CollectionUtils.isEmpty(environmentZones)) {
+            LOGGER.error("Environment Zones are not configured");
+            throw new BadRequestException(String.format("MultiAz is enabled but Availability Zones are not configured for environment %s." +
+                            "Please modify the environment and configure Availability Zones", detailedEnvironmentResponse.getName()));
+        }
+        return environmentZones;
     }
 }

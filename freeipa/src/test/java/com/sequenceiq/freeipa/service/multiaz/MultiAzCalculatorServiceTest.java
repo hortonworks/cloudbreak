@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureConstants;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.converter.AvailabilityZoneConverter;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -180,6 +181,29 @@ class MultiAzCalculatorServiceTest {
 
         assertNull(instanceGroup.getInstanceGroupNetwork().getAttributes());
         assertEquals(Set.of(), instanceGroup.getAvailabilityZones());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    public void testPopulateAvailabilityZonesWithEnvironmentZonesNotAvailable() {
+        AvailabilityZoneConnector availabilityZoneConnector = mock(AvailabilityZoneConnector.class);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+        Stack stack = new Stack();
+        InstanceGroup instanceGroup = new InstanceGroup();
+        stack.setMultiAz(true);
+        stack.setPlatformvariant(AzureConstants.VARIANT.value());
+        stack.setCloudPlatform(AzureConstants.PLATFORM.value());
+        CloudConnector cloudConnector = mock(CloudConnector.class);
+        when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
+        when(cloudConnector.availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
+        EnvironmentNetworkResponse environmentNetworkResponse = mock(EnvironmentNetworkResponse.class);
+        when(environmentNetworkResponse.getAvailabilityZones(CloudPlatform.AZURE)).thenReturn(Set.of());
+        when(detailedEnvironmentResponse.getNetwork()).thenReturn(environmentNetworkResponse);
+        when(detailedEnvironmentResponse.getName()).thenReturn("test-env");
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.populateAvailabilityZones(stack, detailedEnvironmentResponse, instanceGroup));
+        assertEquals("MultiAz is enabled but Availability Zones are not configured for environment test-env." +
+                "Please modify the environment and configure Availability Zones", badRequestException.getMessage());
     }
 
     @Test
@@ -411,10 +435,10 @@ class MultiAzCalculatorServiceTest {
         stack.setCloudPlatform(AzureConstants.PLATFORM.value());
         CloudConnector cloudConnector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
-
         when(cloudConnector.availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
         when(availabilityZoneConnector.getAvailabilityZones(any(), any(), any(), any())).thenReturn(Set.of("1", "2", "3"));
         EnvironmentNetworkResponse environmentNetworkResponse = mock(EnvironmentNetworkResponse.class);
+        when(environmentNetworkResponse.getAvailabilityZones(CloudPlatform.AZURE)).thenReturn(Set.of("1", "2", "3"));
         LocationResponse locationResponse = mock(LocationResponse.class);
         when(detailedEnvironmentResponse.getLocation()).thenReturn(locationResponse);
         when(locationResponse.getName()).thenReturn("westus2");
