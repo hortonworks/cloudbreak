@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,17 +26,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.datalake.entity.DatalakeInstanceGroupScalingDetails;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
@@ -51,8 +56,6 @@ import com.sequenceiq.sdx.api.model.DatalakeHorizontalScaleRequest;
 public class SdxHorizontalScalingServiceTest {
 
     private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:default:environment:e438a2db-d650-4132-ae62-242c5ba2f784";
-
-    private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:default:datalake:e438a2db-d650-4132-ae62-242c5ba2f784";
 
     private static final Long SDX_ID = 2L;
 
@@ -93,7 +96,7 @@ public class SdxHorizontalScalingServiceTest {
         when(stackV4Endpoint.putScaling(any(), anyString(), any(), anyString())).thenReturn(new FlowIdentifier(FlowType.FLOW, "flowId"));
         SdxCluster sdxCluster = getSdxCluster();
         StackScaleV4Request scaleRequest = new StackScaleV4Request();
-        scaleRequest.setGroup("solr_scale_out");
+        scaleRequest.setGroup(DatalakeInstanceGroupScalingDetails.SOLR_SCALE_OUT.getName());
         scaleRequest.setDesiredCount(1);
         String flowId = underTest.triggerScalingFlow(sdxCluster, scaleRequest);
         assertEquals("flowId", flowId);
@@ -108,28 +111,125 @@ public class SdxHorizontalScalingServiceTest {
         when(environmentClientService.getByName(eq(sdxCluster.getEnvName()))).thenReturn(detailedEnvironmentResponse);
         StackV4Response stackV4Response = getStackV4Response();
         when(stackV4Endpoint.getByCrn(any(), eq(sdxCluster.getStackCrn()), anySet())).thenReturn(stackV4Response);
-        sdxCluster.setClusterShape(ENTERPRISE);
-        sdxCluster.setStackId(1L);
         DatalakeHorizontalScaleRequest scaleRequest = new DatalakeHorizontalScaleRequest();
-        scaleRequest.setGroup("auxiliary");
+        scaleRequest.setGroup(DatalakeInstanceGroupScalingDetails.AUXILIARY.getName());
         scaleRequest.setDesiredCount(0);
         assertThrows(BadRequestException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
-        scaleRequest.setGroup("core");
+        scaleRequest.setGroup(DatalakeInstanceGroupScalingDetails.CORE.getName());
         scaleRequest.setDesiredCount(3);
         underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest);
     }
 
     @Test
     void testDatalakeHorizontalScaleValidationNotAllowedGroups() {
+        DetailedEnvironmentResponse environmentDetailedResponse = getEnvironmentDetailedResponse();
+        when(environmentClientService.getByName(anyString())).thenReturn(environmentDetailedResponse);
+        StackV4Response stackV4Response = getStackV4Response();
+        when(stackV4Endpoint.getByCrn(any(), any(), any())).thenReturn(stackV4Response);
         SdxCluster sdxCluster = getSdxCluster();
         DatalakeHorizontalScaleRequest scaleRequest = new DatalakeHorizontalScaleRequest();
-        sdxCluster.setClusterShape(ENTERPRISE);
-        sdxCluster.setStackId(1L);
-        scaleRequest.setGroup("atlas");
+        scaleRequest.setGroup(DatalakeInstanceGroupScalingDetails.ATLAS_SCALE_OUT.getName());
         scaleRequest.setDesiredCount(1);
-        assertThrows(IllegalArgumentException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
-        scaleRequest.setGroup("master");
+        assertThrows(BadRequestException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
+        scaleRequest.setGroup(DatalakeInstanceGroupScalingDetails.MASTER.getName());
         scaleRequest.setDesiredCount(4);
+        assertThrows(BadRequestException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
+        scaleRequest.setDesiredCount(-1);
+        assertThrows(BadRequestException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
+    }
+
+    @Test
+    void testDatalakeHorizontalScaleDownScaleNotAllowedOnGroup() {
+        DetailedEnvironmentResponse environmentDetailedResponse = getEnvironmentDetailedResponse();
+        when(environmentClientService.getByName(anyString())).thenReturn(environmentDetailedResponse);
+        StackV4Response stackV4Response = new StackV4Response();
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        ClouderaManagerV4Response cm = new ClouderaManagerV4Response();
+        ClouderaManagerProductV4Response cdpResponse = new ClouderaManagerProductV4Response();
+        cdpResponse.setName("CDH");
+        cdpResponse.setVersion("7.2.17");
+        cm.setProducts(Collections.singletonList(cdpResponse));
+        clusterV4Response.setCm(cm);
+        stackV4Response.setCluster(clusterV4Response);
+        InstanceGroupV4Response gateway = new InstanceGroupV4Response();
+        gateway.setName(DatalakeInstanceGroupScalingDetails.GATEWAY.getName());
+        gateway.setMinimumNodeCount(2);
+        InstanceGroupV4Response storagehg = new InstanceGroupV4Response();
+        storagehg.setName(DatalakeInstanceGroupScalingDetails.STORAGE_SCALE_OUT.getName());
+        storagehg.setMinimumNodeCount(0);
+        storagehg.setNodeCount(3);
+        stackV4Response.setInstanceGroups(List.of(gateway, storagehg));
+        stackV4Response.setStatus(Status.AVAILABLE);
+        when(stackV4Endpoint.getByCrn(any(), any(), any())).thenReturn(stackV4Response);
+        DatalakeHorizontalScaleRequest scaleRequest = new DatalakeHorizontalScaleRequest();
+        scaleRequest.setGroup(DatalakeInstanceGroupScalingDetails.STORAGE_SCALE_OUT.getName());
+        scaleRequest.setDesiredCount(1);
+        SdxCluster sdxCluster = getSdxCluster();
+        assertThrows(BadRequestException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
+
+    }
+
+    @Test
+    void testDatalakeHorizontalScaleValidationPrimaryGatewayDown() {
+        SdxCluster sdxCluster = getSdxCluster();
+        DatalakeHorizontalScaleRequest scaleRequest = new DatalakeHorizontalScaleRequest();
+
+        scaleRequest.setDesiredCount(1);
+        scaleRequest.setGroup(DatalakeInstanceGroupScalingDetails.SOLR_SCALE_OUT.getName());
+
+        StackV4Response stackV4Response = new StackV4Response();
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        ClouderaManagerV4Response cm = new ClouderaManagerV4Response();
+        ClouderaManagerProductV4Response cdpResponse = new ClouderaManagerProductV4Response();
+        cdpResponse.setName("CDH");
+        cdpResponse.setVersion("7.2.17");
+        cm.setProducts(Collections.singletonList(cdpResponse));
+        clusterV4Response.setCm(cm);
+        stackV4Response.setCluster(clusterV4Response);
+        InstanceGroupV4Response core = new InstanceGroupV4Response();
+        core.setName(DatalakeInstanceGroupScalingDetails.CORE.getName());
+        core.setMinimumNodeCount(3);
+        InstanceGroupV4Response auxiliary = new InstanceGroupV4Response();
+        auxiliary.setName(DatalakeInstanceGroupScalingDetails.AUXILIARY.getName());
+        auxiliary.setMinimumNodeCount(1);
+        InstanceGroupV4Response gateway = new InstanceGroupV4Response();
+        gateway.setName(DatalakeInstanceGroupScalingDetails.GATEWAY.getName());
+        gateway.setMinimumNodeCount(2);
+        InstanceMetaDataV4Response instanceMetaDataV4Response = new InstanceMetaDataV4Response();
+        instanceMetaDataV4Response.setInstanceStatus(InstanceStatus.FAILED);
+        instanceMetaDataV4Response.setInstanceType(InstanceMetadataType.GATEWAY_PRIMARY);
+        gateway.setMetadata(Set.of(instanceMetaDataV4Response));
+        InstanceGroupV4Response solrhg = new InstanceGroupV4Response();
+        solrhg.setName(DatalakeInstanceGroupScalingDetails.SOLR_SCALE_OUT.getName());
+        solrhg.setMinimumNodeCount(0);
+        stackV4Response.setInstanceGroups(List.of(core, auxiliary, gateway, solrhg));
+        stackV4Response.setStatus(Status.AVAILABLE);
+
+        when(stackV4Endpoint.getByCrn(any(), any(), any())).thenReturn(stackV4Response);
+
+        DetailedEnvironmentResponse detailedEnvironmentResponse = getEnvironmentDetailedResponse();
+        when(environmentClientService.getByName(eq(sdxCluster.getEnvName()))).thenReturn(detailedEnvironmentResponse);
+        assertThrows(BadRequestException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
+    }
+
+    @Test
+    void testDatalakeHorizontalScaleInvalidTargetGroup() {
+        SdxCluster sdxCluster = getSdxCluster();
+        DatalakeHorizontalScaleRequest scaleRequest = new DatalakeHorizontalScaleRequest();
+        scaleRequest.setDesiredCount(1);
+        scaleRequest.setGroup("noNameGroup");
+        assertThrows(IllegalArgumentException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
+    }
+
+    @Test
+    void testDatalakeHorizontalScaleEnvironmentIsNotHealthy() {
+        SdxCluster sdxCluster = getSdxCluster();
+        DetailedEnvironmentResponse detailedEnvironmentResponse = getEnvironmentDetailedResponse();
+        detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.DATALAKE_CLUSTERS_DELETE_IN_PROGRESS);
+        when(environmentClientService.getByName(eq(sdxCluster.getEnvName()))).thenReturn(detailedEnvironmentResponse);
+        DatalakeHorizontalScaleRequest scaleRequest = new DatalakeHorizontalScaleRequest();
+        scaleRequest.setGroup(DatalakeInstanceGroupScalingDetails.SOLR_SCALE_OUT.getName());
+        scaleRequest.setDesiredCount(1);
         assertThrows(BadRequestException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
     }
 
@@ -144,20 +244,34 @@ public class SdxHorizontalScalingServiceTest {
         clusterV4Response.setCm(cm);
         stackV4Response.setCluster(clusterV4Response);
         InstanceGroupV4Response core = new InstanceGroupV4Response();
-        core.setName("core");
+        core.setName(DatalakeInstanceGroupScalingDetails.CORE.getName());
         core.setMinimumNodeCount(3);
         InstanceGroupV4Response auxiliary = new InstanceGroupV4Response();
-        auxiliary.setName("auxiliary");
+        auxiliary.setName(DatalakeInstanceGroupScalingDetails.AUXILIARY.getName());
         auxiliary.setMinimumNodeCount(1);
         InstanceGroupV4Response gateway = new InstanceGroupV4Response();
-        gateway.setName("gateway");
+        gateway.setName(DatalakeInstanceGroupScalingDetails.GATEWAY.getName());
         gateway.setMinimumNodeCount(2);
         InstanceGroupV4Response solrhg = new InstanceGroupV4Response();
-        solrhg.setName("solrhg");
+        solrhg.setName(DatalakeInstanceGroupScalingDetails.SOLR_SCALE_OUT.getName());
         solrhg.setMinimumNodeCount(0);
         stackV4Response.setInstanceGroups(List.of(core, auxiliary, gateway, solrhg));
         stackV4Response.setStatus(Status.AVAILABLE);
         return stackV4Response;
+    }
+
+    @Test
+    void testDatalakeHorizontalScaleValidationRAZ() {
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setRangerRazEnabled(false);
+        DatalakeHorizontalScaleRequest scaleRequest = new DatalakeHorizontalScaleRequest();
+        scaleRequest.setGroup(DatalakeInstanceGroupScalingDetails.RAZ_SCALE_OUT.getName());
+        scaleRequest.setDesiredCount(1);
+        DetailedEnvironmentResponse environmentDetailedResponse = getEnvironmentDetailedResponse();
+        when(environmentClientService.getByName(anyString())).thenReturn(environmentDetailedResponse);
+        StackV4Response stackV4Response = getStackV4Response();
+        when(stackV4Endpoint.getByCrn(any(), any(), any())).thenReturn(stackV4Response);
+        assertThrows(BadRequestException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
     }
 
     private DetailedEnvironmentResponse getEnvironmentDetailedResponse() {
@@ -177,6 +291,8 @@ public class SdxHorizontalScalingServiceTest {
         sdxCluster.setEnvCrn(ENVIRONMENT_CRN);
         sdxCluster.setEnvName("envir");
         sdxCluster.setClusterName("sdx-cluster-name");
+        sdxCluster.setClusterShape(ENTERPRISE);
+        sdxCluster.setStackId(1L);
         return sdxCluster;
     }
 }
