@@ -71,7 +71,7 @@ public class DatalakeDatabaseBackupWaitHandler extends ExceptionCatcherEventHand
                     SdxOperationStatus.FAILED, pollerStoppedException.getLocalizedMessage());
             String errorStage = sdxBackupRestoreService.createDatabaseBackupRestoreErrorStage(sdxId);
             response = new DatalakeDatabaseBackupFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Database backup timed out after " + durationInMinutes + " minutes" + errorStage));
+                    new PollerStoppedException("Database backup timed out after " + duration + " minutes" + errorStage));
         } catch (PollerException exception) {
             LOGGER.info("Database backup polling failed for cluster: {}", sdxId);
             sdxBackupRestoreService.updateDatabaseStatusEntry(event.getData().getOperationId(),
