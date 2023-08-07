@@ -139,7 +139,6 @@ import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
-import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
 import com.sequenceiq.sdx.api.model.SdxRefreshDatahubResponse;
@@ -412,22 +411,28 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 () -> stackV4Endpoint.detachRecipeInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(), userCrn));
     }
 
-    public Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxCustomClusterRequest sdxCustomClusterRequest) {
-        final Pair<SdxClusterRequest, ImageSettingsV4Request> convertedRequest = sdxCustomClusterRequest.convertToPair();
-
-        return createSdx(userCrn, name, convertedRequest.getLeft(), null, convertedRequest.getRight());
-    }
-
     public Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest,
             final StackV4Request internalStackV4Request) {
+        ImageSettingsV4Request imageSettingsV4Request = getImageSettingsV4Request(sdxClusterRequest, internalStackV4Request);
+        return createSdx(userCrn, name, sdxClusterRequest, internalStackV4Request, imageSettingsV4Request);
+    }
+
+    private ImageSettingsV4Request getImageSettingsV4Request(SdxClusterRequest sdxClusterRequest, StackV4Request internalStackV4Request) {
         ImageSettingsV4Request imageSettingsV4Request = null;
         if (internalStackV4Request != null && internalStackV4Request.getImage() != null) {
             imageSettingsV4Request = internalStackV4Request.getImage();
-        } else if (StringUtils.isNotBlank(sdxClusterRequest.getOs())) {
-            imageSettingsV4Request = new ImageSettingsV4Request();
-            imageSettingsV4Request.setOs(sdxClusterRequest.getOs());
+        } else if (sdxClusterRequest.getImageSettingsV4Request() != null) {
+            imageSettingsV4Request = sdxClusterRequest.getImageSettingsV4Request();
         }
-        return createSdx(userCrn, name, sdxClusterRequest, internalStackV4Request, imageSettingsV4Request);
+        if (StringUtils.isNotBlank(sdxClusterRequest.getOs())) {
+            if (imageSettingsV4Request == null) {
+                imageSettingsV4Request = new ImageSettingsV4Request();
+                imageSettingsV4Request.setOs(sdxClusterRequest.getOs());
+            } else if (!StringUtils.equalsIgnoreCase(imageSettingsV4Request.getOs(), sdxClusterRequest.getOs())) {
+                throw new BadRequestException("Differing os was set in request, only the image settings os should be set.");
+            }
+        }
+        return imageSettingsV4Request;
     }
 
     public void updateRangerRazEnabled(SdxCluster sdxCluster) {
@@ -456,7 +461,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), accountId);
         validateJavaVersion(sdxClusterRequest.getJavaVersion(), accountId);
         DetailedEnvironmentResponse environment = validateAndGetEnvironment(sdxClusterRequest.getEnvironment());
-        validateImageRequest(imageSettingsV4Request);
+        validateImageRequest(sdxClusterRequest, imageSettingsV4Request);
         ImageCatalogPlatform imageCatalogPlatform = platformStringTransformer
                 .getPlatformStringForImageCatalog(environment.getCloudPlatform(), isGovCloudEnvironment(environment));
         ImageV4Response imageV4Response = imageCatalogService.getImageResponseFromImageRequest(imageSettingsV4Request, imageCatalogPlatform);
@@ -1115,8 +1120,12 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
-    private void validateImageRequest(ImageSettingsV4Request imageSettingsV4Request) {
-        if (imageSettingsV4Request != null && StringUtils.isNoneBlank(imageSettingsV4Request.getId(), imageSettingsV4Request.getOs())) {
+    private void validateImageRequest(SdxClusterRequest sdxClusterRequest, ImageSettingsV4Request imageSettingsV4Request) {
+        boolean hasImageId = imageSettingsV4Request != null && StringUtils.isNotBlank(imageSettingsV4Request.getId());
+        if (hasImageId && StringUtils.isNotBlank(sdxClusterRequest.getRuntime())) {
+            throw new BadRequestException("Runtime version and image id can not be set simultaneously.");
+        }
+        if (hasImageId && StringUtils.isNotBlank(imageSettingsV4Request.getOs())) {
             throw new BadRequestException("Image request can not have both image id and os parameters set.");
         }
     }

@@ -7,7 +7,6 @@ import com.sequenceiq.sdx.api.model.ModelDescriptions;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponseTest;
 import com.sequenceiq.sdx.api.model.SdxClusterShapeTest;
-import com.sequenceiq.sdx.api.model.SdxCustomClusterRequestTest;
 import com.sequenceiq.sdx.api.model.diagnostics.docs.DiagnosticsOperationDescriptions;
 
 public class ApiFormatTest {
@@ -18,7 +17,6 @@ public class ApiFormatTest {
                 .modelPackage("com.sequenceiq.sdx.api.model")
                 .excludedClasses(
                         SdxClusterDetailResponseTest.class,
-                        SdxCustomClusterRequestTest.class,
                         SdxClusterDetailResponse.Builder.class,
                         ModelDescriptions.class,
                         DiagnosticsOperationDescriptions.class,

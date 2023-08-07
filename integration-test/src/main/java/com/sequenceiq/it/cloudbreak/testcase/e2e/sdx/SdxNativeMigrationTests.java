@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupNetworkRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.InstanceGroupAwsNetworkParameters;
@@ -94,7 +95,9 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
                 .withRuntimeVersion(runtimeVersion)
                 .withVariant(AWS)
                 .withEnableMultiAz(false);
-        sdxDto.getRequest().getStackV4Request().getNetwork().getAws().setSubnetId(subnet);
+        StackV4Request stackV4Request = sdxDto.getRequest().getStackV4Request();
+        stackV4Request.getNetwork().getAws().setSubnetId(subnet);
+        stackV4Request.setImage(null);
         sdxDto.when(sdxTestClient.createInternal(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()

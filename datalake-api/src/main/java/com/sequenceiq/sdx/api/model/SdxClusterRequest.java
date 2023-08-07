@@ -1,7 +1,5 @@
 package com.sequenceiq.sdx.api.model;
 
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -16,11 +14,12 @@ public class SdxClusterRequest extends SdxClusterRequestBase {
     @ApiModelProperty(ModelDescriptions.RUNTIME_VERSION)
     private String runtime;
 
+    /**
+     * @deprecated use imageSettingsV4Request's os field instead
+     */
     @ApiModelProperty(ModelDescriptions.OS)
+    @Deprecated
     private String os;
-
-    @ApiModelProperty(ModelDescriptions.RECIPES)
-    private Set<SdxRecipe> recipes;
 
     public String getRuntime() {
         return runtime;
@@ -30,20 +29,14 @@ public class SdxClusterRequest extends SdxClusterRequestBase {
         this.runtime = runtime;
     }
 
+    @Deprecated
     public String getOs() {
         return os;
     }
 
+    @Deprecated
     public void setOs(String os) {
         this.os = os;
-    }
-
-    public Set<SdxRecipe> getRecipes() {
-        return recipes;
-    }
-
-    public void setRecipes(Set<SdxRecipe> recipes) {
-        this.recipes = recipes;
     }
 
     @Override
@@ -51,7 +44,6 @@ public class SdxClusterRequest extends SdxClusterRequestBase {
         return "SdxClusterRequest{" +
                 "runtime='" + runtime + '\'' +
                 ", os='" + os + '\'' +
-                ", recipes=" + recipes +
                 "} " + super.toString();
     }
 }

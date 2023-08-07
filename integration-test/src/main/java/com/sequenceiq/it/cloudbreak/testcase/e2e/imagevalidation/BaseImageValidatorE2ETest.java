@@ -75,7 +75,6 @@ public class BaseImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
                 .withEmptyNetwork()
                 .withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
                 .given(sdxInternalKey, SdxInternalTestDto.class)
-                    .withRuntimeVersion(null)
                     .withCloudStorage(getCloudStorageRequest(testContext))
                     .withStackRequest(key(cluster), key(stack))
                     .withoutDatabase()

@@ -112,7 +112,6 @@ public class DistroXMarketplaceImageTests extends PreconditionSdxE2ETest {
                     .withCloudStorage(getCloudStorageRequest(testContext))
                     .withStackRequest(key(cluster), key(stack))
                     .withTelemetry(telemetry)
-                    .withRuntimeVersion(RUNTIME_VERSION)
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()

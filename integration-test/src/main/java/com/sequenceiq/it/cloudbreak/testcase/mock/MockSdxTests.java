@@ -179,7 +179,6 @@ public class MockSdxTests extends AbstractMockTest {
                 .withCluster(cluster)
                 .withImageSettings(imageSettings)
                 .given(sdxInternal, SdxInternalTestDto.class)
-                .withRuntimeVersion(cdhVersion)
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)

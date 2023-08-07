@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,12 +50,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackDetailsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
@@ -99,20 +95,11 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
-import com.sequenceiq.sdx.api.model.SdxAwsRequest;
-import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
-import com.sequenceiq.sdx.api.model.SdxClusterRequestBase;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
-import com.sequenceiq.sdx.api.model.SdxClusterShape;
-import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
-import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("SDX service tests")
 class SdxServiceTest {
-
-    private static final Map<String, String> TAGS = Collections.singletonMap("mytag", "tagecske");
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
 
@@ -125,8 +112,6 @@ class SdxServiceTest {
     private static final String SDX_CRN = "crn";
 
     private static final String CLUSTER_NAME = "test-sdx-cluster";
-
-    private static final String OS = "centos7";
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
@@ -478,28 +463,6 @@ class SdxServiceTest {
         assertEquals(expected, result);
     }
 
-    private void setSpot(SdxClusterRequestBase sdxClusterRequest) {
-        SdxAwsRequest aws = new SdxAwsRequest();
-        SdxAwsSpotParameters spot = new SdxAwsSpotParameters();
-        spot.setPercentage(100);
-        spot.setMaxPrice(0.9);
-        aws.setSpot(spot);
-        sdxClusterRequest.setAws(aws);
-    }
-
-    private ImageV4Response getImageResponse() {
-        Map<String, Map<String, String>> imageSetsByProvider = new HashMap<>();
-        imageSetsByProvider.put("aws", null);
-        BaseStackDetailsV4Response stackDetails = new BaseStackDetailsV4Response();
-        stackDetails.setVersion("7.2.7");
-
-        ImageV4Response imageV4Response = new ImageV4Response();
-        imageV4Response.setOs(OS);
-        imageV4Response.setImageSetsByProvider(imageSetsByProvider);
-        imageV4Response.setStackDetails(stackDetails);
-        return imageV4Response;
-    }
-
     private void mockEnvironmentCall(SdxClusterResizeRequest sdxClusterResizeRequest, CloudPlatform cloudPlatform) {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName(sdxClusterResizeRequest.getEnvironment());
@@ -526,27 +489,6 @@ class SdxServiceTest {
         sdxCluster.setClusterName("sdx-cluster-name");
         sdxCluster.setSdxDatabase(new SdxDatabase());
         return sdxCluster;
-    }
-
-    private SdxInstanceGroupRequest withInstanceGroup(String name, String instanceType) {
-        SdxInstanceGroupRequest masterInstanceGroup = new SdxInstanceGroupRequest();
-        masterInstanceGroup.setName(name);
-        masterInstanceGroup.setInstanceType(instanceType);
-        return masterInstanceGroup;
-    }
-
-    private SdxCustomClusterRequest createSdxCustomClusterRequest(SdxClusterShape shape, String catalog, String imageId) {
-        ImageSettingsV4Request imageSettingsV4Request = new ImageSettingsV4Request();
-        imageSettingsV4Request.setCatalog(catalog);
-        imageSettingsV4Request.setId(imageId);
-
-        SdxCustomClusterRequest sdxClusterRequest = new SdxCustomClusterRequest();
-        sdxClusterRequest.setClusterShape(shape);
-        sdxClusterRequest.addTags(TAGS);
-        sdxClusterRequest.setEnvironment("envir");
-        sdxClusterRequest.setImageSettingsV4Request(imageSettingsV4Request);
-        sdxClusterRequest.setExternalDatabase(new SdxDatabaseRequest());
-        return sdxClusterRequest;
     }
 
     @Test

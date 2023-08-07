@@ -274,10 +274,12 @@ public interface SdxEndpoint {
     @ApiOperation(value = "Set the rangerRazEnabled flag of the cluster if Raz is installed manually", nickname = "enableRangerRazByName")
     void enableRangerRazByName(@PathParam("name") String name);
 
+    @Deprecated
     @POST
     @Path("{name}/custom_image")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "create custom SDX cluster", produces = MediaType.APPLICATION_JSON, nickname = "createCustomSdx")
+    @ApiOperation(value = "[deprecated] please use createSdx endpoint instead", produces = MediaType.APPLICATION_JSON,
+            nickname = "createCustomSdx")
     SdxClusterResponse create(@PathParam("name") String name, @Valid SdxCustomClusterRequest createSdxClusterRequest);
 
     @POST

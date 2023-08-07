@@ -105,9 +105,7 @@ import com.sequenceiq.sdx.api.model.SdxAwsRequest;
 import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
-import com.sequenceiq.sdx.api.model.SdxClusterRequestBase;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
-import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
@@ -780,19 +778,45 @@ class SdxServiceCreateSdxTest {
 
     @Test
     void testSdxCreateWithBothImageIdAndOsSet() {
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.17", LIGHT_DUTY);
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(LIGHT_DUTY, "id", "catalog");
         withCloudStorage(sdxClusterRequest);
         StackV4Request stackV4Request = new StackV4Request();
-        ImageSettingsV4Request imageSettingsV4Request = new ImageSettingsV4Request();
-        imageSettingsV4Request.setId("id");
-        imageSettingsV4Request.setOs("os");
-        stackV4Request.setImage(imageSettingsV4Request);
+        sdxClusterRequest.getImageSettingsV4Request().setOs("os");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request)));
         assertEquals("Image request can not have both image id and os parameters set.", badRequestException.getMessage());
+    }
+
+    @Test
+    void testSdxCreateWithRuntimeVersionAndImageId() {
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(LIGHT_DUTY, "id", "catalog");
+        sdxClusterRequest.setRuntime("7.2.17");
+        withCloudStorage(sdxClusterRequest);
+        StackV4Request stackV4Request = new StackV4Request();
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
+        mockEnvironmentCall(sdxClusterRequest, AWS, null);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request)));
+        assertEquals("Runtime version and image id can not be set simultaneously.", badRequestException.getMessage());
+    }
+
+    @Test
+    void testSdxCreateWithDifferingOsValues() {
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.17", LIGHT_DUTY);
+        sdxClusterRequest.setOs("os1");
+        withCloudStorage(sdxClusterRequest);
+        StackV4Request stackV4Request = new StackV4Request();
+        ImageSettingsV4Request imageSettingsV4Request = new ImageSettingsV4Request();
+        imageSettingsV4Request.setOs("os2");
+        stackV4Request.setImage(imageSettingsV4Request);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request)));
+        assertEquals("Differing os was set in request, only the image settings os should be set.", badRequestException.getMessage());
     }
 
     @Test
@@ -853,7 +877,7 @@ class SdxServiceCreateSdxTest {
         mockTransactionServiceRequired();
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.7/aws/light_duty.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
-        SdxCustomClusterRequest sdxClusterRequest = createSdxCustomClusterRequest(LIGHT_DUTY, "cdp-default", "imageId_1");
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(LIGHT_DUTY, "cdp-default", "imageId_1");
         setSpot(sdxClusterRequest);
         withCloudStorage(sdxClusterRequest);
         when(imageCatalogService.getImageResponseFromImageRequest(eq(sdxClusterRequest.getImageSettingsV4Request()), any())).thenReturn(imageResponse);
@@ -866,7 +890,7 @@ class SdxServiceCreateSdxTest {
         });
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest));
+                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
 
         SdxCluster createdSdxCluster = result.getLeft();
         StackV4Request stackV4Request = JsonUtil.readValue(createdSdxCluster.getStackRequest(), StackV4Request.class);
@@ -1121,7 +1145,7 @@ class SdxServiceCreateSdxTest {
         assertEquals("Java version 11 is not supported.", badRequestException.getMessage());
     }
 
-    private void setSpot(SdxClusterRequestBase sdxClusterRequest) {
+    private void setSpot(SdxClusterRequest sdxClusterRequest) {
         SdxAwsRequest aws = new SdxAwsRequest();
         SdxAwsSpotParameters spot = new SdxAwsSpotParameters();
         spot.setPercentage(100);
@@ -1143,7 +1167,7 @@ class SdxServiceCreateSdxTest {
         return imageV4Response;
     }
 
-    private DetailedEnvironmentResponse mockEnvironmentCall(SdxClusterRequestBase sdxClusterRequest, CloudPlatform cloudPlatform, Tunnel tunnel) {
+    private DetailedEnvironmentResponse mockEnvironmentCall(SdxClusterRequest sdxClusterRequest, CloudPlatform cloudPlatform, Tunnel tunnel) {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
         detailedEnvironmentResponse.setCloudPlatform(cloudPlatform.name());
@@ -1173,8 +1197,24 @@ class SdxServiceCreateSdxTest {
     }
 
     private SdxClusterRequest createSdxClusterRequest(String runtime, SdxClusterShape shape) {
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        SdxClusterRequest sdxClusterRequest = getSdxClusterRequest(shape);
         sdxClusterRequest.setRuntime(runtime);
+        return sdxClusterRequest;
+    }
+
+    private SdxClusterRequest createSdxClusterRequest(SdxClusterShape shape, String catalog, String imageId) {
+        SdxClusterRequest sdxClusterRequest = getSdxClusterRequest(shape);
+
+        ImageSettingsV4Request imageSettingsV4Request = new ImageSettingsV4Request();
+        imageSettingsV4Request.setCatalog(catalog);
+        imageSettingsV4Request.setId(imageId);
+
+        sdxClusterRequest.setImageSettingsV4Request(imageSettingsV4Request);
+        return sdxClusterRequest;
+    }
+
+    private SdxClusterRequest getSdxClusterRequest(SdxClusterShape shape) {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setClusterShape(shape);
         sdxClusterRequest.addTags(TAGS);
         sdxClusterRequest.setEnvironment("envir");
@@ -1189,7 +1229,7 @@ class SdxServiceCreateSdxTest {
         sdxClusterRequest.setRecipes(Set.of(recipe));
     }
 
-    private void withCloudStorage(SdxClusterRequestBase sdxClusterRequest) {
+    private void withCloudStorage(SdxClusterRequest sdxClusterRequest) {
         SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
         cloudStorage.setFileSystemType(FileSystemType.S3);
         cloudStorage.setBaseLocation("s3a://some/dir/");
@@ -1197,7 +1237,7 @@ class SdxServiceCreateSdxTest {
         sdxClusterRequest.setCloudStorage(cloudStorage);
     }
 
-    private void withCustomInstanceGroups(SdxClusterRequestBase sdxClusterRequest) {
+    private void withCustomInstanceGroups(SdxClusterRequest sdxClusterRequest) {
         sdxClusterRequest.setCustomInstanceGroups(List.of(withInstanceGroup("master", "verylarge"),
                 withInstanceGroup("idbroker", "notverylarge")));
     }
@@ -1207,20 +1247,6 @@ class SdxServiceCreateSdxTest {
         masterInstanceGroup.setName(name);
         masterInstanceGroup.setInstanceType(instanceType);
         return masterInstanceGroup;
-    }
-
-    private SdxCustomClusterRequest createSdxCustomClusterRequest(SdxClusterShape shape, String catalog, String imageId) {
-        ImageSettingsV4Request imageSettingsV4Request = new ImageSettingsV4Request();
-        imageSettingsV4Request.setCatalog(catalog);
-        imageSettingsV4Request.setId(imageId);
-
-        SdxCustomClusterRequest sdxClusterRequest = new SdxCustomClusterRequest();
-        sdxClusterRequest.setClusterShape(shape);
-        sdxClusterRequest.addTags(TAGS);
-        sdxClusterRequest.setEnvironment("envir");
-        sdxClusterRequest.setImageSettingsV4Request(imageSettingsV4Request);
-        sdxClusterRequest.setExternalDatabase(new SdxDatabaseRequest());
-        return sdxClusterRequest;
     }
 
 }

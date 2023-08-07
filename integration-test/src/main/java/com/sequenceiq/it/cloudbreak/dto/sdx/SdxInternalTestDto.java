@@ -114,7 +114,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 .withDefaultSDXSettings()
                 .withClusterShape(getCloudProvider().getInternalClusterShape())
                 .withTags(getCloudProvider().getTags())
-                .withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion())
                 .withEnableMultiAz(getCloudProvider().isMultiAZ());
         EnvironmentTestDto environmentTestDto = getTestContext().get(EnvironmentTestDto.class);
 
@@ -246,9 +245,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         if (gatewayPort.isPresent()) {
             stack.withGatewayPort(gatewayPort.get());
         }
-        SdxInternalTestDto sdxInternalTestDto = withStackRequest(stack.getRequest());
-        sdxInternalTestDto.withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion());
-        return sdxInternalTestDto;
+        return withStackRequest(stack.getRequest());
     }
 
     public SdxInternalTestDto withTelemetry(String telemetry) {
@@ -281,9 +278,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 .withInstanceGroups(MASTER.getName(), IDBROKER.getName())
                 .withStackAuthentication(getAuthenticationFromTemplate(getTestContext().given(StackAuthenticationTestDto.class), templateJson))
                 .withCluster(cluster);
-        SdxInternalTestDto sdxInternalTestDto = withStackRequest(stack.getRequest());
-        sdxInternalTestDto.withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion());
-        return sdxInternalTestDto;
+        return withStackRequest(stack.getRequest());
     }
 
     private String getBlueprintName() {

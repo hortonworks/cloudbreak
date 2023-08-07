@@ -157,7 +157,10 @@ public class SdxController implements SdxEndpoint {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Pair<SdxCluster, FlowIdentifier> result = sdxService.createSdx(userCrn, name, createSdxClusterRequest, null);
         SdxCluster sdxCluster = result.getLeft();
-        metricService.incrementMetricCounter(MetricType.EXTERNAL_SDX_REQUESTED, sdxCluster);
+        MetricType metricType = createSdxClusterRequest.getImageSettingsV4Request() != null
+                ? MetricType.CUSTOM_SDX_REQUESTED
+                : MetricType.EXTERNAL_SDX_REQUESTED;
+        metricService.incrementMetricCounter(metricType, sdxCluster);
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         sdxClusterResponse.setName(sdxCluster.getClusterName());
         sdxClusterResponse.setFlowIdentifier(result.getRight());
@@ -166,15 +169,10 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
-    public SdxClusterResponse create(String name, @Valid SdxCustomClusterRequest createSdxClusterRequest) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        Pair<SdxCluster, FlowIdentifier> result = sdxService.createSdx(userCrn, name, createSdxClusterRequest);
-        SdxCluster sdxCluster = result.getLeft();
-        metricService.incrementMetricCounter(MetricType.CUSTOM_SDX_REQUESTED, sdxCluster);
-        SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
-        sdxClusterResponse.setName(sdxCluster.getClusterName());
-        sdxClusterResponse.setFlowIdentifier(result.getRight());
-        return sdxClusterResponse;
+    public SdxClusterResponse create(String name, @Valid SdxCustomClusterRequest sdxCustomClusterRequest) {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxCustomClusterRequest.copyTo(sdxClusterRequest);
+        return create(name, sdxClusterRequest);
     }
 
     @Override

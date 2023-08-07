@@ -3,12 +3,14 @@ package com.sequenceiq.sdx.api.model;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 
 import io.swagger.annotations.ApiModel;
@@ -55,6 +57,12 @@ public class SdxClusterRequestBase implements TaggableRequest {
 
     @ApiModelProperty(ModelDescriptions.JAVA_VERSION)
     private Integer javaVersion;
+
+    @ApiModelProperty(ModelDescriptions.RECIPES)
+    private Set<SdxRecipe> recipes;
+
+    @ApiModelProperty(ModelDescriptions.IMAGE_SETTINGS)
+    private ImageSettingsV4Request imageSettingsV4Request;
 
     public String getEnvironment() {
         return environment;
@@ -160,6 +168,22 @@ public class SdxClusterRequestBase implements TaggableRequest {
         this.javaVersion = javaVersion;
     }
 
+    public Set<SdxRecipe> getRecipes() {
+        return recipes;
+    }
+
+    public void setRecipes(Set<SdxRecipe> recipes) {
+        this.recipes = recipes;
+    }
+
+    public ImageSettingsV4Request getImageSettingsV4Request() {
+        return imageSettingsV4Request;
+    }
+
+    public void setImageSettingsV4Request(ImageSettingsV4Request imageSettingsV4Request) {
+        this.imageSettingsV4Request = imageSettingsV4Request;
+    }
+
     public void copyTo(SdxClusterRequestBase toInstance) {
         toInstance.setEnvironment(environment);
         toInstance.setClusterShape(clusterShape);
@@ -171,6 +195,8 @@ public class SdxClusterRequestBase implements TaggableRequest {
         toInstance.setEnableMultiAz(enableMultiAz);
         toInstance.setCustomInstanceGroups(customInstanceGroups);
         toInstance.setJavaVersion(javaVersion);
+        toInstance.setRecipes(recipes);
+        toInstance.setImageSettingsV4Request(imageSettingsV4Request);
     }
 
     @Override
@@ -183,6 +209,8 @@ public class SdxClusterRequestBase implements TaggableRequest {
                 ", enableRangerRaz=" + enableRangerRaz +
                 ", enableMultiAz=" + enableMultiAz +
                 ", javaVersion=" + javaVersion +
+                ", recipes=" + recipes +
+                ", imageSettingsV4Request=" + imageSettingsV4Request +
                 '}';
     }
 }
