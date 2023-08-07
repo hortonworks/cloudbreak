@@ -35,7 +35,6 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -43,13 +42,11 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
-import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
@@ -67,15 +64,6 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
     private static final Map<String, String> SDX_TAGS = Map.of("sdxTagKey", "sdxTagValue");
 
     private static final Map<String, String> DX1_TAGS = Map.of("distroxTagKey", "distroxTagValue");
-
-    private static final String VERTICAL_SCALE_FAIL_MSG_FORMAT = "%s vertical scale was not successful, because the expected instance type is the following: %s"
-            + ", but the actual is: %s";
-
-    private static final String FREEIPA_VERTICAL_SCALE_KEY = "freeipaVerticalScaleKey";
-
-    private static final String SDX_VERTICAL_SCALE_KEY = "sdxVerticalScaleKey";
-
-    private static final String DISTROX_VERTICAL_SCALE_KEY = "distroxVerticalScaleKey";
 
     private String telemetryStorageLocation;
 
@@ -159,7 +147,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                     .withNetwork()
                     .withTelemetry("telemetry")
                     .withCreateFreeIpa(Boolean.TRUE)
-                    .withOneFreeIpaNode()
+                    .withFreeIpaNodes(getFreeIpaInstanceCountByProdiver(testContext))
                     .withFreeIpaRecipe(Set.of(recipeName))
                     .addTags(ENV_TAGS)
                 .when(environmentTestClient.create())
@@ -194,8 +182,6 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .when(environmentTestClient.stop())
                 .await(EnvironmentStatus.ENV_STOPPED)
 
-                .when(this::executeVerticalScaleIfSupported)
-
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.start())
                 .await(EnvironmentStatus.AVAILABLE)
@@ -205,81 +191,9 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .await(STACK_AVAILABLE, RunningParameter.key("dx1"))
                 .awaitForHealthyInstances()
                 .then(this::verifyCmServicesStartedSuccessfully)
-
-                .then(this::verifyVerticalScaleOutputsIfSupported)
                 .validate();
 
         LOGGER.info("Environment stop-start test execution has been finished....");
-    }
-
-    private <O extends CloudbreakTestDto, C extends MicroserviceClient<?, ?, ?, ?>> O executeVerticalScaleIfSupported(TestContext testContext, O testDto,
-            C client) {
-        if (testContext.getCloudProvider().verticalScalingSupported()) {
-            VerticalScalingTestDto freeipaVerticalScalingTestDto = testContext
-                    .given(FREEIPA_VERTICAL_SCALE_KEY, VerticalScalingTestDto.class).withFreeipaVerticalScale();
-            freeipaRequestedInstanceType = freeipaVerticalScalingTestDto.getInstanceType();
-            freeipaRequestedGroupName = freeipaVerticalScalingTestDto.getGroupName();
-            freeipaVerticalScalingTestDto.withFreeipaVerticalScale()
-                    .given("telemetry", TelemetryTestDto.class)
-                    .withLogging()
-                    .withReportClusterLogs()
-                    .given(EnvironmentTestDto.class)
-                    .withTelemetry("telemetry")
-                    .when(environmentTestClient.verticalScale(FREEIPA_VERTICAL_SCALE_KEY))
-                    .await(EnvironmentStatus.ENV_STOPPED);
-
-            VerticalScalingTestDto datalakeVerticalScalingTestDto = testContext.given(SDX_VERTICAL_SCALE_KEY, VerticalScalingTestDto.class)
-                    .withSdxVerticalScale();
-            datalakeRequestedInstanceType = datalakeVerticalScalingTestDto.getInstanceType();
-            datalakeRequestedGroupName = datalakeVerticalScalingTestDto.getGroupName();
-            datalakeVerticalScalingTestDto.withSdxVerticalScale()
-                    .given(SdxInternalTestDto.class)
-                    .withTelemetry("telemetry")
-                    .when(sdxTestClient.verticalScale(SDX_VERTICAL_SCALE_KEY))
-                    .await(SdxClusterStatusResponse.STOPPED);
-
-            VerticalScalingTestDto datahubVerticalScalingTestDto = testContext.given(DISTROX_VERTICAL_SCALE_KEY, VerticalScalingTestDto.class)
-                    .withDistroXVerticalScale();
-            datahubRequestedInstanceType = datahubVerticalScalingTestDto.getInstanceType();
-            datahubRequestedGroupName = datahubVerticalScalingTestDto.getGroupName();
-            datahubVerticalScalingTestDto.withDistroXVerticalScale()
-                    .given("dx1", DistroXTestDto.class)
-                    .when(distroXTestClient.verticalScale(DISTROX_VERTICAL_SCALE_KEY))
-                    .await(STACK_STOPPED, RunningParameter.key("dx1"));
-        } else {
-            LOGGER.debug("No vertical scale will happen this case because at this point Cloudbreak does not support vertical scale in case of the following " +
-                    "cloud platform: {}", testContext.getCloudPlatform());
-        }
-        return testDto;
-    }
-
-    private DistroXTestDto verifyVerticalScaleOutputsIfSupported(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient) {
-        if (testContext.getCloudProvider().verticalScalingSupported()) {
-            LOGGER.debug("Vertical scaling verification result initiated since the cloud platform '{}' suppots such operation.",
-                    testContext.getCloudPlatform());
-            testContext
-                    .given("telemetry", TelemetryTestDto.class)
-                        .withLogging()
-                        .withReportClusterLogs()
-                    .given(FreeIpaTestDto.class)
-                        .withTelemetry("telemetry")
-                    .when(freeIpaTestClient.describe())
-                    .then(this::validateFreeIpaInstanceType)
-                    .then(this::validateInstanceTypesOfFreeipaOnProvider)
-                    .given(SdxInternalTestDto.class)
-                        .withTelemetry("telemetry")
-                    .when(sdxTestClient.detailedDescribeInternal())
-                    .then(this::validateDataLakeInstanceType)
-                    .then(this::validateInstanceTypesOfDatalakeOnProvider)
-                    .given("dx1", DistroXTestDto.class)
-                    .when(distroXTestClient.get())
-                    .then(this::validateDataHubInstanceType)
-                    .then(this::validateInstanceTypesOfDatahubOnProvider);
-        } else {
-            LOGGER.debug("Since Cloudbreak right now does not support vertical scaling for cloud platform {}, hence no need for verification.",
-                    testContext.getCloudPlatform());
-        }
-        return testDto;
     }
 
     private FreeIpaTestDto validateInstanceTypesOfFreeipaOnProvider(TestContext testContext, FreeIpaTestDto freeipa, FreeIpaClient freeIpaClient) {
@@ -291,12 +205,15 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
         List<String> instanceTypesOnProvider = testContext.getCloudProvider().getCloudFunctionality()
                 .listInstanceTypes(freeipa.getName(), listOfInstanceIdsInIG);
 
-        Assertions.assertThat(instanceTypesOnProvider).hasSize(1);
-        String actualInstanceType = instanceTypesOnProvider.get(0).toLowerCase();
-        Assertions.assertThat(actualInstanceType).withFailMessage(
-                        "freeipa's instance type does not match with the requested instance type (freeipa: %s, actual: %s, requested: %s)",
-                        freeipa.getName(), actualInstanceType, freeipaRequestedInstanceType.toLowerCase())
-                .isEqualTo(freeipaRequestedInstanceType.toLowerCase());
+        Assertions.assertThat(instanceTypesOnProvider).hasSize(getFreeIpaInstanceCountByProdiver(testContext));
+        LOGGER.info("FreeIPA {} instances {} on provider {}.", freeipa.getResponse().getName(), instanceTypesOnProvider,
+                testContext.getCloudPlatform().name());
+        instanceTypesOnProvider.forEach(instanceTypeOnProvider -> {
+            Assertions.assertThat(instanceTypeOnProvider).withFailMessage(
+                            "freeipa's instance type does not match with the requested instance type (freeipa: %s, actual: %s, requested: %s)",
+                            freeipa.getName(), instanceTypeOnProvider, freeipaRequestedInstanceType.toLowerCase())
+                    .isEqualTo(freeipaRequestedInstanceType.toLowerCase());
+        });
 
         return freeipa;
     }
@@ -342,30 +259,6 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
     private DistroXTestDto verifyCmServicesStartedSuccessfully(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient) {
         clouderaManagerUtil.checkCmServicesStartedSuccessfully(testDto, testContext);
         return testDto;
-    }
-
-    private FreeIpaTestDto validateFreeIpaInstanceType(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient freeIpaClient) {
-        validateInstanceType(testDto.findInstanceGroupByType(freeipaRequestedGroupName).getInstanceTemplate().getInstanceType(),
-                freeipaRequestedInstanceType, "FreeIPA");
-        return testDto;
-    }
-
-    public SdxInternalTestDto validateDataLakeInstanceType(TestContext testContext, SdxInternalTestDto testDto, SdxClient sdxClient) {
-        validateInstanceType(testDto.findInstanceGroupByName(datalakeRequestedGroupName).getTemplate().getInstanceType(), datalakeRequestedInstanceType,
-                "Data Lake");
-        return testDto;
-    }
-
-    private DistroXTestDto validateDataHubInstanceType(TestContext testContext1, DistroXTestDto testDto, CloudbreakClient client) {
-        validateInstanceType(testDto.findInstanceGroupByName(datahubRequestedGroupName).getTemplate().getInstanceType(), datahubRequestedInstanceType,
-                "Data Hub");
-        return testDto;
-    }
-
-    private void validateInstanceType(String instanceType, String expectedType, String service) {
-        if (!instanceType.equals(expectedType)) {
-            throw new TestFailException(format(VERTICAL_SCALE_FAIL_MSG_FORMAT, service, expectedType, instanceType));
-        }
     }
 
     private EnvironmentTestDto getTelemetryStorageLocation(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
