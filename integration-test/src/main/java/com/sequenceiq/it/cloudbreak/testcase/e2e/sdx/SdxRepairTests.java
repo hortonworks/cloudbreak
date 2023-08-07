@@ -241,6 +241,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .then((tc, testDto, client) -> {
                     List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, gatewayHostGroupName);
                     instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, idBrokerHostGroupName));
+                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instancesToDelete));
                     getCloudFunctionality(tc).deleteInstances(testDto.getName(), instancesToDelete);
                     return testDto;
                 })
@@ -252,6 +253,13 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                         key(sdx).withWaitForFlow(Boolean.FALSE).withIgnoredStatues(Set.of(SdxClusterStatusResponse.CLUSTER_UNREACHABLE)))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> {
+                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, gatewayHostGroupName);
+                    instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, idBrokerHostGroupName));
+                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instanceIds));
+                    return testDto;
+                })
+                .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
                 .validate();
     }
 
