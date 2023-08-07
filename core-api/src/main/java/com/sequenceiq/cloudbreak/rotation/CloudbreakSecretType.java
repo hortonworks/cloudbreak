@@ -13,11 +13,14 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.REDBEA
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.SALTBOOT_CONFIG;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.USER_DATA;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
+import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.CM_SERVICE_SHARED_DB;
+import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.DEMO_MULTI_SECRET;
+import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.FREEIPA_CA_CERT;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.INTERNAL;
-import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.MULTI_SECRET;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_UPDATE;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public enum CloudbreakSecretType implements SecretType {
@@ -30,24 +33,42 @@ public enum CloudbreakSecretType implements SecretType {
     IDBROKER_CERT(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE_ROLE_RESTART, CUSTOM_JOB)),
     CLUSTER_CM_SERVICES_DB_PASSWORD(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE)),
     SALT_BOOT_SECRETS(List.of(VAULT, CUSTOM_JOB, SALTBOOT_CONFIG, USER_DATA)),
-    DATAHUB_CM_SERVICE_SHARED_DB(List.of(SALT_PILLAR, CM_SERVICE), Set.of(MULTI_SECRET)),
-    DATAHUB_DEMO_SECRET(List.of(CUSTOM_JOB), Set.of(SKIP_SALT_UPDATE, MULTI_SECRET)),
+    DATAHUB_CM_SERVICE_SHARED_DB(List.of(SALT_PILLAR, CM_SERVICE), CM_SERVICE_SHARED_DB),
+    DATAHUB_DEMO_SECRET(List.of(CUSTOM_JOB), DEMO_MULTI_SECRET, Set.of(SKIP_SALT_UPDATE)),
     DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD(List.of(SALT_PILLAR), Set.of(INTERNAL)),
     INTERNAL_DATALAKE_CM_SERVICE_SHARED_DB(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE), Set.of(INTERNAL)),
-    INTERNAL_DATALAKE_DEMO_SECRET(List.of(CUSTOM_JOB), Set.of(SKIP_SALT_UPDATE, INTERNAL));
+    INTERNAL_DATALAKE_DEMO_SECRET(List.of(CUSTOM_JOB), Set.of(SKIP_SALT_UPDATE, INTERNAL)),
+    INTERNAL_DATALAKE_CM_INTERMEDIATE_CA_CERT(List.of(CUSTOM_JOB), Set.of(INTERNAL)),
+    DATAHUB_CM_INTERMEDIATE_CA_CERT(List.of(CUSTOM_JOB), FREEIPA_CA_CERT);
 
     private final List<SecretRotationStep> steps;
 
-    private final Set<SecretTypeFlag> flags;
+    private final Optional<MultiSecretType> multiSecretType;
 
-    CloudbreakSecretType(List<SecretRotationStep> steps, Set<SecretTypeFlag> flags) {
-        this.steps = steps;
-        this.flags = flags;
-    }
+    private final Set<SecretTypeFlag> flags;
 
     CloudbreakSecretType(List<SecretRotationStep> steps) {
         this.steps = steps;
+        this.multiSecretType = Optional.empty();
         this.flags = Set.of();
+    }
+
+    CloudbreakSecretType(List<SecretRotationStep> steps, MultiSecretType multiSecretType) {
+        this.steps = steps;
+        this.multiSecretType = Optional.ofNullable(multiSecretType);
+        this.flags = Set.of();
+    }
+
+    CloudbreakSecretType(List<SecretRotationStep> steps, MultiSecretType multiSecretType, Set<SecretTypeFlag> flags) {
+        this.steps = steps;
+        this.multiSecretType = Optional.ofNullable(multiSecretType);
+        this.flags = flags;
+    }
+
+    CloudbreakSecretType(List<SecretRotationStep> steps, Set<SecretTypeFlag> flags) {
+        this.steps = steps;
+        this.multiSecretType = Optional.empty();
+        this.flags = flags;
     }
 
     @Override
@@ -58,6 +79,11 @@ public enum CloudbreakSecretType implements SecretType {
     @Override
     public Set<SecretTypeFlag> getFlags() {
         return flags;
+    }
+
+    @Override
+    public Optional<MultiSecretType> getMultiSecretType() {
+        return multiSecretType;
     }
 
     @Override

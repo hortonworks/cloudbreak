@@ -10,7 +10,9 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.InterServiceMultiClusterRotationService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1RotationEndpoint;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXChildResourceMarkingRequest;
 import com.sequenceiq.sdx.api.endpoint.SdxRotationEndpoint;
+import com.sequenceiq.sdx.api.model.SdxChildResourceMarkingRequest;
 
 @Service
 public class FreeipaInterServiceMultiRotationService implements InterServiceMultiClusterRotationService {
@@ -29,14 +31,14 @@ public class FreeipaInterServiceMultiRotationService implements InterServiceMult
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Boolean distroxRotationOngoing = false;
         Boolean sdxRotationOngoing = false;
-        if (multiSecretType.childSecretTypesByDescriptor().containsKey(CrnResourceDescriptor.DATAHUB)) {
+        if (multiSecretType.getChildrenCrnDescriptors().contains(CrnResourceDescriptor.DATAHUB)) {
             distroxRotationOngoing = ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> distroXV1RotationEndpoint.checkOngoingChildrenMultiSecretRotations(parentResourceCrn, multiSecretType.value(), userCrn));
+                    () -> distroXV1RotationEndpoint.checkOngoingChildrenMultiSecretRotationsByParent(parentResourceCrn, multiSecretType.value(), userCrn));
         }
-        if (multiSecretType.childSecretTypesByDescriptor().containsKey(CrnResourceDescriptor.DATALAKE)) {
+        if (multiSecretType.getChildrenCrnDescriptors().contains(CrnResourceDescriptor.DATALAKE)) {
             sdxRotationOngoing = ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> sdxRotationEndpoint.checkOngoingMultiSecretChildrenRotations(parentResourceCrn, multiSecretType.value(), userCrn));
+                    () -> sdxRotationEndpoint.checkOngoingMultiSecretChildrenRotationsByParent(parentResourceCrn, multiSecretType.value(), userCrn));
         }
         return distroxRotationOngoing || sdxRotationOngoing;
     }
@@ -44,13 +46,29 @@ public class FreeipaInterServiceMultiRotationService implements InterServiceMult
     @Override
     public void markChildren(String parentResourceCrn, MultiSecretType multiSecretType) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        if (multiSecretType.childSecretTypesByDescriptor().containsKey(CrnResourceDescriptor.DATAHUB)) {
+        if (multiSecretType.getChildrenCrnDescriptors().contains(CrnResourceDescriptor.DATALAKE)) {
+            SdxChildResourceMarkingRequest request = getSdxRequest(parentResourceCrn, multiSecretType);
             ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> distroXV1RotationEndpoint.markMultiClusterChildrenResources(parentResourceCrn, multiSecretType.value(), userCrn));
+                    () -> sdxRotationEndpoint.markMultiClusterChildrenResourcesByParent(request, userCrn));
         }
-        if (multiSecretType.childSecretTypesByDescriptor().containsKey(CrnResourceDescriptor.DATALAKE)) {
+        if (multiSecretType.getChildrenCrnDescriptors().contains(CrnResourceDescriptor.DATAHUB)) {
+            DistroXChildResourceMarkingRequest request = getDistroxRequest(parentResourceCrn, multiSecretType);
             ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> sdxRotationEndpoint.markMultiClusterChildrenResources(parentResourceCrn, multiSecretType.value(), userCrn));
+                    () -> distroXV1RotationEndpoint.markMultiClusterChildrenResourcesByParent(request, userCrn));
         }
+    }
+
+    private static DistroXChildResourceMarkingRequest getDistroxRequest(String parentResourceCrn, MultiSecretType multiSecretType) {
+        DistroXChildResourceMarkingRequest request = new DistroXChildResourceMarkingRequest();
+        request.setSecret(multiSecretType.value());
+        request.setParentCrn(parentResourceCrn);
+        return request;
+    }
+
+    private static SdxChildResourceMarkingRequest getSdxRequest(String parentResourceCrn, MultiSecretType multiSecretType) {
+        SdxChildResourceMarkingRequest request = new SdxChildResourceMarkingRequest();
+        request.setSecret(multiSecretType.value());
+        request.setParentCrn(parentResourceCrn);
+        return request;
     }
 }

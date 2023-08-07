@@ -6,8 +6,8 @@ import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.rotation.annotation.ValidMultiSecretType;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackRotationService;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1RotationEndpoint;
-import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMultiSecretRotationRequest;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXChildResourceMarkingRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretRotationRequest;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -38,26 +38,18 @@ public class DistroXV1RotationController implements DistroXV1RotationEndpoint {
         return stackRotationService.rotateSecrets(request.getCrn(), request.getSecrets(), request.getExecutionType());
     }
 
-    @Deprecated
     @Override
-    @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_DH_SECRETS)
-    public FlowIdentifier rotateMultiSecrets(@RequestObject DistroXMultiSecretRotationRequest request) {
-        throw new NotImplementedException("Deprecated Rotation API!");
+    @InternalOnly
+    public boolean checkOngoingChildrenMultiSecretRotationsByParent(@ValidCrn(resource = { ENVIRONMENT, DATALAKE }) String parentCrn,
+            @ValidMultiSecretType String multiSecret,
+            @InitiatorUserCrn String initiatorUserCrn) {
+        return stackRotationService.checkOngoingChildrenMultiSecretRotations(parentCrn, multiSecret);
     }
 
     @Override
     @InternalOnly
-    public boolean checkOngoingChildrenMultiSecretRotations(@ValidCrn(resource = { ENVIRONMENT, DATALAKE}) String parentCrn,
-            @ValidMultiSecretType String secret,
+    public void markMultiClusterChildrenResourcesByParent(@Valid DistroXChildResourceMarkingRequest request,
             @InitiatorUserCrn String initiatorUserCrn) {
-        return stackRotationService.checkOngoingChildrenMultiSecretRotations(parentCrn, secret);
-    }
-
-    @Override
-    @InternalOnly
-    public void markMultiClusterChildrenResources(@ValidCrn(resource = { ENVIRONMENT, DATALAKE}) String parentCrn,
-            @ValidMultiSecretType String secret,
-            @InitiatorUserCrn String initiatorUserCrn) {
-        stackRotationService.markMultiClusterChildrenResources(parentCrn, secret);
+        stackRotationService.markMultiClusterChildrenResources(request.getParentCrn(), request.getSecret());
     }
 }

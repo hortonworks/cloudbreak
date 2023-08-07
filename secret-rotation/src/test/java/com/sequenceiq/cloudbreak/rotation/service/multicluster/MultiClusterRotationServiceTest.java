@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.rotation.service.multicluster;
 
-import static com.sequenceiq.cloudbreak.rotation.common.TestMultiSecretType.MULTI_TEST;
+import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.DEMO_MULTI_SECRET;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -47,7 +47,7 @@ public class MultiClusterRotationServiceTest {
         doNothing().when(interServiceMultiClusterRotationService).markChildren(any(), any());
 
         underTest.updateMultiRotationEntriesAfterRotate(
-                new RotationMetadata(TestSecretType.TEST_2, null, null, DATALAKE_CRN, Optional.of(MULTI_TEST)));
+                new RotationMetadata(TestSecretType.TEST_2, null, null, DATALAKE_CRN, Optional.of(DEMO_MULTI_SECRET)));
 
         verify(repository).save(any());
         verify(interServiceMultiClusterRotationService).markChildren(any(), any());
@@ -56,9 +56,9 @@ public class MultiClusterRotationServiceTest {
     @Test
     void testUpdateResourcesIfParentSecondPhase() {
         when(repository.findByResourceCrnAndSecretTypeAndType(any(), any(), any())).thenReturn(Optional.of(
-                new MultiClusterRotationResource(DATALAKE_CRN, MULTI_TEST, MultiClusterRotationResourceType.INITIATED_PARENT)));
+                new MultiClusterRotationResource(DATALAKE_CRN, DEMO_MULTI_SECRET, MultiClusterRotationResourceType.INITIATED_PARENT)));
         underTest.updateMultiRotationEntriesAfterFinalize(
-                new RotationMetadata(TestSecretType.TEST_2, null, null, DATALAKE_CRN, Optional.of(MULTI_TEST)));
+                new RotationMetadata(TestSecretType.TEST_2, null, null, DATALAKE_CRN, Optional.of(DEMO_MULTI_SECRET)));
 
         verify(repository).delete(any());
     }
@@ -66,16 +66,16 @@ public class MultiClusterRotationServiceTest {
     @Test
     void testUpdateResourcesIfChild() {
         when(repository.findByResourceCrnAndSecretTypeAndType(any(), any(), any())).thenReturn(Optional.of(
-                new MultiClusterRotationResource(DATAHUB_CRN, MULTI_TEST, MultiClusterRotationResourceType.PENDING_CHILD)));
+                new MultiClusterRotationResource(DATAHUB_CRN, DEMO_MULTI_SECRET, MultiClusterRotationResourceType.PENDING_CHILD)));
         underTest.updateMultiRotationEntriesAfterFinalize(
-                new RotationMetadata(TestSecretType.TEST_4, null, null, DATAHUB_CRN, Optional.of(MULTI_TEST)));
+                new RotationMetadata(TestSecretType.TEST_4, null, null, DATAHUB_CRN, Optional.of(DEMO_MULTI_SECRET)));
 
         verify(repository).delete(any());
     }
 
     @Test
     void testMarkChildren() {
-        underTest.markChildrenMultiRotationEntriesLocally(Set.of(DATAHUB_CRN, DATALAKE_CRN), "MULTI_TEST");
+        underTest.markChildrenMultiRotationEntriesLocally(Set.of(DATAHUB_CRN, DATALAKE_CRN), DEMO_MULTI_SECRET.value());
 
         verify(repository, times(2)).save(any());
     }

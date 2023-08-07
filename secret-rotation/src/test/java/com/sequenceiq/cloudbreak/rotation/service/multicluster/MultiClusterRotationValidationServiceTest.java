@@ -22,8 +22,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
-import com.sequenceiq.cloudbreak.rotation.common.TestMultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.entity.multicluster.MultiClusterRotationResource;
 import com.sequenceiq.cloudbreak.rotation.entity.multicluster.MultiClusterRotationResourceType;
 
@@ -62,7 +62,7 @@ public class MultiClusterRotationValidationServiceTest {
     void testPrepareParent() {
         when(trackingService.getMultiRotationEntriesForResource(any(), any())).thenReturn(Set.of());
 
-        underTest.validateMultiRotationRequest(DATALAKE_CRN, TestMultiSecretType.MULTI_TEST);
+        underTest.validateMultiRotationRequest(DATALAKE_CRN, TEST_2);
 
         verify(trackingService).getMultiRotationEntriesForResource(any(), any());
         verifyNoInteractions(childContextProvider);
@@ -71,14 +71,14 @@ public class MultiClusterRotationValidationServiceTest {
     @Test
     void testPrepareParentIfChildRotationStillNeeded() throws IllegalAccessException {
         when(trackingService.getMultiRotationEntriesForResource(any(), any())).thenReturn(
-                Set.of(new MultiClusterRotationResource(DATALAKE_CRN, TestMultiSecretType.MULTI_TEST, MultiClusterRotationResourceType.INITIATED_PARENT)));
+                Set.of(new MultiClusterRotationResource(DATALAKE_CRN, MultiSecretType.DEMO_MULTI_SECRET, MultiClusterRotationResourceType.INITIATED_PARENT)));
         InterServiceMultiClusterRotationService interServiceMultiClusterRotationService =
                 mock(InterServiceMultiClusterRotationService.class);
         FieldUtils.writeField(underTest, "interServiceMultiClusterRotationTrackingService",
                 Optional.of(interServiceMultiClusterRotationService), true);
         when(interServiceMultiClusterRotationService.checkOngoingChildrenMultiSecretRotations(any(), any())).thenReturn(Boolean.TRUE);
 
-        assertThrows(BadRequestException.class, () -> underTest.validateMultiRotationRequest(DATALAKE_CRN, TestMultiSecretType.MULTI_TEST));
+        assertThrows(BadRequestException.class, () -> underTest.validateMultiRotationRequest(DATALAKE_CRN, TEST_2));
 
         verify(trackingService).getMultiRotationEntriesForResource(any(), any());
         verifyNoInteractions(childContextProvider);
@@ -88,7 +88,7 @@ public class MultiClusterRotationValidationServiceTest {
     void testPrepareChildIfThereIsNoOngoingRotationForType() {
         when(trackingService.getMultiRotationEntriesForResource(any(), any())).thenReturn(Set.of());
 
-        assertThrows(BadRequestException.class, () -> underTest.validateMultiRotationRequest(DATAHUB_CRN, TestMultiSecretType.MULTI_TEST));
+        assertThrows(BadRequestException.class, () -> underTest.validateMultiRotationRequest(DATAHUB_CRN, TEST_2));
 
         verify(trackingService).getMultiRotationEntriesForResource(any(), any());
         verifyNoInteractions(parentContextProvider);
@@ -97,9 +97,9 @@ public class MultiClusterRotationValidationServiceTest {
     @Test
     void testPrepareChild() {
         when(trackingService.getMultiRotationEntriesForResource(any(), any())).thenReturn(
-                Set.of(new MultiClusterRotationResource(DATAHUB_CRN, TestMultiSecretType.MULTI_TEST, MultiClusterRotationResourceType.PENDING_CHILD)));
+                Set.of(new MultiClusterRotationResource(DATAHUB_CRN, MultiSecretType.DEMO_MULTI_SECRET, MultiClusterRotationResourceType.PENDING_CHILD)));
 
-        underTest.validateMultiRotationRequest(DATAHUB_CRN, TestMultiSecretType.MULTI_TEST);
+        underTest.validateMultiRotationRequest(DATAHUB_CRN, TEST_2);
 
         verify(trackingService).getMultiRotationEntriesForResource(any(), any());
         verifyNoInteractions(parentContextProvider);
@@ -109,7 +109,7 @@ public class MultiClusterRotationValidationServiceTest {
     void testPrepareChildIfRotationNotNeeded() {
         when(trackingService.getMultiRotationEntriesForResource(any(), any())).thenReturn(Set.of());
 
-        assertThrows(BadRequestException.class, () -> underTest.validateMultiRotationRequest(DATAHUB_CRN, TestMultiSecretType.MULTI_TEST));
+        assertThrows(BadRequestException.class, () -> underTest.validateMultiRotationRequest(DATAHUB_CRN, TEST_2));
 
         verify(trackingService).getMultiRotationEntriesForResource(any(), any());
         verifyNoInteractions(parentContextProvider);

@@ -5,8 +5,8 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
@@ -20,7 +20,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.rotation.SdxRotationService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.endpoint.SdxRotationEndpoint;
-import com.sequenceiq.sdx.api.model.SdxMultiSecretRotationRequest;
+import com.sequenceiq.sdx.api.model.SdxChildResourceMarkingRequest;
 import com.sequenceiq.sdx.api.model.SdxSecretRotationRequest;
 
 @Controller
@@ -36,26 +36,18 @@ public class SdxRotationController implements SdxRotationEndpoint {
         return sdxRotationService.triggerSecretRotation(request.getCrn(), request.getSecrets(), request.getExecutionType());
     }
 
-    @Deprecated
     @Override
-    @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_DL_SECRETS)
-    public FlowIdentifier rotateMultiSecrets(@RequestObject SdxMultiSecretRotationRequest request) {
-        throw new NotImplementedException("Deprecated Rotation API!");
+    @InternalOnly
+    public boolean checkOngoingMultiSecretChildrenRotationsByParent(@ValidCrn(resource = ENVIRONMENT) String parentCrn,
+            @ValidMultiSecretType String multiSecret,
+            @InitiatorUserCrn String initiatorUserCrn) {
+        return sdxRotationService.checkOngoingMultiSecretChildrenRotations(parentCrn, multiSecret);
     }
 
     @Override
     @InternalOnly
-    public boolean checkOngoingMultiSecretChildrenRotations(@ValidCrn(resource = ENVIRONMENT) String parentCrn,
-            @ValidMultiSecretType String secret,
+    public void markMultiClusterChildrenResourcesByParent(@Valid SdxChildResourceMarkingRequest request,
             @InitiatorUserCrn String initiatorUserCrn) {
-        return sdxRotationService.checkOngoingMultiSecretChildrenRotations(parentCrn, secret);
-    }
-
-    @Override
-    @InternalOnly
-    public void markMultiClusterChildrenResources(@ValidCrn(resource = ENVIRONMENT) String parentCrn,
-            @ValidMultiSecretType String secret,
-            @InitiatorUserCrn String initiatorUserCrn) {
-        sdxRotationService.markMultiClusterChildrenResources(parentCrn, secret);
+        sdxRotationService.markMultiClusterChildrenResources(request.getParentCrn(), request.getSecret());
     }
 }

@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
-import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.entity.multicluster.MultiClusterRotationResource;
 import com.sequenceiq.cloudbreak.rotation.entity.multicluster.MultiClusterRotationResourceType;
@@ -48,7 +47,7 @@ public class MultiClusterRotationService {
     public void updateMultiRotationEntriesAfterRotate(RotationMetadata metadata) {
         metadata.multiSecretType().ifPresent(secretType -> {
             CrnResourceDescriptor crnResourceDescriptor = CrnResourceDescriptor.getByCrnString(metadata.resourceCrn());
-            if (crnResourceDescriptor.equals(secretType.parentCrnDescriptor())) {
+            if (crnResourceDescriptor.equals(secretType.getParentCrnDescriptor())) {
                 Optional<MultiClusterRotationResource> multiClusterRotationResource = getMultiRotationEntryForMetadata(metadata, INITIATED_PARENT);
                 if (multiClusterRotationResource.isPresent()) {
                     throw new SecretRotationException("Multi rotation resource should not present for parent after rotate.", null);
@@ -62,11 +61,11 @@ public class MultiClusterRotationService {
     public void updateMultiRotationEntriesAfterFinalize(RotationMetadata metadata) {
         metadata.multiSecretType().ifPresent(secretType -> {
             CrnResourceDescriptor crnResourceDescriptor = CrnResourceDescriptor.getByCrnString(metadata.resourceCrn());
-            if (crnResourceDescriptor.equals(secretType.parentCrnDescriptor())) {
+            if (crnResourceDescriptor.equals(secretType.getParentCrnDescriptor())) {
                 LOGGER.info("Removing entry from database for parent resource {}, which means second phase of it's multi rotation is finished",
                         metadata.resourceCrn());
                 getMultiRotationEntryForMetadata(metadata, INITIATED_PARENT).ifPresent(multiClusterRotationResourceRepository::delete);
-            } else if (secretType.childSecretTypesByDescriptor().containsKey(crnResourceDescriptor)) {
+            } else if (secretType.getChildrenCrnDescriptors().contains(crnResourceDescriptor)) {
                 LOGGER.info("Removing entry from database for child resource {}, which means it's multi rotation is finished", metadata.resourceCrn());
                 getMultiRotationEntryForMetadata(metadata, PENDING_CHILD).ifPresent(multiClusterRotationResourceRepository::delete);
             }
@@ -75,7 +74,7 @@ public class MultiClusterRotationService {
 
     public void markChildrenMultiRotationEntriesLocally(Set<String> crns, String multiSecret) {
         LOGGER.info("Adding entries from database for child resources {}.", crns);
-        MultiSecretType multiSecretType = SecretTypeConverter.mapMultiSecretType(multiSecret);
+        MultiSecretType multiSecretType = MultiSecretType.valueOf(multiSecret);
         crns.forEach(crn -> multiClusterRotationResourceRepository.save(new MultiClusterRotationResource(crn, multiSecretType, PENDING_CHILD)));
     }
 

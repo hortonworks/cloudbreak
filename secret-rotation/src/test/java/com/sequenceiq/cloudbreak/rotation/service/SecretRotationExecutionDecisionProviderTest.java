@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.rotation.service;
 
+import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.DEMO_MULTI_SECRET;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.FINALIZE;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.PREVALIDATE;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
+import static com.sequenceiq.cloudbreak.rotation.common.TestSecretType.TEST_2;
+import static com.sequenceiq.cloudbreak.rotation.common.TestSecretType.TEST_4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -23,10 +26,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
-import com.sequenceiq.cloudbreak.rotation.common.TestMultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.common.TestSecretType;
 import com.sequenceiq.cloudbreak.rotation.entity.multicluster.MultiClusterRotationResource;
 import com.sequenceiq.cloudbreak.rotation.entity.multicluster.MultiClusterRotationResourceType;
@@ -39,8 +39,6 @@ public class SecretRotationExecutionDecisionProviderTest {
     private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:acc1:datalake:cluster1";
 
     private static final String DATAHUB_CRN = "crn:cdp:datahub:us-west-1:tenant:cluster:resource1";
-
-    private static final MultiSecretType MULTI_SECRET_TYPE = TestMultiSecretType.MULTI_TEST;
 
     @Mock
     private MultiClusterRotationService trackingService;
@@ -60,8 +58,7 @@ public class SecretRotationExecutionDecisionProviderTest {
     @ParameterizedTest
     @MethodSource("multiChildRotationRequests")
     void testMultiClusterChildRotation(RotationFlowExecutionType currentExecution, RotationFlowExecutionType requestExecution, boolean result) {
-        RotationMetadata metadata = new RotationMetadata(MULTI_SECRET_TYPE.childSecretTypesByDescriptor().get(CrnResourceDescriptor.DATAHUB),
-                currentExecution, requestExecution, DATAHUB_CRN, Optional.of(MULTI_SECRET_TYPE));
+        RotationMetadata metadata = new RotationMetadata(TEST_2, currentExecution, requestExecution, DATAHUB_CRN, Optional.of(DEMO_MULTI_SECRET));
         assertEquals(result, underTest.executionRequired(metadata));
 
         verifyNoInteractions(trackingService);
@@ -72,8 +69,8 @@ public class SecretRotationExecutionDecisionProviderTest {
     void testMultiClusterInitialParentRotation(RotationFlowExecutionType currentExecution, RotationFlowExecutionType requestExecution, boolean result) {
         MultiClusterRotationResourceType multiClusterRotationResourceType = MultiClusterRotationResourceType.INITIATED_PARENT;
         lenient().when(trackingService.getMultiRotationEntryForMetadata(any(), eq(multiClusterRotationResourceType))).thenReturn(Optional.empty());
-        RotationMetadata metadata = new RotationMetadata(MULTI_SECRET_TYPE.parentSecretType(), currentExecution, requestExecution,
-                DATALAKE_CRN, Optional.of(MULTI_SECRET_TYPE));
+        RotationMetadata metadata = new RotationMetadata(TEST_4, currentExecution, requestExecution,
+                DATALAKE_CRN, Optional.of(DEMO_MULTI_SECRET));
         assertEquals(result, underTest.executionRequired(metadata));
     }
 
@@ -89,8 +86,8 @@ public class SecretRotationExecutionDecisionProviderTest {
         FieldUtils.writeField(underTest, "interServiceMultiClusterRotationTrackingService",
                 Optional.of(interServiceMultiClusterRotationService), true);
         lenient().when(interServiceMultiClusterRotationService.checkOngoingChildrenMultiSecretRotations(any(), any())).thenReturn(Boolean.FALSE);
-        RotationMetadata met = new RotationMetadata(MULTI_SECRET_TYPE.parentSecretType(), currentExecution, requestExecution,
-                DATALAKE_CRN, Optional.of(MULTI_SECRET_TYPE));
+        RotationMetadata met = new RotationMetadata(TEST_4, currentExecution, requestExecution,
+                DATALAKE_CRN, Optional.of(DEMO_MULTI_SECRET));
         assertEquals(result, underTest.executionRequired(met));
     }
 

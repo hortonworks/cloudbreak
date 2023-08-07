@@ -125,20 +125,12 @@ public class SecretRotationOrchestrationService {
 
     private RotationMetadata getRotationMetadata(SecretType secretType, String resourceCrn, RotationFlowExecutionType requestedExecutionType,
             RotationFlowExecutionType currentExecutionType) {
-        RotationContextProvider rotationContextProvider = rotationContextProviderMap.get(secretType);
-        return getRotationMetadata(secretType, currentExecutionType, requestedExecutionType, resourceCrn, rotationContextProvider);
-    }
-
-    private RotationMetadata getRotationMetadata(SecretType secretType, RotationFlowExecutionType currentExecution,
-            RotationFlowExecutionType requestExecutionType, String resourceCrn, RotationContextProvider rotationContextProvider) {
         RotationMetadata.Builder builder = RotationMetadata.builder()
                 .secretType(secretType)
-                .currentExecution(currentExecution)
-                .requestedExecutionType(requestExecutionType)
+                .currentExecution(currentExecutionType)
+                .requestedExecutionType(requestedExecutionType)
                 .resourceCrn(resourceCrn);
-        if (secretType.multiSecret()) {
-            rotationContextProvider.getMultiSecret().ifPresent(builder::multiSecretType);
-        }
+        secretType.getMultiSecretType().ifPresent(builder::multiSecretType);
         return builder.build();
     }
 }

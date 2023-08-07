@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SA
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_CM_SERVICE_SHARED_DB;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
@@ -26,7 +24,6 @@ import com.sequenceiq.cloudbreak.rotation.context.CMServiceConfigRotationContext
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.sdx.rotation.DatalakeMultiSecretType;
 
 @Component
 public class DatahubCMServiceSharedDBRotationContextProvider extends AbstractCMRelatedDatabasePasswordContextProvider implements RotationContextProvider {
@@ -67,10 +64,5 @@ public class DatahubCMServiceSharedDBRotationContextProvider extends AbstractCMR
     @Override
     public SecretType getSecret() {
         return DATAHUB_CM_SERVICE_SHARED_DB;
-    }
-
-    @Override
-    public Optional<MultiSecretType> getMultiSecret() {
-        return Optional.of(DatalakeMultiSecretType.CM_SERVICE_SHARED_DB);
     }
 }

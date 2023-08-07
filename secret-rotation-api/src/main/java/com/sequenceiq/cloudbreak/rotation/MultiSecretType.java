@@ -1,26 +1,43 @@
 package com.sequenceiq.cloudbreak.rotation;
 
-import java.util.Map;
+import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATAHUB;
+import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATALAKE;
+import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
+
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
-public interface MultiSecretType extends SerializableRotationEnum {
+public enum MultiSecretType implements SerializableRotationEnum {
 
-    default SecretType getSecretTypeByResourceCrn(String resourceCrn) {
-        CrnResourceDescriptor crnResourceDescriptorByCrn = CrnResourceDescriptor.getByCrnString(resourceCrn);
-        if (crnResourceDescriptorByCrn.equals(parentCrnDescriptor())) {
-            return parentSecretType();
-        } else if (childSecretTypesByDescriptor().containsKey(crnResourceDescriptorByCrn)) {
-            return childSecretTypesByDescriptor().get(crnResourceDescriptorByCrn);
-        } else {
-            throw new BadRequestException(String.format("Multi secret rotation for type %s is not possible by crn %s", value(), resourceCrn));
-        }
+    CM_SERVICE_SHARED_DB(DATALAKE, Set.of(DATAHUB)),
+    DEMO_MULTI_SECRET(DATALAKE, Set.of(DATAHUB)),
+    FREEIPA_CA_CERT(ENVIRONMENT, Set.of(DATALAKE, DATAHUB));
+
+    private final CrnResourceDescriptor parentCrnDescriptor;
+
+    private final Set<CrnResourceDescriptor> childrenCrnDescriptors;
+
+    MultiSecretType(CrnResourceDescriptor parentCrnDescriptor, Set<CrnResourceDescriptor> childrenCrnDescriptors) {
+        this.parentCrnDescriptor = parentCrnDescriptor;
+        this.childrenCrnDescriptors = childrenCrnDescriptors;
     }
 
-    SecretType parentSecretType();
+    public CrnResourceDescriptor getParentCrnDescriptor() {
+        return parentCrnDescriptor;
+    }
 
-    CrnResourceDescriptor parentCrnDescriptor();
+    public Set<CrnResourceDescriptor> getChildrenCrnDescriptors() {
+        return childrenCrnDescriptors;
+    }
 
-    Map<CrnResourceDescriptor, SecretType> childSecretTypesByDescriptor();
+    @Override
+    public Class<? extends Enum<?>> getClazz() {
+        return MultiSecretType.class;
+    }
+
+    @Override
+    public String value() {
+        return name();
+    }
 }

@@ -65,17 +65,19 @@ public class SecretRotationExecutionDecisionProvider {
     }
 
     private Predicate<RotationMetadata> childClusterExecution() {
-        return metadata -> metadata.multiSecretType().orElseThrow().childSecretTypesByDescriptor().containsKey(
+        return metadata -> metadata.multiSecretType().orElseThrow().getChildrenCrnDescriptors().contains(
                 CrnResourceDescriptor.getByCrnString(metadata.resourceCrn()));
     }
 
     private Predicate<RotationMetadata> parentClusterInitialExecution() {
-        return metadata -> metadata.multiSecretType().orElseThrow().parentSecretType().equals(metadata.secretType())
+        return metadata ->
+                metadata.multiSecretType().orElseThrow().getParentCrnDescriptor().equals(CrnResourceDescriptor.getByCrnString(metadata.resourceCrn()))
                 && !resourcePresentInDb(metadata, INITIATED_PARENT) && List.of(PREVALIDATE, ROTATE, ROLLBACK).contains(metadata.currentExecution());
     }
 
     private Predicate<RotationMetadata> parentClusterFinalExecution() {
-        return metadata -> metadata.multiSecretType().orElseThrow().parentSecretType().equals(metadata.secretType())
+        return metadata ->
+                metadata.multiSecretType().orElseThrow().getParentCrnDescriptor().equals(CrnResourceDescriptor.getByCrnString(metadata.resourceCrn()))
                 && resourcePresentInDb(metadata, INITIATED_PARENT) && !childPresent(metadata) && metadata.currentExecution().equals(FINALIZE);
     }
 

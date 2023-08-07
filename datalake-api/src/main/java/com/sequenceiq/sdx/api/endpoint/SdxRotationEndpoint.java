@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidMultiSecretType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.sdx.api.model.SdxMultiSecretRotationRequest;
+import com.sequenceiq.sdx.api.model.SdxChildResourceMarkingRequest;
 import com.sequenceiq.sdx.api.model.SdxSecretRotationRequest;
 
 import io.swagger.annotations.Api;
@@ -38,27 +38,20 @@ public interface SdxRotationEndpoint {
     @ApiOperation(value = "Rotate SDX secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateSDXSecrets")
     FlowIdentifier rotateSecrets(@Valid @NotNull SdxSecretRotationRequest request);
 
-    @Deprecated
-    @PUT
-    @Path("multi_secret/rotate")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Rotate SDX multi secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateSDXMultiSecrets")
-    FlowIdentifier rotateMultiSecrets(@Valid @NotNull SdxMultiSecretRotationRequest request);
-
     @GET
-    @Path("multi_secret/check")
+    @Path("multi_secret/check_children")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Check ongoing child SDX multi secret rotations", produces = MediaType.APPLICATION_JSON, nickname = "checkSDXMultiSecrets")
-    boolean checkOngoingMultiSecretChildrenRotations(@ValidCrn(resource = ENVIRONMENT) @QueryParam("parentCrn") String parentCrn,
-            @ValidMultiSecretType @QueryParam("secret") String secret,
+    @ApiOperation(value = "Check ongoing child SDX multi secret rotations by parent", produces = MediaType.APPLICATION_JSON,
+            nickname = "checkSDXMultiSecretsByParent")
+    boolean checkOngoingMultiSecretChildrenRotationsByParent(@ValidCrn(resource = ENVIRONMENT) @QueryParam("parentCrn") String parentCrn,
+            @ValidMultiSecretType @QueryParam("secret") String multiSecret,
             @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT
-    @Path("multi_secret/mark_resources")
+    @Path("multi_secret/mark_children")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Mark child resources for SDX multi secret rotations", produces = MediaType.APPLICATION_JSON,
-            nickname = "markResourcesSDXMultiSecrets")
-    void markMultiClusterChildrenResources(@ValidCrn(resource = ENVIRONMENT) @QueryParam("parentCrn") String parentCrn,
-            @ValidMultiSecretType @QueryParam("secret") String secret,
+    @ApiOperation(value = "Mark child resources for SDX multi secret rotations by parent", produces = MediaType.APPLICATION_JSON,
+            nickname = "markResourcesSDXMultiSecretsByParent")
+    void markMultiClusterChildrenResourcesByParent(@Valid SdxChildResourceMarkingRequest request,
             @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

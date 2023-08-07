@@ -91,7 +91,7 @@ public class SdxRotationService {
     private SecretRotationValidationService secretRotationValidationService;
 
     public boolean checkOngoingMultiSecretChildrenRotations(String parentCrn, String secret) {
-        MultiSecretType multiSecretType = SecretTypeConverter.mapMultiSecretType(secret);
+        MultiSecretType multiSecretType = MultiSecretType.valueOf(secret);
         Set<String> crnsByEnvironmentCrn = getSdxCrnsByEnvironmentCrn(parentCrn);
         return CollectionUtils.isNotEmpty(multiClusterRotationService.getMultiRotationEntriesForSecretAndResources(multiSecretType, crnsByEnvironmentCrn));
     }
@@ -145,7 +145,7 @@ public class SdxRotationService {
             SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn).orElseThrow(notFound("SDX cluster", datalakeCrn));
             List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
             secretTypes.stream().filter(SecretType::multiSecret).forEach(secretType ->
-                    multiClusterRotationValidationService.validateMultiRotationRequest(datalakeCrn, SecretTypeConverter.getMultiSecretType(secretType)));
+                    multiClusterRotationValidationService.validateMultiRotationRequest(datalakeCrn, secretType));
             secretRotationValidationService.validateExecutionType(datalakeCrn, secretTypes, requestedExecutionType);
             return sdxReactorFlowManager.triggerSecretRotation(sdxCluster, secretTypes, requestedExecutionType);
         } else {

@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidMultiSecretType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
-import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMultiSecretRotationRequest;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXChildResourceMarkingRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretRotationRequest;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -37,26 +37,20 @@ public interface DistroXV1RotationEndpoint {
     @ApiOperation(value = "Rotate DistroX secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateDistroXSecrets")
     FlowIdentifier rotateSecrets(@Valid @NotNull DistroXSecretRotationRequest request);
 
-    @Deprecated
-    @PUT
-    @Path("multi_secret/rotate")
-    @ApiOperation(value = "Rotate DistroX multi secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateDistroXMultiSecrets")
-    FlowIdentifier rotateMultiSecrets(@Valid @NotNull DistroXMultiSecretRotationRequest request);
-
     @GET
-    @Path("multi_secret/check")
+    @Path("multi_secret/check_children")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Check ongoing child DistroX multi secret rotations", produces = MediaType.APPLICATION_JSON, nickname = "checkDistroXMultiSecrets")
-    boolean checkOngoingChildrenMultiSecretRotations(@ValidCrn(resource = { ENVIRONMENT, DATALAKE }) @QueryParam("parentCrn") String parentCrn,
-            @ValidMultiSecretType @QueryParam("secret") String secret,
+    @ApiOperation(value = "Check ongoing child DistroX multi secret rotations by parent", produces = MediaType.APPLICATION_JSON,
+            nickname = "checkDistroXMultiSecretsByParent")
+    boolean checkOngoingChildrenMultiSecretRotationsByParent(@ValidCrn(resource = { ENVIRONMENT, DATALAKE }) @QueryParam("parentCrn") String parentCrn,
+            @ValidMultiSecretType @QueryParam("secret") String multiSecret,
             @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT
-    @Path("multi_secret/mark_resources")
+    @Path("multi_secret/mark_children")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Mark child resources for DistroX multi secret rotations", produces = MediaType.APPLICATION_JSON,
-            nickname = "markResourcesDistroXMultiSecrets")
-    void markMultiClusterChildrenResources(@ValidCrn(resource = { ENVIRONMENT, DATALAKE }) @QueryParam("parentCrn") String parentCrn,
-            @ValidMultiSecretType @QueryParam("secret") String secret,
+    @ApiOperation(value = "Mark child resources for DistroX multi secret rotations by parent", produces = MediaType.APPLICATION_JSON,
+            nickname = "markResourcesDistroXMultiSecretsByParent")
+    void markMultiClusterChildrenResourcesByParent(@Valid DistroXChildResourceMarkingRequest request,
             @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

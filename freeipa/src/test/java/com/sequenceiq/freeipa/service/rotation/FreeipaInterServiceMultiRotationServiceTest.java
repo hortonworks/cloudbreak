@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.rotation;
 
+import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.FREEIPA_CA_CERT;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,34 +50,34 @@ public class FreeipaInterServiceMultiRotationServiceTest {
 
     @Test
     void testCheck() {
-        when(distroXV1RotationEndpoint.checkOngoingChildrenMultiSecretRotations(any(), any(), any())).thenReturn(Boolean.FALSE);
-        when(sdxRotationEndpoint.checkOngoingMultiSecretChildrenRotations(any(), any(), any())).thenReturn(Boolean.FALSE);
+        when(distroXV1RotationEndpoint.checkOngoingChildrenMultiSecretRotationsByParent(any(), any(), any())).thenReturn(Boolean.FALSE);
+        when(sdxRotationEndpoint.checkOngoingMultiSecretChildrenRotationsByParent(any(), any(), any())).thenReturn(Boolean.FALSE);
 
-        assertFalse(underTest.checkOngoingChildrenMultiSecretRotations(ENV_CRN, TestFreeipaMultiSecretType.IPA_MULTI_SECRET));
+        assertFalse(underTest.checkOngoingChildrenMultiSecretRotations(ENV_CRN, FREEIPA_CA_CERT));
 
-        verify(sdxRotationEndpoint).checkOngoingMultiSecretChildrenRotations(eq(ENV_CRN), any(), any());
-        verify(distroXV1RotationEndpoint).checkOngoingChildrenMultiSecretRotations(eq(ENV_CRN), any(), any());
+        verify(sdxRotationEndpoint).checkOngoingMultiSecretChildrenRotationsByParent(eq(ENV_CRN), any(), any());
+        verify(distroXV1RotationEndpoint).checkOngoingChildrenMultiSecretRotationsByParent(eq(ENV_CRN), any(), any());
     }
 
     @Test
     void testCheckIfOngoing() {
-        when(distroXV1RotationEndpoint.checkOngoingChildrenMultiSecretRotations(any(), any(), any())).thenReturn(Boolean.FALSE);
-        when(sdxRotationEndpoint.checkOngoingMultiSecretChildrenRotations(any(), any(), any())).thenReturn(Boolean.TRUE);
+        when(distroXV1RotationEndpoint.checkOngoingChildrenMultiSecretRotationsByParent(any(), any(), any())).thenReturn(Boolean.FALSE);
+        when(sdxRotationEndpoint.checkOngoingMultiSecretChildrenRotationsByParent(any(), any(), any())).thenReturn(Boolean.TRUE);
 
-        assertTrue(underTest.checkOngoingChildrenMultiSecretRotations(ENV_CRN, TestFreeipaMultiSecretType.IPA_MULTI_SECRET));
+        assertTrue(underTest.checkOngoingChildrenMultiSecretRotations(ENV_CRN, FREEIPA_CA_CERT));
 
-        verify(sdxRotationEndpoint).checkOngoingMultiSecretChildrenRotations(eq(ENV_CRN), any(), any());
-        verify(distroXV1RotationEndpoint).checkOngoingChildrenMultiSecretRotations(eq(ENV_CRN), any(), any());
+        verify(sdxRotationEndpoint).checkOngoingMultiSecretChildrenRotationsByParent(eq(ENV_CRN), any(), any());
+        verify(distroXV1RotationEndpoint).checkOngoingChildrenMultiSecretRotationsByParent(eq(ENV_CRN), any(), any());
     }
 
     @Test
     void testMark() {
-        doNothing().when(distroXV1RotationEndpoint).markMultiClusterChildrenResources(any(), any(), any());
-        doNothing().when(sdxRotationEndpoint).markMultiClusterChildrenResources(any(), any(), any());
+        doNothing().when(distroXV1RotationEndpoint).markMultiClusterChildrenResourcesByParent(any(), any());
+        doNothing().when(sdxRotationEndpoint).markMultiClusterChildrenResourcesByParent(any(), any());
 
-        underTest.markChildren(ENV_CRN, TestFreeipaMultiSecretType.IPA_MULTI_SECRET);
+        underTest.markChildren(ENV_CRN, FREEIPA_CA_CERT);
 
-        verify(sdxRotationEndpoint).markMultiClusterChildrenResources(eq(ENV_CRN), any(), any());
-        verify(distroXV1RotationEndpoint).markMultiClusterChildrenResources(eq(ENV_CRN), any(), any());
+        verify(sdxRotationEndpoint).markMultiClusterChildrenResourcesByParent(any(), any());
+        verify(distroXV1RotationEndpoint).markMultiClusterChildrenResourcesByParent(any(), any());
     }
 }

@@ -61,7 +61,7 @@ public class StackRotationService {
             Long stackId = viewByCrn.getId();
             List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
             secretTypes.stream().filter(SecretType::multiSecret).forEach(secretType ->
-                    multiClusterRotationValidationService.validateMultiRotationRequest(crn, SecretTypeConverter.getMultiSecretType(secretType)));
+                    multiClusterRotationValidationService.validateMultiRotationRequest(crn, secretType));
             secretRotationValidationService.validateExecutionType(crn, secretTypes, requestedExecutionType);
             return flowManager.triggerSecretRotation(stackId, crn, secretTypes, requestedExecutionType);
         } else {
@@ -71,7 +71,7 @@ public class StackRotationService {
 
     public boolean checkOngoingChildrenMultiSecretRotations(String parentCrn, String secret) {
         Set<String> crns = getCrnsByParentCrn(parentCrn);
-        MultiSecretType multiSecretType = SecretTypeConverter.mapMultiSecretType(secret);
+        MultiSecretType multiSecretType = MultiSecretType.valueOf(secret);
         return CollectionUtils.isNotEmpty(multiClusterRotationService.getMultiRotationEntriesForSecretAndResources(multiSecretType, crns));
     }
 

@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.rotation;
 
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.INTERNAL;
-import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.MULTI_SECRET;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_UPDATE;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface SecretType extends SerializableRotationEnum {
@@ -19,8 +19,12 @@ public interface SecretType extends SerializableRotationEnum {
         return getFlags().contains(INTERNAL);
     }
 
+    default Optional<MultiSecretType> getMultiSecretType() {
+        return Optional.empty();
+    }
+
     default boolean multiSecret() {
-        return getFlags().contains(MULTI_SECRET);
+        return getMultiSecretType().isPresent();
     }
 
     default boolean saltUpdateNeeded() {

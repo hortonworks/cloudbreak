@@ -20,16 +20,6 @@ public class EnforceRotationFrameworkRulesTest {
     private MessageSource messageSource;
 
     @Test
-    void enforceMultiSecretTypes() {
-        EnforceRotationFrameworkRulesUtil.enforceMultiSecretTypes();
-    }
-
-    @Test
-    void enforceMultiSecretTypeMethodForRelatedContextProviders() {
-        EnforceRotationFrameworkRulesUtil.enforceMultiSecretTypeMethodForRelatedContextProviders();
-    }
-
-    @Test
     void enforceSecretTypeBelongsOnlyOneMultiSecretType() {
         EnforceRotationFrameworkRulesUtil.enforceSecretTypeBelongsOnlyOneMultiSecretType();
     }
@@ -37,11 +27,6 @@ public class EnforceRotationFrameworkRulesTest {
     @Test
     void enforceThereAreNoDuplicatesBetweenSecretTypeEnums() {
         EnforceRotationFrameworkRulesUtil.enforceThereAreNoDuplicatesBetweenSecretTypeEnums();
-    }
-
-    @Test
-    void enforceThereAreNoDuplicatesBetweenMultiSecretTypeEnums() {
-        EnforceRotationFrameworkRulesUtil.enforceThereAreNoDuplicatesBetweenMultiSecretTypeEnums();
     }
 
     @Test

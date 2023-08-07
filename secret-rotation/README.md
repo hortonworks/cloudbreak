@@ -9,8 +9,9 @@ Rotation framework has been created based on this idea.
 - `SecretType`: Every service needs to define the secrets that it handled via implementing this interface with an enum. The `List<SecretRotationStep> getSteps()` method returns in which order and where the secret needs to be updated.
   - additional flags can be defined for secret types:
     - internal: it can be rotated only via internal API call
-    - multiCluster: secret type which belongs to a `MultiSecretType`
-- `MultiSecretType`: For secrets affecting multiple resources this interface need to be implemented with an enum also. This is where secret type of the child and the parent and also the types of resources can be defined.
+    - skipSaltUpdate: if true, there is no need to update salt state before rotation
+  - also MultiSecretType can be added to the enum value to indicate if secret type is related to a multi-cluster rotation
+- `MultiSecretType`: For secrets affecting multiple resources this enum need to be extended with the new value. This is where types of resources can be defined.
 - `SecretRotationStep`: It defines the different steps where secrets can be updated. For example vault or user data.
 - `AbstractRotationExecutor`: Implementations of this abstract class does the core work like rotating, rolling back, finalizing the secret rotation. The payload should extend the `RotationContext` class.
   - rotation: executes the actual replacement/rotation
@@ -39,8 +40,7 @@ Rotation framework has been created based on this idea.
 
 ## API
 - for internal usage we have API, where we can define only one secret, and we can define the execution type of the rotation flow, we can tell the framework to execute only specific phase of the rotation (only rotation, only rollback, etc.). With that we can execute specific phase in a service initiated by another service, and later we can poll the status of the flow.
-- for public usage we have API, where we can define the list of secrets in the request and here we can also define the execution type, but in case of public API we should use this only with caution and only in case of emergency (support cases, etc.) 
-- for multi secrets we have different API, where only on secret can be defined and both parent and child resource secret rotation can be initiated
+- for public usage we have API, where we can define the list of secrets in the request and here we can also define the execution type, but in case of public API we should use this only with caution and only in case of emergency (support cases, etc.)
 
 ## Guidelines
 - where it is possible, we should create an additional user during rotation
@@ -48,7 +48,7 @@ Rotation framework has been created based on this idea.
   - in rollback phase we should remove the new secret (and corresponding user) and use the old one again
   - in finalize phase we should remove the old secret (with corresponding user)
 - the flow engine ensures that we can continue the execution of rotation even if the service has been restarted in the meantime, though we need to ensure that every rotation step execution in every phase (rotate, rollback, finalize) is idempotent and multiple execution of them will give the same result
-- for multi secret rotation the best would be to define different secret types for parent and child
+- for multi secret rotation it is enforced to define different secret types for parent and child
 
 ## Example
 - Single rotation: CM admin user of a datahub cluster
@@ -77,7 +77,7 @@ Rotation framework has been created based on this idea.
 - Multi cluster rotation: Shared database secret regarding a CM service (hive for example)
   - 1 `MultiSecretType` needed
     - CM_SERVICE_SHARED_DB 
-  - 2 `SecretType` needed for child and parent secret types
+  - 2 `SecretType` needed for child and parent secret types (MultiSecretType field should be defined)
     - DATALAKE_CM_SERVICE_SHARED_DB
     - DATAHUB_CM_SERVICE_SHARED_DB
   - related context providers should be implemented for secret types

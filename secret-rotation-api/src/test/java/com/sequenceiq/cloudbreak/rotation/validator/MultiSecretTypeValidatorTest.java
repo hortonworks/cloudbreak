@@ -38,7 +38,7 @@ public class MultiSecretTypeValidatorTest {
 
     @Test
     void testValidation() {
-        assertTrue(validator().isValid("MULTI_TEST", context));
+        assertTrue(validator().isValid("DEMO_MULTI_SECRET", context));
         assertFalse(validator().isValid("TEST", context));
     }
 
