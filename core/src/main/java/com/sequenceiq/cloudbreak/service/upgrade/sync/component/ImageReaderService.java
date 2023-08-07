@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
@@ -29,6 +30,9 @@ public class ImageReaderService {
 
     @Inject
     private ClouderaManagerProductTransformer clouderaManagerProductTransformer;
+
+    @Inject
+    private DefaultClouderaManagerRepoService clouderaManagerRepoService;
 
     @Inject
     private ImageService imageService;
@@ -81,7 +85,7 @@ public class ImageReaderService {
 
     private Optional<ClouderaManagerRepo> getCmComponent(Image image) {
         try {
-            return imageService.getClouderaManagerRepo(image);
+            return clouderaManagerRepoService.getClouderaManagerRepo(image);
         } catch (CloudbreakImageCatalogException e) {
             LOGGER.info("Failed to get CM component from stated image {}", image);
             return Optional.empty();

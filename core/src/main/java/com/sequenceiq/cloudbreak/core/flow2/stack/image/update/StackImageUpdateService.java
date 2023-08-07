@@ -25,8 +25,8 @@ import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.OperationException;
+import com.sequenceiq.cloudbreak.service.StackTypeResolver;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -48,7 +48,7 @@ public class StackImageUpdateService {
     private ImageCatalogService imageCatalogService;
 
     @Inject
-    private ImageService imageService;
+    private StackTypeResolver stackTypeResolver;
 
     @Inject
     private CloudbreakMessagesService messagesService;
@@ -138,7 +138,7 @@ public class StackImageUpdateService {
     public boolean isStackMatchIfPrewarmed(StatedImage image) {
         if (image.getImage().getStackDetails() != null) {
             try {
-                StackType imageStackType = imageService.determineStackType(image.getImage().getStackDetails());
+                StackType imageStackType = stackTypeResolver.determineStackType(image.getImage().getStackDetails());
                 return imageStackType == StackType.CDH;
             } catch (CloudbreakImageCatalogException e) {
                 throw new CloudbreakServiceException(e);

@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -16,8 +17,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerI
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
+import com.sequenceiq.cloudbreak.converter.ImageToClouderaManagerRepoConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
@@ -28,6 +31,12 @@ public class DefaultClouderaManagerRepoService {
 
     @Inject
     private StackMatrixService stackMatrixService;
+
+    @Inject
+    private StackTypeResolver stackTypeResolver;
+
+    @Inject
+    private ImageToClouderaManagerRepoConverter imageToClouderaManagerRepoConverter;
 
     private Map<String, RepositoryInfo> entries = new HashMap<>();
 
@@ -60,4 +69,30 @@ public class DefaultClouderaManagerRepoService {
         LOGGER.info("Missing Cloudera Manager Repo information for os: {} clusterType: {} clusterVersion: {}", osType, clusterType, clusterVersion);
         return null;
     }
+
+    public Optional<ClouderaManagerRepo> getClouderaManagerRepo(Image imgFromCatalog)
+            throws CloudbreakImageCatalogException {
+        return imgFromCatalog.getStackDetails() != null
+                ? Optional.of(getClouderaManagerRepo(imgFromCatalog, stackTypeResolver.determineStackType(imgFromCatalog.getStackDetails())))
+                : Optional.empty();
+    }
+
+    public ClouderaManagerRepo getClouderaManagerRepo(Image imgFromCatalog, StackType stackType)
+            throws CloudbreakImageCatalogException {
+        if (imgFromCatalog.getRepo() != null) {
+            if (StackType.CDH.equals(stackType)) {
+                ClouderaManagerRepo clouderaManagerRepo = imageToClouderaManagerRepoConverter.convert(imgFromCatalog);
+                if (Objects.isNull(clouderaManagerRepo) || clouderaManagerRepo.getBaseUrl() == null) {
+                    throw new CloudbreakImageCatalogException(
+                            String.format("Cloudera Manager repo was not found in image for os: '%s'.", imgFromCatalog.getOsType()));
+                }
+                return clouderaManagerRepo;
+            } else {
+                throw new CloudbreakImageCatalogException(String.format("Invalid repo present in image catalog: '%s'.", imgFromCatalog.getRepo()));
+            }
+        } else {
+            throw new CloudbreakImageCatalogException(String.format("Invalid repo present in image catalog: '%s'.", imgFromCatalog.getRepo()));
+        }
+    }
+
 }

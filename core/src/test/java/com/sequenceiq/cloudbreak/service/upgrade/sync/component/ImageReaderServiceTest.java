@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
@@ -48,6 +49,9 @@ public class ImageReaderServiceTest {
 
     @Mock
     private ImageService imageService;
+
+    @Mock
+    private DefaultClouderaManagerRepoService clouderaManagerRepoService;
 
     @InjectMocks
     private ImageReaderService underTest;
@@ -78,14 +82,14 @@ public class ImageReaderServiceTest {
     @Test
     void testGetCandidateCmReposWhenMultipleImagesThenGetCmRepoIsCalledEachTime() throws CloudbreakImageCatalogException {
         Set<Image> candidateImages = Set.of(mock(Image.class), mock(Image.class));
-        when(imageService.getClouderaManagerRepo(any(Image.class)))
+        when(clouderaManagerRepoService.getClouderaManagerRepo(any(Image.class)))
                 .thenReturn(Optional.of(new ClouderaManagerRepo()))
                 .thenReturn(Optional.of(new ClouderaManagerRepo()));
 
         Set<ClouderaManagerRepo> candidateRepos = underTest.getCmRepos(candidateImages);
 
         assertThat(candidateRepos, hasSize(2));
-        verify(imageService, times(2)).getClouderaManagerRepo(any(Image.class));
+        verify(clouderaManagerRepoService, times(2)).getClouderaManagerRepo(any(Image.class));
     }
 
     @Test
@@ -95,7 +99,7 @@ public class ImageReaderServiceTest {
         Set<ClouderaManagerRepo> candidateRepos = underTest.getCmRepos(candidateImages);
 
         assertThat(candidateRepos, empty());
-        verify(imageService, never()).getClouderaManagerRepo(any(Image.class));
+        verify(clouderaManagerRepoService, never()).getClouderaManagerRepo(any(Image.class));
     }
 
     @Test

@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.CM_REPO_DETAILS;
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.IMAGE;
 import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.DEFAULT_REGION;
 import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.INVALID_PLATFORM;
 import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.PLATFORM;
@@ -17,7 +20,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.hamcrest.CoreMatchers;
@@ -41,16 +46,25 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
+import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.domain.stack.Component;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
+import com.sequenceiq.cloudbreak.service.StackTypeResolver;
+import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
@@ -102,6 +116,18 @@ public class ImageServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private StackTypeResolver stackTypeResolver;
+
+    @Mock
+    private ClouderaManagerProductTransformer clouderaManagerProductTransformer;
+
+    @Mock
+    private ComponentConverter componentConverter;
+
+    @Mock
+    private DefaultClouderaManagerRepoService clouderaManagerRepoService;
 
     @InjectMocks
     private ImageService underTest;
@@ -160,15 +186,15 @@ public class ImageServiceTest {
         when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
                 .thenReturn(expected);
         StatedImage actual = underTest.determineImageFromCatalog(
-                        WORKSPACE_ID,
-                        imageSettingsV4Request,
-                        PLATFORM,
-                        PLATFORM,
-                        TestUtil.blueprint(),
-                        useBaseImage,
-                        baseImageEnabled,
-                        TestUtil.user(USER_ID, USER_ID_STRING),
-                        image -> true);
+                WORKSPACE_ID,
+                imageSettingsV4Request,
+                PLATFORM,
+                PLATFORM,
+                TestUtil.blueprint(),
+                useBaseImage,
+                baseImageEnabled,
+                TestUtil.user(USER_ID, USER_ID_STRING),
+                image -> true);
         assertEquals(expected, actual);
     }
 
@@ -441,8 +467,8 @@ public class ImageServiceTest {
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
 
         Exception exception = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                        () -> assertThrows(CloudbreakImageNotFoundException.class,
-                                () -> underTest.determineImageName(PLATFORM, imageCatalogPlatform, "fake-region", image)));
+                () -> assertThrows(CloudbreakImageNotFoundException.class,
+                        () -> underTest.determineImageName(PLATFORM, imageCatalogPlatform, "fake-region", image)));
         String exceptionMessage = "The virtual machine image couldn't be found for azure";
         MatcherAssert.assertThat(exception.getMessage(), CoreMatchers.containsString(exceptionMessage));
     }
@@ -460,6 +486,53 @@ public class ImageServiceTest {
         String exceptionMessage = "The selected image: 'Image' "
                 + "doesn't contain virtual machine image for the selected platform: 'ImageCatalogPlatform{platform='azure'}'.";
         MatcherAssert.assertThat(exception.getMessage(), CoreMatchers.containsString(exceptionMessage));
+    }
+
+    @Test
+    public void testGetComponents() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Stack stack = new Stack();
+        stack.setCloudPlatform(PLATFORM);
+        stack.setPlatformVariant("VARIANT");
+        stack.setRegion(REGION);
+
+
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform(PLATFORM));
+
+        CloudConnector connector = mock(CloudConnector.class);
+        when(cloudPlatformConnectors.getDefault(Platform.platform(PLATFORM))).thenReturn(connector);
+        when(connector.regionToDisplayName(REGION)).thenReturn(REGION);
+
+        Image image = mock(Image.class);
+        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
+
+        StackRepoDetails stackRepoDetails = new StackRepoDetails(Map.of(StackRepoDetails.REPO_ID_TAG, "CDH"), null);
+        ImageStackDetails imageStackDetails = new ImageStackDetails("7.2.17", stackRepoDetails, "123");
+        when(image.getStackDetails()).thenReturn(imageStackDetails);
+        when(image.getOsType()).thenReturn("redhat8");
+        when(stackTypeResolver.determineStackType(any())).thenReturn(StackType.CDH);
+
+
+        StatedImage statedImage = StatedImage.statedImage(image, "https://url.com", "my-cayalog");
+
+        Set<Component> components = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> {
+                    try {
+                        return underTest.getComponents(stack, statedImage, EnumSet.of(IMAGE, CDH_PRODUCT_DETAILS, CM_REPO_DETAILS));
+                    } catch (CloudbreakImageNotFoundException e) {
+                        throw new RuntimeException(e);
+                    } catch (CloudbreakImageCatalogException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+
+        assertEquals(3, components.size());
+        for (Component component : components) {
+            ComponentType componentType = component.getComponentType();
+            assertTrue(EnumSet.of(IMAGE, CDH_PRODUCT_DETAILS, CM_REPO_DETAILS).contains(componentType));
+            if (componentType == IMAGE) {
+                assertEquals(EXISTING_ID, component.getAttributes().getValue("imageName"));
+            }
+        }
     }
 
     private ImageCatalog getImageCatalog() {
