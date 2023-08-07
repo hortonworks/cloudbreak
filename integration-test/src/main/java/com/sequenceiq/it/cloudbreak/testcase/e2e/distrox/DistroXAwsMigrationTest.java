@@ -49,7 +49,7 @@ public class DistroXAwsMigrationTest extends AbstractE2ETest {
         testContext
                 .given(imgCatalogKey, ImageCatalogTestDto.class)
                 .withName(imgCatalogKey)
-                .withUrl("https://gist.githubusercontent.com/topolyai5/387af3f4b4914b0dab6e7090552bbcee/raw/f3531920f87f1bcc75aa2a28b042a9d47b5b36a7/" +
+                .withUrl("https://github.infra.cloudera.com/raw/cloudbreak/cloudbreak/master/integration-test/src/main/resources/catalog/" +
                         "os-upgrade-image-catalog.json")
                 .when(imageCatalogTestClient.createIfNotExistV4())
                 .given(DistroXImageTestDto.class)
