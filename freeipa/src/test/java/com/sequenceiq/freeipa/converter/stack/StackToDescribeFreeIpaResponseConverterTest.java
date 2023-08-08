@@ -164,7 +164,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
                 // TODO decorateWithCloudStorageAndTelemetry
                 .returns(USERSYNC_STATUS_RESPONSE, DescribeFreeIpaResponse::getUserSyncStatus)
                 .returns(tunnel, DescribeFreeIpaResponse::getTunnel)
-                .returns(true, DescribeFreeIpaResponse::isMultiAz);
+                .returns(true, DescribeFreeIpaResponse::isEnableMultiAz);
 
         assertThat(result.getRecipes()).containsExactlyInAnyOrder("recipe1", "recipe2");
         assertThat(freeIpaServerResponse)

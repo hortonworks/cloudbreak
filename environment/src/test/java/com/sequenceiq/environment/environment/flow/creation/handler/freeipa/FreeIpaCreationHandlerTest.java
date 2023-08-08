@@ -290,7 +290,7 @@ public class FreeIpaCreationHandlerTest {
                     assertEquals(spotMaxPrice, spotParameters.getMaxPrice());
                     assertEquals(spotPercentage, spotParameters.getPercentage());
                 });
-        assertEquals(freeIpaRequest.getMultiAz(), true);
+        assertEquals(freeIpaRequest.getEnableMultiAz(), true);
     }
 
     @Test
@@ -325,7 +325,7 @@ public class FreeIpaCreationHandlerTest {
         CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
         assertEquals(IMAGE_CATALOG, freeIpaRequest.getImage().getCatalog());
         assertEquals(IMAGE_ID, freeIpaRequest.getImage().getId());
-        assertEquals(freeIpaRequest.getMultiAz(), false);
+        assertEquals(freeIpaRequest.getEnableMultiAz(), false);
     }
 
     @Test
@@ -359,7 +359,7 @@ public class FreeIpaCreationHandlerTest {
         verify(eventSender, times(1)).sendEvent(any(EnvCreationEvent.class), any(Event.Headers.class));
         CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
         assertThat(freeIpaRequest.getInstanceGroups()).extracting(ig -> ig.getInstanceTemplate().getInstanceType()).containsOnly(INSTANCE_TYPE);
-        assertEquals(freeIpaRequest.getMultiAz(), false);
+        assertEquals(freeIpaRequest.getEnableMultiAz(), false);
     }
 
     @Test
