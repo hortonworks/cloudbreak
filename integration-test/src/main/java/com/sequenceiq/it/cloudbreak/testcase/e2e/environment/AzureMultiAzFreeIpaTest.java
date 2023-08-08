@@ -79,7 +79,7 @@ public class AzureMultiAzFreeIpaTest extends AbstractE2ETest {
 
     private FreeIpaTestDto validateMultiAz(TestContext testContext, FreeIpaTestDto freeIpaTestDto, FreeIpaClient freeIpaClient) {
         DescribeFreeIpaResponse  freeIpaResponse = freeIpaTestDto.getResponse();
-        if (!freeIpaResponse.isMultiAz()) {
+        if (!freeIpaResponse.isEnableMultiAz()) {
             throw new TestFailException(String.format("MultiAz is not enabled for %s", freeIpaResponse.getName()));
         }
         List<String> instancesWithNoAz = freeIpaResponse.getInstanceGroups().stream()
