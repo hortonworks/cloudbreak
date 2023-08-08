@@ -619,7 +619,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 sdxCluster.getRuntime(),
                 shape,
                 sdxCluster.isRangerRazEnabled(),
-                sdxCluster.isEnableMultiAz(),
+                sdxCluster.isEnableMultiAz()
+                        || sdxClusterResizeRequest.isEnableMultiAz(),
                 environment);
         newSdxCluster.setTags(sdxCluster.getTags());
         newSdxCluster.setCrn(sdxCluster.getCrn());

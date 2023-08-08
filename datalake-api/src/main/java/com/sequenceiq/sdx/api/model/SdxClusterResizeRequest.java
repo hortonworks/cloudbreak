@@ -33,6 +33,9 @@ public class SdxClusterResizeRequest {
     @ApiModelProperty(ModelDescriptions.SKIP_RANGER_METADATA)
     private boolean skipRangerMetadata;
 
+    @ApiModelProperty(ModelDescriptions.MULTI_AZ_ENABLED)
+    private boolean enableMultiAz;
+
     public String getEnvironment() {
         return environment;
     }
@@ -81,11 +84,24 @@ public class SdxClusterResizeRequest {
         this.skipRangerMetadata = skipRangerMetadata;
     }
 
+    public boolean isEnableMultiAz() {
+        return enableMultiAz;
+    }
+
+    public void setEnableMultiAz(boolean enableMultiAz) {
+        this.enableMultiAz = enableMultiAz;
+    }
+
     @Override
     public String toString() {
         return "SdxClusterResizeRequest{" +
                 "environment='" + environment + '\'' +
                 ", clusterShape=" + clusterShape +
+                ", skipValidation=" + skipValidation +
+                ", skipAtlasMetadata=" + skipAtlasMetadata +
+                ", skipRangerAudits=" + skipRangerAudits +
+                ", skipRangerMetadata=" + skipRangerMetadata +
+                ", enableMultiAz=" + enableMultiAz +
                 '}';
     }
 }

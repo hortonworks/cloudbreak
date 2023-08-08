@@ -133,7 +133,7 @@ public class ModelDescriptions {
 
     public static final String RANGER_RAZ_ENABLED = "Option to enable ranger raz.";
 
-    public static final String MULTI_AZ_ENABLED = "Option to enable multi AZ.";
+    public static final String MULTI_AZ_ENABLED = "Option to enable multi availability zones.";
 
     public static final String TAGS = "Tags.";
 
