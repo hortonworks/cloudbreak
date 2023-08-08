@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package meteringingestion;
+
+option java_package = "com.cloudera.thunderhead.service.meteringingestion";
+option java_outer_classname = "MeteringIngestionProto";
+option go_package = "com/cloudera/cdp/protobuf";
+
+import "version.proto";
+import "meteringv2events.proto";
+
+// For future compatibility, all RPCs must take a request and return a response
+// even if there is initially no content for these messages.
+service MeteringIngestion {
+  // Submit a new metering event
+  rpc SubmitEvent (SubmitEventRequest)
+      returns (SubmitEventResponse) {
+  }
+
+  // Get the service version.
+  rpc GetVersion (version.VersionRequest)
+      returns (version.VersionResponse) {}
+}
+
+// Request object for the SubmitEvent method.
+message SubmitEventRequest {
+  // The metering event to submit.
+  meteringv2events.MeteringEvent event = 1;
+}
+
+// Response object for the SubmitEvent method.
+message SubmitEventResponse {
+  // The SQS message ID.
+  string id = 1;
+}

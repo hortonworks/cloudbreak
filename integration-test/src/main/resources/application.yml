@@ -377,6 +377,9 @@ integrationtest:
   authdistributor:
     host: thunderhead-mock
 
+  metering:
+    host: thunderhead-mock
+
   telemetry:
     remoteWriteUrl:
 

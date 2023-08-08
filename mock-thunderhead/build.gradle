@@ -82,5 +82,6 @@ dependencies {
   implementation project(':cluster-dns-connector')
   implementation project(':sdx-connector')
   implementation project(':auth-distributor-connector')
+  implementation project(':metering-connector')
 
 }
