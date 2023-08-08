@@ -104,6 +104,10 @@ public class CloudbreakUtil {
     }
 
     public static void sleep() {
+        sleep(pollingInterval);
+    }
+
+    public static void sleep(long millis) {
         try {
             Thread.sleep(pollingInterval);
         } catch (InterruptedException e) {

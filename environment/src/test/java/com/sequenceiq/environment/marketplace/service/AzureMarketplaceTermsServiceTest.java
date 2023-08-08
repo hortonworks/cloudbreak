@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,10 +18,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.AccessDeniedException;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.environment.exception.MarketplaceTermsAlreadySetException;
 import com.sequenceiq.environment.marketplace.domain.Terms;
 import com.sequenceiq.environment.marketplace.repository.TermsRepository;
 
@@ -33,14 +31,17 @@ public class AzureMarketplaceTermsServiceTest {
     private TermsRepository termsRepository;
 
     @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+    private TransactionService transactionService;
 
     @InjectMocks
     private AzureMarketplaceTermsService azureMarketplaceTermsService;
 
     @BeforeEach
-    public void setUp() {
-        lenient().when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(mock(RegionAwareInternalCrnGenerator.class));
+    void init() throws TransactionService.TransactionExecutionException {
+        lenient().doAnswer(invocation -> {
+            invocation.getArgument(0, Runnable.class).run();
+            return null;
+        }).when(transactionService).required(any(Runnable.class));
     }
 
     @Test
@@ -55,7 +56,6 @@ public class AzureMarketplaceTermsServiceTest {
         Boolean result = azureMarketplaceTermsService.get(accountId);
 
         assertEquals(true, result);
-        verify(regionAwareInternalCrnGeneratorFactory.iam(), times(1)).getInternalCrnForServiceAsString();
         verify(termsRepository, times(1)).findByAccountId(accountId);
     }
 
@@ -68,7 +68,6 @@ public class AzureMarketplaceTermsServiceTest {
         Boolean result = azureMarketplaceTermsService.get(accountId);
 
         assertEquals(false, result);
-        verify(regionAwareInternalCrnGeneratorFactory.iam(), times(1)).getInternalCrnForServiceAsString();
         verify(termsRepository, times(1)).findByAccountId(accountId);
     }
 
@@ -109,7 +108,7 @@ public class AzureMarketplaceTermsServiceTest {
         when(termsRepository.findByAccountId(accountId)).thenReturn(Optional.of(terms));
         doThrow(DataIntegrityViolationException.class).when(termsRepository).save(terms);
 
-        assertThrows(AccessDeniedException.class, () -> azureMarketplaceTermsService.updateOrCreate(false, accountId));
+        assertThrows(MarketplaceTermsAlreadySetException.class, () -> azureMarketplaceTermsService.updateOrCreate(false, accountId));
 
         verify(termsRepository, times(1)).findByAccountId(accountId);
         verify(termsRepository, times(1)).save(terms);

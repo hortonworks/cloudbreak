@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.action.v1.terms;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +11,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.TermsPolicyDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
+import com.sequenceiq.it.cloudbreak.util.CloudbreakUtil;
 
 public class TermsPutAction implements Action<TermsPolicyDto, EnvironmentClient> {
 
@@ -16,12 +19,28 @@ public class TermsPutAction implements Action<TermsPolicyDto, EnvironmentClient>
 
     @Override
     public TermsPolicyDto action(TestContext testContext, TermsPolicyDto testDto, EnvironmentClient client) throws Exception {
-        AzureMarketplaceTermsResponse response = client.getDefaultClient().azureMarketplaceTermsEndpoint().get();
-        if (!response.getAccepted().equals(testDto.getRequest().getAccepted())) {
-            response = client.getDefaultClient().azureMarketplaceTermsEndpoint().put(testDto.getRequest());
-        }
+        AzureMarketplaceTermsResponse response = setOrGetAzureMarketplaceTermsWithRetry(testDto, client);
         testDto.setResponse(response);
         Log.whenJson(LOGGER, " Terms setting updated successfully:\n", testDto.getResponse());
         return testDto;
+    }
+
+    private AzureMarketplaceTermsResponse setOrGetAzureMarketplaceTermsWithRetry(TermsPolicyDto testDto, EnvironmentClient client) {
+        try {
+            return setOrGetAzureMarketplaceTerms(testDto, client);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to set/get AzureMarketplaceTerms for the first time, retrying.", e);
+            CloudbreakUtil.sleep(ThreadLocalRandom.current().nextInt(1000, 3000));
+            return setOrGetAzureMarketplaceTerms(testDto, client);
+        }
+    }
+
+    private AzureMarketplaceTermsResponse setOrGetAzureMarketplaceTerms(TermsPolicyDto testDto, EnvironmentClient client) {
+        AzureMarketplaceTermsResponse response = client.getDefaultClient().azureMarketplaceTermsEndpoint().get();
+        if (!response.getAccepted().equals(testDto.getRequest().getAccepted())) {
+            return client.getDefaultClient().azureMarketplaceTermsEndpoint().put(testDto.getRequest());
+        } else {
+            return response;
+        }
     }
 }
