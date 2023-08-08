@@ -66,8 +66,14 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         Region region = environmentDto.getRegions()
                 .stream().findFirst()
                 .orElseThrow();
-        checkSubnetsProvidedWhenExistingNetwork(resultBuilder, networkDto, networkDto.getAzure(), cloudNetworks, region);
+        checkSubnetsProvidedWhenExistingNetwork(resultBuilder, "subnet IDs", networkDto.getSubnetIds(), networkDto.getAzure(), cloudNetworks, region);
         checkFlexibleServerSubnetIds(networkDto.getAzure(), environmentValidationDto.getEnvironmentDto(), networkDto, resultBuilder);
+        if (CollectionUtils.isNotEmpty(networkDto.getEndpointGatewaySubnetIds())) {
+            LOGGER.debug("Checking EndpointGatewaySubnetIds {}", networkDto.getEndpointGatewaySubnetIds());
+            Map<String, CloudSubnet> endpointGatewayNetworks = cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(environmentDto, networkDto);
+            checkSubnetsProvidedWhenExistingNetwork(resultBuilder, "endpoint gateway subnet IDs",
+                    networkDto.getEndpointGatewaySubnetIds(), networkDto.getAzure(), endpointGatewayNetworks, region);
+        }
         if (environmentValidationDto.getValidationType() == ENVIRONMENT_CREATION) {
             azurePrivateEndpointValidator.checkNetworkPoliciesWhenExistingNetwork(networkDto, cloudNetworks, resultBuilder);
             azurePrivateEndpointValidator.checkMultipleResourceGroup(resultBuilder, environmentDto, networkDto);
@@ -105,24 +111,25 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
 
     private void checkEitherNetworkCidrOrNetworkIdIsPresent(NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
         if (StringUtils.isEmpty(networkDto.getNetworkCidr()) && StringUtils.isEmpty(networkDto.getNetworkId())) {
-            String message = "Either the AZURE network id or cidr needs to be defined!";
+            String message = "Either the AZURE networkId or CIDR needs to be defined!";
             LOGGER.info(message);
             resultBuilder.error(message);
         }
     }
 
-    private void checkSubnetsProvidedWhenExistingNetwork(ValidationResultBuilder resultBuilder, NetworkDto network,
-            AzureParams azureParams, Map<String, CloudSubnet> subnetMetas, Region region) {
+    private void checkSubnetsProvidedWhenExistingNetwork(ValidationResultBuilder resultBuilder, String context,
+            Set<String> subnetIds, AzureParams azureParams, Map<String, CloudSubnet> subnetMetas, Region region) {
         if (StringUtils.isNotEmpty(azureParams.getNetworkId()) && StringUtils.isNotEmpty(azureParams.getResourceGroupName())) {
-            if (CollectionUtils.isEmpty(network.getSubnetIds())) {
-                String message = String.format("If networkId (%s) and resourceGroupName (%s) are specified then subnet ids must be specified as well.",
-                        azureParams.getNetworkId(), azureParams.getResourceGroupName());
+            if (CollectionUtils.isEmpty(subnetIds)) {
+                String message = String.format("If networkId (%s) and resourceGroupName (%s) are specified then %s must be specified as well.",
+                        azureParams.getNetworkId(), azureParams.getResourceGroupName(), context);
                 LOGGER.info(message);
                 resultBuilder.error(message);
-            } else if (subnetMetas.size() != network.getSubnetIds().size()) {
-                String message = String.format("If networkId (%s) and resourceGroupName (%s) are specified then subnet ids must be specified and should exist " +
-                                "on azure as well. Given subnetids: [%s], existing ones: [%s], in region: [%s]", azureParams.getNetworkId(),
-                        azureParams.getResourceGroupName(), network.getSubnetIds().stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")),
+            } else if (subnetMetas.size() != subnetIds.size()) {
+                String message = String.format("If networkId (%s) and resourceGroupName (%s) are specified then %s must be specified and should exist " +
+                                "on Azure as well. Given %s: [%s], existing ones: [%s], in region: [%s]", azureParams.getNetworkId(),
+                        azureParams.getResourceGroupName(), context, context,
+                        subnetIds.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")),
                         subnetMetas.keySet().stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")), region.getDisplayName());
                 LOGGER.info(message);
                 resultBuilder.error(message);
@@ -143,11 +150,11 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
     }
 
     private void checkExistingNetworkParamsProvidedWhenSubnetsPresent(NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
-        if (!networkDto.getSubnetIds().isEmpty()
+        if ((CollectionUtils.isNotEmpty(networkDto.getSubnetIds()) || CollectionUtils.isNotEmpty(networkDto.getEndpointGatewaySubnetIds()))
                 && StringUtils.isEmpty(networkDto.getAzure().getNetworkId())
                 && StringUtils.isEmpty(networkDto.getAzure().getResourceGroupName())) {
             String message =
-                    String.format("If %s subnet ids were provided then network id and resource group name have to be specified, too.", AZURE.name());
+                    String.format("If %s subnet IDs were provided then network id and resource group name have to be specified, too.", AZURE.name());
             LOGGER.info(message);
             resultBuilder.error(message);
         }

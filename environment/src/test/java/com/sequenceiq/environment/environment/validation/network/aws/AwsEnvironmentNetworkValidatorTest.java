@@ -1,5 +1,6 @@
-package com.sequenceiq.environment.environment.validation.network;
+package com.sequenceiq.environment.environment.validation.network.aws;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -14,12 +15,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -29,7 +28,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
-import com.sequenceiq.environment.environment.validation.network.aws.AwsEnvironmentNetworkValidator;
+import com.sequenceiq.environment.environment.validation.network.NetworkTestUtils;
 import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AwsParams;
@@ -49,7 +48,6 @@ class AwsEnvironmentNetworkValidatorTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
         underTest = new AwsEnvironmentNetworkValidator(cloudNetworkService);
     }
 
@@ -146,7 +144,7 @@ class AwsEnvironmentNetworkValidatorTest {
 
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
-        NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of("Either the AWS network id or cidr needs to be defined!"));
+        NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of("Either the AWS network ID or CIDR needs to be defined!"));
     }
 
     @Test
@@ -170,7 +168,8 @@ class AwsEnvironmentNetworkValidatorTest {
 
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
-        NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of("There should be at least two Subnets in the environment network configuration")
+        NetworkTestUtils.checkErrorsPresent(validationResultBuilder,
+                List.of("There should be at least two Subnets in the environment network configuration.")
         );
     }
 
@@ -203,7 +202,7 @@ class AwsEnvironmentNetworkValidatorTest {
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
-                "Subnets of the environment (someenv) are not found in the VPC (key1, key0). All subnets are expected to belong to the same VPC"
+                "Subnet IDs of the environment (someenv) are not found in the VPC (key1, key0). All subnets are expected to belong to the same VPC."
         ));
     }
 
@@ -264,8 +263,8 @@ class AwsEnvironmentNetworkValidatorTest {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         underTest.checkNullable(CloudPlatform.AWS, null, resultBuilder);
         ValidationResult actual = resultBuilder.build();
-        Assertions.assertThat(actual.hasError()).isTrue();
-        Assertions.assertThat(actual.getFormattedErrors()).isEqualTo("Environment network cannot be null");
+        assertThat(actual.hasError()).isTrue();
+        assertThat(actual.getFormattedErrors()).isEqualTo("Environment network cannot be null");
     }
 
     @Test
@@ -274,7 +273,62 @@ class AwsEnvironmentNetworkValidatorTest {
         NetworkDto networkDto = mock(NetworkDto.class);
         underTest.checkNullable(CloudPlatform.AWS, networkDto, resultBuilder);
         ValidationResult actual = resultBuilder.build();
-        Assertions.assertThat(actual.hasError()).isFalse();
+        assertThat(actual.hasError()).isFalse();
+    }
+
+    @Test
+    void testValidateDuringFlowWhenEndpointGatewaySubnetIdNotInVPC() {
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, null, null, "1.2.3.4/16", 2, 2, RegistrationType.EXISTING);
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+
+        EnvironmentDto environmentDto = new EnvironmentDto();
+        environmentDto.setName(ENV_NAME);
+        environmentDto.setNetwork(networkDto);
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
+        Map<String, CloudSubnet> subnetMetas = new HashMap<>();
+        subnetMetas.put("key0", NetworkTestUtils.getCloudSubnet("eu-west-0-a"));
+        subnetMetas.put("key1", NetworkTestUtils.getCloudSubnet("eu-west-1-a"));
+
+        Map<String, CloudSubnet> endpointGwSubnetMetas = new HashMap<>();
+        endpointGwSubnetMetas.put("key0", NetworkTestUtils.getCloudSubnet("eu-west-0-a"));
+
+        when(cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto)).thenReturn(subnetMetas);
+        when(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(environmentDto, networkDto)).thenReturn(endpointGwSubnetMetas);
+
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
+
+        ValidationResult validationResult = validationResultBuilder.build();
+        assertTrue(validationResult.hasError());
+        assertThat(validationResult.getFormattedErrors())
+                .startsWith("Endpoint gateway subnet IDs of the environment (someenv) are not found in the VPC (key1).");
+    }
+
+    @Test
+    void testValidateDuringFlowWhenEndpointGatewaySubnetIdInVPC() {
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, null, null, "1.2.3.4/16", 2, 2, RegistrationType.EXISTING);
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+
+        EnvironmentDto environmentDto = new EnvironmentDto();
+        environmentDto.setName(ENV_NAME);
+        environmentDto.setNetwork(networkDto);
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
+        Map<String, CloudSubnet> subnetMetas = new HashMap<>();
+        subnetMetas.put("key0", NetworkTestUtils.getCloudSubnet("eu-west-0-a"));
+        subnetMetas.put("key1", NetworkTestUtils.getCloudSubnet("eu-west-1-a"));
+
+        Map<String, CloudSubnet> endpointGwSubnetMetas = new HashMap<>();
+        endpointGwSubnetMetas.put("key0", NetworkTestUtils.getCloudSubnet("eu-west-0-a"));
+        endpointGwSubnetMetas.put("key1", NetworkTestUtils.getCloudSubnet("eu-west-1-a"));
+
+        when(cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto)).thenReturn(subnetMetas);
+        when(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(environmentDto, networkDto)).thenReturn(endpointGwSubnetMetas);
+
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
+
+        ValidationResult validationResult = validationResultBuilder.build();
+        assertFalse(validationResult.hasError());
     }
 
     private AwsParams getAwsParams() {

@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.validation.network;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,7 +27,7 @@ public class NetworkTestUtils {
     }
 
     public static NetworkDto.Builder getNetworkDtoBuilder(AzureParams azureParams, AwsParams awsParams, YarnParams yarnParams, String networkId,
-            String networkCidr, Integer numberOfSubnets, RegistrationType registrationType) {
+            String networkCidr, Integer numberOfSubnets, Integer numberOfLoadBalancerSubnets, RegistrationType registrationType) {
         return NetworkDto.builder()
                 .withId(1L)
                 .withName("networkName")
@@ -38,12 +38,19 @@ public class NetworkTestUtils {
                 .withNetworkCidr(networkCidr)
                 .withNetworkId(networkId)
                 .withSubnetMetas(getSubnetMetas(numberOfSubnets))
+                .withEndpointGatewaySubnetMetas(getSubnetMetas(numberOfLoadBalancerSubnets))
                 .withRegistrationType(registrationType);
     }
 
     public static NetworkDto getNetworkDto(AzureParams azureParams, AwsParams awsParams, YarnParams yarnParams, String networkId, String networkCidr,
             Integer numberOfSubnets, RegistrationType registrationType) {
-        return getNetworkDtoBuilder(azureParams, awsParams, yarnParams, networkId, networkCidr, numberOfSubnets, registrationType)
+        return getNetworkDtoBuilder(azureParams, awsParams, yarnParams, networkId, networkCidr, numberOfSubnets, 0, registrationType)
+                .build();
+    }
+
+    public static NetworkDto getNetworkDto(AzureParams azureParams, AwsParams awsParams, YarnParams yarnParams, String networkId, String networkCidr,
+            Integer numberOfSubnets, Integer numberOfLoadbalancerSubnets, RegistrationType registrationType) {
+        return getNetworkDtoBuilder(azureParams, awsParams, yarnParams, networkId, networkCidr, numberOfSubnets, numberOfLoadbalancerSubnets, registrationType)
                 .build();
     }
 
@@ -89,7 +96,7 @@ public class NetworkTestUtils {
         return subnetMetas;
     }
 
-    static CloudSubnet getCloudSubnet(String availabilityZone) {
+    public static CloudSubnet getCloudSubnet(String availabilityZone) {
         return new CloudSubnet("eu-west-1", "name", availabilityZone, "cidr");
     }
 
@@ -110,7 +117,7 @@ public class NetworkTestUtils {
         ValidationResult validationResult = resultBuilder.build();
         assertEquals(errorMessages.size(), validationResult.getErrors().size(), validationResult.getFormattedErrors());
         List<String> actual = validationResult.getErrors();
-        errorMessages.forEach(message -> assertTrue(actual.stream().anyMatch(item -> item.equals(message)), validationResult::getFormattedErrors));
+        errorMessages.forEach(message -> assertThat(actual).contains(message));
     }
 
 }

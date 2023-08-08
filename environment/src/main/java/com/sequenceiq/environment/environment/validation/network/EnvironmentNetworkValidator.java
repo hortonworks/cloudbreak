@@ -1,8 +1,5 @@
 package com.sequenceiq.environment.environment.validation.network;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
@@ -54,16 +51,6 @@ public interface EnvironmentNetworkValidator {
     default boolean isNetworkExisting(@NotNull NetworkDto networkDto) {
         NullUtil.throwIfNull(networkDto, () -> new IllegalArgumentException("NetworkDto should not be null"));
         return networkDto.getRegistrationType() == RegistrationType.EXISTING || StringUtils.isEmpty(networkDto.getNetworkCidr());
-    }
-
-    default Set<String> getSubnetDiff(Set<String> subnets, Set<String> subnetMetaKeys) {
-        Set<String> diff = new HashSet<>();
-        for (String envSubnet : subnets) {
-            if (!subnetMetaKeys.contains(envSubnet)) {
-                diff.add(envSubnet);
-            }
-        }
-        return diff;
     }
 
     default void checkNullable(CloudPlatform cloudPlatform, NetworkDto networkDto, ValidationResultBuilder resultBuilder) {

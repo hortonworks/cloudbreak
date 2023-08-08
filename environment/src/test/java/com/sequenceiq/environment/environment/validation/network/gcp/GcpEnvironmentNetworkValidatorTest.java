@@ -3,6 +3,8 @@ package com.sequenceiq.environment.environment.validation.network.gcp;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -23,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -161,13 +164,13 @@ class GcpEnvironmentNetworkValidatorTest {
                         .build())
                 .build();
         CloudRegions cloudRegions = new CloudRegions(Map.of(), Map.of(), Map.of(), "defaultRegion", Boolean.TRUE);
-        when(platformParameterService.getRegionsByCredential(any(), Mockito.eq(Boolean.TRUE))).thenReturn(cloudRegions);
+        when(platformParameterService.getRegionsByCredential(any(), eq(Boolean.TRUE))).thenReturn(cloudRegions);
 
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
         verify(cloudNetworkService, times(1)).retrieveSubnetMetadata(any(EnvironmentDto.class), any(NetworkDto.class));
         verifyNoMoreInteractions(cloudNetworkService);
-        verify(platformParameterService, times(1)).getRegionsByCredential(any(), Mockito.eq(Boolean.TRUE));
+        verify(platformParameterService, times(1)).getRegionsByCredential(any(), eq(Boolean.TRUE));
         verifyNoInteractions(validationResultBuilder);
     }
 
@@ -186,13 +189,13 @@ class GcpEnvironmentNetworkValidatorTest {
                 .build();
 
         CloudRegions cloudRegions = new CloudRegions(Map.of(), Map.of(), Map.of(), "defaultRegion", Boolean.TRUE);
-        when(platformParameterService.getRegionsByCredential(any(), Mockito.eq(Boolean.TRUE))).thenReturn(cloudRegions);
+        when(platformParameterService.getRegionsByCredential(any(), eq(Boolean.TRUE))).thenReturn(cloudRegions);
 
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
         verify(cloudNetworkService, times(1)).retrieveSubnetMetadata(any(EnvironmentDto.class), any(NetworkDto.class));
         verifyNoMoreInteractions(cloudNetworkService);
-        verify(platformParameterService, times(1)).getRegionsByCredential(any(), Mockito.eq(Boolean.TRUE));
+        verify(platformParameterService, times(1)).getRegionsByCredential(any(), eq(Boolean.TRUE));
         verifyNoInteractions(validationResultBuilder);
     }
 
@@ -211,13 +214,13 @@ class GcpEnvironmentNetworkValidatorTest {
                 .build();
 
         CloudRegions cloudRegions = new CloudRegions(Map.of(), Map.of(), Map.of(), "defaultRegion", Boolean.TRUE);
-        when(platformParameterService.getRegionsByCredential(any(), Mockito.eq(Boolean.TRUE))).thenReturn(cloudRegions);
+        when(platformParameterService.getRegionsByCredential(any(), eq(Boolean.TRUE))).thenReturn(cloudRegions);
 
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
         verify(cloudNetworkService, times(1)).retrieveSubnetMetadata(any(EnvironmentDto.class), any(NetworkDto.class));
         verifyNoMoreInteractions(cloudNetworkService);
-        verify(platformParameterService, times(1)).getRegionsByCredential(any(), Mockito.eq(Boolean.TRUE));
+        verify(platformParameterService, times(1)).getRegionsByCredential(any(), eq(Boolean.TRUE));
         verifyNoInteractions(validationResultBuilder);
     }
 
@@ -240,13 +243,13 @@ class GcpEnvironmentNetworkValidatorTest {
 
         Map<Region, List<AvailabilityZone>> zonesByRegion = Map.of(Region.region("anotherRegion"), List.of(availabilityZone("gcp-region-zone-2")));
         CloudRegions cloudRegions = new CloudRegions(zonesByRegion, Map.of(), Map.of(), "region", Boolean.TRUE);
-        when(platformParameterService.getRegionsByCredential(any(), Mockito.eq(Boolean.TRUE))).thenReturn(cloudRegions);
+        when(platformParameterService.getRegionsByCredential(any(), eq(Boolean.TRUE))).thenReturn(cloudRegions);
 
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
         verify(cloudNetworkService, times(1)).retrieveSubnetMetadata(any(EnvironmentDto.class), any(NetworkDto.class));
         verifyNoMoreInteractions(cloudNetworkService);
-        verify(platformParameterService, times(1)).getRegionsByCredential(any(), Mockito.eq(Boolean.TRUE));
+        verify(platformParameterService, times(1)).getRegionsByCredential(any(), eq(Boolean.TRUE));
         String expectedErrorMsg = String.format(INVALID_REGION_PATTERN, region.getRegionName());
         verify(validationResultBuilder, times(1)).error(expectedErrorMsg);
     }
@@ -271,16 +274,13 @@ class GcpEnvironmentNetworkValidatorTest {
                         .build())
                 .build();
 
-        List<AvailabilityZone> providerZones = List.of(availabilityZone(reqValidZone), availabilityZone(validZone));
-        Map<Region, List<AvailabilityZone>> zonesByRegion = Map.of(region, providerZones);
-        CloudRegions cloudRegions = new CloudRegions(zonesByRegion, Map.of(), Map.of(), "region", Boolean.TRUE);
-        when(platformParameterService.getRegionsByCredential(any(), Mockito.eq(Boolean.TRUE))).thenReturn(cloudRegions);
+        List<AvailabilityZone> providerZones = setupRegionsByCredential(region, reqValidZone, validZone);
 
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
         verify(cloudNetworkService, times(1)).retrieveSubnetMetadata(any(EnvironmentDto.class), any(NetworkDto.class));
         verifyNoMoreInteractions(cloudNetworkService);
-        verify(platformParameterService, times(1)).getRegionsByCredential(any(), Mockito.eq(Boolean.TRUE));
+        verify(platformParameterService, times(1)).getRegionsByCredential(any(), eq(Boolean.TRUE));
         String expectedErrorMsg = String.format(INVALID_ZONE_PATTERN,
                 region.getRegionName(),
                 reqInvalidZone,
@@ -305,16 +305,83 @@ class GcpEnvironmentNetworkValidatorTest {
                         .build())
                 .build();
 
-        List<AvailabilityZone> zonesFromProvider = List.of(availabilityZone("gcp-region-zone-1"), availabilityZone("gcp-region-zone-2"));
-        Map<Region, List<AvailabilityZone>> zonesByRegion = Map.of(region, zonesFromProvider);
-        CloudRegions cloudRegions = new CloudRegions(zonesByRegion, Map.of(), Map.of(), "region", Boolean.TRUE);
-        when(platformParameterService.getRegionsByCredential(any(), Mockito.eq(Boolean.TRUE))).thenReturn(cloudRegions);
+        setupRegionsByCredential(region, "gcp-region-zone-1", "gcp-region-zone-2");
 
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
         verify(cloudNetworkService, times(1)).retrieveSubnetMetadata(any(EnvironmentDto.class), any(NetworkDto.class));
         verifyNoMoreInteractions(cloudNetworkService);
-        verify(platformParameterService, times(1)).getRegionsByCredential(any(), Mockito.eq(Boolean.TRUE));
+        verify(platformParameterService, times(1)).getRegionsByCredential(any(), eq(Boolean.TRUE));
         verifyNoInteractions(validationResultBuilder);
+    }
+
+    @Test
+    void testValidateDuringFlowWhenEndpointGatewaySubnetIdNotInVPC() {
+        Region region = Region.region("region");
+
+        Map<String, CloudSubnet> eagMetas = Map.of("eagsubnet1", new CloudSubnet("eid1",  "eagsubnet1"));
+        Map<String, CloudSubnet> metas = Map.of("subnet1", new CloudSubnet("id1",  "subnet1"));
+
+        NetworkDto networkDto = NetworkDto.builder()
+                .withGcp(GcpParams.builder().withNetworkId("gcpNetworkId").build())
+                .withSubnetMetas(metas)
+                .withEndpointGatewaySubnetMetas(eagMetas)
+                .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder()
+                .withEnvironmentDto(EnvironmentDto.builder()
+                        .withLocationDto(LocationDto.builder()
+                                .withName(region.getRegionName())
+                                .build())
+                        .build())
+                .build();
+
+        setupRegionsByCredential(region, "gcp-region-zone-1", "gcp-region-zone-2");
+
+        when(cloudNetworkService.retrieveSubnetMetadata(any(EnvironmentDto.class), any(NetworkDto.class))).thenReturn(metas);
+
+        Map<String, CloudSubnet> providerSubnets = Map.of("providerSubnet1", new CloudSubnet("pnid1",  "providerSubnet1"),
+                "providerSubnet2", new CloudSubnet("pnid2",  "providerSubnet2"));
+        when(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(any(EnvironmentDto.class), any(NetworkDto.class))).thenReturn(providerSubnets);
+
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
+        verify(validationResultBuilder, times(1)).error(startsWith(
+                "If networkId (gcpNetworkId) is given then endpoint gateway subnet IDs must be specified and must exist on GCP as well."));
+    }
+
+    @Test
+    void testValidateDuringFlowWhenEndpointGatewaySubnetIdIsInVPC() {
+        Region region = Region.region("region");
+
+        Map<String, CloudSubnet> eagMetas = Map.of("eagsubnet1", new CloudSubnet("eid1",  "eagsubnet1"));
+        Map<String, CloudSubnet> metas = Map.of("subnet1", new CloudSubnet("id1",  "subnet1"));
+
+        NetworkDto networkDto = NetworkDto.builder()
+                .withGcp(GcpParams.builder().withNetworkId("gcpNetworkId").build())
+                .withSubnetMetas(metas)
+                .withEndpointGatewaySubnetMetas(eagMetas)
+                .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder()
+                .withEnvironmentDto(EnvironmentDto.builder()
+                        .withLocationDto(LocationDto.builder()
+                                .withName(region.getRegionName())
+                                .build())
+                        .build())
+                .build();
+
+        setupRegionsByCredential(region, "gcp-region-zone-1", "gcp-region-zone-2");
+
+        when(cloudNetworkService.retrieveSubnetMetadata(any(EnvironmentDto.class), any(NetworkDto.class))).thenReturn(metas);
+        when(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(any(EnvironmentDto.class), any(NetworkDto.class))).thenReturn(eagMetas);
+
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
+        verifyNoInteractions(validationResultBuilder);
+    }
+
+    private List<AvailabilityZone> setupRegionsByCredential(Region region, String zone1, String zone2) {
+        List<AvailabilityZone> zonesFromProvider = List.of(availabilityZone(zone1), availabilityZone(zone2));
+        Map<Region, List<AvailabilityZone>> zonesByRegion = Map.of(region, zonesFromProvider);
+        CloudRegions cloudRegions = new CloudRegions(zonesByRegion, Map.of(), Map.of(), "region", Boolean.TRUE);
+        when(platformParameterService.getRegionsByCredential(any(), eq(Boolean.TRUE))).thenReturn(cloudRegions);
+        return zonesFromProvider;
     }
 }

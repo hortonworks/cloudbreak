@@ -1,11 +1,13 @@
 package com.sequenceiq.environment.environment.validation.network.aws;
 
-
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,53 +36,88 @@ public class AwsEnvironmentNetworkValidator implements EnvironmentNetworkValidat
 
     @Override
     public void validateDuringFlow(EnvironmentValidationDto environmentValidationDto, NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
-        String message;
         EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
 
         if (networkDto != null && networkDto.getRegistrationType() == RegistrationType.EXISTING) {
-            Map<String, CloudSubnet> cloudmetadata = cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto);
-            if (StringUtils.isEmpty(networkDto.getNetworkCidr()) && StringUtils.isEmpty(networkDto.getNetworkId())) {
-                message = "Either the AWS network id or cidr needs to be defined!";
-                LOGGER.info(message);
-                resultBuilder.error(message);
+            if (missingCidrOrNetwork(resultBuilder, networkDto)) {
                 return;
             }
-            if (networkDto.getSubnetMetas().size() != cloudmetadata.size()) {
-                message = String.format("Subnets of the environment (%s) are not found in the VPC (%s). All subnets are expected to belong to the same VPC",
-                        environmentDto.getName(), String.join(", ", getSubnetDiff(networkDto.getSubnetIds(), cloudmetadata.keySet())));
-                LOGGER.info(message);
-                resultBuilder.error(message);
+            Map<String, CloudSubnet> cloudSubnetMetadata = cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto);
+            if (subnetsNotFoundInVpc(resultBuilder, "Subnet IDs", environmentDto, networkDto.getSubnetMetas(), cloudSubnetMetadata)) {
                 return;
             }
-            if (cloudmetadata.size() < 2) {
-                message = "There should be at least two Subnets in the environment network configuration";
-                LOGGER.info(message);
-                resultBuilder.error(message);
+            if (tooFewSubnets(resultBuilder, cloudSubnetMetadata)) {
                 return;
             }
-            Map<String, Long> zones = cloudmetadata.values().stream()
-                    .collect(Collectors.groupingBy(CloudSubnet::getAvailabilityZone, Collectors.counting()));
-            if (zones.size() < 2) {
-                message = String.format("The Subnets in the VPC (%s) should be present at least in two different " +
-                        "availability zones, but they are present only in availability zone %s. Please add " +
-                        "subnets to the environment from the required number of different availability zones.",
-                        String.join(", ", zones.keySet()
-                                .stream()
-                                .collect(Collectors.toList())),
-                        String.join(", ", cloudmetadata.values()
-                                .stream()
-                                .map(e -> e.getName())
-                                .collect(Collectors.toList())));
-                LOGGER.info(message);
-                resultBuilder.error(message);
+            if (tooFewAvailabilityZones(resultBuilder, cloudSubnetMetadata)) {
+                return;
+            }
+            if (CollectionUtils.isNotEmpty(networkDto.getEndpointGatewaySubnetIds())) {
+                Map<String, CloudSubnet> cloudLoadBalancerSubnetMetadata =
+                        cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(environmentDto, networkDto);
+                if (subnetsNotFoundInVpc(resultBuilder, "Endpoint gateway subnet IDs",
+                        environmentDto, networkDto.getEndpointGatewaySubnetMetas(), cloudLoadBalancerSubnetMetadata)) {
+                    return;
+                }
             }
         }
+    }
+
+    private boolean missingCidrOrNetwork(ValidationResultBuilder resultBuilder, NetworkDto networkDto) {
+        if (StringUtils.isEmpty(networkDto.getNetworkCidr()) && StringUtils.isEmpty(networkDto.getNetworkId())) {
+            String message = "Either the AWS network ID or CIDR needs to be defined!";
+            LOGGER.info(message);
+            resultBuilder.error(message);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean subnetsNotFoundInVpc(ValidationResultBuilder resultBuilder, String context, EnvironmentDto environmentDto,
+            Map<String, CloudSubnet> subnetMetas, Map<String, CloudSubnet> subnetsFromProvider) {
+        if (subnetMetas.size() != subnetsFromProvider.size()) {
+            String message = String.format("%s of the environment (%s) are not found in the VPC (%s). All subnets are expected to belong to the same VPC.",
+                    context, environmentDto.getName(), String.join(", ", SetUtils.difference(subnetMetas.keySet(), subnetsFromProvider.keySet())));
+            LOGGER.info(message);
+            resultBuilder.error(message);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean tooFewSubnets(ValidationResultBuilder resultBuilder, Map<String, CloudSubnet> cloudmetadata) {
+        if (cloudmetadata.size() < 2) {
+            String message = "There should be at least two Subnets in the environment network configuration.";
+            LOGGER.info(message);
+            resultBuilder.error(message);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean tooFewAvailabilityZones(ValidationResultBuilder resultBuilder, Map<String, CloudSubnet> cloudmetadata) {
+        Map<String, Long> zones = cloudmetadata.values().stream()
+                .collect(Collectors.groupingBy(CloudSubnet::getAvailabilityZone, Collectors.counting()));
+        if (zones.size() < 2) {
+            String message = String.format("The Subnets in the VPC (%s) should be present at least in two different " +
+                            "availability zones, but they are present only in availability zone %s. Please add " +
+                            "subnets to the environment from the required number of different availability zones.",
+                    String.join(", ", new ArrayList<>(zones.keySet())),
+                    cloudmetadata.values()
+                            .stream()
+                            .map(CloudSubnet::getName)
+                            .collect(Collectors.joining(", ")));
+            LOGGER.info(message);
+            resultBuilder.error(message);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public void validateDuringRequest(NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
         if (networkDto != null && isNetworkExisting(networkDto)) {
-            LOGGER.debug("Validation - existing - AWS network param(s) during requiest time");
+            LOGGER.debug("Validation - existing - AWS network param(s) during request time");
             if (networkDto.getAws() != null) {
                 if (StringUtils.isEmpty(networkDto.getAws().getVpcId())) {
                     resultBuilder.error(missingParamErrorMessage("VPC identifier(vpcId)", getCloudPlatform().name()));

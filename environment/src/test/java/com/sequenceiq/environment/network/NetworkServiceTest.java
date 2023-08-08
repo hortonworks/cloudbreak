@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.network;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
@@ -54,7 +56,7 @@ import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
 @ExtendWith(MockitoExtension.class)
-public class NetworkServiceTest {
+class NetworkServiceTest {
 
     private BaseNetworkRepository networkRepository = mock(BaseNetworkRepository.class);
 
@@ -79,7 +81,7 @@ public class NetworkServiceTest {
             regionAwareCrnGenerator);
 
     @Test
-    public void testSaveNetworkIfNewNetwork() {
+    void testSaveNetworkIfNewNetwork() {
         NetworkDto networkDto = mock(NetworkDto.class);
         EnvironmentNetworkConverter environmentNetworkConverter = mock(EnvironmentNetworkConverter.class);
         Network network = mock(Network.class);
@@ -102,7 +104,7 @@ public class NetworkServiceTest {
     }
 
     @Test
-    public void testRefreshMetadataFromAwsCloudProviderMustUseSubnetId() {
+    void testRefreshMetadataFromAwsCloudProviderMustUseSubnetId() {
         NetworkDto networkDto = mock(NetworkDto.class);
         AuthenticationDto authenticationDto = mock(AuthenticationDto.class);
         EnvironmentTelemetry environmentTelemetry = mock(EnvironmentTelemetry.class);
@@ -157,7 +159,7 @@ public class NetworkServiceTest {
     }
 
     @Test
-    public void testRefreshMetadataFromGoogleCloudProviderMustUseSubnetName() {
+    void testRefreshMetadataFromGoogleCloudProviderMustUseSubnetName() {
         NetworkDto networkDto = mock(NetworkDto.class);
         AuthenticationDto authenticationDto = mock(AuthenticationDto.class);
         EnvironmentTelemetry environmentTelemetry = mock(EnvironmentTelemetry.class);
@@ -220,7 +222,7 @@ public class NetworkServiceTest {
 
     @ParameterizedTest
     @EnumSource(CloudPlatform.class)
-    public void testMergeNetworkDtoWithNetworkIfNetworkCreateNew(CloudPlatform cloudPlatform) {
+    void testMergeNetworkDtoWithNetworkIfNetworkCreateNew(CloudPlatform cloudPlatform) {
         AwsNetwork baseNetwork = new AwsNetwork();
         baseNetwork.setSubnetMetas(Collections.emptyMap());
         baseNetwork.setRegistrationType(RegistrationType.CREATE_NEW);
@@ -256,7 +258,7 @@ public class NetworkServiceTest {
     }
 
     @Test
-    public void testMergeNetworkDtoWithNetworkForAvailabilityZonesInAzure() {
+    void testMergeNetworkDtoWithNetworkForAvailabilityZonesInAzure() {
         BaseNetwork baseNetwork = new AzureNetwork();
         baseNetwork.setSubnetMetas(Collections.emptyMap());
         Environment environment = new Environment();
@@ -278,7 +280,7 @@ public class NetworkServiceTest {
     }
 
     @Test
-    public void testRefreshMetadataFromCloudProviderWhenVpcHasMultipleCidrs() {
+    void testRefreshMetadataFromCloudProviderWhenVpcHasMultipleCidrs() {
         String primaryCidr = "10.0.0.0/16";
         String secondaryCidr = "10.2.0.0/16";
         AwsNetwork baseNetwork = new AwsNetwork();
@@ -303,5 +305,41 @@ public class NetworkServiceTest {
         verify(environmentNetworkService, times(1)).getNetworkCidr(network, environment.getCloudPlatform(), environment.getCredential());
         Assertions.assertEquals(primaryCidr, actualNetwork.getNetworkCidr());
         Assertions.assertEquals(StringUtils.join(networkCidr.getCidrs(), ","), actualNetwork.getNetworkCidrs());
+    }
+
+    @Test
+    void testClonedNetworkDtoHasSubnet() {
+        NetworkDto editNetworkDto = NetworkDto.builder()
+                .withSubnetMetas(Map.of("editedSubnet1", new CloudSubnet()))
+                .build();
+        NetworkDto capturedNetwork = captureNetworkFromSubnetEditValidate(editNetworkDto);
+        assertThat(capturedNetwork.getSubnetIds()).hasSameElementsAs(Set.of("editedSubnet1"));
+    }
+
+    @Test
+    void testClonedNetworkDtoHasEndpointGatewaySubnet() {
+        NetworkDto editNetworkDto = NetworkDto.builder()
+                .withEndpointGatewaySubnetMetas(Map.of("editedGwSubnet1", new CloudSubnet()))
+                .build();
+        NetworkDto capturedNetwork = captureNetworkFromSubnetEditValidate(editNetworkDto);
+        assertThat(capturedNetwork.getEndpointGatewaySubnetIds()).hasSameElementsAs(Set.of("editedGwSubnet1"));
+    }
+
+    private NetworkDto captureNetworkFromSubnetEditValidate(NetworkDto editNetworkDto) {
+        BaseNetwork baseNetwork = new AwsNetwork();
+        baseNetwork.setSubnetMetas(Collections.emptyMap());
+        Environment environment = new Environment();
+        environment.setCloudPlatform(CloudPlatform.AWS.name());
+        environment.setNetwork(baseNetwork);
+        NetworkDto savedNetwork = NetworkDto.builder().build();
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder().withNetwork(editNetworkDto).build();
+        when(environmentNetworkConverterMap.get(CloudPlatform.AWS)).thenReturn(environmentNetworkConverter);
+        when(environmentNetworkConverter.convertToDto(baseNetwork)).thenReturn(savedNetwork);
+        when(networkCreationValidator.validateNetworkEdit(eq(environment), any(NetworkDto.class)))
+                .thenReturn(new ValidationResult.ValidationResultBuilder());
+        underTest.validate(baseNetwork, environmentEditDto, environment);
+        ArgumentCaptor<NetworkDto> networkCaptor = ArgumentCaptor.forClass(NetworkDto.class);
+        verify(networkCreationValidator).validateNetworkEdit(eq(environment), networkCaptor.capture());
+        return networkCaptor.getValue();
     }
 }

@@ -62,8 +62,15 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
         }
 
         EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
-        checkSubnetsProvidedWhenExistingNetwork(resultBuilder, networkDto, networkDto.getGcp(),
+        checkSubnetsProvidedWhenExistingNetwork(resultBuilder, "subnet IDs",
+                networkDto.getSubnetIds(), networkDto.getGcp(),
                 cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto));
+        if (CollectionUtils.isNotEmpty(networkDto.getEndpointGatewaySubnetIds())) {
+            LOGGER.debug("Checking EndpointGatewaySubnetIds {}", networkDto.getEndpointGatewaySubnetIds());
+            checkSubnetsProvidedWhenExistingNetwork(resultBuilder, "endpoint gateway subnet IDs",
+                    networkDto.getEndpointGatewaySubnetIds(), networkDto.getGcp(),
+                    cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(environmentDto, networkDto));
+        }
         checkAvailabilityZones(resultBuilder, environmentDto, networkDto);
     }
 
@@ -90,18 +97,18 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
         }
     }
 
-    private void checkSubnetsProvidedWhenExistingNetwork(ValidationResult.ValidationResultBuilder resultBuilder, NetworkDto network,
-        GcpParams gcpParams, Map<String, CloudSubnet> subnetMetas) {
+    private void checkSubnetsProvidedWhenExistingNetwork(ValidationResult.ValidationResultBuilder resultBuilder, String context,
+            Set<String> subnetIds, GcpParams gcpParams, Map<String, CloudSubnet> subnetMetas) {
         if (StringUtils.isNotEmpty(gcpParams.getNetworkId())) {
-            if (CollectionUtils.isEmpty(network.getSubnetIds())) {
-                String message = String.format("If networkId (%s) is given then subnet ids must exist on GCP as well.",
-                        gcpParams.getNetworkId());
+            if (CollectionUtils.isEmpty(subnetIds)) {
+                String message = String.format("If networkId (%s) is given then %s must exist on GCP as well.",
+                        gcpParams.getNetworkId(), context);
                 LOGGER.info(message);
                 resultBuilder.error(message);
-            } else if (subnetMetas.size() != network.getSubnetIds().size()) {
-                String message = String.format("If networkId (%s) is given then subnet ids must be specified and must exist on GCP as well. " +
-                                " Given subnetids: [%s], exisiting ones: [%s]", gcpParams.getNetworkId(),
-                        network.getSubnetIds().stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")),
+            } else if (subnetMetas.size() != subnetIds.size()) {
+                String message = String.format("If networkId (%s) is given then %s must be specified and must exist on GCP as well. " +
+                                "Given %s: [%s], exisiting ones: [%s]", gcpParams.getNetworkId(), context, context,
+                        subnetIds.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")),
                         subnetMetas.keySet().stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")));
                 LOGGER.info(message);
                 resultBuilder.error(message);
@@ -110,7 +117,7 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
     }
 
     private void checkExistingNetworkParamsProvidedWhenSubnetsPresent(NetworkDto networkDto, ValidationResult.ValidationResultBuilder resultBuilder) {
-        if (!networkDto.getSubnetIds().isEmpty()
+        if ((CollectionUtils.isNotEmpty(networkDto.getSubnetIds()) || CollectionUtils.isNotEmpty(networkDto.getEndpointGatewaySubnetIds()))
                 && StringUtils.isEmpty(networkDto.getGcp().getNetworkId())) {
             String message =
                     String.format("If %s subnet ids were provided then network id have to be specified, too.", GCP.name());
@@ -120,7 +127,7 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
     }
 
     private void checkNetworkIdIsSpecifiedWhenSubnetIdsArePresent(ValidationResult.ValidationResultBuilder resultBuilder,
-        GcpParams gcpParams, NetworkDto networkDto) {
+            GcpParams gcpParams, NetworkDto networkDto) {
         if (StringUtils.isEmpty(gcpParams.getNetworkId()) && CollectionUtils.isNotEmpty(networkDto.getSubnetIds())) {
             resultBuilder.error("If subnetIds are given, then networkId must be specified too.");
         }
@@ -137,7 +144,7 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
         }
     }
 
-    private static void checkAvailabilityZones(ValidationResult.ValidationResultBuilder resultBuilder, GcpParams gcpParams) {
+    private void checkAvailabilityZones(ValidationResult.ValidationResultBuilder resultBuilder, GcpParams gcpParams) {
         Set<String> availabilityZones = gcpParams.getAvailabilityZones();
         if (CollectionUtils.isNotEmpty(availabilityZones) && availabilityZones.size() > 1) {
             LOGGER.info(MULTIPLE_AVAILABILITY_ZONES_PROVIDED_ERROR_MSG);
