@@ -76,6 +76,8 @@ upgrade_postgresql_db:
     - makedirs: True
     - source: {{ original_postgres_directory}}/certs
     - force: True
+    - user: postgres
+    - group: postgres
     - require:
       - cmd: upgrade_postgresql_db
 
