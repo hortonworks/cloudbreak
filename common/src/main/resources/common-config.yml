@@ -148,7 +148,7 @@ jobs:
 cb:
   db.override:
     minRuntimeVersion: 7.2.7
-    engineVersion: 11
+    engineVersion: 14
     aws.fallback:
       enabled: true
       targetversion: "11.16"

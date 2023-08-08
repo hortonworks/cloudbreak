@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 
 @Component
@@ -23,24 +24,34 @@ public class DatabaseDefaultVersionProvider {
 
     private final VersionComparator versionComparator = new VersionComparator();
 
-    public String calculateDbVersionBasedOnRuntimeAndOsIfMissing(String runtime, String os, String requestedDbEngineVersion) {
+    public String calculateDbVersionBasedOnRuntimeAndOsIfMissing(String runtime, String os, String requestedDbEngineVersion, CloudPlatform cloudPlatform,
+            boolean externalDb) {
         if (StringUtils.isNotBlank(requestedDbEngineVersion)) {
             LOGGER.debug("DB engine version already requested to be [{}]", requestedDbEngineVersion);
             return requestedDbEngineVersion;
         } else if (StringUtils.isNotBlank(runtime)) {
             if (0 <= versionComparator.compare(() -> runtime, () -> minRuntimeVersion)) {
                 LOGGER.debug("Setting DB engine version to [{}] for runtime [{}]", dbEngineVersion, runtime);
-                return dbEngineVersion;
+                return choosePg11InCaseOfAzureExternalDb(dbEngineVersion, cloudPlatform, externalDb);
             } else {
                 LOGGER.debug("Setting DB engine version to 'null' for runtime [{}]", runtime);
                 return null;
             }
         } else if (REDHAT_8.equalsIgnoreCase(os)) {
             LOGGER.debug("Setting DB engine version to [{}] for os [{}]", dbEngineVersion, os);
-            return dbEngineVersion;
+            return choosePg11InCaseOfAzureExternalDb(dbEngineVersion, cloudPlatform, externalDb);
         } else {
             LOGGER.warn("Setting DB engine version to 'null' for runtime [{}] and os [{}]", runtime, os);
             return null;
+        }
+    }
+
+    private String choosePg11InCaseOfAzureExternalDb(String dbEngineVersion, CloudPlatform cloudPlatform, boolean externalDb) {
+        if (CloudPlatform.AZURE == cloudPlatform && externalDb) {
+            LOGGER.info("Selecting PG11 for Azure external DB");
+            return "11";
+        } else {
+            return dbEngineVersion;
         }
     }
 }

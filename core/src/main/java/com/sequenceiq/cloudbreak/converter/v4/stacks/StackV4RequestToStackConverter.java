@@ -237,7 +237,7 @@ public class StackV4RequestToStackConverter {
     }
 
     private void convertDatabase(StackV4Request source, Stack stack) {
-        stack.setDatabase(databaseRequestToDatabaseConverter.convert(stack, source.getCloudPlatform(), source.getExternalDatabase()));
+        stack.setDatabase(databaseRequestToDatabaseConverter.convert(source.getCloudPlatform(), source.getExternalDatabase()));
     }
 
     private void setTimeToLive(StackV4Request source, Stack stack) {

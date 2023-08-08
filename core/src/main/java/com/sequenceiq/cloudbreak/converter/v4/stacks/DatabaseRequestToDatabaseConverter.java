@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.common.model.AzureDatabaseType;
 
 @Component
@@ -29,7 +28,7 @@ public class DatabaseRequestToDatabaseConverter {
     @Inject
     private EntitlementService entitlementService;
 
-    public Database convert(Stack stack, CloudPlatform cloudPlatform, DatabaseRequest source) {
+    public Database convert(CloudPlatform cloudPlatform, DatabaseRequest source) {
         Database database = new Database();
         if (source != null) {
             database.setExternalDatabaseAvailabilityType(source.getAvailabilityType());

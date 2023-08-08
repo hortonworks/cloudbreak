@@ -633,7 +633,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             throw new BadRequestException("Cloud storage parameter is required.");
         }
 
-        newSdxCluster.setSdxDatabase(DatabaseParameterFallbackUtil.setupDatabaseInitParams(newSdxCluster, sdxCluster.getDatabaseAvailabilityType(),
+        newSdxCluster.setSdxDatabase(DatabaseParameterFallbackUtil.setupDatabaseInitParams(sdxCluster.getDatabaseAvailabilityType(),
                 sdxCluster.getDatabaseEngineVersion(), Optional.ofNullable(sdxCluster.getSdxDatabase()).map(SdxDatabase::getAttributes).orElse(null)));
         StackV4Request stackRequest = getStackRequest(shape, sdxCluster.isRangerRazEnabled(), null, cloudPlatform, sdxCluster.getRuntime(), null,
                 stackV4Response.getJavaVersion());

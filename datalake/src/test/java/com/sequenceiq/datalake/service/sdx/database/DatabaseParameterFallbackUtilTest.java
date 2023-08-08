@@ -1,8 +1,6 @@
 package com.sequenceiq.datalake.service.sdx.database;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +13,7 @@ public class DatabaseParameterFallbackUtilTest {
     @Test
     public void testSetupDatabaseInitParams() {
         SdxCluster sdxCluster = new SdxCluster();
-        SdxDatabase sdxDatabase = DatabaseParameterFallbackUtil.setupDatabaseInitParams(sdxCluster, SdxDatabaseAvailabilityType.HA, "1.0");
+        SdxDatabase sdxDatabase = DatabaseParameterFallbackUtil.setupDatabaseInitParams(SdxDatabaseAvailabilityType.HA, "1.0");
         sdxCluster.setSdxDatabase(sdxDatabase);
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("1.0", sdxDatabase.getDatabaseEngineVersion());
@@ -33,53 +31,16 @@ public class DatabaseParameterFallbackUtilTest {
     }
 
     @Test
-    public void testGetDatabaseCrn() {
-        SdxDatabase sdxDatabase = new SdxDatabase();
-        sdxDatabase.setDatabaseCrn("crn456");
-        String fallbackDatabaseCrn = "fallback456";
-        assertEquals("crn456", DatabaseParameterFallbackUtil.getDatabaseCrn(sdxDatabase, fallbackDatabaseCrn));
-        assertEquals(fallbackDatabaseCrn, DatabaseParameterFallbackUtil.getDatabaseCrn(null, fallbackDatabaseCrn));
-    }
-
-    @Test
-    public void testGetDatabaseEngineVersion() {
-        SdxDatabase sdxDatabase = new SdxDatabase();
-        sdxDatabase.setDatabaseEngineVersion("2.0");
-        String fallbackDatabaseEngineVersion = "fallback2.0";
-        assertEquals("fallback2.0", DatabaseParameterFallbackUtil.getDatabaseEngineVersion(sdxDatabase, fallbackDatabaseEngineVersion));
-        assertEquals(fallbackDatabaseEngineVersion, DatabaseParameterFallbackUtil.getDatabaseEngineVersion(null, fallbackDatabaseEngineVersion));
-    }
-
-    @Test
-    public void testGetDatabaseEngineVersionNull() {
-        SdxDatabase sdxDatabase = new SdxDatabase();
-        sdxDatabase.setDatabaseEngineVersion(null);
-        String fallbackDatabaseEngineVersion = "fallback2.0";
-        assertEquals("fallback2.0", DatabaseParameterFallbackUtil.getDatabaseEngineVersion(sdxDatabase, fallbackDatabaseEngineVersion));
-    }
-
-    @Test
-    public void testIsCreateDatabase() {
-        SdxDatabase sdxDatabase = new SdxDatabase();
-        sdxDatabase.setCreateDatabase(true);
-        boolean fallbackCreateDatabase = false;
-        assertTrue(DatabaseParameterFallbackUtil.isCreateDatabase(sdxDatabase, fallbackCreateDatabase));
-        assertFalse(DatabaseParameterFallbackUtil.isCreateDatabase(null, fallbackCreateDatabase));
-    }
-
-    @Test
     public void testGetDatabaseAvailabilityType() {
         SdxDatabase sdxDatabase = new SdxDatabase();
         sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-        boolean fallbackCreateDatabase = false;
-        SdxDatabaseAvailabilityType fallbackDatabaseAvailabilityType = SdxDatabaseAvailabilityType.HA;
         assertEquals(SdxDatabaseAvailabilityType.NONE,
-                DatabaseParameterFallbackUtil.getDatabaseAvailabilityType(sdxDatabase, fallbackDatabaseAvailabilityType, fallbackCreateDatabase));
+                DatabaseParameterFallbackUtil.getDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NONE, false));
         assertEquals(SdxDatabaseAvailabilityType.HA,
-                DatabaseParameterFallbackUtil.getDatabaseAvailabilityType(null, fallbackDatabaseAvailabilityType, true));
+                DatabaseParameterFallbackUtil.getDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA, true));
         assertEquals(SdxDatabaseAvailabilityType.NONE,
-                DatabaseParameterFallbackUtil.getDatabaseAvailabilityType(null, null, false));
+                DatabaseParameterFallbackUtil.getDatabaseAvailabilityType(null, false));
         assertEquals(SdxDatabaseAvailabilityType.HA,
-                DatabaseParameterFallbackUtil.getDatabaseAvailabilityType(null, null, true));
+                DatabaseParameterFallbackUtil.getDatabaseAvailabilityType(null, true));
     }
 }

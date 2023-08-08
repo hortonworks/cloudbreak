@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.aspect.Measure;
@@ -63,6 +64,7 @@ import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -612,7 +614,10 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
         try {
             Set<Component> components = imageService.create(stack, imgFromCatalog);
-            setRuntimeAndDbVersion(stack, components, imgFromCatalog.getImage().getOs());
+            Stack savedStackWithRuntimeAndDbVersion = setRuntimeAndDbVersion(savedStack, components, imgFromCatalog.getImage().getOs());
+            measure(() -> addTemplateForStack(savedStackWithRuntimeAndDbVersion, connector.waitGetTemplate(templateRequest)),
+                    LOGGER, "Save cluster template took {} ms for stack {}", stackName);
+            return savedStackWithRuntimeAndDbVersion;
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Cloudbreak Image not found", e);
             throw new CloudbreakApiException(e.getMessage(), e);
@@ -620,14 +625,9 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
             LOGGER.info("Cloudbreak Image Catalog error", e);
             throw new CloudbreakApiException(e.getMessage(), e);
         }
-
-        measure(() -> addTemplateForStack(savedStack, connector.waitGetTemplate(templateRequest)),
-                LOGGER, "Save cluster template took {} ms for stack {}", stackName);
-
-        return savedStack;
     }
 
-    private void setRuntimeAndDbVersion(Stack stack, Set<Component> components, String os) {
+    private Stack setRuntimeAndDbVersion(Stack stack, Set<Component> components, String os) {
         ClouderaManagerProduct runtime = ComponentConfigProviderService.getComponent(components, ClouderaManagerProduct.class, CDH_PRODUCT_DETAILS);
         String stackVersion = null;
         if (Objects.nonNull(runtime)) {
@@ -639,11 +639,12 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
             LOGGER.warn("Product component is not present amongst components, runtime could not be set!");
         }
         String dbEngineVersion = databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(
-                stackVersion, os, stack.getExternalDatabaseEngineVersion());
+                stackVersion, os, stack.getExternalDatabaseEngineVersion(), CloudPlatform.valueOf(stack.getCloudPlatform()),
+                !Optional.ofNullable(stack.getDatabase().getExternalDatabaseAvailabilityType()).orElse(DatabaseAvailabilityType.NONE).isEmbedded());
         if (stack.getDatabase() != null) {
             stack.getDatabase().setExternalDatabaseEngineVersion(dbEngineVersion);
         }
-        stackRepository.save(stack);
+        return stackRepository.save(stack);
     }
 
     public StackViewService getStackViewService() {

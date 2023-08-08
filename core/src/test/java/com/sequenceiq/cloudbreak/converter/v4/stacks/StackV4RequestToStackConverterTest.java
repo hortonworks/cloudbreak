@@ -198,7 +198,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         lenient().when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new HashMap<>());
         lenient().when(datalakeService.getDatalakeCrn(any(), any())).thenReturn("crn");
         lenient().when(targetedUpscaleSupportService.isUnboundEliminationSupported(anyString())).thenReturn(Boolean.FALSE);
-        lenient().when(databaseRequestToDatabaseConverter.convert(any(Stack.class), any(CloudPlatform.class), isNull()))
+        lenient().when(databaseRequestToDatabaseConverter.convert(any(CloudPlatform.class), isNull()))
                 .thenReturn(new Database());
         // GIVEN
         InstanceGroup instanceGroup = new InstanceGroup();

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -45,7 +46,7 @@ public class SdxExternalDatabaseConfigurerTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(any(), any(), any())).thenReturn("11");
+        lenient().when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(any(), any(), any(), any(), anyBoolean())).thenReturn("11");
     }
 
     @Test
@@ -224,7 +225,7 @@ public class SdxExternalDatabaseConfigurerTest {
         databaseRequest.setAvailabilityType(DatabaseAvailabilityType.HA);
         SdxCluster sdxCluster = new SdxCluster();
         when(platformConfig.isExternalDatabaseSupportedOrExperimental(cloudPlatform)).thenReturn(true);
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(any(), any(), any())).thenReturn(null);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(any(), any(), any(), any(), anyBoolean())).thenReturn(null);
 
         SdxDatabase sdxDatabase = underTest.configure(cloudPlatform, null, databaseRequest, null, sdxCluster);
 

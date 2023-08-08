@@ -31,15 +31,13 @@ public class AzureDatabaseAttributesService {
     private EntitlementService entitlementService;
 
     public AzureDatabaseType getAzureDatabaseType(SdxDatabase sdxDatabase) {
-        String dbTypeStr = "";
-        AzureDatabaseType azureDatabaseType = AzureDatabaseType.SINGLE_SERVER;
-        if (sdxDatabase.getAttributes() != null) {
-            dbTypeStr = (String) sdxDatabase.getAttributes().getMap().get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY);
-        }
+        String dbTypeStr = sdxDatabase.getAttributes() != null ?
+            (String) sdxDatabase.getAttributes().getMap().get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY) : "";
         if (StringUtils.isNotBlank(dbTypeStr)) {
-            azureDatabaseType = AzureDatabaseType.safeValueOf(dbTypeStr);
+            return AzureDatabaseType.safeValueOf(dbTypeStr);
+        } else {
+            return AzureDatabaseType.SINGLE_SERVER;
         }
-        return azureDatabaseType;
     }
 
     public void configureAzureDatabase(DatabaseRequest internalDatabaseRequest, SdxDatabaseRequest databaseRequest, SdxDatabase sdxDatabase) {
