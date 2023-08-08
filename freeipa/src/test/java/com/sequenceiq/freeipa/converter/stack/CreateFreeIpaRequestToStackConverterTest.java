@@ -153,7 +153,7 @@ public class CreateFreeIpaRequestToStackConverterTest {
         freeIpaServerRequest.setHostname("dummyHostName");
         source.setNetwork(new NetworkRequest());
         source.setFreeIpa(freeIpaServerRequest);
-        source.setMultiAz(true);
+        source.setEnableMultiAz(true);
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setAws(AwsEnvironmentParameters.builder()
                 .withAwsDiskEncryptionParameters(AwsDiskEncryptionParameters.builder()
@@ -192,7 +192,7 @@ public class CreateFreeIpaRequestToStackConverterTest {
     @Test
     void testConvertForInstanceGroupsWhenEncryptionKeyIsPresentForGcp() {
         CreateFreeIpaRequest source = createCreateFreeIpaRequest();
-        source.setMultiAz(false);
+        source.setEnableMultiAz(false);
 
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
 
