@@ -10,6 +10,8 @@ public class ClouderaManagerStackDescriptorV4Response {
 
     private String version;
 
+    private String os;
+
     private ClouderaManagerStackRepoDetailsV4Response repository;
 
     private ClouderaManagerInfoV4Response clouderaManager;
@@ -24,6 +26,14 @@ public class ClouderaManagerStackDescriptorV4Response {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getOs() {
+        return os;
+    }
+
+    public void setOs(String os) {
+        this.os = os;
     }
 
     public ClouderaManagerStackRepoDetailsV4Response getRepository() {
