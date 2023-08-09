@@ -101,7 +101,7 @@ public class CreateFreeIpaRequest implements TaggableRequest {
     private String variant;
 
     @ApiModelProperty(value = FreeIpaModelDescriptions.MULTIAZ)
-    private Boolean multiAz;
+    private Boolean enableMultiAz;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -236,12 +236,12 @@ public class CreateFreeIpaRequest implements TaggableRequest {
         tags.put(key, value);
     }
 
-    public Boolean getMultiAz() {
-        return multiAz;
+    public Boolean getEnableMultiAz() {
+        return enableMultiAz;
     }
 
-    public void setMultiAz(Boolean multiAz) {
-        this.multiAz = multiAz;
+    public void setEnableMultiAz(Boolean enableMultiAz) {
+        this.enableMultiAz = enableMultiAz;
     }
 
     @Override
@@ -262,7 +262,7 @@ public class CreateFreeIpaRequest implements TaggableRequest {
                 ", tags=" + tags +
                 ", useCcm=" + useCcm +
                 ", tunnel=" + tunnel +
-                ", multiaz=" + multiAz +
+                ", enableMultiAz=" + enableMultiAz +
                 ", variant='" + variant + '\'' +
                 '}';
     }

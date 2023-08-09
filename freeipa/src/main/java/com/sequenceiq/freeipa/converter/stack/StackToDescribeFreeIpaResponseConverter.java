@@ -87,7 +87,7 @@ public class StackToDescribeFreeIpaResponseConverter {
         describeFreeIpaResponse.setStatus(stack.getStackStatus().getStatus());
         describeFreeIpaResponse.setStatusString(stack.getStackStatus().getStatusString());
         describeFreeIpaResponse.setStatusReason(stack.getStackStatus().getStatusReason());
-        describeFreeIpaResponse.setMultiAz(stack.isMultiAz());
+        describeFreeIpaResponse.setEnableMultiAz(stack.isMultiAz());
         decorateFreeIpaServerResponseWithIps(describeFreeIpaResponse.getFreeIpa(), describeFreeIpaResponse.getInstanceGroups());
         decorateFreeIpaServerResponseWithLoadBalancedHost(stack, describeFreeIpaResponse.getFreeIpa(), freeIpa);
         describeFreeIpaResponse.setAppVersion(stack.getAppVersion());
