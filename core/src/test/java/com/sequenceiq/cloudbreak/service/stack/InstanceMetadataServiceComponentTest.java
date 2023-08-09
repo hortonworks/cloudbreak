@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
-import com.sequenceiq.cloudbreak.service.multiaz.InstanceMetadataAvailabilityZoneCalculator;
+import com.sequenceiq.cloudbreak.service.multiaz.DataLakeAwareInstanceMetadataAvailabilityZoneCalculator;
 import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValidator;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -67,7 +67,7 @@ public class InstanceMetadataServiceComponentTest {
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @MockBean
-    private InstanceMetadataAvailabilityZoneCalculator instanceMetadataAvailabilityZoneCalculator;
+    private DataLakeAwareInstanceMetadataAvailabilityZoneCalculator instanceMetadataAvailabilityZoneCalculator;
 
     @Test
     public void saveInstanceAndGetUpdatedStack() {

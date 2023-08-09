@@ -14,7 +14,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
@@ -27,7 +26,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
-@Service
 public class InstanceMetadataAvailabilityZoneCalculator {
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceMetadataAvailabilityZoneCalculator.class);
 
@@ -42,7 +40,15 @@ public class InstanceMetadataAvailabilityZoneCalculator {
 
     public void populate(Long stackId) {
         Stack stack = stackService.getByIdWithLists(stackId);
-        if (stack.isMultiAz() && availabilityZoneConnectorExistsForPlatform(stack)) {
+        populate(stack);
+    }
+
+    protected boolean populateSupportedOnStack(Stack stack) {
+        return stack.isMultiAz() && availabilityZoneConnectorExistsForPlatform(stack);
+    }
+
+    protected void populate(Stack stack) {
+        if (populateSupportedOnStack(stack)) {
             LOGGER.debug("Starting to calculate availability zones for instances of stack.");
                 Set<InstanceMetaData> instancesToBeUpdated = new HashSet<>();
                 for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
@@ -52,22 +58,13 @@ public class InstanceMetadataAvailabilityZoneCalculator {
         } else {
             LOGGER.debug("Stack is NOT multi-AZ enabled or AvailabilityZone connector doesn't exist for platform , no need to populate zones for instances");
         }
-
     }
 
-    private boolean availabilityZoneConnectorExistsForPlatform(Stack stack) {
-        LOGGER.debug("CloudPlatform is {} PlatformVariant is {}", stack.getCloudPlatform(), stack.getPlatformVariant());
-        CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
-                Platform.platform(stack.getCloudPlatform()),
-                Variant.variant(stack.getPlatformVariant()));
-        return Optional.ofNullable(cloudPlatformConnectors.get(cloudPlatformVariant).availabilityZoneConnector()).isPresent();
-    }
-
-    private Set<InstanceMetaData> populateAvailabilityZonesOnGroup(InstanceGroup instanceGroup) {
+    protected Set<InstanceMetaData> populateAvailabilityZonesOnGroup(InstanceGroup instanceGroup) {
         String groupName = instanceGroup.getGroupName();
         Set<String> availabilityZonesForGroup = instanceGroup.getAvailabilityZones();
         if (CollectionUtils.isNotEmpty(availabilityZonesForGroup)) {
-            LOGGER.info("Availability zones to distribute the instances over: '{}'", availabilityZonesForGroup);
+            LOGGER.info("Availability zones to distribute the instances over: '{}' for group: '{}'", availabilityZonesForGroup, groupName);
             Set<InstanceMetaData> instancesInGroup = instanceGroup.getNotDeletedInstanceMetaDataSet();
             return populateAvailabilityZoneOfInstances(availabilityZonesForGroup, instancesInGroup, groupName);
         } else {
@@ -77,7 +74,7 @@ public class InstanceMetadataAvailabilityZoneCalculator {
         }
     }
 
-    private Set<InstanceMetaData> populateAvailabilityZoneOfInstances(Set<String> availabilityZonesForGroup, Set<InstanceMetaData> instanceMetaDataSet,
+    protected Set<InstanceMetaData> populateAvailabilityZoneOfInstances(Set<String> availabilityZonesForGroup, Set<InstanceMetaData> instanceMetaDataSet,
             String groupName) {
         Set<InstanceMetaData> updatedInstances = new HashSet<>();
         Map<String, Long> zoneToNodeCountMap = availabilityZonesForGroup.stream().collect(Collectors.toMap(Function.identity(),
@@ -95,14 +92,26 @@ public class InstanceMetadataAvailabilityZoneCalculator {
         return updatedInstances;
     }
 
-    private long countInstancesForAvailabilityZone(Set<InstanceMetaData> instanceMetaDataSet, String availabilityZone) {
-        return instanceMetaDataSet.stream().filter(instance -> availabilityZone.equals(instance.getAvailabilityZone())).count();
-    }
-
-    private void updateInstancesMetaData(Set<InstanceMetaData> instancesToBeUpdated) {
+    protected void updateInstancesMetaData(Set<InstanceMetaData> instancesToBeUpdated) {
         if (CollectionUtils.isNotEmpty(instancesToBeUpdated)) {
             LOGGER.debug("Saving instance meta data set with populated availability zones.");
             instanceMetaDataService.saveAll(instancesToBeUpdated);
         }
+    }
+
+    protected StackService getStackService() {
+        return stackService;
+    }
+
+    private boolean availabilityZoneConnectorExistsForPlatform(Stack stack) {
+        LOGGER.debug("CloudPlatform is {} PlatformVariant is {}", stack.getCloudPlatform(), stack.getPlatformVariant());
+        CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
+                Platform.platform(stack.getCloudPlatform()),
+                Variant.variant(stack.getPlatformVariant()));
+        return Optional.ofNullable(cloudPlatformConnectors.get(cloudPlatformVariant).availabilityZoneConnector()).isPresent();
+    }
+
+    private long countInstancesForAvailabilityZone(Set<InstanceMetaData> instanceMetaDataSet, String availabilityZone) {
+        return instanceMetaDataSet.stream().filter(instance -> availabilityZone.equals(instance.getAvailabilityZone())).count();
     }
 }

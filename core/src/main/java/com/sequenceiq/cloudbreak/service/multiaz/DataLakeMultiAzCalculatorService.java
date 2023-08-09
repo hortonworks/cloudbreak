@@ -54,7 +54,7 @@ public class DataLakeMultiAzCalculatorService {
         }
         Optional<InstanceGroup> auxiliaryHostGroup = getInstanceGroupByInstanceGroupName(stack, InstanceGroupName.AUXILIARY);
         Optional<InstanceGroup> gatewayHostGroup = getInstanceGroupByInstanceGroupName(stack, InstanceGroupName.GATEWAY);
-        if (!(auxiliaryHostGroup.isEmpty() && gatewayHostGroup.isEmpty())) {
+        if (auxiliaryHostGroup.isPresent() || gatewayHostGroup.isPresent()) {
             Set<InstanceMetaData> mergedInstanceMetaData = new HashSet<>();
             mergedInstanceMetaData.addAll(getInstanceMetadata(stack, InstanceGroupName.GATEWAY));
             mergedInstanceMetaData.addAll(getInstanceMetadata(stack, InstanceGroupName.AUXILIARY));
