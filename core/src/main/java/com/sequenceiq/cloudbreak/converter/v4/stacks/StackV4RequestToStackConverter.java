@@ -255,7 +255,7 @@ public class StackV4RequestToStackConverter {
         stack.setName(source.getName());
         stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
         stack.setOrchestrator(getOrchestrator());
-        stack.setMultiAz(source.isMultiAz());
+        stack.setMultiAz(source.isEnableMultiAz());
         updateCustomDomainOrKerberos(source, stack);
     }
 

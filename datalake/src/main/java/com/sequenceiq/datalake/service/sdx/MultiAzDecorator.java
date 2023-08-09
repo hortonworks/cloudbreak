@@ -52,7 +52,7 @@ public class MultiAzDecorator {
                 networkParameter.setSubnetIds(subnetIds);
             }
         });
-        stackV4Request.setMultiAz(true);
+        stackV4Request.setEnableMultiAz(true);
     }
 
     private void decorateStackRequestWithMultiAzAzure(StackV4Request stackV4Request, SdxClusterShape clusterShape) {
@@ -61,7 +61,7 @@ public class MultiAzDecorator {
                     String.format("Encountered clusterShape=%s with isMultiAzEnabledByDefault()==false. Azure multi AZ is unsupported for such shapes.",
                             clusterShape));
         }
-        stackV4Request.setMultiAz(true);
+        stackV4Request.setEnableMultiAz(true);
     }
 
     private List<String> collectMultiAzSubnetIdsForGroup(DetailedEnvironmentResponse environment, InstanceGroupV4Request ig) {

@@ -118,7 +118,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setExternalDatabase(getIfNotNull(source.getExternalDatabase(), databaseRequestConverter::convert));
         request.setEnableLoadBalancer(source.isEnableLoadBalancer());
         request.setJavaVersion(source.getJavaVersion());
-        request.setMultiAz(source.isMultiAz());
+        request.setEnableMultiAz(source.isEnableMultiAz());
         calculateVariant(environment, source, request);
         checkMultipleGatewayNodes(source);
         return request;

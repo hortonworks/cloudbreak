@@ -110,7 +110,7 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
     private Integer javaVersion;
 
     @ApiModelProperty(value = StackModelDescription.MULTIPLE_AVAILABILITY_ZONES)
-    private boolean multiAz;
+    private boolean enableMultiAz;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -276,11 +276,11 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
         this.javaVersion = javaVersion;
     }
 
-    public boolean isMultiAz() {
-        return multiAz;
+    public boolean isEnableMultiAz() {
+        return enableMultiAz;
     }
 
-    public void setMultiAz(boolean multiAz) {
-        this.multiAz = multiAz;
+    public void setEnableMultiAz(boolean enableMultiAz) {
+        this.enableMultiAz = enableMultiAz;
     }
 }

@@ -198,7 +198,7 @@ public class StackCreatorService {
         stackStub.setCreator(user);
         StackType stackType = determineStackTypeBasedOnTheUsedApi(stackStub, distroxRequest);
         stackStub.setType(stackType);
-        stackStub.setMultiAz(stackRequest.isMultiAz());
+        stackStub.setMultiAz(stackRequest.isEnableMultiAz());
         String platformString = stackStub.getCloudPlatform().toLowerCase();
 
         MDCBuilder.buildMdcContext(stackStub);

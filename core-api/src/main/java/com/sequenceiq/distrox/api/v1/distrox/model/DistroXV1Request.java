@@ -60,7 +60,7 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
     private Integer javaVersion;
 
-    private boolean multiAz;
+    private boolean enableMultiAz;
 
     public String getEnvironmentName() {
         return environmentName;
@@ -178,12 +178,12 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
         this.javaVersion = javaVersion;
     }
 
-    public boolean isMultiAz() {
-        return multiAz;
+    public boolean isEnableMultiAz() {
+        return enableMultiAz;
     }
 
-    public void setMultiAz(boolean multiAz) {
-        this.multiAz = multiAz;
+    public void setEnableMultiAz(boolean enableMultiAz) {
+        this.enableMultiAz = enableMultiAz;
     }
 
     @JsonIgnore

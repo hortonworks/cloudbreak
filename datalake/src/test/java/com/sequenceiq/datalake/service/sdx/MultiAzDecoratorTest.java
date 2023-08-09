@@ -66,7 +66,7 @@ class MultiAzDecoratorTest {
         assertTrue(stackV4Request.getInstanceGroups().stream()
                 .allMatch(ig -> ig.getNetwork().getAws().getSubnetIds().stream()
                         .allMatch(PREFERRED_SUBNET_ID::equals)));
-        assertThat(stackV4Request.isMultiAz()).isTrue();
+        assertThat(stackV4Request.isEnableMultiAz()).isTrue();
     }
 
     @Test
@@ -91,7 +91,7 @@ class MultiAzDecoratorTest {
 
         assertTrue(stackV4Request.getInstanceGroups().stream()
                 .allMatch(ig -> ig.getNetwork().getAws().getSubnetIds().containsAll(subnetIds)));
-        assertThat(stackV4Request.isMultiAz()).isTrue();
+        assertThat(stackV4Request.isEnableMultiAz()).isTrue();
     }
 
     @Test
@@ -117,7 +117,7 @@ class MultiAzDecoratorTest {
         assertTrue(stackV4Request.getInstanceGroups().stream()
                 .allMatch(ig -> InstanceGroupType.GATEWAY.equals(
                         ig.getType()) ? ig.getNetwork().getAws().getSubnetIds().size() == 1 : ig.getNetwork().getAws().getSubnetIds().containsAll(subnetIds)));
-        assertThat(stackV4Request.isMultiAz()).isTrue();
+        assertThat(stackV4Request.isEnableMultiAz()).isTrue();
     }
 
     @ParameterizedTest(name = "{0}")
@@ -155,7 +155,7 @@ class MultiAzDecoratorTest {
 
         underTest.decorateStackRequestWithMultiAz(stackV4Request, environment, clusterShape);
 
-        assertThat(stackV4Request.isMultiAz()).isTrue();
+        assertThat(stackV4Request.isEnableMultiAz()).isTrue();
     }
 
     private InstanceGroupV4Request getInstanceGroupV4Request(InstanceGroupType instanceGroupType) {

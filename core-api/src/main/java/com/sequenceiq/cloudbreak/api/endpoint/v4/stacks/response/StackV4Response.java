@@ -147,7 +147,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
     @ApiModelProperty(StackModelDescription.JAVA_VERSION)
     private Integer javaVersion;
 
-    private boolean multiAz;
+    private boolean enableMultiAz;
 
     public Long getId() {
         return id;
@@ -436,12 +436,12 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
         this.javaVersion = javaVersion;
     }
 
-    public boolean isMultiAz() {
-        return multiAz;
+    public boolean isEnableMultiAz() {
+        return enableMultiAz;
     }
 
-    public void setMultiAz(boolean multiAz) {
-        this.multiAz = multiAz;
+    public void setEnableMultiAz(boolean enableMultiAz) {
+        this.enableMultiAz = enableMultiAz;
     }
 
     @Override
@@ -481,7 +481,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
                 ", flowIdentifier=" + flowIdentifier +
                 ", externalDatabase=" + externalDatabase +
                 ", javaVersion=" + javaVersion +
-                ", multiAz=" + multiAz +
+                ", multiAz=" + enableMultiAz +
                 '}';
     }
 }
