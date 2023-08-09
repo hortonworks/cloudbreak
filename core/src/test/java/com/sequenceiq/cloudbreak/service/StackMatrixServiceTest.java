@@ -3,20 +3,22 @@ package com.sequenceiq.cloudbreak.service;
 import static com.sequenceiq.cloudbreak.RepoTestUtil.getCMStackDescriptorResponse;
 import static com.sequenceiq.cloudbreak.RepoTestUtil.getDefaultCDHInfo;
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
@@ -30,7 +32,7 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.Rep
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.StackInfoToClouderaManagerStackDescriptorV4ResponseConverter;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class StackMatrixServiceTest {
 
     private static final Long WORKSPACE_ID = 0L;
@@ -42,6 +44,8 @@ public class StackMatrixServiceTest {
     private static final String IMAGE_CATALOG_NAME = "image catalog name";
 
     private static final String OS = "centos7";
+
+    private static final String CLUSTER_VERSION = "6.1.0";
 
     @Mock
     private ImageBasedDefaultCDHEntries imageBasedDefaultCDHEntries;
@@ -56,7 +60,7 @@ public class StackMatrixServiceTest {
     private StackMatrixService stackMatrixService;
 
     @Test
-    public void getStackMatrixWithoutAmbari() throws Exception {
+    void getStackMatrixWithoutAmbari() throws Exception {
         setupStackEntries();
 
         when(repositoryInfoToClouderaManagerInfoV4ResponseConverter.convert(any(RepositoryInfo.class))).thenReturn(new ClouderaManagerInfoV4Response());
@@ -65,16 +69,38 @@ public class StackMatrixServiceTest {
 
         assertEquals(1L, stackMatrixV4Response.getCdh().size());
 
-        assertEquals("6.1.0-1.cdh6.1.0.p0.770702", stackMatrixV4Response.getCdh().get("6.1.0").getVersion());
-        assertNull(stackMatrixV4Response.getCdh().get("6.1.0").getClouderaManager().getRepository());
-        assertNull(stackMatrixV4Response.getCdh().get("6.1.0").getClouderaManager().getVersion());
+        assertEquals("6.1.0-1.cdh6.1.0.p0.770702", stackMatrixV4Response.getCdh().get(CLUSTER_VERSION).getVersion());
+        assertNull(stackMatrixV4Response.getCdh().get(CLUSTER_VERSION).getClouderaManager().getRepository());
+        assertNull(stackMatrixV4Response.getCdh().get(CLUSTER_VERSION).getClouderaManager().getVersion());
+    }
+
+    @Test
+    void getSupportedOperatingSystemsWithSupportedOs() throws Exception {
+        setupStackEntries();
+        when(repositoryInfoToClouderaManagerInfoV4ResponseConverter.convert(any(RepositoryInfo.class))).thenReturn(new ClouderaManagerInfoV4Response());
+
+        Set<String> result = stackMatrixService.getSupportedOperatingSystems(WORKSPACE_ID, CLUSTER_VERSION, IMAGECATALOGPLATFORM, OS, IMAGE_CATALOG_NAME);
+
+        assertThat(result).containsOnly(OS);
+    }
+
+    @Test
+    void getSupportedOperatingSystemsWithUnsupportedOs() throws Exception {
+        String os = "redhat8";
+        when(imageBasedDefaultCDHEntries.getEntries(WORKSPACE_ID, IMAGECATALOGPLATFORM, os, IMAGE_CATALOG_NAME)).thenReturn(Map.of());
+
+        Set<String> result = stackMatrixService.getSupportedOperatingSystems(WORKSPACE_ID, CLUSTER_VERSION, IMAGECATALOGPLATFORM, os, IMAGE_CATALOG_NAME);
+
+        assertThat(result).isEmpty();
     }
 
     private void setupStackEntries() throws Exception {
         Map<String, ImageBasedDefaultCDHInfo> cdhEntries = new HashMap<>();
 
         DefaultCDHInfo cdhInfo = getDefaultCDHInfo("6.1.0-1.cdh6.1.0.p0.770702");
-        cdhEntries.put("6.1.0", new ImageBasedDefaultCDHInfo(cdhInfo, mock(Image.class)));
+        Image image = mock(Image.class);
+        when(image.getOs()).thenReturn(OS);
+        cdhEntries.put(CLUSTER_VERSION, new ImageBasedDefaultCDHInfo(cdhInfo, image));
         when(stackInfoToClouderaManagerStackDescriptorV4ResponseConverter.convert(cdhInfo))
                 .thenReturn(getCMStackDescriptorResponse("6.1.0-1.cdh6.1.0.p0.770702"));
 

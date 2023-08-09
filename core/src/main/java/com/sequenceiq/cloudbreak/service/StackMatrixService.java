@@ -76,7 +76,7 @@ public class StackMatrixService {
         StackMatrixV4Response stackMatrix = getStackMatrix(workspaceId, platform, os, imageCatalogName);
         LOGGER.debug("Get Cloudera Manager stack info for getSupportedOperatingSystems the supported OS types for version: {} and os: {}", clusterVersion, os);
         ClouderaManagerStackDescriptorV4Response cmStackDescriptor = stackMatrix.getCdh().get(clusterVersion);
-        return cmStackDescriptor != null ? cmStackDescriptor.getClouderaManager().getRepository().keySet() : Collections.emptySet();
+        return cmStackDescriptor != null ? Set.of(cmStackDescriptor.getOs()) : Collections.emptySet();
     }
 
     private ClouderaManagerStackDescriptorV4Response getImageBasedCMStackDescriptor(DefaultCDHInfo stackInfo, Image image) {
@@ -96,6 +96,7 @@ public class StackMatrixService {
             stackDescriptorV4.getProducts().add(ClouderaManagerProductToClouderaManagerProductV4Response.convert(parcel));
         }
         stackDescriptorV4.setProductDefinitions(stackInfo.getCsd());
+        stackDescriptorV4.setOs(image.getOs());
         return stackDescriptorV4;
     }
 }
