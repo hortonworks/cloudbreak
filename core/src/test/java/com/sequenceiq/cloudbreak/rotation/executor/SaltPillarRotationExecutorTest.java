@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
+import com.sequenceiq.cloudbreak.rotation.RotationMetadataTestUtil;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
@@ -73,7 +74,7 @@ class SaltPillarRotationExecutorTest {
     @BeforeEach
     void setup() {
         lenient().when(exitCriteriaProvider.get(any())).thenReturn(ClusterDeletionBasedExitCriteriaModel.nonCancellableModel());
-        lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
+        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -103,7 +104,8 @@ class SaltPillarRotationExecutorTest {
     void rotateShouldThrowSecretRotationExceptionIfStackNotFound() {
         when(stackDtoService.getByCrn(eq(RESOURCE_CRN))).thenThrow(NotFoundException.notFound("Stack", RESOURCE_CRN).get());
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
-                () -> underTest.executeRotate(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()), null));
+                () -> underTest.executeRotate(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()),
+                        RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null)));
         Assertions.assertEquals("Execution of rotation failed at SALT_PILLAR step for resourceCrn regarding secret null.",
                 secretRotationException.getMessage());
     }
@@ -115,7 +117,8 @@ class SaltPillarRotationExecutorTest {
         doThrow(new RuntimeException("error")).when(hostOrchestrator)
                 .saveCustomPillars(any(), any(), any());
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
-                () -> underTest.executeRotate(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()), null));
+                () -> underTest.executeRotate(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()),
+                        RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null)));
         Assertions.assertEquals("Execution of rotation failed at SALT_PILLAR step for resourceCrn regarding secret null.",
                 secretRotationException.getMessage());
         verify(hostOrchestrator, times(1)).saveCustomPillars(any(), any(), any());

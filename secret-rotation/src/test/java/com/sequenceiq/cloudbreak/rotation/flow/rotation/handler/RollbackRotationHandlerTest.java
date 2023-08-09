@@ -47,7 +47,7 @@ public class RollbackRotationHandlerTest {
 
     @Test
     public void testHandler() {
-        doNothing().when(secretRotationOrchestrationService).rollbackIfNeeded(any(), any(), any(), any());
+        doNothing().when(secretRotationOrchestrationService).rollbackIfNeeded(any(), any(), any());
 
         underTest.accept(Event.wrap(getTriggerEvent()));
 
@@ -56,7 +56,7 @@ public class RollbackRotationHandlerTest {
 
     @Test
     public void testHandlerFailure() {
-        doThrow(new CloudbreakServiceException("anything")).when(secretRotationOrchestrationService).rollbackIfNeeded(any(), any(), any(), any());
+        doThrow(new CloudbreakServiceException("anything")).when(secretRotationOrchestrationService).rollbackIfNeeded(any(), any(), any());
 
         underTest.accept(Event.wrap(getTriggerEvent()));
 
@@ -64,7 +64,7 @@ public class RollbackRotationHandlerTest {
     }
 
     private static RollbackRotationTriggerEvent getTriggerEvent() {
-        return new RollbackRotationTriggerEvent(null, null, null, SECRET_TYPE, null, null, null);
+        return new RollbackRotationTriggerEvent(null, null, null, SECRET_TYPE, null, null);
     }
 
 }

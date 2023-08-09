@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.rotation.RotationMetadataTestUtil;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.CMUserRotationContext;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
@@ -67,7 +68,7 @@ public class CMUserRotationExecutorTest {
 
     @BeforeEach
     public void mockProgressService() {
-        lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
+        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -146,7 +147,8 @@ public class CMUserRotationExecutorTest {
                 new RotationSecret(String.valueOf(i.getArguments()[0]), null));
         CMUserRotationContext rotationContext = getRotationContext();
 
-        assertThrows(SecretRotationException.class, () -> underTest.executeRotate(rotationContext, null));
+        assertThrows(SecretRotationException.class, () -> underTest.executeRotate(rotationContext,
+                RotationMetadataTestUtil.metadataForRotation("resource", null)));
     }
 
     @Test
@@ -155,7 +157,8 @@ public class CMUserRotationExecutorTest {
                 new RotationSecret(String.valueOf(i.getArguments()[0]), null));
         CMUserRotationContext rotationContext = getRotationContext();
 
-        assertThrows(SecretRotationException.class, () -> underTest.executeRollback(rotationContext, null));
+        assertThrows(SecretRotationException.class, () -> underTest.executeRollback(rotationContext,
+                RotationMetadataTestUtil.metadataForRollback("resource", null)));
     }
 
     @Test
@@ -164,7 +167,8 @@ public class CMUserRotationExecutorTest {
                 new RotationSecret(String.valueOf(i.getArguments()[0]), null));
         CMUserRotationContext rotationContext = getRotationContext();
 
-        assertThrows(SecretRotationException.class, () -> underTest.executeFinalize(rotationContext, null));
+        assertThrows(SecretRotationException.class, () -> underTest.executeFinalize(rotationContext,
+                RotationMetadataTestUtil.metadataForFinalize("resource", null)));
     }
 
     @Test
@@ -174,7 +178,8 @@ public class CMUserRotationExecutorTest {
                 .createNewUser(anyString(), anyString(), anyString(), anyString(), anyString());
 
         CMUserRotationContext rotationContext = getRotationContext();
-        assertThrows(SecretRotationException.class, () -> underTest.executeRotate(rotationContext, null));
+        assertThrows(SecretRotationException.class, () -> underTest.executeRotate(rotationContext,
+                RotationMetadataTestUtil.metadataForRotation("resource", null)));
 
         verify(clusterSecurityService, times(1)).createNewUser(
                 eq("old" + USER),
@@ -189,7 +194,7 @@ public class CMUserRotationExecutorTest {
         ClusterSecurityService clusterSecurityService = setup();
         CMUserRotationContext rotationContext = getRotationContext();
 
-        underTest.executeRollback(rotationContext, null);
+        underTest.executeRollback(rotationContext, RotationMetadataTestUtil.metadataForRollback("resource", null));
 
         verify(clusterSecurityService, times(1)).deleteUser(
                 eq(USER),
@@ -202,7 +207,7 @@ public class CMUserRotationExecutorTest {
         ClusterSecurityService clusterSecurityService = setup();
         CMUserRotationContext rotationContext = getRotationContext();
 
-        underTest.executeFinalize(rotationContext, null);
+        underTest.executeFinalize(rotationContext, RotationMetadataTestUtil.metadataForFinalize("resource", null));
 
         verify(clusterSecurityService, times(1)).deleteUser(
                 eq("old" + USER),

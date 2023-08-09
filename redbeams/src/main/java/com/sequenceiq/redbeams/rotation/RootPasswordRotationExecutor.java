@@ -81,7 +81,7 @@ public class RootPasswordRotationExecutor extends AbstractRotationExecutor<Rotat
     protected void preValidate(RotationContext rotationContext) throws Exception {
         ExternalDatabaseStatus databaseServerStatus = getExternalDatabaseStatus(rotationContext);
         if (!ExternalDatabaseStatus.STARTED.equals(databaseServerStatus)) {
-            throw new SecretRotationException("Database is not running or transition is in progress, thus rotation is not possible!", getType());
+            throw new SecretRotationException("Database is not running or transition is in progress, thus rotation is not possible!");
         }
     }
 
@@ -89,7 +89,7 @@ public class RootPasswordRotationExecutor extends AbstractRotationExecutor<Rotat
     protected void postValidate(RotationContext rotationContext) throws Exception {
         ExternalDatabaseStatus databaseServerStatus = getExternalDatabaseStatus(rotationContext);
         if (!ExternalDatabaseStatus.STARTED.equals(databaseServerStatus)) {
-            throw new SecretRotationException("Database is not running or transition is in progress, thus rotation has been failed!", getType());
+            throw new SecretRotationException("Database is not running or transition is in progress, thus rotation has been failed!");
         }
     }
 
@@ -133,7 +133,7 @@ public class RootPasswordRotationExecutor extends AbstractRotationExecutor<Rotat
         } else {
             String message = "Root password is not in rotation state in Vault, rotation is not possible.";
             LOGGER.warn(message);
-            throw new SecretRotationException(message, getType());
+            throw new SecretRotationException(message);
         }
     }
 

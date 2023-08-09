@@ -87,7 +87,7 @@ public class LaunchTemplateRotationExecutor extends AbstractRotationExecutor<Rot
             } catch (Exception e) {
                 String msg = "Failed to update aws launch template.";
                 LOGGER.info(msg, e);
-                throw new SecretRotationException(msg, e, getType());
+                throw new SecretRotationException(msg, e);
             }
         } else {
             LOGGER.info("No template update is needed.");

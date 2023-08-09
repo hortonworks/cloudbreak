@@ -10,13 +10,13 @@ import com.sequenceiq.flow.core.FlowParameters;
 
 public class RotationFlowContext extends CommonContext {
 
-    private Long resourceId;
+    private final Long resourceId;
 
-    private String resourceCrn;
+    private final String resourceCrn;
 
-    private SecretType secretType;
+    private final SecretType secretType;
 
-    private RotationFlowExecutionType executionType;
+    private final RotationFlowExecutionType executionType;
 
     @JsonCreator
     public RotationFlowContext(

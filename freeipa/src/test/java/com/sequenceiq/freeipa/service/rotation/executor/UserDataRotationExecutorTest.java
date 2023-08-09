@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.rotation.executor;
 
-import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.USER_DATA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -73,7 +72,7 @@ class UserDataRotationExecutorTest {
     @BeforeEach
     public void setUp() {
         lenient().when(cloudStackConverter.convert(any())).thenReturn(cloudStack);
-        lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
+        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -97,7 +96,6 @@ class UserDataRotationExecutorTest {
         SecretRotationException exception = assertThrows(SecretRotationException.class,
                 () -> underTest.rotate(new UserDataRotationContext(RESOURCE_CRN, List.of(Pair.of(new TestAModifier(), "path/secretA")))));
 
-        assertEquals(USER_DATA, exception.getFailedRotationStep());
         assertEquals("Secret is not in a rotated state. User data modification failed.", exception.getMessage());
         verifyNoMoreInteractions(userDataService);
     }
@@ -123,7 +121,6 @@ class UserDataRotationExecutorTest {
         SecretRotationException exception = assertThrows(SecretRotationException.class,
                 () -> underTest.rotate(new UserDataRotationContext(RESOURCE_CRN, List.of(Pair.of(new TestAModifier(), "path/secretA")))));
 
-        assertEquals(USER_DATA, exception.getFailedRotationStep());
         assertEquals("Secret is not in a rotated state. User data modification failed.", exception.getMessage());
         verifyNoMoreInteractions(userDataService);
     }

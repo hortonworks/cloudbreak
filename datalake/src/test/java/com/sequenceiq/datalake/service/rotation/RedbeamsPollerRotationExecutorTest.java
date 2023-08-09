@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.rotation.RotationMetadataTestUtil;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
@@ -47,7 +48,7 @@ class RedbeamsPollerRotationExecutorTest {
 
     @BeforeEach
     public void mockProgressService() {
-        lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
+        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -55,7 +56,8 @@ class RedbeamsPollerRotationExecutorTest {
         doThrow(new RuntimeException("error")).when(sdxRotationService).rotateRedbeamsSecret(anyString(),
                 eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(ROTATE));
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
-                () -> underTest.executeRotate(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), null));
+                () -> underTest.executeRotate(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD),
+                        RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null)));
         Assertions.assertEquals("Execution of rotation failed at REDBEAMS_ROTATE_POLLING step for resourceCrn regarding secret null.",
                 secretRotationException.getMessage());
     }
@@ -72,7 +74,8 @@ class RedbeamsPollerRotationExecutorTest {
         doThrow(new RuntimeException("error")).when(sdxRotationService).rotateRedbeamsSecret(anyString(),
                 eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(ROLLBACK));
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
-                () -> underTest.executeRollback(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), null));
+                () -> underTest.executeRollback(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD),
+                        RotationMetadataTestUtil.metadataForRollback(RESOURCE_CRN, null)));
         Assertions.assertEquals("Rollback of rotation failed at REDBEAMS_ROTATE_POLLING step for resourceCrn regarding secret null.",
                 secretRotationException.getMessage());
     }
@@ -89,7 +92,8 @@ class RedbeamsPollerRotationExecutorTest {
         doThrow(new RuntimeException("error")).when(sdxRotationService).rotateRedbeamsSecret(anyString(),
                 eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(FINALIZE));
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
-                () -> underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), null));
+                () -> underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD),
+                        RotationMetadataTestUtil.metadataForFinalize(RESOURCE_CRN, null)));
         Assertions.assertEquals("Finalization of rotation failed at REDBEAMS_ROTATE_POLLING step for resourceCrn regarding secret null.",
                 secretRotationException.getMessage());
     }

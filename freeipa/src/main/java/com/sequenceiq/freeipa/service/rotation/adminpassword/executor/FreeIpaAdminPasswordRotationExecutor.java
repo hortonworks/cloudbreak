@@ -65,11 +65,11 @@ public class FreeIpaAdminPasswordRotationExecutor extends AbstractRotationExecut
                 });
             } catch (Exception e) {
                 LOGGER.info("Rotation of freeipa admin password failed", e);
-                throw new SecretRotationException("Freeipa admin password rotation failed", e, getType());
+                throw new SecretRotationException("Freeipa admin password rotation failed", e);
             }
         } else {
             throw new SecretRotationException("Freeipa admin password is not in rotation state in Vault, thus rotation of admin password " +
-                    "is not possible.", getType());
+                    "is not possible.");
         }
     }
 
@@ -107,7 +107,7 @@ public class FreeIpaAdminPasswordRotationExecutor extends AbstractRotationExecut
 
     @Override
     public void preValidate(FreeIpaAdminPasswordRotationContext rotationContext) {
-        freeIpaAdminPasswordRotationUtil.checkRedhat8(rotationContext, getType());
+        freeIpaAdminPasswordRotationUtil.checkRedhat8(rotationContext);
     }
 
     @Override

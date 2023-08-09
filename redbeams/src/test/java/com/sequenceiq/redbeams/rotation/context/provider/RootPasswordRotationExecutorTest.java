@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
+import com.sequenceiq.cloudbreak.rotation.RotationMetadataTestUtil;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
@@ -41,7 +42,6 @@ import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.dto.Credential;
-import com.sequenceiq.redbeams.rotation.RedbeamsSecretRotationStep;
 import com.sequenceiq.redbeams.rotation.RootPasswordRotationExecutor;
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
@@ -94,7 +94,7 @@ class RootPasswordRotationExecutorTest {
 
     @BeforeEach
     void mockProgressService() {
-        lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
+        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -169,11 +169,10 @@ class RootPasswordRotationExecutorTest {
         when(secretService.getRotation(eq(CONNECTION_PASSWORD))).thenReturn(new RotationSecret(CONNECTION_PASSWORD, null));
 
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
-                () -> underTest.executeRotate(new RotationContext(RESOURCE_CRN), null));
+                () -> underTest.executeRotate(new RotationContext(RESOURCE_CRN), RotationMetadataTestUtil.metadataForRotation("resource", null)));
 
         assertEquals("Execution of rotation failed at PROVIDER_DATABASE_ROOT_PASSWORD step for resourceCrn regarding secret null.",
                 secretRotationException.getMessage());
-        assertEquals(RedbeamsSecretRotationStep.PROVIDER_DATABASE_ROOT_PASSWORD, secretRotationException.getFailedRotationStep());
         verify(dbStackService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(databaseServerConfigService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(secretService, times(1)).getRotation(eq(ROOT_PASSWORD));

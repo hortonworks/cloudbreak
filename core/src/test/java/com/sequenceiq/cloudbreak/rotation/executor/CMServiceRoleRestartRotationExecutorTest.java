@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.rotation.RotationMetadataTestUtil;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.CMServiceRoleRestartRotationContext;
@@ -67,7 +68,7 @@ class CMServiceRoleRestartRotationExecutorTest {
 
     @BeforeEach
     public void mockProgressService() {
-        lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
+        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
         lenient().when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         lenient().when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         lenient().when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
@@ -86,7 +87,7 @@ class CMServiceRoleRestartRotationExecutorTest {
         doThrow(new RuntimeException("something")).when(clusterModificationService).restartServiceRoleByType(SERVICE_TYPE, ROLE_TYPE);
 
         assertThrows(SecretRotationException.class, () ->
-                underTest.executeRotate(createContext(), null));
+                underTest.executeRotate(createContext(), RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null)));
 
         verify(clusterModificationService, times(1))
                 .restartServiceRoleByType(SERVICE_TYPE, ROLE_TYPE);
@@ -97,7 +98,7 @@ class CMServiceRoleRestartRotationExecutorTest {
         doThrow(new RuntimeException("something")).when(clusterModificationService).restartServiceRoleByType(SERVICE_TYPE, ROLE_TYPE);
 
         assertThrows(SecretRotationException.class, () ->
-                underTest.executeRollback(createContext(), null));
+                underTest.executeRollback(createContext(), RotationMetadataTestUtil.metadataForRollback(RESOURCE_CRN, null)));
 
         verify(clusterModificationService, times(1))
                 .restartServiceRoleByType(SERVICE_TYPE, ROLE_TYPE);
@@ -105,7 +106,7 @@ class CMServiceRoleRestartRotationExecutorTest {
 
     @Test
     public void testFinalization() throws Exception {
-        underTest.executeFinalize(createContext(), null);
+        underTest.executeFinalize(createContext(), RotationMetadataTestUtil.metadataForFinalize(RESOURCE_CRN, null));
 
         verify(clusterModificationService, times(0))
                 .restartServiceRoleByType(SERVICE_TYPE, ROLE_TYPE);

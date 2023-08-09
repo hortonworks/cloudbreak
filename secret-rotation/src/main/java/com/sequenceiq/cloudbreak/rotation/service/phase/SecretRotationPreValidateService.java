@@ -21,7 +21,7 @@ public class SecretRotationPreValidateService extends AbstractSecretRotationServ
                 metadata.secretType(), metadata.resourceCrn());
         metadata.secretType().getSteps().forEach(step -> {
             LOGGER.info("Executing pre validation step {} for secret {} regarding resource {}", step, metadata.secretType(), metadata.resourceCrn());
-            getExecutor(step).executePreValidation(contexts.get(step), metadata.secretType());
+            getExecutor(step).executePreValidation(contexts.get(step), metadata);
         });
     }
 }

@@ -1,34 +1,16 @@
 package com.sequenceiq.cloudbreak.rotation.common;
 
-import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
-
 public class SecretRotationException extends RuntimeException {
 
-    private final SecretRotationStep failedRotationStep;
-
-    public SecretRotationException(String message, SecretRotationStep failedRotationStep) {
+    public SecretRotationException(String message) {
         super(message);
-        this.failedRotationStep = failedRotationStep;
     }
 
-    public SecretRotationException(String message, Throwable cause, SecretRotationStep failedRotationStep) {
-        super(message, cause);
-        this.failedRotationStep = failedRotationStep;
-    }
-
-    public SecretRotationException(Throwable cause, SecretRotationStep failedRotationStep) {
+    public SecretRotationException(Throwable cause) {
         super(cause);
-        this.failedRotationStep = failedRotationStep;
     }
 
-    public SecretRotationStep getFailedRotationStep() {
-        return failedRotationStep;
-    }
-
-    public static SecretRotationStep getFailedStepFromException(Exception ex) {
-        if (ex instanceof SecretRotationException) {
-            return ((SecretRotationException) ex).getFailedRotationStep();
-        }
-        return null;
+    public SecretRotationException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

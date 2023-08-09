@@ -46,7 +46,7 @@ public class CMServiceConfigRotationExecutorTest {
 
     @BeforeEach
     public void mockProgressService() {
-        lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
+        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
     }
 
     @Test

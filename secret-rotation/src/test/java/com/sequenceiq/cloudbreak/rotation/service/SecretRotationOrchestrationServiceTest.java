@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.rotation.service;
 
-import static com.sequenceiq.cloudbreak.rotation.common.TestSecretRotationStep.STEP;
 import static com.sequenceiq.cloudbreak.rotation.common.TestSecretType.TEST;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -107,7 +106,7 @@ public class SecretRotationOrchestrationServiceTest {
     @Test
     public void testRollbackWhenNotNeeded() {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.FALSE);
-        underTest.rollbackIfNeeded(TEST, RESOURCE, null, null);
+        underTest.rollbackIfNeeded(TEST, RESOURCE, null);
 
         verifyNoInteractions(contextProvider, rollbackService, secretRotationStatusService, secretRotationUsageService);
     }
@@ -160,11 +159,11 @@ public class SecretRotationOrchestrationServiceTest {
     @Test
     public void testRollback() {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.TRUE);
-        doNothing().when(rollbackService).rollback(any(), any());
+        doNothing().when(rollbackService).rollback(any());
 
-        underTest.rollbackIfNeeded(TEST, RESOURCE, null, STEP);
+        underTest.rollbackIfNeeded(TEST, RESOURCE, null);
 
-        verify(rollbackService).rollback(any(), any());
+        verify(rollbackService).rollback(any());
         verify(secretRotationStatusService, times(1)).rollbackStarted(eq(RESOURCE), eq(TEST));
         verify(secretRotationUsageService, times(1)).rollbackStarted(eq(TEST), eq(RESOURCE), isNull());
         verify(secretRotationStatusService, times(1)).rollbackFinished(eq(RESOURCE), eq(TEST));

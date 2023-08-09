@@ -38,7 +38,6 @@ import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataSecretModifier;
@@ -133,7 +132,7 @@ class UserDataRotationExecutorTest {
     @BeforeEach
     public void setUp() throws IllegalAccessException {
         lenient().when(cloudStackConverter.convert(any())).thenReturn(cloudStack);
-        lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
+        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -181,7 +180,6 @@ class UserDataRotationExecutorTest {
         SecretRotationException exception = assertThrows(SecretRotationException.class,
                 () -> underTest.rotate(new UserDataRotationContext(RESOURCE_CRN, List.of(Pair.of(new TestAModifier(), "path/secretA")))));
 
-        assertEquals(CommonSecretRotationStep.USER_DATA, exception.getFailedRotationStep());
         assertEquals("Secret is not in a rotated state. User data modification failed.", exception.getMessage());
         verifyNoMoreInteractions(userDataService);
     }
@@ -229,7 +227,6 @@ class UserDataRotationExecutorTest {
         SecretRotationException exception = assertThrows(SecretRotationException.class,
                 () -> underTest.rotate(new UserDataRotationContext(RESOURCE_CRN, List.of(Pair.of(new TestAModifier(), "path/secretA")))));
 
-        assertEquals(CommonSecretRotationStep.USER_DATA, exception.getFailedRotationStep());
         assertEquals("Secret is not in a rotated state. User data modification failed.", exception.getMessage());
         verifyNoMoreInteractions(userDataService);
     }

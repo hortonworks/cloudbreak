@@ -20,7 +20,7 @@ public class SecretRotationService extends AbstractSecretRotationService {
         LOGGER.info("Contexts generation for secret rotation of {} regarding resource {} is finished.", metadata.secretType(), metadata.resourceCrn());
         metadata.secretType().getSteps().forEach(step -> {
             LOGGER.info("Executing rotation step {} for secret {} regarding resource {}", step, metadata.secretType(), metadata.resourceCrn());
-            getExecutor(step).executeRotate(contexts.get(step), metadata.secretType());
+            getExecutor(step).executeRotate(contexts.get(step), metadata);
         });
     }
 }

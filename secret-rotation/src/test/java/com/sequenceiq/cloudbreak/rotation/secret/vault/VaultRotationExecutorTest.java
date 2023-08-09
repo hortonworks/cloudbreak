@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.rotation.RotationMetadataTestUtil;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
@@ -42,7 +43,7 @@ public class VaultRotationExecutorTest {
 
     @BeforeEach
     public void mockProgressService() {
-        lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
+        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -100,7 +101,7 @@ public class VaultRotationExecutorTest {
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
-        underTest.executeRotate(rotationContext, null);
+        underTest.executeRotate(rotationContext, RotationMetadataTestUtil.metadataForRotation("resource", null));
 
         verify(secretService, times(1)).putRotation(eq("secretPath"), eq("secret"));
     }
@@ -112,7 +113,7 @@ public class VaultRotationExecutorTest {
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
-        underTest.executeFinalize(rotationContext, null);
+        underTest.executeFinalize(rotationContext, RotationMetadataTestUtil.metadataForFinalize("resource", null));
 
         verify(secretService, times(1)).update(eq("secretPath"), eq("new"));
     }
@@ -124,7 +125,7 @@ public class VaultRotationExecutorTest {
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
-        underTest.executeRollback(rotationContext, null);
+        underTest.executeRollback(rotationContext, RotationMetadataTestUtil.metadataForRollback("resource", null));
 
         verify(secretService, times(1)).update(eq("secretPath"), eq("old"));
     }
@@ -136,6 +137,7 @@ public class VaultRotationExecutorTest {
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
-        assertThrows(SecretRotationException.class, () -> underTest.executeRotate(rotationContext, null));
+        assertThrows(SecretRotationException.class, () -> underTest.executeRotate(rotationContext,
+                RotationMetadataTestUtil.metadataForRotation("resource", null)));
     }
 }

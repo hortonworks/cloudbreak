@@ -49,18 +49,18 @@ public class CMUserRotationExecutor extends AbstractRotationExecutor<CMUserRotat
                     clientUser,
                     clientPassword);
         } else {
-            throw new SecretRotationException("User or password is not in rotation state in Vault, thus rotation of CM user is not possible.", getType());
+            throw new SecretRotationException("User or password is not in rotation state in Vault, thus rotation of CM user is not possible.");
         }
     }
 
     @Override
-    protected void rollback(CMUserRotationContext rotationContext) {
+    protected void rollback(CMUserRotationContext rotationContext) throws CloudbreakException {
         LOGGER.info("Starting to rollback rotation of CM user by deleting the new user");
         RotationSecret userRotationSecret = secretService.getRotation(rotationContext.getUserSecret());
         if (userRotationSecret.isRotation()) {
             deleteUser(userRotationSecret.getSecret(), rotationContext);
         } else {
-            throw new SecretRotationException("User is not in rotation state in Vault, thus we cannot rollback it.", getType());
+            throw new SecretRotationException("User is not in rotation state in Vault, thus we cannot rollback it.");
         }
     }
 
@@ -71,7 +71,7 @@ public class CMUserRotationExecutor extends AbstractRotationExecutor<CMUserRotat
         if (userRotationSecret.isRotation()) {
             deleteUser(userRotationSecret.getBackupSecret(), rotationContext);
         } else {
-            throw new SecretRotationException("User or password is not in rotation state in Vault, thus we cannot finalize it.", getType());
+            throw new SecretRotationException("User or password is not in rotation state in Vault, thus we cannot finalize it.");
         }
     }
 
@@ -91,7 +91,7 @@ public class CMUserRotationExecutor extends AbstractRotationExecutor<CMUserRotat
             LOGGER.info("Checking if CM API call is possible with new user!");
             getClusterSecurityService(rotationContext).testUser(userRotationSecret.getSecret(), passwordRotationSecret.getSecret());
         } else {
-            throw new SecretRotationException("User and password is not in rotation state in Vault, thus rotation of CM user have been failed.", getType());
+            throw new SecretRotationException("User and password is not in rotation state in Vault, thus rotation of CM user have been failed.");
         }
     }
 
@@ -102,18 +102,14 @@ public class CMUserRotationExecutor extends AbstractRotationExecutor<CMUserRotat
         clusterSecurityService.checkUser(user, clientUser, clientPassword);
     }
 
-    private void deleteUser(String user, CMUserRotationContext rotationContext) {
+    private void deleteUser(String user, CMUserRotationContext rotationContext) throws CloudbreakException {
         ClusterSecurityService clusterSecurityService = getClusterSecurityService(rotationContext);
         String clientUser = secretService.get(rotationContext.getClientUserSecret());
         String clientPassword = secretService.get(rotationContext.getClientPasswordSecret());
-        try {
-            clusterSecurityService.deleteUser(
-                    user,
-                    clientUser,
-                    clientPassword);
-        } catch (CloudbreakException e) {
-            throw new SecretRotationException(e, getType());
-        }
+        clusterSecurityService.deleteUser(
+                user,
+                clientUser,
+                clientPassword);
     }
 
     private ClusterSecurityService getClusterSecurityService(RotationContext rotationContext) {

@@ -64,7 +64,7 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
         for (Map.Entry<String, String> entry : rotationContext.getVaultPathSecretMap().entrySet()) {
             String vaultPath = entry.getKey();
             if (!secretService.isSecret(vaultPath)) {
-                throw new SecretRotationException(String.format("%s is not a vault path, thus rotation is not possible!", vaultPath), getType());
+                throw new SecretRotationException(String.format("%s is not a vault path, thus rotation is not possible!", vaultPath));
             }
         }
     }
@@ -75,7 +75,7 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
             String vaultPath = entry.getKey();
             if (!secretService.getRotation(vaultPath).isRotation()) {
                 String message = String.format("%s vault path is not in rotation state, thus something went wrong during rotation!", vaultPath);
-                throw new SecretRotationException(message, getType());
+                throw new SecretRotationException(message);
             }
         }
     }

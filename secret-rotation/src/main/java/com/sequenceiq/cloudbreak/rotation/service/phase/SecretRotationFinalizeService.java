@@ -26,7 +26,7 @@ public class SecretRotationFinalizeService extends AbstractSecretRotationService
         });
         Lists.reverse(metadata.secretType().getSteps()).forEach(step -> {
             LOGGER.info("Finalizing rotation step {} for secret {} regarding resource {}.", step, metadata.secretType(), metadata.resourceCrn());
-            getExecutor(step).executeFinalize(contexts.get(step), metadata.secretType());
+            getExecutor(step).executeFinalize(contexts.get(step), metadata);
         });
     }
 }

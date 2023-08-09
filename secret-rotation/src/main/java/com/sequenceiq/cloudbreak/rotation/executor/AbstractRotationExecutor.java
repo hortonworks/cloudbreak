@@ -1,10 +1,5 @@
 package com.sequenceiq.cloudbreak.rotation.executor;
 
-import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.FINALIZE;
-import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.PREVALIDATE;
-import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
-import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
-
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -13,12 +8,11 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
-import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgress;
+import com.sequenceiq.cloudbreak.rotation.service.RotationMetadata;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.util.CheckedConsumer;
@@ -47,23 +41,26 @@ public abstract class AbstractRotationExecutor<C extends RotationContext> {
 
     public abstract SecretRotationStep getType();
 
-    public final void executeRotate(RotationContext context, SecretType secretType) {
-        invokeRotationPhaseWithProgressCheck(context, secretType, ROTATE, this::rotate,
-                () -> String.format("Execution of rotation failed at %s step for %s regarding secret %s.", getType(), context.getResourceCrn(), secretType));
+    public final void executeRotate(RotationContext context, RotationMetadata metadata) {
+        invokeRotationPhaseWithProgressCheck(context, metadata, this::rotate,
+                () -> String.format("Execution of rotation failed at %s step for %s regarding secret %s.",
+                        getType(), context.getResourceCrn(), metadata.secretType()));
     }
 
-    public final void executeRollback(RotationContext context, SecretType secretType) {
-        invokeRotationPhaseWithProgressCheck(context, secretType, ROLLBACK, this::rollback,
-                () -> String.format("Rollback of rotation failed at %s step for %s regarding secret %s.", getType(), context.getResourceCrn(), secretType));
+    public final void executeRollback(RotationContext context, RotationMetadata metadata) {
+        invokeRotationPhaseWithProgressCheck(context, metadata, this::rollback,
+                () -> String.format("Rollback of rotation failed at %s step for %s regarding secret %s.",
+                        getType(), context.getResourceCrn(), metadata.secretType()));
     }
 
-    public final void executeFinalize(RotationContext context, SecretType secretType) {
-        invokeRotationPhaseWithProgressCheck(context, secretType, FINALIZE, this::finalize,
-                () -> String.format("Finalization of rotation failed at %s step for %s regarding secret %s.", getType(), context.getResourceCrn(), secretType));
+    public final void executeFinalize(RotationContext context, RotationMetadata metadata) {
+        invokeRotationPhaseWithProgressCheck(context, metadata, this::finalize,
+                () -> String.format("Finalization of rotation failed at %s step for %s regarding secret %s.",
+                        getType(), context.getResourceCrn(), metadata.secretType()));
     }
 
-    public final void executePreValidation(RotationContext context, SecretType secretType) {
-        invokeRotationPhaseWithProgressCheck(context, secretType, PREVALIDATE, this::preValidate,
+    public final void executePreValidation(RotationContext context, RotationMetadata metadata) {
+        invokeRotationPhaseWithProgressCheck(context, metadata, this::preValidate,
                 () -> String.format("Pre validation of rotation failed at %s step for %s", getType(), context.getResourceCrn()));
     }
 
@@ -74,15 +71,15 @@ public abstract class AbstractRotationExecutor<C extends RotationContext> {
 
     private void logAndThrow(Exception e, String errorMessage) {
         LOGGER.error(errorMessage, e);
-        throw new SecretRotationException(errorMessage, e, getType());
+        throw new SecretRotationException(errorMessage, e);
     }
 
-    private void invokeRotationPhaseWithProgressCheck(RotationContext context, SecretType secretType, RotationFlowExecutionType executionType,
+    private void invokeRotationPhaseWithProgressCheck(RotationContext context, RotationMetadata metadata,
             CheckedConsumer<C, Exception> rotationPhaseLogic, Supplier<String> errorMessageSupplier) {
-        Optional<SecretRotationStepProgress> latestStepProgress = progressService.latestStep(context.getResourceCrn(), secretType, getType(), executionType);
+        Optional<SecretRotationStepProgress> latestStepProgress = progressService.latestStep(metadata, getType());
         if (latestStepProgress.isEmpty() || latestStepProgress.get().getFinished() == null) {
             try {
-                secretRotationNotificationService.sendNotification(context.getResourceCrn(), secretType, getType(), executionType);
+                secretRotationNotificationService.sendNotification(metadata, getType());
                 rotationPhaseLogic.accept(castContext(context));
             } catch (Exception e) {
                 logAndThrow(e, errorMessageSupplier.get());
@@ -90,7 +87,8 @@ public abstract class AbstractRotationExecutor<C extends RotationContext> {
                 latestStepProgress.ifPresent(progressService::finished);
             }
         } else {
-            LOGGER.info("{} is already finished for {} step regarding {} secret, thus skipping it.", executionType, getType(), secretType);
+            LOGGER.info("{} is already finished for {} step regarding {} secret, thus skipping it.",
+                    metadata.currentExecution(), getType(), metadata.secretType());
         }
     }
 
@@ -106,6 +104,6 @@ public abstract class AbstractRotationExecutor<C extends RotationContext> {
         if (getContextClass().isAssignableFrom(context.getClass())) {
             return (C) context;
         }
-        throw new SecretRotationException(String.format("Type of provided context for rotation step %s is not correct.", getType()), getType());
+        throw new SecretRotationException(String.format("Type of provided context for rotation step %s is not correct.", getType()));
     }
 }

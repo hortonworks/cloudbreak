@@ -73,7 +73,7 @@ class SaltBootConfigRotationExecutorTest {
 
     @BeforeEach
     public void setUp() {
-        lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
+        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
     }
 
     @Test

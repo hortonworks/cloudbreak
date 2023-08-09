@@ -139,7 +139,7 @@ public class UserDataRotationExecutor extends AbstractRotationExecutor<UserDataR
                     RotationSecret rotationSecret = secretService.getRotation(vaultPath);
                     if (!rotationSecret.isRotation()) {
                         LOGGER.error("Secret {} is not in a rotated state. User data modification failed.", vaultPath);
-                        throw new SecretRotationException("Secret is not in a rotated state. User data modification failed.", getType());
+                        throw new SecretRotationException("Secret is not in a rotated state. User data modification failed.");
                     }
                     return rotationSecret;
                 }));
@@ -177,7 +177,7 @@ public class UserDataRotationExecutor extends AbstractRotationExecutor<UserDataR
             } catch (Exception e) {
                 String msg = "Failed to update aws launch template.";
                 LOGGER.info(msg, e);
-                throw new SecretRotationException(msg, e, getType());
+                throw new SecretRotationException(msg, e);
             }
         } else {
             LOGGER.info("No template update is needed.");

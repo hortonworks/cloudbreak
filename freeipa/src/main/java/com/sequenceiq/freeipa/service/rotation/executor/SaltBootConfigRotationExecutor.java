@@ -33,7 +33,7 @@ public class SaltBootConfigRotationExecutor extends AbstractRotationExecutor<Sal
     private HostOrchestrator hostOrchestrator;
 
     @Override
-    protected void rotate(SaltBootConfigRotationContext rotationContext) {
+    protected void rotate(SaltBootConfigRotationContext rotationContext) throws CloudbreakOrchestratorFailedException {
         SaltBootUpdateConfiguration saltBootUpdateConfiguration = rotationContext.getServiceUpdateConfiguration();
         GatewayConfig gatewayConfig = getUsableGatewayConfig(saltBootUpdateConfiguration);
         uploadFile(saltBootUpdateConfiguration, gatewayConfig, saltBootUpdateConfiguration.newConfig());
@@ -41,7 +41,7 @@ public class SaltBootConfigRotationExecutor extends AbstractRotationExecutor<Sal
     }
 
     @Override
-    protected void rollback(SaltBootConfigRotationContext rotationContext) {
+    protected void rollback(SaltBootConfigRotationContext rotationContext) throws CloudbreakOrchestratorFailedException {
         SaltBootUpdateConfiguration saltBootUpdateConfiguration = rotationContext.getServiceUpdateConfiguration();
         GatewayConfig gatewayConfig = getUsableGatewayConfig(saltBootUpdateConfiguration);
         uploadFile(saltBootUpdateConfiguration, gatewayConfig, saltBootUpdateConfiguration.oldConfig());
@@ -87,8 +87,7 @@ public class SaltBootConfigRotationExecutor extends AbstractRotationExecutor<Sal
         }
         throw new SecretRotationException(String.format(
                 "Salt boot is not reachable with old nor with new secrets. %s/%s service config can't be updated.",
-                saltBootUpdateConfiguration.configFolder(), saltBootUpdateConfiguration.configFile()),
-                getType());
+                saltBootUpdateConfiguration.configFolder(), saltBootUpdateConfiguration.configFile()));
     }
 
     private boolean isSaltBootReachableWithGatewayConfig(SaltBootUpdateConfiguration saltBootUpdateConfiguration, GatewayConfig gatewayConfig) {
@@ -120,27 +119,23 @@ public class SaltBootConfigRotationExecutor extends AbstractRotationExecutor<Sal
             LOGGER.info("Uploaded service configuration to {}/{} on hosts {}",
                     saltBootUpdateConfiguration.configFolder(), saltBootUpdateConfiguration.configFile(), saltBootUpdateConfiguration.targetPrivateIps());
         } catch (CloudbreakOrchestratorFailedException e) {
-            LOGGER.error("Couldn't upload service configuration to {}/{} on hosts {}",
-                    saltBootUpdateConfiguration.configFolder(), saltBootUpdateConfiguration.configFile(), saltBootUpdateConfiguration.targetPrivateIps(),
-                    e);
-            throw new SecretRotationException(e, getType());
+            String message = String.format("Couldn't upload service configuration to %s/%s on hosts %s",
+                    saltBootUpdateConfiguration.configFolder(), saltBootUpdateConfiguration.configFile(), saltBootUpdateConfiguration.targetPrivateIps());
+            LOGGER.error(message, e);
+            throw new SecretRotationException(message, e);
         }
     }
 
-    private void restartSaltBootService(SaltBootUpdateConfiguration serviceConfig, GatewayConfig gatewayConfig) {
+    private void restartSaltBootService(SaltBootUpdateConfiguration serviceConfig, GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException {
         if (CollectionUtils.isNotEmpty(serviceConfig.serviceRestartActions())) {
-            try {
-                LOGGER.info("Executing restart actions {} on hosts {}", serviceConfig.serviceRestartActions(), serviceConfig.targetFqdns());
-                hostOrchestrator.executeSaltState(
-                        gatewayConfig,
-                        serviceConfig.targetFqdns(),
-                        serviceConfig.serviceRestartActions(),
-                        serviceConfig.exitCriteriaModel(),
-                        Optional.of(serviceConfig.maxRetryCount()),
-                        Optional.of(serviceConfig.maxRetryCount()));
-            } catch (CloudbreakOrchestratorFailedException e) {
-                throw new SecretRotationException(e, getType());
-            }
+            LOGGER.info("Executing restart actions {} on hosts {}", serviceConfig.serviceRestartActions(), serviceConfig.targetFqdns());
+            hostOrchestrator.executeSaltState(
+                    gatewayConfig,
+                    serviceConfig.targetFqdns(),
+                    serviceConfig.serviceRestartActions(),
+                    serviceConfig.exitCriteriaModel(),
+                    Optional.of(serviceConfig.maxRetryCount()),
+                    Optional.of(serviceConfig.maxRetryCount()));
         }
     }
 

@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.rotation.RotationMetadataTestUtil;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
@@ -47,7 +48,7 @@ class CloudbreakPollerRotationExecutorTest {
 
     @BeforeEach
     public void mockProgressService() throws IllegalAccessException {
-        lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
+        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -55,14 +56,16 @@ class CloudbreakPollerRotationExecutorTest {
         doThrow(new RuntimeException("error")).when(sdxRotationService).rotateCloudbreakSecret(anyString(),
                 eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(ROTATE));
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
-                () -> underTest.executeRotate(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), null));
+                () -> underTest.executeRotate(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD),
+                        RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null)));
         Assertions.assertEquals("Execution of rotation failed at CLOUDBREAK_ROTATE_POLLING step for resourceCrn regarding secret null.",
                 secretRotationException.getMessage());
     }
 
     @Test
     void rotateShouldSucceed() {
-        underTest.executeRotate(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), null);
+        underTest.executeRotate(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD),
+                RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null));
         verify(sdxRotationService, times(1)).rotateCloudbreakSecret(eq(RESOURCE_CRN),
                 eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(ROTATE));
     }
@@ -72,14 +75,16 @@ class CloudbreakPollerRotationExecutorTest {
         doThrow(new RuntimeException("error")).when(sdxRotationService).rotateCloudbreakSecret(anyString(),
                 eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(ROLLBACK));
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
-                () -> underTest.executeRollback(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), null));
+                () -> underTest.executeRollback(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD),
+                        RotationMetadataTestUtil.metadataForRollback(RESOURCE_CRN, null)));
         Assertions.assertEquals("Rollback of rotation failed at CLOUDBREAK_ROTATE_POLLING step for resourceCrn regarding secret null.",
                 secretRotationException.getMessage());
     }
 
     @Test
     void rollbackShouldSucceed() {
-        underTest.executeRollback(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), null);
+        underTest.executeRollback(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD),
+                RotationMetadataTestUtil.metadataForRollback(RESOURCE_CRN, null));
         verify(sdxRotationService, times(1)).rotateCloudbreakSecret(eq(RESOURCE_CRN),
                 eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(ROLLBACK));
     }
@@ -89,14 +94,16 @@ class CloudbreakPollerRotationExecutorTest {
         doThrow(new RuntimeException("error")).when(sdxRotationService).rotateCloudbreakSecret(anyString(),
                 eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(FINALIZE));
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
-                () -> underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), null));
+                () -> underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD),
+                        RotationMetadataTestUtil.metadataForFinalize(RESOURCE_CRN, null)));
         Assertions.assertEquals("Finalization of rotation failed at CLOUDBREAK_ROTATE_POLLING step for resourceCrn regarding secret null.",
                 secretRotationException.getMessage());
     }
 
     @Test
     void finalizeShouldSucceed() {
-        underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), null);
+        underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD),
+                RotationMetadataTestUtil.metadataForFinalize(RESOURCE_CRN, null));
         verify(sdxRotationService, times(1)).rotateCloudbreakSecret(eq(RESOURCE_CRN),
                 eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(FINALIZE));
     }

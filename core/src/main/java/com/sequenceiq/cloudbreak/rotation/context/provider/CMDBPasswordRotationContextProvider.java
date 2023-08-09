@@ -90,7 +90,7 @@ public class CMDBPasswordRotationContextProvider extends AbstractCMRelatedDataba
             ClusterApi connector = clusterApiConnectors.getConnector(stack);
             connector.clusterSetupService().waitForServer(false);
         } catch (Exception e) {
-            throw new SecretRotationException(e, CUSTOM_JOB);
+            throw new SecretRotationException(e);
         }
     }
 

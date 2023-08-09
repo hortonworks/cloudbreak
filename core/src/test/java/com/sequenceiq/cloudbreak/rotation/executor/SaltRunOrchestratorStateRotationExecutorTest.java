@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
+import com.sequenceiq.cloudbreak.rotation.RotationMetadataTestUtil;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.SaltRunOrchestratorStateRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.SaltRunOrchestratorStateRotationContext.SaltRunOrchestratorStateRotationContextBuilder;
@@ -51,7 +52,7 @@ class SaltRunOrchestratorStateRotationExecutorTest {
 
     @BeforeEach
     public void mockProgressService() {
-        lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
+        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -105,7 +106,8 @@ class SaltRunOrchestratorStateRotationExecutorTest {
         doThrow(new CloudbreakOrchestratorFailedException("something")).when(hostOrchestrator).runOrchestratorState(any());
 
         assertThrows(SecretRotationException.class, () ->
-                underTest.executeRotate(createContext(List.of("state"), Optional.empty(), Optional.empty()), null));
+                underTest.executeRotate(createContext(List.of("state"), Optional.empty(), Optional.empty()),
+                        RotationMetadataTestUtil.metadataForRotation("resource", null)));
 
         verify(hostOrchestrator).runOrchestratorState(orchestratorStateParamsArgumentCaptor.capture());
         OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsArgumentCaptor.getValue();
@@ -117,7 +119,8 @@ class SaltRunOrchestratorStateRotationExecutorTest {
         doThrow(new CloudbreakOrchestratorFailedException("something")).when(hostOrchestrator).runOrchestratorState(any());
 
         assertThrows(SecretRotationException.class, () ->
-                underTest.executeRollback(createContext(List.of("state"), Optional.of(List.of("rollback")), Optional.empty()), null));
+                underTest.executeRollback(createContext(List.of("state"), Optional.of(List.of("rollback")), Optional.empty()),
+                        RotationMetadataTestUtil.metadataForRollback("resource", null)));
 
         verify(hostOrchestrator).runOrchestratorState(orchestratorStateParamsArgumentCaptor.capture());
         OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsArgumentCaptor.getValue();
@@ -151,7 +154,8 @@ class SaltRunOrchestratorStateRotationExecutorTest {
         doThrow(new CloudbreakOrchestratorFailedException("something")).when(hostOrchestrator).runOrchestratorState(any());
 
         assertThrows(SecretRotationException.class, () ->
-                underTest.executeFinalize(createContext(List.of("state"), Optional.empty(), Optional.of(List.of("finalize"))), null));
+                underTest.executeFinalize(createContext(List.of("state"), Optional.empty(), Optional.of(List.of("finalize"))),
+                        RotationMetadataTestUtil.metadataForFinalize("resource", null)));
 
         verify(hostOrchestrator).runOrchestratorState(orchestratorStateParamsArgumentCaptor.capture());
         OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsArgumentCaptor.getValue();

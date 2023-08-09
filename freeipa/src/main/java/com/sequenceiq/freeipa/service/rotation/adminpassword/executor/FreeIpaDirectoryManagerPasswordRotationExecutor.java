@@ -60,7 +60,7 @@ public class FreeIpaDirectoryManagerPasswordRotationExecutor extends AbstractRot
                     });
         } else {
             throw new SecretRotationException("Freeipa admin password is not in rotation state in Vault, thus rotation of directory manager password " +
-                    "is not possible.", getType());
+                    "is not possible.");
         }
     }
 
@@ -93,7 +93,7 @@ public class FreeIpaDirectoryManagerPasswordRotationExecutor extends AbstractRot
 
     @Override
     public void preValidate(FreeIpaAdminPasswordRotationContext rotationContext) {
-        freeIpaAdminPasswordRotationUtil.checkRedhat8(rotationContext, getType());
+        freeIpaAdminPasswordRotationUtil.checkRedhat8(rotationContext);
     }
 
     @Override

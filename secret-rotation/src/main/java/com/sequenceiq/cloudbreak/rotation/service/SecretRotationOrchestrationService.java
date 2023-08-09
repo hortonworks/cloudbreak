@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
-import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
@@ -84,13 +83,13 @@ public class SecretRotationOrchestrationService {
         }
     }
 
-    public void rollbackIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType, SecretRotationStep failedStep) {
+    public void rollbackIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType) {
         RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, ROLLBACK);
         if (executionDecisionProvider.executionRequired(rotationMetadata)) {
             try {
                 secretRotationStatusService.rollbackStarted(resourceCrn, secretType);
                 secretRotationUsageService.rollbackStarted(secretType, resourceCrn, executionType);
-                rollbackService.rollback(rotationMetadata, failedStep);
+                rollbackService.rollback(rotationMetadata);
                 secretRotationProgressService.deleteAllForCurrentRotation(resourceCrn, secretType);
                 secretRotationStatusService.rollbackFinished(resourceCrn, secretType);
                 secretRotationUsageService.rollbackFinished(secretType, resourceCrn, executionType);

@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SerializableRotationEnum;
+import com.sequenceiq.cloudbreak.rotation.service.RotationMetadata;
 
 @Component
 public class SecretRotationNotificationService {
@@ -26,8 +27,8 @@ public class SecretRotationNotificationService {
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
-    public void sendNotification(String resourceCrn, SecretType secretType, SecretRotationStep step, RotationFlowExecutionType executionType) {
-        createNotificationMessage(secretType, step, executionType).ifPresent(message -> send(resourceCrn, message));
+    public void sendNotification(RotationMetadata metadata, SecretRotationStep step) {
+        createNotificationMessage(metadata.secretType(), step, metadata.currentExecution()).ifPresent(message -> send(metadata.resourceCrn(), message));
     }
 
     private Optional<String> createNotificationMessage(SecretType secretType, SecretRotationStep step, RotationFlowExecutionType executionType) {

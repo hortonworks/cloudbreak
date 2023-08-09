@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.rotation.RotationMetadataTestUtil;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
@@ -44,12 +45,13 @@ class CustomJobRotationExecutorTest {
 
     @BeforeEach
     public void mockProgressService() {
-        lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
+        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
     }
 
     @Test
     public void testRotation() throws Exception {
-        underTest.executeRotate(createContext(rotateCustomJob, null, null), null);
+        underTest.executeRotate(createContext(rotateCustomJob, null, null),
+                RotationMetadataTestUtil.metadataForRotation("resource", null));
 
         verify(rotateCustomJob).run();
         verify(rollbackCustomJob, times(0)).run();
@@ -61,7 +63,8 @@ class CustomJobRotationExecutorTest {
         doThrow(new RuntimeException("something")).when(rotateCustomJob).run();
 
         assertThrows(SecretRotationException.class, () ->
-                underTest.executeRotate(createContext(rotateCustomJob, null, null), null));
+                underTest.executeRotate(createContext(rotateCustomJob, null, null),
+                        RotationMetadataTestUtil.metadataForRotation("resource", null)));
 
         verify(rotateCustomJob).run();
         verify(rollbackCustomJob, times(0)).run();
@@ -73,7 +76,8 @@ class CustomJobRotationExecutorTest {
         doThrow(new RuntimeException("something")).when(rollbackCustomJob).run();
 
         assertThrows(SecretRotationException.class, () ->
-                underTest.executeRollback(createContext(rotateCustomJob, rollbackCustomJob, null), null));
+                underTest.executeRollback(createContext(rotateCustomJob, rollbackCustomJob, null),
+                        RotationMetadataTestUtil.metadataForRollback("resource", null)));
 
         verify(rotateCustomJob, times(0)).run();
         verify(rollbackCustomJob).run();
@@ -82,7 +86,8 @@ class CustomJobRotationExecutorTest {
 
     @Test
     public void testFinalization() throws Exception {
-        underTest.executeFinalize(createContext(rotateCustomJob, null, finalizeCustomJob), null);
+        underTest.executeFinalize(createContext(rotateCustomJob, null, finalizeCustomJob),
+                RotationMetadataTestUtil.metadataForFinalize("resource", null));
 
         verify(rotateCustomJob, times(0)).run();
         verify(rollbackCustomJob, times(0)).run();
@@ -94,7 +99,8 @@ class CustomJobRotationExecutorTest {
         doThrow(new RuntimeException("something")).when(finalizeCustomJob).run();
 
         assertThrows(SecretRotationException.class, () ->
-                underTest.executeFinalize(createContext(rotateCustomJob, null, finalizeCustomJob), null));
+                underTest.executeFinalize(createContext(rotateCustomJob, null, finalizeCustomJob),
+                        RotationMetadataTestUtil.metadataForFinalize("resource", null)));
 
         verify(rotateCustomJob, times(0)).run();
         verify(rollbackCustomJob, times(0)).run();

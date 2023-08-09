@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep;
 import com.sequenceiq.freeipa.service.freeipa.user.DirectoryManagerUserService;
 import com.sequenceiq.freeipa.service.rotation.adminpassword.context.FreeIpaAdminPasswordRotationContext;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -70,7 +69,6 @@ class FreeIpaDirectoryManagerPasswordRotationExecutorTest {
 
         assertEquals("Freeipa admin password is not in rotation state in Vault, thus rotation of directory manager password " +
                 "is not possible.", exception.getMessage());
-        assertEquals(FreeIpaSecretRotationStep.FREEIPA_DIRECTORY_MANAGER_PASSWORD, exception.getFailedRotationStep());
     }
 
     @Test

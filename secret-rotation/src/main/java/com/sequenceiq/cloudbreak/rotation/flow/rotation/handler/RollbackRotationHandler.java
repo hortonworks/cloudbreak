@@ -27,15 +27,13 @@ public class RollbackRotationHandler extends ExceptionCatcherEventHandler<Rollba
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<RollbackRotationTriggerEvent> event) {
-        return RotationFailedEvent.fromPayload(SecretRotationEvent.ROTATION_FAILED_EVENT.event(), event.getData(), e, event.getData().getFailedStep());
+        return RotationFailedEvent.fromPayload(SecretRotationEvent.ROTATION_FAILED_EVENT.event(), event.getData(), e);
     }
 
     @Override
     protected Selectable doAccept(HandlerEvent<RollbackRotationTriggerEvent> event) {
         RollbackRotationTriggerEvent rollbackEvent = event.getData();
-        secretRotationOrchestrationService.rollbackIfNeeded(rollbackEvent.getSecretType(), rollbackEvent.getResourceCrn(), rollbackEvent.getExecutionType(),
-                rollbackEvent.getFailedStep());
-        return RotationFailedEvent.fromPayload(SecretRotationEvent.ROTATION_FAILED_EVENT.event(), rollbackEvent, rollbackEvent.getException(),
-                rollbackEvent.getFailedStep());
+        secretRotationOrchestrationService.rollbackIfNeeded(rollbackEvent.getSecretType(), rollbackEvent.getResourceCrn(), rollbackEvent.getExecutionType());
+        return RotationFailedEvent.fromPayload(SecretRotationEvent.ROTATION_FAILED_EVENT.event(), rollbackEvent, rollbackEvent.getException());
     }
 }

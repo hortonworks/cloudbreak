@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.rotation.RotationMetadataTestUtil;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.ClusterProxyRotationContext;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
@@ -49,7 +50,7 @@ public class ClusterProxyRotationExecutorTest {
 
     @BeforeEach
     public void mockProgressService() {
-        lenient().when(secretRotationProgressService.latestStep(any(), any(), any(), any())).thenReturn(Optional.empty());
+        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -58,7 +59,8 @@ public class ClusterProxyRotationExecutorTest {
         when(stackDtoService.getByCrn(any())).thenReturn(stackDto);
         when(clusterProxyService.reRegisterCluster(anyLong())).thenReturn(Optional.of(new ConfigRegistrationResponse()));
 
-        underTest.executeRotate(ClusterProxyRotationContext.builder().withResourceCrn("resource").build(), null);
+        underTest.executeRotate(ClusterProxyRotationContext.builder().withResourceCrn("resource").build(),
+                RotationMetadataTestUtil.metadataForRotation("resource", null));
 
         verify(clusterProxyService).reRegisterCluster(eq(1L));
     }
@@ -70,7 +72,8 @@ public class ClusterProxyRotationExecutorTest {
         when(clusterProxyService.reRegisterCluster(anyLong())).thenThrow(new CloudbreakServiceException("something"));
 
         assertThrows(SecretRotationException.class, () ->
-                underTest.executeRotate(ClusterProxyRotationContext.builder().withResourceCrn("resource").build(), null));
+                underTest.executeRotate(ClusterProxyRotationContext.builder().withResourceCrn("resource").build(),
+                        RotationMetadataTestUtil.metadataForRotation("resource", null)));
 
         verify(clusterProxyService).reRegisterCluster(eq(1L));
     }
@@ -81,7 +84,8 @@ public class ClusterProxyRotationExecutorTest {
         when(stackDtoService.getByCrn(any())).thenReturn(stackDto);
         when(clusterProxyService.reRegisterCluster(anyLong())).thenReturn(Optional.of(new ConfigRegistrationResponse()));
 
-        underTest.executeRollback(ClusterProxyRotationContext.builder().withResourceCrn("resource").build(), null);
+        underTest.executeRollback(ClusterProxyRotationContext.builder().withResourceCrn("resource").build(),
+                RotationMetadataTestUtil.metadataForRollback("resource", null));
 
         verify(clusterProxyService).reRegisterCluster(eq(1L));
     }

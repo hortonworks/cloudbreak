@@ -1,11 +1,15 @@
 package com.sequenceiq.cloudbreak.rotation;
 
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
+import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 import static com.sequenceiq.redbeams.api.model.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,15 +20,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.rotation.service.RotationMetadata;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 @ExtendWith(MockitoExtension.class)
 class StackSecretRotationNotificationServiceTest {
 
     private static final Long STACK_ID = 1L;
+
+    private static final RotationMetadata METADATA = new RotationMetadata(DATALAKE_SALT_BOOT_SECRETS, ROTATE, null,
+            "", Optional.empty());
 
     @Mock
     private StackDtoService stackDtoService;
@@ -54,8 +61,7 @@ class StackSecretRotationNotificationServiceTest {
     public void testRotationNotification() {
         when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stackView);
 
-        underTest.sendNotification("crn", DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS, CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING,
-                RotationFlowExecutionType.ROTATE);
+        underTest.sendNotification(METADATA, CLOUDBREAK_ROTATE_POLLING);
 
         verifyEventIsSent("Execute secret [random secret]: small step for a secret, big step for the customer");
         verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS");
@@ -65,8 +71,7 @@ class StackSecretRotationNotificationServiceTest {
     public void testRollbackNotification() {
         when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stackView);
 
-        underTest.sendNotification("crn", DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS, CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING,
-                RotationFlowExecutionType.ROLLBACK);
+        underTest.sendNotification(METADATA, CLOUDBREAK_ROTATE_POLLING);
 
         verifyEventIsSent("Execute secret [random secret]: small step for a secret, big step for the customer");
         verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS");
@@ -76,8 +81,7 @@ class StackSecretRotationNotificationServiceTest {
     public void testFinalizeNotification() {
         when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stackView);
 
-        underTest.sendNotification("crn", DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS, CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING,
-                RotationFlowExecutionType.FINALIZE);
+        underTest.sendNotification(METADATA, CLOUDBREAK_ROTATE_POLLING);
 
         verifyEventIsSent("Execute secret [random secret]: small step for a secret, big step for the customer");
         verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS");
