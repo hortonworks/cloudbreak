@@ -21,6 +21,17 @@ public class SdxResizeTests extends PreconditionSdxE2ETest {
             then = "SDX resize should be successful, the new cluster should be up and running"
     )
     public void testSDXResize(TestContext testContext) {
-        sdxResizeTestUtil.runResizeTest(testContext, resourcePropertyProvider().getName(), getCloudStorageRequest(testContext));
+        sdxResizeTestUtil.runResizeTestMediumDuty(testContext, resourcePropertyProvider().getName(), getCloudStorageRequest(testContext));
+    }
+
+    @Test(dataProvider =  TEST_CONTEXT)
+    @UseSpotInstances
+    @Description(
+            given = "there is an available environment with a running SDX cluster",
+            when = "resize is called on the SDX cluster",
+            then = "SDX resize should be successful, the new cluster should be up and running"
+    )
+    public void testSdxResizeEDL(TestContext testContext) {
+        sdxResizeTestUtil.runResizeTestEDL(testContext, resourcePropertyProvider().getName(), getCloudStorageRequest(testContext));
     }
 }

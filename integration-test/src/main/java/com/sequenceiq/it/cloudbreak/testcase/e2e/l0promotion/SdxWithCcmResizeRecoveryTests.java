@@ -40,7 +40,7 @@ public class SdxWithCcmResizeRecoveryTests extends PreconditionSdxE2ETest {
             then = "recovery should be available and successful when run, the original cluster should be up and running"
     )
     public void testCcmSdxResizeRecoveryFromProvisioningFailure(TestContext testContext) {
-        sdxResizeTestUtil.runResizeRecoveryFromProvisioningFailureTest(
+        sdxResizeTestUtil.runResizeRecoveryFromProvisioningFailureMediumDutyTest(
                 testContext, resourcePropertyProvider().getName(), getCloudStorageRequest(testContext)
         );
     }
