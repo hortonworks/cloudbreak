@@ -62,7 +62,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
     private Set<SdxRecipe> recipes;
 
     @ApiModelProperty(ModelDescriptions.IMAGE_SETTINGS)
-    private ImageSettingsV4Request imageSettingsV4Request;
+    private ImageSettingsV4Request image;
 
     public String getEnvironment() {
         return environment;
@@ -176,12 +176,12 @@ public class SdxClusterRequestBase implements TaggableRequest {
         this.recipes = recipes;
     }
 
-    public ImageSettingsV4Request getImageSettingsV4Request() {
-        return imageSettingsV4Request;
+    public ImageSettingsV4Request getImage() {
+        return image;
     }
 
-    public void setImageSettingsV4Request(ImageSettingsV4Request imageSettingsV4Request) {
-        this.imageSettingsV4Request = imageSettingsV4Request;
+    public void setImage(ImageSettingsV4Request image) {
+        this.image = image;
     }
 
     public void copyTo(SdxClusterRequestBase toInstance) {
@@ -196,7 +196,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
         toInstance.setCustomInstanceGroups(customInstanceGroups);
         toInstance.setJavaVersion(javaVersion);
         toInstance.setRecipes(recipes);
-        toInstance.setImageSettingsV4Request(imageSettingsV4Request);
+        toInstance.setImage(image);
     }
 
     @Override
@@ -210,7 +210,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
                 ", enableMultiAz=" + enableMultiAz +
                 ", javaVersion=" + javaVersion +
                 ", recipes=" + recipes +
-                ", imageSettingsV4Request=" + imageSettingsV4Request +
+                ", image=" + image +
                 '}';
     }
 }

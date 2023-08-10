@@ -157,7 +157,7 @@ public class SdxController implements SdxEndpoint {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Pair<SdxCluster, FlowIdentifier> result = sdxService.createSdx(userCrn, name, createSdxClusterRequest, null);
         SdxCluster sdxCluster = result.getLeft();
-        MetricType metricType = createSdxClusterRequest.getImageSettingsV4Request() != null
+        MetricType metricType = createSdxClusterRequest.getImage() != null
                 ? MetricType.CUSTOM_SDX_REQUESTED
                 : MetricType.EXTERNAL_SDX_REQUESTED;
         metricService.incrementMetricCounter(metricType, sdxCluster);

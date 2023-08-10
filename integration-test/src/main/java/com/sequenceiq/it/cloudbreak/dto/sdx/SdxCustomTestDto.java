@@ -150,7 +150,7 @@ public class SdxCustomTestDto extends AbstractSdxTestDto<SdxCustomClusterRequest
         ImageSettingsV4Request image = new ImageSettingsV4Request();
         image.setCatalog(imageCatalogName);
         image.setId(imageId);
-        getRequest().setImageSettingsV4Request(image);
+        getRequest().setImage(image);
         return this;
     }
 

@@ -106,7 +106,6 @@ import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
-import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
@@ -782,7 +781,7 @@ class SdxServiceCreateSdxTest {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(LIGHT_DUTY, "id", "catalog");
         withCloudStorage(sdxClusterRequest);
         StackV4Request stackV4Request = new StackV4Request();
-        sdxClusterRequest.getImageSettingsV4Request().setOs("os");
+        sdxClusterRequest.getImage().setOs("os");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
 
@@ -881,7 +880,7 @@ class SdxServiceCreateSdxTest {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(LIGHT_DUTY, "cdp-default", "imageId_1");
         setSpot(sdxClusterRequest);
         withCloudStorage(sdxClusterRequest);
-        when(imageCatalogService.getImageResponseFromImageRequest(eq(sdxClusterRequest.getImageSettingsV4Request()), any())).thenReturn(imageResponse);
+        when(imageCatalogService.getImageResponseFromImageRequest(eq(sdxClusterRequest.getImage()), any())).thenReturn(imageResponse);
         when(externalDatabaseConfigurer.configure(any(), eq(OS), any(), any(), any())).thenReturn(new SdxDatabase());
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
@@ -1210,7 +1209,7 @@ class SdxServiceCreateSdxTest {
         imageSettingsV4Request.setCatalog(catalog);
         imageSettingsV4Request.setId(imageId);
 
-        sdxClusterRequest.setImageSettingsV4Request(imageSettingsV4Request);
+        sdxClusterRequest.setImage(imageSettingsV4Request);
         return sdxClusterRequest;
     }
 
@@ -1248,20 +1247,6 @@ class SdxServiceCreateSdxTest {
         masterInstanceGroup.setName(name);
         masterInstanceGroup.setInstanceType(instanceType);
         return masterInstanceGroup;
-    }
-
-    private SdxCustomClusterRequest createSdxCustomClusterRequest(SdxClusterShape shape, String catalog, String imageId) {
-        ImageSettingsV4Request imageSettingsV4Request = new ImageSettingsV4Request();
-        imageSettingsV4Request.setCatalog(catalog);
-        imageSettingsV4Request.setId(imageId);
-
-        SdxCustomClusterRequest sdxClusterRequest = new SdxCustomClusterRequest();
-        sdxClusterRequest.setClusterShape(shape);
-        sdxClusterRequest.addTags(TAGS);
-        sdxClusterRequest.setEnvironment("envir");
-        sdxClusterRequest.setImageSettingsV4Request(imageSettingsV4Request);
-        sdxClusterRequest.setExternalDatabase(new SdxDatabaseRequest());
-        return sdxClusterRequest;
     }
 
     private String readLightDutyTestTemplate() throws IOException {

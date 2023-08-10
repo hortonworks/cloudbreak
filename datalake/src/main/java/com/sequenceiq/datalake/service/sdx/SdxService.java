@@ -421,8 +421,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         ImageSettingsV4Request imageSettingsV4Request = null;
         if (internalStackV4Request != null && internalStackV4Request.getImage() != null) {
             imageSettingsV4Request = internalStackV4Request.getImage();
-        } else if (sdxClusterRequest.getImageSettingsV4Request() != null) {
-            imageSettingsV4Request = sdxClusterRequest.getImageSettingsV4Request();
+        } else if (sdxClusterRequest.getImage() != null) {
+            imageSettingsV4Request = sdxClusterRequest.getImage();
         }
         if (StringUtils.isNotBlank(sdxClusterRequest.getOs())) {
             if (imageSettingsV4Request == null) {
