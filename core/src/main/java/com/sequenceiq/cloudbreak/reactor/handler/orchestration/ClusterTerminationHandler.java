@@ -1,28 +1,36 @@
 package com.sequenceiq.cloudbreak.reactor.handler.orchestration;
 
+import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ClusterStatus;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
+import com.sequenceiq.cloudbreak.service.metering.MeteringService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
-/**
- * @deprecated Kept for backward compatibility
- */
-@Deprecated
 @Component
 public class ClusterTerminationHandler implements EventHandler<ClusterTerminationRequest> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTerminationHandler.class);
 
     @Inject
     private EventBus eventBus;
+
+    @Inject
+    private MeteringService meteringService;
+
+    @Inject
+    private StackDtoService stackDtoService;
 
     @Override
     public String selector() {
@@ -34,6 +42,8 @@ public class ClusterTerminationHandler implements EventHandler<ClusterTerminatio
         ClusterTerminationRequest request = event.getData();
         ClusterTerminationResult result;
         try {
+            StackDto stack = stackDtoService.getById(request.getStackId());
+            meteringService.sendMeteringStatusChangeEventForStack(stack, ClusterStatus.Value.DELETED);
             result = new ClusterTerminationResult(request);
         } catch (RuntimeException e) {
             LOGGER.warn("Failed to delete cluster containers", e);

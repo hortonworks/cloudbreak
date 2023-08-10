@@ -13,10 +13,10 @@ import io.grpc.ManagedChannelBuilder;
 @Configuration
 public class MeteringConfig {
 
-    @Value("${metering.host:localhost}")
+    @Value("${meteringingestion.host:localhost}")
     private String endpoint;
 
-    @Value("${metering.port:8982}")
+    @Value("${meteringingestion.port:8982}")
     private int port;
 
     @Bean

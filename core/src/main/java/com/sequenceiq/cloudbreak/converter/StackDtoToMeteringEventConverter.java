@@ -16,7 +16,7 @@ import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.Resource;
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.StatusChange;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
-import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
@@ -24,23 +24,23 @@ public class StackDtoToMeteringEventConverter {
 
     private static final int DEFAULT_VERSION = 1;
 
-    public MeteringEvent convertToSyncEvent(StackDto stack) {
+    public MeteringEvent convertToSyncEvent(StackDtoDelegate stack) {
         MeteringEvent.Builder builder = convertBase(stack);
         return builder.setSync(convertSync(stack)).build();
     }
 
-    public MeteringEvent convertToStatusChangeEvent(StackDto stack, ClusterStatus.Value eventOperation) {
+    public MeteringEvent convertToStatusChangeEvent(StackDtoDelegate stack, ClusterStatus.Value eventOperation) {
         MeteringEvent.Builder builder = convertBase(stack);
         return builder.setStatusChange(convertStatusChange(stack, eventOperation)).build();
     }
 
-    private Sync convertSync(StackDto stack) {
+    private Sync convertSync(StackDtoDelegate stack) {
         return Sync.newBuilder()
                 .addAllResources(convertResources(stack))
                 .build();
     }
 
-    private List<Resource> convertResources(StackDto stack) {
+    private List<Resource> convertResources(StackDtoDelegate stack) {
         return stack.getInstanceGroupDtos().stream().flatMap(this::convertInstanceGroup).toList();
     }
 
@@ -60,14 +60,14 @@ public class StackDtoToMeteringEventConverter {
                 .build();
     }
 
-    private StatusChange convertStatusChange(StackDto stack, ClusterStatus.Value eventOperation) {
+    private StatusChange convertStatusChange(StackDtoDelegate stack, ClusterStatus.Value eventOperation) {
         return StatusChange.newBuilder()
                 .setStatus(eventOperation)
                 .addAllResources(convertResources(stack))
                 .build();
     }
 
-    private MeteringEvent.Builder convertBase(StackDto stack) {
+    private MeteringEvent.Builder convertBase(StackDtoDelegate stack) {
         return MeteringEvent.newBuilder()
                 .setId(UUID.randomUUID().toString())
                 .setTimestamp(System.currentTimeMillis())

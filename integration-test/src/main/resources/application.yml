@@ -377,7 +377,7 @@ integrationtest:
   authdistributor:
     host: thunderhead-mock
 
-  metering:
+  meteringingestion:
     host: thunderhead-mock
 
   telemetry:

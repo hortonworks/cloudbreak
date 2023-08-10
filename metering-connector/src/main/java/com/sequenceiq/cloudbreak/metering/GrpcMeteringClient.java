@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -23,8 +24,14 @@ public class GrpcMeteringClient {
     @Inject
     private ManagedChannelWrapper channelWrapper;
 
+    @Value("${meteringingestion.enabled:false}")
+    private boolean meteringEnabled;
+
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
+    private MeteringInfoProvider meteringInfoProvider;
 
     public static GrpcMeteringClient createClient(ManagedChannelWrapper channelWrapper,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
@@ -37,9 +44,13 @@ public class GrpcMeteringClient {
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 20000))
     public void sendMeteringEvent(MeteringEvent meteringEvent) {
-        LOGGER.debug("Send metering event for environment: {}", meteringEvent.getEnvironmentCrn());
-        MeteringClient meteringClient = makeClient(channelWrapper, regionAwareInternalCrnGeneratorFactory);
-        meteringClient.sendMeteringEvent(meteringEvent);
+        if (meteringEnabled) {
+            LOGGER.debug("Send metering event: {}", meteringInfoProvider.getReducedInfo(meteringEvent));
+            MeteringClient meteringClient = makeClient(channelWrapper, regionAwareInternalCrnGeneratorFactory);
+            meteringClient.sendMeteringEvent(meteringEvent);
+        } else {
+            LOGGER.debug("Metering event sending is disabled!");
+        }
     }
 
     private MeteringClient makeClient(ManagedChannelWrapper channelWrapper,
