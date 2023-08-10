@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -31,9 +32,11 @@ public class AzureInstanceGroupV4Parameters extends InstanceGroupV4ParametersBas
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
         if (availabilitySet != null) {
-            putIfValueNotNull(map, "faultDomainCount", availabilitySet.getFaultDomainCount());
-            putIfValueNotNull(map, "name", availabilitySet.getName());
-            putIfValueNotNull(map, "updateDomainCount", availabilitySet.getUpdateDomainCount());
+            Map<String, Object> availabilitySetMap = super.asMap();
+            putIfValueNotNull(availabilitySetMap, "faultDomainCount", availabilitySet.getFaultDomainCount());
+            putIfValueNotNull(availabilitySetMap, "name", availabilitySet.getName());
+            putIfValueNotNull(availabilitySetMap, "updateDomainCount", availabilitySet.getUpdateDomainCount());
+            putIfValueNotNull(map, "availabilitySet", availabilitySetMap);
         }
         return map;
     }
@@ -48,14 +51,16 @@ public class AzureInstanceGroupV4Parameters extends InstanceGroupV4ParametersBas
     @Override
     public void parse(Map<String, Object> parameters) {
         super.parse(parameters);
-        AzureAvailabiltySetV4 availabiltySet = new AzureAvailabiltySetV4();
-        availabiltySet.setFaultDomainCount(getInt(parameters, "faultDomainCount"));
-        availabiltySet.setName(getParameterOrNull(parameters, "name"));
-        availabiltySet.setUpdateDomainCount(getInt(parameters, "updateDomainCount"));
-        if (availabiltySet.getFaultDomainCount() != null
-                || availabiltySet.getName() != null
-                || availabiltySet.getUpdateDomainCount() != null) {
-            availabilitySet = availabiltySet;
+        Map<String, Object> availabilitySetMap = null != parameters ?
+                (Map<String, Object>) parameters.getOrDefault("availabilitySet", new HashMap<>()) : new HashMap<>();
+        AzureAvailabiltySetV4 availabilitySet = new AzureAvailabiltySetV4();
+        availabilitySet.setFaultDomainCount(getInt(availabilitySetMap, "faultDomainCount"));
+        availabilitySet.setName(getParameterOrNull(availabilitySetMap, "name"));
+        availabilitySet.setUpdateDomainCount(getInt(availabilitySetMap, "updateDomainCount"));
+        if (availabilitySet.getFaultDomainCount() != null
+                || availabilitySet.getName() != null
+                || availabilitySet.getUpdateDomainCount() != null) {
+            this.availabilitySet = availabilitySet;
         }
     }
 }
