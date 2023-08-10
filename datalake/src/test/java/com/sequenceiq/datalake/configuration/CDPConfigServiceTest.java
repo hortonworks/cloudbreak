@@ -55,6 +55,8 @@ class CDPConfigServiceTest {
 
     private static final String RUNTIME_7214 = "7.2.14";
 
+    private static final String RUNTIME_7217 = "7.2.17";
+
     @Spy
     private Set<String> advertisedRuntimes;
 
@@ -110,13 +112,13 @@ class CDPConfigServiceTest {
             when(supportedRuntimes.isEmpty()).thenReturn(true);
             cdpConfigService.initCdpStackRequests();
             assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, RUNTIME_7212)));
-            assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, RUNTIME_710)));
+            assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, RUNTIME_7214)));
             assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, RUNTIME_7212)));
             assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, RUNTIME_7212)));
             assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, RUNTIME_7212)));
-            assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, RUNTIME_710)));
+            assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, RUNTIME_7214)));
             assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, RUNTIME_7212)));
-            assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, RUNTIME_710)));
+            assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, RUNTIME_7214)));
             assertTrue(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.MEDIUM_DUTY_HA, RUNTIME_7214))
                     .getCluster().getBlueprintName().contains("Profiler"));
             assertFalse(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.MEDIUM_DUTY_HA, RUNTIME_7212))
@@ -139,10 +141,10 @@ class CDPConfigServiceTest {
         assertNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, RUNTIME_7212)));
         assertNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, RUNTIME_7212)));
         assertNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, RUNTIME_7212)));
-        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, RUNTIME_710)));
-        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, RUNTIME_710)));
-        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, RUNTIME_710)));
-        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, RUNTIME_710)));
+        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, RUNTIME_7214)));
+        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, RUNTIME_7214)));
+        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, RUNTIME_7214)));
+        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, RUNTIME_7214)));
     }
 
     @Test
@@ -154,24 +156,26 @@ class CDPConfigServiceTest {
         assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, RUNTIME_7212)));
         assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, RUNTIME_7212)));
         assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, RUNTIME_7212)));
-        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, RUNTIME_710)));
-        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, RUNTIME_710)));
-        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, RUNTIME_710)));
-        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, RUNTIME_710)));
+        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, RUNTIME_7214)));
+        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, RUNTIME_7214)));
+        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, RUNTIME_7214)));
+        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, RUNTIME_7214)));
     }
 
     @Test
     void testEmptyAdvertisedRuntimes() {
+        ReflectionTestUtils.setField(cdpConfigService, "defaultRuntime", RUNTIME_7217);
+
         when(supportedRuntimes.isEmpty()).thenReturn(false);
         when(supportedRuntimes.contains(Mockito.anyString())).thenReturn(false);
         when(supportedRuntimes.contains(RUNTIME_7212)).thenReturn(true);
-        when(supportedRuntimes.contains(RUNTIME_710)).thenReturn(true);
+        when(supportedRuntimes.contains(RUNTIME_7217)).thenReturn(true);
 
         when(advertisedRuntimes.isEmpty()).thenReturn(true);
 
         cdpConfigService.initCdpStackRequests();
 
-        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7212, false), rt(RUNTIME_710, true));
+        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7217, true), rt(RUNTIME_7212, false));
         List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null);
 
         assertArrayEquals(expected.toArray(), actual.toArray());
@@ -185,7 +189,6 @@ class CDPConfigServiceTest {
         when(supportedRuntimes.isEmpty()).thenReturn(false);
         when(supportedRuntimes.contains(Mockito.anyString())).thenReturn(false);
         when(supportedRuntimes.contains(RUNTIME_7212)).thenReturn(true);
-        when(supportedRuntimes.contains(RUNTIME_710)).thenReturn(true);
 
         when(advertisedRuntimes.isEmpty()).thenReturn(true);
 
@@ -199,10 +202,10 @@ class CDPConfigServiceTest {
 
     @Test
     void testFilteredDlVersions() {
-        List<String> supportedVersions = List.of(RUNTIME_7212, RUNTIME_726);
+        List<String> supportedVersions = List.of(RUNTIME_7212, RUNTIME_7214);
         mockSupportedRuntimes(supportedVersions);
         cdpConfigService.initCdpStackRequests();
-        assertArrayEquals(supportedVersions.toArray(), cdpConfigService.getDatalakeVersions("").toArray());
+        assertArrayEquals(supportedVersions.toArray(), cdpConfigService.getDatalakeVersions("").stream().sorted().toArray());
     }
 
     @Test
@@ -214,40 +217,40 @@ class CDPConfigServiceTest {
         List<String> supportedVersions = List.of(RUNTIME_7212, RUNTIME_726, RUNTIME_722);
         mockSupportedRuntimes(supportedVersions);
         cdpConfigService.initCdpStackRequests();
-        assertArrayEquals(List.of(RUNTIME_7212, RUNTIME_726).toArray(), cdpConfigService.getDatalakeVersions("").toArray());
+        assertArrayEquals(List.of(RUNTIME_7212).toArray(), cdpConfigService.getDatalakeVersions("").toArray());
     }
 
     @Test
     void testFilteredDlVersionsForGcp() {
-        List<String> supportedVersions = List.of(RUNTIME_726, RUNTIME_722);
+        List<String> supportedVersions = List.of(RUNTIME_729, RUNTIME_722);
         mockSupportedRuntimes(supportedVersions);
         cdpConfigService.initCdpStackRequests();
-        List<String> gcpSupportedVersions = List.of(RUNTIME_726);
-        assertArrayEquals("Templates are only available from 7.2.6",
+        List<String> gcpSupportedVersions = List.of(RUNTIME_729);
+        assertArrayEquals("Templates are only available from 7.2.9",
                 gcpSupportedVersions.toArray(), cdpConfigService.getDatalakeVersions("GCP").toArray());
     }
 
     @Test
     void testFilteredDlVersionsForAws() {
-        List<String> supportedVersions = List.of(RUNTIME_726, RUNTIME_7212);
+        List<String> supportedVersions = List.of(RUNTIME_7214, RUNTIME_7212);
         mockSupportedRuntimes(supportedVersions);
         cdpConfigService.initCdpStackRequests();
-        List<String> gcpSupportedVersions = List.of(RUNTIME_7212, RUNTIME_726);
-        assertArrayEquals(gcpSupportedVersions.toArray(), cdpConfigService.getDatalakeVersions("AWS").toArray());
+        List<String> awsSupportedVersions = List.of(RUNTIME_7212, RUNTIME_7214);
+        assertArrayEquals(awsSupportedVersions.toArray(), cdpConfigService.getDatalakeVersions("AWS").stream().sorted().toArray());
     }
 
     @Test
     void testAdvertisedRuntimes() {
-        List<String> supportedVersions = List.of(RUNTIME_710, RUNTIME_7212);
+        List<String> supportedVersions = List.of(RUNTIME_7217, RUNTIME_7212);
         mockSupportedRuntimes(supportedVersions);
 
         when(advertisedRuntimes.isEmpty()).thenReturn(false);
         when(advertisedRuntimes.contains(RUNTIME_7212)).thenReturn(false);
-        when(advertisedRuntimes.contains(RUNTIME_710)).thenReturn(true);
+        when(advertisedRuntimes.contains(RUNTIME_7217)).thenReturn(true);
 
         cdpConfigService.initCdpStackRequests();
 
-        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_710, true));
+        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7217, false));
         List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null);
 
         assertArrayEquals(expected.toArray(), actual.toArray());
@@ -276,17 +279,17 @@ class CDPConfigServiceTest {
 
     @Test
     void testAdvertisedRuntimesForGcp() {
-        ReflectionTestUtils.setField(cdpConfigService, "defaultRuntime", RUNTIME_726);
+        ReflectionTestUtils.setField(cdpConfigService, "defaultRuntime", RUNTIME_7214);
 
-        List<String> supportedVersions = List.of(RUNTIME_726, RUNTIME_722);
+        List<String> supportedVersions = List.of(RUNTIME_7214, RUNTIME_722);
         mockSupportedRuntimes(supportedVersions);
 
-        List<String> advertisedVersions = List.of(RUNTIME_726);
+        List<String> advertisedVersions = List.of(RUNTIME_7214);
         mockAdvertisedRuntimes(advertisedVersions);
 
         cdpConfigService.initCdpStackRequests();
 
-        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_726, true));
+        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7214, true));
         List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes("GCP");
 
         assertArrayEquals(expected.toArray(), actual.toArray());

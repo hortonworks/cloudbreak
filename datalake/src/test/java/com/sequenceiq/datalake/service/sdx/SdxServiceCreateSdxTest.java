@@ -106,6 +106,7 @@ import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
@@ -353,7 +354,7 @@ class SdxServiceCreateSdxTest {
     void testCreateNOTInternalSdxClusterFromLightDutyTemplateShouldTriggerSdxCreationFlow() throws IOException, TransactionExecutionException {
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
         mockTransactionServiceRequired();
-        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.1.0/aws/light_duty.json");
+        String lightDutyJson = readLightDutyTestTemplate();
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
@@ -407,7 +408,7 @@ class SdxServiceCreateSdxTest {
     void testCreateNOTInternalSdxClusterFromLightDutyTemplateWhenLocationSpecifiedWithSlashShouldCreateAndSettedUpBaseLocationWithOUTSlash()
             throws IOException, TransactionExecutionException {
         mockTransactionServiceRequired();
-        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.1.0/aws/light_duty.json");
+        String lightDutyJson = readLightDutyTestTemplate();
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
         withCloudStorage(sdxClusterRequest);
@@ -427,7 +428,7 @@ class SdxServiceCreateSdxTest {
     @Test
     void testCreateSdxClusterWithSpotStackRequestContainsRequiredAttributes() throws IOException, TransactionExecutionException {
         mockTransactionServiceRequired();
-        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.1.0/aws/light_duty.json");
+        String lightDutyJson = readLightDutyTestTemplate();
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
         setSpot(sdxClusterRequest);
@@ -451,7 +452,7 @@ class SdxServiceCreateSdxTest {
     @Test
     void testCreateSdxClusterWithJavaVersionStackRequestContainsRequiredAttributes() throws IOException, TransactionExecutionException {
         mockTransactionServiceRequired();
-        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.1.0/aws/light_duty.json");
+        String lightDutyJson = readLightDutyTestTemplate();
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(Set.of(11));
 
@@ -476,7 +477,7 @@ class SdxServiceCreateSdxTest {
     void testCreateNOTInternalSdxClusterFromLightDutyTemplateWhenBaseLocationSpecifiedShouldCreateStackRequestWithSettedUpBaseLocation()
             throws IOException, TransactionExecutionException {
         mockTransactionServiceRequired();
-        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.1.0/aws/light_duty.json");
+        String lightDutyJson = readLightDutyTestTemplate();
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         //doNothing().when(cloudStorageLocationValidator.validate("s3a://some/dir", ));
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
@@ -570,10 +571,10 @@ class SdxServiceCreateSdxTest {
     void testSdxCreateRazNotRequestedAndMultiAzRequested(String testCaseName, CloudPlatform cloudPlatform, boolean multiAz)
             throws IOException, TransactionExecutionException {
         mockTransactionServiceRequired();
-        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.1.0/aws/light_duty.json");
+        String lightDutyJson = readLightDutyTestTemplate();
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.1.0", LIGHT_DUTY);
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.17", LIGHT_DUTY);
         withCloudStorage(sdxClusterRequest);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         long id = 10L;
@@ -703,7 +704,7 @@ class SdxServiceCreateSdxTest {
     @MethodSource("razCloudPlatformAndRuntimeDataProvider")
     void testSdxCreateRazEnabled(String testCaseName, CloudPlatform cloudPlatform, String runtime) throws IOException, TransactionExecutionException {
         mockTransactionServiceRequired();
-        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.1.0/aws/light_duty.json");
+        String lightDutyJson = readLightDutyTestTemplate();
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, LIGHT_DUTY);
@@ -1249,4 +1250,21 @@ class SdxServiceCreateSdxTest {
         return masterInstanceGroup;
     }
 
+    private SdxCustomClusterRequest createSdxCustomClusterRequest(SdxClusterShape shape, String catalog, String imageId) {
+        ImageSettingsV4Request imageSettingsV4Request = new ImageSettingsV4Request();
+        imageSettingsV4Request.setCatalog(catalog);
+        imageSettingsV4Request.setId(imageId);
+
+        SdxCustomClusterRequest sdxClusterRequest = new SdxCustomClusterRequest();
+        sdxClusterRequest.setClusterShape(shape);
+        sdxClusterRequest.addTags(TAGS);
+        sdxClusterRequest.setEnvironment("envir");
+        sdxClusterRequest.setImageSettingsV4Request(imageSettingsV4Request);
+        sdxClusterRequest.setExternalDatabase(new SdxDatabaseRequest());
+        return sdxClusterRequest;
+    }
+
+    private String readLightDutyTestTemplate() throws IOException {
+        return FileReaderUtils.readFileFromClasspath("/duties/7.2.17/aws/light_duty.json");
+    }
 }
