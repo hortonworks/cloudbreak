@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Map;
@@ -26,10 +27,12 @@ public class AzureInstanceGroupV4ParametersTest {
         underTest.setAvailabilitySet(availabilitySet);
 
         Map<String, Object> response = underTest.asMap();
+        assertEquals("AZURE", response.get("cloudPlatform"));
         Map<String, Object> responseAvailabilityTest = (Map<String, Object>) response.get("availabilitySet");
         assertEquals("TEST", responseAvailabilityTest.get("name"));
         assertEquals(2, responseAvailabilityTest.get("faultDomainCount"));
         assertEquals(3, responseAvailabilityTest.get("updateDomainCount"));
+        assertFalse(responseAvailabilityTest.containsKey("cloudPlatform"));
     }
 
     @Test
