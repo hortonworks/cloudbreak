@@ -53,8 +53,8 @@ public class SecretTypesValidatorTest {
 
     @Test
     void testValidateIfMultiSecretProvided() {
-        assertFalse(validator(false).isValid(List.of("TEST_2"), context));
-        assertEquals("Request should contain secret types which affects only one resource!", errorMessageCaptor.getValue());
+        assertFalse(validator(false).isValid(List.of("TEST_2", "TEST_4"), context));
+        assertEquals("Request should contain maximum 1 secret type which affects multiple resources!", errorMessageCaptor.getValue());
     }
 
     @Test
@@ -65,7 +65,7 @@ public class SecretTypesValidatorTest {
 
     @Test
     void testValidate() {
-        assertTrue(validator(true).isValid(List.of("TEST_3"), context));
+        assertTrue(validator(true).isValid(List.of("TEST_3", "TEST_2"), context));
     }
 
     private SecretTypesValidator validator(boolean internalAllowed) {

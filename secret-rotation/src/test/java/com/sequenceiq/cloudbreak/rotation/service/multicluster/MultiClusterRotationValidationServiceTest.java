@@ -59,29 +59,18 @@ public class MultiClusterRotationValidationServiceTest {
     }
 
     @Test
-    void testPrepareParentIfThereIsOtherMultiRotationOngoing() {
-        when(trackingService.getMultiRotationEntriesForResource(any())).thenReturn(
-                Set.of(new MultiClusterRotationResource(null, TestMultiSecretType.MULTI_TEST_2, null)));
-
-        assertThrows(BadRequestException.class, () -> underTest.validateMultiRotationRequest(DATALAKE_CRN, TestMultiSecretType.MULTI_TEST));
-
-        verify(trackingService).getMultiRotationEntriesForResource(any());
-        verifyNoInteractions(childContextProvider);
-    }
-
-    @Test
     void testPrepareParent() {
-        when(trackingService.getMultiRotationEntriesForResource(any())).thenReturn(Set.of());
+        when(trackingService.getMultiRotationEntriesForResource(any(), any())).thenReturn(Set.of());
 
         underTest.validateMultiRotationRequest(DATALAKE_CRN, TestMultiSecretType.MULTI_TEST);
 
-        verify(trackingService).getMultiRotationEntriesForResource(any());
+        verify(trackingService).getMultiRotationEntriesForResource(any(), any());
         verifyNoInteractions(childContextProvider);
     }
 
     @Test
     void testPrepareParentIfChildRotationStillNeeded() throws IllegalAccessException {
-        when(trackingService.getMultiRotationEntriesForResource(any())).thenReturn(
+        when(trackingService.getMultiRotationEntriesForResource(any(), any())).thenReturn(
                 Set.of(new MultiClusterRotationResource(DATALAKE_CRN, TestMultiSecretType.MULTI_TEST, MultiClusterRotationResourceType.INITIATED_PARENT)));
         InterServiceMultiClusterRotationService interServiceMultiClusterRotationService =
                 mock(InterServiceMultiClusterRotationService.class);
@@ -91,38 +80,38 @@ public class MultiClusterRotationValidationServiceTest {
 
         assertThrows(BadRequestException.class, () -> underTest.validateMultiRotationRequest(DATALAKE_CRN, TestMultiSecretType.MULTI_TEST));
 
-        verify(trackingService).getMultiRotationEntriesForResource(any());
+        verify(trackingService).getMultiRotationEntriesForResource(any(), any());
         verifyNoInteractions(childContextProvider);
     }
 
     @Test
     void testPrepareChildIfThereIsNoOngoingRotationForType() {
-        when(trackingService.getMultiRotationEntriesForResource(any())).thenReturn(Set.of());
+        when(trackingService.getMultiRotationEntriesForResource(any(), any())).thenReturn(Set.of());
 
         assertThrows(BadRequestException.class, () -> underTest.validateMultiRotationRequest(DATAHUB_CRN, TestMultiSecretType.MULTI_TEST));
 
-        verify(trackingService).getMultiRotationEntriesForResource(any());
+        verify(trackingService).getMultiRotationEntriesForResource(any(), any());
         verifyNoInteractions(parentContextProvider);
     }
 
     @Test
     void testPrepareChild() {
-        when(trackingService.getMultiRotationEntriesForResource(any())).thenReturn(
+        when(trackingService.getMultiRotationEntriesForResource(any(), any())).thenReturn(
                 Set.of(new MultiClusterRotationResource(DATAHUB_CRN, TestMultiSecretType.MULTI_TEST, MultiClusterRotationResourceType.PENDING_CHILD)));
 
         underTest.validateMultiRotationRequest(DATAHUB_CRN, TestMultiSecretType.MULTI_TEST);
 
-        verify(trackingService).getMultiRotationEntriesForResource(any());
+        verify(trackingService).getMultiRotationEntriesForResource(any(), any());
         verifyNoInteractions(parentContextProvider);
     }
 
     @Test
     void testPrepareChildIfRotationNotNeeded() {
-        when(trackingService.getMultiRotationEntriesForResource(any())).thenReturn(Set.of());
+        when(trackingService.getMultiRotationEntriesForResource(any(), any())).thenReturn(Set.of());
 
         assertThrows(BadRequestException.class, () -> underTest.validateMultiRotationRequest(DATAHUB_CRN, TestMultiSecretType.MULTI_TEST));
 
-        verify(trackingService).getMultiRotationEntriesForResource(any());
+        verify(trackingService).getMultiRotationEntriesForResource(any(), any());
         verifyNoInteractions(parentContextProvider);
     }
 }

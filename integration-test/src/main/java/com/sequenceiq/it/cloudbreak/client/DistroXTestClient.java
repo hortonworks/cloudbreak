@@ -6,7 +6,6 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
-import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.CheckVariant;
@@ -24,7 +23,6 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRemoveInstancesAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRepairAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRepairInstancesAction;
-import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRotateMultiSecretAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRotateSaltPasswordAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRotateSecretAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleAction;
@@ -147,10 +145,6 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> rotateSecret(Set<CloudbreakSecretType> secretTypes) {
         return new DistroXRotateSecretAction(secretTypes);
-    }
-
-    public Action<DistroXTestDto, CloudbreakClient> rotateMultiSecret(MultiSecretType multiSecretType) {
-        return new DistroXRotateMultiSecretAction(multiSecretType);
     }
 
     public Action<DistroXTestDto, CloudbreakClient> deleteDisks() {

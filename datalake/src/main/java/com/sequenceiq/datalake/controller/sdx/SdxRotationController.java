@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONME
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
@@ -35,10 +36,11 @@ public class SdxRotationController implements SdxRotationEndpoint {
         return sdxRotationService.triggerSecretRotation(request.getCrn(), request.getSecrets(), request.getExecutionType());
     }
 
+    @Deprecated
     @Override
     @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_DL_SECRETS)
     public FlowIdentifier rotateMultiSecrets(@RequestObject SdxMultiSecretRotationRequest request) {
-        return sdxRotationService.triggerMultiSecretRotation(request.getCrn(), request.getSecret());
+        throw new NotImplementedException("Deprecated Rotation API!");
     }
 
     @Override

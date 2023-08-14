@@ -35,8 +35,8 @@ public class SecretTypesValidator implements ConstraintValidator<ValidSecretType
             if (!internalAllowed && secretTypes.stream().anyMatch(SecretType::internal)) {
                 return false;
             }
-            if (secretTypes.stream().anyMatch(SecretType::multiSecret)) {
-                ValidatorUtil.addConstraintViolation(context, "Request should contain secret types which affects only one resource!");
+            if (secretTypes.stream().filter(SecretType::multiSecret).count() > 1) {
+                ValidatorUtil.addConstraintViolation(context, "Request should contain maximum 1 secret type which affects multiple resources!");
                 return false;
             }
         } catch (Exception e) {

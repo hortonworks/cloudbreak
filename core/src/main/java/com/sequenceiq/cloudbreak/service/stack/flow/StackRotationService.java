@@ -60,20 +60,10 @@ public class StackRotationService {
             StackView viewByCrn = stackDtoService.getStackViewByCrn(crn);
             Long stackId = viewByCrn.getId();
             List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
+            secretTypes.stream().filter(SecretType::multiSecret).forEach(secretType ->
+                    multiClusterRotationValidationService.validateMultiRotationRequest(crn, SecretTypeConverter.getMultiSecretType(secretType)));
             secretRotationValidationService.validateExecutionType(crn, secretTypes, requestedExecutionType);
             return flowManager.triggerSecretRotation(stackId, crn, secretTypes, requestedExecutionType);
-        } else {
-            throw new CloudbreakServiceException("Account is not entitled to execute any secret rotation!");
-        }
-    }
-
-    public FlowIdentifier rotateMultiSecrets(String crn, String secret) {
-        if (entitlementService.isSecretRotationEnabled(Crn.safeFromString(crn).getAccountId())) {
-            MultiSecretType multiSecretType = SecretTypeConverter.mapMultiSecretType(secret);
-            StackView viewByCrn = stackDtoService.getStackViewByCrn(crn);
-            Long stackId = viewByCrn.getId();
-            multiClusterRotationValidationService.validateMultiRotationRequest(crn, multiSecretType);
-            return flowManager.triggerSecretRotation(stackId, crn, List.of(multiSecretType.getSecretTypeByResourceCrn(crn)), null);
         } else {
             throw new CloudbreakServiceException("Account is not entitled to execute any secret rotation!");
         }

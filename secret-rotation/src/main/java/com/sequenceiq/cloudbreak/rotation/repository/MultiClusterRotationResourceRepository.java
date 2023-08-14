@@ -20,7 +20,7 @@ public interface MultiClusterRotationResourceRepository extends CrudRepository<M
     Optional<MultiClusterRotationResource> findByResourceCrnAndSecretTypeAndType(String resourceCrn, MultiSecretType secretType,
             MultiClusterRotationResourceType type);
 
-    Set<MultiClusterRotationResource> findAllByResourceCrn(String resourceCrn);
+    Set<MultiClusterRotationResource> findAllBySecretTypeAndResourceCrn(MultiSecretType secretType, String resourceCrn);
 
     Set<MultiClusterRotationResource> findAllBySecretTypeAndResourceCrnIn(MultiSecretType secretType, Set<String> crns);
 }

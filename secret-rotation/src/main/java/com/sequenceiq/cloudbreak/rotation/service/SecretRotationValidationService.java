@@ -31,19 +31,24 @@ public class SecretRotationValidationService {
 
     public void validateExecutionType(String resourceCrn, Collection<SecretType> secretTypes, RotationFlowExecutionType requestedExecutionType) {
         for (SecretType secretType : secretTypes) {
-            List<SecretRotationStepProgress> progress = secretRotationStepProgressService.listSteps(resourceCrn, secretType);
-            CloudbreakServiceException alreadyRunningRotationException =
-                    new CloudbreakServiceException(String.format("There is already a running rotation for %s secret type.", secretType));
-            if (progress.isEmpty()) {
-                expectPreValidateOrFullExecution(secretType, requestedExecutionType);
-            } else if (requestedExecutionType == null) {
-                throw alreadyRunningRotationException;
-            } else {
-                switch (requestedExecutionType) {
-                    case ROTATE -> expectStepsWithExecutionTypes(progress, PREVALIDATE);
-                    case ROLLBACK, FINALIZE -> expectStepsWithExecutionTypes(progress, PREVALIDATE, ROTATE);
-                    default -> throw alreadyRunningRotationException;
+            if (!secretType.multiSecret()) {
+                List<SecretRotationStepProgress> progress = secretRotationStepProgressService.listSteps(resourceCrn, secretType);
+                CloudbreakServiceException alreadyRunningRotationException =
+                        new CloudbreakServiceException(String.format("There is already a running rotation for %s secret type.", secretType));
+                if (progress.isEmpty()) {
+                    expectPreValidateOrFullExecution(secretType, requestedExecutionType);
+                } else if (requestedExecutionType == null) {
+                    throw alreadyRunningRotationException;
+                } else {
+                    switch (requestedExecutionType) {
+                        case ROTATE -> expectStepsWithExecutionTypes(progress, PREVALIDATE);
+                        case ROLLBACK, FINALIZE -> expectStepsWithExecutionTypes(progress, PREVALIDATE, ROTATE);
+                        default -> throw alreadyRunningRotationException;
+                    }
                 }
+            } else {
+                LOGGER.info("Execution type validation skipped in case of secret type {}, since it is related to a multi-cluster rotation, " +
+                        "multi-cluster rotation has it's own rules for validation and execution", secretType);
             }
         }
     }

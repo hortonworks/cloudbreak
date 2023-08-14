@@ -32,8 +32,8 @@ public class MultiClusterRotationService {
     @Inject
     private Optional<InterServiceMultiClusterRotationService> interServiceMultiClusterRotationTrackingService;
 
-    public Set<MultiClusterRotationResource> getMultiRotationEntriesForResource(String resourceCrn) {
-        return multiClusterRotationResourceRepository.findAllByResourceCrn(resourceCrn);
+    public Set<MultiClusterRotationResource> getMultiRotationEntriesForResource(MultiSecretType secretType, String resourceCrn) {
+        return multiClusterRotationResourceRepository.findAllBySecretTypeAndResourceCrn(secretType, resourceCrn);
     }
 
     public Set<MultiClusterRotationResource> getMultiRotationEntriesForSecretAndResources(MultiSecretType secretType, Set<String> crns) {

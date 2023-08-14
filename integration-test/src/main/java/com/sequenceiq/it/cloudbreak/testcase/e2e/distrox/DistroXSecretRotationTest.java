@@ -5,8 +5,9 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CB
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CM_DB_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CM_SERVICES_DB_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_MGMT_CM_ADMIN_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeMultiSecretType.CM_SERVICE_SHARED_DB;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_CM_SERVICE_SHARED_DB;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CB_CM_ADMIN_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_SERVICE_SHARED_DB;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_MGMT_CM_ADMIN_PASSWORD;
 
 import java.util.Set;
@@ -70,13 +71,13 @@ public class DistroXSecretRotationTest extends AbstractE2ETest {
     public void testMultiSecretRotation(TestContext testContext, ITestContext iTestContext) {
         testContext
                 .given(SdxInternalTestDto.class)
-                .when(sdxTestClient.rotateMultiSecret(CM_SERVICE_SHARED_DB))
+                .when(sdxTestClient.rotateSecret(Set.of(DATALAKE_CM_SERVICE_SHARED_DB)))
                 .awaitForFlow()
                 .given(DistroXTestDto.class)
-                .when(distroXTestClient.rotateMultiSecret(CM_SERVICE_SHARED_DB))
+                .when(distroXTestClient.rotateSecret(Set.of(DATAHUB_CM_SERVICE_SHARED_DB)))
                 .awaitForFlow()
                 .given(SdxInternalTestDto.class)
-                .when(sdxTestClient.rotateMultiSecret(CM_SERVICE_SHARED_DB))
+                .when(sdxTestClient.rotateSecret(Set.of(DATALAKE_CM_SERVICE_SHARED_DB)))
                 .awaitForFlow()
                 .validate();
     }

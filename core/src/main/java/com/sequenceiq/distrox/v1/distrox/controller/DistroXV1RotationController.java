@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONME
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -37,10 +38,11 @@ public class DistroXV1RotationController implements DistroXV1RotationEndpoint {
         return stackRotationService.rotateSecrets(request.getCrn(), request.getSecrets(), request.getExecutionType());
     }
 
+    @Deprecated
     @Override
     @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_DH_SECRETS)
     public FlowIdentifier rotateMultiSecrets(@RequestObject DistroXMultiSecretRotationRequest request) {
-        return stackRotationService.rotateMultiSecrets(request.getCrn(), request.getSecret());
+        throw new NotImplementedException("Deprecated Rotation API!");
     }
 
     @Override

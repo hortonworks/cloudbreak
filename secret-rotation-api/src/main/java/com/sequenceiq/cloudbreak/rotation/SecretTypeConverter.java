@@ -12,6 +12,7 @@ import org.reflections.scanners.Scanners;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 public class SecretTypeConverter {
@@ -72,6 +73,16 @@ public class SecretTypeConverter {
             LOGGER.warn(message);
             throw new CloudbreakServiceException(message, e);
         }
+    }
+
+    public static MultiSecretType getMultiSecretType(SecretType secretType) {
+        return AVAILABLE_MULTI_SECRET_TYPES.stream()
+                .map(Class::getEnumConstants)
+                .flatMap(Arrays::stream)
+                .filter(multiSecretType -> Sets.union(Set.of(multiSecretType.parentSecretType()),
+                        Sets.newHashSet(multiSecretType.childSecretTypesByDescriptor().values())).contains(secretType))
+                .findFirst()
+                .orElseThrow();
     }
 
     private static Optional<SecretType> getSecretType(String secret, Set<Class<? extends SecretType>> allowedSecretTypes) {

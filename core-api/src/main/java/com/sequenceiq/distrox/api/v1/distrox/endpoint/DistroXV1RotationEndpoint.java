@@ -37,6 +37,7 @@ public interface DistroXV1RotationEndpoint {
     @ApiOperation(value = "Rotate DistroX secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateDistroXSecrets")
     FlowIdentifier rotateSecrets(@Valid @NotNull DistroXSecretRotationRequest request);
 
+    @Deprecated
     @PUT
     @Path("multi_secret/rotate")
     @ApiOperation(value = "Rotate DistroX multi secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateDistroXMultiSecrets")

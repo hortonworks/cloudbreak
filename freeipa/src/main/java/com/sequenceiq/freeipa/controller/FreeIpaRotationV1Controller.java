@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -51,10 +52,11 @@ public class FreeIpaRotationV1Controller implements FreeIpaRotationV1Endpoint {
         return freeIpaSecretRotationService.rotateSecretsByCrn(accountId, environmentCrn, request);
     }
 
+    @Deprecated
     @Override
     @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_ENV_SECRETS)
     public FlowIdentifier rotateMultiSecretsByCrn(@Valid @NotNull @RequestObject FreeIpaMultiSecretRotationRequest request,
             @InitiatorUserCrn String initiatorUserCrn) {
-        return null;
+        throw new NotImplementedException("Deprecated Rotation API!");
     }
 }

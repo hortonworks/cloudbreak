@@ -45,6 +45,7 @@ public interface FreeIpaRotationV1Endpoint {
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
             @Valid @NotNull FreeIpaSecretRotationRequest request);
 
+    @Deprecated
     @PUT
     @Path("multi_secret/rotate")
     @Produces(MediaType.APPLICATION_JSON)

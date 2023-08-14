@@ -38,6 +38,7 @@ public interface SdxRotationEndpoint {
     @ApiOperation(value = "Rotate SDX secrets", produces = MediaType.APPLICATION_JSON, nickname = "rotateSDXSecrets")
     FlowIdentifier rotateSecrets(@Valid @NotNull SdxSecretRotationRequest request);
 
+    @Deprecated
     @PUT
     @Path("multi_secret/rotate")
     @Produces(MediaType.APPLICATION_JSON)

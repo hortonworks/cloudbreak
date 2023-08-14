@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationValidationService;
@@ -90,19 +89,6 @@ public class StackRotationServiceTest {
                 List.of(CLUSTER_CB_CM_ADMIN_PASSWORD.name()), null));
 
         verifyNoInteractions(flowManager, stackDtoService);
-    }
-
-    @Test
-    public void testMultiRotateSecrets() {
-        Stack stack = new Stack();
-        stack.setId(1L);
-        when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
-        when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stack);
-        when(flowManager.triggerSecretRotation(anyLong(), anyString(), any(), any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, "flowchain"));
-
-        underTest.rotateMultiSecrets(CRN, "DEMO_MULTI_SECRET");
-
-        verify(flowManager).triggerSecretRotation(any(), eq(CRN), eq(List.of(CloudbreakSecretType.DATAHUB_DEMO_SECRET)), any());
     }
 
     @Test

@@ -44,7 +44,7 @@ public class SecretRotationExecutionDecisionProvider {
                 .test(metadata);
         LOGGER.info("Execution of current rotation phase {} is {} based on resource:[{}], secret type:[{}] and requested execution type:[{}].",
                 metadata.currentExecution(), result ? "needed" : "not needed", metadata.resourceCrn(),
-                metadata.resourceCrn(), metadata.requestedExecutionType());
+                metadata.secretType(), metadata.requestedExecutionType());
         return result;
     }
 
