@@ -266,69 +266,6 @@ cb:
       gov:
         exclusionList: "cdp-flow-management,cdp-flow-management-small,cdp-flink-heavy,cdp-flink-light,cdp-data-engineering-spark3-ha,cdp-rt-data-mart-spark3"
       defaults:
-        7.1.0: >
-          7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
-          7.1.0 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha;
-          7.1.0 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3;
-          7.1.0 - Data Mart: Apache Impala, Hue=cdp-data-mart;
-          7.1.0 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
-          7.1.0 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management;
-          7.1.0 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart;
-          7.1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
-          7.1.0 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming;
-          7.1.0 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small
-        7.2.0: >
-          7.2.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
-          7.2.0 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha;
-          7.2.0 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3;
-          7.2.0 - Data Mart: Apache Impala, Hue=cdp-data-mart;
-          7.2.0 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart;
-          7.2.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
-          7.2.0 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming;
-          7.2.0 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small;
-          7.2.0 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
-          7.2.0 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management;
-          7.2.0 - Data Discovery and Exploration=cdp-dde
-        7.2.1: >
-          7.2.1 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
-          7.2.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
-          7.2.1 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha;
-          7.2.1 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3;
-          7.2.1 - Data Mart: Apache Impala, Hue=cdp-data-mart;
-          7.2.1 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart;
-          7.2.1 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming;
-          7.2.1 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small;
-          7.2.1 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
-          7.2.1 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management;
-          7.2.1 - Data Discovery and Exploration=cdp-dde
-        7.2.2: >
-          7.2.2 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
-          7.2.2 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha;
-          7.2.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
-          7.2.2 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha;
-          7.2.2 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3;
-          7.2.2 - Data Mart: Apache Impala, Hue=cdp-data-mart;
-          7.2.2 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart;
-          7.2.2 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming;
-          7.2.2 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small;
-          7.2.2 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
-          7.2.2 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management;
-          7.2.2 - Data Discovery and Exploration=cdp-dde;
-          7.2.2 - COD Edge Node=cdp-cod-edge-node
-        7.2.6: >
-          7.2.6 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
-          7.2.6 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha;
-          7.2.6 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
-          7.2.6 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha;
-          7.2.6 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3;
-          7.2.6 - Data Mart: Apache Impala, Hue=cdp-data-mart;
-          7.2.6 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart;
-          7.2.6 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager=cdp-streaming;
-          7.2.6 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager=cdp-streaming-small;
-          7.2.6 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
-          7.2.6 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management;
-          7.2.6 - Data Discovery and Exploration=cdp-dde;
-          7.2.6 - COD Edge Node=cdp-cod-edge-node
         7.2.7: >
           7.2.7 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
           7.2.7 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha;
