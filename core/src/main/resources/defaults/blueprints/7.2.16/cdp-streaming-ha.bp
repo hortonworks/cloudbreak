@@ -106,6 +106,17 @@
             "base": true
           }
         ]
+      },
+      {
+        "refName": "knox",
+        "serviceType": "KNOX",
+        "roleConfigGroups": [
+          {
+            "refName": "knox-KNOX_GATEWAY-BASE",
+            "roleType": "KNOX_GATEWAY",
+            "base": true
+          }
+        ]
       }
     ],
     "hostTemplates": [
@@ -113,7 +124,6 @@
         "refName": "master",
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
-          "stub_dfs-STORAGEOPERATIONS-BASE",
           "cruise_control-CRUISE_CONTROL_SERVER-BASE",
           "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_SERVER-BASE",
           "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE",
@@ -160,6 +170,14 @@
         "roleConfigGroupsRefNames": [
           "kafka-GATEWAY-BASE",
           "kafka-KAFKA_CONNECT-BASE"
+        ]
+      },
+      {
+        "refName": "manager",
+        "cardinality": 2,
+        "roleConfigGroupsRefNames": [
+          "knox-KNOX_GATEWAY-BASE",
+          "stub_dfs-STORAGEOPERATIONS-BASE"
         ]
       }
     ]

@@ -10,6 +10,7 @@
     "externalDatabase": {
       "availabilityType": "HA"
     },
+    "enableLoadBalancer": true,
     "instanceGroups": [
       {
         "name": "master",
@@ -25,7 +26,7 @@
           ]
         },
         "nodeCount": 1,
-        "type": "GATEWAY",
+        "type": "CORE",
         "recoveryMode": "MANUAL"
       },
       {
@@ -144,6 +145,27 @@
         },
         "nodeCount": 0,
         "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "manager",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.4xlarge"
+        },
+        "nodeCount": 2,
+        "type": "GATEWAY",
         "recoveryMode": "MANUAL"
       }
     ]
