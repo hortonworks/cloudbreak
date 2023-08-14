@@ -183,7 +183,9 @@ cb:
         MOCK: magnetic
     upgrade:
       embedded.targetversion: VERSION_11
-      rds.targetversion: VERSION_11
+      rds:
+        targetversion: VERSION_14
+        azure.targetversion: VERSION_11
       rds.backuprestore:
         cloudplatforms: AZURE
         validationratio: 0.2

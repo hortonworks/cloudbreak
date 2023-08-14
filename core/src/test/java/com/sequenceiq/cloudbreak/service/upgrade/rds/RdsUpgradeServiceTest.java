@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.rds;
 
+import static com.sequenceiq.cloudbreak.common.database.TargetMajorVersion.VERSION_11;
+import static com.sequenceiq.cloudbreak.common.database.TargetMajorVersion.VERSION_14;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RDS_UPGRADE_NOT_AVAILABLE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,7 +18,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -27,10 +28,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.util.ReflectionUtils;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -191,25 +193,26 @@ class RdsUpgradeServiceTest {
         assertThat(response.getFlowIdentifier().getPollableId()).isEqualTo(FLOW_ID);
     }
 
-    @Test
-    void testUpgradeRdsWithMissingTargetVersionThenSuccess() {
-        Field defaultTargetMajorVersion = ReflectionUtils.findField(RdsUpgradeService.class, "defaultTargetMajorVersion");
-        ReflectionUtils.makeAccessible(defaultTargetMajorVersion);
-        ReflectionUtils.setField(defaultTargetMajorVersion, underTest, TARGET_VERSION);
-
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void testUpgradeRdsWithMissingTargetVersionThenSuccess(boolean onAzure) {
+        ReflectionTestUtils.setField(underTest, "defaultTargetMajorVersion", VERSION_14);
+        ReflectionTestUtils.setField(underTest, "defaultAzureTargetMajorVersion", VERSION_11);
+        TargetMajorVersion desiredVersion = onAzure ? VERSION_11 : VERSION_14;
         Stack stack = createStack(Status.AVAILABLE);
         StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
+        when(stackDto.getCloudPlatform()).thenReturn(onAzure ? "AZURE" : "AWS");
         when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
-        when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE))).thenReturn(flowId);
+        when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(desiredVersion), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE))).thenReturn(flowId);
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
         RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), null);
 
-        verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE));
+        verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(desiredVersion), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE));
         assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.FLOW_CHAIN);
         assertThat(response.getFlowIdentifier().getPollableId()).isEqualTo(FLOW_ID);
     }

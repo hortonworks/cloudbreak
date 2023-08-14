@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.upgrade.database;
 
+import static com.sequenceiq.cloudbreak.common.database.TargetMajorVersion.VERSION_11;
+import static com.sequenceiq.cloudbreak.common.database.TargetMajorVersion.VERSION_14;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -35,6 +38,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
@@ -102,7 +106,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
 
     @Test
     void testUpgradeWhenClusterRunningThenUpgradeTriggered() {
-        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        TargetMajorVersion targetMajorVersion = VERSION_11;
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.RUNNING);
@@ -121,30 +125,35 @@ public class SdxDatabaseServerUpgradeServiceTest {
         assertEquals(targetMajorVersion, response.getTargetMajorVersion());
     }
 
-    @Test
-    void testUpgradeWhenNoTargetMajorIsDefinedThenUpgradeTo11() {
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void testUpgradeWhenNoTargetMajorIsDefinedThenUpgradeToCorrectVersion(boolean onAzure) {
         SdxCluster sdxCluster = getSdxCluster();
-        ReflectionTestUtils.setField(underTest, "defaultTargetMajorVersion", TargetMajorVersion.VERSION_11);
+        sdxCluster.setCloudStorageFileSystemType(onAzure ? FileSystemType.ADLS_GEN_2 : FileSystemType.S3);
+        TargetMajorVersion desiredVersion = onAzure ? VERSION_11 : VERSION_14;
+        ReflectionTestUtils.setField(underTest, "defaultTargetMajorVersion", VERSION_14);
+        ReflectionTestUtils.setField(underTest, "defaultAzureTargetMajorVersion", VERSION_11);
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(status);
         sdxCluster.getSdxDatabase().setDatabaseCrn(DB_CRN);
         when(databaseService.getDatabaseServer(DB_CRN)).thenReturn(databaseResponse);
-        when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(databaseResponse, TargetMajorVersion.VERSION_11)).thenReturn(true);
+        when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(databaseResponse, desiredVersion)).thenReturn(true);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
-        when(reactorFlowManager.triggerDatabaseServerUpgradeFlow(sdxCluster, TargetMajorVersion.VERSION_11)).thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDatabaseServerUpgradeFlow(sdxCluster, desiredVersion)).thenReturn(flowIdentifier);
         when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any())).thenReturn(true);
         when(databaseResponse.getStatus()).thenReturn(DatabaseServerStatus.AVAILABLE);
 
         SdxUpgradeDatabaseServerResponse response = underTest.upgrade(NAME_OR_CRN, null);
 
         assertEquals(flowIdentifier, response.getFlowIdentifier());
-        assertEquals(TargetMajorVersion.VERSION_11, response.getTargetMajorVersion());
+
+        assertEquals(desiredVersion, response.getTargetMajorVersion());
     }
 
     @Test
     void testUpgradeWhenUpgradeFailedThenUpgradeTriggered() {
-        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        TargetMajorVersion targetMajorVersion = VERSION_11;
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.DATALAKE_UPGRADE_DATABASE_SERVER_FAILED);
@@ -171,7 +180,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
                     "DATALAKE_UPGRADE_DATABASE_SERVER_IN_PROGRESS"},
             mode = EnumSource.Mode.EXCLUDE)
     void testUpgradeWhenClusterNotAvailableThenUpgradeNotTriggered(DatalakeStatusEnum datalakeStatusEnum) {
-        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        TargetMajorVersion targetMajorVersion = VERSION_11;
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(datalakeStatusEnum);
@@ -188,7 +197,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
 
     @Test
     void testUpgradeWhenClusterNotExistThenExceptionIsThrown() {
-        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        TargetMajorVersion targetMajorVersion = VERSION_11;
         doThrow(new NotFoundException("SDX cluster 'testCluster' not found."))
                 .when(sdxService).getByNameOrCrn(any(), eq(NAME_OR_CRN));
 
@@ -204,7 +213,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
     @ParameterizedTest
     @EnumSource(value = DatalakeStatusEnum.class, names = {"DATALAKE_UPGRADE_DATABASE_SERVER_REQUESTED", "DATALAKE_UPGRADE_DATABASE_SERVER_IN_PROGRESS"})
     void testUpgradeWhenUpgradeInProgressThenUpgradeNotTriggered(DatalakeStatusEnum datalakeStatusEnum) {
-        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        TargetMajorVersion targetMajorVersion = VERSION_11;
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(datalakeStatusEnum);
@@ -221,7 +230,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
 
     @Test
     void testUpgradeWhenDatabaseRuntimeTooLowThenNotTriggered() {
-        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        TargetMajorVersion targetMajorVersion = VERSION_11;
         SdxCluster sdxCluster = getSdxCluster("tooLow");
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.RUNNING);
@@ -237,7 +246,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
 
     @Test
     void testUpgradeWhenUpgradeCheckThrowsExceptionThenNotTriggered() {
-        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        TargetMajorVersion targetMajorVersion = VERSION_11;
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.RUNNING);
@@ -258,7 +267,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
 
     @Test
     void testInitUpgradeInCb() {
-        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        TargetMajorVersion targetMajorVersion = VERSION_11;
         SdxCluster sdxCluster = getSdxCluster();
 
         underTest.initUpgradeInCb(sdxCluster, targetMajorVersion);
@@ -268,7 +277,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
 
     @Test
     void testInitUpgradeWhenNotAlreadyUpgradedExceptionInCb() {
-        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        TargetMajorVersion targetMajorVersion = VERSION_11;
         SdxCluster sdxCluster = getSdxCluster();
         String expectedCoreMessage = "Upgrading database server is not needed as it is already on the latest version (11).";
         when(cloudbreakMessagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED.getMessage(),
@@ -290,7 +299,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
 
     @Test
     void testInitUpgradeWhenAlreadyUpgradedExceptionInCb() {
-        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        TargetMajorVersion targetMajorVersion = VERSION_11;
         SdxCluster sdxCluster = getSdxCluster();
         String expectedCoreMessage = "Upgrading database server is not needed as it is already on the latest version (11).";
         String mappedSdxMessage = String.format("Database server is already on the latest version for data lake %s", sdxCluster.getName());
@@ -315,7 +324,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
     @ParameterizedTest
     @EnumSource(value = DatabaseServerStatus.class, names = {"AVAILABLE", "UPGRADE_FAILED"})
     void testUpgradeWhenDatabaseIsAvailableForUpgradeThenUpgradeTriggered(DatabaseServerStatus dbStatus) {
-        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        TargetMajorVersion targetMajorVersion = VERSION_11;
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.RUNNING);
@@ -336,7 +345,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
 
     @Test
     void testUpgradeWhenDatabaseStatusIsNullThenUpgradeNotTriggered() {
-        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        TargetMajorVersion targetMajorVersion = VERSION_11;
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.RUNNING);
@@ -357,7 +366,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
     @ParameterizedTest
     @EnumSource(value = DatabaseServerStatus.class, names = {"AVAILABLE", "UPGRADE_FAILED"}, mode = EnumSource.Mode.EXCLUDE)
     void testUpgradeWhenDatabaseNotAvailableThenUpgradeNotTriggered(DatabaseServerStatus dbStatus) {
-        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        TargetMajorVersion targetMajorVersion = VERSION_11;
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.RUNNING);

@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -72,6 +73,9 @@ public class RdsUpgradeService {
     @Value("${cb.db.env.upgrade.rds.targetversion}")
     private TargetMajorVersion defaultTargetMajorVersion;
 
+    @Value("${cb.db.env.upgrade.rds.azure.targetversion}")
+    private TargetMajorVersion defaultAzureTargetMajorVersion;
+
     @Inject
     private DatabaseUpgradeRuntimeValidator databaseUpgradeRuntimeValidator;
 
@@ -89,10 +93,10 @@ public class RdsUpgradeService {
     }
 
     public RdsUpgradeV4Response upgradeRds(NameOrCrn nameOrCrn, TargetMajorVersion targetMajorVersion) {
-        TargetMajorVersion calculatedVersion = ObjectUtils.defaultIfNull(targetMajorVersion, defaultTargetMajorVersion);
         String accountId = restRequestThreadLocalService.getAccountId();
         StackDto stackDto = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         StackView stackView = stackDto.getStack();
+        TargetMajorVersion calculatedVersion = getTargetMajorVersion(targetMajorVersion, stackDto.getCloudPlatform());
 
         boolean dataHubWithEmbeddedDatabase = !stackView.isDatalake() && stackDto.getExternalDatabaseCreationType().isEmbedded();
         if (dataHubWithEmbeddedDatabase) {
@@ -109,6 +113,18 @@ public class RdsUpgradeService {
         String backupLocation = getBackupLocation(environment);
         String backupInstanceProfile = getBackupInstanceProfile(environment);
         return triggerRdsUpgradeFlow(stackView, calculatedVersion, backupLocation, backupInstanceProfile);
+    }
+
+    private TargetMajorVersion getTargetMajorVersion(TargetMajorVersion requestedTargetVersion, String cloudPlatform) {
+        boolean onAzure = CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform);
+        TargetMajorVersion calculatedVersion = ObjectUtils.defaultIfNull(requestedTargetVersion, onAzure ?
+                defaultAzureTargetMajorVersion : defaultTargetMajorVersion);
+        LOGGER.debug("Calculated upgrade target is {}, based on requested {}, general default {} and Azure default {}",
+                calculatedVersion,
+                requestedTargetVersion,
+                defaultTargetMajorVersion,
+                defaultAzureTargetMajorVersion);
+        return calculatedVersion;
     }
 
     private void validate(NameOrCrn nameOrCrn, StackView stack, TargetMajorVersion targetMajorVersion, String accountId) {
