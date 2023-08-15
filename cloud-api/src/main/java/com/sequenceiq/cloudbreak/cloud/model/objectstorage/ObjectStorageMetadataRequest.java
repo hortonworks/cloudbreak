@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model.objectstorage;
 
 import java.util.Objects;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformAware;
@@ -15,7 +16,7 @@ public class ObjectStorageMetadataRequest implements CloudPlatformAware {
 
     private @NotNull String cloudPlatform;
 
-    private @NotNull String objectStoragePath;
+    private @NotNull @NotEmpty @ValidObjectStoragePathLength String objectStoragePath;
 
     private @NotNull String region;
 
