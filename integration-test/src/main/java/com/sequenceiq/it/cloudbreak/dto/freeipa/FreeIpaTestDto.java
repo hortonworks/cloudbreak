@@ -488,6 +488,11 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         return this;
     }
 
+    public FreeIpaTestDto withEnableMultiAz(boolean enableMultiAz) {
+        getRequest().setEnableMultiAz(enableMultiAz);
+        return this;
+    }
+
     @Override
     public CloudbreakTestDto refresh() {
         LOGGER.info("Refresh FreeIPA with name: {}", getName());

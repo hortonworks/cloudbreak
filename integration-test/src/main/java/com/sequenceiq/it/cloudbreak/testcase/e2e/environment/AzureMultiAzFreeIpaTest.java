@@ -68,7 +68,7 @@ public class AzureMultiAzFreeIpaTest extends AbstractE2ETest {
                 .withCreateFreeIpa(Boolean.TRUE)
                 .withFreeIpaNodes(3)
                 .withResourceGroup(ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE_MULTIPLE, "")
-                .withMultiAzFreeIpa()
+                .withEnableMultiAzFreeIpa()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .init(FreeIpaTestDto.class)
