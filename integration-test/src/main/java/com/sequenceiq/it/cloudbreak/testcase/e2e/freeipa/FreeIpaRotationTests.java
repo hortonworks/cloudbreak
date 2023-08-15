@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 
-import static com.sequenceiq.freeipa.api.rotation.FreeIpaSecretType.FREEIPA_ADMIN_PASSWORD;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_ADMIN_PASSWORD;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.HashMap;
