@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,20 @@ public class VersionComparatorTest {
         assertEquals(-1L, underTest.compare(() -> "7.2.9-1000", () -> "7.2.9.1"));
         assertEquals(-1L, underTest.compare(() -> "7.2.9-1", () -> "7.2.9.1-200"));
         assertEquals(-1L, underTest.compare(() -> "7.2.9", () -> "7.2.9.1-1000"));
+    }
+
+    @Test
+    public void testNull() {
+        assertEquals(IllegalArgumentException.class, assertThrows(RuntimeException.class,
+                () -> underTest.compare(() -> null, () -> null)).getClass());
+        assertEquals(IllegalArgumentException.class, assertThrows(RuntimeException.class,
+                () -> underTest.compare(() -> null, () -> "7.2.9")).getClass());
+        assertEquals(IllegalArgumentException.class, assertThrows(RuntimeException.class,
+                () -> underTest.compare(() -> "7.2.9.1-1000", () -> null)).getClass());
+        assertEquals(IllegalArgumentException.class, assertThrows(RuntimeException.class,
+                () -> underTest.compare(null, () -> "7.2.9")).getClass());
+        assertEquals(IllegalArgumentException.class, assertThrows(RuntimeException.class,
+                () -> underTest.compare(() -> "7.2.9", null)).getClass());
     }
 
     @Test

@@ -14,6 +14,7 @@ public class VersionComparator implements Comparator<Versioned>, Serializable {
 
     @Override
     public int compare(Versioned o1, Versioned o2) {
+        validateInputParameters(o1, o2);
         ImmutablePair<Versioned, Versioned> versionedVersionedPair = transformByLength(new ImmutablePair<>(o1, o2));
         String[] vals1 = versionedVersionedPair.getLeft().getVersion().split(VERSION_SPLITTER_REGEX);
         String[] vals2 = versionedVersionedPair.getRight().getVersion().split(VERSION_SPLITTER_REGEX);
@@ -32,6 +33,17 @@ public class VersionComparator implements Comparator<Versioned>, Serializable {
         // the strings are equal or one string is a substring of the other, then shorter wins
         // e.g. "2.4.2.0" is newer than "2.4.2.0-9999"
         return Integer.signum(vals2.length - vals1.length);
+    }
+
+    private void validateInputParameters(Versioned o1, Versioned o2) {
+        if (isNullVersion(o1) || isNullVersion(o2)) {
+            throw new IllegalArgumentException("The version can not be null. " +
+                            "The potential problem can be that your image catalog contains a wrong entry.");
+        }
+    }
+
+    private boolean isNullVersion(Versioned versioned) {
+        return versioned == null || versioned.getVersion() == null;
     }
 
     private ImmutablePair<Versioned, Versioned> transformByLength(ImmutablePair<Versioned, Versioned> input) {
