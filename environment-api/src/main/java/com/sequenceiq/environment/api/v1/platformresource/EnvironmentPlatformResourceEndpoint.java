@@ -18,6 +18,7 @@ import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceModelDescription.OpEnvDescription;
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformAccessConfigsResponse;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDatabaseCapabilitiesResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformEncryptionKeysResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformGatewaysResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformIpPoolsResponse;
@@ -185,5 +186,16 @@ public interface EnvironmentPlatformResourceEndpoint {
     PlatformPrivateDnsZonesResponse getPrivateDnsZones(
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("platformVariant") String platformVariant);
+
+    @GET
+    @Path("database_capabilities")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OpEnvDescription.GET_DATABASE_CAPABILITIES, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
+            nickname = "getDatabaseCapabilities")
+    PlatformDatabaseCapabilitiesResponse getDatabaseCapabilities(
+            @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
+            @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant,
+            @QueryParam("availabilityZone") String availabilityZone);
 
 }

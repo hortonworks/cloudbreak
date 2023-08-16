@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.view;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.AzureHighAvailabiltyMode;
@@ -33,9 +34,13 @@ public class AzureDatabaseServerView {
     @VisibleForTesting
     static final String KEY_VAULT_RESOURCE_GROUP_NAME = "keyVaultResourceGroupName";
 
-    private static final String HIGH_AVAILABILITY = "highAvailability";
+    private static final String STAND_BY_AVAILABILITY_ZONE = "standbyAvailabilityZone";
+
+    private static final String AVAILABILITY_ZONE = "availabilityZone";
 
     private static final int NUM_MB_IN_GB = 1024;
+
+    private static final String ZONE_1 = "1";
 
     private final DatabaseServer databaseServer;
 
@@ -97,6 +102,19 @@ public class AzureDatabaseServerView {
 
     public Boolean getStorageAutoGrow() {
         return databaseServer.getParameter(STORAGE_AUTO_GROW, Boolean.class);
+    }
+
+    public String getStandbyAvailabilityZone() {
+        return databaseServer.getParameter(STAND_BY_AVAILABILITY_ZONE, String.class);
+    }
+
+    public boolean useStandbyAvailabilityZone() {
+        return !Strings.isNullOrEmpty(getStandbyAvailabilityZone());
+    }
+
+    public String getAvailabilityZone() {
+        String zone = databaseServer.getParameter(AVAILABILITY_ZONE, String.class);
+        return Strings.isNullOrEmpty(zone) ? ZONE_1 : zone;
     }
 
     public String getAdminLoginName() {

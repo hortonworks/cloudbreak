@@ -118,7 +118,7 @@ public class DatabaseService {
                 serverStatusV4Response =
                 ThreadBasedUserCrnProvider.doAsInternalActor(
                         regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                        () -> databaseServerV4Endpoint.createInternal(getDatabaseRequest(sdxCluster, env), initiatorUserCrn));
+                        () -> databaseServerV4Endpoint.createInternal(getDatabaseRequest(sdxCluster, env, initiatorUserCrn), initiatorUserCrn));
                 dbResourceCrn = serverStatusV4Response.getResourceCrn();
                 DatabaseParameterFallbackUtil.setDatabaseCrn(sdxCluster, dbResourceCrn);
                 sdxDatabaseRepository.save(sdxCluster.getSdxDatabase());
@@ -181,12 +181,12 @@ public class DatabaseService {
         }
     }
 
-    private AllocateDatabaseServerV4Request getDatabaseRequest(SdxCluster sdxCluster, DetailedEnvironmentResponse env) {
+    private AllocateDatabaseServerV4Request getDatabaseRequest(SdxCluster sdxCluster, DetailedEnvironmentResponse env, String initiatorUserCrn) {
         AllocateDatabaseServerV4Request req = new AllocateDatabaseServerV4Request();
         String environmentCrn = env.getCrn();
         req.setEnvironmentCrn(environmentCrn);
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(env.getCloudPlatform().toUpperCase(Locale.US));
-        req.setDatabaseServer(getDatabaseServerRequest(cloudPlatform, sdxCluster));
+        req.setDatabaseServer(getDatabaseServerRequest(cloudPlatform, sdxCluster, env, initiatorUserCrn));
         req.setTags(getTags(sdxCluster.getTags()));
         req.setClusterCrn(sdxCluster.getCrn());
 
@@ -219,7 +219,8 @@ public class DatabaseService {
         return versionComparator.compare(currentVersion, baseVersion) > -1;
     }
 
-    private DatabaseServerV4StackRequest getDatabaseServerRequest(CloudPlatform cloudPlatform, SdxCluster sdxCluster) {
+    private DatabaseServerV4StackRequest getDatabaseServerRequest(CloudPlatform cloudPlatform, SdxCluster sdxCluster,
+        DetailedEnvironmentResponse env, String initiatorUserCrn) {
         DatabaseConfig databaseConfig = dbConfigs.get(new DatabaseConfigKey(cloudPlatform, sdxCluster.getClusterShape(),
                 databaseServerParameterSetterMap.get(cloudPlatform).getDatabaseType(sdxCluster.getSdxDatabase()).orElse(null)));
         if (databaseConfig == null) {
@@ -230,7 +231,7 @@ public class DatabaseService {
         req.setInstanceType(databaseConfig.getInstanceType());
         req.setDatabaseVendor(databaseConfig.getVendor());
         req.setStorageSize(databaseConfig.getVolumeSize());
-        databaseServerParameterSetterMap.get(cloudPlatform).setParameters(req, sdxCluster.getSdxDatabase());
+        databaseServerParameterSetterMap.get(cloudPlatform).setParameters(req, sdxCluster, env, initiatorUserCrn);
         return req;
     }
 

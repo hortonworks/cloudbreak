@@ -3,185 +3,329 @@
     {
       "name": "Japan West",
       "latitude": "34.6939",
-      "longitude": "135.5022"
+      "longitude": "135.5022",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": false
+      }
     },
     {
       "name": "East Asia",
       "latitude": "22.267",
-      "longitude": "114.188"
+      "longitude": "114.188",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "Southeast Asia",
       "latitude": "1.283",
-      "longitude": "103.833"
+      "longitude": "103.833",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": false
+      }
     },
     {
       "name": "South Central US",
       "latitude": "29.4167",
-      "longitude": "-98.5"
+      "longitude": "-98.5",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "West US",
       "latitude": "37.783",
-      "longitude": "-122.417"
+      "longitude": "-122.417",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "East US",
       "latitude": "37.3719",
-      "longitude": "-79.8164"
+      "longitude": "-79.8164",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "North Central US",
       "latitude": "41.8819",
-      "longitude": "-87.6278"
+      "longitude": "-87.6278",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": false
+      }
     },
     {
       "name": "North Europe",
       "latitude": "53.3478",
-      "longitude": "-6.2597"
+      "longitude": "-6.2597",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "Australia Southeast",
       "latitude": "-37.8136",
-      "longitude": "144.9631"
+      "longitude": "144.9631",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": false
+      }
     },
     {
       "name": "Australia East",
       "latitude": "-33.86",
-      "longitude": "151.2094"
+      "longitude": "151.2094",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "Japan East",
       "latitude": "35.68",
-      "longitude": "139.77"
+      "longitude": "139.77",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "Brazil South",
       "latitude": "-23.55",
-      "longitude": "-46.633"
+      "longitude": "-46.633",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "East US 2",
       "latitude": "36.6681",
-      "longitude": "-78.3889"
+      "longitude": "-78.3889",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": false
+      }
     },
     {
       "name": "West Europe",
       "latitude": "52.3667",
-      "longitude": "4.9"
+      "longitude": "4.9",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": false
+      }
     },
     {
       "name": "West Central US",
       "latitude": "40.890",
-      "longitude": "-110.234"
+      "longitude": "-110.234",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": false
+      }
     },
     {
       "name": "Central India",
       "latitude": "18.5822",
-      "longitude": "73.9197"
+      "longitude": "73.9197",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "UK West",
       "latitude": "53.427",
-      "longitude": "-3.084"
+      "longitude": "-3.084",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": false
+      }
     },
     {
       "name": "West US 2",
       "latitude": "47.233",
-      "longitude": "-119.852"
+      "longitude": "-119.852",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": false
+      }
     },
     {
       "name": "West India",
       "latitude": "19.088",
-      "longitude": "72.868"
+      "longitude": "72.868",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": false
+      }
     },
     {
       "name": "South India",
       "latitude": "12.9822",
-      "longitude": "80.1636"
+      "longitude": "80.1636",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": false
+      }
     },
     {
       "name": "Canada East",
       "latitude": "46.817",
-      "longitude": "-71.217"
+      "longitude": "-71.217",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": false
+      }
     },
     {
       "name": "Korea Central",
       "latitude": "37.5665",
-      "longitude": "126.9780"
+      "longitude": "126.9780",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "Korea South",
       "latitude": "35.1796",
-      "longitude": "129.0756"
+      "longitude": "129.0756",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": false
+      }
     },
     {
       "name": "Central US",
       "latitude": "41.5908",
-      "longitude": "-93.6208"
+      "longitude": "-93.6208",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "UK South",
       "latitude": "50.941",
-      "longitude": "-0.799"
+      "longitude": "-0.799",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "Canada Central",
       "latitude": "43.653",
-      "longitude": "-79.383"
+      "longitude": "-79.383",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "France Central",
       "latitude": "46.3772",
-      "longitude": "2.3730"
+      "longitude": "2.3730",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "Australia Central",
       "latitude": "-35.3075",
-      "longitude": "149.1244"
+      "longitude": "149.1244",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "UAE North",
       "latitude": "25.266666",
-      "longitude": "55.316666"
+      "longitude": "55.316666",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "UAE Central",
       "latitude": "59.913868",
       "longitude": "10.752245",
-      "entitlements": [ "CDP_AZURE_IMAGE_MARKETPLACE", "CDP_AZURE_UAE_CENTRAL" ]
+      "entitlements": [ "CDP_AZURE_IMAGE_MARKETPLACE", "CDP_AZURE_UAE_CENTRAL" ],
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "South Africa North",
       "latitude": "-25.731340",
-      "longitude": "28.218370"
+      "longitude": "28.218370",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "Switzerland North",
       "latitude": "47.451542",
-      "longitude": "8.564572"
+      "longitude": "8.564572",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "Switzerland West",
       "latitude": "47.373878",
       "longitude": "8.545094",
-      "entitlements": [ "CDP_AZURE_IMAGE_MARKETPLACE" ]
+      "entitlements": [ "CDP_AZURE_IMAGE_MARKETPLACE" ],
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": false
+      }
     },
     {
       "name": "Germany West Central",
       "latitude": "50.110924",
-      "longitude": "8.682127"
+      "longitude": "8.682127",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "Norway East",
       "latitude": "59.913868",
-      "longitude": "10.752245"
+      "longitude": "10.752245",
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     },
     {
       "name": "Qatar Central",
       "latitude": "25.286106",
       "longitude": "51.534817",
-      "entitlements": [ "CDP_AZURE_DATABASE_FLEXIBLE_SERVER" ]
+      "entitlements": [ "CDP_AZURE_DATABASE_FLEXIBLE_SERVER" ],
+      "flexible": {
+        "sameZoneEnabled": true,
+        "zoneRedundantEnabled": true
+      }
     }
   ]
 }

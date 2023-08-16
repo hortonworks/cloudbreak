@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
+import static com.sequenceiq.cloudbreak.cloud.model.DatabaseAvailabiltyType.databaseAvailabiltyType;
+import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.SAME_ZONE;
+import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.ZONE_REDUNDANT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -18,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,12 +34,15 @@ import com.azure.resourcemanager.compute.models.VirtualMachineSize;
 import com.azure.resourcemanager.compute.models.VirtualMachineSizeTypes;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
+import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRegionProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
@@ -51,15 +57,13 @@ class AzurePlatformResourcesTest {
     private ExtendedCloudCredential cloudCredential;
 
     @Mock
+    private AzureRegionProvider azureRegionProvider;
+
+    @Mock
     private AzureClientService azureClientService;
 
     @InjectMocks
     private AzurePlatformResources underTest;
-
-    @BeforeEach
-    void setUp() {
-        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
-    }
 
     @Test
     void testVirtualMachinesWhenNoInstanceTypeShouldBeFilteredOut() {
@@ -69,6 +73,7 @@ class AzurePlatformResourcesTest {
         virtualMachineSizes.add(createVirtualMachineSize("Standard_E64ds_v4", 1400000));
         when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
         when(azureClient.getAvailabilityZones(region.value())).thenReturn(Map.of());
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
 
         CloudVmTypes actual = underTest.virtualMachines(cloudCredential, region, Map.of());
 
@@ -115,6 +120,7 @@ class AzurePlatformResourcesTest {
         zoneInfo.put("Standard_DS2_v2", List.of("1"));
         zoneInfo.put("Standard_E64ds_v4", List.of("1", "2", "3"));
         when(azureClient.getAvailabilityZones(region.value())).thenReturn(zoneInfo);
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
 
         CloudVmTypes actual = underTest.virtualMachines(cloudCredential, region, Map.of());
 
@@ -175,7 +181,7 @@ class AzurePlatformResourcesTest {
                 .collect(Collectors.toSet());
 
         when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
-
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureClient.getAvailabilityZones(region.value())).thenReturn(zoneInfo);
 
         CloudVmTypes actual = underTest.virtualMachines(cloudCredential, region, availabilityZones != null ? Map.of(NetworkConstants.AVAILABILITY_ZONES,
@@ -214,7 +220,7 @@ class AzurePlatformResourcesTest {
                 .collect(Collectors.toSet());
 
         when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
-
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureClient.getAvailabilityZones(region.value())).thenReturn(zoneInfo);
 
         CloudVmTypes actual = underTest.virtualMachines(cloudCredential, region, availabilityZones != null ? Map.of(NetworkConstants.AVAILABILITY_ZONES,
@@ -248,7 +254,7 @@ class AzurePlatformResourcesTest {
         Set<VirtualMachineSize> virtualMachineSizes = new HashSet<>();
         virtualMachineSizes.add(createVirtualMachineSize("Standard_D8_v3", 20000));
         when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
-
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         InstanceStoreMetadata instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, Collections.singletonList("Standard_D8_v3"));
 
         assertEquals(1, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("Standard_D8_v3"));
@@ -264,7 +270,7 @@ class AzurePlatformResourcesTest {
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
         Set<VirtualMachineSize> virtualMachineSizes = new HashSet<>();
         when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
-
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         InstanceStoreMetadata instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, Collections.singletonList("unsupported"));
 
         assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("unsupported"));
@@ -278,6 +284,35 @@ class AzurePlatformResourcesTest {
 
         assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("Standard_D8_v3"));
         assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("Standard_D8_v3"));
+    }
+
+    @Test
+    void collectDatabaseCapabilitiesTest() {
+        Region region = Region.region("us-west-1");
+        CloudContext cloudContext = new CloudContext.Builder()
+                .withLocation(Location.location(region, availabilityZone("us-west-1")))
+                .build();
+        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
+        when(azureRegionProvider.enabledRegions()).thenReturn(Map.of(
+                Region.region("A"), azureCoordinate("az1", true, true),
+                Region.region("B"), azureCoordinate("az2", true, false)
+        ));
+
+        PlatformDatabaseCapabilities databaseCapabilities = underTest.databaseCapabilities(cloudCredential, region, new HashMap<>());
+
+        assertEquals(4, databaseCapabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).size());
+        assertEquals(2, databaseCapabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).size());
+    }
+
+    private AzureCoordinate azureCoordinate(String name, boolean flexibleSameZoneEnabled, boolean flexibleZoneRedundantEnabled) {
+        return coordinate("1",
+                "1",
+                name,
+                name + "key",
+                false,
+                List.of(),
+                flexibleSameZoneEnabled,
+                flexibleZoneRedundantEnabled);
     }
 
     private VirtualMachineSize createVirtualMachineSize(String name, int resourceDiskSizeInMB) {

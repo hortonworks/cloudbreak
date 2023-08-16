@@ -99,8 +99,14 @@
     },
     "availabilityZone": {
       "type": "string",
-      "defaultValue": "1"
+      "defaultValue": "${availabilityZone}"
     },
+    <#if useStandbyAvailabilityZone>
+    "standbyAvailabilityZone": {
+        "type": "string",
+        "defaultValue": "${standbyAvailabilityZone}"
+    },
+    </#if>
     "version": {
       "type": "string",
       "defaultValue": "${dbVersion}"
@@ -159,6 +165,9 @@
         },
         "highAvailability": {
           "mode": "[parameters('haMode')]"
+          <#if useStandbyAvailabilityZone>,
+          "standbyAvailabilityZone": "[parameters('standbyAvailabilityZone')]"
+          </#if>
         },
         "storage": {
           "storageSizeGB": "[parameters('skuSizeGB')]"

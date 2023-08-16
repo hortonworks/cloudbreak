@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.dns.CloudPrivateDnsZones;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
@@ -38,6 +39,7 @@ import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.api.v1.platformresource.EnvironmentPlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformAccessConfigsResponse;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDatabaseCapabilitiesResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformEncryptionKeysResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformGatewaysResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformIpPoolsResponse;
@@ -64,6 +66,7 @@ import com.sequenceiq.environment.platformresource.v1.converter.CloudNoSqlTables
 import com.sequenceiq.environment.platformresource.v1.converter.CloudSecurityGroupsToPlatformSecurityGroupsV1ResponseConverter;
 import com.sequenceiq.environment.platformresource.v1.converter.CloudSshKeysToPlatformSshKeysV1ResponseConverter;
 import com.sequenceiq.environment.platformresource.v1.converter.CloudVmTypesToPlatformVmTypesV1ResponseConverter;
+import com.sequenceiq.environment.platformresource.v1.converter.DatabaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter;
 import com.sequenceiq.environment.platformresource.v1.converter.PlatformRegionsToRegionV1ResponseConverter;
 
 @Controller
@@ -104,6 +107,9 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
 
     @Inject
     private CloudNoSqlTablesToPlatformNoSqlTablesV1ResponseConverter cloudNoSqlTablesToPlatformNoSqlTablesV1ResponseConverter;
+
+    @Inject
+    private DatabaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter databaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter;
 
     @Inject
     private VerticalScaleInstanceProvider verticalScaleInstanceProvider;
@@ -424,6 +430,29 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 .collect(Collectors.toList());
         PlatformPrivateDnsZonesResponse response = new PlatformPrivateDnsZonesResponse(platformPrivateDnsZones);
         LOGGER.debug("Resp /platform_resources/private_dns_zones, request: {}, privateDnsZones: {}, response: {}", request, privateDnsZones, response);
+        return response;
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public PlatformDatabaseCapabilitiesResponse getDatabaseCapabilities(
+            @ResourceCrn String environmentCrn,
+            String region,
+            String platformVariant,
+            String availabilityZone) {
+        String accountId = getAccountId();
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
+                accountId,
+                environmentCrn,
+                region,
+                platformVariant,
+                availabilityZone,
+                null);
+        LOGGER.info("Get /platform_resources/database_capabilities, request: {}", request);
+        PlatformDatabaseCapabilities platformDatabaseCapabilities = platformParameterService.getDatabaseCapabilities(request);
+        PlatformDatabaseCapabilitiesResponse response = databaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter
+                .convert(platformDatabaseCapabilities);
+        LOGGER.info("Resp /platform_resources/database_capabilities, request: {}, response: {}", request, response);
         return response;
     }
 

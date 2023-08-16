@@ -158,6 +158,9 @@ public final class ModelDescriptions {
         public static final String DB_VERSION = "The version of the database software to use";
         public static final String AZURE_DATABASE_TYPE = "The type of the azure database: single server / flexible server";
         public static final String HIGH_AVAILABILITY = "Whether to use a highly available deployment";
+        public static final String STANDBY_AVAILABILITY_ZONE = "Secondary AZ for flexible server in case of zone redundant type";
+        public static final String AVAILABILITY_ZONE = "Primary AZ for flexible server";
+
     }
 
     public static class GcpDatabaseServerModelDescriptions {

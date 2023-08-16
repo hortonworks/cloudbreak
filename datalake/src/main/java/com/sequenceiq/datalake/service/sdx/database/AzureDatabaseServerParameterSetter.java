@@ -1,5 +1,14 @@
 package com.sequenceiq.datalake.service.sdx.database;
 
+import static com.sequenceiq.common.model.AzureDatabaseType.FLEXIBLE_SERVER;
+import static com.sequenceiq.common.model.AzureDatabaseType.SINGLE_SERVER;
+import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.DISABLED;
+import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.SAME_ZONE;
+import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.ZONE_REDUNDANT;
+import static com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType.HA;
+import static com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType.NON_HA;
+
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -9,10 +18,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.AzureHighAvailabiltyMode;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.platformresource.EnvironmentPlatformResourceEndpoint;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDatabaseCapabilitiesResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureDatabaseServerV4Parameters;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
@@ -39,28 +53,107 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
     @Inject
     private AzureDatabaseAttributesService azureDatabaseAttributesService;
 
+    @Inject
+    private EnvironmentPlatformResourceEndpoint environmentPlatformResourceEndpoint;
+
     @Override
-    public void setParameters(DatabaseServerV4StackRequest request, SdxDatabase sdxDatabase) {
+    public void setParameters(DatabaseServerV4StackRequest request, SdxCluster sdxCluster, DetailedEnvironmentResponse env, String initiatorUserCrn) {
+        SdxDatabase sdxDatabase = sdxCluster.getSdxDatabase();
         AzureDatabaseServerV4Parameters parameters = new AzureDatabaseServerV4Parameters();
         SdxDatabaseAvailabilityType availabilityType = DatabaseParameterFallbackUtil.getDatabaseAvailabilityType(
                 sdxDatabase.getDatabaseAvailabilityType(), sdxDatabase.isCreateDatabase());
         String databaseEngineVersion = sdxDatabase.getDatabaseEngineVersion();
-        if (SdxDatabaseAvailabilityType.HA.equals(availabilityType)) {
-            parameters.setBackupRetentionDays(backupRetentionPeriodHa);
-            parameters.setGeoRedundantBackup(geoRedundantBackupHa);
-            parameters.setHighAvailabilityMode(AzureHighAvailabiltyMode.SAME_ZONE);
-        } else if (SdxDatabaseAvailabilityType.NON_HA.equals(availabilityType)) {
-            parameters.setBackupRetentionDays(backupRetentionPeriodNonHa);
-            parameters.setGeoRedundantBackup(geoRedundantBackupNonHa);
-            parameters.setHighAvailabilityMode(AzureHighAvailabiltyMode.DISABLED);
+        // Until flexible is not a default. Remove this statement after that
+        AzureDatabaseType azureDatabaseType = getAzureDatabaseType(sdxDatabase);
+        parameters.setAzureDatabaseType(azureDatabaseType);
+        if (sdxCluster.isEnableMultiAz() && FLEXIBLE_SERVER.equals(azureDatabaseType)) {
+            List<String> zones = env.getNetwork().getAzure().getAvailabilityZones().stream().toList();
+            parameters.setAvailabilityZone(getAvailabilityZone(zones));
+            AzureHighAvailabiltyMode highAvailabilityMode =
+                    getHighAvailabilityMode(availabilityType, isZoneRedundantHaEnabled(env, initiatorUserCrn));
+            parameters.setHighAvailabilityMode(highAvailabilityMode);
+            parameters.setStandbyAvailabilityZone(getStandByAvailabilityZone(zones, highAvailabilityMode));
         } else {
-            throw new IllegalArgumentException(availabilityType + " database availability type is not supported on Azure.");
+            parameters.setHighAvailabilityMode(getHighAvailabilityMode(availabilityType, false));
         }
-        if (StringUtils.isNotEmpty(databaseEngineVersion)) {
-            parameters.setDbVersion(databaseEngineVersion);
-        }
-        parameters.setAzureDatabaseType(getAzureDatabaseType(sdxDatabase));
+        parameters.setBackupRetentionDays(getBackupRetentionPeriod(availabilityType));
+        parameters.setGeoRedundantBackup(isGeoRedundantBackup(availabilityType));
+        parameters.setDbVersion(StringUtils.isNotEmpty(databaseEngineVersion) ? databaseEngineVersion : null);
         request.setAzure(parameters);
+    }
+
+    private boolean isZoneRedundantHaEnabled(DetailedEnvironmentResponse env, String initiatorUserCrn) {
+        boolean zoneRedundantHaEnabled = false;
+        PlatformDatabaseCapabilitiesResponse databaseCapabilities = getDatabaseCapabilities(env, initiatorUserCrn);
+        List<String> enabledRegions = databaseCapabilities.getIncludedRegions().get(ZONE_REDUNDANT.name());
+        if (enabledRegions != null) {
+            if (enabledRegions.contains(env.getLocation().getName())) {
+                zoneRedundantHaEnabled = true;
+            }
+        }
+        return zoneRedundantHaEnabled;
+    }
+
+    private PlatformDatabaseCapabilitiesResponse getDatabaseCapabilities(DetailedEnvironmentResponse env, String initiatorUserCrn) {
+        return ThreadBasedUserCrnProvider.doAs(initiatorUserCrn, () ->
+                environmentPlatformResourceEndpoint.getDatabaseCapabilities(
+                        env.getCrn(),
+                        env.getLocation().getName(),
+                        env.getCloudPlatform(),
+                        null)
+        );
+    }
+
+    private AzureHighAvailabiltyMode getHighAvailabilityMode(SdxDatabaseAvailabilityType availabilityType, boolean zoneRedundantEnabled) {
+        if (HA.equals(availabilityType)) {
+            if (zoneRedundantEnabled) {
+                return ZONE_REDUNDANT;
+            } else {
+                return SAME_ZONE;
+            }
+        } else if (NON_HA.equals(availabilityType)) {
+            return DISABLED;
+        } else {
+            throw unkownDatabaseAvailabilityType(availabilityType);
+        }
+    }
+
+    private boolean isGeoRedundantBackup(SdxDatabaseAvailabilityType availabilityType) {
+        if (HA.equals(availabilityType)) {
+            return geoRedundantBackupHa;
+        } else if (NON_HA.equals(availabilityType)) {
+            return geoRedundantBackupNonHa;
+        } else {
+            throw unkownDatabaseAvailabilityType(availabilityType);
+        }
+    }
+
+    private int getBackupRetentionPeriod(SdxDatabaseAvailabilityType availabilityType) {
+        if (HA.equals(availabilityType)) {
+            return backupRetentionPeriodHa;
+        } else if (NON_HA.equals(availabilityType)) {
+            return backupRetentionPeriodNonHa;
+        } else {
+            throw unkownDatabaseAvailabilityType(availabilityType);
+        }
+    }
+
+    private IllegalArgumentException unkownDatabaseAvailabilityType(SdxDatabaseAvailabilityType availabilityType) {
+        return new IllegalArgumentException(availabilityType + " database availability type is not supported on Azure.");
+    }
+
+    private String getAvailabilityZone(List<String> zones) {
+        if (zones != null && !zones.isEmpty()) {
+            return zones.get(0);
+        }
+        return null;
+    }
+
+    private String getStandByAvailabilityZone(List<String> zones, AzureHighAvailabiltyMode highAvailabilityMode) {
+        if (ZONE_REDUNDANT.equals(highAvailabilityMode) && zones != null && !zones.isEmpty() && zones.size() > 1) {
+            return zones.get(1);
+        }
+        return null;
     }
 
     @Override
@@ -74,6 +167,6 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
     }
 
     private AzureDatabaseType getAzureDatabaseType(SdxDatabase sdxDatabase) {
-        return sdxDatabase != null ? azureDatabaseAttributesService.getAzureDatabaseType(sdxDatabase) : AzureDatabaseType.SINGLE_SERVER;
+        return sdxDatabase != null ? azureDatabaseAttributesService.getAzureDatabaseType(sdxDatabase) : SINGLE_SERVER;
     }
 }

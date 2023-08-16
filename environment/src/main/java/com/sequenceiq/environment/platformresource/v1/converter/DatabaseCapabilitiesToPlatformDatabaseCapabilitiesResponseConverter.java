@@ -1,0 +1,36 @@
+package com.sequenceiq.environment.platformresource.v1.converter;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseAvailabiltyType;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDatabaseCapabilitiesResponse;
+
+@Component
+public class DatabaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter {
+
+    public PlatformDatabaseCapabilitiesResponse convert(PlatformDatabaseCapabilities source) {
+        Map<String, List<String>> includedRegions = new HashMap<>();
+        for (Map.Entry<DatabaseAvailabiltyType, Collection<Region>> databaseEntry : source.getEnabledRegions().entrySet()) {
+            String databaseAvailabilityType = databaseEntry.getKey().getValue();
+            if (includedRegions.containsKey(databaseAvailabilityType)) {
+                includedRegions.put(databaseAvailabilityType, new ArrayList<>());
+            }
+
+            includedRegions.get(databaseAvailabilityType).addAll(
+                    databaseEntry.getValue()
+                        .stream()
+                        .map(e -> e.getRegionName())
+                        .collect(Collectors.toList()));
+        }
+        return new PlatformDatabaseCapabilitiesResponse(includedRegions);
+    }
+}

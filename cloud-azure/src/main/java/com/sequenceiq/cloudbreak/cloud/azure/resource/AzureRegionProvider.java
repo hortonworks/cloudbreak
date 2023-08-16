@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
+import static com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 import java.io.IOException;
@@ -21,13 +21,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
+import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureRegionCoordinateSpecification;
+import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureRegionCoordinateSpecifications;
 import com.sequenceiq.cloudbreak.cloud.azure.util.RegionUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
-import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
@@ -44,7 +45,7 @@ public class AzureRegionProvider {
     @Value("${cb.arm.zone.parameter.default:North Europe}")
     private String armZoneParameterDefault;
 
-    private Map<Region, Coordinate> enabledRegions = new HashMap<>();
+    private Map<Region, AzureCoordinate> enabledRegions = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -52,7 +53,7 @@ public class AzureRegionProvider {
     }
 
     public CloudRegions regions(Region region, Collection<com.azure.core.management.Region> azureRegions,
-                                List<String> entitlements) {
+            List<String> entitlements) {
         Map<Region, List<AvailabilityZone>> cloudRegions = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
         Map<Region, Coordinate> coordinates = new HashMap<>();
@@ -96,16 +97,20 @@ public class AzureRegionProvider {
                 .collect(Collectors.toSet());
     }
 
+    public Map<Region, AzureCoordinate> enabledRegions() {
+        return enabledRegions;
+    }
+
     private String resourceDefinition() {
         return cloudbreakResourceReaderService.resourceDefinition("azure", ENABLED_REGIONS_FILE);
     }
 
-    private Map<Region, Coordinate> readEnabledRegions() {
+    private Map<Region, AzureCoordinate> readEnabledRegions() {
         String displayNames = resourceDefinition();
-        Map<Region, Coordinate> regionCoordinates = new HashMap<>();
+        Map<Region, AzureCoordinate> regionCoordinates = new HashMap<>();
         try {
-            RegionCoordinateSpecifications regionCoordinateSpecifications = JsonUtil.readValue(displayNames, RegionCoordinateSpecifications.class);
-            for (RegionCoordinateSpecification regionCoordinateSpecification : regionCoordinateSpecifications.getItems()) {
+            AzureRegionCoordinateSpecifications regionCoordinateSpecifications = JsonUtil.readValue(displayNames, AzureRegionCoordinateSpecifications.class);
+            for (AzureRegionCoordinateSpecification regionCoordinateSpecification : regionCoordinateSpecifications.getItems()) {
                 regionCoordinates.put(region(regionCoordinateSpecification.getName()),
                         coordinate(
                                 regionCoordinateSpecification.getLongitude(),
@@ -113,7 +118,9 @@ public class AzureRegionProvider {
                                 RegionUtil.findByLabelOrName(regionCoordinateSpecification.getName()).label(),
                                 RegionUtil.findByLabelOrName(regionCoordinateSpecification.getName()).name(),
                                 regionCoordinateSpecification.isK8sSupported(),
-                                regionCoordinateSpecification.getEntitlements()));
+                                regionCoordinateSpecification.getEntitlements(),
+                                regionCoordinateSpecification.getFlexible().isSameZoneEnabled(),
+                                regionCoordinateSpecification.getFlexible().isZoneRedundantEnabled()));
             }
         } catch (IOException ignored) {
             LOGGER.error("Failed to read enabled Azure regions from file.");

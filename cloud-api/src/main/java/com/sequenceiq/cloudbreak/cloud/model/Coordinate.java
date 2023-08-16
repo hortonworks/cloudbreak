@@ -17,7 +17,7 @@ public class Coordinate {
 
     private final List<String> entitlements;
 
-    private Coordinate(Double longitude, Double latitude, String displayName, String key, boolean k8sSupported, List<String> entitlements) {
+    protected Coordinate(Double longitude, Double latitude, String displayName, String key, boolean k8sSupported, List<String> entitlements) {
         this.longitude = longitude;
         this.latitude = latitude;
         this.displayName = displayName;

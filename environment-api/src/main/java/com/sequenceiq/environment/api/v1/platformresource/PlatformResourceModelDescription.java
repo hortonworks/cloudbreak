@@ -53,6 +53,8 @@ public class PlatformResourceModelDescription {
         public static final String GET_ENCRYPTIONKEYS = "retrieve encryption keys with properties by environment";
         public static final String GET_NOSQL_TABLES = "retrieve nosql tables by environment";
         public static final String GET_RESOURCE_GROUPS = "retrieve resource groups by environment";
+
+        public static final String GET_DATABASE_CAPABILITIES = "retrieve database capabilities by environment";
         public static final String GET_PRIVATE_DNS_ZONES = "retrieve private DNS zones by environment";
     }
 

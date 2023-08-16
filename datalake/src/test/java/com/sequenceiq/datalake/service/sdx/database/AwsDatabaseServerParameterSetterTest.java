@@ -12,6 +12,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
@@ -37,7 +38,7 @@ public class AwsDatabaseServerParameterSetterTest {
 
     @Test
     public void testHAServer() {
-        underTest.setParameters(request, createSdxDatabase(SdxDatabaseAvailabilityType.HA, null));
+        underTest.setParameters(request, createSdxDatabase(SdxDatabaseAvailabilityType.HA, null), null, "crn");
 
         verify(request).setAws(captor.capture());
         AwsDatabaseServerV4Parameters awsDatabaseServerV4Parameters = captor.getValue();
@@ -47,7 +48,7 @@ public class AwsDatabaseServerParameterSetterTest {
 
     @Test
     public void testNonHAServer() {
-        underTest.setParameters(request, createSdxDatabase(SdxDatabaseAvailabilityType.NON_HA, null));
+        underTest.setParameters(request, createSdxDatabase(SdxDatabaseAvailabilityType.NON_HA, null), null, "crn");
 
         verify(request).setAws(captor.capture());
         AwsDatabaseServerV4Parameters awsDatabaseServerV4Parameters = captor.getValue();
@@ -57,7 +58,7 @@ public class AwsDatabaseServerParameterSetterTest {
 
     @Test
     public void testEngineVersion() {
-        underTest.setParameters(request, createSdxDatabase(SdxDatabaseAvailabilityType.NON_HA, "13"));
+        underTest.setParameters(request, createSdxDatabase(SdxDatabaseAvailabilityType.NON_HA, "13"), null, "crn");
 
         verify(request).setAws(captor.capture());
         AwsDatabaseServerV4Parameters awsDatabaseServerV4Parameters = captor.getValue();
@@ -70,15 +71,18 @@ public class AwsDatabaseServerParameterSetterTest {
     public void shouldThrowExceptionWhenAvailabilityTypeIsNotSupported() {
         IllegalArgumentException result =
                 Assertions.assertThrows(IllegalArgumentException.class,
-                        () -> underTest.setParameters(request, createSdxDatabase(SdxDatabaseAvailabilityType.NONE, null)));
+                        () -> underTest.setParameters(request, createSdxDatabase(SdxDatabaseAvailabilityType.NONE, null), null, "crn"));
 
         assertEquals("NONE database availability type is not supported on AWS.", result.getMessage());
     }
 
-    private SdxDatabase createSdxDatabase(SdxDatabaseAvailabilityType sdxDatabaseAvailabilityType, String databaseEngineVeersion) {
+    private SdxCluster createSdxDatabase(SdxDatabaseAvailabilityType sdxDatabaseAvailabilityType, String databaseEngineVersion) {
         SdxDatabase sdxDatabase = new SdxDatabase();
         sdxDatabase.setDatabaseAvailabilityType(sdxDatabaseAvailabilityType);
-        sdxDatabase.setDatabaseEngineVersion(databaseEngineVeersion);
-        return sdxDatabase;
+        sdxDatabase.setDatabaseEngineVersion(databaseEngineVersion);
+
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setSdxDatabase(sdxDatabase);
+        return sdxCluster;
     }
 }

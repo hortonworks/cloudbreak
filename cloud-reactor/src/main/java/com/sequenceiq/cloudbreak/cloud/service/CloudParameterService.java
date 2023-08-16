@@ -26,6 +26,8 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudGatewaysRe
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudGatewaysResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudIpPoolsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudIpPoolsResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformDatabaseCapabilityRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformDatabaseCapabilityResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformEncryptionKeysRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformEncryptionKeysResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformInstanceGroupParameterRequest;
@@ -69,6 +71,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
@@ -203,6 +206,27 @@ public class CloudParameterService {
             return res.getPlatformParameters();
         } catch (InterruptedException e) {
             LOGGER.error("Error while getting platform parameters", e);
+            throw new OperationException(e);
+        }
+    }
+
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
+    public PlatformDatabaseCapabilities getDatabaseCapabilities(ExtendedCloudCredential cloudCredential, String region,
+            String variant, Map<String, String> filters) {
+        LOGGER.debug("Get database capabilities");
+        GetPlatformDatabaseCapabilityRequest getDatabaseCapabilityRequest =
+                new GetPlatformDatabaseCapabilityRequest(cloudCredential, cloudCredential, variant, region, filters);
+        eventBus.notify(getDatabaseCapabilityRequest.selector(), Event.wrap(getDatabaseCapabilityRequest));
+        try {
+            GetPlatformDatabaseCapabilityResult result = getDatabaseCapabilityRequest.await();
+            LOGGER.debug("Platform database capabilities result: {}", result);
+            if (result.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.debug("Failed to get database capabilities", result.getErrorDetails());
+                throw new GetCloudParameterException(getCauseMessages(result.getErrorDetails()), result.getErrorDetails());
+            }
+            return result.getPlatformDatabaseCapabilities();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting the database capabilities", e);
             throw new OperationException(e);
         }
     }

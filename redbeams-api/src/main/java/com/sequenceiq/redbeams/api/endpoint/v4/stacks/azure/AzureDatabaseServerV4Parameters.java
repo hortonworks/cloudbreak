@@ -37,6 +37,10 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
 
     private static final String STORAGE_AUTO_GROW = "storageAutoGrow";
 
+    private static final String STAND_BY_AVAILABILITY_ZONE = "standbyAvailabilityZone";
+
+    private static final String AVAILABILITY_ZONE = "availabilityZone";
+
     private static final String AZURE_DATABASE_TYPE = AzureDatabaseType.AZURE_DATABASE_TYPE_KEY;
 
     private static final String HIGH_AVAILABILITY = AzureHighAvailabiltyMode.AZURE_HA_MODE_KEY;
@@ -71,6 +75,12 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
 
     @ApiModelProperty(AzureDatabaseServerModelDescriptions.HIGH_AVAILABILITY)
     private AzureHighAvailabiltyMode highAvailabilityMode;
+
+    @ApiModelProperty(AzureDatabaseServerModelDescriptions.STANDBY_AVAILABILITY_ZONE)
+    private String standbyAvailabilityZone;
+
+    @ApiModelProperty(AzureDatabaseServerModelDescriptions.AVAILABILITY_ZONE)
+    private String availabilityZone;
 
     public Integer getBackupRetentionDays() {
         return backupRetentionDays;
@@ -144,6 +154,22 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
         this.highAvailabilityMode = highAvailabilityMode;
     }
 
+    public String getStandbyAvailabilityZone() {
+        return standbyAvailabilityZone;
+    }
+
+    public void setStandbyAvailabilityZone(String standbyAvailabilityZone) {
+        this.standbyAvailabilityZone = standbyAvailabilityZone;
+    }
+
+    public String getAvailabilityZone() {
+        return availabilityZone;
+    }
+
+    public void setAvailabilityZone(String availabilityZone) {
+        this.availabilityZone = availabilityZone;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
@@ -156,6 +182,8 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
         putIfValueNotNull(map, STORAGE_AUTO_GROW, storageAutoGrow);
         putIfValueNotNull(map, AZURE_DATABASE_TYPE, azureDatabaseType == null ? AzureDatabaseType.SINGLE_SERVER.name() : azureDatabaseType.name());
         putIfValueNotNull(map, HIGH_AVAILABILITY, highAvailabilityMode == null ? AzureHighAvailabiltyMode.DISABLED.name() : highAvailabilityMode.name());
+        putIfValueNotNull(map, STAND_BY_AVAILABILITY_ZONE, standbyAvailabilityZone);
+        putIfValueNotNull(map, AVAILABILITY_ZONE, availabilityZone);
         return map;
     }
 
@@ -177,6 +205,8 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
         storageAutoGrow = Boolean.valueOf(getParameterOrNull(parameters, STORAGE_AUTO_GROW));
         azureDatabaseType = AzureDatabaseType.safeValueOf(getParameterOrNull(parameters, AZURE_DATABASE_TYPE));
         highAvailabilityMode = AzureHighAvailabiltyMode.safeValueOf(getParameterOrNull(parameters, HIGH_AVAILABILITY));
+        standbyAvailabilityZone = getParameterOrNull(parameters, STAND_BY_AVAILABILITY_ZONE);
+        availabilityZone = getParameterOrNull(parameters, AVAILABILITY_ZONE);
     }
 
     @Override
@@ -191,6 +221,8 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
                 ", storageAutoGrow=" + storageAutoGrow +
                 ", azureDatabaseType=" + azureDatabaseType +
                 ", highAvailabilityMode=" + highAvailabilityMode +
+                ", availabilityZone=" + availabilityZone +
+                ", standbyAvailabilityZone=" + standbyAvailabilityZone +
                 "} " + super.toString();
     }
 }

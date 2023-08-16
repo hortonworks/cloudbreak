@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificates;
 import com.sequenceiq.cloudbreak.cloud.model.dns.CloudPrivateDnsZones;
@@ -163,6 +164,10 @@ public interface PlatformResources {
      * @throws NullPointerException if either argument is {@code null}
      */
     default CloudDatabaseServerSslCertificates databaseServerGeneralSslRootCertificates(CloudCredential cloudCredential, Region region) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    default PlatformDatabaseCapabilities databaseCapabilities(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 

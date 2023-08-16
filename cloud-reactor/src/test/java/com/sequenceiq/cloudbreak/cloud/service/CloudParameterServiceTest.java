@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -14,10 +15,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformDatabaseCapabilityRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformDatabaseCapabilityResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNoSqlTablesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNoSqlTablesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTable;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -53,5 +57,24 @@ class CloudParameterServiceTest {
                 "aws",
                 null);
         assertEquals(expected, noSqlTables);
+    }
+
+    @Test
+    void getDatabaseCapabilities() {
+        PlatformDatabaseCapabilities expected = new PlatformDatabaseCapabilities(new HashMap<>());
+        GetPlatformDatabaseCapabilityResult response = new GetPlatformDatabaseCapabilityResult(1L, expected);
+        doAnswer(invocation -> {
+            Event<GetPlatformDatabaseCapabilityRequest> ev = invocation.getArgument(1);
+            ev.getData().getResult().onNext(response);
+            return null;
+        }).when(eventBus).notify(anyString(), any(Event.class));
+        PlatformDatabaseCapabilities platformDatabaseCapabilities = underTest.getDatabaseCapabilities(
+                new ExtendedCloudCredential(
+                        new CloudCredential("id", "name", "acc"), "aws", "desc", "crn",
+                        "account", new ArrayList<>()),
+                "region",
+                "aws",
+                null);
+        assertEquals(expected, platformDatabaseCapabilities);
     }
 }
