@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobSe
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.job.SdxClusterJobAdapter;
+import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 
@@ -43,6 +44,9 @@ public class SdxDetachService {
 
     @Inject
     private StatusCheckerJobService jobService;
+
+    @Inject
+    private EnvironmentClientService environmentClientService;
 
     /**
      * Detaches the internal SDX cluster by assigning it a new "detached" name and CRN.
@@ -103,5 +107,9 @@ public class SdxDetachService {
         sdxStatusService.setStatusForDatalakeAndNotify(
                 DatalakeStatusEnum.STOPPED, "Datalake is detached.", detachedClusterID
         );
+    }
+
+    public boolean isCCMv1(SdxCluster cluster) {
+        return environmentClientService.getByCrn(cluster.getEnvCrn()).getTunnel().useCcmV1();
     }
 }

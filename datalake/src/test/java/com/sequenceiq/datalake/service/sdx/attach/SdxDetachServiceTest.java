@@ -23,10 +23,13 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 
 public class SdxDetachServiceTest {
@@ -70,6 +73,9 @@ public class SdxDetachServiceTest {
 
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
+    @Mock
+    private EnvironmentClientService environmentClientService;
 
     @InjectMocks
     private SdxAttachDetachUtils mockSdxAttachDetachUtils = spy(SdxAttachDetachUtils.class);
@@ -176,5 +182,17 @@ public class SdxDetachServiceTest {
         verify(mockSdxStatusService).setStatusForDatalakeAndNotify(
                 eq(DatalakeStatusEnum.STOPPED), eq("Datalake is detached."), eq(TEST_CLUSTER_ID)
         );
+    }
+
+    @Test
+    void testIsCCMv1() {
+        DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
+
+        for (Tunnel tunnel : Tunnel.values()) {
+            env.setTunnel(tunnel);
+            when(environmentClientService.getByCrn(eq(TEST_CLUSTER_ENV_CRN))).thenReturn(env);
+
+            assertEquals(sdxDetachService.isCCMv1(testCluster), tunnel.equals(Tunnel.CCM));
+        }
     }
 }

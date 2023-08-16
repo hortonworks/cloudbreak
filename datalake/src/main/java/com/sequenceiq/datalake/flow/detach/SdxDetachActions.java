@@ -33,7 +33,6 @@ import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.detach.event.SdxDetachFailedEvent;
 import com.sequenceiq.datalake.flow.detach.event.SdxStartDetachEvent;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
-import com.sequenceiq.datalake.service.sdx.CloudbreakStackService;
 import com.sequenceiq.datalake.service.sdx.attach.SdxAttachService;
 import com.sequenceiq.datalake.service.sdx.attach.SdxDetachService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -59,9 +58,6 @@ public class SdxDetachActions {
 
     @Inject
     private EventSenderService eventSenderService;
-
-    @Inject
-    private CloudbreakStackService cloudbreakStackService;
 
     @Bean(name = "SDX_DETACH_CLUSTER_STATE")
     public Action<?, ?> sdxDetachCluster() {
@@ -94,13 +90,13 @@ public class SdxDetachActions {
         return new AbstractSdxAction<>(SdxEvent.class) {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
+                SdxCluster detached = (SdxCluster) variables.get(DETACHED_SDX);
                 sdxDetachService.detachStack(
-                        (SdxCluster) variables.get(DETACHED_SDX),
+                        detached,
                         ((SdxCluster) variables.get(RESIZED_SDX)).getClusterName()
                 );
 
-                SdxCluster detached = (SdxCluster) variables.get(DETACHED_SDX);
-                if (cloudbreakStackService.getStack(detached).getTunnel().useCcmV1()) {
+                if (sdxDetachService.isCCMv1(detached)) {
                     sendEvent(context, SDX_DETACH_STACK_SUCCESS_WITH_CCMV1_EVENT.event(), payload);
                 } else if (detached.hasExternalDatabase()) {
                     sendEvent(context, SDX_DETACH_STACK_SUCCESS_WITH_EXTERNAL_DB_EVENT.event(), payload);
@@ -227,7 +223,7 @@ public class SdxDetachActions {
                     String detachedCrn = detached.getCrn();
                     SdxCluster reattached = sdxAttachService.reattachCluster(detached);
                     sdxAttachService.reattachStack(reattached, detachedName);
-                    if (cloudbreakStackService.getStack(detached).getTunnel().useCcmV1()) {
+                    if (sdxDetachService.isCCMv1(detached)) {
                         sdxAttachService.reRegisterClusterProxyConfig(reattached, true, detachedCrn);
                     }
 
