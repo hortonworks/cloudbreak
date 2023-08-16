@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.Recommendat
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
@@ -260,6 +261,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return getAllAvailableInWorkspace(workspace);
     }
 
+    @Measure(BlueprintService.class)
     public Set<BlueprintView> getAllAvailableViewInWorkspaceAndFilterBySdxReady(Long workspaceId, Boolean withSdx) {
         User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
@@ -274,6 +276,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                 .filter(it -> !blueprintListFilters.isDatalakeBlueprint(it)).collect(Collectors.toSet());
     }
 
+    @Measure(BlueprintService.class)
     public Set<Blueprint> getAllAvailableInWorkspace(Workspace workspace) {
         updateDefaultBlueprintCollection(workspace);
         return getAllAvailableInWorkspaceWithoutUpdate(workspace);
@@ -283,6 +286,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return blueprintRepository.findAllByNotDeletedInWorkspace(workspace.getId());
     }
 
+    @Measure(BlueprintService.class)
     public Blueprint getByNameForWorkspaceAndLoadDefaultsIfNecessary(String name, Workspace workspace) {
         Optional<Blueprint> blueprint = blueprintRepository.findByNameAndWorkspaceId(name, workspace.getId());
         if (blueprint.isPresent()) {
@@ -297,6 +301,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         throw new NotFoundException(String.format("No cluster template found with name '%s'", name));
     }
 
+    @Measure(BlueprintService.class)
     public void updateDefaultBlueprintCollection(Long workspaceId) {
         User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
