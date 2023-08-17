@@ -523,6 +523,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         ownerAssignmentService.assignResourceOwnerRoleIfEntitled(userCrn, resourceCrn);
 
         SdxCluster savedSdxCluster;
+        validateAndGetEnvironment(sdxClusterRequest.getEnvironment());
         try {
             savedSdxCluster = transactionService.required(() -> {
                 SdxCluster created = save(sdxCluster);
