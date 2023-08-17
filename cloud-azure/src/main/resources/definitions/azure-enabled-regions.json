@@ -176,6 +176,12 @@
       "name": "Norway East",
       "latitude": "59.913868",
       "longitude": "10.752245"
+    },
+    {
+      "name": "Qatar Central",
+      "latitude": "25.286106",
+      "longitude": "51.534817",
+      "entitlements": [ "CDP_AZURE_DATABASE_FLEXIBLE_SERVER" ]
     }
   ]
 }
