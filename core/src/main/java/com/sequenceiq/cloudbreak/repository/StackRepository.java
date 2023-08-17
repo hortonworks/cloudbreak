@@ -427,6 +427,14 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             "AND ss.status not in (:notInStatuses)")
     List<JobResource> getJobResourcesNotIn(@Param("notInStatuses") Set<Status> notInStatuses);
 
+    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name, s.cloudPlatform as provider " +
+            "FROM Stack s " +
+            "LEFT JOIN s.stackStatus ss " +
+            "WHERE s.terminated = null " +
+            "AND s.type = 'WORKLOAD' " +
+            "AND ss.status not in (:notInStatuses)")
+    List<JobResource> getDatahubJobResourcesNotIn(@Param("notInStatuses") Set<Status> notInStatuses);
+
     @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name " +
             "FROM Stack s " +
             "WHERE s.terminated = null " +

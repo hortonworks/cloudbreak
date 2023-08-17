@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.handler.orchestration;
 
-import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ClusterStatus;
+import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ClusterStatus.Value.DELETED;
 
 import javax.inject.Inject;
 
@@ -42,8 +42,9 @@ public class ClusterTerminationHandler implements EventHandler<ClusterTerminatio
         ClusterTerminationRequest request = event.getData();
         ClusterTerminationResult result;
         try {
-            StackDto stack = stackDtoService.getById(request.getStackId());
-            meteringService.sendMeteringStatusChangeEventForStack(stack, ClusterStatus.Value.DELETED);
+            StackDto stack = stackDtoService.getByIdWithoutResources(request.getStackId());
+            meteringService.sendMeteringStatusChangeEventForStack(stack, DELETED);
+            meteringService.unscheduleSync(request.getStackId());
             result = new ClusterTerminationResult(request);
         } catch (RuntimeException e) {
             LOGGER.warn("Failed to delete cluster containers", e);

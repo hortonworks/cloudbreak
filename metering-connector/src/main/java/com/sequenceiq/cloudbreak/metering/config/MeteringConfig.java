@@ -1,34 +1,55 @@
 package com.sequenceiq.cloudbreak.metering.config;
 
-import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
-
-import io.grpc.ManagedChannelBuilder;
-
-@Configuration
+@Component
+@ConfigurationProperties("meteringingestion")
 public class MeteringConfig {
 
-    @Value("${meteringingestion.host:localhost}")
-    private String endpoint;
+    private static final String DEFAULT_HOST = "localhost";
 
-    @Value("${meteringingestion.port:8982}")
-    private int port;
+    private static final int DEFAULT_PORT = 8982;
 
-    @Bean
-    public ManagedChannelWrapper meteringManagedChannelWrapper() {
-        return newManagedChannelWrapper(endpoint, port);
+    private static final int DEFAULT_INTERVAL_IN_SECONDS = 600;
+
+    private String host = DEFAULT_HOST;
+
+    private int port = DEFAULT_PORT;
+
+    private boolean enabled;
+
+    private int intervalInSeconds = DEFAULT_INTERVAL_IN_SECONDS;
+
+    public String getHost() {
+        return host;
     }
 
-    public static ManagedChannelWrapper newManagedChannelWrapper(String endpoint, int port) {
-        return new ManagedChannelWrapper(
-                ManagedChannelBuilder.forAddress(endpoint, port)
-                        .usePlaintext()
-                        .maxInboundMessageSize(DEFAULT_MAX_MESSAGE_SIZE)
-                        .build());
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public int getIntervalInSeconds() {
+        return intervalInSeconds;
+    }
+
+    public void setIntervalInSeconds(int intervalInSeconds) {
+        this.intervalInSeconds = intervalInSeconds;
     }
 }

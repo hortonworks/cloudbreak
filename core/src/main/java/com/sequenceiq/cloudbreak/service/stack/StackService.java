@@ -1028,6 +1028,10 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return stackRepository.getJobResourcesNotIn(statusesNotIn);
     }
 
+    public List<JobResource> getAllAliveDatahubs(Set<Status> statusesNotIn) {
+        return stackRepository.getDatahubJobResourcesNotIn(statusesNotIn);
+    }
+
     public JobResource getJobResource(Long resourceId) {
         return stackRepository.getJobResource(resourceId).orElseThrow(notFound("Stack", resourceId));
     }

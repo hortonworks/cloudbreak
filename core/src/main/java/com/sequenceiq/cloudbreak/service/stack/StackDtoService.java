@@ -117,6 +117,10 @@ public class StackDtoService {
         return getById(id, true);
     }
 
+    public StackDto getByIdWithoutResources(Long id) {
+        return getById(id, false);
+    }
+
     public StackDto getById(Long id, boolean fetchResources) {
         StackView stackView = stackDtoRepository.findById(id).orElseThrow(NotFoundException.notFound("Stack", id));
         return getStackProxy(stackView, fetchResources);
