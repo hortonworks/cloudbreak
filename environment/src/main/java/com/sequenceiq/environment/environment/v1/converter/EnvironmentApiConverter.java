@@ -36,9 +36,11 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEn
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureDatabaseParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.DatabaseSetup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
@@ -59,6 +61,7 @@ import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureDatabaseParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
@@ -257,6 +260,12 @@ public class EnvironmentApiConverter {
                                 .map(this::azureResourceGroupToAzureResourceGroupDto)
                                 .orElse(buildDefaultResourceGroupDto())
                 )
+                .withAzureDatabaseParametersDto(
+                        Optional.ofNullable(azureEnvironmentParameters)
+                                .map(AzureEnvironmentParameters::getAzureDatabaseParameters)
+                                .map(this::azureDatabaseParamsToAzureDatabaseParametersDto)
+                                .orElse(null)
+                )
                 .withAzureResourceEncryptionParametersDto(
                         Optional.ofNullable(azureEnvironmentParameters)
                                 .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
@@ -308,18 +317,30 @@ public class EnvironmentApiConverter {
                 .build();
     }
 
+    private AzureDatabaseParametersDto azureDatabaseParamsToAzureDatabaseParametersDto(AzureDatabaseParameters azureDatabaseParameters) {
+        return AzureDatabaseParametersDto.builder()
+                .withDatabaseSetup(convertDatabaseSetup(azureDatabaseParameters.getDatabaseSetup()))
+                .build();
+    }
+
     private ResourceGroupUsagePattern resourceGroupUsageToResourceGroupUsagePattern(ResourceGroupUsage resourceGroupUsage) {
         if (Objects.nonNull(resourceGroupUsage)) {
-            switch (resourceGroupUsage) {
-                case SINGLE:
-                    return ResourceGroupUsagePattern.USE_SINGLE;
-                case MULTIPLE:
-                    return ResourceGroupUsagePattern.USE_MULTIPLE;
-                case SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT:
-                    return ResourceGroupUsagePattern.USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT;
-                default:
-                    throw new RuntimeException("Unknown usage pattern: %s" + resourceGroupUsage);
-            }
+            return switch (resourceGroupUsage) {
+                case SINGLE -> ResourceGroupUsagePattern.USE_SINGLE;
+                case MULTIPLE -> ResourceGroupUsagePattern.USE_MULTIPLE;
+                case SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT -> ResourceGroupUsagePattern.USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT;
+            };
+        } else {
+            return null;
+        }
+    }
+
+    private com.sequenceiq.environment.parameter.dto.DatabaseSetup convertDatabaseSetup(DatabaseSetup databaseSetup) {
+        if (Objects.nonNull(databaseSetup)) {
+            return switch (databaseSetup) {
+                case PRIVATE -> com.sequenceiq.environment.parameter.dto.DatabaseSetup.PRIVATE;
+                case PUBLIC ->  com.sequenceiq.environment.parameter.dto.DatabaseSetup.PUBLIC;
+            };
         } else {
             return null;
         }

@@ -9,15 +9,16 @@ import java.util.Optional;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureDatabaseParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.DatabaseSetup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
@@ -41,6 +42,7 @@ import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureDatabaseParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
@@ -244,17 +246,23 @@ public class EnvironmentResponseConverter {
     }
 
     private AzureEnvironmentParameters azureEnvParamsToAzureEnvironmentParams(ParametersDto parameters) {
-        AzureResourceGroupDto resourceGroupDto = Optional.ofNullable(parameters.getAzureParametersDto())
+        AzureParametersDto azureParametersDto = parameters.getAzureParametersDto();
+        AzureResourceGroupDto resourceGroupDto = Optional.ofNullable(azureParametersDto)
                 .map(AzureParametersDto::getAzureResourceGroupDto)
                 .filter(rgDto -> Objects.nonNull(rgDto.getResourceGroupUsagePattern()))
                 .filter(rgDto -> Objects.nonNull(rgDto.getResourceGroupCreation()))
                 .orElse(null);
-        AzureResourceEncryptionParametersDto resourceEncryptionParametersDto = Optional.ofNullable(parameters.getAzureParametersDto())
+        AzureResourceEncryptionParametersDto resourceEncryptionParametersDto = Optional.ofNullable(azureParametersDto)
                 .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
                 .orElse(null);
+        AzureDatabaseParametersDto azureDatabaseParametersDto = Optional.ofNullable(azureParametersDto)
+                .map(AzureParametersDto::getAzureDatabaseParametersDto)
+                .orElse(null);
+
         return AzureEnvironmentParameters.builder()
                 .withAzureResourceGroup(getIfNotNull(resourceGroupDto, this::azureParametersToAzureResourceGroup))
                 .withResourceEncryptionParameters(getIfNotNull(resourceEncryptionParametersDto, this::azureParametersToAzureResourceEncryptionParameters))
+                .withAzureDatabaseParameters(getIfNotNull(azureDatabaseParametersDto, this::azureParametersToAzureDatabaseParameters))
                 .build();
     }
 
@@ -296,6 +304,11 @@ public class EnvironmentResponseConverter {
                 .build();
     }
 
+    private AzureDatabaseParameters azureParametersToAzureDatabaseParameters(AzureDatabaseParametersDto azureDatabaseParametersDto) {
+        return AzureDatabaseParameters.builder()
+                .withDatabaseSetup(convertDatabaseSetup(azureDatabaseParametersDto.getDatabaseSetup())).build();
+    }
+
     private AzureResourceEncryptionParameters azureParametersToAzureResourceEncryptionParameters(
             AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto) {
         return AzureResourceEncryptionParameters.builder()
@@ -313,16 +326,21 @@ public class EnvironmentResponseConverter {
     }
 
     private ResourceGroupUsage resourceGroupUsagePatternToResourceGroupUsage(ResourceGroupUsagePattern resourceGroupUsagePattern) {
-        switch (resourceGroupUsagePattern) {
-            case USE_SINGLE:
-                return ResourceGroupUsage.SINGLE;
-            case USE_MULTIPLE:
-                return ResourceGroupUsage.MULTIPLE;
-            case USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT:
-                return ResourceGroupUsage.SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT;
-            default:
-                throw new BadRequestException("Unknown resource group usage pattern: %s" + resourceGroupUsagePattern);
+        return switch (resourceGroupUsagePattern) {
+            case USE_SINGLE -> ResourceGroupUsage.SINGLE;
+            case USE_MULTIPLE -> ResourceGroupUsage.MULTIPLE;
+            case USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT -> ResourceGroupUsage.SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT;
+        };
+    }
+
+    private DatabaseSetup convertDatabaseSetup(com.sequenceiq.environment.parameter.dto.DatabaseSetup databaseSetup) {
+        if (Objects.isNull(databaseSetup)) {
+            return null;
         }
+        return switch (databaseSetup) {
+            case PRIVATE -> DatabaseSetup.PRIVATE;
+            case PUBLIC ->  DatabaseSetup.PUBLIC;
+        };
     }
 
     private EnvironmentDeletionType deletionType(com.sequenceiq.environment.environment.EnvironmentDeletionType deletionType) {
@@ -330,16 +348,11 @@ public class EnvironmentResponseConverter {
             LOGGER.debug("Environment deletion type is not filled, falling back to NONE");
             return  EnvironmentDeletionType.NONE;
         }
-        switch (deletionType) {
-            case NONE:
-                return EnvironmentDeletionType.NONE;
-            case SIMPLE:
-                return EnvironmentDeletionType.SIMPLE;
-            case FORCE:
-                return EnvironmentDeletionType.FORCE;
-            default:
-                throw new BadRequestException("Unknown deletion type: %s" + deletionType);
-        }
+        return switch (deletionType) {
+            case NONE -> EnvironmentDeletionType.NONE;
+            case SIMPLE -> EnvironmentDeletionType.SIMPLE;
+            case FORCE -> EnvironmentDeletionType.FORCE;
+        };
     }
 
     private TagResponse environmentTagsToTagResponse(EnvironmentTags tags) {

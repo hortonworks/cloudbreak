@@ -3,6 +3,7 @@ package com.sequenceiq.common.model;
 import org.apache.commons.lang3.StringUtils;
 
 public enum AzureDatabaseType implements DatabaseType {
+
     SINGLE_SERVER("single"),
 
     FLEXIBLE_SERVER("flexible");
