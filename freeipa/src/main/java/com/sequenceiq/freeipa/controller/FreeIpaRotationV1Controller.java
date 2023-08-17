@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.controller;
 
-import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ROTATE_ENV_SECRETS;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ROTATE_FREEIPA_SECRETS;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 
 import javax.inject.Inject;
@@ -44,7 +44,7 @@ public class FreeIpaRotationV1Controller implements FreeIpaRotationV1Endpoint {
     private MultiClusterRotationService multiClusterRotationService;
 
     @Override
-    @CheckPermissionByResourceCrn(action = ROTATE_ENV_SECRETS)
+    @CheckPermissionByResourceCrn(action = ROTATE_FREEIPA_SECRETS)
     public FlowIdentifier rotateSecretsByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn,
             @Valid @NotNull FreeIpaSecretRotationRequest request) {
@@ -54,7 +54,7 @@ public class FreeIpaRotationV1Controller implements FreeIpaRotationV1Endpoint {
 
     @Deprecated
     @Override
-    @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_ENV_SECRETS)
+    @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_FREEIPA_SECRETS)
     public FlowIdentifier rotateMultiSecretsByCrn(@Valid @NotNull @RequestObject FreeIpaMultiSecretRotationRequest request,
             @InitiatorUserCrn String initiatorUserCrn) {
         throw new NotImplementedException("Deprecated Rotation API!");
