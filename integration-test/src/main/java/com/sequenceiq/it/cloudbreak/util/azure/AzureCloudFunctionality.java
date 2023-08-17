@@ -161,4 +161,9 @@ public class AzureCloudFunctionality implements CloudFunctionality {
         LOGGER.warn("CloudFormation is only available at AWS. So validation on AZURE is not possible!");
         Log.then(LOGGER, "CloudFormation is only available at AWS. So validation on AZURE is not possible! ");
         return true;    }
+
+    @Override
+    public Map<String, Set<String>> listAvailabilityZonesForVms(String clusterName, List<String> instanceIds) {
+        return azureClientActions.listAvailabilityZonesForVms(clusterName, instanceIds);
+    }
 }

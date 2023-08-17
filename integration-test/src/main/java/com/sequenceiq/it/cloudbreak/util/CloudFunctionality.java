@@ -163,4 +163,12 @@ public interface CloudFunctionality {
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
     )
     Boolean isFreeipaCfStackExistForEnvironment(String environmentCrn);
+
+    @Retryable(
+            maxAttempts = ATTEMPTS,
+            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
+    )
+    default Map<String, Set<String>> listAvailabilityZonesForVms(String clusterName, List<String> instanceIds) {
+        return Map.of();
+    }
 }

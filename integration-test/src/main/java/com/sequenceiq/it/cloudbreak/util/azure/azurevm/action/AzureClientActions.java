@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -24,6 +25,7 @@ import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.models.PowerState;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.azure.resourcemanager.compute.models.VirtualMachineDataDisk;
+import com.azure.resourcemanager.resources.fluentcore.arm.AvailabilityZoneId;
 import com.azure.resourcemanager.resources.fluentcore.arm.models.HasId;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
@@ -230,6 +232,22 @@ public class AzureClientActions {
                     "Please set a valid Azure resource group name at 'integrationtest.azure.resourcegroup.name' variable in the 'application.yml'" +
                     " or as environment variable!");
         }
+    }
+
+    public Map<String, Set<String>> listAvailabilityZonesForVms(String clusterName, List<String> instanceIds) {
+        Map<String, Set<String>> availabilityZoneForVms = new HashMap<>();
+        if (!instanceIds.isEmpty()) {
+            String resourceGroup = getResourceGroupName(clusterName, instanceIds.get(0));
+            List<VirtualMachine> virtualMachines = getVmList(instanceIds, resourceGroup);
+            availabilityZoneForVms = virtualMachines.stream().collect(Collectors.toMap(VirtualMachine::name,
+                    vm -> vm.availabilityZones().stream().
+                    map(AvailabilityZoneId::toString).collect(Collectors.toSet())));
+            LOGGER.info("Availability zones for Vms are {}", availabilityZoneForVms);
+            LOGGER.info("Fetching availability zones for instances finished successfully");
+        } else {
+            LOGGER.info("Instance id list is empty for {} ", clusterName);
+        }
+        return availabilityZoneForVms;
     }
 
     public void deleteResourceGroup(String resourceGroupName) {
