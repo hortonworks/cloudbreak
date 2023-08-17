@@ -208,13 +208,11 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         String resourceCrn = createCRN(accountId);
         imageCatalog.setResourceCrn(resourceCrn);
         imageCatalog.setCreator(creator);
+        ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creator, resourceCrn);
         try {
-            return transactionService.required(() -> {
-                ImageCatalog created = super.createForLoggedInUser(imageCatalog, workspaceId);
-                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creator, resourceCrn, accountId);
-                return created;
-            });
+            return transactionService.required(() -> super.createForLoggedInUser(imageCatalog, workspaceId));
         } catch (TransactionExecutionException e) {
+            ownerAssignmentService.notifyResourceDeleted(resourceCrn);
             throw new TransactionRuntimeExecutionException(e);
         }
     }

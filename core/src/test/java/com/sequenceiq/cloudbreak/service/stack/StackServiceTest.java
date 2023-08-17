@@ -42,7 +42,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -125,9 +124,6 @@ class StackServiceTest {
     private static final LocalDateTime MOCK_NOW = LocalDateTime.of(1969, 4, 1, 4, 20);
 
     private static final String PUBLIC_KEY = "ssh-rsa foobar";
-
-    @Captor
-    public final ArgumentCaptor<String> crnCaptor = ArgumentCaptor.forClass(String.class);
 
     @InjectMocks
     private StackService underTest;
@@ -269,7 +265,7 @@ class StackServiceTest {
                 .when(imageService)
                 .create(eq(stack), nullable(StatedImage.class));
 
-        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, Optional.empty())))
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace)))
                 .hasCause(imageNotFound);
         verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
     }
@@ -295,7 +291,7 @@ class StackServiceTest {
         when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion, CloudPlatform.MOCK, false))
                 .thenReturn(calculatedDbVersion);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, Optional.empty()));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
 
         verify(stack).setStackVersion(stackVersion);
         verify(stackRepository, times(2)).save(stack);
@@ -319,7 +315,7 @@ class StackServiceTest {
         when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(null, os, dbVersion, CloudPlatform.MOCK, false))
                 .thenReturn(calculatedDbVersion);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, Optional.empty()));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
 
         verify(stack, never()).setStackVersion(any());
         verify(stackRepository, times(2)).save(stack);
@@ -337,13 +333,9 @@ class StackServiceTest {
 
         try {
             stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                    () -> underTest.create(stack, statedImage, user, workspace, Optional.empty()));
+                    () -> underTest.create(stack, statedImage, user, workspace));
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
-            verify(stack).setResourceCrn(crnCaptor.capture());
-            String resourceCrn = crnCaptor.getValue();
-            assertTrue(resourceCrn.matches("crn:cdp:datahub:us-west-1:1234:cluster:.*"));
-
             verify(stackUpdater, times(0)).updateStackStatus(eq(Long.MAX_VALUE), eq(DetailedStackStatus.PROVISION_FAILED), anyString());
         }
     }
@@ -360,7 +352,7 @@ class StackServiceTest {
         when(stack.getDatabase()).thenReturn(database);
 
         stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.create(stack, statedImage, user, workspace, Optional.empty()));
+                () -> underTest.create(stack, statedImage, user, workspace));
 
         verify(connector, never()).checkAndGetPlatformVariant(any(Stack.class));
         verify(stack, never()).setPlatformVariant(anyString());
@@ -386,7 +378,7 @@ class StackServiceTest {
         when(stack.getDatabase()).thenReturn(database);
 
         stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.create(stack, statedImage, user, workspace, Optional.empty()));
+                () -> underTest.create(stack, statedImage, user, workspace));
 
         verify(connector, never()).checkAndGetPlatformVariant(any(Stack.class));
         verify(stack, never()).setPlatformVariant(anyString());

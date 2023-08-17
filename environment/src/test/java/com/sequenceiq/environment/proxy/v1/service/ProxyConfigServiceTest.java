@@ -67,7 +67,7 @@ public class ProxyConfigServiceTest {
 
     @BeforeEach
     public void setUp() throws TransactionService.TransactionExecutionException {
-        lenient().doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(any(), any(), anyString());
+        lenient().doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(any(), any());
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
     }
 

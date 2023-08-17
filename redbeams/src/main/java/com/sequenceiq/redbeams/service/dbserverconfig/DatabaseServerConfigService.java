@@ -113,23 +113,20 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
                     resource.getConnectionDriver());
         }
 
+        if (resource.getResourceCrn() == null) {
+            Crn crn = crnService.createCrn(resource);
+            resource.setResourceCrn(crn);
+            resource.setAccountId(crn.getAccountId());
+        }
+
         try {
             MDCBuilder.buildMdcContext(resource);
-            // prepareCreation(resource);
             resource.setCreationDate(clock.getCurrentTimeMillis());
-            if (resource.getResourceCrn() == null) {
-                Crn crn = crnService.createCrn(resource);
-                resource.setResourceCrn(crn);
-                resource.setAccountId(crn.getAccountId());
-            }
             resource.setWorkspaceId(workspaceId);
-            return transactionService.required(() -> {
-                DatabaseServerConfig saved = repository.save(resource);
-                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(),
-                        saved.getResourceCrn().toString(), ThreadBasedUserCrnProvider.getAccountId());
-                return saved;
-            });
+            ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(), resource.getResourceCrn().toString());
+            return transactionService.required(() -> repository.save(resource));
         } catch (TransactionService.TransactionExecutionException e) {
+            ownerAssignmentService.notifyResourceDeleted(resource.getResourceCrn().toString());
             LOGGER.error("Error happened during database server creation: ", e);
             throw new InternalServerErrorException(e);
         }

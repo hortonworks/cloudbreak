@@ -33,7 +33,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
@@ -68,9 +67,6 @@ class EnvironmentServiceTest {
 
     @Mock
     private GrpcUmsClient grpcUmsClient;
-
-    @Mock
-    private OwnerAssignmentService ownerAssignmentService;
 
     @Mock
     private RoleCrnGenerator roleCrnGenerator;

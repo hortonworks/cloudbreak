@@ -3,13 +3,13 @@ package com.sequenceiq.cloudbreak.service.template;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.FeatureState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -75,12 +76,16 @@ class ClusterTemplateServiceCreationValidationTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private OwnerAssignmentService ownerAssignmentService;
+
     @InjectMocks
     private ClusterTemplateService underTest;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
+        doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(any(), any());
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
         try {
             when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> {
@@ -104,9 +109,9 @@ class ClusterTemplateServiceCreationValidationTest {
         when(internalClusterTemplateValidator
                 .isInternalTemplateInNotInternalTenant(anyBoolean(), any(FeatureState.class))).thenReturn(true);
 
-        Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
-                WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID));
-        Assert.assertEquals("Datahub template in cluster definition should contain a – valid – cluster request!", e.getMessage());
+        Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
+                WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID),
+                "Datahub template in cluster definition should contain a – valid – cluster request!");
     }
 
     @Test
@@ -126,9 +131,9 @@ class ClusterTemplateServiceCreationValidationTest {
         when(internalClusterTemplateValidator
                 .isInternalTemplateInNotInternalTenant(anyBoolean(), any(FeatureState.class))).thenReturn(true);
 
-        Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
-                WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID));
-        Assert.assertEquals("The Datahub template in the cluster definition must exist!", e.getMessage());
+        Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
+                WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID),
+                "The Datahub template in the cluster definition must exist!");
     }
 
     @Test
@@ -150,9 +155,9 @@ class ClusterTemplateServiceCreationValidationTest {
         when(internalClusterTemplateValidator
                 .isInternalTemplateInNotInternalTenant(anyBoolean(), any(FeatureState.class))).thenReturn(true);
 
-        Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
-                WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID));
-        Assert.assertEquals("Cluster definition should contain a Datahub template!", e.getMessage());
+        Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
+                WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID),
+                "Cluster definition should contain a Datahub template!");
     }
 
 }

@@ -145,7 +145,7 @@ public class SdxAttachService {
     public SdxCluster saveSdxAndAssignResourceOwnerRole(SdxCluster cluster, String userCrn) {
         SdxCluster created = sdxService.save(cluster);
         try {
-            ownerAssignmentService.assignResourceOwnerRoleIfEntitled(userCrn, created.getCrn(), created.getAccountId());
+            ownerAssignmentService.assignResourceOwnerRoleIfEntitled(userCrn, created.getCrn());
             return created;
         } catch (Exception e) {
             LOGGER.error("Failed to assign resource owner role to new SDX with CRN '" + created.getCrn() +

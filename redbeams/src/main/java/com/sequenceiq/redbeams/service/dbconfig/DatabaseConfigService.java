@@ -99,21 +99,17 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
             }
         }
 
+        Crn crn = crnService.createCrn(configToSave);
         try {
             MDCBuilder.buildMdcContext(configToSave);
-            // prepareCreation(configToSave);
             configToSave.setCreationDate(clock.getCurrentTimeMillis());
-            Crn crn = crnService.createCrn(configToSave);
             configToSave.setResourceCrn(crn);
             configToSave.setAccountId(crn.getAccountId());
-            return transactionService.required(() -> {
-                DatabaseConfig saved = repository.save(configToSave);
-                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(),
-                        saved.getResourceCrn().toString(), ThreadBasedUserCrnProvider.getAccountId());
-                return saved;
-            });
+            ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(), crn.toString());
+            return transactionService.required(() -> repository.save(configToSave));
         } catch (TransactionService.TransactionExecutionException e) {
             LOGGER.error("Error happened during database config registration: ", e);
+            ownerAssignmentService.notifyResourceDeleted(crn.toString());
             throw new InternalServerErrorException(e);
         }
     }

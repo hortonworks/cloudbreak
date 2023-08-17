@@ -164,17 +164,18 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
             String message = String.format("%s already exists with name '%s'", recipe.getResourceName(), recipe.getName());
             throw new BadRequestException(message);
         }
-        recipe.setResourceCrn(createCRN(accountId));
+        String resourceCrn = createCRN(accountId);
+        recipe.setResourceCrn(resourceCrn);
         recipe.setCreator(creator);
+        ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(), resourceCrn);
         try {
             return transactionService.required(() -> {
                 Recipe created = super.createForLoggedInUser(recipe, workspaceId);
-                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(), created.getResourceCrn(),
-                        ThreadBasedUserCrnProvider.getAccountId());
-                recipeUsageService.sendCreatedUsageReport(created.getName(), created.getResourceCrn(), created.getRecipeTypeString());
+                recipeUsageService.sendCreatedUsageReport(created.getName(), resourceCrn, created.getRecipeTypeString());
                 return created;
             });
         } catch (TransactionService.TransactionExecutionException e) {
+            ownerAssignmentService.notifyResourceDeleted(resourceCrn);
             throw new TransactionService.TransactionRuntimeExecutionException(e);
         }
     }

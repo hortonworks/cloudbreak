@@ -150,7 +150,7 @@ public class DatabaseServerConfigServiceTest {
         server2.setName("myotherserver");
         server2.setResourceCrn(SERVER_2_CRN);
 
-        doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString(), anyString());
+        doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString());
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
     }
 

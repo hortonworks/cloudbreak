@@ -135,13 +135,11 @@ public class ProxyConfigService implements CompositeAuthResourcePropertyProvider
         proxyConfig.setResourceCrn(createCRN(accountId));
         proxyConfig.setCreator(creator);
         proxyConfig.setAccountId(accountId);
+        ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creator, proxyConfig.getResourceCrn());
         try {
-            return transactionService.required(() -> {
-                ProxyConfig created = proxyConfigRepository.save(proxyConfig);
-                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creator, proxyConfig.getResourceCrn(), accountId);
-                return created;
-            });
+            return transactionService.required(() -> proxyConfigRepository.save(proxyConfig));
         } catch (TransactionService.TransactionExecutionException e) {
+            ownerAssignmentService.notifyResourceDeleted(proxyConfig.getResourceCrn());
             throw e.getCause();
         }
     }

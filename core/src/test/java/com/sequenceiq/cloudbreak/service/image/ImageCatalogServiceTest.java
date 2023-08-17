@@ -798,7 +798,7 @@ public class ImageCatalogServiceTest {
         assertThat(imageCatalog.getCreator(), is("creator"));
         String crnPattern = "crn:cdp:datahub:us-west-1:account_id:imageCatalog:.*";
         assertTrue(imageCatalog.getResourceCrn().matches(crnPattern));
-        verify(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(eq("creator"), matches(crnPattern), eq("account_id"));
+        verify(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(eq("creator"), matches(crnPattern));
     }
 
     @Test

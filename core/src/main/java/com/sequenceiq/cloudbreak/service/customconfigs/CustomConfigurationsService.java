@@ -126,8 +126,7 @@ public class CustomConfigurationsService implements CompositeAuthResourcePropert
         customConfigurations.setAccount(accountId);
         Set<CustomConfigurationProperty> configurationProperties = new HashSet<>(customConfigurations.getConfigurations());
         configurationProperties.forEach(config -> config.setCustomConfigurations(customConfigurations));
-        ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(), customConfigurations.getCrn(),
-                    ThreadBasedUserCrnProvider.getAccountId());
+        ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(), customConfigurations.getCrn());
         customConfigurationPropertyRepository.saveAll(configurationProperties);
         return customConfigurations;
     }

@@ -511,20 +511,23 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         prepareDefaultSecurityConfigs(internalStackV4Request, stackRequest, cloudPlatform);
         prepareProviderSpecificParameters(stackRequest, sdxClusterRequest, cloudPlatform);
         updateStackV4RequestWithRecipes(sdxClusterRequest, stackRequest);
-        stackRequest.setResourceCrn(sdxCluster.getCrn());
+        String resourceCrn = sdxCluster.getCrn();
+        stackRequest.setResourceCrn(resourceCrn);
         sdxCluster.setStackRequest(stackRequest);
 
         MDCBuilder.buildMdcContext(sdxCluster);
+
+        ownerAssignmentService.assignResourceOwnerRoleIfEntitled(userCrn, resourceCrn);
 
         SdxCluster savedSdxCluster;
         try {
             savedSdxCluster = transactionService.required(() -> {
                 SdxCluster created = save(sdxCluster);
-                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(userCrn, created.getCrn(), created.getAccountId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REQUESTED, "Datalake requested", created);
                 return created;
             });
         } catch (TransactionExecutionException e) {
+            ownerAssignmentService.notifyResourceDeleted(resourceCrn);
             throw new TransactionRuntimeExecutionException(e);
         }
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxCreation(savedSdxCluster);

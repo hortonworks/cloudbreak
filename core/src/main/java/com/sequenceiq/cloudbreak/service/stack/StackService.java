@@ -46,11 +46,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.Databas
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.aspect.Measure;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
@@ -109,7 +106,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
-import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.environment.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService;
@@ -228,16 +224,10 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     private AccountTelemetryClientService accountTelemetryClientService;
 
     @Inject
-    private SdxClientService sdxClientService;
-
-    @Inject
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
 
     @Inject
     private TargetGroupPersistenceService targetGroupPersistenceService;
-
-    @Inject
-    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     @Inject
     private StackToStackV4ResponseConverter stackToStackV4ResponseConverter;
@@ -554,7 +544,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     }
 
     @Measure(StackService.class)
-    public Stack create(Stack stack, StatedImage imgFromCatalog, User user, Workspace workspace, Optional<String> externalCrn) {
+    public Stack create(Stack stack, StatedImage imgFromCatalog, User user, Workspace workspace) {
         if (stack.getGatewayPort() == null) {
             stack.setGatewayPort(nginxPort);
         }
@@ -578,16 +568,6 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
             orchestratorService.save(stack.getOrchestrator());
         }
         stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
-
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-
-        if (externalCrn.isPresent()) {
-            // it means it is a DL cluster, double check it in sdx service
-            sdxClientService.getByCrn(externalCrn.get());
-            stack.setResourceCrn(externalCrn.get());
-        } else {
-            stack.setResourceCrn(createCRN(accountId));
-        }
         setDefaultTags(stack);
 
         Stack savedStack = measure(() -> save(stack), LOGGER, "Stackrepository save took {} ms for stack {}", stackName);
@@ -931,10 +911,6 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
                 })
                 .collect(Collectors.toList());
         componentConfigProviderService.store(enrichedComponents);
-    }
-
-    private String createCRN(String accountId) {
-        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.DATAHUB, accountId);
     }
 
     public Optional<Duration> getTtlValueForStack(Long stackId) {

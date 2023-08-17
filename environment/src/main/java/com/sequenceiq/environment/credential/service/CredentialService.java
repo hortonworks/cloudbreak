@@ -226,15 +226,13 @@ public class CredentialService extends AbstractCredentialService implements Comp
         if (verifiedCredential.getVerificationStatusText() != null) {
             throw new BadRequestException(verifiedCredential.getVerificationStatusText());
         }
+        ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creatorUserCrn, credentialCrn);
         try {
-            Credential createdCredential = transactionService.required(() -> {
-                Credential created = repository.save(verifiedCredential);
-                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creatorUserCrn, credentialCrn, accountId);
-                return created;
-            });
+            Credential createdCredential = transactionService.required(() -> repository.save(verifiedCredential));
             sendCredentialNotification(createdCredential, ResourceEvent.CREDENTIAL_CREATED);
             return createdCredential;
         } catch (TransactionService.TransactionExecutionException e) {
+            ownerAssignmentService.notifyResourceDeleted(credentialCrn);
             LOGGER.error("Error happened during credential creation: ", e);
             throw new InternalServerErrorException(e);
         }

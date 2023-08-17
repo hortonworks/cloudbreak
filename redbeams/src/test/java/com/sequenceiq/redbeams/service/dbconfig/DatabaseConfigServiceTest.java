@@ -131,7 +131,7 @@ public class DatabaseConfigServiceTest {
         db.setId(1L);
         db.setName("mydb");
 
-        doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString(), anyString());
+        doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString());
         doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString());
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
     }

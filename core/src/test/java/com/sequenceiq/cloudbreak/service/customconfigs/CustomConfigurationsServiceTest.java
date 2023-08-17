@@ -113,7 +113,7 @@ class CustomConfigurationsServiceTest {
 
     @Test
     void testIfCustomConfigsAreBeingAddedCorrectly() throws TransactionService.TransactionExecutionException {
-        doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString(), anyString());
+        doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString());
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN_1, () -> underTest.create(customConfigurations, TEST_ACCOUNT_ID_1));

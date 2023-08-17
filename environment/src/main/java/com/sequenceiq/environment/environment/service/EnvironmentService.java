@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.InternalServerErrorException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -84,8 +83,6 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
 
     private final EnvironmentDtoConverter environmentDtoConverter;
 
-    private final OwnerAssignmentService ownerAssignmentService;
-
     private final GrpcUmsClient grpcUmsClient;
 
     private final TransactionService transactionService;
@@ -111,7 +108,6 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         this.environmentRepository = environmentRepository;
         this.platformParameterService = platformParameterService;
         this.environmentDtoConverter = environmentDtoConverter;
-        this.ownerAssignmentService = ownerAssignmentService;
         this.grpcUmsClient = grpcUmsClient;
         this.transactionService = transactionService;
         this.roleCrnGenerator = roleCrnGenerator;
@@ -122,19 +118,6 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     public Environment save(Environment environment) {
         LOGGER.debug("Saving environment '{}'.", environment);
         return environmentRepository.save(environment);
-    }
-
-    public Environment saveWithOwnerRoleAssignment(Environment environment) {
-        try {
-            return transactionService.required(() -> {
-                Environment saved = save(environment);
-                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(),
-                        saved.getResourceCrn(), ThreadBasedUserCrnProvider.getAccountId());
-                return saved;
-            });
-        } catch (TransactionService.TransactionExecutionException e) {
-            throw new InternalServerErrorException("Error happened during saving environment state and assigned owner role: ", e);
-        }
     }
 
     public EnvironmentDto getEnvironmentDto(Environment environment) {

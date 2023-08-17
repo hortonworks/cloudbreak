@@ -4,10 +4,13 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 
 import io.grpc.Status;
@@ -27,9 +30,10 @@ public class OwnerAssignmentService {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public void assignResourceOwnerRoleIfEntitled(String userCrn, String resourceCrn, String accountId) {
+    @Retryable(value = Exception.class, backoff = @Backoff(delay = 5000))
+    public void assignResourceOwnerRoleIfEntitled(String userCrn, String resourceCrn) {
         try {
-            umsClient.assignResourceRole(userCrn, resourceCrn, roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(accountId),
+            umsClient.assignResourceRole(userCrn, resourceCrn, roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(Crn.safeFromString(resourceCrn).getAccountId()),
                     regionAwareInternalCrnGeneratorFactory);
             LOGGER.debug("Owner role of {} is successfully assigned to the {} user", resourceCrn, userCrn);
         } catch (StatusRuntimeException ex) {

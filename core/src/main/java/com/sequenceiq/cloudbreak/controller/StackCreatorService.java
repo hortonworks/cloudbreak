@@ -42,6 +42,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
@@ -74,6 +76,7 @@ import com.sequenceiq.cloudbreak.service.JavaVersionValidator;
 import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -174,9 +177,16 @@ public class StackCreatorService {
     @Inject
     private JavaVersionValidator javaVersionValidator;
 
+    @Inject
+    private SdxClientService sdxClientService;
+
+    @Inject
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
         long start = System.currentTimeMillis();
         String stackName = stackRequest.getName();
+        String crn = getCrnForCreation(Optional.ofNullable(stackRequest.getResourceCrn()));
 
         nodeCountLimitValidator.validateProvision(stackRequest);
         measure(() ->
@@ -200,6 +210,10 @@ public class StackCreatorService {
         stackStub.setType(stackType);
         stackStub.setMultiAz(stackRequest.isEnableMultiAz());
         String platformString = stackStub.getCloudPlatform().toLowerCase();
+
+        measure(() -> assignOwnerRoleOnDataHub(stackType, crn),
+                LOGGER,
+                "assignOwnerRoleOnDataHub to stack took {} ms with name {}.", stackName);
 
         MDCBuilder.buildMdcContext(stackStub);
         Stack savedStack;
@@ -231,6 +245,7 @@ public class StackCreatorService {
                             LOGGER,
                             "Validate orchestrator took {} ms");
                 }
+                stack.setResourceCrn(crn);
                 stack.setUseCcm(environment.getTunnel().useCcm());
                 stack.setTunnel(environment.getTunnel());
                 if (stackRequest.getCluster() != null) {
@@ -255,7 +270,7 @@ public class StackCreatorService {
                 javaVersionValidator.validateImage(imgFromCatalog.getImage(), stackRequest.getJavaVersion(), ThreadBasedUserCrnProvider.getAccountId());
                 stackRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
                 Stack newStack = measure(() -> stackService.create(
-                            stack, imgFromCatalog, user, workspace, Optional.ofNullable(stackRequest.getResourceCrn())),
+                            stack, imgFromCatalog, user, workspace),
                             LOGGER,
                         "Save the remaining stack data took {} ms"
                         );
@@ -268,13 +283,10 @@ public class StackCreatorService {
                 } catch (CloudbreakImageCatalogException | IOException | TransactionExecutionException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
-
-                measure(() -> assignOwnerRoleOnDataHub(user, stackRequest, newStack),
-                        LOGGER,
-                        "assignOwnerRoleOnDataHub to stack took {} ms with name {}.", stackName);
                 return newStack;
             });
         } catch (TransactionExecutionException e) {
+            ownerAssignmentService.notifyResourceDeleted(crn);
             stackUnderOperationService.off();
             if (e.getCause() instanceof DataIntegrityViolationException) {
                 String msg = String.format("Error with resource [%s], error: [%s]", APIResourceType.STACK,
@@ -303,6 +315,21 @@ public class StackCreatorService {
         return response;
     }
 
+    private String getCrnForCreation(Optional<String> externalCrn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        if (externalCrn.isPresent()) {
+            // it means it is a DL cluster, double check it in sdx service
+            sdxClientService.getByCrn(externalCrn.get());
+            return externalCrn.get();
+        } else {
+            return createCRN(accountId);
+        }
+    }
+
+    private String createCRN(String accountId) {
+        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.DATAHUB, accountId);
+    }
+
     private Set<String> getHueHostGroups(String blueprintText) {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(blueprintText);
         return cmTemplateProcessor.getHostGroupsWithComponent(HueRoles.HUE_SERVER);
@@ -318,9 +345,9 @@ public class StackCreatorService {
         return stackType;
     }
 
-    private void assignOwnerRoleOnDataHub(User user, StackV4Request stackRequest, Stack newStack) {
-        if (StackType.WORKLOAD.equals(stackRequest.getType())) {
-            ownerAssignmentService.assignResourceOwnerRoleIfEntitled(user.getUserCrn(), newStack.getResourceCrn(), ThreadBasedUserCrnProvider.getAccountId());
+    private void assignOwnerRoleOnDataHub(StackType stackType, String resourceCrn) {
+        if (StackType.WORKLOAD.equals(stackType)) {
+            ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(), resourceCrn);
         }
     }
 

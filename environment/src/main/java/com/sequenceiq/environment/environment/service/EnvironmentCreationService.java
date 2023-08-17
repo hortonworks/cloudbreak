@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -63,6 +65,8 @@ public class EnvironmentCreationService {
 
     private final EnvironmentRecipeService recipeService;
 
+    private final OwnerAssignmentService ownerAssignmentService;
+
     @Value("${info.app.version}")
     private String environmentServiceVersion;
 
@@ -75,7 +79,8 @@ public class EnvironmentCreationService {
             AuthenticationDtoConverter authenticationDtoConverter,
             ParametersService parametersService,
             LoadBalancerEntitlementService loadBalancerEntitlementService,
-            EnvironmentRecipeService recipeService) {
+            EnvironmentRecipeService recipeService,
+            OwnerAssignmentService ownerAssignmentService) {
         this.environmentService = environmentService;
         validatorService = environmentValidatorService;
         this.environmentResourceService = environmentResourceService;
@@ -85,6 +90,7 @@ public class EnvironmentCreationService {
         this.parametersService = parametersService;
         this.loadBalancerEntitlementService = loadBalancerEntitlementService;
         this.recipeService = recipeService;
+        this.ownerAssignmentService = ownerAssignmentService;
     }
 
     public EnvironmentDto create(EnvironmentCreationDto creationDto) {
@@ -97,6 +103,8 @@ public class EnvironmentCreationService {
             throw new BadRequestException(String.format("Environment with name '%s' already exists in account '%s'.",
                     creationDto.getName(), creationDto.getAccountId()));
         }
+
+        ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(), creationDto.getCrn());
 
         Environment environment = initializeEnvironment(creationDto);
         initializeEnvironmentTunnel(environment);
@@ -117,7 +125,7 @@ public class EnvironmentCreationService {
                     getIfNotNull(creationDto.getNetwork(), NetworkDto::getSubnetMetas),
                     getIfNotNull(creationDto.getNetwork(), NetworkDto::getEndpointGatewaySubnetMetas));
             createAndSetParameters(environment, creationDto.getParameters());
-            environmentService.saveWithOwnerRoleAssignment(environment);
+            environmentService.save(environment);
             reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), creationDto.getCreator(), environment.getResourceCrn());
         } catch (Exception e) {
             environment.setStatus(EnvironmentStatus.CREATE_FAILED);

@@ -51,6 +51,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -110,6 +112,8 @@ public class StackCreatorServiceTest {
     private static final String YARN_PLATFORM = "YARN";
 
     private static final String ACCOUNT_ID = "accountId";
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:userName";
 
     @Mock
     private StackDecorator stackDecorator;
@@ -201,6 +205,9 @@ public class StackCreatorServiceTest {
     @Mock
     private MultiAzValidator multiAzValidator;
 
+    @Mock
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
     @BeforeEach
     void before() {
         underTestSpy = spy(new StackCreatorService());
@@ -222,9 +229,9 @@ public class StackCreatorServiceTest {
         doThrow(new NotFoundException("missing recipe"))
                 .when(recipeService).get(NameOrCrn.ofName(RECIPE_NAME), WORKSPACE_ID);
 
-        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, stackRequest, false));
-
-        assertThat(badRequestException).hasMessage("The given recipe does not exist for the instance group \"INSTANCE_GROUP\": RECIPE_NAME");
+        assertThrows(BadRequestException.class, () ->
+                        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, false)),
+                "The given recipe does not exist for the instance group \"INSTANCE_GROUP\": RECIPE_NAME");
     }
 
     @Test
@@ -243,9 +250,9 @@ public class StackCreatorServiceTest {
         when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.of(mock(StackView.class)));
 
-        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, stackRequest, false));
-
-        assertThat(badRequestException).hasMessage("Cluster already exists: STACK_NAME");
+        assertThrows(BadRequestException.class, () ->
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, false)),
+                "Cluster already exists: STACK_NAME");
 
         verify(recipeService).get(NameOrCrn.ofName(RECIPE_NAME), WORKSPACE_ID);
         verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);

@@ -173,13 +173,11 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
             throw new AccessDeniedException("You can not create Internal Template for an outsider organization");
         }
         resource.setResourceCrn(createCRN(accountId));
+        ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creator, resource.getResourceCrn());
         try {
-            return transactionService.required(() -> {
-                ClusterTemplate created = super.createForLoggedInUser(resource, workspaceId);
-                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creator, resource.getResourceCrn(), accountId);
-                return created;
-            });
+            return transactionService.required(() -> super.createForLoggedInUser(resource, workspaceId));
         } catch (TransactionExecutionException e) {
+            ownerAssignmentService.notifyResourceDeleted(resource.getResourceCrn());
             if (e.getCause() instanceof BadRequestException) {
                 throw e.getCause();
             }
