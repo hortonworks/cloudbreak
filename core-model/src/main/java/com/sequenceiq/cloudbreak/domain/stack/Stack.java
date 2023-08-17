@@ -851,6 +851,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return instanceGroups != null && !instanceGroups.isEmpty();
     }
 
+    @Override
     public Json getTags() {
         return tags;
     }

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.downscale;
 
+import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ClusterStatus.Value.SCALE_DOWN;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_9_0;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleEvent.FAILURE_EVENT;
 import static java.util.Collections.emptySet;
@@ -44,6 +45,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCand
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.StopCmServicesOnHostsRequest;
+import com.sequenceiq.cloudbreak.service.metering.MeteringService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
@@ -62,6 +64,9 @@ public class ClusterDownscaleActions {
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentProvider;
+
+    @Inject
+    private MeteringService meteringService;
 
     @Bean(name = "COLLECT_CANDIDATES_STATE")
     public Action<?, ?> collectCandidatesAction() {
@@ -133,6 +138,7 @@ public class ClusterDownscaleActions {
                 } else {
                     clusterDownscaleService.finalizeClusterScaleDown(context.getStackId(), payload.getHostGroups());
                 }
+                meteringService.sendMeteringStatusChangeEventForStack(context.getStackId(), SCALE_DOWN);
                 sendEvent(context);
             }
 

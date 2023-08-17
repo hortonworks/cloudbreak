@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartUpscaleCommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartUpscaleCommissionViaCMResult;
+import com.sequenceiq.cloudbreak.service.metering.MeteringService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -131,6 +132,9 @@ public class StopStartUpscaleActionsTest {
 
     @Mock
     private CloudbreakMetricService metricService;
+
+    @Mock
+    private MeteringService meteringService;
 
     @Test
     void testGetRecoveryCandidatesAction() throws Exception {

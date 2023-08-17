@@ -3,24 +3,38 @@ package com.sequenceiq.cloudbreak.converter;
 import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ClusterStatus;
 import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ServiceType.Value.DATAHUB;
 import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.Sync;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.InstanceResource;
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.MeteringEvent;
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.Resource;
+import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ServiceType;
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.StatusChange;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
 public class StackDtoToMeteringEventConverter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackDtoToMeteringEventConverter.class);
 
     private static final int DEFAULT_VERSION = 1;
 
@@ -46,7 +60,7 @@ public class StackDtoToMeteringEventConverter {
 
     private Stream<Resource> convertInstanceGroup(InstanceGroupDto instanceGroup) {
         return instanceGroup.getNotDeletedInstanceMetaData().stream()
-                .filter(InstanceMetadataView::isRunning)
+                .filter(instanceMetadata -> Set.of(SERVICES_RUNNING, SERVICES_HEALTHY, SERVICES_UNHEALTHY).contains(instanceMetadata.getInstanceStatus()))
                 .map(instanceMetadata -> convertInstance(instanceMetadata, instanceGroup.getInstanceGroup().getTemplate().getInstanceType()));
     }
 
@@ -72,8 +86,24 @@ public class StackDtoToMeteringEventConverter {
                 .setId(UUID.randomUUID().toString())
                 .setTimestamp(System.currentTimeMillis())
                 .setVersion(DEFAULT_VERSION)
-                .setServiceType(DATAHUB)
+                .setServiceType(getServiceType(stack, DATAHUB))
                 .setResourceCrn(stack.getResourceCrn())
                 .setEnvironmentCrn(stack.getEnvironmentCrn());
+    }
+
+    private ServiceType.Value getServiceType(StackDtoDelegate stack, ServiceType.Value defaultServiceType) {
+        if (stack.getTags() != null) {
+            try {
+                StackTags stackTags = stack.getTags().get(StackTags.class);
+                if (stackTags != null) {
+                    Map<String, String> applicationTags = stackTags.getApplicationTags();
+                    String serviceTypeName = applicationTags.get(ClusterTemplateApplicationTag.SERVICE_TYPE.key());
+                    return EnumUtils.getEnum(ServiceType.Value.class, serviceTypeName, defaultServiceType);
+                }
+            } catch (IOException e) {
+                LOGGER.warn("Stack related applications tags cannot be parsed, use default service type for metering.", e);
+            }
+        }
+        return defaultServiceType;
     }
 }

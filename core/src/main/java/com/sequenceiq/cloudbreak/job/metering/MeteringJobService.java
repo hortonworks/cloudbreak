@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.metering.config.MeteringConfig;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
+import com.sequenceiq.cloudbreak.util.RandomUtil;
 
 @Service
 public class MeteringJobService implements JobSchedulerService {
@@ -114,7 +115,7 @@ public class MeteringJobService implements JobSchedulerService {
     }
 
     private Date delayedStart(int delayInSeconds) {
-        return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofSeconds(delayInSeconds)));
+        return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofSeconds(RandomUtil.getInt(delayInSeconds))));
     }
 
     @Override

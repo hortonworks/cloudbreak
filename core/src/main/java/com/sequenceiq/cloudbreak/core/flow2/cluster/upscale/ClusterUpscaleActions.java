@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.upscale;
 
+import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ClusterStatus.Value.SCALE_UP;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.FINALIZED_EVENT;
 
 import java.util.HashMap;
@@ -59,6 +60,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesResu
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UpscaleCheckHostMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UpscaleCheckHostMetadataResult;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.metering.MeteringService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -75,6 +77,9 @@ public class ClusterUpscaleActions {
 
     @Inject
     private StackDtoService stackDtoService;
+
+    @Inject
+    private MeteringService meteringService;
 
     @Bean(name = "UPLOAD_UPSCALE_RECIPES_STATE")
     public Action<?, ?> uploadUpscaleRecipesAction() {
@@ -395,6 +400,7 @@ public class ClusterUpscaleActions {
             protected void doExecute(ClusterUpscaleContext context, UpscalePostRecipesResult payload, Map<Object, Object> variables) {
                 clusterUpscaleFlowService.clusterUpscaleFinished(context.getStack(), context.getHostGroups(), context.isRepair());
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL, context.getStack());
+                meteringService.sendMeteringStatusChangeEventForStack(context.getStackId(), SCALE_UP);
                 sendEvent(context, FINALIZED_EVENT.event(), payload);
             }
 

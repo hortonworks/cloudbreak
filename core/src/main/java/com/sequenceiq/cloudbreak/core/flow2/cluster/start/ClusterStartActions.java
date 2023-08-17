@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.start;
 
+import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ClusterStatus.Value.STARTED;
+
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -27,6 +29,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPillarCon
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DnsUpdateFinished;
+import com.sequenceiq.cloudbreak.service.metering.MeteringService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -44,6 +47,9 @@ public class ClusterStartActions {
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
+
+    @Inject
+    private MeteringService meteringService;
 
     @Bean(name = "CLUSTER_DB_CERT_ROTATION_STATE")
     public Action<?, ?> clusterDbCertRotation() {
@@ -112,6 +118,8 @@ public class ClusterStartActions {
             protected void doExecute(ClusterViewContext context, ClusterStartResult payload, Map<Object, Object> variables) {
                 clusterStartService.clusterStartFinished(context.getStack());
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_START_SUCCESSFUL, context.getStack());
+                meteringService.sendMeteringStatusChangeEventForStack(context.getStackId(), STARTED);
+                meteringService.scheduleSync(context.getStackId());
                 sendEvent(context);
             }
 

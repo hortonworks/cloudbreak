@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds;
 
+import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ClusterStatus.Value.SCALE_DOWN;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
@@ -55,6 +56,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartDownscaleDecommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartDownscaleDecommissionViaCMResult;
+import com.sequenceiq.cloudbreak.service.metering.MeteringService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -81,6 +83,9 @@ public class StopStartDownscaleActions {
 
     @Inject
     private CloudInstanceIdToInstanceMetaDataConverter cloudInstanceIdToInstanceMetaDataConverter;
+
+    @Inject
+    private MeteringService meteringService;
 
     @Bean(name = "STOPSTART_DOWNSCALE_GET_RECOVERY_CANDIDATES_STATE")
     public Action<?, ?> getRecoveryCandidatesAction() {
@@ -204,6 +209,8 @@ public class StopStartDownscaleActions {
                 handleNotStartedInstances(context, payload.getAffectedInstanceStatuses());
 
                 stopStartDownscaleFlowService.clusterDownscaleFinished(stack.getId(), context.getHostGroupName(), stoppedInstanceMetadata);
+
+                meteringService.sendMeteringStatusChangeEventForStack(stack, SCALE_DOWN);
 
                 sendEvent(context, STOPSTART_DOWNSCALE_FINALIZED_EVENT.event(), payload);
             }

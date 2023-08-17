@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.domain.IdAware;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -82,8 +83,8 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
 
     private Map<InstanceGroupView, List<String>> availabilityZonesByInstanceGroup;
 
-    public StackDto(StackView stack, ClusterView cluster, Network network, Database database, Workspace workspace, Tenant tenant, Map<String,
-            InstanceGroupDto> instanceGroups, Set<Resource> resources, Blueprint blueprint, GatewayView gateway, Orchestrator orchestrator,
+    public StackDto(StackView stack, ClusterView cluster, Network network, Database database, Workspace workspace, Tenant tenant,
+            Map<String, InstanceGroupDto> instanceGroups, Set<Resource> resources, Blueprint blueprint, GatewayView gateway, Orchestrator orchestrator,
             FileSystem fileSystem, FileSystem additionalFileSystem, Set<ClusterComponentView> clusterComponents, List<StackParameters> stackParameters,
             SecurityConfig securityConfig, Map<InstanceGroupView, List<String>> availabilityZonesByInstanceGroup) {
         this.stack = stack;
@@ -459,5 +460,10 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
 
     public boolean isOnGovPlatformVariant() {
         return CloudConstants.AWS_NATIVE_GOV.equals(getPlatformVariant());
+    }
+
+    @Override
+    public Json getTags() {
+        return getStack().getTags();
     }
 }

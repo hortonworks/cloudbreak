@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.stop;
 
+import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ClusterStatus.Value.STOPPED;
+
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -20,6 +22,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopFailedRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopResult;
+import com.sequenceiq.cloudbreak.service.metering.MeteringService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -33,6 +36,9 @@ public class ClusterStopActions {
 
     @Inject
     private StackDtoService stackDtoService;
+
+    @Inject
+    private MeteringService meteringService;
 
     @Bean(name = "CLUSTER_STOPPING_STATE")
     public Action<?, ?> stoppingCluster() {
@@ -57,6 +63,8 @@ public class ClusterStopActions {
             protected void doExecute(ClusterViewContext context, ClusterStopResult payload, Map<Object, Object> variables) {
                 clusterStopService.clusterStopFinished(context.getStackId());
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_STOP_SUCCESSFUL, context.getStack());
+                meteringService.unscheduleSync(context.getStackId());
+                meteringService.sendMeteringStatusChangeEventForStack(context.getStackId(), STOPPED);
                 sendEvent(context);
             }
 

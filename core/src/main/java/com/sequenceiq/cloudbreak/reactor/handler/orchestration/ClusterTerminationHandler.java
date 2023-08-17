@@ -43,8 +43,8 @@ public class ClusterTerminationHandler implements EventHandler<ClusterTerminatio
         ClusterTerminationResult result;
         try {
             StackDto stack = stackDtoService.getByIdWithoutResources(request.getStackId());
-            meteringService.sendMeteringStatusChangeEventForStack(stack, DELETED);
             meteringService.unscheduleSync(request.getStackId());
+            meteringService.sendMeteringStatusChangeEventForStack(stack, DELETED);
             result = new ClusterTerminationResult(request);
         } catch (RuntimeException e) {
             LOGGER.warn("Failed to delete cluster containers", e);
