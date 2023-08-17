@@ -38,7 +38,7 @@ public enum MetricType implements Metric {
     EXTERNAL_DATABASE_START_FAILED("externaldatabase.start.failed"),
     EXTERNAL_DATABASE_STOP_SUCCESSFUL("externaldatabase.stop.successful"),
     EXTERNAL_DATABASE_STOP_FAILED("externaldatabase.stop.failed"),
-
+    METERING_REPORT_FAILED("metering.report.failed"),
     AWS_VARIANT_MIGRATION_FAILED("aws.variant.migration.successful"),
     AWS_VARIANT_MIGRATION_SUCCESSFUL("aws.variant.migration.failed");
 

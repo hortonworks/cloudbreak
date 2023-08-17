@@ -10,11 +10,14 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.MeteringEvent;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.common.metrics.CommonMetricService;
 import com.sequenceiq.cloudbreak.converter.StackDtoToMeteringEventConverter;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.job.metering.MeteringJobAdapter;
 import com.sequenceiq.cloudbreak.job.metering.MeteringJobService;
 import com.sequenceiq.cloudbreak.metering.GrpcMeteringClient;
+import com.sequenceiq.cloudbreak.service.metrics.MeteringMetricTag;
+import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
 
@@ -35,13 +38,16 @@ public class MeteringService {
     @Inject
     private MeteringJobService meteringJobService;
 
+    @Inject
+    private CommonMetricService metricsService;
+
     public void sendMeteringSyncEventForStack(long stackId) {
         sendMeteringSyncEventForStack(stackDtoService.getByIdWithoutResources(stackId));
     }
 
     public void sendMeteringSyncEventForStack(StackDtoDelegate stack) {
         if (StackType.WORKLOAD == stack.getType()) {
-            sendMeteringEvent(stackDtoToMeteringEventConverter.convertToSyncEvent(stack));
+            sendPeriodicMeteringEvent(stackDtoToMeteringEventConverter.convertToSyncEvent(stack));
         }
     }
 
@@ -51,7 +57,7 @@ public class MeteringService {
 
     public void sendMeteringStatusChangeEventForStack(StackDtoDelegate stack, ClusterStatus.Value eventOperation) {
         if (StackType.WORKLOAD == stack.getType()) {
-            grpcMeteringClient.sendMeteringEvent(stackDtoToMeteringEventConverter.convertToStatusChangeEvent(stack, eventOperation));
+            sendMeteringEvent(stackDtoToMeteringEventConverter.convertToStatusChangeEvent(stack, eventOperation));
         }
     }
 
@@ -69,10 +75,22 @@ public class MeteringService {
         }
     }
 
+    private void sendPeriodicMeteringEvent(MeteringEvent meteringEvent) {
+        try {
+            grpcMeteringClient.sendMeteringEvent(meteringEvent);
+        } catch (Exception e) {
+            metricsService.incrementMetricCounter(MetricType.METERING_REPORT_FAILED,
+                    MeteringMetricTag.REPORT_TYPE.name(), "SYNC");
+            LOGGER.warn("Periodic Metering event send failed.", e);
+        }
+    }
+
     private void sendMeteringEvent(MeteringEvent meteringEvent) {
         try {
             grpcMeteringClient.sendMeteringEvent(meteringEvent);
         } catch (Exception e) {
+            metricsService.incrementMetricCounter(MetricType.METERING_REPORT_FAILED,
+                    MeteringMetricTag.REPORT_TYPE.name(), meteringEvent.getStatusChange().getStatus().name());
             LOGGER.warn("Metering event send failed.", e);
         }
     }
