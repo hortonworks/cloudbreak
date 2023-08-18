@@ -2,5 +2,6 @@ name: "ccm-sdx-tests"
 tests:
   - name: "ccm_sdx_tests"
     classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.DatalakeCcmUpgradeTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.SdxWithCcmResizeRecoveryTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.SdxWithCcmResizeTests

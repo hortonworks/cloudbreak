@@ -12,13 +12,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
@@ -43,58 +48,78 @@ public class DatalakeCcmUpgradeTest extends AbstractE2ETest {
     @Inject
     private EnvironmentUtil environmentUtil;
 
+    @Inject
+    private FreeIpaTestClient freeIpaTestClient;
+
     @Override
     protected void setupTest(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
-        createEnvironmentWithFreeIpa(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running environment and freeipa connected via CCM" +
-                    "there is a running sdx connected via CCM",
-            when = "CCM upgrade called to the environment",
-            then = "environment and sdx ccm upgrade is successful")
-    public void testCcmUpgrade(TestContext testContext) {
-        givenSdx(testContext)
+            given = "There is a running environment with datalake connected via CCMv1",
+            when = "CCM Upgrade called on the environment - CCMv1 to the latest (JUMPGATE)",
+            then = "environment CCM Upgrade should be successful, along with datalake.")
+    public void testCcmV1Upgrade(TestContext testContext) {
+        createEnvironmentWithCcm(testContext, Tunnel.CCM);
+        createSdxForEnvironment(testContext);
+        upgradeCcmOnEnvironment(testContext);
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
+    @Description(
+            given = "There is a running environment with datalake connected via CCMv2",
+            when = "CCM Upgrade called on the environment - CCMv2 to the latest (JUMPGATE)",
+            then = "environment CCM Upgrade should be successful, along with datalake.")
+    public void testCcmV2Upgrade(TestContext testContext) {
+        createEnvironmentWithCcm(testContext, Tunnel.CCMV2);
+        createSdxForEnvironment(testContext);
+        upgradeCcmOnEnvironment(testContext);
+    }
+
+    private void createEnvironmentWithCcm(TestContext testContext, Tunnel ccmVersion) {
+        environmentUtil
+                .createEnvironmentWithDefinedCcm(testContext, ccmVersion)
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .when(environmentTestClient.describe())
+                .given(FreeIpaUserSyncTestDto.class)
+                .when(freeIpaTestClient.getLastSyncOperationStatus())
+                .await(OperationState.COMPLETED)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
+                .validate();
+    }
+
+    private void createSdxForEnvironment(TestContext testContext) {
+        testContext
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.describe())
+                .given(SdxInternalTestDto.class)
+                    .withEnvironment()
+                    .withoutDatabase()
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .validate();
+    }
 
+    private void upgradeCcmOnEnvironment(TestContext testContext) {
         testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.upgradeCcm())
                 .await(EnvironmentStatus.AVAILABLE)
-                .then(getEnvironmentTestDtoEnvironmentClientAssertion())
-                .validate();
-
-    }
-
-    @Override
-    protected void initiateEnvironmentCreation(TestContext testContext) {
-        environmentUtil.createCCMv1Environment(testContext)
-                .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
-                        commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
-                .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .then(validateCcmUpgradeOnEnvironment())
                 .validate();
     }
 
-    private SdxInternalTestDto givenSdx(TestContext testContext) {
-        return testContext
-                .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.describe())
-                .given(SdxInternalTestDto.class)
-                .withEnvironment()
-                .withoutDatabase();
-    }
-
-    private Assertion<EnvironmentTestDto, EnvironmentClient> getEnvironmentTestDtoEnvironmentClientAssertion() {
+    private Assertion<EnvironmentTestDto, EnvironmentClient> validateCcmUpgradeOnEnvironment() {
         return (testContext1, sdxInternalTestDto, environmentClient) -> {
             CloudFunctionality cloudFunctionality = testContext1.getCloudProvider().getCloudFunctionality();
             Map<String, String> launchTemplateUserData = cloudFunctionality.getLaunchTemplateUserData(sdxInternalTestDto.getName());
@@ -112,7 +137,6 @@ public class DatalakeCcmUpgradeTest extends AbstractE2ETest {
             if (!ccmV2Enabled) {
                 throw new TestFailException(format("user data is not updated by %s", EXPORT_IS_CCM_V_2_JUMPGATE_ENABLED_TRUE));
             }
-
             return sdxInternalTestDto;
         };
     }

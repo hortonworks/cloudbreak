@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -25,9 +26,7 @@ public class SdxWithCcmResizeTests extends PreconditionSdxE2ETest {
 
     @Override
     protected void initiateEnvironmentCreation(TestContext testContext) {
-        environmentUtil.createCCMv2Environment(testContext)
-                    .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
-                        commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
+        environmentUtil.createEnvironmentWithDefinedCcm(testContext, Tunnel.CCMV2_JUMPGATE)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .validate();

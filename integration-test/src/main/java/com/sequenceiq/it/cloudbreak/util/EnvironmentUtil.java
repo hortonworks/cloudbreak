@@ -64,7 +64,7 @@ public class EnvironmentUtil {
         return virtualGroups;
     }
 
-    public EnvironmentTestDto createCCMv1Environment(TestContext testContext) {
+    public EnvironmentTestDto createEnvironmentWithDefinedCcm(TestContext testContext, Tunnel ccmTunnel) {
         return testContext
                 .given("telemetry", TelemetryTestDto.class)
                     .withLogging()
@@ -72,23 +72,17 @@ public class EnvironmentUtil {
                 .given(EnvironmentTestDto.class)
                     .withNetwork()
                     .withTelemetry("telemetry")
-                    .withTunnel(Tunnel.CCM)
+                    .withTunnel(ccmTunnel)
                     .withOverrideTunnel()
                     .withCreateFreeIpa(Boolean.TRUE)
-                    .withOneFreeIpaNode();
+                    .withFreeIpaNodes(getFreeIpaInstanceCountByProdiver(testContext));
     }
 
-    public EnvironmentTestDto createCCMv2Environment(TestContext testContext) {
-        return testContext
-                .given("telemetry", TelemetryTestDto.class)
-                    .withLogging()
-                    .withReportClusterLogs()
-                .given(EnvironmentTestDto.class)
-                    .withNetwork()
-                    .withTelemetry("telemetry")
-                    .withTunnel(Tunnel.CCMV2_JUMPGATE)
-                    .withOverrideTunnel()
-                    .withCreateFreeIpa(Boolean.TRUE)
-                    .withOneFreeIpaNode();
+    public int getFreeIpaInstanceCountByProdiver(TestContext testContext) {
+        if (testContext.getCloudProvider().getGovCloud()) {
+            return 2;
+        } else {
+            return 1;
+        }
     }
 }

@@ -45,6 +45,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
+import com.sequenceiq.it.cloudbreak.util.EnvironmentUtil;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
@@ -92,6 +93,9 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     @Inject
     private AzureMarketplaceTermsClient azureMarketplaceTermsClient;
+
+    @Inject
+    private EnvironmentUtil environmentUtil;
 
     @BeforeMethod
     public final void minimalSetupForClusterCreation(Object[] data, ITestResult testResult) {
@@ -379,11 +383,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     }
 
     protected int getFreeIpaInstanceCountByProdiver(TestContext testContext) {
-        if (testContext.getCloudProvider().getGovCloud()) {
-            return 2;
-        } else {
-            return 1;
-        }
+        return environmentUtil.getFreeIpaInstanceCountByProdiver(testContext);
     }
 
     protected void createProxyConfig(TestContext testContext) {
