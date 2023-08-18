@@ -173,7 +173,7 @@ public class AzureImageFormatValidator implements Validator {
         return isVhdImageFormat(image.getImageName());
     }
 
-    private boolean isVhdImageFormat(String imageUri) {
+    public boolean isVhdImageFormat(String imageUri) {
         Matcher matcher = VHD_PATTERN.matcher(imageUri);
         if (matcher.matches()) {
             LOGGER.debug("Image with name {} is a valid VHD based image", imageUri);

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -33,6 +34,8 @@ public class ImageFallbackHandler extends ExceptionCatcherEventHandler<ImageFall
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageFallbackHandler.class);
 
+    private static final String REDHAT8 = "redhat8";
+
     @Inject
     private StackService stackService;
 
@@ -44,6 +47,9 @@ public class ImageFallbackHandler extends ExceptionCatcherEventHandler<ImageFall
 
     @Inject
     private ImageProviderFactory imageProviderFactory;
+
+    @Inject
+    private AzureImageFormatValidator azureImageFormatValidator;
 
     @Override
     public String selector() {
@@ -71,6 +77,11 @@ public class ImageFallbackHandler extends ExceptionCatcherEventHandler<ImageFall
 
         try {
             ImageEntity currentImage = imageService.getByStack(stack);
+
+            if (REDHAT8.equalsIgnoreCase(currentImage.getOsType()) && azureImageFormatValidator.isVhdImageFormat(currentImage.getImageName())) {
+                throw new CloudbreakServiceException("No valid fallback path from redhat8 VHD image.");
+            }
+
             ImageProvider imageProvider = imageProviderFactory.getImageProvider(currentImage.getImageCatalogName());
             FreeIpaImageFilterSettings imageFilterSettings = createFreeIpaImageFilterSettings(stack, currentImage);
             String imgNotFoundMsg = String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",

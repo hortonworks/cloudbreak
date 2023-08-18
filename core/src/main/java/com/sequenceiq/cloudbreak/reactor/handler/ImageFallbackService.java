@@ -10,7 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
@@ -31,6 +33,8 @@ public class ImageFallbackService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageFallbackService.class);
 
+    private static final String REDHAT8 = "redhat8";
+
     @Inject
     private StackDtoService stackDtoService;
 
@@ -49,6 +53,9 @@ public class ImageFallbackService {
     @Inject
     private PlatformStringTransformer platformStringTransformer;
 
+    @Inject
+    private AzureImageFormatValidator azureImageFormatValidator;
+
     public void fallbackToVhd(Long stackId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException, IOException {
         StackView stackView = stackDtoService.getStackViewById(stackId);
         if (!CloudPlatform.AZURE.name().equals(stackView.getCloudPlatform())) {
@@ -58,6 +65,10 @@ public class ImageFallbackService {
 
         com.sequenceiq.cloudbreak.domain.stack.Component component = componentConfigProviderService.getImageComponent(stackId);
         Image currentImage = component.getAttributes().get(Image.class);
+
+        if (REDHAT8.equalsIgnoreCase(currentImage.getOsType()) && azureImageFormatValidator.isVhdImageFormat(currentImage)) {
+            throw new CloudbreakServiceException("No valid fallback path from redhat8 VHD image.");
+        }
 
         ImageCatalogPlatform platformString = platformStringTransformer.getPlatformStringForImageCatalog(
                 stackView.getCloudPlatform(),
