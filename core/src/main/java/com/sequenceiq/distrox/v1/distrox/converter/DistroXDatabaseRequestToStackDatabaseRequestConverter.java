@@ -5,10 +5,8 @@ import static java.lang.String.format;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAzureRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
-import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAzureRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 
 @Component
@@ -20,7 +18,6 @@ public class DistroXDatabaseRequestToStackDatabaseRequestConverter {
         DatabaseRequest request = new DatabaseRequest();
         request.setAvailabilityType(convertAvailabilityType(source.getAvailabilityType()));
         request.setDatabaseEngineVersion(source.getDatabaseEngineVersion());
-        request.setDatabaseAzureRequest(convertDistroxDatabaseAzureRequest(source.getDatabaseAzureRequest()));
         return request;
     }
 
@@ -30,7 +27,6 @@ public class DistroXDatabaseRequestToStackDatabaseRequestConverter {
             request.setAvailabilityType(convertAvailabilityType(source.getAvailabilityType()));
         }
         request.setDatabaseEngineVersion(source.getDatabaseEngineVersion());
-        request.setDatabaseAzureRequest(convertDatabaseAzureRequest(source.getDatabaseAzureRequest()));
         return request;
     }
 
@@ -57,23 +53,4 @@ public class DistroXDatabaseRequestToStackDatabaseRequestConverter {
         };
     }
 
-    private DatabaseAzureRequest convertDistroxDatabaseAzureRequest(DistroXDatabaseAzureRequest distroxDatabaseAzureRequest) {
-        if (distroxDatabaseAzureRequest != null) {
-            DatabaseAzureRequest databaseAzureRequest = new DatabaseAzureRequest();
-            databaseAzureRequest.setAzureDatabaseType(distroxDatabaseAzureRequest.getAzureDatabaseType());
-            return databaseAzureRequest;
-        } else {
-            return null;
-        }
-    }
-
-    private DistroXDatabaseAzureRequest convertDatabaseAzureRequest(DatabaseAzureRequest databaseAzureRequest) {
-        if (databaseAzureRequest != null) {
-            DistroXDatabaseAzureRequest distroXDatabaseAzureRequest = new DistroXDatabaseAzureRequest();
-            distroXDatabaseAzureRequest.setAzureDatabaseType(databaseAzureRequest.getAzureDatabaseType());
-            return distroXDatabaseAzureRequest;
-        } else {
-            return null;
-        }
-    }
 }
