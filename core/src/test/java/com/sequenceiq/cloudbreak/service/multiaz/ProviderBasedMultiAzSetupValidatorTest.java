@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.service.multiaz;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -10,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -53,6 +58,9 @@ class ProviderBasedMultiAzSetupValidatorTest {
     private static final String STACK_MULTAZ_DISABLED_SOME_GROUPS_AZ_CONFIGURED = "The multi-AZ flag was not enabled, but zones were provided " +
             "on some the groups of the deployment. Please use the multi-AZ flag or set explicit zone(s) for all the groups of the deployment!";
 
+    private static final String NOT_ENTITLED_FOR_MULTIAZ_AZURE = String.format("Provisioning a multi AZ cluster on Azure requires entitlement %s.",
+            Entitlement.CDP_CB_AZURE_MULTIAZ.name());
+
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
 
@@ -74,8 +82,16 @@ class ProviderBasedMultiAzSetupValidatorTest {
     @Mock
     private InstanceGroupService instanceGroupService;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private ProviderBasedMultiAzSetupValidator underTest;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(entitlementService.isAzureMultiAzEnabled(anyString())).thenReturn(Boolean.TRUE);
+    }
 
     @Test
     void testValidateWhenAvailabilityZoneConnectorDoesNotExistForPlatform() {
@@ -111,6 +127,22 @@ class ProviderBasedMultiAzSetupValidatorTest {
         underTest.validate(resultBuilder, stack);
 
         verify(resultBuilder).error(NO_AVAILABILITY_ZONE_CONFIGURED_ON_ENV);
+    }
+
+    @Test
+    void testValidateWhenMultiAzRequestedForStackConnectorExistForPlatformButNotEntitledForFeature() {
+        AvailabilityZoneConnector zoneConnector = mock(AvailabilityZoneConnector.class);
+        CloudConnector cloudConnector = mock(CloudConnector.class);
+        when(cloudConnector.availabilityZoneConnector()).thenReturn(zoneConnector);
+        when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
+        Stack stack = TestUtil.stack(Status.REQUESTED, TestUtil.azureCredential());
+        stack.setInstanceGroups(Set.of());
+        stack.setMultiAz(Boolean.TRUE);
+        when(entitlementService.isAzureMultiAzEnabled(anyString())).thenReturn(Boolean.FALSE);
+
+        underTest.validate(resultBuilder, stack);
+
+        verify(resultBuilder).error(NOT_ENTITLED_FOR_MULTIAZ_AZURE);
     }
 
     @Test

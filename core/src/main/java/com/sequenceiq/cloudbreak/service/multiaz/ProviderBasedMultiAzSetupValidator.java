@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.multiaz;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -13,6 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
@@ -55,15 +60,18 @@ public class ProviderBasedMultiAzSetupValidator {
     @Inject
     private InstanceGroupService instanceGroupService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public void validate(ValidationResultBuilder validationBuilder, Stack stack) {
         updateMultiAzFlagOnStackIfNecessary(stack, validationBuilder);
         if (stack.isMultiAz()) {
             AvailabilityZoneConnector availabilityZoneConnector = getAvailabilityZoneConnector(stack);
-            if (availabilityZoneConnector != null) {
+            if (availabilityZoneConnector != null && hasMultiAzEntitlementForPlatform(validationBuilder, stack)) {
                 validateWithAvailabilityZoneConnector(validationBuilder, stack, availabilityZoneConnector);
             } else {
-                LOGGER.debug("Implementation for AvailabilityZoneConnector is not present for CloudPlatform {} and PlatformVariant {}",
-                        stack.getCloudPlatform(), stack.getPlatformVariant());
+                LOGGER.debug("Implementation for AvailabilityZoneConnector is not present for CloudPlatform {} and PlatformVariant {} or the account is not "
+                        + "entitled for multi-Az functionality on the platform", stack.getCloudPlatform(), stack.getPlatformVariant());
             }
         } else {
             LOGGER.debug("Multi-AZ flag is disabled on the Stack, no need to validate group level zones.");
@@ -86,6 +94,25 @@ public class ProviderBasedMultiAzSetupValidator {
                 validationBuilder.error(msg);
             }
         }
+    }
+
+    private AvailabilityZoneConnector getAvailabilityZoneConnector(Stack stack) {
+        LOGGER.debug("CloudPlatform is {} PlatformVariant is {}", stack.getCloudPlatform(), stack.getPlatformVariant());
+        CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
+                Platform.platform(stack.getCloudPlatform()),
+                Variant.variant(stack.getPlatformVariant()));
+        return cloudPlatformConnectors.get(cloudPlatformVariant).availabilityZoneConnector();
+    }
+
+    private boolean hasMultiAzEntitlementForPlatform(ValidationResultBuilder validationBuilder, Stack stack) {
+        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
+        if (AZURE.equals(CloudPlatform.valueOf(stack.cloudPlatform())) && !entitlementService.isAzureMultiAzEnabled(accountId)) {
+            String errorMsg = String.format("Provisioning a multi AZ cluster on Azure requires entitlement %s.", Entitlement.CDP_CB_AZURE_MULTIAZ.name());
+            LOGGER.info(errorMsg);
+            validationBuilder.error(errorMsg);
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
     }
 
     private void validateWithAvailabilityZoneConnector(ValidationResultBuilder validationBuilder, Stack stack, AvailabilityZoneConnector azConnector) {
@@ -168,13 +195,5 @@ public class ProviderBasedMultiAzSetupValidator {
             minZones = availabilityZoneConnector.getMinZonesForDataHub();
         }
         return minZones;
-    }
-
-    private AvailabilityZoneConnector getAvailabilityZoneConnector(Stack stack) {
-        LOGGER.debug("CloudPlatform is {} PlatformVariant is {}", stack.getCloudPlatform(), stack.getPlatformVariant());
-        CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
-                Platform.platform(stack.getCloudPlatform()),
-                Variant.variant(stack.getPlatformVariant()));
-        return cloudPlatformConnectors.get(cloudPlatformVariant).availabilityZoneConnector();
     }
 }
