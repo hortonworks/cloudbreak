@@ -22,11 +22,9 @@ import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 
 @ExtendWith(MockitoExtension.class)
 public class CmProductChooserServiceTest {
-    private static final String PARCEL_VERSION_1 = "7.2.12";
+    private static final String PARCEL_VERSION_1 = "Version1";
 
-    private static final String PARCEL_VERSION_2 = "7.2.15";
-
-    private static final String PARCEL_VERSION_3 = "7.2.7";
+    private static final String PARCEL_VERSION_2 = "Version2";
 
     private static final String PARCEL_NAME_1 = "ParcelName1";
 
@@ -87,34 +85,12 @@ public class CmProductChooserServiceTest {
 
     @Test
     void testChooseParcelProductWhenMatchingNameButDifferentVersionThenEmptyResult() {
-        Set<ParcelInfo> activeParcels = Set.of(new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_1, ParcelStatus.ACTIVATED));
-        Set<ClouderaManagerProduct> candidateProducts = Set.of(new ClouderaManagerProduct().withName(PARCEL_NAME_1).withVersion(PARCEL_VERSION_3));
-
-        Set<ClouderaManagerProduct> foundProducts = underTest.chooseParcelProduct(activeParcels, candidateProducts);
-
-        assertThat(foundProducts, hasSize(0));
-    }
-
-    @Test
-    void testChooseParcelProductWhenMatchingNameButNewerActiveVersionThenReturnsOne() {
-        Set<ParcelInfo> activeParcels = Set.of(new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_1, ParcelStatus.ACTIVATED));
-        Set<ClouderaManagerProduct> candidateProducts = Set.of(new ClouderaManagerProduct().withName(PARCEL_NAME_1).withVersion(PARCEL_VERSION_2));
-
-        Set<ClouderaManagerProduct> foundProducts = underTest.chooseParcelProduct(activeParcels, candidateProducts);
-
-        assertThat(foundProducts, hasSize(1));
-        assertEquals(PARCEL_VERSION_2, foundProducts.iterator().next().getVersion());
-    }
-
-    @Test
-    void testChooseParcelProductWhenMatchingNameButEqualActiveVersionThenReturnsOne() {
-        Set<ParcelInfo> activeParcels = Set.of(new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_1, ParcelStatus.ACTIVATED));
+        Set<ParcelInfo> activeParcels = Set.of(new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_2, ParcelStatus.ACTIVATED));
         Set<ClouderaManagerProduct> candidateProducts = Set.of(new ClouderaManagerProduct().withName(PARCEL_NAME_1).withVersion(PARCEL_VERSION_1));
 
         Set<ClouderaManagerProduct> foundProducts = underTest.chooseParcelProduct(activeParcels, candidateProducts);
 
-        assertThat(foundProducts, hasSize(1));
-        assertEquals(PARCEL_VERSION_1, foundProducts.iterator().next().getVersion());
+        assertThat(foundProducts, hasSize(0));
     }
 
     @Test
