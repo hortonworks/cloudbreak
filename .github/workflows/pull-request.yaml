@@ -38,6 +38,24 @@ jobs:
               cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
               cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
               cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+      - name: Cache Java libs
+        id: cache-java
+        uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
+        env:
+          cache-name: cache-java-libs
+        with:
+          path: |
+            /home/jenkins/.gradle/caches
+            /home/jenkins/.gradle/wrapper
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+        name: List the state of java libs
+        continue-on-error: true
+        run: ./gradlew dependencies
       - name: Gradle build
         run: |-
           #!/bin/bash -x
@@ -67,7 +85,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.build_secrets.outputs.GITHUB_TOKEN}}
         uses: Kitchen/RE-thirdparty-actions/actions/test-reporter@main
         with:
-          name: test-results
+          name: JUnit Test Report
           path: '**/build/test-results/test/TEST-*.xml'
           reporter: java-junit
           list-suites: 'failed'
@@ -116,6 +134,24 @@ jobs:
               cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
               cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
               cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+      - name: Cache Java libs
+        id: cache-java
+        uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
+        env:
+          cache-name: cache-java-libs
+        with:
+          path: |
+            /home/jenkins/.gradle/caches
+            /home/jenkins/.gradle/wrapper
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+        name: List the state of java libs
+        continue-on-error: true
+        run: ./gradlew dependencies
       - name: Gradle build
         run: |-
           #!/bin/bash -x
@@ -125,6 +161,13 @@ jobs:
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
           export CIRCLECI=true
           ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleTest -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+      - uses: cloudbreak/cloudbreak-github-actions/actions/checkstyle-github-action@master
+        if: success() || failure()
+        name: Checkstyle Main Report
+        with:
+          name: Checkstyle Main Report
+          title: Checkstyle Main Report
+          path: '**/checkstyle/main.xml'
 
   checkstyle-test:
     name: Checkstyle Test
@@ -150,6 +193,24 @@ jobs:
               cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
               cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
               cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+      - name: Cache Java libs
+        id: cache-java
+        uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
+        env:
+          cache-name: cache-java-libs
+        with:
+          path: |
+            /home/jenkins/.gradle/caches
+            /home/jenkins/.gradle/wrapper
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+        name: List the state of java libs
+        continue-on-error: true
+        run: ./gradlew dependencies
       - name: Gradle build
         run: |-
           #!/bin/bash -x
@@ -159,6 +220,13 @@ jobs:
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
           export CIRCLECI=true
           ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleMain -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+      - uses: cloudbreak/cloudbreak-github-actions/actions/checkstyle-github-action@master
+        if: success() || failure()
+        name: Checkstyle Test Report
+        with:
+          name: Checkstyle Test Report
+          title: Checkstyle Test Report
+          path: '**/checkstyle/test.xml'
 
   spotbugs-test:
     name: Spotbugs Test
@@ -184,6 +252,24 @@ jobs:
               cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
               cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
               cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+      - name: Cache Java libs
+        id: cache-java
+        uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
+        env:
+          cache-name: cache-java-libs
+        with:
+          path: |
+            /home/jenkins/.gradle/caches
+            /home/jenkins/.gradle/wrapper
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+        name: List the state of java libs
+        continue-on-error: true
+        run: ./gradlew dependencies
       - name: Gradle build
         run: |-
           #!/bin/bash -x
@@ -193,6 +279,13 @@ jobs:
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
           export CIRCLECI=true
           ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x checkstyleTest -x checkstyleMain -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+      - uses: cloudbreak/cloudbreak-github-actions/actions/spotbugs-github-action@master
+        if: success() || failure()
+        name: SpotBugs Test Report
+        with:
+          name: SpotBugs Test Report
+          title: SpotBugs Test Report
+          path: '**/spotbugsXml.xml'
 
   spotbugs-main:
     name: Spotbugs Main
@@ -218,6 +311,24 @@ jobs:
               cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
               cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
               cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+      - name: Cache Java libs
+        id: cache-java
+        uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
+        env:
+          cache-name: cache-java-libs
+        with:
+          path: |
+            /home/jenkins/.gradle/caches
+            /home/jenkins/.gradle/wrapper
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+        name: List the state of java libs
+        continue-on-error: true
+        run: ./gradlew dependencies
       - name: Gradle build
         run: |-
           #!/bin/bash -x
@@ -227,3 +338,10 @@ jobs:
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
           export CIRCLECI=true
           ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsTest -x checkstyleTest -x checkstyleMain -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+      - uses: cloudbreak/cloudbreak-github-actions/actions/spotbugs-github-action@master
+        if: success() || failure()
+        name: SpotBugs Main Report
+        with:
+          name: SpotBugs Main Report
+          title: SpotBugs Main Report
+          path: '**/spotbugsXml.xml'
