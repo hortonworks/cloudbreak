@@ -4,6 +4,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -35,6 +36,7 @@ import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 
 public class FreeIpaMultiAzScalingTests extends AbstractE2ETest {
 
@@ -58,7 +60,6 @@ public class FreeIpaMultiAzScalingTests extends AbstractE2ETest {
         Set<String> primaryGatewayInstanceId = new HashSet<>();
         testContext
                 .given(freeIpa, FreeIpaTestDto.class)
-                .withTelemetry("telemetry")
                 .withEnableMultiAz(true)
                 .when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
@@ -75,10 +76,9 @@ public class FreeIpaMultiAzScalingTests extends AbstractE2ETest {
                     Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client);
                     assertInstanceCount(testDto.getRequest().getTargetAvailabilityType(), instanceMetaDataResponses);
                     assertPrimaryGatewayHasNotChanged(primaryGatewayInstanceId, instanceMetaDataResponses);
-                    validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, OperationType.UPSCALE);
+                    validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, freeIpa, tc, OperationType.UPSCALE);
                     return testDto;
                 })
-
                 .given(FreeIpaDownscaleTestDto.class)
                 .withAvailabilityType(AvailabilityType.TWO_NODE_BASED)
                 .when(freeIpaTestClient.downscale())
@@ -87,7 +87,7 @@ public class FreeIpaMultiAzScalingTests extends AbstractE2ETest {
                     Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client);
                     assertInstanceCount(testDto.getRequest().getTargetAvailabilityType(), instanceMetaDataResponses);
                     assertPrimaryGatewayHasNotChanged(primaryGatewayInstanceId, instanceMetaDataResponses);
-                    validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, OperationType.DOWNSCALE);
+                    validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, freeIpa, tc, OperationType.DOWNSCALE);
                     return testDto;
                 })
 
@@ -99,7 +99,7 @@ public class FreeIpaMultiAzScalingTests extends AbstractE2ETest {
                     Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client);
                     assertInstanceCount(testDto.getRequest().getTargetAvailabilityType(), instanceMetaDataResponses);
                     assertPrimaryGatewayHasNotChanged(primaryGatewayInstanceId, instanceMetaDataResponses);
-                    validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, OperationType.UPSCALE);
+                    validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, freeIpa, tc, OperationType.UPSCALE);
                     return testDto;
                 })
                 .validate();
@@ -160,24 +160,28 @@ public class FreeIpaMultiAzScalingTests extends AbstractE2ETest {
         }
     }
 
-    private void validateMultiAz(String environmentCrn, FreeIpaClient client, OperationType operationType) {
+    private void validateMultiAz(String environmentCrn, FreeIpaClient client, String freeIpa, TestContext tc, OperationType operationType) {
         DescribeFreeIpaResponse freeIpaResponse = client.getDefaultClient().getFreeIpaV1Endpoint().describe(environmentCrn);
         if (!freeIpaResponse.isEnableMultiAz()) {
-            throw new TestFailException(String.format("MultiAz is not enabled for %s after %s", freeIpaResponse.getName(),
-                    operationType.getLowerCaseName()));
+            throw new TestFailException(String.format("MultiAz is not enabled for %s after %s", freeIpaResponse.getName(), operationType.getLowerCaseName()));
         }
-        List<String> instancesWithNoAz = freeIpaResponse.getInstanceGroups().stream()
+        List<String> instanceIds = freeIpaResponse.getInstanceGroups().stream()
                 .map(ig -> ig.getMetaData())
                 .filter(Objects::nonNull)
                 .flatMap(ins -> ins.stream())
-                .filter(igm1 -> igm1.getAvailabilityZone() == null)
-                .map(igm2 -> igm2.getInstanceId())
+                .map(InstanceMetaDataResponse::getInstanceId)
+                .collect(Collectors.toList());
+        Map<String, Set<String>> availabilityZoneForVms = getCloudFunctionality(tc).listAvailabilityZonesForVms(freeIpa, instanceIds);
+        List<String> instancesWithNoAz = instanceIds.stream().filter(instance -> CollectionUtils.isEmpty(availabilityZoneForVms.get(instance)))
                 .collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(instancesWithNoAz)) {
             throw new TestFailException(String.format("Availability Zones is missing for instances %s in %s after %s",
-                    instancesWithNoAz.stream().collect(Collectors.joining(",")), freeIpaResponse.getName(),
-                    operationType.getLowerCaseName()));
+                    instancesWithNoAz.stream().collect(Collectors.joining(",")), freeIpaResponse.getName(), operationType.getLowerCaseName()));
         }
+    }
+
+    private CloudFunctionality getCloudFunctionality(TestContext testContext) {
+        return testContext.getCloudProvider().getCloudFunctionality();
     }
 
 }
