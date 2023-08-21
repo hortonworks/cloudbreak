@@ -14,6 +14,7 @@ base:
     - ntp
     - postgresql.root-certs
     - resize
+    - customrepo
 
   'G@roles:ad_member and G@os_family:RedHat':
     - match: compound
