@@ -13,7 +13,9 @@ public class ImageToClouderaManagerRepoConverter {
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setPredefined(Boolean.TRUE);
         clouderaManagerRepo.setVersion(image.getPackageVersion(ImagePackageVersion.CM));
-        clouderaManagerRepo.setBaseUrl(image.getRepo().get(image.getOsType()));
+        String baseUrl = image.getRepo().get(image.getOsType());
+        clouderaManagerRepo.setBaseUrl(baseUrl);
+        clouderaManagerRepo.setGpgKeyUrl(baseUrl + "/RPM-GPG-KEY-cloudera");
         clouderaManagerRepo.setBuildNumber(image.getCmBuildNumber());
         return clouderaManagerRepo;
     }

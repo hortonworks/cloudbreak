@@ -106,17 +106,17 @@ public class UserDataService {
 
     public Map<InstanceGroupType, String> getUserData(Long stackId) {
         try {
-            Image image = imageService.getImage(stackId);
-            if (image.getUserdata() == null || image.getUserdata().isEmpty()) {
+            LOGGER.debug("Try to find userdata with userdata repository");
+            Optional<Userdata> userdataOptional = userdataRepository.findByStackId(stackId);
+            if (userdataOptional.isPresent()) {
                 Map<InstanceGroupType, String> map = new HashMap<>();
-                Optional<Userdata> userdataOptional = userdataRepository.findByStackId(stackId);
-                if (userdataOptional.isPresent()) {
-                    LOGGER.debug("Collecting user data from UserData table with stack id: {}", stackId);
-                    map.put(InstanceGroupType.CORE, userdataOptional.get().getCoreUserdata());
-                    map.put(InstanceGroupType.GATEWAY, userdataOptional.get().getGatewayUserdata());
-                }
+                LOGGER.debug("Collecting user data from UserData table with stack id: {}", stackId);
+                map.put(InstanceGroupType.CORE, userdataOptional.get().getCoreUserdata());
+                map.put(InstanceGroupType.GATEWAY, userdataOptional.get().getGatewayUserdata());
                 return map;
             } else {
+                LOGGER.debug("Userdata was not found with userdata repository, fallback to image service");
+                Image image = imageService.getImage(stackId);
                 return new HashMap<>(image.getUserdata());
             }
         } catch (CloudbreakImageNotFoundException e) {
