@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.DATALAK
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.WORKLOAD;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,11 +19,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.common.metrics.CommonMetricService;
 import com.sequenceiq.cloudbreak.converter.StackDtoToMeteringEventConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.job.metering.MeteringJobAdapter;
 import com.sequenceiq.cloudbreak.job.metering.MeteringJobService;
 import com.sequenceiq.cloudbreak.metering.GrpcMeteringClient;
+import com.sequenceiq.cloudbreak.service.metrics.MeteringMetricTag;
+import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
 
@@ -43,6 +47,9 @@ class MeteringServiceTest {
     @Mock
     private MeteringJobService meteringJobService;
 
+    @Mock
+    private CommonMetricService metricService;
+
     @InjectMocks
     private MeteringService underTest;
 
@@ -60,11 +67,27 @@ class MeteringServiceTest {
         when(stackDtoToMeteringEventConverter.convertToStatusChangeEvent(any(), any())).thenReturn(meteringEvent);
         underTest.sendMeteringStatusChangeEventForStack(getStack(WORKLOAD), SCALE_UP);
         verify(grpcMeteringClient, times(1)).sendMeteringEvent(eq(meteringEvent));
+        verify(metricService, times(0)).incrementMetricCounter(MetricType.METERING_REPORT_FAILED,
+                MeteringMetricTag.REPORT_TYPE.name(), SCALE_UP.name());
+        verify(metricService, times(1)).incrementMetricCounter(MetricType.METERING_REPORT_SUCCESSFUL,
+                MeteringMetricTag.REPORT_TYPE.name(), SCALE_UP.name());
+    }
+
+    @Test
+    void failedSendShouldIncreaseFailureCountWhenDatahub() {
+        MeteringEvent meteringEvent = MeteringEvent.newBuilder().build();
+        when(stackDtoToMeteringEventConverter.convertToStatusChangeEvent(any(), any())).thenReturn(meteringEvent);
+        doThrow(new RuntimeException("Inject Failure")).when(grpcMeteringClient).sendMeteringEvent(meteringEvent);
+        underTest.sendMeteringStatusChangeEventForStack(getStack(WORKLOAD), SCALE_UP);
+        verify(grpcMeteringClient, times(1)).sendMeteringEvent(eq(meteringEvent));
+        verify(metricService, times(1)).incrementMetricCounter(MetricType.METERING_REPORT_FAILED,
+                MeteringMetricTag.REPORT_TYPE.name(), SCALE_UP.name());
+        verify(metricService, times(0)).incrementMetricCounter(MetricType.METERING_REPORT_SUCCESSFUL,
+                MeteringMetricTag.REPORT_TYPE.name(), SCALE_UP.name());
     }
 
     @Test
     void sendMeteringSyncEventForStackShouldNotSendEventWhenNotDatahub() {
-        MeteringEvent meteringEvent = MeteringEvent.newBuilder().build();
         underTest.sendMeteringSyncEventForStack(getStack(DATALAKE));
         verify(stackDtoToMeteringEventConverter, never()).convertToStatusChangeEvent(any(), any());
         verify(grpcMeteringClient, never()).sendMeteringEvent(any());
@@ -72,7 +95,6 @@ class MeteringServiceTest {
 
     @Test
     void sendMeteringStatusChangeEventForStackShouldNotSendEventWhenNotDatahub() {
-        MeteringEvent meteringEvent = MeteringEvent.newBuilder().build();
         underTest.sendMeteringStatusChangeEventForStack(getStack(DATALAKE), SCALE_UP);
         verify(stackDtoToMeteringEventConverter, never()).convertToStatusChangeEvent(any(), any());
         verify(grpcMeteringClient, never()).sendMeteringEvent(any());

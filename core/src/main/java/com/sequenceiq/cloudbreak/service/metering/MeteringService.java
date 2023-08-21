@@ -88,6 +88,8 @@ public class MeteringService {
     private void sendMeteringEvent(MeteringEvent meteringEvent) {
         try {
             grpcMeteringClient.sendMeteringEvent(meteringEvent);
+            metricsService.incrementMetricCounter(MetricType.METERING_REPORT_SUCCESSFUL,
+                    MeteringMetricTag.REPORT_TYPE.name(), meteringEvent.getStatusChange().getStatus().name());
         } catch (Exception e) {
             metricsService.incrementMetricCounter(MetricType.METERING_REPORT_FAILED,
                     MeteringMetricTag.REPORT_TYPE.name(), meteringEvent.getStatusChange().getStatus().name());
