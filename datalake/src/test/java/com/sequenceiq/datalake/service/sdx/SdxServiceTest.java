@@ -602,48 +602,6 @@ class SdxServiceTest {
     }
 
     @Test
-    void testSdxToEDLResizeGcpClusterSuccess() throws IOException {
-        final String runtime = "7.2.17";
-        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
-        sdxClusterResizeRequest.setClusterShape(ENTERPRISE);
-        sdxClusterResizeRequest.setEnvironment("environment");
-
-        SdxCluster sdxCluster = getSdxCluster();
-        sdxCluster.setId(1L);
-        sdxCluster.setCloudStorageFileSystemType(FileSystemType.GCS);
-        sdxCluster.setClusterShape(LIGHT_DUTY);
-        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
-        sdxCluster.setRuntime(runtime);
-        sdxCluster.setCloudStorageBaseLocation("gcs://some/dir/");
-
-        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
-        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
-        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
-        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
-
-        mockEnvironmentCall(sdxClusterResizeRequest, GCP);
-        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class)))
-                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
-
-        String enterpriseJSON = FileReaderUtils.readFileFromClasspath("/duties/7.2.17/gcp/enterprise.json");
-        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(enterpriseJSON, StackV4Request.class));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        StackV4Response stackV4Response = new StackV4Response();
-        stackV4Response.setStatus(Status.STOPPED);
-        when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
-
-        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
-                underTest.resizeSdx(USER_CRN, sdxCluster.getClusterName(), sdxClusterResizeRequest));
-        SdxCluster createdSdxCluster = result.getLeft();
-        assertEquals(sdxCluster.getClusterName(), createdSdxCluster.getClusterName());
-        assertEquals(runtime, createdSdxCluster.getRuntime());
-        assertEquals("gcs://some/dir/", createdSdxCluster.getCloudStorageBaseLocation());
-        assertEquals("envir", createdSdxCluster.getEnvName());
-    }
-
-    @Test
     void testSdxResizeByAccountIdAndNameWhenSdxWithExistingDetachedSdx() {
         SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
         sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);

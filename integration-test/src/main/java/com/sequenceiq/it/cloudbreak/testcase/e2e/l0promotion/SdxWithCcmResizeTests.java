@@ -40,7 +40,7 @@ public class SdxWithCcmResizeTests extends PreconditionSdxE2ETest {
             then = "SDX resize should be successful, the new cluster should be up and running"
     )
     public void testCcmSDXResize(TestContext testContext) {
-        sdxResizeTestUtil.runResizeTestMediumDuty(
+        sdxResizeTestUtil.runResizeTest(
                 testContext, resourcePropertyProvider().getName(), getCloudStorageRequest(testContext)
         );
     }
