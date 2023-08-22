@@ -163,6 +163,9 @@ restore_db_from_local() {
   doLog "INFO Restoring $SERVICE"
   psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "drop database ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to drop database ${SERVICE}"
   psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "create database ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to re-create database ${SERVICE}"
+# change ownership to the service user. If it fails we still can use restore but subsequent backups might fail on other datalakes.
+  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "GRANT ALL PRIVILEGES ON DATABASE ${SERVICE} TO ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || doLog "WARN: Unable to grant permissions to ${SERVICE}"
+  psql --host="$HOST" --port="$PORT" --dbname="${SERVICE}" --username="$USERNAME" -c "ALTER SCHEMA public OWNER TO ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || doLog "WARN: Unable to change ownership to ${SERVICE}"
 
   if [ -f "$BACKUP_PLAIN" ]; then
       doLog "INFO restore a plain text dump file"
