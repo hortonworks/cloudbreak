@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricTag;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.periscope.aspects.RequestLogging;
+import com.sequenceiq.periscope.config.YarnConfig;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.model.InstanceConfig;
 import com.sequenceiq.periscope.model.TlsConfiguration;
@@ -65,6 +66,9 @@ public class YarnMetricsClient {
     @Inject
     private YarnServiceConfigClient yarnServiceConfigClient;
 
+    @Inject
+    private YarnConfig yarnConfig;
+
     @Retryable(value = Exception.class, maxAttempts = 2, backoff = @Backoff(delay = 5000))
     public YarnScalingServiceV1Response getYarnMetricsForCluster(Cluster cluster, StackV4Response stackV4Response,
             String hostGroup, String pollingUserCrn, Optional<Integer> maxDecommissionNodeCount) throws Exception {
@@ -93,6 +97,41 @@ public class YarnMetricsClient {
 
         maxDecommissionNodeCount.ifPresent(
                 scaleDownCount -> yarnMetricsURI.queryParam(PARAM_DOWNSCALE_FACTOR_IN_NODE_COUNT, stackV4Response.getNodeCount()));
+
+        YarnScalingServiceV1Response yarnResponse =
+                invokeYarnAPIWithExceptionHandling(restClient, yarnMetricsURI, pollingUserCrn, yarnScalingServiceV1Request, cluster);
+
+        LOGGER.info("YarnScalingAPI response for cluster crn '{}',  response '{}'", cluster.getStackCrn(), yarnResponse);
+        return yarnResponse;
+    }
+
+    @Retryable(value = Exception.class, maxAttempts = 2, backoff = @Backoff(delay = 5000))
+    public YarnScalingServiceV1Response getYarnMetricsForCluster(Cluster cluster,
+            String hostGroup, String pollingUserCrn, Optional<Integer> connectionTimeout, Optional<Integer> readTimeout) throws Exception {
+        TlsConfiguration tlsConfig = tlsSecurityService.getTls(cluster.getId());
+        String clusterProxyUrl = clusterProxyConfigurationService.getClusterProxyUrl()
+                .orElseThrow(() -> new RuntimeException(String.format("ClusterProxy Not Configured for Cluster %s, " +
+                        " cannot query YARN Metrics.", cluster.getStackCrn())));
+
+        Client restClient;
+        restClient = RestClientUtil.createClient(tlsConfig.getServerCert(),
+                tlsConfig.getClientCert(), tlsConfig.getClientKey(), connectionTimeout.get(), readTimeout.get(), true);
+        String yarnApiUrl = String.format(YARN_API_URL, clusterProxyUrl, cluster.getStackCrn());
+
+        long start = clock.getCurrentTimeMillis();
+        InstanceConfig instanceConfig = new InstanceConfig("trial");
+        instanceConfig.setCoreCPU(yarnConfig.getCpuCores());
+        instanceConfig.setMemoryInMb(yarnConfig.getMemoryInMb());
+        metricService.recordClusterManagerInvocation(cluster, start);
+
+        YarnScalingServiceV1Request yarnScalingServiceV1Request = new YarnScalingServiceV1Request();
+        yarnScalingServiceV1Request.setInstanceTypes(List.of(
+                new HostGroupInstanceType(instanceConfig.getInstanceName(),
+                        instanceConfig.getMemoryInMb().intValue(), instanceConfig.getCoreCPU())));
+
+        LOGGER.debug("Using actorCrn '{}' for Cluster '{}' yarn polling.", pollingUserCrn, cluster.getStackCrn());
+
+        UriBuilder yarnMetricsURI = UriBuilder.fromPath(yarnApiUrl);
 
         YarnScalingServiceV1Response yarnResponse =
                 invokeYarnAPIWithExceptionHandling(restClient, yarnMetricsURI, pollingUserCrn, yarnScalingServiceV1Request, cluster);

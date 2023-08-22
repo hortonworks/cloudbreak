@@ -39,6 +39,11 @@ management:
       enabled: true
 
 periscope:
+  yarn:
+    connection.timeout: 5000
+    read.timeout: 10000
+    core: 8
+    memory: 1
   cert:
     dir: /certs/
   db:

@@ -7,6 +7,7 @@ public class ApiDescription {
     public static final String HISTORY_DESCRIPTION = "Operations on histories";
     public static final String CLUSTERS_DESCRIPTION = "Operations on clusters";
     public static final String SCALING_ACTIVITY_DESCRIPTION = "opertions on scaling activities";
+    public static final String YARN_RECOMMENDATION_DESCRIPTION = "get recommendation from yarn";
     public static final String POLICIES_DESCRIPTION = "Operations on policies";
 
     private ApiDescription() {
@@ -94,6 +95,7 @@ public class ApiDescription {
                 "Get all failed scaling activities between start and end time in epoch milliseconds";
         public static final String SCALING_ACTIVITIES_IN_DURATION_IN_MINUTES = "Get all scaling activities in given time duration in minutes";
         public static final String SCALING_OPERATION_ID = "Get a particular scaling activity using it's operation ID";
+        public static final String YARN_RECOMMENDATION = "Get the recommendation from yarn.";
         public static final String CLUSTER_PUT = "modify cluster";
         public static final String CLUSTER_GET = "retrieve cluster";
         public static final String CLUSTER_GET_ALL = "retrieve all cluster";
@@ -136,6 +138,7 @@ public class ApiDescription {
         public static final String ACTIVITY_STATUS = "Status of the scaling activity";
         public static final String ACTIVITY_REASON = "Reason for the scaling activity";
         public static final String LOAD_ALERTS = "Load based alerts of the cluster";
+        public static final String YARN_RECOMMENDATION = "recommendation from yarn.";
         public static final String SCALING_CONFIGURATION = "Scaling configuration for the cluster";
     }
 
