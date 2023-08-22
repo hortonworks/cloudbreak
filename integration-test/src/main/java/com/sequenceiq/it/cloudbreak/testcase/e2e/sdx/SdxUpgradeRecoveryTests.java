@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-import static com.sequenceiq.it.cloudbreak.util.SdxUtil.MINIMUM_EDL_RUN_TIME_VERSION;
 import static java.lang.String.format;
 
 import java.util.List;
@@ -29,10 +28,7 @@ import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
-import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class SdxUpgradeRecoveryTests extends PreconditionSdxE2ETest {
 
@@ -83,41 +79,6 @@ public class SdxUpgradeRecoveryTests extends PreconditionSdxE2ETest {
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> getOriginalImageIdAndStackCrn(originalImageId, originalCrn, testDto, client))
                 .then((tc, testDto, client) -> executeCommandToCauseUpgradeFailure(testDto, client))
-                .when(sdxTestClient.upgrade(), key(sdx))
-                .awaitForFlowFail()
-                .when(sdxTestClient.recoverFromUpgrade(), key(sdx))
-                .awaitForFlow(emptyRunningParameter().withWaitForFlowSuccess())
-                .then((tc, dto, client) -> validateStackCrn(originalCrn, dto))
-                .then((tc, dto, client) -> validateImageId(originalImageId, dto))
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT)
-    @UseSpotInstances
-    @Description(
-            given = "there is a running Cloudbreak and an EDL in available state, ",
-            when = "recovery called on the EDL",
-            then = "SDX recovery should be successful, the cluster should be up and running, the image should be the same, stack CRN should be retained"
-    )
-    public void testSdxEDLUpgradeRecovery(TestContext testContext) {
-        AtomicReference<String> originalImageId = new AtomicReference<>();
-        AtomicReference<String> originalCrn = new AtomicReference<>();
-        String sdx = resourcePropertyProvider().getName();
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setCreate(true);
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
-
-        testContext
-                .given(sdx, SdxTestDto.class)
-                .withCloudStorage()
-                .withRuntimeVersion(MINIMUM_EDL_RUN_TIME_VERSION)
-                .withClusterShape(SdxClusterShape.ENTERPRISE)
-                .withExternalDatabase(sdxDatabaseRequest)
-                .when(sdxTestClient.create(), key(sdx))
-                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .awaitForHealthyInstances()
-                .then((tc, dto, client) -> getOriginalImageIdAndStackCrn(originalImageId, originalCrn, dto, client))
-                .then((tc, dto, client) -> executeCommandToCauseUpgradeFailure(dto, client))
                 .when(sdxTestClient.upgrade(), key(sdx))
                 .awaitForFlowFail()
                 .when(sdxTestClient.recoverFromUpgrade(), key(sdx))

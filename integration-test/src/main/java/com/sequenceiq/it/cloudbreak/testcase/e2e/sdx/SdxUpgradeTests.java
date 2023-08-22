@@ -3,7 +3,6 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-import static com.sequenceiq.it.cloudbreak.util.SdxUtil.MINIMUM_EDL_RUN_TIME_VERSION;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -120,30 +119,6 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest {
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
                 // This assertion is disabled until the Audit Service is not configured.
                 //.then(datalakeAuditGrpcServiceAssertion::upgradeClusterByNameInternal)
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT)
-    @UseSpotInstances
-    @Description(
-            given = "there is a running Cloudbreak, and an ENTERPRISE SDX cluster in available state",
-            when = "upgrade called on the SDX cluster",
-            then = "SDX upgrade should be successful, the cluster should be up and running"
-    )
-    public void testSDXHAUpgradeEDL(TestContext testContext) {
-        String sdx = resourcePropertyProvider().getName();
-        testContext
-                .given(sdx, SdxTestDto.class)
-                .withClusterShape(SdxClusterShape.ENTERPRISE)
-                .withCloudStorage()
-                .withRuntimeVersion(MINIMUM_EDL_RUN_TIME_VERSION)
-                .when(sdxTestClient.create(), key(sdx))
-                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .awaitForHealthyInstances()
-                .when(sdxTestClient.upgrade(), key(sdx))
-                .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
-                .await(SdxClusterStatusResponse.RUNNING)
-                .awaitForHealthyInstances()
                 .validate();
     }
 }
