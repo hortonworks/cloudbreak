@@ -22,35 +22,16 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 @Component
 public class SdxResizeTestUtil {
-
     @Inject
     private SdxTestClient sdxTestClient;
 
     @Inject
     private SdxUtil sdxUtil;
 
-    public void runResizeTestEDL(TestContext testContext, String sdxKey, SdxCloudStorageRequest cloudStorageRequest) {
-        SdxResizeTestValidator resizeTestValidator = new SdxResizeTestValidator(SdxClusterShape.ENTERPRISE);
-        performInitialResizeSteps(testContext, sdxKey, cloudStorageRequest, resizeTestValidator, false, SdxClusterShape.ENTERPRISE)
-                .await(SdxClusterStatusResponse.RUNNING, key(sdxKey))
-                .awaitForHealthyInstances()
-                .then((tc, dto, client) -> resizeTestValidator.validateResizedCluster(dto))
-                .validate();
-    }
-
-    public void runResizeTestEDLWithRecovery(TestContext testContext, String sdxKey, SdxCloudStorageRequest cloudStorageRequest) {
-        SdxResizeTestValidator resizeTestValidator = new SdxResizeTestValidator(SdxClusterShape.ENTERPRISE);
-        performInitialResizeSteps(testContext, sdxKey, cloudStorageRequest, resizeTestValidator, false, SdxClusterShape.ENTERPRISE)
-                .then((tc, testDto, client) -> performProvisioningFailureAndRecovery(testDto, sdxKey))
-                // Ensure current cluster is identical to original cluster.
-                .then((tc, dto, client) -> resizeTestValidator.validateRecoveredCluster(dto))
-                .validate();
-    }
-
-    public void runResizeTestMediumDuty(TestContext testContext, String sdxKey, SdxCloudStorageRequest cloudStorageRequest) {
+    public void runResizeTest(TestContext testContext, String sdxKey, SdxCloudStorageRequest cloudStorageRequest) {
         SdxResizeTestValidator resizeTestValidator = new SdxResizeTestValidator(SdxClusterShape.MEDIUM_DUTY_HA);
 
-        performInitialResizeSteps(testContext, sdxKey, cloudStorageRequest, resizeTestValidator, false, SdxClusterShape.CUSTOM)
+        performInitialResizeSteps(testContext, sdxKey, cloudStorageRequest, resizeTestValidator, false)
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxKey))
                 .awaitForHealthyInstances()
 
@@ -59,10 +40,10 @@ public class SdxResizeTestUtil {
                 .validate();
     }
 
-    public void runResizeRecoveryFromProvisioningFailureMediumDutyTest(TestContext testContext, String sdxKey, SdxCloudStorageRequest cloudStorageRequest) {
+    public void runResizeRecoveryFromProvisioningFailureTest(TestContext testContext, String sdxKey, SdxCloudStorageRequest cloudStorageRequest) {
         SdxResizeTestValidator resizeTestValidator = new SdxResizeTestValidator(SdxClusterShape.CUSTOM);
 
-        performInitialResizeSteps(testContext, sdxKey, cloudStorageRequest, resizeTestValidator, true, SdxClusterShape.CUSTOM)
+        performInitialResizeSteps(testContext, sdxKey, cloudStorageRequest, resizeTestValidator, true)
                 .then((tc, testDto, client) -> performProvisioningFailureAndRecovery(testDto, sdxKey))
 
                 // Ensure current cluster is identical to original cluster.
@@ -71,7 +52,7 @@ public class SdxResizeTestUtil {
     }
 
     private SdxInternalTestDto performInitialResizeSteps(TestContext testContext, String sdxKey, SdxCloudStorageRequest cloudStorageRequest,
-            SdxResizeTestValidator validator, Boolean recoveryTest, SdxClusterShape clusterShape) {
+            SdxResizeTestValidator validator, Boolean recoveryTest) {
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         return testContext
@@ -83,7 +64,7 @@ public class SdxResizeTestUtil {
                 .given(sdxKey, SdxInternalTestDto.class)
                 .withDatabase(sdxDatabaseRequest)
                 .withCloudStorage(cloudStorageRequest)
-                .withClusterShape(clusterShape)
+                .withClusterShape(SdxClusterShape.CUSTOM)
                 .withTelemetry("telemetry")
                 .when(sdxTestClient.createInternal(), key(sdxKey))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxKey))

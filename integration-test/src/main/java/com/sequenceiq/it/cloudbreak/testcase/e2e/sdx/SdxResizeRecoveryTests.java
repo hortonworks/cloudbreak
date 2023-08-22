@@ -21,20 +21,8 @@ public class SdxResizeRecoveryTests extends PreconditionSdxE2ETest {
             then = "recovery should be available and successful when run, the original cluster should be up and running"
     )
     public void testSdxResizeRecoveryFromProvisioningFailure(TestContext testContext) {
-        sdxResizeTestUtil.runResizeRecoveryFromProvisioningFailureMediumDutyTest(
+        sdxResizeTestUtil.runResizeRecoveryFromProvisioningFailureTest(
                 testContext, resourcePropertyProvider().getName(), getCloudStorageRequest(testContext)
-        );
-    }
-
-    @Test(dataProvider = TEST_CONTEXT)
-    @UseSpotInstances
-    @Description(
-            given = "there is an available environment with a running SDX cluster",
-            when = "resize is performed on the SDX cluster but fails during provisioning",
-            then = "recovery should be available and successful when run, the original cluster should be up and running"
-    )
-    public void testSdxResizeRecoveryFromProvisioningFailureEDL(TestContext testContext) {
-        sdxResizeTestUtil.runResizeTestEDLWithRecovery(testContext, resourcePropertyProvider().getName(), getCloudStorageRequest(testContext)
         );
     }
 }

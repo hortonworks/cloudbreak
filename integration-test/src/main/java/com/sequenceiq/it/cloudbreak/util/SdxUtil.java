@@ -13,8 +13,6 @@ import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 @Component
 public class SdxUtil {
 
-    public static final String MINIMUM_EDL_RUN_TIME_VERSION = "7.2.17";
-
     public List<String> getInstanceIds(AbstractSdxTestDto testDto, SdxClient sdxClient, String hostGroupName) {
         List<InstanceGroupV4Response> instanceGroups = getSdxClusterDetailResponse(testDto, sdxClient)
                 .getStackV4Response().getInstanceGroups();
