@@ -16,7 +16,7 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 
 public class NetworkTest {
 
-    protected static final String UNMATCHED_AZ_MSG = "Please provide public subnets in each of the following availability zones:";
+    protected static final String UNMATCHED_AZ_MSG = "Please provide subnets in each of the following availability zones:";
 
     protected static final String AZ_1 = "AZ-1";
 
