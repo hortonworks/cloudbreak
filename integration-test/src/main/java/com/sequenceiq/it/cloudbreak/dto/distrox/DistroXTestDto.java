@@ -414,4 +414,9 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         this.osUpgradeByUpgradeSets = osUpgradeByUpgradeSets;
     }
 
+    public DistroXTestDto withEnableMultiAz(boolean enableMultiAz) {
+        getRequest().setEnableMultiAz(enableMultiAz);
+        return this;
+    }
+
 }
