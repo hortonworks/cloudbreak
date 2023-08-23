@@ -121,12 +121,7 @@ public class CloudFormationStackUtil {
 
     public List<CloudResource> getInstanceCloudResources(AuthenticatedContext ac, AmazonCloudFormationClient client,
             AmazonAutoScalingClient amazonASClient, List<Group> groups) {
-        Map<String, Group> groupNameMapping = groups.stream()
-                .collect(Collectors.toMap(
-                        group -> getAutoscalingGroupName(ac, client, group.getName()),
-                        group -> group
-                ));
-
+        Map<String, Group> groupNameMapping = getAutoscalingGroupNameToCloudStackGroup(ac, client, groups);
         Map<Group, List<String>> idsByGroups = getInstanceIdsByGroups(amazonASClient, groupNameMapping);
         return idsByGroups.entrySet().stream()
                 .flatMap(entry -> {
@@ -160,6 +155,24 @@ public class CloudFormationStackUtil {
                     return cloudResources.stream();
                 })
                 .collect(Collectors.toList());
+    }
+
+    private Map<String, Group> getAutoscalingGroupNameToCloudStackGroup(AuthenticatedContext ac, AmazonCloudFormationClient client, List<Group> groups) {
+        Map<String, Group> groupNameMapping = groups.stream()
+                .collect(Collectors.toMap(
+                        group -> getAutoscalingGroupName(ac, client, group.getName()),
+                        group -> group
+                ));
+        return groupNameMapping;
+    }
+
+    public Map<String, String> getGroupNameToAutoscalingGroupName(AuthenticatedContext ac, AmazonCloudFormationClient client, List<Group> groups) {
+        Map<String, String> groupNameMapping = groups.stream()
+                .collect(Collectors.toMap(
+                        Group::getName,
+                        group -> getAutoscalingGroupName(ac, client, group.getName())
+                ));
+        return groupNameMapping;
     }
 
     public CloudResource getCloudFormationStackResource(Iterable<CloudResource> cloudResources) {
