@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.environment.environment.validation.ValidationType.ENVIRONMENT_CREATION;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudSubnetParametersService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -35,13 +38,20 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
 
     private final AzurePrivateEndpointValidator azurePrivateEndpointValidator;
 
+    private final AzureCloudSubnetParametersService azureCloudSubnetParametersService;
+
+    private final EntitlementService entitlementService;
+
     @Value("${cb.multiaz.azure.availabilityZones}")
     private Set<String> azureAvailabilityZones;
 
     public AzureEnvironmentNetworkValidator(CloudNetworkService cloudNetworkService,
-            AzurePrivateEndpointValidator azurePrivateEndpointValidator) {
+            AzurePrivateEndpointValidator azurePrivateEndpointValidator, AzureCloudSubnetParametersService azureCloudSubnetParametersService,
+            EntitlementService entitlementService) {
         this.cloudNetworkService = cloudNetworkService;
         this.azurePrivateEndpointValidator = azurePrivateEndpointValidator;
+        this.azureCloudSubnetParametersService = azureCloudSubnetParametersService;
+        this.entitlementService = entitlementService;
     }
 
     @Override
@@ -57,6 +67,7 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
                 .stream().findFirst()
                 .orElseThrow();
         checkSubnetsProvidedWhenExistingNetwork(resultBuilder, networkDto, networkDto.getAzure(), cloudNetworks, region);
+        checkFlexibleServerSubnetIds(networkDto.getAzure(), environmentValidationDto.getEnvironmentDto(), networkDto, resultBuilder);
         if (environmentValidationDto.getValidationType() == ENVIRONMENT_CREATION) {
             azurePrivateEndpointValidator.checkNetworkPoliciesWhenExistingNetwork(networkDto, cloudNetworks, resultBuilder);
             azurePrivateEndpointValidator.checkMultipleResourceGroup(resultBuilder, environmentDto, networkDto);
@@ -208,6 +219,23 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
             return false;
         } else {
             return true;
+        }
+    }
+
+    private void checkFlexibleServerSubnetIds(AzureParams azureParams, EnvironmentDto environmentDto, NetworkDto networkDto,
+            ValidationResultBuilder resultBuilder) {
+        Set<String> flexibleServerSubnetIds = azureParams.getFlexibleServerSubnetIds();
+        if (entitlementService.isAzureDatabaseFlexibleServerEnabled(environmentDto.getAccountId()) && CollectionUtils.isNotEmpty(flexibleServerSubnetIds)) {
+            Map<String, CloudSubnet> flexibleSubnets = cloudNetworkService.getSubnetMetadata(environmentDto, networkDto, flexibleServerSubnetIds);
+            Set<String> invalidSubnets = flexibleSubnets.entrySet().stream()
+                    .filter(entry -> !azureCloudSubnetParametersService.isFlexibleServerDelegatedSubnet(entry.getValue()))
+                    .map(Entry::getKey)
+                    .collect(Collectors.toSet());
+            if (CollectionUtils.isNotEmpty(invalidSubnets)) {
+                String message = String.format("The following subnets are not delegated to flexible servers: %s", String.join(",", invalidSubnets));
+                LOGGER.info(message);
+                resultBuilder.error(message);
+            }
         }
     }
 

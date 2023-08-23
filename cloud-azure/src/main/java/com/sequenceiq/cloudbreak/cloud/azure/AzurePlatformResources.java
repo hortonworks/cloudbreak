@@ -164,6 +164,7 @@ public class AzurePlatformResources implements PlatformResources {
         for (Entry<String, Subnet> subnet : network.subnets().entrySet()) {
             CloudSubnet cloudSubnet = new CloudSubnet(subnet.getKey(), subnet.getKey(), null, subnet.getValue().addressPrefix());
             azureCloudSubnetParametersService.addPrivateEndpointNetworkPolicies(cloudSubnet, subnet.getValue().innerModel().privateEndpointNetworkPolicies());
+            azureCloudSubnetParametersService.addFlexibleServerDelegatedSubnet(cloudSubnet, subnet.getValue().innerModel().delegations());
             subnets.add(cloudSubnet);
             LOGGER.debug("Mapping azure subnet '{}' to cloudSubnet: {}", subnet.getKey(), cloudSubnet);
         }

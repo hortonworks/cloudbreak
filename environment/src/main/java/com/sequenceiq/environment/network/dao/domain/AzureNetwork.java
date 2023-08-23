@@ -1,10 +1,14 @@
 package com.sequenceiq.environment.network.dao.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import com.sequenceiq.cloudbreak.common.database.StringSetToStringConverter;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 
@@ -26,6 +30,10 @@ public class AzureNetwork extends BaseNetwork {
     @Convert(converter = JsonToString.class)
     @Column(name = "zonemetas", columnDefinition = "TEXT")
     private Json zoneMetas;
+
+    @Convert(converter = StringSetToStringConverter.class)
+    @Column(name = "flexibleserversubnetids", columnDefinition = "TEXT")
+    private Set<String> flexibleServerSubnetIds = new HashSet<>();
 
     @Override
     public String getNetworkId() {
@@ -84,6 +92,14 @@ public class AzureNetwork extends BaseNetwork {
         this.zoneMetas = zoneMetas;
     }
 
+    public Set<String> getFlexibleServerSubnetIds() {
+        return flexibleServerSubnetIds;
+    }
+
+    public void setFlexibleServerSubnetIds(Set<String> flexibleServerSubnetIds) {
+        this.flexibleServerSubnetIds = flexibleServerSubnetIds;
+    }
+
     @Override
     public String toString() {
         return "AzureNetwork{" +
@@ -92,8 +108,9 @@ public class AzureNetwork extends BaseNetwork {
                 ", noPublicIp=" + noPublicIp +
                 ", databasePrivateDnsZoneId='" + databasePrivateDnsZoneId + '\'' +
                 ", aksPrivateDnsZoneId='" + aksPrivateDnsZoneId + '\'' +
-                ", noOutboundLoadBalancer='" + noOutboundLoadBalancer + '\'' +
-                ", zones='" + zoneMetas + '\'' +
+                ", noOutboundLoadBalancer=" + noOutboundLoadBalancer +
+                ", zoneMetas=" + zoneMetas +
+                ", flexibleServerSubnetIds=" + flexibleServerSubnetIds +
                 "} " + super.toString();
     }
 }

@@ -87,6 +87,7 @@ public class NetworkRequestToDtoConverterTest {
         assertEquals(network.getAzure().getAksPrivateDnsZoneId(), actual.getAzure().getAksPrivateDnsZoneId());
         assertEquals(network.getAzure().getNoOutboundLoadBalancer(), actual.getAzure().isNoOutboundLoadBalancer());
         assertEquals(network.getAzure().getAvailabilityZones(), actual.getAzure().getAvailabilityZones());
+        assertEquals(network.getAzure().getFlexibleServerSubnetIds(), actual.getAzure().getFlexibleServerSubnetIds());
         assertCommonFields(network, actual);
     }
 
@@ -200,6 +201,7 @@ public class NetworkRequestToDtoConverterTest {
         azureParams.setAksPrivateDnsZoneId("aks-private-dns-zone-id");
         azureParams.setNoOutboundLoadBalancer(true);
         azureParams.setAvailabilityZones(Set.of("1", "2", "3"));
+        azureParams.setFlexibleServerSubnetIds(Set.of("f1", "f2", "f3"));
         return azureParams;
     }
 

@@ -77,7 +77,7 @@ public class CloudNetworkService {
         return subnetMetadata;
     }
 
-    private Map<String, CloudSubnet> getSubnetMetadata(EnvironmentDto environmentDto, NetworkDto network, Set<String> subnetIds) {
+    public Map<String, CloudSubnet> getSubnetMetadata(EnvironmentDto environmentDto, NetworkDto network, Set<String> subnetIds) {
         LOGGER.debug("retrieveSubnetMetadata() has called with the following parameters: EnvironmentDto -> {}, NetworkDto -> {}", environmentDto, network);
         if (network == null || subnetIds.isEmpty()) {
             return Map.of();

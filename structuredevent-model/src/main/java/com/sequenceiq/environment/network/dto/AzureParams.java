@@ -22,6 +22,8 @@ public class AzureParams {
 
     private Set<String> availabilityZones;
 
+    private Set<String> flexibleServerSubnetIds;
+
     private AzureParams(Builder builder) {
         networkId = builder.networkId;
         resourceGroupName = builder.resourceGroupName;
@@ -30,6 +32,7 @@ public class AzureParams {
         noOutboundLoadBalancer = builder.noOutboundLoadBalancer;
         aksPrivateDnsZoneId = builder.aksPrivateDnsZoneId;
         availabilityZones = builder.availabilityZones;
+        flexibleServerSubnetIds = builder.flexibleServerSubnetIds;
     }
 
     public String getNetworkId() {
@@ -88,6 +91,14 @@ public class AzureParams {
         this.availabilityZones = availabilityZones;
     }
 
+    public Set<String> getFlexibleServerSubnetIds() {
+        return flexibleServerSubnetIds;
+    }
+
+    public void setFlexibleServerSubnetIds(Set<String> flexibleServerSubnetIds) {
+        this.flexibleServerSubnetIds = flexibleServerSubnetIds;
+    }
+
     @Override
     public String toString() {
         return "AzureParams{" +
@@ -96,8 +107,9 @@ public class AzureParams {
                 ", noPublicIp=" + noPublicIp +
                 ", databasePrivateDnsZoneId='" + databasePrivateDnsZoneId + '\'' +
                 ", aksPrivateDnsZoneId='" + aksPrivateDnsZoneId + '\'' +
-                ", noOutboundLoadBalancer='" + noOutboundLoadBalancer + '\'' +
-                ", availabilityZones='" + availabilityZones + '\'' +
+                ", noOutboundLoadBalancer=" + noOutboundLoadBalancer +
+                ", availabilityZones=" + availabilityZones +
+                ", flexibleServerSubnetIds=" + flexibleServerSubnetIds +
                 '}';
     }
 
@@ -120,6 +132,8 @@ public class AzureParams {
         private boolean noOutboundLoadBalancer;
 
         private Set<String> availabilityZones;
+
+        private Set<String> flexibleServerSubnetIds;
 
         private Builder() {
         }
@@ -156,6 +170,11 @@ public class AzureParams {
 
         public Builder withAvailabilityZones(Set<String> availabilityZones) {
             this.availabilityZones = availabilityZones;
+            return this;
+        }
+
+        public Builder withFlexibleServerSubnetIds(Set<String> flexibleServerSubnetIds) {
+            this.flexibleServerSubnetIds = flexibleServerSubnetIds;
             return this;
         }
 
