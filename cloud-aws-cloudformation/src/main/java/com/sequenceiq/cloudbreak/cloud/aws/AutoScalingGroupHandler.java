@@ -42,8 +42,8 @@ public class AutoScalingGroupHandler {
     }
 
     public Map<AutoScalingGroup, String> getAutoScalingGroups(AmazonCloudFormationClient cloudFormationClient,
-            AmazonAutoScalingClient autoScalingClient, String stackName) {
-        DescribeStackResourcesRequest resourcesRequest = DescribeStackResourcesRequest.builder().stackName(stackName).build();
+            AmazonAutoScalingClient autoScalingClient, String cloudFormationStackName) {
+        DescribeStackResourcesRequest resourcesRequest = DescribeStackResourcesRequest.builder().stackName(cloudFormationStackName).build();
         DescribeStackResourcesResponse resourcesResult = cloudFormationClient.describeStackResources(resourcesRequest);
         Map<String, String> autoScalingGroups = resourcesResult.stackResources().stream()
                 .filter(stackResource -> "AWS::AutoScaling::AutoScalingGroup".equalsIgnoreCase(stackResource.resourceType()))
@@ -55,8 +55,16 @@ public class AutoScalingGroupHandler {
     }
 
     public Optional<AutoScalingGroup> getAutoScalingGroup(AmazonCloudFormationClient cloudFormationClient,
-            AmazonAutoScalingClient autoScalingClient, String stackName, String groupName) {
-        Map<AutoScalingGroup, String> autoScalingGroups = getAutoScalingGroups(cloudFormationClient, autoScalingClient, stackName);
+            AmazonAutoScalingClient autoScalingClient, String cloudFormationStackName, String groupName) {
+        Map<AutoScalingGroup, String> autoScalingGroups = getAutoScalingGroups(cloudFormationClient, autoScalingClient, cloudFormationStackName);
         return autoScalingGroups.keySet().stream().filter(a -> a.autoScalingGroupName().equals(groupName)).findFirst();
+    }
+
+    public Map<String, AutoScalingGroup> autoScalingGroupByName(AmazonCloudFormationClient cloudFormationRetryClient,
+            AmazonAutoScalingClient autoScalingClient, String cloudFormationStackName) {
+        Map<AutoScalingGroup, String> autoScalingGroups = getAutoScalingGroups(cloudFormationRetryClient, autoScalingClient, cloudFormationStackName);
+
+        return autoScalingGroups.keySet().stream()
+                .collect(Collectors.toMap(AutoScalingGroup::autoScalingGroupName, asg -> asg));
     }
 }

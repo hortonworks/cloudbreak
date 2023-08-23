@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsMetadataCollector;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsSyncUserDataService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
@@ -88,6 +89,9 @@ public class AwsUpscaleService {
     private AwsMetadataCollector awsMetadataCollector;
 
     @Inject
+    private AwsSyncUserDataService syncUserDataService;
+
+    @Inject
     private EntitlementService entitlementService;
 
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources,
@@ -99,7 +103,7 @@ public class AwsUpscaleService {
         AmazonCloudFormationClient cloudFormationClient = awsClient.createCloudFormationClient(credentialView, regionName);
         AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(credentialView, regionName);
         AmazonEc2Client amazonEC2Client = awsClient.createEc2Client(credentialView, regionName);
-
+        syncUserDataService.syncUserData(ac, stack, resources);
         List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
         Map<String, Group> desiredAutoscalingGroupsByName = getAutoScaleGroupsByNameFromCloudFormationTemplate(ac, cloudFormationClient, scaledGroups);
         LOGGER.info("Desired autoscaling groups: {}", desiredAutoscalingGroupsByName);

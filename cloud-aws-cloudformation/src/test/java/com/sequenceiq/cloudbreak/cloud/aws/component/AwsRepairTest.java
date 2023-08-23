@@ -42,6 +42,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsMetadataCollector;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsSyncUserDataService;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
@@ -216,6 +217,9 @@ public class AwsRepairTest {
 
     @MockBean
     private AwsMetricPublisher awsMetricPublisher;
+
+    @MockBean
+    private AwsSyncUserDataService awsSyncUserDataService;
 
     @Test
     public void repairStack() throws Exception {
