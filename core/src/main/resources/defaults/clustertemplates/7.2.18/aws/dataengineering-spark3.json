@@ -6,7 +6,7 @@
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.18 - Data Engineering: Apache Spark3"
+      "blueprintName": "7.2.18 - Data Engineering: Apache Spark3, Apache Hive, Apache Oozie"
     },
     "instanceGroups": [
       {

@@ -1,8 +1,8 @@
 {
-  "description": "7.2.18 - Data Discovery and Exploration",
+  "description": "7.2.18 - Data Discovery and Exploration for Spark3",
   "blueprint": {
     "cdhVersion": "7.2.18",
-    "displayName": "dde",
+    "displayName": "dde-spark3",
     "blueprintUpgradeOption": "GA",
     "services": [
       {
@@ -190,18 +190,24 @@
         ]
       },
       {
-        "refName": "spark_on_yarn",
-        "serviceType": "SPARK_ON_YARN",
+        "refName": "spark3_on_yarn",
+        "serviceType": "SPARK3_ON_YARN",
         "roleConfigGroups": [
           {
-            "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
-            "roleType": "SPARK_YARN_HISTORY_SERVER",
+            "refName": "spark3_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+            "roleType": "SPARK3_YARN_HISTORY_SERVER",
             "base": true
           },
           {
-            "refName": "spark_on_yarn-GATEWAY-BASE",
+            "refName": "spark3_on_yarn-GATEWAY-BASE",
             "roleType": "GATEWAY",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                "name": "spark3-conf/spark-defaults.conf_client_config_safety_valve",
+                "value": "spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version=1"
+              }
+            ]
           }
         ]
       }
@@ -214,7 +220,7 @@
           "hdfs-GATEWAY-BASE",
           "yarn-GATEWAY-BASE",
           "solr-GATEWAY-BASE",
-          "spark_on_yarn-GATEWAY-BASE"
+          "spark3_on_yarn-GATEWAY-BASE"
         ]
       },
       {
@@ -228,7 +234,7 @@
           "zookeeper-SERVER-BASE",
           "yarn-GATEWAY-BASE",
           "solr-GATEWAY-BASE",
-          "spark_on_yarn-GATEWAY-BASE",
+          "spark3_on_yarn-GATEWAY-BASE",
           "hue-HUE_LOAD_BALANCER-BASE",
           "hue-HUE_SERVER-BASE"
         ]
@@ -243,8 +249,8 @@
           "yarn-RESOURCEMANAGER-BASE",
           "yarn-GATEWAY-BASE",
           "solr-GATEWAY-BASE",
-          "spark_on_yarn-GATEWAY-BASE",
-          "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE"
+          "spark3_on_yarn-GATEWAY-BASE",
+          "spark3_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE"
         ]
       },
       {
@@ -255,7 +261,7 @@
           "hdfs-GATEWAY-BASE",
           "solr-SOLR_SERVER-BASE",
           "yarn-GATEWAY-BASE",
-          "spark_on_yarn-GATEWAY-BASE"
+          "spark3_on_yarn-GATEWAY-BASE"
         ]
       },
       {
@@ -267,7 +273,7 @@
           "yarn-NODEMANAGER-BASE",
           "yarn-GATEWAY-BASE",
           "solr-GATEWAY-BASE",
-          "spark_on_yarn-GATEWAY-BASE"
+          "spark3_on_yarn-GATEWAY-BASE"
         ]
       }
     ]

@@ -1,69 +1,17 @@
 {
-  "name": "7.2.18 - Data Engineering HA for YCloud",
+  "name": "7.2.18 - Data Discovery and Exploration - Spark3 for YCloud",
   "description": "",
-  "type": "DATAENGINEERING",
-  "featureState": "PREVIEW",
+  "type": "DISCOVERY_DATA_AND_EXPLORATION",
+  "featureState": "RELEASED",
   "cloudPlatform": "YARN",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.18 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie"
-    },
-    "externalDatabase": {
-      "availabilityType": "HA"
+      "blueprintName": "7.2.18 - Data Discovery and Exploration for Spark3"
     },
     "instanceGroups": [
       {
-        "nodeCount": 1,
-        "name": "manager",
-        "type": "GATEWAY",
-        "recoveryMode": "MANUAL",
-        "template": {
-          "rootVolume": {
-            "size": 50
-          },
-          "yarn": {
-            "cpus": 4,
-            "memory": 8192
-          }
-        },
-        "recipeNames": []
-      },
-      {
-        "nodeCount": 0,
-        "name": "compute",
-        "type": "CORE",
-        "recoveryMode": "MANUAL",
-        "template": {
-          "rootVolume": {
-            "size": 50
-          },
-          "yarn": {
-            "cpus": 4,
-            "memory": 8192
-          }
-        },
-        "recipeNames": []
-      },
-      {
-        "nodeCount": 3,
-        "name": "worker",
-        "type": "CORE",
-        "recoveryMode": "MANUAL",
-        "template": {
-          "rootVolume": {
-            "size": 50
-          },
-          "yarn": {
-            "cpus": 4,
-            "memory": 8192
-          }
-        },
-        "recipeNames": []
-      },
-      {
-        "nodeCount": 2,
         "name": "master",
-        "type": "CORE",
+        "nodeCount": 2,
         "recoveryMode": "MANUAL",
         "template": {
           "rootVolume": {
@@ -74,12 +22,12 @@
             "memory": 32768
           }
         },
-        "recipeNames": []
+        "type": "CORE"
       },
       {
-        "nodeCount": 0,
         "name": "gateway",
-        "type": "CORE",
+        "nodeCount": 1,
+        "recoveryMode": "MANUAL",
         "template": {
           "rootVolume": {
             "size": 50
@@ -89,12 +37,11 @@
             "memory": 8192
           }
         },
-        "recipeNames": []
+        "type": "CORE"
       },
       {
+        "name": "leader",
         "nodeCount": 1,
-        "name": "masterx",
-        "type": "CORE",
         "recoveryMode": "MANUAL",
         "template": {
           "rootVolume": {
@@ -102,10 +49,40 @@
           },
           "yarn": {
             "cpus": 4,
-            "memory": 32768
+            "memory": 8192
           }
         },
-        "recipeNames": []
+        "type": "GATEWAY"
+      },
+      {
+        "name": "worker",
+        "nodeCount": 3,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 8192
+          }
+        },
+        "type": "CORE"
+      },
+      {
+        "name": "yarnworker",
+        "nodeCount": 1,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 8192
+          }
+        },
+        "type": "CORE"
       }
     ]
   }

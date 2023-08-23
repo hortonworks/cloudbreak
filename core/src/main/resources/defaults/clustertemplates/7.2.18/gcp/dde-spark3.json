@@ -1,12 +1,12 @@
 {
-  "name": "7.2.18 - Data Discovery and Exploration for Azure",
+  "name": "7.2.18 - Data Discovery and Exploration - Spark3 for Google Cloud",
   "description": "",
   "type": "DISCOVERY_DATA_AND_EXPLORATION",
-  "featureState": "RELEASED",
-  "cloudPlatform": "AZURE",
+  "featureState": "PREVIEW",
+  "cloudPlatform": "GCP",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.18 - Data Discovery and Exploration"
+      "blueprintName": "7.2.18 - Data Discovery and Exploration for Spark3"
     },
     "instanceGroups": [
       {
@@ -18,11 +18,11 @@
             {
               "count": 1,
               "size": 100,
-              "type": "StandardSSD_LRS"
+              "type": "pd-standard"
             }
           ],
-          "instanceType": "Standard_D8_v3",
-          "cloudPlatform": "AZURE"
+          "instanceType": "e2-standard-8",
+          "cloudPlatform": "GCP"
         },
         "type": "CORE"
       },
@@ -35,11 +35,11 @@
             {
               "count": 1,
               "size": 100,
-              "type": "StandardSSD_LRS"
+              "type": "pd-standard"
             }
           ],
-          "instanceType": "Standard_D8_v3",
-          "cloudPlatform": "AZURE"
+          "instanceType": "e2-standard-8",
+          "cloudPlatform": "GCP"
         },
         "type": "CORE"
       },
@@ -52,11 +52,11 @@
             {
               "count": 1,
               "size": 100,
-              "type": "StandardSSD_LRS"
+              "type": "pd-standard"
             }
           ],
-          "instanceType": "Standard_D8_v3",
-          "cloudPlatform": "AZURE"
+          "instanceType": "e2-standard-8",
+          "cloudPlatform": "GCP"
         },
         "type": "GATEWAY"
       },
@@ -69,11 +69,11 @@
             {
               "count": 1,
               "size": 100,
-              "type": "StandardSSD_LRS"
+              "type": "pd-standard"
             }
           ],
-          "instanceType": "Standard_D8_v3",
-          "cloudPlatform": "AZURE"
+          "instanceType": "e2-standard-8",
+          "cloudPlatform": "GCP"
         },
         "type": "CORE"
       },
@@ -86,11 +86,11 @@
             {
               "count": 1,
               "size": 100,
-              "type": "StandardSSD_LRS"
+              "type": "pd-standard"
             }
           ],
-          "instanceType": "Standard_D8_v3",
-          "cloudPlatform": "AZURE"
+          "instanceType": "e2-standard-8",
+          "cloudPlatform": "GCP"
         },
         "type": "CORE"
       }

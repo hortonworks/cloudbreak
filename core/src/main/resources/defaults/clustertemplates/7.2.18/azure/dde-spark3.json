@@ -1,12 +1,12 @@
 {
-  "name": "7.2.18 - Data Discovery and Exploration for AWS",
+  "name": "7.2.18 - Data Discovery and Exploration - Spark3 for Azure",
   "description": "",
   "type": "DISCOVERY_DATA_AND_EXPLORATION",
   "featureState": "RELEASED",
-  "cloudPlatform": "AWS",
+  "cloudPlatform": "AZURE",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.18 - Data Discovery and Exploration"
+      "blueprintName": "7.2.18 - Data Discovery and Exploration for Spark3"
     },
     "instanceGroups": [
       {
@@ -18,16 +18,11 @@
             {
               "count": 1,
               "size": 100,
-              "type": "standard"
+              "type": "StandardSSD_LRS"
             }
           ],
-          "aws": {
-            "encryption": {
-              "type": "NONE"
-            }
-          },
-          "instanceType": "m5.2xlarge",
-          "cloudPlatform": "AWS"
+          "instanceType": "Standard_D8_v3",
+          "cloudPlatform": "AZURE"
         },
         "type": "CORE"
       },
@@ -40,16 +35,11 @@
             {
               "count": 1,
               "size": 100,
-              "type": "standard"
+              "type": "StandardSSD_LRS"
             }
           ],
-          "aws": {
-            "encryption": {
-              "type": "NONE"
-            }
-          },
-          "instanceType": "m5.2xlarge",
-          "cloudPlatform": "AWS"
+          "instanceType": "Standard_D8_v3",
+          "cloudPlatform": "AZURE"
         },
         "type": "CORE"
       },
@@ -62,16 +52,11 @@
             {
               "count": 1,
               "size": 100,
-              "type": "standard"
+              "type": "StandardSSD_LRS"
             }
           ],
-          "aws": {
-            "encryption": {
-              "type": "NONE"
-            }
-          },
-          "instanceType": "m5.2xlarge",
-          "cloudPlatform": "AWS"
+          "instanceType": "Standard_D8_v3",
+          "cloudPlatform": "AZURE"
         },
         "type": "GATEWAY"
       },
@@ -84,16 +69,11 @@
             {
               "count": 1,
               "size": 100,
-              "type": "standard"
+              "type": "StandardSSD_LRS"
             }
           ],
-          "aws": {
-            "encryption": {
-              "type": "NONE"
-            }
-          },
-          "instanceType": "m5.2xlarge",
-          "cloudPlatform": "AWS"
+          "instanceType": "Standard_D8_v3",
+          "cloudPlatform": "AZURE"
         },
         "type": "CORE"
       },
@@ -106,16 +86,11 @@
             {
               "count": 1,
               "size": 100,
-              "type": "standard"
+              "type": "StandardSSD_LRS"
             }
           ],
-          "aws": {
-            "encryption": {
-              "type": "NONE"
-            }
-          },
-          "instanceType": "m5.2xlarge",
-          "cloudPlatform": "AWS"
+          "instanceType": "Standard_D8_v3",
+          "cloudPlatform": "AZURE"
         },
         "type": "CORE"
       }

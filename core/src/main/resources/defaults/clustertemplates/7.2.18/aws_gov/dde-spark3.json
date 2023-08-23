@@ -1,22 +1,27 @@
 {
-  "name": "7.2.18 - Real-time Data Mart for AWS",
+  "name": "7.2.18 - Data Discovery and Exploration - Spark3 for AWS",
   "description": "",
-  "type": "DATAMART",
+  "type": "DISCOVERY_DATA_AND_EXPLORATION",
   "featureState": "RELEASED",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.18 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark"
+      "blueprintName": "7.2.18 - Data Discovery and Exploration for Spark3"
+    },
+    "externalDatabase": {
+      "availabilityType": "HA"
     },
     "instanceGroups": [
       {
-        "name": "master1",
+        "name": "master",
+        "nodeCount": 2,
+        "recoveryMode": "MANUAL",
         "template": {
           "attachedVolumes": [
             {
               "count": 1,
               "size": 100,
-              "type": "gp3"
+              "type": "standard"
             }
           ],
           "aws": {
@@ -24,20 +29,21 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge"
+          "instanceType": "m5.2xlarge",
+          "cloudPlatform": "AWS"
         },
-        "nodeCount": 1,
-        "type": "GATEWAY",
-        "recoveryMode": "MANUAL"
+        "type": "CORE"
       },
       {
-        "name": "master2",
+        "name": "gateway",
+        "nodeCount": 1,
+        "recoveryMode": "MANUAL",
         "template": {
           "attachedVolumes": [
             {
               "count": 1,
               "size": 100,
-              "type": "gp3"
+              "type": "standard"
             }
           ],
           "aws": {
@@ -45,20 +51,21 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge"
+          "instanceType": "m5.2xlarge",
+          "cloudPlatform": "AWS"
         },
-        "nodeCount": 1,
-        "type": "CORE",
-        "recoveryMode": "MANUAL"
+        "type": "CORE"
       },
       {
-        "name": "master3",
+        "name": "leader",
+        "nodeCount": 1,
+        "recoveryMode": "MANUAL",
         "template": {
           "attachedVolumes": [
             {
               "count": 1,
               "size": 100,
-              "type": "gp3"
+              "type": "standard"
             }
           ],
           "aws": {
@@ -66,53 +73,54 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge"
+          "instanceType": "m5.2xlarge",
+          "cloudPlatform": "AWS"
         },
-        "nodeCount": 1,
-        "type": "CORE",
-        "recoveryMode": "MANUAL"
+        "type": "GATEWAY"
       },
       {
-        "name": "coordinator",
-        "template": {
-          "attachedVolumes": [
-            {
-              "count": 2,
-              "size": 300,
-              "type": "ephemeral"
-            }
-          ],
-          "aws": {
-            "encryption": {
-              "type": "NONE"
-            }
-          },
-          "instanceType": "r5d.4xlarge"
-        },
-        "nodeCount": 1,
-        "type": "CORE",
-        "recoveryMode": "MANUAL"
-      },
-      {
-        "name": "executor",
-        "template": {
-          "attachedVolumes": [
-            {
-              "count": 5,
-              "size": 500,
-              "type": "gp3"
-            }
-          ],
-          "aws": {
-            "encryption": {
-              "type": "NONE"
-            }
-          },
-          "instanceType": "r5d.4xlarge"
-        },
+        "name": "worker",
         "nodeCount": 3,
-        "type": "CORE",
-        "recoveryMode": "MANUAL"
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.2xlarge",
+          "cloudPlatform": "AWS"
+        },
+        "type": "CORE"
+      },
+      {
+        "name": "yarnworker",
+        "nodeCount": 1,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.2xlarge",
+          "cloudPlatform": "AWS"
+        },
+        "type": "CORE"
       }
     ]
   }
