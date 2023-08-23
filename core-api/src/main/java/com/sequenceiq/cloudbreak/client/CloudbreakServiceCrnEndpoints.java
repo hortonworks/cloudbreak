@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.progress.ProgressV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DiskUpdateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
@@ -37,14 +38,17 @@ public class CloudbreakServiceCrnEndpoints extends AbstractUserCrnServiceEndpoin
         super(webTarget, crn);
     }
 
+    @Override
     public AuditEventV4Endpoint auditV4Endpoint() {
         return getEndpoint(AuditEventV4Endpoint.class);
     }
 
+    @Override
     public AutoscaleV4Endpoint autoscaleEndpoint() {
         return getEndpoint(AutoscaleV4Endpoint.class);
     }
 
+    @Override
     public BlueprintV4Endpoint blueprintV4Endpoint() {
         return getEndpoint(BlueprintV4Endpoint.class);
     }
@@ -53,58 +57,72 @@ public class CloudbreakServiceCrnEndpoints extends AbstractUserCrnServiceEndpoin
         return getEndpoint(BlueprintUtilV4Endpoint.class);
     }
 
+    @Override
     public ImageCatalogV4Endpoint imageCatalogV4Endpoint() {
         return getEndpoint(ImageCatalogV4Endpoint.class);
     }
 
+    @Override
     public CloudbreakInfoV4Endpoint cloudbreakInfoV4Endpoint() {
         return getEndpoint(CloudbreakInfoV4Endpoint.class);
     }
 
+    @Override
     public DatabaseV4Endpoint databaseV4Endpoint() {
         return getEndpoint(DatabaseV4Endpoint.class);
     }
 
+    @Override
     public RecipeV4Endpoint recipeV4Endpoint() {
         return getEndpoint(RecipeV4Endpoint.class);
     }
 
+    @Override
     public CustomConfigurationsV4Endpoint customConfigurationsV4Endpoint() {
         return getEndpoint(CustomConfigurationsV4Endpoint.class);
     }
 
+    @Override
     public UserProfileV4Endpoint userProfileV4Endpoint() {
         return getEndpoint(UserProfileV4Endpoint.class);
     }
 
+    @Override
     public FileSystemV4Endpoint filesystemV4Endpoint() {
         return getEndpoint(FileSystemV4Endpoint.class);
     }
 
+    @Override
     public UtilV4Endpoint utilV4Endpoint() {
         return getEndpoint(UtilV4Endpoint.class);
     }
 
+    @Override
     public WorkspaceAwareUtilV4Endpoint workspaceAwareUtilV4Endpoint() {
         return getEndpoint(WorkspaceAwareUtilV4Endpoint.class);
     }
 
+    @Override
     public ClusterTemplateV4Endpoint clusterTemplateV4EndPoint() {
         return getEndpoint(ClusterTemplateV4Endpoint.class);
     }
 
+    @Override
     public StackV4Endpoint stackV4Endpoint() {
         return getEndpoint(StackV4Endpoint.class);
     }
 
+    @Override
     public DistroXV1Endpoint distroXV1Endpoint() {
         return getEndpoint(DistroXV1Endpoint.class);
     }
 
+    @Override
     public DistroXV1RotationEndpoint distroXV1RotationEndpoint() {
         return getEndpoint(DistroXV1RotationEndpoint.class);
     }
 
+    @Override
     public DistroXUpgradeV1Endpoint distroXUpgradeV1Endpoint() {
         return getEndpoint(DistroXUpgradeV1Endpoint.class);
     }
@@ -113,14 +131,22 @@ public class CloudbreakServiceCrnEndpoints extends AbstractUserCrnServiceEndpoin
         return getEndpoint(DistroXInternalV1Endpoint.class);
     }
 
+    @Override
     public DatalakeV4Endpoint datalakeV4Endpoint() {
         return getEndpoint(DatalakeV4Endpoint.class);
     }
 
+    @Override
+    public DiskUpdateEndpoint diskUpdateEndpoint() {
+        return getEndpoint(DiskUpdateEndpoint.class);
+    }
+
+    @Override
     public CloudProviderServicesV4Endopint cloudProviderServicesEndpoint() {
         return getEndpoint(CloudProviderServicesV4Endopint.class);
     }
 
+    @Override
     public AuthorizationUtilEndpoint authorizationUtilEndpoint() {
         return getEndpoint(AuthorizationUtilEndpoint.class);
     }

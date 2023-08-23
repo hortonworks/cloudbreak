@@ -87,4 +87,13 @@ public class CloudParameterCache {
         Boolean result = getSpecialParameters(platform).get(PlatformParametersConsts.DELETE_VOLUMES_SUPPORTED);
         return result == null || result;
     }
+
+    public boolean isDiskTypeChangeSupported(String platform) {
+        return isDiskTypeChangeSupported(Platform.platform(platform));
+    }
+
+    public boolean isDiskTypeChangeSupported(Platform platform) {
+        Boolean result = getSpecialParameters(platform).get(PlatformParametersConsts.DISK_TYPE_CHANGE_SUPPORTED);
+        return result == null || result;
+    }
 }

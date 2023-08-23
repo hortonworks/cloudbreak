@@ -366,5 +366,13 @@
   {
     "path": "/var/log/sssd/*.log",
     "label": "SSSD"
+  },
+  {
+    "path": "/var/log/resize-storage-volumes.log",
+    "label": "resize_storage_volumes"
+  },
+  {
+    "path": "/var/log/resize-storage-volumes-allout.log",
+    "label": "resize_storage_volumes_allout"
   }
 ]

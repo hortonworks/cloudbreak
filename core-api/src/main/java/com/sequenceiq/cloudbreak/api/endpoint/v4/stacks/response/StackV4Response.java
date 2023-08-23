@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImag
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resource.ResourceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -148,6 +149,9 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
     private Integer javaVersion;
 
     private boolean enableMultiAz;
+
+    @ApiModelProperty("List of resources attached to the stack")
+    private List<ResourceV4Response> resources;
 
     public Long getId() {
         return id;
@@ -444,6 +448,14 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
         this.enableMultiAz = enableMultiAz;
     }
 
+    public List<ResourceV4Response> getResources() {
+        return resources;
+    }
+
+    public void setResources(List<ResourceV4Response> resources) {
+        this.resources = resources;
+    }
+
     @Override
     public String toString() {
         return "StackV4Response{ " +
@@ -482,6 +494,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
                 ", externalDatabase=" + externalDatabase +
                 ", javaVersion=" + javaVersion +
                 ", multiAz=" + enableMultiAz +
+                ", resources=" + resources +
                 '}';
     }
 }

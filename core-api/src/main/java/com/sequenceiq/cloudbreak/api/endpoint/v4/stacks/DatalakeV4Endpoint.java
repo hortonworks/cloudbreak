@@ -29,5 +29,4 @@ public interface DatalakeV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LIST_BY_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "listDatalakes")
     StackViewV4Responses list(@Deprecated @QueryParam("environment") String environment, @QueryParam("environmentCrn") String environmentCrn);
-
 }

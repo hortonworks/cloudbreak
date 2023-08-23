@@ -12,7 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DiskUpdateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -23,6 +25,7 @@ import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleEvent;
 import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleStateSelectors;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -58,9 +61,15 @@ public class VerticalScaleService {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    @Inject
+    private SdxReactorFlowManager sdxReactorFlowManager;
+
+    @Inject
+    private DiskUpdateEndpoint diskUpdateEndpoint;
+
     public FlowIdentifier verticalScaleDatalake(SdxCluster sdxCluster, StackVerticalScaleV4Request request, String userCrn) {
         MDCBuilder.buildMdcContext(sdxCluster);
-        LOGGER.info("Environment Vertical Scale flow triggered for environment {}", sdxCluster.getName());
+        LOGGER.info("Data Lake Cluster Vertical Scale flow triggered for environment {}", sdxCluster.getName());
         DatalakeVerticalScaleEvent environmentVerticalScaleEvent = DatalakeVerticalScaleEvent.builder()
                 .withAccepted(new Promise<>())
                 .withResourceCrn(sdxCluster.getResourceCrn())
@@ -71,7 +80,7 @@ public class VerticalScaleService {
                 .withSelector(DatalakeVerticalScaleStateSelectors.VERTICAL_SCALING_DATALAKE_VALIDATION_EVENT.selector())
                 .build();
         FlowIdentifier flowIdentifier = eventSender.sendEvent(environmentVerticalScaleEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
-        LOGGER.debug("Environment Vertical Scale flow trigger event sent for environment {}", sdxCluster.getName());
+        LOGGER.debug("Data Lake Cluster Vertical Scale flow trigger event sent for environment {}", sdxCluster.getName());
         return flowIdentifier;
     }
 
@@ -112,4 +121,13 @@ public class VerticalScaleService {
                 () -> stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
     }
 
+    public FlowIdentifier updateDisksDatalake(SdxCluster sdxCluster, DiskUpdateRequest updateRequest, String userCrn) {
+        return sdxReactorFlowManager.triggerDatalakeDiskUpdate(sdxCluster, updateRequest, userCrn);
+    }
+
+    public boolean getDiskTypeChangeSupported(String cloudPlatform) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.sdxAdmin().getInternalCrnForServiceAsString(),
+                () -> diskUpdateEndpoint.isDiskTypeChangeSupported(cloudPlatform));
+    }
 }

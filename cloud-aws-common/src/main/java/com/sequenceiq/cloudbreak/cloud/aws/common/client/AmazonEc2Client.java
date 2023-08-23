@@ -56,6 +56,8 @@ import software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeSubnetsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesModificationsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesModificationsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeVpcEndpointServicesResponse;
@@ -74,6 +76,8 @@ import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeRequest;
 import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeResponse;
 import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateRequest;
 import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateResponse;
+import software.amazon.awssdk.services.ec2.model.ModifyVolumeRequest;
+import software.amazon.awssdk.services.ec2.model.ModifyVolumeResponse;
 import software.amazon.awssdk.services.ec2.model.ReleaseAddressRequest;
 import software.amazon.awssdk.services.ec2.model.ReleaseAddressResponse;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
@@ -286,5 +290,13 @@ public class AmazonEc2Client extends AmazonClient {
 
     public DetachVolumeResponse detachVolume(DetachVolumeRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.detachVolume(request));
+    }
+
+    public ModifyVolumeResponse modifyVolume(ModifyVolumeRequest request) {
+        return retry.testWith2SecDelayMax15Times(() -> client.modifyVolume(request));
+    }
+
+    public DescribeVolumesModificationsResponse describeVolumeModifications(DescribeVolumesModificationsRequest request) {
+        return retry.testWith2SecDelayMax15Times(() -> client.describeVolumesModifications(request));
     }
 }

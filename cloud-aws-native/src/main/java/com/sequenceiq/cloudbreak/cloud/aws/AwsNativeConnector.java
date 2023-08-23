@@ -76,7 +76,7 @@ public class AwsNativeConnector implements CloudConnector {
     private AwsInstanceConnector awsInstanceConnector;
 
     @Inject
-    private ResourceVolumeConnector resourceVolumeConnector;
+    private AwsNativeResourceVolumeConnector resourceVolumeConnector;
 
     @Inject
     private AwsNativeSetup awsNativeSetup;

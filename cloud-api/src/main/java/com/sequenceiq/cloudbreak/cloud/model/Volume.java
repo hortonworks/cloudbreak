@@ -12,6 +12,8 @@ public class Volume {
 
     private final CloudVolumeUsageType volumeUsageType;
 
+    private String id;
+
     @JsonCreator
     public Volume(@JsonProperty("mount") String mount,
             @JsonProperty("type") String type,
@@ -39,6 +41,14 @@ public class Volume {
         return volumeUsageType == null ? CloudVolumeUsageType.GENERAL : volumeUsageType;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Volume{");
@@ -46,6 +56,7 @@ public class Volume {
         sb.append(", type='").append(type).append('\'');
         sb.append(", size=").append(size);
         sb.append(", volumeUsageType=").append(volumeUsageType);
+        sb.append(", id=").append(id);
         sb.append('}');
         return sb.toString();
     }

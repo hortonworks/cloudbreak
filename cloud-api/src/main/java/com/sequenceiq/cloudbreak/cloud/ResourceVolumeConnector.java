@@ -24,4 +24,15 @@ public interface ResourceVolumeConnector {
      * @throws Exception in case of any error
      */
     void deleteVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources) throws Exception;
+
+    /**
+     * Updates the type & size of the given disk volumes to the specified new values.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param volumeIds contains the list of cloud volumes being modified
+     * @param diskType desired disk type of EBS volumes being modified
+     * @param size desired disk size of EBS volumes being modified
+     * @throws Exception in case of any error
+     */
+    void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception;
 }

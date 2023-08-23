@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.GatewayTopologyV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resource.ResourceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
@@ -42,6 +44,7 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.network.NetworkToNetworkV4R
 import com.sequenceiq.cloudbreak.converter.v4.workspaces.WorkspaceToWorkspaceResourceV4ResponseConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
@@ -129,6 +132,9 @@ public class StackToStackV4ResponseConverter {
     @Inject
     private HostGroupService hostGroupService;
 
+    @Inject
+    private ResourceToResourceV4ResponseConverter resourceToResourceV4ResponseConverter;
+
     public StackV4Response convert(StackDtoDelegate stack) {
         StackView source = stack.getStack();
         StackV4Response response = new StackV4Response();
@@ -137,10 +143,10 @@ public class StackToStackV4ResponseConverter {
 
             Image image = imageService.getImage(source.getId());
             response.setImage(imageToStackImageV4ResponseConverter.convert(image));
-        } catch (CloudbreakImageNotFoundException exc) {
+            response.setResources(convertResources(stack.getResources()));
+        } catch (CloudbreakImageNotFoundException | NotImplementedException exc) {
             LOGGER.debug(exc.getMessage());
         }
-
         response.setName(source.getName());
         response.setAuthentication(stackAuthenticationToStackAuthenticationV4ResponseConverter.convert(source.getStackAuthentication()));
         response.setCrn(source.getResourceCrn());
@@ -177,6 +183,10 @@ public class StackToStackV4ResponseConverter {
             response.setEnableLoadBalancer(true);
         }
         return response;
+    }
+
+    private List<ResourceV4Response> convertResources(Set<Resource> resourceList) {
+        return resourceList.stream().map(resourceToResourceV4ResponseConverter::convertResourceToResourceV4Response).collect(Collectors.toList());
     }
 
     private void filterExposedServicesByType(StackType stackType, ClusterV4Response clusterV4Response) {

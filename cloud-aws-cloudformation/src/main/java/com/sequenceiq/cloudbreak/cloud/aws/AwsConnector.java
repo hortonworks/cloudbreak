@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
+import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.validator.AwsStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -100,7 +101,7 @@ public class AwsConnector implements CloudConnector {
     private AwsStorageValidator awsStorageValidator;
 
     @Inject
-    private ResourceVolumeConnector resourceVolumeConnector;
+    private AwsResourceVolumeConnector resourceVolumeConnector;
 
     @Inject
     private List<ConsumptionCalculator> consumptionCalculators;

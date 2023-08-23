@@ -157,14 +157,15 @@ public class StackCommonService {
         return stackService.getJsonByCrn(crn);
     }
 
-    public StackV4Response findStackByNameOrCrnAndWorkspaceId(NameOrCrn nameOrCrn, String accountId, Set<String> entries, StackType stackType) {
+    public StackV4Response findStackByNameOrCrnAndWorkspaceId(NameOrCrn nameOrCrn, String accountId, Set<String> entries, StackType stackType,
+            boolean withResources) {
         return nameOrCrn.hasName()
-                ? stackService.getByNameInWorkspaceWithEntries(nameOrCrn.getName(), accountId, entries, stackType)
-                : stackService.getByCrnInWorkspaceWithEntries(nameOrCrn.getCrn(), entries, stackType);
+                ? stackService.getByNameInWorkspaceWithEntries(nameOrCrn.getName(), accountId, entries, stackType, withResources)
+                : stackService.getByCrnInWorkspaceWithEntries(nameOrCrn.getCrn(), entries, stackType, withResources);
     }
 
     private StackV4Response findStackByCrnAndWorkspaceId(String crn, Set<String> entries, StackType stackType) {
-        return stackService.getByCrnInWorkspaceWithEntries(crn, entries, stackType);
+        return stackService.getByCrnInWorkspaceWithEntries(crn, entries, stackType, false);
     }
 
     public FlowIdentifier putInDefaultWorkspace(String crn, UpdateStackV4Request updateRequest) {

@@ -188,6 +188,7 @@ public class AzurePlatformParameters implements PlatformParameters {
         SpecialParameters specialParameters = PlatformParameters.super.specialParameters();
         specialParameters.getSpecialParameters().put(PlatformParametersConsts.DB_SUBNETS_UPDATE_ENABLED, Boolean.TRUE);
         specialParameters.getSpecialParameters().put(PlatformParametersConsts.DELETE_VOLUMES_SUPPORTED, Boolean.FALSE);
+        specialParameters.getSpecialParameters().put(PlatformParametersConsts.DISK_TYPE_CHANGE_SUPPORTED, Boolean.FALSE);
         return specialParameters;
     }
 
