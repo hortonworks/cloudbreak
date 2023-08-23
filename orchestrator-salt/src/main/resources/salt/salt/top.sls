@@ -13,7 +13,6 @@ base:
     - logrotate
     - ntp
     - postgresql.root-certs
-    - sshd
     - resize
 
   'G@roles:ad_member and G@os_family:RedHat':
