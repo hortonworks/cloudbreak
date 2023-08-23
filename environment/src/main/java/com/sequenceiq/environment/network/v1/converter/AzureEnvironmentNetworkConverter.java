@@ -60,6 +60,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
             }
             azureNetwork.setZoneMetas(availabilityZoneConverter.getJsonAttributesWithAvailabilityZones(azureParams.getAvailabilityZones(),
                     azureNetwork.getZoneMetas()));
+            azureNetwork.setFlexibleServerSubnetIds(azureParams.getFlexibleServerSubnetIds());
         }
         return azureNetwork;
     }
@@ -113,6 +114,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
                                 .withAksPrivateDnsZoneId(azureNetwork.getAksPrivateDnsZoneId())
                                 .withNoOutboundLoadBalancer(azureNetwork.isNoOutboundLoadBalancer())
                                 .withAvailabilityZones(availabilityZoneConverter.getAvailabilityZonesFromJsonAttributes(azureNetwork.getZoneMetas()))
+                                .withFlexibleServerSubnetIds(azureNetwork.getFlexibleServerSubnetIds())
                                 .build())
                 .build();
     }

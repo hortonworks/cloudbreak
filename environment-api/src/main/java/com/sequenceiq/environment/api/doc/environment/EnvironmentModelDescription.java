@@ -38,6 +38,7 @@ public class EnvironmentModelDescription {
     public static final String GCP_AVAILABILITY_ZONES = "Gcp availability zones";
 
     public static final String AZURE_AVAILABILITY_ZONES = "List of Azure Availability Zones";
+    public static final String AZURE_DELEGATED_FLEXIBLE_SERVER_SUBNET_IDS = "List of Azure Delegated Subnet IDs for flexible database server";
 
     public static final String AZURE_RESOURCE_GROUP_NAME = "Azure Resource Group Name of the specified network";
     public static final String AZURE_PRIVATE_DNS_ZONE_ID = "Full resource ID of an existing Azure private DNS zone";

@@ -107,6 +107,7 @@ class AzureEnvironmentNetworkConverterTest {
     void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDto() {
         Environment environment = createEnvironment();
         Set<String> availabilityZones = Set.of("1", "2");
+        Set<String> flexibleServerSubnetIds = Set.of("subnet1", "subnet2");
         Map<String, Set<String>> availabilityZonesMap = Map.of(NetworkConstants.AVAILABILITY_ZONES, availabilityZones);
         NetworkDto networkDto = NetworkDto.builder()
                 .withAzure(AzureParams.builder()
@@ -114,6 +115,7 @@ class AzureEnvironmentNetworkConverterTest {
                         .withResourceGroupName(RESOURCE_GROUP_NAME)
                         .withNoPublicIp(true)
                         .withAvailabilityZones(availabilityZones)
+                        .withFlexibleServerSubnetIds(flexibleServerSubnetIds)
                         .build())
                 .withName(NETWORK_NAME)
                 .withNetworkCidr(NETWORK_CIDR)
@@ -133,6 +135,7 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(RegistrationType.EXISTING, actual.getRegistrationType());
         assertTrue(SUBNET_IDS.containsAll(actual.getSubnetMetas().keySet()));
         assertEquals(new Json(availabilityZonesMap), actual.getZoneMetas());
+        assertEquals(flexibleServerSubnetIds, actual.getFlexibleServerSubnetIds());
         verify(environmentViewConverter).convert(environment);
     }
 

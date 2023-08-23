@@ -55,6 +55,7 @@ public class NetworkRequestToDtoConverter {
                     .withAksPrivateDnsZoneId(network.getAzure().getAksPrivateDnsZoneId())
                     .withNoOutboundLoadBalancer(isNoOutboundLoadBalancer(network.getAzure()))
                     .withAvailabilityZones(network.getAzure().getAvailabilityZones())
+                    .withFlexibleServerSubnetIds(network.getAzure().getFlexibleServerSubnetIds())
                     .build();
             builder.withAzure(azureParams);
             builder.withNetworkId(network.getAzure().getNetworkId());
