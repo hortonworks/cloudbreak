@@ -858,6 +858,13 @@ public class CmTemplateProcessorTest {
         assertThat(hostInfo.getRackId()).isEqualTo(rackIdExpected);
     }
 
+    @Test
+    public void getHostTemplateRoleNames() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/cdp-invalid-multi-host-template-name.bp"));
+        assertEquals(5, underTest.getHostTemplateRoleNames("worker").size());
+        assertEquals(1, underTest.getHostTemplateRoleNames("worker").stream().filter("hdfs-DATANODE-BASE"::equals).count());
+    }
+
     private static void assertSortedEquals(Set<?> expected, Set<?> actual) {
         assertEquals(new TreeSet<>(expected), new TreeSet<>(actual));
     }

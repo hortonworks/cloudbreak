@@ -108,4 +108,7 @@ public interface ClusterModificationService {
     Map<String, String> fetchServiceStatuses() throws Exception;
 
     void restartServiceRoleByType(String serviceType, String roleType);
+
+    void updateServiceConfig(String serviceType, Map<String, String> config, List<String> roleGroupNames) throws CloudbreakException;
+
 }

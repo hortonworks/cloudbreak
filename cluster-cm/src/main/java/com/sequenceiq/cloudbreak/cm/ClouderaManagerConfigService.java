@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cm;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -325,5 +326,43 @@ public class ClouderaManagerConfigService {
                 throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
             }
         };
+    }
+
+    public void modifyRoleBasedConfig(ApiClient client, String stackName, String serviceType, Map<String, String> config,
+            List<String> roleConfigGroupName) throws CloudbreakException {
+        ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(client);
+        LOGGER.info("Trying to modify config: {} for service {}", Arrays.asList(config), serviceType);
+        getServiceName(stackName, serviceType, servicesResourceApi)
+                .ifPresentOrElse(
+                        modifyRoleBasedConfig(stackName, roleConfigGroupsResourceApi, config, roleConfigGroupName),
+                        () -> {
+                            LOGGER.error("{} service name is missing.", serviceType);
+                            throw new ClouderaManagerOperationFailedException(String.format("Service of type: %s is not found", serviceType));
+                        });
+    }
+
+    private Consumer<String> modifyRoleBasedConfig(String stackName, RoleConfigGroupsResourceApi roleConfigGroupsResourceApi,
+            Map<String, String> config, List<String> roleConfigGroupNames) throws CloudbreakException  {
+        ApiConfigList apiConfigList = createApiConfigList(config);
+        return serviceName -> {
+            roleConfigGroupNames.forEach(role -> {
+                try {
+                    roleConfigGroupsResourceApi.updateConfig(stackName, role, serviceName, "Modifying role based config for service " + serviceName,
+                            apiConfigList);
+                } catch (ApiException e) {
+                    LOGGER.error("Failed to set configs {} for service {}", Arrays.asList(config), serviceName, e);
+                    throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+                }
+            });
+        };
+    }
+
+    private ApiConfigList createApiConfigList(Map<String, String> config) {
+        ApiConfigList apiConfigList = new ApiConfigList();
+        config.forEach((key, value) -> {
+            apiConfigList.addItemsItem(new ApiConfig().name(key).value(value));
+        });
+        return apiConfigList;
     }
 }

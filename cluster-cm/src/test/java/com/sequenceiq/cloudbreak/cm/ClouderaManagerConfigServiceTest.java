@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -555,5 +556,54 @@ public class ClouderaManagerConfigServiceTest {
                 () -> underTest.startClouderaManagerService(new ApiClient(), stack, serviceType));
 
         assertEquals("Service of type: YARN is not found", exception.getMessage());
+    }
+
+    @Test
+    public void tesModifyRoleBasedConfigSuccess() throws Exception {
+        String serviceType = "YARN";
+        String yarnName = "yarn-1";
+        String roleName = "yarn-NODEMANAGER-WORKER";
+        ServicesResourceApi serviceResourceApi = mock(ServicesResourceApi.class);
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = mock(RoleConfigGroupsResourceApi.class);
+        ApiServiceList apiServiceList = new ApiServiceList().addItemsItem(new ApiService().name(yarnName).type(serviceType));
+        StackDtoDelegate stack = mock(StackDtoDelegate.class);
+        when(serviceResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(serviceResourceApi);
+        when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(any())).thenReturn(roleConfigGroupsResourceApi);
+        Map<String, String> config = new HashMap<>();
+        config.put("test-config", "test-config-property");
+        ApiConfigList apiConfigList = new ApiConfigList();
+        apiConfigList.addItemsItem(new ApiConfig().name("test-config").value("test-config-property"));
+
+        underTest.modifyRoleBasedConfig(new ApiClient(), TEST_CLUSTER_NAME, serviceType, config, List.of(roleName));
+
+        verify(roleConfigGroupsResourceApi, times(1)).updateConfig(eq(TEST_CLUSTER_NAME), eq(roleName),
+                eq(yarnName), eq("Modifying role based config for service yarn-1"), eq(apiConfigList));
+    }
+
+    @Test
+    public void tesModifyRoleBasedConfigException() throws Exception {
+        String serviceType = "YARN";
+        String yarnName = "yarn-1";
+        String roleName = "yarn-NODEMANAGER-WORKER";
+        ServicesResourceApi serviceResourceApi = mock(ServicesResourceApi.class);
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = mock(RoleConfigGroupsResourceApi.class);
+        ApiServiceList apiServiceList = new ApiServiceList().addItemsItem(new ApiService().name(yarnName).type(serviceType));
+        when(serviceResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(serviceResourceApi);
+        when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(any())).thenReturn(roleConfigGroupsResourceApi);
+        Map<String, String> config = new HashMap<>();
+        config.put("test-config", "test-config-property");
+        ApiConfigList apiConfigList = new ApiConfigList();
+        apiConfigList.addItemsItem(new ApiConfig().name("test-config").value("test-config-property"));
+        doThrow(new ApiException("Test")).when(roleConfigGroupsResourceApi).updateConfig(eq(TEST_CLUSTER_NAME), eq(roleName),
+                eq(yarnName), eq("Modifying role based config for service yarn-1"), eq(apiConfigList));
+
+
+        ClouderaManagerOperationFailedException exception = assertThrows(ClouderaManagerOperationFailedException.class,
+                () -> underTest.modifyRoleBasedConfig(new ApiClient(), TEST_CLUSTER_NAME, serviceType, config, List.of(roleName)));
+
+        verify(roleConfigGroupsResourceApi, times(1)).updateConfig(eq(TEST_CLUSTER_NAME), eq(roleName),
+                eq(yarnName), eq("Modifying role based config for service yarn-1"), eq(apiConfigList));
     }
 }
