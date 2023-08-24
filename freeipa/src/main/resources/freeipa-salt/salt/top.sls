@@ -13,7 +13,6 @@ base:
              - logrotate
              - ccm
              - monitoring
-             - sshd
 
            'recipes:pre-cloudera-manager-start':
              - match: grain
