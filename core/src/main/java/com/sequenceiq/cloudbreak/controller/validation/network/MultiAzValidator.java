@@ -35,7 +35,7 @@ public class MultiAzValidator {
     @Value("${cb.multiaz.supported.variants:AWS_NATIVE,AWS_NATIVE_GOV}")
     private Set<String> supportedMultiAzVariants;
 
-    @Value("${cb.multiaz.supported.instancemetadata.platforms:AWS,GCP,AZURE,YARN}")
+    @Value("${cb.multiaz.supported.instancemetadata.platforms:AWS,YARN}")
     private Set<String> supportedInstanceMetadataPlatforms;
 
     @Inject
@@ -52,8 +52,6 @@ public class MultiAzValidator {
         if (supportedInstanceMetadataPlatforms.isEmpty()) {
             supportedInstanceMetadataPlatforms = Set.of(
                     CloudPlatform.AWS.name(),
-                    CloudPlatform.GCP.name(),
-                    CloudPlatform.AZURE.name(),
                     CloudPlatform.YARN.name());
         }
     }

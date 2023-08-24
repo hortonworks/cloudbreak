@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
+import com.sequenceiq.cloudbreak.service.multiaz.DataLakeAwareInstanceMetadataAvailabilityZoneCalculator;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
@@ -115,6 +116,9 @@ public class StackUpscaleActions {
 
     @Inject
     private StackUpgradeService stackUpgradeService;
+
+    @Inject
+    private DataLakeAwareInstanceMetadataAvailabilityZoneCalculator availabilityZoneCalculator;
 
     @Bean(name = "UPDATE_DOMAIN_DNS_RESOLVER_STATE")
     public Action<?, ?> updateDomainDnsResolverAction() {
@@ -176,8 +180,8 @@ public class StackUpscaleActions {
 
             @Override
             protected Selectable createRequest(StackScalingFlowContext context) {
-                Map<String, Integer> hostGroupWithInstanceCountToCreate = getHostGroupsWithInstanceCountToCreate(context);
                 StackDto stack = stackDtoService.getById(context.getStackId());
+                Map<String, Integer> hostGroupWithInstanceCountToCreate = getHostGroupsWithInstanceCountToCreate(context, stack);
                 StackDtoDelegate updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, hostGroupWithInstanceCountToCreate,
                         context.getHostgroupWithHostnames(), false, context.isRepair(), context.getStackNetworkScaleDetails());
                 CloudStack cloudStack = cloudStackConverter.convert(updatedStack);
@@ -191,10 +195,14 @@ public class StackUpscaleActions {
         return new AbstractStackUpscaleAction<>(UpscaleStackValidationResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, UpscaleStackValidationResult payload, Map<Object, Object> variables) {
-                Map<String, Integer> hostGroupWithInstanceCountToCreate = getHostGroupsWithInstanceCountToCreate(context);
+                boolean repair = context.isRepair();
                 StackDto stack = stackDtoService.getById(context.getStackId());
+                Map<String, Integer> hostGroupWithInstanceCountToCreate = getHostGroupsWithInstanceCountToCreate(context, stack);
                 StackDtoDelegate updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, hostGroupWithInstanceCountToCreate,
-                        context.getHostgroupWithHostnames(), true, context.isRepair(), context.getStackNetworkScaleDetails());
+                        context.getHostgroupWithHostnames(), true, repair, context.getStackNetworkScaleDetails());
+                if (availabilityZoneCalculator.populateForScaling(updatedStack, hostGroupWithInstanceCountToCreate.keySet(), repair)) {
+                    updatedStack = stackDtoService.getById(context.getStackId());
+                }
                 List<CloudResource> resources = resourceService.getAllByStackId(updatedStack.getId()).stream()
                         .map(r -> cloudResourceConverter.convert(r))
                         .collect(Collectors.toList());
@@ -467,9 +475,8 @@ public class StackUpscaleActions {
         };
     }
 
-    private Map<String, Integer> getHostGroupsWithInstanceCountToCreate(StackScalingFlowContext context) {
+    private Map<String, Integer> getHostGroupsWithInstanceCountToCreate(StackScalingFlowContext context, StackDto stack) {
         LOGGER.debug("Assembling upscale stack event for stack: {}", context.getStack().getName());
-        StackDto stack = stackDtoService.getById(context.getStackId());
         Map<String, Integer> hostGroupsWithAdjustment = context.getHostGroupWithAdjustment();
         Map<String, Integer> hostGroupWithInstanceCountToCreate = new HashMap<>();
         for (Map.Entry<String, Integer> hostGroupWithAdjustment : hostGroupsWithAdjustment.entrySet()) {

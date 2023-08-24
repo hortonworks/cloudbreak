@@ -4,18 +4,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -30,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -94,7 +102,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
     @Test
     void testPopulateWhenTheStackIsMultiAzEnabledButAvailabilityZoneConnectorDoesNotExistForPlatformShouldDoNothing() {
         Stack stack = TestUtil.stack();
-        stack.setMultiAz(Boolean.FALSE);
+        stack.setMultiAz(Boolean.TRUE);
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
         when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(null);
 
@@ -123,19 +131,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
     @Test
     void testPopulateWhenTheStackIsMultiAzEnabledButSomeOfTheInstancesHaveAzConfigAlready() {
         Set<String> groupAvailabilityZones = Set.of("1", "2", "3");
-        Stack stack = TestUtil.stack(Status.REQUESTED, TestUtil.azureCredential());
-        stack.setMultiAz(Boolean.TRUE);
-        stack.getInstanceGroups()
-                .forEach(ig -> {
-                    ig.setInstanceMetaData(TestUtil.generateInstanceMetaDatas(groupAvailabilityZones.size(), ig.getId(), ig));
-                    Set<AvailabilityZone> availabilityZones = groupAvailabilityZones.stream().map(az -> {
-                        AvailabilityZone availabilityZone = new AvailabilityZone();
-                        availabilityZone.setAvailabilityZone(az);
-                        availabilityZone.setInstanceGroup(ig);
-                        return availabilityZone;
-                    }).collect(Collectors.toSet());
-                    ig.setAvailabilityZones(availabilityZones);
-                });
+        Stack stack = getStackWithGroupsAndInstances(groupAvailabilityZones);
         Set<InstanceMetaData> instancesWithAzConfig = stack.getInstanceGroupsAsList().get(0).getInstanceMetaData();
         instancesWithAzConfig.forEach(im -> im.setAvailabilityZone("1"));
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
@@ -153,7 +149,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
                 .allMatch(ig -> ig.getInstanceMetaData().stream()
                         .allMatch(im -> groupAvailabilityZones.contains(im.getAvailabilityZone()))));
         assertTrue(instancesExpectedToBeUpdated.stream()
-                        .allMatch(im -> ("/" + im.getAvailabilityZone()).equals(im.getRackId())));
+                .allMatch(im -> ("/" + im.getAvailabilityZone()).equals(im.getRackId())));
     }
 
     @Test
@@ -232,6 +228,130 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
                 assertEquals(Long.valueOf(expectedCountByAzEntry.getValue()), actualInstanceCountByAz);
             }
         }
+    }
 
+    @Test
+    void testPopulateForScalingWhenStackIsNotMultiAzEnabled() {
+        Stack stack = TestUtil.stack();
+        stack.setMultiAz(Boolean.FALSE);
+
+        boolean actual = underTest.populateForScaling(stack, Set.of(), Boolean.FALSE);
+
+        Assertions.assertFalse(actual);
+        verifyNoInteractions(instanceMetaDataService);
+
+    }
+
+    @Test
+    void testPopulateForScalingWhenStackPlatformIsNotSupportedFromConnectorSide() {
+        Stack stack = TestUtil.stack();
+        stack.setMultiAz(Boolean.TRUE);
+        when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(null);
+
+        boolean actual = underTest.populateForScaling(stack, Set.of(), Boolean.FALSE);
+
+        Assertions.assertFalse(actual);
+        verifyNoInteractions(instanceMetaDataService);
+    }
+
+    @Test
+    void testPopulateForScalingWhenPopulationIsNeededButInstanceGroupNamesSetIsEmpty() {
+        Stack stack = TestUtil.stack();
+        stack.setMultiAz(Boolean.TRUE);
+        when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
+
+        boolean actual = underTest.populateForScaling(stack, Set.of(), Boolean.FALSE);
+
+        Assertions.assertFalse(actual);
+        verify(instanceMetaDataService, times(1)).getNotDeletedInstanceMetadataByStackId(stack.getId());
+    }
+
+    @Test
+    void testPopulateForScalingWhenPopulationIsNeededAndUpscale() {
+        Set<String> groupAvailabilityZones = Set.of("1", "2", "3");
+        Stack stack = getStackWithGroupsAndInstances(groupAvailabilityZones);
+        when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
+        Set<String> groupNamesToScale = stack.getInstanceGroups().stream().map(InstanceGroup::getGroupName).collect(Collectors.toSet());
+        Set<InstanceMetaData> notDeletedInstanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(stack.getId())).thenReturn(notDeletedInstanceMetaDataSet);
+
+        boolean actual = underTest.populateForScaling(stack, groupNamesToScale, Boolean.FALSE);
+
+        Assertions.assertTrue(actual);
+        verify(instanceMetaDataService, times(1)).getNotDeletedInstanceMetadataByStackId(stack.getId());
+        verify(instanceMetaDataService, times(1)).saveAll(notDeletedInstanceMetaDataSet);
+        verify(instanceMetaDataService, times(0)).getAvailabilityZoneFromDiskIfRepair(any(), anyBoolean(), anyString(), anyString());
+        notDeletedInstanceMetaDataSet
+                .forEach(im -> assertTrue(StringUtils.isNotEmpty(im.getAvailabilityZone())));
+    }
+
+    @Test
+    void testPopulateForScalingWhenPopulationIsNeededAndRepair() {
+        boolean repair = Boolean.TRUE;
+        Set<String> groupAvailabilityZones = Set.of("1", "2", "3");
+        Map<String, String> expectedAvailabilityZoneByFqdn = new HashMap<>();
+        Stack stack = getStackWithGroupsAndInstances(groupAvailabilityZones);
+        when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
+        Set<String> groupNamesToScale = stack.getInstanceGroups().stream().map(InstanceGroup::getGroupName).collect(Collectors.toSet());
+        Set<InstanceMetaData> notDeletedInstanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(stack.getId())).thenReturn(notDeletedInstanceMetaDataSet);
+
+        int index = 0;
+        List<String> availabilityZoneList = new ArrayList<>(groupAvailabilityZones);
+        for (InstanceMetaData im : notDeletedInstanceMetaDataSet) {
+            im.setInstanceStatus(InstanceStatus.REQUESTED);
+            String discoveryFQDN = im.getDiscoveryFQDN();
+            String expectedZoneForInstance = availabilityZoneList.get(index % groupAvailabilityZones.size());
+            expectedAvailabilityZoneByFqdn.put(discoveryFQDN, expectedZoneForInstance);
+            when(instanceMetaDataService.getAvailabilityZoneFromDiskIfRepair(stack, repair, im.getInstanceGroup().getGroupName(), discoveryFQDN))
+                    .thenReturn(expectedZoneForInstance);
+            index++;
+        }
+
+        boolean actual = underTest.populateForScaling(stack, groupNamesToScale, repair);
+
+        Assertions.assertTrue(actual);
+        verify(instanceMetaDataService, times(1)).getNotDeletedInstanceMetadataByStackId(stack.getId());
+        verify(instanceMetaDataService, times(1)).saveAll(notDeletedInstanceMetaDataSet);
+        verify(instanceMetaDataService, times(notDeletedInstanceMetaDataSet.size()))
+                .getAvailabilityZoneFromDiskIfRepair(any(), anyBoolean(), anyString(), anyString());
+        notDeletedInstanceMetaDataSet.forEach(instanceMetaData -> {
+            String discoveryFQDN = instanceMetaData.getDiscoveryFQDN();
+            String expectedAz = expectedAvailabilityZoneByFqdn.get(discoveryFQDN);
+            assertEquals(expectedAz, instanceMetaData.getAvailabilityZone());
+            verify(instanceMetaDataService).getAvailabilityZoneFromDiskIfRepair(stack, repair, instanceMetaData.getInstanceGroupName(), discoveryFQDN);
+        });
+    }
+
+    @Test
+    void testPopulateForScalingWhenPopulationIsNeededAndRepairButAzCouldNotBeFoundInVolume() {
+        boolean repair = Boolean.TRUE;
+        Set<String> groupAvailabilityZones = Set.of("1", "2", "3");
+        Stack stack = getStackWithGroupsAndInstances(groupAvailabilityZones);
+        when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
+        Set<String> groupNamesToScale = stack.getInstanceGroups().stream().map(InstanceGroup::getGroupName).collect(Collectors.toSet());
+        Set<InstanceMetaData> notDeletedInstanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(stack.getId())).thenReturn(notDeletedInstanceMetaDataSet);
+        notDeletedInstanceMetaDataSet.forEach(im -> im.setInstanceStatus(InstanceStatus.REQUESTED));
+        when(instanceMetaDataService.getAvailabilityZoneFromDiskIfRepair(any(), anyBoolean(), anyString(), anyString())).thenReturn(null);
+
+        assertThrows(CloudbreakServiceException.class, () -> underTest.populateForScaling(stack, groupNamesToScale, repair));
+    }
+
+    private static Stack getStackWithGroupsAndInstances(Set<String> groupAvailabilityZones) {
+        Stack stack = TestUtil.stack(Status.REQUESTED, TestUtil.azureCredential());
+        stack.setMultiAz(Boolean.TRUE);
+        stack.getInstanceGroups()
+                .forEach(ig -> {
+                    ig.setInstanceMetaData(TestUtil.generateInstanceMetaDatas(groupAvailabilityZones.size(), ig.getId(), ig));
+                    Set<AvailabilityZone> availabilityZones = groupAvailabilityZones.stream().map(az -> {
+                        AvailabilityZone availabilityZone = new AvailabilityZone();
+                        availabilityZone.setAvailabilityZone(az);
+                        availabilityZone.setInstanceGroup(ig);
+                        return availabilityZone;
+                    }).collect(Collectors.toSet());
+                    ig.setAvailabilityZones(availabilityZones);
+                });
+        return stack;
     }
 }

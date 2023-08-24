@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -20,11 +21,13 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -329,24 +332,32 @@ class InstanceMetaDataServiceTest {
         verify(multiAzCalculatorService, never()).determineRackId(anyString(), anyString());
     }
 
-    @Test
-    public void testGetAzFromDiskOrNullIfRepairWhenRepairAndCloudPlatformSupported() {
+    static Stream<Arguments> supportedProvidersWithVolumeResource() {
+        return Stream.of(
+                arguments(CloudPlatform.AWS, ResourceType.AWS_VOLUMESET),
+                arguments(CloudPlatform.AZURE, ResourceType.AZURE_VOLUMESET)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("supportedProvidersWithVolumeResource")
+    public void testGetAzFromDiskOrNullIfRepairWhenRepairAndCloudPlatformSupported(CloudPlatform cloudPlatform, ResourceType supportedVolumeResourceType) {
         Stack stack = new Stack();
         stack.setId(1L);
-        stack.setCloudPlatform(CloudPlatform.AWS.name());
+        stack.setCloudPlatform(cloudPlatform.name());
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", false, "fstab", List.of(), 10, "type");
         volumeSetAttributes.setDiscoveryFQDN("hostname");
         CloudResource cloudResource = CloudResource.builder()
-                .withType(ResourceType.AWS_VOLUMESET)
+                .withType(supportedVolumeResourceType)
                 .withStatus(CommonStatus.DETACHED)
                 .withName("name")
                 .withParameters(Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
                 .build();
-        when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L, "ig"))
+        when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.DETACHED, supportedVolumeResourceType, 1L, "ig"))
                 .thenReturn(List.of(cloudResource));
-        String actual = underTest.getAzFromDiskOrNullIfRepair(stack, true, "ig", "hostname");
+        String actual = underTest.getAvailabilityZoneFromDiskIfRepair(stack, true, "ig", "hostname");
         assertThat(actual).isEqualTo("az");
-        verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L, "ig");
+        verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.DETACHED, supportedVolumeResourceType, 1L, "ig");
     }
 
     @Test
@@ -354,7 +365,7 @@ class InstanceMetaDataServiceTest {
         Stack stack = new Stack();
         stack.setId(1L);
         stack.setCloudPlatform(CloudPlatform.GCP.name());
-        String actual = underTest.getAzFromDiskOrNullIfRepair(stack, true, "ig", "hostname");
+        String actual = underTest.getAvailabilityZoneFromDiskIfRepair(stack, true, "ig", "hostname");
         assertThat(actual).isNull();
         verify(resourceRetriever, never()).findByStatusAndTypeAndStack(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L);
     }
@@ -374,7 +385,7 @@ class InstanceMetaDataServiceTest {
                 .build();
         when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L, "ig"))
                 .thenReturn(List.of(cloudResource));
-        String actual = underTest.getAzFromDiskOrNullIfRepair(stack, true, "ig", "hostname");
+        String actual = underTest.getAvailabilityZoneFromDiskIfRepair(stack, true, "ig", "hostname");
         assertThat(actual).isNull();
         verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L, "ig");
     }

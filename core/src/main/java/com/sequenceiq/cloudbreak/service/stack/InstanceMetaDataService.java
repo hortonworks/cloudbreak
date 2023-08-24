@@ -24,7 +24,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -175,21 +174,23 @@ public class InstanceMetaDataService {
         return validId;
     }
 
-    @VisibleForTesting
-    String getAzFromDiskOrNullIfRepair(StackView stack, boolean repair, String instanceGroup, String hostname) {
+    public String getAvailabilityZoneFromDiskIfRepair(StackView stack, boolean repair, String instanceGroup, String hostname) {
         String availabilityZone = null;
         if (repair) {
-            ResourceType resourceType = getSupportedReattachableDiskType(stack);
+            ResourceType resourceType = getSupportedReAttachableDiskType(stack);
             if (resourceType != null) {
-                List<CloudResource> reattachableDiskResources = resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.DETACHED,
+                LOGGER.debug("Looking for availability zone of host: '{}' with resource type: '{}'", hostname, resourceType.name());
+                List<CloudResource> reAttachableDiskResources = resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.DETACHED,
                         resourceType, stack.getId(), instanceGroup);
-                Optional<CloudResource> reattachableDiskResource = reattachableDiskResources.stream()
+                Optional<CloudResource> reAttachableDiskResource = reAttachableDiskResources.stream()
                         .filter(d -> d.getParameter(ATTRIBUTES, VolumeSetAttributes.class).getDiscoveryFQDN().equals(hostname))
                         .findFirst();
-                if (reattachableDiskResource.isPresent()) {
-                    VolumeSetAttributes volumeSetAttributes = reattachableDiskResource.get().getParameter(ATTRIBUTES, VolumeSetAttributes.class);
+                if (reAttachableDiskResource.isPresent()) {
+                    CloudResource cloudResource = reAttachableDiskResource.get();
+                    VolumeSetAttributes volumeSetAttributes = cloudResource.getParameter(ATTRIBUTES, VolumeSetAttributes.class);
                     availabilityZone = volumeSetAttributes.getAvailabilityZone();
-                    LOGGER.debug("Found AZ for the {}: {}", resourceType, availabilityZone);
+                    LOGGER.info("Found availability zone '{}' for host: '{}' based on resource: '{}' typed with: '{}'", availabilityZone, hostname,
+                            cloudResource.getName(), resourceType.name());
                 } else {
                     LOGGER.debug("Cannot find {} for {} in instanceGroup of {}", resourceType, hostname, instanceGroup);
                 }
@@ -198,17 +199,19 @@ public class InstanceMetaDataService {
         return availabilityZone;
     }
 
-    private ResourceType getSupportedReattachableDiskType(StackView stack) {
-        if (stack.getCloudPlatform().equalsIgnoreCase(CloudPlatform.AWS.name())) {
+    private ResourceType getSupportedReAttachableDiskType(StackView stack) {
+        if (CloudPlatform.AWS.equalsIgnoreCase(stack.getCloudPlatform())) {
             return ResourceType.AWS_VOLUMESET;
+        } else if (CloudPlatform.AZURE.equalsIgnoreCase(stack.getCloudPlatform())) {
+            return ResourceType.AZURE_VOLUMESET;
         }
-        LOGGER.debug("Cloudbreak does not support the disk reattachment for {}", stack.getCloudPlatform());
+        LOGGER.debug("Cloudbreak does not support the disk re-attachment for {}", stack.getCloudPlatform());
         return null;
     }
 
     private Map<String, String> getSubnetAzPairsFilteredByHostNameIfRepair(DetailedEnvironmentResponse environment, StackView stack, boolean repair,
             String instanceGroup, String hostname) {
-        String az = getAzFromDiskOrNullIfRepair(stack, repair, instanceGroup, hostname);
+        String az = getAvailabilityZoneFromDiskIfRepair(stack, repair, instanceGroup, hostname);
         return multiAzCalculatorService.prepareSubnetAzMap(environment, az);
     }
 

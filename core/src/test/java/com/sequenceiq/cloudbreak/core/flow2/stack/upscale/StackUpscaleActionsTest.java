@@ -7,10 +7,17 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUp
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.REPAIR;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.TRIGGERED_VARIANT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,11 +25,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -46,9 +57,12 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
+import com.sequenceiq.cloudbreak.service.multiaz.DataLakeAwareInstanceMetadataAvailabilityZoneCalculator;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -125,6 +139,12 @@ class StackUpscaleActionsTest {
     @Mock
     private CloudResourceStatus cloudResourceStatus;
 
+    @Mock
+    private DataLakeAwareInstanceMetadataAvailabilityZoneCalculator availabilityZoneCalculator;
+
+    @Mock
+    private StackUpgradeService stackUpgradeService;
+
     @BeforeEach
     void setUp() {
         lenient().when(stack.getId()).thenReturn(STACK_ID);
@@ -134,6 +154,12 @@ class StackUpscaleActionsTest {
 
     private AbstractStackUpscaleAction<UpdateDomainDnsResolverResult> getPrevalidateAction() {
         AbstractStackUpscaleAction<UpdateDomainDnsResolverResult> action = (AbstractStackUpscaleAction<UpdateDomainDnsResolverResult>) underTest.prevalidate();
+        initActionPrivateFields(action);
+        return action;
+    }
+
+    private AbstractStackUpscaleAction<UpscaleStackValidationResult> getAddInstancesAction() {
+        AbstractStackUpscaleAction<UpscaleStackValidationResult> action = (AbstractStackUpscaleAction<UpscaleStackValidationResult>) underTest.addInstances();
         initActionPrivateFields(action);
         return action;
     }
@@ -262,12 +288,59 @@ class StackUpscaleActionsTest {
         Assertions.assertEquals(networkScaleDetails, variables.get(NETWORK_SCALE_DETAILS));
     }
 
+    static Stream<Arguments> addInstancesAvailabilityZonePopulationTestProvider() {
+        return Stream.of(
+                //Args:   zoneUpdateHappened, repair
+                arguments(Boolean.FALSE, Boolean.FALSE),
+                arguments(Boolean.TRUE, Boolean.FALSE),
+                arguments(Boolean.TRUE, Boolean.TRUE),
+                arguments(Boolean.FALSE, Boolean.TRUE)
+        );
+    }
+
+    @ParameterizedTest(name = "{0} when availability zone update happened: '{1}' and is repair: '{2}'")
+    @MethodSource("addInstancesAvailabilityZonePopulationTestProvider")
+    void testAddInstancesDoExecuteWhenAvailabilityZoneConnectorDoesNotPopulate(boolean zoneUpdateHappened, boolean repair) throws Exception {
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT_ZERO.longValue());
+        context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO),
+                Map.of(), Map.of(), repair, adjustmentTypeWithThreshold);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(stackUpscaleService.getInstanceCountToCreate(stackDto, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO, repair)).thenReturn(ADJUSTMENT_ZERO);
+        when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
+        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(eq(stackDto), anyMap(), anyMap(), anyBoolean(), anyBoolean(), any())).thenReturn(stackDto);
+        when(availabilityZoneCalculator.populateForScaling(eq(stackDto), anySet(), eq(repair))).thenReturn(zoneUpdateHappened);
+        when(stackUpgradeService.awsVariantMigrationIsFeasible(any(), anyString())).thenReturn(Boolean.FALSE);
+        UpscaleStackValidationResult payload = new UpscaleStackValidationResult(STACK_ID);
+        CloudStack convertedCloudStack = mock(CloudStack.class);
+        when(cloudStackConverter.convert(stackDto)).thenReturn(convertedCloudStack);
+        when(cloudContext.getId()).thenReturn(STACK_ID);
+
+
+        new AbstractActionTestSupport<>(getAddInstancesAction()).doExecute(context, payload, createVariables(Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO),
+                Map.of(), NetworkScaleDetails.getEmpty(), adjustmentTypeWithThreshold, VARIANT, repair));
+
+        int expectedNumberOfInvocations = zoneUpdateHappened ? 2 : 1;
+        verify(stackDtoService, times(expectedNumberOfInvocations)).getById(STACK_ID);
+        verify(reactorEventFactory).createEvent(anyMap(), payloadArgumentCaptor.capture());
+        verify(eventBus).notify("UPSCALESTACKREQUEST", event);
+        Object responsePayload = payloadArgumentCaptor.getValue();
+        assertThat(responsePayload).isInstanceOf(UpscaleStackRequest.class);
+        UpscaleStackRequest stackEvent = (UpscaleStackRequest) responsePayload;
+        assertThat(stackEvent.getResourceId()).isEqualTo(STACK_ID);
+    }
+
     public Map<Object, Object> createVariables(Map<String, Integer> hostGroupsWithAdjustment, Map<String, Set<String>> hostGroupsWithHostNames,
             NetworkScaleDetails networkScaleDetails, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant) {
+        return createVariables(hostGroupsWithAdjustment, hostGroupsWithHostNames, networkScaleDetails, adjustmentTypeWithThreshold, triggeredStackVariant,
+                Boolean.FALSE);
+    }
+
+    public Map<Object, Object> createVariables(Map<String, Integer> hostGroupsWithAdjustment, Map<String, Set<String>> hostGroupsWithHostNames,
+            NetworkScaleDetails networkScaleDetails, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant, boolean repair) {
         Map<Object, Object> variables = new HashMap<>();
         variables.put(HOST_GROUP_WITH_ADJUSTMENT, hostGroupsWithAdjustment);
         variables.put(HOST_GROUP_WITH_HOSTNAMES, hostGroupsWithHostNames);
-        variables.put(REPAIR, false);
+        variables.put(REPAIR, repair);
         if (triggeredStackVariant != null) {
             variables.put(TRIGGERED_VARIANT, triggeredStackVariant);
         }
