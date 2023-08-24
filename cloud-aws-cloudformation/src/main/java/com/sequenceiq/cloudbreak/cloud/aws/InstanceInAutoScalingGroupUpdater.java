@@ -15,7 +15,7 @@ import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeRequest;
 @Component
 public class InstanceInAutoScalingGroupUpdater {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsLaunchTemplateUpdateService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceInAutoScalingGroupUpdater.class);
 
     public void updateInstanceInAutoscalingGroup(AmazonEc2Client ec2Client, AutoScalingGroup autoScalingGroup, Group group) {
         for (Instance instance : autoScalingGroup.instances()) {
