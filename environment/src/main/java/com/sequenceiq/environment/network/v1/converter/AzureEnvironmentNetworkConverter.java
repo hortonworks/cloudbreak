@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.AvailabilityZoneConverter;
 import com.sequenceiq.common.api.type.DeploymentRestriction;
-import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -55,9 +54,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
             azureNetwork.setNoPublicIp(azureParams.isNoPublicIp());
             azureNetwork.setAksPrivateDnsZoneId(azureParams.getAksPrivateDnsZoneId());
             azureNetwork.setNoOutboundLoadBalancer(azureParams.isNoOutboundLoadBalancer());
-            if (ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT.equals(network.getServiceEndpointCreation())) {
-                azureNetwork.setDatabasePrivateDnsZoneId(azureParams.getDatabasePrivateDnsZoneId());
-            }
+            azureNetwork.setDatabasePrivateDnsZoneId(azureParams.getDatabasePrivateDnsZoneId());
             azureNetwork.setZoneMetas(availabilityZoneConverter.getJsonAttributesWithAvailabilityZones(azureParams.getAvailabilityZones(),
                     azureNetwork.getZoneMetas()));
             azureNetwork.setFlexibleServerSubnetIds(azureParams.getFlexibleServerSubnetIds());

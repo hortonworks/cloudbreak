@@ -18,6 +18,8 @@ public class AzureNetworkView {
 
     private static final String EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID = "existingDatabasePrivateDnsZoneId";
 
+    private static final String FLEXIBLE_SERVER_DELEGATED_SUBNET_ID = "flexibleServerDelegatedSubnetId";
+
     private String networkId;
 
     private String resourceGroupName;
@@ -105,5 +107,9 @@ public class AzureNetworkView {
 
     public String getExistingDatabasePrivateDnsZoneId() {
         return network.getStringParameter(EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID);
+    }
+
+    public String getFlexibleServerDelegatedSubnetId() {
+        return network.getStringParameter(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID);
     }
 }

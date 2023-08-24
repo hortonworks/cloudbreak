@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.environment.validation.ValidationType.E
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,6 +29,10 @@ import com.sequenceiq.environment.environment.validation.network.EnvironmentNetw
 import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameter.dto.AzureDatabaseParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.DatabaseSetup;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 
 @Component
 public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValidator {
@@ -71,7 +76,14 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         if (environmentValidationDto.getValidationType() == ENVIRONMENT_CREATION) {
             azurePrivateEndpointValidator.checkNetworkPoliciesWhenExistingNetwork(networkDto, cloudNetworks, resultBuilder);
             azurePrivateEndpointValidator.checkMultipleResourceGroup(resultBuilder, environmentDto, networkDto);
-            azurePrivateEndpointValidator.checkExistingManagedPrivateDnsZone(resultBuilder, environmentDto, networkDto);
+            DatabaseSetup databaseSetup = Optional.ofNullable(environmentDto.getParameters())
+                    .map(ParametersDto::azureParametersDto)
+                    .map(AzureParametersDto::getAzureDatabaseParametersDto)
+                    .map(AzureDatabaseParametersDto::getDatabaseSetup)
+                    .orElse(DatabaseSetup.PUBLIC);
+            if (databaseSetup != DatabaseSetup.PRIVATE) {
+                azurePrivateEndpointValidator.checkExistingManagedPrivateDnsZone(resultBuilder, environmentDto, networkDto);
+            }
             azurePrivateEndpointValidator.checkNewPrivateDnsZone(resultBuilder, environmentDto, networkDto);
             azurePrivateEndpointValidator.checkExistingRegisteredOnlyPrivateDnsZone(resultBuilder, environmentDto, networkDto);
         } else {
@@ -224,7 +236,9 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
 
     private void checkFlexibleServerSubnetIds(AzureParams azureParams, EnvironmentDto environmentDto, NetworkDto networkDto,
             ValidationResultBuilder resultBuilder) {
-        Set<String> flexibleServerSubnetIds = azureParams.getFlexibleServerSubnetIds();
+        Set<String> flexibleServerSubnetIds = azureParams.getFlexibleServerSubnetIds().stream()
+                .map(subnet -> StringUtils.substringAfterLast(subnet, "/"))
+                .collect(Collectors.toSet());
         if (entitlementService.isAzureDatabaseFlexibleServerEnabled(environmentDto.getAccountId()) && CollectionUtils.isNotEmpty(flexibleServerSubnetIds)) {
             Map<String, CloudSubnet> flexibleSubnets = cloudNetworkService.getSubnetMetadata(environmentDto, networkDto, flexibleServerSubnetIds);
             Set<String> invalidSubnets = flexibleSubnets.entrySet().stream()
