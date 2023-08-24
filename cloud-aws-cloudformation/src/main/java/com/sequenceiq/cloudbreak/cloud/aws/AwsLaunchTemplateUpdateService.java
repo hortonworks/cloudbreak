@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,10 @@ import software.amazon.awssdk.services.autoscaling.model.UpdateAutoScalingGroupR
 import software.amazon.awssdk.services.autoscaling.model.UpdateAutoScalingGroupResponse;
 import software.amazon.awssdk.services.ec2.model.CreateLaunchTemplateVersionRequest;
 import software.amazon.awssdk.services.ec2.model.CreateLaunchTemplateVersionResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeLaunchTemplateVersionsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeLaunchTemplateVersionsResponse;
 import software.amazon.awssdk.services.ec2.model.LaunchTemplateBlockDeviceMappingRequest;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateVersion;
 import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateRequest;
 import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateResponse;
 import software.amazon.awssdk.services.ec2.model.RequestLaunchTemplateData;
@@ -52,16 +56,16 @@ public class AwsLaunchTemplateUpdateService {
     @Inject
     private InstanceInAutoScalingGroupUpdater instanceUpdater;
 
-    public void updateFieldsOnAllLaunchTemplate(AuthenticatedContext authenticatedContext, String stackName, Map<LaunchTemplateField, String> updatableFields,
-            CloudStack cloudStack) {
-        updateFieldsOnAllLaunchTemplate(authenticatedContext, stackName, updatableFields, false, cloudStack);
+    public void updateFieldsOnAllLaunchTemplate(AuthenticatedContext authenticatedContext, String cloudFormationStackName,
+            Map<LaunchTemplateField, String> updatableFields, CloudStack cloudStack) {
+        updateFieldsOnAllLaunchTemplate(authenticatedContext, cloudFormationStackName, updatableFields, false, cloudStack);
     }
 
-    public void updateFieldsOnAllLaunchTemplate(AuthenticatedContext authenticatedContext, String stackName,
+    public void updateFieldsOnAllLaunchTemplate(AuthenticatedContext authenticatedContext, String cloudFormationStackName,
             Map<LaunchTemplateField, String> updatableFields, boolean dryRun, CloudStack cloudStack) {
         AmazonAutoScalingClient autoScalingClient = getAutoScalingClient(authenticatedContext);
         AmazonEc2Client ec2Client = getEc2Client(authenticatedContext);
-        Map<AutoScalingGroup, String> autoScalingGroups = getAutoScalingGroups(authenticatedContext, stackName, dryRun);
+        Map<AutoScalingGroup, String> autoScalingGroups = getAutoScalingGroups(authenticatedContext, cloudFormationStackName, dryRun);
         LOGGER.debug("Modifying the {} fields for the [{}] autoscaling groups' launchtemplates [dryrun: {}]",
                 updatableFields,
                 autoScalingGroups.values(),
@@ -71,10 +75,11 @@ public class AwsLaunchTemplateUpdateService {
         }
     }
 
-    public Map<AutoScalingGroup, String> getAutoScalingGroups(AuthenticatedContext authenticatedContext, String stackName, boolean dryRun) {
+    private Map<AutoScalingGroup, String> getAutoScalingGroups(AuthenticatedContext authenticatedContext, String cloudFormationStackName, boolean dryRun) {
         AmazonCloudFormationClient cloudFormationClient = getAmazonCloudFormationClient(authenticatedContext);
         AmazonAutoScalingClient autoScalingClient = getAutoScalingClient(authenticatedContext);
-        Map<AutoScalingGroup, String> autoScalingGroups = autoScalingGroupHandler.getAutoScalingGroups(cloudFormationClient, autoScalingClient, stackName);
+        Map<AutoScalingGroup, String> autoScalingGroups = autoScalingGroupHandler
+                .getAutoScalingGroups(cloudFormationClient, autoScalingClient, cloudFormationStackName);
         return filterGroupsForDryRun(autoScalingGroups, dryRun);
     }
 
@@ -165,6 +170,23 @@ public class AwsLaunchTemplateUpdateService {
         } else {
             return autoScalingGroups;
         }
+    }
+
+    public String getUserDataFromAutoScalingGroup(AuthenticatedContext ac, AutoScalingGroup asg) {
+        AmazonEc2Client ec2Client = getEc2Client(ac);
+        LaunchTemplateSpecification launchTemplateSpecification = getLaunchTemplateSpecification(asg);
+        DescribeLaunchTemplateVersionsResponse launchTemplateVersionsResponse = ec2Client.describeLaunchTemplateVersions(
+                DescribeLaunchTemplateVersionsRequest.builder()
+                .launchTemplateId(launchTemplateSpecification.launchTemplateId())
+                .versions(launchTemplateSpecification.version())
+                .build());
+        List<LaunchTemplateVersion> launchTemplateVersions = launchTemplateVersionsResponse.launchTemplateVersions();
+        if (launchTemplateVersions.size() != 1) {
+            LOGGER.warn("ASG {} did not return launch template {} version {}",
+                    asg.autoScalingGroupName(), launchTemplateSpecification.launchTemplateId(), launchTemplateSpecification.version());
+            return null;
+        }
+        return new String(Base64.getDecoder().decode(launchTemplateVersions.get(0).launchTemplateData().userData()));
     }
 
     private LaunchTemplateSpecification getLaunchTemplateSpecification(AutoScalingGroup autoScalingGroup) {

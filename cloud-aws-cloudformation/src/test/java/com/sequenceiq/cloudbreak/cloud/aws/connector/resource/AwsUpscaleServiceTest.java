@@ -28,18 +28,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsMetadataCollector;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsSyncUserDataService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
@@ -109,13 +108,11 @@ class AwsUpscaleServiceTest {
     @Mock
     private AwsMetadataCollector awsMetadataCollector;
 
+    @Mock
+    private AwsSyncUserDataService syncUserDataService;
+
     @InjectMocks
     private AwsUpscaleService awsUpscaleService;
-
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     void upscaleTest() throws AmazonAutoscalingFailedException {
@@ -194,6 +191,7 @@ class AwsUpscaleServiceTest {
         verify(cfStackUtil, times(0)).addLoadBalancerTargets(any(), any(), any());
         verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(false), any());
         verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(true), any());
+        verify(syncUserDataService).syncUserData(any(), any(), any());
     }
 
     @Test

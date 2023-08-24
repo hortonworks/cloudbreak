@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -48,15 +49,18 @@ import software.amazon.awssdk.services.autoscaling.model.UpdateAutoScalingGroupR
 import software.amazon.awssdk.services.autoscaling.model.UpdateAutoScalingGroupResponse;
 import software.amazon.awssdk.services.ec2.model.CreateLaunchTemplateVersionRequest;
 import software.amazon.awssdk.services.ec2.model.CreateLaunchTemplateVersionResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeLaunchTemplateVersionsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeLaunchTemplateVersionsResponse;
 import software.amazon.awssdk.services.ec2.model.LaunchTemplateBlockDeviceMappingRequest;
 import software.amazon.awssdk.services.ec2.model.LaunchTemplateVersion;
 import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateRequest;
 import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateResponse;
+import software.amazon.awssdk.services.ec2.model.ResponseLaunchTemplateData;
 import software.amazon.awssdk.services.ec2.model.ValidationError;
 import software.amazon.awssdk.services.ec2.model.ValidationWarning;
 
 @ExtendWith(MockitoExtension.class)
-public class AwsLaunchTemplateUpdateServiceTest {
+class AwsLaunchTemplateUpdateServiceTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
@@ -66,7 +70,15 @@ public class AwsLaunchTemplateUpdateServiceTest {
 
     private static final String USER_DATA = Base64.getEncoder().encodeToString("userdata".getBytes());
 
-    private static final long LAUNCH_TEMPLATE_VERSION = 1L;
+    private static final String USERDATA_B64 = "dXNlckRhdGFPblByb3ZpZGVy";
+
+    private static final String USERDATA = "userDataOnProvider";
+
+    private static final String LAUNCH_TEMPLATE_VERSION_STRING = "12";
+
+    private static final Long LAUNCH_TEMPLATE_VERSION = 12L;
+
+    private static final String LAUNCH_TEMPLATE_ID = "launchtemplate-1";
 
     @Mock
     private AwsCloudFormationClient awsClient;
@@ -101,7 +113,7 @@ public class AwsLaunchTemplateUpdateServiceTest {
     private AuthenticatedContext ac;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         Location location = Location.location(Region.region("region"));
         CloudContext context = CloudContext.Builder.builder()
                 .withId(LAUNCH_TEMPLATE_VERSION)
@@ -122,7 +134,7 @@ public class AwsLaunchTemplateUpdateServiceTest {
     }
 
     @Test
-    public void shouldUpdateImage() {
+    void shouldUpdateImage() {
         // GIVEN
         String cfStackName = "cf";
         CloudResource cfResource = CloudResource.builder()
@@ -147,7 +159,7 @@ public class AwsLaunchTemplateUpdateServiceTest {
     }
 
     @Test
-    public void testUpdateFieldsUpdatesTheAppropriateParams() {
+    void testUpdateFieldsUpdatesTheAppropriateParams() {
         // GIVEN
         String cfStackName = "cf";
         CloudResource cfResource = CloudResource.builder()
@@ -173,7 +185,7 @@ public class AwsLaunchTemplateUpdateServiceTest {
     }
 
     @Test
-    public void testUpdateFieldsUpdatesWithMissingParams() {
+    void testUpdateFieldsUpdatesWithMissingParams() {
         // GIVEN
         String cfStackName = "cf";
         CloudResource cfResource = CloudResource.builder()
@@ -199,7 +211,7 @@ public class AwsLaunchTemplateUpdateServiceTest {
     }
 
     @Test
-    public void testUpdateLaunchTemplate() {
+    void testUpdateLaunchTemplate() {
         // GIVEN
         Map<LaunchTemplateField, String> updatableFields = new HashMap<>();
         AmazonAutoScalingClient autoScalingClient = mock(AmazonAutoScalingClient.class);
@@ -232,7 +244,7 @@ public class AwsLaunchTemplateUpdateServiceTest {
     }
 
     @Test
-    public void testUpdateImageWithWrongTemplateParams() {
+    void testUpdateImageWithWrongTemplateParams() {
         // GIVEN
         String cfStackName = "cf";
         CloudResource cfResource = CloudResource.builder()
@@ -252,9 +264,45 @@ public class AwsLaunchTemplateUpdateServiceTest {
                         Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()), stack));
     }
 
+    @Test
+    void testGetUserDataFromAutoScalingGroup() {
+        AutoScalingGroup asg = createAsg();
+        LaunchTemplateVersion lt = LaunchTemplateVersion.builder()
+                .launchTemplateId(LAUNCH_TEMPLATE_ID)
+                .versionNumber(Long.valueOf(LAUNCH_TEMPLATE_VERSION))
+                .launchTemplateData(ResponseLaunchTemplateData.builder()
+                        .userData(USERDATA_B64)
+                        .build())
+                .build();
+        DescribeLaunchTemplateVersionsResponse ltvResponse = DescribeLaunchTemplateVersionsResponse.builder()
+                .launchTemplateVersions(lt)
+                .build();
+        when(ec2Client.describeLaunchTemplateVersions(any())).thenReturn(ltvResponse);
+        String result = underTest.getUserDataFromAutoScalingGroup(ac, asg);
+        assertThat(result).isEqualTo(USERDATA);
+        ArgumentCaptor<DescribeLaunchTemplateVersionsRequest> captor = ArgumentCaptor.forClass(DescribeLaunchTemplateVersionsRequest.class);
+        verify(ec2Client).describeLaunchTemplateVersions(captor.capture());
+        DescribeLaunchTemplateVersionsRequest capturedRequest = captor.getValue();
+        assertThat(capturedRequest.launchTemplateId()).isEqualTo(LAUNCH_TEMPLATE_ID);
+        assertThat(capturedRequest.versions()).isEqualTo(List.of(LAUNCH_TEMPLATE_VERSION_STRING));
+    }
+
+    @Test
+    void testGetUserDataFromAutoScalingGroupWhenNoLaunchTemplate() {
+        AutoScalingGroup asg = createAsg();
+        DescribeLaunchTemplateVersionsResponse ltvResponse = DescribeLaunchTemplateVersionsResponse.builder().build();
+        when(ec2Client.describeLaunchTemplateVersions(any())).thenReturn(ltvResponse);
+        String result = underTest.getUserDataFromAutoScalingGroup(ac, asg);
+        assertThat(result).isNull();
+    }
+
     private Map<AutoScalingGroup, String> createAutoScalingGroupHandler() {
-        AutoScalingGroup autoScalingGroup = AutoScalingGroup.builder().autoScalingGroupName("ag").mixedInstancesPolicy(createMixedInstancePolicy()).build();
+        AutoScalingGroup autoScalingGroup = createAsg();
         return Map.of(autoScalingGroup, autoScalingGroup.autoScalingGroupName());
+    }
+
+    private AutoScalingGroup createAsg() {
+        return AutoScalingGroup.builder().autoScalingGroupName("ag").mixedInstancesPolicy(createMixedInstancePolicy()).build();
     }
 
     private MixedInstancesPolicy createMixedInstancePolicy() {
@@ -265,6 +313,6 @@ public class AwsLaunchTemplateUpdateServiceTest {
     }
 
     private LaunchTemplateSpecification createLaunchTemplateSpecification() {
-        return LaunchTemplateSpecification.builder().launchTemplateId("templateid").version("1").build();
+        return LaunchTemplateSpecification.builder().launchTemplateId(LAUNCH_TEMPLATE_ID).version(LAUNCH_TEMPLATE_VERSION_STRING).build();
     }
 }
