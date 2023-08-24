@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -54,6 +55,9 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Mock
+    private MultiAzCalculatorService multiAzCalculatorService;
 
     @Mock
     private AvailabilityZoneConnector availabilityZoneConnector;
@@ -136,6 +140,9 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         instancesWithAzConfig.forEach(im -> im.setAvailabilityZone("1"));
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
         when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
+        when(multiAzCalculatorService.determineRackId(any(), eq("1"))).thenReturn("/1");
+        when(multiAzCalculatorService.determineRackId(any(), eq("2"))).thenReturn("/2");
+        when(multiAzCalculatorService.determineRackId(any(), eq("3"))).thenReturn("/3");
 
         underTest.populate(1L);
 
@@ -145,6 +152,8 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         assertTrue(stack.getInstanceGroups().stream()
                 .allMatch(ig -> ig.getInstanceMetaData().stream()
                         .allMatch(im -> groupAvailabilityZones.contains(im.getAvailabilityZone()))));
+        assertTrue(instancesExpectedToBeUpdated.stream()
+                        .allMatch(im -> ("/" + im.getAvailabilityZone()).equals(im.getRackId())));
     }
 
     @Test

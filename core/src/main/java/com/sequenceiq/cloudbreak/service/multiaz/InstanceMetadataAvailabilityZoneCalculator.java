@@ -38,6 +38,9 @@ public class InstanceMetadataAvailabilityZoneCalculator {
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
+    @Inject
+    private MultiAzCalculatorService multiAzCalculatorService;
+
     public void populate(Long stackId) {
         Stack stack = stackService.getByIdWithLists(stackId);
         populate(stack);
@@ -85,8 +88,11 @@ public class InstanceMetadataAvailabilityZoneCalculator {
                 String availabilityZone = Collections.min(zoneToNodeCountMap.entrySet(), Map.Entry.comparingByValue()).getKey();
                 zoneToNodeCountMap.put(availabilityZone, zoneToNodeCountMap.get(availabilityZone) + 1);
                 instance.setAvailabilityZone(availabilityZone);
+                String previousRackId = instance.getRackId();
+                instance.setRackId(multiAzCalculatorService.determineRackId(instance.getSubnetId(), availabilityZone));
                 updatedInstances.add(instance);
                 LOGGER.info("Set availability zone('{}') for instance '{}'", instance.getAvailabilityZone(), instance.getInstanceId());
+                LOGGER.info("Rack Id updated from {} to {}", previousRackId, instance.getRackId());
             }
         }
         return updatedInstances;
