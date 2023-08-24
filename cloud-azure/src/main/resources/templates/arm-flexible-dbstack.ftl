@@ -126,9 +126,13 @@
       "type": "string",
       "defaultValue": ""
     },
-    "privateDnsZoneArmResourceId": {
+    "existingDatabasePrivateDnsZoneId": {
       "type": "string",
-      "defaultValue": ""
+      "defaultValue": "${existingDatabasePrivateDnsZoneId!""}"
+    },
+    "flexibleServerDelegatedSubnetId": {
+      "type": "string",
+      "defaultValue": "${flexibleServerDelegatedSubnetId!""}"
     }
   },
   "variables": {
@@ -150,8 +154,8 @@
         "administratorLogin": "[parameters('administratorLogin')]",
         "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
         "network": {
-          "delegatedSubnetResourceId": "[if(empty(parameters('virtualNetworkExternalId')), json('null'), json(format('{0}/subnets/{1}', parameters('virtualNetworkExternalId'), parameters('subnetName'))))]",
-          "privateDnsZoneArmResourceId": "[if(empty(parameters('virtualNetworkExternalId')), json('null'), parameters('privateDnsZoneArmResourceId'))]"
+          "delegatedSubnetResourceId": "[if(empty(parameters('flexibleServerDelegatedSubnetId')), json('null'), parameters('flexibleServerDelegatedSubnetId'))]",
+          "privateDnsZoneArmResourceId": "[if(empty(parameters('existingDatabasePrivateDnsZoneId')), json('null'), parameters('existingDatabasePrivateDnsZoneId'))]"
         },
         "highAvailability": {
           "mode": "[parameters('haMode')]"

@@ -39,6 +39,8 @@ public class AzureFlexibleServerDatabaseTemplateModelBuilder implements AzureDat
             LOGGER.warn("Found port {} in database stack, but Azure ignores it", azureDatabaseServerView.getPort());
         }
         model.put("serverTags", databaseStack.getTags());
+        model.put("existingDatabasePrivateDnsZoneId", azureNetworkView.getExistingDatabasePrivateDnsZoneId());
+        model.put("flexibleServerDelegatedSubnetId", azureNetworkView.getFlexibleServerDelegatedSubnetId());
         model.put("skuName", azureDatabaseServerView.getSkuName());
         model.put("skuSizeGB", azureDatabaseServerView.getStorageSizeInGb());
         model.put("skuTier", getSkuTier(azureDatabaseServerView));

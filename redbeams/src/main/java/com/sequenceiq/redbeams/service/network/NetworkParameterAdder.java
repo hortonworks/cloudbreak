@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_I
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -14,6 +15,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.ServiceEndpointCreationToEndpointTypeConverter;
 import com.sequenceiq.common.model.PrivateEndpointType;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
+import com.sequenceiq.environment.api.v1.environment.model.base.EnvironmentNetworkBase;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureDatabaseParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.DatabaseSetup;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
@@ -37,6 +43,8 @@ public class NetworkParameterAdder {
     private static final String SUBNET_FOR_PRIVATE_ENDPOINT = "subnetForPrivateEndpoint";
 
     private static final String EXISTING_PRIVATE_DNS_ZONE_ID = "existingDatabasePrivateDnsZoneId";
+
+    private static final String FLEXIBLE_SERVER_DELEGATED_SUBNET_ID = "flexibleServerDelegatedSubnetId";
 
     private static final String SUBNETS = "subnets";
 
@@ -77,10 +85,22 @@ public class NetworkParameterAdder {
             case AZURE:
                 PrivateEndpointType privateEndpointType
                         = serviceEndpointCreationToEndpointTypeConverter.convert(
-                                environmentResponse.getNetwork().getServiceEndpointCreation(), cloudPlatform.name());
+                        environmentResponse.getNetwork().getServiceEndpointCreation(), cloudPlatform.name());
                 parameters.put(ENDPOINT_TYPE, privateEndpointType);
                 if (PrivateEndpointType.USE_PRIVATE_ENDPOINT == privateEndpointType) {
                     parameters.put(SUBNET_FOR_PRIVATE_ENDPOINT, getAzureSubnetToUseWithPrivateEndpoint(environmentResponse, dbStack));
+                    parameters.put(EXISTING_PRIVATE_DNS_ZONE_ID, environmentResponse.getNetwork().getAzure().getDatabasePrivateDnsZoneId());
+                }
+                DatabaseSetup databaseSetup = Optional.ofNullable(environmentResponse.getAzure())
+                        .map(AzureEnvironmentParameters::getAzureDatabaseParameters)
+                        .map(AzureDatabaseParameters::getDatabaseSetup)
+                        .orElse(DatabaseSetup.PUBLIC);
+                if (databaseSetup == DatabaseSetup.PRIVATE) {
+                    Optional.ofNullable(environmentResponse.getNetwork())
+                            .map(EnvironmentNetworkBase::getAzure)
+                            .map(EnvironmentNetworkAzureParams::getFlexibleServerSubnetIds)
+                            .flatMap(subnetIds -> subnetIds.stream().findFirst())
+                            .ifPresent(subnetId -> parameters.put(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID, subnetId));
                     parameters.put(EXISTING_PRIVATE_DNS_ZONE_ID, environmentResponse.getNetwork().getAzure().getDatabasePrivateDnsZoneId());
                 }
                 break;
