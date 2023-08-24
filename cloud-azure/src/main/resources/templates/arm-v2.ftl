@@ -1,4 +1,13 @@
 <#setting number_format="computer">
+<#macro zoneredundant>
+<#if multiAz>,
+"zones": [
+           "1",
+           "2",
+           "3"
+         ]
+</#if>
+</#macro>
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
@@ -455,7 +464,7 @@
              </#list>
             <#list loadBalancers as loadBalancer>
                 ,{
-                  "apiVersion": "2020-05-01",
+                  "apiVersion": "2023-04-01",
                   "type": "Microsoft.Network/loadBalancers",
                   "dependsOn": [
                     <#if loadBalancer.type == "PUBLIC" || loadBalancer.type == "OUTBOUND">
@@ -506,7 +515,7 @@
                             "id": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]"
                           }
                           </#if>
-                        }
+                        }<@zoneredundant/>
                       }<#if gatewayPrivateLbNeeded!false>,
                       {
                         "name": "${loadBalancer.name}-frontend-gateway",
@@ -516,7 +525,7 @@
                           "subnet": {
                             "id": "[concat(variables('vnetID'), '/subnets/', '${endpointGwSubnet}')]"
                           }
-                        }
+                        }<@zoneredundant/>
                       }
                        </#if>
                       </#if>
@@ -607,13 +616,13 @@
                     ]
                   },
                   "sku": {
-                      "name": "${loadBalancer.sku.templateName}"
+                      "name": <#if multiAz>"Standard"<#else>"${loadBalancer.sku.templateName}"</#if>
                   }
                 }
                 <#if loadBalancer.type == "PUBLIC" || loadBalancer.type == "OUTBOUND">
                 ,{
                     "type": "Microsoft.Network/publicIPAddresses",
-                    "apiVersion": "2020-06-01",
+                    "apiVersion": "2023-04-01",
                     "name": "${loadBalancer.name}-publicIp",
                     "location": "[parameters('region')]",
                     "tags": {
@@ -624,12 +633,12 @@
                         </#if>
                     },
                     "sku": {
-                        "name": "${loadBalancer.sku.templateName}"
+                        "name": <#if multiAz>"Standard"<#else>"${loadBalancer.sku.templateName}"</#if>
                     },
                     "properties": {
                         "publicIPAddressVersion": "IPv4",
                         "publicIPAllocationMethod": "Static"
-                    }
+                    }<@zoneredundant/>
                 }
                 </#if>
             </#list>

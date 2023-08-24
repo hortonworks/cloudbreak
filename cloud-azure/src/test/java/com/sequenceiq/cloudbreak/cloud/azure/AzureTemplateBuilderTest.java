@@ -132,6 +132,8 @@ public class AzureTemplateBuilderTest {
 
     private static final String LATEST_TEMPLATE_PATH_FREEIPA = "templates/arm-v2-freeipa.ftl";
 
+    private static final String ZONE_REDUNDANT = "\"zones\":[\"1\",\"2\",\"3\"]";
+
     private static final int ROOT_VOLUME_SIZE = 50;
 
     private static final Map<String, Boolean> ACCELERATED_NETWORK_SUPPORT = Map.of("m1.medium", false);
@@ -202,10 +204,6 @@ public class AzureTemplateBuilderTest {
         }).collect(Collectors.toList());
         templates.addAll(olderTemplates);
         return templates;
-    }
-
-    public static Iterable<?> templatesPathDataProviderFreeIPA() {
-        return Lists.newArrayList(LATEST_TEMPLATE_PATH_FREEIPA);
     }
 
     @BeforeEach
@@ -553,7 +551,7 @@ public class AzureTemplateBuilderTest {
 
     @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndBasicLoadBalancer {0}")
     @MethodSource("templatesPathDataProvider")
-    public void buildWithGatewayInstanceGroupTypeAndBasicLoadBalancer(String templatePath) {
+    public void buildWithGatewayInstanceGroupTypeAndBasicLoadBalancerAndMultiAz(String templatePath) {
         assumeTrue(isTemplateVersionGreaterOrEqualThan(templatePath, "2.7.3.0"));
         //GIVEN
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
@@ -575,7 +573,7 @@ public class AzureTemplateBuilderTest {
 
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, loadBalancers, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA);
+                null, loadBalancers, null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, true);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
@@ -594,7 +592,10 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"name\": \"port-443-rule\","));
         assertTrue(templateString.contains("\"name\": \"port-8443-probe\","));
         assertTrue(templateString.contains("\"type\": \"Microsoft.Network/publicIPAddresses\","));
-        assertTrue(templateString.contains("\"name\": \"Basic\""));
+        assertTrue(templateString.contains("\"name\": \"Standard\""));
+
+        String strippedTemplateString = templateString.replaceAll("\\s", "");
+        assertTrue(strippedTemplateString.contains(ZONE_REDUNDANT));
     }
 
     @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndStandardLoadBalancer {0}")
@@ -642,11 +643,14 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"type\": \"Microsoft.Network/publicIPAddresses\","));
         assertTrue(templateString.contains("\"name\": \"Standard\""));
         assertTrue(templateString.contains("\"tier\": \"Regional\""));
+
+        String strippedTemplateString = templateString.replaceAll("\\s", "");
+        assertFalse(strippedTemplateString.contains(ZONE_REDUNDANT));
     }
 
     @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndOutboundLoadBalancer {0}")
     @MethodSource("templatesPathDataProvider")
-    public void buildWithGatewayInstanceGroupTypeAndOutboundLoadBalancer(String templatePath) {
+    public void buildWithGatewayInstanceGroupTypeAndOutboundLoadBalancerAndMultiAZ(String templatePath) {
         assumeTrue(isTemplateVersionGreaterOrEqualThan(templatePath, "2.7.3.0"));
         //GIVEN
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
@@ -671,7 +675,7 @@ public class AzureTemplateBuilderTest {
 
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, loadBalancers, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA);
+                null, loadBalancers, null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, true);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
@@ -701,6 +705,9 @@ public class AzureTemplateBuilderTest {
                 "\"type\": \"Microsoft.Network/loadBalancers\","));
         assertEquals(1, StringUtils.countMatches(templateString,
                 "\"id\": \"[resourceId('Microsoft.Network/publicIPAddresses', 'LoadBalancertestStackOUTBOUND-publicIp')]\""));
+
+        String strippedTemplateString = templateString.replaceAll("\\s", "");
+        assertEquals(2, StringUtils.countMatches(strippedTemplateString, ZONE_REDUNDANT));
     }
 
     @ParameterizedTest(name = "buildWithStandardLoadBalancerOnlyTargetGroupsUpdated {0}")
@@ -825,7 +832,7 @@ public class AzureTemplateBuilderTest {
     }
 
     @Test
-    public void buildWithGatewayInstanceGroupTypePrivateAndGatewayLoadBalancers() {
+    public void buildWithGatewayInstanceGroupTypePrivateAndGatewayLoadBalancersAndMultiAZ() {
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, LATEST_TEMPLATE_PATH);
         //GIVEN
         Network network = new Network(new Subnet(SUBNET_CIDR));
@@ -850,7 +857,7 @@ public class AzureTemplateBuilderTest {
 
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, loadBalancers, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA);
+                null, loadBalancers, null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, true);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
@@ -865,10 +872,10 @@ public class AzureTemplateBuilderTest {
         String strippedTemplateString = templateString.replaceAll("\\s", "");
         String twoFrontendIps = "\"frontendIPConfigurations\":[{\"name\":\"LoadBalancertestStackPRIVATE-frontend\",\"properties\":"
                 + "{\"privateIPAddressVersion\":\"IPv4\",\"privateIPAllocationMethod\":\"Dynamic\",\"subnet\":"
-                + "{\"id\":\"[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]\"}}},"
+                + "{\"id\":\"[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]\"}},\"zones\":[\"1\",\"2\",\"3\"]},"
                 + "{\"name\":\"LoadBalancertestStackPRIVATE-frontend-gateway\",\"properties\":"
                 + "{\"privateIPAddressVersion\":\"IPv4\",\"privateIPAllocationMethod\":\"Dynamic\",\"subnet\":"
-                + "{\"id\":\"[concat(variables('vnetID'),'/subnets/','endpointGwSubnet')]\"}}}],";
+                + "{\"id\":\"[concat(variables('vnetID'),'/subnets/','endpointGwSubnet')]\"}},\"zones\":[\"1\",\"2\",\"3\"]}],";
         assertThat(strippedTemplateString).contains(twoFrontendIps);
 
         String twoLoadBalancingRules = "\"loadBalancingRules\":[{\"name\":\"port-443-rule\",\"properties\":"
@@ -885,6 +892,8 @@ public class AzureTemplateBuilderTest {
                 + "\"loadDistribution\":\"Default\",\"probe\":{\"id\":\"[resourceId('Microsoft.Network/loadBalancers/probes','LoadBalancertestStackPRIVATE',"
                 + "'port-8443-probe')]\"},\"protocol\":\"Tcp\"}}],";
         assertThat(strippedTemplateString).contains(twoLoadBalancingRules);
+
+        assertEquals(2, StringUtils.countMatches(strippedTemplateString, ZONE_REDUNDANT));
     }
 
     @ParameterizedTest(name = "testNicDependenciesAreValidJson {0}")
@@ -1748,226 +1757,6 @@ public class AzureTemplateBuilderTest {
         gson.fromJson(templateString, Map.class);
         assertThat(templateString).contains("\"diskEncryptionSet\": {");
         assertThat(templateString).contains("\"id\": \"myDES\"");
-    }
-
-    @ParameterizedTest(name = "buildTestAvailabilitySetInTemplate {0}")
-    @MethodSource("templatesPathDataProviderFreeIPA")
-    public void buildTestAvailabilitySetInFreeIPATemplate(String templatePath) {
-        //GIVEN
-        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
-        ReflectionTestUtils.setField(azureTemplateBuilder, "armTemplateParametersPath", "templates/parameters-freeipa.ftl");
-
-        Network network = new Network(new Subnet(SUBNET_CIDR));
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("persistentStorage", "persistentStorageTest");
-        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
-        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
-
-        Group gatewayGroup = new Group("gateway", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
-        Map<String, Object> asMap = new HashMap<>();
-        String availabilitySetName = gatewayGroup.getType().name().toLowerCase() + "-as";
-        asMap.put("name", availabilitySetName);
-        asMap.put("faultDomainCount", 2);
-        asMap.put("updateDomainCount", 20);
-        gatewayGroup.putParameter("availabilitySet", asMap);
-        groups.add(gatewayGroup);
-
-        Group coreGroup = new Group("core", InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
-        coreGroup.putParameter("availabilitySet", null);
-        groups.add(coreGroup);
-
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
-
-        //WHEN
-        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
-
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
-        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
-        String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
-        //THEN
-        gson.fromJson(templateString, Map.class);
-        assertTrue(templateString.contains("\"gatewayAsName\": \"gateway-as\","));
-        assertTrue(templateString.contains("\"gatewayAsFaultDomainCount\": 2,"));
-        assertTrue(templateString.contains("\"gatewayAsUpdateDomainCount\": 20,"));
-        assertTrue(templateString.contains("'Microsoft.Compute/availabilitySets', 'gateway-as'"));
-        String strippedTemplateString = templateString.replaceAll("\\s", "");
-        assertTrue(strippedTemplateString.contains("\"dependsOn\":[\"[concat('Microsoft.Compute/availabilitySets/','gateway-as')]\""));
-        assertTrue(strippedTemplateString.contains("\"properties\":{\"availabilitySet\":{\"id\"" +
-                ":\"[resourceId('Microsoft.Compute/availabilitySets','gateway-as')]"));
-
-    }
-
-    @ParameterizedTest(name = "buildTestAvailabilitySetInTemplate {0}")
-    @MethodSource("templatesPathDataProviderFreeIPA")
-    public void buildTestAvailabilitySetNotInFreeIPATemplateForMultiAz(String templatePath) {
-        //GIVEN
-        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
-        ReflectionTestUtils.setField(azureTemplateBuilder, "armTemplateParametersPath", "templates/parameters-freeipa.ftl");
-
-        Network network = new Network(new Subnet(SUBNET_CIDR));
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("persistentStorage", "persistentStorageTest");
-        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
-        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
-
-        Group gatewayGroup = new Group("gateway", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
-        Map<String, Object> asMap = new HashMap<>();
-        String availabilitySetName = gatewayGroup.getType().name().toLowerCase() + "-as";
-        asMap.put("name", availabilitySetName);
-        asMap.put("faultDomainCount", 2);
-        asMap.put("updateDomainCount", 20);
-        gatewayGroup.putParameter("availabilitySet", asMap);
-        groups.add(gatewayGroup);
-
-        Group coreGroup = new Group("core", InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
-        coreGroup.putParameter("availabilitySet", null);
-        groups.add(coreGroup);
-
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, true);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
-
-        //WHEN
-        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
-
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
-        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
-        String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
-        //THEN
-        gson.fromJson(templateString, Map.class);
-        assertFalse(templateString.contains("\"gatewayAsName\": \"gateway-as\","));
-        assertFalse(templateString.contains("\"gatewayAsFaultDomainCount\": 2,"));
-        assertFalse(templateString.contains("\"gatewayAsUpdateDomainCount\": 20,"));
-        assertFalse(templateString.contains("'Microsoft.Compute/availabilitySets', 'gateway-as'"));
-        String strippedTemplateString = templateString.replaceAll("\\s", "");
-        assertFalse(strippedTemplateString.contains("\"dependsOn\":[\"[concat('Microsoft.Compute/availabilitySets/','gateway-as')]\""));
-        assertFalse(strippedTemplateString.contains("\"properties\":{\"availabilitySet\":{\"id\"" +
-                ":\"[resourceId('Microsoft.Compute/availabilitySets','gateway-as')]"));
-    }
-
-    @ParameterizedTest(name = "buildTestAvailabilitySetInTemplate {0}")
-    @MethodSource("templatesPathDataProviderFreeIPA")
-    public void buildTestZonesInformationInFreeIPATemplateForMultiAz(String templatePath) {
-        //GIVEN
-        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
-        ReflectionTestUtils.setField(azureTemplateBuilder, "armTemplateParametersPath", "templates/parameters-freeipa.ftl");
-
-        Network network = new Network(new Subnet(SUBNET_CIDR));
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("persistentStorage", "persistentStorageTest");
-        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
-        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
-
-        instance.setAvailabilityZone("1");
-
-        CloudInstance instance1 = new CloudInstance("SOME_ID", instance.getTemplate(), instanceAuthentication, "existingSubnet", "2", instance.getParameters());
-
-
-        Group gatewayGroup = new Group("gateway", InstanceGroupType.GATEWAY, List.of(instance, instance1), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
-        Map<String, Object> asMap = new HashMap<>();
-        String availabilitySetName = gatewayGroup.getType().name().toLowerCase() + "-as";
-        asMap.put("name", availabilitySetName);
-        asMap.put("faultDomainCount", 2);
-        asMap.put("updateDomainCount", 20);
-        gatewayGroup.putParameter("availabilitySet", asMap);
-        groups.add(gatewayGroup);
-
-        Group coreGroup = new Group("core", InstanceGroupType.CORE, List.of(instance, instance1), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
-        coreGroup.putParameter("availabilitySet", null);
-        groups.add(coreGroup);
-
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, true);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
-
-        //WHEN
-        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
-
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
-        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
-        String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
-        //THEN
-        gson.fromJson(templateString, Map.class);
-        String strippedTemplateString = templateString.replaceAll("\\s", "");
-        assertTrue(strippedTemplateString.contains("\"zones\":[\"1\"],\"sku\":{\"name\":\"Standard\",\"tier\":\"Regional\"}"));
-        assertTrue(strippedTemplateString.contains("\"zones\":[\"2\"],\"sku\":{\"name\":\"Standard\",\"tier\":\"Regional\"}"));
-        assertTrue(strippedTemplateString.contains("\"zones\":[\"1\"],\"properties\""));
-        assertTrue(strippedTemplateString.contains("\"zones\":[\"2\"],\"properties\""));
-    }
-
-    @ParameterizedTest(name = "buildTestAvailabilitySetInTemplate {0}")
-    @MethodSource("templatesPathDataProviderFreeIPA")
-    public void buildTestZonesInformationNotPresentInFreeIPATemplate(String templatePath) {
-        //GIVEN
-        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
-        ReflectionTestUtils.setField(azureTemplateBuilder, "armTemplateParametersPath", "templates/parameters-freeipa.ftl");
-
-        Network network = new Network(new Subnet(SUBNET_CIDR));
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("persistentStorage", "persistentStorageTest");
-        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
-        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
-
-        Group gatewayGroup = new Group("gateway", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
-        Map<String, Object> asMap = new HashMap<>();
-        String availabilitySetName = gatewayGroup.getType().name().toLowerCase() + "-as";
-        asMap.put("name", availabilitySetName);
-        asMap.put("faultDomainCount", 2);
-        asMap.put("updateDomainCount", 20);
-        gatewayGroup.putParameter("availabilitySet", asMap);
-        groups.add(gatewayGroup);
-
-        Group coreGroup = new Group("core", InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
-        coreGroup.putParameter("availabilitySet", null);
-        groups.add(coreGroup);
-
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
-
-        //WHEN
-        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
-
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
-        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
-        String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
-        //THEN
-        gson.fromJson(templateString, Map.class);
-        String strippedTemplateString = templateString.replaceAll("\\s", "");
-        assertFalse(strippedTemplateString.contains("\"zones\":[\"1\"],\"sku\":{\"name\":\"Standard\",\"tier\":\"Regional\"}"));
-        assertFalse(strippedTemplateString.contains("\"zones\":[\"2\"],\"sku\":{\"name\":\"Standard\",\"tier\":\"Regional\"}"));
-        assertFalse(strippedTemplateString.contains("\"zones\":[\"1\"],\"properties\""));
-        assertFalse(strippedTemplateString.contains("\"zones\":[\"2\"],\"properties\""));
     }
 
     private boolean isTemplateVersionGreaterOrEqualThan2100(String templatePath) {
