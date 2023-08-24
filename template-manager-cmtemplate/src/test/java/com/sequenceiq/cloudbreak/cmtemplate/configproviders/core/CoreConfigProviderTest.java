@@ -75,7 +75,7 @@ public class CoreConfigProviderTest {
 
     @Test
     public void isConfigurationNeededWhenKafkaPresentedHdfsNotAndStorageConfiguredMustReturnTrue() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(false);
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
         BaseFileSystemConfigurationsView fileSystemConfiguration = mock(BaseFileSystemConfigurationsView.class);
@@ -125,7 +125,7 @@ public class CoreConfigProviderTest {
 
         when(mockTemplateProcessor.isRoleTypePresentInService(HDFS, List.of(NAMENODE))).thenReturn(false);
         when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(fileSystemConfigurationView);
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(false);
         when(generalClusterConfigs.isGovCloud()).thenReturn(false);
         when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
 
@@ -140,7 +140,7 @@ public class CoreConfigProviderTest {
     }
 
     @Test
-    public void isConfigurationNeededWhenNotPresentedHdfsNotAndStorageConfiguredMustReturnTrueSDXOptimizationEnabled() {
+    public void isConfigurationNeededWhenNotPresentedHdfsNotAndStorageConfiguredMustReturnTrueWireEncryptionEnabled() {
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
         BaseFileSystemConfigurationsView fileSystemConfiguration = mock(BaseFileSystemConfigurationsView.class);
@@ -157,7 +157,7 @@ public class CoreConfigProviderTest {
 
         when(mockTemplateProcessor.isRoleTypePresentInService(HDFS, List.of(NAMENODE))).thenReturn(false);
         when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(fileSystemConfigurationView);
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(true);
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(true);
         when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
@@ -191,7 +191,7 @@ public class CoreConfigProviderTest {
 
         when(mockTemplateProcessor.isRoleTypePresentInService(HDFS, List.of(NAMENODE))).thenReturn(false);
         when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(fileSystemConfigurationView);
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(false);
         when(generalClusterConfigs.isGovCloud()).thenReturn(true);
         when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
 
@@ -209,7 +209,7 @@ public class CoreConfigProviderTest {
 
     @Test
     public void isConfigurationNotNeededWhenNotPresentedHdfsNotAndStorageConfiguredAndDefaultFsNotConfiguredMustReturnFalse() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(false);
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         GeneralClusterConfigs generalClusterConfigs = mock(GeneralClusterConfigs.class);
         TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
@@ -232,8 +232,8 @@ public class CoreConfigProviderTest {
     }
 
     @Test
-    public void isConfigurationNotNeededWhenNotPresentedHdfsNotAndStorageConfiguredAndDefaultFsNotConfiguredMustReturnFalseSDXOptimizationEnabled() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(true);
+    public void isConfigurationNotNeededWhenNotPresentedHdfsNotAndStorageConfiguredAndDefaultFsNotConfiguredMustReturnFalseWireEncryptionEnabled() {
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(true);
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
         BaseFileSystemConfigurationsView fileSystemConfiguration = mock(BaseFileSystemConfigurationsView.class);
@@ -261,7 +261,7 @@ public class CoreConfigProviderTest {
         TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
         GeneralClusterConfigs generalClusterConfigs = mock(GeneralClusterConfigs.class);
         when(mockTemplateProcessor.isRoleTypePresentInService(HDFS, List.of(NAMENODE))).thenReturn(true);
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(false);
         when(generalClusterConfigs.isGovCloud()).thenReturn(false);
         when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
@@ -283,7 +283,7 @@ public class CoreConfigProviderTest {
 
         when(mockTemplateProcessor.isRoleTypePresentInService(HDFS, List.of(NAMENODE))).thenReturn(false);
         when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(fileSystemConfigurationView);
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(false);
         when(generalClusterConfigs.isGovCloud()).thenReturn(false);
         when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
 
@@ -298,14 +298,14 @@ public class CoreConfigProviderTest {
     }
 
     @Test
-    public void isConfigurationNeededWhenKafkaPresentedHdfsNotAndStorageNotConfiguredMustReturnFalseSDXOptimizationEnabled() {
+    public void isConfigurationNeededWhenKafkaPresentedHdfsNotAndStorageNotConfiguredMustReturnFalseWireEncryptionEnabled() {
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);
         Optional<BaseFileSystemConfigurationsView> fileSystemConfigurationView = Optional.empty();
 
         when(mockTemplateProcessor.isRoleTypePresentInService(HDFS, List.of(NAMENODE))).thenReturn(false);
         when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(fileSystemConfigurationView);
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(true);
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(true);
         when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
@@ -322,7 +322,7 @@ public class CoreConfigProviderTest {
 
     @Test
     public void isHdfsSecurityGroupCacheReloadPropertyPresent() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(false);
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         GeneralClusterConfigs generalClusterConfigs = mock(GeneralClusterConfigs.class);
         TemplatePreparationObject templatePreparationObject = mock(TemplatePreparationObject.class);

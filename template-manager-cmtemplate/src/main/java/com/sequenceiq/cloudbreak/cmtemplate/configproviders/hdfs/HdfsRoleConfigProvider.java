@@ -59,7 +59,7 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
                 configs.add(
                         config(FAILED_VOLUMES_TOLERATED, NUM_FAILED_VOLUMES_TOLERATED.toString())
                 );
-                if (isSDXOptimizationEnabled(source)) {
+                if (isWireEncryptionEnabled(source)) {
                     configs.add(
                             config(DFS_ENCRYPT_DATA_TRANSFER, "true")
                     );
@@ -75,7 +75,7 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
                 }
                 return List.of();
             case HdfsRoles.GATEWAY:
-                if (isSDXOptimizationEnabled(source) && isNamenodeHA(source)) {
+                if (isWireEncryptionEnabled(source) && isNamenodeHA(source)) {
                     //CHECKSTYLE:OFF
                     return List.of(config(
                             "hdfs_client_config_safety_valve",
@@ -92,18 +92,18 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
-        if (isSDXOptimizationEnabled(source) || source.getGeneralClusterConfigs().isGovCloud()) {
+        if (isWireEncryptionEnabled(source) || source.getGeneralClusterConfigs().isGovCloud()) {
             configs.add(config(HADOOP_RPC_PROTECTION, "privacy"));
         }
-        if (isSDXOptimizationEnabled(source)) {
+        if (isWireEncryptionEnabled(source)) {
             configs.add(config(DFS_DATA_TRANSFER_PROTECTION, "privacy"));
             configs.add(config(DFS_ENCRYPT_DATA_TRANSFER, "true"));
         }
         return configs;
     }
 
-    private boolean isSDXOptimizationEnabled(TemplatePreparationObject source) {
-        return entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
+    private boolean isWireEncryptionEnabled(TemplatePreparationObject source) {
+        return entitlementService.isWireEncryptionEnabled(ThreadBasedUserCrnProvider.getAccountId())
                 && !CloudPlatform.YARN.equals(source.getCloudPlatform())
                 && StackType.DATALAKE.equals(source.getStackType());
     }

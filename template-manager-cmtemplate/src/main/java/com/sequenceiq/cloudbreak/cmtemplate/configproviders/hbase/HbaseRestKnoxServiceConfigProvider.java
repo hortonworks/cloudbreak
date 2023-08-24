@@ -37,7 +37,7 @@ public class HbaseRestKnoxServiceConfigProvider implements CmTemplateComponentCo
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         configs.add(config(RESTSERVER_SECURITY_AUTHENTICATION, "kerberos"));
-        if (isSDXOptimizationNeeded(templatePreparationObject)) {
+        if (isWireEncryptionEnabled(templatePreparationObject)) {
             configs.add(config(HBASE_RPC_PROTECTION, "privacy"));
         }
         return configs;
@@ -60,8 +60,8 @@ public class HbaseRestKnoxServiceConfigProvider implements CmTemplateComponentCo
                 && source.getGatewayView().getExposedServices().contains(exposedServiceCollector.getHBaseRestService().getKnoxService());
     }
 
-    private boolean isSDXOptimizationNeeded(TemplatePreparationObject source) {
-        return entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
+    private boolean isWireEncryptionEnabled(TemplatePreparationObject source) {
+        return entitlementService.isWireEncryptionEnabled(ThreadBasedUserCrnProvider.getAccountId())
                 && !CloudPlatform.YARN.equals(source.getCloudPlatform())
                 && StackType.DATALAKE.equals(source.getStackType());
     }

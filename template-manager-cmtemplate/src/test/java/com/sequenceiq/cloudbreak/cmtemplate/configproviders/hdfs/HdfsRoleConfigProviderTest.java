@@ -37,7 +37,7 @@ class HdfsRoleConfigProviderTest {
 
     @Test
     void nameNodeHA() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(false);
         HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
         HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
@@ -62,7 +62,7 @@ class HdfsRoleConfigProviderTest {
 
     @Test
     void nonHA() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(false);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 1);
         HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, 3);
         String inputJson = FileReaderUtils.readFileFromClasspathQuietly("input/clouderamanager.bp");
@@ -82,7 +82,7 @@ class HdfsRoleConfigProviderTest {
 
     @Test
     void optimizedHDFSReplicaHA() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(true);
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(true);
         HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
         HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
@@ -113,7 +113,7 @@ class HdfsRoleConfigProviderTest {
 
     @Test
     void optimizedHDFSReplicaHAServiceConfig() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(true);
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(true);
         HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
         HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
@@ -140,7 +140,7 @@ class HdfsRoleConfigProviderTest {
 
     @Test
     void optimizedHDFSReplicaHAServiceConfigWhenGovCloudShouldReturnRpcProtectionTrue() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(false);
         HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
         HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
@@ -166,7 +166,7 @@ class HdfsRoleConfigProviderTest {
 
     @Test
     void optimizedHDFSDataEncryptHA() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(true);
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(true);
         HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
         HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
@@ -197,7 +197,7 @@ class HdfsRoleConfigProviderTest {
 
     @Test
     void optimizedHDFSDataEncryptHAEtitlementDisabled() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(false);
         HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
         HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);

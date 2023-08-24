@@ -58,7 +58,7 @@ public class AtlasKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
-        if (isSDXOptimizationEnabled(source)) {
+        if (isWireEncryptionEnabled(source)) {
             LOG.info(String.format("SDX Optimization Enabled for %s.", roleType));
             configs.add(config(ATLAS_DIFFERENTIAL_AUDIT_CONFIG, "true"));
         }
@@ -84,10 +84,10 @@ public class AtlasKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
                 && source.getGatewayView().getExposedServices().contains(exposedServiceCollector.getAtlasService().getKnoxService());
     }
 
-    private boolean isSDXOptimizationEnabled(TemplatePreparationObject source) {
+    private boolean isWireEncryptionEnabled(TemplatePreparationObject source) {
         return !CloudPlatform.YARN.equals(source.getCloudPlatform())
                 && StackType.DATALAKE.equals(source.getStackType())
-                && entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
+                && entitlementService.isWireEncryptionEnabled(ThreadBasedUserCrnProvider.getAccountId())
                 && isDatalakeVersionSupported(source.getBlueprintView().getBlueprintText());
     }
 

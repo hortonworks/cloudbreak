@@ -22,6 +22,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ROTATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
@@ -98,7 +99,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH_ONE_HOUR_TOKEN;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.PERSONAL_VIEW_CB_BY_RIGHT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.PREFER_RHEL8_IMAGES;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.SDX_CONFIGURATION_OPTIMIZATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_SYNC;
@@ -492,10 +492,6 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, CDP_ENVIRONMENT_EDIT_PROXY_CONFIG);
     }
 
-    public boolean isSDXOptimizedConfigurationEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, SDX_CONFIGURATION_OPTIMIZATION);
-    }
-
     public boolean isTargetingSubnetsForEndpointAccessGatewayEnabled(String accountId) {
         return isEntitlementRegistered(accountId, TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY);
     }
@@ -546,6 +542,10 @@ public class EntitlementService {
 
     public boolean isAzureMultiAzEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_AZURE_MULTIAZ);
+    }
+
+    public boolean isWireEncryptionEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_WIRE_ENCRYPTION);
     }
 
     public List<String> getEntitlements(String accountId) {

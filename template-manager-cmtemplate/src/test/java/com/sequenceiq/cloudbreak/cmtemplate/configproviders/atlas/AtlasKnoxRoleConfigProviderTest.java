@@ -43,8 +43,8 @@ class AtlasKnoxRoleConfigProviderTest {
     private final AtlasKnoxRoleConfigProvider underTest = new AtlasKnoxRoleConfigProvider(entitlementService, exposedServiceCollector, objectMapper);
 
     @Test
-    void atlasKnoxSdxOptimalizationDisabled() {
-        sdxEntitlementDisable();
+    void atlasKnoxWireEncryptionDisable() {
+        wireEncryptionDisable();
         String inputJson = FileReaderUtils.readFileFromClasspathQuietly("input/sdx-md.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
@@ -66,8 +66,8 @@ class AtlasKnoxRoleConfigProviderTest {
     }
 
     @Test
-    void atlasKnoxSdxOptimalizationEnabled() {
-        sdxEntitlementEnable();
+    void atlasKnoxWireEncryptionEnable() {
+        wireEncryptionEnable();
         String inputJson = FileReaderUtils.readFileFromClasspathQuietly("input/sdx-md.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
@@ -89,8 +89,8 @@ class AtlasKnoxRoleConfigProviderTest {
     }
 
     @Test
-    void atlasKnoxSdxOptimalizationEnabledWithNewerVersion() {
-        sdxEntitlementEnable();
+    void atlasKnoxWireEncryptionEnabledWithNewerVersion() {
+        wireEncryptionEnable();
         String inputJson = FileReaderUtils.readFileFromClasspathQuietly("input/sdx-md.bp");
         inputJson = inputJson.replace("\"cdhVersion\": \"7.2.10\",", "\"cdhVersion\": \"7.2.18\",");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -115,8 +115,8 @@ class AtlasKnoxRoleConfigProviderTest {
     }
 
     @Test
-    void atlasKnoxSdxOptimalizationEnabledWithRequiredVersion() {
-        sdxEntitlementEnable();
+    void aatlasKnoxWireEncryptionEnabledWithRequiredVersion() {
+        wireEncryptionEnable();
         String inputJson = FileReaderUtils.readFileFromClasspathQuietly("input/sdx-md.bp");
         inputJson = inputJson.replace("\"cdhVersion\": \"7.2.10\",", "\"cdhVersion\": \"7.2.15\",");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -168,12 +168,12 @@ class AtlasKnoxRoleConfigProviderTest {
         assertFalse(() -> underTest.isDatalakeVersionSupported(inputJson), "Unsupported DataLake version!");
     }
 
-    private void sdxEntitlementEnable() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(true);
+    private void wireEncryptionEnable() {
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(true);
     }
 
-    private void sdxEntitlementDisable() {
-        when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
+    private void wireEncryptionDisable() {
+        when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(false);
     }
 
 }

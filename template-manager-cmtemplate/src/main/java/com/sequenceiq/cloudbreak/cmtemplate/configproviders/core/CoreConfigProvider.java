@@ -84,15 +84,15 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
                 apiClusterTemplateConfigs.add(config(CORE_SITE_SAFETY_VALVE, hdfsCoreSiteSafetyValveValue.toString()));
             }
         }
-        if (isSDXOptimizationNeeded(source) || source.getGeneralClusterConfigs().isGovCloud()) {
+        if (isWireEncryptionEnabled(source) || source.getGeneralClusterConfigs().isGovCloud()) {
             apiClusterTemplateConfigs.add(config(HADOOP_RPC_PROTECTION, "privacy"));
         }
 
         return apiClusterTemplateConfigs;
     }
 
-    private boolean isSDXOptimizationNeeded(TemplatePreparationObject source) {
-        return entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
+    private boolean isWireEncryptionEnabled(TemplatePreparationObject source) {
+        return entitlementService.isWireEncryptionEnabled(ThreadBasedUserCrnProvider.getAccountId())
                 && !CloudPlatform.YARN.equals(source.getCloudPlatform())
                 && StackType.DATALAKE.equals(source.getStackType());
     }
@@ -145,7 +145,7 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return isCoreSettingsNeededForHdfsNameNode(cmTemplateProcessor, source) || isSDXOptimizationNeeded(source);
+        return isCoreSettingsNeededForHdfsNameNode(cmTemplateProcessor, source) || isWireEncryptionEnabled(source);
     }
 
     private boolean isCoreSettingsNeededForHdfsNameNode(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {

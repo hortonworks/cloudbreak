@@ -36,7 +36,7 @@ class HbaseRestKnoxServiceConfigProviderTest extends AbstractHbaseConfigProvider
     private EntitlementService entitlementService;
 
     @Test
-    void getServiceConfigsWhenSDXOptimizationEnabled() {
+    void getServiceConfigsWhenWireEncryptionEnabled() {
         HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
         HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
@@ -51,7 +51,7 @@ class HbaseRestKnoxServiceConfigProviderTest extends AbstractHbaseConfigProvider
                 .build();
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
-            when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(true);
+            when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(true);
             List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
             assertEquals(2, serviceConfigs.size());
             assertEquals("hbase_rpc_protection", serviceConfigs.get(1).getName());
@@ -60,7 +60,7 @@ class HbaseRestKnoxServiceConfigProviderTest extends AbstractHbaseConfigProvider
     }
 
     @Test
-    void getServiceConfigsWhenSDXOptimizationNotEnabled() {
+    void getServiceConfigsWhenWireEncryptionNotEnabled() {
         HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.CORE, 2);
         HostgroupView quorum = new HostgroupView("quorum", 0, InstanceGroupType.CORE, 3);
@@ -75,7 +75,7 @@ class HbaseRestKnoxServiceConfigProviderTest extends AbstractHbaseConfigProvider
                 .build();
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
-            when(entitlementService.isSDXOptimizedConfigurationEnabled(anyString())).thenReturn(false);
+            when(entitlementService.isWireEncryptionEnabled(anyString())).thenReturn(false);
             List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
             assertEquals(1, serviceConfigs.size());
         });
