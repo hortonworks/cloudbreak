@@ -3,7 +3,6 @@ package com.sequenceiq.environment.proxy.service;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.service.datahub.DatahubService;
@@ -40,9 +38,6 @@ class ProxyConfigModificationServiceTest {
     private static final String ACCOUNT_ID = "account-id";
 
     private static final String ENV_CRN = "env-crn";
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @Mock
     private FreeIpaService freeIpaService;
@@ -67,19 +62,9 @@ class ProxyConfigModificationServiceTest {
         lenient().when(environment.getAccountId()).thenReturn(ACCOUNT_ID);
         lenient().when(environment.getResourceCrn()).thenReturn(ENV_CRN);
 
-        lenient().when(entitlementService.isEditProxyConfigEnabled(ACCOUNT_ID)).thenReturn(true);
         setFreeipaStatus(Status.AVAILABLE);
         setSdxStatus(SdxClusterStatusResponse.RUNNING);
         setDistroxStatuses(com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE);
-    }
-
-    @Test
-    void modifyValidateWithoutEntitlement() {
-        when(entitlementService.isEditProxyConfigEnabled(ACCOUNT_ID)).thenReturn(false);
-
-        assertThatThrownBy(() -> underTest.validateModify(environment))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Modifying proxy config is not enabled in your account");
     }
 
     @Test

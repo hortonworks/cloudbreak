@@ -46,7 +46,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_EDIT_PROXY_CONFIG;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_PRIVILEGED_USER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED;
@@ -516,9 +515,6 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.datalake.long.time.backup.enable:false}")
     private boolean enableLongTimeDatalakeBackup;
 
-    @Value("${auth.mock.environment.edit.proxy.enable}")
-    private boolean enableEditProxy;
-
     @Value("${auth.mock.targeting.subnets.for.endpoint.access.gateway.enable}")
     private boolean enableTargetingSubnetsForEndpointAccessGateway;
 
@@ -957,9 +953,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (skipUpgradeAttachedDatahubsCheck) {
             builder.addEntitlements(createEntitlement(CDP_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK));
-        }
-        if (enableEditProxy) {
-            builder.addEntitlements(createEntitlement(CDP_ENVIRONMENT_EDIT_PROXY_CONFIG));
         }
         if (skipPostgresUpgradeServicesAndCmStop) {
             builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP));

@@ -21,7 +21,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
@@ -51,9 +50,6 @@ class FreeipaModifyProxyConfigServiceTest {
     private StackUpdater stackUpdater;
 
     @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
     private OperationService operationService;
 
     @Mock
@@ -77,7 +73,6 @@ class FreeipaModifyProxyConfigServiceTest {
     @BeforeEach
     void setUp() {
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
-        lenient().when(entitlementService.isEditProxyConfigEnabled(ACCOUNT_ID)).thenReturn(true);
         lenient().when(stack.isAvailable()).thenReturn(true);
         lenient().when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
         lenient().when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
@@ -88,15 +83,6 @@ class FreeipaModifyProxyConfigServiceTest {
                 List.of(ENV_CRN), List.of())).thenReturn(operation);
         lenient().when(operation.getStatus()).thenReturn(OperationState.RUNNING);
         lenient().when(operationConverter.convert(operation)).thenReturn(operationStatus);
-    }
-
-    @Test
-    void validateWithoutEntitlement() {
-        when(entitlementService.isEditProxyConfigEnabled(ACCOUNT_ID)).thenReturn(false);
-
-        Assertions.assertThatThrownBy(() -> underTest.modifyProxyConfig(ENV_CRN, null, ACCOUNT_ID))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Proxy config modification is not enabled in your account");
     }
 
     @Test

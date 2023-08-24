@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
@@ -33,8 +32,6 @@ public class FreeipaModifyProxyConfigService {
 
     private final StackUpdater stackUpdater;
 
-    private final EntitlementService entitlementService;
-
     private final OperationService operationService;
 
     private final OperationToOperationStatusConverter operationConverter;
@@ -43,13 +40,11 @@ public class FreeipaModifyProxyConfigService {
             FreeIpaFlowManager flowManager,
             StackService stackService,
             StackUpdater stackUpdater,
-            EntitlementService entitlementService,
             OperationService operationService,
             OperationToOperationStatusConverter operationConverter) {
         this.flowManager = flowManager;
         this.stackService = stackService;
         this.stackUpdater = stackUpdater;
-        this.entitlementService = entitlementService;
         this.operationService = operationService;
         this.operationConverter = operationConverter;
     }
@@ -62,9 +57,6 @@ public class FreeipaModifyProxyConfigService {
     }
 
     private void validate(Stack stack) {
-        if (!entitlementService.isEditProxyConfigEnabled(stack.getAccountId())) {
-            throw new BadRequestException("Proxy config modification is not enabled in your account");
-        }
         if (!stack.getStackStatus().getStatus().isProxyConfigModifiablePhase()) {
             throw new BadRequestException("Proxy config modification is not supported in current FreeIpa status: " + stack.getStackStatus().getStatus());
         }

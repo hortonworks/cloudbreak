@@ -87,7 +87,6 @@ auth:
     postgres.upgrade.exception.enable: false
     postgres.upgrade.skip.attached.datahubs.check.enable: false
     postgres.upgrade.skip.service.stop.enable: false
-    environment.edit.proxy.enable: true
     upgrade.skip.attached.datahubs.check.enable: false
     targeting.subnets.for.endpoint.access.gateway.enable: true
     cost.calculation.enable: true
