@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import software.amazon.awssdk.services.iam.model.EvaluationResult;
 import software.amazon.awssdk.services.iam.model.IamException;
 import software.amazon.awssdk.services.iam.model.InstanceProfile;
+import software.amazon.awssdk.services.iam.model.OrganizationsDecisionDetail;
 import software.amazon.awssdk.services.iam.model.PolicyEvaluationDecisionType;
 import software.amazon.awssdk.services.iam.model.Role;
 
@@ -37,14 +38,16 @@ public class AwsIDBrokerAssumeRoleValidator {
     private AwsIamService awsIamService;
 
     public boolean canAssumeRoles(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
-            Collection<Role> roles, ValidationResultBuilder resultBuilder) {
+            Collection<Role> roles, boolean skipOrgPolicyDecisions, ValidationResultBuilder resultBuilder) {
         Collection<String> roleArns = roles.stream().map(Role::arn).collect(Collectors.toCollection(TreeSet::new));
 
         for (Role instanceProfileRole : instanceProfile.roles()) {
             try {
                 List<EvaluationResult> evaluationResults = awsIamService.simulatePrincipalPolicy(iam,
                         instanceProfileRole.arn(), ASSUME_ROLE_ACTION, roleArns);
+                LOGGER.debug("EvaluationResult result for {}, {}", instanceProfileRole.arn(), evaluationResults);
                 for (EvaluationResult evaluationResult : evaluationResults) {
+                    handleOrgPolicyDecisions(skipOrgPolicyDecisions, resultBuilder, roleArns, evaluationResult);
                     if (PolicyEvaluationDecisionType.ALLOWED.toString().equals(evaluationResult.evalDecision().toString())) {
                         roleArns.remove(evaluationResult.evalResourceName());
                     }
@@ -71,10 +74,28 @@ public class AwsIDBrokerAssumeRoleValidator {
             return true;
         } else {
             resultBuilder.error(
-                    String.format("Data Access Instance profile (%s) doesn't have permissions to assume " +
+                    String.format("Data Access Instance profile (%s) assume validation failed for " +
                                     "the role(s): %s. %s",
                             instanceProfile.arn(), roleArns, getAdviceMessage(INSTANCE_PROFILE, ID_BROKER)));
             return false;
+        }
+    }
+
+    private static void handleOrgPolicyDecisions(boolean skipOrgPolicyDecisions, ValidationResultBuilder resultBuilder,
+            Collection<String> roleArns, EvaluationResult evaluationResult) {
+        OrganizationsDecisionDetail organizationsDecisionDetail = evaluationResult.organizationsDecisionDetail();
+        if (organizationsDecisionDetail != null && !organizationsDecisionDetail.allowedByOrganizations()) {
+            if (skipOrgPolicyDecisions) {
+                LOGGER.warn("skipOrgPolicyDecisions is enabled, validation result will be ignored for {}", evaluationResult.evalActionName());
+                roleArns.remove(evaluationResult.evalResourceName());
+            } else {
+                resultBuilder.error(
+                        String.format("Validation failed due to an Organizational Policy Deny rule when evaluating (%s). " +
+                                        "It's possible bypass this validation " +
+                                        "by setting 'skipOrgPolicyDecisions' on the credentials settings page. " +
+                                        "Please note that this could result in other failures during cluster creation.",
+                                evaluationResult.evalActionName()));
+            }
         }
     }
 }

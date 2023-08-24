@@ -85,7 +85,7 @@ public class AwsIDBrokerObjectStorageValidator {
                 instanceProfile.instanceProfileName(), validationRequest.getBackupOperationType().name());
         awsInstanceProfileEC2TrustValidator.isTrusted(instanceProfile, cloudFileSystem.getCloudIdentityType(), resultBuilder);
         Set<Role> allMappedRoles = getAllMappedRoles(iam, cloudFileSystem, resultBuilder);
-        awsIDBrokerAssumeRoleValidator.canAssumeRoles(iam, instanceProfile, allMappedRoles, resultBuilder);
+        awsIDBrokerAssumeRoleValidator.canAssumeRoles(iam, instanceProfile, allMappedRoles, skipOrgPolicyDecisions, resultBuilder);
         awsDataAccessRolePermissionValidator.validate(iam, cloudFileSystem, validationRequest.getBackupLocationBase(),
                 accountId, validationRequest.getBackupOperationType(), resultBuilder, skipOrgPolicyDecisions);
         awsRangerAuditRolePermissionValidator.validate(iam, cloudFileSystem, validationRequest.getBackupLocationBase(),
