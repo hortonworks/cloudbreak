@@ -57,6 +57,7 @@ public class FreeIpaRepairTest extends AbstractMockTest {
         initializeDefaultBlueprints(testContext);
     }
 
+    // NOTE: set -Dfreeipa.delayed.scale-sec=1 for freeipa application, without this it will time out.
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "environment is present",

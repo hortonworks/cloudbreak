@@ -25,7 +25,6 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.cloudstorage.Validate
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.cloudstorage.ValidateCloudStorageSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationSuccess;
-import com.sequenceiq.freeipa.flow.freeipa.provision.event.hostmetadatasetup.HostMetadataSetupRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.hostmetadatasetup.HostMetadataSetupSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigSuccess;
@@ -78,13 +77,13 @@ public class FreeIpaProvisionActions {
         return new AbstractStackProvisionAction<>(BootstrapMachinesSuccess.class) {
             @Override
             protected void doExecute(StackContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) {
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.COLLECTING_HOST_METADATA, "Collecting host metadata");
+                // UNUSED STEP
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                return new HostMetadataSetupRequest(context.getStack().getId());
+                return new HostMetadataSetupSuccess(context.getStack().getId());
             }
         };
     }

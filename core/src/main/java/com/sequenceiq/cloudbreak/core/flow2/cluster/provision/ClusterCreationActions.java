@@ -85,7 +85,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyGat
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyGatewayRegistrationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyRegistrationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyRegistrationSuccess;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.PreFlightCheckRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.PreFlightCheckSuccess;
@@ -192,13 +191,13 @@ public class ClusterCreationActions {
         return new AbstractStackCreationAction<>(BootstrapMachinesSuccess.class) {
             @Override
             protected void doExecute(StackCreationContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) {
-                clusterCreationService.collectingHostMetadata(context.getStackId());
+                // UNUSED STEP
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new HostMetadataSetupRequest(context.getStackId());
+                return new HostMetadataSetupSuccess(context.getStackId());
             }
         };
     }

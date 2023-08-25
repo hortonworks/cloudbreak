@@ -27,7 +27,10 @@ public class SpiService {
         Optional<CloudVmMetaDataStatus> cloudVmMetaDataStatus = read.getVmMetaDataStatuses().stream()
                 .filter(md -> md.getCloudVmInstanceStatus().getCloudInstance().getInstanceId().equals(instanceId))
                 .findFirst();
-        cloudVmMetaDataStatus.ifPresent(vmMetaDataStatus -> spiStoreService.remove(mockUuid, vmMetaDataStatus));
+        cloudVmMetaDataStatus.ifPresent(vmMetaDataStatus -> {
+            read.getVmMetaDataStatuses().remove(vmMetaDataStatus);
+            spiStoreService.remove(mockUuid, vmMetaDataStatus);
+        });
     }
 
     public CloudVmInstanceStatus startInstance(String mockUuid, String instanceId) {

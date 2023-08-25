@@ -19,10 +19,6 @@ public class HostNameService {
     public String getHostName(String mockUuid, String privateIp) {
         List<Minion> minions = saltStoreService.getMinions(mockUuid);
         Optional<Minion> minion = minions.stream().filter(m -> m.getAddress().equals(privateIp)).findFirst();
-        return minion.map(value -> generateHostNameByIp(privateIp, value.getDomain())).orElse(null);
-    }
-
-    public String generateHostNameByIp(String address, String realm) {
-        return "host-" + address.replace(".", "-") + "." + realm;
+        return minion.map(m -> m.getHostName() + "." + m.getDomain()).orElse(null);
     }
 }

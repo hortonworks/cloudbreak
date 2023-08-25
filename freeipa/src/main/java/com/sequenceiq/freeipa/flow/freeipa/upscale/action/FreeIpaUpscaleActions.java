@@ -74,7 +74,6 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMa
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.cloudstorage.ValidateCloudStorageRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationSuccess;
-import com.sequenceiq.freeipa.flow.freeipa.provision.event.hostmetadatasetup.HostMetadataSetupRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.hostmetadatasetup.HostMetadataSetupSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaRequest;
@@ -461,8 +460,8 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Collecting host metadata");
-                HostMetadataSetupRequest request = new HostMetadataSetupRequest(stack.getId());
+                // UNUSED STEP
+                HostMetadataSetupSuccess request = new HostMetadataSetupSuccess(stack.getId());
                 sendEvent(context, request.selector(), request);
             }
         };

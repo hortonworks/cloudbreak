@@ -19,9 +19,8 @@ public class ServerFindResponse extends AbstractFreeIpaResponse<Set<IpaServer>> 
     @Override
     protected Set<IpaServer> handleInternal(List<CloudVmMetaDataStatus> metadatas, String body) {
         return metadatas.stream().map(metadata -> {
-            String privateIp = metadata.getMetaData().getPrivateIp();
             IpaServer ipaServer = new IpaServer();
-            ipaServer.setCn("host-" + privateIp.replaceAll("\\.", "-") + ".ipatest.local");
+            ipaServer.setCn("ipaserver" + metadata.getCloudVmInstanceStatus().getCloudInstance().getTemplate().getPrivateId() + ".ipatest.local");
             return ipaServer;
         }).collect(Collectors.toSet());
     }

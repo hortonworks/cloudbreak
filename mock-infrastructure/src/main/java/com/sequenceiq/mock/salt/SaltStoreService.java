@@ -77,8 +77,8 @@ public class SaltStoreService {
         SaltDto saltDto = read(mockUuid);
         List<Minion> newMinions = new ArrayList<>();
         for (Minion minion : minions) {
-            boolean exist = saltDto.getMinions().stream().anyMatch(m -> m.getAddress().equals(minion.getAddress()));
-            if (!exist) {
+            boolean exist = saltDto.getMinions().stream().anyMatch(m -> m.getHostName().equals(minion.getHostName()));
+            if (!exist && minion.getHostName() != null) {
                 newMinions.add(minion);
             }
         }

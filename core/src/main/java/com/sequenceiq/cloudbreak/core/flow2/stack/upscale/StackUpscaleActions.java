@@ -400,10 +400,10 @@ public class StackUpscaleActions {
         return new AbstractStackUpscaleAction<>(BootstrapNewNodesResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, BootstrapNewNodesResult payload, Map<Object, Object> variables) {
-                stackUpscaleService.extendingHostMetadata(context.getStack());
-                Selectable request = new ExtendHostMetadataRequest(context.getStack().getId(),
+                // UNUSED STEP
+                ExtendHostMetadataRequest request = new ExtendHostMetadataRequest(context.getStack().getId(),
                         payload.getRequest().getUpscaleCandidateAddresses());
-                sendEvent(context, request);
+                sendEvent(context, new ExtendHostMetadataResult(request));
             }
         };
     }

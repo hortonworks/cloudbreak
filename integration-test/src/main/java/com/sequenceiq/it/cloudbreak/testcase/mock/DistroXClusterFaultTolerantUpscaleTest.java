@@ -80,10 +80,14 @@ public class DistroXClusterFaultTolerantUpscaleTest extends AbstractClouderaMana
     public void testUpscaleWithFewNodesBeingUnreachable(MockedTestContext testContext, ITestContext testNgContext) {
         String stack = resourcePropertyProvider().getName();
         createDatalake(testContext);
+
+        MinionIpAddressesResponse minionIpAddressesResponse = getMockResponseForIpAddrsSaltCall(stack);
+        Set<String> saltBodyFilters = getSaltBodyFilters(stack);
+
         DistroXTestDto currentContext = setUpContextForUpscale(testContext, stack);
         currentContext
-                .mockSalt().run().post().bodyContains(getSaltBodyFilters(), 1)
-                .thenReturn(getMockResponseForIpAddrsSaltCall(), null, 200, 0, null)
+                .mockSalt().run().post().bodyContains(saltBodyFilters, 100)
+                .thenReturn(minionIpAddressesResponse, null, 200, 0, null)
                 .when(distroXClient.scale(UPSCALED_INSTANCE_GROUP_NAME, SUCCESSFUL_UPSCALE_NODE_COUNT))
                 .awaitForFlow()
                 .await(STACK_AVAILABLE, key(stack).withPollingInterval(POLLING_INTERVAL))
@@ -134,16 +138,15 @@ public class DistroXClusterFaultTolerantUpscaleTest extends AbstractClouderaMana
                 .await(STACK_AVAILABLE, key(stack).withIgnoredStatues(Set.of(Status.UNREACHABLE)));
     }
 
-    private MinionIpAddressesResponse getMockResponseForIpAddrsSaltCall() {
+    private MinionIpAddressesResponse getMockResponseForIpAddrsSaltCall(String stack) {
         int successfulNodeCount = SUCCESSFUL_UPSCALE_NODE_COUNT - FAILING_NODE_COUNT;
         Map<String, JsonNode> ipAddressesForMinions = new HashMap<>();
         try {
-            ipAddressesForMinions.put("host-192-2-0-0.ipatest.local", JsonUtil.readTree("[\"192.2.0.0\"]"));
             for (int i = 3; i < successfulNodeCount; i++) {
-                ipAddressesForMinions.put("host-192-3-0-" + i + ".ipatest.local", JsonUtil.readTree("[\"192.3.0." + i + "\"]"));
+                ipAddressesForMinions.put(stack + "-worker" + i + ".ipatest.local", JsonUtil.readTree("[\"192.3.0." + i + "\"]"));
             }
             for (int i = 0; i < FAILING_NODE_COUNT; i++) {
-                ipAddressesForMinions.put("host-192-3-0-" + (i + successfulNodeCount) + ".ipatest.local", JsonUtil.readTree("[\"\"]"));
+                ipAddressesForMinions.put(stack + "-worker" + (i + successfulNodeCount) + ".ipatest.local", JsonUtil.readTree("[\"\"]"));
             }
         } catch (IOException e) {
             throw new TestFailException("The specified IP addresses could not be deserialized. IOException: " + e.getMessage());
@@ -156,10 +159,12 @@ public class DistroXClusterFaultTolerantUpscaleTest extends AbstractClouderaMana
         return minionIpAddressesResponse;
     }
 
-    private Set<String> getSaltBodyFilters() {
+    private Set<String> getSaltBodyFilters(String stackName) {
         Set<String> saltBodyfilters = new HashSet<>();
         saltBodyfilters.add("fun=network.ipaddrs");
-        saltBodyfilters.add("tgt=host-192-3-0");
+        for (int i = 3; i < SUCCESSFUL_UPSCALE_NODE_COUNT; i++) {
+            saltBodyfilters.add(stackName + "-worker" + i + ".ipatest.local");
+        }
         return saltBodyfilters;
     }
 
@@ -167,19 +172,19 @@ public class DistroXClusterFaultTolerantUpscaleTest extends AbstractClouderaMana
         ApiHostList apiHostList = new ApiHostList();
         ApiHost master = new ApiHost();
         master.setIpAddress("192.0.0.0");
-        master.setHostname("host-192-0-0-0.ipatest.local");
+        master.setHostname("master0.ipatest.local");
         master.setLastHeartbeat(ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(10).format(DateTimeFormatter.ISO_INSTANT));
         apiHostList.addItemsItem(master);
         ApiHost gateway = new ApiHost();
         gateway.setIpAddress("192.2.0.0");
-        gateway.setHostname("host-192-2-0-0.ipatest.local");
+        gateway.setHostname("gateway0.ipatest.local");
         gateway.setLastHeartbeat(ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(10).format(DateTimeFormatter.ISO_INSTANT));
         apiHostList.addItemsItem(gateway);
 
         for (int i = 0; i < SUCCESSFUL_UPSCALE_NODE_COUNT; i++) {
             ApiHost temp = new ApiHost();
             temp.setIpAddress("192.3.0." + i);
-            temp.setHostname("192-3-0-" + i + ".ipatest.local");
+            temp.setHostname("worker" + i + ".ipatest.local");
             if (i < SUCCESSFUL_UPSCALE_NODE_COUNT - FAILING_NODE_COUNT) {
                 temp.setLastHeartbeat(ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(10).format(DateTimeFormatter.ISO_INSTANT));
             }

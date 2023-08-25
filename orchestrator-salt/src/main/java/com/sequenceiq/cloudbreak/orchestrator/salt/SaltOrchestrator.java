@@ -1377,13 +1377,6 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public Map<String, String> getMembers(GatewayConfig gatewayConfig, List<String> privateIps) throws CloudbreakOrchestratorException {
-        try (SaltConnector saltConnector = saltService.createSaltConnector(gatewayConfig)) {
-            return saltConnector.members(privateIps);
-        }
-    }
-
-    @Override
     public void backupDatabase(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel,
             int databaseMaxDurationInMin)
             throws CloudbreakOrchestratorFailedException {

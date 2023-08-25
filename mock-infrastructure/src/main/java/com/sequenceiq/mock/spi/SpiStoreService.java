@@ -82,6 +82,10 @@ public class SpiStoreService {
         }
         List<CloudVmMetaDataStatus> instances = defaultModelService.createInstances(mockUuid, spiDto, groups);
         LOGGER.info("{} will be resized with {}", mockUuid, instances.size());
+        List<String> newPrivateIps = instances.stream().map(cloudVmMetaDataStatus -> cloudVmMetaDataStatus.getMetaData().getPrivateIp()).toList();
+        List<CloudVmMetaDataStatus> cloudVmMetaDataStatusesToReplace = spiDto.getVmMetaDataStatuses().stream()
+                .filter(cloudVmMetaDataStatus -> newPrivateIps.contains(cloudVmMetaDataStatus.getMetaData().getPrivateIp())).toList();
+        spiDto.getVmMetaDataStatuses().removeAll(cloudVmMetaDataStatusesToReplace);
         spiDto.getVmMetaDataStatuses().addAll(instances);
         LOGGER.info("Instances added in {} ms", System.currentTimeMillis() - start);
         return instances;

@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.client;
 
 import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltEndpoint.BOOT_FINGERPRINT_DISTRIBUTE;
-import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltEndpoint.BOOT_HOSTNAME_ENDPOINT;
-import static java.util.Collections.singletonMap;
 
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
@@ -12,10 +10,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
@@ -44,7 +40,6 @@ import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.client.SetProxyTimeoutFeature;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyWebApplicationException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
@@ -316,36 +311,9 @@ public class SaltConnector implements Closeable {
         return formDataMultiPart.bodyPart(streamDataBodyPart);
     }
 
-    @Measure(SaltConnector.class)
-    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
-    public Map<String, String> members(List<String> privateIps) throws CloudbreakOrchestratorFailedException {
-        Map<String, List<String>> clients = singletonMap("clients", privateIps);
-        Response response = postSignedJsonSaltRequest(BOOT_HOSTNAME_ENDPOINT, clients);
-        GenericResponses responses = JaxRSUtil.response(response, GenericResponses.class);
-        List<GenericResponse> failedResponses = responses.getResponses().stream()
-                .filter(genericResponse -> !ACCEPTED_STATUSES.contains(genericResponse.getStatusCode())).collect(Collectors.toList());
-        if (!failedResponses.isEmpty()) {
-            failedResponseErrorLog(failedResponses);
-            String nodeErrors = failedResponses.stream().map(gr -> gr.getAddress() + ": " + gr.getErrorText()).collect(Collectors.joining(","));
-            throw new CloudbreakOrchestratorFailedException("Hostname resolution failed for nodes: " + nodeErrors);
-        }
-        return responses.getResponses().stream().collect(Collectors.toMap(GenericResponse::getAddress, GenericResponse::getStatus));
-    }
-
     public FingerprintsResponse collectFingerPrints(FingerprintRequest request) {
         Response fingerprintResponse = postSignedJsonSaltRequest(BOOT_FINGERPRINT_DISTRIBUTE, request);
         return JaxRSUtil.response(fingerprintResponse, FingerprintsResponse.class);
-    }
-
-    private void failedResponseErrorLog(Iterable<GenericResponse> failedResponses) {
-        StringBuilder failedResponsesErrorMessage = new StringBuilder();
-        failedResponsesErrorMessage.append("Failed response from salt bootstrap, endpoint: ").append(BOOT_HOSTNAME_ENDPOINT);
-        for (GenericResponse failedResponse : failedResponses) {
-            failedResponsesErrorMessage.append('\n').append("Status code: ").append(failedResponse.getStatusCode());
-            failedResponsesErrorMessage.append(" Status: ").append(failedResponse.getStatus());
-            failedResponsesErrorMessage.append(" Error message: ").append(failedResponse.getErrorText());
-        }
-        LOGGER.info(failedResponsesErrorMessage.toString());
     }
 
     private Form addAuth(Form form) {
