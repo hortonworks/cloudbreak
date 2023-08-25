@@ -106,9 +106,16 @@ public class AwsUpdateService {
             CloudResource cfResource = getCloudFormationStack(resources);
             stack.getGroups().forEach(group -> {
                 String groupUserData = userData.get(group.getType());
-                String encodedGroupUserData = Base64.getEncoder().encodeToString(groupUserData.getBytes());
-                Map<LaunchTemplateField, String> updatableFields = Map.of(LaunchTemplateField.USER_DATA, encodedGroupUserData);
-                awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group, stack);
+                if (StringUtils.isNotEmpty(groupUserData)) {
+                    String encodedGroupUserData = Base64.getEncoder().encodeToString(groupUserData.getBytes());
+                    Map<LaunchTemplateField, String> updatableFields = Map.of(LaunchTemplateField.USER_DATA, encodedGroupUserData);
+                    awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group, stack);
+                } else {
+                    String msg = String.format("The user data is empty for group '%s' and group type '%s' which should not happen!",
+                            group.getName(), group.getType());
+                    LOGGER.warn(msg);
+                    throw new IllegalStateException(msg);
+                }
             });
         } else {
             throw new NotImplementedException("UserData update for stack template is not implemented yet, only for AWS::EC2::LaunchTemplate.");
