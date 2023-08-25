@@ -70,10 +70,6 @@
                 "value": "true"
               },
               {
-                "name": "xml.authorizers.userGroupProvider.shell-user-group-provider.enabled",
-                "value": "true"
-              },
-              {
                 "name": "xml.authorizers.userGroupProvider.shell-user-group-provider.property.Exclude Groups",
                 "value": "nifi|cloudbreak|users|hadoop"
               },
@@ -84,10 +80,6 @@
               {
                 "name": "xml.authorizers.userGroupProvider.composite-user-group-provider.property.User Group Provider 1",
                 "value": "cm-user-group-provider"
-              },
-              {
-                "name": "xml.authorizers.userGroupProvider.composite-user-group-provider.property.User Group Provider 2",
-                "value": "shell-user-group-provider"
               },
               {
                 "name": "xml.authorizers.authorizer.ranger-provider.enabled",
@@ -126,8 +118,8 @@
                 "value": "ranger-provider"
               },
               {
-                "name" : "nifi.analytics.predict.enabled",
-                "value" : "true"
+                "name": "nifi.analytics.predict.enabled",
+                "value": "true"
               },
               {
                 "name": "java.arg.3",
@@ -156,6 +148,94 @@
               {
                 "name": "nifi.nar.hotfix.provider.enabled",
                 "value": "true"
+              },
+              {
+                "name": "nifi.ldap.url",
+                "value": "${LDAP_URL}"
+              },
+              {
+                "name": "nifi.ldap.manager.dn",
+                "value": "${LDAP_BIND_DN}"
+              },
+              {
+                "name": "nifi.ldap.manager.password",
+                "value": "${LDAP_BIND_PW}"
+              },
+              {
+                "name": "nifi.ldap.user.search.base",
+                "value": "${LDAP_USER_SEARCH_BASE}"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.ldap-user-group-provider.property.Group Search Base",
+                "value": "${LDAP_GROUP_SEARCH_BASE}"
+              },
+              {
+                "name": "nifi.ldap.enabled",
+                "value": "true"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.shell-user-group-provider.enabled",
+                "value": "false"
+              },
+              {
+                "name": "nifi.ldap.authentication.strategy",
+                "value": "LDAPS"
+              },
+              {
+                "name": "nifi.ldap.tls.protocol",
+                "value": "TLS"
+              },
+              {
+                "name": "nifi.ldap.tls.keystore.type",
+                "value": "jks"
+              },
+              {
+                "name": "nifi.ldap.tls.truststore.type",
+                "value": "jks"
+              },
+              {
+                "name": "nifi.ldap.tls.keystore",
+                "value": "${nifi.security.keystore}"
+              },
+              {
+                "name": "nifi.ldap.tls.truststore",
+                "value": "${nifi.security.truststore}"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.ldap-user-group-provider.property.Group Object Class",
+                "value": "top"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.ldap-user-group-provider.property.User Group Name Attribute",
+                "value": "memberOf"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.ldap-user-group-provider.property.User Identity Attribute",
+                "value": "uid"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.ldap-user-group-provider.property.Group Name Attribute",
+                "value": "cn"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.composite-user-group-provider.property.User Group Provider 2",
+                "value": "ldap-user-group-provider"
+              },
+              {
+                "name": "xml.loginIdentityProviders.provider.ldap-provider.property.TLS - Keystore Password",
+                "value": "${nifi.security.keystorePasswd}"
+              },
+              {
+                "name": "xml.loginIdentityProviders.provider.ldap-provider.property.TLS - Truststore Password",
+                "value": "${nifi.security.truststorePasswd}"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.ldap-user-group-provider.property.TLS - Keystore Password",
+                "value": "${nifi.security.keystorePasswd}"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.ldap-user-group-provider.property.TLS - Truststore Password",
+                "value": "${nifi.security.truststorePasswd}"
               }
             ]
           }
@@ -231,10 +311,6 @@
                 "value": "true"
               },
               {
-                "name": "xml.authorizers.userGroupProvider.shell-user-group-provider.enabled",
-                "value": "true"
-              },
-              {
                 "name": "xml.authorizers.userGroupProvider.shell-user-group-provider.property.Exclude Groups",
                 "value": "nifiregistry|cloudbreak|users|hadoop"
               },
@@ -245,10 +321,6 @@
               {
                 "name": "xml.authorizers.userGroupProvider.composite-user-group-provider.property.User Group Provider 1",
                 "value": "cm-user-group-provider"
-              },
-              {
-                "name": "xml.authorizers.userGroupProvider.composite-user-group-provider.property.User Group Provider 2",
-                "value": "shell-user-group-provider"
               },
               {
                 "name": "xml.authorizers.authorizer.ranger-provider.enabled",
@@ -287,16 +359,104 @@
                 "value": "nifi.registry.security.identity.provider,nifi.registry.kerberos.spnego.principal,nifi.registry.kerberos.spnego.keytab.location,nifi.registry.kerberos.spnego.authentication.expiration"
               },
               {
-                "name": "xml.authorizers.userGroupProvider.composite-configurable-user-group-provider.property.User Group Provider 2",
-                "value": "shell-user-group-provider"
-              },
-              {
                 "name": "xml.providers.flowPersistenceProvider.file-provider.enabled",
                 "value": "false"
               },
               {
                 "name": "xml.providers.flowPersistenceProvider.database-provider.enabled",
                 "value": "true"
+              },
+              {
+                "name": "nifi.registry.ldap.url",
+                "value": "${LDAP_URL}"
+              },
+              {
+                "name": "nifi.registry.ldap.manager.dn",
+                "value": "${LDAP_BIND_DN}"
+              },
+              {
+                "name": "nifi.registry.ldap.manager.password",
+                "value": "${LDAP_BIND_PW}"
+              },
+              {
+                "name": "nifi.registry.ldap.user.search.base",
+                "value": "${LDAP_USER_SEARCH_BASE}"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.ldap-user-group-provider.property.Group Search Base",
+                "value": "${LDAP_GROUP_SEARCH_BASE}"
+              },
+              {
+                "name": "nifi.registry.ldap.enabled",
+                "value": "true"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.shell-user-group-provider.enabled",
+                "value": "false"
+              },
+              {
+                "name": "nifi.registry.ldap.authentication.strategy",
+                "value": "LDAPS"
+              },
+              {
+                "name": "nifi.registry.ldap.tls.protocol",
+                "value": "TLS"
+              },
+              {
+                "name": "nifi.registry.ldap.tls.keystore.type",
+                "value": "jks"
+              },
+              {
+                "name": "nifi.registry.ldap.tls.truststore.type",
+                "value": "jks"
+              },
+              {
+                "name": "nifi.registry.ldap.tls.keystore",
+                "value": "${nifi.registry.security.keystore}"
+              },
+              {
+                "name": "nifi.registry.ldap.tls.truststore",
+                "value": "${nifi.registry.security.truststore}"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.ldap-user-group-provider.property.Group Object Class",
+                "value": "top"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.ldap-user-group-provider.property.User Group Name Attribute",
+                "value": "memberOf"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.ldap-user-group-provider.property.User Identity Attribute",
+                "value": "uid"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.ldap-user-group-provider.property.Group Name Attribute",
+                "value": "cn"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.composite-user-group-provider.property.User Group Provider 2",
+                "value": "ldap-user-group-provider"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.composite-configurable-user-group-provider.property.User Group Provider 2",
+                "value": "ldap-user-group-provider"
+              },
+              {
+                "name": "xml.identityProviders.provider.ldap-provider.property.TLS - Keystore Password",
+                "value": "${nifi.registry.security.keystorePasswd}"
+              },
+              {
+                "name": "xml.identityProviders.provider.ldap-provider.property.TLS - Truststore Password",
+                "value": "${nifi.registry.security.truststorePasswd}"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.ldap-user-group-provider.property.TLS - Keystore Password",
+                "value": "${nifi.registry.security.keystorePasswd}"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.ldap-user-group-provider.property.TLS - Truststore Password",
+                "value": "${nifi.registry.security.truststorePasswd}"
               }
             ]
           }
