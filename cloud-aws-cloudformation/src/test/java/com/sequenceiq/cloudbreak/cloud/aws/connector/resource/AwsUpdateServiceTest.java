@@ -10,12 +10,17 @@ import static org.mockito.Mockito.when;
 
 import java.util.Base64;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -110,6 +115,26 @@ class AwsUpdateServiceTest {
 
         verify(awsImageUpdateService, times(0)).updateImage(ac, stack, cloudResource);
         assertEquals(1, statuses.size());
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {""})
+    void testUpdateUserDataWhenUserdataIsNullOrEmptyForGroup(String userdata) {
+        when(stack.getTemplate()).thenReturn("AWS::EC2::LaunchTemplate");
+        Group gatewayGroup = mock(Group.class);
+        when(gatewayGroup.getType()).thenReturn(InstanceGroupType.GATEWAY);
+        when(stack.getGroups()).thenReturn(List.of(gatewayGroup));
+        Map<InstanceGroupType, String> userDataMap = new HashMap<>();
+        userDataMap.put(InstanceGroupType.GATEWAY, userdata);
+
+        CloudResource cf = CloudResource.builder()
+                .withName("cf")
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .withParameters(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
+                .build();
+
+        Assertions.assertThrows(IllegalStateException.class, () -> underTest.updateUserData(ac, stack, List.of(cf), userDataMap));
     }
 
     @Test

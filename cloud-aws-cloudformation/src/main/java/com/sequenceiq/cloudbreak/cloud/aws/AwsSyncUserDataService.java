@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -50,19 +52,35 @@ public class AwsSyncUserDataService {
         }
 
         for (Group group : cloudStack.getGroups()) {
-            if (!cloudStack.getUserDataByType(group.getType()).equals(launchTemplateUserData.get(group.getName()))) {
-                LOGGER.info("User data in Launch template differs from database content for group '{}'", group.getName());
-                updateNeeded = true;
+            String userDataByGroupType = cloudStack.getUserDataByType(group.getType());
+            if (StringUtils.isNotEmpty(userDataByGroupType)) {
+                String userDataFromLaunchTemplate = launchTemplateUserData.get(group.getName());
+                String trimmedUserDataFromLaunchTemplate = userDataFromLaunchTemplate != null ? userDataFromLaunchTemplate.trim() : null;
+                if (!userDataByGroupType.trim().equals(trimmedUserDataFromLaunchTemplate)) {
+                    LOGGER.info("User data in Launch template differs from database content for group '{}'", group.getName());
+                    updateNeeded = true;
+                }
+            } else {
+                String msg = String.format("The user data is empty for group '%s' and group type '%s' which should not happen!",
+                        group.getName(), group.getType());
+                LOGGER.warn(msg);
+                throw new IllegalStateException(msg);
             }
         }
         return updateNeeded;
     }
 
     private Map<InstanceGroupType, String> getUserDataMap(CloudStack cloudStack) {
-        return Map.of(
-                InstanceGroupType.GATEWAY, cloudStack.getGatewayUserData(),
-                InstanceGroupType.CORE, cloudStack.getCoreUserData()
-        );
+        Map<InstanceGroupType, String> result = new HashMap<>();
+        putUserDataByTypeIfNotEmpty(result, InstanceGroupType.GATEWAY, cloudStack.getGatewayUserData());
+        putUserDataByTypeIfNotEmpty(result, InstanceGroupType.CORE, cloudStack.getCoreUserData());
+        return result;
+    }
+
+    private static void putUserDataByTypeIfNotEmpty(Map<InstanceGroupType, String> result, InstanceGroupType groupType, String userData) {
+        if (StringUtils.isNotEmpty(userData)) {
+            result.put(groupType, userData);
+        }
     }
 
 }
