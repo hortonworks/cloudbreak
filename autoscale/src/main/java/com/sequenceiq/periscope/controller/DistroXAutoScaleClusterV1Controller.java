@@ -139,11 +139,11 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
 
         alertValidator.validateEntitlementAndDisableIfNotEntitled(cluster);
         alertValidator.validateDistroXAutoscaleClusterRequest(cluster, autoscaleClusterRequest);
+        alertValidator.validateScheduleWithStopStart(autoscaleClusterRequest);
 
         if (Boolean.TRUE.equals(autoscaleClusterRequest.getUseStopStartMechanism())) {
             alertValidator.validateStopStartEntitlementAndDisableIfNotEntitled(cluster);
         }
-        alertValidator.validateScheduleWithStopStart(cluster, autoscaleClusterRequest);
 
         String policyHostGroup = asClusterCommonService.determineLoadBasedPolicyHostGroup(cluster).orElse(null);
         try {
@@ -155,7 +155,8 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
                         timeAlertRequestConverter.convertAllFromJson(autoscaleClusterRequest.getTimeAlertRequests()));
                 asClusterCommonService.setAutoscaleState(cluster.getId(), autoscaleClusterRequest.getEnableAutoscaling());
                 asClusterCommonService.setStopStartScalingState(cluster.getId(), autoscaleClusterRequest.getUseStopStartMechanism(),
-                        !ObjectUtils.isEmpty(autoscaleClusterRequest.getTimeAlertRequests()));
+                        !ObjectUtils.isEmpty(autoscaleClusterRequest.getTimeAlertRequests()),
+                        !ObjectUtils.isEmpty(autoscaleClusterRequest.getLoadAlertRequests()));
             });
         } catch (TransactionService.TransactionExecutionException e) {
             throw e.getCause();

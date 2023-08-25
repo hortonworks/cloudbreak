@@ -144,7 +144,7 @@ public class AlertValidatorTest {
         expectedException.expectMessage("account.not.entitled");
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateStopStartEntitlementAndDisableIfNotEntitled(aCluster));
-        verify(asClusterCommonService, times(1)).setStopStartScalingState(aCluster.getId(), false, false);
+        verify(asClusterCommonService, times(1)).setStopStartScalingState(aCluster.getId(), false, false, true);
     }
 
     @Test
@@ -154,7 +154,7 @@ public class AlertValidatorTest {
         when(entitlementValidationService.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS")).thenReturn(true);
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateStopStartEntitlementAndDisableIfNotEntitled(aCluster));
-        verify(asClusterCommonService, never()).setStopStartScalingState(aCluster.getId(), false, false);
+        verify(asClusterCommonService, never()).setStopStartScalingState(aCluster.getId(), false, false, true);
     }
 
     @Test
@@ -247,7 +247,7 @@ public class AlertValidatorTest {
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
 
-        underTest.validateScheduleWithStopStart(aCluster, autoscaleClusterRequest);
+        underTest.validateScheduleWithStopStart(autoscaleClusterRequest);
     }
 
     @Test
@@ -267,6 +267,7 @@ public class AlertValidatorTest {
         );
         aCluster.setStopStartScalingEnabled(Boolean.TRUE);
         autoscaleClusterRequest.setTimeAlertRequests(timeAlerts);
+        autoscaleClusterRequest.setUseStopStartMechanism(Boolean.TRUE);
 
         when(messagesService.getMessage(VALIDATION_TIME_STOP_START_UNSUPPORTED))
                 .thenReturn("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
@@ -274,7 +275,7 @@ public class AlertValidatorTest {
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
 
-        underTest.validateScheduleWithStopStart(aCluster, autoscaleClusterRequest);
+        underTest.validateScheduleWithStopStart(autoscaleClusterRequest);
     }
 
     @Test
@@ -320,7 +321,7 @@ public class AlertValidatorTest {
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
 
-        underTest.validateScheduleWithStopStart(aCluster, autoscaleRequest);
+        underTest.validateScheduleWithStopStart(autoscaleRequest);
     }
 
     @Test
@@ -341,7 +342,7 @@ public class AlertValidatorTest {
         autoscaleClusterRequest.setUseStopStartMechanism(Boolean.FALSE);
         autoscaleClusterRequest.setTimeAlertRequests(timeAlerts);
 
-        assertDoesNotThrow(() -> underTest.validateScheduleWithStopStart(aCluster, autoscaleClusterRequest));
+        assertDoesNotThrow(() -> underTest.validateScheduleWithStopStart(autoscaleClusterRequest));
     }
 
     @Test
@@ -372,7 +373,7 @@ public class AlertValidatorTest {
         autoscaleClusterRequest.setTimeAlertRequests(timeAlerts);
         aCluster.setStopStartScalingEnabled(Boolean.TRUE);
 
-        assertDoesNotThrow(() -> underTest.validateScheduleWithStopStart(aCluster, autoscaleClusterRequest));
+        assertDoesNotThrow(() -> underTest.validateScheduleWithStopStart(autoscaleClusterRequest));
     }
 
     @Test
@@ -403,7 +404,7 @@ public class AlertValidatorTest {
         timeAlert.setCron("1 0 1 1 1 1");
         aCluster.setTimeAlerts(Set.of(timeAlert));
 
-        assertDoesNotThrow(() -> underTest.validateScheduleWithStopStart(aCluster, asClusterRequest));
+        assertDoesNotThrow(() -> underTest.validateScheduleWithStopStart(asClusterRequest));
     }
 
     @Test
