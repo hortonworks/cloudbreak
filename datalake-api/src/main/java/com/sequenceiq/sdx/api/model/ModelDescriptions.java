@@ -143,10 +143,8 @@ public class ModelDescriptions {
 
     public static final String DATABASE_ENGINE_VERSION = "Database engine version.";
 
-    @Deprecated
     public static final String AZURE_DATABASE_REQUEST = "Azure Database request.";
 
-    @Deprecated
     public static final String AZURE_DATABASE_TYPE = "The type of the azure database: single server / flexible server";
 
     public static final String EXTERNAL_DATABASE_OPTIONS = "External database options.";

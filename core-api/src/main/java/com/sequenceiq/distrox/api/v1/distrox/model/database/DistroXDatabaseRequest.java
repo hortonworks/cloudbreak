@@ -15,15 +15,12 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class DistroXDatabaseRequest extends DistroXDatabaseBase implements Serializable {
     @ApiModelProperty(Database.AZURE_DATABASE_REQUEST)
-    @Deprecated
     private DistroXDatabaseAzureRequest databaseAzureRequest;
 
-    @Deprecated
     public DistroXDatabaseAzureRequest getDatabaseAzureRequest() {
         return databaseAzureRequest;
     }
 
-    @Deprecated
     public void setDatabaseAzureRequest(DistroXDatabaseAzureRequest databaseAzureRequest) {
         this.databaseAzureRequest = databaseAzureRequest;
     }

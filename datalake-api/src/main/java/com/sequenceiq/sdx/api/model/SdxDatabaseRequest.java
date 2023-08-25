@@ -26,7 +26,6 @@ public class SdxDatabaseRequest {
     private String databaseEngineVersion;
 
     @ApiModelProperty(ModelDescriptions.AZURE_DATABASE_REQUEST)
-    @Deprecated
     private SdxDatabaseAzureRequest sdxDatabaseAzureRequest;
 
     public Boolean getCreate() {
@@ -53,12 +52,10 @@ public class SdxDatabaseRequest {
         this.databaseEngineVersion = databaseEngineVersion;
     }
 
-    @Deprecated
     public SdxDatabaseAzureRequest getSdxDatabaseAzureRequest() {
         return sdxDatabaseAzureRequest;
     }
 
-    @Deprecated
     public void setSdxDatabaseAzureRequest(SdxDatabaseAzureRequest sdxDatabaseAzureRequest) {
         this.sdxDatabaseAzureRequest = sdxDatabaseAzureRequest;
     }

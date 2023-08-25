@@ -7,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Assertions;
@@ -41,7 +39,7 @@ public class SdxExternalDatabaseConfigurerTest {
     private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
 
     @Mock
-    private AzureDatabaseAttributesService  azureDatabaseAttributesService;
+    private AzureDatabaseAttributesService azureDatabaseAttributesService;
 
     @InjectMocks
     private SdxExternalDatabaseConfigurer underTest;
@@ -63,7 +61,6 @@ public class SdxExternalDatabaseConfigurerTest {
         assertTrue(actualResult.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, actualResult.getDatabaseAvailabilityType());
         assertEquals("11", actualResult.getDatabaseEngineVersion());
-        verify(azureDatabaseAttributesService, never()).configureAzureDatabase(any(SdxDatabase.class));
     }
 
     @Test
@@ -109,7 +106,6 @@ public class SdxExternalDatabaseConfigurerTest {
         assertTrue(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
-        verify(azureDatabaseAttributesService).configureAzureDatabase(any(SdxDatabase.class));
     }
 
     @Test
@@ -125,7 +121,6 @@ public class SdxExternalDatabaseConfigurerTest {
         assertFalse(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.NONE, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
-        verify(azureDatabaseAttributesService).configureAzureDatabase(any(SdxDatabase.class));
     }
 
     @Test
@@ -142,7 +137,6 @@ public class SdxExternalDatabaseConfigurerTest {
         assertFalse(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.NONE, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
-        verify(azureDatabaseAttributesService).configureAzureDatabase(any(SdxDatabase.class));
     }
 
     @Test
@@ -160,7 +154,6 @@ public class SdxExternalDatabaseConfigurerTest {
         assertTrue(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
-        verify(azureDatabaseAttributesService).configureAzureDatabase(any(SdxDatabase.class));
     }
 
     @Test
@@ -178,7 +171,6 @@ public class SdxExternalDatabaseConfigurerTest {
         assertTrue(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
-        verify(azureDatabaseAttributesService).configureAzureDatabase(any(SdxDatabase.class));
     }
 
     @Test

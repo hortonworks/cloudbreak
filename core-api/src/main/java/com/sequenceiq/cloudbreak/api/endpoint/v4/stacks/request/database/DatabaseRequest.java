@@ -13,15 +13,12 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DatabaseRequest extends DatabaseBase {
     @ApiModelProperty(ModelDescriptions.Database.AZURE_DATABASE_REQUEST)
-    @Deprecated
     private DatabaseAzureRequest databaseAzureRequest;
 
-    @Deprecated
     public DatabaseAzureRequest getDatabaseAzureRequest() {
         return databaseAzureRequest;
     }
 
-    @Deprecated
     public void setDatabaseAzureRequest(DatabaseAzureRequest databaseAzureRequest) {
         this.databaseAzureRequest = databaseAzureRequest;
     }

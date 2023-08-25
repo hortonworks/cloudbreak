@@ -61,7 +61,7 @@ public class SdxExternalDatabaseConfigurer {
                 databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(sdxCluster.getRuntime(), os, requestedDbEngineVersion,
                         cloudPlatform, SdxDatabaseAvailabilityType.hasExternalDatabase(databaseAvailabilityType));
         SdxDatabase sdxDatabase = DatabaseParameterFallbackUtil.setupDatabaseInitParams(databaseAvailabilityType, dbEngineVersion);
-        configureAzureDatabase(cloudPlatform, sdxDatabase);
+        configureAzureDatabase(cloudPlatform, internalDatabaseRequest, databaseRequest, sdxDatabase);
         LOGGER.debug("Set database availability type to {}, and engine version to {}", sdxDatabase.getDatabaseAvailabilityType(),
                 sdxDatabase.getDatabaseEngineVersion());
         validate(cloudPlatform, sdxCluster.getClusterName(), sdxDatabase);
@@ -134,9 +134,10 @@ public class SdxExternalDatabaseConfigurer {
         }
     }
 
-    private void configureAzureDatabase(CloudPlatform cloudPlatform, SdxDatabase sdxDatabase) {
+    private void configureAzureDatabase(CloudPlatform cloudPlatform, DatabaseRequest internalDatabaseRequest, SdxDatabaseRequest databaseRequest,
+            SdxDatabase sdxDatabase) {
         if (CloudPlatform.AZURE == cloudPlatform) {
-            azureDatabaseAttributesService.configureAzureDatabase(sdxDatabase);
+            azureDatabaseAttributesService.configureAzureDatabase(internalDatabaseRequest, databaseRequest, sdxDatabase);
         }
     }
 }
