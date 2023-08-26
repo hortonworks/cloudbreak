@@ -12,11 +12,14 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -73,6 +76,25 @@ class AwsSyncUserDataServiceTest {
         verify(awsUpdateService, never()).updateUserData(any(), any(), any(), any());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {""})
+    @NullSource
+    void testSyncUserDataWhenUserDataIsNullOrEmpty(String userdata) {
+        List<CloudResource> resources = List.of();
+        Map<String, String> userDataMap = Map.of("hostgroup1", "awsUserdata-A", "hostgroup2", "awsUserdata-B");
+        when(awsUserDataService.getUserData(ac, cloudStack)).thenReturn(userDataMap);
+
+        Group hostgroup1 = mock(Group.class);
+        when(hostgroup1.getName()).thenReturn("hostgroup1");
+        when(hostgroup1.getType()).thenReturn(InstanceGroupType.GATEWAY);
+
+        List<Group> groups = List.of(hostgroup1);
+        when(cloudStack.getGroups()).thenReturn(groups);
+        when(cloudStack.getUserDataByType(InstanceGroupType.GATEWAY)).thenReturn(userdata);
+
+        Assertions.assertThrows(IllegalStateException.class, () -> underTest.syncUserData(ac, cloudStack, resources));
+    }
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("scenarios")
     void testSyncUserDataUpdateIsNeeded(String testCaseName, String gatewayUserdataFromDatabase, String coreUserdataFromDatabase, boolean shouldSync) {
@@ -115,6 +137,7 @@ class AwsSyncUserDataServiceTest {
         return new Object[][] {
             //testCaseName        gatewayUserdataFromDatabase                     coreUserdataFromDatabase             shouldSync
             { "userdata is up-to-date",      "awsUserdata-A",                     "awsUserdata-B",                     false },
+            { "userdata is up-to-date",      "awsUserdata-A ",                     " awsUserdata-B",                   false },
             { "userdata changed on core",    "awsUserdata-A",                     "awsUserdata-B-changed-in-database", true },
             { "userdata changed on gateway", "awsUserdata-A-changed-in-database", "awsUserdata-B",                     true },
             { "both userdata changed",       "awsUserdata-A-changed-in-database", "awsUserdata-B-changed-in-database", true }

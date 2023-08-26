@@ -10,7 +10,7 @@ public class TargetMajorVersionTest {
     @ParameterizedTest
     @EnumSource(value = TargetMajorVersion.class)
     void testConvertToMajorVersion(TargetMajorVersion targetMajorVersion) {
-        assertEquals(targetMajorVersion.name(), targetMajorVersion.convertToMajorVersion().name());
+        assertEquals(targetMajorVersion.getMajorVersion(), targetMajorVersion.convertToMajorVersion().getMajorVersion());
     }
 
 }
