@@ -14,6 +14,7 @@ public enum UmsVirtualGroupRight {
     ZEPPELIN_ADMIN("environments/adminZeppelin"),
     NIFI_ADMIN("datahub/adminNiFi"),
     NIFI_REGISTRY_ADMIN("datahub/adminNiFiRegistry"),
+    EFM_ADMIN("datahub/adminEfm"),
     HBASE_ADMIN("datahub/adminHBase"),
     ALLOW_PRIVILEGED_OS_OPERATIONS("environments/allowPrivilegedOSOperations", CDP_ENVIRONMENT_PRIVILEGED_USER);
 

@@ -38,7 +38,7 @@ public class EfmRoleConfigProviderTest {
     }
 
     @Test
-    public void testGetSchemaRegistryRoleConfigs720() {
+    public void testDbConfigs() {
         String inputJson = FileReaderUtils.readFileFromClasspathQuietly("input/efm.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor);
