@@ -16,11 +16,8 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.ServiceEndpointCreationToEndpointTypeConverter;
 import com.sequenceiq.common.model.PrivateEndpointType;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
-import com.sequenceiq.environment.api.v1.environment.model.base.EnvironmentNetworkBase;
-import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureDatabaseParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.azure.DatabaseSetup;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
 
@@ -76,55 +73,48 @@ public class NetworkParameterAdder {
 
     public Map<String, Object> addParameters(
             Map<String, Object> parameters, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform, DBStack dbStack) {
+        EnvironmentNetworkResponse network = environmentResponse.getNetwork();
         switch (cloudPlatform) {
-            case AWS:
-                parameters.put(VPC_CIDR, environmentResponse.getNetwork().getNetworkCidr());
-                parameters.put(VPC_CIDRS, environmentResponse.getNetwork().getNetworkCidrs());
-                parameters.put(VPC_ID, environmentResponse.getNetwork().getAws().getVpcId());
-                break;
-            case AZURE:
+            case AWS -> {
+                parameters.put(VPC_CIDR, network.getNetworkCidr());
+                parameters.put(VPC_CIDRS, network.getNetworkCidrs());
+                parameters.put(VPC_ID, network.getAws().getVpcId());
+            }
+            case AZURE -> {
                 PrivateEndpointType privateEndpointType
                         = serviceEndpointCreationToEndpointTypeConverter.convert(
-                        environmentResponse.getNetwork().getServiceEndpointCreation(), cloudPlatform.name());
+                        network.getServiceEndpointCreation(), cloudPlatform.name());
                 parameters.put(ENDPOINT_TYPE, privateEndpointType);
+                Optional<String> databasePrivateDnsZoneId = Optional.ofNullable(network.getAzure())
+                        .map(EnvironmentNetworkAzureParams::getDatabasePrivateDnsZoneId);
                 if (PrivateEndpointType.USE_PRIVATE_ENDPOINT == privateEndpointType) {
                     parameters.put(SUBNET_FOR_PRIVATE_ENDPOINT, getAzureSubnetToUseWithPrivateEndpoint(environmentResponse, dbStack));
-                    parameters.put(EXISTING_PRIVATE_DNS_ZONE_ID, environmentResponse.getNetwork().getAzure().getDatabasePrivateDnsZoneId());
+                    databasePrivateDnsZoneId.ifPresent(dnsZoneId -> parameters.put(EXISTING_PRIVATE_DNS_ZONE_ID, dnsZoneId));
                 }
-                DatabaseSetup databaseSetup = Optional.ofNullable(environmentResponse.getAzure())
-                        .map(AzureEnvironmentParameters::getAzureDatabaseParameters)
-                        .map(AzureDatabaseParameters::getDatabaseSetup)
-                        .orElse(DatabaseSetup.PUBLIC);
-                if (databaseSetup == DatabaseSetup.PRIVATE) {
-                    Optional.ofNullable(environmentResponse.getNetwork())
-                            .map(EnvironmentNetworkBase::getAzure)
-                            .map(EnvironmentNetworkAzureParams::getFlexibleServerSubnetIds)
-                            .flatMap(subnetIds -> subnetIds.stream().findFirst())
-                            .ifPresent(subnetId -> parameters.put(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID, subnetId));
-                    parameters.put(EXISTING_PRIVATE_DNS_ZONE_ID, environmentResponse.getNetwork().getAzure().getDatabasePrivateDnsZoneId());
+                Optional<String> delegatedSubnet = Optional.ofNullable(network.getAzure())
+                        .map(EnvironmentNetworkAzureParams::getFlexibleServerSubnetIds)
+                        .flatMap(subnetIds -> subnetIds.stream().findFirst());
+                delegatedSubnet.ifPresent(subnetId -> parameters.put(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID, subnetId));
+                databasePrivateDnsZoneId.ifPresent(dnsZoneId -> parameters.put(EXISTING_PRIVATE_DNS_ZONE_ID, dnsZoneId));
+            }
+            case GCP -> {
+                if (!Strings.isNullOrEmpty(network.getGcp().getSharedProjectId())) {
+                    parameters.put(SHARED_PROJECT_ID, network.getGcp().getSharedProjectId());
                 }
-                break;
-            case GCP:
-                if (!Strings.isNullOrEmpty(environmentResponse.getNetwork().getGcp().getSharedProjectId())) {
-                    parameters.put(SHARED_PROJECT_ID, environmentResponse.getNetwork().getGcp().getSharedProjectId());
-                }
-                break;
-            case MOCK:
-                parameters.put(VPC_ID, environmentResponse.getNetwork().getMock().getVpcId());
-                break;
-            default:
-                throw new RedbeamsException(String.format("Support for cloud platform %s not yet added", cloudPlatform.name()));
+            }
+            case MOCK -> parameters.put(VPC_ID, network.getMock().getVpcId());
+            default -> throw new RedbeamsException(String.format("Support for cloud platform %s not yet added", cloudPlatform.name()));
         }
         return parameters;
     }
 
-    private String getAzureSubnetToUseWithPrivateEndpoint(DetailedEnvironmentResponse detailedEnvironmentResponse, DBStack dbStack) {
-        String subscriptionId = subnetListerService.getAzureSubscriptionId(detailedEnvironmentResponse.getCrn());
+    private String getAzureSubnetToUseWithPrivateEndpoint(DetailedEnvironmentResponse environmentResponse, DBStack dbStack) {
+        String subscriptionId = subnetListerService.getAzureSubscriptionId(environmentResponse.getCrn());
         return subnetChooserService.chooseSubnetForPrivateEndpoint(
-                detailedEnvironmentResponse.getNetwork().getSubnetMetas().values(), dbStack, detailedEnvironmentResponse.getNetwork().isExistingNetwork())
+                        environmentResponse.getNetwork().getSubnetMetas().values(), dbStack, environmentResponse.getNetwork().isExistingNetwork())
                 .stream()
                 .findFirst()
-                .map(csn -> subnetListerService.expandAzureResourceId(csn, detailedEnvironmentResponse, subscriptionId))
+                .map(csn -> subnetListerService.expandAzureResourceId(csn, environmentResponse, subscriptionId))
                 .map(CloudSubnet::getId).orElseThrow(() -> new RedbeamsException("It is not possible to create private endpoints for database: " +
                         "there are no subnets with privateEndpointNetworkPolicies disabled"));
     }

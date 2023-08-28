@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.parameters.v1.converter;
 
-import static com.sequenceiq.environment.parameter.dto.DatabaseSetup.PRIVATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -15,7 +14,6 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
-import com.sequenceiq.environment.parameter.dto.AzureDatabaseParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -63,10 +61,6 @@ public class AzureEnvironmentParametersConverterTest {
                                     .withEncryptionKeyUrl(KEY_URL)
                                     .withEncryptionKeyResourceGroupName(KEY_RESOURCE_GROUP_NAME)
                                     .build())
-                            .withAzureDatabaseParametersDto(
-                                    AzureDatabaseParametersDto.builder()
-                                            .withDatabaseSetup(PRIVATE)
-                                            .build())
                             .build())
                     .build();
             Environment environment = new Environment();
@@ -83,30 +77,27 @@ public class AzureEnvironmentParametersConverterTest {
             assertEquals(ID, azureResult.getId());
             assertEquals(KEY_URL, azureResult.getEncryptionKeyUrl());
             assertEquals(KEY_RESOURCE_GROUP_NAME, azureResult.getEncryptionKeyResourceGroupName());
-            assertEquals(PRIVATE, azureResult.getDatabaseSetup());
         }
 
         @Test
         void convertToDtoTest() {
+            EnvironmentView environmentView = ENVIRONMENT_VIEW;
             AzureParameters parameters = new AzureParameters();
             parameters.setAccountId(ACCOUNT_ID);
-            parameters.setEnvironment(ENVIRONMENT_VIEW);
+            parameters.setEnvironment(environmentView);
             parameters.setId(ID);
             parameters.setName(ENV_NAME);
             parameters.setEncryptionKeyUrl(KEY_URL);
             parameters.setDiskEncryptionSetId("DummyDesId");
             parameters.setEncryptionKeyResourceGroupName(KEY_RESOURCE_GROUP_NAME);
-            parameters.setDatabaseSetup(PRIVATE);
 
             ParametersDto result = underTest.convertToDto(parameters);
 
             assertEquals(ACCOUNT_ID, result.getAccountId());
             assertEquals(ID, result.getId());
             assertEquals(ENV_NAME, result.getName());
-            AzureParametersDto parametersDto = result.getAzureParametersDto();
-            assertEquals(KEY_URL, parametersDto.getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl());
-            assertEquals("DummyDesId", parametersDto.getAzureResourceEncryptionParametersDto().getDiskEncryptionSetId());
-            assertEquals(KEY_RESOURCE_GROUP_NAME, parametersDto.getAzureResourceEncryptionParametersDto().getEncryptionKeyResourceGroupName());
-            assertEquals(PRIVATE, parametersDto.getAzureDatabaseParametersDto().getDatabaseSetup());
+            assertEquals(KEY_URL, result.getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl());
+            assertEquals("DummyDesId", result.getAzureParametersDto().getAzureResourceEncryptionParametersDto().getDiskEncryptionSetId());
+            assertEquals(KEY_RESOURCE_GROUP_NAME, result.getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyResourceGroupName());
         }
 }

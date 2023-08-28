@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -93,6 +94,12 @@ public class AzurePrivateEndpointValidator {
             NetworkDto networkDto) {
         if (azureExistingPrivateDnsZonesService.hasNoExistingManagedZones(networkDto)) {
             LOGGER.debug("No existing private DNS zones are used, nothing to do.");
+            return;
+        }
+        boolean hasFlexibleServerSubnets = CollectionUtils.isNotEmpty(networkDto.getAzure().getFlexibleServerSubnetIds());
+        if (hasFlexibleServerSubnets) {
+            // TODO: Create proper validation
+            LOGGER.debug("Skipping validation of DNS Zone in case of Azure Flexible Server");
             return;
         }
 
