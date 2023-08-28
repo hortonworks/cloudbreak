@@ -13,3 +13,5 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMultiAzUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXMultiAzProvisioningTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxMultiAzProvisioningTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMarketplaceUpgradeTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxMarketplaceUpgradeTests

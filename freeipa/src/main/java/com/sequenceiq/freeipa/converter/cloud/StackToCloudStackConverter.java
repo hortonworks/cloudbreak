@@ -509,7 +509,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     }
 
     private Optional<Boolean> getAzureMarketplaceTermsAcceptancePolicy(String cloudPlatform) {
-        return CloudPlatform.AZURE.equals(cloudPlatform) ? Optional.of(measure(() -> azureMarketplaceTermsClientService.getAccepted(),
+        return CloudPlatform.AZURE.name().equals(cloudPlatform) ? Optional.of(measure(() -> azureMarketplaceTermsClientService.getAccepted(),
                 LOGGER, "Terms setting queried under {} ms")) : Optional.empty();
     }
 

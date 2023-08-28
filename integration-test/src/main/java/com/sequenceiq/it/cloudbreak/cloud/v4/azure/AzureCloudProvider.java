@@ -492,8 +492,28 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getFreeIpaMarketplaceUpgradeImageId() {
+        return azureProperties.getFreeipa().getMarketplace().getUpgrade().getImageId();
+    }
+
+    @Override
     public String getFreeIpaUpgradeImageCatalog() {
         return azureProperties.getFreeipa().getUpgrade().getCatalog();
+    }
+
+    @Override
+    public String getFreeIpaMarketplaceUpgradeImageCatalog() {
+        return azureProperties.getFreeipa().getMarketplace().getUpgrade().getCatalog();
+    }
+
+    @Override
+    public String getSdxMarketplaceUpgradeImageId() {
+        return azureProperties.getMarketplace().getSdx().getUpgrade().getImageId();
+    }
+
+    @Override
+    public String getSdxMarketplaceUpgradeImageCatalog() {
+        return azureProperties.getMarketplace().getSdx().getUpgrade().getCatalog();
     }
 
     @Override

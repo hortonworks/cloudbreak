@@ -453,6 +453,10 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         return withCatalog(getCloudProvider().getFreeIpaUpgradeImageCatalog(), getCloudProvider().getFreeIpaUpgradeImageId());
     }
 
+    public FreeIpaTestDto withMarketplaceUpgradeCatalogAndImage() {
+        return withCatalog(getCloudProvider().getFreeIpaMarketplaceUpgradeImageCatalog(), getCloudProvider().getFreeIpaMarketplaceUpgradeImageId());
+    }
+
     public FreeIpaTestDto await(Status status) {
         return await(status, emptyRunningParameter());
     }

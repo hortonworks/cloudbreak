@@ -360,8 +360,32 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
+    public String getFreeIpaMarketplaceUpgradeImageId() {
+        LOGGER.warn("'freeIpaMarketplaceUpgradeImageId' is not implemented");
+        return null;
+    }
+
+    @Override
     public String getFreeIpaUpgradeImageCatalog() {
         LOGGER.warn("'freeIpaUpgradeImageCatalog' is not implemented");
+        return null;
+    }
+
+    @Override
+    public String getFreeIpaMarketplaceUpgradeImageCatalog() {
+        LOGGER.warn("'freeIpaMarketplaceUpgradeImageCatalog' is not implemented");
+        return null;
+    }
+
+    @Override
+    public String getSdxMarketplaceUpgradeImageId() {
+        LOGGER.warn("'sdxMarketplaceUpgradeImageId' is not implemented");
+        return null;
+    }
+
+    @Override
+    public String getSdxMarketplaceUpgradeImageCatalog() {
+        LOGGER.warn("'sdxMarketplaceUpgradeImageCatalog' is not implemented");
         return null;
     }
 

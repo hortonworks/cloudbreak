@@ -226,6 +226,10 @@ integrationtest:
       usage: SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT
       name: cb-e2e-westus2-tmp
     marketplace:
+      sdx:
+        upgrade:
+          imageId: 69d1c57e-155f-49a3-9cbb-e670ab31ae75
+          catalog: https://cloudbreak-imagecatalog.s3.us-west-1.amazonaws.com/v3-mp-cb-image-catalog.json
       freeipa:
         image:
           uuid: 4c9de617-26b6-404c-990d-a8b6578f74e4
@@ -235,6 +239,10 @@ integrationtest:
       upgrade:
         imageId: dc277098-ea7c-48b7-b1a2-89950b989b6a
         catalog: https://cloudbreak-imagecatalog.s3.us-west-1.amazonaws.com/freeipa-upgrade-test-catalog.json
+      marketplace:
+        upgrade:
+            imageId: 5cc93573-4bf2-49f3-927b-b12a52f72dba
+            catalog: https://cloudbreak-imagecatalog.s3.us-west-1.amazonaws.com/v3-mp-freeipa-image-catalog.json
     diskEncryption:
       encryptionKeyUrl:
       resourceGroupName:
