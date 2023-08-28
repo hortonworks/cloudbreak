@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneDescriptor;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneRegistrationEnum;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
@@ -22,7 +23,7 @@ public class AzureExistingPrivateDnsZonesService {
 
     public Map<AzurePrivateDnsZoneServiceEnum, String> getExistingManagedZones(NetworkDto networkDto) {
         Map<AzurePrivateDnsZoneServiceEnum, String> result = new HashMap<>();
-        Optional.ofNullable(networkDto.getAzure().getDatabasePrivateDnsZoneId())
+        Optional.ofNullable(networkDto.getAzure() != null ? Strings.emptyToNull(networkDto.getAzure().getDatabasePrivateDnsZoneId()) : null)
                 .ifPresent(privateDnsZone -> result.put(AzurePrivateDnsZoneServiceEnum.POSTGRES, privateDnsZone));
         LOGGER.debug("Existing service private DNS zones: {}", result);
         return result;

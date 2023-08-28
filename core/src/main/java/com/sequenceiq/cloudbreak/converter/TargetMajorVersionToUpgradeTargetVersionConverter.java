@@ -12,6 +12,8 @@ public class TargetMajorVersionToUpgradeTargetVersionConverter {
         return switch (sourceTargetVersion) {
             case VERSION_11 -> UpgradeTargetMajorVersion.VERSION_11;
             case VERSION_14 -> UpgradeTargetMajorVersion.VERSION_14;
+            case VERSION11 -> UpgradeTargetMajorVersion.VERSION_11;
+            case VERSION14 -> UpgradeTargetMajorVersion.VERSION_14;
         };
     }
 }
