@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.parameter.dto.AzureDatabaseParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
@@ -45,10 +44,6 @@ public class AzureEnvironmentParametersConverter extends BaseEnvironmentParamete
                 .map(AzureParametersDto::getAzureResourceGroupDto)
                 .map(AzureResourceGroupDto::getResourceGroupUsagePattern)
                 .orElse(null));
-        azureParameters.setDatabaseSetup(azureParametersDto
-                .map(AzureParametersDto::getAzureDatabaseParametersDto)
-                .map(AzureDatabaseParametersDto::getDatabaseSetup)
-                .orElse(null));
         azureParameters.setEncryptionKeyUrl(azureParametersDto
                 .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
                 .map(AzureResourceEncryptionParametersDto::getEncryptionKeyUrl)
@@ -76,11 +71,6 @@ public class AzureEnvironmentParametersConverter extends BaseEnvironmentParamete
                                 .withDiskEncryptionSetId(azureParameters.getDiskEncryptionSetId())
                                 .withEncryptionKeyResourceGroupName(azureParameters.getEncryptionKeyResourceGroupName())
                                 .build())
-                .withAzureDatabaseParametersDto(
-                        AzureDatabaseParametersDto.builder()
-                                .withDatabaseSetup(azureParameters.getDatabaseSetup())
-                                .build()
-                )
                 .build());
     }
 }

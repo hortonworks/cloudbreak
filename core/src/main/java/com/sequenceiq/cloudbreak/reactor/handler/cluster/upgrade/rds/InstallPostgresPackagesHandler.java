@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -7,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -41,9 +45,10 @@ public class InstallPostgresPackagesHandler extends ExceptionCatcherEventHandler
     public Selectable doAccept(HandlerEvent<UpgradeRdsInstallPostgresPackagesRequest> event) {
         UpgradeRdsInstallPostgresPackagesRequest request = event.getData();
         Long stackId = request.getResourceId();
-        LOGGER.info("Installing Postgres packages for RDS upgrade...");
+        MajorVersion targetVersion = Optional.ofNullable(request.getVersion()).map(TargetMajorVersion::convertToMajorVersion).orElse(MajorVersion.VERSION_11);
+        LOGGER.info("Installing Postgres [{}] packages for RDS upgrade...", targetVersion);
         try {
-            upgradeRdsService.installPostgresPackages(stackId);
+            upgradeRdsService.installPostgresPackages(stackId, targetVersion);
         } catch (CloudbreakOrchestratorException e) {
             upgradeRdsService.handleInstallPostgresPackagesError(stackId, request.getVersion().getMajorVersion(), e.getMessage());
             LOGGER.warn("Installing Postgres packages failed due to {}", e.getMessage());

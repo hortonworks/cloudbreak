@@ -23,6 +23,8 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -35,6 +37,7 @@ import org.springframework.util.ReflectionUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
@@ -385,5 +388,31 @@ class RdsUpgradeOrchestratorServiceTest {
                 return orchestratorStateParams;
             }
         });
+    }
+
+    @ParameterizedTest
+    @EnumSource(MajorVersion.class)
+    void testInstallPostgresPackages(MajorVersion targetVersion) throws CloudbreakOrchestratorException {
+        OrchestratorStateParams stateParams = new OrchestratorStateParams();
+        when(saltStateParamsService.createStateParams(stack,
+                MajorVersion.VERSION_14 == targetVersion ? "postgresql/pg14-install" : "postgresql/pg11-install", false, 2000, 3))
+                .thenReturn(stateParams);
+
+        underTest.installPostgresPackages(STACK_ID, targetVersion);
+
+        verify(hostOrchestrator).runOrchestratorState(stateParams);
+    }
+
+    @ParameterizedTest
+    @EnumSource(MajorVersion.class)
+    void testupdatePostgresAlternatives(MajorVersion targetVersion) throws CloudbreakOrchestratorException {
+        OrchestratorStateParams stateParams = new OrchestratorStateParams();
+        when(saltStateParamsService.createStateParams(stack,
+                MajorVersion.VERSION_14 == targetVersion ? "postgresql/pg14-alternatives" : "postgresql/pg11-alternatives", false, 2000, 3))
+                .thenReturn(stateParams);
+
+        underTest.updatePostgresAlternatives(STACK_ID, targetVersion);
+
+        verify(hostOrchestrator).runOrchestratorState(stateParams);
     }
 }

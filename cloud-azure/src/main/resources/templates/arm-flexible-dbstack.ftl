@@ -169,9 +169,9 @@
         },
         "availabilityZone": "[parameters('availabilityZone')]"
       }
-    },
+    }
     <#if !useSslEnforcement>
-    {
+    ,{
       "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
       "apiVersion": "2022-12-01",
       "name": "[concat(parameters('dbServerName'), '/require_secure_transport')]",
@@ -182,9 +182,10 @@
         "value": "off",
         "source": "user-override"
       }
-    },
+    }
     </#if>
-    {
+    <#if !existingDatabasePrivateDnsZoneId?has_content && !flexibleServerDelegatedSubnetId?has_content>
+    ,{
       "name": "[concat(parameters('dbServerName'), '/publicaccess')]",
       "type": "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules",
       "apiVersion": "2022-12-01",
@@ -196,6 +197,7 @@
         "endIpAddress": "255.255.255.255"
       }
     }
+    </#if>
   ],
   "outputs": {
     "databaseServerFQDN": {

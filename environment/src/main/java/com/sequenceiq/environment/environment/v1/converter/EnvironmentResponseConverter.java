@@ -14,11 +14,9 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureDatabaseParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
-import com.sequenceiq.environment.api.v1.environment.model.request.azure.DatabaseSetup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
@@ -42,7 +40,6 @@ import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
-import com.sequenceiq.environment.parameter.dto.AzureDatabaseParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
@@ -246,23 +243,17 @@ public class EnvironmentResponseConverter {
     }
 
     private AzureEnvironmentParameters azureEnvParamsToAzureEnvironmentParams(ParametersDto parameters) {
-        AzureParametersDto azureParametersDto = parameters.getAzureParametersDto();
-        AzureResourceGroupDto resourceGroupDto = Optional.ofNullable(azureParametersDto)
+        AzureResourceGroupDto resourceGroupDto = Optional.ofNullable(parameters.getAzureParametersDto())
                 .map(AzureParametersDto::getAzureResourceGroupDto)
                 .filter(rgDto -> Objects.nonNull(rgDto.getResourceGroupUsagePattern()))
                 .filter(rgDto -> Objects.nonNull(rgDto.getResourceGroupCreation()))
                 .orElse(null);
-        AzureResourceEncryptionParametersDto resourceEncryptionParametersDto = Optional.ofNullable(azureParametersDto)
+        AzureResourceEncryptionParametersDto resourceEncryptionParametersDto = Optional.ofNullable(parameters.getAzureParametersDto())
                 .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
                 .orElse(null);
-        AzureDatabaseParametersDto azureDatabaseParametersDto = Optional.ofNullable(azureParametersDto)
-                .map(AzureParametersDto::getAzureDatabaseParametersDto)
-                .orElse(null);
-
         return AzureEnvironmentParameters.builder()
                 .withAzureResourceGroup(getIfNotNull(resourceGroupDto, this::azureParametersToAzureResourceGroup))
                 .withResourceEncryptionParameters(getIfNotNull(resourceEncryptionParametersDto, this::azureParametersToAzureResourceEncryptionParameters))
-                .withAzureDatabaseParameters(getIfNotNull(azureDatabaseParametersDto, this::azureParametersToAzureDatabaseParameters))
                 .build();
     }
 
@@ -304,11 +295,6 @@ public class EnvironmentResponseConverter {
                 .build();
     }
 
-    private AzureDatabaseParameters azureParametersToAzureDatabaseParameters(AzureDatabaseParametersDto azureDatabaseParametersDto) {
-        return AzureDatabaseParameters.builder()
-                .withDatabaseSetup(convertDatabaseSetup(azureDatabaseParametersDto.getDatabaseSetup())).build();
-    }
-
     private AzureResourceEncryptionParameters azureParametersToAzureResourceEncryptionParameters(
             AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto) {
         return AzureResourceEncryptionParameters.builder()
@@ -330,16 +316,6 @@ public class EnvironmentResponseConverter {
             case USE_SINGLE -> ResourceGroupUsage.SINGLE;
             case USE_MULTIPLE -> ResourceGroupUsage.MULTIPLE;
             case USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT -> ResourceGroupUsage.SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT;
-        };
-    }
-
-    private DatabaseSetup convertDatabaseSetup(com.sequenceiq.environment.parameter.dto.DatabaseSetup databaseSetup) {
-        if (Objects.isNull(databaseSetup)) {
-            return null;
-        }
-        return switch (databaseSetup) {
-            case PRIVATE -> DatabaseSetup.PRIVATE;
-            case PUBLIC ->  DatabaseSetup.PUBLIC;
         };
     }
 

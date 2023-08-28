@@ -119,7 +119,6 @@ public class EnvironmentModelDescription {
     public static final String YARN_PARAMETERS = "YARN Specific parameters.";
 
     public static final String RESOURCE_GROUP_PARAMETERS = "Azure resource group parameters.";
-    public static final String AZURE_DATABASE_SETUP = "Azure database setup type.";
     public static final String EXISTING_RESOURCE_GROUP_NAME = "Name of an existing Azure resource group.";
     public static final String RESOURCE_GROUP_USAGE = "Resource group usage: single resource group for all resources where possible "
             + "or use multiple resource groups.";
@@ -128,7 +127,6 @@ public class EnvironmentModelDescription {
     public static final String ENCRYPTION_KEY_RESOURCE_GROUP_NAME = "Name of the Azure resource group of the Customer Managed Key to encrypt Azure resources";
     public static final String DISK_ENCRYPTION_SET_ID = "Resource Id of the disk encryption set used to encrypt Azure disks.";
     public static final String RESOURCE_ENCRYPTION_PARAMETERS = "Azure resource encryption parameters.";
-    public static final String AZURE_DATABASE_PARAMETERS = "Azure database related parameters.";
     public static final String PARENT_ENVIRONMENT_CRN = "Parent environment global identifier";
     public static final String PARENT_ENVIRONMENT_NAME = "Parent environment name";
     public static final String PARENT_ENVIRONMENT_CLOUD_PLATFORM = "Parent environment cloud platform";

@@ -3,7 +3,6 @@ package com.sequenceiq.environment.environment.v1.converter;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
-import static com.sequenceiq.environment.api.v1.environment.model.request.azure.DatabaseSetup.PRIVATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -62,11 +61,9 @@ import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
-import com.sequenceiq.environment.parameter.dto.AzureDatabaseParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
-import com.sequenceiq.environment.parameter.dto.DatabaseSetup;
 import com.sequenceiq.environment.parameter.dto.GcpParametersDto;
 import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -263,7 +260,6 @@ public class EnvironmentResponseConverterTest {
                 azureEnvironmentParameters.getResourceEncryptionParameters().getEncryptionKeyUrl());
         assertEquals("dummy-des-id", azureEnvironmentParameters.getResourceEncryptionParameters().getDiskEncryptionSetId());
         assertEquals("dummyResourceGroupName", azureEnvironmentParameters.getResourceEncryptionParameters().getEncryptionKeyResourceGroupName());
-        assertEquals(PRIVATE, azureEnvironmentParameters.getAzureDatabaseParameters().getDatabaseSetup());
     }
 
     private void assertGcpParameters(GcpParametersDto gcpParametersDto, GcpEnvironmentParameters gcpEnvironmentParameters) {
@@ -341,11 +337,6 @@ public class EnvironmentResponseConverterTest {
                                         .withDiskEncryptionSetId("dummy-des-id")
                                         .withEncryptionKeyResourceGroupName("dummyResourceGroupName")
                                         .build())
-                        .withAzureDatabaseParametersDto(
-                                AzureDatabaseParametersDto.builder()
-                                        .withDatabaseSetup(DatabaseSetup.PRIVATE)
-                                        .build()
-                        )
                         .build())
                 .build();
     }

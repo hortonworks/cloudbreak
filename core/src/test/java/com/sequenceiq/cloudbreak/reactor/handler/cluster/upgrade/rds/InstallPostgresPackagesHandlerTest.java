@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsService;
@@ -49,7 +50,7 @@ class InstallPostgresPackagesHandlerTest {
         when(event.getData()).thenReturn(request);
 
         Selectable result = underTest.doAccept(event);
-        verify(upgradeRdsService).installPostgresPackages(STACK_ID);
+        verify(upgradeRdsService).installPostgresPackages(STACK_ID, MajorVersion.VERSION_11);
         assertThat(result.selector()).isEqualTo("UPGRADERDSINSTALLPOSTGRESPACKAGESRESULT");
     }
 
@@ -57,10 +58,11 @@ class InstallPostgresPackagesHandlerTest {
     void orchestrationException() throws CloudbreakOrchestratorException {
         UpgradeRdsInstallPostgresPackagesRequest request = new UpgradeRdsInstallPostgresPackagesRequest(STACK_ID, TARGET_MAJOR_VERSION);
         when(event.getData()).thenReturn(request);
-        doThrow(new CloudbreakOrchestratorFailedException("salt error")).when(upgradeRdsService).installPostgresPackages(eq(STACK_ID));
+        doThrow(new CloudbreakOrchestratorFailedException("salt error"))
+                .when(upgradeRdsService).installPostgresPackages(eq(STACK_ID), eq(MajorVersion.VERSION_11));
 
         Selectable result = underTest.doAccept(event);
-        verify(upgradeRdsService).installPostgresPackages(STACK_ID);
+        verify(upgradeRdsService).installPostgresPackages(STACK_ID, MajorVersion.VERSION_11);
         assertThat(result.selector()).isEqualTo("UPGRADERDSINSTALLPOSTGRESPACKAGESRESULT");
         assertThat(result).isInstanceOf(UpgradeRdsInstallPostgresPackagesResult.class);
         verify(upgradeRdsService).handleInstallPostgresPackagesError(eq(STACK_ID), eq("11"), eq("salt error"));

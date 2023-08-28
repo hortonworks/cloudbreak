@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
@@ -44,6 +45,10 @@ public class RdsUpgradeOrchestratorService {
     private static final String PG11_INSTALL_STATE = "postgresql/pg11-install";
 
     private static final String PG11_ALTERNATIVES_STATE = "postgresql/pg11-alternatives";
+
+    private static final String PG14_INSTALL_STATE = "postgresql/pg14-install";
+
+    private static final String PG14_ALTERNATIVES_STATE = "postgresql/pg14-alternatives";
 
     private static final String UPGRADE_EMBEDDED_DATABASE = "postgresql/upgrade/embedded";
 
@@ -108,14 +113,16 @@ public class RdsUpgradeOrchestratorService {
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
-    public void installPostgresPackages(Long stackId) throws CloudbreakOrchestratorException {
-        OrchestratorStateParams stateParams = createStateParams(stackId, PG11_INSTALL_STATE, false);
+    public void installPostgresPackages(Long stackId, MajorVersion targetVersion) throws CloudbreakOrchestratorException {
+        String installSaltState = MajorVersion.VERSION_14.equals(targetVersion) ? PG14_INSTALL_STATE : PG11_INSTALL_STATE;
+        OrchestratorStateParams stateParams = createStateParams(stackId, installSaltState, false);
         LOGGER.debug("Calling installPostgresPackages with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
-    public void updatePostgresAlternatives(Long stackId) throws CloudbreakOrchestratorException {
-        OrchestratorStateParams stateParams = createStateParams(stackId, PG11_ALTERNATIVES_STATE, false);
+    public void updatePostgresAlternatives(Long stackId, MajorVersion targetVersion) throws CloudbreakOrchestratorException {
+        String alternativesSaltState = MajorVersion.VERSION_14.equals(targetVersion) ? PG14_ALTERNATIVES_STATE : PG11_ALTERNATIVES_STATE;
+        OrchestratorStateParams stateParams = createStateParams(stackId, alternativesSaltState, false);
         LOGGER.debug("Calling updatePostgresAlternatives with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
