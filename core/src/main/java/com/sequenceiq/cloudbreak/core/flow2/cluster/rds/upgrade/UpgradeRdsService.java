@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -97,9 +98,9 @@ public class UpgradeRdsService {
         rdsUpgradeOrchestratorService.restoreRdsData(stackId, targetVersion);
     }
 
-    public void installPostgresPackages(Long stackId) throws CloudbreakOrchestratorException {
-        rdsUpgradeOrchestratorService.installPostgresPackages(stackId);
-        rdsUpgradeOrchestratorService.updatePostgresAlternatives(stackId);
+    public void installPostgresPackages(Long stackId, MajorVersion targetVersion) throws CloudbreakOrchestratorException {
+        rdsUpgradeOrchestratorService.installPostgresPackages(stackId, targetVersion);
+        rdsUpgradeOrchestratorService.updatePostgresAlternatives(stackId, targetVersion);
     }
 
     public void handleInstallPostgresPackagesError(Long stackId, String version, String exception) {
