@@ -373,6 +373,10 @@ public class AwsCredentialConnectorTest {
         Map<PolicyType, String> rangerAuditJson = Map.of(PolicyType.PUBLIC, "testRangerAuditJson");
         Map<PolicyType, String> rangeRazJson = Map.of(PolicyType.PUBLIC, "testRangeRazJson");
         Map<PolicyType, String> dataLakeAdminJson = Map.of(PolicyType.PUBLIC, "testDataLakeAdminJson");
+        Map<PolicyType, String> logPolicyJson = Map.of(PolicyType.PUBLIC, "testlogPolicyJson");
+        Map<PolicyType, String> datalakeBackupPolicyJson = Map.of(PolicyType.PUBLIC, "testdatalakeBackupPolicyJson");
+        Map<PolicyType, String> datalakeRestorePolicyJson = Map.of(PolicyType.PUBLIC, "testdatalakeRestorePolicyJson");
+        Map<PolicyType, String> idbrokerPolicyJson = Map.of(PolicyType.PUBLIC, "testIdbrokerPolicyJson");
 
         when(awsPlatformParameters.getCredentialPoliciesJson()).thenReturn(credentialPoliciesJson);
         when(awsPlatformParameters.getAuditPoliciesJson()).thenReturn(auditPoliciesJson);
@@ -382,12 +386,16 @@ public class AwsCredentialConnectorTest {
         when(awsPlatformParameters.getCdpRangerAuditS3PolicyJson()).thenReturn(rangerAuditJson);
         when(awsPlatformParameters.getCdpRangerRazS3PolicyJson()).thenReturn(rangeRazJson);
         when(awsPlatformParameters.getCdpDatalakeAdminS3PolicyJson()).thenReturn(dataLakeAdminJson);
+        when(awsPlatformParameters.getCdpLogPolicyJson()).thenReturn(logPolicyJson);
+        when(awsPlatformParameters.getCdpDatalakeBackupPolicyJson()).thenReturn(datalakeBackupPolicyJson);
+        when(awsPlatformParameters.getCdpDatalakeRestorePolicyJson()).thenReturn(datalakeRestorePolicyJson);
+        when(awsPlatformParameters.getCdpIdbrokerPolicyJson()).thenReturn(idbrokerPolicyJson);
 
         CredentialPrerequisitesResponse result = underTest.getPrerequisites(CloudContext.Builder.builder().build(), "externalId",
                 "auditExtenralId", "deploymentaddress", CredentialType.ENVIRONMENT);
 
         assertNotNull(result);
-        assertEquals(7, result.getAws().getPolicies().size());
+        assertEquals(11, result.getAws().getPolicies().size());
         assertTrue(result.getAws().getPolicies().containsKey("Audit"));
         assertTrue(result.getAws().getPolicies().containsKey("DynamoDB"));
         assertTrue(result.getAws().getPolicies().containsKey("Bucket_Access"));
@@ -395,7 +403,10 @@ public class AwsCredentialConnectorTest {
         assertTrue(result.getAws().getPolicies().containsKey("Ranger_Audit"));
         assertTrue(result.getAws().getPolicies().containsKey("Ranger_Raz"));
         assertTrue(result.getAws().getPolicies().containsKey("Datalake_Admin"));
-
+        assertTrue(result.getAws().getPolicies().containsKey("Datalake_Backup"));
+        assertTrue(result.getAws().getPolicies().containsKey("Idbroker_Assumer"));
+        assertTrue(result.getAws().getPolicies().containsKey("Datalake_Restore"));
+        assertTrue(result.getAws().getPolicies().containsKey("Log_Policy"));
     }
 
 }

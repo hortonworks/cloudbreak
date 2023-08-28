@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsConfusedDeputyException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsPermissionMissingException;
@@ -167,15 +168,19 @@ public class AwsCredentialConnector implements CredentialConnector {
     }
 
     private Map<String, String> collectNecessaryPolicies(boolean govCloud) {
-        return Map.of(
-                "Audit", awsPlatformParameters.getAuditPoliciesJson().get(getPolicyType(govCloud)),
-                "DynamoDB", awsPlatformParameters.getCdpDynamoDbPolicyJson().get(getPolicyType(govCloud)),
-                "Bucket_Access", awsPlatformParameters.getCdpBucketAccessPolicyJson().get(getPolicyType(govCloud)),
-                "Environment", awsPlatformParameters.getEnvironmentMinimalPoliciesJson().get(getPolicyType(govCloud)),
-                "Ranger_Audit", awsPlatformParameters.getCdpRangerAuditS3PolicyJson().get(getPolicyType(govCloud)),
-                "Ranger_Raz", awsPlatformParameters.getCdpRangerRazS3PolicyJson().get(getPolicyType(govCloud)),
-                "Datalake_Admin", awsPlatformParameters.getCdpDatalakeAdminS3PolicyJson().get(getPolicyType(govCloud))
-        );
+        return ImmutableMap.<String, String>builder()
+                .put("Audit", awsPlatformParameters.getAuditPoliciesJson().get(getPolicyType(govCloud)))
+                .put("DynamoDB", awsPlatformParameters.getCdpDynamoDbPolicyJson().get(getPolicyType(govCloud)))
+                .put("Bucket_Access", awsPlatformParameters.getCdpBucketAccessPolicyJson().get(getPolicyType(govCloud)))
+                .put("Environment", awsPlatformParameters.getEnvironmentMinimalPoliciesJson().get(getPolicyType(govCloud)))
+                .put("Ranger_Audit", awsPlatformParameters.getCdpRangerAuditS3PolicyJson().get(getPolicyType(govCloud)))
+                .put("Ranger_Raz", awsPlatformParameters.getCdpRangerRazS3PolicyJson().get(getPolicyType(govCloud)))
+                .put("Datalake_Admin", awsPlatformParameters.getCdpDatalakeAdminS3PolicyJson().get(getPolicyType(govCloud)))
+                .put("Datalake_Backup", awsPlatformParameters.getCdpDatalakeBackupPolicyJson().get(getPolicyType(govCloud)))
+                .put("Idbroker_Assumer", awsPlatformParameters.getCdpIdbrokerPolicyJson().get(getPolicyType(govCloud)))
+                .put("Datalake_Restore", awsPlatformParameters.getCdpDatalakeRestorePolicyJson().get(getPolicyType(govCloud)))
+                .put("Log_Policy", awsPlatformParameters.getCdpLogPolicyJson().get(getPolicyType(govCloud)))
+                .build();
     }
 
     private CDPServicePolicyVerificationResponses verifyIamRoleIsAssumable(CloudCredential cloudCredential,

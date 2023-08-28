@@ -92,6 +92,12 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private Map<PolicyType, String> cdpRangerRazS3PolicyJson;
 
+    private Map<PolicyType, String> cdpIdbrokerPolicyJson;
+
+    private Map<PolicyType, String> cdpDatalakeBackupPolicyJson;
+
+    private Map<PolicyType, String> cdpDatalakeRestorePolicyJson;
+
     @PostConstruct
     public void init() {
         credentialPoliciesJson = initCBPolicyJson();
@@ -104,6 +110,9 @@ public class AwsPlatformParameters implements PlatformParameters {
         cdpRangerAuditS3PolicyJson = initCdpRangerAuditS3PolicyJson();
         cdpRangerRazS3PolicyJson = initCdpRangerRazS3PolicyJson();
         cdpDatalakeAdminS3PolicyJson = initCdpDatalakeAdminS3PolicyJson();
+        cdpIdbrokerPolicyJson = initCdpIdbrokerAssumerPolicyJson();
+        cdpDatalakeBackupPolicyJson = initCdpDatalakeBackupPolicyJson();
+        cdpDatalakeRestorePolicyJson = initCdpDatalakeRestorePolicyJson();
     }
 
     @Override
@@ -230,6 +239,18 @@ public class AwsPlatformParameters implements PlatformParameters {
         return cdpRangerRazS3PolicyJson;
     }
 
+    public Map<PolicyType, String> getCdpIdbrokerPolicyJson() {
+        return cdpIdbrokerPolicyJson;
+    }
+
+    public Map<PolicyType, String> getCdpDatalakeBackupPolicyJson() {
+        return cdpDatalakeBackupPolicyJson;
+    }
+
+    public Map<PolicyType, String> getCdpDatalakeRestorePolicyJson() {
+        return cdpDatalakeRestorePolicyJson;
+    }
+
     private VmRecommendations initVmRecommendations() {
         VmRecommendations result = null;
         String vmRecommendation = resourceDefinition("vm-recommendation");
@@ -285,6 +306,21 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private Map<PolicyType, String> initCdpRangerRazS3PolicyJson() {
         String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "cdp-ranger-raz-s3-policy");
+        return getPolicyJson(resourceDefinition);
+    }
+
+    private Map<PolicyType, String> initCdpDatalakeBackupPolicyJson() {
+        String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "datalake-backup-policy");
+        return getPolicyJson(resourceDefinition);
+    }
+
+    private Map<PolicyType, String> initCdpDatalakeRestorePolicyJson() {
+        String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "datalake-restore-policy");
+        return getPolicyJson(resourceDefinition);
+    }
+
+    private Map<PolicyType, String> initCdpIdbrokerAssumerPolicyJson() {
+        String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "cdp-idbroker-assume-role-policy");
         return getPolicyJson(resourceDefinition);
     }
 
