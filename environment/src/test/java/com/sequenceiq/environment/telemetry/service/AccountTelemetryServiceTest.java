@@ -3,10 +3,13 @@ package com.sequenceiq.environment.telemetry.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
+import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.environment.configuration.telemetry.AccountTelemetryConfig;
 import com.sequenceiq.environment.telemetry.domain.AccountTelemetry;
 import com.sequenceiq.environment.telemetry.repository.AccountTelemetryRepository;
@@ -143,7 +147,7 @@ public class AccountTelemetryServiceTest {
     public void testDefaultRules() {
         // GIVEN
         // WHEN
-        AccountTelemetry result = underTest.createDefaultAccuontTelemetry();
+        AccountTelemetry result = underTest.createDefaultAccountTelemetry();
         // THEN
         for (AnonymizationRule rule : result.getRules()) {
             testPatternWithOutput(rule, "str myemail@email.com", "email");
@@ -153,6 +157,62 @@ public class AccountTelemetryServiceTest {
             testPatternWithOutput(rule, "cdpHashedPassword='{SHA512}abcdef'", "[CDP");
         }
         assertThat(result.getFeatures().getClusterLogsCollection().getEnabled()).isEqualTo(false);
+    }
+
+    @Test
+    public void testWorkloadAnalyticsEnabledByDefault() {
+        AccountTelemetry accountTelemetry = underTest.getOrDefault("account-id");
+        assertEquals(Boolean.TRUE, accountTelemetry.getFeatures().getWorkloadAnalytics().getEnabled());
+    }
+
+    @Test
+    public void testWorkloadAnalyticsIfFeaturesAreMissing() {
+        when(accountTelemetryRepository.findByAccountId(any())).thenReturn(Optional.of(new AccountTelemetry()));
+
+        AccountTelemetry accountTelemetry = underTest.getOrDefault("account-id");
+        assertEquals(Boolean.TRUE, accountTelemetry.getFeatures().getWorkloadAnalytics().getEnabled());
+    }
+
+    @Test
+    public void testWorkloadAnalyticsAlwaysOverwritten() {
+        AccountTelemetry accountTelemetryInDatabase = createAccountTelemetry(false, false, false);
+
+        when(accountTelemetryRepository.findByAccountId(any())).thenReturn(Optional.of(accountTelemetryInDatabase));
+
+        AccountTelemetry accountTelemetry = underTest.getOrDefault("account-id");
+        assertEquals(Boolean.TRUE, accountTelemetry.getFeatures().getWorkloadAnalytics().getEnabled());
+    }
+
+    @Test
+    public void testUpdateAccountTelemetry() {
+        AccountTelemetry accountTelemetryInDatabase = createAccountTelemetry(false, false, false);
+
+        when(accountTelemetryRepository.findByAccountId(any())).thenReturn(Optional.of(accountTelemetryInDatabase));
+
+        Features newFeatures = new Features();
+        newFeatures.addWorkloadAnalytics(true);
+        newFeatures.addClusterLogsCollection(true);
+        newFeatures.addMonitoring(true);
+
+        Features updatedFeatures = underTest.updateFeatures("account-id", newFeatures);
+        assertEquals(true, updatedFeatures.getMonitoring().getEnabled());
+        assertEquals(true, updatedFeatures.getClusterLogsCollection().getEnabled());
+        assertEquals(true, updatedFeatures.getWorkloadAnalytics().getEnabled());
+    }
+
+    @Test
+    public void testSelectiveUpdateAccountTelemetry() {
+        AccountTelemetry accountTelemetryInDatabase = createAccountTelemetry(false, false, false);
+
+        when(accountTelemetryRepository.findByAccountId(any())).thenReturn(Optional.of(accountTelemetryInDatabase));
+
+        Features newFeatures = new Features();
+        newFeatures.addWorkloadAnalytics(true);
+
+        Features updatedFeatures = underTest.updateFeatures("account-id", newFeatures);
+        assertEquals(false, updatedFeatures.getMonitoring().getEnabled());
+        assertEquals(false, updatedFeatures.getClusterLogsCollection().getEnabled());
+        assertEquals(true, updatedFeatures.getWorkloadAnalytics().getEnabled());
     }
 
     private void testPatternWithOutput(AnonymizationRule rule, String input, String startsWith) {
@@ -182,6 +242,17 @@ public class AccountTelemetryServiceTest {
         rule.setValue(pattern);
         rule.setReplacement(replacement);
         return rule;
+    }
+
+    private AccountTelemetry createAccountTelemetry(boolean monitoring, boolean workloadAnalytics, boolean logCollection) {
+        Features features = new Features();
+        features.addWorkloadAnalytics(workloadAnalytics);
+        features.addClusterLogsCollection(logCollection);
+        features.addMonitoring(monitoring);
+
+        AccountTelemetry accountTelemetry = new AccountTelemetry();
+        accountTelemetry.setFeatures(features);
+        return accountTelemetry;
     }
 
 }

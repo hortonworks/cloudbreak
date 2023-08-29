@@ -57,7 +57,7 @@ public class AccountTelemetryController extends NotificationController implement
     @Override
     @DisableCheckPermissions
     public AccountTelemetryResponse getDefault() {
-        return accountTelemetryConverter.convert(accountTelemetryService.createDefaultAccuontTelemetry());
+        return accountTelemetryConverter.convert(accountTelemetryService.createDefaultAccountTelemetry());
     }
 
     @Override

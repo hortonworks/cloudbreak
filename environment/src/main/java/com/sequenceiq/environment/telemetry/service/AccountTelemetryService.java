@@ -63,8 +63,20 @@ public class AccountTelemetryService {
     public AccountTelemetry getOrDefault(String accountId) {
         try {
             LOGGER.debug("Get account telemetry for account: {}", accountId);
-            Optional<AccountTelemetry> telemetry = accountTelemetryRepository.findByAccountId(accountId);
-            return telemetry.orElse(createDefaultAccuontTelemetry());
+            Optional<AccountTelemetry> optionalAccountTelemetry = accountTelemetryRepository.findByAccountId(accountId);
+            if (optionalAccountTelemetry.isPresent()) {
+                AccountTelemetry accountTelemetry = optionalAccountTelemetry.get();
+                Features features = accountTelemetry.getFeatures();
+                if (features == null) {
+                    features = new Features();
+                }
+                // Since it is always enabled on account level, we should set it true, once the UI is modified we can delete this part from the code
+                features.addWorkloadAnalytics(true);
+                accountTelemetry.setFeatures(features);
+                return accountTelemetry;
+            } else {
+                return createDefaultAccountTelemetry();
+            }
         } catch (DataIntegrityViolationException e) {
             throw new AccessDeniedException("Access denied", e);
         }
@@ -74,7 +86,7 @@ public class AccountTelemetryService {
         try {
             LOGGER.debug("Update account telemetry features for account: {}", accountId);
             Optional<AccountTelemetry> telemetryOpt = accountTelemetryRepository.findByAccountId(accountId);
-            AccountTelemetry telemetry = telemetryOpt.orElse(createDefaultAccuontTelemetry());
+            AccountTelemetry telemetry = telemetryOpt.orElse(createDefaultAccountTelemetry());
             Features features = telemetry.getFeatures();
             Features finalFeatures = null;
             if (features != null && newFeatures != null) {
@@ -111,7 +123,7 @@ public class AccountTelemetryService {
         }
     }
 
-    public AccountTelemetry createDefaultAccuontTelemetry() {
+    public AccountTelemetry createDefaultAccountTelemetry() {
         AccountTelemetry defaultTelemetry = new AccountTelemetry();
         List<AnonymizationRule> defaultEncodedRules = defaultRules
                 .stream()
@@ -123,6 +135,7 @@ public class AccountTelemetryService {
                 }).collect(Collectors.toList());
         Features defaultFeatures = new Features();
         defaultFeatures.addClusterLogsCollection(false);
+        defaultFeatures.addWorkloadAnalytics(true);
         defaultFeatures.addCloudStorageLogging(true);
         defaultTelemetry.setRules(defaultEncodedRules);
         defaultTelemetry.setFeatures(defaultFeatures);
