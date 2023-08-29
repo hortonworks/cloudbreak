@@ -29,6 +29,9 @@ public class SssdConfigProvider {
     @Value("${sssd.heartbeat.timeout}")
     private int heartbeatTimeout;
 
+    @Value("${sssd.nss.timeout}")
+    private int nssTimeout;
+
     @Inject
     private FreeIpaConfigProvider freeIpaConfigProvider;
 
@@ -54,6 +57,7 @@ public class SssdConfigProvider {
             sssdConfig.put("entryCacheTimeout", entryCacheTimeout);
             sssdConfig.put("memcacheTimeout", memcacheTimeout);
             sssdConfig.put("heartbeatTimeout", heartbeatTimeout);
+            sssdConfig.put("nssTimeout", nssTimeout);
             Map<String, Object> freeIpaConfig = freeIpaConfigProvider.createFreeIpaConfig(environmentCrn);
             return Map.of("sssd-ipa", new SaltPillarProperties("/sssd/ipa.sls",
                     Map.of("sssd-ipa", sssdConfig, "freeipa", freeIpaConfig)));

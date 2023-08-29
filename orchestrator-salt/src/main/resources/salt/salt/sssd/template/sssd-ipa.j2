@@ -9,6 +9,7 @@ domains = {{ pillar['sssd-ipa']['realm'] }}
 [nss]
 homedir_substring = /home
 memcache_timeout = {{ pillar['sssd-ipa']['memcacheTimeout'] }}
+timeout = {{ pillar['sssd-ipa']['nssTimeout'] | default(30, true) }}
 
 [domain/{{ pillar['sssd-ipa']['realm'] }}]
 cache_credentials = True

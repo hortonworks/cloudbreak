@@ -32,6 +32,8 @@ class SssdConfigProviderTest {
 
     private static final int HEARTBEAT_TIMEOUT = 60;
 
+    private static final int NSS_TIMEOUT = 30;
+
     private static final int DNS_TTL = 30;
 
     private static final String ENV_CRN = "envCrn";
@@ -50,6 +52,7 @@ class SssdConfigProviderTest {
         ReflectionTestUtils.setField(underTest, "entryCacheTimeout", ENTRY_CACHE_TIMEOUT);
         ReflectionTestUtils.setField(underTest, "memcacheTimeout", MEMCACHE_TIMEOUT);
         ReflectionTestUtils.setField(underTest, "heartbeatTimeout", HEARTBEAT_TIMEOUT);
+        ReflectionTestUtils.setField(underTest, "nssTimeout", NSS_TIMEOUT);
     }
 
     @Test
@@ -119,6 +122,7 @@ class SssdConfigProviderTest {
         assertEquals(ENTRY_CACHE_TIMEOUT, sssdConfig.get("entryCacheTimeout"));
         assertEquals(MEMCACHE_TIMEOUT, sssdConfig.get("memcacheTimeout"));
         assertEquals(HEARTBEAT_TIMEOUT, sssdConfig.get("heartbeatTimeout"));
+        assertEquals(NSS_TIMEOUT, sssdConfig.get("nssTimeout"));
 
         Map<String, Object> freeIpaConfigResult = (Map<String, Object>) properties.get("freeipa");
         assertEquals(freeIpaConfig, freeIpaConfigResult);
