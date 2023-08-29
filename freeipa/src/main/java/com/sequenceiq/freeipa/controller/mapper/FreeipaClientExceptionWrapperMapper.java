@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
+import com.sequenceiq.freeipa.client.FreeIpaClientBuildException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionWrapper;
 
 @Component
@@ -22,7 +23,11 @@ public class FreeipaClientExceptionWrapperMapper extends BaseExceptionMapper<Fre
 
     @Override
     public Status getResponseStatus(FreeIpaClientExceptionWrapper exception) {
-        return Status.INTERNAL_SERVER_ERROR;
+        if (exception.getWrappedException() != null && exception.getWrappedException() instanceof FreeIpaClientBuildException) {
+            return Status.BAD_GATEWAY;
+        } else {
+            return Status.INTERNAL_SERVER_ERROR;
+        }
     }
 
     @Override

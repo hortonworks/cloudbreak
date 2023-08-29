@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.client.ClusterProxyErrorRpcListener;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
+import com.sequenceiq.freeipa.client.FreeIpaClientBuildException;
 import com.sequenceiq.freeipa.client.FreeIpaClientBuilder;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaHostNotAvailableException;
@@ -212,7 +213,7 @@ public class FreeIpaClientFactory {
     private FreeIpaClientException createFreeIpaUnableToBuildClient(Exception e) {
         String message = CANT_BUILD_CLIENT_MSG + e.getLocalizedMessage();
         LOGGER.error(message);
-        return new FreeIpaClientException(message, e);
+        return new FreeIpaClientBuildException(message, e);
     }
 
     private RetryableFreeIpaClientException createFreeIpaUnableToBuildClient(RetryableFreeIpaClientException e) {
