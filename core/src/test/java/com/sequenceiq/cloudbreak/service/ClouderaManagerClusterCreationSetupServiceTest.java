@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -222,13 +223,13 @@ class ClouderaManagerClusterCreationSetupServiceTest {
         stack.setType(StackType.DATALAKE);
 
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(SOME_CDH_VERSION);
-        when(clouderaManagerProductsProvider.getCdhProducts(anySet())).thenReturn(cdhProduct);
+        when(clouderaManagerProductsProvider.getCdhProduct(anySet())).thenReturn(Optional.of(cdhProduct));
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster, cmRepoComponent,
                 productComponentList, imageComponent);
 
         assertVersionsMatch(clusterComponents, CM_VERSION, SOME_CDH_VERSION);
-        verify(clouderaManagerProductsProvider).getCdhProducts(anySet());
+        verify(clouderaManagerProductsProvider).getCdhProduct(anySet());
         verifyNoInteractions(parcelFilterService);
     }
 
