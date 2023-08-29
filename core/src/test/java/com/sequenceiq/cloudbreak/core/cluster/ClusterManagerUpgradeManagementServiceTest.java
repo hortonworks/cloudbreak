@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -69,6 +69,9 @@ public class ClusterManagerUpgradeManagementServiceTest {
     @Mock
     private ClusterManagerUpgradeService clusterManagerUpgradeService;
 
+    @Mock
+    private ClouderaManagerRepo clouderaManagerRepo;
+
     @InjectMocks
     private ClusterManagerUpgradeManagementService underTest;
 
@@ -81,10 +84,12 @@ public class ClusterManagerUpgradeManagementServiceTest {
 
     private static Stream<Arguments> cmVersions() {
         return Stream.of(
-                Arguments.of(CM_VERSION, CM_VERSION),
-                Arguments.of(CM_VERSION_WITH_P, CM_VERSION),
-                Arguments.of(CM_VERSION, CM_VERSION_WITH_P),
-                Arguments.of(CM_VERSION_WITH_P, CM_VERSION_WITH_P)
+                Arguments.of(CM_VERSION, CM_VERSION, false, false, 1),
+                Arguments.of(CM_VERSION, CM_VERSION, true, false, 1),
+                Arguments.of(CM_VERSION_WITH_P, CM_VERSION, false, true, 2),
+                Arguments.of(CM_VERSION_WITH_P, CM_VERSION, true, false, 1),
+                Arguments.of(CM_VERSION, CM_VERSION_WITH_P, false, true, 2),
+                Arguments.of(CM_VERSION_WITH_P, CM_VERSION_WITH_P, true, false, 1)
         );
     }
 
@@ -95,48 +100,55 @@ public class ClusterManagerUpgradeManagementServiceTest {
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(stackDto.getCluster()).thenReturn(cluster);
         when(cmServerQueryService.queryCmVersion(stackDto)).thenReturn(Optional.empty());
+        lenient().when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
     }
 
     @ParameterizedTest
     @MethodSource("cmVersions")
-    public void testUpgradeClusterManager(String versionOnHost, String versionInRepo) throws CloudbreakOrchestratorException, CloudbreakException {
-        ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
+    public void testUpgradeClusterManager(String versionOnHost, String versionInRepo, boolean rollingUpgradeEnabled, boolean stopServices,
+            int expectedClusterApiCalls) throws CloudbreakOrchestratorException, CloudbreakException {
         when(stackDto.getStack()).thenReturn(stack);
         when(clouderaManagerRepo.getFullVersion()).thenReturn(versionInRepo);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId())).thenReturn(clouderaManagerRepo);
         when(cmServerQueryService.queryCmVersion(stackDto)).thenReturn(Optional.of(OLD_CM_VERSION)).thenReturn(Optional.of(versionOnHost));
 
-        underTest.upgradeClusterManager(STACK_ID, true, true);
+        underTest.upgradeClusterManager(STACK_ID, rollingUpgradeEnabled);
 
+        if (stopServices) {
+            verify(clusterApiConnectors, times(expectedClusterApiCalls)).getConnector(stackDto);
+            verify(clusterApi).stopCluster(true);
+        }
+        if (!rollingUpgradeEnabled) {
+            verify(clusterApi).startCluster();
+        }
         verify(cmServerQueryService, times(2)).queryCmVersion(stackDto);
         verify(clusterUpgradeService).upgradeClusterManager(STACK_ID);
         verify(clusterManagerUpgradeService).upgradeClouderaManager(stackDto, clouderaManagerRepo);
     }
 
     @Test
-    public void testUpgradeClusterManagerVersionIsDifferent() throws CloudbreakOrchestratorException {
-        ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
+    public void testUpgradeClusterManagerVersionIsDifferentAfterTheUpgrade() throws CloudbreakOrchestratorException {
         when(clouderaManagerRepo.getFullVersion()).thenReturn(CM_VERSION);
         when(stackDto.getStack()).thenReturn(stack);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId())).thenReturn(clouderaManagerRepo);
         when(cmServerQueryService.queryCmVersion(stackDto)).thenReturn(Optional.of(OLD_CM_VERSION)).thenReturn(Optional.of("wrong"));
 
-        assertThrows(CloudbreakServiceException.class, () -> underTest.upgradeClusterManager(STACK_ID, true, true));
+        assertThrows(CloudbreakServiceException.class, () -> underTest.upgradeClusterManager(STACK_ID, true));
 
         verify(cmServerQueryService, times(2)).queryCmVersion(stackDto);
         verify(clusterUpgradeService).upgradeClusterManager(STACK_ID);
         verify(clusterManagerUpgradeService).upgradeClouderaManager(stackDto, clouderaManagerRepo);
+        verifyNoInteractions(clusterApiConnectors);
     }
 
     @Test
     public void testUpgradeClusterManagerShouldSkipUpgradeWhenTheRequiredCmVersionIsAlreadyInstalled()
             throws CloudbreakOrchestratorException, CloudbreakException {
-        ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
         when(clouderaManagerRepo.getFullVersion()).thenReturn(CM_VERSION);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId())).thenReturn(clouderaManagerRepo);
         when(cmServerQueryService.queryCmVersion(stackDto)).thenReturn(Optional.of(CM_VERSION));
 
-        underTest.upgradeClusterManager(STACK_ID, true, true);
+        underTest.upgradeClusterManager(STACK_ID, true);
 
         verify(clusterComponentConfigProvider).getClouderaManagerRepoDetails(cluster.getId());
         verify(cmServerQueryService).queryCmVersion(stackDto);

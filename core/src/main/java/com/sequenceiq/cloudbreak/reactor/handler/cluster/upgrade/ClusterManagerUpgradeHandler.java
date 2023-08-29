@@ -39,8 +39,7 @@ public class ClusterManagerUpgradeHandler extends ExceptionCatcherEventHandler<C
         LOGGER.debug("Accepting Cluster Manager upgrade event..");
         ClusterManagerUpgradeRequest request = event.getData();
         try {
-            clusterManagerUpgradeManagementService.upgradeClusterManager(request.getResourceId(), request.isRuntimeServicesStartNeeded(),
-                    request.isRollingUpgradeEnabled());
+            clusterManagerUpgradeManagementService.upgradeClusterManager(request.getResourceId(), request.isRollingUpgradeEnabled());
             return new ClusterManagerUpgradeSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.info("Cluster Manager upgrade event failed", e);
