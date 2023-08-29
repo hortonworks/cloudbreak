@@ -186,6 +186,7 @@
         "ec2:ModifyInstanceAttribute",
         "ec2:CreateLaunchTemplateVersion",
         "ec2:ModifyLaunchTemplate",
+        "ec2:DescribeLaunchTemplateVersions",
         "ec2:DescribeVolumeAttribute",
         "ec2:DescribeVolumesModifications",
         "ec2:DescribeVolumeStatus"
