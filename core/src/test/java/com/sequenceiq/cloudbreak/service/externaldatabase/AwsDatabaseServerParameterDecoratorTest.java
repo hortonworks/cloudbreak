@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -16,14 +17,19 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackReque
 
 class AwsDatabaseServerParameterDecoratorTest {
 
-    private AwsDatabaseServerParameterDecorator underTest = new AwsDatabaseServerParameterDecorator();
+    private AwsDatabaseServerParameterDecorator underTest;
+
+    @BeforeEach
+    void setUp() {
+        underTest = new AwsDatabaseServerParameterDecorator();
+    }
 
     @ParameterizedTest
     @MethodSource("availabilityTypes")
     void setParameters(DatabaseAvailabilityType availabilityType, boolean needsHA) {
         DatabaseServerParameter serverParameter = DatabaseServerParameter.builder().withAvailabilityType(availabilityType).build();
         DatabaseServerV4StackRequest request = new DatabaseServerV4StackRequest();
-        underTest.setParameters(request, serverParameter);
+        underTest.setParameters(request, serverParameter, null, false);
         assertThat(request.getAws().getMultiAZ()).isEqualTo(Boolean.toString(needsHA));
     }
 
@@ -40,4 +46,5 @@ class AwsDatabaseServerParameterDecoratorTest {
                 Arguments.of(DatabaseAvailabilityType.HA, true)
         );
     }
+
 }

@@ -112,15 +112,16 @@ public class AzureRegionProvider {
             AzureRegionCoordinateSpecifications regionCoordinateSpecifications = JsonUtil.readValue(displayNames, AzureRegionCoordinateSpecifications.class);
             for (AzureRegionCoordinateSpecification regionCoordinateSpecification : regionCoordinateSpecifications.getItems()) {
                 regionCoordinates.put(region(regionCoordinateSpecification.getName()),
-                        coordinate(
-                                regionCoordinateSpecification.getLongitude(),
-                                regionCoordinateSpecification.getLatitude(),
-                                RegionUtil.findByLabelOrName(regionCoordinateSpecification.getName()).label(),
-                                RegionUtil.findByLabelOrName(regionCoordinateSpecification.getName()).name(),
-                                regionCoordinateSpecification.isK8sSupported(),
-                                regionCoordinateSpecification.getEntitlements(),
-                                regionCoordinateSpecification.getFlexible().isSameZoneEnabled(),
-                                regionCoordinateSpecification.getFlexible().isZoneRedundantEnabled()));
+                        AzureCoordinate.AzureCoordinateBuilder.builder()
+                                .longitude(regionCoordinateSpecification.getLongitude())
+                                .latitude(regionCoordinateSpecification.getLatitude())
+                                .displayName(RegionUtil.findByLabelOrName(regionCoordinateSpecification.getName()).label())
+                                .key(RegionUtil.findByLabelOrName(regionCoordinateSpecification.getName()).name())
+                                .k8sSupported(regionCoordinateSpecification.isK8sSupported())
+                                .entitlements(regionCoordinateSpecification.getEntitlements())
+                                .flexibleSameZoneEnabled(regionCoordinateSpecification.getFlexible().isSameZoneEnabled())
+                                .flexibleZoneRedundantEnabled(regionCoordinateSpecification.getFlexible().isZoneRedundantEnabled())
+                                .build());
             }
         } catch (IOException ignored) {
             LOGGER.error("Failed to read enabled Azure regions from file.");

@@ -269,7 +269,7 @@ public class DatabaseServiceTest {
         return new DatabaseServerParameterSetter() {
             @Override
             public void setParameters(DatabaseServerV4StackRequest request, SdxCluster sdxCluster,
-                DetailedEnvironmentResponse environmentResponse, String userCrn) {
+                    DetailedEnvironmentResponse environmentResponse, String userCrn) {
                 request.setAws(new AwsDatabaseServerV4Parameters());
             }
 

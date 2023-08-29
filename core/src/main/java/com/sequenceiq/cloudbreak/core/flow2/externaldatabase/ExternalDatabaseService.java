@@ -299,7 +299,7 @@ public class ExternalDatabaseService {
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase(Locale.US));
         String databaseEngineVersion = stack.getExternalDatabaseEngineVersion();
         req.setDatabaseServer(getDatabaseServerStackRequest(cloudPlatform, stack.getExternalDatabaseCreationType(), databaseEngineVersion,
-                getAttributes(stack.getDatabase())));
+                getAttributes(stack.getDatabase()), environment, stack.isMultiAz()));
         req.setClusterCrn(stack.getResourceCrn());
         req.setTags(getUserDefinedTags(stack));
         configureSslEnforcement(req, cloudPlatform, stack.getCluster());
@@ -362,7 +362,7 @@ public class ExternalDatabaseService {
     }
 
     private DatabaseServerV4StackRequest getDatabaseServerStackRequest(CloudPlatform cloudPlatform, DatabaseAvailabilityType externalDatabase,
-            String databaseEngineVersion, Map<String, Object> attributes) {
+            String databaseEngineVersion, Map<String, Object> attributes, DetailedEnvironmentResponse environment, boolean multiAz) {
         DatabaseStackConfig databaseStackConfig = dbConfigs.get(new DatabaseStackConfigKey(cloudPlatform,
                 parameterDecoratorMap.get(cloudPlatform).getDatabaseType(attributes).orElse(null)));
         if (databaseStackConfig == null) {
@@ -377,7 +377,7 @@ public class ExternalDatabaseService {
                 .withEngineVersion(databaseEngineVersion)
                 .withAttributes(attributes)
                 .build();
-        parameterDecoratorMap.get(cloudPlatform).setParameters(request, serverParameter);
+        parameterDecoratorMap.get(cloudPlatform).setParameters(request, serverParameter, environment, multiAz);
         if (Objects.isNull(request.getCloudPlatform())) {
             request.setCloudPlatform(cloudPlatform);
         }
@@ -397,8 +397,8 @@ public class ExternalDatabaseService {
                 .run(() -> databaseObtainerService.obtainAttemptResult(cluster, databaseOperation, databaseCrn, cancellable));
     }
 
-    public DatabaseServerV4StackRequest migrateDatabaseSettingsIfNeeded(StackDto stack, TargetMajorVersion majorVersion) {
-
+    public DatabaseServerV4StackRequest migrateDatabaseSettingsIfNeeded(StackDto stack, TargetMajorVersion majorVersion,
+            DetailedEnvironmentResponse environment) {
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(stack.getCloudPlatform());
         Versioned currentVersion = stack::getExternalDatabaseEngineVersion;
         Versioned targetVersion = majorVersion::getMajorVersion;
@@ -410,14 +410,13 @@ public class ExternalDatabaseService {
         if (cloudPlatform == CloudPlatform.AZURE
                 && upgradeTargetVersionImpliesFlexibleServerMigration
                 && currentVersionImpliesFlexibleServerMigration) {
-
             Map<String, Object> attributes = getAttributes(stack.getDatabase());
             attributes.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name());
             DatabaseServerV4StackRequest modifiedRequest = getDatabaseServerStackRequest(
                     cloudPlatform,
                     stack.getExternalDatabaseCreationType(),
                     majorVersion.getMajorVersion(),
-                    attributes);
+                    attributes, environment, stack.getStack().isMultiAz());
             LOGGER.debug("Migration resulted in request: {}", modifiedRequest);
             return modifiedRequest;
         }

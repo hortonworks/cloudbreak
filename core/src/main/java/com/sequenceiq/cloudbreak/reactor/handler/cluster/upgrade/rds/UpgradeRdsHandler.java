@@ -23,9 +23,11 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerResult;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeOrchestratorService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -51,6 +53,9 @@ public class UpgradeRdsHandler extends ExceptionCatcherEventHandler<UpgradeRdsUp
 
     @Inject
     private TargetMajorVersionToUpgradeTargetVersionConverter targetMajorVersionToUpgradeTargetVersionConverter;
+
+    @Inject
+    private EnvironmentClientService environmentClientService;
 
     @Override
     public String selector() {
@@ -98,7 +103,8 @@ public class UpgradeRdsHandler extends ExceptionCatcherEventHandler<UpgradeRdsUp
     private UpgradeRdsUpgradeDatabaseServerResult upgradeExternalDatabase(UpgradeRdsUpgradeDatabaseServerRequest request, Long stackId, StackDto stackDto) {
         TargetMajorVersion targetMajorVersion = request.getVersion();
         UpgradeTargetMajorVersion upgradeTargetMajorVersion = targetMajorVersionToUpgradeTargetVersionConverter.convert(targetMajorVersion);
-        DatabaseServerV4StackRequest migratedRequest = databaseService.migrateDatabaseSettingsIfNeeded(stackDto, targetMajorVersion);
+        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stackDto.getEnvironmentCrn());
+        DatabaseServerV4StackRequest migratedRequest = databaseService.migrateDatabaseSettingsIfNeeded(stackDto, targetMajorVersion, environment);
         databaseService.upgradeDatabase(stackDto.getCluster(), upgradeTargetMajorVersion, migratedRequest);
         return new UpgradeRdsUpgradeDatabaseServerResult(stackId, request.getVersion());
     }

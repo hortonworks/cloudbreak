@@ -169,6 +169,7 @@ class ExternalDatabaseServiceTest {
         environmentResponse.setCrn(ENV_CRN);
         dbConfigs.put(new DatabaseStackConfigKey(CLOUD_PLATFORM, null), new DatabaseStackConfig(INSTANCE_TYPE, VENDOR, VOLUME_SIZE));
         lenient().when(parameterDecoratorMap.get(CLOUD_PLATFORM)).thenReturn(dbServerParameterDecorator);
+        databaseServerV4StackRequest = new DatabaseServerV4StackRequest();
     }
 
     @Test
@@ -194,6 +195,7 @@ class ExternalDatabaseServiceTest {
         stack.setResourceCrn(CLUSTER_CRN);
         stack.setDatabase(createDatabase(availability));
         stack.setCluster(cluster);
+        stack.setMultiAz(true);
         when(redbeamsClient.getByClusterCrn(nullable(String.class), nullable(String.class))).thenReturn(null);
         when(redbeamsClient.create(any())).thenReturn(createResponse);
         when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
@@ -204,7 +206,7 @@ class ExternalDatabaseServiceTest {
         verify(redbeamsClient).getByClusterCrn(ENV_CRN, CLUSTER_CRN);
         verify(redbeamsClient).create(any(AllocateDatabaseServerV4Request.class));
         verify(cluster).setDatabaseServerCrn(RDBMS_CRN);
-        verify(dbServerParameterDecorator).setParameters(any(), serverParameterCaptor.capture());
+        verify(dbServerParameterDecorator).setParameters(any(), serverParameterCaptor.capture(), eq(environmentResponse), eq(true));
         verify(clusterRepository).save(cluster);
         DatabaseServerParameter paramValue = serverParameterCaptor.getValue();
         assertThat(paramValue.getAvailabilityType()).isEqualTo(availability);
@@ -234,7 +236,7 @@ class ExternalDatabaseServiceTest {
         verify(redbeamsClient).getByClusterCrn(ENV_CRN, CLUSTER_CRN);
         verify(redbeamsClient).create(any(AllocateDatabaseServerV4Request.class));
         verify(cluster).setDatabaseServerCrn(RDBMS_CRN);
-        verify(dbServerParameterDecorator).setParameters(any(), serverParameterCaptor.capture());
+        verify(dbServerParameterDecorator).setParameters(any(), serverParameterCaptor.capture(), eq(environmentResponse), eq(false));
         verify(clusterRepository).save(cluster);
         DatabaseServerParameter paramValue = serverParameterCaptor.getValue();
         assertThat(paramValue.getAvailabilityType()).isEqualTo(availability);
@@ -274,7 +276,7 @@ class ExternalDatabaseServiceTest {
 
         verify(redbeamsClient).getByClusterCrn(ENV_CRN, CLUSTER_CRN);
         verify(redbeamsClient, never()).create(any(AllocateDatabaseServerV4Request.class));
-        verify(dbServerParameterDecorator, never()).setParameters(any(), any());
+        verify(dbServerParameterDecorator, never()).setParameters(any(), any(), any(), anyBoolean());
         verify(cluster).setDatabaseServerCrn(RDBMS_CRN);
         verify(clusterRepository).save(cluster);
     }
@@ -317,7 +319,7 @@ class ExternalDatabaseServiceTest {
 
         ArgumentCaptor<DatabaseServerV4StackRequest> databaseServerCaptor = ArgumentCaptor.forClass(DatabaseServerV4StackRequest.class);
         ArgumentCaptor<DatabaseServerParameter> serverParameterCaptor = ArgumentCaptor.forClass(DatabaseServerParameter.class);
-        verify(dbServerParameterDecorator).setParameters(databaseServerCaptor.capture(), serverParameterCaptor.capture());
+        verify(dbServerParameterDecorator).setParameters(databaseServerCaptor.capture(), serverParameterCaptor.capture(), eq(environmentResponse), eq(false));
 
         DatabaseServerParameter serverParameter = serverParameterCaptor.getValue();
         assertThat(serverParameter).isNotNull();
@@ -555,19 +557,26 @@ class ExternalDatabaseServiceTest {
         when(stack.getCloudPlatform()).thenReturn(platform);
         when(majorVersion.getMajorVersion()).thenReturn(target);
         when(stack.getExternalDatabaseEngineVersion()).thenReturn(current);
+        if (migrationRequired) {
+            when(stack.getExternalDatabaseCreationType()).thenReturn(DatabaseAvailabilityType.HA);
+            Stack realStack = new Stack();
+            realStack.setMultiAz(true);
+            when(stack.getStack()).thenReturn(realStack);
+        }
 
-        DatabaseServerV4StackRequest result = underTest.migrateDatabaseSettingsIfNeeded(stack, majorVersion);
+        DatabaseServerV4StackRequest result = underTest.migrateDatabaseSettingsIfNeeded(stack, majorVersion, environmentResponse);
 
         if (migrationRequired) {
             DatabaseServerParameter serverParameter = DatabaseServerParameter.builder()
                     .withEngineVersion(target)
                     .withAttributes(Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name()))
+                    .withAvailabilityType(DatabaseAvailabilityType.HA)
                     .build();
             assertNotNull(result);
-            verify(dbServerParameterDecorator).setParameters(eq(result), eq(serverParameter));
+            verify(dbServerParameterDecorator).setParameters(eq(result), eq(serverParameter), eq(environmentResponse), eq(true));
         } else {
             assertNull(result);
-            verify(dbServerParameterDecorator, never()).setParameters(any(), any());
+            verify(dbServerParameterDecorator, never()).setParameters(any(), any(), any(), anyBoolean());
         }
     }
 

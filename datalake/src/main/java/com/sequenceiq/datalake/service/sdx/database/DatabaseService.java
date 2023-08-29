@@ -220,7 +220,7 @@ public class DatabaseService {
     }
 
     private DatabaseServerV4StackRequest getDatabaseServerRequest(CloudPlatform cloudPlatform, SdxCluster sdxCluster,
-        DetailedEnvironmentResponse env, String initiatorUserCrn) {
+            DetailedEnvironmentResponse env, String initiatorUserCrn) {
         DatabaseConfig databaseConfig = dbConfigs.get(new DatabaseConfigKey(cloudPlatform, sdxCluster.getClusterShape(),
                 databaseServerParameterSetterMap.get(cloudPlatform).getDatabaseType(sdxCluster.getSdxDatabase()).orElse(null)));
         if (databaseConfig == null) {

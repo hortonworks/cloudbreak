@@ -21,7 +21,7 @@ public class DatabaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter
         Map<String, List<String>> includedRegions = new HashMap<>();
         for (Map.Entry<DatabaseAvailabiltyType, Collection<Region>> databaseEntry : source.getEnabledRegions().entrySet()) {
             String databaseAvailabilityType = databaseEntry.getKey().getValue();
-            if (includedRegions.containsKey(databaseAvailabilityType)) {
+            if (!includedRegions.containsKey(databaseAvailabilityType)) {
                 includedRegions.put(databaseAvailabilityType, new ArrayList<>());
             }
 

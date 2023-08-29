@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.DatabaseAvailabiltyType.databaseAvailabiltyType;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.SAME_ZONE;
@@ -305,14 +304,16 @@ class AzurePlatformResourcesTest {
     }
 
     private AzureCoordinate azureCoordinate(String name, boolean flexibleSameZoneEnabled, boolean flexibleZoneRedundantEnabled) {
-        return coordinate("1",
-                "1",
-                name,
-                name + "key",
-                false,
-                List.of(),
-                flexibleSameZoneEnabled,
-                flexibleZoneRedundantEnabled);
+        return AzureCoordinate.AzureCoordinateBuilder.builder()
+                .longitude("1")
+                .latitude("1")
+                .displayName(name)
+                .key(name + "key")
+                .k8sSupported(false)
+                .entitlements(List.of())
+                .flexibleSameZoneEnabled(flexibleSameZoneEnabled)
+                .flexibleZoneRedundantEnabled(flexibleZoneRedundantEnabled)
+                .build();
     }
 
     private VirtualMachineSize createVirtualMachineSize(String name, int resourceDiskSizeInMB) {
