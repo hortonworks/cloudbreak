@@ -22,7 +22,7 @@ public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerA
 
     private static final int[] ERROR_CODES = {502, 503, 504};
 
-    private static final String[] CONNECTION_MESSAGES = {"Connection refused", "connect timed out"};
+    private static final String[] CONNECTION_MESSAGES = {"Connection refused", "connect timed out", "Connection reset"};
 
     public ClouderaManagerStartupListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
             ClusterEventService clusterEventService) {
