@@ -12,10 +12,8 @@ import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
-import com.sequenceiq.environment.parameter.dto.DatabaseSetup;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupCreation;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
-import com.sequenceiq.environment.parameters.dao.converter.DatabaseSetupConverter;
 import com.sequenceiq.environment.parameters.dao.converter.ResourceGroupCreationConverter;
 import com.sequenceiq.environment.parameters.dao.converter.ResourceGroupUsagePatternConverter;
 
@@ -33,10 +31,6 @@ public class AzureParameters extends BaseParameters implements AccountIdAwareRes
     @Column(name = "resource_group_single")
     @Convert(converter = ResourceGroupUsagePatternConverter.class)
     private ResourceGroupUsagePattern resourceGroupUsagePattern;
-
-    @Column(name = "database_setup")
-    @Convert(converter = DatabaseSetupConverter.class)
-    private DatabaseSetup databaseSetup;
 
     @Column(name = "encryption_key_url")
     @Convert(converter = SecretToString.class)
@@ -100,13 +94,5 @@ public class AzureParameters extends BaseParameters implements AccountIdAwareRes
 
     public void setEncryptionKeyResourceGroupName(String encryptionKeyResourceGroupName) {
         this.encryptionKeyResourceGroupName = encryptionKeyResourceGroupName;
-    }
-
-    public DatabaseSetup getDatabaseSetup() {
-        return databaseSetup;
-    }
-
-    public void setDatabaseSetup(DatabaseSetup databaseSetup) {
-        this.databaseSetup = databaseSetup;
     }
 }

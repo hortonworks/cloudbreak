@@ -22,10 +22,6 @@ public class AzureEnvironmentParameters implements Serializable {
     @ApiModelProperty(EnvironmentModelDescription.RESOURCE_ENCRYPTION_PARAMETERS)
     private AzureResourceEncryptionParameters resourceEncryptionParameters;
 
-    @Valid
-    @ApiModelProperty(EnvironmentModelDescription.AZURE_DATABASE_PARAMETERS)
-    private AzureDatabaseParameters azureDatabaseParameters;
-
     public AzureResourceGroup getResourceGroup() {
         return resourceGroup;
     }
@@ -42,20 +38,11 @@ public class AzureEnvironmentParameters implements Serializable {
         this.resourceEncryptionParameters = resourceEncryptionParameters;
     }
 
-    public AzureDatabaseParameters getAzureDatabaseParameters() {
-        return azureDatabaseParameters;
-    }
-
-    public void setAzureDatabaseParameters(AzureDatabaseParameters azureDatabaseParameters) {
-        this.azureDatabaseParameters = azureDatabaseParameters;
-    }
-
     @Override
     public String toString() {
         return "AzureEnvironmentParameters{" +
                 "resourceGroup=" + resourceGroup +
                 ", resourceEncryptionParameters=" + resourceEncryptionParameters +
-                ", azureDatabaseParameters=" + azureDatabaseParameters +
                 '}';
     }
 
@@ -68,8 +55,6 @@ public class AzureEnvironmentParameters implements Serializable {
         private AzureResourceGroup azureResourceGroup;
 
         private AzureResourceEncryptionParameters resourceEncryptionParameters;
-
-        private AzureDatabaseParameters azureDatabaseParameters;
 
         private Builder() {
         }
@@ -84,16 +69,10 @@ public class AzureEnvironmentParameters implements Serializable {
             return this;
         }
 
-        public Builder withAzureDatabaseParameters(AzureDatabaseParameters azureDatabaseParameters) {
-            this.azureDatabaseParameters = azureDatabaseParameters;
-            return this;
-        }
-
         public AzureEnvironmentParameters build() {
             AzureEnvironmentParameters azureEnvironmentParameters = new AzureEnvironmentParameters();
             azureEnvironmentParameters.setResourceGroup(azureResourceGroup);
             azureEnvironmentParameters.setResourceEncryptionParameters(resourceEncryptionParameters);
-            azureEnvironmentParameters.setAzureDatabaseParameters(azureDatabaseParameters);
             return azureEnvironmentParameters;
         }
     }

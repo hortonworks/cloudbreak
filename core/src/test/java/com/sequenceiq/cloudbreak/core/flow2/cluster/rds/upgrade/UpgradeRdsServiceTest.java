@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -116,10 +117,10 @@ class UpgradeRdsServiceTest {
 
     @Test
     public void testInstallPostgresPackages() throws CloudbreakOrchestratorException {
-        underTest.installPostgresPackages(STACK_ID);
+        underTest.installPostgresPackages(STACK_ID, MajorVersion.VERSION_14);
 
-        verify(rdsUpgradeOrchestratorService).installPostgresPackages(eq(STACK_ID));
-        verify(rdsUpgradeOrchestratorService).updatePostgresAlternatives(eq(STACK_ID));
+        verify(rdsUpgradeOrchestratorService).installPostgresPackages(eq(STACK_ID), eq(MajorVersion.VERSION_14));
+        verify(rdsUpgradeOrchestratorService).updatePostgresAlternatives(eq(STACK_ID), eq(MajorVersion.VERSION_14));
     }
 
     @Test

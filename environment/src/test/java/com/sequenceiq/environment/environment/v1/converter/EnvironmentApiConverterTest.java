@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -51,11 +50,9 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnviro
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaSpotParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureDatabaseParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
-import com.sequenceiq.environment.api.v1.environment.model.request.azure.DatabaseSetup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
@@ -234,69 +231,6 @@ public class EnvironmentApiConverterTest {
 
         assertEquals(ResourceGroupUsagePattern.USE_MULTIPLE,
                 actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getResourceGroupUsagePattern());
-        verify(networkRequestToDtoConverter).setDefaultAvailabilityZonesIfNeeded(actual.getNetwork());
-    }
-
-    @ParameterizedTest
-    @EnumSource(value = DatabaseSetup.class)
-    @NullSource
-    void testAzureDatabaseParameters(DatabaseSetup setup) {
-        EnvironmentRequest request = createEnvironmentRequest(AZURE);
-        request.setAzure(AzureEnvironmentParameters.builder()
-                .withAzureDatabaseParameters(
-                        AzureDatabaseParameters.builder()
-                                .withDatabaseSetup(setup)
-                                .build())
-                .build());
-        FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
-        EnvironmentTelemetry environmentTelemetry = mock(EnvironmentTelemetry.class);
-        AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
-        Features features = mock(Features.class);
-        NetworkDto networkDto = mock(NetworkDto.class);
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(AZURE.name());
-        when(freeIpaConverter.convert(request.getFreeIpa(), "id", CloudConstants.AWS)).thenReturn(freeIpaCreationDto);
-        when(accountTelemetry.getFeatures()).thenReturn(features);
-        when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
-        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any(), anyString())).thenReturn(environmentTelemetry);
-        when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
-        when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
-
-        EnvironmentCreationDto actual = testInitCreationDto(request);
-
-        com.sequenceiq.environment.parameter.dto.DatabaseSetup actualDatabaseSetup =
-                actual.getParameters().getAzureParametersDto().getAzureDatabaseParametersDto().getDatabaseSetup();
-        if (actualDatabaseSetup == null) {
-            assertNull(setup);
-            return;
-        }
-        switch (actualDatabaseSetup) {
-            case PUBLIC -> assertEquals(DatabaseSetup.PUBLIC, setup);
-            case PRIVATE -> assertEquals(DatabaseSetup.PRIVATE, setup);
-            default -> assertNull(setup);
-        }
-        verify(networkRequestToDtoConverter).setDefaultAvailabilityZonesIfNeeded(actual.getNetwork());
-    }
-
-    @Test
-    void testNullAzureDatabaseParameters() {
-        EnvironmentRequest request = createEnvironmentRequest(AZURE);
-        request.setAzure(null);
-        FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
-        EnvironmentTelemetry environmentTelemetry = mock(EnvironmentTelemetry.class);
-        AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
-        Features features = mock(Features.class);
-        NetworkDto networkDto = mock(NetworkDto.class);
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(AZURE.name());
-        when(freeIpaConverter.convert(request.getFreeIpa(), "id", CloudConstants.AWS)).thenReturn(freeIpaCreationDto);
-        when(accountTelemetry.getFeatures()).thenReturn(features);
-        when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
-        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any(), anyString())).thenReturn(environmentTelemetry);
-        when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
-        when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
-
-        EnvironmentCreationDto actual = testInitCreationDto(request);
-
-        assertNull(actual.getParameters().azureParametersDto().getAzureDatabaseParametersDto());
         verify(networkRequestToDtoConverter).setDefaultAvailabilityZonesIfNeeded(actual.getNetwork());
     }
 
