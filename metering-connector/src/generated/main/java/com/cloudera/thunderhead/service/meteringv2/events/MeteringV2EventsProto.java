@@ -10840,6 +10840,17 @@ public final class MeteringV2EventsProto {
        * <code>DELETED = 4;</code>
        */
       DELETED(4),
+      /**
+       * <pre>
+       * A cluster type resource has been vertically scaled.
+       * The instance type needs to be reported as part of the
+       * existing instance type field. We do not need the old
+       * instance type.
+       * </pre>
+       *
+       * <code>VERTICAL_SCALE = 5;</code>
+       */
+      VERTICAL_SCALE(5),
       UNRECOGNIZED(-1),
       ;
 
@@ -10883,6 +10894,17 @@ public final class MeteringV2EventsProto {
        * <code>DELETED = 4;</code>
        */
       public static final int DELETED_VALUE = 4;
+      /**
+       * <pre>
+       * A cluster type resource has been vertically scaled.
+       * The instance type needs to be reported as part of the
+       * existing instance type field. We do not need the old
+       * instance type.
+       * </pre>
+       *
+       * <code>VERTICAL_SCALE = 5;</code>
+       */
+      public static final int VERTICAL_SCALE_VALUE = 5;
 
 
       public final int getNumber() {
@@ -10914,6 +10936,7 @@ public final class MeteringV2EventsProto {
           case 2: return STOPPED;
           case 3: return STARTED;
           case 4: return DELETED;
+          case 5: return VERTICAL_SCALE;
           default: return null;
         }
       }
@@ -11435,11 +11458,12 @@ public final class MeteringV2EventsProto {
       "\002\022\007\n\003EBS\020\003\"t\n\014StatusChange\0225\n\006status\030\001 \001" +
       "(\0162%.meteringv2events.ClusterStatus.Valu" +
       "e\022-\n\tresources\030\002 \003(\0132\032.meteringv2events." +
-      "Resource\"]\n\rClusterStatus\"L\n\005Value\022\014\n\010SC" +
+      "Resource\"q\n\rClusterStatus\"`\n\005Value\022\014\n\010SC" +
       "ALE_UP\020\000\022\016\n\nSCALE_DOWN\020\001\022\013\n\007STOPPED\020\002\022\013\n" +
-      "\007STARTED\020\003\022\013\n\007DELETED\020\004BK\n2com.cloudera." +
-      "thunderhead.service.meteringv2.eventsB\025M" +
-      "eteringV2EventsProtob\006proto3"
+      "\007STARTED\020\003\022\013\n\007DELETED\020\004\022\022\n\016VERTICAL_SCAL" +
+      "E\020\005BK\n2com.cloudera.thunderhead.service." +
+      "meteringv2.eventsB\025MeteringV2EventsProto" +
+      "b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

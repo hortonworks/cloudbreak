@@ -283,5 +283,10 @@ message ClusterStatus {
     STARTED = 3;
     // A resource has been deleted.
     DELETED = 4;
+    // A cluster type resource has been vertically scaled.
+    // The instance type needs to be reported as part of the
+    // existing instance type field. We do not need the old
+    // instance type.
+    VERTICAL_SCALE = 5;
   }
 }

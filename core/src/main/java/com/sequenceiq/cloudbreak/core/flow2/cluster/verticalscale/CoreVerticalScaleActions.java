@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale;
 
+import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ClusterStatus.Value.VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
@@ -41,6 +42,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleResult;
+import com.sequenceiq.cloudbreak.service.metering.MeteringService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -65,6 +67,9 @@ public class CoreVerticalScaleActions {
 
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
+
+    @Inject
+    private MeteringService meteringService;
 
     @Bean(name = "STACK_VERTICALSCALE_STATE")
     public Action<?, ?> stackVerticalScale() {
@@ -109,6 +114,7 @@ public class CoreVerticalScaleActions {
             protected void doExecute(ClusterViewContext context, CoreVerticalScaleResult payload, Map<Object, Object> variables) {
                 coreVerticalScaleService.updateTemplateWithVerticalScaleInformation(context.getStackId(), payload.getStackVerticalScaleV4Request());
                 coreVerticalScaleService.finishVerticalScale(context.getStackId(), payload.getStackVerticalScaleV4Request());
+                meteringService.sendMeteringStatusChangeEventForStack(context.getStackId(), VERTICAL_SCALE);
                 sendEvent(context);
             }
 

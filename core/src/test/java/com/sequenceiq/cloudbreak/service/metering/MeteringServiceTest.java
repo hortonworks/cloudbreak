@@ -35,6 +35,8 @@ class MeteringServiceTest {
 
     private static final Long STACK_ID = 1L;
 
+    private static final String SYNC = "SYNC";
+
     @Mock
     private StackDtoToMeteringEventConverter stackDtoToMeteringEventConverter;
 
@@ -58,7 +60,11 @@ class MeteringServiceTest {
         MeteringEvent meteringEvent = MeteringEvent.newBuilder().build();
         when(stackDtoToMeteringEventConverter.convertToSyncEvent(any())).thenReturn(meteringEvent);
         underTest.sendMeteringSyncEventForStack(getStack(WORKLOAD));
-        verify(grpcMeteringClient, times(1)).sendMeteringEvent(eq(meteringEvent));
+        verify(grpcMeteringClient, times(1)).sendMeteringEventWithoutRetry(eq(meteringEvent));
+        verify(metricService, times(0)).incrementMetricCounter(MetricType.METERING_REPORT_FAILED,
+                MeteringMetricTag.REPORT_TYPE.name(), SYNC);
+        verify(metricService, times(1)).incrementMetricCounter(MetricType.METERING_REPORT_SUCCESSFUL,
+                MeteringMetricTag.REPORT_TYPE.name(), SYNC);
     }
 
     @Test
@@ -74,7 +80,7 @@ class MeteringServiceTest {
     }
 
     @Test
-    void failedSendShouldIncreaseFailureCountWhenDatahub() {
+    void failedSendMeteringStatusChangeEventShouldIncreaseFailureCountWhenDatahub() {
         MeteringEvent meteringEvent = MeteringEvent.newBuilder().build();
         when(stackDtoToMeteringEventConverter.convertToStatusChangeEvent(any(), any())).thenReturn(meteringEvent);
         doThrow(new RuntimeException("Inject Failure")).when(grpcMeteringClient).sendMeteringEvent(meteringEvent);
@@ -84,6 +90,19 @@ class MeteringServiceTest {
                 MeteringMetricTag.REPORT_TYPE.name(), SCALE_UP.name());
         verify(metricService, times(0)).incrementMetricCounter(MetricType.METERING_REPORT_SUCCESSFUL,
                 MeteringMetricTag.REPORT_TYPE.name(), SCALE_UP.name());
+    }
+
+    @Test
+    void failedSendMeteringSyncEventShouldIncreaseFailureCountWhenDatahub() {
+        MeteringEvent meteringEvent = MeteringEvent.newBuilder().build();
+        when(stackDtoToMeteringEventConverter.convertToSyncEvent(any())).thenReturn(meteringEvent);
+        doThrow(new RuntimeException("Inject Failure")).when(grpcMeteringClient).sendMeteringEventWithoutRetry(meteringEvent);
+        underTest.sendMeteringSyncEventForStack(getStack(WORKLOAD));
+        verify(grpcMeteringClient, times(1)).sendMeteringEventWithoutRetry(eq(meteringEvent));
+        verify(metricService, times(1)).incrementMetricCounter(MetricType.METERING_REPORT_FAILED,
+                MeteringMetricTag.REPORT_TYPE.name(), SYNC);
+        verify(metricService, times(0)).incrementMetricCounter(MetricType.METERING_REPORT_SUCCESSFUL,
+                MeteringMetricTag.REPORT_TYPE.name(), SYNC);
     }
 
     @Test

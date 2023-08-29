@@ -10,6 +10,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.MeteringEvent;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
@@ -53,7 +54,12 @@ public class GrpcMeteringClient {
         }
     }
 
-    private MeteringClient makeClient(ManagedChannelWrapper channelWrapper,
+    public void sendMeteringEventWithoutRetry(MeteringEvent meteringEvent) {
+        sendMeteringEvent(meteringEvent);
+    }
+
+    @VisibleForTesting
+    MeteringClient makeClient(ManagedChannelWrapper channelWrapper,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         return new MeteringClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
     }

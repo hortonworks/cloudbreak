@@ -26,6 +26,8 @@ public class MeteringService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MeteringService.class);
 
+    private static final String SYNC = "SYNC";
+
     @Inject
     private StackDtoToMeteringEventConverter stackDtoToMeteringEventConverter;
 
@@ -77,10 +79,12 @@ public class MeteringService {
 
     private void sendPeriodicMeteringEvent(MeteringEvent meteringEvent) {
         try {
-            grpcMeteringClient.sendMeteringEvent(meteringEvent);
+            grpcMeteringClient.sendMeteringEventWithoutRetry(meteringEvent);
+            metricsService.incrementMetricCounter(MetricType.METERING_REPORT_SUCCESSFUL,
+                    MeteringMetricTag.REPORT_TYPE.name(), SYNC);
         } catch (Exception e) {
             metricsService.incrementMetricCounter(MetricType.METERING_REPORT_FAILED,
-                    MeteringMetricTag.REPORT_TYPE.name(), "SYNC");
+                    MeteringMetricTag.REPORT_TYPE.name(), SYNC);
             LOGGER.warn("Periodic Metering event send failed.", e);
         }
     }
