@@ -27,30 +27,20 @@ public class MDCRequestIdOnlyFilter extends OncePerRequestFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MDCRequestIdOnlyFilter.class);
 
-    private final Runnable mdcAppender;
-
-    public MDCRequestIdOnlyFilter(Runnable mdcAppender) {
-        this.mdcAppender = mdcAppender;
-    }
-
-    public MDCRequestIdOnlyFilter() {
-        this(() -> {
-        });
-    }
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         MDCBuilder.cleanupMdc();
         HttpServletRequestWrapper wrapper = new RequestIdHeaderInjectingHttpRequestWrapper(request);
         Builder builder = MdcContext.builder().requestId(wrapper.getHeader(REQUEST_ID_HEADER));
         builder.buildMdc();
-        LOGGER.trace("Request id has been added to MDC context for request, method: {}, path: {}",
+        LOGGER.debug("Request id has been added to MDC context for request, method: {}, path: {}",
                 request.getMethod().toUpperCase(),
                 request.getRequestURI());
-        if (mdcAppender != null) {
-            mdcAppender.run();
+        try {
+            filterChain.doFilter(wrapper, response);
+        } finally {
+            MDCBuilder.cleanupMdc();
         }
-        filterChain.doFilter(wrapper, response);
     }
 
     protected static class RequestIdHeaderInjectingHttpRequestWrapper extends HttpServletRequestWrapper {
@@ -61,7 +51,7 @@ public class MDCRequestIdOnlyFilter extends OncePerRequestFilter {
             super(request);
             if (StringUtils.isEmpty(request.getHeader(REQUEST_ID_HEADER))) {
                 String requestId = UUID.randomUUID().toString();
-                LOGGER.trace("No requestId in request. Adding requestId: '{}'", requestId);
+                LOGGER.debug("No requestId in request. Adding requestId: '{}'", requestId);
                 addHeader(REQUEST_ID_HEADER, requestId);
             }
         }

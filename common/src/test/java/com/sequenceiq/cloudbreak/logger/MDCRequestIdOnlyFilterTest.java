@@ -38,9 +38,6 @@ class MDCRequestIdOnlyFilterTest {
     @Mock
     private FilterChain filterChain;
 
-    @Mock
-    private Runnable mdcAppender;
-
     @Captor
     private ArgumentCaptor<MDCRequestIdOnlyFilter.RequestIdHeaderInjectingHttpRequestWrapper> wrapperArgumentCaptor;
 
@@ -60,7 +57,6 @@ class MDCRequestIdOnlyFilterTest {
         verify(filterChain).doFilter(wrapperArgumentCaptor.capture(), any());
 
         verify(request, times(2)).getHeader(REQUEST_ID_HEADER);
-        verify(mdcAppender, times(1)).run();
         assertEquals("1234-5678-9999-8888", wrapperArgumentCaptor.getValue().getHeader(REQUEST_ID_HEADER));
     }
 
@@ -72,7 +68,6 @@ class MDCRequestIdOnlyFilterTest {
         verify(filterChain).doFilter(wrapperArgumentCaptor.capture(), any());
 
         verify(request, times(2)).getHeader(REQUEST_ID_HEADER);
-        verify(mdcAppender, times(1)).run();
         assertTrue(UuidUtil.isValid(wrapperArgumentCaptor.getValue().getHeader(REQUEST_ID_HEADER)));
     }
 }

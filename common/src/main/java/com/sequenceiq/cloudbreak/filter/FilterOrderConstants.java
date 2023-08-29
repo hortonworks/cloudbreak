@@ -2,9 +2,7 @@ package com.sequenceiq.cloudbreak.filter;
 
 public class FilterOrderConstants {
 
-    public static final int SPAN_FINISHING_ORDER = Integer.MIN_VALUE;
-
-    public static final int MDC_REQUEST_ID_FILTER_ORDER = 0;
+    public static final int MDC_REQUEST_ID_FILTER_ORDER = Integer.MIN_VALUE;
 
     public static final int CRN_FILTER_ORDER = 1;
 
