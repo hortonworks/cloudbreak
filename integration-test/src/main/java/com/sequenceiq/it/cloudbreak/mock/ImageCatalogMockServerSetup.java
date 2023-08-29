@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
@@ -59,8 +60,11 @@ public class ImageCatalogMockServerSetup {
         Invocation.Builder request = target.request();
         try (Response response = request.get()) {
             CBVersion cbVersion = response.readEntity(CBVersion.class);
-            LOGGER.info("CB version: Appname: {}, version: {}", cbVersion.getApp().getName(), cbVersion.getApp().getVersion());
-            return cbVersion.getApp().getVersion();
+            String appVersion = cbVersion.getApp().getVersion();
+            LOGGER.info("CB version: Appname: {}, version: {}", cbVersion.getApp().getName(), appVersion);
+            testParameter.put("cbversion", appVersion);
+            MDC.put("cbversion", appVersion);
+            return appVersion;
         } catch (Exception e) {
             LOGGER.error(String.format("Cannot fetch the CB version at '%s'", cbServerAddress), e);
             throw e;

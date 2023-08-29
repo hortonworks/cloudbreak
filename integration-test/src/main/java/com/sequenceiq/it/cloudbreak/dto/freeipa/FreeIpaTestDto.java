@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.plac
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -82,6 +83,7 @@ import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.search.StorageUrl;
 import com.sequenceiq.it.cloudbreak.util.FreeIpaInstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.StructuredEventUtil;
+import com.sequenceiq.it.cloudbreak.util.yarn.YarnCloudFunctionality;
 
 @Prototype
 public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest, DescribeFreeIpaResponse, FreeIpaTestDto>
@@ -94,6 +96,11 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     @Inject
     private FreeIpaInstanceUtil freeIpaInstanceUtil;
+
+    @Inject
+    private YarnCloudFunctionality yarnCloudFunctionality;
+
+    private CloudPlatform cloudPlatformFromStack;
 
     public FreeIpaTestDto(TestContext testContext) {
         super(new CreateFreeIpaRequest(), testContext);
@@ -542,6 +549,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         }
         String resourceName = getResponse().getName();
         String resourceCrn = getResponse().getCrn();
+        setCloudPlatformFromStack(getResponse());
         boolean hasSpotTermination = (getResponse().getInstanceGroups() == null) ? false : getResponse().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetaData().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
@@ -565,18 +573,36 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     @Override
     public String getCloudStorageUrl(String resourceName, String resourceCrn) {
-        CloudProviderProxy cloudProviderProxy = getTestContext().getCloudProvider();
-        String baseLocation = (getResponse().getTelemetry() != null)
-                ? getResponse().getTelemetry().getLogging().getStorageLocation()
-                : null;
-        StorageUrl storageUrl = new ClusterLogsStorageUrl();
-        return (isCloudProvider(cloudProviderProxy) && StringUtils.isNotBlank(baseLocation))
-                ? storageUrl.getFreeIpaStorageUrl(resourceName, resourceCrn, baseLocation, cloudProviderProxy)
-                : null;
+        if (CloudPlatform.YARN.equalsIgnoreCase(getCloudPlatform().name())) {
+            LOGGER.info("Special case for AWS-YCloud Hybrid tests. " +
+                    "Here the defined Cloud Provider is AWS and the Cluster Logs are stored at AWS. " +
+                    "However the FreeIPA has been created at YCloud. So the Base Location for logs are also different.");
+            return yarnCloudFunctionality.getFreeIpaS3LogsUrl(resourceCrn);
+        } else {
+            CloudProviderProxy cloudProviderProxy = getTestContext().getCloudProvider();
+            String baseLocation = (getResponse().getTelemetry() != null)
+                    ? getResponse().getTelemetry().getLogging().getStorageLocation()
+                    : null;
+            StorageUrl storageUrl = new ClusterLogsStorageUrl();
+            return (isCloudProvider(cloudProviderProxy) && StringUtils.isNotBlank(baseLocation))
+                    ? storageUrl.getFreeIpaStorageUrl(resourceName, resourceCrn, baseLocation, cloudProviderProxy)
+                    : null;
+        }
     }
 
     @Override
     public String getEnvironmentCrn() {
         return getResponse().getEnvironmentCrn();
+    }
+
+    private void setCloudPlatformFromStack(DescribeFreeIpaResponse describeFreeIpaResponse) {
+        if (describeFreeIpaResponse != null) {
+            cloudPlatformFromStack = CloudPlatform.valueOf(describeFreeIpaResponse.getCloudPlatform());
+        }
+    }
+
+    @Override
+    public CloudPlatform getCloudPlatform() {
+        return (cloudPlatformFromStack != null) ? cloudPlatformFromStack : super.getCloudPlatform();
     }
 }

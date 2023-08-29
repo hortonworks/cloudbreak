@@ -13,6 +13,8 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
@@ -23,12 +25,14 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.search.ClusterLogsStorageUrl;
 import com.sequenceiq.it.cloudbreak.search.StorageUrl;
-import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
+import com.sequenceiq.it.cloudbreak.util.yarn.YarnCloudFunctionality;
 
 public abstract class AbstractSdxTestDto<R, S, T extends CloudbreakTestDto> extends AbstractTestDto<R, S, T, SdxClient> {
 
     @Inject
-    private FlowUtil flowUtil;
+    private YarnCloudFunctionality yarnCloudFunctionality;
+
+    private CloudPlatform cloudPlatformFromStack;
 
     protected AbstractSdxTestDto(R request, TestContext testContext) {
         super(request, testContext);
@@ -127,6 +131,18 @@ public abstract class AbstractSdxTestDto<R, S, T extends CloudbreakTestDto> exte
         return getTestContext().awaitForInstance((T) this, statuses, runningParameter);
     }
 
+    public boolean hasSpotTermination(StackV4Response stackResponse) {
+        return stackResponse != null && stackResponse.getInstanceGroups().stream()
+                .flatMap(ig -> ig.getMetadata().stream())
+                .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
+    }
+
+    public void setCloudPlatformFromStack(StackV4Response stackResponse) {
+        if (stackResponse != null) {
+            cloudPlatformFromStack = stackResponse.getCloudPlatform();
+        }
+    }
+
     public String getSdxBaseLocation() {
         TelemetryResponse telemetryResponse = (getTestContext().get(EnvironmentTestDto.class) != null)
                 ? getTestContext().get(EnvironmentTestDto.class).getResponse().getTelemetry()
@@ -138,10 +154,22 @@ public abstract class AbstractSdxTestDto<R, S, T extends CloudbreakTestDto> exte
 
     @Override
     public String getCloudStorageUrl(String resourceName, String resourceCrn) {
-        CloudProviderProxy cloudProviderProxy = getTestContext().getCloudProvider();
-        StorageUrl storageUrl = new ClusterLogsStorageUrl();
-        return (isCloudProvider(cloudProviderProxy) && StringUtils.isNotBlank(getSdxBaseLocation()))
-                ? storageUrl.getDatalakeStorageUrl(resourceName, resourceCrn, getSdxBaseLocation(), cloudProviderProxy)
-                : null;
+        if (CloudPlatform.YARN.equalsIgnoreCase(getCloudPlatform().name())) {
+            LOGGER.info("Special case for AWS-YCloud Hybrid tests. " +
+                    "Here the defined Cloud Provider is AWS and the Cluster Logs are stored at AWS. " +
+                    "However the Datalake has been created at YCloud. So the Base Location for logs are also different.");
+            return yarnCloudFunctionality.getDataLakeS3LogsUrl(resourceCrn);
+        } else {
+            CloudProviderProxy cloudProviderProxy = getTestContext().getCloudProvider();
+            StorageUrl storageUrl = new ClusterLogsStorageUrl();
+            return (isCloudProvider(cloudProviderProxy) && StringUtils.isNotBlank(getSdxBaseLocation()))
+                    ? storageUrl.getDatalakeStorageUrl(resourceName, resourceCrn, getSdxBaseLocation(), cloudProviderProxy)
+                    : null;
+        }
+    }
+
+    @Override
+    public CloudPlatform getCloudPlatform() {
+        return (cloudPlatformFromStack != null) ? cloudPlatformFromStack : super.getCloudPlatform();
     }
 }

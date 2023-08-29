@@ -61,6 +61,7 @@ import com.sequenceiq.it.cloudbreak.search.StorageUrl;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
+import com.sequenceiq.it.cloudbreak.util.yarn.YarnCloudFunctionality;
 
 @Prototype
 public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implements Purgable<StackV4Response, CloudbreakClient>, Investigable, Searchable {
@@ -81,6 +82,11 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Inject
     private DistroXTestClient distroXTestClient;
+
+    @Inject
+    private YarnCloudFunctionality yarnCloudFunctionality;
+
+    private CloudPlatform cloudPlatformFromStack;
 
     public DistroXTestDto(TestContext testContext) {
         super(new DistroXV1Request(), testContext);
@@ -343,6 +349,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         }
         String resourceName = getResponse().getName();
         String resourceCrn = getResponse().getCrn();
+        setCloudPlatformFromStack(getResponse());
         AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
                 getTestContext().getMicroserviceClient(CloudbreakClient.class),
                 CloudbreakEventService.DATAHUB_RESOURCE_TYPE,
@@ -365,14 +372,21 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Override
     public String getCloudStorageUrl(String resourceName, String resourceCrn) {
-        CloudProviderProxy cloudProviderProxy = getTestContext().getCloudProvider();
-        String baseLocation = getResponse().getTelemetry() != null && getResponse().getTelemetry().getLogging() != null
-                ? getResponse().getTelemetry().getLogging().getStorageLocation()
-                : null;
-        StorageUrl storageUrl = new ClusterLogsStorageUrl();
-        return (isCloudProvider(cloudProviderProxy) && StringUtils.isNotBlank(baseLocation))
-                ? storageUrl.getDataHubStorageUrl(resourceName, resourceCrn, baseLocation, cloudProviderProxy)
-                : null;
+        if (CloudPlatform.YARN.equalsIgnoreCase(getCloudPlatform().name())) {
+            LOGGER.info("Special case for AWS-YCloud Hybrid tests. " +
+                    "Here the defined Cloud Provider is AWS and the Cluster Logs are stored at AWS. " +
+                    "However the Datahub has been created at YCloud. So the Base Location for logs are also different.");
+            return yarnCloudFunctionality.getDataHubS3LogsUrl(resourceCrn);
+        } else {
+            CloudProviderProxy cloudProviderProxy = getTestContext().getCloudProvider();
+            String baseLocation = getResponse().getTelemetry() != null && getResponse().getTelemetry().getLogging() != null
+                    ? getResponse().getTelemetry().getLogging().getStorageLocation()
+                    : null;
+            StorageUrl storageUrl = new ClusterLogsStorageUrl();
+            return (isCloudProvider(cloudProviderProxy) && StringUtils.isNotBlank(baseLocation))
+                    ? storageUrl.getDataHubStorageUrl(resourceName, resourceCrn, baseLocation, cloudProviderProxy)
+                    : null;
+        }
     }
 
     public InstanceGroupV4Response findInstanceGroupByName(String name) {
@@ -419,4 +433,14 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         return this;
     }
 
+    private void setCloudPlatformFromStack(StackV4Response stackResponse) {
+        if (stackResponse != null) {
+            cloudPlatformFromStack = stackResponse.getCloudPlatform();
+        }
+    }
+
+    @Override
+    public CloudPlatform getCloudPlatform() {
+        return (cloudPlatformFromStack != null) ? cloudPlatformFromStack : super.getCloudPlatform();
+    }
 }

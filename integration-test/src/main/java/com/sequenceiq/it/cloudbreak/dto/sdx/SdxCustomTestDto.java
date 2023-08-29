@@ -16,6 +16,7 @@ import javax.ws.rs.NotFoundException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
@@ -241,14 +242,13 @@ public class SdxCustomTestDto extends AbstractSdxTestDto<SdxCustomClusterRequest
         }
         String resourceName = getResponse().getName();
         String resourceCrn = getResponse().getCrn();
+        StackV4Response stackResponse = getResponse().getStackV4Response();
+        setCloudPlatformFromStack(stackResponse);
         AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
                 getTestContext().getMicroserviceClient(CloudbreakClient.class),
                 CloudbreakEventService.DATALAKE_RESOURCE_TYPE,
                 null,
                 resourceCrn);
-        boolean hasSpotTermination = (getResponse().getStackV4Response() == null) ? false : getResponse().getStackV4Response().getInstanceGroups().stream()
-                .flatMap(ig -> ig.getMetadata().stream())
-                .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
         List<CDPStructuredEvent> structuredEvents = List.of();
         if (getResponse() != null && resourceCrn != null) {
             CDPStructuredEventV1Endpoint cdpStructuredEventV1Endpoint =
@@ -264,7 +264,7 @@ public class SdxCustomTestDto extends AbstractSdxTestDto<SdxCustomClusterRequest
                 auditEvents,
                 structuredEvents,
                 getResponse(),
-                hasSpotTermination);
+                hasSpotTermination(stackResponse));
     }
 
     protected CommonClusterManagerProperties commonClusterManagerProperties() {
