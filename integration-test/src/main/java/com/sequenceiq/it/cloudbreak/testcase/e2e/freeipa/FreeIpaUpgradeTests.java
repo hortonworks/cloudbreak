@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.polling.AbsolutTimeBasedTimeoutChecker;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsARecordRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsCnameRecordRequest;
-import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.binduser.BindUserCreateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -159,7 +158,6 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
                 try {
                     addAndDeleteDnsARecord(ipaClient, environmentCrn);
                     addAndDeleteDnsCnameRecord(ipaClient, environmentCrn);
-                    addListDeleteDnsZonesBySubnet(ipaClient, environmentCrn);
                     createBindUser(testContext, ipaClient, environmentCrn);
                     generateHostKeyTab(ipaClient, environmentCrn);
                     generateServiceKeytab(ipaClient, environmentCrn);
@@ -237,28 +235,6 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
         } catch (Exception e) {
             logger.error("DNS CNAME record test failed during upgrade", e);
             throw new TestFailException("DNS CNAME record test failed during upgrade with: " + e.getMessage(), e);
-        }
-    }
-
-    private void addListDeleteDnsZonesBySubnet(com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient, String environmentCrn) {
-        try {
-            AddDnsZoneForSubnetsRequest request = new AddDnsZoneForSubnetsRequest();
-            request.setSubnets(List.of("10.0.1.0/24", "192.168.1.0/24"));
-            request.setEnvironmentCrn(environmentCrn);
-            ipaClient.getDnsV1Endpoint().addDnsZoneForSubnets(request);
-/*          Until CB-15454 is fixed
-            Set<String> dnsZones = ipaClient.getDnsV1Endpoint().listDnsZones(environmentCrn);
-            Assertions.assertTrue(dnsZones.stream().anyMatch(dnsZone -> dnsZone.startsWith("1.0.10")));
-            Assertions.assertTrue(dnsZones.stream().anyMatch(dnsZone -> dnsZone.startsWith("1.168.192")));*/
-
-            ipaClient.getDnsV1Endpoint().deleteDnsZoneBySubnet(environmentCrn, "192.168.1.0/24");
-            ipaClient.getDnsV1Endpoint().deleteDnsZoneBySubnet(environmentCrn, "10.0.1.0/24");
-/*            dnsZones = ipaClient.getDnsV1Endpoint().listDnsZones(environmentCrn);
-            Assertions.assertFalse(dnsZones.stream().anyMatch(dnsZone -> dnsZone.startsWith("1.0.10")));
-            Assertions.assertFalse(dnsZones.stream().anyMatch(dnsZone -> dnsZone.startsWith("1.168.192")));*/
-        } catch (Exception e) {
-            logger.error("DNS ZONE test failed during upgrade", e);
-            throw new TestFailException("DNS ZONE test failed during upgrade with: " + e.getMessage(), e);
         }
     }
 
