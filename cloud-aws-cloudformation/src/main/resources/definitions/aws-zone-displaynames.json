@@ -103,6 +103,10 @@
     {
       "name": "us-gov-west-1",
       "displayName": "AWS GovCloud (US-West)"
+    },
+    {
+      "name": "il-central-1",
+      "displayName": "Israel (Tel Aviv)"
     }
   ]
 }

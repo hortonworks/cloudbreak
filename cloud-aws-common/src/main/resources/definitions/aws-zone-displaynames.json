@@ -103,6 +103,10 @@
     {
       "name": "ap-east-1",
       "displayName": "Asia Pacific (Hong Kong)"
+    },
+    {
+      "name": "il-central-1",
+      "displayName": "Israel (Tel Aviv)"
     }
   ]
 }

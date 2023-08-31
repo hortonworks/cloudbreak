@@ -90,5 +90,9 @@
   "Asia Pacific (Hong Kong)": {
     "zoneid": "ap-east-1",
     "defaultvm": "i2.4xlarge"
+  },
+  "Israel (Tel Aviv)": {
+    "zoneid": "il-central-1",
+    "defaultvm": "i2.4xlarge"
   }
 }

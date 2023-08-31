@@ -203,6 +203,14 @@
         "us-gov-east-1b",
         "us-gov-east-1c"
       ]
+    },
+    {
+      "name": "il-central-1",
+      "zones": [
+        "il-central-1a",
+        "il-central-1b",
+        "il-central-1c"
+      ]
     }
   ]
 }

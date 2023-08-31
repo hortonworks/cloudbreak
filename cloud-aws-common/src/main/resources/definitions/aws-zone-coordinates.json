@@ -174,6 +174,13 @@
       "latitude": "23.4241",
       "longitude": "53.8478",
       "k8sSupported": true
+    },
+    {
+      "name": "il-central-1",
+      "displayName": "Israel (Tel Aviv)",
+      "latitude": "32.109333",
+      "longitude": "34.855499",
+      "k8sSupported": true
     }
   ]
 }

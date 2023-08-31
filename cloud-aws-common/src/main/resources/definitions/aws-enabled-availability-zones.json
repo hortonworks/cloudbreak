@@ -203,6 +203,14 @@
         "ap-east-1b",
         "ap-east-1c"
       ]
+    },
+    {
+      "name": "il-central-1",
+      "zones": [
+        "il-central-1a",
+        "il-central-1b",
+        "il-central-1c"
+      ]
     }
   ]
 }
