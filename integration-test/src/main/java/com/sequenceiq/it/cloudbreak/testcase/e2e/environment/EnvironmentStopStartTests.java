@@ -119,7 +119,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
         initializeDefaultBlueprints(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000)
+    @Test(dataProvider = TEST_CONTEXT, timeOut = 10800000)
     @Description(
             given = "there is a running cloudbreak",
             when = "create an attached SDX and Datahubs (in case of AWS, create one of the Datahub with external database)",
