@@ -9,7 +9,7 @@ create_upgrade_ccm_script:
 
 call_upgrade_ccm:
   cmd.run:
-    - name: /opt/salt/scripts/upgrade-ccm.sh | tee -a /var/log/upgrade-ccm.log
+    - name: /opt/salt/scripts/upgrade-ccm.sh 2>&1 | tee -a /var/log/upgrade-ccm.log && exit ${PIPESTATUS[0]}
     - runas: root
     - shell: /bin/bash
     - failhard: True

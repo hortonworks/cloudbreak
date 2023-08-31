@@ -9,7 +9,7 @@ create_rotate_ccm_script:
 
 call_rotate_ccm:
   cmd.run:
-    - name: /opt/salt/scripts/rotate-ccm.sh | tee -a /var/log/rotate-ccm.log
+    - name: /opt/salt/scripts/rotate-ccm.sh 2>&1 | tee -a /var/log/rotate-ccm.log && exit ${PIPESTATUS[0]}
     - runas: root
     - shell: /bin/bash
     - failhard: True
