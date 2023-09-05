@@ -151,7 +151,7 @@ cb:
     engineVersion: 14
     aws.fallback:
       enabled: true
-      targetversion: "11.16"
+      targetversion: "14.8"
 
 quartz:
   initialization:
