@@ -252,52 +252,21 @@ class FreeIpaScalingValidationServiceTest {
     void testValidateStackForDownscaleForMultiAzSuccess() {
         Stack stack = getStack(true);
         AvailabilityZoneConnector availabilityZoneConnector = mock(AvailabilityZoneConnector.class);
-        setupMockForMultiAz(stack, availabilityZoneConnector);
         Set<InstanceMetaData> validImSet = createValidImSet(3, true);
         when(this.allowedScalingPaths.getPaths()).thenReturn(Map.of(HA, List.of(TWO_NODE_BASED, NON_HA)));
         underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA), Set.of("im2"));
     }
 
     @Test
-    void testValidateStackForDownscaleForMultiAzFailedWithInstances() {
-        Stack stack = getStack(true);
-        AvailabilityZoneConnector availabilityZoneConnector = mock(AvailabilityZoneConnector.class);
-        setupMockForMultiAz(stack, availabilityZoneConnector);
-        Set<InstanceMetaData> validImSet = createValidImSet(3, true);
-        when(this.allowedScalingPaths.getPaths()).thenReturn(Map.of(HA, List.of(TWO_NODE_BASED, NON_HA)));
-        assertThatCode(() -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA), Set.of("im2", "im3")))
-                .isExactlyInstanceOf(BadRequestException.class)
-                .hasMessage("downscale will result in number of availability zones less than minimum number of availability zones " +
-                        "needed for Multi AZ deployment. Number of zones after downscale: 1. Minimum zones needed: 2");
-    }
-
-    @Test
     void testValidateStackForDownscaleForMultiAzWithValidationsSkipped() {
         Stack stack = getStack(true);
-        setupMockForMultiAz(stack, null);
         Set<InstanceMetaData> validImSet = createValidImSet(3, true);
         when(this.allowedScalingPaths.getPaths()).thenReturn(Map.of(HA, List.of(TWO_NODE_BASED, NON_HA)));
         underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA), Set.of("im2", "im3"));
     }
 
-    @Test
-    void testValidateStackForDownscaleForMultiAzFailedWithTargetAvailabilityType() {
-        Stack stack = getStack(true);
-        AvailabilityZoneConnector availabilityZoneConnector = mock(AvailabilityZoneConnector.class);
-        setupMockForMultiAz(stack, availabilityZoneConnector);
-        Set<InstanceMetaData> validImSet = createValidImSet(3, true);
-        when(this.allowedScalingPaths.getPaths()).thenReturn(Map.of(HA, List.of(TWO_NODE_BASED, NON_HA)));
-        assertThatCode(() -> underTest.validateStackForDownscale(validImSet, stack, new ScalingPath(HA, NON_HA), null))
-                .isExactlyInstanceOf(BadRequestException.class)
-                .hasMessage("downscale will result in number of availability zones less than minimum number of availability zones " +
-                        "needed for Multi AZ deployment. Number of zones after downscale: 1. Minimum zones needed: 2");
-    }
-
     private void setupMockForMultiAz(Stack stack, AvailabilityZoneConnector availabilityZoneConnector)  {
         when(stack.isMultiAz()).thenReturn(true);
-        if (availabilityZoneConnector != null) {
-            when(availabilityZoneConnector.getMinZonesForFreeIpa()).thenReturn(2);
-        }
         when(multiAzCalculatorService.getAvailabilityZoneConnector(stack)).thenReturn(availabilityZoneConnector);
     }
 

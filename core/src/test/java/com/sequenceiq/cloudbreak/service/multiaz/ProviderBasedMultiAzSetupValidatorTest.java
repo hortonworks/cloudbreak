@@ -49,8 +49,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.LocationResp
 @ExtendWith(MockitoExtension.class)
 class ProviderBasedMultiAzSetupValidatorTest {
 
-    private static final String INVALID_NUMBER_OF_ZONES_PATTERN = "Based on the configured availability zones and instance type('%s'), number of available " +
-            "zones for instance group %s are %d. Please configure at least %d zones for Multi Az deployment";
+    private static final String INVALID_NUMBER_OF_ZONES_PATTERN = "Based on configured availability zones and instance type, there are no availability zones " +
+                    "for instance group %s and instance type %s. Please configure at least one Availability zone for Multi Az deployment";
 
     private static final String NO_AVAILABILITY_ZONE_CONFIGURED_ON_ENV = "No availability zone configured on the environment, " +
             "multi/targeted availability zone could not be requested.";
@@ -177,8 +177,7 @@ class ProviderBasedMultiAzSetupValidatorTest {
     @Test
     void testValidateShouldAddViolationErrorWhenGroupLevelZonesAreLessThanTheRequiredMinimum() {
         AvailabilityZoneConnector zoneConnector = mockCredentialConversionFromEnvironmentWith(Set.of("1", "2"));
-        when(zoneConnector.getMinZonesForDataLake()).thenReturn(2);
-        when(zoneConnector.getAvailabilityZones(any(), any(), any(), any())).thenReturn(Set.of("1"));
+        when(zoneConnector.getAvailabilityZones(any(), any(), any(), any())).thenReturn(Set.of());
         Stack stack = TestUtil.stack(Status.REQUESTED, TestUtil.azureCredential());
         stack.setType(StackType.DATALAKE);
         stack.getInstanceGroups().forEach(ig -> {
@@ -190,8 +189,8 @@ class ProviderBasedMultiAzSetupValidatorTest {
         underTest.validate(resultBuilder, stack);
 
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            verify(resultBuilder).error(String.format(INVALID_NUMBER_OF_ZONES_PATTERN, instanceGroup.getTemplate().getInstanceType(),
-                    instanceGroup.getGroupName(), 1, 2));
+            verify(resultBuilder).error(String.format(INVALID_NUMBER_OF_ZONES_PATTERN, instanceGroup.getGroupName(),
+                    instanceGroup.getTemplate().getInstanceType()));
         }
     }
 
@@ -200,7 +199,6 @@ class ProviderBasedMultiAzSetupValidatorTest {
         String invalidZone = "1";
         Set<String> validZones = Set.of("3", "2");
         AvailabilityZoneConnector zoneConnector = mockCredentialConversionFromEnvironmentWith(validZones);
-        when(zoneConnector.getMinZonesForDataLake()).thenReturn(1);
         Stack stack = TestUtil.stack(Status.REQUESTED, TestUtil.azureCredential());
         stack.setType(StackType.DATALAKE);
         stack.getInstanceGroups().forEach(ig -> {
@@ -234,7 +232,6 @@ class ProviderBasedMultiAzSetupValidatorTest {
     void testValidateShouldRSetStackLevelMultiAzFlagWhenAllGroupsHaveZonesAndMultiAzFlagIsFalseOnStackLevel() {
         Set<String> validZones = Set.of("1", "2");
         AvailabilityZoneConnector zoneConnector = mockCredentialConversionFromEnvironmentWith(validZones);
-        when(zoneConnector.getMinZonesForDataHub()).thenReturn(1);
         when(zoneConnector.getAvailabilityZones(any(), any(), any(), any())).thenReturn(Set.of("1"));
         Stack stack = TestUtil.stack(Status.REQUESTED, TestUtil.azureCredential());
         stack.setType(StackType.WORKLOAD);

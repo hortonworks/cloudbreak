@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -134,7 +133,6 @@ public class ProviderBasedMultiAzSetupValidator {
 
     private void validateInstanceGroups(ValidationResultBuilder validationBuilder, Stack stack, AvailabilityZoneConnector azConnector,
             ExtendedCloudCredential cloudCredential, Set<String> environmentZones, Region region) {
-        Integer minZones = getMinZonesForStack(stack.getType(), azConnector);
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             String groupName = instanceGroup.getGroupName();
             String instanceType = instanceGroup.getTemplate().getInstanceType();
@@ -145,22 +143,16 @@ public class ProviderBasedMultiAzSetupValidator {
                 Set<String> availabilityZones = azConnector.getAvailabilityZones(cloudCredential, zonesToCheckOnProviderSide, instanceType, region);
                 LOGGER.info("Availability zones for instance group '{}' with instance type: '{}' in region '{}' for environment are: '{}'", groupName,
                         instanceType, region.getRegionName(), availabilityZones);
-                validateTheMinimumNumberOfZones(validationBuilder, minZones, groupName, availabilityZones, instanceType);
+                if (CollectionUtils.isEmpty(availabilityZones)) {
+                    LOGGER.warn("There are no availability zones configured");
+                    validationBuilder.error(String.format("Based on configured availability zones and instance type, there are no availability zones " +
+                            "for instance group %s and instance type %s. Please configure at least one Availability zone for Multi Az deployment",
+                            groupName, instanceType));
+                }
             } else {
                 LOGGER.debug("Validation is disabled because either the stack is not multi-AZ: '{}' or the zones set to check is empty: '{}'",
                         stack.isMultiAz(), CollectionUtils.isEmpty(zonesToCheckOnProviderSide));
             }
-        }
-    }
-
-    private static void validateTheMinimumNumberOfZones(ValidationResultBuilder validationBuilder, Integer minZones, String groupName,
-            Set<String> availabilityZones, String instanceType) {
-        int requestedNumberOfZones = availabilityZones.size();
-        if (requestedNumberOfZones < minZones) {
-            LOGGER.warn("Number of zones are less than the allowed minimum number of Zones");
-            validationBuilder.error(String.format("Based on the configured availability zones and instance type('%s'), number of available zones " +
-                            "for instance group %s are %d. Please configure at least %d zones for Multi Az deployment", instanceType, groupName,
-                    requestedNumberOfZones, minZones));
         }
     }
 
@@ -187,13 +179,4 @@ public class ProviderBasedMultiAzSetupValidator {
         return zonesToCheckOnProviderSide;
     }
 
-    private Integer getMinZonesForStack(StackType stackType, AvailabilityZoneConnector availabilityZoneConnector) {
-        Integer minZones;
-        if (StackType.DATALAKE.equals(stackType)) {
-            minZones = availabilityZoneConnector.getMinZonesForDataLake();
-        } else {
-            minZones = availabilityZoneConnector.getMinZonesForDataHub();
-        }
-        return minZones;
-    }
 }

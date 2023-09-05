@@ -174,23 +174,17 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
     private void validateAvailabilityZones(EnvironmentValidationDto environmentValidationDto, ValidationResultBuilder resultBuilder, AzureParams azureParams) {
         if (CollectionUtils.isNotEmpty(azureParams.getAvailabilityZones())) {
             LOGGER.debug("Availability zones are {}", azureParams.getAvailabilityZones());
-            if (azureParams.getAvailabilityZones().size() == 1) {
-                String message = "There should be more than one Availability Zone configured for environment";
-                LOGGER.info(message);
-                resultBuilder.error(message);
-            } else {
-                boolean allZonesValid = checkInvalidAvailabilityZones(azureParams, resultBuilder);
-                if (allZonesValid) {
-                    Set<String> existingAvailabilityZones = getAvailabilityZones(environmentValidationDto);
-                    if (CollectionUtils.isNotEmpty(existingAvailabilityZones)) {
-                        if (!CollectionUtils.containsAll(azureParams.getAvailabilityZones(), existingAvailabilityZones)) {
-                            String message = String.format("Provided Availability Zones for environment do not contain the existing Availability Zones. " +
-                                            "Provided Availability Zones : %s. Existing Availability Zones : %s", azureParams.getAvailabilityZones()
-                                            .stream().sorted().collect(Collectors.joining(",")),
-                                    existingAvailabilityZones.stream().sorted().collect(Collectors.joining(",")));
-                            LOGGER.info(message);
-                            resultBuilder.error(message);
-                        }
+            boolean allZonesValid = checkInvalidAvailabilityZones(azureParams, resultBuilder);
+            if (allZonesValid) {
+                Set<String> existingAvailabilityZones = getAvailabilityZones(environmentValidationDto);
+                if (CollectionUtils.isNotEmpty(existingAvailabilityZones)) {
+                    if (!CollectionUtils.containsAll(azureParams.getAvailabilityZones(), existingAvailabilityZones)) {
+                        String message = String.format("Provided Availability Zones for environment do not contain the existing Availability Zones. " +
+                                        "Provided Availability Zones : %s. Existing Availability Zones : %s", azureParams.getAvailabilityZones()
+                                        .stream().sorted().collect(Collectors.joining(",")),
+                                existingAvailabilityZones.stream().sorted().collect(Collectors.joining(",")));
+                        LOGGER.info(message);
+                        resultBuilder.error(message);
                     }
                 }
             }

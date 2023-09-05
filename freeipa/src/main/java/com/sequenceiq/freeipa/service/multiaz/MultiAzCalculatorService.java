@@ -228,7 +228,13 @@ public class MultiAzCalculatorService {
                     Set<String> environmentZones = validateAndGetEnvironmentZones(environment, stack);
                     Set<String> availabilityZones = availabilityZoneConnector.getAvailabilityZones(getExtendedCloudCredential(stack), environmentZones,
                             instanceGroup.getTemplate().getInstanceType(), Region.region(environment.getLocation().getName()));
-                    validateMinimumZones(instanceGroup.getGroupName(), availabilityZones.size(), availabilityZoneConnector.getMinZonesForFreeIpa());
+                    if (CollectionUtils.isEmpty(availabilityZones)) {
+                        LOGGER.warn("There are no availability zones configured");
+                        throw new BadRequestException(String.format("Based on configured availability zones and instance type, " +
+                                        "there are no availability zones for instance group %s and instance type %s. " +
+                                        "Please configure at least one zone for Multi Az deployment",
+                                instanceGroup.getGroupName(), instanceGroup.getTemplate().getInstanceType()));
+                    }
                     LOGGER.debug("Availability Zones for instance group are  {}", availabilityZones);
                     instanceGroup.getInstanceGroupNetwork().setAttributes(availabilityZoneConverter.getJsonAttributesWithAvailabilityZones(availabilityZones,
                             instanceGroup.getInstanceGroupNetwork().getAttributes()));
@@ -284,15 +290,6 @@ public class MultiAzCalculatorService {
     private ExtendedCloudCredential getExtendedCloudCredential(Stack stack) {
         return extendedCloudCredentialConverter
                 .convert(credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn()));
-    }
-
-    private void validateMinimumZones(String instanceGroupName, int requestNumZones, int minZones) {
-        if (requestNumZones < minZones) {
-            LOGGER.error("Number of zones are less than min number of Zones");
-            throw new BadRequestException(String.format("Based on configured availability zones and instance type, number of available zones " +
-                            "for instance group %s are %d. Please configure at least %d zones for Multi Az deployment", instanceGroupName,
-                    requestNumZones, minZones));
-        }
     }
 
     private long countInstancesForAvailabilityZone(Set<InstanceMetaData> instanceMetaDataSets, String availabilityZone) {

@@ -247,13 +247,15 @@ class MultiAzCalculatorServiceTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName("master");
         setUpForPopulateAvailabilityZones(stack, instanceGroup, availabilityZoneConnector, detailedEnvironmentResponse);
-        when(availabilityZoneConnector.getMinZonesForFreeIpa()).thenReturn(4);
+        instanceGroup.getTemplate().setInstanceType("instance0");
+        when(availabilityZoneConnector.getAvailabilityZones(any(), any(), any(), any())).thenReturn(Set.of());
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.populateAvailabilityZones(stack, detailedEnvironmentResponse, instanceGroup));
 
-        assertEquals("Based on configured availability zones and instance type, number of available zones " +
-                "for instance group master are 3. Please configure at least 4 zones for Multi Az deployment", badRequestException.getMessage());
+        assertEquals("Based on configured availability zones and instance type, " +
+                        "there are no availability zones for instance group master and instance type instance0. " +
+                        "Please configure at least one zone for Multi Az deployment", badRequestException.getMessage());
         verify(availabilityZoneConnector).getAvailabilityZones(any(), any(), any(), any());
     }
 

@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
@@ -54,9 +53,6 @@ public class FreeIpaScalingValidationService {
         validateScalingIsDownscale(scalingPath);
         validateInstanceIdsToDelete(allInstances, instanceIdsToDelete);
         executeCommonValidations(allInstances, stack, scalingPath, OperationType.DOWNSCALE);
-        if (stack.isMultiAz()) {
-            validateDownScaleForMultiAz(stack, scalingPath, allInstances, instanceIdsToDelete);
-        }
     }
 
     private void validateInstanceIdsToDelete(Set<InstanceMetaData> allInstances, Set<String> instanceIdsToDelete) {
@@ -133,24 +129,6 @@ public class FreeIpaScalingValidationService {
     private boolean scalingPathDisabled(ScalingPath scalingPath) {
         List<AvailabilityType> targetAvailabilityTypes = allowedScalingPaths.getPaths().get(scalingPath.getOriginalAvailabilityType());
         return Objects.isNull(targetAvailabilityTypes) || !targetAvailabilityTypes.contains(scalingPath.getTargetAvailabilityType());
-    }
-
-    private void validateDownScaleForMultiAz(Stack stack, ScalingPath scalingPath, Set<InstanceMetaData> allInstances, Set<String> instanceIdsToDelete) {
-        AvailabilityZoneConnector availabilityZoneConnector = multiAzCalculatorService.getAvailabilityZoneConnector(stack);
-        if (availabilityZoneConnector != null) {
-            long numberOfZonesAfterDownscale = calculateNumberOfZonesAfterDownscale(scalingPath, allInstances, instanceIdsToDelete);
-            LOGGER.debug("Number of zones after downscale will be {}", numberOfZonesAfterDownscale);
-            if (numberOfZonesAfterDownscale < availabilityZoneConnector.getMinZonesForFreeIpa()) {
-                throw new BadRequestException(String.format("%s will result in number of availability zones less than minimum number of availability zones " +
-                                "needed for Multi AZ deployment. Number of zones after %s: %d. Minimum zones needed: %d",
-                        OperationType.DOWNSCALE.getLowerCaseName(), OperationType.DOWNSCALE.getLowerCaseName(), numberOfZonesAfterDownscale,
-                        availabilityZoneConnector.getMinZonesForFreeIpa()));
-            }
-        } else {
-            LOGGER.info("Implementation for AvailabilityZoneConnector is not present for CloudPlatform {} and PlatformVariant {}." +
-                            "Skipping MultiAz validations for {}",
-                    stack.getCloudPlatform(), stack.getPlatformvariant(), OperationType.DOWNSCALE.getLowerCaseName());
-        }
     }
 
     private boolean nodeCountAlreadyMatchesTarget(Set<InstanceMetaData> allInstances, ScalingPath scalingPath) {

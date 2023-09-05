@@ -389,8 +389,9 @@ class AzureEnvironmentNetworkValidatorTest {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         underTest.validateDuringRequest(networkDto, resultBuilder);
 
-        NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of(
-                "There should be more than one Availability Zone configured for environment"));
+        ValidationResult validationResult = resultBuilder.build();
+
+        assertFalse(validationResult.hasError(), validationResult.getFormattedErrors());
     }
 
     @Test
