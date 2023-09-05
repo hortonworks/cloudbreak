@@ -32,8 +32,10 @@ public class ClusterApiViewToClusterViewV4ResponseConverter {
         clusterViewResponse.setDescription(source.getDescription());
         clusterViewResponse.setId(source.getId());
         clusterViewResponse.setServerIp(source.getClusterManagerIp());
-        clusterViewResponse.setBlueprint(blueprintViewToBlueprintV4ViewResponseConverter
-                .convert(source.getBlueprint()));
+        if (clusterViewResponse.getBlueprint() != null) {
+            clusterViewResponse.setBlueprint(blueprintViewToBlueprintV4ViewResponseConverter
+                    .convert(source.getBlueprint()));
+        }
         clusterViewResponse.setStatus(source.getStatus());
         clusterViewResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
         clusterViewResponse.setCertExpirationState(source.getCertExpirationState());
