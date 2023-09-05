@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation;
 
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_CM_INTERMEDIATE_CA_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_BOOT_SECRETS;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,16 +10,28 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 
-class CbSaltUpdateSaltUpdateEventProviderTest {
+class CloudbreakSecretRotationFlowEventProviderTest {
 
-    private CbSaltUpdateSaltUpdateEventProvider underTest = new CbSaltUpdateSaltUpdateEventProvider();
+    private CloudbreakSecretRotationFlowEventProvider underTest = new CloudbreakSecretRotationFlowEventProvider();
+
+    @Test
+    public void testGetPostFlowEvents() {
+        assertTrue(underTest.getPostFlowEvent(new SecretRotationFlowChainTriggerEvent(null, 1L, null,
+                List.of(SALT_BOOT_SECRETS), null)).isEmpty());
+        Set<Selectable> postFlowEvents = underTest.getPostFlowEvent(new SecretRotationFlowChainTriggerEvent(null, 1L, null,
+                List.of(DATAHUB_CM_INTERMEDIATE_CA_CERT), null));
+        assertFalse(postFlowEvents.isEmpty());
+        assertEquals(postFlowEvents.iterator().next().getSelector(), ClusterCertificatesRotationEvent.CLUSTER_CMCA_ROTATION_EVENT.event());
+    }
 
     @Test
     public void testTriggerEventProvided() {

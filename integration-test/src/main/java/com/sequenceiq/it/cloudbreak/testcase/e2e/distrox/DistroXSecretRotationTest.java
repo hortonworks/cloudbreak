@@ -24,7 +24,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
-import com.sequenceiq.it.cloudbreak.util.clouderamanager.ClouderaManagerUtil;
 
 public class DistroXSecretRotationTest extends AbstractE2ETest {
 
@@ -33,9 +32,6 @@ public class DistroXSecretRotationTest extends AbstractE2ETest {
 
     @Inject
     private SdxTestClient sdxTestClient;
-
-    @Inject
-    private ClouderaManagerUtil clouderaManagerUtil;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -66,9 +62,9 @@ public class DistroXSecretRotationTest extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running default Distrox cluster",
-            when = "multi secrets are getting rotated",
-            then = "rotation should be successful and cluster should be available")
-    public void testMultiSecretRotation(TestContext testContext, ITestContext iTestContext) {
+            when = "CM shared DB multi secret are getting rotated",
+            then = "rotation should be successful and clusters should be available")
+    public void testCMSharedDbMultiSecretRotation(TestContext testContext, ITestContext iTestContext) {
         testContext
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.rotateSecret(Set.of(DATALAKE_CM_SERVICE_SHARED_DB)))

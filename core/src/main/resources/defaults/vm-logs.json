@@ -374,5 +374,13 @@
   {
     "path": "/var/log/resize-storage-volumes-allout.log",
     "label": "resize_storage_volumes_allout"
+  },
+  {
+    "path": "/var/log/cm_cmca*.log",
+    "label": "rotation_cmca_renewal"
+  },
+  {
+    "path": "/var/log/postgresql_rotate*.log",
+    "label": "rotation_db_secrets"
   }
 ]

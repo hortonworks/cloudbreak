@@ -17,6 +17,7 @@ import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.CM_SERVICE_SHAR
 import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.DEMO_MULTI_SECRET;
 import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.FREEIPA_CA_CERT;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.INTERNAL;
+import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.POST_FLOW;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_UPDATE;
 
 import java.util.List;
@@ -39,8 +40,8 @@ public enum CloudbreakSecretType implements SecretType {
     DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD(List.of(SALT_PILLAR), Set.of(INTERNAL)),
     INTERNAL_DATALAKE_CM_SERVICE_SHARED_DB(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE), Set.of(INTERNAL)),
     INTERNAL_DATALAKE_DEMO_SECRET(List.of(CUSTOM_JOB), Set.of(SKIP_SALT_UPDATE, INTERNAL)),
-    INTERNAL_DATALAKE_CM_INTERMEDIATE_CA_CERT(List.of(CUSTOM_JOB), Set.of(INTERNAL)),
-    DATAHUB_CM_INTERMEDIATE_CA_CERT(List.of(CUSTOM_JOB), FREEIPA_CA_CERT);
+    INTERNAL_DATALAKE_CM_INTERMEDIATE_CA_CERT(List.of(SALT_STATE_APPLY), Set.of(INTERNAL, POST_FLOW)),
+    DATAHUB_CM_INTERMEDIATE_CA_CERT(List.of(SALT_STATE_APPLY), FREEIPA_CA_CERT, Set.of(POST_FLOW));
 
     private final List<SecretRotationStep> steps;
 

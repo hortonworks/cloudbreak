@@ -91,7 +91,7 @@ public class RootCertRegisterService extends AbstractConfigRegister {
         }
     }
 
-    private String getRootCertFromFreeIpa(Stack stack) throws FreeIpaClientException {
+    public String getRootCertFromFreeIpa(Stack stack) throws FreeIpaClientException {
         FreeIpaClient freeIpaClient = clientFactory.getFreeIpaClientForStack(stack);
         return freeIpaClient.getRootCertificate();
     }
@@ -105,7 +105,7 @@ public class RootCertRegisterService extends AbstractConfigRegister {
         return rootCertService.save(rootCert);
     }
 
-    private String convertToPemFormat(String certificate) {
+    public static String convertToPemFormat(String certificate) {
         return String.join("\n",
                 BEGIN_CERTIFICATE,
                 String.join("\n",
