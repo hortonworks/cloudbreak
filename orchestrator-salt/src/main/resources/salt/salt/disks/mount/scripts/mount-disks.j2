@@ -128,8 +128,8 @@ mount_one() {
 demount_tempstorage_azure() {
       local return_value=0
       local waagent_conf="/etc/waagent.conf"
-      local original_path="/mnt/resource"
-      local device=$(df | grep $original_path | awk '{print $1}')
+      local original_path=$(df -P $(readlink -f /dev/disk/azure/resource-part1) | tail -1 | awk '{print $6}')
+      local device=$(readlink -f /dev/disk/azure/resource-part1)
 
       log $LOG_FILE demounting $device temporary storage device from path $original_path
       umount $original_path >> $LOG_FILE 2>&1
