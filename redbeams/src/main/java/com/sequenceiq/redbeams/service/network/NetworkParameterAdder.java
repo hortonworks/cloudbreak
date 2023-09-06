@@ -94,7 +94,12 @@ public class NetworkParameterAdder {
                 Optional<String> delegatedSubnet = Optional.ofNullable(network.getAzure())
                         .map(EnvironmentNetworkAzureParams::getFlexibleServerSubnetIds)
                         .flatMap(subnetIds -> subnetIds.stream().findFirst());
-                delegatedSubnet.ifPresent(subnetId -> parameters.put(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID, subnetId));
+                delegatedSubnet
+                        .map(subnetId -> {
+                            String subscriptionId = subnetListerService.getAzureSubscriptionId(environmentResponse.getCrn());
+                            return subnetListerService.expandAzureResourceId(subnetId, environmentResponse, subscriptionId);
+                        })
+                        .ifPresent(subnetId -> parameters.put(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID, subnetId));
                 databasePrivateDnsZoneId.ifPresent(dnsZoneId -> parameters.put(EXISTING_PRIVATE_DNS_ZONE_ID, dnsZoneId));
             }
             case GCP -> {

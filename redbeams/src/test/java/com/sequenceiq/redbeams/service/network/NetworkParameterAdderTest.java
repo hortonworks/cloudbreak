@@ -55,6 +55,9 @@ public class NetworkParameterAdderTest {
 
     private static final String SUBNETS = "subnets";
 
+    private static final String SUBNET_RESOURCE_ID =
+            "/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/networkId/subnets/mySubnet";
+
     @Mock
     private ServiceEndpointCreationToEndpointTypeConverter serviceEndpointCreationToEndpointTypeConverter;
 
@@ -123,13 +126,14 @@ public class NetworkParameterAdderTest {
         when(subnetListerService.getAzureSubscriptionId(any())).thenReturn("mySubscription");
         when(subnetChooserService.chooseSubnetForPrivateEndpoint(any(), any(), anyBoolean())).thenReturn(List.of(subnetForPrivateEndpoint));
         when(serviceEndpointCreationToEndpointTypeConverter.convert(any(), any())).thenReturn(PrivateEndpointType.USE_PRIVATE_ENDPOINT);
-        when(subnetListerService.expandAzureResourceId(any(), any(), anyString())).thenCallRealMethod();
+        CloudSubnet cloudSubnet = new CloudSubnet(SUBNET_RESOURCE_ID, SUBNET_ID);
+        when(subnetListerService.expandAzureResourceId(any(CloudSubnet.class), any(), anyString())).thenReturn(cloudSubnet);
 
         parameters = underTest.addParameters(parameters, environment, CloudPlatform.AZURE, dbStack);
 
         assertThat(parameters, IsMapContaining.hasEntry(ENDPOINT_TYPE, PrivateEndpointType.USE_PRIVATE_ENDPOINT));
         assertThat(parameters, IsMapContaining.hasEntry(SUBNET_FOR_PRIVATE_ENDPOINT,
-                "/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/networkId/subnets/mySubnet"));
+                SUBNET_RESOURCE_ID));
         assertThat(parameters, IsMapContaining.hasEntry(EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID, "databasePrivateDsZoneId"));
     }
 

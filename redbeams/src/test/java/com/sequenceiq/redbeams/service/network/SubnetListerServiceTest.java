@@ -117,6 +117,19 @@ public class SubnetListerServiceTest {
         assertEquals(expectedId, expandedSubnet.getId());
     }
 
+    @Test
+    public void testExpandAzureResourceIdWithResourceId() {
+        when(environmentNetworkResponse.getAzure().getResourceGroupName()).thenReturn(RESOURCE_GROUP);
+        when(environmentNetworkResponse.getAzure().getNetworkId()).thenReturn(NETWORK_ID);
+
+        String subnetResourceId = formatAzureResourceId(SUBSCRIPTION_ID, RESOURCE_GROUP, NETWORK_ID, SUBNET_ID_1);
+        CloudSubnet cloudSubnet = new CloudSubnet(subnetResourceId, "name1");
+
+        CloudSubnet expandedSubnet = underTest.expandAzureResourceId(cloudSubnet, detailedEnvironmentResponse, SUBSCRIPTION_ID);
+
+        assertEquals(subnetResourceId, expandedSubnet.getId());
+    }
+
     private String formatAzureResourceId(String subscription, String resourceGroup, String networkId, String subnetId) {
         return String.format("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s",
                 subscription, resourceGroup, networkId, subnetId);

@@ -2,6 +2,8 @@ package com.sequenceiq.redbeams.service.network;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -23,6 +25,9 @@ import com.sequenceiq.redbeams.service.CredentialService;
 public class SubnetListerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubnetListerService.class);
+
+    private static final String SUBNET_RESOURCE_ID_PATTERN = "^/subscriptions/[a-zA-Z0-9-]+/resourceGroups/[a-zA-Z0-9-_]+" +
+            "/providers/Microsoft\\.Network/virtualNetworks/[a-zA-Z0-9-_]+/subnets/[a-zA-Z0-9-_]+$";
 
     @Inject
     private CredentialService credentialService;
@@ -63,13 +68,32 @@ public class SubnetListerService {
 
     @VisibleForTesting
     CloudSubnet expandAzureResourceId(CloudSubnet meta, DetailedEnvironmentResponse environmentResponse, String subscriptionId) {
+        String expandedSubnetID = expandAzureResourceId(meta.getId(), environmentResponse, subscriptionId);
+        return meta.withId(expandedSubnetID);
+    }
 
-        StringBuilder expandedId = new StringBuilder("/subscriptions/");
-        expandedId.append(subscriptionId);
-        expandedId.append("/resourceGroups/").append(environmentResponse.getNetwork().getAzure().getResourceGroupName());
-        expandedId.append("/providers/Microsoft.Network/virtualNetworks/").append(environmentResponse.getNetwork().getAzure().getNetworkId());
-        expandedId.append("/subnets/").append(meta.getId());
+    String expandAzureResourceId(String subnetID, DetailedEnvironmentResponse environmentResponse, String subscriptionId) {
+        if (isValidAzureSubnetResourceId(subnetID)) {
+            LOGGER.debug("Subnet id: {} is a valid Azure subnet resource id.", subnetID);
+            return subnetID;
+        } else {
+            StringBuilder expandedId = new StringBuilder("/subscriptions/");
+            expandedId.append(subscriptionId);
+            expandedId.append("/resourceGroups/").append(environmentResponse.getNetwork().getAzure().getResourceGroupName());
+            expandedId.append("/providers/Microsoft.Network/virtualNetworks/").append(environmentResponse.getNetwork().getAzure().getNetworkId());
+            expandedId.append("/subnets/").append(subnetID);
 
-        return meta.withId(expandedId.toString());
+            LOGGER.debug("Subnet id: {} expanded to Azure subnet resource id: {}", subnetID, expandedId);
+            return expandedId.toString();
+        }
+    }
+
+    private boolean isValidAzureSubnetResourceId(String input) {
+        Pattern pattern = Pattern.compile(SUBNET_RESOURCE_ID_PATTERN);
+        Matcher matcher = pattern.matcher(input);
+        boolean result = matcher.matches();
+        LOGGER.debug("Checking subnet id {}, whether it conforms with the Azure resource ID pattern: {}. Pattern matching result: {}",
+                input, SUBNET_RESOURCE_ID_PATTERN, result);
+        return result;
     }
 }

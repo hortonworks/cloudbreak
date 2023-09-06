@@ -13,10 +13,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -141,19 +147,41 @@ class AzureEnvironmentNetworkValidatorTest {
         assertFalse(validationResultBuilder.build().hasError());
     }
 
-    @Test
-    void testValidateDuringFlowWhenFlexibleServerSubnetIdsAreValid() {
+    private static Stream<Set<String>> provideFlexibleServerSubnetArguments() {
+        return Stream.of(
+                Set.of("azure/flexibleSubnet"),
+                Set.of("flexibleSubnet1"),
+                Set.of("azure/flexibleSubnet, flexibleSubnet1"),
+                Set.of("azure/flexibleSubnet1, azure/flexibleSubnet2"),
+                Set.of("flexibleSubnet1, flexibleSubnet2")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideFlexibleServerSubnetArguments")
+    void testValidateDuringFlowWhenFlexibleServerSubnetIdsAreValid(Set<String> input) {
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         AzureParams azureParams = getAzureParams("networkId", "networkResourceGroupName");
-        azureParams.setFlexibleServerSubnetIds(Set.of("azure/flexibleSubnet"));
+        azureParams.setFlexibleServerSubnetIds(input);
         NetworkDto networkDto = NetworkTestUtils.getNetworkDtoBuilder(azureParams, null, null, azureParams.getNetworkId(), null, 1, RegistrationType.EXISTING)
                 .build();
         EnvironmentValidationDto environmentValidationDto = environmentValidationDtoWithSingleRg(MY_SINGLE_RG, ResourceGroupUsagePattern.USE_SINGLE);
         when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
+        Set<String> subnetNames = input.stream()
+                .map(subnet -> {
+                    if (subnet.contains("/")) {
+                        return StringUtils.substringAfterLast(subnet, "/");
+                    } else {
+                        return subnet;
+                    }
+                }).collect(Collectors.toSet());
+        Map<String, CloudSubnet> subnetToCloudSubnet = subnetNames.stream().collect(Collectors.toMap(Function.identity(), sn -> new CloudSubnet(sn, null)));
         when(cloudNetworkService.retrieveSubnetMetadata(environmentValidationDto.getEnvironmentDto(), networkDto))
-                .thenReturn(Map.ofEntries(Map.entry("flexibleSubnet", new CloudSubnet())));
-        when(cloudNetworkService.getSubnetMetadata(environmentValidationDto.getEnvironmentDto(), networkDto, Set.of("flexibleSubnet")))
-                .thenReturn(Map.ofEntries(Map.entry("flexibleServer", new CloudSubnet())));
+                .thenReturn(subnetToCloudSubnet);
+
+        when(cloudNetworkService.getSubnetMetadata(environmentValidationDto.getEnvironmentDto(), networkDto, subnetNames))
+                .thenReturn(subnetToCloudSubnet);
+
         when(azureCloudSubnetParametersService.isFlexibleServerDelegatedSubnet(any(CloudSubnet.class))).thenReturn(true);
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
@@ -262,7 +290,7 @@ class AzureEnvironmentNetworkValidatorTest {
         AzureParams azureParams = NetworkTestUtils.getAzureParams(true, true, true);
         azureParams.setFlexibleServerSubnetIds(new HashSet<>());
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, azureParams.getNetworkId(), null, numberOfSubnets);
-        EnvironmentDto environmentDto =  getEnvironmentDtoWithRegion();
+        EnvironmentDto environmentDto = getEnvironmentDtoWithRegion();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder()
                 .withEnvironmentDto(environmentDto)
                 .build();

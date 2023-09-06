@@ -219,7 +219,13 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
     private void checkFlexibleServerSubnetIds(AzureParams azureParams, EnvironmentDto environmentDto, NetworkDto networkDto,
             ValidationResultBuilder resultBuilder) {
         Set<String> flexibleServerSubnetIds = azureParams.getFlexibleServerSubnetIds().stream()
-                .map(subnet -> StringUtils.substringAfterLast(subnet, "/"))
+                .map(subnet -> {
+                    if (subnet.contains("/")) {
+                        return StringUtils.substringAfterLast(subnet, "/");
+                    } else {
+                        return subnet;
+                    }
+                })
                 .collect(Collectors.toSet());
         if (entitlementService.isAzureDatabaseFlexibleServerEnabled(environmentDto.getAccountId()) && CollectionUtils.isNotEmpty(flexibleServerSubnetIds)) {
             Map<String, CloudSubnet> flexibleSubnets = cloudNetworkService.getSubnetMetadata(environmentDto, networkDto, flexibleServerSubnetIds);
