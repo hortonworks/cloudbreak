@@ -21,8 +21,6 @@ public class AzureCloudSubnetParametersService {
 
     private static final String DISABLED = "disabled";
 
-    private static final String FLEXIBLE_SERVER = "Microsoft.DBforPostgreSQL/flexibleServers";
-
     public void addPrivateEndpointNetworkPolicies(CloudSubnet cloudSubnet, VirtualNetworkPrivateEndpointNetworkPolicies azurePrivateEndpointNetworkPolicies) {
         cloudSubnet.putParameter(PRIVATE_ENDPOINT_NETWORK_POLICIES,
                 VirtualNetworkPrivateEndpointNetworkPolicies.DISABLED.equals(azurePrivateEndpointNetworkPolicies) ? DISABLED : ENABLED);
@@ -37,7 +35,7 @@ public class AzureCloudSubnetParametersService {
     public void addFlexibleServerDelegatedSubnet(CloudSubnet cloudSubnet, List<Delegation> delegations) {
         Boolean flexibleServerDelegatedSubnet = CollectionUtils.isNotEmpty(delegations) ? delegations.stream()
                 .map(Delegation::serviceName)
-                .anyMatch(serviceName -> serviceName.equals(FLEXIBLE_SERVER)) : Boolean.FALSE;
+                .anyMatch(serviceName -> serviceName.equals(AzurePrivateDnsZoneServiceEnum.POSTGRES_FLEXIBLE.getResourceType())) : Boolean.FALSE;
         cloudSubnet.putParameter(FLEXIBLE_SERVER_DELEGATED_SUBNET, flexibleServerDelegatedSubnet);
     }
 

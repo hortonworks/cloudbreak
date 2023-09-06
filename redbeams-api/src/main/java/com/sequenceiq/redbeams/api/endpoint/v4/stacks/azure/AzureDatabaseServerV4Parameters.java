@@ -49,7 +49,7 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
     @ApiModelProperty(AzureDatabaseServerModelDescriptions.BACKUP_RETENTION_DAYS)
     private Integer backupRetentionDays;
 
-    @Pattern(regexp = "\\d+(?:\\.\\d)?")
+    @Pattern(regexp = "\\d+(?:\\.\\d)?", message = "Invalid database version, please enter a valid number, e.g. 11 or 14")
     @ApiModelProperty(AzureDatabaseServerModelDescriptions.DB_VERSION)
     private String dbVersion;
 

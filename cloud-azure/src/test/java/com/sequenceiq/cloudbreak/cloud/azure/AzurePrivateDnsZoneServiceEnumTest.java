@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum.POSTGRES;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum.POSTGRES_FLEXIBLE;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum.STORAGE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,7 +30,7 @@ public class AzurePrivateDnsZoneServiceEnumTest {
         assertThat(STORAGE.getDnsZoneNamePatterns()).asList().hasSize(1);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} {1} {0}")
     @MethodSource("testZoneNamePatterns")
     void testPatterns(AzurePrivateDnsZoneServiceEnum serviceEnum, String testZoneName, Boolean shouldMatch) {
         boolean zoneNameMatchedByPattern = serviceEnum.getDnsZoneNamePatterns().stream()
@@ -48,6 +49,24 @@ public class AzurePrivateDnsZoneServiceEnumTest {
                 {POSTGRES, "privatelink.postgres.databasex.azure.com", false},
                 {POSTGRES, "privatelink.postgresx.database.azure.com", false},
                 {POSTGRES, "privatelinkx.postgres.database.azure.com", false},
+
+                {POSTGRES_FLEXIBLE, "privatelink.postgres.database.azure.com", true},
+                {POSTGRES_FLEXIBLE, "postgres.database.azure.com", true},
+                {POSTGRES_FLEXIBLE, "mypostgres.privatelink.postgres.database.azure.com", true},
+                {POSTGRES_FLEXIBLE, "privatelink.postgres.database.azure.comx", false},
+                {POSTGRES_FLEXIBLE, "privatelink.postgres.database.azurex.com", false},
+                {POSTGRES_FLEXIBLE, "privatelink.postgres.databasex.azure.com", false},
+                {POSTGRES_FLEXIBLE, "privatelink.postgresx.database.azure.com", false},
+                {POSTGRES_FLEXIBLE, "a.b.c.postgres.database.azure.com", true},
+                {POSTGRES_FLEXIBLE, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.postgres.database.azure.com", true},
+                {POSTGRES_FLEXIBLE, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`.postgres.database.azure.com", false},
+                {POSTGRES_FLEXIBLE, "a-b-c.postgres.database.azure.com", true},
+                {POSTGRES_FLEXIBLE, "a.-b-c.postgres.database.azure.com", false},
+                {POSTGRES_FLEXIBLE, "a.-b.-c.postgres.database.azure.com", false},
+                {POSTGRES_FLEXIBLE, "-a.b.c.postgres.database.azure.com", false},
+                {POSTGRES_FLEXIBLE, ".a.b.c.postgres.database.azure.com", false},
+                {POSTGRES_FLEXIBLE, "a.b.c-.postgres.database.azure.com", false},
+                {POSTGRES_FLEXIBLE, "a.b.c..postgres.database.azure.com", false},
 
                 {STORAGE, "privatelink.blob.core.windows.net", true},
                 {STORAGE, "blob.core.windows.net", false},

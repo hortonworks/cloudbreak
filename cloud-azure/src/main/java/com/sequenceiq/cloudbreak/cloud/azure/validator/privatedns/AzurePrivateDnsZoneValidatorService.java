@@ -5,7 +5,6 @@ import static com.azure.resourcemanager.privatedns.models.ProvisioningState.SUCC
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -64,7 +63,7 @@ public class AzurePrivateDnsZoneValidatorService {
         List<String> connectedNetworks = azureClient.listNetworkLinksByPrivateDnsZoneName(
                         privateDnsZoneResourceId.subscriptionId(), privateDnsZoneResourceId.resourceGroupName(), privateDnsZoneResourceId.name())
                 .getStream(AZURE_HANDLE_ALL_EXCEPTIONS)
-                .map(vnl -> vnl.virtualNetwork().id()).collect(Collectors.toList());
+                .map(vnl -> vnl.virtualNetwork().id()).toList();
         if (!connectedNetworks.contains(networkId)) {
             String validationMessage = String.format("The private DNS zone %s does not have a network link to network %s. Please make sure the private DNS " +
                     "zone is connected to the network provided to the environment.", privateDnsZoneResourceId.id(), networkName);

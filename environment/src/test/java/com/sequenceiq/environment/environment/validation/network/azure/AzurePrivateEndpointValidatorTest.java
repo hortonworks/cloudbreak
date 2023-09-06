@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.privatedns.AzureExistingPrivateDnsZoneValidatorService;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.privatedns.AzureNewPrivateDnsZoneValidatorService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
@@ -48,6 +50,8 @@ public class AzurePrivateEndpointValidatorTest {
 
     private static final String EXISTING_AKS_PRIVATE_DNS_ZONE_ID = "existingAksPrivateDnsZoneId";
 
+    private static final String FLEXIBLE_SERVER_SUBNET_ID = "flexibleServerSubnetId";
+
     @Mock
     private AzureCloudSubnetParametersService azureCloudSubnetParametersService;
 
@@ -70,7 +74,7 @@ public class AzurePrivateEndpointValidatorTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         underTest = new AzurePrivateEndpointValidator(
                 azureCloudSubnetParametersService,
                 credentialToCloudCredentialConverter,
@@ -226,8 +230,8 @@ public class AzurePrivateEndpointValidatorTest {
 
         assertTrue(validationResultBuilder.build().hasError());
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
-                "A private DNS zone is provided, but private endpoint creation is turned off. Please either turn on private endpoint creation" +
-                        " or do not specify the existing private DNS zone."));
+                "A private DNS zone is provided, but private endpoint creation is turned off and no Flexible server delegated subnet is specified. "
+                        + "Please specify exactly one of them or do not specify the existing private DNS zone."));
     }
 
     @Test
@@ -240,6 +244,21 @@ public class AzurePrivateEndpointValidatorTest {
         underTest.checkExistingManagedPrivateDnsZone(validationResultBuilder, new EnvironmentDto(), networkDto);
 
         assertFalse(validationResultBuilder.build().hasError());
+        verify(credentialToCloudCredentialConverter).convert(any());
+        verify(azureClientService).getClient(any());
+        verify(azureExistingPrivateDnsZoneValidatorService).validate(any(), any(), any(), any(), eq(validationResultBuilder));
+    }
+
+    @Test
+    void testCheckExistingManagedPrivateDnsZoneWhenBothPrivateEndpointAndFlexibleServerSubnet() {
+        ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
+        AzureParams azureParams = getAzureParams(EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID, null, FLEXIBLE_SERVER_SUBNET_ID);
+        NetworkDto networkDto = getNetworkDto(azureParams);
+        when(azureExistingPrivateDnsZonesService.hasNoExistingManagedZones(networkDto)).thenReturn(false);
+
+        underTest.checkExistingManagedPrivateDnsZone(validationResultBuilder, new EnvironmentDto(), networkDto);
+
+        assertTrue(validationResultBuilder.build().hasError());
         verify(credentialToCloudCredentialConverter).convert(any());
         verify(azureClientService).getClient(any());
         verify(azureExistingPrivateDnsZoneValidatorService).validate(any(), any(), any(), any(), eq(validationResultBuilder));
@@ -280,11 +299,16 @@ public class AzurePrivateEndpointValidatorTest {
     }
 
     private AzureParams getAzureParams(String databasePrivateDnsZoneId, String aksPrivateDnsZoneId) {
+        return getAzureParams(databasePrivateDnsZoneId, aksPrivateDnsZoneId, null);
+    }
+
+    private AzureParams getAzureParams(String databasePrivateDnsZoneId, String aksPrivateDnsZoneId, String flexibleSubnetId) {
         return AzureParams.builder()
                 .withNetworkId(NETWORK_ID)
                 .withResourceGroupName("networkResourceGroupName")
                 .withDatabasePrivateDnsZoneId(databasePrivateDnsZoneId)
                 .withAksPrivateDnsZoneId(aksPrivateDnsZoneId)
+                .withFlexibleServerSubnetIds(NullUtil.getIfNotNullOtherwise(flexibleSubnetId, Set::of, null))
                 .build();
     }
 

@@ -13,12 +13,28 @@ Azure private DNS zones that can be registered and used by cloudbreak are listed
  */
 public enum AzurePrivateDnsZoneServiceEnum implements AzurePrivateDnsZoneDescriptor {
 
-    POSTGRES("Microsoft.DBforPostgreSQL/servers", "postgresqlServer", "privatelink.postgres.database.azure.com",
-            "postgres.database.azure.com", AzurePrivateDnsZoneServiceEnum.POSTGRES_DNS_ZONE_NAME_PATTERN),
-    STORAGE("Microsoft.Storage/storageAccounts", "Blob", "privatelink.blob.core.windows.net",
-            "blob.core.windows.net", AzurePrivateDnsZoneServiceEnum.STORAGE_DNS_ZONE_NAME_PATTERN);
+    POSTGRES("Microsoft.DBforPostgreSQL/servers",
+            "postgresqlServer",
+            "privatelink.postgres.database.azure.com",
+            "postgres.database.azure.com",
+            AzurePrivateDnsZoneServiceEnum.POSTGRES_DNS_ZONE_NAME_PATTERN),
+    POSTGRES_FLEXIBLE("Microsoft.DBforPostgreSQL/flexibleServers",
+            "flexiblePostgresqlServer",
+            "postgres.database.azure.com",
+            "postgres.database.azure.com",
+            AzurePrivateDnsZoneServiceEnum.FLEXIBLE_POSTGRES_DNS_ZONE_NAME_PATTERN),
+    STORAGE("Microsoft.Storage/storageAccounts",
+            "Blob",
+            "privatelink.blob.core.windows.net",
+            "blob.core.windows.net",
+            AzurePrivateDnsZoneServiceEnum.STORAGE_DNS_ZONE_NAME_PATTERN);
 
     private static final String POSTGRES_DNS_ZONE_NAME_PATTERN = "privatelink\\.postgres\\.database\\.azure\\.com";
+
+    // Each DNS label must start with a letter, end with a letter or digit, and have as interior
+    // characters only letters, digits, and hyphen. It's length must be 63 characters or fewer
+    // source: https://www.ietf.org/rfc/rfc1035.txt
+    private static final String FLEXIBLE_POSTGRES_DNS_ZONE_NAME_PATTERN = "^((?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.)*postgres\\.database\\.azure\\.com";
 
     private static final String STORAGE_DNS_ZONE_NAME_PATTERN = "privatelink\\.blob\\.core\\.windows\\.net";
 

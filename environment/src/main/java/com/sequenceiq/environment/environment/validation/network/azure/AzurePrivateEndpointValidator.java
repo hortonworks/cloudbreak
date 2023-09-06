@@ -97,15 +97,16 @@ public class AzurePrivateEndpointValidator {
             return;
         }
         boolean hasFlexibleServerSubnets = CollectionUtils.isNotEmpty(networkDto.getAzure().getFlexibleServerSubnetIds());
-        if (hasFlexibleServerSubnets) {
-            // TODO: Create proper validation
-            LOGGER.debug("Skipping validation of DNS Zone in case of Azure Flexible Server");
-            return;
+        boolean hasPrivateEndpointEnabled = networkDto.isPrivateEndpointEnabled(CloudPlatform.AZURE);
+
+        if (hasFlexibleServerSubnets && hasPrivateEndpointEnabled) {
+            addValidationError("A private DNS zone is provided with both private endpoint enabled and Flexible Server delegated subnet(s) present. "
+                    + "Please either turn off private endpoint creation or do not specify the existing delegated subnet(s).", resultBuilder);
         }
 
-        if (!networkDto.isPrivateEndpointEnabled(CloudPlatform.AZURE)) {
-            addValidationError("A private DNS zone is provided, but private endpoint creation is turned off. Please either turn on private endpoint " +
-                    "creation or do not specify the existing private DNS zone.", resultBuilder);
+        if (!hasFlexibleServerSubnets && !hasPrivateEndpointEnabled) {
+            addValidationError("A private DNS zone is provided, but private endpoint creation is turned off and no Flexible server delegated subnet is "
+                    + "specified. Please specify exactly one of them or do not specify the existing private DNS zone.", resultBuilder);
         } else {
             CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environmentDto.getCredential());
             AzureClient azureClient = azureClientService.getClient(cloudCredential);

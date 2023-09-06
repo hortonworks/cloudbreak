@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneDescriptor;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneRegistrationEnum;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
+import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
@@ -22,6 +23,8 @@ public class AzureExistingPrivateDnsZonesServiceTest {
     private static final String POSTGRES_PRIVATE_DNS_ZONE_ID = "postgresPrivateDnsZoneId";
 
     private static final String AKS_PRIVATE_DNS_ZONE_ID = "aksPrivateDnsZoneId";
+
+    private static final String FLEXIBLE_SERVER_SUBNET_ID = "subnetId";
 
     private final AzureExistingPrivateDnsZonesService underTest = new AzureExistingPrivateDnsZonesService();
 
@@ -50,6 +53,15 @@ public class AzureExistingPrivateDnsZonesServiceTest {
         Map<AzurePrivateDnsZoneDescriptor, String> existingZones = underTest.getExistingManagedZonesAsDescriptors(networkDto);
 
         assertEquals(POSTGRES_PRIVATE_DNS_ZONE_ID, existingZones.get(AzurePrivateDnsZoneServiceEnum.POSTGRES));
+    }
+
+    @Test
+    void testGetExistingManagedZonesAsDescriptorsWhenFlexiblePostgresPresent() {
+        NetworkDto networkDto = getNetworkDto(POSTGRES_PRIVATE_DNS_ZONE_ID, null, FLEXIBLE_SERVER_SUBNET_ID);
+
+        Map<AzurePrivateDnsZoneDescriptor, String> existingZones = underTest.getExistingManagedZonesAsDescriptors(networkDto);
+
+        assertEquals(POSTGRES_PRIVATE_DNS_ZONE_ID, existingZones.get(AzurePrivateDnsZoneServiceEnum.POSTGRES_FLEXIBLE));
     }
 
     @Test
@@ -128,11 +140,16 @@ public class AzureExistingPrivateDnsZonesServiceTest {
     }
 
     private NetworkDto getNetworkDto(String postgresPrivateDnsZoneId, String aksPrivateDnsZoneId) {
+        return getNetworkDto(postgresPrivateDnsZoneId, aksPrivateDnsZoneId, null);
+    }
+
+    private NetworkDto getNetworkDto(String postgresPrivateDnsZoneId, String aksPrivateDnsZoneId, String flexibleSubnetId) {
         return NetworkDto.builder()
                 .withAzure(
                         AzureParams.builder()
                                 .withDatabasePrivateDnsZoneId(postgresPrivateDnsZoneId)
                                 .withAksPrivateDnsZoneId(aksPrivateDnsZoneId)
+                                .withFlexibleServerSubnetIds(NullUtil.getIfNotNullOtherwise(flexibleSubnetId, Set::of, null))
                                 .build()
                 )
                 .build();
