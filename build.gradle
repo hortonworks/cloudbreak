@@ -100,7 +100,7 @@ allprojects {
         force "com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion"
         force "org.codehaus.jackson:jackson-jaxrs:1.9.13"
         force "org.codehaus.jackson:jackson-mapper-asl:1.9.13"
-        force "org.codehaus.jackson:jackson-core-asl:1.9.13"
+        force "org.codehaus.jackson:jackson-core-asl:1.9.13-atlassian-2"
         force "org.codehaus.jackson:jackson-xc:1.9.13-atlassian-2"
         force "org.testng:testng:$testNgVersion"
         force "org.springframework:spring-messaging:$springFrameworkVersion"
