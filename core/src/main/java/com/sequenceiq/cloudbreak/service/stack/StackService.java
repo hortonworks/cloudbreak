@@ -618,9 +618,11 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
             // happens for base images
             LOGGER.warn("Product component is not present amongst components, runtime could not be set!");
         }
+        boolean flexibleServerEnabled = entitlementService.isAzureDatabaseFlexibleServerEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId());
         String dbEngineVersion = databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(
                 stackVersion, os, stack.getExternalDatabaseEngineVersion(), CloudPlatform.valueOf(stack.getCloudPlatform()),
-                !Optional.ofNullable(stack.getDatabase().getExternalDatabaseAvailabilityType()).orElse(DatabaseAvailabilityType.NONE).isEmbedded());
+                !Optional.ofNullable(stack.getDatabase().getExternalDatabaseAvailabilityType()).orElse(DatabaseAvailabilityType.NONE).isEmbedded(),
+                flexibleServerEnabled);
         if (stack.getDatabase() != null) {
             stack.getDatabase().setExternalDatabaseEngineVersion(dbEngineVersion);
         }

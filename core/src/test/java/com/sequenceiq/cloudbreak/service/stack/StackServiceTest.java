@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
@@ -233,11 +234,15 @@ class StackServiceTest {
     @Mock
     private DatabaseService databaseService;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @BeforeEach
     void setUp() throws Exception {
         underTest.nowSupplier = () -> MOCK_NOW;
 
         lenient().when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
+        lenient().when(stack.getResourceCrn()).thenReturn("crn:cdp:datahub:us-west-1:tenant:cluster:878605d9-f9e9-44c6-9da6-e4bce9570ef5");
         lenient().when(stackAuthentication.passwordAuthenticationRequired()).thenReturn(false);
         lenient().when(stackRepository.save(stack)).thenReturn(stack);
         lenient().when(statedImage.getImage()).thenReturn(image);
@@ -288,7 +293,7 @@ class StackServiceTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);
         when(stack.getDatabase()).thenReturn(database);
         String calculatedDbVersion = "11";
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion, CloudPlatform.MOCK, false))
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion, CloudPlatform.MOCK, false, false))
                 .thenReturn(calculatedDbVersion);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
@@ -312,7 +317,7 @@ class StackServiceTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);
         when(stack.getDatabase()).thenReturn(database);
         String calculatedDbVersion = "11";
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(null, os, dbVersion, CloudPlatform.MOCK, false))
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(null, os, dbVersion, CloudPlatform.MOCK, false, false))
                 .thenReturn(calculatedDbVersion);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
