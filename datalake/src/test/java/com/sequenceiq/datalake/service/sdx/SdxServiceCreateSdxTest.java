@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -364,7 +365,7 @@ class SdxServiceCreateSdxTest {
             sdxWithId.setId(id);
             return sdxWithId;
         });
-        when(externalDatabaseConfigurer.configure(any(), any(), any(), any(), any())).thenReturn(new SdxDatabase());
+        when(externalDatabaseConfigurer.configure(any(), any(), any(), any(), any(), anyBoolean())).thenReturn(new SdxDatabase());
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest, AZURE, null);
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
@@ -881,7 +882,7 @@ class SdxServiceCreateSdxTest {
         setSpot(sdxClusterRequest);
         withCloudStorage(sdxClusterRequest);
         when(imageCatalogService.getImageResponseFromImageRequest(eq(sdxClusterRequest.getImage()), any())).thenReturn(imageResponse);
-        when(externalDatabaseConfigurer.configure(any(), eq(OS), any(), any(), any())).thenReturn(new SdxDatabase());
+        when(externalDatabaseConfigurer.configure(any(), eq(OS), any(), any(), any(), anyBoolean())).thenReturn(new SdxDatabase());
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
@@ -897,7 +898,7 @@ class SdxServiceCreateSdxTest {
         assertNotNull(stackV4Request.getImage());
         assertEquals("cdp-default", stackV4Request.getImage().getCatalog());
         assertEquals("imageId_1", stackV4Request.getImage().getId());
-        verify(externalDatabaseConfigurer).configure(any(), eq(OS), any(), any(), any());
+        verify(externalDatabaseConfigurer).configure(any(), eq(OS), any(), any(), any(), anyBoolean());
     }
 
     @Test

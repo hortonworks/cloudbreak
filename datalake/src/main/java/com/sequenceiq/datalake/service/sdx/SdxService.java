@@ -502,8 +502,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
 
         DatabaseRequest internalDatabaseRequest = Optional.ofNullable(internalStackV4Request).map(StackV4Request::getExternalDatabase).orElse(null);
-        sdxCluster.setSdxDatabase(externalDatabaseConfigurer.configure(
-                cloudPlatform, os, internalDatabaseRequest, sdxClusterRequest.getExternalDatabase(), sdxCluster));
+        sdxCluster.setSdxDatabase(externalDatabaseConfigurer.configure(cloudPlatform, os, internalDatabaseRequest, sdxClusterRequest.getExternalDatabase(),
+                sdxCluster, entitlementService.isAzureDatabaseFlexibleServerEnabled(accountId)));
 
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(internalStackV4Request, environment.getCrn());
         StackV4Request stackRequest = getStackRequest(sdxClusterRequest.getClusterShape(), sdxClusterRequest.isEnableRangerRaz(),
