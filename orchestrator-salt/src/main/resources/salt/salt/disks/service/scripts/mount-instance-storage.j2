@@ -138,24 +138,22 @@ find_format_and_mount_tempstorage_azure() {
 
       log $LOG_FILE "Start mounting of regular temporary disk to path: $path"
 
-      local device=""
-      all_devices=$(blkid | awk '{print $1}' | sed 's/.$//')
-      mounted_devices=$(df | tail -n +2 | awk '{print $1}')
-      for dev in $all_devices; do
-          if [[ ! ${mounted_devices[*]} =~ ${dev} ]]; then
-              device=$dev
-          fi
-      done
-      if [[ $device == "" ]]; then
-        log $LOG_FILE No unmounted temporary disk found
+      device=$(readlink -f /dev/disk/azure/resource-part1)
+      mounted_info=$(df -P | grep "${device}")
+
+      if [ -n "$mounted_info" ]; then
+        mount_point=$(echo "$mounted_info" | awk '{print $6}')
+        log $LOG_FILE "Temporary disk $device is mounted at $mount_point"
         return_value=0
         return $((return_value))
+      else
+        log $LOG_FILE "Temporary disk $device is not mounted"
       fi
 
-      log $LOG_FILE "formatting: $device"
+      log $LOG_FILE "formatting temporary disk: $device"
       $(mkfs -E lazy_itable_init=1 -O uninit_bg -F -t $FS_TYPE $device >> $LOG_FILE 2>&1)
       if [ ! $? -eq 0 ]; then
-        log $LOG_FILE "formatting of device $device failed"
+        log $LOG_FILE "formatting of temporary disk device $device failed"
         return_value=1
         return $((return_value))
       fi
