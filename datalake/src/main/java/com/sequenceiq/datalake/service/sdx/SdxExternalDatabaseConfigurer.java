@@ -53,13 +53,13 @@ public class SdxExternalDatabaseConfigurer {
     }
 
     public SdxDatabase configure(CloudPlatform cloudPlatform, String os, DatabaseRequest internalDatabaseRequest, SdxDatabaseRequest databaseRequest,
-            SdxCluster sdxCluster) {
+            SdxCluster sdxCluster, boolean flexibleServerEnabled) {
         LOGGER.debug("Create database configuration from internal request {} and database request {}", internalDatabaseRequest, databaseRequest);
         SdxDatabaseAvailabilityType databaseAvailabilityType = getDatabaseAvailabilityType(internalDatabaseRequest, databaseRequest, cloudPlatform, sdxCluster);
         String requestedDbEngineVersion = getDbEngineVersion(internalDatabaseRequest, databaseRequest);
         String dbEngineVersion =
                 databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(sdxCluster.getRuntime(), os, requestedDbEngineVersion,
-                        cloudPlatform, SdxDatabaseAvailabilityType.hasExternalDatabase(databaseAvailabilityType));
+                        cloudPlatform, SdxDatabaseAvailabilityType.hasExternalDatabase(databaseAvailabilityType), flexibleServerEnabled);
         SdxDatabase sdxDatabase = DatabaseParameterFallbackUtil.setupDatabaseInitParams(databaseAvailabilityType, dbEngineVersion);
         configureAzureDatabase(cloudPlatform, internalDatabaseRequest, databaseRequest, sdxDatabase);
         LOGGER.debug("Set database availability type to {}, and engine version to {}", sdxDatabase.getDatabaseAvailabilityType(),
