@@ -8,8 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -21,6 +26,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.BadRequestException;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,12 +38,20 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.azure.resourcemanager.compute.models.VirtualMachineSize;
 import com.azure.resourcemanager.compute.models.VirtualMachineSizeTypes;
+import com.azure.resourcemanager.network.fluent.models.SubnetInner;
+import com.azure.resourcemanager.network.models.Network;
+import com.azure.resourcemanager.network.models.Subnet;
+import com.azure.resourcemanager.network.models.VirtualNetworkPrivateEndpointNetworkPolicies;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRegionProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
+import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
@@ -45,6 +60,7 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
+import com.sequenceiq.cloudbreak.constant.AzureConstants;
 
 @ExtendWith(MockitoExtension.class)
 class AzurePlatformResourcesTest {
@@ -60,6 +76,9 @@ class AzurePlatformResourcesTest {
 
     @Mock
     private AzureClientService azureClientService;
+
+    @Mock
+    private AzureCloudSubnetParametersService azureCloudSubnetParametersService;
 
     @InjectMocks
     private AzurePlatformResources underTest;
@@ -353,5 +372,71 @@ class AzurePlatformResourcesTest {
                 return name;
             }
         };
+    }
+
+    @Test
+    void testNetworksWhenNoNetworks() {
+        Region region = Region.region("westus2");
+        AzureListResult<Network> azureListResult = mock(AzureListResult.class);
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getNetworks()).thenReturn(azureListResult);
+        CloudNetworks networks = underTest.networks(cloudCredential, region, Map.of());
+        assertTrue(networks.getCloudNetworkResponses().get("westus2").isEmpty());
+    }
+
+    @Test
+    void testNetworksWhenNetworkWithoutRegion() {
+        Region region = Region.region("westus2");
+        AzureListResult<Network> azureListResult = mock(AzureListResult.class);
+        Network network = mock(Network.class);
+        when(azureListResult.getAll()).thenReturn(List.of(network));
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getNetworks()).thenReturn(azureListResult);
+        assertThrows(BadRequestException.class, () -> underTest.networks(cloudCredential, region, Map.of()));
+    }
+
+    @Test
+    void testNetworksWhenNetworkWithRegion() {
+        Region region = Region.region("westus2");
+        AzureListResult<Network> azureListResult = mock(AzureListResult.class);
+        Network network = mock(Network.class);
+        when(network.region()).thenReturn(com.azure.core.management.Region.US_WEST2);
+        when(azureListResult.getAll()).thenReturn(List.of(network));
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getNetworks()).thenReturn(azureListResult);
+        CloudNetworks actual = underTest.networks(cloudCredential, region, Map.of());
+        assertFalse(actual.getCloudNetworkResponses().get("westus2").isEmpty());
+    }
+
+    @Test
+    void testNetworksWhenNetworkWhenResourceGroupAndNetworkIdGiven() {
+        Region region = Region.region("westus2");
+        Map<String, String> filter = Map.ofEntries(
+                Map.entry(AzureConstants.NETWORK_ID, "networkid"),
+                Map.entry(AzureConstants.RESOURCE_GROUP_NAME, "resourcegroup"));
+        Network network = mock(Network.class);
+        when(network.region()).thenReturn(com.azure.core.management.Region.US_WEST2);
+        List<String> addressSpaces = List.of("as1", "as2");
+        List<String> dnsServerIPs = List.of("dns1", "dns2");
+        when(network.addressSpaces()).thenReturn(addressSpaces);
+        when(network.dnsServerIPs()).thenReturn(dnsServerIPs);
+        when(network.resourceGroupName()).thenReturn("rg");
+        Subnet subnet = mock(Subnet.class);
+        when(subnet.innerModel()).thenReturn(new SubnetInner()
+                .withDelegations(List.of())
+                .withPrivateEndpointNetworkPolicies(VirtualNetworkPrivateEndpointNetworkPolicies.fromString("")));
+        when(network.subnets()).thenReturn(Map.of("subnet", subnet));
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getNetworkByResourceGroup("resourcegroup", "networkid")).thenReturn(network);
+        CloudNetworks actualNetworks = underTest.networks(cloudCredential, region, filter);
+        assertFalse(actualNetworks.getCloudNetworkResponses().get("westus2").isEmpty());
+        verify(azureCloudSubnetParametersService).addPrivateEndpointNetworkPolicies(
+                any(CloudSubnet.class), any(VirtualNetworkPrivateEndpointNetworkPolicies.class));
+        verify(azureCloudSubnetParametersService).addFlexibleServerDelegatedSubnet(any(CloudSubnet.class), anyList());
+        CloudNetwork actualNetwork = actualNetworks.getCloudNetworkResponses().get("westus2").iterator().next();
+        assertEquals(addressSpaces, actualNetwork.getProperties().get("addressSpaces"));
+        assertEquals(dnsServerIPs, actualNetwork.getProperties().get("dnsServerIPs"));
+        assertEquals("rg", actualNetwork.getProperties().get("resourceGroupName"));
+        assertEquals("subnet", actualNetwork.getSubnetsMeta().iterator().next().getId());
     }
 }

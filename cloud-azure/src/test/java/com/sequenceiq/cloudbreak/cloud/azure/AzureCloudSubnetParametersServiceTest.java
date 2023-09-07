@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.azure.resourcemanager.network.models.Delegation;
@@ -14,7 +15,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 class AzureCloudSubnetParametersServiceTest {
     private static final String FLEXIBLE_SERVER = "Microsoft.DBforPostgreSQL/flexibleServers";
 
-    private AzureCloudSubnetParametersService underTest = new AzureCloudSubnetParametersService();
+    private AzureCloudSubnetParametersService underTest;
+
+    @BeforeEach
+    void setUp() {
+        underTest = new AzureCloudSubnetParametersService();
+    }
 
     @Test
     void testAddFlexibleServerDelegatedSubnetWithEmptyDelegation() {
