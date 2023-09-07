@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -57,10 +56,6 @@ public class KibanaSearchUrl implements SearchUrl {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");
         String end = formatter.format(testStopDate);
         String start = formatter.format(testStartDate);
-        if (StringUtils.containsIgnoreCase(kibanaProps.getUrl(), "vpc-dev-gov-logs-7x")) {
-            end = formatter.format(DateUtils.addHours(testStopDate, -2));
-            start = formatter.format(DateUtils.addHours(testStartDate, -2));
-        }
         return String.format("(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'%s',to:'%s'))", start, end);
     }
 
