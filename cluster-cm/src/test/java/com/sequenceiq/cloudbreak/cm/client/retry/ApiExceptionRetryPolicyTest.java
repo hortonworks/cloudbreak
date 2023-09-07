@@ -42,7 +42,7 @@ public class ApiExceptionRetryPolicyTest {
         RetryContext context = policy.open(null);
 
         ApiException apiException = mock(ApiException.class);
-        when(apiException.getCode()).thenReturn(401);
+        when(apiException.getCode()).thenReturn(402);
 
         // ...so we can't retry this one...
         policy.registerThrowable(context, apiException);
@@ -59,7 +59,7 @@ public class ApiExceptionRetryPolicyTest {
         assertTrue(policy.canRetry(context));
 
         // ...and we can retry this one...
-        when(apiException.getCode()).thenReturn(599);
+        when(apiException.getCode()).thenReturn(401);
         policy.registerThrowable(context, apiException);
         assertTrue(policy.canRetry(context));
 

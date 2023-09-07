@@ -67,8 +67,10 @@ public class ApiExceptionRetryPolicy implements RetryPolicy {
 
     private boolean handleStatusCodeNotZero(RetryContext context, int code) {
         boolean httpStatus5xxServerError = isHttpStatus5xxServerError(code);
-        LOGGER.warn("{} Exception occurred during CM API call, retryable: {} ({}/{})", code, httpStatus5xxServerError, context.getRetryCount(), maxAttempts);
-        return httpStatus5xxServerError;
+        // retry for 401 is needed because of OPSAPS-68536
+        boolean retryable = httpStatus5xxServerError || code == HttpStatus.UNAUTHORIZED.value();
+        LOGGER.warn("{} Exception occurred during CM API call, retryable: {} ({}/{})", code, retryable, context.getRetryCount(), maxAttempts);
+        return retryable;
     }
 
     private boolean isHttpStatus5xxServerError(int code) {
