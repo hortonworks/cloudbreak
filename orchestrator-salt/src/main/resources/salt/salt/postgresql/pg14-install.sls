@@ -9,6 +9,4 @@ install-postgres14:
         - postgresql14
         - postgresql14-contrib
         - postgresql14-docs
-        - postgresql14-devel
-        - postgresql-jdbc
     - fromrepo: pgdg14
