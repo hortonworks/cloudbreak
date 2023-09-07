@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
@@ -44,14 +45,14 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
     @Value("${integrationtest.cloudProvider:}")
     private String cloudProvider;
 
-    @Retryable
+    @Retryable(maxAttempts = 5, backoff = @Backoff(delay = 5000))
     public SdxInternalTestDto checkConfig(SdxInternalTestDto testDto, TestContext testContext, Map<String, String> expectedConfig) {
         String serverIp = testDto.getResponse().getStackV4Response().getCluster().getServerIp();
         checkConfig(serverIp, testDto.getName(), testContext, expectedConfig);
         return testDto;
     }
 
-    @Retryable
+    @Retryable(maxAttempts = 5, backoff = @Backoff(delay = 5000))
     public DistroXTestDto checkConfig(DistroXTestDto testDto, TestContext testContext, Map<String, String> expectedConfig) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
         checkConfig(serverIp, testDto.getName(), testContext, expectedConfig);
