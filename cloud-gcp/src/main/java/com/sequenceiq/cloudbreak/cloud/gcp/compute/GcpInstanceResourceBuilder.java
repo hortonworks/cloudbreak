@@ -34,7 +34,7 @@ import com.google.api.services.compute.model.AttachedDiskInitializeParams;
 import com.google.api.services.compute.model.CustomerEncryptionKey;
 import com.google.api.services.compute.model.CustomerEncryptionKeyProtectedDisk;
 import com.google.api.services.compute.model.Instance;
-import com.google.api.services.compute.model.InstanceGroupList;
+import com.google.api.services.compute.model.InstanceGroup;
 import com.google.api.services.compute.model.InstanceGroupsAddInstancesRequest;
 import com.google.api.services.compute.model.InstanceReference;
 import com.google.api.services.compute.model.InstancesStartWithEncryptionKeyRequest;
@@ -256,7 +256,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
                 throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
             }
         } else {
-            LOGGER.info("skipping group assignment {} doesn't exist in project {}", group.getName(), projectId);
+            LOGGER.warn("skipping group assignment {} doesn't exist in project {}", group.getName(), projectId);
         }
 
     }
@@ -268,8 +268,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     private boolean doesGcpInstanceGroupExist(Compute compute, String projectId, String zone, CloudResource instanceGroupResource) throws IOException {
-        InstanceGroupList instanceGroupList = compute.instanceGroups().list(projectId, zone).execute();
-        return instanceGroupList.getItems().stream().anyMatch(item -> item.getName().equals(instanceGroupResource.getName()));
+        InstanceGroup instanceGroup = compute.instanceGroups().get(projectId, zone, instanceGroupResource.getName()).execute();
+        return !instanceGroup.isEmpty();
     }
 
     private void addTagIfNotEmpty(List<String> tagList, String actualTag) {
