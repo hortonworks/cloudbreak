@@ -57,7 +57,6 @@ import com.google.api.services.compute.model.CustomerEncryptionKeyProtectedDisk;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.InstanceGroup;
-import com.google.api.services.compute.model.InstanceGroupList;
 import com.google.api.services.compute.model.InstancesStartWithEncryptionKeyRequest;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.collect.ImmutableMap;
@@ -410,11 +409,12 @@ public class GcpInstanceResourceBuilderTest {
         context.addGroupResources(group.getName(), singletonList(instanceGroup));
         when(compute.instanceGroups()).thenReturn(instanceGroups);
         when(instanceGroups.addInstances(anyString(), anyString(), anyString(), any())).thenReturn(addInstances);
-        InstanceGroups.List list = mock(InstanceGroups.List.class);
-        when(instanceGroups.list(anyString(), anyString())).thenReturn(list);
-        InstanceGroupList instanceGroupList = new InstanceGroupList();
-        instanceGroupList.setItems(singletonList(new InstanceGroup().setName("test-master-1")));
-        when(list.execute()).thenReturn(instanceGroupList);
+        InstanceGroups.Get get = mock(InstanceGroups.Get.class);
+        get.setInstanceGroup("test-master-1");
+        InstanceGroup ig = new InstanceGroup();
+        ig.setName("test-master-1");
+        when(instanceGroups.get(anyString(), anyString(), anyString())).thenReturn(get);
+        when(get.execute()).thenReturn(ig);
         when(addInstances.execute()).thenReturn(addOperation);
 
         assertThrows(GcpResourceException.class,
@@ -469,13 +469,13 @@ public class GcpInstanceResourceBuilderTest {
         when(compute.instanceGroups()).thenReturn(instanceGroups);
         ArgumentCaptor<String> groupName = ArgumentCaptor.forClass(String.class);
         when(instanceGroups.addInstances(anyString(), anyString(), groupName.capture(), any())).thenReturn(addInstances);
-        InstanceGroups.List list = mock(InstanceGroups.List.class);
-        when(instanceGroups.list(anyString(), anyString())).thenReturn(list);
-        InstanceGroupList instanceGroupList = new InstanceGroupList();
-        instanceGroupList.setItems(singletonList(new InstanceGroup().setName(masterInstanceGroup.getName())));
-        when(list.execute()).thenReturn(instanceGroupList);
+        InstanceGroups.Get get = mock(InstanceGroups.Get.class);
+        InstanceGroup ig = new InstanceGroup();
+        ig.setName(masterInstanceGroup.getName());
+        get.setInstanceGroup(masterInstanceGroup.getName());
+        when(instanceGroups.get(anyString(), anyString(), anyString())).thenReturn(get);
+        when(get.execute()).thenReturn(ig);
         when(addInstances.execute()).thenReturn(addOperation);
-
 
         builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
 
