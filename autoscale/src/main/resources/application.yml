@@ -58,12 +58,14 @@ periscope:
       addr: localhost
       port: 5432
   cloudbreak.url: http://localhost:9091
+  yarn.mock.cluster.url: https://localhost:10090/%s/resourcemanager/v1/cluster/scaling
   freeipa:
     url: http://localhost:8090
     contextPath: /freeipa
   notification:
     endpoint: http://localhost:3000/notifications
   entitlementCheckEnabled: true
+  skipEntitlementCheckPlatforms: YARN,MOCK
   enabledAutoscaleMonitors:
     time-monitor:
       enabled: true
@@ -155,5 +157,8 @@ altus:
 crn:
   partition: cdp
   region: us-west-1
+clusterProxy:
+  disabledPlatforms: MOCK
+
 
 quartz.common.scheduler.enabled: false

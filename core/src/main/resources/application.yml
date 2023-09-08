@@ -151,6 +151,8 @@ cb:
     url: http://localhost:8099
     contextPath: /consumption
     enabled: false
+  periscope:
+    skipEntitlementCheckPlatforms: MOCK
   runtimes:
     latest: "7.2.18"
     gov: "7.2.18"

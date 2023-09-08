@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +24,9 @@ import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.model.yarn.YarnScalingServiceV1Response;
 import com.sequenceiq.periscope.monitor.client.YarnMetricsClient;
+import com.sequenceiq.periscope.monitor.evaluator.load.YarnResponseUtils;
+import com.sequenceiq.periscope.monitor.handler.CloudbreakCommunicator;
+import com.sequenceiq.periscope.utils.StackResponseUtils;
 
 @ExtendWith(MockitoExtension.class)
 class YarnRecommendationServiceTest {
@@ -68,6 +72,15 @@ class YarnRecommendationServiceTest {
     @Mock
     private AutoscaleRestRequestThreadLocalService restRequestThreadLocalService;
 
+    @Mock
+    private CloudbreakCommunicator cloudbreakCommunicator;
+
+    @Mock
+    private StackResponseUtils stackResponseUtils;
+
+    @Mock
+    private YarnResponseUtils yarnResponseUtils;
+
     @Test
     void testGetRecommendationFromYarnWithOnlyComputeNodes() throws Exception {
         Cluster cluster = getACluster();
@@ -77,10 +90,11 @@ class YarnRecommendationServiceTest {
         when(yarnMetricsClient.getYarnMetricsForCluster(cluster, TEST_HOSTGROUP_COMPUTE, TEST_USER_CRN, Optional.of(5000), Optional.of(10000)))
                 .thenReturn(yarnScalingServiceV1Response);
         when(restRequestThreadLocalService.getCloudbreakTenant()).thenReturn(tenant);
-
+        List<String> expected = List.of("testFqdncompute1:8042", "testFqdncompute2:8042", "testFqdncompute3:8042");
+        when(yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(any(), any())).thenReturn(expected);
         when(clusterService.findOneByStackCrnAndTenant(TEST_CLUSTER_CRN, tenant)).thenReturn(Optional.of(cluster));
         List<String> trial = underTest.getRecommendationFromYarn(TEST_CLUSTER_CRN);
-        List<String> expected = List.of("testFqdncompute1:8042", "testFqdncompute2:8042", "testFqdncompute3:8042");
+
         assertThat(trial).hasSameElementsAs(expected);
     }
 
@@ -88,15 +102,15 @@ class YarnRecommendationServiceTest {
     void testGetRecommendationFromYarnWithComputeAndWorkerNodes() throws Exception {
         Cluster cluster = getACluster();
         YarnScalingServiceV1Response yarnScalingServiceV1Response = getMockYarnScalingResponse(3, 3);
+        List<String> expected = List.of("testFqdncompute1:8042", "testFqdncompute2:8042", "testFqdncompute3:8042");
         doReturn(CONNECTION_TIME).when(yarnConfig).getConnectionTimeOutMs();
         doReturn(READ_TIME).when(yarnConfig).getReadTimeOutMs();
         when(yarnMetricsClient.getYarnMetricsForCluster(cluster, TEST_HOSTGROUP_COMPUTE, TEST_USER_CRN, Optional.of(5000), Optional.of(10000)))
                 .thenReturn(yarnScalingServiceV1Response);
         when(restRequestThreadLocalService.getCloudbreakTenant()).thenReturn(tenant);
-
+        when(yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(any(), any())).thenReturn(expected);
         when(clusterService.findOneByStackCrnAndTenant(TEST_CLUSTER_CRN, tenant)).thenReturn(Optional.of(cluster));
         List<String> trial = underTest.getRecommendationFromYarn(TEST_CLUSTER_CRN);
-        List<String> expected = List.of("testFqdncompute1:8042", "testFqdncompute2:8042", "testFqdncompute3:8042");
         assertThat(trial).hasSameElementsAs(expected);
     }
 

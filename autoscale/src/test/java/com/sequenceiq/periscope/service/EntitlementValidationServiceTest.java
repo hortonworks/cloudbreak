@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import java.util.Set;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +31,7 @@ class EntitlementValidationServiceTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(underTest, "entitlementCheckEnabled", true);
+        ReflectionTestUtils.setField(underTest, "skipEntitlementCheckPlatforms", Set.of("YARN", "MOCK"));
     }
 
     @Test
@@ -99,6 +102,12 @@ class EntitlementValidationServiceTest {
     @Test
     void testWhenYarnAndAlwaysAllowed() {
         boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "YARN");
+        assertTrue(entitled, "isEntitled should be true when entitlement always allowed");
+    }
+
+    @Test
+    void testWhenMockAndAlwaysAllowed() {
+        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "MOCK");
         assertTrue(entitled, "isEntitled should be true when entitlement always allowed");
     }
 

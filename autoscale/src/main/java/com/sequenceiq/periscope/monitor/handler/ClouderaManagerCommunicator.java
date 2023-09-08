@@ -50,8 +50,7 @@ public class ClouderaManagerCommunicator {
     private CmRequestIdProviderInterceptor cmRequestIdProviderInterceptor;
 
     private ApiClient createApiClient(Cluster cluster) {
-        HttpClientConfig clientConfig = tlsHttpClientConfigurationService.buildTLSClientConfig(cluster.getStackCrn(), cluster.getClusterManager().getHost(),
-                cluster.getTunnel());
+        HttpClientConfig clientConfig = tlsHttpClientConfigurationService.buildTLSClientConfig(cluster);
         ClusterManager cm = cluster.getClusterManager();
         String user = secretService.get(cm.getUser());
         String pass = secretService.get(cm.getPass());

@@ -3,8 +3,8 @@ package com.sequenceiq.periscope.service;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.WORKLOAD;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.AuthorizationEnvironmentCrnProvider;
 import com.sequenceiq.authorization.service.AuthorizationResourceCrnProvider;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.periscope.config.YarnConfig;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.LoadAlert;
@@ -83,13 +84,15 @@ public class YarnRecommendationService implements AuthorizationResourceCrnProvid
         String policyHostGroup = loadAlert.getScalingPolicy().getHostGroup();
         String pollingUserCrn = cluster.getClusterPertain().getUserCrn();
 
+        StackV4Response stackV4Response = cloudbreakCommunicator.getByCrn(clusterCrn);
+
         YarnScalingServiceV1Response yarnResponse =
                 yarnMetricsClient.getYarnMetricsForCluster(cluster, policyHostGroup,
                         pollingUserCrn, Optional.of(yarnConfig.getConnectionTimeOutMs()), Optional.of(yarnConfig.getReadTimeOutMs()));
 
-        List<String> yarnRecommendation = yarnResponse.getScaleDownCandidates().orElse(List.of()).stream()
-                .map(YarnScalingServiceV1Response.DecommissionCandidate::getNodeId)
-                .filter(i -> i.contains(policyHostGroup)).collect(Collectors.toList());
+        Map<String, String> hostFqdnsToInstanceId = stackResponseUtils.getCloudInstanceIdsForHostGroup(stackV4Response, policyHostGroup);
+
+        List<String> yarnRecommendation = yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(yarnResponse, hostFqdnsToInstanceId);
 
         LOGGER.info("yarnRecommendedDecommission={}, for Cluster= {}", yarnRecommendation, cluster.getStackName());
 

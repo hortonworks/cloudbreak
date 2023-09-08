@@ -79,4 +79,8 @@ public class ClouderaManagerResourceOperation {
     public ResponseEntity<ApiConfigList> updateConfig(String mockUuid, @Valid String message, @Valid ApiConfigList body) {
         return responseCreatorComponent.exec(new ApiConfigList().items(new ArrayList<>()));
     }
+
+    public ResponseEntity<ApiCommand> hostsRecommissionAndExitMaintenanceModeCommand(String mockUuid, String recommissionType, ApiHostNameList hosts) {
+        return responseCreatorComponent.exec(dataProviderService.getSuccessfulApiCommand(CommandId.CLUSTER_START));
+    }
 }

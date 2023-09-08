@@ -29,6 +29,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -51,11 +52,14 @@ import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.ResourceType;
 
 class StackUtilTest {
 
     private static final String ENV_CRN = "envCrn";
+
+    private static final String DATAHUB_CRN = "crn:cdp:datahub:us-west-1:default:cluster:0ba0ca99-e961-4c8d-b7e9-da0587cd40d0";
 
     @Mock
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
@@ -260,6 +264,16 @@ class StackUtilTest {
         assertThat(result).hasSize(1);
         Node node = result.stream().findFirst().get();
         assertThat(node.getHostname()).isEqualTo("node3.example.com");
+    }
+
+    @Test
+    void testStopStartScalingEntitlementEnabledForMock() {
+        ReflectionTestUtils.setField(stackUtil, "skipStartStopEntitlementCheckPlatforms", Set.of("MOCK"));
+        StackView stackView = mock(StackView.class);
+        when(stackView.getResourceCrn()).thenReturn(DATAHUB_CRN);
+        when(stackView.getCloudPlatform()).thenReturn("MOCK");
+        boolean entitlementEnabled = stackUtil.stopStartScalingEntitlementEnabled(stackView);
+        assertTrue(entitlementEnabled);
     }
 
     private InstanceMetaData getInstanceMetaData(String fqdn) {

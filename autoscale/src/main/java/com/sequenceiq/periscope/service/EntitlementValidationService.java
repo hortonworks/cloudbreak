@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.service;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -15,13 +17,16 @@ public class EntitlementValidationService {
     @Value("${periscope.entitlementCheckEnabled:true}")
     private Boolean entitlementCheckEnabled;
 
+    @Value("${periscope.skipEntitlementCheckPlatforms}")
+    private Set<String> skipEntitlementCheckPlatforms;
+
     @Inject
     private EntitlementService entitlementService;
 
     @Cacheable(cacheNames = "accountEntitlementCache", key = "{#accountId,#cloudPlatform}")
     public boolean autoscalingEntitlementEnabled(String accountId, String cloudPlatform) {
         boolean entitled = false;
-        if (Boolean.FALSE.equals(entitlementCheckEnabled) || "YARN".equalsIgnoreCase(cloudPlatform)) {
+        if (Boolean.FALSE.equals(entitlementCheckEnabled) || skipEntitlementCheckPlatforms.contains(cloudPlatform)) {
             entitled = true;
         } else if (CloudPlatform.AWS.equalsIgnoreCase(cloudPlatform)) {
             entitled = entitlementService.awsAutoScalingEnabled(accountId);

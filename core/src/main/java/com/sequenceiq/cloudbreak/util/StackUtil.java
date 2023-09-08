@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -80,6 +81,9 @@ public class StackUtil {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Value("${cb.periscope.skipEntitlementCheckPlatforms}")
+    private Set<String> skipStartStopEntitlementCheckPlatforms;
 
     public Set<Node> collectNodes(StackDtoDelegate stackDto) {
         return collectNodes(stackDto, emptySet());
@@ -320,6 +324,8 @@ public class StackUtil {
             entitled = entitlementService.azureStopStartScalingEnabled(accountId);
         } else if (CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform)) {
             entitled = entitlementService.gcpStopStartScalingEnabled(accountId);
+        } else {
+            entitled = skipStartStopEntitlementCheckPlatforms.contains(cloudPlatform);
         }
         return entitled;
     }

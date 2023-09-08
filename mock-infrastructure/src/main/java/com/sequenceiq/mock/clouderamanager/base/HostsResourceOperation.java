@@ -50,4 +50,8 @@ public class HostsResourceOperation {
     public ResponseEntity<ApiCommand> removeHostsFromCluster(String mockUuid, ApiHostsToRemoveArgs body) {
         return responseCreatorComponent.exec(dataProviderService.getSuccessfulApiCommand(CommandId.REMOVE_HOSTS));
     }
+
+    public ResponseEntity<ApiCommand> enterMaintenanceMode(String mockUuid, String hostId) {
+        return responseCreatorComponent.exec(dataProviderService.getSuccessfulApiCommand(CommandId.HOST_DECOMMISSION));
+    }
 }

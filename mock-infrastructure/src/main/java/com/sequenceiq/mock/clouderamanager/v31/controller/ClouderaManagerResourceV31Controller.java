@@ -70,4 +70,9 @@ public class ClouderaManagerResourceV31Controller implements ClouderaManagerReso
     public ResponseEntity<ApiConfigList> updateConfig(String mockUuid, @Valid String message, @Valid ApiConfigList body) {
         return clouderaManagerResourceOperation.updateConfig(mockUuid, message, body);
     }
+
+    @Override
+    public ResponseEntity<ApiCommand> hostsRecommissionAndExitMaintenanceModeCommand(String mockUuid, String recommissionType, ApiHostNameList hosts) {
+        return clouderaManagerResourceOperation.hostsRecommissionAndExitMaintenanceModeCommand(mockUuid, recommissionType, hosts);
+    }
 }
