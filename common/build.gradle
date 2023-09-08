@@ -107,7 +107,7 @@ sourceSets {
   main {
     java {
       if (!project.hasProperty("integrationTest"))
-        exclude 'com/sequenceiq/cloudbreak/client/patch/**'
+        exclude 'com/sequenceiq/cloudbreak/_patch/glassfish/**'
     }
   }
 }
