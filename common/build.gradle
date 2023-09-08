@@ -102,3 +102,12 @@ configurations {
 artifacts {
   tests testJar
 }
+
+sourceSets {
+  main {
+    java {
+      if (!project.hasProperty("integrationTest"))
+        exclude 'com/sequenceiq/cloudbreak/client/patch/**'
+    }
+  }
+}
