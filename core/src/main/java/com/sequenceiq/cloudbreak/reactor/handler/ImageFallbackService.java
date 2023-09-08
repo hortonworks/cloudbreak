@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler;
 
+import static com.sequenceiq.common.model.OsType.RHEL8;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,8 +35,6 @@ public class ImageFallbackService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageFallbackService.class);
 
-    private static final String REDHAT8 = "redhat8";
-
     @Inject
     private StackDtoService stackDtoService;
 
@@ -66,7 +66,7 @@ public class ImageFallbackService {
         com.sequenceiq.cloudbreak.domain.stack.Component component = componentConfigProviderService.getImageComponent(stackId);
         Image currentImage = component.getAttributes().get(Image.class);
 
-        if (REDHAT8.equalsIgnoreCase(currentImage.getOsType()) && azureImageFormatValidator.isVhdImageFormat(currentImage)) {
+        if (RHEL8.getOs().equalsIgnoreCase(currentImage.getOsType()) && azureImageFormatValidator.isVhdImageFormat(currentImage)) {
             throw new CloudbreakServiceException("No valid fallback path from redhat8 VHD image.");
         }
 

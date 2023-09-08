@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 
+import static com.sequenceiq.common.model.OsType.RHEL8;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_ADMIN_PASSWORD;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
@@ -69,7 +70,7 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
         testContext
                 .given(freeIpa, FreeIpaTestDto.class)
                     .withTelemetry("telemetry")
-                    .withOsType("redhat8")
+                    .withOsType(RHEL8.getOs())
                     .withFreeIpaHa(1, 2)
                 .when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)

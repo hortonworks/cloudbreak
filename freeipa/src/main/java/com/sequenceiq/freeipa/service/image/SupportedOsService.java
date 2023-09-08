@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.image;
 
+import static com.sequenceiq.common.model.OsType.RHEL8;
+
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -11,8 +13,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 @Service
 public class SupportedOsService {
 
-    private static final String REDHAT8 = "redhat8";
-
     @Inject
     private EntitlementService entitlementService;
 
@@ -20,13 +20,13 @@ public class SupportedOsService {
     private String defaultOs;
 
     public boolean isSupported(String os) {
-        if (!defaultOs.equalsIgnoreCase(os) && REDHAT8.equalsIgnoreCase(os)) {
+        if (!defaultOs.equalsIgnoreCase(os) && RHEL8.getOs().equalsIgnoreCase(os)) {
             return entitlementService.isRhel8ImageSupportEnabled(ThreadBasedUserCrnProvider.getAccountId());
         }
         return true;
     }
 
     public boolean isRhel8Supported() {
-        return isSupported(REDHAT8);
+        return isSupported(RHEL8.getOs());
     }
 }

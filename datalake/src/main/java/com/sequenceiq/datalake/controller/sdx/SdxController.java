@@ -372,14 +372,14 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
-    public List<String> versions(String cloudPlatform) {
-        return cdpConfigService.getDatalakeVersions(cloudPlatform);
+    public List<String> versions(String cloudPlatform, String os) {
+        return cdpConfigService.getDatalakeVersions(cloudPlatform, os);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
-    public List<AdvertisedRuntime> advertisedRuntimes(String cloudPlatform) {
-        return cdpConfigService.getAdvertisedRuntimes(cloudPlatform);
+    public List<AdvertisedRuntime> advertisedRuntimes(String cloudPlatform, String os) {
+        return cdpConfigService.getAdvertisedRuntimes(cloudPlatform, os);
     }
 
     @Override

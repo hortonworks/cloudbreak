@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.rotation.adminpassword.executor;
 
+import static com.sequenceiq.common.model.OsType.RHEL8;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -15,8 +17,6 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 @Service
 public class FreeIpaAdminPasswordRotationUtil {
 
-    public static final String REDHAT_8 = "redhat8";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaAdminPasswordRotationUtil.class);
 
     @Inject
@@ -27,7 +27,7 @@ public class FreeIpaAdminPasswordRotationUtil {
         Crn environmentCrn = Crn.safeFromString(environmentCrnAsString);
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrnAsString, environmentCrn.getAccountId());
         String osType = stack.getImage().getOsType();
-        if (!REDHAT_8.equalsIgnoreCase(osType)) {
+        if (!RHEL8.getOs().equalsIgnoreCase(osType)) {
             LOGGER.info("OS type is not REDHAT 8: {}", osType);
             throw new SecretRotationException("Freeipa admin password rotation is supported only on Redhat 8");
         }

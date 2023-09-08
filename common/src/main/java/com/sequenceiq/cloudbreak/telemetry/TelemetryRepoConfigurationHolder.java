@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.telemetry;
 
+import static com.sequenceiq.common.model.OsType.RHEL8;
+
 import javax.validation.constraints.NotBlank;
 
 import org.slf4j.Logger;
@@ -23,7 +25,7 @@ public class TelemetryRepoConfigurationHolder {
 
     public TelemetryRepoConfiguration selectCorrectRepoConfig(TelemetryContext context) {
         String osType = context.getOsType();
-        if ("redhat8".equals(osType)) {
+        if (RHEL8.getOs().equals(osType)) {
             return rhel8;
         }
         if ("redhat7".equals(osType)) {

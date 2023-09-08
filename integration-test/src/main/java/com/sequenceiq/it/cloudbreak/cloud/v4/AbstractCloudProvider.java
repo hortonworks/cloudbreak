@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4;
 
+import static com.sequenceiq.common.model.OsType.RHEL8;
 import static java.lang.String.format;
 
 import java.util.Comparator;
@@ -295,7 +296,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     public String getLatestPreWarmedImageByRuntimeVersion(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform,
             boolean govCloud, String runtimeVersion) {
-        String osType = govCloud ? "redhat8" : "redhat7";
+        String osType = govCloud ? RHEL8.getOs() : "redhat7";
         try {
             List<ImageV4Response> prewarmedImagesForRuntime = cloudbreakClient
                     .getDefaultClient()

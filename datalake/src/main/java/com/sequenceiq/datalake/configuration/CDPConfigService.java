@@ -1,5 +1,8 @@
 package com.sequenceiq.datalake.configuration;
 
+import static com.sequenceiq.common.model.OsType.CENTOS7;
+import static com.sequenceiq.common.model.OsType.RHEL8;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -65,6 +68,8 @@ public class CDPConfigService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPConfigService.class);
 
     private static final VersionComparator VERSION_COMPARATOR = new VersionComparator();
+
+    private static final String RUNTIME_SUPPORTIG_CENTOS7_AND_RHEL8 = "7.2.17";
 
     // Defines what is the default runtime version (UI / API)
     @Value("${datalake.runtimes.default}")
@@ -161,14 +166,14 @@ public class CDPConfigService {
 
     public String getDefaultRuntime() {
         if (Strings.isNullOrEmpty(defaultRuntime)) {
-            return getDatalakeVersions(null).stream().findFirst()
+            return getDatalakeVersions(null, null).stream().findFirst()
                     .orElseThrow(() -> new CloudbreakServiceException("Runtime not found in the default image catalog"));
         } else {
             return defaultRuntime;
         }
     }
 
-    public List<String> getDatalakeVersions(String cloudPlatform) {
+    public List<String> getDatalakeVersions(String cloudPlatform, String os) {
         List<String> runtimeVersions = getRuntimeVersions(cloudPlatform);
         boolean govCloudDeployment = commonGovService.govCloudDeployment(
                 preferencesService.enabledGovPlatforms(),
@@ -185,10 +190,28 @@ public class CDPConfigService {
             runtimeVersions = runtimeVersions.stream()
                     .filter(e -> commonGovService.govCloudCompatibleVersion(e))
                     .collect(Collectors.toList());
+        } else {
+            runtimeVersions = supportedOsFilter(runtimeVersions, os);
         }
 
         LOGGER.debug("Available runtime versions for datalake: {}", runtimeVersions);
         return runtimeVersions;
+    }
+
+    private List<String> supportedOsFilter(List<String> runtimeVersions, String os) {
+        List<String> ret;
+        if (StringUtils.isBlank(os)) {
+            ret = runtimeVersions;
+        } else if (RHEL8.getOs().equals(os)) {
+            ret = runtimeVersions.stream()
+                    .filter(r -> VERSION_COMPARATOR.compare(() -> r, () -> RUNTIME_SUPPORTIG_CENTOS7_AND_RHEL8) >= 0).collect(Collectors.toList());
+        } else if (CENTOS7.getOs().equals(os)) {
+            ret = runtimeVersions.stream()
+                    .filter(r -> VERSION_COMPARATOR.compare(() -> r, () -> RUNTIME_SUPPORTIG_CENTOS7_AND_RHEL8) <= 0).collect(Collectors.toList());
+        } else {
+            ret = new ArrayList<>();
+        }
+        return ret;
     }
 
     private List<String> getRuntimeVersions(String cloudPlatform) {
@@ -211,8 +234,8 @@ public class CDPConfigService {
         };
     }
 
-    public List<AdvertisedRuntime> getAdvertisedRuntimes(String cloudPlatform) {
-        List<String> runtimeVersions = getDatalakeVersions(cloudPlatform).stream()
+    public List<AdvertisedRuntime> getAdvertisedRuntimes(String cloudPlatform, String os) {
+        List<String> runtimeVersions = getDatalakeVersions(cloudPlatform, os).stream()
                 .filter(runtimeVersion -> advertisedRuntimes.isEmpty() || advertisedRuntimes.contains(runtimeVersion)).collect(Collectors.toList());
         Optional<String> calculatedDefault
                 = Strings.isNullOrEmpty(this.defaultRuntime) ? runtimeVersions.stream().findFirst() : Optional.ofNullable(this.defaultRuntime);

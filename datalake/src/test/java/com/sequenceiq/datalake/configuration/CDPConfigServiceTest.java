@@ -55,7 +55,13 @@ class CDPConfigServiceTest {
 
     private static final String RUNTIME_7214 = "7.2.14";
 
+    private static final String RUNTIME_7215 = "7.2.15";
+
+    private static final String RUNTIME_7216 = "7.2.16";
+
     private static final String RUNTIME_7217 = "7.2.17";
+
+    private static final String RUNTIME_7218 = "7.2.18";
 
     @Spy
     private Set<String> advertisedRuntimes;
@@ -176,7 +182,7 @@ class CDPConfigServiceTest {
         cdpConfigService.initCdpStackRequests();
 
         List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7217, true), rt(RUNTIME_7212, false));
-        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null);
+        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, null);
 
         assertArrayEquals(expected.toArray(), actual.toArray());
     }
@@ -195,7 +201,7 @@ class CDPConfigServiceTest {
         cdpConfigService.initCdpStackRequests();
 
         List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7212, true));
-        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null);
+        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, null);
 
         assertArrayEquals(expected.toArray(), actual.toArray());
     }
@@ -205,7 +211,7 @@ class CDPConfigServiceTest {
         List<String> supportedVersions = List.of(RUNTIME_7212, RUNTIME_7214);
         mockSupportedRuntimes(supportedVersions);
         cdpConfigService.initCdpStackRequests();
-        assertArrayEquals(supportedVersions.toArray(), cdpConfigService.getDatalakeVersions("").stream().sorted().toArray());
+        assertArrayEquals(supportedVersions.toArray(), cdpConfigService.getDatalakeVersions("", null).stream().sorted().toArray());
     }
 
     @Test
@@ -217,7 +223,7 @@ class CDPConfigServiceTest {
         List<String> supportedVersions = List.of(RUNTIME_7212, RUNTIME_726, RUNTIME_722);
         mockSupportedRuntimes(supportedVersions);
         cdpConfigService.initCdpStackRequests();
-        assertArrayEquals(List.of(RUNTIME_7212).toArray(), cdpConfigService.getDatalakeVersions("").toArray());
+        assertArrayEquals(List.of(RUNTIME_7212).toArray(), cdpConfigService.getDatalakeVersions("", null).toArray());
     }
 
     @Test
@@ -227,7 +233,7 @@ class CDPConfigServiceTest {
         cdpConfigService.initCdpStackRequests();
         List<String> gcpSupportedVersions = List.of(RUNTIME_729);
         assertArrayEquals("Templates are only available from 7.2.9",
-                gcpSupportedVersions.toArray(), cdpConfigService.getDatalakeVersions("GCP").toArray());
+                gcpSupportedVersions.toArray(), cdpConfigService.getDatalakeVersions("GCP", null).toArray());
     }
 
     @Test
@@ -236,7 +242,7 @@ class CDPConfigServiceTest {
         mockSupportedRuntimes(supportedVersions);
         cdpConfigService.initCdpStackRequests();
         List<String> awsSupportedVersions = List.of(RUNTIME_7212, RUNTIME_7214);
-        assertArrayEquals(awsSupportedVersions.toArray(), cdpConfigService.getDatalakeVersions("AWS").stream().sorted().toArray());
+        assertArrayEquals(awsSupportedVersions.toArray(), cdpConfigService.getDatalakeVersions("AWS", null).stream().sorted().toArray());
     }
 
     @Test
@@ -251,7 +257,7 @@ class CDPConfigServiceTest {
         cdpConfigService.initCdpStackRequests();
 
         List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7217, false));
-        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null);
+        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, null);
 
         assertArrayEquals(expected.toArray(), actual.toArray());
     }
@@ -272,7 +278,7 @@ class CDPConfigServiceTest {
         cdpConfigService.initCdpStackRequests();
 
         List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7212, true), rt(RUNTIME_729, false));
-        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null);
+        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, null);
 
         assertArrayEquals(expected.toArray(), actual.toArray());
     }
@@ -290,7 +296,44 @@ class CDPConfigServiceTest {
         cdpConfigService.initCdpStackRequests();
 
         List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7214, true));
-        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes("GCP");
+        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes("GCP", null);
+
+        assertArrayEquals(expected.toArray(), actual.toArray());
+    }
+
+    @Test
+    void testAdvertisedRuntimesForCentOS7() {
+        ReflectionTestUtils.setField(cdpConfigService, "defaultRuntime", RUNTIME_7217);
+
+        List<String> supportedVersions = List.of(RUNTIME_7218, RUNTIME_7217, RUNTIME_7216, RUNTIME_7215, RUNTIME_7214);
+        mockSupportedRuntimes(supportedVersions);
+
+        List<String> advertisedVersions = List.of(RUNTIME_7218, RUNTIME_7217, RUNTIME_7216, RUNTIME_7215);
+        mockAdvertisedRuntimes(advertisedVersions);
+
+        cdpConfigService.initCdpStackRequests();
+
+        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7217, true), rt(RUNTIME_7216, false),
+                rt(RUNTIME_7215, false));
+        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, "centos7");
+
+        assertArrayEquals(expected.toArray(), actual.toArray());
+    }
+
+    @Test
+    void testAdvertisedRuntimesForRHEL8() {
+        ReflectionTestUtils.setField(cdpConfigService, "defaultRuntime", RUNTIME_7217);
+
+        List<String> supportedVersions = List.of(RUNTIME_7218, RUNTIME_7217, RUNTIME_7216, RUNTIME_7215, RUNTIME_7214);
+        mockSupportedRuntimes(supportedVersions);
+
+        List<String> advertisedVersions = List.of(RUNTIME_7218, RUNTIME_7217, RUNTIME_7216, RUNTIME_7215);
+        mockAdvertisedRuntimes(advertisedVersions);
+
+        cdpConfigService.initCdpStackRequests();
+
+        List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7218, false), rt(RUNTIME_7217, true));
+        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, "redhat8");
 
         assertArrayEquals(expected.toArray(), actual.toArray());
     }

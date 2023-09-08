@@ -229,13 +229,13 @@ public interface SdxEndpoint {
     @Path("/versions")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "list datalake versions", produces = MediaType.APPLICATION_JSON, nickname = "versions")
-    List<String> versions(@QueryParam("cloudPlatform") String cloudPlatform);
+    List<String> versions(@QueryParam("cloudPlatform") String cloudPlatform, @QueryParam("os") String os);
 
     @GET
     @Path("/advertisedruntimes")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "list advertised datalake versions", produces = MediaType.APPLICATION_JSON, nickname = "advertisedruntimes")
-    List<AdvertisedRuntime> advertisedRuntimes(@QueryParam("cloudPlatform") String cloudPlatform);
+    List<AdvertisedRuntime> advertisedRuntimes(@QueryParam("cloudPlatform") String cloudPlatform, @QueryParam("os") String os);
 
     @POST
     @Path("/envcrn/{envCrn}/ranger_cloud_identity_mapping")

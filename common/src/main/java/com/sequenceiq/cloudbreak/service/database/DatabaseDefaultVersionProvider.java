@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.database;
 
+import static com.sequenceiq.common.model.OsType.RHEL8;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +15,6 @@ import com.sequenceiq.cloudbreak.util.VersionComparator;
 public class DatabaseDefaultVersionProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseDefaultVersionProvider.class);
-
-    private static final String REDHAT_8 = "redhat8";
 
     @Value("${cb.db.override.minRuntimeVersion}")
     private String minRuntimeVersion;
@@ -37,7 +37,7 @@ public class DatabaseDefaultVersionProvider {
                 LOGGER.debug("Setting DB engine version to 'null' for runtime [{}]", runtime);
                 return null;
             }
-        } else if (REDHAT_8.equalsIgnoreCase(os)) {
+        } else if (RHEL8.getOs().equalsIgnoreCase(os)) {
             LOGGER.debug("Setting DB engine version to [{}] for os [{}]", dbEngineVersion, os);
             return choosePg11InCaseOfAzureExternalDb(dbEngineVersion, cloudPlatform, externalDb, flexibleEnabled);
         } else {

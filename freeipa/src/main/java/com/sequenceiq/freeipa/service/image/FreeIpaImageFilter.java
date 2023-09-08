@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.image;
 
+import static com.sequenceiq.common.model.OsType.RHEL8;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +23,7 @@ public class FreeIpaImageFilter {
 
     private static final String DEFAULT_REGION = "default";
 
-    private static final String MAJOR_OS_UPGRADE_TARGET = "redhat8";
+    private static final String MAJOR_OS_UPGRADE_TARGET = RHEL8.getOs();
 
     @Inject
     private ProviderSpecificImageFilter providerSpecificImageFilter;

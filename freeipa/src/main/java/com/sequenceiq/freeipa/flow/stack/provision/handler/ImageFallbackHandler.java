@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.provision.handler;
 
+import static com.sequenceiq.common.model.OsType.RHEL8;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -33,8 +35,6 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 public class ImageFallbackHandler extends ExceptionCatcherEventHandler<ImageFallbackRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageFallbackHandler.class);
-
-    private static final String REDHAT8 = "redhat8";
 
     @Inject
     private StackService stackService;
@@ -78,7 +78,7 @@ public class ImageFallbackHandler extends ExceptionCatcherEventHandler<ImageFall
         try {
             ImageEntity currentImage = imageService.getByStack(stack);
 
-            if (REDHAT8.equalsIgnoreCase(currentImage.getOsType()) && azureImageFormatValidator.isVhdImageFormat(currentImage.getImageName())) {
+            if (RHEL8.getOs().equalsIgnoreCase(currentImage.getOsType()) && azureImageFormatValidator.isVhdImageFormat(currentImage.getImageName())) {
                 throw new CloudbreakServiceException("No valid fallback path from redhat8 VHD image.");
             }
 

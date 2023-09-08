@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static com.sequenceiq.common.model.OsType.CENTOS7;
+import static com.sequenceiq.common.model.OsType.RHEL8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -26,7 +28,7 @@ class ImageOsServiceTest {
 
     private static final String ACCOUNT_ID = "accountid";
 
-    private static final String DEFAULT_OS = "centos7";
+    private static final String DEFAULT_OS = CENTOS7.getOs();
 
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -52,7 +54,7 @@ class ImageOsServiceTest {
 
     @Test
     void isSupportedRedhat8() {
-        boolean result = underTest.isSupported(ImageOsService.REDHAT8);
+        boolean result = underTest.isSupported(RHEL8.getOs());
 
         assertThat(result).isFalse();
         verify(entitlementService).isRhel8ImageSupportEnabled(ACCOUNT_ID);
@@ -60,7 +62,7 @@ class ImageOsServiceTest {
 
     @Test
     void isSupportedDefaultRedhat8Os() {
-        setDefaultOs(ImageOsService.REDHAT8);
+        setDefaultOs(RHEL8.getOs());
 
         boolean result = underTest.isSupported(DEFAULT_OS);
 
@@ -88,8 +90,8 @@ class ImageOsServiceTest {
     static Stream<Arguments> preferredOsArguments() {
         return Stream.of(
                 Arguments.of(null, false, DEFAULT_OS),
-                Arguments.of(null, true, ImageOsService.REDHAT8),
-                Arguments.of(ImageOsService.REDHAT8, false, ImageOsService.REDHAT8),
+                Arguments.of(null, true, RHEL8.getOs()),
+                Arguments.of(RHEL8.getOs(), false, RHEL8.getOs()),
                 Arguments.of("random", false, "random"),
                 Arguments.of("random", true, "random")
         );

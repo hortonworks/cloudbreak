@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static com.sequenceiq.common.model.OsType.RHEL8;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,8 +14,6 @@ import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLoca
 @Component
 public class ImageOsService {
 
-    static final String REDHAT8 = "redhat8";
-
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
@@ -24,7 +24,7 @@ public class ImageOsService {
     private String defaultOs;
 
     public boolean isSupported(String os) {
-        if (!defaultOs.equalsIgnoreCase(os) && REDHAT8.equalsIgnoreCase(os)) {
+        if (!defaultOs.equalsIgnoreCase(os) && RHEL8.getOs().equalsIgnoreCase(os)) {
             return entitlementService.isRhel8ImageSupportEnabled(restRequestThreadLocalService.getAccountId());
         }
         return true;
@@ -38,7 +38,7 @@ public class ImageOsService {
         if (StringUtils.isNotBlank(requestedOs)) {
             return requestedOs;
         } else if (entitlementService.isRhel8ImagePreferred(restRequestThreadLocalService.getAccountId())) {
-            return REDHAT8;
+            return RHEL8.getOs();
         } else {
             return defaultOs;
         }

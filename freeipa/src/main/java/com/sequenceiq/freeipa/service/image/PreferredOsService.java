@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.image;
 
+import static com.sequenceiq.common.model.OsType.RHEL8;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,8 +13,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 
 @Service
 public class PreferredOsService {
-
-    private static final String REDHAT8 = "redhat8";
 
     @Inject
     private EntitlementService entitlementService;
@@ -28,7 +28,7 @@ public class PreferredOsService {
         if (StringUtils.isNotBlank(requestedOs)) {
             return requestedOs;
         } else if (entitlementService.isRhel8ImagePreferred(ThreadBasedUserCrnProvider.getAccountId())) {
-            return REDHAT8;
+            return RHEL8.getOs();
         } else {
             return defaultOs;
         }
