@@ -170,5 +170,4 @@ class EnvironmentBaseNetworkConverterTest {
             result.setRegistrationType(RegistrationType.EXISTING);
         }
     }
-
 }

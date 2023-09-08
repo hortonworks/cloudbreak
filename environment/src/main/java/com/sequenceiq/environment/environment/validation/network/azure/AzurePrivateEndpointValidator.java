@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -17,9 +18,10 @@ import com.sequenceiq.cloudbreak.cloud.azure.validator.privatedns.AzureNewPrivat
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
@@ -57,8 +59,15 @@ public class AzurePrivateEndpointValidator {
         this.azureExistingPrivateDnsZonesService = azureExistingPrivateDnsZonesService;
     }
 
+    public void checkExistingDnsZoneDeletion(ValidationType validationType, String originalZoneId, String newZoneId, ValidationResultBuilder resultBuilder) {
+        if (validationType == ValidationType.ENVIRONMENT_EDIT && StringUtils.isNotEmpty(originalZoneId) && StringUtils.isEmpty(newZoneId)) {
+            String message = "Deletion of existing dns zone id is not a valid operation";
+            addValidationError(message, resultBuilder);
+        }
+    }
+
     public void checkNetworkPoliciesWhenExistingNetwork(
-            NetworkDto networkDto, Map<String, CloudSubnet> cloudNetworks, ValidationResult.ValidationResultBuilder resultBuilder) {
+            NetworkDto networkDto, Map<String, CloudSubnet> cloudNetworks, ValidationResultBuilder resultBuilder) {
         if (!networkDto.isPrivateEndpointEnabled(CloudPlatform.AZURE)) {
             LOGGER.debug("No private endpoint network policies validation requested");
             return;
@@ -81,7 +90,7 @@ public class AzurePrivateEndpointValidator {
         }
     }
 
-    public void checkMultipleResourceGroup(ValidationResult.ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto,
+    public void checkMultipleResourceGroup(ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto,
             NetworkDto networkDto) {
         ResourceGroupUsagePattern resourceGroupUsagePattern = getResourceGroupUsagePattern(environmentDto);
         if (resourceGroupUsagePattern == ResourceGroupUsagePattern.USE_MULTIPLE && networkDto.isPrivateEndpointEnabled(CloudPlatform.AZURE)) {
@@ -90,7 +99,7 @@ public class AzurePrivateEndpointValidator {
         }
     }
 
-    public void checkExistingManagedPrivateDnsZone(ValidationResult.ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto,
+    public void checkExistingManagedPrivateDnsZone(ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto,
             NetworkDto networkDto) {
         if (azureExistingPrivateDnsZonesService.hasNoExistingManagedZones(networkDto)) {
             LOGGER.debug("No existing private DNS zones are used, nothing to do.");
@@ -115,7 +124,7 @@ public class AzurePrivateEndpointValidator {
         }
     }
 
-    public void checkExistingRegisteredOnlyPrivateDnsZone(ValidationResult.ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto,
+    public void checkExistingRegisteredOnlyPrivateDnsZone(ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto,
             NetworkDto networkDto) {
         if (azureExistingPrivateDnsZonesService.hasNoExistingRegisteredOnlyZones(networkDto)) {
             LOGGER.debug("No existing private DNS zones are used, nothing to do.");
@@ -129,7 +138,7 @@ public class AzurePrivateEndpointValidator {
 
     }
 
-    public void checkNewPrivateDnsZone(ValidationResult.ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto, NetworkDto networkDto) {
+    public void checkNewPrivateDnsZone(ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto, NetworkDto networkDto) {
         if (networkDto.isPrivateEndpointEnabled(CloudPlatform.AZURE) && ResourceGroupUsagePattern.USE_MULTIPLE != getResourceGroupUsagePattern(environmentDto)) {
             CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environmentDto.getCredential());
             AzureClient azureClient = azureClientService.getClient(cloudCredential);
@@ -153,7 +162,7 @@ public class AzurePrivateEndpointValidator {
                 .map(AzureParametersDto::getAzureResourceGroupDto);
     }
 
-    private void addValidationError(String message, ValidationResult.ValidationResultBuilder resultBuilder) {
+    private void addValidationError(String message, ValidationResultBuilder resultBuilder) {
         LOGGER.warn(message);
         resultBuilder.error(message);
     }

@@ -2,9 +2,11 @@ package com.sequenceiq.environment.environment.validation.network.azure;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.environment.environment.validation.ValidationType.ENVIRONMENT_CREATION;
+import static com.sequenceiq.environment.environment.validation.ValidationType.ENVIRONMENT_EDIT;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,6 +26,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
+import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.dto.AzureParams;
@@ -67,22 +70,14 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
                 .stream().findFirst()
                 .orElseThrow();
         checkSubnetsProvidedWhenExistingNetwork(resultBuilder, "subnet IDs", networkDto.getSubnetIds(), networkDto.getAzure(), cloudNetworks, region);
-        checkFlexibleServerSubnetIds(networkDto.getAzure(), environmentValidationDto.getEnvironmentDto(), networkDto, resultBuilder);
+        checkFlexibleServerSubnetIds(environmentValidationDto, networkDto, resultBuilder);
         if (CollectionUtils.isNotEmpty(networkDto.getEndpointGatewaySubnetIds())) {
             LOGGER.debug("Checking EndpointGatewaySubnetIds {}", networkDto.getEndpointGatewaySubnetIds());
             Map<String, CloudSubnet> endpointGatewayNetworks = cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(environmentDto, networkDto);
             checkSubnetsProvidedWhenExistingNetwork(resultBuilder, "endpoint gateway subnet IDs",
                     networkDto.getEndpointGatewaySubnetIds(), networkDto.getAzure(), endpointGatewayNetworks, region);
         }
-        if (environmentValidationDto.getValidationType() == ENVIRONMENT_CREATION) {
-            azurePrivateEndpointValidator.checkNetworkPoliciesWhenExistingNetwork(networkDto, cloudNetworks, resultBuilder);
-            azurePrivateEndpointValidator.checkMultipleResourceGroup(resultBuilder, environmentDto, networkDto);
-            azurePrivateEndpointValidator.checkExistingManagedPrivateDnsZone(resultBuilder, environmentDto, networkDto);
-            azurePrivateEndpointValidator.checkNewPrivateDnsZone(resultBuilder, environmentDto, networkDto);
-            azurePrivateEndpointValidator.checkExistingRegisteredOnlyPrivateDnsZone(resultBuilder, environmentDto, networkDto);
-        } else {
-            LOGGER.debug("Skipping Private Endpoint related validations as they have been validated before during env creation");
-        }
+        checkPrivateDnsZoneId(environmentValidationDto, networkDto, resultBuilder, environmentDto, cloudNetworks);
     }
 
     @Override
@@ -205,7 +200,7 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
                 && environmentValidationDto.getEnvironmentDto().getNetwork().getAzure() != null) {
             availabilityZones = environmentValidationDto.getEnvironmentDto().getNetwork().getAzure().getAvailabilityZones();
         }
-        return  availabilityZones;
+        return availabilityZones;
     }
 
     private boolean checkInvalidAvailabilityZones(AzureParams azureParams, ValidationResultBuilder resultBuilder) {
@@ -223,28 +218,86 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         }
     }
 
-    private void checkFlexibleServerSubnetIds(AzureParams azureParams, EnvironmentDto environmentDto, NetworkDto networkDto,
+    private void checkFlexibleServerSubnetIds(EnvironmentValidationDto environmentValidationDto, NetworkDto networkDto,
             ValidationResultBuilder resultBuilder) {
-        Set<String> flexibleServerSubnetIds = azureParams.getFlexibleServerSubnetIds().stream()
-                .map(subnet -> {
-                    if (subnet.contains("/")) {
-                        return StringUtils.substringAfterLast(subnet, "/");
-                    } else {
-                        return subnet;
-                    }
-                })
-                .collect(Collectors.toSet());
-        if (entitlementService.isAzureDatabaseFlexibleServerEnabled(environmentDto.getAccountId()) && CollectionUtils.isNotEmpty(flexibleServerSubnetIds)) {
-            Map<String, CloudSubnet> flexibleSubnets = cloudNetworkService.getSubnetMetadata(environmentDto, networkDto, flexibleServerSubnetIds);
-            Set<String> invalidSubnets = flexibleSubnets.entrySet().stream()
-                    .filter(entry -> !azureCloudSubnetParametersService.isFlexibleServerDelegatedSubnet(entry.getValue()))
-                    .map(Entry::getKey)
-                    .collect(Collectors.toSet());
-            if (CollectionUtils.isNotEmpty(invalidSubnets)) {
-                String message = String.format("The following subnets are not delegated to flexible servers: %s", String.join(",", invalidSubnets));
-                LOGGER.info(message);
+        EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
+        if (entitlementService.isAzureDatabaseFlexibleServerEnabled(environmentDto.getAccountId())) {
+            Set<String> originalFlexibleSubnets = Optional.ofNullable(environmentDto.getNetwork())
+                    .map(NetworkDto::getAzure)
+                    .map(AzureParams::getFlexibleServerSubnetIds)
+                    .orElse(Set.of());
+            Set<String> newFlexibleSubnets = Optional.ofNullable(networkDto.getAzure())
+                    .map(AzureParams::getFlexibleServerSubnetIds)
+                    .orElse(Set.of());
+            if (environmentValidationDto.getValidationType() == ENVIRONMENT_EDIT && originalFlexibleSubnets.equals(newFlexibleSubnets)) {
+                LOGGER.info("Flexible server subnet validation is not needed during environment edit as subnet ids has not changed.");
+            } else if (environmentValidationDto.getValidationType() == ENVIRONMENT_EDIT &&
+                    !originalFlexibleSubnets.isEmpty() && newFlexibleSubnets.isEmpty()) {
+                String message = "Deletion of all flexible server delegated subnets is not a valid operation";
+                LOGGER.warn(message);
                 resultBuilder.error(message);
+            } else if (!newFlexibleSubnets.isEmpty()) {
+                Set<String> flexibleServerSubnetIds = convertFlexibleServerSubnetIds(newFlexibleSubnets);
+                Map<String, CloudSubnet> flexibleSubnets = cloudNetworkService.getSubnetMetadata(environmentDto, networkDto, flexibleServerSubnetIds);
+                if (flexibleSubnets.size() != flexibleServerSubnetIds.size()) {
+                    String message = String.format("The following flexible server delegated subnets are not found on the provider side: %s",
+                            newFlexibleSubnets.stream()
+                                    .filter(subnetId -> !flexibleSubnets.containsKey(convertFlexibleServerSubnetId(subnetId)))
+                                    .collect(Collectors.joining(",")));
+                    LOGGER.warn(message);
+                    resultBuilder.error(message);
+                } else {
+                    String invalidSubnets = flexibleSubnets.entrySet().stream()
+                            .filter(entry -> !azureCloudSubnetParametersService.isFlexibleServerDelegatedSubnet(entry.getValue()))
+                            .map(Entry::getKey)
+                            .collect(Collectors.joining(","));
+                    if (StringUtils.isNotEmpty(invalidSubnets)) {
+                        String message = String.format("The following subnets are not delegated to flexible servers: %s", invalidSubnets);
+                        LOGGER.warn(message);
+                        resultBuilder.error(message);
+                    }
+                }
             }
+        }
+    }
+
+    private Set<String> convertFlexibleServerSubnetIds(Set<String> flexibleServerSubnetIds) {
+        return flexibleServerSubnetIds.stream()
+                .map(this::convertFlexibleServerSubnetId)
+                .collect(Collectors.toSet());
+    }
+
+    private String convertFlexibleServerSubnetId(String subnetId) {
+        if (subnetId.contains("/")) {
+            return StringUtils.substringAfterLast(subnetId, "/");
+        } else {
+            return subnetId;
+        }
+    }
+
+    private void checkPrivateDnsZoneId(EnvironmentValidationDto environmentValidationDto, NetworkDto networkDto, ValidationResultBuilder resultBuilder,
+            EnvironmentDto environmentDto, Map<String, CloudSubnet> cloudNetworks) {
+        ValidationType validationType = environmentValidationDto.getValidationType();
+        String originalDnsZone = Optional.ofNullable(environmentValidationDto.getEnvironmentDto())
+                .map(EnvironmentDto::getNetwork)
+                .map(NetworkDto::getAzure)
+                .map(AzureParams::getDatabasePrivateDnsZoneId)
+                .orElse(null);
+        String newDnsZone = Optional.ofNullable(networkDto.getAzure())
+                .map(AzureParams::getDatabasePrivateDnsZoneId)
+                .orElse(null);
+        if (validationType == ENVIRONMENT_CREATION ||
+                (validationType == ENVIRONMENT_EDIT && !StringUtils.equals(originalDnsZone, newDnsZone))) {
+            LOGGER.debug("Dns zone validation: validation type: {}, originalDnsZone: {}, newDnsZone {}", validationType, originalDnsZone, newDnsZone);
+            azurePrivateEndpointValidator.checkExistingDnsZoneDeletion(validationType, originalDnsZone, newDnsZone, resultBuilder);
+            azurePrivateEndpointValidator.checkNetworkPoliciesWhenExistingNetwork(networkDto, cloudNetworks, resultBuilder);
+            azurePrivateEndpointValidator.checkMultipleResourceGroup(resultBuilder, environmentDto, networkDto);
+            azurePrivateEndpointValidator.checkExistingManagedPrivateDnsZone(resultBuilder, environmentDto, networkDto);
+            azurePrivateEndpointValidator.checkNewPrivateDnsZone(resultBuilder, environmentDto, networkDto);
+            azurePrivateEndpointValidator.checkExistingRegisteredOnlyPrivateDnsZone(resultBuilder, environmentDto, networkDto);
+            LOGGER.debug("Dns zone validation finished");
+        } else {
+            LOGGER.debug("Skipping Private Dns Zone related validations as it is not changed during environment edit.");
         }
     }
 

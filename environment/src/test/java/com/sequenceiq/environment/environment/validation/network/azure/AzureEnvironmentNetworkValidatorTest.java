@@ -126,6 +126,49 @@ class AzureEnvironmentNetworkValidatorTest {
     }
 
     @Test
+    void testValidateDuringFlowWhenFlexiblePrivateEndpointAndEnvEditThenPrivateEndpointValidationsAreRun() {
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        AzureParams azureParams = getAzureParams("networkId", "networkResourceGroupName");
+        azureParams.setFlexibleServerSubnetIds(new HashSet<>());
+        NetworkDto networkDto = NetworkTestUtils
+                .getNetworkDtoBuilder(azureParams, null, null, azureParams.getNetworkId(), null, 1, 0, RegistrationType.EXISTING)
+                .withAzure(AzureParams.builder().withDatabasePrivateDnsZoneId("privateDnsZone").build())
+                .build();
+        EnvironmentValidationDto environmentValidationDto = environmentValidationDtoWithSingleRg(MY_SINGLE_RG, ValidationType.ENVIRONMENT_EDIT,
+                ResourceGroupUsagePattern.USE_SINGLE);
+
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
+
+        EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
+        verify(azurePrivateEndpointValidator).checkNewPrivateDnsZone(validationResultBuilder, environmentDto, networkDto);
+        verify(azurePrivateEndpointValidator).checkMultipleResourceGroup(validationResultBuilder, environmentDto,
+                networkDto);
+        verify(azurePrivateEndpointValidator).checkNewPrivateDnsZone(validationResultBuilder, environmentDto, networkDto);
+        verify(azurePrivateEndpointValidator).checkExistingManagedPrivateDnsZone(validationResultBuilder, environmentDto, networkDto);
+    }
+
+    @Test
+    void testValidateDuringFlowWhenEnvEditAndDnsZoneNotChangedThenPrivateEndpointValidationsSkipped() {
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        AzureParams azureParams = getAzureParams("", "networkResourceGroupName");
+        azureParams.setFlexibleServerSubnetIds(new HashSet<>());
+
+        NetworkDto networkDto = getNetworkDto(azureParams);
+        when(cloudNetworkService.retrieveSubnetMetadata(any(EnvironmentDto.class), any())).thenReturn(getCloudSubnets(false));
+        EnvironmentValidationDto environmentDto = environmentValidationDtoWithSingleRg(MY_SINGLE_RG, ResourceGroupUsagePattern.USE_SINGLE);
+        environmentDto.setValidationType(ValidationType.ENVIRONMENT_EDIT);
+
+        underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
+
+        verify(azurePrivateEndpointValidator, never()).checkNewPrivateDnsZone(any(), any(), any());
+        verify(azurePrivateEndpointValidator, never()).checkMultipleResourceGroup(any(), any(), any());
+        verify(azurePrivateEndpointValidator, never()).checkNewPrivateDnsZone(any(), any(), any());
+        verify(azurePrivateEndpointValidator, never()).checkExistingManagedPrivateDnsZone(any(), any(), any());
+        verify(azurePrivateEndpointValidator, never()).checkExistingRegisteredOnlyPrivateDnsZone(any(), any(), any());
+        assertFalse(validationResultBuilder.build().hasError());
+    }
+
+    @Test
     void testValidateDuringFlowWhenEnvironmentIsBeingEditedThenPrivateEndpointValidationsSkipped() {
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         AzureParams azureParams = getAzureParams("", "networkResourceGroupName");
@@ -162,7 +205,8 @@ class AzureEnvironmentNetworkValidatorTest {
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         AzureParams azureParams = getAzureParams("networkId", "networkResourceGroupName");
         azureParams.setFlexibleServerSubnetIds(input);
-        NetworkDto networkDto = NetworkTestUtils.getNetworkDtoBuilder(azureParams, null, null, azureParams.getNetworkId(), null, 1, 0, RegistrationType.EXISTING)
+        NetworkDto networkDto = NetworkTestUtils
+                .getNetworkDtoBuilder(azureParams, null, null, azureParams.getNetworkId(), null, 1, 0, RegistrationType.EXISTING)
                 .build();
         EnvironmentValidationDto environmentValidationDto = environmentValidationDtoWithSingleRg(MY_SINGLE_RG, ResourceGroupUsagePattern.USE_SINGLE);
         when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
@@ -177,14 +221,92 @@ class AzureEnvironmentNetworkValidatorTest {
         Map<String, CloudSubnet> subnetToCloudSubnet = subnetNames.stream().collect(Collectors.toMap(Function.identity(), sn -> new CloudSubnet(sn, null)));
         when(cloudNetworkService.retrieveSubnetMetadata(environmentValidationDto.getEnvironmentDto(), networkDto))
                 .thenReturn(subnetToCloudSubnet);
-
         when(cloudNetworkService.getSubnetMetadata(environmentValidationDto.getEnvironmentDto(), networkDto, subnetNames))
                 .thenReturn(subnetToCloudSubnet);
-
         when(azureCloudSubnetParametersService.isFlexibleServerDelegatedSubnet(any(CloudSubnet.class))).thenReturn(true);
+
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
         assertFalse(validationResultBuilder.build().hasError());
+    }
+
+    @Test
+    void testValidateDuringFlowWhenNoFlexibleServerEntitlement() {
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        AzureParams azureParams = getAzureParams("networkId", "networkResourceGroupName");
+        azureParams.setFlexibleServerSubnetIds(Set.of("azure/flexibleSubnet"));
+        NetworkDto networkDto = NetworkTestUtils
+                .getNetworkDtoBuilder(azureParams, null, null, azureParams.getNetworkId(), null, 1, 0, RegistrationType.EXISTING)
+                .build();
+        EnvironmentValidationDto environmentValidationDto = environmentValidationDtoWithSingleRg(MY_SINGLE_RG, ResourceGroupUsagePattern.USE_SINGLE);
+        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(false);
+        when(cloudNetworkService.retrieveSubnetMetadata(environmentValidationDto.getEnvironmentDto(), networkDto))
+                .thenReturn(Map.ofEntries(Map.entry("flexibleSubnet", new CloudSubnet())));
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
+
+        ValidationResult validationResult = validationResultBuilder.build();
+        assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    void testValidateDuringFlowWhenFlexibleServerSubnetsNotChanged() {
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        AzureParams azureParams = getAzureParams("networkId", "networkResourceGroupName");
+        NetworkDto networkDto = NetworkTestUtils
+                .getNetworkDtoBuilder(azureParams, null, null, azureParams.getNetworkId(), null, 1, 0, RegistrationType.EXISTING)
+                .build();
+        EnvironmentValidationDto environmentValidationDto = environmentValidationDtoWithSingleRg(MY_SINGLE_RG, ValidationType.ENVIRONMENT_EDIT,
+                ResourceGroupUsagePattern.USE_SINGLE);
+        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
+        when(cloudNetworkService.retrieveSubnetMetadata(environmentValidationDto.getEnvironmentDto(), networkDto))
+                .thenReturn(Map.ofEntries(Map.entry("flexibleSubnet", new CloudSubnet())));
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
+
+        ValidationResult validationResult = validationResultBuilder.build();
+        assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    void testValidateDuringFlowWhenFlexibleServerSubnetsDeleted() {
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        AzureParams azureParams = getAzureParams("networkId", "networkResourceGroupName");
+        NetworkDto networkDto = NetworkTestUtils
+                .getNetworkDtoBuilder(azureParams, null, null, azureParams.getNetworkId(), null, 1, 0, RegistrationType.EXISTING)
+                .build();
+        EnvironmentValidationDto environmentValidationDto = environmentValidationDtoWithSingleRg(MY_SINGLE_RG, ValidationType.ENVIRONMENT_EDIT,
+                ResourceGroupUsagePattern.USE_SINGLE);
+        environmentValidationDto.getEnvironmentDto().getNetwork().getAzure().setFlexibleServerSubnetIds(Set.of("azure/flexibleSubnet"));
+        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
+        when(cloudNetworkService.retrieveSubnetMetadata(environmentValidationDto.getEnvironmentDto(), networkDto))
+                .thenReturn(Map.ofEntries(Map.entry("flexibleSubnet", new CloudSubnet())));
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
+
+        ValidationResult validationResult = validationResultBuilder.build();
+        assertTrue(validationResult.hasError());
+        assertTrue(validationResult.getErrors().stream()
+                .anyMatch(error -> error.startsWith("Deletion of all flexible server delegated subnets is not a valid operation")));
+    }
+
+    @Test
+    void testValidateDuringFlowWhenFlexibleServerSubnetsMissingOnProvider() {
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        AzureParams azureParams = getAzureParams("networkId", "networkResourceGroupName");
+        azureParams.setFlexibleServerSubnetIds(Set.of("azure/flexibleSubnet"));
+        NetworkDto networkDto = NetworkTestUtils
+                .getNetworkDtoBuilder(azureParams, null, null, azureParams.getNetworkId(), null, 1, 0, RegistrationType.EXISTING)
+                .build();
+        EnvironmentValidationDto environmentValidationDto = environmentValidationDtoWithSingleRg(MY_SINGLE_RG, ResourceGroupUsagePattern.USE_SINGLE);
+        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
+        when(cloudNetworkService.retrieveSubnetMetadata(environmentValidationDto.getEnvironmentDto(), networkDto))
+                .thenReturn(Map.ofEntries(Map.entry("flexibleSubnet", new CloudSubnet())));
+        when(cloudNetworkService.getSubnetMetadata(environmentValidationDto.getEnvironmentDto(), networkDto, Set.of("flexibleSubnet")))
+                .thenReturn(Map.of());
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
+
+        ValidationResult validationResult = validationResultBuilder.build();
+        assertTrue(validationResult.hasError());
+        assertTrue(validationResult.getErrors().stream()
+                .anyMatch(error -> error.startsWith("The following flexible server delegated subnets are not found on the provider side")));
     }
 
     @Test
@@ -203,7 +325,10 @@ class AzureEnvironmentNetworkValidatorTest {
         when(azureCloudSubnetParametersService.isFlexibleServerDelegatedSubnet(any(CloudSubnet.class))).thenReturn(false);
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
+        ValidationResult validationResult = validationResultBuilder.build();
         assertTrue(validationResultBuilder.build().hasError());
+        assertTrue(validationResult.getErrors().stream()
+                .anyMatch(error -> error.startsWith("The following subnets are not delegated to flexible servers")));
     }
 
     @Test
@@ -557,11 +682,16 @@ class AzureEnvironmentNetworkValidatorTest {
     }
 
     private EnvironmentValidationDto environmentValidationDtoWithSingleRg(String name, ResourceGroupUsagePattern resourceGroupUsagePattern) {
+        return environmentValidationDtoWithSingleRg(name, ValidationType.ENVIRONMENT_CREATION, resourceGroupUsagePattern);
+    }
+
+    private EnvironmentValidationDto environmentValidationDtoWithSingleRg(String name, ValidationType validationType,
+            ResourceGroupUsagePattern resourceGroupUsagePattern) {
         Region usWestRegion = new Region();
         usWestRegion.setName("eastus");
         usWestRegion.setDisplayName("East US");
         return EnvironmentValidationDto.builder()
-                .withValidationType(ValidationType.ENVIRONMENT_CREATION)
+                .withValidationType(validationType)
                 .withEnvironmentDto(EnvironmentDto.builder()
                         .withAccountId("acc")
                         .withParameters(ParametersDto.builder()
@@ -574,6 +704,7 @@ class AzureEnvironmentNetworkValidatorTest {
                                                 .build()
                                 ).build())
                         .withRegions(Set.of(usWestRegion))
+                        .withNetwork(NetworkDto.builder().withAzure(AzureParams.builder().build()).build())
                         .build())
                 .build();
     }
@@ -591,6 +722,7 @@ class AzureEnvironmentNetworkValidatorTest {
         usWestRegion.setDisplayName("East US");
         EnvironmentDto environmentDto = EnvironmentDto.builder()
                 .withRegions(Set.of(usWestRegion))
+                .withNetwork(NetworkDto.builder().withAzure(AzureParams.builder().build()).build())
                 .build();
         return environmentDto;
     }

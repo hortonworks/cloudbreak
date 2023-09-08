@@ -117,6 +117,18 @@ public class AzureParams {
         return new Builder();
     }
 
+    public static Builder builder(AzureParams azureParams) {
+        return builder()
+                .withNetworkId(azureParams.networkId)
+                .withResourceGroupName(azureParams.resourceGroupName)
+                .withNoPublicIp(azureParams.noPublicIp)
+                .withDatabasePrivateDnsZoneId(azureParams.databasePrivateDnsZoneId)
+                .withAksPrivateDnsZoneId(azureParams.aksPrivateDnsZoneId)
+                .withNoOutboundLoadBalancer(azureParams.noOutboundLoadBalancer)
+                .withAvailabilityZones(azureParams.availabilityZones != null ? Set.copyOf(azureParams.availabilityZones) : null)
+                .withFlexibleServerSubnetIds(azureParams.flexibleServerSubnetIds != null ? Set.copyOf(azureParams.flexibleServerSubnetIds) : null);
+    }
+
     @JsonPOJOBuilder
     public static final class Builder {
         private String networkId;
