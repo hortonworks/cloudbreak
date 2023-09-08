@@ -155,3 +155,5 @@ altus:
 crn:
   partition: cdp
   region: us-west-1
+
+quartz.common.scheduler.enabled: false

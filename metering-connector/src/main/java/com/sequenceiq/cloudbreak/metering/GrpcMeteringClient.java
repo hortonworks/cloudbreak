@@ -47,7 +47,7 @@ public class GrpcMeteringClient {
     public void sendMeteringEvent(MeteringEvent meteringEvent) {
         if (meteringConfig.isEnabled()) {
             LOGGER.debug("Send metering event: {}", meteringInfoProvider.getReducedInfo(meteringEvent));
-            MeteringClient meteringClient = makeClient(channelWrapper, regionAwareInternalCrnGeneratorFactory);
+            MeteringClient meteringClient = makeClient();
             meteringClient.sendMeteringEvent(meteringEvent);
         } else {
             LOGGER.debug("Metering event sending is disabled!");
@@ -59,8 +59,7 @@ public class GrpcMeteringClient {
     }
 
     @VisibleForTesting
-    MeteringClient makeClient(ManagedChannelWrapper channelWrapper,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
-        return new MeteringClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
+    MeteringClient makeClient() {
+        return new MeteringClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory, meteringConfig);
     }
 }

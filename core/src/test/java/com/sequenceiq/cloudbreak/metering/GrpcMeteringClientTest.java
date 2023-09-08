@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.metering;
 
 import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.MeteringEvent;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
@@ -52,7 +51,7 @@ class GrpcMeteringClientTest {
     public void setUp() {
         underTest = spy(rawGrpcMeteringClient);
         lenient().doReturn(managedChannel).when(channelWrapper).getChannel();
-        lenient().doReturn(meteringClient).when(underTest).makeClient(any(ManagedChannelWrapper.class), any());
+        lenient().doReturn(meteringClient).when(underTest).makeClient();
     }
 
     @Test

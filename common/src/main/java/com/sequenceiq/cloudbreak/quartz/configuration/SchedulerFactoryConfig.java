@@ -3,12 +3,19 @@ package com.sequenceiq.cloudbreak.quartz.configuration;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
+import javax.sql.DataSource;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.quartz.QuartzProperties;
 import org.springframework.boot.autoconfigure.quartz.SchedulerFactoryBeanCustomizer;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 import com.sequenceiq.cloudbreak.quartz.metric.JobMetricsListener;
 import com.sequenceiq.cloudbreak.quartz.metric.SchedulerMetricsListener;
@@ -19,10 +26,13 @@ import com.sequenceiq.cloudbreak.quartz.statuschecker.StatusCheckerConfig;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 
+@ConditionalOnProperty(value = "quartz.common.scheduler.enabled", matchIfMissing = true)
 @Configuration
 public class SchedulerFactoryConfig {
 
     public static final String QUARTZ_EXECUTOR_THREAD_NAME_PREFIX = "quartzExecutor-";
+
+    public static final String METERING_QUARTZ_EXECUTOR_THREAD_NAME_PREFIX = "meteringQuartzExecutor-";
 
     private static final String QUARTZ_TASK_EXECUTOR = "quartzTaskExecutor";
 
@@ -58,6 +68,13 @@ public class SchedulerFactoryConfig {
 
     @Inject
     private SchedulerMetricsListener schedulerMetricsListener;
+
+    @Primary
+    @Bean
+    public SchedulerFactoryBean quartzScheduler(QuartzProperties quartzProperties, ObjectProvider<SchedulerFactoryBeanCustomizer> customizers,
+            ApplicationContext applicationContext, DataSource dataSource) {
+        return SchedulerFactoryBeanUtil.createSchedulerFactoryBean(quartzProperties, customizers, applicationContext);
+    }
 
     @Bean
     public SchedulerFactoryBeanCustomizer schedulerFactoryBeanCustomizer() {

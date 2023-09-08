@@ -66,7 +66,8 @@ class RoutingDataSourceTest {
      */
     private static Collection<String> getQuartzThreadNames() {
         return Set.of(
-                "quartzScheduler_Worker-6",
+                "quartzExecutor-6",
+                "meteringQuartzExecutor-6",
                 "QuartzScheduler_quartzScheduler-dbajzath1648036370090_ClusterManager",
                 "QuartzScheduler_quartzScheduler-dbajzath1648036370090_MisfireHandler"
         );

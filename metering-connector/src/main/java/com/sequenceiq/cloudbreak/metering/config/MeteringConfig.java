@@ -13,6 +13,8 @@ public class MeteringConfig {
 
     private static final int DEFAULT_INTERVAL_IN_SECONDS = 600;
 
+    private static final int DEFAULT_GRPC_TIMEOUT_IN_SECONDS = 10;
+
     private String host = DEFAULT_HOST;
 
     private int port = DEFAULT_PORT;
@@ -20,6 +22,8 @@ public class MeteringConfig {
     private boolean enabled;
 
     private int intervalInSeconds = DEFAULT_INTERVAL_IN_SECONDS;
+
+    private int grpcTimeoutInSeconds = DEFAULT_GRPC_TIMEOUT_IN_SECONDS;
 
     public String getHost() {
         return host;
@@ -51,5 +55,13 @@ public class MeteringConfig {
 
     public void setIntervalInSeconds(int intervalInSeconds) {
         this.intervalInSeconds = intervalInSeconds;
+    }
+
+    public int getGrpcTimeoutInSeconds() {
+        return grpcTimeoutInSeconds;
+    }
+
+    public void setGrpcTimeoutInSeconds(int grpcTimeoutInSeconds) {
+        this.grpcTimeoutInSeconds = grpcTimeoutInSeconds;
     }
 }

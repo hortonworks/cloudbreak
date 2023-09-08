@@ -27,14 +27,17 @@ public class QuartzJobInitializerService {
     private StatusCheckerConfig properties;
 
     @Inject
-    private TransactionalScheduler transactionalScheduler;
+    private List<TransactionalScheduler> transactionalSchedulers;
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 5000))
     public void initQuartz() {
         if (properties.isAutoSyncEnabled() && initJobDefinitions.isPresent()) {
             try {
-                LOGGER.info("AutoSync is enabled and there are job initializers, clearing the Quartz scheduler.");
-                transactionalScheduler.clear();
+                LOGGER.info("AutoSync is enabled and there are job initializers, clearing the Quartz schedulers.");
+                for (TransactionalScheduler transactionalScheduler : transactionalSchedulers) {
+                    LOGGER.debug("Clearing scheduler: {}", transactionalScheduler.getClass().getSimpleName());
+                    transactionalScheduler.clear();
+                }
             } catch (TransactionService.TransactionExecutionException e) {
                 LOGGER.error("Error during clearing quartz jobs", e);
                 throw e.getCause();

@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.metering.config.MeteringConfig;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
-import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
 
@@ -38,7 +37,7 @@ public class MeteringJobService implements JobSchedulerService {
     private MeteringConfig meteringConfig;
 
     @Inject
-    private TransactionalScheduler scheduler;
+    private MeteringTransactionalScheduler scheduler;
 
     @Inject
     private ApplicationContext applicationContext;
