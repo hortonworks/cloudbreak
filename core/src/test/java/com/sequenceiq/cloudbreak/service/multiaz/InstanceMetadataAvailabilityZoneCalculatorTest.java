@@ -305,6 +305,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
             expectedAvailabilityZoneByFqdn.put(discoveryFQDN, expectedZoneForInstance);
             when(instanceMetaDataService.getAvailabilityZoneFromDiskIfRepair(stack, repair, im.getInstanceGroup().getGroupName(), discoveryFQDN))
                     .thenReturn(expectedZoneForInstance);
+            when(multiAzCalculatorService.determineRackId(im.getSubnetId(), expectedZoneForInstance)).thenReturn("/" + expectedZoneForInstance);
             index++;
         }
 
@@ -319,6 +320,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
             String discoveryFQDN = instanceMetaData.getDiscoveryFQDN();
             String expectedAz = expectedAvailabilityZoneByFqdn.get(discoveryFQDN);
             assertEquals(expectedAz, instanceMetaData.getAvailabilityZone());
+            assertEquals("/" + expectedAz, instanceMetaData.getRackId());
             verify(instanceMetaDataService).getAvailabilityZoneFromDiskIfRepair(stack, repair, instanceMetaData.getInstanceGroupName(), discoveryFQDN);
         });
     }

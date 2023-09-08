@@ -191,6 +191,7 @@ public class InstanceMetadataAvailabilityZoneCalculator {
                 LOGGER.info("Setting availability zone to '{}' for instance with FQDN '{}' in group '{}' during repair", zoneFromDisk, discoveryFQDN,
                         hostGroupName);
                 im.setAvailabilityZone(zoneFromDisk);
+                im.setRackId(multiAzCalculatorService.determineRackId(im.getSubnetId(), zoneFromDisk));
                 updatedInstances.add(im);
             } else {
                 String msg = String.format("Repair could not be initiated because availability zone could not be found for instances as no disk " +
