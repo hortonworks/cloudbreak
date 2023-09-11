@@ -15,6 +15,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.client.ClientProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -189,6 +190,7 @@ public class ParcelService {
     public Optional<Response> getHeadResponseForParcel(String url) {
         Client client = restClientFactory.getOrCreateDefault();
         WebTarget target = client.target(url);
+        target.property(ClientProperties.FOLLOW_REDIRECTS, Boolean.TRUE);
         paywallCredentialPopulator.populateWebTarget(url, target);
         Response response = target.request().head();
         LOGGER.info("Head request for {} status: {}", url, response.getStatus());
