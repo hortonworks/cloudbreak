@@ -4,7 +4,6 @@
     {
       "Effect": "Allow",
       "Action": [
-        "ec2:DeleteTags",
         "ec2:AssociateAddress",
         "ec2:StartInstances",
         "ec2:StopInstances",
