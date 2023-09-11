@@ -42,6 +42,7 @@ public class EnvironmentOpDescription {
     public static final String UPDATE_AZURE_ENCRYPTION_RESOURCES_BY_CRN = "Updates the Customer managed key of the Azure environment of a given CRN.";
     public static final String UPGRADE_CCM = "Initiates the CCM tunnel type upgrade to the latest available version";
     public static final String VERTICAL_SCALING = "Initiates the vertical scaling on FreeIPA";
+    public static final String LIST_SUPPORTED_OS = "LIst supported operating systems by environment.";
 
     private EnvironmentOpDescription() {
     }

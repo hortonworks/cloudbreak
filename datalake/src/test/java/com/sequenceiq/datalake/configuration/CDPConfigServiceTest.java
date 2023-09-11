@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -334,6 +335,21 @@ class CDPConfigServiceTest {
 
         List<AdvertisedRuntime> expected = List.of(rt(RUNTIME_7218, false), rt(RUNTIME_7217, true));
         List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, "redhat8");
+
+        assertArrayEquals(expected.toArray(), actual.toArray());
+    }
+
+    @Test
+    void testAdvertisedRuntimesForInvalidOS() {
+        ReflectionTestUtils.setField(cdpConfigService, "defaultRuntime", RUNTIME_7217);
+
+        List<String> supportedVersions = List.of(RUNTIME_7218, RUNTIME_7217, RUNTIME_7216, RUNTIME_7215, RUNTIME_7214);
+        mockSupportedRuntimes(supportedVersions);
+
+        cdpConfigService.initCdpStackRequests();
+
+        List<AdvertisedRuntime> expected = new ArrayList<>();
+        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, "invalid");
 
         assertArrayEquals(expected.toArray(), actual.toArray());
     }

@@ -39,6 +39,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
+import com.sequenceiq.environment.api.v1.environment.model.response.SupportedOperatingSystemResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
@@ -337,5 +338,12 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.UPGRADE_CCM_AVAILABLE, produces = MediaType.TEXT_PLAIN, notes = ENVIRONMENT_NOTES,
             nickname = "isUpgradeCcmAvailableV1ByCrn")
     boolean isUpgradeCcmAvailable(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
+
+    @GET
+    @Path("/os/supported")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.LIST_SUPPORTED_OS, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "listSupportedOperatingSystemV1")
+    SupportedOperatingSystemResponse listSupportedOperatingSystem();
 
 }

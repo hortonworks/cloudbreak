@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
+import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 
 @Service
 public class ProviderPreferencesService {
@@ -28,6 +31,9 @@ public class ProviderPreferencesService {
 
     @Autowired(required = false)
     private List<CloudConstant> cloudConstants = new ArrayList<>();
+
+    @Inject
+    private CommonGovService commonGovService;
 
     public Boolean isPlatformSelectionDisabled() {
         return !StringUtils.isEmpty(enabledPlatforms);
@@ -85,6 +91,10 @@ public class ProviderPreferencesService {
             }
         }
         return result;
+    }
+
+    public boolean isGovCloudDeployment() {
+        return commonGovService.govCloudDeployment(enabledGovPlatforms(), enabledPlatforms());
     }
 
     private boolean enabledPlatformConfigurationsAreEmpty() {

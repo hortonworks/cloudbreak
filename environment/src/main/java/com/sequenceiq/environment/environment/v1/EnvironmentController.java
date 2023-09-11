@@ -28,6 +28,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.RequestObject;
@@ -61,6 +62,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
+import com.sequenceiq.environment.api.v1.environment.model.response.SupportedOperatingSystemResponse;
 import com.sequenceiq.environment.authorization.EnvironmentFiltering;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
@@ -84,6 +86,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentStartService;
 import com.sequenceiq.environment.environment.service.EnvironmentStopService;
 import com.sequenceiq.environment.environment.service.EnvironmentUpgradeCcmService;
 import com.sequenceiq.environment.environment.service.EnvironmentVerticalScaleService;
+import com.sequenceiq.environment.environment.service.SupportedOperatingSystemService;
 import com.sequenceiq.environment.environment.service.cloudstorage.CloudStorageValidator;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentApiConverter;
@@ -140,6 +143,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    private final SupportedOperatingSystemService supportedOperatingSystemService;
+
     public EnvironmentController(
             EnvironmentApiConverter environmentApiConverter,
             EnvironmentResponseConverter environmentResponseConverter,
@@ -160,7 +165,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EnvironmentUpgradeCcmService upgradeCcmService,
             EnvironmentVerticalScaleService environmentVerticalScaleService,
             StackV4Endpoint stackV4Endpoint,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory,
+            SupportedOperatingSystemService supportedOperatingSystemService) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentResponseConverter = environmentResponseConverter;
         this.environmentService = environmentService;
@@ -181,6 +187,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.environmentVerticalScaleService = environmentVerticalScaleService;
         this.stackV4Endpoint = stackV4Endpoint;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
+        this.supportedOperatingSystemService = supportedOperatingSystemService;
     }
 
     @Override
@@ -515,5 +522,13 @@ public class EnvironmentController implements EnvironmentEndpoint {
                         ThreadBasedUserCrnProvider.doAsInternalActor(
                                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                                 () -> stackV4Endpoint.getNotCcmUpgradedStackCount(0L, crn, ThreadBasedUserCrnProvider.getUserCrn()) > 0);
+    }
+
+    @Override
+    // We can disable permission since it does not contain sensitive information
+    @DisableCheckPermissions
+    public SupportedOperatingSystemResponse listSupportedOperatingSystem() {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        return supportedOperatingSystemService.listSupportedOperatingSystem(accountId);
     }
 }
