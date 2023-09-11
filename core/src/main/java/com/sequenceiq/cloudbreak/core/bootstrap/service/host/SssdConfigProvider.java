@@ -50,9 +50,7 @@ public class SssdConfigProvider {
             sssdConfig.put("dns_ttl", kerberosDetailService.getDnsTtl());
             // enumeration has performance impacts so it's only enabled if Ranger is installed on the cluster
             // otherwise the usersync does not work with nss
-            boolean enumerate = !CollectionUtils.isEmpty(serviceLocations.get("RANGER_ADMIN"))
-                    || !CollectionUtils.isEmpty(serviceLocations.get("NIFI_REGISTRY_SERVER"))
-                    || !CollectionUtils.isEmpty(serviceLocations.get("NIFI_NODE"));
+            boolean enumerate = !CollectionUtils.isEmpty(serviceLocations.get("RANGER_ADMIN"));
             sssdConfig.put("enumerate", enumerate);
             sssdConfig.put("entryCacheTimeout", entryCacheTimeout);
             sssdConfig.put("memcacheTimeout", memcacheTimeout);

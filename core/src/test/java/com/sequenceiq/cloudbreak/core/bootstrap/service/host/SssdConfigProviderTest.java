@@ -81,14 +81,8 @@ class SssdConfigProviderTest {
 
     static Object[][] scenarios() {
         return new Object[][]{
-                {"Empty Services", Map.of("RANGER_ADMIN", List.of(), "NIFI_REGISTRY_SERVER", List.of(), "NIFI_NODE", List.of()), false},
-                {"Ranger present", Map.of("RANGER_ADMIN", List.of("asf"), "NIFI_REGISTRY_SERVER", List.of(), "NIFI_NODE", List.of()), true},
-                {"Ranger present alone", Map.of("RANGER_ADMIN", List.of("asf")), true},
-                {"NifiNode present", Map.of("RANGER_ADMIN", List.of(), "NIFI_REGISTRY_SERVER", List.of(), "NIFI_NODE", List.of("asf")), true},
-                {"NifiNode present alone", Map.of("NIFI_NODE", List.of("asf")), true},
-                {"NifiRegistry present", Map.of("RANGER_ADMIN", List.of(), "NIFI_REGISTRY_SERVER", List.of("asf"), "NIFI_NODE", List.of()), true},
-                {"NifiRegistry present alone", Map.of("NIFI_REGISTRY_SERVER", List.of("asf")), true},
-                {"All present", Map.of("RANGER_ADMIN", List.of("asf"), "NIFI_REGISTRY_SERVER", List.of("asf"), "NIFI_NODE", List.of("asf")), true},
+                {"Empty Services", Map.of("RANGER_ADMIN", List.of()), false},
+                {"Ranger present", Map.of("RANGER_ADMIN", List.of("asf")), true},
         };
     }
 
