@@ -87,7 +87,7 @@ public class SaltCheckerConclusionStep extends ConclusionStep {
         Set<String> availableNodes = stackUtil.collectNodes(stackDto, allAvailableInstanceHostNames)
                 .stream().map(Node::getHostname).collect(Collectors.toSet());
         try {
-            stackUtil.collectAndCheckReachableNodes(stackDto, availableNodes);
+            stackUtil.collectReachableAndCheckNecessaryNodes(stackDto, availableNodes);
         } catch (NodesUnreachableException e) {
             Set<String> unreachableNodes = e.getUnreachableNodes();
             String conclusion = cloudbreakMessagesService.getMessageWithArgs(SALT_COLLECT_UNREACHABLE_FOUND, unreachableNodes);

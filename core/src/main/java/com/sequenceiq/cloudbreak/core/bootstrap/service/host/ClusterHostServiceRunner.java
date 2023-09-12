@@ -42,7 +42,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
-import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.google.common.net.InetAddresses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -284,7 +283,7 @@ public class ClusterHostServiceRunner {
             Map<String, String> candidateAddresses, boolean runPreServiceDeploymentRecipe) {
         try {
             Set<Node> allNodes = stackUtil.collectNodes(stackDto, emptySet());
-            Set<Node> reachableNodes = stackUtil.collectAndCheckReachableNodes(stackDto, candidateAddresses.keySet());
+            Set<Node> reachableNodes = stackUtil.collectReachableAndCheckNecessaryNodes(stackDto, candidateAddresses.keySet());
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stackDto);
             List<GrainProperties> grainsProperties = grainPropertiesService.createGrainProperties(gatewayConfigs, stackDto, reachableNodes);
             executeRunClusterServices(stackDto, candidateAddresses,
@@ -302,25 +301,29 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public NodeReachabilityResult runTargetedClusterServices(@Nonnull StackDto stackDto, Map<String, String> candidateAddresses) {
+    public NodeReachabilityResult runTargetedClusterServices(StackDto stackDto, Map<String, String> candidateAddresses) {
         try {
             Set<String> notTerminatedAndNotZombieGateways = stackDto.getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream()
                     .map(InstanceMetadataView::getDiscoveryFQDN).filter(Objects::nonNull).collect(Collectors.toSet());
-            NodeReachabilityResult nodeReachabilityResult = stackUtil.collectReachableAndUnreachableCandidateNodes(stackDto,
-                    Sets.union(candidateAddresses.keySet(), notTerminatedAndNotZombieGateways));
-            Set<Node> reachableCandidates = nodeReachabilityResult.getReachableNodes();
+            Set<Node> reachableGatewayNodes = stackUtil.collectReachableAndCheckNecessaryNodes(stackDto, notTerminatedAndNotZombieGateways)
+                    .stream()
+                    .filter(node -> notTerminatedAndNotZombieGateways.contains(node.getHostname()))
+                    .collect(Collectors.toSet());
+            NodeReachabilityResult candidateNodesReachabilityResult =
+                    stackUtil.collectReachableAndUnreachableCandidateNodes(stackDto, candidateAddresses.keySet());
+            Set<Node> reachableCandidates = Sets.union(candidateNodesReachabilityResult.getReachableNodes(), reachableGatewayNodes);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stackDto);
             List<GrainProperties> grainsProperties = grainPropertiesService
                     .createGrainPropertiesForTargetedUpscale(gatewayConfigs, stackDto, reachableCandidates);
-            Set<String> reachableCandidateHostNames = nodeReachabilityResult.getReachableHosts();
             LOGGER.debug("We are about to execute cluster services (salt highstate, pre cluster manager recipe execution, mount disks, etc.) " +
-                    "for reachable candidates (targeted operation): {}", Joiner.on(",").join(reachableCandidateHostNames));
+                    "for reachable candidates (targeted operation): {}",
+                    reachableCandidates.stream().map(Node::getHostname).collect(Collectors.joining(",")));
             executeRunClusterServices(stackDto, candidateAddresses, reachableCandidates, reachableCandidates,
                     gatewayConfigs, grainsProperties, true);
-            return nodeReachabilityResult;
+            return new NodeReachabilityResult(reachableCandidates, candidateNodesReachabilityResult.getUnreachableNodes());
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
-        } catch (CloudbreakOrchestratorException | IOException | CloudbreakException e) {
+        } catch (CloudbreakOrchestratorException | IOException | CloudbreakException | NodesUnreachableException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
