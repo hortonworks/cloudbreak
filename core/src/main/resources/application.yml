@@ -182,7 +182,7 @@ cb:
         GCP: pd-ssd
         MOCK: magnetic
     upgrade:
-      embedded.targetversion: VERSION_11
+      embedded.targetversion: VERSION_14
       rds:
         targetversion: VERSION_14
         azure.targetversion: VERSION_11
