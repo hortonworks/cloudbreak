@@ -98,7 +98,7 @@ ext {
   mockitoVersion = '5.1.1'
   openPojoVersion = '0.9.1'
   testContainersVersion = '1.16.0'
-  testNgVersion = '7.3.0'
+  testNgVersion = '7.8.0'
   podamVersion = '7.2.11.RELEASE'
 
   // Tracing
