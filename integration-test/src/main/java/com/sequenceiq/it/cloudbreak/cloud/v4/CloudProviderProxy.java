@@ -448,8 +448,28 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String getFreeIpaMarketplaceUpgradeImageId() {
+        return delegate.getFreeIpaMarketplaceUpgradeImageId();
+    }
+
+    @Override
     public String getFreeIpaUpgradeImageCatalog() {
         return delegate.getFreeIpaUpgradeImageCatalog();
+    }
+
+    @Override
+    public String getFreeIpaMarketplaceUpgradeImageCatalog() {
+        return delegate.getFreeIpaMarketplaceUpgradeImageCatalog();
+    }
+
+    @Override
+    public String getSdxMarketplaceUpgradeImageId() {
+        return delegate.getSdxMarketplaceUpgradeImageId();
+    }
+
+    @Override
+    public String getSdxMarketplaceUpgradeImageCatalog() {
+        return delegate.getSdxMarketplaceUpgradeImageCatalog();
     }
 
     @Override

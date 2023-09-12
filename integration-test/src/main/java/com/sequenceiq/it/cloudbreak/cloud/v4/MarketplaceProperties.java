@@ -1,10 +1,10 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4;
 
-public class FreeIpaProperties {
+public class MarketplaceProperties {
 
     private Upgrade upgrade = new Upgrade();
 
-    private Marketplace marketplace = new Marketplace();
+    private Sdx sdx = new Sdx();
 
     public Upgrade getUpgrade() {
         return upgrade;
@@ -14,12 +14,12 @@ public class FreeIpaProperties {
         this.upgrade = upgrade;
     }
 
-    public Marketplace getMarketplace() {
-        return marketplace;
+    public Sdx getSdx() {
+        return sdx;
     }
 
-    public void setMarketplace(Marketplace marketplace) {
-        this.marketplace = marketplace;
+    public void setSdx(Sdx marketplace) {
+        this.sdx = marketplace;
     }
 
     public static class Upgrade {
@@ -44,7 +44,7 @@ public class FreeIpaProperties {
         }
     }
 
-    public static class Marketplace {
+    public static class Sdx {
 
         private Upgrade upgrade;
 

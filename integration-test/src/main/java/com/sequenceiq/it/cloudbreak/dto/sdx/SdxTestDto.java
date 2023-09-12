@@ -22,10 +22,12 @@ import javax.ws.rs.NotFoundException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.util.Strings;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -437,5 +439,23 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         } catch (NotFoundException nfe) {
             LOGGER.info("SDX resource not found, thus cleanup not needed.");
         }
+    }
+
+    public SdxTestDto withMarketplaceUpgradeCatalogAndImage(String imgCatalogKey) {
+        return withCatalog(imgCatalogKey, getCloudProvider().getSdxMarketplaceUpgradeImageId());
+    }
+
+    public SdxTestDto withCatalog(String imageCatalog, String imageUuid) {
+        if (!Strings.isNullOrEmpty(imageCatalog) && !Strings.isNullOrEmpty(imageUuid)) {
+            LOGGER.info("Using catalog [{}] and image [{}] for creating SDX", imageCatalog, imageUuid);
+            ImageSettingsV4Request imageSettingsRequest = new ImageSettingsV4Request();
+            imageSettingsRequest.setCatalog(imageCatalog);
+            imageSettingsRequest.setId(imageUuid);
+
+            getRequest().setImage(imageSettingsRequest);
+        } else {
+            LOGGER.warn("Catalog [{}] or image [{}] is null or empty", imageCatalog, imageUuid);
+        }
+        return this;
     }
 }

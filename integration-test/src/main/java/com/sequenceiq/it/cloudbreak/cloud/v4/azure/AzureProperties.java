@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.it.cloudbreak.cloud.v4.FreeIpaProperties;
+import com.sequenceiq.it.cloudbreak.cloud.v4.MarketplaceProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.VerticalScaleProperties;
 
 @Configuration
@@ -39,6 +40,8 @@ public class AzureProperties {
     private VerticalScaleProperties verticalScale = new VerticalScaleProperties();
 
     private Boolean externalDatabaseSslEnforcementSupported;
+
+    private MarketplaceProperties marketplace = new MarketplaceProperties();
 
     public VerticalScaleProperties getVerticalScale() {
         return verticalScale;
@@ -118,6 +121,14 @@ public class AzureProperties {
 
     public void setExternalDatabaseSslEnforcementSupported(Boolean externalDatabaseSslEnforcementSupported) {
         this.externalDatabaseSslEnforcementSupported = externalDatabaseSslEnforcementSupported;
+    }
+
+    public MarketplaceProperties getMarketplace() {
+        return marketplace;
+    }
+
+    public void setMarketplace(MarketplaceProperties marketplace) {
+        this.marketplace = marketplace;
     }
 
     public static class Credential {

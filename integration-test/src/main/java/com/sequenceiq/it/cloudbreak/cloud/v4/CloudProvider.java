@@ -185,7 +185,15 @@ public interface CloudProvider {
 
     String getFreeIpaUpgradeImageId();
 
+    String getFreeIpaMarketplaceUpgradeImageId();
+
     String getFreeIpaUpgradeImageCatalog();
+
+    String getFreeIpaMarketplaceUpgradeImageCatalog();
+
+    String getSdxMarketplaceUpgradeImageId();
+
+    String getSdxMarketplaceUpgradeImageCatalog();
 
     String getStorageOptimizedInstanceType();
 
