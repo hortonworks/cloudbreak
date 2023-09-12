@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -40,6 +41,28 @@ class StackServiceTest {
     private static final String STACK_NAME = "stack-name";
 
     private static final String ACCOUNT_ID = "account:id";
+
+    private ResourceBasicView resourceBasicView = new ResourceBasicView() {
+        @Override
+        public Long getId() {
+            return null;
+        }
+
+        @Override
+        public String getResourceCrn() {
+            return null;
+        }
+
+        @Override
+        public String getName() {
+            return null;
+        }
+
+        @Override
+        public String getEnvironmentCrn() {
+            return null;
+        }
+    };
 
     @InjectMocks
     private StackService underTest;
@@ -71,6 +94,20 @@ class StackServiceTest {
         when(stackRepository.findOneWithLists(STACK_ID)).thenReturn(Optional.of(stack));
         Stack stackByIdWithListsInTransaction = underTest.getByIdWithListsInTransaction(STACK_ID);
         assertEquals(stack, stackByIdWithListsInTransaction);
+    }
+
+    @Test
+    void getResourceBasicViewByCrnNotFound() {
+        when(stackRepository.findResourceBasicViewByResourceCrn(FREEIPA_CRN)).thenReturn(Optional.empty());
+        NotFoundException notFoundException = assertThrows(NotFoundException.class, () -> underTest.getResourceBasicViewByCrn(FREEIPA_CRN));
+        assertEquals("FreeIPA stack [" + FREEIPA_CRN + "] not found", notFoundException.getMessage());
+    }
+
+    @Test
+    void getResourceBasicViewByCrn() {
+        when(stackRepository.findResourceBasicViewByResourceCrn(FREEIPA_CRN)).thenReturn(Optional.of(resourceBasicView));
+        ResourceBasicView resourceBasicView1 = underTest.getResourceBasicViewByCrn(FREEIPA_CRN);
+        assertEquals(resourceBasicView, resourceBasicView1);
     }
 
     @Test

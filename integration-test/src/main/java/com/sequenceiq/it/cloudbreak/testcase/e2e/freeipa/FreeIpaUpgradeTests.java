@@ -102,7 +102,7 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
                 .then((tc, testDto, freeIpaClient) -> testFreeIpaAvailabilityDuringUpgrade(tc, testDto, freeIpaClient, freeIpa))
                 .await(COMPLETED)
                 .given(freeIpa, FreeIpaTestDto.class)
-                .await(FREEIPA_AVAILABLE, waitForFlow().withWaitForFlow(Boolean.FALSE))
+                .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> freeIpaTestClient.delete().action(tc, testDto, client))
                 .await(FREEIPA_DELETE_COMPLETED, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .validate();
