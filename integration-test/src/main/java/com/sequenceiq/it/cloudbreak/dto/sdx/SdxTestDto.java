@@ -399,6 +399,13 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         return this;
     }
 
+    public SdxTestDto withImageId(String imageId) {
+        ImageSettingsV4Request imageRequest = new ImageSettingsV4Request();
+        imageRequest.setId(imageId);
+        getRequest().setImage(imageRequest);
+        return this;
+    }
+
     @Override
     public Clue investigate() {
         if (getResponse() == null || getResponse().getCrn() == null) {
