@@ -94,7 +94,8 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     public SdxUpgradeDatabaseServerResponse upgradeDatabaseServerByName(@TenantAwareParam @ResourceName String clusterName,
             SdxUpgradeDatabaseServerRequest sdxUpgradeDatabaseServerRequest) {
         NameOrCrn sdxNameOrCrn = NameOrCrn.ofName(clusterName);
-        return sdxDatabaseServerUpgradeService.upgrade(sdxNameOrCrn, sdxUpgradeDatabaseServerRequest.getTargetMajorVersion());
+        return sdxDatabaseServerUpgradeService.upgrade(sdxNameOrCrn, sdxUpgradeDatabaseServerRequest.getTargetMajorVersion(),
+                Boolean.TRUE.equals(sdxUpgradeDatabaseServerRequest.getForced()));
     }
 
     @Override
@@ -102,7 +103,8 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     public SdxUpgradeDatabaseServerResponse upgradeDatabaseServerByCrn(@TenantAwareParam @ResourceCrn String clusterCrn,
             SdxUpgradeDatabaseServerRequest sdxUpgradeDatabaseServerRequest) {
         NameOrCrn sdxNameOrCrn = NameOrCrn.ofCrn(clusterCrn);
-        return sdxDatabaseServerUpgradeService.upgrade(sdxNameOrCrn, sdxUpgradeDatabaseServerRequest.getTargetMajorVersion());
+        return sdxDatabaseServerUpgradeService.upgrade(sdxNameOrCrn, sdxUpgradeDatabaseServerRequest.getTargetMajorVersion(),
+                Boolean.TRUE.equals(sdxUpgradeDatabaseServerRequest.getForced()));
     }
 
 }

@@ -27,4 +27,11 @@ public abstract class AbstractUpgradeRdsEvent extends StackEvent {
     public TargetMajorVersion getVersion() {
         return version;
     }
+
+    @Override
+    public String toString() {
+        return "AbstractUpgradeRdsEvent{" +
+                "version=" + version +
+                "} " + super.toString();
+    }
 }

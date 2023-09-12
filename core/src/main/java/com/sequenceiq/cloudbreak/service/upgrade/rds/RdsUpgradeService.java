@@ -92,27 +92,27 @@ public class RdsUpgradeService {
         validateAttachedDatahubsAreNotRunning(stack, accountId);
     }
 
-    public RdsUpgradeV4Response upgradeRds(NameOrCrn nameOrCrn, TargetMajorVersion targetMajorVersion) {
+    public RdsUpgradeV4Response upgradeRds(NameOrCrn nameOrCrn, TargetMajorVersion targetMajorVersion, boolean forced) {
         String accountId = restRequestThreadLocalService.getAccountId();
         StackDto stackDto = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         StackView stackView = stackDto.getStack();
+        MDCBuilder.buildMdcContext(stackView);
         TargetMajorVersion calculatedVersion = getTargetMajorVersion(targetMajorVersion, stackDto.getCloudPlatform());
 
         boolean dataHubWithEmbeddedDatabase = !stackView.isDatalake() && stackDto.getExternalDatabaseCreationType().isEmbedded();
         if (dataHubWithEmbeddedDatabase) {
             LOGGER.warn("Database upgrade is not allowed for DataHubs with embedded database ");
             throw new BadRequestException("Database upgrade is not allowed for DataHubs with embedded database");
+        }  else {
+            LOGGER.info("RDS upgrade has been initiated for stack {} to version {}, request version was {}",
+                    nameOrCrn.getNameOrCrn(), calculatedVersion, targetMajorVersion);
+            validate(nameOrCrn, stackView, calculatedVersion, accountId, forced);
+            LOGGER.info("External database for stack {} will be upgraded to version {}", stackView.getName(), calculatedVersion.getMajorVersion());
+            DetailedEnvironmentResponse environment = environmentService.getByCrn(stackView.getEnvironmentCrn());
+            String backupLocation = getBackupLocation(environment);
+            String backupInstanceProfile = getBackupInstanceProfile(environment);
+            return triggerRdsUpgradeFlow(stackView, calculatedVersion, backupLocation, backupInstanceProfile);
         }
-
-        MDCBuilder.buildMdcContext(stackView);
-        LOGGER.info("RDS upgrade has been initiated for stack {} to version {}, request version was {}",
-                nameOrCrn.getNameOrCrn(), calculatedVersion, targetMajorVersion);
-        validate(nameOrCrn, stackView, calculatedVersion, accountId);
-        LOGGER.info("External database for stack {} will be upgraded to version {}", stackView.getName(), calculatedVersion.getMajorVersion());
-        DetailedEnvironmentResponse environment = environmentService.getByCrn(stackView.getEnvironmentCrn());
-        String backupLocation = getBackupLocation(environment);
-        String backupInstanceProfile = getBackupInstanceProfile(environment);
-        return triggerRdsUpgradeFlow(stackView, calculatedVersion, backupLocation, backupInstanceProfile);
     }
 
     private TargetMajorVersion getTargetMajorVersion(TargetMajorVersion requestedTargetVersion, String cloudPlatform) {
@@ -127,17 +127,19 @@ public class RdsUpgradeService {
         return calculatedVersion;
     }
 
-    private void validate(NameOrCrn nameOrCrn, StackView stack, TargetMajorVersion targetMajorVersion, String accountId) {
+    private void validate(NameOrCrn nameOrCrn, StackView stack, TargetMajorVersion targetMajorVersion, String accountId, boolean forced) {
         StackDatabaseServerResponse databaseServer = databaseService.getDatabaseServer(nameOrCrn);
-        validateRdsIsNotUpgraded(databaseServer, targetMajorVersion);
+        validateRdsIsNotUpgraded(databaseServer, targetMajorVersion, forced);
         validateRuntimeEligibleForUpgrade(stack, accountId);
         validateStackStatus(stack);
         validateAttachedDatahubsAreNotRunning(stack, accountId);
         validateRdsIsAvailableForUpgrade(databaseServer);
     }
 
-    private void validateRdsIsNotUpgraded(StackDatabaseServerResponse databaseServer, TargetMajorVersion targetMajorVersion) {
-        if (getCurrentRdsVersion(databaseServer).equals(targetMajorVersion.getMajorVersion())) {
+    private void validateRdsIsNotUpgraded(StackDatabaseServerResponse databaseServer, TargetMajorVersion targetMajorVersion, boolean forced) {
+        String currentRdsVersion = getCurrentRdsVersion(databaseServer);
+        LOGGER.debug("Current version: [{}] Target version: [{}] Forced: [{}]", currentRdsVersion, targetMajorVersion.getMajorVersion(), forced);
+        if (currentRdsVersion.equals(targetMajorVersion.getMajorVersion()) && !forced) {
             alreadyOnLatestAnswer(targetMajorVersion);
         }
     }

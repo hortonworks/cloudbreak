@@ -10,27 +10,36 @@ public class UpgradeDatabaseServerRequest extends SdxEvent {
 
     private final TargetMajorVersion targetMajorVersion;
 
+    private final boolean forced;
+
     @JsonCreator
     public UpgradeDatabaseServerRequest(
             @JsonProperty("resourceId") Long sdxId,
             @JsonProperty("userId") String userId,
-            @JsonProperty("targetMajorVersion") TargetMajorVersion targetMajorVersion) {
+            @JsonProperty("targetMajorVersion") TargetMajorVersion targetMajorVersion,
+            @JsonProperty("forced") boolean forced) {
         super(sdxId, userId);
         this.targetMajorVersion = targetMajorVersion;
+        this.forced = forced;
     }
 
-    public static UpgradeDatabaseServerRequest from(SdxContext context, TargetMajorVersion targetMajorVersion) {
-        return new UpgradeDatabaseServerRequest(context.getSdxId(), context.getUserId(), targetMajorVersion);
+    public static UpgradeDatabaseServerRequest from(SdxContext context, TargetMajorVersion targetMajorVersion, boolean forced) {
+        return new UpgradeDatabaseServerRequest(context.getSdxId(), context.getUserId(), targetMajorVersion, forced);
     }
 
     public TargetMajorVersion getTargetMajorVersion() {
         return targetMajorVersion;
     }
 
+    public boolean isForced() {
+        return forced;
+    }
+
     @Override
     public String toString() {
         return "UpgradeDatabaseServerRequest{" +
                 "targetMajorVersion=" + targetMajorVersion +
+                ", forced=" + forced +
                 "} " + super.toString();
     }
 

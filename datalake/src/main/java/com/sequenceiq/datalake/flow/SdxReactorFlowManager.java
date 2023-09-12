@@ -191,11 +191,11 @@ public class SdxReactorFlowManager {
         }
     }
 
-    public FlowIdentifier triggerDatabaseServerUpgradeFlow(SdxCluster cluster, TargetMajorVersion targetMajorVersion) {
-        LOGGER.info("Trigger Database Server Upgrade on Datalake for: {} with targetMajorVersion: {}", cluster, targetMajorVersion);
+    public FlowIdentifier triggerDatabaseServerUpgradeFlow(SdxCluster cluster, TargetMajorVersion targetMajorVersion, boolean forced) {
+        LOGGER.info("Trigger Database Server Upgrade on Datalake for: {} with targetMajorVersion: {}. Forced: {}", cluster, targetMajorVersion, forced);
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        SdxUpgradeDatabaseServerEvent event =
-                new SdxUpgradeDatabaseServerEvent(SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT.event(), cluster.getId(), initiatorUserCrn, targetMajorVersion);
+        SdxUpgradeDatabaseServerEvent event = new SdxUpgradeDatabaseServerEvent(SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT.event(), cluster.getId(),
+                initiatorUserCrn, targetMajorVersion, forced);
         return notify(SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT.event(), event, cluster.getClusterName());
     }
 

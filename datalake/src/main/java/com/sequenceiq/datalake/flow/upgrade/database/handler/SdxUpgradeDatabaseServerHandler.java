@@ -48,7 +48,7 @@ public class SdxUpgradeDatabaseServerHandler extends ExceptionCatcherEventHandle
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
         try {
-            sdxDatabaseServerUpgradeService.initUpgradeInCb(sdxCluster, request.getTargetMajorVersion());
+            sdxDatabaseServerUpgradeService.initUpgradeInCb(sdxCluster, request.getTargetMajorVersion(), request.isForced());
             LOGGER.debug("Database server upgrade was called successfully in core.");
             return new SdxUpgradeDatabaseServerSuccessEvent(sdxId, userId);
         } catch (Exception e) {

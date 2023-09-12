@@ -7,6 +7,8 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -44,49 +46,52 @@ public class SdxUpgradeDatabaseServerHandlerTest {
         assertEquals(EventSelectorUtil.selector(UpgradeDatabaseServerRequest.class), underTest.selector());
     }
 
-    @Test
-    void testDefaultFailureEvent() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testDefaultFailureEvent(boolean forced) {
         Exception e = new Exception();
         TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
-        Event<UpgradeDatabaseServerRequest> event = setupEvent(targetMajorVersion);
+        Event<UpgradeDatabaseServerRequest> event = setupEvent(targetMajorVersion, forced);
 
         Selectable selectable = underTest.defaultFailureEvent(RESOURCE_ID, e, event);
 
         assertEquals(EventSelectorUtil.selector(SdxUpgradeDatabaseServerFailedEvent.class), selectable.getSelector());
     }
 
-    @Test
-    void testDoAccept() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testDoAccept(boolean forced) {
         TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
-        HandlerEvent<UpgradeDatabaseServerRequest> event = setupHandlerEvent(targetMajorVersion);
+        HandlerEvent<UpgradeDatabaseServerRequest> event = setupHandlerEvent(targetMajorVersion, forced);
         SdxCluster sdxCluster = new SdxCluster();
         when(sdxService.getById(SDX_ID)).thenReturn(sdxCluster);
 
         Selectable nextEvent = underTest.doAccept(event);
 
         assertEquals(nextEvent.getSelector(), EventSelectorUtil.selector(SdxUpgradeDatabaseServerSuccessEvent.class));
-        verify(sdxDatabaseServerUpgradeService).initUpgradeInCb(sdxCluster, targetMajorVersion);
+        verify(sdxDatabaseServerUpgradeService).initUpgradeInCb(sdxCluster, targetMajorVersion, forced);
     }
 
-    @Test
-    void testDoAcceptWhenInitUpgradeInCbThrows() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testDoAcceptWhenInitUpgradeInCbThrows(boolean forced) {
         TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
-        HandlerEvent<UpgradeDatabaseServerRequest> event = setupHandlerEvent(targetMajorVersion);
+        HandlerEvent<UpgradeDatabaseServerRequest> event = setupHandlerEvent(targetMajorVersion, forced);
         SdxCluster sdxCluster = new SdxCluster();
         when(sdxService.getById(SDX_ID)).thenReturn(sdxCluster);
-        doThrow(RuntimeException.class).when(sdxDatabaseServerUpgradeService).initUpgradeInCb(sdxCluster, targetMajorVersion);
+        doThrow(RuntimeException.class).when(sdxDatabaseServerUpgradeService).initUpgradeInCb(sdxCluster, targetMajorVersion, forced);
 
         Selectable nextEvent = underTest.doAccept(event);
 
         assertEquals(nextEvent.getSelector(), EventSelectorUtil.selector(SdxUpgradeDatabaseServerFailedEvent.class));
     }
 
-    private HandlerEvent<UpgradeDatabaseServerRequest> setupHandlerEvent(TargetMajorVersion targetMajorVersion) {
-        return new HandlerEvent<>(setupEvent(targetMajorVersion));
+    private HandlerEvent<UpgradeDatabaseServerRequest> setupHandlerEvent(TargetMajorVersion targetMajorVersion, boolean forced) {
+        return new HandlerEvent<>(setupEvent(targetMajorVersion, forced));
     }
 
-    private Event<UpgradeDatabaseServerRequest> setupEvent(TargetMajorVersion targetMajorVersion) {
-        UpgradeDatabaseServerRequest request = new UpgradeDatabaseServerRequest(SDX_ID, "userId", targetMajorVersion);
+    private Event<UpgradeDatabaseServerRequest> setupEvent(TargetMajorVersion targetMajorVersion, boolean forced) {
+        UpgradeDatabaseServerRequest request = new UpgradeDatabaseServerRequest(SDX_ID, "userId", targetMajorVersion, forced);
         return new Event<>(request);
     }
 

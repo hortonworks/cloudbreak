@@ -80,7 +80,7 @@ public class SdxDatabaseServerUpgradeService {
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
-    public SdxUpgradeDatabaseServerResponse upgrade(NameOrCrn sdxNameOrCrn, TargetMajorVersion requestedTargetMajorVersion) {
+    public SdxUpgradeDatabaseServerResponse upgrade(NameOrCrn sdxNameOrCrn, TargetMajorVersion requestedTargetMajorVersion, boolean forced) {
         LOGGER.debug("Upgrade database server called for {} with target major version {}", sdxNameOrCrn, requestedTargetMajorVersion);
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster cluster = sdxService.getByNameOrCrn(userCrn, sdxNameOrCrn);
@@ -101,7 +101,7 @@ public class SdxDatabaseServerUpgradeService {
         }
 
         StackDatabaseServerResponse databaseResponse = databaseService.getDatabaseServer(cluster.getDatabaseCrn());
-        if (!isUpgradeNeeded(targetMajorVersion, databaseResponse)) {
+        if (!isUpgradeNeeded(targetMajorVersion, databaseResponse, forced)) {
             throwAlreadyOnLatestError(cluster);
         }
 
@@ -110,7 +110,7 @@ public class SdxDatabaseServerUpgradeService {
         }
 
         cloudbreakStackService.checkUpgradeRdsByClusterNameInternal(cluster, targetMajorVersion);
-        return triggerDatabaseUpgrade(cluster, targetMajorVersion);
+        return triggerDatabaseUpgrade(cluster, targetMajorVersion, forced);
     }
 
     private TargetMajorVersion getTargetMajorVersion(TargetMajorVersion requestedTargetMajorVersion, SdxCluster cluster) {
@@ -126,8 +126,8 @@ public class SdxDatabaseServerUpgradeService {
         return targetMajorVersion;
     }
 
-    private boolean isUpgradeNeeded(TargetMajorVersion targetMajorVersion, StackDatabaseServerResponse databaseResponse) {
-        return sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(databaseResponse, targetMajorVersion);
+    private boolean isUpgradeNeeded(TargetMajorVersion targetMajorVersion, StackDatabaseServerResponse databaseResponse, boolean forced) {
+        return sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(databaseResponse, targetMajorVersion, forced);
     }
 
     private boolean isDatabaseServerUpgradeInProgress(DatalakeStatusEnum status) {
@@ -147,11 +147,11 @@ public class SdxDatabaseServerUpgradeService {
         return status != null && status.isAvailableForUpgrade();
     }
 
-    public void initUpgradeInCb(SdxCluster sdxCluster, TargetMajorVersion targetMajorVersion) {
-        LOGGER.debug("Calling database server upgrade on stack endpoint for CRN {} for datalake {} to version {}",
-                sdxCluster.getStackCrn(), sdxCluster.getName(), targetMajorVersion.getMajorVersion());
+    public void initUpgradeInCb(SdxCluster sdxCluster, TargetMajorVersion targetMajorVersion, boolean forced) {
+        LOGGER.debug("Calling database server upgrade on stack endpoint for CRN {} for datalake {} to version {}. Forced: {}",
+                sdxCluster.getStackCrn(), sdxCluster.getName(), targetMajorVersion.getMajorVersion(), forced);
         try {
-            cloudbreakStackService.upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion);
+            cloudbreakStackService.upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion, forced);
         } catch (CloudbreakApiException exception) {
             handleIfAlreadyUpgradedOrThrow(sdxCluster, targetMajorVersion, exception);
         }
@@ -209,12 +209,12 @@ public class SdxDatabaseServerUpgradeService {
         throw new BadRequestException(message);
     }
 
-    private SdxUpgradeDatabaseServerResponse triggerDatabaseUpgrade(SdxCluster cluster, TargetMajorVersion targetMajorVersion) {
+    private SdxUpgradeDatabaseServerResponse triggerDatabaseUpgrade(SdxCluster cluster, TargetMajorVersion targetMajorVersion, boolean forced) {
         LOGGER.debug("Triggering database server upgrade");
         sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_UPGRADE_DATABASE_SERVER_REQUESTED,
                 Collections.singleton(targetMajorVersion.getMajorVersion()), "Database server upgrade requested",
                 cluster.getId());
-        FlowIdentifier flowIdentifier = reactorFlowManager.triggerDatabaseServerUpgradeFlow(cluster, targetMajorVersion);
+        FlowIdentifier flowIdentifier = reactorFlowManager.triggerDatabaseServerUpgradeFlow(cluster, targetMajorVersion, forced);
         LOGGER.info("RDS database server upgrade has been initiated for stack {} to version {}", cluster.getName(), targetMajorVersion.getMajorVersion());
         return new SdxUpgradeDatabaseServerResponse(flowIdentifier, targetMajorVersion);
     }
