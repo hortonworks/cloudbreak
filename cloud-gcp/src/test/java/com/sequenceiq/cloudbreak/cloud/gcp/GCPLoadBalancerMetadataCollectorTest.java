@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -119,6 +119,17 @@ public class GCPLoadBalancerMetadataCollectorTest {
         lenient().when(compute.backendServices()).thenReturn(backendServices);
         lenient().when(backendServices.get(anyString(), eq(BACKEND_SERVICE_NAME))).thenReturn(backendServicesGet);
         lenient().when(backendServicesGet.execute()).thenReturn(createBackendService());
+    }
+
+    @Test
+    public void testCollectLoadBalancerWhenGcpReturnsWithNullForwardingRule() {
+        List<CloudResource> resources = new ArrayList<>();
+        resources.add(createCloudResource(FORWARDING_RULE_NAME_1, ResourceType.GCP_FORWARDING_RULE));
+        when(forwardingRuleListResponse.isEmpty()).thenReturn(Boolean.TRUE);
+
+        List<CloudLoadBalancerMetadata> result = underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.PUBLIC), resources);
+
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -254,7 +265,7 @@ public class GCPLoadBalancerMetadataCollectorTest {
         List<CloudLoadBalancerMetadata> result = underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.PUBLIC), resources);
 
         assertEquals(1, result.size());
-        assertEquals(null, result.get(0).getIp());
+        assertNull(result.get(0).getIp());
         assertEquals(LoadBalancerType.PUBLIC, result.get(0).getType());
         assertEquals(FORWARDING_RULE_NAME_1, result.get(0).getName());
         assertEquals(FORWARDING_RULE_NAME_1, result.get(0).getStringParameter(GcpLoadBalancerMetadataView.LOADBALANCER_NAME));

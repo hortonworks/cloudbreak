@@ -158,24 +158,28 @@ public class GcpMetadataCollector implements MetadataCollector {
             if (forwardingRuleList.getWarning() != null) {
                 LOGGER.warn("Warning fetching GCP loadbalancer metadata, {}", forwardingRuleList.getWarning().getMessage());
             }
-            for (ForwardingRule item : forwardingRuleList.getItems()) {
-                LoadBalancerType itemType = gcpLoadBalancerTypeConverter.getScheme(item.getLoadBalancingScheme()).getCbType();
-                Optional<CloudResource> rule = forwardingRules.stream().filter(r -> r.getName().equals(item.getName())).findFirst();
-                if (rule.isPresent() && itemType == LoadBalancerType.PRIVATE &&
-                        LoadBalancerTypeAttribute.GATEWAY_PRIVATE == rule.get().getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class)) {
-                    LOGGER.debug("GATEWAY_PRIVATE LoadBalancer selected");
-                    itemType = LoadBalancerType.GATEWAY_PRIVATE;
+            if (!forwardingRuleList.isEmpty()) {
+                for (ForwardingRule item : forwardingRuleList.getItems()) {
+                    LoadBalancerType itemType = gcpLoadBalancerTypeConverter.getScheme(item.getLoadBalancingScheme()).getCbType();
+                    Optional<CloudResource> rule = forwardingRules.stream().filter(r -> r.getName().equals(item.getName())).findFirst();
+                    if (rule.isPresent() && itemType == LoadBalancerType.PRIVATE &&
+                            LoadBalancerTypeAttribute.GATEWAY_PRIVATE == rule.get().getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class)) {
+                        LOGGER.debug("GATEWAY_PRIVATE LoadBalancer selected");
+                        itemType = LoadBalancerType.GATEWAY_PRIVATE;
+                    }
+                    if (rule.isPresent() && loadBalancerTypes.contains(itemType)) {
+                        Map<String, Object> params = getParams(compute, projectId, item);
+                        CloudLoadBalancerMetadata loadBalancerMetadata = CloudLoadBalancerMetadata.builder()
+                                .withType(itemType)
+                                .withIp(item.getIPAddress())
+                                .withName(item.getName())
+                                .withParameters(params)
+                                .build();
+                        results.add(loadBalancerMetadata);
+                    }
                 }
-                if (rule.isPresent() && loadBalancerTypes.contains(itemType)) {
-                    Map<String, Object> params = getParams(compute, projectId, item);
-                    CloudLoadBalancerMetadata loadBalancerMetadata = CloudLoadBalancerMetadata.builder()
-                            .withType(itemType)
-                            .withIp(item.getIPAddress())
-                            .withName(item.getName())
-                            .withParameters(params)
-                            .build();
-                    results.add(loadBalancerMetadata);
-                }
+            } else {
+                LOGGER.info("No GCP load balancer forwarding rule has been returned for project id: '{}' in region '{}'", projectId, region);
             }
         } catch (RuntimeException | IOException e) {
             LOGGER.error("Couldn't collect GCP LB metadata for {} ", projectId, e);
