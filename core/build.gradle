@@ -147,7 +147,7 @@ dependencyManagement {
     }
     dependency group: 'dnsjava',                            name: 'dnsjava',                     version: '3.5.2'
 
-    dependency group: 'org.springframework.retry',          name: 'spring-retry',                version: '1.3.4'
+    dependency group: 'org.springframework.retry',          name: 'spring-retry',                version: '2.0.2'
     dependency group: 'org.springframework',                name: 'spring-context-support',      version: springFrameworkVersion
 
     dependency group: 'com.google.code.gson',               name: 'gson',                        version: gsonVersion
