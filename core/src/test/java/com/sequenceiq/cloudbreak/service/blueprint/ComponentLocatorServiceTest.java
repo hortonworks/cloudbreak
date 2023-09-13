@@ -1,7 +1,14 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -17,7 +24,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
@@ -80,6 +92,9 @@ class ComponentLocatorServiceTest {
 
     @Mock
     private BlueprintTextProcessor blueprintTextProcessor;
+
+    @Mock
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @InjectMocks
     private ComponentLocatorService underTest;
@@ -149,4 +164,43 @@ class ComponentLocatorServiceTest {
         assertEquals(6, result.size());
     }
 
+    @Test
+    void testGetImpalaCoordinatorLocationsWhenTheBlueprintOnTheStackDtoDelegateIsNull() {
+        StackDto stackDto = mock(StackDto.class);
+
+        Map<String, List<String>> result = assertDoesNotThrow(() -> underTest.getImpalaCoordinatorLocations(stackDto));
+
+        verifyNoInteractions(cmTemplateProcessorFactory);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testGetImpalaCoordinatorLocationsWhenTheBlueprintOnTheStackDtoDelegateIsNotNullButStackDoesNotHaveGroups() {
+        String blueprintText = "BLUEPRINTTEXT";
+        StackDto stackDto = mock(StackDto.class);
+        Blueprint blueprint = mock(Blueprint.class);
+        when(stackDto.getBlueprint()).thenReturn(blueprint);
+        when(blueprint.getBlueprintText()).thenReturn(blueprintText);
+
+        Map<String, List<String>> result = assertDoesNotThrow(() -> underTest.getImpalaCoordinatorLocations(stackDto));
+
+        verify(cmTemplateProcessorFactory, times(1)).get(blueprintText);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testGetImpalaCoordinatorLocationsWhenTheBlueprintOnTheStackDtoDelegateIsNotNullButStackHaveGroups() {
+        Stack stackDto = TestUtil.cluster().getStack();
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
+        String impalaServiceName = "impala";
+        when(cmTemplateProcessor.getImpalaCoordinatorsInHostGroup(anyString())).thenReturn(Set.of(impalaServiceName)).thenReturn(Set.of());
+
+        Map<String, List<String>> result = assertDoesNotThrow(() -> underTest.getImpalaCoordinatorLocations(stackDto));
+
+        verify(cmTemplateProcessorFactory, times(1)).get(anyString());
+        verify(cmTemplateProcessor, times(3)).getImpalaCoordinatorsInHostGroup(anyString());
+        assertFalse(result.isEmpty());
+        assertFalse(result.get(impalaServiceName).isEmpty());
+    }
 }

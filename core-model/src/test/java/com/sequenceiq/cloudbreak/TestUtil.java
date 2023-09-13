@@ -442,6 +442,7 @@ public class TestUtil {
         workspace.setId(1L);
         cluster.setWorkspace(workspace);
         cluster.setDatabaseServerCrn("databaseCRN");
+        stack.setCluster(cluster);
         return cluster;
     }
 

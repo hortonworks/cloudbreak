@@ -12,16 +12,20 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Service
 public class ComponentLocatorService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComponentLocatorService.class);
 
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
@@ -32,12 +36,17 @@ public class ComponentLocatorService {
 
     public Map<String, List<String>> getImpalaCoordinatorLocations(StackDtoDelegate stack) {
         Map<String, List<String>> result = new HashMap<>();
-        CmTemplateProcessor processor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintText());
+        Blueprint blueprint = stack.getBlueprint();
+        if (blueprint != null) {
+            CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprint.getBlueprintText());
 
-        stack.getInstanceGroupDtos().forEach(ig -> {
-            Set<String> hgComponents = new HashSet<>(processor.getImpalaCoordinatorsInHostGroup(ig.getInstanceGroup().getGroupName()));
-            fillList(result, ig.getReachableInstanceMetaData(), hgComponents);
-        });
+            stack.getInstanceGroupDtos().forEach(ig -> {
+                Set<String> hgComponents = new HashSet<>(processor.getImpalaCoordinatorsInHostGroup(ig.getInstanceGroup().getGroupName()));
+                fillList(result, ig.getReachableInstanceMetaData(), hgComponents);
+            });
+        } else {
+            LOGGER.info("No blueprint available on stack with CRN: '{}'", stack.getResourceCrn());
+        }
         return result;
     }
 
