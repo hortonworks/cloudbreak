@@ -20,13 +20,17 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxUpgradeTestDto;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 
 public class SdxMarketplaceUpgradeTests extends PreconditionSdxE2ETest {
+
+    private static final String TARGET_RUNTIME_VERSION = "7.2.16";
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -78,6 +82,11 @@ public class SdxMarketplaceUpgradeTests extends PreconditionSdxE2ETest {
                     expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instances));
                     return testDto;
                 })
+                .given(SdxUpgradeTestDto.class)
+                    .withReplaceVms(SdxUpgradeReplaceVms.ENABLED)
+                    .withRuntime(TARGET_RUNTIME_VERSION)
+                    .setSkipBackup(Boolean.TRUE)
+                .given(sdx, SdxTestDto.class)
                 .when(sdxTestClient.upgrade(), key(sdx))
                 .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -89,8 +98,6 @@ public class SdxMarketplaceUpgradeTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
-                // This assertion is disabled until the Audit Service is not configured.
-                //.then(datalakeAuditGrpcServiceAssertion::upgradeClusterByNameInternal)
                 .validate();
     }
 }
