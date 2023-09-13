@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -296,7 +297,7 @@ class ClusterHostServiceRunnerTest {
             underTest.runClusterServices(stack, Map.of(), true);
             fail();
         } catch (NullPointerException e) {
-            verify(stackUtil).collectAndCheckReachableNodes(eq(stack), any());
+            verify(stackUtil).collectReachableAndCheckNecessaryNodes(eq(stack), any());
         }
     }
 
@@ -304,7 +305,7 @@ class ClusterHostServiceRunnerTest {
     void collectAndCheckReachableNodesThrowsException() throws NodesUnreachableException {
         Set<String> unreachableNodes = new HashSet<>();
         unreachableNodes.add("node1.example.com");
-        when(stackUtil.collectAndCheckReachableNodes(eq(stack), any())).thenThrow(new NodesUnreachableException("error", unreachableNodes));
+        when(stackUtil.collectReachableAndCheckNecessaryNodes(eq(stack), any())).thenThrow(new NodesUnreachableException("error", unreachableNodes));
 
         CloudbreakServiceException cloudbreakServiceException = Assertions.assertThrows(CloudbreakServiceException.class,
                 () -> underTest.runClusterServices(stack, Map.of(), true));
@@ -428,14 +429,16 @@ class ClusterHostServiceRunnerTest {
     }
 
     @Test
-    void testDecoratePillarWithMountInfoAndTargetedSaltCall() throws CloudbreakOrchestratorException {
+    void testDecoratePillarWithMountInfoAndTargetedSaltCall() throws CloudbreakOrchestratorException, NodesUnreachableException {
         setupMocksForRunClusterServices();
-        Set<Node> nodes = Sets.newHashSet(node("fqdn3"), node("gateway1"), node("gateway2"), node("gateway3"));
+        Set<Node> gatewayNodes = Set.of(node("gateway1"), node("gateway2"), node("gateway3"));
+        Set<Node> nodes = Sets.union(Set.of(node("fqdn3")), gatewayNodes);
         List<InstanceMetadataView> gwNodes = Lists.newArrayList(createInstanceMetadata("gateway1"), createInstanceMetadata("gateway2"),
                 createInstanceMetadata("1.1.3.1"), createInstanceMetadata("1.1.3.2"));
         when(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(gwNodes);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         when(stackUtil.collectReachableAndUnreachableCandidateNodes(any(), any())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
+        when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), any())).thenReturn(gatewayNodes);
         KerberosConfig kerberosConfig = new KerberosConfig();
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
         when(sssdConfigProvider.createSssdAdPillar(kerberosConfig)).thenReturn(Map.of("ad", new SaltPillarProperties("adpath", Map.of())));
@@ -444,6 +447,8 @@ class ClusterHostServiceRunnerTest {
 
         underTest.runTargetedClusterServices(stack, Map.of("fqdn3", "1.1.1.1"));
 
+        verify(stackUtil, times(1)).collectReachableAndUnreachableCandidateNodes(any(), any());
+        verify(stackUtil, times(1)).collectReachableAndCheckNecessaryNodes(any(), any());
         ArgumentCaptor<Set<Node>> reachableCandidates = ArgumentCaptor.forClass(Set.class);
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).runService(any(), reachableCandidates.capture(), saltConfig.capture(), any());
@@ -458,11 +463,21 @@ class ClusterHostServiceRunnerTest {
     }
 
     @Test
+    void testTargetedCallWhenGatewayUnreachable() throws NodesUnreachableException {
+        when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), any())).thenThrow(NodesUnreachableException.class);
+
+        assertThrows(CloudbreakServiceException.class, () -> underTest.runTargetedClusterServices(stack, Map.of("fqdn3", "1.1.1.1")));
+
+        verify(stackUtil, times(1)).collectReachableAndCheckNecessaryNodes(any(), any());
+        verify(stackUtil, times(0)).collectReachableAndUnreachableCandidateNodes(any(), any());
+    }
+
+    @Test
     void testDecoratePillarWithMountInfo() throws CloudbreakOrchestratorException, NodesUnreachableException, CloudbreakException {
         setupMocksForRunClusterServices();
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3"));
-        when(stackUtil.collectAndCheckReachableNodes(any(), any())).thenReturn(nodes);
+        when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), any())).thenReturn(nodes);
         KerberosConfig kerberosConfig = new KerberosConfig();
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
         when(sssdConfigProvider.createSssdAdPillar(kerberosConfig)).thenReturn(Map.of("ad", new SaltPillarProperties("adpath", Map.of())));
@@ -492,7 +507,7 @@ class ClusterHostServiceRunnerTest {
         setupMocksForRunClusterServices();
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3"));
-        when(stackUtil.collectAndCheckReachableNodes(any(), any())).thenReturn(nodes);
+        when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), any())).thenReturn(nodes);
         KerberosConfig kerberosConfig = new KerberosConfig();
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
         when(sssdConfigProvider.createSssdAdPillar(kerberosConfig)).thenReturn(Map.of("ad", new SaltPillarProperties("adpath", Map.of())));
