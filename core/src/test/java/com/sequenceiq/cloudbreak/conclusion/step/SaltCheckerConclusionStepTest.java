@@ -70,7 +70,7 @@ public class SaltCheckerConclusionStepTest {
         when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
         Set<Node> nodes = Set.of(createNode("host1"), createNode("host2"));
         when(stackUtil.collectNodes(any(), any())).thenReturn(nodes);
-        when(stackUtil.collectAndCheckReachableNodes(any(), anyCollection())).thenReturn(nodes);
+        when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), anyCollection())).thenReturn(nodes);
         Conclusion stepResult = underTest.check(1L);
 
         assertFalse(stepResult.isFailureFound());
@@ -80,7 +80,7 @@ public class SaltCheckerConclusionStepTest {
         verify(nodeStatusService, times(1)).saltPing(eq(1L));
         verify(stackDtoService, times(1)).getById(eq(1L));
         verify(stackUtil, times(1)).collectNodes(any(), any());
-        verify(stackUtil, times(1)).collectAndCheckReachableNodes(any(), any());
+        verify(stackUtil, times(1)).collectReachableAndCheckNecessaryNodes(any(), any());
     }
 
     @Test
@@ -93,7 +93,7 @@ public class SaltCheckerConclusionStepTest {
         when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
         Set<Node> nodes = Set.of(createNode("host1"), createNode("host2"));
         when(stackUtil.collectNodes(any(), any())).thenReturn(nodes);
-        when(stackUtil.collectAndCheckReachableNodes(any(), anyCollection())).thenReturn(nodes);
+        when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), anyCollection())).thenReturn(nodes);
         Conclusion stepResult = underTest.check(1L);
 
         assertFalse(stepResult.isFailureFound());
@@ -103,7 +103,7 @@ public class SaltCheckerConclusionStepTest {
         verify(nodeStatusService, times(1)).saltPing(eq(1L));
         verify(stackDtoService, times(1)).getById(eq(1L));
         verify(stackUtil, times(1)).collectNodes(any(), any());
-        verify(stackUtil, times(1)).collectAndCheckReachableNodes(any(), any());
+        verify(stackUtil, times(1)).collectReachableAndCheckNecessaryNodes(any(), any());
     }
 
     @Test
@@ -117,7 +117,7 @@ public class SaltCheckerConclusionStepTest {
         when(nodeStatusService.saltPing(eq(1L))).thenReturn(response);
         when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
         when(stackUtil.collectNodes(any(), any())).thenReturn(Set.of(createNode("host1"), createNode("host2")));
-        when(stackUtil.collectAndCheckReachableNodes(any(), anyCollection())).thenThrow(new NodesUnreachableException("error", Set.of("host1")));
+        when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), anyCollection())).thenThrow(new NodesUnreachableException("error", Set.of("host1")));
         Conclusion stepResult = underTest.check(1L);
 
         assertTrue(stepResult.isFailureFound());
@@ -127,7 +127,7 @@ public class SaltCheckerConclusionStepTest {
         verify(nodeStatusService, times(1)).saltPing(eq(1L));
         verify(stackDtoService, times(1)).getById(eq(1L));
         verify(stackUtil, times(1)).collectNodes(any(), any());
-        verify(stackUtil, times(1)).collectAndCheckReachableNodes(any(), any());
+        verify(stackUtil, times(1)).collectReachableAndCheckNecessaryNodes(any(), any());
     }
 
     @Test

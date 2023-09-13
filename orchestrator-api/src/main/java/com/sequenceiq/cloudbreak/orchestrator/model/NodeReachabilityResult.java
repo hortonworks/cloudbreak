@@ -32,7 +32,7 @@ public class NodeReachabilityResult {
 
     public Set<String> getReachableHosts() {
         return reachableNodes.stream()
-                .map(node -> node.getHostname())
+                .map(Node::getHostname)
                 .collect(Collectors.toSet());
     }
 
@@ -42,7 +42,7 @@ public class NodeReachabilityResult {
 
     public Set<String> getUnreachableHosts() {
         return unreachableNodes.stream()
-                .map(node -> node.getHostname())
+                .map(Node::getHostname)
                 .collect(Collectors.toSet());
     }
 
