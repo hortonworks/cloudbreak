@@ -1,6 +1,6 @@
 <#setting number_format="computer">
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters" : {
         "userImageStorageAccountName": {
@@ -72,7 +72,7 @@
             {
                 "type": "Microsoft.Compute/availabilitySets",
                 "name": "[variables('${group.compressedName}AsName')]",
-                "apiVersion": "2018-04-01",
+                "apiVersion": "2023-07-01",
                 "location": "[parameters('region')]",
                 "tags": {
                     <#if userDefinedTags?? && userDefinedTags?has_content>
@@ -97,7 +97,7 @@
              <#list igs as group>
              <#if ! securityGroups[group.name]?? || ! securityGroups[group.name]?has_content>
              {
-               "apiVersion": "2016-11-01",
+               "apiVersion": "2023-06-01",
                "type": "Microsoft.Network/networkSecurityGroups",
                "name": "[variables('${group.compressedName}secGroupName')]",
                "location": "[parameters('region')]",
@@ -149,7 +149,7 @@
             <#list groups[instanceGroup] as instance>
                  <#if !noPublicIp>
                  {
-                   "apiVersion": "2017-08-01",
+                   "apiVersion": "2023-06-01",
                    "type": "Microsoft.Network/publicIPAddresses",
                    "name": "[concat(parameters('publicIPNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
@@ -175,7 +175,7 @@
                  },
                  </#if>
                  {
-                   "apiVersion": "2016-09-01",
+                   "apiVersion": "2023-06-01",
                    "type": "Microsoft.Network/networkInterfaces",
                    "name": "[concat(parameters('nicNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
@@ -233,7 +233,7 @@
                    }
                  },
                  {
-                   "apiVersion": "2019-07-01",
+                   "apiVersion": "2023-07-01",
                    "type": "Microsoft.Compute/virtualMachines",
                    "name": "[concat(parameters('vmNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",

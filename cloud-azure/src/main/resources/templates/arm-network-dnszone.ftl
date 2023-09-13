@@ -1,6 +1,6 @@
 <#setting number_format="computer">
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters" : {
         "virtualNetworkId": {
@@ -32,7 +32,7 @@
         <#if !deployOnlyNetworkLinks>
         {
             "type": "Microsoft.Network/privateDnsZones",
-            "apiVersion": "2018-09-01",
+            "apiVersion": "2020-06-01",
             "name": "${privateEndpointService.dnsZoneName}",
             "location": "global",
             "tags": "[parameters('serverTags')]"
@@ -40,7 +40,7 @@
         </#if>
         {
             "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
-            "apiVersion": "2018-09-01",
+            "apiVersion": "2020-06-01",
             "name": "[concat('${privateEndpointService.dnsZoneName}', '/', parameters('virtualNetworkName'))]",
             "location": "global",
             "tags": "[parameters('serverTags')]",

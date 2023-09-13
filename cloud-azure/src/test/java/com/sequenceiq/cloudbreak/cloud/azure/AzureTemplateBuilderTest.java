@@ -719,12 +719,12 @@ public class AzureTemplateBuilderTest {
 
         String lbGroupExpectedBlob =
                 "\"tags\":{},\"sku\":{\"name\":\"Standard\",\"tier\":\"Regional\"},\"properties\":{\"publicIPAllocationM" +
-                        "ethod\":\"Static\"}},{\"apiVersion\":\"2016-09-01\",\"type\":\"Microsoft.Network/networkInterfa" +
+                        "ethod\":\"Static\"}},{\"apiVersion\":\"2023-06-01\",\"type\":\"Microsoft.Network/networkInterfa" +
                         "ces\",\"name\":\"[concat(parameters('nicNamePrefix'),'m0-c4ca4238')]\",\"location\":\"[parameters('regio" +
                         "n')]\",\"tags\":{},\"dependsOn\":[\"[concat('Microsoft.Network/networkSecurityGroups/',variable" +
                         "s('gateway-groupsecGroupName'))]\"";
         String nonLbGroupExpectedBlob =
-                "\"tags\":{},\"properties\":{\"publicIPAllocationMethod\":\"Dynamic\"}},{\"apiVersion\":\"2016-09-01\",\"" +
+                "\"tags\":{},\"properties\":{\"publicIPAllocationMethod\":\"Dynamic\"}},{\"apiVersion\":\"2023-06-01\",\"" +
                         "type\":\"Microsoft.Network/networkInterfaces\",\"name\":\"[concat(parameters('nicNamePrefix'),'" +
                         "m0-c4ca4238')]\",\"location\":\"[parameters('region')]\",\"tags\":{},\"dependsOn\":[\"[concat('Microsoft" +
                         ".Network/networkSecurityGroups/',variables('core-groupsecGroupName'))]\"";
@@ -1468,7 +1468,7 @@ public class AzureTemplateBuilderTest {
 
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString).contains("                   \"apiVersion\": \"2019-07-01\",\n" +
+        assertThat(templateString).contains("                   \"apiVersion\": \"2023-07-01\",\n" +
                 "                   \"type\": \"Microsoft.Compute/virtualMachines\",\n");
     }
 
