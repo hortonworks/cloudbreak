@@ -143,7 +143,7 @@ public class StackUtil {
         return nodeReachabilityResultWithCandidates;
     }
 
-    public Set<Node> collectAndCheckReachableNodes(StackDto stack, Collection<String> necessaryNodes) throws NodesUnreachableException {
+    public Set<Node> collectReachableAndCheckNecessaryNodes(StackDto stack, Collection<String> necessaryNodes) throws NodesUnreachableException {
         Set<Node> reachableNodes = collectReachableNodes(stack);
         Set<String> reachableAddresses = reachableNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         Set<String> unReachableCandidateNodes = necessaryNodes.stream()
