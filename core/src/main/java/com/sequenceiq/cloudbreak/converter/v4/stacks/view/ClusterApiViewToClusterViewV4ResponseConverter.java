@@ -32,7 +32,7 @@ public class ClusterApiViewToClusterViewV4ResponseConverter {
         clusterViewResponse.setDescription(source.getDescription());
         clusterViewResponse.setId(source.getId());
         clusterViewResponse.setServerIp(source.getClusterManagerIp());
-        if (clusterViewResponse.getBlueprint() != null) {
+        if (source.getBlueprint() != null) {
             clusterViewResponse.setBlueprint(blueprintViewToBlueprintV4ViewResponseConverter
                     .convert(source.getBlueprint()));
         }
