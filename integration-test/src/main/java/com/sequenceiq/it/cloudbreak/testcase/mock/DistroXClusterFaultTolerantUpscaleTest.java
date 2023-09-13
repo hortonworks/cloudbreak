@@ -80,14 +80,10 @@ public class DistroXClusterFaultTolerantUpscaleTest extends AbstractClouderaMana
     public void testUpscaleWithFewNodesBeingUnreachable(MockedTestContext testContext, ITestContext testNgContext) {
         String stack = resourcePropertyProvider().getName();
         createDatalake(testContext);
-
-        MinionIpAddressesResponse minionIpAddressesResponse = getMockResponseForIpAddrsSaltCall();
-        Set<String> saltBodyFilters = getSaltBodyFilters();
-
         DistroXTestDto currentContext = setUpContextForUpscale(testContext, stack);
         currentContext
-                .mockSalt().run().post().bodyContains(saltBodyFilters, 1)
-                .thenReturn(minionIpAddressesResponse, null, 200, 0, null)
+                .mockSalt().run().post().bodyContains(getSaltBodyFilters(), 1)
+                .thenReturn(getMockResponseForIpAddrsSaltCall(), null, 200, 0, null)
                 .when(distroXClient.scale(UPSCALED_INSTANCE_GROUP_NAME, SUCCESSFUL_UPSCALE_NODE_COUNT))
                 .awaitForFlow()
                 .await(STACK_AVAILABLE, key(stack).withPollingInterval(POLLING_INTERVAL))
@@ -163,10 +159,7 @@ public class DistroXClusterFaultTolerantUpscaleTest extends AbstractClouderaMana
     private Set<String> getSaltBodyFilters() {
         Set<String> saltBodyfilters = new HashSet<>();
         saltBodyfilters.add("fun=network.ipaddrs");
-        saltBodyfilters.add("host-192-2-0-0.ipatest.local");
-        for (int i = 3; i < SUCCESSFUL_UPSCALE_NODE_COUNT; i++) {
-            saltBodyfilters.add("host-192-3-0-" + i + ".ipatest.local");
-        }
+        saltBodyfilters.add("tgt=host-192-3-0");
         return saltBodyfilters;
     }
 

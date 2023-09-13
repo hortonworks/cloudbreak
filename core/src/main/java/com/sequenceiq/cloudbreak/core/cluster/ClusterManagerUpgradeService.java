@@ -62,7 +62,7 @@ public class ClusterManagerUpgradeService {
         SaltConfig pillar = createSaltConfig(stackDto, primaryGatewayConfig, clouderaManagerRepo);
         Set<String> allNode = stackUtil.collectNodes(stackDto).stream().map(Node::getHostname).collect(Collectors.toSet());
         try {
-            Set<Node> reachableNodes = stackUtil.collectAndCheckReachableNodes(stackDto, allNode);
+            Set<Node> reachableNodes = stackUtil.collectReachableAndCheckNecessaryNodes(stackDto, allNode);
             LOGGER.debug("Starting to upgrade cluster manager.");
             hostOrchestrator.upgradeClusterManager(primaryGatewayConfig, gatewayFQDN, reachableNodes, pillar, exitCriteriaModel);
             LOGGER.debug("Cluster manager upgrade finished.");

@@ -161,7 +161,7 @@ class StackUtilTest {
         nodes.add(new Node("1.1.1.3", "1.1.1.3", "3", "m5.xlarge", "node3.example.com", "worker"));
         when(hostOrchestrator.getResponsiveNodes(nodesCaptor.capture(), any(), eq(Boolean.FALSE))).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
 
-        stackUtil.collectAndCheckReachableNodes(stack, necessaryNodes);
+        stackUtil.collectReachableAndCheckNecessaryNodes(stack, necessaryNodes);
 
         verify(hostOrchestrator).getResponsiveNodes(nodesCaptor.capture(), any(), eq(Boolean.FALSE));
         List<String> fqdns = nodesCaptor.getValue().stream().map(Node::getHostname).collect(Collectors.toList());
@@ -182,7 +182,7 @@ class StackUtilTest {
         when(hostOrchestrator.getResponsiveNodes(nodesCaptor.capture(), any(), eq(Boolean.FALSE))).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
 
         NodesUnreachableException nodesUnreachableException = Assertions.assertThrows(NodesUnreachableException.class,
-                () -> stackUtil.collectAndCheckReachableNodes(stack, necessaryNodes));
+                () -> stackUtil.collectReachableAndCheckNecessaryNodes(stack, necessaryNodes));
 
         assertEquals(1, nodesUnreachableException.getUnreachableNodes().size());
         assertEquals("node3.example.com", nodesUnreachableException.getUnreachableNodes().iterator().next());
