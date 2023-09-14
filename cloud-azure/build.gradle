@@ -43,7 +43,7 @@ dependencies {
 
   implementation group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',                           version: { strictly jacksonDatabindVersion }
   constraints {
-    implementation 'com.nimbusds:nimbus-jose-jwt:9.31'
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.34'
   }
 
   testImplementation project(path: ':core-model', configuration: 'tests')
