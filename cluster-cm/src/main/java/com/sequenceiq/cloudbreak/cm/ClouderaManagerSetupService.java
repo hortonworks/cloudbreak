@@ -380,30 +380,25 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Override
     public ExtendedPollingResult waitForHosts(Set<InstanceMetadataView> hostsInCluster) throws ClusterClientInitException {
-        ClusterView cluster = stack.getCluster();
-        String user = cluster.getCloudbreakAmbariUser();
-        String password = cluster.getCloudbreakAmbariPassword();
-        ApiClient client;
-        try {
-            client = clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), user, password, clientConfig);
-        } catch (ClouderaManagerClientInitException e) {
-            throw new ClusterClientInitException(e);
-        }
+        ApiClient client = createApiClienForWaitingForHosts();
         List<String> privateIps = hostsInCluster.stream().map(InstanceMetadataView::getPrivateIp).collect(Collectors.toList());
         return clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, client, privateIps);
     }
 
-    @Override
-    public ExtendedPollingResult waitForHostsHealthy(Set<InstanceMetadataView> hostsInCluster) throws ClusterClientInitException {
+    private ApiClient createApiClienForWaitingForHosts() throws ClusterClientInitException {
         ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
-        ApiClient client;
         try {
-            client = clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), user, password, clientConfig);
+            return clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), user, password, clientConfig);
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
+    }
+
+    @Override
+    public ExtendedPollingResult waitForHostsHealthy(Set<InstanceMetadataView> hostsInCluster) throws ClusterClientInitException {
+        ApiClient client = createApiClienForWaitingForHosts();
         return clouderaManagerPollingServiceProvider.startPollingCmHostStatusHealthy(
                 stack, client, hostsInCluster);
     }

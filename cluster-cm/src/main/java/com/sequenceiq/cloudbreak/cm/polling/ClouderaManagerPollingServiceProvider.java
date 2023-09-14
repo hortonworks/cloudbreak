@@ -60,7 +60,9 @@ public class ClouderaManagerPollingServiceProvider {
 
     private static final long POLL_FOR_5_MINUTES = TimeUnit.MINUTES.toSeconds(5);
 
-    private static final long POLL_FOR_10_MINUTES = TimeUnit.MINUTES.toSeconds(10);
+    private static final int MAX_CONSECUTIVE_FAILURES = 10;
+
+    private static final long POLL_FOR_10_MINUTES = TimeUnit.MINUTES.toSeconds(MAX_CONSECUTIVE_FAILURES);
 
     private static final int DEFAULT_BACKOFF_NODECOUNT_LIMIT = 50;
 
@@ -320,7 +322,7 @@ public class ClouderaManagerPollingServiceProvider {
                 listenerTask,
                 clouderaManagerPollerObject,
                 getPollInterval(stack),
-                maximumWaitTimeInSeconds);
+                maximumWaitTimeInSeconds, MAX_CONSECUTIVE_FAILURES);
     }
 
     private ExtendedPollingResult pollCommandWithTimeListener(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId, long maximumWaitTimeInSeconds,
