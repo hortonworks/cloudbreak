@@ -17,14 +17,17 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentUseCaseAware;
 import com.sequenceiq.environment.environment.flow.loadbalancer.LoadBalancerUpdateState;
 import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateStateSelectors;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class LoadBalancerUpdateFlowConfig extends AbstractFlowConfiguration<LoadBalancerUpdateState, LoadBalancerUpdateStateSelectors>
-    implements RetryableFlowConfiguration<LoadBalancerUpdateStateSelectors> {
+    implements RetryableFlowConfiguration<LoadBalancerUpdateStateSelectors>, EnvironmentUseCaseAware {
 
     private static final List<Transition<LoadBalancerUpdateState, LoadBalancerUpdateStateSelectors>> TRANSITIONS =
         new Transition.Builder<LoadBalancerUpdateState, LoadBalancerUpdateStateSelectors>()
@@ -76,5 +79,17 @@ public class LoadBalancerUpdateFlowConfig extends AbstractFlowConfiguration<Load
     @Override
     public LoadBalancerUpdateStateSelectors getRetryableEvent() {
         return HANDLED_FAILED_LOAD_BALANCER_UPDATE_EVENT;
+    }
+
+    @Override
+    public UsageProto.CDPEnvironmentStatus.Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return UsageProto.CDPEnvironmentStatus.Value.LOAD_BALANCER_UPDATE_STARTED;
+        } else if (LOAD_BALANCER_UPDATE_FAILED_STATE.equals(flowState)) {
+            return UsageProto.CDPEnvironmentStatus.Value.LOAD_BALANCER_UPDATE_FAILED;
+        } else if (LOAD_BALANCER_UPDATE_FINISHED_STATE.equals(flowState)) {
+            return UsageProto.CDPEnvironmentStatus.Value.LOAD_BALANCER_UPDATE_FINISHED;
+        }
+        return UsageProto.CDPEnvironmentStatus.Value.UNSET;
     }
 }

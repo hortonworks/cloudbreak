@@ -1644,6 +1644,41 @@ message CDPEnvironmentStatus {
     RESUME_FINISHED = 11;
     // The status when an environment failed to resume.
     RESUME_FAILED = 12;
+
+    // The status when CCM upgrade has been triggered on the environment.
+    CCM_UPGRADE_STARTED = 13;
+    // The status when CCM upgrade has been finished on the environment.
+    CCM_UPGRADE_FINISHED = 14;
+    // The status when CCM upgrade has been failed on the environment.
+    CCM_UPGRADE_FAILED = 15;
+
+    // The status when proxy modification has been triggered on the environment.
+    PROXY_MODIFICATION_STARTED = 16;
+    // The status when proxy modification has been finished on the environment.
+    PROXY_MODIFICATION_FINISHED = 17;
+    // The status when proxy modification has been failed on the environment.
+    PROXY_MODIFICATION_FAILED = 18;
+
+    // The status when vertical scale has been triggered on the environment.
+    ENVIRONMENT_VERTICAL_SCALE_STARTED = 19;
+    // The status when vertical scale has been finished on the environment.
+    ENVIRONMENT_VERTICAL_SCALE_FINISHED = 20;
+    // The status when vertical scale has been failed on the environment.
+    ENVIRONMENT_VERTICAL_SCALE_FAILED = 21;
+
+    // The status when stack config update has been triggered on the environment.
+    ENVIRONMENT_STACK_CONFIG_UPDATE_STARTED = 22;
+    // The status when stack config update has been finished on the environment.
+    ENVIRONMENT_STACK_CONFIG_UPDATE_FINISHED = 23;
+    // The status when stack config update has been failed on the environment.
+    ENVIRONMENT_STACK_CONFIG_UPDATE_FAILED = 24;
+
+    // The status when load balancer update has been triggered on the environment.
+    LOAD_BALANCER_UPDATE_STARTED = 25;
+    // The status when load balancer update has been finished on the environment.
+    LOAD_BALANCER_UPDATE_FINISHED = 26;
+    // The status when load balancer update has been failed on the environment.
+    LOAD_BALANCER_UPDATE_FAILED = 27;
   }
 }
 

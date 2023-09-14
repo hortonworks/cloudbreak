@@ -23,14 +23,17 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentUseCaseAware;
 import com.sequenceiq.environment.environment.flow.upgrade.ccm.UpgradeCcmState;
 import com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmStateSelectors;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class UpgradeCcmFlowConfig extends AbstractFlowConfiguration<UpgradeCcmState, UpgradeCcmStateSelectors>
-        implements RetryableFlowConfiguration<UpgradeCcmStateSelectors> {
+        implements RetryableFlowConfiguration<UpgradeCcmStateSelectors>, EnvironmentUseCaseAware {
 
     private static final List<Transition<UpgradeCcmState, UpgradeCcmStateSelectors>> TRANSITIONS =
             new Transition.Builder<UpgradeCcmState, UpgradeCcmStateSelectors>()
@@ -91,5 +94,17 @@ public class UpgradeCcmFlowConfig extends AbstractFlowConfiguration<UpgradeCcmSt
     @Override
     public UpgradeCcmStateSelectors getRetryableEvent() {
         return HANDLED_FAILED_UPGRADE_CCM_EVENT;
+    }
+
+    @Override
+    public UsageProto.CDPEnvironmentStatus.Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return UsageProto.CDPEnvironmentStatus.Value.CCM_UPGRADE_STARTED;
+        } else if (UPGRADE_CCM_FAILED_STATE.equals(flowState)) {
+            return UsageProto.CDPEnvironmentStatus.Value.CCM_UPGRADE_FAILED;
+        } else if (UPGRADE_CCM_FINISHED_STATE.equals(flowState)) {
+            return UsageProto.CDPEnvironmentStatus.Value.CCM_UPGRADE_FINISHED;
+        }
+        return UsageProto.CDPEnvironmentStatus.Value.UNSET;
     }
 }

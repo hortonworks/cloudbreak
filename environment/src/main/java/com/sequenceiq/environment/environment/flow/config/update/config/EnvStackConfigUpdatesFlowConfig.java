@@ -15,15 +15,18 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentUseCaseAware;
 import com.sequenceiq.environment.environment.flow.config.update.EnvStackConfigUpdatesState;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesStateSelectors;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class EnvStackConfigUpdatesFlowConfig extends
     AbstractFlowConfiguration<EnvStackConfigUpdatesState, EnvStackConfigUpdatesStateSelectors>
-    implements RetryableFlowConfiguration<EnvStackConfigUpdatesStateSelectors> {
+    implements RetryableFlowConfiguration<EnvStackConfigUpdatesStateSelectors>, EnvironmentUseCaseAware {
 
     private static final List<Transition<EnvStackConfigUpdatesState, EnvStackConfigUpdatesStateSelectors>>
         TRANSITIONS = new Transition.Builder<EnvStackConfigUpdatesState, EnvStackConfigUpdatesStateSelectors>()
@@ -73,5 +76,17 @@ public class EnvStackConfigUpdatesFlowConfig extends
     @Override
     public EnvStackConfigUpdatesStateSelectors getRetryableEvent() {
         return HANDLE_FAILED_ENV_STACK_CONIFG_UPDATES_EVENT;
+    }
+
+    @Override
+    public UsageProto.CDPEnvironmentStatus.Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return UsageProto.CDPEnvironmentStatus.Value.ENVIRONMENT_STACK_CONFIG_UPDATE_STARTED;
+        } else if (STACK_CONFIG_UPDATES_FAILED_STATE.equals(flowState)) {
+            return UsageProto.CDPEnvironmentStatus.Value.ENVIRONMENT_STACK_CONFIG_UPDATE_FAILED;
+        } else if (STACK_CONFIG_UPDATES_FINISHED_STATE.equals(flowState)) {
+            return UsageProto.CDPEnvironmentStatus.Value.ENVIRONMENT_STACK_CONFIG_UPDATE_FINISHED;
+        }
+        return UsageProto.CDPEnvironmentStatus.Value.UNSET;
     }
 }

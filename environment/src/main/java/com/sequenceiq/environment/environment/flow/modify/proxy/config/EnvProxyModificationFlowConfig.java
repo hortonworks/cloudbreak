@@ -21,15 +21,18 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentUseCaseAware;
 import com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationState;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class EnvProxyModificationFlowConfig extends
         AbstractFlowConfiguration<EnvProxyModificationState, EnvProxyModificationStateSelectors>
-        implements RetryableFlowConfiguration<EnvProxyModificationStateSelectors> {
+        implements RetryableFlowConfiguration<EnvProxyModificationStateSelectors>, EnvironmentUseCaseAware {
 
     private static final List<Transition<EnvProxyModificationState, EnvProxyModificationStateSelectors>> TRANSITIONS =
             new Transition.Builder<EnvProxyModificationState, EnvProxyModificationStateSelectors>()
@@ -87,5 +90,17 @@ public class EnvProxyModificationFlowConfig extends
     @Override
     public EnvProxyModificationStateSelectors getRetryableEvent() {
         return HANDLE_FAILED_MODIFY_PROXY_EVENT;
+    }
+
+    @Override
+    public UsageProto.CDPEnvironmentStatus.Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return UsageProto.CDPEnvironmentStatus.Value.PROXY_MODIFICATION_STARTED;
+        } else if (PROXY_CONFIG_MODIFICATION_FAILED_STATE.equals(flowState)) {
+            return UsageProto.CDPEnvironmentStatus.Value.PROXY_MODIFICATION_FAILED;
+        } else if (PROXY_CONFIG_MODIFICATION_FINISHED_STATE.equals(flowState)) {
+            return UsageProto.CDPEnvironmentStatus.Value.PROXY_MODIFICATION_FINISHED;
+        }
+        return UsageProto.CDPEnvironmentStatus.Value.UNSET;
     }
 }
