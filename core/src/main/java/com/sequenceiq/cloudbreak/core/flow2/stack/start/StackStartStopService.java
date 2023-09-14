@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.start;
 
+import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ClusterStatus.Value.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.FAILED;
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.metering.MeteringService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
@@ -49,6 +51,7 @@ import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class StackStartStopService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStartStopService.class);
 
     @Inject
@@ -68,6 +71,9 @@ public class StackStartStopService {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private MeteringService meteringService;
 
     public void startStackStart(StackStartStopContext context) {
         StackDto stackDto = context.getStack();
@@ -107,12 +113,14 @@ public class StackStartStopService {
 
     public void finishStackStop(StackStartStopContext context, StopInstancesResult stopInstancesResult) {
         StackDto stack = context.getStack();
+        meteringService.unscheduleSync(stack.getId());
         try {
             transactionService.required(() -> updateInstancesToStopped(stack, stopInstancesResult.getResults().getResults()));
         } catch (TransactionExecutionException e) {
             LOGGER.error("Error occurred during the finish stack stop: {}", e.getMessage(), e);
             throw new TransactionRuntimeExecutionException(e);
         }
+        meteringService.sendMeteringStatusChangeEventForStack(stack.getId(), STOPPED);
         validateResourceResults(context.getCloudContext(), stopInstancesResult.getErrorDetails(), stopInstancesResult.getResults(), false);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STACK_STOPPED, "Cluster infrastructure stopped successfully.");
 

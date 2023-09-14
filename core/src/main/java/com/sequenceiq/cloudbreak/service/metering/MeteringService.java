@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.MeteringEvent;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.metrics.CommonMetricService;
 import com.sequenceiq.cloudbreak.converter.StackDtoToMeteringEventConverter;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
@@ -48,7 +49,7 @@ public class MeteringService {
     }
 
     public void sendMeteringSyncEventForStack(StackDtoDelegate stack) {
-        if (StackType.WORKLOAD == stack.getType()) {
+        if (shouldSendMeteringEventForStack(stack.getStack())) {
             sendPeriodicMeteringEvent(stackDtoToMeteringEventConverter.convertToSyncEvent(stack));
         }
     }
@@ -58,21 +59,21 @@ public class MeteringService {
     }
 
     public void sendMeteringStatusChangeEventForStack(StackDtoDelegate stack, ClusterStatus.Value eventOperation) {
-        if (StackType.WORKLOAD == stack.getType()) {
+        if (shouldSendMeteringEventForStack(stack.getStack())) {
             sendMeteringEvent(stackDtoToMeteringEventConverter.convertToStatusChangeEvent(stack, eventOperation));
         }
     }
 
     public void scheduleSync(long stackId) {
         StackView stack = stackDtoService.getStackViewById(stackId);
-        if (StackType.WORKLOAD == stack.getType()) {
+        if (shouldSendMeteringEventForStack(stack)) {
             meteringJobService.schedule(stackId, MeteringJobAdapter.class);
         }
     }
 
     public void unscheduleSync(long stackId) {
         StackView stack = stackDtoService.getStackViewById(stackId);
-        if (StackType.WORKLOAD == stack.getType()) {
+        if (shouldSendMeteringEventForStack(stack)) {
             meteringJobService.unschedule(String.valueOf(stackId));
         }
     }
@@ -99,5 +100,9 @@ public class MeteringService {
                     MeteringMetricTag.REPORT_TYPE.name(), meteringEvent.getStatusChange().getStatus().name());
             LOGGER.warn("Metering event send failed.", e);
         }
+    }
+
+    private boolean shouldSendMeteringEventForStack(StackView stack) {
+        return StackType.WORKLOAD == stack.getType() && !CloudPlatform.YARN.equalsIgnoreCase(stack.getCloudPlatform());
     }
 }
