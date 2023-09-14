@@ -11,7 +11,6 @@ repositories {
 dependencies {
     implementation project(':common')
     implementation group: 'jakarta.ws.rs',                 name: 'jakarta.ws.rs-api',              version: '2.1.6'
-    implementation group: 'org.springframework.boot',      name: 'spring-boot-starter-security',   version: springBootVersion
     implementation group: 'io.swagger.core.v3',            name: 'swagger-jaxrs2',                 version: swaggerCoreVersion
     implementation group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion
     implementation group: 'javax.el',                      name: 'javax.el-api',                   version: '3.0.0'

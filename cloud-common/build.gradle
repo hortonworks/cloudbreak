@@ -34,8 +34,9 @@ dependencies {
     implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-actuator',   version: springBootVersion
     implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-freemarker', version: springBootVersion
     implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-jersey',     version: springBootVersion
+    implementation group: 'org.springframework.security',          name: 'spring-security-jwt',            version: springSecurityJwtVersion
     implementation group: 'org.springframework',                   name: 'spring-context-support',         version: springFrameworkVersion
-    implementation (group: 'org.springframework.vault',            name: 'spring-vault-core',              version: '2.3.3') {
+    implementation (group: 'org.springframework.vault',            name: 'spring-vault-core',              version: sprintVaultCoreVersion) {
         exclude group: 'org.springframework'
     }
     implementation group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonDatabindVersion
