@@ -43,6 +43,10 @@ class PythonVersionValidatorTest {
 
     private static final String CURRENT_IMAGE = "currentImage";
 
+    private static final String ACCOUNT_ID = "1234";
+
+    private static final String STACK_CRN = "crn:cdp:sdx:us-west-1:1234:stack:mystack";
+
     @InjectMocks
     private PythonVersionValidator underTest;
 
@@ -66,8 +70,9 @@ class PythonVersionValidatorTest {
         when(stack.getWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(stack.getCloudPlatform()).thenReturn(CLOUD_PLATFORM);
         when(stack.getPlatformVariant()).thenReturn(PLATFORM_VARIANT);
+        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
         when(platformStringTransformer.getPlatformStringForImageCatalogSet(CLOUD_PLATFORM, PLATFORM_VARIANT)).thenReturn(imageCatalogPlatformSet);
-        when(imageCatalogService.getAllCdhImages(eq(WORKSPACE_ID), eq(IMAGE_CATALOG_NAME), eq(imageCatalogPlatformSet))).thenReturn(CDH_IMAGES);
+        when(imageCatalogService.getAllCdhImages(eq(ACCOUNT_ID), eq(WORKSPACE_ID), eq(IMAGE_CATALOG_NAME), eq(imageCatalogPlatformSet))).thenReturn(CDH_IMAGES);
     }
 
     @Test
