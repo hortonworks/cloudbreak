@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -54,7 +55,10 @@ import software.amazon.awssdk.services.autoscaling.model.LifecycleState;
 import software.amazon.awssdk.services.cloudformation.model.DescribeStackResourceRequest;
 import software.amazon.awssdk.services.cloudformation.model.DescribeStackResourceResponse;
 import software.amazon.awssdk.services.cloudformation.model.DescribeStacksRequest;
+import software.amazon.awssdk.services.cloudformation.model.ListStackResourcesRequest;
+import software.amazon.awssdk.services.cloudformation.model.ListStackResourcesResponse;
 import software.amazon.awssdk.services.cloudformation.model.Output;
+import software.amazon.awssdk.services.cloudformation.model.StackResourceSummary;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.efs.model.DescribeFileSystemsRequest;
 import software.amazon.awssdk.services.efs.model.DescribeFileSystemsResponse;
@@ -105,6 +109,25 @@ public class CloudFormationStackUtil {
                 .logicalResourceId(String.format("AmbariNodes%s", instanceGroup.replaceAll("_", "")))
                 .build());
         return asGroupResource.stackResourceDetail().physicalResourceId();
+    }
+
+    @Retryable(
+            value = SdkClientException.class,
+            maxAttempts = 15,
+            backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000)
+    )
+    public List<String> getLoadbalancersArns(AuthenticatedContext ac, AmazonCloudFormationClient amazonCFClient) {
+        String cFStackName = getCfStackName(ac);
+        ListStackResourcesResponse listStackResourcesResponse = amazonCFClient.listStackResources(ListStackResourcesRequest.builder()
+                .stackName(cFStackName)
+                .build());
+        List<StackResourceSummary> summaries = listStackResourcesResponse.stackResourceSummaries();
+        Optional<StackResourceSummary> loadBalancerSummary = summaries.stream()
+                .filter(stackResourceSummary -> stackResourceSummary.resourceType().equals("AWS::ElasticLoadBalancingV2::LoadBalancer"))
+                .findFirst();
+        return loadBalancerSummary.stream()
+                .map(e -> e.physicalResourceId())
+                .collect(Collectors.toList());
     }
 
     public Map<String, String> getOutputs(String cFStackName, AmazonCloudFormationClient client) {

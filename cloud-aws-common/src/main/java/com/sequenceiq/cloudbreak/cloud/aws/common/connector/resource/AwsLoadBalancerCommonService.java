@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsListener;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
@@ -25,6 +26,11 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.GroupSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ElasticLoadBalancingV2Exception;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerAttribute;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyLoadBalancerAttributesRequest;
 
 @Service
 public class AwsLoadBalancerCommonService {
@@ -58,6 +64,42 @@ public class AwsLoadBalancerCommonService {
         }
 
         return awsLoadBalancers;
+    }
+
+    public void disableDeletionProtection(AmazonElasticLoadBalancingClient client, String arn) {
+        disableDeletionProtection(client, List.of(arn));
+    }
+
+    public void disableDeletionProtection(AmazonElasticLoadBalancingClient client, List<String> arns) {
+        arns.forEach(arn -> modifyDeletionProtection(client, arn, false));
+    }
+
+    public void enableDeletionProtection(AmazonElasticLoadBalancingClient client, String arn) {
+        enableDeletionProtection(client, List.of(arn));
+    }
+
+    public void enableDeletionProtection(AmazonElasticLoadBalancingClient client, List<String> arns) {
+        arns.forEach(arn -> modifyDeletionProtection(client, arn, true));
+    }
+
+    private void modifyDeletionProtection(AmazonElasticLoadBalancingClient client, String arn, boolean deletionProtection) {
+        try {
+            ModifyLoadBalancerAttributesRequest modifyLoadBalancerAttributesRequest = ModifyLoadBalancerAttributesRequest.builder()
+                    .loadBalancerArn(arn)
+                    .attributes(LoadBalancerAttribute.builder()
+                            .key("deletion_protection.enabled")
+                            .value(String.valueOf(deletionProtection))
+                            .build())
+                    .build();
+            client.modifyLoadBalancerAttributes(modifyLoadBalancerAttributesRequest);
+        } catch (AwsServiceException amazonServiceException) {
+            if (amazonServiceException instanceof ElasticLoadBalancingV2Exception) {
+                LOGGER.info("User has no right to edit loadbalancer to be deletionprotected. " +
+                        "The role needs elasticloadbalancing:ModifyLoadBalancerAttributes permission");
+            } else {
+                throw amazonServiceException;
+            }
+        }
     }
 
     @VisibleForTesting

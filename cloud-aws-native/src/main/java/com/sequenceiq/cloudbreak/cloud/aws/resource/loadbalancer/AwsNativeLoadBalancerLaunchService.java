@@ -98,6 +98,9 @@ public class AwsNativeLoadBalancerLaunchService {
     @Inject
     private AwsResourceNameService resourceNameService;
 
+    @Inject
+    private AwsLoadBalancerCommonService awsLoadBalancerCommonService;
+
     public List<CloudResourceStatus> launchLoadBalancerResources(AuthenticatedContext authenticatedContext, CloudStack stack,
             PersistenceNotifier persistenceNotifier, AmazonElasticLoadBalancingClient loadBalancingClient, boolean registerTargetGroups) {
         LOGGER.debug("Creating AWS load balancer and it's resources for cloud stack: '{}'", authenticatedContext.getCloudContext().getCrn());
@@ -170,6 +173,7 @@ public class AwsNativeLoadBalancerLaunchService {
                     .findFirst()
                     .orElseThrow()
                     .loadBalancerArn();
+            awsLoadBalancerCommonService.enableDeletionProtection(context.getLoadBalancingClient(), loadBalancerArn);
             context.setLoadBalancerArn(loadBalancerArn);
             Map<String, Object> params = Map.of(CloudResource.ATTRIBUTES,
                     Enum.valueOf(LoadBalancerTypeAttribute.class, awsLoadBalancer.getScheme().getLoadBalancerType().name()));

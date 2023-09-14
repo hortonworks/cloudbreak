@@ -15,6 +15,8 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsLoadBalancerCommonService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessageProvider;
@@ -67,6 +69,9 @@ public class AwsTerminateService {
     @Inject
     private AwsCloudWatchService awsCloudWatchService;
 
+    @Inject
+    private AwsLoadBalancerCommonService awsLoadBalancerCommonService;
+
     public List<CloudResourceStatus> terminate(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
         LOGGER.debug("Deleting stack: {}", ac.getCloudContext().getId());
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
@@ -98,6 +103,7 @@ public class AwsTerminateService {
         if (exists) {
             DescribeStacksRequest describeStacksRequest = DescribeStacksRequest.builder().stackName(cFStackName).build();
             resumeAutoScalingPolicies(ac, stack);
+            disableDeletionProtection(ac, amazonCloudFormationClient);
             LOGGER.debug("Delete cloudformation stack from resources");
             DeleteStackRequest deleteStackRequest = DeleteStackRequest.builder().stackName(cFStackName).build();
             try {
@@ -142,6 +148,13 @@ public class AwsTerminateService {
                 LOGGER.warn(errorMessage, e);
             }
         }
+    }
+
+    private void disableDeletionProtection(AuthenticatedContext ac, AmazonCloudFormationClient client) {
+        String regionName = ac.getCloudContext().getLocation().getRegion().value();
+        AmazonElasticLoadBalancingClient lbClient = awsClient
+                .createElasticLoadBalancingClient(new AwsCredentialView(ac.getCloudCredential()), regionName);
+        awsLoadBalancerCommonService.disableDeletionProtection(lbClient, cfStackUtil.getLoadbalancersArns(ac, client));
     }
 
     private void resumeAutoScalingPolicies(AuthenticatedContext ac, CloudStack stack) {

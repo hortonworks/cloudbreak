@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsLoadBalancerCommonService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.AbstractAwsNativeComputeBuilder;
@@ -33,6 +34,9 @@ public class AwsNativeLoadBalancerResourceBuilder extends AbstractAwsNativeCompu
     @Inject
     private AwsMethodExecutor awsMethodExecutor;
 
+    @Inject
+    private AwsLoadBalancerCommonService awsLoadBalancerCommonService;
+
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         LOGGER.info("There is no need to create resources as it is handled by the launchLoadBalancers method ResourceConnector interface...");
@@ -51,7 +55,9 @@ public class AwsNativeLoadBalancerResourceBuilder extends AbstractAwsNativeCompu
         LOGGER.info("Deleting load balancer ('{}') from provider side", resource.getReference());
         AmazonElasticLoadBalancingClient loadBalancingClient = context.getLoadBalancingClient();
         DeleteLoadBalancerRequest deleteLoadBalancerRequest = DeleteLoadBalancerRequest.builder().loadBalancerArn(resource.getReference()).build();
-        DeleteLoadBalancerResponse deleteResponse = awsMethodExecutor.execute(() -> loadBalancingClient.deleteLoadBalancer(deleteLoadBalancerRequest), null);
+        awsLoadBalancerCommonService.disableDeletionProtection(loadBalancingClient, resource.getReference());
+        DeleteLoadBalancerResponse deleteResponse = awsMethodExecutor
+                .execute(() -> loadBalancingClient.deleteLoadBalancer(deleteLoadBalancerRequest), null);
         return deleteResponse != null ? resource : null;
     }
 

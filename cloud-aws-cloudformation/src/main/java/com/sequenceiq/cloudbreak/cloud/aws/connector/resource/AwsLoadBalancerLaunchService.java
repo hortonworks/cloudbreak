@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsLoadBalancerCommonService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsModelService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsListener;
@@ -102,6 +103,7 @@ public class AwsLoadBalancerLaunchService {
             String regionName = ac.getCloudContext().getLocation().getRegion().value();
             AmazonCloudFormationClient cfRetryClient = awsClient.createCloudFormationClient(credentialView, regionName);
             AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(credentialView, regionName);
+            AmazonElasticLoadBalancingClient loadBalancingClient = awsClient.createElasticLoadBalancingClient(credentialView, regionName);
             List<CloudResource> instances = cfStackUtil.getInstanceCloudResources(ac, cfRetryClient, amazonASClient, stack.getGroups());
             Network network = stack.getNetwork();
             AwsNetworkView awsNetworkView = new AwsNetworkView(network);
@@ -127,7 +129,10 @@ public class AwsLoadBalancerLaunchService {
             }
 
             setLoadBalancerMetadata(awsLoadBalancers, result);
-
+            loadBalancerCommonService.enableDeletionProtection(loadBalancingClient, modelContext.getLoadBalancers()
+                    .stream()
+                    .map(lb -> lb.getArn())
+                    .collect(toList()));
             LOGGER.debug("Starting CloudFormation update to create listeners.");
             if (checkForListenerResources(cfRetryClient, cFStackName, awsLoadBalancers)) {
                 LOGGER.debug("Listener resources already exist, skipping creation");

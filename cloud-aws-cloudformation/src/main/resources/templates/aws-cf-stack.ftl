@@ -280,6 +280,10 @@
           "${subnetId}"<#sep>,
           </#list>
         ],
+        "LoadBalancerAttributes" : [{
+            "Key" : "deletion_protection.enabled",
+            "Value": true
+        }],
         "Type" : "network"
       }
     }

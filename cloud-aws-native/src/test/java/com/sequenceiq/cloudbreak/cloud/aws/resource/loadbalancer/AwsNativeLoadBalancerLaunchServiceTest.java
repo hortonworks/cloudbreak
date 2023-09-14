@@ -144,6 +144,9 @@ class AwsNativeLoadBalancerLaunchServiceTest {
     @Mock
     private AwsResourceNameService resourceNameService;
 
+    @Mock
+    private AwsLoadBalancerCommonService awsLoadBalancerCommonService;
+
     @InjectMocks
     private AwsNativeLoadBalancerLaunchService underTest;
 

@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsLoadBalancerCommonService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -95,6 +96,9 @@ public class AwsTerminateServiceIntegrationTest {
 
     @Mock
     private AmazonAutoScalingClient amazonAutoScalingClient;
+
+    @Mock
+    private AwsLoadBalancerCommonService awsLoadBalancerCommonService;
 
     @Test
     public void testTerminateWhenCloudformationStackTerminated() {
