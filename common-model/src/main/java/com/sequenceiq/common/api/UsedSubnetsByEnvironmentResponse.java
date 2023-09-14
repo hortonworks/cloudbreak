@@ -9,6 +9,9 @@ public class UsedSubnetsByEnvironmentResponse {
 
     private List<UsedSubnetWithResourceResponse> responses;
 
+    public UsedSubnetsByEnvironmentResponse() {
+    }
+
     @JsonCreator
     public UsedSubnetsByEnvironmentResponse(@JsonProperty("responses") List<UsedSubnetWithResourceResponse> responses) {
         this.responses = responses;

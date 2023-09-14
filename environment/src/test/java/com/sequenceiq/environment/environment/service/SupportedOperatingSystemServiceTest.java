@@ -13,10 +13,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
+import com.sequenceiq.environment.api.v1.environment.OsTypeToOsTypeResponseConverter;
 import com.sequenceiq.environment.api.v1.environment.model.response.SupportedOperatingSystemResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,6 +29,9 @@ class SupportedOperatingSystemServiceTest {
 
     @Mock
     private ProviderPreferencesService providerPreferencesService;
+
+    @Spy
+    private OsTypeToOsTypeResponseConverter osTypeToOsTypeResponseConverter;
 
     @InjectMocks
     private SupportedOperatingSystemService underTest;
@@ -41,7 +46,7 @@ class SupportedOperatingSystemServiceTest {
 
         assertEquals("centos7", response.getDefaultOs());
         assertEquals(CENTOS7.getOs(), response.getDefaultOs());
-        assertEquals(List.of(CENTOS7), response.getOsTypes());
+        assertEquals(List.of(osTypeToOsTypeResponseConverter.convert(CENTOS7)), response.getOsTypes());
     }
 
     @Test
@@ -55,7 +60,7 @@ class SupportedOperatingSystemServiceTest {
 
         assertEquals("centos7", response.getDefaultOs());
         assertEquals(CENTOS7.getOs(), response.getDefaultOs());
-        assertEquals(List.of(CENTOS7), response.getOsTypes());
+        assertEquals(List.of(osTypeToOsTypeResponseConverter.convert(CENTOS7)), response.getOsTypes());
     }
 
     @Test
@@ -68,7 +73,7 @@ class SupportedOperatingSystemServiceTest {
 
         assertEquals("centos7", response.getDefaultOs());
         assertEquals(CENTOS7.getOs(), response.getDefaultOs());
-        assertEquals(List.of(CENTOS7, RHEL8), response.getOsTypes());
+        assertEquals(List.of(osTypeToOsTypeResponseConverter.convert(CENTOS7), osTypeToOsTypeResponseConverter.convert(RHEL8)), response.getOsTypes());
     }
 
     @Test
@@ -81,7 +86,7 @@ class SupportedOperatingSystemServiceTest {
 
         assertEquals("redhat8", response.getDefaultOs());
         assertEquals(RHEL8.getOs(), response.getDefaultOs());
-        assertEquals(response.getOsTypes(), List.of(CENTOS7, RHEL8));
+        assertEquals(response.getOsTypes(), List.of(osTypeToOsTypeResponseConverter.convert(CENTOS7), osTypeToOsTypeResponseConverter.convert(RHEL8)));
     }
 
     @Test
@@ -92,6 +97,6 @@ class SupportedOperatingSystemServiceTest {
 
         assertEquals("redhat8", response.getDefaultOs());
         assertEquals(RHEL8.getOs(), response.getDefaultOs());
-        assertEquals(response.getOsTypes(), List.of(RHEL8));
+        assertEquals(response.getOsTypes(), List.of(osTypeToOsTypeResponseConverter.convert(RHEL8)));
     }
 }

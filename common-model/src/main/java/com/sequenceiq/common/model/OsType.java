@@ -1,9 +1,5 @@
 package com.sequenceiq.common.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-
-@JsonFormat(shape = Shape.OBJECT)
 public enum OsType {
 
     CENTOS7("centos7", "CentOS 7", "CentOS 7"),

@@ -2,19 +2,17 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 
 import java.util.List;
 
-import com.sequenceiq.common.model.OsType;
-
 public class SupportedOperatingSystemResponse {
 
-    private List<OsType> osTypes;
+    private List<OsTypeResponse> osTypes;
 
     private String defaultOs;
 
-    public List<OsType> getOsTypes() {
+    public List<OsTypeResponse> getOsTypes() {
         return osTypes;
     }
 
-    public void setOsTypes(List<OsType> osTypes) {
+    public void setOsTypes(List<OsTypeResponse> osTypes) {
         this.osTypes = osTypes;
     }
 

@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.common.model.OsType;
+import com.sequenceiq.environment.api.v1.environment.OsTypeToOsTypeResponseConverter;
+import com.sequenceiq.environment.api.v1.environment.model.response.OsTypeResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SupportedOperatingSystemResponse;
 
 @Service
@@ -25,21 +27,26 @@ public class SupportedOperatingSystemService {
 
     private final ProviderPreferencesService providerPreferencesService;
 
-    public SupportedOperatingSystemService(EntitlementService entitlementService, ProviderPreferencesService providerPreferencesService) {
+    private final OsTypeToOsTypeResponseConverter osTypeToOsTypeResponseConverter;
+
+    public SupportedOperatingSystemService(EntitlementService entitlementService, ProviderPreferencesService providerPreferencesService,
+            OsTypeToOsTypeResponseConverter osTypeToOsTypeResponseConverter) {
         this.entitlementService = entitlementService;
         this.providerPreferencesService = providerPreferencesService;
+        this.osTypeToOsTypeResponseConverter = osTypeToOsTypeResponseConverter;
     }
 
     public SupportedOperatingSystemResponse listSupportedOperatingSystem(String accountId) {
         SupportedOperatingSystemResponse response = new SupportedOperatingSystemResponse();
 
         if (providerPreferencesService.isGovCloudDeployment()) {
-            response.setOsTypes(List.of(RHEL8));
+            response.setOsTypes(List.of(osTypeToOsTypeResponseConverter.convert(RHEL8)));
             response.setDefaultOs(RHEL8.getOs());
             LOGGER.info("List of supported OS for gov cloud response: {}", response);
         } else {
             boolean rhel8Enabled = entitlementService.isRhel8ImageSupportEnabled(accountId);
-            List<OsType> supportedOs = Arrays.stream(OsType.values()).filter(r -> rhel8Enabled || r != RHEL8).collect(Collectors.toList());
+            List<OsTypeResponse> supportedOs = Arrays.stream(OsType.values()).filter(r -> rhel8Enabled || r != RHEL8)
+                    .map(osTypeToOsTypeResponseConverter::convert).collect(Collectors.toList());
             response.setOsTypes(supportedOs);
 
             boolean rhel8Default = entitlementService.isRhel8ImagePreferred(accountId);
