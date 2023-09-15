@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 
 import java.util.Set;
 
@@ -31,7 +32,7 @@ public class MeteringJobInitializer implements JobInitializer {
     @Override
     public void initJobs() {
         if (meteringConfig.isEnabled()) {
-            stackService.getAllAliveDatahubs(Set.of(DELETE_COMPLETED, DELETE_IN_PROGRESS, DELETE_FAILED, CREATE_FAILED, CREATE_IN_PROGRESS))
+            stackService.getAllAliveDatahubs(Set.of(DELETE_COMPLETED, DELETE_IN_PROGRESS, DELETE_FAILED, CREATE_FAILED, CREATE_IN_PROGRESS, STOPPED))
                     .forEach(s -> meteringJobService.schedule(new MeteringJobAdapter(s)));
         }
     }

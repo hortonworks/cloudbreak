@@ -78,6 +78,11 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
         return stackRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("FreeIPA stack [%s] not found", id)));
     }
 
+    public ResourceBasicView getResourceBasicViewByCrn(String freeIpaCrn) {
+        return stackRepository.findResourceBasicViewByResourceCrn(freeIpaCrn)
+                .orElseThrow(() -> new NotFoundException(String.format("FreeIPA stack [%s] not found", freeIpaCrn)));
+    }
+
     @Override
     public PayloadContext getPayloadContext(Long resourceId) {
         return stackRepository.getStackAsPayloadContextById(resourceId).orElse(null);
