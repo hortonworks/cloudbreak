@@ -35,17 +35,28 @@ public class SecretRotationExecutionDecisionProvider {
 
     public boolean executionRequired(RotationMetadata metadata) {
         Predicate<RotationMetadata> executionTypeCorrect = emptyExecution().or(explicitExecution());
-        Predicate<RotationMetadata> multiClusterExecution = multiClusterExecution().and(executionTypeCorrect);
-        Predicate<RotationMetadata> singleClusterExecution = singleClusterExecution().and(executionTypeCorrect);
-        boolean result = singleClusterExecution
-                .or(multiClusterExecution.and(childClusterExecution()))
-                .or(multiClusterExecution.and(parentClusterInitialExecution()))
-                .or(multiClusterExecution.and(parentClusterFinalExecution()))
-                .test(metadata);
-        LOGGER.info("Execution of current rotation phase {} is {} based on resource:[{}], secret type:[{}] and requested execution type:[{}].",
-                metadata.currentExecution(), result ? "needed" : "not needed", metadata.resourceCrn(),
-                metadata.secretType(), metadata.requestedExecutionType());
-        return result;
+        if (!executionTypeCorrect.test(metadata)) {
+            logRotationMetadata("Execution type is not empty and not explicit. Execution is not needed.", metadata);
+            return false;
+        }
+        if (singleClusterExecution(metadata)) {
+            logRotationMetadata("Execution is required for single cluster execution.", metadata);
+            return true;
+        }
+        if (multiClusterExecution(metadata)) {
+            if (childClusterExecution(metadata)) {
+                logRotationMetadata("Child cluster execution is required.", metadata);
+                return true;
+            } else if (parentClusterInitialExecution(metadata)) {
+                logRotationMetadata("Parent cluster initial execution is required.", metadata);
+                return true;
+            } else if (parentClusterFinalExecution(metadata)) {
+                logRotationMetadata("Parent cluster final execution is required.", metadata);
+                return true;
+            }
+        }
+        logRotationMetadata("Execution is not required.", metadata);
+        return false;
     }
 
     private Predicate<RotationMetadata> explicitExecution() {
@@ -56,28 +67,26 @@ public class SecretRotationExecutionDecisionProvider {
         return rotationMetadata -> rotationMetadata.requestedExecutionType() == null;
     }
 
-    private Predicate<RotationMetadata> singleClusterExecution() {
-        return rotationMetadata -> !rotationMetadata.secretType().multiSecret();
+    private boolean singleClusterExecution(RotationMetadata rotationMetadata) {
+        return !rotationMetadata.secretType().multiSecret();
     }
 
-    private Predicate<RotationMetadata> multiClusterExecution() {
-        return rotationMetadata -> rotationMetadata.secretType().multiSecret();
+    private boolean multiClusterExecution(RotationMetadata rotationMetadata) {
+        return rotationMetadata.secretType().multiSecret();
     }
 
-    private Predicate<RotationMetadata> childClusterExecution() {
-        return metadata -> metadata.multiSecretType().orElseThrow().getChildrenCrnDescriptors().contains(
+    private boolean childClusterExecution(RotationMetadata metadata) {
+        return metadata.multiSecretType().orElseThrow().getChildrenCrnDescriptors().contains(
                 CrnResourceDescriptor.getByCrnString(metadata.resourceCrn()));
     }
 
-    private Predicate<RotationMetadata> parentClusterInitialExecution() {
-        return metadata ->
-                metadata.multiSecretType().orElseThrow().getParentCrnDescriptor().equals(CrnResourceDescriptor.getByCrnString(metadata.resourceCrn()))
+    private boolean parentClusterInitialExecution(RotationMetadata metadata) {
+        return metadata.multiSecretType().orElseThrow().getParentCrnDescriptor().equals(CrnResourceDescriptor.getByCrnString(metadata.resourceCrn()))
                 && !resourcePresentInDb(metadata, INITIATED_PARENT) && List.of(PREVALIDATE, ROTATE, ROLLBACK).contains(metadata.currentExecution());
     }
 
-    private Predicate<RotationMetadata> parentClusterFinalExecution() {
-        return metadata ->
-                metadata.multiSecretType().orElseThrow().getParentCrnDescriptor().equals(CrnResourceDescriptor.getByCrnString(metadata.resourceCrn()))
+    private boolean parentClusterFinalExecution(RotationMetadata metadata) {
+        return metadata.multiSecretType().orElseThrow().getParentCrnDescriptor().equals(CrnResourceDescriptor.getByCrnString(metadata.resourceCrn()))
                 && resourcePresentInDb(metadata, INITIATED_PARENT) && !childPresent(metadata) && metadata.currentExecution().equals(FINALIZE);
     }
 
@@ -89,5 +98,14 @@ public class SecretRotationExecutionDecisionProvider {
         MultiSecretType multiSecretType = metadata.multiSecretType().orElseThrow();
         return interServiceMultiClusterRotationTrackingService.map(interServiceMultiClusterRotationService ->
                 interServiceMultiClusterRotationService.checkOngoingChildrenMultiSecretRotations(metadata.resourceCrn(), multiSecretType)).orElse(false);
+    }
+
+    private void logRotationMetadata(String message, RotationMetadata rotationMetadata) {
+        LOGGER.info("{} Current execution {}, resource {}, secret type: {}, requested execution type: {}",
+                message,
+                rotationMetadata.currentExecution(),
+                rotationMetadata.resourceCrn(),
+                rotationMetadata.secretType(),
+                rotationMetadata.requestedExecutionType());
     }
 }
