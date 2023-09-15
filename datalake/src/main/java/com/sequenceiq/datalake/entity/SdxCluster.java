@@ -19,6 +19,7 @@ import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
@@ -335,6 +336,7 @@ public class SdxCluster implements AccountAwareResource {
         this.enableMultiAz = enableMultiAz;
     }
 
+    @JsonIgnore
     public boolean isCreateDatabase() {
         return sdxDatabase.isCreateDatabase();
     }
@@ -363,18 +365,22 @@ public class SdxCluster implements AccountAwareResource {
         this.detached = detached;
     }
 
+    @JsonIgnore
     public String getDatabaseCrn() {
         return sdxDatabase.getDatabaseCrn();
     }
 
+    @JsonIgnore
     public SdxDatabaseAvailabilityType getDatabaseAvailabilityType() {
         return sdxDatabase.getDatabaseAvailabilityType();
     }
 
+    @JsonIgnore
     public boolean hasExternalDatabase() {
         return sdxDatabase.hasExternalDatabase();
     }
 
+    @JsonIgnore
     public String getDatabaseEngineVersion() {
         return sdxDatabase.getDatabaseEngineVersion();
     }
