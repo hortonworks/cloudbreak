@@ -59,7 +59,7 @@ class MeteringServiceTest {
     void sendMeteringSyncEventForStackShouldSendEventWhenDatahub() {
         MeteringEvent meteringEvent = MeteringEvent.newBuilder().build();
         when(stackDtoToMeteringEventConverter.convertToSyncEvent(any())).thenReturn(meteringEvent);
-        underTest.sendMeteringSyncEventForStack(getStack(WORKLOAD));
+        underTest.sendMeteringSyncEventForStack(getStack(WORKLOAD, "AWS"));
         verify(grpcMeteringClient, times(1)).sendMeteringEventWithoutRetry(eq(meteringEvent));
         verify(metricService, times(0)).incrementMetricCounter(MetricType.METERING_REPORT_FAILED,
                 MeteringMetricTag.REPORT_TYPE.name(), SYNC);
@@ -71,7 +71,7 @@ class MeteringServiceTest {
     void sendMeteringStatusChangeEventForStackShouldSendEventWhenDatahub() {
         MeteringEvent meteringEvent = MeteringEvent.newBuilder().build();
         when(stackDtoToMeteringEventConverter.convertToStatusChangeEvent(any(), any())).thenReturn(meteringEvent);
-        underTest.sendMeteringStatusChangeEventForStack(getStack(WORKLOAD), SCALE_UP);
+        underTest.sendMeteringStatusChangeEventForStack(getStack(WORKLOAD, "AWS"), SCALE_UP);
         verify(grpcMeteringClient, times(1)).sendMeteringEvent(eq(meteringEvent));
         verify(metricService, times(0)).incrementMetricCounter(MetricType.METERING_REPORT_FAILED,
                 MeteringMetricTag.REPORT_TYPE.name(), SCALE_UP.name());
@@ -84,7 +84,7 @@ class MeteringServiceTest {
         MeteringEvent meteringEvent = MeteringEvent.newBuilder().build();
         when(stackDtoToMeteringEventConverter.convertToStatusChangeEvent(any(), any())).thenReturn(meteringEvent);
         doThrow(new RuntimeException("Inject Failure")).when(grpcMeteringClient).sendMeteringEvent(meteringEvent);
-        underTest.sendMeteringStatusChangeEventForStack(getStack(WORKLOAD), SCALE_UP);
+        underTest.sendMeteringStatusChangeEventForStack(getStack(WORKLOAD, "AWS"), SCALE_UP);
         verify(grpcMeteringClient, times(1)).sendMeteringEvent(eq(meteringEvent));
         verify(metricService, times(1)).incrementMetricCounter(MetricType.METERING_REPORT_FAILED,
                 MeteringMetricTag.REPORT_TYPE.name(), SCALE_UP.name());
@@ -97,7 +97,7 @@ class MeteringServiceTest {
         MeteringEvent meteringEvent = MeteringEvent.newBuilder().build();
         when(stackDtoToMeteringEventConverter.convertToSyncEvent(any())).thenReturn(meteringEvent);
         doThrow(new RuntimeException("Inject Failure")).when(grpcMeteringClient).sendMeteringEventWithoutRetry(meteringEvent);
-        underTest.sendMeteringSyncEventForStack(getStack(WORKLOAD));
+        underTest.sendMeteringSyncEventForStack(getStack(WORKLOAD, "AWS"));
         verify(grpcMeteringClient, times(1)).sendMeteringEventWithoutRetry(eq(meteringEvent));
         verify(metricService, times(1)).incrementMetricCounter(MetricType.METERING_REPORT_FAILED,
                 MeteringMetricTag.REPORT_TYPE.name(), SYNC);
@@ -107,21 +107,28 @@ class MeteringServiceTest {
 
     @Test
     void sendMeteringSyncEventForStackShouldNotSendEventWhenNotDatahub() {
-        underTest.sendMeteringSyncEventForStack(getStack(DATALAKE));
+        underTest.sendMeteringSyncEventForStack(getStack(DATALAKE, "AWS"));
+        verify(stackDtoToMeteringEventConverter, never()).convertToStatusChangeEvent(any(), any());
+        verify(grpcMeteringClient, never()).sendMeteringEvent(any());
+    }
+
+    @Test
+    void sendMeteringSyncEventForStackShouldNotSendEventWhenDatahubButYarn() {
+        underTest.sendMeteringSyncEventForStack(getStack(WORKLOAD, "YARN"));
         verify(stackDtoToMeteringEventConverter, never()).convertToStatusChangeEvent(any(), any());
         verify(grpcMeteringClient, never()).sendMeteringEvent(any());
     }
 
     @Test
     void sendMeteringStatusChangeEventForStackShouldNotSendEventWhenNotDatahub() {
-        underTest.sendMeteringStatusChangeEventForStack(getStack(DATALAKE), SCALE_UP);
+        underTest.sendMeteringStatusChangeEventForStack(getStack(DATALAKE, "AWS"), SCALE_UP);
         verify(stackDtoToMeteringEventConverter, never()).convertToStatusChangeEvent(any(), any());
         verify(grpcMeteringClient, never()).sendMeteringEvent(any());
     }
 
     @Test
     void scheduleSyncShouldScheduleJobWhenDatahub() {
-        StackView stack = getStack(WORKLOAD);
+        StackView stack = getStack(WORKLOAD, "AWS");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.scheduleSync(STACK_ID);
         verify(meteringJobService, times(1)).schedule(eq(STACK_ID), eq(MeteringJobAdapter.class));
@@ -129,7 +136,15 @@ class MeteringServiceTest {
 
     @Test
     void scheduleSyncShouldNotScheduleJobWhenNotDatahub() {
-        StackView stack = getStack(DATALAKE);
+        StackView stack = getStack(DATALAKE, "AWS");
+        when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
+        underTest.scheduleSync(STACK_ID);
+        verify(meteringJobService, never()).schedule(eq(STACK_ID), eq(MeteringJobAdapter.class));
+    }
+
+    @Test
+    void scheduleSyncShouldNotScheduleJobWhenDatahubButYarn() {
+        StackView stack = getStack(WORKLOAD, "YARN");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.scheduleSync(STACK_ID);
         verify(meteringJobService, never()).schedule(eq(STACK_ID), eq(MeteringJobAdapter.class));
@@ -137,7 +152,7 @@ class MeteringServiceTest {
 
     @Test
     void unscheduleSyncShouldScheduleJobWhenDatahub() {
-        StackView stack = getStack(WORKLOAD);
+        StackView stack = getStack(WORKLOAD, "AWS");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.unscheduleSync(STACK_ID);
         verify(meteringJobService, times(1)).unschedule(eq(String.valueOf(STACK_ID)));
@@ -145,15 +160,24 @@ class MeteringServiceTest {
 
     @Test
     void unscheduleSyncShouldNotScheduleJobWhenNotDatahub() {
-        StackView stack = getStack(DATALAKE);
+        StackView stack = getStack(DATALAKE, "AWS");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.unscheduleSync(STACK_ID);
         verify(meteringJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
     }
 
-    private Stack getStack(StackType stackType) {
+    @Test
+    void unscheduleSyncShouldNotScheduleJobWhenDatahubButYarn() {
+        StackView stack = getStack(DATALAKE, "YARN");
+        when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
+        underTest.unscheduleSync(STACK_ID);
+        verify(meteringJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
+    }
+
+    private Stack getStack(StackType stackType, String cloudPlatform) {
         Stack stack = new Stack();
         stack.setType(stackType);
+        stack.setCloudPlatform(cloudPlatform);
         return stack;
     }
 }

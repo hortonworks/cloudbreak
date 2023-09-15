@@ -53,7 +53,7 @@ public class FreeIpaMultiAzUpgradeTests extends AbstractE2ETest {
                 .await(FREEIPA_AVAILABLE)
                 .given(freeIpa, FreeIpaTestDto.class)
                 .when(freeIpaTestClient.upgrade())
-                .await(FREEIPA_AVAILABLE, waitForFlow().withWaitForFlow(Boolean.FALSE))
+                .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
                     validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, freeIpa, tc);
                     return testDto;

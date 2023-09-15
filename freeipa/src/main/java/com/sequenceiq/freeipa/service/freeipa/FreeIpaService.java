@@ -4,9 +4,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.service.list.ResourceWithId;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
@@ -19,6 +22,8 @@ import com.sequenceiq.freeipa.util.CrnService;
 
 @Service
 public class FreeIpaService implements ResourceIdProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaService.class);
 
     @Inject
     private StackService stackService;
@@ -55,8 +60,15 @@ public class FreeIpaService implements ResourceIdProvider {
     }
 
     @Override
-    public Long getResourceIdByResourceCrn(String environmentCrn) {
-        return stackService.getByEnvironmentCrnAndAccountId(environmentCrn, crnService.getCurrentAccountId()).getId();
+    public Long getResourceIdByResourceCrn(String resourceCrn) {
+        Long resourceId;
+        if (Crn.fromString(resourceCrn).getResourceType() == Crn.ResourceType.ENVIRONMENT) {
+            resourceId = stackService.getByEnvironmentCrnAndAccountId(resourceCrn, crnService.getCurrentAccountId()).getId();
+            LOGGER.warn("Fetched FreeIpa resource successfully by using Environment CRN while it is expected to use FreeIpa CRN for getResourceIdByResourceCrn");
+        } else {
+            resourceId = stackService.getResourceBasicViewByCrn(resourceCrn).getId();
+        }
+        return resourceId;
     }
 
     public List<FreeIpa> getAllByIds(List<Long> ids) {
