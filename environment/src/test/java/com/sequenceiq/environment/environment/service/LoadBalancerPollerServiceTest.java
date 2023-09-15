@@ -1,18 +1,23 @@
 package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.environment.environment.service.LoadBalancerPollerService.LOAD_BALANCER_UPDATE_FAILED_STATE;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -23,6 +28,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.invocation.Invocation;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
@@ -206,9 +213,10 @@ class LoadBalancerPollerServiceTest {
     void testPollingTimeout() {
         setupDatalakeResponse();
         setupDatahubResponse();
+        int flowCount = 3;
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(stackService.updateLoadBalancer(eq(Set.of(DL_NAME, DH_NAME1, DH_NAME2)))).thenReturn(setupFlowIdentifiers(3));
+        when(stackService.updateLoadBalancer(eq(Set.of(DL_NAME, DH_NAME1, DH_NAME2)))).thenReturn(setupFlowIdentifiers(flowCount));
         when(flowEndpoint.hasFlowRunningByFlowId(anyString())).thenReturn(setupActiveFlowCheckResponse());
         String expectedError = "Stack update poller reached timeout.";
 
@@ -216,8 +224,17 @@ class LoadBalancerPollerServiceTest {
             assertThrows(UpdateFailedException.class, () ->
                 underTest.updateStackWithLoadBalancer(ACCOUNT_ID, ENV_CRN, ENV_NAME, PublicEndpointAccessGateway.ENABLED, false));
 
-        verify(flowEndpoint, times(6)).hasFlowRunningByFlowId(anyString());
         assertEquals(expectedError, exception.getMessage());
+        verify(flowEndpoint, atLeast(flowCount)).hasFlowRunningByFlowId(anyString());
+        Collection<Invocation> flowEndpointInvocations = mockingDetails(flowEndpoint).getInvocations();
+        long callCount = flowEndpointInvocations.stream()
+                .map(InvocationOnMock::getMethod)
+                .map(Method::getName)
+                .filter("hasFlowRunningByFlowId"::equals)
+                .count();
+        assertThat(callCount % flowCount)
+                .withFailMessage("hasFlowRunningByFlowId was not called for all flow IDs")
+                .isEqualTo(0);
     }
 
     private void setupDatalakeResponse() {

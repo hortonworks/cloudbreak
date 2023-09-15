@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "dbServerName": {
@@ -237,7 +237,7 @@
     <#if usePrivateEndpoints>
         {
             "type": "Microsoft.Network/privateEndpoints",
-            "apiVersion": "2020-05-01",
+            "apiVersion": "2023-05-01",
             "name": "${privateEndpointName}",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -270,7 +270,7 @@
         },
         {
             "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
-            "apiVersion": "2020-05-01",
+            "apiVersion": "2023-05-01",
             "name": "[concat('${privateEndpointName}', '/default')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/privateEndpoints', '${privateEndpointName}') ]"
@@ -313,7 +313,7 @@
     <#if dataEncryption == true> ,
         {
           "type": "Microsoft.Resources/deployments",
-          "apiVersion": "2019-05-01",
+          "apiVersion": "2023-07-01",
           "name": "[concat(parameters('dbServerName'), '-', 'addAccessPolicy')]",
           "resourceGroup": "[parameters('keyVaultResourceGroupName')]",
           "dependsOn": [
@@ -322,18 +322,18 @@
           "properties": {
             "mode": "Incremental",
             "template": {
-              "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+              "$schema": "http://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
               "contentVersion": "1.0.0.0",
               "resources": [
                 {
                   "type": "Microsoft.KeyVault/vaults/accessPolicies",
                   "name": "[concat(parameters('keyVaultName'), '/add')]",
-                  "apiVersion": "2018-02-14-preview",
+                  "apiVersion": "2023-08-01-PREVIEW",
                   "properties": {
                     "accessPolicies": [
                       {
                         "tenantId": "[subscription().tenantId]",
-                        "objectId": "[reference(resourceId('Microsoft.DBforPostgreSQL/servers/', parameters('dbServerName')), '2017-12-01', 'Full').identity.principalId]",
+                        "objectId": "[reference(resourceId('Microsoft.DBforPostgreSQL/servers/', parameters('dbServerName')), variables('apiVersion'), 'Full').identity.principalId]",
                         "permissions": {
                           "keys": [
                             "get",
@@ -359,7 +359,7 @@
           ],
           "properties": {
             "serverKeyType": "AzureKeyVault",
-            "uri": "[concat(reference(resourceId(parameters('keyVaultResourceGroupName'), 'Microsoft.KeyVault/vaults/', parameters('keyVaultName')), '2018-02-14-preview', 'Full').properties.vaultUri, 'keys/', parameters('keyName'), '/', parameters('keyVersion'))]"
+            "uri": "[concat(reference(resourceId(parameters('keyVaultResourceGroupName'), 'Microsoft.KeyVault/vaults/', parameters('keyVaultName')), '2022-11-01', 'Full').properties.vaultUri, 'keys/', parameters('keyName'), '/', parameters('keyVersion'))]"
           }
         }
     </#if>

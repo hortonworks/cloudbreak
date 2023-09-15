@@ -1,5 +1,5 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters" : {
     "virtualNetworkId": {
@@ -24,14 +24,14 @@
   "resources": [
     {
       "type": "Microsoft.Network/privateDnsZones",
-      "apiVersion": "2018-09-01",
+      "apiVersion": "2020-06-01",
       "name": "privatelink.blob.core.windows.net",
       "location": "global",
       "tags": "[parameters('serverTags')]"
     },
     {
       "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
-      "apiVersion": "2018-09-01",
+      "apiVersion": "2020-06-01",
       "name": "[concat('privatelink.blob.core.windows.net', '/', parameters('virtualNetworkName'))]",
       "location": "global",
       "tags":"[parameters('serverTags')]",
@@ -47,14 +47,14 @@
     },
     {
       "type": "Microsoft.Network/privateDnsZones",
-      "apiVersion": "2018-09-01",
+      "apiVersion": "2020-06-01",
       "name": "privatelink.postgres.database.azure.com",
       "location": "global",
       "tags": "[parameters('serverTags')]"
     },
     {
       "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
-      "apiVersion": "2018-09-01",
+      "apiVersion": "2020-06-01",
       "name": "[concat('privatelink.postgres.database.azure.com', '/', parameters('virtualNetworkName'))]",
       "location": "global",
       "tags": "[parameters('serverTags')]",
