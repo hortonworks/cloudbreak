@@ -6,6 +6,7 @@ env:
   serviceversion: ${{github.sha}}
   PROJECT: cloudbreak/cloudbreak
   BRANCH: ${{github.base_ref}}
+  SOURCE_BRANCH: ${{github.head_ref}}
   PULL_REQUEST_NUMBER: ${{ github.event.number }}
 
 on:
@@ -13,6 +14,36 @@ on:
   pull_request:
 
 jobs:
+  jira-update:
+    name: Jira Update
+    runs-on: [ cb-ubi8 ]
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup secrets
+        id: build_secrets
+        uses: Kitchen/RE-thirdparty-actions/actions/vault@main
+        with:
+          tlsSkipVerify: true
+          url: https://re-vault.infra.cloudera.com/
+          method: kubernetes
+          path: rke_re_jenkins
+          role: cb
+          secrets: |
+            cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
+      - name: Update Jira ticket
+        run: |-
+          #!/bin/bash -x
+          export JIRA_TOKEN=$(echo "${{ steps.build_secrets.outputs.JIRA_TOKEN }}")
+          export PULL_REQUEST_NUMBER=$PULL_REQUEST_NUMBER
+          export BRANCH=$SOURCE_BRANCH
+          export PROJECT=$PROJECT
+          ./scripts/jira.sh
+
   unit-test:
     name: Unit Test
     runs-on: [cb-ubi8]
@@ -38,6 +69,7 @@ jobs:
               cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
               cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
               cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+              cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
       - name: Cache Java libs
         id: cache-java
         uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
