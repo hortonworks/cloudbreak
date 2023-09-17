@@ -98,7 +98,9 @@ class UpgradeServiceTest {
     @Test
     public void testUpgradeTriggered() {
         FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
-        request.setImage(new ImageSettingsRequest());
+        ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
+        imageSettingsRequest.setCatalog("requestCatalog");
+        request.setImage(imageSettingsRequest);
         request.setEnvironmentCrn(ENVIRONMENT_CRN);
         String triggeredVariant = "triggeredVariant";
 
@@ -143,6 +145,9 @@ class UpgradeServiceTest {
 
         verify(validationService).validateStackForUpgrade(allInstances, stack);
         verify(validationService).validateSelectedImageDifferentFromCurrent(eq(currentImage), eq(selectedImage), anySet());
+        ArgumentCaptor<FreeIpaImageFilterSettings> imageFilterSettingsArgumentCaptor = ArgumentCaptor.forClass(FreeIpaImageFilterSettings.class);
+        verify(imageService).selectImage(imageFilterSettingsArgumentCaptor.capture());
+        assertEquals("requestCatalog", imageFilterSettingsArgumentCaptor.getValue().catalog());
     }
 
     @Test
@@ -243,6 +248,9 @@ class UpgradeServiceTest {
 
         verify(validationService).validateStackForUpgrade(allInstances, stack);
         verify(validationService).validateSelectedImageDifferentFromCurrent(eq(selectedImage), eq(selectedImage), anySet());
+        ArgumentCaptor<FreeIpaImageFilterSettings> imageFilterSettingsArgumentCaptor = ArgumentCaptor.forClass(FreeIpaImageFilterSettings.class);
+        verify(imageService).selectImage(imageFilterSettingsArgumentCaptor.capture());
+        assertEquals("mockcatalog", imageFilterSettingsArgumentCaptor.getValue().catalog());
     }
 
     @Test
@@ -265,6 +273,7 @@ class UpgradeServiceTest {
         when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup));
         ImageInfoResponse selectedImage = mockSelectedImage();
         ImageInfoResponse currentImage = mockCurrentImage(stack);
+        currentImage.setCatalog("catalogurl");
         Operation operation = mockOperation(OperationState.RUNNING);
         ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "flowId");
@@ -300,6 +309,9 @@ class UpgradeServiceTest {
 
         verify(validationService).validateStackForUpgrade(allInstances, stack);
         verify(validationService).validateSelectedImageDifferentFromCurrent(eq(currentImage), eq(selectedImage), anySet());
+        ArgumentCaptor<FreeIpaImageFilterSettings> imageFilterSettingsArgumentCaptor = ArgumentCaptor.forClass(FreeIpaImageFilterSettings.class);
+        verify(imageService).selectImage(imageFilterSettingsArgumentCaptor.capture());
+        assertEquals("catalogurl", imageFilterSettingsArgumentCaptor.getValue().catalog());
     }
 
     @Test
@@ -316,6 +328,8 @@ class UpgradeServiceTest {
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
         ImageInfoResponse selectedImage = mockSelectedImage();
         ImageInfoResponse currentImage = mockCurrentImage(stack);
+        currentImage.setCatalogName("catalogname");
+        currentImage.setCatalog("catalogurl");
         Operation operation = mockOperation(OperationState.RUNNING);
         ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "flowId");
@@ -343,6 +357,9 @@ class UpgradeServiceTest {
 
         verify(validationService).validateStackForUpgrade(allInstances, stack);
         verify(validationService).validateSelectedImageDifferentFromCurrent(eq(currentImage), eq(selectedImage), anySet());
+        ArgumentCaptor<FreeIpaImageFilterSettings> imageFilterSettingsArgumentCaptor = ArgumentCaptor.forClass(FreeIpaImageFilterSettings.class);
+        verify(imageService).selectImage(imageFilterSettingsArgumentCaptor.capture());
+        assertEquals("catalogname", imageFilterSettingsArgumentCaptor.getValue().catalog());
     }
 
     private Operation mockOperation(OperationState operationState) {
