@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -18,7 +19,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -154,23 +154,19 @@ public class AwsRdsVersionOperationsTest {
     }
 
     @Test
-    void testGetAllUpgradeTargetsWhenDescribeDBEngineVersionsAccessDenied() {
-        ReflectionTestUtils.setField(underTest, "fallbackTargetVersionEnabled", true);
-        ReflectionTestUtils.setField(underTest, "fallbackTargetVersion", "11.16");
+    void testGetAllUpgradeTargetsShouldThrowExceptionWhenDescribeDBEngineVersionsThrowsAccessDenied() {
         AmazonRdsClient rdsClient = mock(AmazonRdsClient.class);
         RdsEngineVersion rdsEngineVersion = new RdsEngineVersion("1.0");
         RdsException exception = (RdsException) RdsException.builder().awsErrorDetails(AwsErrorDetails.builder()
                 .errorMessage("error").errorCode("AccessDenied").build()).build();
         when(rdsClient.describeDBEngineVersions(any())).thenThrow(exception);
 
-        Set<String> upgradeTargetVersions = underTest.getAllUpgradeTargetVersions(rdsClient, rdsEngineVersion);
-        assertEquals(Set.of("11.16"), upgradeTargetVersions);
+        String message = assertThrows(CloudConnectorException.class, () -> underTest.getAllUpgradeTargetVersions(rdsClient, rdsEngineVersion)).getMessage();
+        assertEquals("Could not query valid upgrade targets because user is not authorized to perform rds:DescribeDBEngineVersions action.", message);
     }
 
     @Test
     void testGetAllUpgradeTargetsWhenRdsClientThrowsOtherAmazonRDSException() {
-        ReflectionTestUtils.setField(underTest, "fallbackTargetVersionEnabled", true);
-        ReflectionTestUtils.setField(underTest, "fallbackTargetVersion", "11.16");
         AmazonRdsClient rdsClient = mock(AmazonRdsClient.class);
         RdsEngineVersion rdsEngineVersion = new RdsEngineVersion("1.0");
         RdsException exception = (RdsException) RdsException.builder().awsErrorDetails(AwsErrorDetails.builder()

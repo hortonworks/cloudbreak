@@ -149,9 +149,6 @@ cb:
   db.override:
     minRuntimeVersion: 7.2.7
     engineVersion: 14
-    aws.fallback:
-      enabled: true
-      targetversion: "14.8"
 
 quartz:
   initialization:
