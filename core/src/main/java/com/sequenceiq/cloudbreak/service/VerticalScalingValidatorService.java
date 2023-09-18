@@ -1,18 +1,31 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
+
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
+import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
@@ -23,11 +36,14 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
 import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Service
 public class VerticalScalingValidatorService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(VerticalScalingValidatorService.class);
 
     @Inject
     private CloudParameterService cloudParameterService;
@@ -43,6 +59,12 @@ public class VerticalScalingValidatorService {
 
     @Inject
     private CloudParameterCache cloudParameterCache;
+
+    @Inject
+    private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Inject
+    private MultiAzCalculatorService multiAzCalculatorService;
 
     public void validateProviderForDelete(Stack stack, String message, boolean checkStackStopped) {
         if (!cloudParameterCache.isDeleteVolumesSupported(stack.getCloudPlatform())) {
@@ -143,5 +165,73 @@ public class VerticalScalingValidatorService {
                             .collect(Collectors.joining(", ")))
             );
         }
+    }
+
+    public void validateInstanceTypeForMultiAz(Stack stack, StackVerticalScaleV4Request verticalScaleV4Request) {
+        String group = verticalScaleV4Request.getGroup();
+        Optional<InstanceGroup> instanceGroupOptional = stack.getInstanceGroups()
+                .stream()
+                .filter(e -> e.getGroupName().equals(group))
+                .findFirst();
+        String requestedInstanceType = verticalScaleV4Request.getTemplate().getInstanceType();
+        if (instanceGroupOptional.isPresent()) {
+            if (stack.isMultiAz()) {
+                validateInstanceForMultiAz(stack, instanceGroupOptional.get(), requestedInstanceType);
+            } else {
+                LOGGER.debug("MultiAz is not enabled so skipping validations for MultiAz");
+            }
+        } else {
+            throw new BadRequestException(String.format("Define a group which exists in Cluster. It can be [%s].",
+                    stack.getInstanceGroups()
+                            .stream()
+                            .map(InstanceGroup::getGroupName)
+                            .collect(Collectors.joining(", ")))
+            );
+        }
+    }
+
+    private void validateInstanceForMultiAz(Stack stack, InstanceGroup instanceGroup, String requestedInstanceType) {
+        if (getAvailabilityZoneConnector(stack) != null) {
+            LOGGER.debug("MultiAz is enabled so validating vertical scaling request for MultiAz");
+            String availabilityZone = stack.getAvailabilityZone();
+            String region = stack.getRegion();
+            Credential credential = credentialService.getByEnvironmentCrn(stack.getEnvironmentCrn());
+            ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
+            CloudVmTypes allVmTypes = cloudParameterService.getVmTypesV2(
+                    cloudCredential,
+                    stack.getRegion(),
+                    stack.getPlatformVariant(),
+                    CdpResourceType.DEFAULT,
+                    Maps.newHashMap());
+            VmType vmType = getInstance(region, availabilityZone, requestedInstanceType, allVmTypes).orElseThrow();
+            validateInstanceSupportsExistingZones(instanceGroup.getAvailabilityZones(), vmType.getMetaData().getAvailabilityZones(), vmType.value());
+        } else {
+            LOGGER.debug("Implementation for AvailabilityZoneConnector is not present for CloudPlatform {} and PlatformVariant {}",
+                    stack.getCloudPlatform(), stack.getPlatformVariant());
+        }
+    }
+
+    private String convertCollectionToString(Collection<String> c) {
+        return CollectionUtils.isEmpty(c) ? "" : c.stream().sorted().collect(Collectors.joining(","));
+    }
+
+    private void validateInstanceSupportsExistingZones(Set<String> instanceGroupZones, List<String> availabilityZonesForVm, String instanceType) {
+        if (!emptyIfNull(availabilityZonesForVm).containsAll(emptyIfNull(instanceGroupZones))) {
+            String errorMsg = String.format("Stack is MultiAz enabled but requested instance type is not supported in existing " +
+                            "Availability Zones for Instance Group. Supported Availability Zones for Instance type %s : %s. " +
+                            "Existing Availability Zones for " +
+                            "Instance Group : %s", instanceType, convertCollectionToString(availabilityZonesForVm),
+                    convertCollectionToString(instanceGroupZones));
+            LOGGER.error(errorMsg);
+            throw new BadRequestException(errorMsg);
+        }
+    }
+
+    private AvailabilityZoneConnector getAvailabilityZoneConnector(Stack stack) {
+        LOGGER.debug("CloudPlatform is {} PlatformVariant is {}", stack.getCloudPlatform(), stack.getPlatformVariant());
+        CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
+                Platform.platform(stack.getCloudPlatform()),
+                Variant.variant(stack.getPlatformVariant()));
+        return cloudPlatformConnectors.get(cloudPlatformVariant).availabilityZoneConnector();
     }
 }

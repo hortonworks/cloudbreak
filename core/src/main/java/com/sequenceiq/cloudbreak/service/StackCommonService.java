@@ -322,6 +322,7 @@ public class StackCommonService {
         verticalScalingValidatorService.validateProvider(stack, "Vertical scaling", verticalScaleV4Request);
         verticalScalingValidatorService.validateRequest(stack, verticalScaleV4Request);
         verticalScalingValidatorService.validateInstanceType(stack, verticalScaleV4Request);
+        verticalScalingValidatorService.validateInstanceTypeForMultiAz(stack, verticalScaleV4Request);
     }
 
     public void deleteWithKerberosInWorkspace(NameOrCrn nameOrCrn, String accountId, boolean forced) {
