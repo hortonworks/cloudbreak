@@ -105,7 +105,7 @@ public class UpgradeService {
     private ImageSettingsRequest assembleImageSettingsRequest(FreeIpaUpgradeRequest request, ImageInfoResponse currentImage) {
         ImageSettingsRequest imageSettingsRequest = Optional.ofNullable(request.getImage()).orElseGet(ImageSettingsRequest::new);
         if (StringUtils.isBlank(imageSettingsRequest.getCatalog())) {
-            imageSettingsRequest.setCatalog(Optional.ofNullable(currentImage.getCatalog()).orElse(currentImage.getCatalogName()));
+            imageSettingsRequest.setCatalog(Optional.ofNullable(currentImage.getCatalogName()).orElse(currentImage.getCatalog()));
         }
         return imageSettingsRequest;
     }
