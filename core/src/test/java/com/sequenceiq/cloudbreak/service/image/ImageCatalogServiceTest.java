@@ -132,6 +132,8 @@ public class ImageCatalogServiceTest {
 
     private static final String CUSTOM_IMAGE_ID = "customImageId";
 
+    private static final String ACCOUNT_ID = "1111";
+
     private static final String USER_CRN = "crn:altus:iam:us-west-1:1111:user:1111";
 
     private static final ImageCatalogPlatform IMAGE_CATALOG_PLATFORM = imageCatalogPlatform("aws");
@@ -850,7 +852,7 @@ public class ImageCatalogServiceTest {
         when(imageCatalogRepository.findByNameAndWorkspaceId(CUSTOM_CATALOG_NAME, WORKSPACE_ID)).thenReturn(Optional.of(imageCatalog));
         when(customImageProvider.mergeSourceImageAndCustomImageProperties(any(), any(), any(), any())).thenReturn(statedImage);
 
-        StatedImages actual = underTest.getImages(USER_CRN, WORKSPACE_ID, CUSTOM_CATALOG_NAME, null, Set.of(imageCatalogPlatform("AWS")));
+        StatedImages actual = underTest.getImages(ACCOUNT_ID, WORKSPACE_ID, CUSTOM_CATALOG_NAME, Set.of(imageCatalogPlatform("AWS")), null, true);
         assertEquals(statedImage.getImage(), actual.getImages().getCdhImages().stream().findFirst().get());
 
     }
@@ -865,7 +867,7 @@ public class ImageCatalogServiceTest {
         when(imageCatalogRepository.findByNameAndWorkspaceId(CUSTOM_CATALOG_NAME, WORKSPACE_ID)).thenReturn(Optional.of(imageCatalog));
         when(customImageProvider.mergeSourceImageAndCustomImageProperties(any(), any(), any(), any())).thenReturn(statedImage);
 
-        StatedImages actual = underTest.getImages(USER_CRN, WORKSPACE_ID, CUSTOM_CATALOG_NAME, null, Set.of(imageCatalogPlatform("AWS")));
+        StatedImages actual = underTest.getImages(ACCOUNT_ID, WORKSPACE_ID, CUSTOM_CATALOG_NAME, Set.of(imageCatalogPlatform("AWS")), null, true);
 
         assertEquals(statedImage.getImage(), actual.getImages().getFreeIpaImages().stream().findFirst().get());
     }
