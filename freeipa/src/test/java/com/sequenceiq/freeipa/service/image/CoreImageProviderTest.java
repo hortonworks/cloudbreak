@@ -84,8 +84,12 @@ public class CoreImageProviderTest {
         when(imageCatalogV4Endpoint.getSingleImageByCatalogNameAndImageId(WORKSPACE_ID_DEFAULT, CATALOG_NAME, IMAGE_ID)).thenReturn(anImageResponse());
 
         Optional<ImageWrapper> actual = victim.getImage(createImageFilterSettings());
-        Image image = actual.get().getImage();
 
+        ImageWrapper imageWrapper = actual.get();
+        assertEquals(CATALOG_NAME, imageWrapper.getCatalogName());
+        assertNull(imageWrapper.getCatalogUrl());
+
+        Image image = imageWrapper.getImage();
         assertEquals(DATE, image.getDate());
         assertEquals(DESCRIPTION, image.getDescription());
         assertEquals(UUID, image.getUuid());

@@ -172,8 +172,11 @@ public class FreeIpaImageProviderTest {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, null, DEFAULT_OS, false);
         //when(freeIpaImageFilter.filterRegion(any(), any())).thenReturn(true);
 
-        Image image = underTest.getImage(imageFilterSettings).get().getImage();
+        ImageWrapper imageWrapper = underTest.getImage(imageFilterSettings).get();
+        assertEquals(CUSTOM_IMAGE_CATALOG_URL, imageWrapper.getCatalogUrl());
+        assertNull(imageWrapper.getCatalogName());
 
+        Image image = imageWrapper.getImage();
         assertEquals(DEFAULT_OS, image.getOs());
         assertEquals(LATEST_DATE, image.getDate());
         assertEquals(IMAGE_UUID, image.getUuid());
@@ -235,8 +238,11 @@ public class FreeIpaImageProviderTest {
     public void testGetImageGivenIdInputFound() {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, null, null, null, false);
 
-        Image image = underTest.getImage(imageFilterSettings).get().getImage();
+        ImageWrapper imageWrapper = underTest.getImage(imageFilterSettings).get();
+        assertEquals(DEFAULT_CATALOG_URL, imageWrapper.getCatalogUrl());
+        assertNull(imageWrapper.getCatalogName());
 
+        Image image = imageWrapper.getImage();
         assertEquals(DEFAULT_OS, image.getOs());
         assertEquals(LATEST_DATE, image.getDate());
         assertEquals(IMAGE_UUID, image.getUuid());

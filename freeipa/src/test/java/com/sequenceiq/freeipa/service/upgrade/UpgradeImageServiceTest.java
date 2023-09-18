@@ -44,7 +44,7 @@ class UpgradeImageServiceTest {
     @Test
     public void testSelectImage() {
         Image image = createImage("now");
-        ImageWrapper imageWrapper = new ImageWrapper(image, CATALOG_URL, "catalogName");
+        ImageWrapper imageWrapper = ImageWrapper.ofFreeipaImage(image, CATALOG_URL);
         when(imageService.fetchImageWrapperAndName(imageFilterSettings)).thenReturn(Pair.of(imageWrapper, "imageName"));
 
         ImageInfoResponse imageInfoResponse = underTest.selectImage(imageFilterSettings);
@@ -81,7 +81,7 @@ class UpgradeImageServiceTest {
     public void testFindTargetImages() {
         Stack stack = new Stack();
         Image image = createImage("2021-09-01");
-        ImageWrapper imageWrapper = new ImageWrapper(image, CATALOG_URL, "catalogName");
+        ImageWrapper imageWrapper = ImageWrapper.ofFreeipaImage(image, CATALOG_URL);
         when(imageService.fetchImagesWrapperAndName(eq(stack), any(), any(), eq(true))).thenReturn(List.of(Pair.of(imageWrapper, "imageName")));
 
         ImageInfoResponse currentImage = new ImageInfoResponse();
@@ -103,7 +103,7 @@ class UpgradeImageServiceTest {
     public void testFindTargetImagesNoNewerImage() {
         Stack stack = new Stack();
         Image image = createImage("2021-07-01");
-        ImageWrapper imageWrapper = new ImageWrapper(image, CATALOG_URL, "catalogName");
+        ImageWrapper imageWrapper = ImageWrapper.ofFreeipaImage(image, CATALOG_URL);
         when(imageService.fetchImagesWrapperAndName(eq(stack), any(), any(), eq(true))).thenReturn(List.of(Pair.of(imageWrapper, "imageName")));
 
         ImageInfoResponse currentImage = new ImageInfoResponse();
@@ -119,7 +119,7 @@ class UpgradeImageServiceTest {
     public void testFindTargetImagesImageWithSameId() {
         Stack stack = new Stack();
         Image image = createImage("2021-09-01");
-        ImageWrapper imageWrapper = new ImageWrapper(image, CATALOG_URL, "catalogName");
+        ImageWrapper imageWrapper = ImageWrapper.ofFreeipaImage(image, CATALOG_URL);
         when(imageService.fetchImagesWrapperAndName(eq(stack), any(), any(), eq(true))).thenReturn(List.of(Pair.of(imageWrapper, "imageName")));
 
         ImageInfoResponse currentImage = new ImageInfoResponse();
@@ -137,11 +137,11 @@ class UpgradeImageServiceTest {
         stack.setCloudPlatform("AWS");
         stack.setRegion("reg");
         Image image = createImage("2021-09-01");
-        ImageWrapper imageWrapper = new ImageWrapper(image, CATALOG_URL, "catalogName");
+        ImageWrapper imageWrapper = ImageWrapper.ofFreeipaImage(image, CATALOG_URL);
         when(imageService.fetchImagesWrapperAndName(eq(stack), any(), any(), eq(true))).thenReturn(List.of(Pair.of(imageWrapper, "imageName")));
         ArgumentCaptor<FreeIpaImageFilterSettings> captor = ArgumentCaptor.forClass(FreeIpaImageFilterSettings.class);
         Image currentImageFromCatalog = createImage("2021-08-01");
-        ImageWrapper currentImageWrapperFromCatalog = new ImageWrapper(currentImageFromCatalog, "asdf", "Asdf");
+        ImageWrapper currentImageWrapperFromCatalog = ImageWrapper.ofFreeipaImage(currentImageFromCatalog, "asdf");
         when(imageService.getImage(captor.capture())).thenReturn(currentImageWrapperFromCatalog);
 
         ImageInfoResponse currentImage = new ImageInfoResponse();
@@ -173,11 +173,11 @@ class UpgradeImageServiceTest {
         stack.setCloudPlatform("AWS");
         stack.setRegion("reg");
         Image image = createImage("2021-09-01");
-        ImageWrapper imageWrapper = new ImageWrapper(image, CATALOG_URL, "catalogName");
+        ImageWrapper imageWrapper = ImageWrapper.ofFreeipaImage(image, CATALOG_URL);
         when(imageService.fetchImagesWrapperAndName(eq(stack), any(), any(), eq(true))).thenReturn(List.of(Pair.of(imageWrapper, "imageName")));
         ArgumentCaptor<FreeIpaImageFilterSettings> captor = ArgumentCaptor.forClass(FreeIpaImageFilterSettings.class);
         Image currentImageFromCatalog = createImage(null);
-        ImageWrapper currentImageWrapperFromCatalog = new ImageWrapper(currentImageFromCatalog, "asdf", "Asdf");
+        ImageWrapper currentImageWrapperFromCatalog = ImageWrapper.ofFreeipaImage(currentImageFromCatalog, "asdf");
         when(imageService.getImage(captor.capture())).thenReturn(currentImageWrapperFromCatalog);
 
         ImageInfoResponse currentImage = new ImageInfoResponse();
@@ -202,7 +202,7 @@ class UpgradeImageServiceTest {
         stack.setCloudPlatform("AWS");
         stack.setRegion("reg");
         Image image = createImage("2021-09-01");
-        ImageWrapper imageWrapper = new ImageWrapper(image, CATALOG_URL, "catalogName");
+        ImageWrapper imageWrapper = ImageWrapper.ofFreeipaImage(image, CATALOG_URL);
         when(imageService.fetchImagesWrapperAndName(eq(stack), any(), any(), eq(true))).thenReturn(List.of(Pair.of(imageWrapper, "imageName")));
         ArgumentCaptor<FreeIpaImageFilterSettings> captor = ArgumentCaptor.forClass(FreeIpaImageFilterSettings.class);
         when(imageService.getImage(captor.capture())).thenThrow(new ImageNotFoundException("Image not found"));
@@ -227,9 +227,9 @@ class UpgradeImageServiceTest {
     public void testFindTargetImagesImageWithWrongDateFormatIgnored() {
         Stack stack = new Stack();
         Image image = createImage("2021-09-01");
-        ImageWrapper imageWrapper = new ImageWrapper(image, CATALOG_URL, "catalogName");
+        ImageWrapper imageWrapper = ImageWrapper.ofFreeipaImage(image, CATALOG_URL);
         Image image2 = createImage("20210901");
-        ImageWrapper imageWrapper2 = new ImageWrapper(image2, CATALOG_URL, "catalogName");
+        ImageWrapper imageWrapper2 = ImageWrapper.ofFreeipaImage(image2, CATALOG_URL);
         when(imageService.fetchImagesWrapperAndName(eq(stack), any(), any(), eq(true)))
                 .thenReturn(List.of(Pair.of(imageWrapper, "imageName"), Pair.of(imageWrapper2, "imageName2")));
 

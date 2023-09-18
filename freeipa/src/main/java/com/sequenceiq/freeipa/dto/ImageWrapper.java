@@ -10,7 +10,7 @@ public class ImageWrapper {
 
     private final String catalogName;
 
-    public ImageWrapper(Image image, String catalogUrl, String catalogName) {
+    private ImageWrapper(Image image, String catalogUrl, String catalogName) {
         this.image = image;
         this.catalogUrl = catalogUrl;
         this.catalogName = catalogName;
@@ -26,6 +26,14 @@ public class ImageWrapper {
 
     public String getCatalogName() {
         return catalogName;
+    }
+
+    public static ImageWrapper ofFreeipaImage(Image image, String catalogUrl) {
+        return new ImageWrapper(image, catalogUrl, null);
+    }
+
+    public static ImageWrapper ofCoreImage(Image image, String catalogName) {
+        return new ImageWrapper(image, null, catalogName);
     }
 
     @Override

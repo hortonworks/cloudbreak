@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -102,7 +103,7 @@ class ImageFallbackHandlerTest {
         Stack stack = mock(Stack.class);
         ImageEntity currentImage = mock(ImageEntity.class);
         ImageProvider imageProvider = mock(ImageProvider.class);
-        ImageWrapper imageWrapper = new ImageWrapper(null, "catalog", "catalogName");
+        ImageWrapper imageWrapper = ImageWrapper.ofCoreImage(mock(Image.class), "catalogName");
         FreeIpaImageFilterSettings settings =
                 new FreeIpaImageFilterSettings(null, null, null, null, null, "azure", false);
 

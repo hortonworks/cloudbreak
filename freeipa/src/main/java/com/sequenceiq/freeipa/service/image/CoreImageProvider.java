@@ -44,7 +44,7 @@ public class CoreImageProvider implements ImageProvider {
 
             Optional<Image> image = convert(imageV4Response);
 
-            return image.map(i -> new ImageWrapper(i, null, imageFilterSettings.catalog()));
+            return image.map(i -> ImageWrapper.ofCoreImage(i, imageFilterSettings.catalog()));
         } catch (Exception ex) {
             LOGGER.warn("Image lookup failed: {}", ex.getMessage());
             return Optional.empty();
@@ -58,7 +58,7 @@ public class CoreImageProvider implements ImageProvider {
                 ImageV4Response imageV4Response = imageCatalogV4Endpoint.getSingleImageByCatalogNameAndImageIdInternal(
                         WORKSPACE_ID_DEFAULT, imageFilterSettings.catalog(), imageFilterSettings.currentImageId(), accountId);
                 Optional<Image> image = convert(imageV4Response);
-                return image.map(i -> new ImageWrapper(i, null, imageFilterSettings.catalog()));
+                return image.map(i -> ImageWrapper.ofCoreImage(i, imageFilterSettings.catalog()));
             } catch (Exception ex) {
                 LOGGER.warn("Image lookup failed: {}", ex.getMessage());
                 return Optional.empty();
@@ -77,7 +77,7 @@ public class CoreImageProvider implements ImageProvider {
                     orElseGet(List::of).stream()
                     .map(this::convert)
                     .flatMap(Optional::stream)
-                    .map(img -> new ImageWrapper(img, null, imageFilterSettings.catalog()))
+                    .map(img -> ImageWrapper.ofCoreImage(img, imageFilterSettings.catalog()))
                     .collect(Collectors.toList());
         } catch (WebApplicationException e) {
             String errorMessage = messageExtractor.getErrorMessage(e);

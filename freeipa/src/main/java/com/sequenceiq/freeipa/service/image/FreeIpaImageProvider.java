@@ -54,7 +54,7 @@ public class FreeIpaImageProvider implements ImageProvider {
         ImageCatalog cachedImageCatalog = imageCatalogProvider.getImageCatalog(imageFilterSettings.catalog());
         return findImageForAppVersion(imageFilterSettings, cachedImageCatalog)
                 .or(() -> retryAfterEvictingCache(imageFilterSettings))
-                .map(i -> new ImageWrapper(i, imageFilterSettings.catalog(), null));
+                .map(i -> ImageWrapper.ofFreeipaImage(i, imageFilterSettings.catalog()));
     }
 
     @Override
@@ -74,7 +74,7 @@ public class FreeIpaImageProvider implements ImageProvider {
         LOGGER.debug("Compatible images: {} " + System.lineSeparator() + "Images in versions: {}", compatibleImages, imagesInVersions);
         return compatibleImages.stream()
                 .filter(image -> imagesInVersions.contains(image.getUuid()))
-                .map(image -> new ImageWrapper(image, imageFilterSettings.catalog(), null))
+                .map(image -> ImageWrapper.ofFreeipaImage(image, imageFilterSettings.catalog()))
                 .collect(Collectors.toList());
     }
 

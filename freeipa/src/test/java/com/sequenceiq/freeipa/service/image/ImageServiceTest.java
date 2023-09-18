@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.image;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -173,7 +174,7 @@ public class ImageServiceTest {
         stack.setAccountId(ACCOUNT_ID);
         ImageSettingsRequest imageRequest = new ImageSettingsRequest();
         when(imageProviderFactory.getImageProvider(any())).thenReturn(imageProvider);
-        when(imageProvider.getImage(any())).thenReturn(Optional.of(new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG)));
+        when(imageProvider.getImage(any())).thenReturn(Optional.of(ImageWrapper.ofFreeipaImage(image, IMAGE_CATALOG_URL)));
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
         when(imageRepository.getByStack(stack)).thenReturn(new ImageEntity());
         when(image.getUuid()).thenReturn(IMAGE_UUID);
@@ -189,7 +190,7 @@ public class ImageServiceTest {
 
         assertEquals(EXISTING_ID, imageEntity.getImageName());
         assertEquals(IMAGE_CATALOG_URL, imageEntity.getImageCatalogUrl());
-        assertEquals(IMAGE_CATALOG, imageEntity.getImageCatalogName());
+        assertNull(imageEntity.getImageCatalogName());
         assertEquals(IMAGE_UUID, imageEntity.getImageId());
         assertEquals("1.2.3", imageEntity.getLdapAgentVersion());
         assertEquals("source-image", imageEntity.getSourceImage());
@@ -205,7 +206,7 @@ public class ImageServiceTest {
         stack.setAccountId(ACCOUNT_ID);
         ImageSettingsRequest imageRequest = new ImageSettingsRequest();
         when(imageProviderFactory.getImageProvider(any())).thenReturn(imageProvider);
-        when(imageProvider.getImage(any())).thenReturn(Optional.of(new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG)));
+        when(imageProvider.getImage(any())).thenReturn(Optional.of(ImageWrapper.ofCoreImage(image, IMAGE_CATALOG)));
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(DEFAULT_REGION, EXISTING_ID)));
         when(imageRepository.save(any(ImageEntity.class))).thenAnswer(invocation -> invocation.getArgument(0, ImageEntity.class));
         when(imageConverter.convert(any(), any())).thenReturn(new ImageEntity());
@@ -215,7 +216,7 @@ public class ImageServiceTest {
 
         assertEquals(stack, imageEntity.getStack());
         assertEquals(EXISTING_ID, imageEntity.getImageName());
-        assertEquals(IMAGE_CATALOG_URL, imageEntity.getImageCatalogUrl());
+        assertNull(imageEntity.getImageCatalogUrl());
         assertEquals(IMAGE_CATALOG, imageEntity.getImageCatalogName());
     }
 
@@ -258,7 +259,7 @@ public class ImageServiceTest {
 
         when(imageProviderFactory.getImageProvider(IMAGE_CATALOG)).thenReturn(imageProvider);
         Image image = new Image(123L, "now", "desc", DEFAULT_OS, IMAGE_UUID, Map.of(), "os", Map.of(), true);
-        ImageWrapper imageWrapper = new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG);
+        ImageWrapper imageWrapper = ImageWrapper.ofCoreImage(image, IMAGE_CATALOG);
         when(imageProvider.getImage(any(), anyString())).thenReturn(Optional.of(imageWrapper));
         when(platformStringTransformer.getPlatformString(stack)).thenReturn("aws");
 
