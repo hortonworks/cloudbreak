@@ -137,7 +137,7 @@ public class AzurePrivateEndpointValidator {
                     .map(AzureResourceGroupDto::getName);
             resourceGroupName.ifPresent(rgName -> azureNewPrivateDnsZoneValidatorService.zonesNotConnectedToNetwork(azureClient,
                     networkDto.getAzure().getNetworkId(), rgName, azureExistingPrivateDnsZonesService.getServicesWithExistingManagedZones(networkDto),
-                    resultBuilder));
+                    networkDto.getPrivateDatabaseVariant(), resultBuilder));
         }
     }
 

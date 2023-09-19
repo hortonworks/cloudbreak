@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.task.dnszone.AzureDnsZoneCreationCh
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.network.PrivateDatabaseVariant;
 import com.sequenceiq.common.api.type.CommonStatus;
 
 @Service
@@ -42,11 +43,12 @@ public class AzureDnsZoneService {
     private AzurePrivateEndpointServicesProvider azurePrivateEndpointServicesProvider;
 
     public void checkOrCreateDnsZones(AuthenticatedContext authenticatedContext, AzureClient azureClient, AzureNetworkView networkView,
-            String resourceGroup, Map<String, String> tags, Set<AzurePrivateDnsZoneServiceEnum> servicesWithExistingPrivateDnsZone) {
+            String resourceGroup, Map<String, String> tags, Set<AzureManagedPrivateDnsZoneService> servicesWithExistingPrivateDnsZone,
+            PrivateDatabaseVariant privateEndpointVariant) {
 
         String networkId = networkView.getNetworkId();
-        List<AzurePrivateDnsZoneServiceEnum> cdpManagedDnsZones = azurePrivateEndpointServicesProvider
-                .getCdpManagedDnsZones(servicesWithExistingPrivateDnsZone);
+        List<AzureManagedPrivateDnsZoneService> cdpManagedDnsZones = azurePrivateEndpointServicesProvider
+                .getCdpManagedDnsZoneServices(servicesWithExistingPrivateDnsZone, privateEndpointVariant);
         boolean dnsZonesDeployed = azureClient.checkIfDnsZonesDeployed(resourceGroup, cdpManagedDnsZones);
 
         if (!dnsZonesDeployed) {
@@ -97,7 +99,7 @@ public class AzureDnsZoneService {
     }
 
     private void createDnsZonesAndNetworkLinks(AzureClient azureClient, String azureNetworkId, String resourceGroup,
-            Map<String, String> tags, List<AzurePrivateDnsZoneServiceEnum> enabledPrivateEndpointServices) {
+            Map<String, String> tags, List<AzureManagedPrivateDnsZoneService> enabledPrivateEndpointServices) {
         AzureDnsZoneDeploymentParameters parameters = new AzureDnsZoneDeploymentParameters(azureNetworkId,
                 false,
                 enabledPrivateEndpointServices,

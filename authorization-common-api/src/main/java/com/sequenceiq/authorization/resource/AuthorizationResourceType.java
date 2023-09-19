@@ -16,7 +16,7 @@ public enum AuthorizationResourceType {
     PROXY(false),
     STRUCTURED_EVENT(false);
 
-    private boolean hierarchicalAuthorizationNeeded;
+    private final boolean hierarchicalAuthorizationNeeded;
 
     AuthorizationResourceType(boolean hierarchicalAuthorizationNeeded) {
         this.hierarchicalAuthorizationNeeded = hierarchicalAuthorizationNeeded;

@@ -119,7 +119,7 @@ public class AzureExistingPrivateDnsZoneValidatorServiceTest {
         }
 
         @Override
-        public String getDnsZoneName() {
+        public String getDnsZoneName(String resourceGroupName) {
             return "ZoneNameTest";
         }
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.validation.network.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService.POSTGRES_FLEXIBLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -10,9 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneDescriptor;
-import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneRegistrationEnum;
-import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureRegisteredPrivateDnsZoneService;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -32,16 +33,16 @@ public class AzureExistingPrivateDnsZonesServiceTest {
     void testGetExistingManagedZonesWhenPostgresPresent() {
         NetworkDto networkDto = getNetworkDto(POSTGRES_PRIVATE_DNS_ZONE_ID, null);
 
-        Map<AzurePrivateDnsZoneServiceEnum, String> existingZones = underTest.getExistingManagedZones(networkDto);
+        Map<AzureManagedPrivateDnsZoneService, String> existingZones = underTest.getExistingManagedZones(networkDto);
 
-        assertEquals(POSTGRES_PRIVATE_DNS_ZONE_ID, existingZones.get(AzurePrivateDnsZoneServiceEnum.POSTGRES));
+        assertEquals(POSTGRES_PRIVATE_DNS_ZONE_ID, existingZones.get(AzureManagedPrivateDnsZoneService.POSTGRES));
     }
 
     @Test
     void testGetExistingManagedZonesWhenPostgresNotPresent() {
         NetworkDto networkDto = getNetworkDto(null, null);
 
-        Map<AzurePrivateDnsZoneServiceEnum, String> existingZones = underTest.getExistingManagedZones(networkDto);
+        Map<AzureManagedPrivateDnsZoneService, String> existingZones = underTest.getExistingManagedZones(networkDto);
 
         assertThat(existingZones).isEmpty();
     }
@@ -52,7 +53,7 @@ public class AzureExistingPrivateDnsZonesServiceTest {
 
         Map<AzurePrivateDnsZoneDescriptor, String> existingZones = underTest.getExistingManagedZonesAsDescriptors(networkDto);
 
-        assertEquals(POSTGRES_PRIVATE_DNS_ZONE_ID, existingZones.get(AzurePrivateDnsZoneServiceEnum.POSTGRES));
+        assertEquals(POSTGRES_PRIVATE_DNS_ZONE_ID, existingZones.get(AzureManagedPrivateDnsZoneService.POSTGRES));
     }
 
     @Test
@@ -61,7 +62,7 @@ public class AzureExistingPrivateDnsZonesServiceTest {
 
         Map<AzurePrivateDnsZoneDescriptor, String> existingZones = underTest.getExistingManagedZonesAsDescriptors(networkDto);
 
-        assertEquals(POSTGRES_PRIVATE_DNS_ZONE_ID, existingZones.get(AzurePrivateDnsZoneServiceEnum.POSTGRES_FLEXIBLE));
+        assertEquals(POSTGRES_PRIVATE_DNS_ZONE_ID, existingZones.get(POSTGRES_FLEXIBLE));
     }
 
     @Test
@@ -79,7 +80,7 @@ public class AzureExistingPrivateDnsZonesServiceTest {
 
         Map<AzurePrivateDnsZoneDescriptor, String> existingZones = underTest.getExistingRegisteredOnlyZonesAsDescriptors(networkDto);
 
-        assertEquals(AKS_PRIVATE_DNS_ZONE_ID, existingZones.get(AzurePrivateDnsZoneRegistrationEnum.AKS));
+        assertEquals(AKS_PRIVATE_DNS_ZONE_ID, existingZones.get(AzureRegisteredPrivateDnsZoneService.AKS));
     }
 
     @Test
@@ -95,17 +96,17 @@ public class AzureExistingPrivateDnsZonesServiceTest {
     void testGetServicesWithExistingManagedZonesWhenPostgresWithExistingPrivateDnsZone() {
         NetworkDto networkDto = getNetworkDto(POSTGRES_PRIVATE_DNS_ZONE_ID, null);
 
-        Set<AzurePrivateDnsZoneServiceEnum> servicesWithPrivateDnsZones = underTest.getServicesWithExistingManagedZones(networkDto);
+        Set<AzureManagedPrivateDnsZoneService> servicesWithPrivateDnsZones = underTest.getServicesWithExistingManagedZones(networkDto);
 
         assertThat(servicesWithPrivateDnsZones).hasSize(1);
-        assertThat(servicesWithPrivateDnsZones).contains(AzurePrivateDnsZoneServiceEnum.POSTGRES);
+        assertThat(servicesWithPrivateDnsZones).contains(AzureManagedPrivateDnsZoneService.POSTGRES);
     }
 
     @Test
     void testGetServicesWithExistingManagedZonesWhenNoServicesWithExistingPrivateDnsZone() {
         NetworkDto networkDto = getNetworkDto(null, null);
 
-        Set<AzurePrivateDnsZoneServiceEnum> servicesWithPrivateDnsZones = underTest.getServicesWithExistingManagedZones(networkDto);
+        Set<AzureManagedPrivateDnsZoneService> servicesWithPrivateDnsZones = underTest.getServicesWithExistingManagedZones(networkDto);
 
         assertThat(servicesWithPrivateDnsZones).isEmpty();
     }
@@ -117,7 +118,7 @@ public class AzureExistingPrivateDnsZonesServiceTest {
         Set<String> servicesWithPrivateDnsZones = underTest.getServiceNamesWithExistingManagedZones(networkDto);
 
         assertThat(servicesWithPrivateDnsZones).hasSize(1);
-        assertThat(servicesWithPrivateDnsZones).contains(AzurePrivateDnsZoneServiceEnum.POSTGRES.name());
+        assertThat(servicesWithPrivateDnsZones).contains(AzureManagedPrivateDnsZoneService.POSTGRES.name());
     }
 
     @Test

@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService.POSTGRES;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService.POSTGRES_FLEXIBLE;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService.STORAGE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
@@ -45,9 +48,9 @@ public class AzureNetworkDnsZoneTemplateBuilderTest {
     }
 
     @Test
-    public void whenBuildTemplateThenModelParametersAreSet() throws IOException, TemplateException {
+    public void whenBuildTemplateThenModelParametersAreSet() throws Exception {
         AzureDnsZoneDeploymentParameters parameters = new AzureDnsZoneDeploymentParameters("networkId", false,
-                List.of(AzurePrivateDnsZoneServiceEnum.STORAGE, AzurePrivateDnsZoneServiceEnum.POSTGRES),
+                List.of(STORAGE, POSTGRES, POSTGRES_FLEXIBLE),
                 "resourceGroup",
                 Collections.emptyMap());
 
@@ -56,9 +59,6 @@ public class AzureNetworkDnsZoneTemplateBuilderTest {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode expectedJson = objectMapper.readTree(new File("src/test/resources/json/arm-network-dnszone.json"));
         String actual = underTest.build(parameters);
-        JsonNode actualJson = objectMapper.readTree(actual);
-
-        assertEquals(expectedJson, actualJson);
-
+        new JsonExpectationsHelper().assertJsonEqual(expectedJson.toString(), actual, false);
     }
 }

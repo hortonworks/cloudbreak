@@ -6,14 +6,18 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.network.PrivateDatabaseVariant;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.LoadBalancerCreation;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
@@ -249,6 +253,19 @@ public class NetworkDto {
 
     public Set<String> getAvailabilityZones() {
         return azure != null && CollectionUtils.isNotEmpty(azure.getAvailabilityZones()) ? azure.getAvailabilityZones() : Collections.emptySet();
+    }
+
+    public PrivateDatabaseVariant getPrivateDatabaseVariant() {
+        boolean hasFlexibleServerSubnets = CollectionUtils.isNotEmpty(
+                Optional.ofNullable(azure)
+                        .map(AzureParams::getFlexibleServerSubnetIds)
+                        .orElse(Set.of()));
+        boolean hasPrivateEndpointEnabled = (ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT == serviceEndpointCreation);
+        boolean hasExistingDnsZone = Optional.ofNullable(azure)
+                .map(AzureParams::getDatabasePrivateDnsZoneId)
+                .filter(Predicate.not(StringUtils::isEmpty))
+                .isPresent();
+        return PrivateDatabaseVariant.fromPrivateEndpointSettings(hasPrivateEndpointEnabled, hasExistingDnsZone, hasFlexibleServerSubnets);
     }
 
     @Override

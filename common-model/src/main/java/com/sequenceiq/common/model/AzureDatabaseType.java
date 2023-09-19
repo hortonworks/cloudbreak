@@ -4,9 +4,9 @@ import org.apache.commons.lang3.StringUtils;
 
 public enum AzureDatabaseType implements DatabaseType {
 
-    SINGLE_SERVER("single"),
+    SINGLE_SERVER("postgresqlServer"),
 
-    FLEXIBLE_SERVER("flexible");
+    FLEXIBLE_SERVER("flexiblePostgresqlServer");
 
     public static final String AZURE_DATABASE_TYPE_KEY = "AZURE_DATABASE_TYPE";
 

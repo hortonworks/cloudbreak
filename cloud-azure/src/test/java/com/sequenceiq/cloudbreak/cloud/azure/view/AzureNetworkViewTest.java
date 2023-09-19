@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.view;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,8 +28,7 @@ public class AzureNetworkViewTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
-
+        openMocks(this);
         underTest = new AzureNetworkView(network);
     }
 
