@@ -123,11 +123,11 @@ public class AzureStorage {
     }
 
     public StorageAccount createStorage(AzureClient client, String osStorageName, AzureDiskType storageType, String storageGroup,
-            String region, Boolean encrypted, Map<String, String> tags) throws ManagementException {
+            String region, Map<String, String> tags) throws ManagementException {
         Optional<StorageAccount> storageAccountOptional = findStorageAccount(client, osStorageName);
         if (storageAccountOptional.isEmpty()) {
             StorageAccountParameters storageAccountParameters = new StorageAccountParameters(
-                    storageGroup, osStorageName, region, skuTypeResolver.resolveFromAzureDiskType(storageType), encrypted, tags);
+                    storageGroup, osStorageName, region, skuTypeResolver.resolveFromAzureDiskType(storageType), tags);
             return azureStorageAccountBuilderService.buildStorageAccount(client, storageAccountParameters);
         } else {
             StorageAccount storageAccount = storageAccountOptional.get();
@@ -184,18 +184,6 @@ public class AzureStorage {
 
     public String getDiskContainerName(CloudContext cloudContext) {
         return armUtils.getStackName(cloudContext);
-    }
-
-    public String getPersistentStorageName(CloudStack stack) {
-        return stack.getParameters().get("persistentStorage");
-    }
-
-    public Boolean isEncrytionNeeded(Map<String, String> parameters) {
-        return Boolean.parseBoolean(parameters.get("encryptStorage"));
-    }
-
-    public boolean isPersistentStorage(String persistentStorageName) {
-        return !Strings.isNullOrEmpty(persistentStorageName);
     }
 
     private Optional<StorageAccount> findStorageAccount(AzureClient client, String storageName) {

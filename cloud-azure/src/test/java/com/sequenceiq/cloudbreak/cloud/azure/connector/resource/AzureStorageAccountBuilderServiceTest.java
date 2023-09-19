@@ -37,7 +37,7 @@ class AzureStorageAccountBuilderServiceTest {
             "\"properties.minimumTlsVersion\",\"targetValue\":\"TLS1_2\",\"operator\":\"Equals\"[truncated 1005 chars]";
 
     private static final StorageAccountParameters STORAGE_ACCOUNT_PARAMETERS = new StorageAccountParameters("resourceGroupName", "storageAccountName", "",
-            StorageAccountSkuType.STANDARD_LRS, false, Map.of());
+            StorageAccountSkuType.STANDARD_LRS, Map.of());
 
     @InjectMocks
     private AzureStorageAccountBuilderService underTest;
