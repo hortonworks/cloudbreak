@@ -132,7 +132,7 @@ dependencies {
 
   implementation group: 'org.kohsuke', name: 'wordnet-random-name', version: '1.5'
   implementation group: 'com.google.code.gson',          name: 'gson',                           version: gsonVersion
-  implementation (group: 'com.google.apis',              name: 'google-api-services-compute',    version: 'v1-rev20230606-2.0.0'){
+  implementation (group: 'com.google.apis',              name: 'google-api-services-compute',    version: 'v1-rev20230912-2.0.0'){
     exclude group: 'com.google.guava',  module: 'guava'
   }
   implementation group: 'com.google.apis',               name: 'google-api-services-storage',    version: 'v1-rev20230617-2.0.0'
