@@ -13,10 +13,6 @@
         "sku_name": {
             "defaultValue": "${skuName}",
             "type": "String"
-        },
-        "encrypted": {
-            "type":"bool",
-            "defaultValue": ${(encrypted!true)?c}
         }
     },
     "variables": {},
@@ -50,11 +46,11 @@
                     "services": {
                         "file": {
                             "keyType": "Account",
-                            "enabled": "[parameters('encrypted')]"
+                            "enabled": true
                         },
                         "blob": {
                             "keyType": "Account",
-                            "enabled": "[parameters('encrypted')]"
+                            "enabled": true
                         }
                     },
                     "keySource": "Microsoft.Storage"

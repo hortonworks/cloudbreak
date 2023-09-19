@@ -21,6 +21,7 @@ public class AzureStackV4Parameters extends StackV4ParameterBase {
     @ApiModelProperty
     private String resourceGroupName;
 
+    @Deprecated
     @ApiModelProperty
     private boolean encryptStorage;
 

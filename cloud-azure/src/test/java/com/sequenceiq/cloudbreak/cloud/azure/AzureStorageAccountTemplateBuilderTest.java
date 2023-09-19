@@ -39,7 +39,7 @@ class AzureStorageAccountTemplateBuilderTest {
     @Test
     void whenBuildTemplateThenModelParametersAreSet() throws IOException, TemplateException {
         StorageAccountParameters storageAccountParameters =
-                new StorageAccountParameters("my-rg", "my-sa", "sa-location", StorageAccountSkuType.STANDARD_LRS, true, Map.of("tagKey", "tagValue"));
+                new StorageAccountParameters("my-rg", "my-sa", "sa-location", StorageAccountSkuType.STANDARD_LRS, Map.of("tagKey", "tagValue"));
         Template templateMock = mock(Template.class);
         when(azureStorageAccoutTemplateProviderService.getTemplate()).thenReturn(templateMock);
 
@@ -50,7 +50,6 @@ class AzureStorageAccountTemplateBuilderTest {
         Map<String, Object> templateModel = captor.getValue();
         assertThat(templateModel, IsMapContaining.hasEntry("storageAccountName", "my-sa"));
         assertThat(templateModel, IsMapContaining.hasEntry("location", "sa-location"));
-        assertThat(templateModel, IsMapContaining.hasEntry("encrypted", true));
         assertThat(templateModel, IsMapContaining.hasEntry("skuName", StorageAccountSkuType.STANDARD_LRS.name().toString()));
         assertThat(templateModel, IsMapContaining.hasKey("userDefinedTags"));
     }

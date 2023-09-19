@@ -33,7 +33,6 @@ public class AzureStorageAccountTemplateBuilder {
             model.put("storageAccountName", storageAccountParameters.getStorageAccountName());
             model.put("location", storageAccountParameters.getStorageLocation());
             model.put("skuName", storageAccountParameters.getStorageAccountSkuType().name().toString());
-            model.put("encrypted", storageAccountParameters.getEncrypted());
             model.put("userDefinedTags", storageAccountParameters.getTags());
             String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(azureStorageAccoutTemplateProviderService.getTemplate(), model);
             LOGGER.info("Generated storage account Arm template: {}", generatedTemplate);

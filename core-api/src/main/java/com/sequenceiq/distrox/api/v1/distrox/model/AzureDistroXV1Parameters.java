@@ -19,6 +19,7 @@ public class AzureDistroXV1Parameters implements Serializable {
     @ApiModelProperty
     private String resourceGroupName;
 
+    @Deprecated
     @ApiModelProperty
     private boolean encryptStorage;
 

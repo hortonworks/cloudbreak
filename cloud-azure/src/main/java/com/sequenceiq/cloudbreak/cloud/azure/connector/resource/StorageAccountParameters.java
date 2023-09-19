@@ -14,17 +14,14 @@ public class StorageAccountParameters {
 
     private final StorageAccountSkuType storageAccountSkuType;
 
-    private final Boolean encrypted;
-
     private final Map<String, String> tags;
 
     public StorageAccountParameters(String resourceGroupName, String storageAccountName, String storageLocation, StorageAccountSkuType storageAccountSkuType,
-            Boolean encrypted, Map<String, String> tags) {
+            Map<String, String> tags) {
         this.resourceGroupName = resourceGroupName;
         this.storageAccountName = storageAccountName;
         this.storageLocation = storageLocation;
         this.storageAccountSkuType = storageAccountSkuType;
-        this.encrypted = encrypted;
         this.tags = tags;
     }
 
@@ -42,10 +39,6 @@ public class StorageAccountParameters {
 
     public StorageAccountSkuType getStorageAccountSkuType() {
         return storageAccountSkuType;
-    }
-
-    public Boolean getEncrypted() {
-        return encrypted;
     }
 
     public Map<String, String> getTags() {
