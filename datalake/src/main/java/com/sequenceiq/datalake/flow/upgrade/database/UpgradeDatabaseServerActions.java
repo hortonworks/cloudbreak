@@ -50,7 +50,7 @@ public class UpgradeDatabaseServerActions {
                 LOGGER.info("Execute upgrade database server flow for SDX: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_UPGRADE_DATABASE_SERVER_IN_PROGRESS, "Database server upgrade is in progress",
                         payload.getResourceId());
-                UpgradeDatabaseServerRequest request = UpgradeDatabaseServerRequest.from(context, payload.getTargetMajorVersion());
+                UpgradeDatabaseServerRequest request = UpgradeDatabaseServerRequest.from(context, payload.getTargetMajorVersion(), payload.isForced());
                 sendEvent(context, request);
             }
 

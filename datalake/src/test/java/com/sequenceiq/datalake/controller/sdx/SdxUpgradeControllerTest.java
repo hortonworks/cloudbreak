@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -274,18 +276,20 @@ class SdxUpgradeControllerTest {
         assertThat(sdxCcmUpgradeResponse).isEqualTo(response);
     }
 
-    @Test
-    void testUpgradeDatabaseServerByName() {
+    @ParameterizedTest
+    @ValueSource(booleans =  {true, false})
+    void testUpgradeDatabaseServerByName(boolean forced) {
         SdxUpgradeDatabaseServerRequest request = new SdxUpgradeDatabaseServerRequest();
+        request.setForced(forced);
         TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
         request.setTargetMajorVersion(targetMajorVersion);
         SdxUpgradeDatabaseServerResponse sdxUpgradeDatabaseServerResponse = new SdxUpgradeDatabaseServerResponse();
-        when(sdxDatabaseServerUpgradeService.upgrade(NameOrCrn.ofName(CLUSTER_NAME), targetMajorVersion)).thenReturn(sdxUpgradeDatabaseServerResponse);
+        when(sdxDatabaseServerUpgradeService.upgrade(NameOrCrn.ofName(CLUSTER_NAME), targetMajorVersion, forced)).thenReturn(sdxUpgradeDatabaseServerResponse);
 
         SdxUpgradeDatabaseServerResponse response = underTest.upgradeDatabaseServerByName(CLUSTER_NAME, request);
 
         assertEquals(response, sdxUpgradeDatabaseServerResponse);
-        verify(sdxDatabaseServerUpgradeService).upgrade(NameOrCrn.ofName(CLUSTER_NAME), targetMajorVersion);
+        verify(sdxDatabaseServerUpgradeService).upgrade(NameOrCrn.ofName(CLUSTER_NAME), targetMajorVersion, forced);
     }
 
     @Test
@@ -295,7 +299,7 @@ class SdxUpgradeControllerTest {
         request.setTargetMajorVersion(targetMajorVersion);
 
         doThrow(new NotFoundException("SDX cluster 'testCluster' not found."))
-                .when(sdxDatabaseServerUpgradeService).upgrade(eq(NameOrCrn.ofName(CLUSTER_NAME)), eq(targetMajorVersion));
+                .when(sdxDatabaseServerUpgradeService).upgrade(eq(NameOrCrn.ofName(CLUSTER_NAME)), eq(targetMajorVersion), eq(false));
 
         NotFoundException exception = doAs(USER_CRN, () -> Assertions.assertThrows(NotFoundException.class,
                 () -> underTest.upgradeDatabaseServerByName(CLUSTER_NAME, request)));
@@ -303,17 +307,19 @@ class SdxUpgradeControllerTest {
         assertEquals(exception.getMessage(), "SDX cluster 'testCluster' not found.");
     }
 
-    @Test
-    void testUpgradeDatabaseServerByCrn() {
+    @ParameterizedTest
+    @ValueSource(booleans =  {true, false})
+    void testUpgradeDatabaseServerByCrn(boolean forced) {
         SdxUpgradeDatabaseServerRequest request = new SdxUpgradeDatabaseServerRequest();
+        request.setForced(forced);
         TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
         request.setTargetMajorVersion(targetMajorVersion);
         SdxUpgradeDatabaseServerResponse sdxUpgradeDatabaseServerResponse = new SdxUpgradeDatabaseServerResponse();
-        when(sdxDatabaseServerUpgradeService.upgrade(NameOrCrn.ofCrn(CLUSTER_CRN), targetMajorVersion)).thenReturn(sdxUpgradeDatabaseServerResponse);
+        when(sdxDatabaseServerUpgradeService.upgrade(NameOrCrn.ofCrn(CLUSTER_CRN), targetMajorVersion, forced)).thenReturn(sdxUpgradeDatabaseServerResponse);
 
         SdxUpgradeDatabaseServerResponse response = underTest.upgradeDatabaseServerByCrn(CLUSTER_CRN, request);
 
-        verify(sdxDatabaseServerUpgradeService).upgrade(NameOrCrn.ofCrn(CLUSTER_CRN), targetMajorVersion);
+        verify(sdxDatabaseServerUpgradeService).upgrade(NameOrCrn.ofCrn(CLUSTER_CRN), targetMajorVersion, forced);
         assertEquals(response, sdxUpgradeDatabaseServerResponse);
     }
 

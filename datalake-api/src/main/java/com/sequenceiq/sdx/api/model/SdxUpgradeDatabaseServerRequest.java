@@ -15,6 +15,9 @@ public class SdxUpgradeDatabaseServerRequest {
     @ApiModelProperty(ModelDescriptions.TARGET_MAJOR_VERSION)
     private TargetMajorVersion targetMajorVersion;
 
+    @ApiModelProperty(ModelDescriptions.FORCED)
+    private Boolean forced;
+
     public TargetMajorVersion getTargetMajorVersion() {
         return targetMajorVersion;
     }
@@ -23,10 +26,19 @@ public class SdxUpgradeDatabaseServerRequest {
         this.targetMajorVersion = targetMajorVersion;
     }
 
+    public Boolean getForced() {
+        return forced;
+    }
+
+    public void setForced(Boolean forced) {
+        this.forced = forced;
+    }
+
     @Override
     public String toString() {
-        return "SdxUpgradeRdsRequest{" +
-                "targetVersion=" + targetMajorVersion +
+        return "SdxUpgradeDatabaseServerRequest{" +
+                "targetMajorVersion=" + targetMajorVersion +
+                ", forced=" + forced +
                 '}';
     }
 }

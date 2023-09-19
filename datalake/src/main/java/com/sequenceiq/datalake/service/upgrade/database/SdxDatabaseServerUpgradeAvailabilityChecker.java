@@ -16,20 +16,20 @@ public class SdxDatabaseServerUpgradeAvailabilityChecker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxDatabaseServerUpgradeAvailabilityChecker.class);
 
-    public boolean isUpgradeNeeded(StackDatabaseServerResponse stackDatabaseServerResponse, TargetMajorVersion targetMajorVersion) {
+    public boolean isUpgradeNeeded(StackDatabaseServerResponse stackDatabaseServerResponse, TargetMajorVersion targetMajorVersion, boolean forced) {
         Optional<MajorVersion> currentVersionOptional = Optional.ofNullable(stackDatabaseServerResponse.getMajorVersion());
         LOGGER.debug("Checking if database upgrade is needed for sdx cluster. Registered database engine version: {}", currentVersionOptional);
         return currentVersionOptional
-                .map(majorVersion -> isUpgradeNeeded(majorVersion, targetMajorVersion))
+                .map(majorVersion -> isUpgradeNeeded(majorVersion, targetMajorVersion, forced))
                 .orElse(true);
     }
 
-    private boolean isUpgradeNeeded(MajorVersion currentVersion, TargetMajorVersion targetMajorVersion) {
+    private boolean isUpgradeNeeded(MajorVersion currentVersion, TargetMajorVersion targetMajorVersion, boolean forced) {
         MajorVersionComparator majorVersionComparator = new MajorVersionComparator();
-        boolean upgradeNeeded = majorVersionComparator.compare(currentVersion, targetMajorVersion.convertToMajorVersion()) < 0;
-        LOGGER.debug("Comparing current and target versions. Current version is {}, and target version is {}, isUpgradeNeeded: {}", currentVersion,
-                targetMajorVersion, upgradeNeeded);
+        int compareResult = majorVersionComparator.compare(currentVersion, targetMajorVersion.convertToMajorVersion());
+        boolean upgradeNeeded = compareResult < 0 || (forced && compareResult == 0);
+        LOGGER.debug("Comparing current and target versions. Current version is {}, and target version is {}, forced is {}, isUpgradeNeeded: {}",
+                currentVersion, targetMajorVersion, forced, upgradeNeeded);
         return upgradeNeeded;
     }
-
 }

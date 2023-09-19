@@ -66,13 +66,13 @@ public class CloudbreakStackService {
         }
     }
 
-    public RdsUpgradeV4Response upgradeRdsByClusterNameInternal(SdxCluster sdxCluster, TargetMajorVersion targetMajorVersion) {
+    public RdsUpgradeV4Response upgradeRdsByClusterNameInternal(SdxCluster sdxCluster, TargetMajorVersion targetMajorVersion, boolean forced) {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         try {
             RdsUpgradeV4Response upgradeResponse =
                     ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                             () -> stackV4Endpoint.upgradeRdsByClusterNameInternal(WORKSPACE_ID, sdxCluster.getClusterName(), targetMajorVersion,
-                                    initiatorUserCrn));
+                                    initiatorUserCrn, forced));
             LOGGER.debug("Launching database server upgrade in core returned: {}", upgradeResponse);
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, upgradeResponse.getFlowIdentifier());
             return upgradeResponse;

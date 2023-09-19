@@ -17,6 +17,8 @@ import javax.ws.rs.WebApplicationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -89,8 +91,9 @@ public class CloudbreakStackServiceTest {
         );
     }
 
-    @Test
-    void testUpgradeRdsByClusterNameInternal() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testUpgradeRdsByClusterNameInternal(boolean forced) {
         try (MockedStatic<ThreadBasedUserCrnProvider> threadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
             SdxCluster sdxCluster = setupSdxCluster();
             setupIam();
@@ -100,15 +103,16 @@ public class CloudbreakStackServiceTest {
             threadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getUserCrn).thenReturn(USER_CRN);
             threadBasedUserCrnProvider.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(), any(Supplier.class))).thenReturn(rdsUpgradeV4Response);
 
-            RdsUpgradeV4Response response = underTest.upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion);
+            RdsUpgradeV4Response response = underTest.upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion, forced);
 
             assertEquals(rdsUpgradeV4Response, response);
             verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         }
     }
 
-    @Test
-    void testUpgradeRdsByClusterNameInternalWhenErrorResponse() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testUpgradeRdsByClusterNameInternalWhenErrorResponse(boolean forced) {
         try (MockedStatic<ThreadBasedUserCrnProvider> threadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
             SdxCluster sdxCluster = setupSdxCluster();
             setupIam();
@@ -118,7 +122,7 @@ public class CloudbreakStackServiceTest {
                     .thenThrow(new WebApplicationException());
 
             Assertions.assertThrows(CloudbreakApiException.class, () ->
-                    underTest.upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion)
+                    underTest.upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion, forced)
             );
 
             verify(cloudbreakFlowService, never()).saveLastCloudbreakFlowChainId(any(), any());

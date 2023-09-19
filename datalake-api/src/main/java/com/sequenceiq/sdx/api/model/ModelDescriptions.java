@@ -216,6 +216,8 @@ public class ModelDescriptions {
 
     public static final String DATABASE_BACKUP_RESTORE_MAX_DURATION = "The maximum duration allowed for a backup or restore";
 
+    public static final String FORCED = "Force operation. It will disable some of the validation.";
+
     private ModelDescriptions() {
     }
 }

@@ -4,8 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,32 +24,39 @@ public class SdxDatabaseServerUpgradeAvailabilityCheckerTest {
     @InjectMocks
     private SdxDatabaseServerUpgradeAvailabilityChecker underTest;
 
-    @Test
-    void testUpgradeNeededWhenDatabaseEngineVersionSmallerThanTargetVersion() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testUpgradeNeededWhenDatabaseEngineVersionSmallerThanTargetVersion(boolean forced) {
         TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
         when(stackDatabaseServerResponse.getMajorVersion()).thenReturn(MajorVersion.VERSION_10);
 
-        boolean upgradeNeeded = underTest.isUpgradeNeeded(stackDatabaseServerResponse, targetMajorVersion);
+        boolean upgradeNeeded = underTest.isUpgradeNeeded(stackDatabaseServerResponse, targetMajorVersion, forced);
 
         assertTrue(upgradeNeeded);
     }
 
-    @Test
-    void testUpgradeNeededWhenDatabaseEngineVersionEqualsTargetVersion() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testUpgradeNeededWhenDatabaseEngineVersionEqualsTargetVersion(boolean forced) {
         TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
         when(stackDatabaseServerResponse.getMajorVersion()).thenReturn(MajorVersion.VERSION_11);
 
-        boolean upgradeNeeded = underTest.isUpgradeNeeded(stackDatabaseServerResponse, targetMajorVersion);
+        boolean upgradeNeeded = underTest.isUpgradeNeeded(stackDatabaseServerResponse, targetMajorVersion, forced);
 
-        assertFalse(upgradeNeeded);
+        if (forced) {
+            assertTrue(upgradeNeeded);
+        } else {
+            assertFalse(upgradeNeeded);
+        }
     }
 
-    @Test
-    void testIsUpgradeNeededWhenExternalDbAndVersionUnknown() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testIsUpgradeNeededWhenExternalDbAndVersionUnknown(boolean forced) {
         TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
         when(stackDatabaseServerResponse.getMajorVersion()).thenReturn(null);
 
-        boolean upgradeNeeded = underTest.isUpgradeNeeded(stackDatabaseServerResponse, targetMajorVersion);
+        boolean upgradeNeeded = underTest.isUpgradeNeeded(stackDatabaseServerResponse, targetMajorVersion, forced);
 
         assertTrue(upgradeNeeded);
     }

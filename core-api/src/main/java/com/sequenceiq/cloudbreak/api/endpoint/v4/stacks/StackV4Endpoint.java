@@ -496,7 +496,7 @@ public interface StackV4Endpoint {
             @NotEmpty @ResourceName @PathParam("name") String clusterName,
             @QueryParam("targetVersion") TargetMajorVersion targetMajorVersion,
             @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER}) @QueryParam("initiatorUserCrn")
-            String initiatorUserCrn);
+            String initiatorUserCrn, @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @Deprecated
     @PUT

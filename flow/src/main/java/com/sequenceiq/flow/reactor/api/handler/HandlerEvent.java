@@ -31,4 +31,12 @@ public class HandlerEvent<T> {
     public int getCounter() {
         return eventCounter;
     }
+
+    @Override
+    public String toString() {
+        return "HandlerEvent{" +
+                "event=" + event +
+                ", eventCounter=" + eventCounter +
+                '}';
+    }
 }
