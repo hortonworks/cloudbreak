@@ -53,7 +53,7 @@ public class StackPreTerminationHandler implements EventHandler<StackPreTerminat
         StackDto stackDto = stackDtoService.getById(request.getResourceId());
         try {
             ClusterView cluster = stackDto.getCluster();
-            if (cluster != null) {
+            if (cluster != null && stackDto.getSecurityConfig() != null) {
                 Set<HostGroup> hostGroupsWithRecipes = hostGroupService.getByClusterWithRecipes(cluster.getId());
                 telemetryAgentService.stopTelemetryAgent(stackDto);
                 recipeEngine.executePreTerminationRecipes(stackDto, hostGroupsWithRecipes, request.isForced());

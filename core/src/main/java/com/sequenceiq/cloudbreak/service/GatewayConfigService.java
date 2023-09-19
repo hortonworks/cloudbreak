@@ -82,10 +82,14 @@ public class GatewayConfigService {
     }
 
     private SaltClientConfig getSaltClientConfig(SecurityConfig securityConfig) {
-        SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
-        String privateKey = saltSecurityConfig.getSaltBootSignPrivateKey();
-        String saltBootPassword = saltSecurityConfig.getSaltBootPassword();
-        String saltPassword = saltSecurityConfig.getSaltPassword();
-        return new SaltClientConfig(saltPassword, saltBootPassword, new String(Base64.decodeBase64(privateKey)));
+        if (securityConfig != null) {
+            SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
+            String privateKey = saltSecurityConfig.getSaltBootSignPrivateKey();
+            String saltBootPassword = saltSecurityConfig.getSaltBootPassword();
+            String saltPassword = saltSecurityConfig.getSaltPassword();
+            return new SaltClientConfig(saltPassword, saltBootPassword, new String(Base64.decodeBase64(privateKey)));
+        } else {
+            throw new NotFoundException("Cannot find security config for the given gateway instance.");
+        }
     }
 }
