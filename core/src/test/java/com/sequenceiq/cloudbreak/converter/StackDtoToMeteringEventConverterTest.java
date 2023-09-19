@@ -6,9 +6,11 @@ import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2Event
 import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ServiceType;
 import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ServiceType.Value.DATAHUB;
 import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ServiceType.Value.DATA_WAREHOUSE;
+import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ServiceType.Value.OPERATIONAL_DB;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.TERMINATED;
+import static com.sequenceiq.cloudbreak.converter.StackDtoToMeteringEventConverter.CLOUDERA_EXTERNAL_RESOURCE_NAME_TAG;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,6 +38,8 @@ import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
 
 class StackDtoToMeteringEventConverterTest {
 
+    private static final String OPDB_CRN = "crn:cdp:datahub:us-west-1:e7b1345f-4ae1-4594-9113-fc91f22ef8bd:cluster:e7b1345f-4ae1-4594-9113-xc91322esi7t";
+
     private StackDtoToMeteringEventConverter underTest = new StackDtoToMeteringEventConverter();
 
     @Test
@@ -43,6 +47,7 @@ class StackDtoToMeteringEventConverterTest {
         StackDto stack = stack();
         MeteringEvent meteringEvent = underTest.convertToSyncEvent(stack);
         assertBase(stack, meteringEvent, DATAHUB);
+        assertEquals(stack.getResourceCrn(), meteringEvent.getResourceCrn());
         Sync sync = meteringEvent.getSync();
         assertNotNull(sync);
         assertResources(sync.getResourcesList());
@@ -53,6 +58,7 @@ class StackDtoToMeteringEventConverterTest {
         StackDto stack = stack();
         MeteringEvent meteringEvent = underTest.convertToStatusChangeEvent(stack, SCALE_UP);
         assertBase(stack, meteringEvent, DATAHUB);
+        assertEquals(stack.getResourceCrn(), meteringEvent.getResourceCrn());
         StatusChange statusChange = meteringEvent.getStatusChange();
         assertNotNull(statusChange);
         assertEquals(SCALE_UP, statusChange.getStatus());
@@ -64,6 +70,7 @@ class StackDtoToMeteringEventConverterTest {
         StackDto stack = stack(new Json(new StackTags(Map.of(), Map.of("APPLOCATION_TAG_KEY", "APPLICATION_TAG_VALUE"), Map.of())));
         MeteringEvent meteringEvent = underTest.convertToStatusChangeEvent(stack, SCALE_UP);
         assertBase(stack, meteringEvent, DATAHUB);
+        assertEquals(stack.getResourceCrn(), meteringEvent.getResourceCrn());
         StatusChange statusChange = meteringEvent.getStatusChange();
         assertNotNull(statusChange);
         assertEquals(SCALE_UP, statusChange.getStatus());
@@ -75,6 +82,7 @@ class StackDtoToMeteringEventConverterTest {
         StackDto stack = stack(new Json(new StackTags(Map.of(), Map.of(ClusterTemplateApplicationTag.SERVICE_TYPE.key(), "INVALID"), Map.of())));
         MeteringEvent meteringEvent = underTest.convertToStatusChangeEvent(stack, SCALE_UP);
         assertBase(stack, meteringEvent, DATAHUB);
+        assertEquals(stack.getResourceCrn(), meteringEvent.getResourceCrn());
         StatusChange statusChange = meteringEvent.getStatusChange();
         assertNotNull(statusChange);
         assertEquals(SCALE_UP, statusChange.getStatus());
@@ -87,6 +95,33 @@ class StackDtoToMeteringEventConverterTest {
                 Map.of(ClusterTemplateApplicationTag.SERVICE_TYPE.key(), DATA_WAREHOUSE.name()), Map.of())));
         MeteringEvent meteringEvent = underTest.convertToStatusChangeEvent(stack, SCALE_UP);
         assertBase(stack, meteringEvent, DATA_WAREHOUSE);
+        assertEquals(stack.getResourceCrn(), meteringEvent.getResourceCrn());
+        StatusChange statusChange = meteringEvent.getStatusChange();
+        assertNotNull(statusChange);
+        assertEquals(SCALE_UP, statusChange.getStatus());
+        assertResources(statusChange.getResourcesList());
+    }
+
+    @Test
+    void testConvertWhenTagsContainsValidClouderaExternalResourceName() {
+        StackDto stack = stack(new Json(new StackTags(Map.of(),
+                Map.of(ClusterTemplateApplicationTag.SERVICE_TYPE.key(), OPERATIONAL_DB.name(), CLOUDERA_EXTERNAL_RESOURCE_NAME_TAG, OPDB_CRN), Map.of())));
+        MeteringEvent meteringEvent = underTest.convertToStatusChangeEvent(stack, SCALE_UP);
+        assertBase(stack, meteringEvent, OPERATIONAL_DB);
+        assertEquals(OPDB_CRN, meteringEvent.getResourceCrn());
+        StatusChange statusChange = meteringEvent.getStatusChange();
+        assertNotNull(statusChange);
+        assertEquals(SCALE_UP, statusChange.getStatus());
+        assertResources(statusChange.getResourcesList());
+    }
+
+    @Test
+    void testConvertWhenTagsContainsIncalidClouderaExternalResourceName() {
+        StackDto stack = stack(new Json(new StackTags(Map.of(),
+                Map.of(ClusterTemplateApplicationTag.SERVICE_TYPE.key(), OPERATIONAL_DB.name(), CLOUDERA_EXTERNAL_RESOURCE_NAME_TAG, "invalidcrn"), Map.of())));
+        MeteringEvent meteringEvent = underTest.convertToStatusChangeEvent(stack, SCALE_UP);
+        assertBase(stack, meteringEvent, OPERATIONAL_DB);
+        assertEquals(stack.getResourceCrn(), meteringEvent.getResourceCrn());
         StatusChange statusChange = meteringEvent.getStatusChange();
         assertNotNull(statusChange);
         assertEquals(SCALE_UP, statusChange.getStatus());
@@ -98,7 +133,6 @@ class StackDtoToMeteringEventConverterTest {
         assertNotNull(meteringEvent.getTimestamp());
         assertEquals(1, meteringEvent.getVersion());
         assertEquals(serviceType, meteringEvent.getServiceType());
-        assertEquals(stack.getResourceCrn(), meteringEvent.getResourceCrn());
         assertEquals(stack.getEnvironmentCrn(), meteringEvent.getEnvironmentCrn());
     }
 

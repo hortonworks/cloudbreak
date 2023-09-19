@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,6 +26,7 @@ import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.Resource;
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ServiceType;
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.StatusChange;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
@@ -33,6 +35,8 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
 public class StackDtoToMeteringEventConverter {
+
+    public static final String CLOUDERA_EXTERNAL_RESOURCE_NAME_TAG = "Cloudera-External-Resource-Name";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDtoToMeteringEventConverter.class);
 
@@ -87,23 +91,37 @@ public class StackDtoToMeteringEventConverter {
                 .setTimestamp(System.currentTimeMillis())
                 .setVersion(DEFAULT_VERSION)
                 .setServiceType(getServiceType(stack, DATAHUB))
-                .setResourceCrn(stack.getResourceCrn())
+                .setResourceCrn(getResourceCrn(stack))
                 .setEnvironmentCrn(stack.getEnvironmentCrn());
     }
 
     private ServiceType.Value getServiceType(StackDtoDelegate stack, ServiceType.Value defaultServiceType) {
+        Map<String, String> applicationTags = getApplicationTags(stack);
+        String serviceTypeName = applicationTags.get(ClusterTemplateApplicationTag.SERVICE_TYPE.key());
+        return EnumUtils.getEnum(ServiceType.Value.class, serviceTypeName, defaultServiceType);
+    }
+
+    private String getResourceCrn(StackDtoDelegate stack) {
+        Map<String, String> applicationTags = getApplicationTags(stack);
+        String externalCrn = applicationTags.get(CLOUDERA_EXTERNAL_RESOURCE_NAME_TAG);
+        if (StringUtils.isNotEmpty(externalCrn) && Crn.isCrn(externalCrn)) {
+            return externalCrn;
+        } else {
+            return stack.getResourceCrn();
+        }
+    }
+
+    private Map<String, String> getApplicationTags(StackDtoDelegate stack) {
         if (stack.getTags() != null) {
             try {
                 StackTags stackTags = stack.getTags().get(StackTags.class);
                 if (stackTags != null) {
-                    Map<String, String> applicationTags = stackTags.getApplicationTags();
-                    String serviceTypeName = applicationTags.get(ClusterTemplateApplicationTag.SERVICE_TYPE.key());
-                    return EnumUtils.getEnum(ServiceType.Value.class, serviceTypeName, defaultServiceType);
+                    return stackTags.getApplicationTags();
                 }
             } catch (IOException e) {
-                LOGGER.warn("Stack related applications tags cannot be parsed, use default service type for metering.", e);
+                LOGGER.warn("Stack related application tags cannot be parsed.", e);
             }
         }
-        return defaultServiceType;
+        return new HashMap<>();
     }
 }
