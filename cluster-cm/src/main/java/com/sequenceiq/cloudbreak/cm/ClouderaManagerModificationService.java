@@ -239,9 +239,17 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                     .collect(Collectors.toList());
         } catch (ApiException e) {
             LOGGER.error(String.format("Failed to upscale. Response: %s", e.getResponseBody()), e);
-            throw new ScalingException("Failed to upscale", e,
-                    upscaleInstancesMap.values().stream().map(InstanceMetaData::getInstanceId).collect(Collectors.toSet()));
+            throwScalingException(upscaleInstancesMap, e);
+        } catch (ClouderaManagerParcelActivationTimeoutException e) {
+            LOGGER.error(String.format("Failed to upscale. Response: %s", e.getMessage()), e);
+            throwScalingException(upscaleInstancesMap, e);
         }
+        return Collections.emptyList();
+    }
+
+    private void throwScalingException(Map<String, InstanceMetaData> upscaleInstancesMap, Exception e) throws ScalingException {
+        throw new ScalingException("Failed to upscale", e,
+                upscaleInstancesMap.values().stream().map(InstanceMetaData::getInstanceId).collect(Collectors.toSet()));
     }
 
     private ApiHostRefList getBodyForApplyHostGroupRoles(Map<String, InstanceMetaData> upscaleInstancesMap, Map<String, ApiHost> upscaleHostsMap,

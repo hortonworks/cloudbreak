@@ -4,13 +4,20 @@ import static com.sequenceiq.cloudbreak.cm.util.TestUtil.CDH;
 import static com.sequenceiq.cloudbreak.cm.util.TestUtil.CDH_VERSION;
 import static com.sequenceiq.cloudbreak.cm.util.TestUtil.CDSW;
 import static com.sequenceiq.cloudbreak.cm.util.TestUtil.CDSW_VERSION;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_COMMAND_TIMEOUT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_COMMAND_TIMEOUT_PARCELACTIVATION;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +32,7 @@ import com.cloudera.api.swagger.model.ApiParcel;
 import com.cloudera.api.swagger.model.ApiParcelList;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
+import com.sequenceiq.cloudbreak.cm.ClouderaManagerParcelActivationTimeoutException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.cm.util.TestUtil;
@@ -39,6 +47,8 @@ class ClouderaManagerParcelActivationListenerTaskTest {
     private static final String STACK_NAME = "stack_name";
 
     private static final String ACTIVATED = "ACTIVATED";
+
+    private static final String DOWNLOADED = "DOWNLOADED";
 
     private static final String ACTIVATING = "ACTIVATING";
 
@@ -127,5 +137,31 @@ class ClouderaManagerParcelActivationListenerTaskTest {
         ApiParcelList apiParcelList = new ApiParcelList().items(List.of(apiParcel1, apiParcel2));
         when(parcelsResourcesApi.readParcels(eq(STACK_NAME), eq(SUMMARY))).thenReturn(apiParcelList);
         assertTrue(underTest.checkStatus(clouderaManagerCommandPollerObject));
+    }
+
+    @Test
+    void testHandleTimeout() {
+        ClouderaManagerCommandPollerObject pollerObject = mock(ClouderaManagerCommandPollerObject.class);
+        ClouderaManagerParcelActivationTimeoutException e = assertThrows(ClouderaManagerParcelActivationTimeoutException.class,
+                () -> underTest.handleTimeout(pollerObject));
+        assertTrue(e.getMessage().startsWith("Operation timed out. Failed to execute command parcel activation"));
+    }
+
+    @Test
+    void testSendTimeoutEvent() throws ApiException {
+        when(clouderaManagerApiPojoFactory.getParcelsResourceApi(eq(apiClientMock))).thenReturn(parcelsResourcesApi);
+        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClientMock, COMMAND_ID);
+
+        ApiParcel apiParcel1 = TestUtil.apiParcel(CDH, DOWNLOADED);
+        ApiParcel apiParcel2 = TestUtil.apiParcel(CDSW, ACTIVATED);
+        ApiParcelList apiParcelList = new ApiParcelList().items(List.of(apiParcel1, apiParcel2));
+        when(parcelsResourcesApi.readParcels(eq(STACK_NAME), eq(SUMMARY))).thenReturn(apiParcelList);
+
+        underTest.sendTimeoutEvent(pollerObject);
+
+        verify(clusterEventService, times(1)).fireCloudbreakEvent(stack, CLUSTER_CM_COMMAND_TIMEOUT_PARCELACTIVATION,
+                List.of(String.format("(%s %s : %s)", CDH, CDH_VERSION, DOWNLOADED)));
+        verify(clusterEventService, times(1)).fireClusterManagerEvent(pollerObject.getStack(), CLUSTER_CM_COMMAND_TIMEOUT,
+                "Parcel activation", Optional.of(pollerObject.getId()));
     }
 }

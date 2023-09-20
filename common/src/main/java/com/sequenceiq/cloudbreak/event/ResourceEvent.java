@@ -471,6 +471,7 @@ public enum ResourceEvent {
     CLUSTER_CM_SERVICE_DEREGISTER_FAILED("cm.cluster.service.deregister.failed"),
     CLUSTER_CM_COMMAND_FAILED("cm.cluster.command.failed"),
     CLUSTER_CM_COMMAND_TIMEOUT("cm.cluster.command.timeout"),
+    CLUSTER_CM_COMMAND_TIMEOUT_PARCELACTIVATION("cm.cluster.command.timeout.parcelactivation"),
     CLUSTER_CM_COMMAND_TIMEOUT_WARNING("cm.cluster.command.timeout.warning"),
     CLUSTER_MANAGER_CLUSTER_DECOMMISSIONING_TIME("cluster.ambari.cluster.decommissioning.time"),
     CLUSTER_MANAGER_CLUSTER_SERVICES_STOPPING("cluster.ambari.cluster.services.stopping"),

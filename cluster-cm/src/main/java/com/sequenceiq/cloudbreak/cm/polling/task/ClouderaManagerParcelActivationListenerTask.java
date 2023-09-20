@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +16,11 @@ import com.cloudera.api.swagger.model.ApiParcelList;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
+import com.sequenceiq.cloudbreak.cm.ClouderaManagerParcelActivationTimeoutException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 public class ClouderaManagerParcelActivationListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
@@ -43,6 +46,32 @@ public class ClouderaManagerParcelActivationListenerTask extends AbstractClouder
         } else {
             LOGGER.debug("Some parcels are not yet activated: [{}].", getJoinedParcelStages(notActivated));
             return false;
+        }
+    }
+
+    @Override
+    public void handleTimeout(ClouderaManagerCommandPollerObject pollerObject) {
+        String timeoutErrorMessage = String.format("Operation timed out. Failed to execute command %s.", getCommandName().toLowerCase());
+        if (additionalTimeoutErrorMessage().isPresent()) {
+            timeoutErrorMessage = StringUtils.appendIfMissing(timeoutErrorMessage, additionalTimeoutErrorMessage().get());
+        }
+        throw new ClouderaManagerParcelActivationTimeoutException(timeoutErrorMessage);
+    }
+
+    @Override
+    public void sendTimeoutEvent(ClouderaManagerCommandPollerObject pollerObject) {
+        super.sendTimeoutEvent(pollerObject);
+        try {
+            ApiClient apiClient = pollerObject.getApiClient();
+            StackDtoDelegate stack = pollerObject.getStack();
+            ApiParcelList parcels = getClouderaManagerParcels(apiClient, stack.getName());
+            List<ApiParcel> notActivated = getNotActivatedOrMissingParcels(parcels);
+            if (!notActivated.isEmpty() && pollerObject.getId() != null) {
+                getClusterEventService().fireCloudbreakEvent(pollerObject.getStack(),
+                        ResourceEvent.CLUSTER_CM_COMMAND_TIMEOUT_PARCELACTIVATION, List.of(getJoinedParcelStages(notActivated)));
+            }
+        } catch (ApiException e) {
+            LOGGER.warn("Could not send parcel activation failure resource event.", e);
         }
     }
 
