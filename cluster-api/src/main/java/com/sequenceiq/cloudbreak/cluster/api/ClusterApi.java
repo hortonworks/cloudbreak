@@ -59,9 +59,9 @@ public interface ClusterApi {
         return clusterModificationService().upscaleCluster(instanceMetaDatasByHostGroup);
     }
 
-    default void upgradeClusterRuntime(Set<ClouderaManagerProduct> products, boolean patchUpgrade, Optional<String> remoteDataContext,
+    default void upgradeClusterRuntime(Set<ClusterComponentView> components, boolean patchUpgrade, Optional<String> remoteDataContext,
             boolean rollingUpgradeEnabled) throws CloudbreakException {
-        clusterModificationService().upgradeClusterRuntime(products, patchUpgrade, remoteDataContext, rollingUpgradeEnabled);
+        clusterModificationService().upgradeClusterRuntime(components, patchUpgrade, remoteDataContext, rollingUpgradeEnabled);
     }
 
     default void updateServiceConfig(String serviceType, Map<String, String> config) throws CloudbreakException {

@@ -286,7 +286,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void upgradeClusterRuntime(Set<ClouderaManagerProduct> products, boolean patchUpgrade, Optional<String> remoteDataContext,
+    public void upgradeClusterRuntime(Set<ClusterComponentView> components, boolean patchUpgrade, Optional<String> remoteDataContext,
             boolean rollingUpgradeEnabled) throws CloudbreakException {
         try {
             LOGGER.info("Starting to upgrade cluster runtimes. Patch upgrade: {}", patchUpgrade);
@@ -301,6 +301,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
             refreshRemoteDataContextFromDatalakeInCaseOfDatahub(remoteDataContext);
 
+            Set<ClouderaManagerProduct> products = getProducts(components);
             setParcelRepo(products, clouderaManagerResourceApi);
             refreshParcelRepos(clouderaManagerResourceApi);
             restartMgmtServices();
@@ -311,8 +312,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 callPostClouderaRuntimeUpgradeCommandIfCMIsNewerThan751(rollingUpgradeEnabled);
                 restartServices(rollingUpgradeEnabled);
             } else {
-                upgradeNonCdhProducts(products, parcelResourceApi);
-                upgradeCdh(clustersResourceApi, parcelResourceApi, products, rollingUpgradeEnabled);
+                ClouderaManagerProduct cdhProduct = clouderaManagerProductsProvider.getCdhProducts(products);
+                upgradeNonCdhProducts(products, cdhProduct.getName(), parcelResourceApi, true);
+                upgradeCdh(clustersResourceApi, parcelResourceApi, cdhProduct, rollingUpgradeEnabled);
                 startServices();
                 deployConfigAndRefreshCMStaleServices(clustersResourceApi, false);
             }
@@ -435,25 +437,24 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         }
     }
 
-    private void upgradeCdh(ClustersResourceApi clustersResourceApi, ParcelResourceApi parcelResourceApi, Set<ClouderaManagerProduct> products,
+    private void upgradeCdh(ClustersResourceApi clustersResourceApi, ParcelResourceApi parcelResourceApi, ClouderaManagerProduct cdhService,
             boolean rollingUpgradeEnabled) throws ApiException, CloudbreakException {
-        Optional<ClouderaManagerProduct> cdhProduct = clouderaManagerProductsProvider.getCdhProduct(products);
-        if (cdhProduct.isEmpty()) {
-            LOGGER.debug("Skipping CDH product upgrade because upgrade candidate list not contains any CDH parcel.");
-        } else {
-            ClouderaManagerProduct cdh = cdhProduct.get();
-            downloadParcels(Collections.singleton(cdh), parcelResourceApi);
-            distributeParcels(Collections.singleton(cdh), parcelResourceApi);
-            callUpgradeCdhCommand(cdhProduct.get(), clustersResourceApi, rollingUpgradeEnabled);
-        }
+        downloadParcels(Collections.singleton(cdhService), parcelResourceApi);
+        distributeParcels(Collections.singleton(cdhService), parcelResourceApi);
+        callUpgradeCdhCommand(cdhService, clustersResourceApi, rollingUpgradeEnabled);
     }
 
-    private void upgradeNonCdhProducts(Set<ClouderaManagerProduct> products, ParcelResourceApi parcelResourceApi) throws CloudbreakException, ApiException {
-        Set<ClouderaManagerProduct> nonCdhServices = clouderaManagerProductsProvider.getNonCdhProducts(products);
+    private Set<ClouderaManagerProduct> getProducts(Set<ClusterComponentView> components) {
+        return clouderaManagerProductsProvider.getProducts(components);
+    }
+
+    private void upgradeNonCdhProducts(Set<ClouderaManagerProduct> products, String cdhServiceName, ParcelResourceApi parcelResourceApi,
+            boolean activateParcels) throws CloudbreakException, ApiException {
+        Set<ClouderaManagerProduct> nonCdhServices = getNonCdhProducts(products, cdhServiceName);
         if (!nonCdhServices.isEmpty()) {
             List<String> productNames = nonCdhServices.stream().map(ClouderaManagerProduct::getName).collect(Collectors.toList());
             LOGGER.debug("Starting to upgrade the following Non-CDH products: {}", productNames);
-            downloadAndActivateParcels(nonCdhServices, parcelResourceApi, true);
+            downloadAndActivateParcels(nonCdhServices, parcelResourceApi, activateParcels);
         } else {
             LOGGER.debug("Skipping Non-CDH products upgrade because the cluster does not contains any other products beside CDH.");
         }
@@ -468,6 +469,12 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         } else {
             LOGGER.info("No parcel activation is necessary yet.");
         }
+    }
+
+    private Set<ClouderaManagerProduct> getNonCdhProducts(Set<ClouderaManagerProduct> products, String cdhProductName) {
+        return products.stream()
+                .filter(product -> !product.getName().equals(cdhProductName))
+                .collect(Collectors.toSet());
     }
 
     private void checkParcelApiAvailability() throws CloudbreakException {
