@@ -46,12 +46,14 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxRotateSecretAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStartAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStatusAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStopAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxStopByNameAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpgradeDatabaseServerAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpgradeRecoveryAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxVerticalScaleAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxVerticalScaleByCrnAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.RenewDatalakeCertificateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.SdxRetryAction;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCMDiagnosticsTestDto;
@@ -200,6 +202,10 @@ public class SdxTestClient {
         return new SdxStopAction();
     }
 
+    public Action<SdxTestDto, SdxClient> stop() {
+        return new SdxStopByNameAction();
+    }
+
     public Action<SdxDiagnosticsTestDto, SdxClient> collectDiagnostics() {
         return new SdxCollectDiagnosticsAction();
     }
@@ -254,6 +260,10 @@ public class SdxTestClient {
 
     public Action<SdxInternalTestDto, SdxClient> verticalScale(String verticalScaleKey) {
         return new SdxVerticalScaleAction(verticalScaleKey);
+    }
+
+    public Action<SdxTestDto, SdxClient> verticalScaleByCrn(String verticalScaleKey) {
+        return new SdxVerticalScaleByCrnAction(verticalScaleKey);
     }
 
     public Action<SdxInternalTestDto, SdxClient> rotateSecret(Set<DatalakeSecretType> secretTypes) {

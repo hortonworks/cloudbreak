@@ -4,7 +4,6 @@ import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.FAILED;
 import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.FINISHED;
 import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.RUNNING;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -54,15 +53,6 @@ public class CloudbreakPoller extends AbstractFlowPoller {
     public void pollCreateUntilAvailable(SdxCluster sdxCluster, PollingConfig pollingConfig) {
         waitForState("Data Lake creation", sdxCluster, pollingConfig,
                 Status.getAvailableStatuses(), Sets.immutableEnumSet(Status.CREATE_FAILED));
-    }
-
-    public void pollCreateUntilVerticalScaleDone(SdxCluster sdxCluster, PollingConfig pollingConfig) {
-        Set<Status> acceptedStatus = new HashSet<>();
-        acceptedStatus.addAll(Status.getAvailableStatuses());
-        acceptedStatus.addAll(Status.getStoppedStatuses());
-
-        waitForState("Data Lake vertical scale", sdxCluster, pollingConfig,
-                acceptedStatus, Sets.immutableEnumSet(Status.getUnschedulableStatuses()));
     }
 
     public void pollUpdateUntilAvailable(String process, SdxCluster sdxCluster, PollingConfig pollingConfig) {

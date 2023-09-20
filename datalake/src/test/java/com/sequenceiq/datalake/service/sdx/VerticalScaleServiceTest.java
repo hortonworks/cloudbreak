@@ -37,9 +37,6 @@ public class VerticalScaleServiceTest {
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @Mock
-    private CloudbreakPoller cloudbreakPoller;
-
-    @Mock
     private EventSender eventSender;
 
     @Mock

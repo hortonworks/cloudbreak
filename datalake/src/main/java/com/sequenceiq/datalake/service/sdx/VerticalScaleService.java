@@ -28,6 +28,8 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleEvent;
 import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleStateSelectors;
+import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
+import com.sequenceiq.datalake.service.sdx.flowwait.SdxWaitService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
@@ -53,9 +55,6 @@ public class VerticalScaleService {
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @Inject
-    private CloudbreakPoller cloudbreakPoller;
-
-    @Inject
     private EventSender eventSender;
 
     @Inject
@@ -66,6 +65,12 @@ public class VerticalScaleService {
 
     @Inject
     private DiskUpdateEndpoint diskUpdateEndpoint;
+
+    @Inject
+    private SdxWaitService sdxWaitService;
+
+    @Inject
+    private CloudbreakFlowService cloudbreakFlowService;
 
     public FlowIdentifier verticalScaleDatalake(SdxCluster sdxCluster, StackVerticalScaleV4Request request, String userCrn) {
         MDCBuilder.buildMdcContext(sdxCluster);
@@ -94,10 +99,11 @@ public class VerticalScaleService {
 
         try {
             LOGGER.debug("Vertical scale starts in group of {} with instanceType: {}", request.getGroup(), request.getTemplate().getInstanceType());
-            ThreadBasedUserCrnProvider.doAsInternalActor(
+            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () ->
                     stackV4Endpoint.verticalScalingByName(0L, sdxCluster.getClusterName(), initiatorUserCrn, request));
+            cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS,
                     "Data Lake vertical scale in progress", sdxCluster);
         } catch (NotFoundException e) {
@@ -115,7 +121,7 @@ public class VerticalScaleService {
     public StackV4Response waitCloudbreakClusterVerticalScale(Long id, PollingConfig pollingConfig) {
         SdxCluster sdxCluster = sdxService.getById(id);
         LOGGER.debug("Waiting for vertical scale flow");
-        cloudbreakPoller.pollCreateUntilVerticalScaleDone(sdxCluster, pollingConfig);
+        sdxWaitService.waitForCloudbreakFlow(id, pollingConfig, "Polling stack vertical scale flow");
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
