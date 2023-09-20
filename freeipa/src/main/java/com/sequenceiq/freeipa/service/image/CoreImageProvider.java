@@ -9,7 +9,6 @@ import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
@@ -28,9 +27,6 @@ public class CoreImageProvider implements ImageProvider {
 
     private static final long WORKSPACE_ID_DEFAULT = 0L;
 
-    @Value("${freeipa.image.catalog.url}")
-    private String defaultCatalogUrl;
-
     @Inject
     private ImageCatalogV4Endpoint imageCatalogV4Endpoint;
 
@@ -48,7 +44,7 @@ public class CoreImageProvider implements ImageProvider {
 
             Optional<Image> image = convert(imageV4Response);
 
-            return image.map(i -> new ImageWrapper(i, defaultCatalogUrl, imageFilterSettings.catalog()));
+            return image.map(i -> new ImageWrapper(i, null, imageFilterSettings.catalog()));
         } catch (Exception ex) {
             LOGGER.warn("Image lookup failed: {}", ex.getMessage());
             return Optional.empty();
@@ -62,7 +58,7 @@ public class CoreImageProvider implements ImageProvider {
                 ImageV4Response imageV4Response = imageCatalogV4Endpoint.getSingleImageByCatalogNameAndImageIdInternal(
                         WORKSPACE_ID_DEFAULT, imageFilterSettings.catalog(), imageFilterSettings.currentImageId(), accountId);
                 Optional<Image> image = convert(imageV4Response);
-                return image.map(i -> new ImageWrapper(i, defaultCatalogUrl, imageFilterSettings.catalog()));
+                return image.map(i -> new ImageWrapper(i, null, imageFilterSettings.catalog()));
             } catch (Exception ex) {
                 LOGGER.warn("Image lookup failed: {}", ex.getMessage());
                 return Optional.empty();
