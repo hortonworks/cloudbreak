@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
@@ -231,7 +230,7 @@ public class ClouderaManagerClusterCreationSetupService {
     private Set<ClouderaManagerProduct> filterParcelsIfNecessary(Cluster cluster, Set<ClouderaManagerProduct> products) {
         Stack stack = cluster.getStack();
         if (stack.isDatalake()) {
-            return Set.of(clouderaManagerProductsProvider.getCdhProduct(products).orElseThrow(() -> new NotFoundException("Runtime component not found!")));
+            return Set.of(clouderaManagerProductsProvider.getCdhProducts(products));
         } else {
             LOGGER.info("Product list before filter out products by blueprint: {}", products);
             Set<ClouderaManagerProduct> filteredProducts = parcelFilterService
