@@ -1,32 +1,28 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import java.util.List;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AzureRoleDefinitionProperties {
 
+    @JsonProperty("Name")
     private String roleName;
 
+    @JsonProperty("Description")
     private String description;
 
-    private String type;
+    @JsonProperty("Actions")
+    private List<String> actions;
 
-    private List<AzurePermission> permissions;
+    @JsonProperty("DataActions")
+    private List<String> dataActions;
 
+    @JsonProperty("AssignableScopes")
     private List<String> assignableScopes;
-
-    public AzureRoleDefinitionProperties() {
-    }
-
-    public AzureRoleDefinitionProperties(String roleName, String description, String type, List<AzurePermission> permissions, List<String> assignableScopes) {
-        this.roleName = roleName;
-        this.description = description;
-        this.type = type;
-        this.permissions = permissions;
-        this.assignableScopes = assignableScopes;
-    }
 
     public String getRoleName() {
         return roleName;
@@ -44,20 +40,20 @@ public class AzureRoleDefinitionProperties {
         this.description = description;
     }
 
-    public String getType() {
-        return type;
+    public List<String> getActions() {
+        return actions;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setActions(List<String> actions) {
+        this.actions = actions;
     }
 
-    public Iterable<AzurePermission> getPermissions() {
-        return permissions;
+    public List<String> getDataActions() {
+        return dataActions;
     }
 
-    public void setPermissions(List<AzurePermission> permissions) {
-        this.permissions = permissions;
+    public void setDataActions(List<String> dataActions) {
+        this.dataActions = dataActions;
     }
 
     public List<String> getAssignableScopes() {
@@ -68,16 +64,14 @@ public class AzureRoleDefinitionProperties {
         this.assignableScopes = assignableScopes;
     }
 
-    //BEGIN GENERATED CODE
     @Override
     public String toString() {
-        return "AzureRoleDefinitionProperties{"
-                + "roleName='" + roleName + '\''
-                + ", description='" + description + '\''
-                + ", type='" + type + '\''
-                + ", permissions=" + permissions
-                + ", assignableScopes=" + assignableScopes
-                + '}';
+        return new StringJoiner(", ", AzureRoleDefinitionProperties.class.getSimpleName() + "[", "]")
+                .add("roleName='" + roleName + "'")
+                .add("description='" + description + "'")
+                .add("actions=" + actions)
+                .add("dataActions=" + dataActions)
+                .add("assignableScopes=" + assignableScopes)
+                .toString();
     }
-    //END GENERATED CODE
 }

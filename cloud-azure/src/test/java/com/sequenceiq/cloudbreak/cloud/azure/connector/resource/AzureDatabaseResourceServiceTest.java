@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.ResourceGroupUsage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureFlexibleServerPermissionValidator;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -123,6 +124,9 @@ class AzureDatabaseResourceServiceTest {
 
     @Mock
     private PersistenceNotifier persistenceNotifier;
+
+    @Mock
+    private AzureFlexibleServerPermissionValidator azureFlexibleServerPermissionValidator;
 
     @InjectMocks
     private AzureDatabaseResourceService underTest;

@@ -36,6 +36,7 @@ import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.authorization.fluent.models.RoleAssignmentInner;
 import com.azure.resourcemanager.authorization.models.RoleAssignment;
 import com.azure.resourcemanager.authorization.models.RoleAssignments;
+import com.azure.resourcemanager.authorization.models.RoleDefinition;
 import com.azure.resourcemanager.compute.ComputeManager;
 import com.azure.resourcemanager.compute.fluent.models.DiskEncryptionSetInner;
 import com.azure.resourcemanager.compute.fluent.models.DiskInner;
@@ -1042,5 +1043,17 @@ public class AzureClient {
                     .withAdministratorLoginPassword(newPassword)
                     .apply();
         });
+    }
+
+    public String getServicePrincipalId() {
+        return azure.accessManagement().servicePrincipals().getByName(azureClientFactory.getAccessKey()).id();
+    }
+
+    public RoleDefinition getRoleDefinitionById(String roleDefinitionId) {
+        return azure.accessManagement().roleDefinitions().getById(roleDefinitionId);
+    }
+
+    public List<RoleAssignment> listRoleAssignmentsByServicePrincipal(String servicePrincipalId) {
+        return azureListResultFactory.create(getRoleAssignments().listByServicePrincipal(servicePrincipalId)).getAll();
     }
 }

@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.ResourceGroupUsage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTransientDeploymentService;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureFlexibleServerPermissionValidator;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -81,6 +82,9 @@ public class AzureDatabaseResourceService {
     private AzureTransientDeploymentService azureTransientDeploymentService;
 
     @Inject
+    private AzureFlexibleServerPermissionValidator azureFlexibleServerPermissionValidator;
+
+    @Inject
     @Qualifier("DefaultRetryService")
     private Retry retryService;
 
@@ -88,6 +92,7 @@ public class AzureDatabaseResourceService {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
 
+        azureFlexibleServerPermissionValidator.validate(client, stack.getDatabaseServer());
         String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         ResourceGroupUsage resourceGroupUsage = azureResourceGroupMetadataProvider.getResourceGroupUsage(stack);

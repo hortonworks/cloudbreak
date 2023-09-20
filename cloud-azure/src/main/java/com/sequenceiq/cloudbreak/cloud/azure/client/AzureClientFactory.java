@@ -118,6 +118,10 @@ public class AzureClientFactory {
         }
     }
 
+    public String getAccessKey() {
+        return credentialView.getAccessKey();
+    }
+
     private TokenCredential newCertificateCredential() {
         LOGGER.info("Creating Azure credentials with certificate and private key: {}", credentialView.getName());
         Objects.requireNonNull(credentialView.getCertificate(), "'certificate' cannot be null.");

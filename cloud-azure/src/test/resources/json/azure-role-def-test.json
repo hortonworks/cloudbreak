@@ -1,0 +1,48 @@
+{
+  "Name": "Cloudera Management Console Azure Operator",
+  "IsCustom": true,
+  "Description": "Can use Cloudera Management Console managed clusters and resources.",
+  "Actions": [
+    "Microsoft.Authorization/*/read",
+    "Microsoft.Compute/*/read",
+    "Microsoft.Compute/availabilitySets/*",
+    "Microsoft.Compute/disks/*",
+    "Microsoft.Compute/images/*",
+    "Microsoft.Compute/virtualMachines/*",
+    "Microsoft.DBforPostgreSQL/servers/virtualNetworkRules/write",
+    "Microsoft.DBforPostgreSQL/servers/write",
+    "Microsoft.DataLakeStore/*/read",
+    "Microsoft.Features/*/read",
+    "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action",
+    "Microsoft.ManagedIdentity/userAssignedIdentities/read",
+    "Microsoft.ManagedIdentity/userAssignedIdentities/write",
+    "Microsoft.Network/*/read",
+    "Microsoft.Network/loadBalancers/backendAddressPools/join/action",
+    "Microsoft.Network/loadBalancers/write",
+    "Microsoft.Network/networkInterfaces/*",
+    "Microsoft.Network/networkSecurityGroups/*",
+    "Microsoft.Network/publicIPAddresses/*",
+    "Microsoft.Network/virtualNetworks/*",
+    "Microsoft.ResourceHealth/*/read",
+    "Microsoft.Resources/*/read",
+    "Microsoft.Resources/deployments/*",
+    "Microsoft.Resources/subscriptions/resourceGroups/*",
+    "Microsoft.Storage/*/read",
+    "Microsoft.Storage/locations/deleteVirtualNetworkOrSubnets/action",
+    "Microsoft.Storage/storageAccounts/blobServices/containers/*",
+    "Microsoft.Storage/storageAccounts/blobServices/write",
+    "Microsoft.Storage/storageAccounts/delete",
+    "Microsoft.Storage/storageAccounts/listkeys/action",
+    "Microsoft.Storage/storageAccounts/regeneratekey/action",
+    "Microsoft.Storage/storageAccounts/write",
+    "Microsoft.Support/*"
+  ],
+  "NotActions": [],
+  "DataActions": [
+    "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
+  ],
+  "NotDataActions": [],
+  "AssignableScopes": [
+    "/subscriptions/{subscriptionId}"
+  ]
+}
