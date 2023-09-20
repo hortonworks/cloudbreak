@@ -8,6 +8,7 @@ import java.lang.module.ModuleDescriptor;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -161,9 +162,9 @@ public class DiagnosticsFlowService {
             String cloudPlatform = stack.getCloudPlatform();
             if (cloudPlatform != null) {
                 try {
-                    cloudPlatformEnum = UsageProto.CDPEnvironmentsEnvironmentType.Value.valueOf(cloudPlatform.toUpperCase());
+                    cloudPlatformEnum = UsageProto.CDPEnvironmentsEnvironmentType.Value.valueOf(cloudPlatform.toUpperCase(Locale.ROOT));
                 } catch (IllegalArgumentException e) {
-                    // Do not set the cloud platform.
+                    LOGGER.info("exception happened {}", e);
                 }
             }
             reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.CLOUDERA_ARCHIVE, networkDetailsList,
@@ -267,8 +268,8 @@ public class DiagnosticsFlowService {
         } else {
             String resourceCrn = stack.getResourceCrn();
             String accountId = Crn.safeFromString(resourceCrn).getAccountId();
-            String clusterType = StackType.DATALAKE == stack.getType() ? CloudbreakEventService.DATALAKE_RESOURCE_TYPE.toUpperCase()
-                    : CloudbreakEventService.DATAHUB_RESOURCE_TYPE.toUpperCase();
+            String clusterType = StackType.DATALAKE == stack.getType() ? CloudbreakEventService.DATALAKE_RESOURCE_TYPE.toUpperCase(Locale.ROOT)
+                    : CloudbreakEventService.DATAHUB_RESOURCE_TYPE.toUpperCase(Locale.ROOT);
             List<String> unhealthyNodes = getUnhealthyHosts(networkNodes, healthEvaluator);
             UsageProto.CDPNetworkCheckResult.Value networkCheckResult = unhealthyNodes.isEmpty()
                     ? UsageProto.CDPNetworkCheckResult.Value.SUCCESSFUL : UsageProto.CDPNetworkCheckResult.Value.FAILED;

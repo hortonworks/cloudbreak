@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +16,8 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 @Service
 @ConfigurationProperties(prefix = "cb.limit")
 public class LimitConfiguration {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LimitConfiguration.class);
 
     private static final String UPGRADE_NODE_COUNT_LIMIT_PROPERTY = "upgrade";
 
@@ -56,7 +60,7 @@ public class LimitConfiguration {
                 return EXPERIMENTAL_LIMITS_KEY;
             }
         } catch (Exception ignored) {
-
+            LOGGER.info("exception happened {}", ignored);
         }
         return SAFE_LIMITS_KEY;
     }

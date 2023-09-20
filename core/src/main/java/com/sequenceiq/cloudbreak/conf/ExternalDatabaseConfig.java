@@ -115,7 +115,7 @@ public class ExternalDatabaseConfig {
     }
 
     private String getResourcePath(CloudPlatform cloudPlatform, DatabaseType databaseType) {
-        String cloudPlatformString = cloudPlatform.toString().toLowerCase(Locale.US);
+        String cloudPlatformString = cloudPlatform.toString().toLowerCase(Locale.ROOT);
         String resourcePath;
         if (databaseType == null) {
             resourcePath = String.format("externaldatabase/%s/database-template.json", cloudPlatformString);

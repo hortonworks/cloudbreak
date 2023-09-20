@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.view;
 
+import java.util.Locale;
+
 public class AzurePortView {
 
     private final String cidr;
@@ -27,6 +29,6 @@ public class AzurePortView {
     }
 
     public String getCapitalProtocol() {
-        return protocol.substring(0, 1).toUpperCase() + protocol.substring(1);
+        return protocol.substring(0, 1).toUpperCase(Locale.ROOT) + protocol.substring(1);
     }
 }

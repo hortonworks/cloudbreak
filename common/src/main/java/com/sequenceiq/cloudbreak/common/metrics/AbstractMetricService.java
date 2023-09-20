@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.common.metrics;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,7 +43,7 @@ public abstract class AbstractMetricService implements MetricService {
         GaugeMetricKey key = new GaugeMetricKey(getMetricName(metric), tagsMap);
         gaugeMetricMap.computeIfAbsent(key, gaugeKey -> {
             Iterable<Tag> tags = gaugeKey.tags().entrySet().stream()
-                    .map(label -> Tag.of(label.getKey(), label.getValue().toLowerCase()))
+                    .map(label -> Tag.of(label.getKey(), label.getValue().toLowerCase(Locale.ROOT)))
                     .collect(Collectors.toList());
             return Metrics.gauge(gaugeKey.metricName(), tags, new AtomicDouble(value));
         }).set(value);
@@ -92,9 +93,9 @@ public abstract class AbstractMetricService implements MetricService {
 
     private String getMetricName(Metric metric) {
         if (getMetricPrefix().isPresent()) {
-            return getMetricPrefix().get() + '.' + metric.getMetricName().toLowerCase();
+            return getMetricPrefix().get() + '.' + metric.getMetricName().toLowerCase(Locale.ROOT);
         } else {
-            return metric.getMetricName().toLowerCase();
+            return metric.getMetricName().toLowerCase(Locale.ROOT);
         }
     }
 

@@ -24,6 +24,7 @@ public class ClientVersionUtil {
                 return true;
             }
         } catch (ArrayIndexOutOfBoundsException | NullPointerException ignore) {
+            return false;
         }
         return false;
     }

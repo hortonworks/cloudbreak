@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,7 +53,8 @@ class ClouderaManagerParcelManagementService {
             LOGGER.debug("The following parcels are found in {} status: {}", parcelStatus, parcelResponse);
             return parcelResponse;
         } catch (ApiException e) {
-            String errorMessage = String.format("Unable to fetch the list of %s parcels due to: %s", parcelStatus.name().toLowerCase(), e.getMessage());
+            String errorMessage = String.format("Unable to fetch the list of %s parcels due to: %s",
+                    parcelStatus.name().toLowerCase(Locale.ROOT), e.getMessage());
             LOGGER.error(errorMessage, e);
             throw new ClouderaManagerOperationFailedException(errorMessage, e);
         }

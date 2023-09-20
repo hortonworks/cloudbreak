@@ -7,6 +7,7 @@ import static org.apache.commons.lang3.StringUtils.isAnyEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -102,7 +103,7 @@ public class GcpStackUtil {
         if (projectId == null) {
             throw new CredentialVerificationException("Missing Project Id from GCP Credential");
         }
-        return projectId.toLowerCase().replaceAll("[^A-Za-z0-9 ]", "-");
+        return projectId.toLowerCase(Locale.ROOT).replaceAll("[^A-Za-z0-9 ]", "-");
     }
 
     public boolean isNewNetworkAndSubnet(Network network) {
@@ -352,7 +353,7 @@ public class GcpStackUtil {
     }
 
     public String convertGroupName(String group) {
-        return group.toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
+        return group.toLowerCase(Locale.ROOT).replaceAll("[^A-Za-z0-9 ]", "");
     }
 
     public String getNetworkSecurityIdFromGroup(Group group) {
@@ -364,14 +365,14 @@ public class GcpStackUtil {
     }
 
     public String getGroupClusterTag(CloudContext cloudContext, Group group) {
-        return group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "") + cloudContext.getId();
+        return group.getName().toLowerCase(Locale.ROOT).replaceAll("[^A-Za-z0-9 ]", "") + cloudContext.getId();
     }
 
     public String getGroupTypeTag(InstanceGroupType type) {
         if (type == null) {
             throw new CloudbreakServiceException("Type of the group must not be null");
         }
-        return type.name().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
+        return type.name().toLowerCase(Locale.ROOT).replaceAll("[^A-Za-z0-9 ]", "");
     }
 
     public Instance getComputeInstanceWithId(Compute compute, String projectId, String availabilityZone, String instanceId) throws IOException {

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request;
 
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -23,6 +24,6 @@ public class OneOfEnumValidator implements ConstraintValidator<OneOfEnum, CharSe
             return true;
         }
 
-        return acceptedValues.contains(value.toString().toUpperCase());
+        return acceptedValues.contains(value.toString().toUpperCase(Locale.ROOT));
     }
 }

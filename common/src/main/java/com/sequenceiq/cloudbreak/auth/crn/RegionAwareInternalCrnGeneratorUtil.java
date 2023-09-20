@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.auth.crn;
 
+import java.util.Locale;
+
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 
 public class RegionAwareInternalCrnGeneratorUtil {
@@ -22,7 +24,7 @@ public class RegionAwareInternalCrnGeneratorUtil {
     }
 
     public static CrnUser createInternalCrnUser(Crn crn)  {
-        String service = crn.getService().toString().toUpperCase();
+        String service = crn.getService().toString().toUpperCase(Locale.ROOT);
         String role = "AUTOSCALE".equals(service) ? "ROLE_AUTOSCALE" : "ROLE_INTERNAL";
         return new CrnUser(crn.getResource(),
                 crn.toString(),

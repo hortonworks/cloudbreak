@@ -117,7 +117,7 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
             return false;
         }
         ImageInfoV4Response that = (ImageInfoV4Response) o;
-        return created == that.created &&
+        return Objects.equals(created, that.created) &&
                 Objects.equals(imageName, that.imageName) &&
                 Objects.equals(imageId, that.imageId) &&
                 Objects.equals(imageCatalogName, that.imageCatalogName) &&

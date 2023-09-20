@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model.filesystem.efs;
 
+import java.util.Locale;
+
 import org.apache.commons.lang3.StringUtils;
 
 public enum PerformanceMode {
@@ -30,6 +32,6 @@ public enum PerformanceMode {
             throw new IllegalArgumentException("Value cannot be null or empty!");
         }
 
-        return PerformanceMode.valueOf(value.toUpperCase());
+        return PerformanceMode.valueOf(value.toUpperCase(Locale.ROOT));
     }
 }

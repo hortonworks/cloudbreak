@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.dto;
 
+import java.util.Locale;
+
 import com.google.common.xml.XmlEscapers;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.view.VersionConstant;
@@ -57,7 +59,7 @@ public class LdapView {
     }
 
     public boolean isSecure() {
-        return "ldaps".equalsIgnoreCase(protocol.toLowerCase());
+        return "ldaps".equalsIgnoreCase(protocol.toLowerCase(Locale.ROOT));
     }
 
     public String getProtocol() {
@@ -309,7 +311,7 @@ public class LdapView {
             } else {
                 ldapView.connectionURL = protocol + "://" + serverHost;
                 if (serverPort != null) {
-                    ldapView.connectionURL = ldapView.connectionURL.toLowerCase() + ':' + serverPort;
+                    ldapView.connectionURL = ldapView.connectionURL.toLowerCase(Locale.ROOT) + ':' + serverPort;
                 }
             }
             return ldapView;

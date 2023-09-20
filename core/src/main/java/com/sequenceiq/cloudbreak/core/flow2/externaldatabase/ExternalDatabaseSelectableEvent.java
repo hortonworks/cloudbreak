@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.externaldatabase;
 
+import java.util.Locale;
+
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -23,10 +25,10 @@ public class ExternalDatabaseSelectableEvent extends BaseNamedFlowEvent {
     }
 
     public static String selector(Class<?> clazz) {
-        return clazz.getSimpleName().toUpperCase();
+        return clazz.getSimpleName().toUpperCase(Locale.ROOT);
     }
 
     public static String failureSelector(Class<?> clazz) {
-        return clazz.getSimpleName().toUpperCase() + "_ERROR";
+        return clazz.getSimpleName().toUpperCase(Locale.ROOT) + "_ERROR";
     }
 }

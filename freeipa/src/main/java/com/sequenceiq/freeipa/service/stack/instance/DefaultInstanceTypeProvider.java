@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.stack.instance;
 
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -44,12 +45,12 @@ public class DefaultInstanceTypeProvider {
     }
 
     public String getForPlatform(String platform) {
-        if (!platformInstanceTypeMap.containsKey(platform.toUpperCase())) {
+        if (!platformInstanceTypeMap.containsKey(platform.toUpperCase(Locale.ROOT))) {
             LOGGER.debug("No default instance type found for platform: {}. Falling back to default empty string. "
                             + "Set '{}' property if '{}' is a valid cloud provider.",
                     platform, DEFAULT_INSTANCE_TYPE_PROPERTY_PERFIX + platform, platform);
         }
-        return platformInstanceTypeMap.getOrDefault(platform.toUpperCase(), "");
+        return platformInstanceTypeMap.getOrDefault(platform.toUpperCase(Locale.ROOT), "");
     }
 
     private String initPlatform(Environment environment, Platform platform) {

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -80,7 +81,7 @@ public class AzureCloudResourceService {
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
     private CommonStatus convertProvisioningState(String provisioningState) {
         CommonStatus status;
-        switch (provisioningState.toLowerCase()) {
+        switch (provisioningState.toLowerCase(Locale.ROOT)) {
             case "succeeded":
             case "created":
                 status = CommonStatus.CREATED;

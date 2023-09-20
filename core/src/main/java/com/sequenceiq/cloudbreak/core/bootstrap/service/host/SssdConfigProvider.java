@@ -6,6 +6,7 @@ import static java.util.Collections.singletonMap;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -47,7 +48,7 @@ public class SssdConfigProvider {
         if (kerberosDetailService.isIpaJoinable(kerberosConfig)) {
             Map<String, Object> sssdConfig = new HashMap<>();
             sssdConfig.put("principal", kerberosConfig.getPrincipal());
-            sssdConfig.put("realm", kerberosConfig.getRealm().toUpperCase());
+            sssdConfig.put("realm", kerberosConfig.getRealm().toUpperCase(Locale.ROOT));
             sssdConfig.put("domain", kerberosConfig.getDomain());
             sssdConfig.put("password", kerberosConfig.getPassword());
             sssdConfig.put("server", kerberosConfig.getUrl());
@@ -87,8 +88,8 @@ public class SssdConfigProvider {
         if (kerberosDetailService.isAdJoinable(kerberosConfig)) {
             Map<String, Object> sssdConnfig = new HashMap<>();
             sssdConnfig.put("username", kerberosConfig.getPrincipal());
-            sssdConnfig.put("domainuppercase", kerberosConfig.getRealm().toUpperCase());
-            sssdConnfig.put("domain", kerberosConfig.getRealm().toLowerCase());
+            sssdConnfig.put("domainuppercase", kerberosConfig.getRealm().toUpperCase(Locale.ROOT));
+            sssdConnfig.put("domain", kerberosConfig.getRealm().toLowerCase(Locale.ROOT));
             sssdConnfig.put("password", kerberosConfig.getPassword());
             return Map.of("sssd-ad", new SaltPillarProperties("/sssd/ad.sls", singletonMap("sssd-ad", sssdConnfig)));
         } else {

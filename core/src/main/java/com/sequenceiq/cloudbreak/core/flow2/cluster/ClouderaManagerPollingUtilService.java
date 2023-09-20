@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +27,7 @@ public class ClouderaManagerPollingUtilService {
                 .run(() -> {
                     LOGGER.debug("Polling CM Service {} to check if {}", service, status);
                     Map<String, String> readResults = clusterApi.clusterModificationService().fetchServiceStatuses();
-                    if (status.equals(readResults.get(service.toLowerCase()))) {
+                    if (status.equals(readResults.get(service.toLowerCase(Locale.ROOT)))) {
                         return AttemptResults.justFinish();
                     }
                     return AttemptResults.justContinue();

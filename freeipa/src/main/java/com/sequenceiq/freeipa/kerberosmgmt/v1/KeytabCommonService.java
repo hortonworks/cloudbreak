@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.kerberosmgmt.v1;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -64,8 +65,8 @@ public class KeytabCommonService {
         try {
             FreeIpa freeIpa = freeIpaService.findByStack(stack);
             if (StringUtils.isNotBlank(freeIpa.getDomain())) {
-                LOGGER.debug("Realm of IPA Server: {}", freeIpa.getDomain().toUpperCase());
-                return freeIpa.getDomain().toUpperCase();
+                LOGGER.debug("Realm of IPA Server: {}", freeIpa.getDomain().toUpperCase(Locale.ROOT));
+                return freeIpa.getDomain().toUpperCase(Locale.ROOT);
             } else {
                 LOGGER.warn("Domain in FreeIPA is empty");
                 throw new KeytabCreationException(EMPTY_REALM);

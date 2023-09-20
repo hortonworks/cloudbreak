@@ -8,7 +8,7 @@ import javax.annotation.Nonnull;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpoint;
 import com.sequenceiq.cloudbreak.util.HostUtil;
 
-public class GatewayConfig {
+public final class GatewayConfig {
 
     // Used by cloudbreak to connect the cluster
     private final String connectionAddress;

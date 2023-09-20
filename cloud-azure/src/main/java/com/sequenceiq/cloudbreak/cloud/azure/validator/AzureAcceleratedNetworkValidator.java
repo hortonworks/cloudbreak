@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.validator;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -47,7 +48,7 @@ public class AzureAcceleratedNetworkValidator {
             String segment = parts[1];
             validCpu = isValidCpu(segment);
             String transformedSegment = getSegment(segment);
-            transformedFlavor = vmType.replaceAll(segment, transformedSegment).toLowerCase();
+            transformedFlavor = vmType.replaceAll(segment, transformedSegment).toLowerCase(Locale.ROOT);
             LOGGER.debug("Transformed flavor to validate: " + transformedFlavor);
         }
         return validCpu && getSupportedVmTypes().stream().parallel().anyMatch(transformedFlavor::endsWith);
@@ -57,7 +58,7 @@ public class AzureAcceleratedNetworkValidator {
         return segment
                 .replaceAll("[0-9]", "")
                 .replaceAll("-", "")
-                .toLowerCase();
+                .toLowerCase(Locale.ROOT);
     }
 
     private boolean isValidCpu(String segment) {

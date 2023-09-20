@@ -142,9 +142,13 @@ public class YarnBasedScalingAdjustmentService {
             return true;
         } else {
             LOGGER.debug("Cluster {} cannot be {} for {} min(s)", clusterCrn, coolDownAction,
-                    ClusterUtils.TIME_FORMAT.format((double) remainingTime / TimeUtil.MIN_IN_MS));
+                    format((double) remainingTime / TimeUtil.MIN_IN_MS));
         }
         return false;
+    }
+
+    private synchronized String format(double number) {
+        return ClusterUtils.TIME_FORMAT.format(number);
     }
 
     private void publishScalingEventIfNeeded(Cluster cluster, int finalScaleUpCount, StackV4Response stackV4Response, List<String> hostsToDecommission,

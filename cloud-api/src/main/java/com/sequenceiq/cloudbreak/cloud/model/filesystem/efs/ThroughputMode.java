@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model.filesystem.efs;
 
+import java.util.Locale;
+
 import org.apache.commons.lang3.StringUtils;
 
 public enum ThroughputMode {
@@ -9,7 +11,7 @@ public enum ThroughputMode {
 
     @Override
     public String toString() {
-        return super.toString().toLowerCase();
+        return super.toString().toLowerCase(Locale.ROOT);
     }
 
     /**
@@ -24,6 +26,6 @@ public enum ThroughputMode {
             throw new IllegalArgumentException("Value cannot be null or empty!");
         }
 
-        return valueOf(value.toUpperCase());
+        return valueOf(value.toUpperCase(Locale.ROOT));
     }
 }

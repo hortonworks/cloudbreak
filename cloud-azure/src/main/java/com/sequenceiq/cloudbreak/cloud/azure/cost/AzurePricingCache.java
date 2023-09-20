@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.cost;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -166,7 +167,7 @@ public class AzurePricingCache implements PricingCache {
 
     private String getQueryFilter(String region, String instanceType) {
         Map<String, String> filters = Map.of(
-                "armRegionName", "'" + region.replace(" ", "").toLowerCase() + "'",
+                "armRegionName", "'" + region.replace(" ", "").toLowerCase(Locale.ROOT) + "'",
                 "armSkuName", "'" + instanceType + "'",
                 "serviceName", "'Virtual Machines'",
                 "priceType", "'Consumption'",

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -34,7 +35,7 @@ public class MDCRequestIdOnlyFilter extends OncePerRequestFilter {
         Builder builder = MdcContext.builder().requestId(wrapper.getHeader(REQUEST_ID_HEADER));
         builder.buildMdc();
         LOGGER.debug("Request id has been added to MDC context for request, method: {}, path: {}",
-                request.getMethod().toUpperCase(),
+                request.getMethod().toUpperCase(Locale.ROOT),
                 request.getRequestURI());
         try {
             filterChain.doFilter(wrapper, response);

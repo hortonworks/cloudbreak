@@ -11,6 +11,7 @@ import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
@@ -189,7 +190,8 @@ public class IntegrationTestApp implements CommandLineRunner {
             xmlSuite.setListeners(Arrays.asList(TestNgListener.class.getName(), ThreadLocalTestListener.class.getName(),
                     ReportListener.class.getName(), TestInvocationListener.class.getName(), CustomHTMLReporter.class.getName(),
                     CustomJUnitXMLReporter.class.getName(), TestCaseTimeoutListener.class.getName()));
-            LOG.info("Test are running in: {} type of parallel mode, thread count: {} and with test timeout: {}", parallel.toUpperCase(), threadCount, timeOut);
+            LOG.info("Test are running in: {} type of parallel mode, thread count: {} and with test timeout: {}",
+                    parallel.toUpperCase(Locale.ROOT), threadCount, timeOut);
             return xmlSuite;
         }
     }

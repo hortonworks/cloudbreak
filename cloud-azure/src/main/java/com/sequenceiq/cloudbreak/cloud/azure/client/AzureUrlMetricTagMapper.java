@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,7 +37,7 @@ public class AzureUrlMetricTagMapper implements Function<Request, String> {
         } else if (url.contains("/providers/")) {
             Matcher matcher = PROVIDER_PATTERN.matcher(url);
             if (matcher.find()) {
-                return matcher.group(1).toLowerCase();
+                return matcher.group(1).toLowerCase(Locale.ROOT);
             }
         } else if (url.contains("/operationresults/")) {
             return "operationresults";

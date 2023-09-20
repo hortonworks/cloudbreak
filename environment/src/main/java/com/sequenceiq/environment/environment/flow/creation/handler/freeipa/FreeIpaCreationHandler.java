@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -298,7 +299,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private void setPlacementAndNetwork(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest, boolean multiAzRequired) {
         PlacementRequest placementRequest = new PlacementRequest();
         String region = environment.getRegions().iterator().next().getName();
-        Platform platform = platform(environment.getCloudPlatform().toUpperCase());
+        Platform platform = platform(environment.getCloudPlatform().toUpperCase(Locale.ROOT));
         placementRequest.setRegion(connectors.getDefault(platform).regionToDisplayName(region));
         createFreeIpaRequest.setPlacement(placementRequest);
 

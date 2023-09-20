@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -235,7 +236,7 @@ public class AzureTemplateBuilderFreeIpaTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
                 instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
         Map<String, Object> asMap = new HashMap<>();
-        String availabilitySetName = gatewayGroup.getType().name().toLowerCase() + "-as";
+        String availabilitySetName = gatewayGroup.getType().name().toLowerCase(Locale.ROOT) + "-as";
         asMap.put("name", availabilitySetName);
         asMap.put("faultDomainCount", 2);
         asMap.put("updateDomainCount", 20);
@@ -291,7 +292,7 @@ public class AzureTemplateBuilderFreeIpaTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
                 instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
         Map<String, Object> asMap = new HashMap<>();
-        String availabilitySetName = gatewayGroup.getType().name().toLowerCase() + "-as";
+        String availabilitySetName = gatewayGroup.getType().name().toLowerCase(Locale.ROOT) + "-as";
         asMap.put("name", availabilitySetName);
         asMap.put("faultDomainCount", 2);
         asMap.put("updateDomainCount", 20);
@@ -351,7 +352,7 @@ public class AzureTemplateBuilderFreeIpaTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
                 instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
         Map<String, Object> asMap = new HashMap<>();
-        String availabilitySetName = gatewayGroup.getType().name().toLowerCase() + "-as";
+        String availabilitySetName = gatewayGroup.getType().name().toLowerCase(Locale.ROOT) + "-as";
         asMap.put("name", availabilitySetName);
         asMap.put("faultDomainCount", 2);
         asMap.put("updateDomainCount", 20);
@@ -403,7 +404,7 @@ public class AzureTemplateBuilderFreeIpaTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
                 instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
         Map<String, Object> asMap = new HashMap<>();
-        String availabilitySetName = gatewayGroup.getType().name().toLowerCase() + "-as";
+        String availabilitySetName = gatewayGroup.getType().name().toLowerCase(Locale.ROOT) + "-as";
         asMap.put("name", availabilitySetName);
         asMap.put("faultDomainCount", 2);
         asMap.put("updateDomainCount", 20);

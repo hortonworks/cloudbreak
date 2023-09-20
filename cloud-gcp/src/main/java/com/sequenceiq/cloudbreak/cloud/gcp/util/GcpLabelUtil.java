@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.util;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -41,7 +42,7 @@ public class GcpLabelUtil {
                 LOGGER.debug("Ignoring CRN ({}) parse error during tag value generation : {}", value, e.getMessage());
             }
         }
-        String sanitized = value.split("@")[0].toLowerCase().replaceAll("[^\\w]", "-");
+        String sanitized = value.split("@")[0].toLowerCase(Locale.ROOT).replaceAll("[^\\w]", "-");
         String shortenedValue = StringUtils.right(sanitized, GCP_MAX_TAG_LEN);
         LOGGER.debug("GCP label element has been transformed from '{}' to '{}'", value, shortenedValue);
         return shortenedValue;

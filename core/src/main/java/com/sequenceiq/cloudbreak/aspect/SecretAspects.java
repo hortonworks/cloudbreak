@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.aspect;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -88,8 +89,10 @@ public class SecretAspects {
                         if (value != null && value.getRaw() != null && value.getSecret() == null) {
                             tenant = Optional.ofNullable(tenant).orElseGet(() -> findTenant(entity));
                             String path = String.format("%s/%s/%s/%s-%s", tenant,
-                                    entity.getClass().getSimpleName().toLowerCase(), field.getName().toLowerCase(),
-                                    UUID.randomUUID().toString(), Long.toHexString(clock.getCurrentTimeMillis()));
+                                    entity.getClass().getSimpleName().toLowerCase(Locale.ROOT),
+                                    field.getName().toLowerCase(Locale.ROOT),
+                                    UUID.randomUUID().toString(),
+                                    Long.toHexString(clock.getCurrentTimeMillis()));
                             String secret = secretService.put(path, value.getRaw());
                             LOGGER.debug("Field: '{}' is saved at path: {}", field.getName(), path);
                             field.set(entity, new SecretProxy(secretService, secret));

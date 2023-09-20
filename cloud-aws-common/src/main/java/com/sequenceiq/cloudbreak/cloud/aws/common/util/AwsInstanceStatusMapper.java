@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.util;
 
+import java.util.Locale;
+
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
 import software.amazon.awssdk.services.ec2.model.InstanceState;
@@ -11,11 +13,11 @@ public class AwsInstanceStatusMapper {
     }
 
     public static InstanceStatus getInstanceStatusByAwsStatus(String status) {
-        return getInstanceStatusByAwsStateAndReason(InstanceState.builder().name(status.toLowerCase()).build(), null);
+        return getInstanceStatusByAwsStateAndReason(InstanceState.builder().name(status.toLowerCase(Locale.ROOT)).build(), null);
     }
 
     public static InstanceStatus getInstanceStatusByAwsStateAndReason(InstanceState state, StateReason stateReason) {
-        switch (state.nameAsString().toLowerCase()) {
+        switch (state.nameAsString().toLowerCase(Locale.ROOT)) {
             case "stopped":
                 return InstanceStatus.STOPPED;
             case "running":

@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.user.event;
 
+import java.util.Locale;
+
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 
@@ -29,11 +31,11 @@ public class FreeIpaClientResult<R extends FreeIpaClientRequest<?>> implements P
     }
 
     public static String selector(Class<?> clazz) {
-        return clazz.getSimpleName().toUpperCase();
+        return clazz.getSimpleName().toUpperCase(Locale.ROOT);
     }
 
     public static String failureSelector(Class<?> clazz) {
-        return clazz.getSimpleName().toUpperCase() + "_ERROR";
+        return clazz.getSimpleName().toUpperCase(Locale.ROOT) + "_ERROR";
     }
 
     public String selector() {

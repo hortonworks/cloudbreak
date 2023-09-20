@@ -4,7 +4,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class CommonExperience {
+public final class CommonExperience {
 
     private String name;
 

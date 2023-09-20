@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.dto.mock;
 
+import java.util.Locale;
+
 import org.springframework.http.HttpMethod;
 
 public class Method {
@@ -15,7 +17,7 @@ public class Method {
     public static Method build(String methodName) {
         HttpMethod httpMethod = null;
         try {
-            httpMethod = HttpMethod.valueOf(methodName.toUpperCase());
+            httpMethod = HttpMethod.valueOf(methodName.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             for (HttpMethod checkMethod : HttpMethod.values()) {
                 if (methodName.startsWith(checkMethod.name().toLowerCase())) {

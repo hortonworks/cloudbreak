@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.service;
 
 import java.util.Date;
+import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
 
     public String nativeInstance(String stackName, String groupName, Long stackId, Long privateId) {
         String name;
-        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(groupName).toLowerCase());
+        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(groupName).toLowerCase(Locale.ROOT));
         name = normalize(stackName);
         name = adjustPartLength(name);
         name = appendPart(name, stackId);
@@ -47,7 +48,7 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
 
     public String rootDisk(String stackName, Long stackId, String groupName, Long privateId) {
         String name;
-        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(groupName).toLowerCase());
+        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(groupName).toLowerCase(Locale.ROOT));
         name = normalize(stackName);
         name = adjustPartLength(name);
         name = appendPart(name, stackId);
@@ -59,7 +60,7 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
 
     public String securityGroup(String stackName, String groupName, Long stackId) {
         String name;
-        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(groupName).toLowerCase());
+        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(groupName).toLowerCase(Locale.ROOT));
         name = normalize(stackName);
         name = adjustPartLength(name);
         name = appendPart(name, stackId);
@@ -71,7 +72,7 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
 
     public String eip(String stackName, String groupName, Long stackId) {
         String name;
-        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(groupName).toLowerCase());
+        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(groupName).toLowerCase(Locale.ROOT));
         name = normalize(stackName);
         name = adjustPartLength(name);
         name = appendPart(name, stackId);
@@ -111,7 +112,7 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
 
     public String cloudWatch(String stackName, Long stackId, String groupName, Long privateId) {
         String name;
-        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(groupName).toLowerCase());
+        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(groupName).toLowerCase(Locale.ROOT));
         name = normalize(stackName);
         name = adjustPartLength(name);
         name = appendPart(name, stackId);
@@ -124,7 +125,7 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
 
     private String instance(String stackName, String groupName, Long privateId) {
         String name;
-        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(groupName).toLowerCase());
+        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(groupName).toLowerCase(Locale.ROOT));
         name = normalize(stackName);
         name = adjustPartLength(name);
         name = appendPart(name, normalize(instanceGroupName));

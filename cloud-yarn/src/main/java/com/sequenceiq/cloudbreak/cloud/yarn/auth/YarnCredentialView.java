@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.yarn.auth;
 
+import java.util.Locale;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -14,7 +15,7 @@ public class YarnCredentialView {
     }
 
     public String getYarnEndpoint() {
-        String yarn = YarnConstants.YARN_PLATFORM.value().toLowerCase();
+        String yarn = YarnConstants.YARN_PLATFORM.value().toLowerCase(Locale.ROOT);
         if (cloudCredential.hasParameter(yarn)) {
             return (String) cloudCredential.getParameter(yarn, Map.class).get(YarnConstants.YARN_ENDPOINT_PARAMETER);
         }

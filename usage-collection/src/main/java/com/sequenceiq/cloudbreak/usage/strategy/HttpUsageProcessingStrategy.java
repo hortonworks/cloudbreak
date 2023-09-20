@@ -40,7 +40,7 @@ public class HttpUsageProcessingStrategy implements UsageProcessingStrategy {
         long timestamp = event.getTimestamp();
         String binaryUsageEvent = BaseEncoding.base64().encode(event.toByteArray());
         fields.put("@message", String.format("CDP_BINARY_USAGE_EVENT - %s", binaryUsageEvent));
-        fields.put("@timestamp", simpleDateFormat.format(Date.from(Instant.now())));
+        fields.put("@timestamp", format(Date.from(Instant.now())));
         edhHttpConfiguration.getAdditionalFields().stream()
                 .filter(f -> StringUtils.isNotBlank(f.getKey()))
                 .forEach(
@@ -49,5 +49,9 @@ public class HttpUsageProcessingStrategy implements UsageProcessingStrategy {
         String jsonMessageInput = JsonUtil.createJsonTree(fields).toString();
         UsageHttpRecordRequest request = new UsageHttpRecordRequest(jsonMessageInput, event, timestamp, true);
         usageHttpRecordProcessor.processRecord(request);
+    }
+
+    private synchronized String format(Date date) {
+        return simpleDateFormat.format(date);
     }
 }

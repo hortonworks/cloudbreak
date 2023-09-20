@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -115,7 +116,7 @@ class LaunchStackHandlerTest {
         verify(resourceConnector).launch(authenticatedCtx, cloudStack, persistanceNotifier, data.getAdjustmentWithThreshold());
 
         ArgumentCaptor<Event> resultArgumentCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(eq(LaunchStackResult.class.getSimpleName().toUpperCase()), resultArgumentCaptor.capture());
+        verify(eventBus).notify(eq(LaunchStackResult.class.getSimpleName().toUpperCase(Locale.ROOT)), resultArgumentCaptor.capture());
 
         Event<LaunchStackResult> resultEvent = resultArgumentCaptor.getValue();
         LaunchStackResult result = resultEvent.getData();
@@ -167,7 +168,7 @@ class LaunchStackHandlerTest {
 
         verify(authentication).authenticate(cloudCtx, cloudCredential);
         verify(resourceConnector).launch(authenticatedCtx, cloudStack, persistanceNotifier, data.getAdjustmentWithThreshold());
-        String failureSelector = LaunchStackResult.class.getSimpleName().toUpperCase() + "_ERROR";
+        String failureSelector = LaunchStackResult.class.getSimpleName().toUpperCase(Locale.ROOT) + "_ERROR";
         verify(eventBus).notify(eq(failureSelector), any(Event.class));
     }
 }

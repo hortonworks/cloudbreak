@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.actor;
 
 import java.util.Base64;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -56,7 +57,7 @@ public class CloudbreakActor extends CloudbreakUserCache implements Actor {
     private void checkNonEmpty(String name, String value) {
         if (StringUtils.isBlank(value)) {
             throw new NullPointerException(String.format("Following variable must be set whether as environment variables or (test) application.yml:: %s",
-                    name.replaceAll("\\.", "_").toUpperCase()));
+                    name.replaceAll("\\.", "_").toUpperCase(Locale.ROOT)));
         }
     }
 }

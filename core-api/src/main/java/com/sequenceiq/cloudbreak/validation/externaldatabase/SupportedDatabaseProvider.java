@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.OR
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.POSTGRES;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
@@ -43,12 +44,12 @@ public final class SupportedDatabaseProvider {
     }
 
     public static Optional<SupportedExternalDatabaseServiceEntry> getOthers() {
-        return SUPPORTED_EXTERNAL_DATABASES.stream().filter(item -> item.getName().equals("Other".toUpperCase())).findFirst();
+        return SUPPORTED_EXTERNAL_DATABASES.stream().filter(item -> item.getName().equals("Other".toUpperCase(Locale.ROOT))).findFirst();
     }
 
     private static SupportedExternalDatabaseServiceEntry getSupportedServiceEntry(String name, DatabaseVendor... vendors) {
         SupportedExternalDatabaseServiceEntry entry = new SupportedExternalDatabaseServiceEntry();
-        entry.setName(name.toUpperCase().replaceAll(" ", "_"));
+        entry.setName(name.toUpperCase(Locale.ROOT).replaceAll(" ", "_"));
         entry.setDisplayName(name);
         for (DatabaseVendor databaseVendor : vendors) {
             entry.getDatabases().add(new SupportedDatabaseEntry(databaseVendor.name(), databaseVendor.displayName(),

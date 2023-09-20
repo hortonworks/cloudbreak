@@ -56,7 +56,7 @@ public class LoggingRequestValidator implements ConstraintValidator<ValidLogging
                 valid = true;
             }
         } catch (InvalidPathException ex) {
-            // valid = false
+            valid = false;
         }
         return valid && !StringUtils.containsWhitespace(value.getStorageLocation());
     }

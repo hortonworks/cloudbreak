@@ -30,7 +30,7 @@ import com.sequenceiq.periscope.monitor.Monitored;
 import com.sequenceiq.periscope.monitor.evaluator.ScalingConstants;
 
 @Entity
-public class Cluster implements Monitored, Clustered {
+public final class Cluster implements Monitored, Clustered {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "cluster_generator")

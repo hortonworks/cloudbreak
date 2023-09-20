@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.validator;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -75,12 +76,12 @@ public abstract class AbstractAwsSimulatePolicyValidator {
     }
 
     private boolean isEvaluationFailed(EvaluationResult evaluationResult) {
-        return evaluationResult.evalDecisionAsString().toLowerCase().contains("deny")
+        return evaluationResult.evalDecisionAsString().toLowerCase(Locale.ROOT).contains("deny")
                 && CollectionUtils.isEmpty(evaluationResult.missingContextValues());
     }
 
     private boolean isEvaluationWarning(EvaluationResult evaluationResult) {
-        return evaluationResult.evalDecisionAsString().toLowerCase().contains("deny")
+        return evaluationResult.evalDecisionAsString().toLowerCase(Locale.ROOT).contains("deny")
                 && !CollectionUtils.isEmpty(evaluationResult.missingContextValues());
     }
 

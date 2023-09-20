@@ -7,6 +7,7 @@ import static java.util.Collections.singletonList;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -250,7 +251,7 @@ public class ClusterProxyService {
         String gatewayIp = stack.getPrimaryGatewayInstance().getPrivateIp();
         Cluster cluster = stack.getCluster();
         String knoxUrl = String.format("https://%s:%d/%s/%s", gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort(),
-                KnownServiceIdentifier.KNOX.toString().toLowerCase(),
+                KnownServiceIdentifier.KNOX.toString().toLowerCase(Locale.ROOT),
                 cluster.getGateway().getPath());
         LOGGER.info("The generated URL for Knox in case of CCMv2(.x): '{}'", knoxUrl);
         return knoxUrl;

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.util;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -23,6 +24,6 @@ public class RegionUtil {
         if (labelOrName == null) {
             return null;
         }
-        return REGIONS_BY_NAME.get(labelOrName.toLowerCase().replace(" ", ""));
+        return REGIONS_BY_NAME.get(labelOrName.toLowerCase(Locale.ROOT).replace(" ", ""));
     }
 }

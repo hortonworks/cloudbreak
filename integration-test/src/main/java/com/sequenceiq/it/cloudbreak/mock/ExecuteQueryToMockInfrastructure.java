@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.mock;
 
 import java.security.KeyManagementException;
 import java.security.SecureRandom;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -63,7 +64,7 @@ public class ExecuteQueryToMockInfrastructure {
     public void executeMethod(Method method, String path, Map<String, String> parameters, Entity<?> body, Consumer<Response> proc, Function<WebTarget,
             WebTarget> deco) {
         WebTarget target = buildWebTarget(path, deco, parameters);
-        proc.accept(target.request().method(method.getMethodName().toUpperCase(), body));
+        proc.accept(target.request().method(method.getMethodName().toUpperCase(Locale.ROOT), body));
     }
 
     public <T> T executeMethod(HttpMethod method, String path, Map<String, String> parameters, Entity<?> body, Function<Response, T> proc, Function<WebTarget,

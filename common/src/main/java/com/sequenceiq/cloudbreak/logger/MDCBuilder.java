@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -225,13 +226,13 @@ public class MDCBuilder {
                 return field.get().get(o).toString();
             }
         } catch (Exception ignored) {
-
+            return null;
         }
         return null;
     }
 
     private static String getResourceType(Object object) {
-        String typeName = object.getClass().getSimpleName().toUpperCase();
+        String typeName = object.getClass().getSimpleName().toUpperCase(Locale.ROOT);
         return typeName.endsWith("VIEW") ? StringUtils.substringBefore(typeName, "VIEW") : typeName;
     }
 

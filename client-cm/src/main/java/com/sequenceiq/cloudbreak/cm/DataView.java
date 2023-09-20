@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import java.util.Locale;
+
 import com.google.common.base.Joiner;
 
 public enum DataView {
@@ -17,14 +19,14 @@ public enum DataView {
 
     // List of supported views
     private static final String SUPPORTED_VIEWS =
-            Joiner.on(", ").join(values()).toLowerCase();
+            Joiner.on(", ").join(values()).toLowerCase(Locale.ROOT);
 
     public static DataView fromString(String s) {
         if (s == null || s.isEmpty()) {
             return SUMMARY;
         }
 
-        return valueOf(s.toUpperCase());
+        return valueOf(s.toUpperCase(Locale.ROOT));
     }
 }
 

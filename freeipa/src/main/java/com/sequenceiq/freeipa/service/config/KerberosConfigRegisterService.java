@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.config;
 
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,7 +53,7 @@ public class KerberosConfigRegisterService extends AbstractConfigRegister {
         kerberosConfig.setEnvironmentCrn(envCrn);
         kerberosConfig.setName(stack.getName());
         kerberosConfig.setPrincipal(dn);
-        kerberosConfig.setRealm(freeIpa.getDomain().toUpperCase());
+        kerberosConfig.setRealm(freeIpa.getDomain().toUpperCase(Locale.ROOT));
         kerberosConfig.setType(KerberosType.FREEIPA);
         Set<InstanceMetaData> allNotDeletedInstances = stack.getInstanceGroups().stream()
                 .flatMap(instanceGroup -> instanceGroup.getNotDeletedInstanceMetaDataSet().stream()).collect(Collectors.toSet());

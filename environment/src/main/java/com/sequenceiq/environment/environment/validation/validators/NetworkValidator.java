@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.validation.validators;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -57,7 +58,7 @@ public class NetworkValidator {
 
     @VisibleForTesting
     void validateNetwork(Environment environment, NetworkDto network, ValidationResultBuilder resultBuilder) {
-        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase());
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase(Locale.ROOT));
         EnvironmentNetworkValidator environmentNetworkValidator =
                 environmentNetworkValidatorsByCloudPlatform.get(cloudPlatform);
         if (environmentNetworkValidator != null) {
@@ -71,7 +72,7 @@ public class NetworkValidator {
     private void validateNetworkToEdit(Environment environment, NetworkDto network, ValidationResultBuilder resultBuilder) {
         if (network != null) {
             EnvironmentNetworkValidator environmentNetworkValidator =
-                    environmentNetworkValidatorsByCloudPlatform.get(CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase()));
+                    environmentNetworkValidatorsByCloudPlatform.get(CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase(Locale.ROOT)));
             if (environmentNetworkValidator != null) {
                 EnvironmentDto environmentDto = environmentDtoConverter.environmentToDto(environment);
                 EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder()

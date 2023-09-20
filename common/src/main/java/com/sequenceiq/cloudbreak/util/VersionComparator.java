@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.util;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -123,7 +124,7 @@ public class VersionComparator implements Comparator<Versioned>, Serializable {
     }
 
     private PreReleaseIdentifier getPreReleaseIdentifierPrecedence(String preReleaseIdentifier) {
-        switch (preReleaseIdentifier.toLowerCase()) {
+        switch (preReleaseIdentifier.toLowerCase(Locale.ROOT)) {
             case "b":
                 return PreReleaseIdentifier.RE_VERSION;
             case "rc":

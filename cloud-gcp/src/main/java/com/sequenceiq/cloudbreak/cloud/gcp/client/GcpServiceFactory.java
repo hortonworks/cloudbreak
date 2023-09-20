@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.client;
 
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -26,7 +27,8 @@ public abstract class GcpServiceFactory {
         ExponentialBackOff backOff = new ExponentialBackOff();
         return request -> {
             credential.initialize(request);
-            MetricLoggerInterceptor metricLoggerInterceptor = new MetricLoggerInterceptor(metricService, getClass().getSimpleName().toLowerCase());
+            MetricLoggerInterceptor metricLoggerInterceptor =
+                    new MetricLoggerInterceptor(metricService, getClass().getSimpleName().toLowerCase(Locale.ROOT));
             request.setResponseInterceptor(metricLoggerInterceptor);
             CompositeHttpExecuteInterceptor compositeHttpExecuteInterceptor = new CompositeHttpExecuteInterceptor(List.of(credential, metricLoggerInterceptor));
             request.setInterceptor(compositeHttpExecuteInterceptor);

@@ -12,6 +12,8 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull.MutuallyExclusiveNotNullValidator;
@@ -20,6 +22,8 @@ import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull.MutuallyExc
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = MutuallyExclusiveNotNullValidator.class)
 public @interface MutuallyExclusiveNotNull {
+
+    Logger LOGGER = LoggerFactory.getLogger(MutuallyExclusiveNotNull.class);
 
     String[] fieldGroups();
 
@@ -93,7 +97,7 @@ public @interface MutuallyExclusiveNotNull {
                         return field;
                     }
                 } catch (NoSuchFieldException | SecurityException ignore) {
-                    // Nothing. We'll try to get field from superclass
+                    LOGGER.info("exception happened {}", ignore);
                 }
                 currentClass = currentClass.getSuperclass();
             } while (currentClass != null && !currentClass.equals(Object.class));

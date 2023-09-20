@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.cloudbreak.service.image.CsdSegments.segments;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -42,7 +43,7 @@ public class CsdParcelNameMatcher {
 
     private Optional<CsdSegments> getMatchingSegments(String parcelName) {
         if (!Strings.isNullOrEmpty(parcelName)) {
-            return Optional.ofNullable(parcelCsdSegmentsMapping.get(parcelName.toUpperCase()));
+            return Optional.ofNullable(parcelCsdSegmentsMapping.get(parcelName.toUpperCase(Locale.ROOT)));
         }
         return Optional.empty();
     }

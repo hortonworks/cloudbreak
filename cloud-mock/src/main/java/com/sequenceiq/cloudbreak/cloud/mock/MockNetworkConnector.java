@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,7 +52,7 @@ public class MockNetworkConnector implements DefaultNetworkConnector {
         CreatedSubnet subnet = new CreatedSubnet();
         subnet.setCidr(subnetRequest.getCidr());
         subnet.setPublicSubnet(subnetRequest.getType() == PUBLIC);
-        subnet.setSubnetId(subnetRequest.getType().name().toLowerCase() + "_" + index);
+        subnet.setSubnetId(subnetRequest.getType().name().toLowerCase(Locale.ROOT) + "_" + index);
         subnet.setType(subnetRequest.getType());
         int azCount = MockPlatformResources.LONDON_AVAILABILITY_ZONES.length;
         subnet.setAvailabilityZone(MockPlatformResources.LONDON_AVAILABILITY_ZONES[index % azCount]);

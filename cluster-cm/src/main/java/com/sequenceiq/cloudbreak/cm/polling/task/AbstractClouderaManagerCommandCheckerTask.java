@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -44,13 +45,13 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
 
     @Override
     public String successMessage(T pollerObject) {
-        return String.format("Cloudera Manager application of command '%s' was a success", getCommandName().toLowerCase());
+        return String.format("Cloudera Manager application of command '%s' was a success", getCommandName().toLowerCase(Locale.ROOT));
     }
 
     @Override
     public void handleTimeout(ClouderaManagerCommandPollerObject pollerObject) {
         throw new ClouderaManagerOperationFailedException(String.format("Operation timed out. Failed to execute command %s.",
-                getCommandName().toLowerCase()));
+                getCommandName().toLowerCase(Locale.ROOT)));
     }
 
     protected String getOperationIdentifier(T pollerObject) {

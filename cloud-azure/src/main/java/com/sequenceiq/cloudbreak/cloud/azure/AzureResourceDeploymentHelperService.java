@@ -4,6 +4,7 @@ import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_DNS_ZONE
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_VIRTUAL_NETWORK_LINK;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -103,7 +104,7 @@ public class AzureResourceDeploymentHelperService {
         String fullDeploymentName = enabledPrivateEndpointServices.stream()
                 .map(AzurePrivateDnsZoneServiceEnum::getSubResource)
                 .collect(Collectors.joining("-", "", suffix))
-                .toLowerCase();
+                .toLowerCase(Locale.ROOT);
         String deploymentName = StringUtils.left(fullDeploymentName, DEPLOYMENT_LENGTH_LIMIT);
         LOGGER.debug("Generated deployment name {}", deploymentName);
         return deploymentName;

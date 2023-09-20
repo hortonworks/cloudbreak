@@ -503,7 +503,7 @@ public class HttpUrlConnector implements Connector {
                                                 (HttpURLConnection) delegateField.get(httpURLConnection);
                                         setRequestMethodViaJreBugWorkaround(delegateConnection, method);
                                     } catch (NoSuchFieldException e) {
-                                        // Ignore for now, keep going
+                                        LOGGER.info("exception happened" + e.getMessage());
                                     } catch (IllegalArgumentException | IllegalAccessException e) {
                                         throw new RuntimeException(e);
                                     }

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -85,7 +86,7 @@ class DelayedStartStackHandlerTest {
         assertEquals(1, instanceCaptorAllValues.get(2).size());
         assertEquals(cloudInstance3, instanceCaptorAllValues.get(2).get(0));
         verify(delayedExecutorService, times(2)).runWithDelay(any(Callable.class), eq(DELAY), eq(TimeUnit.SECONDS));
-        verify(eventBus).notify(eq(StartInstancesResult.class.getSimpleName().toUpperCase()), any(Event.class));
+        verify(eventBus).notify(eq(StartInstancesResult.class.getSimpleName().toUpperCase(Locale.ROOT)), any(Event.class));
     }
 
     @Test
@@ -111,7 +112,7 @@ class DelayedStartStackHandlerTest {
         assertEquals(1, instanceCaptorAllValues.size());
         assertEquals(1, instanceCaptorAllValues.get(0).size());
         verifyNoInteractions(delayedExecutorService);
-        verify(eventBus).notify(eq(StartInstancesResult.class.getSimpleName().toUpperCase()), any(Event.class));
+        verify(eventBus).notify(eq(StartInstancesResult.class.getSimpleName().toUpperCase(Locale.ROOT)), any(Event.class));
     }
 
     @Test
@@ -130,7 +131,7 @@ class DelayedStartStackHandlerTest {
 
         verifyNoInteractions(delayedExecutorService);
         verify(cloudConnector, never()).instances();
-        verify(eventBus).notify(eq(StartInstancesResult.class.getSimpleName().toUpperCase()), any(Event.class));
+        verify(eventBus).notify(eq(StartInstancesResult.class.getSimpleName().toUpperCase(Locale.ROOT)), any(Event.class));
     }
 
     @Test
@@ -145,7 +146,7 @@ class DelayedStartStackHandlerTest {
 
         verifyNoInteractions(delayedExecutorService);
         verify(cloudConnector, never()).instances();
-        verify(eventBus).notify(eq(StartInstancesResult.class.getSimpleName().toUpperCase() + "_ERROR"), any(Event.class));
+        verify(eventBus).notify(eq(StartInstancesResult.class.getSimpleName().toUpperCase(Locale.ROOT) + "_ERROR"), any(Event.class));
     }
 
     @Test

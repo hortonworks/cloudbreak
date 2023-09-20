@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -137,7 +138,7 @@ class AzureImageFilterTest {
 
     private Set<String> getRegionSet(List<Image> filteredImages) {
         return filteredImages.stream().map(Image::getImageSetsByProvider)
-                .map(i -> i.get(CloudConstants.AZURE.toLowerCase()))
+                .map(i -> i.get(CloudConstants.AZURE.toLowerCase(Locale.ROOT)))
                 .filter(Objects::nonNull)
                 .map(Map::keySet)
                 .flatMap(Collection::stream)
@@ -148,7 +149,7 @@ class AzureImageFilterTest {
         Map<String, Map<String, String>> imageSetsByProvider = new HashMap<>();
         Map<String, String> regionImageIdMap = new HashMap<>();
         regionImageIdMap.put(MARKETPLACE_REGION, VALID_MARKETPLACE_IMAGE_NAME);
-        imageSetsByProvider.put(CloudConstants.AZURE.toLowerCase(), regionImageIdMap);
+        imageSetsByProvider.put(CloudConstants.AZURE.toLowerCase(Locale.ROOT), regionImageIdMap);
 
         return createImage(imageSetsByProvider, "1");
     }
@@ -161,11 +162,11 @@ class AzureImageFilterTest {
         regionImageIdMap.put(AN_AZURE_REGION, AN_AZURE_REGION);
         regionImageIdMap.put(ANOTHER_AZURE_REGION, ANOTHER_AZURE_REGION);
         regionImageIdMap.put(THIRD_AZURE_REGION, THIRD_AZURE_REGION);
-        imageSetsByProvider.put(CloudConstants.AZURE.toLowerCase(), regionImageIdMap);
+        imageSetsByProvider.put(CloudConstants.AZURE.toLowerCase(Locale.ROOT), regionImageIdMap);
 
         regionImageIdMap = new HashMap<>();
         regionImageIdMap.put("us-west-1", "ami-0a0986bb98dbabcde");
-        imageSetsByProvider.put(CloudConstants.AWS.toLowerCase(), regionImageIdMap);
+        imageSetsByProvider.put(CloudConstants.AWS.toLowerCase(Locale.ROOT), regionImageIdMap);
 
         return createImage(imageSetsByProvider, "2");
     }
@@ -176,7 +177,7 @@ class AzureImageFilterTest {
         Map<String, String> regionImageIdMap = new HashMap<>();
         regionImageIdMap.put(MARKETPLACE_REGION, VALID_MARKETPLACE_IMAGE_NAME);
         regionImageIdMap.put(AN_AZURE_REGION, AN_AZURE_IMAGE_NAME);
-        imageSetsByProvider.put(CloudConstants.AZURE.toLowerCase(), regionImageIdMap);
+        imageSetsByProvider.put(CloudConstants.AZURE.toLowerCase(Locale.ROOT), regionImageIdMap);
 
         return createImage(imageSetsByProvider, "3");
     }
@@ -186,7 +187,7 @@ class AzureImageFilterTest {
 
         Map<String, String> regionImageIdMap = new HashMap<>();
         regionImageIdMap.put(MARKETPLACE_REGION, INVALID_MARKETPLACE_IMAGE_NAME);
-        imageSetsByProvider.put(CloudConstants.AZURE.toLowerCase(), regionImageIdMap);
+        imageSetsByProvider.put(CloudConstants.AZURE.toLowerCase(Locale.ROOT), regionImageIdMap);
 
         return createImage(imageSetsByProvider, "4");
     }
@@ -196,7 +197,7 @@ class AzureImageFilterTest {
 
         Map<String, String> regionImageIdMap = new HashMap<>();
         regionImageIdMap.put(AN_AZURE_REGION, AN_AZURE_IMAGE_NAME);
-        imageSetsByProvider.put(CloudConstants.AZURE.toLowerCase(), regionImageIdMap);
+        imageSetsByProvider.put(CloudConstants.AZURE.toLowerCase(Locale.ROOT), regionImageIdMap);
 
         return createImage(imageSetsByProvider, "5");
     }

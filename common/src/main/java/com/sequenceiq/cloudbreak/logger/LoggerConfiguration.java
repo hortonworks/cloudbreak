@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.logger;
 
+import java.util.Locale;
+
 import org.apache.commons.lang3.StringUtils;
 
 public class LoggerConfiguration {
@@ -20,7 +22,7 @@ public class LoggerConfiguration {
     }
 
     private static String getProperty(String property, String defaultValue) {
-        String envProperty = property.toUpperCase().replace(".", "_");
+        String envProperty = property.toUpperCase(Locale.ROOT).replace(".", "_");
         if (StringUtils.isNotEmpty(System.getenv(envProperty))) {
             return System.getenv(envProperty);
         } else if (StringUtils.isNotEmpty(System.getProperty(property))) {

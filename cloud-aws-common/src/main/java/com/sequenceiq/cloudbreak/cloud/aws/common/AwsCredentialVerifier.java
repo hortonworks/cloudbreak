@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -73,7 +74,7 @@ public class AwsCredentialVerifier {
                 boolean skipOrgPolicyDecisions = awsCredential.isSkipOrgPolicyDecisions();
                 LOGGER.debug("Simulate policy response: {}, skipOrgPolicyDecisions: {}", simulatePrincipalPolicyResponse, skipOrgPolicyDecisions);
                 simulatePrincipalPolicyResponse.evaluationResults().stream()
-                        .filter(evaluationResult -> evaluationResult.evalDecisionAsString().toLowerCase().contains("deny"))
+                        .filter(evaluationResult -> evaluationResult.evalDecisionAsString().toLowerCase(Locale.ROOT).contains("deny"))
                         .filter(evaluationResult -> shouldCheckEvaluationResult(evaluationResult, skipOrgPolicyDecisions))
                         .map(evaluationResult -> {
                             OrganizationsDecisionDetail organizationsDecisionDetail = evaluationResult.organizationsDecisionDetail();

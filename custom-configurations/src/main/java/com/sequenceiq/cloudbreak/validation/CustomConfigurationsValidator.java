@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.validation;
 
 
+import java.util.Locale;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,7 +18,7 @@ public class CustomConfigurationsValidator {
         LOGGER.info("Validating service names for Custom Configs " + customConfigurations.getName());
         customConfigurations.getConfigurations().forEach(config -> {
             try {
-                AllServiceTypes.valueOf(config.getServiceType().toUpperCase());
+                AllServiceTypes.valueOf(config.getServiceType().toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException e) {
                 throw new BadRequestException("Service name with " + config.getServiceType() + " does not exist.");
             }

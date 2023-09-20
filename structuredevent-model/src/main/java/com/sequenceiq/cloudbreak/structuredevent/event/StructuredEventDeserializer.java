@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-public class StructuredEventDeserializer extends StdDeserializer<StructuredEvent> {
+public final class StructuredEventDeserializer extends StdDeserializer<StructuredEvent> {
 
     private final Map<String, Class<? extends StructuredEvent>> classes = new HashMap<>();
 

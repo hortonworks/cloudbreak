@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.mapper;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,7 +53,8 @@ public class SdkClientExceptionMapper {
     }
 
     private String addMethodNameIfNotContains(String message, String methodName) {
-        if (NullUtil.allNotNull(message, methodName) && !message.toLowerCase().contains(methodName.toLowerCase())) {
+        if (NullUtil.allNotNull(message, methodName)
+                && !message.toLowerCase(Locale.ROOT).contains(methodName.toLowerCase(Locale.ROOT))) {
             String pre = "Cannot execute method: " + methodName + ". ";
             return pre + message;
         } else if (message == null && methodName != null) {

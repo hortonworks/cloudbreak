@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +105,7 @@ public abstract class CloudbreakResourceNameService {
         normalized = normalized.replaceAll("[^a-zA-Z0-9]", "");
         LOGGER.debug("Trimmed invalid characters: {}", part);
 
-        normalized = normalized.toLowerCase();
+        normalized = normalized.toLowerCase(Locale.ROOT);
         LOGGER.debug("Lower case: {}", part);
 
         return normalized;

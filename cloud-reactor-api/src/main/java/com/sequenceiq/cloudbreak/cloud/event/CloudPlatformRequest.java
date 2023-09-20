@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.event;
 
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -24,7 +25,7 @@ public class CloudPlatformRequest<T> implements Selectable {
     }
 
     public static String selector(Class<?> clazz) {
-        return clazz.getSimpleName().toUpperCase();
+        return clazz.getSimpleName().toUpperCase(Locale.ROOT);
     }
 
     @Override

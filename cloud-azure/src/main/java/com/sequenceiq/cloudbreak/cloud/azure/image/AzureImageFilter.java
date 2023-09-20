@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarke
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -46,7 +47,7 @@ public class AzureImageFilter implements ImageFilter {
     private List<Image> includeOnlyMarketplaceImages(List<Image> imageList) {
         LOGGER.debug("Only Azure Marketplace images are permitted, filtering for those..");
         List<Image> filteredImageList = imageList.stream()
-                .filter(image -> image.getImageSetsByProvider().containsKey(AZURE.name().toLowerCase()))
+                .filter(image -> image.getImageSetsByProvider().containsKey(AZURE.name().toLowerCase(Locale.ROOT)))
                 .filter(this::checkIfMarketplaceImage)
                 .map(this::removeNonMarketplaceRegions)
                 .collect(Collectors.toList());
@@ -57,7 +58,7 @@ public class AzureImageFilter implements ImageFilter {
     private List<Image> excludeMarketplaceImages(List<Image> imageList) {
         LOGGER.debug("Azure Marketplace images are not permitted, filtering those out..");
         List<Image> filteredImageList = imageList.stream()
-                .filter(image -> image.getImageSetsByProvider().containsKey(AZURE.name().toLowerCase()))
+                .filter(image -> image.getImageSetsByProvider().containsKey(AZURE.name().toLowerCase(Locale.ROOT)))
                 .map(this::removeMarketplaceRegions)
                 .collect(Collectors.toList());
         LOGGER.debug("After filtering, the following image ids remained available for selection: {}", getImageIds(filteredImageList));

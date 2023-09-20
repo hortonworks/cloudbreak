@@ -429,9 +429,12 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         Optional<ProxyConfig> optionalProxy = Optional.ofNullable(proxyConfig);
         ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
         ApiConfigList proxyConfigList = new ApiConfigList();
-        proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_server").value(optionalProxy.map(ProxyConfig::getServerHost).orElse("")));
-        proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_port").value(optionalProxy.map(pc -> String.valueOf(pc.getServerPort())).orElse("")));
-        proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_protocol").value(optionalProxy.map(pc -> pc.getProtocol().toUpperCase()).orElse("")));
+        proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_server")
+                .value(optionalProxy.map(ProxyConfig::getServerHost).orElse("")));
+        proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_port")
+                .value(optionalProxy.map(pc -> String.valueOf(pc.getServerPort())).orElse("")));
+        proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_protocol")
+                .value(optionalProxy.map(pc -> pc.getProtocol().toUpperCase(Locale.ROOT)).orElse("")));
 
         proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_user")
                 .value(optionalProxy.flatMap(ProxyConfig::getProxyAuthentication).map(ProxyAuthentication::getUserName).orElse("")));

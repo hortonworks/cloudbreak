@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -143,7 +144,7 @@ public class AzureStorage {
     private String buildStorageName(ArmAttachedStorageOption armAttachedStorageOption, AzureCredentialView acv, Long vmId, CloudContext cloudContext,
             AzureDiskType storageType) {
         String result;
-        String name = cloudContext.getName().toLowerCase().replaceAll("\\s+|-", "");
+        String name = cloudContext.getName().toLowerCase(Locale.ROOT).replaceAll("\\s+|-", "");
         name = name.length() > MAX_LENGTH_OF_NAME_SLICE ? name.substring(0, MAX_LENGTH_OF_NAME_SLICE) : name;
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
@@ -170,9 +171,9 @@ public class AzureStorage {
 
     private String getPersistentStorageName(String prefix, AzureCredentialView acv, String region, String resourceGroup) {
         String subscriptionIdPart = StringUtils.isBlank(resourceGroup)
-                ? acv.getSubscriptionId().replaceAll("-", "").toLowerCase()
-                : armUtils.encodeString(acv.getSubscriptionId().replaceAll("-", "").toLowerCase());
-        String regionInitials = WordUtils.initials(RegionUtil.findByLabelOrName(region).label(), ' ').toLowerCase();
+                ? acv.getSubscriptionId().replaceAll("-", "").toLowerCase(Locale.ROOT)
+                : armUtils.encodeString(acv.getSubscriptionId().replaceAll("-", "").toLowerCase(Locale.ROOT));
+        String regionInitials = WordUtils.initials(RegionUtil.findByLabelOrName(region).label(), ' ').toLowerCase(Locale.ROOT);
         String resourceGroupPart = armUtils.encodeString(resourceGroup);
         String result = String.format("%s%s%s%s", prefix, regionInitials, subscriptionIdPart, resourceGroupPart);
         if (result.length() > MAX_LENGTH_OF_RESOURCE_NAME) {

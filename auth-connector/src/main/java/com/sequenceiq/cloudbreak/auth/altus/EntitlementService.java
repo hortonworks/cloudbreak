@@ -104,6 +104,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_USERSYNC_ROUTING;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -549,7 +550,7 @@ public class EntitlementService {
                 regionAwareInternalCrnGeneratorFactory);
         return accountDetails.getEntitlementsList()
                 .stream()
-                .map(e -> e.getEntitlementName().toUpperCase())
+                .map(e -> e.getEntitlementName().toUpperCase(Locale.ROOT))
                 .collect(Collectors.toList());
     }
 

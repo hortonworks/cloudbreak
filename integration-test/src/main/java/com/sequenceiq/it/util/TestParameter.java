@@ -1,6 +1,7 @@
 package com.sequenceiq.it.util;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -26,7 +27,7 @@ public class TestParameter {
         Optional<String> valueAsProperty = Optional.ofNullable(parameters.get(key));
         if (valueAsProperty.isEmpty()) {
             LOGGER.debug("key has not been found as property, trying as environment variable");
-            valueAsProperty = Optional.ofNullable(parameters.get(key.toUpperCase().replaceAll("\\.", "_")));
+            valueAsProperty = Optional.ofNullable(parameters.get(key.toUpperCase(Locale.ROOT).replaceAll("\\.", "_")));
         }
         LOGGER.info(valueAsProperty.isPresent()
                 ? String.format("Acquiring key %s resulting: %s", key, valueAsProperty.get())

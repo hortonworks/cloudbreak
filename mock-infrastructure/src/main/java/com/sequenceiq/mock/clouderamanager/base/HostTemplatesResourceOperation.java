@@ -1,5 +1,7 @@
 package com.sequenceiq.mock.clouderamanager.base;
 
+import java.util.Locale;
+
 import javax.inject.Inject;
 
 import org.springframework.http.ResponseEntity;
@@ -24,7 +26,7 @@ public class HostTemplatesResourceOperation {
     private ClouderaManagerStoreService clouderaManagerStoreService;
 
     public ResponseEntity<ApiHostTemplate> readHostTemplate(String mockUuid, String clusterName, String hostTemplateName) {
-        ApiHostTemplate apiHostTemplate = dataProviderService.getApiHostTemplate(hostTemplateName, hostTemplateName.toUpperCase());
+        ApiHostTemplate apiHostTemplate = dataProviderService.getApiHostTemplate(hostTemplateName, hostTemplateName.toUpperCase(Locale.ROOT));
         return responseCreatorComponent.exec(apiHostTemplate);
     }
 

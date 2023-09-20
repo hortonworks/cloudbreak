@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.image;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -43,7 +44,7 @@ public class ProviderSpecificImageFilter {
     }
 
     private Optional<ImageFilter> getImageFilter(String cloudPlatform) {
-        String platform = cloudPlatform.toUpperCase();
+        String platform = cloudPlatform.toUpperCase(Locale.ROOT);
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
                 Platform.platform(platform),
                 Variant.variant(platform));

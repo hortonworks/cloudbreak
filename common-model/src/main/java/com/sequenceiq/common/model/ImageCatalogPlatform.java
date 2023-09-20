@@ -1,5 +1,6 @@
 package com.sequenceiq.common.model;
 
+import java.util.Locale;
 import java.util.Objects;
 
 public class ImageCatalogPlatform {
@@ -7,7 +8,7 @@ public class ImageCatalogPlatform {
     private final String platform;
 
     public ImageCatalogPlatform(String platform) {
-        this.platform = platform.toLowerCase();
+        this.platform = platform.toLowerCase(Locale.ROOT);
     }
 
     public String name() {
@@ -15,15 +16,15 @@ public class ImageCatalogPlatform {
     }
 
     public String nameToUpperCase() {
-        return platform.toUpperCase();
+        return platform.toUpperCase(Locale.ROOT);
     }
 
     public String nameToLowerCase() {
-        return platform.toLowerCase();
+        return platform.toLowerCase(Locale.ROOT);
     }
 
     public static ImageCatalogPlatform imageCatalogPlatform(String platform) {
-        return new ImageCatalogPlatform(platform.toUpperCase());
+        return new ImageCatalogPlatform(platform.toUpperCase(Locale.ROOT));
     }
 
     @Override

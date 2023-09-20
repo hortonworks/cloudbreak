@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-public class AzureInstanceView {
+public final class AzureInstanceView {
 
     private final CloudInstance instance;
 

@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
         name = "customconfigurations",
         uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "account"}), @UniqueConstraint(columnNames = "crn")}
 )
-public class CustomConfigurations implements Serializable {
+public final class CustomConfigurations implements Serializable {
     @Id
     @SequenceGenerator(
             name = "custom_configs_generator",

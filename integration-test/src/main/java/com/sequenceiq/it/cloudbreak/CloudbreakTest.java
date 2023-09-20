@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -144,7 +145,7 @@ public class CloudbreakTest extends AbstractTestNGSpringContextTests {
     private void checkNonEmpty(String name, String value) {
         if (StringUtils.isBlank(value)) {
             throw new NullPointerException(String.format("Following variable must be set whether as environment variables or (test) application.yml:: %s",
-                    name.replaceAll("\\.", "_").toUpperCase()));
+                    name.replaceAll("\\.", "_").toUpperCase(Locale.ROOT)));
         }
     }
 }

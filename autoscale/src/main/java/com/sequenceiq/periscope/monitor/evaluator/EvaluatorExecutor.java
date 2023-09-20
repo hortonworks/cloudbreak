@@ -54,8 +54,12 @@ public abstract class EvaluatorExecutor implements Runnable {
             return true;
         } else {
             LOGGER.debug("Cluster {} cannot be {} for {} min(s)", clusterCrn, coolDownAction,
-                    ClusterUtils.TIME_FORMAT.format((double) remainingTime / TimeUtil.MIN_IN_MS));
+                    format((double) remainingTime / TimeUtil.MIN_IN_MS));
         }
         return false;
+    }
+
+    private synchronized String format(double number) {
+        return ClusterUtils.TIME_FORMAT.format(number);
     }
 }

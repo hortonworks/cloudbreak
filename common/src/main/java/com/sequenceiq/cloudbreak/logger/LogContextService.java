@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.logger;
 
+import java.util.Locale;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +13,7 @@ public class LogContextService {
     public void buildMDCParams(Object target, String[] paramNames, Object[] args) {
         Builder builder = MdcContext.builder();
         for (int i = 0; i < paramNames.length; i++) {
-            String paramName = paramNames[i].toLowerCase();
+            String paramName = paramNames[i].toLowerCase(Locale.ROOT);
             Object paramValue = args[i];
             String paramString = paramValue != null ? paramValue.toString() : "";
             if (paramName.contains("name") || paramName.contains("resourceName")) {
@@ -26,7 +28,7 @@ public class LogContextService {
         }
         String controllerClassName = target.getClass().getSimpleName();
         String resourceType = controllerClassName.substring(0, controllerClassName.indexOf("Controller"));
-        builder.resourceType(resourceType.toUpperCase());
+        builder.resourceType(resourceType.toUpperCase(Locale.ROOT));
         builder.buildMdc();
     }
 

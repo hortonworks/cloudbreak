@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -139,7 +140,7 @@ public class AzureUtils {
     }
 
     public static String getGroupName(String group) {
-        String shortened = WordUtils.initials(group.replaceAll("_", " ")).toLowerCase();
+        String shortened = WordUtils.initials(group.replaceAll("_", " ")).toLowerCase(Locale.ROOT);
         return shortened.length() <= HOST_GROUP_LENGTH ? shortened : shortened.substring(0, HOST_GROUP_LENGTH);
     }
 
@@ -840,7 +841,7 @@ public class AzureUtils {
             checksum.reset();
             checksum.update(bytes, 0, bytes.length);
             long checksumValue = checksum.getValue();
-            return Long.toHexString(checksumValue).toLowerCase();
+            return Long.toHexString(checksumValue).toLowerCase(Locale.ROOT);
         } else {
             return "";
         }

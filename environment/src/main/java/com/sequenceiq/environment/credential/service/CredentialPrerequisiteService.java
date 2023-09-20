@@ -176,6 +176,7 @@ public class CredentialPrerequisiteService {
         try {
             return new Json(credential.getAttributes()).get(CredentialAttributes.class);
         } catch (IOException ignore) {
+            LOGGER.info("exception happened {}", ignore);
         }
         return null;
     }

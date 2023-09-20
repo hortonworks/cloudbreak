@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.event;
 
+import java.util.Locale;
+
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 
@@ -34,11 +36,11 @@ public class CloudPlatformResult implements Payload {
     }
 
     public static String selector(Class<?> clazz) {
-        return clazz.getSimpleName().toUpperCase();
+        return clazz.getSimpleName().toUpperCase(Locale.ROOT);
     }
 
     public static String failureSelector(Class<?> clazz) {
-        return clazz.getSimpleName().toUpperCase() + "_ERROR";
+        return clazz.getSimpleName().toUpperCase(Locale.ROOT) + "_ERROR";
     }
 
     public String selector() {

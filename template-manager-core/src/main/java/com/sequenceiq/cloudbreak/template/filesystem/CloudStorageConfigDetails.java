@@ -66,6 +66,7 @@ public class CloudStorageConfigDetails {
                 configQueryEntry.setSecure(secure);
                 configQueryEntry.setDefaultPath(generateConfigWithParameters(configQueryEntry.getDefaultPath(), fileSystemType, templateObject));
             } catch (IOException e) {
+                LOGGER.info("exception happened {}", e);
             }
         }
         filtered = filtered.stream().sorted(Comparator.comparing(ConfigQueryEntry::getPropertyName)).collect(Collectors.toCollection(LinkedHashSet::new));

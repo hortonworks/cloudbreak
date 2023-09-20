@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -240,7 +241,7 @@ public class CredentialService extends AbstractCredentialService implements Comp
 
     public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, boolean govCloud,
             String deploymentAddress, String userCrn, CredentialType type) {
-        String cloudPlatformInUpperCase = cloudPlatform.toUpperCase();
+        String cloudPlatformInUpperCase = cloudPlatform.toUpperCase(Locale.ROOT);
         credentialValidator.validateCredentialCloudPlatform(cloudPlatformInUpperCase, userCrn, type);
         return credentialPrerequisiteService.getPrerequisites(cloudPlatformInUpperCase, govCloud, deploymentAddress, type);
     }

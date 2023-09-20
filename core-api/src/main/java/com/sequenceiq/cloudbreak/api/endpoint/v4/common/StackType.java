@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.common;
 import static com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService.DATAHUB_RESOURCE_TYPE;
 import static com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService.LEGACY_RESOURCE_TYPE;
 
+import java.util.Locale;
+
 public enum  StackType {
     WORKLOAD,
     DATALAKE,
@@ -16,6 +18,6 @@ public enum  StackType {
         if (LEGACY.equals(this)) {
             return LEGACY_RESOURCE_TYPE;
         }
-        return name().toLowerCase();
+        return name().toLowerCase(Locale.ROOT);
     }
 }

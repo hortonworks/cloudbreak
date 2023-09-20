@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CloudEfsAttributes {
+public final class CloudEfsAttributes {
 
     public static final String EFS_TAGKEY_NAME = "Name";
 

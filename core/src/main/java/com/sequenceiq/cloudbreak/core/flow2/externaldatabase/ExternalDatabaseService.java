@@ -296,7 +296,7 @@ public class ExternalDatabaseService {
     private AllocateDatabaseServerV4Request getDatabaseRequest(Stack stack, DetailedEnvironmentResponse environment) {
         AllocateDatabaseServerV4Request req = new AllocateDatabaseServerV4Request();
         req.setEnvironmentCrn(environment.getCrn());
-        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase(Locale.US));
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase(Locale.ROOT));
         String databaseEngineVersion = stack.getExternalDatabaseEngineVersion();
         req.setDatabaseServer(getDatabaseServerStackRequest(cloudPlatform, stack.getExternalDatabaseCreationType(), databaseEngineVersion,
                 getAttributes(stack.getDatabase()), environment, stack.isMultiAz()));

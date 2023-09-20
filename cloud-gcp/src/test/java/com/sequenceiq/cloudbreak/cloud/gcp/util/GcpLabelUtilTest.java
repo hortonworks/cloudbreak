@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -31,9 +32,12 @@ class GcpLabelUtilTest {
         Map<String, String> result = gcpLabelUtil.createLabelsFromTags(cloudStack);
 
         assertEquals(3L, result.size());
-        assertEquals("12474ddc-6e44-4f4c-806a-b197ef12cbb8", result.get(ENVIRONMENT_CRN.toLowerCase()));
-        assertEquals("5d7-b645-7ccf9edbb73d-user-05ca1026-c028-466b-8943-b04f765fa3f6", result.get(CREATOR_CRN.toLowerCase()));
-        assertEquals("-b645-7ccf9edbb73d-freeipa-8111d534-8c7e-4a68-a8ba-7ebb389a3a20", result.get(RESOURCE_CRN.toLowerCase()));
+        assertEquals("12474ddc-6e44-4f4c-806a-b197ef12cbb8",
+                result.get(ENVIRONMENT_CRN.toLowerCase(Locale.ROOT)));
+        assertEquals("5d7-b645-7ccf9edbb73d-user-05ca1026-c028-466b-8943-b04f765fa3f6",
+                result.get(CREATOR_CRN.toLowerCase(Locale.ROOT)));
+        assertEquals("-b645-7ccf9edbb73d-freeipa-8111d534-8c7e-4a68-a8ba-7ebb389a3a20",
+                result.get(RESOURCE_CRN.toLowerCase(Locale.ROOT)));
     }
 
     @Test

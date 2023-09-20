@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
@@ -864,7 +865,7 @@ public class ClouderaManagerSetupServiceTest {
         assertThat(capturedConfigs.getItems()).containsExactlyInAnyOrder(
                 new ApiConfig().name("parcel_proxy_server").value(PROXY_HOST),
                 new ApiConfig().name("parcel_proxy_port").value(Integer.toString(PROXY_PORT)),
-                new ApiConfig().name("parcel_proxy_protocol").value(PROXY_PROTOCOL.toUpperCase()),
+                new ApiConfig().name("parcel_proxy_protocol").value(PROXY_PROTOCOL.toUpperCase(Locale.ROOT)),
                 new ApiConfig().name("parcel_proxy_user").value(PROXY_USER),
                 new ApiConfig().name("parcel_proxy_password").value(PROXY_PASSWORD)
         );
@@ -901,7 +902,7 @@ public class ClouderaManagerSetupServiceTest {
         assertThat(capturedConfigs.getItems()).containsExactlyInAnyOrder(
                 new ApiConfig().name("parcel_proxy_server").value(PROXY_HOST),
                 new ApiConfig().name("parcel_proxy_port").value(Integer.toString(PROXY_PORT)),
-                new ApiConfig().name("parcel_proxy_protocol").value(PROXY_PROTOCOL.toUpperCase()),
+                new ApiConfig().name("parcel_proxy_protocol").value(PROXY_PROTOCOL.toUpperCase(Locale.ROOT)),
                 new ApiConfig().name("parcel_proxy_user").value(PROXY_USER),
                 new ApiConfig().name("parcel_proxy_password").value(PROXY_PASSWORD),
                 new ApiConfig().name("parcel_no_proxy_list").value(PROXY_NO_PROXY_HOSTS)

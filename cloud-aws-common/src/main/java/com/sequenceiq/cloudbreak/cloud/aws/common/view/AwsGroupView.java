@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.view;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
@@ -199,6 +200,6 @@ public class AwsGroupView {
     }
 
     public String getPlacementGroupStrategy() {
-        return placementGroupStrategy.toLowerCase();
+        return placementGroupStrategy.toLowerCase(Locale.ROOT);
     }
 }

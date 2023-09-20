@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -287,8 +288,8 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
                         environment.getName(),
                         source.getName()))
                 .withRealm(String.format("%s.%s.WL.<ACCOUNT-NAME>.SITE",
-                        environment.getName().toUpperCase(),
-                        source.getName().toUpperCase()))
+                        environment.getName().toUpperCase(Locale.ROOT),
+                        source.getName().toUpperCase(Locale.ROOT)))
                 .withTcpAllowed(false)
                 .withPrincipal("kerberosbind-sdfsdfsf")
                 .withVerifyKdcTrust(true)

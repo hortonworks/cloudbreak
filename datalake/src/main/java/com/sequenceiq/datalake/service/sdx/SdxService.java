@@ -1351,7 +1351,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                     () -> environmentClientService.getByCrn(sdxCluster.getEnvCrn()));
             return PayloadContext.create(sdxCluster.getCrn(), envResp.getCloudPlatform());
         } catch (NotFoundException ignored) {
-            // skip
+            LOGGER.info("exception happened {}", ignored);
         } catch (Exception e) {
             LOGGER.warn("Error happened during fetching payload context for datalake with environment response.", e);
         }

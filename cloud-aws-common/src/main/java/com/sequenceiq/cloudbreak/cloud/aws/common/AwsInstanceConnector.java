@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -350,7 +351,7 @@ public class AwsInstanceConnector implements InstanceConnector {
                 DescribeInstancesRequest.builder().instanceIds(instances).build());
         for (Reservation reservation : describeInstances.reservations()) {
             for (Instance instance : reservation.instances()) {
-                if (state.equalsIgnoreCase(instance.state().name().toString().toLowerCase())
+                if (state.equalsIgnoreCase(instance.state().name().toString().toLowerCase(Locale.ROOT))
                         || completedStatuses.contains(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(instance.state().name().toString()))) {
                     LOGGER.debug(" Removing AWS instance [{}] with {} state from list of stop/start instances.",
                             instance.instanceId(), instance.state().name());

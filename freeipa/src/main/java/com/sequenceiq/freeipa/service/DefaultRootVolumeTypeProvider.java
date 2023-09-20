@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service;
 
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -40,12 +41,12 @@ public class DefaultRootVolumeTypeProvider {
     }
 
     public String getForPlatform(String platform) {
-        if (!platformVolumeTypeMap.containsKey(platform.toUpperCase())) {
+        if (!platformVolumeTypeMap.containsKey(platform.toUpperCase(Locale.ROOT))) {
             LOGGER.debug("No default root volume type found for platform: {}. Falling back to default value of {}. "
                             + "Set '{}' property if '{}' is a valid cloud provider.",
                     platform, DEFAULT_ROOT_VOLUME_TYPE, ROOT_VOLUME_TYPE_PROPERTY_PREFIX + platform, platform);
         }
-        return platformVolumeTypeMap.getOrDefault(platform.toUpperCase(), DEFAULT_ROOT_VOLUME_TYPE);
+        return platformVolumeTypeMap.getOrDefault(platform.toUpperCase(Locale.ROOT), DEFAULT_ROOT_VOLUME_TYPE);
     }
 
     private String initPlatform(Environment environment, Platform platform) {

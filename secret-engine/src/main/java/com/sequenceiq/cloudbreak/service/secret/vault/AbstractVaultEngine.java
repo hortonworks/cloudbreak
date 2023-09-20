@@ -71,6 +71,7 @@ abstract class AbstractVaultEngine<E> implements SecretEngine {
                 return vaultSecret;
             }
         } catch (JsonSyntaxException ignore) {
+            LOGGER.info("exception happened {}", ignore);
         }
         return null;
     }

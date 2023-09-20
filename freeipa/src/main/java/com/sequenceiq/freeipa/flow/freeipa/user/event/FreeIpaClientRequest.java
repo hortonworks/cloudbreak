@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.flow.freeipa.user.event;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -19,7 +20,7 @@ public class FreeIpaClientRequest<T> implements Selectable {
     }
 
     public static String selector(Class<?> clazz) {
-        return clazz.getSimpleName().toUpperCase();
+        return clazz.getSimpleName().toUpperCase(Locale.ROOT);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-public class CloudCredentialStatus {
+public final class CloudCredentialStatus {
 
     private final CloudCredential cloudCredential;
 

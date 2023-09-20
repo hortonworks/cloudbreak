@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.validator;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 import org.springframework.stereotype.Service;
 
@@ -22,9 +23,9 @@ public class AzurePremiumValidatorService {
         String transformedSegment = segment
                 .replaceAll("[0-9]", "")
                 .replaceAll("-", "")
-                .toLowerCase();
+                .toLowerCase(Locale.ROOT);
 
-        String transformedFlavor = flavor.replaceAll(segment, transformedSegment).toLowerCase();
+        String transformedFlavor = flavor.replaceAll(segment, transformedSegment).toLowerCase(Locale.ROOT);
         String[] items = { "_ds", "_das", "_ls", "_gs", "_fs", "_es_v3", "_eis_v3" };
         return Arrays.stream(items).parallel().anyMatch(transformedFlavor::contains);
     }

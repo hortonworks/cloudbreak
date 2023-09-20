@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
+import java.util.Locale;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -101,7 +103,7 @@ public class AwsRdsStatusLookupService {
     }
 
     private ExternalDatabaseStatus getExternalDatabaseStatus(String dbInstanceStatus) {
-        switch (dbInstanceStatus.toLowerCase()) {
+        switch (dbInstanceStatus.toLowerCase(Locale.ROOT)) {
             case "starting":
                 return ExternalDatabaseStatus.START_IN_PROGRESS;
             case "available":

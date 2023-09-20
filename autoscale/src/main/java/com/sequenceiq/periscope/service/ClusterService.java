@@ -7,6 +7,7 @@ import static com.sequenceiq.periscope.service.NotFoundException.notFound;
 import static org.springframework.util.StringUtils.isEmpty;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -89,7 +90,7 @@ public class ClusterService {
         cluster.setEnvironmentCrn(stack.getEnvironmentCrn());
 
         if (stack.getCloudPlatform() != null) {
-            cluster.setCloudPlatform(stack.getCloudPlatform().toUpperCase());
+            cluster.setCloudPlatform(stack.getCloudPlatform().toUpperCase(Locale.ROOT));
         }
 
         String gatewayPort = String.valueOf(stack.getGatewayPort());

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_HANDLER_EVENT;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -68,6 +69,6 @@ public class DeleteVolumesHandlerRequest extends StackEvent {
 
     @Override
     public String selector() {
-        return getClass().getSimpleName().toUpperCase();
+        return getClass().getSimpleName().toUpperCase(Locale.ROOT);
     }
 }

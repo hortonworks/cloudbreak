@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -235,7 +236,7 @@ public class ImageService {
         Optional<Map<String, String>> imagesForPlatform = findStringKeyWithEqualsIgnoreCase(
                 platformString.nameToLowerCase(),
                 imgFromCatalog.getImageSetsByProvider());
-        String translatedRegion = cloudPlatformConnectors.getDefault(platform(cloudPlatform.toUpperCase())).regionToDisplayName(region);
+        String translatedRegion = cloudPlatformConnectors.getDefault(platform(cloudPlatform.toUpperCase(Locale.ROOT))).regionToDisplayName(region);
         if (imagesForPlatform.isPresent()) {
             Map<String, String> imagesByRegion = imagesForPlatform.get();
             return selectImageByRegionPreferDefault(translatedRegion, imagesByRegion, platformString.nameToLowerCase());
@@ -250,7 +251,7 @@ public class ImageService {
         Optional<Map<String, String>> imagesForPlatform = findStringKeyWithEqualsIgnoreCase(
                 platformString.nameToLowerCase(),
                 imgFromCatalog.getImageSetsByProvider());
-        String translatedRegion = cloudPlatformConnectors.getDefault(platform(cloudPlatform.toUpperCase())).regionToDisplayName(region);
+        String translatedRegion = cloudPlatformConnectors.getDefault(platform(cloudPlatform.toUpperCase(Locale.ROOT))).regionToDisplayName(region);
         if (imagesForPlatform.isPresent()) {
             Map<String, String> imagesByRegion = imagesForPlatform.get();
             return selectImageByRegion(translatedRegion, imagesByRegion, platformString.nameToLowerCase());

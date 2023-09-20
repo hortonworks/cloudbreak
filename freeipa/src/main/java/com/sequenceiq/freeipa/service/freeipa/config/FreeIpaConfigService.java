@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.config;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
@@ -62,7 +63,7 @@ public class FreeIpaConfigService {
         LOGGER.debug("Reverse zones : {}", reverseZones);
 
         return builder
-                .withRealm(freeIpa.getDomain().toUpperCase())
+                .withRealm(freeIpa.getDomain().toUpperCase(Locale.ROOT))
                 .withDomain(freeIpa.getDomain())
                 .withPassword(freeIpa.getAdminPassword())
                 .withDnssecValidationEnabled(isDnsSecValidationEnabled(stack.getCloudPlatform()))

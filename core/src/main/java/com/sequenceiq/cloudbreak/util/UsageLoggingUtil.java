@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.util;
 
+import java.util.Locale;
+
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -19,6 +23,8 @@ import com.sequenceiq.cloudbreak.usage.UsageReportProcessor;
  */
 @Component
 public class UsageLoggingUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UsageLoggingUtil.class);
 
     private final UsageReportProcessor usageReportProcessor;
 
@@ -45,9 +51,9 @@ public class UsageLoggingUtil {
                 UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET;
         if (cloudPlatform != null) {
             try {
-                cloudPlatformEnum = UsageProto.CDPEnvironmentsEnvironmentType.Value.valueOf(cloudPlatform.toUpperCase());
+                cloudPlatformEnum = UsageProto.CDPEnvironmentsEnvironmentType.Value.valueOf(cloudPlatform.toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException e) {
-                // Do not set the cloud platform.
+                LOGGER.info("exception happened {}", e);
             }
         }
         if (StackType.DATALAKE == stack.getType()) {
@@ -86,9 +92,9 @@ public class UsageLoggingUtil {
         UsageProto.CDPCloudbreakClusterStatus.Value newStatusEnum = null;
         try {
             oldStatusEnum = UsageProto.CDPCloudbreakClusterStatus.Value.valueOf(
-                    oldClusterStatus.name().toUpperCase());
+                    oldClusterStatus.name().toUpperCase(Locale.ROOT));
             newStatusEnum = UsageProto.CDPCloudbreakClusterStatus.Value.valueOf(
-                    newClusterStatus.name().toUpperCase());
+                    newClusterStatus.name().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             return;
         }

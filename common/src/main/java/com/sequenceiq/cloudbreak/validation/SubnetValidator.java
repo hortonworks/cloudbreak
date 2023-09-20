@@ -84,5 +84,22 @@ public class SubnetValidator implements ConstraintValidator<ValidSubnet, String>
             }
             return 0;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Ip ip = (Ip) o;
+            return Arrays.equals(parts, ip.parts);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(parts);
+        }
     }
 }

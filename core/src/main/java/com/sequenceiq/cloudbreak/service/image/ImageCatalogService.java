@@ -17,6 +17,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -630,7 +631,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                     .collect(Collectors.toSet()));
             platforms.addAll(preferencesService.enabledGovPlatforms()
                     .stream()
-                    .map(e -> imageCatalogPlatform(e.concat("_GOV").toUpperCase()))
+                    .map(e -> imageCatalogPlatform(e.concat("_GOV").toUpperCase(Locale.ROOT)))
                     .collect(Collectors.toSet()));
             try {
                 return getImages(getLoggedInUser(), workspaceId, name, null, platforms).getImages();

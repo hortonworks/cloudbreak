@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -46,12 +47,12 @@ public class DefaultRootVolumeSizeProvider implements RootVolumeSizeProvider {
     }
 
     public int getForPlatform(String platform) {
-        if (!platformVolumeSizeMap.containsKey(platform.toUpperCase())) {
+        if (!platformVolumeSizeMap.containsKey(platform.toUpperCase(Locale.ROOT))) {
             LOGGER.debug("No default root volume size found for platform: {}. Falling back to default value of {} GB. "
                             + "Set '{}' property if '{}' is a valid cloud provider.", DEFAULT_ROOT_VOLUME_SIZE,
                     platform, ROOT_VOLUME_SIZE_PROPERTY_PREFIX + platform, platform);
         }
-        return platformVolumeSizeMap.getOrDefault(platform.toUpperCase(), DEFAULT_ROOT_VOLUME_SIZE);
+        return platformVolumeSizeMap.getOrDefault(platform.toUpperCase(Locale.ROOT), DEFAULT_ROOT_VOLUME_SIZE);
     }
 
     private Integer initPlatform(Environment environment, Platform platform) {

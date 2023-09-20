@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.util;
 
+import java.util.Locale;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -15,11 +17,13 @@ public class CustomVMImageNameProvider {
 
     public String getImageNameWithRegion(String region, String vhdUri) {
         String vhdName = getImageNameFromConnectionString(vhdUri);
-        String name = vhdName + DELIMITER + region.toLowerCase().replaceAll("\\s", "");
+        String name = vhdName + DELIMITER + region.toLowerCase(Locale.ROOT)
+                .replaceAll("\\s", "");
         if (name.length() > NAME_MAXIMUM_LENGTH) {
             int diff = name.length() - NAME_MAXIMUM_LENGTH;
             int calculatedEndIndexOfVhdName = vhdName.length() - diff;
-            name = vhdName.substring(0, calculatedEndIndexOfVhdName) + '-' + region.toLowerCase().replaceAll("\\s", "");
+            name = vhdName.substring(0, calculatedEndIndexOfVhdName) + '-' + region.toLowerCase(Locale.ROOT)
+                    .replaceAll("\\s", "");
         }
 
         LOGGER.debug("The following azure Azure image name obtained from the region [{}] and VHD URI [{}]: {}", region, vhdUri, name);
