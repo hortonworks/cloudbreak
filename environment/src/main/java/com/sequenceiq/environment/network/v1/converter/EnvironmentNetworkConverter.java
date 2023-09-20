@@ -24,7 +24,16 @@ public interface EnvironmentNetworkConverter {
 
     Network convertToNetwork(BaseNetwork baseNetwork);
 
+    default NetworkDto.Builder extendBuilderWithProviderSpecificParameters(NetworkDto.Builder networkDtoBuilder, NetworkDto originalNetworkDto,
+            NetworkDto newNetworkDto) {
+        return networkDtoBuilder;
+    }
+
     default void updateAvailabilityZones(BaseNetwork baseNetwork, Set<String> availabilityZones) {
+
+    }
+
+    default void updateProviderSpecificParameters(BaseNetwork baseNetwork, NetworkDto networkDto) {
 
     }
 }

@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.environment.validation.network.NetworkTestUtils;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AzureParams;
@@ -292,6 +293,22 @@ public class AzurePrivateEndpointValidatorTest {
         verify(credentialToCloudCredentialConverter).convert(any());
         verify(azureClientService).getClient(any());
         verify(azureExistingPrivateDnsZoneValidatorService).validate(any(), any(), any(), any(), eq(validationResultBuilder));
+    }
+
+    @Test
+    void testCheckExistingDnsZoneDeletion() {
+        ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
+        underTest.checkExistingDnsZoneDeletion(ValidationType.ENVIRONMENT_EDIT, "orig", "new", validationResultBuilder);
+        assertFalse(validationResultBuilder.build().hasError());
+    }
+
+    @Test
+    void testCheckExistingDnsZoneDeletionInvalid() {
+        ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
+        underTest.checkExistingDnsZoneDeletion(ValidationType.ENVIRONMENT_EDIT, "orig", "", validationResultBuilder);
+        ValidationResult validationResult = validationResultBuilder.build();
+        assertTrue(validationResult.hasError());
+        assertTrue(validationResult.getErrors().stream().anyMatch(error -> error.startsWith("Deletion of existing dns zone id is not a valid operation")));
     }
 
     private AzureParams getAzureParams() {

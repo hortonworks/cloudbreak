@@ -843,6 +843,8 @@ class EnvironmentModificationServiceTest {
                 .thenReturn(awsNetwork);
         when(networkService.refreshMetadataFromCloudProvider(any(), any(), any()))
                 .thenReturn(awsNetwork);
+        when(networkService.refreshProviderSpecificParameters(any(), any(), any()))
+                .thenReturn(awsNetwork);
         when(dnsV1Endpoint.addDnsZoneForSubnetIds(any())).thenReturn(new AddDnsZoneForSubnetsResponse());
         when(environmentService.save(any()))
                 .thenReturn(environment);
@@ -856,11 +858,12 @@ class EnvironmentModificationServiceTest {
         verify(environmentService, times(1)).findByNameAndAccountIdAndArchivedIsFalse(any(), anyString());
         verify(networkService, times(1)).validate(any(), any(), any());
         verify(networkService, times(1)).refreshMetadataFromCloudProvider(any(), any(), any());
+        verify(networkService, times(1)).refreshProviderSpecificParameters(any(), any(), any());
         verify(dnsV1Endpoint, times(1)).addDnsZoneForSubnetIds(any());
         verify(environmentService, times(1)).save(any());
         verify(environmentDtoConverter, times(1)).environmentToDto(any());
         verify(environmentDtoConverter, times(1)).networkToNetworkDto(any());
-
+        assertEquals(environment.getNetwork(), awsNetwork);
     }
 
     @Test

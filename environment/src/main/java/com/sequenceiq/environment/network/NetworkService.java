@@ -87,7 +87,7 @@ public class NetworkService {
         }
         EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(cloudPlatform);
         NetworkDto originalNetworkDto = environmentNetworkConverter.convertToDto(originalNetwork);
-        NetworkDto cloneNetworkDto = getNetworkDtoClone(editDto, originalNetworkDto);
+        NetworkDto cloneNetworkDto = getNetworkDtoClone(editDto, originalNetworkDto, environmentNetworkConverter);
         ValidationResultBuilder validationResultBuilder = networkValidator.validateNetworkEdit(environment, cloneNetworkDto);
         ValidationResult validationResult = validationResultBuilder.build();
         if (validationResult.hasError()) {
@@ -100,7 +100,7 @@ public class NetworkService {
     public BaseNetwork refreshMetadataFromCloudProvider(BaseNetwork originalNetwork, EnvironmentEditDto editDto, Environment environment) {
         EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform()));
         NetworkDto originalNetworkDto = environmentNetworkConverter.convertToDto(originalNetwork);
-        NetworkDto cloneNetworkDto = getNetworkDtoClone(editDto, originalNetworkDto);
+        NetworkDto cloneNetworkDto = getNetworkDtoClone(editDto, originalNetworkDto, environmentNetworkConverter);
 
         try {
             Map<String, CloudSubnet> subnetMetadatas = cloudNetworkService.retrieveSubnetMetadata(environment, cloneNetworkDto);
@@ -125,7 +125,7 @@ public class NetworkService {
         return originalNetwork;
     }
 
-    private NetworkDto getNetworkDtoClone(EnvironmentEditDto editDto, NetworkDto originalNetworkDto) {
+    private NetworkDto getNetworkDtoClone(EnvironmentEditDto editDto, NetworkDto originalNetworkDto, EnvironmentNetworkConverter environmentNetworkConverter) {
         NetworkDto editNetworkDto = editDto.getNetworkDto();
         NetworkDto.Builder cloneNetworkDtoBuilder = NetworkDto.builder(originalNetworkDto);
         if (CollectionUtils.isNotEmpty(editDto.getNetworkDto().getAvailabilityZones())) {
@@ -137,7 +137,14 @@ public class NetworkService {
         if (MapUtils.isNotEmpty(editNetworkDto.getEndpointGatewaySubnetMetas())) {
             cloneNetworkDtoBuilder.withEndpointGatewaySubnetMetas(editDto.getNetworkDto().getEndpointGatewaySubnetMetas());
         }
+        environmentNetworkConverter.extendBuilderWithProviderSpecificParameters(cloneNetworkDtoBuilder, originalNetworkDto, editDto.getNetworkDto());
         return cloneNetworkDtoBuilder.build();
+    }
+
+    public BaseNetwork refreshProviderSpecificParameters(BaseNetwork originalNetwork, EnvironmentEditDto editDto, Environment environment) {
+        EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform()));
+        environmentNetworkConverter.updateProviderSpecificParameters(originalNetwork, editDto.getNetworkDto());
+        return originalNetwork;
     }
 
     private String getId(String cloudPlatform, CloudSubnet cloudSubnet) {

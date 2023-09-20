@@ -274,6 +274,42 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(azureNetwork.getZoneMetas().getMap(), expectedAttributes.getMap());
     }
 
+    @Test
+    void testExtendBuilderWithProviderSpecificParametersWhenEmpty() {
+        AzureParams originalAzureParams = AzureParams.builder()
+                .withDatabasePrivateDnsZoneId("dnszone")
+                .withFlexibleServerSubnetIds(Set.of("subnetid"))
+                .build();
+        NetworkDto orignalNetworkDto = NetworkDto.builder()
+                .withAzure(originalAzureParams)
+                .build();
+        NetworkDto newNetworkDto = NetworkDto.builder().withAzure(AzureParams.builder().build()).build();
+        NetworkDto.Builder networkDtoBuilder = NetworkDto.builder();
+        NetworkDto actualNetworkDto = underTest.extendBuilderWithProviderSpecificParameters(networkDtoBuilder, orignalNetworkDto, newNetworkDto).build();
+        assertEquals(originalAzureParams.getDatabasePrivateDnsZoneId(), actualNetworkDto.getAzure().getDatabasePrivateDnsZoneId());
+        assertEquals(originalAzureParams.getFlexibleServerSubnetIds(), actualNetworkDto.getAzure().getFlexibleServerSubnetIds());
+    }
+
+    @Test
+    void testExtendBuilderWithProviderSpecificParameters() {
+        NetworkDto originalNetworkDto = NetworkDto.builder().withAzure(AzureParams.builder()
+                        .withFlexibleServerSubnetIds(Set.of("orignalsubnetid"))
+                        .withDatabasePrivateDnsZoneId("originalDnsZone")
+                        .build())
+                .build();
+        AzureParams newAzureParams = AzureParams.builder()
+                .withDatabasePrivateDnsZoneId("dnszone")
+                .withFlexibleServerSubnetIds(Set.of("subnetid"))
+                .build();
+        NetworkDto newNetworkDto = NetworkDto.builder()
+                .withAzure(newAzureParams)
+                .build();
+        NetworkDto.Builder networkDtoBuilder = NetworkDto.builder();
+        NetworkDto actualNetworkDto = underTest.extendBuilderWithProviderSpecificParameters(networkDtoBuilder, originalNetworkDto, newNetworkDto).build();
+        assertEquals(newAzureParams.getDatabasePrivateDnsZoneId(), actualNetworkDto.getAzure().getDatabasePrivateDnsZoneId());
+        assertEquals(newAzureParams.getFlexibleServerSubnetIds(), actualNetworkDto.getAzure().getFlexibleServerSubnetIds());
+    }
+
     private Set<CreatedSubnet> createCreatedSubnets() {
         CreatedSubnet createdSubnet1 = new CreatedSubnet();
         createdSubnet1.setSubnetId(SUBNET_1);

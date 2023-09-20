@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -149,10 +150,31 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
     }
 
     @Override
+    public NetworkDto.Builder extendBuilderWithProviderSpecificParameters(NetworkDto.Builder networkDtoBuilder, NetworkDto originalNetworkDto,
+            NetworkDto newNetworkDto) {
+        AzureParams newAzureParams = newNetworkDto.getAzure();
+        AzureParams.Builder azureParamsBuilder = AzureParams.builder(originalNetworkDto.getAzure());
+        if (StringUtils.isNotEmpty(newAzureParams.getDatabasePrivateDnsZoneId())) {
+            azureParamsBuilder.withDatabasePrivateDnsZoneId(newAzureParams.getDatabasePrivateDnsZoneId());
+        }
+        if (CollectionUtils.isNotEmpty(newAzureParams.getFlexibleServerSubnetIds())) {
+            azureParamsBuilder.withFlexibleServerSubnetIds(newAzureParams.getFlexibleServerSubnetIds());
+        }
+        return networkDtoBuilder.withAzure(azureParamsBuilder.build());
+    }
+
+    @Override
     public void updateAvailabilityZones(BaseNetwork baseNetwork, Set<String> availabilityZones) {
         if (CollectionUtils.isNotEmpty(availabilityZones)) {
             AzureNetwork azureNetwork = (AzureNetwork) baseNetwork;
             azureNetwork.setZoneMetas(availabilityZoneConverter.getJsonAttributesWithAvailabilityZones(availabilityZones, azureNetwork.getZoneMetas()));
         }
+    }
+
+    @Override
+    public void updateProviderSpecificParameters(BaseNetwork baseNetwork, NetworkDto networkDto) {
+        AzureNetwork azureNetwork = (AzureNetwork) baseNetwork;
+        azureNetwork.setFlexibleServerSubnetIds(networkDto.getAzure().getFlexibleServerSubnetIds());
+        azureNetwork.setDatabasePrivateDnsZoneId(networkDto.getAzure().getDatabasePrivateDnsZoneId());
     }
 }

@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.AdditionalAnswers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -273,6 +274,8 @@ class NetworkServiceTest {
         EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder().withNetwork(networkDto).build();
         when(environmentNetworkConverterMap.get(CloudPlatform.AZURE)).thenReturn(environmentNetworkConverter);
         when(environmentNetworkConverter.convertToDto(baseNetwork)).thenReturn(networkDto);
+        when(environmentNetworkConverter.extendBuilderWithProviderSpecificParameters(any(NetworkDto.Builder.class), any(NetworkDto.class),
+                any(NetworkDto.class))).thenAnswer(AdditionalAnswers.returnsFirstArg());
         when(networkCreationValidator.validateNetworkEdit(eq(environment), any(NetworkDto.class)))
                 .thenReturn(new ValidationResult.ValidationResultBuilder());
         underTest.validate(baseNetwork, environmentEditDto, environment);

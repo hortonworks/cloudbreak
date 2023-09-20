@@ -77,5 +77,4 @@ public class YarnEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.YARN;
     }
-
 }
