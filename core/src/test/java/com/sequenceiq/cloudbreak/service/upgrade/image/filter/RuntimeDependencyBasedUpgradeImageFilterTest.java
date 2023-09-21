@@ -40,6 +40,10 @@ class RuntimeDependencyBasedUpgradeImageFilterTest {
 
     private static final String IMAGE_CATALOG_NAME = "image-catalog-name";
 
+    private static final String ACCOUNT_ID = "1234";
+
+    private static final String STACK_CRN = "crn:cdp:sdx:us-west-1:1234:stack:mystack";
+
     @InjectMocks
     private RuntimeDependencyBasedUpgradeImageFilter underTest;
 
@@ -66,7 +70,8 @@ class RuntimeDependencyBasedUpgradeImageFilterTest {
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
         when(stack.getWorkspaceId()).thenReturn(WORKSPACE_ID);
-        when(imageCatalogService.getAllCdhImages(eq(WORKSPACE_ID), eq(IMAGE_CATALOG_NAME), any())).thenReturn(IMAGES);
+        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
+        when(imageCatalogService.getAllCdhImages(eq(ACCOUNT_ID), eq(WORKSPACE_ID), eq(IMAGE_CATALOG_NAME), any())).thenReturn(IMAGES);
         when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, IMAGES, imageFilterParams.getCurrentImage(), image1))
                 .thenReturn(true);
         when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, IMAGES, imageFilterParams.getCurrentImage(), image2))
@@ -87,7 +92,8 @@ class RuntimeDependencyBasedUpgradeImageFilterTest {
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
         when(stack.getWorkspaceId()).thenReturn(WORKSPACE_ID);
-        when(imageCatalogService.getAllCdhImages(eq(WORKSPACE_ID), eq(IMAGE_CATALOG_NAME), any())).thenReturn(IMAGES);
+        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
+        when(imageCatalogService.getAllCdhImages(eq(ACCOUNT_ID), eq(WORKSPACE_ID), eq(IMAGE_CATALOG_NAME), any())).thenReturn(IMAGES);
         when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, IMAGES, imageFilterParams.getCurrentImage(), image1))
                 .thenReturn(false);
         when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, IMAGES, imageFilterParams.getCurrentImage(), image2))
