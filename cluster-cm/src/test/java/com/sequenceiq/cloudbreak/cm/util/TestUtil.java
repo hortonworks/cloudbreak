@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cm.util;
 import java.util.Set;
 
 import com.cloudera.api.swagger.model.ApiParcel;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
@@ -21,10 +20,6 @@ public class TestUtil {
     public static final String CDSW = "CDSW";
 
     public static final String CDSW_VERSION = "2.0.0.p1.1410896";
-
-    private static final String CM = "CM";
-
-    private static final String CM_VERSION = "7.0.0";
 
     private static final String PARCEL_TEMPLATE = "{\"name\":\"%s\",\"version\":\"%s\","
             + "\"parcel\":\"https://archive.cloudera.com/cdh7/7.0.0/parcels/\"}";
@@ -54,13 +49,6 @@ public class TestUtil {
         ClusterComponentView cdswComponent = createClusterComponent(CDSW_ATTRIBUTES, CDSW, ComponentType.CDH_PRODUCT_DETAILS, clusterId);
         ClusterComponentView cmComponent = createClusterComponent(CM_ATTRIBUTES, ComponentType.CM_REPO_DETAILS.name(), ComponentType.CM_REPO_DETAILS, clusterId);
         return Set.of(cdhComponent, cdswComponent, cmComponent);
-    }
-
-    public static Set<ClouderaManagerProduct> clouderaManagerProducts() {
-        ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct().withName(CDH).withVersion(CDH_VERSION);
-        ClouderaManagerProduct cdswProduct = new ClouderaManagerProduct().withName(CDSW).withVersion(CDSW_VERSION);
-        ClouderaManagerProduct cmProduct = new ClouderaManagerProduct().withName(CM).withVersion(CM_VERSION);
-        return Set.of(cdhProduct, cdswProduct, cmProduct);
     }
 
     public static ApiParcel apiParcel(String type, String status) {

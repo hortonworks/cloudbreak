@@ -34,7 +34,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -94,6 +96,7 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
 import com.sequenceiq.cloudbreak.cm.util.TestUtil;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -762,7 +765,32 @@ class ClouderaManagerModificationServiceTest {
     }
 
     @Test
+    void testUpgradeClusterComponentIsNotPresent() throws ApiException {
+        BigDecimal apiCommandId = new BigDecimal(200);
+        ApiCommandList apiCommandList = new ApiCommandList();
+        apiCommandList.setItems(new ArrayList<>());
+        when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
+        when(mgmtServiceResourceApi.listActiveCommands("SUMMARY")).thenReturn(apiCommandList);
+        when(mgmtServiceResourceApi.restartCommand()).thenReturn(new ApiCommand().id(apiCommandId));
+        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, v31Client, apiCommandId)).thenReturn(success);
+        when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, v31Client)).thenReturn(success);
+        ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_5_1.getVersion());
+
+        Set<ClusterComponentView> clusterComponents = TestUtil.clusterComponentSet(CLUSTER_ID);
+        Set<ClusterComponentView> clusterComponentsNoCDH = clusterComponents.stream().filter(clusterComponent -> !clusterComponent.getName().equals("CDH"))
+                .collect(Collectors.toSet());
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> underTest.upgradeClusterRuntime(clusterComponentsNoCDH, false,
+                Optional.empty(), false));
+        Assertions.assertEquals("Runtime component not found!", exception.getMessage());
+    }
+
+    @Test
     void testUpgradeClusterWhenPatchUpgradeAndNoPostUpgradeCommandIsAvailable() throws CloudbreakException, ApiException {
+        Set<ClusterComponentView> clusterComponentViews = TestUtil.clusterComponentSet(CLUSTER_ID);
+
         when(clouderaManagerApiFactory.getParcelResourceApi(any())).thenReturn(parcelResourceApi);
         when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
@@ -798,7 +826,7 @@ class ClouderaManagerModificationServiceTest {
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
         when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_4_3.getVersion());
 
-        underTest.upgradeClusterRuntime(TestUtil.clouderaManagerProducts(), true, Optional.empty(), false);
+        underTest.upgradeClusterRuntime(clusterComponentViews, true, Optional.empty(), false);
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, v31Client);
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(stack, v31Client);
@@ -829,6 +857,8 @@ class ClouderaManagerModificationServiceTest {
     @Test
     void testUpgradeClusterWhenPatchUpgradeAndPostUpgradeCommandIsAvailable()
             throws CloudbreakException, ApiException, ClouderaManagerClientInitException {
+        Set<ClusterComponentView> clusterComponentViews = TestUtil.clusterComponentSet(CLUSTER_ID);
+
         when(clouderaManagerApiFactory.getParcelResourceApi(any())).thenReturn(parcelResourceApi);
         when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
@@ -880,7 +910,7 @@ class ClouderaManagerModificationServiceTest {
 
         when(clouderaManagerApiClientProvider.getV45Client(any(), any(), any(), any())).thenReturn(v31Client);
 
-        underTest.upgradeClusterRuntime(TestUtil.clouderaManagerProducts(), true, Optional.empty(), false);
+        underTest.upgradeClusterRuntime(clusterComponentViews, true, Optional.empty(), false);
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, v31Client);
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(stack, v31Client);
@@ -922,6 +952,8 @@ class ClouderaManagerModificationServiceTest {
     @Test
     void testUpgradeClusterWhenPatchUpgradeAndPostUpgradeCommandIsAvailableAndRestartIsRunning()
             throws CloudbreakException, ApiException, ClouderaManagerClientInitException {
+        Set<ClusterComponentView> clusterComponentViews = TestUtil.clusterComponentSet(CLUSTER_ID);
+
         when(clouderaManagerApiFactory.getParcelResourceApi(any())).thenReturn(parcelResourceApi);
         when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
@@ -959,7 +991,7 @@ class ClouderaManagerModificationServiceTest {
 
         when(clouderaManagerApiClientProvider.getV45Client(any(), any(), any(), any())).thenReturn(v31Client);
 
-        underTest.upgradeClusterRuntime(TestUtil.clouderaManagerProducts(), true, Optional.empty(), false);
+        underTest.upgradeClusterRuntime(clusterComponentViews, true, Optional.empty(), false);
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, v31Client);
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(stack, v31Client);
@@ -993,6 +1025,8 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     void testUpgradeClusterWhenNotPatchUpgrade() throws CloudbreakException, ApiException {
+        Set<ClusterComponentView> clusterComponentViews = TestUtil.clusterComponentSet(CLUSTER_ID);
+
         when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
         when(clouderaManagerApiFactory.getParcelResourceApi(any())).thenReturn(parcelResourceApi);
         when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
@@ -1032,7 +1066,7 @@ class ClouderaManagerModificationServiceTest {
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
         when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_5_1.getVersion());
 
-        underTest.upgradeClusterRuntime(TestUtil.clouderaManagerProducts(), false, Optional.empty(), true);
+        underTest.upgradeClusterRuntime(clusterComponentViews, false, Optional.empty(), true);
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, v31Client);
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(stack, v31Client);
