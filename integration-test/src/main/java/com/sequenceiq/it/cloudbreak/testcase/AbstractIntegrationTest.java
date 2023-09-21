@@ -176,6 +176,17 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .validate();
     }
 
+    protected void initiateDatalakeCreationWithAutoTls(TestContext testContext) {
+        testContext
+                .given(SdxInternalTestDto.class)
+                    .withAutoTls()
+                    .withCloudStorage(getCloudStorageRequest(testContext))
+                    .withEnableMultiAz()
+                    .withTelemetry("telemetry")
+                .when(sdxTestClient.createInternal())
+                .validate();
+    }
+
     protected void waitForDatalakeCreation(TestContext testContext) {
         testContext.given(SdxInternalTestDto.class)
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -207,9 +218,19 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         waitForDefaultDatahubCreation(testContext);
     }
 
+    protected void createDefaultDatahubWithAutoTlsForExistingDatalake(TestContext testContext) {
+        initiateDefaultDatahubCreationWithAutoTls(testContext);
+        waitForDefaultDatahubCreation(testContext);
+    }
+
     protected void createDefaultDatahub(TestContext testContext) {
         createDefaultDatalake(testContext);
         createDefaultDatahubForExistingDatalake(testContext);
+    }
+
+    protected void createDefaultDatahubWithAutoTls(TestContext testContext) {
+        createDefaultDatalakeWithAutoTls(testContext);
+        createDefaultDatahubWithAutoTlsForExistingDatalake(testContext);
     }
 
     protected void createStorageOptimizedDatahub(TestContext testContext) {
@@ -221,6 +242,14 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     protected void initiateDefaultDatahubCreation(TestContext testContext) {
         testContext
                 .given(DistroXTestDto.class)
+                .when(distroXTestClient.create())
+                .validate();
+    }
+
+    protected void initiateDefaultDatahubCreationWithAutoTls(TestContext testContext) {
+        testContext
+                .given(DistroXTestDto.class)
+                .withAutoTls()
                 .when(distroXTestClient.create())
                 .validate();
     }
@@ -341,6 +370,14 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     protected void createDefaultDatalake(TestContext testContext) {
         initiateEnvironmentCreation(testContext);
         initiateDatalakeCreation(testContext);
+        waitForEnvironmentCreation(testContext);
+        waitForUserSync(testContext);
+        waitForDatalakeCreation(testContext);
+    }
+
+    protected void createDefaultDatalakeWithAutoTls(TestContext testContext) {
+        initiateEnvironmentCreation(testContext);
+        initiateDatalakeCreationWithAutoTls(testContext);
         waitForEnvironmentCreation(testContext);
         waitForUserSync(testContext);
         waitForDatalakeCreation(testContext);

@@ -270,6 +270,11 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         return internalStackResponse;
     }
 
+    public DistroXTestDto withAutoTls() {
+        getRequest().getCluster().getCm().setEnableAutoTls(true);
+        return this;
+    }
+
     public DistroXTestDto withInternalStackResponse(StackViewV4Response internalStackResponse) {
         this.internalStackResponse = internalStackResponse;
         return this;

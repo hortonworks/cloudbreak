@@ -19,7 +19,7 @@ public class ClouderaManagerTestDto extends AbstractCloudbreakTestDto<ClouderaMa
         return withAutoTls(Boolean.FALSE);
     }
 
-    private ClouderaManagerTestDto withAutoTls(Boolean autoTls) {
+    public ClouderaManagerTestDto withAutoTls(Boolean autoTls) {
         getRequest().setEnableAutoTls(autoTls);
         return this;
     }

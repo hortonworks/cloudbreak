@@ -15,12 +15,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @ExtendWith(MockitoExtension.class)
 public class DatalakeCMIntermediateCacertRotationContextProviderTest {
@@ -40,7 +40,10 @@ public class DatalakeCMIntermediateCacertRotationContextProviderTest {
     @Test
     void testGetContexts() {
         StackDto stackDto = mock(StackDto.class);
+        ClusterView clusterView = mock(ClusterView.class);
         when(stackDto.getResourceCrn()).thenReturn("crn");
+        when(stackDto.getCluster()).thenReturn(clusterView);
+        when(clusterView.getAutoTlsEnabled()).thenReturn(Boolean.TRUE);
         when(stackService.getByCrn(any())).thenReturn(stackDto);
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         when(gatewayConfig.getHostname()).thenReturn("host");
@@ -48,7 +51,6 @@ public class DatalakeCMIntermediateCacertRotationContextProviderTest {
 
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts("crn");
 
-        assertEquals(1, contexts.size());
-        assertEquals(CloudbreakSecretRotationStep.SALT_STATE_APPLY, contexts.keySet().iterator().next());
+        assertEquals(2, contexts.size());
     }
 }

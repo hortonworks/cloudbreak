@@ -137,6 +137,11 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return getResponse().getCrn();
     }
 
+    public SdxInternalTestDto withAutoTls() {
+        getRequest().getStackV4Request().getCluster().getCm().setEnableAutoTls(true);
+        return this;
+    }
+
     public SdxInternalTestDto withDatabase(SdxDatabaseRequest sdxDatabaseRequest) {
         getRequest().setExternalDatabase(sdxDatabaseRequest);
         return this;
