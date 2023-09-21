@@ -64,6 +64,7 @@ public class SdxValidationHandler extends ExceptionCatcherEventHandler<SdxValida
             Optional<SdxCluster> sdxCluster = sdxClusterRepository.findById(sdxId);
             if (sdxCluster.isPresent()) {
                 sdxRecommendationService.validateVmTypeOverride(environment, sdxCluster.get());
+                sdxRecommendationService.validateRecommendedImage(environment, sdxCluster.get());
                 return new SdxValidationSuccessEvent(sdxId, userId);
             } else {
                 throw notFound("SDX cluster", sdxId).get();

@@ -18,9 +18,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageRecommendationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.UpdateImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.RuntimeVersionsV4Response;
@@ -202,4 +204,12 @@ public interface ImageCatalogV4Endpoint {
     @ApiOperation(value = ImageCatalogOpDescription.GET_DEFAULT_IMAGE_CATALOG_RUNTIME_VERSIONS, produces = MediaType.APPLICATION_JSON,
             notes = IMAGE_CATALOG_NOTES, nickname = "getRuntimeVersionsFromDefault")
     RuntimeVersionsV4Response getRuntimeVersionsFromDefault(@PathParam("workspaceId") Long workspaceId) throws Exception;
+
+    @POST
+    @Path("validate_recommended")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.VALIDATE_RECOMMENDED_IMAGE_WITH_PROVIDER, produces = MediaType.APPLICATION_JSON,
+            notes = IMAGE_CATALOG_NOTES, nickname = "validateRecommendedImageWithProvider")
+    ImageRecommendationV4Response validateRecommendedImageWithProvider(@PathParam("workspaceId") Long workspaceId, @Valid ImageRecommendationV4Request request)
+            throws Exception;
 }
