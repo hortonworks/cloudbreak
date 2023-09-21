@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
@@ -65,7 +66,8 @@ public class CmSyncImageCollectorService {
     }
 
     private Set<Image> getAllImagesFromCatalog(Stack stack, String imageCatalogName, Long workspaceId) throws CloudbreakImageCatalogException {
-        List<Image> allCdhImages = imageCatalogService.getAllCdhImages(workspaceId, imageCatalogName,
+        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
+        List<Image> allCdhImages = imageCatalogService.getAllCdhImages(accountId, workspaceId, imageCatalogName,
                 platformStringTransformer.getPlatformStringForImageCatalogSet(stack.getCloudPlatform(), stack.getPlatformVariant()));
         return new HashSet<>(allCdhImages);
     }

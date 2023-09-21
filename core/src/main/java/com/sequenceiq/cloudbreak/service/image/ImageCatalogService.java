@@ -354,11 +354,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return getImages(getLoggedInUser(), workspaceId, imageCatalogName, runtimeVersion, ImmutableSet.of(provider));
     }
 
-    public List<Image> getAllCdhImages(Long workspaceId, String imageCatalogName, Set<ImageCatalogPlatform> provider) throws CloudbreakImageCatalogException {
-        User user = getLoggedInUser();
-        return getImages(user, workspaceId, imageCatalogName, provider, null, false).getImages().getCdhImages();
-    }
-
     public List<Image> getAllCdhImages(String accountId, Long workspaceId, String imageCatalogName, Set<ImageCatalogPlatform> provider)
             throws CloudbreakImageCatalogException {
         return getImages(accountId, workspaceId, imageCatalogName, provider, null, false).getImages().getCdhImages();
