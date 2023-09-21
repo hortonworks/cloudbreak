@@ -38,19 +38,21 @@ import com.sequenceiq.common.model.ImageCatalogPlatform;
 @ExtendWith(MockitoExtension.class)
 public class CmSyncImageCollectorServiceTest {
 
-    private static final String USER_CRN = "userCrn";
-
     private static final String IMAGE_UUID_1 = "imageUuid1";
 
     private static final long STACK_ID = 2L;
 
     private static final String CURRENT_IMAGE_CATALOG_NAME = "currentImageCatalogName";
 
-    private static final long WORKSPCE_ID = 3L;
+    private static final long WORKSPACE_ID = 3L;
 
     private static final String CURRENT_IMAGE_UUID = "currentImageUuid";
 
     private static final String CURRENT_CLOUD_PLATFORM = "currentCloudPlatform";
+
+    private static final String ACCOUNT_ID = "1234";
+
+    private static final String STACK_CRN = "crn:cdp:sdx:us-west-1:1234:stack:mystack";
 
     @Mock
     private ImageCatalogService imageCatalogService;
@@ -74,8 +76,8 @@ public class CmSyncImageCollectorServiceTest {
         StatedImage currentStatedImage = getCurrentStatedImage();
         StatedImage anotherStatedImage = getStatedImage(IMAGE_UUID_1);
         when(imageService.getCurrentImageCatalogName(STACK_ID)).thenReturn(CURRENT_IMAGE_CATALOG_NAME);
-        when(imageService.getCurrentImage(WORKSPCE_ID, STACK_ID)).thenReturn(currentStatedImage);
-        when(imageCatalogService.getImageByCatalogName(WORKSPCE_ID, IMAGE_UUID_1, CURRENT_IMAGE_CATALOG_NAME)).thenReturn(anotherStatedImage);
+        when(imageService.getCurrentImage(WORKSPACE_ID, STACK_ID)).thenReturn(currentStatedImage);
+        when(imageCatalogService.getImageByCatalogName(WORKSPACE_ID, IMAGE_UUID_1, CURRENT_IMAGE_CATALOG_NAME)).thenReturn(anotherStatedImage);
 
         Set<Image> collectedImages = underTest.collectImages(stack, candidateImageUuids);
 
@@ -85,9 +87,9 @@ public class CmSyncImageCollectorServiceTest {
                 hasProperty("uuid", is(CURRENT_IMAGE_UUID))
         ));
         verify(imageService).getCurrentImageCatalogName(STACK_ID);
-        verify(imageCatalogService).getImageByCatalogName(WORKSPCE_ID, IMAGE_UUID_1, CURRENT_IMAGE_CATALOG_NAME);
-        verify(imageService).getCurrentImage(WORKSPCE_ID, STACK_ID);
-        verify(imageCatalogService, never()).getAllCdhImages(anyLong(), anyString(), anySet());
+        verify(imageCatalogService).getImageByCatalogName(WORKSPACE_ID, IMAGE_UUID_1, CURRENT_IMAGE_CATALOG_NAME);
+        verify(imageService).getCurrentImage(WORKSPACE_ID, STACK_ID);
+        verify(imageCatalogService, never()).getAllCdhImages(anyString(), anyLong(), anyString(), anySet());
     }
 
     @Test
@@ -96,8 +98,9 @@ public class CmSyncImageCollectorServiceTest {
         setupStack(true, true);
         Set<String> candidateImageUuids = Set.of();
         List<Image> allCdhImages = List.of(getImage(IMAGE_UUID_1));
+        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
         when(imageService.getCurrentImageCatalogName(STACK_ID)).thenReturn(CURRENT_IMAGE_CATALOG_NAME);
-        when(imageCatalogService.getAllCdhImages(anyLong(), anyString(), anySet())).thenReturn(allCdhImages);
+        when(imageCatalogService.getAllCdhImages(ACCOUNT_ID, WORKSPACE_ID, CURRENT_IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform))).thenReturn(allCdhImages);
         when(platformStringTransformer.getPlatformStringForImageCatalogSet(any(), anyString()))
                 .thenReturn(Set.of(imageCatalogPlatform));
 
@@ -108,7 +111,7 @@ public class CmSyncImageCollectorServiceTest {
                 hasProperty("uuid", is(IMAGE_UUID_1))
         ));
         verify(imageService).getCurrentImageCatalogName(STACK_ID);
-        verify(imageCatalogService).getAllCdhImages(WORKSPCE_ID, CURRENT_IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform));
+        verify(imageCatalogService).getAllCdhImages(ACCOUNT_ID, WORKSPACE_ID, CURRENT_IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform));
         verify(imageService, never()).getCurrentImage(anyLong(), anyLong());
         verify(imageCatalogService, never()).getImageByCatalogName(anyLong(), anyString(), anyString());
     }
@@ -123,7 +126,7 @@ public class CmSyncImageCollectorServiceTest {
 
         assertThat(collectedImages, emptyCollectionOf(Image.class));
         verify(imageService).getCurrentImageCatalogName(STACK_ID);
-        verify(imageCatalogService, never()).getAllCdhImages(anyLong(), anyString(), anySet());
+        verify(imageCatalogService, never()).getAllCdhImages(anyString(), anyLong(), anyString(), anySet());
         verify(imageService, never()).getCurrentImage(anyLong(), anyLong());
         verify(imageCatalogService, never()).getImageByCatalogName(anyLong(), anyString(), anyString());
     }
@@ -133,7 +136,8 @@ public class CmSyncImageCollectorServiceTest {
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(CURRENT_CLOUD_PLATFORM);
         setupStack(true, true);
         Set<String> candidateImageUuids = Set.of();
-        when(imageCatalogService.getAllCdhImages(WORKSPCE_ID, CURRENT_IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform(CURRENT_CLOUD_PLATFORM))))
+        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
+        when(imageCatalogService.getAllCdhImages(ACCOUNT_ID, WORKSPACE_ID, CURRENT_IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform(CURRENT_CLOUD_PLATFORM))))
                 .thenThrow(new CloudbreakImageCatalogException("My custom image catalog exception"));
         when(imageService.getCurrentImageCatalogName(STACK_ID)).thenReturn(CURRENT_IMAGE_CATALOG_NAME);
         when(platformStringTransformer.getPlatformStringForImageCatalogSet(any(), anyString()))
@@ -143,7 +147,7 @@ public class CmSyncImageCollectorServiceTest {
 
         assertThat(collectedImages, emptyCollectionOf(Image.class));
         verify(imageService).getCurrentImageCatalogName(STACK_ID);
-        verify(imageCatalogService).getAllCdhImages(WORKSPCE_ID, CURRENT_IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform));
+        verify(imageCatalogService).getAllCdhImages(ACCOUNT_ID, WORKSPACE_ID, CURRENT_IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform));
         verify(imageService, never()).getCurrentImage(anyLong(), anyLong());
         verify(imageCatalogService, never()).getImageByCatalogName(anyLong(), anyString(), anyString());
     }
@@ -165,7 +169,7 @@ public class CmSyncImageCollectorServiceTest {
     private void setupStack(boolean setupWorkspace, boolean setupCloudPlatform) {
         when(stack.getId()).thenReturn(STACK_ID);
         if (setupWorkspace) {
-            when(stack.getWorkspaceId()).thenReturn(WORKSPCE_ID);
+            when(stack.getWorkspaceId()).thenReturn(WORKSPACE_ID);
         }
         if (setupCloudPlatform) {
             when(stack.getCloudPlatform()).thenReturn(CURRENT_CLOUD_PLATFORM);
