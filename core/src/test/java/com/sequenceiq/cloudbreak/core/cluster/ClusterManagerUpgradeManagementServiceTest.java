@@ -119,7 +119,7 @@ public class ClusterManagerUpgradeManagementServiceTest {
             verify(clusterApi).stopCluster(true);
         }
         if (!rollingUpgradeEnabled) {
-            verify(clusterApi).startCluster();
+            verify(clusterApi).startClusterMgmtServices();
         }
         verify(cmServerQueryService, times(2)).queryCmVersion(stackDto);
         verify(clusterUpgradeService).upgradeClusterManager(STACK_ID);

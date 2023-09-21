@@ -99,8 +99,8 @@ public class ClusterManagerUpgradeManagementService {
         if (rollingUpgradeEnabled) {
             LOGGER.debug("Not necessary to start services because the rolling upgrade option is enabled");
         } else {
-            LOGGER.debug("Starting cluster runtime services after CM upgrade.");
-            clusterApiConnectors.getConnector(stackDto).startCluster();
+            LOGGER.debug("Starting cluster manager services after CM upgrade.");
+            clusterApiConnectors.getConnector(stackDto).startClusterMgmtServices();
         }
     }
 }
