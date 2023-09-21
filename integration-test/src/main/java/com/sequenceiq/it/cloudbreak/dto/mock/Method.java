@@ -20,7 +20,7 @@ public class Method {
             httpMethod = HttpMethod.valueOf(methodName.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             for (HttpMethod checkMethod : HttpMethod.values()) {
-                if (methodName.startsWith(checkMethod.name().toLowerCase())) {
+                if (methodName.startsWith(checkMethod.name().toLowerCase(Locale.ROOT))) {
                     httpMethod = checkMethod;
                     break;
                 }

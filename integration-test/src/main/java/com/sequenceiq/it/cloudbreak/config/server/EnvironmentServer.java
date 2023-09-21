@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.config.server;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -89,7 +90,9 @@ public class EnvironmentServer {
 
     private void checkNonEmpty(String name, String value) {
         if (StringUtils.isEmpty(value)) {
-            throw new NullPointerException(String.format(WARNING_TEXT_FORMAT, name.replaceAll("\\.", "_").toUpperCase()));
+            throw new NullPointerException(String.format(WARNING_TEXT_FORMAT, name
+                    .replaceAll("\\.", "_")
+                    .toUpperCase(Locale.ROOT)));
         }
     }
 }

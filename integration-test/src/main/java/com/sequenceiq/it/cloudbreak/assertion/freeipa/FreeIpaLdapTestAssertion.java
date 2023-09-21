@@ -3,6 +3,8 @@ package com.sequenceiq.it.cloudbreak.assertion.freeipa;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.Locale;
+
 import com.sequenceiq.freeipa.api.v1.ldap.model.describe.DescribeLdapConfigResponse;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
@@ -19,7 +21,8 @@ public class FreeIpaLdapTestAssertion {
             DescribeLdapConfigResponse ldapConfigResponse =
                     freeIpaClient.getDefaultClient().getLdapConfigV1Endpoint().describe(entity.getResponse().getEnvironmentCrn());
             assertNotNull(ldapConfigResponse);
-            assertEquals(entity.getRequest().getFreeIpa().getDomain().toUpperCase(), ldapConfigResponse.getDomain().toUpperCase());
+            assertEquals(entity.getRequest().getFreeIpa().getDomain().toUpperCase(Locale.ROOT),
+                    ldapConfigResponse.getDomain().toUpperCase(Locale.ROOT));
             return entity;
         };
     }

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.metrics;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import org.springframework.context.annotation.Primary;
@@ -31,7 +32,7 @@ public class FreeIpaMetricService extends AbstractMetricService {
     }
 
     private String getMetricNameWithPlatform(MetricType metric, String cloudPlatform) {
-        return String.format("%s.%s.%s", METRIC_PREFIX, metric.getMetricName(), cloudPlatform.toLowerCase());
+        return String.format("%s.%s.%s", METRIC_PREFIX, metric.getMetricName(), cloudPlatform.toLowerCase(Locale.ROOT));
     }
 
     @Override

@@ -35,7 +35,7 @@ public class TransactionalScheduler {
     public void clear() throws TransactionExecutionException {
         transactionService.required(() -> {
             try {
-                scheduler().clear();
+                getScheduler().clear();
             } catch (SchedulerException e) {
                 LOGGER.error("Scheduler clear failed.", e);
                 throw new SchedulerRuntimeException("Scheduler clear failed", e);
@@ -46,7 +46,7 @@ public class TransactionalScheduler {
     public void scheduleJob(JobDetail jobDetail, Trigger trigger) throws TransactionExecutionException {
         transactionService.required(() -> {
             try {
-                scheduler().scheduleJob(jobDetail, trigger);
+                getScheduler().scheduleJob(jobDetail, trigger);
             } catch (SchedulerException e) {
                 JobKey jobKey = jobDetail.getKey();
                 LOGGER.error("Scheduling job failed, jobKey: {}, jobGroup: {}", jobKey.getName(), jobKey.getGroup(), e);
@@ -58,7 +58,7 @@ public class TransactionalScheduler {
     public void deleteJob(JobKey jobKey) throws TransactionExecutionException {
         transactionService.required(() -> {
             try {
-                scheduler().deleteJob(jobKey);
+                getScheduler().deleteJob(jobKey);
             } catch (SchedulerException e) {
                 LOGGER.error("Deleting job failed, jobKey: {}, jobGroup: {}", jobKey.getName(), jobKey.getGroup(), e);
                 throw new SchedulerRuntimeException("Deleting job failed", e);
@@ -67,18 +67,18 @@ public class TransactionalScheduler {
     }
 
     public JobDetail getJobDetail(JobKey jobKey) throws SchedulerException {
-        return scheduler().getJobDetail(jobKey);
+        return getScheduler().getJobDetail(jobKey);
     }
 
     public ListenerManager getListenerManager() throws SchedulerException {
-        return scheduler().getListenerManager();
+        return getScheduler().getListenerManager();
     }
 
     public Set<JobKey> getJobKeys(GroupMatcher<JobKey> groupMatcher) throws SchedulerException {
-        return scheduler().getJobKeys(groupMatcher);
+        return getScheduler().getJobKeys(groupMatcher);
     }
 
-    protected Scheduler scheduler() {
+    protected Scheduler getScheduler() {
         return scheduler;
     }
 }

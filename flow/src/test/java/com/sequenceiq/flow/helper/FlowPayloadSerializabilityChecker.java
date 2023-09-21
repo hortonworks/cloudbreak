@@ -15,6 +15,7 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
@@ -297,7 +298,7 @@ public class FlowPayloadSerializabilityChecker {
     private Optional<Class<?>> getBuilderClass(Class<?> clazz) {
         for (Class<?> innerClass : clazz.getDeclaredClasses()) {
             if (isStatic(innerClass) && isPublic(innerClass) &&
-                    innerClass.getSimpleName().toLowerCase().contains("builder")) {
+                    innerClass.getSimpleName().toLowerCase(Locale.ROOT).contains("builder")) {
                 return Optional.of(innerClass);
             }
         }

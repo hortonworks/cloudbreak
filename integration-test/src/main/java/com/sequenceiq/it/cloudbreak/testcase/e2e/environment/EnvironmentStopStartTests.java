@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.assertion.freeipa.RecipeTestAssertion
 import static java.lang.String.format;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -211,7 +212,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
         instanceTypesOnProvider.forEach(instanceTypeOnProvider -> {
             Assertions.assertThat(instanceTypeOnProvider).withFailMessage(
                             "freeipa's instance type does not match with the requested instance type (freeipa: %s, actual: %s, requested: %s)",
-                            freeipa.getName(), instanceTypeOnProvider, freeipaRequestedInstanceType.toLowerCase())
+                            freeipa.getName(), instanceTypeOnProvider, freeipaRequestedInstanceType.toLowerCase(Locale.ROOT))
                     .isEqualTo(freeipaRequestedInstanceType.toLowerCase());
         });
 

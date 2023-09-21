@@ -299,9 +299,12 @@ public class AwsIamService {
      * @throws IOException if unable to read file
      */
     String getResourceFileAsString(String fileName) throws IOException {
-        try (InputStream is = AwsIamService.class.getClassLoader().getResourceAsStream(fileName)) {
-            return inputStreamtoString(is);
+        if (fileName != null) {
+            try (InputStream is = AwsIamService.class.getClassLoader().getResourceAsStream(fileName)) {
+                return inputStreamtoString(is);
+            }
         }
+        return null;
     }
 
     private String inputStreamtoString(InputStream is) throws IOException {

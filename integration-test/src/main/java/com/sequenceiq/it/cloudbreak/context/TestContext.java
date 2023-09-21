@@ -14,6 +14,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -1445,7 +1446,7 @@ public abstract class TestContext implements ApplicationContextAware {
     public void checkNonEmpty(String name, String value) {
         if (StringUtils.isEmpty(value)) {
             throw new NullPointerException(format("Following variable must be set whether as environment variables or (test) application.yaml: %s",
-                    name.replaceAll("\\.", "_").toUpperCase()));
+                    name.replaceAll("\\.", "_").toUpperCase(Locale.ROOT)));
         }
     }
 

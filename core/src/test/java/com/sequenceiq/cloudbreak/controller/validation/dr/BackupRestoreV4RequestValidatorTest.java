@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -178,7 +179,7 @@ public class BackupRestoreV4RequestValidatorTest {
 
         // As we are using regex, we assume fully capitalized versions of the schemas suffice for testing.
         List<String> cloudPlatformValidPrefixes = cloudPlatformValidSchemesCaseInsensitive.stream()
-                .flatMap(scheme -> Stream.of(scheme + "://", scheme.toUpperCase() + "://")).collect(Collectors.toList());
+                .flatMap(scheme -> Stream.of(scheme + "://", scheme.toUpperCase(Locale.ROOT) + "://")).collect(Collectors.toList());
 
         Iterable<String> validPrefixes = Iterables.concat(BASE_VALID_LOCATION_PREFIXES, cloudPlatformValidPrefixes);
         boolean validationPassed = true;

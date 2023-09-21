@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toSet;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -232,7 +233,7 @@ public class UpgradeService {
 
     private String getImageNameForStack(StackView stack, StatedImage statedImage) {
         return statedImage.getImage().getImageSetsByProvider()
-                .get(stack.getPlatformVariant().toLowerCase())
+                .get(stack.getPlatformVariant().toLowerCase(Locale.ROOT))
                 .get(stack.getRegion());
     }
 
@@ -255,7 +256,7 @@ public class UpgradeService {
                 .determineImageFromCatalog(
                         workspaceId,
                         toImageSettingsRequest(image),
-                        stack.getCloudPlatform().toLowerCase(),
+                        stack.getCloudPlatform().toLowerCase(Locale.ROOT),
                         stack.getPlatformVariant(),
                         optionalBlueprint.orElse(null),
                         false,

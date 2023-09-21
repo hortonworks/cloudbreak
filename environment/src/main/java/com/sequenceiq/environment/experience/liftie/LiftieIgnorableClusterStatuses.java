@@ -4,6 +4,8 @@ import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
+import java.util.Locale;
+
 public enum LiftieIgnorableClusterStatuses {
 
     DELETED,
@@ -23,9 +25,9 @@ public enum LiftieIgnorableClusterStatuses {
 
     public static boolean contains(String status) {
         return !isEmpty(status) && stream(LiftieIgnorableClusterStatuses.values())
-                .map(s -> s.name().toLowerCase())
+                .map(s -> s.name().toLowerCase(Locale.ROOT))
                 .collect(toSet())
-                .contains(status.toLowerCase());
+                .contains(status.toLowerCase(Locale.ROOT));
     }
 
 }

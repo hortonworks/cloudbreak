@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.generator.dependencies;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -31,9 +32,9 @@ public class ServiceDependencyMatrixService {
         Set<String> deps = new HashSet<>();
         for (String service : services) {
             for (ServiceConfig serviceInformation : resolver.serviceConfigs()) {
-                if (service.toUpperCase().equals(serviceInformation.getName())) {
+                if (service.toUpperCase(Locale.ROOT).equals(serviceInformation.getName())) {
                     for (String dependency : serviceInformation.getDependencies()) {
-                        deps.add(dependency.toUpperCase());
+                        deps.add(dependency.toUpperCase(Locale.ROOT));
                     }
                     break;
                 }

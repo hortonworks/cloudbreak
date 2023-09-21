@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -68,7 +69,7 @@ public class GeneratedCmTemplateService {
         Set<ServiceConfig> serviceConfigs = new HashSet<>();
         for (String service : services) {
             for (ServiceConfig serviceInformation : resolver.serviceConfigs()) {
-                if (serviceInformation.getName().equals(service.toUpperCase())) {
+                if (serviceInformation.getName().equals(service.toUpperCase(Locale.ROOT))) {
                     serviceConfigs.add(serviceInformation);
                 }
             }
@@ -93,11 +94,11 @@ public class GeneratedCmTemplateService {
 
                     String componentName = component.getName();
                     boolean base = component.getGroups().size() == 1 || component.isBase();
-                    String hostServiceNameEnd = base ? "BASE" : group.toUpperCase();
-                    String hostServiceName = String.format("%s-%s-%s", lowerCaseServiceName, component.getName().toUpperCase(), hostServiceNameEnd);
+                    String hostServiceNameEnd = base ? "BASE" : group.toUpperCase(Locale.ROOT);
+                    String hostServiceName = String.format("%s-%s-%s", lowerCaseServiceName, component.getName().toUpperCase(Locale.ROOT), hostServiceNameEnd);
 
                     ApiClusterTemplateRoleConfigGroup apiClusterTemplateRoleConfigGroup = new ApiClusterTemplateRoleConfigGroup();
-                    apiClusterTemplateRoleConfigGroup.setRoleType(componentName.toUpperCase());
+                    apiClusterTemplateRoleConfigGroup.setRoleType(componentName.toUpperCase(Locale.ROOT));
                     apiClusterTemplateRoleConfigGroup.setRefName(hostServiceName);
                     apiClusterTemplateRoleConfigGroup.setBase(base);
 

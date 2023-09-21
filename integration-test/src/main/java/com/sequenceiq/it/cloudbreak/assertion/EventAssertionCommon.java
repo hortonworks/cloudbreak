@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.assertion;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -26,7 +27,7 @@ public class EventAssertionCommon {
         if (event.getOperation().getResourceEvent() != null) {
             sb.append("-").append(event.getOperation().getResourceEvent());
         }
-        String id = sb.toString().toLowerCase();
+        String id = sb.toString().toLowerCase(Locale.ROOT);
         LOGGER.debug("Generated rest id: {}", id);
         return id;
     }

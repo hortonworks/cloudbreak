@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.kerberos.v1;
 
+import java.util.Locale;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -49,7 +51,7 @@ public class CreateKerberosConfigRequestToKerberosConfigConverter {
         if (StringUtils.isNotBlank(source.getDomain())) {
             config.setDomain(source.getDomain());
         } else if (StringUtils.isNotBlank(source.getRealm())) {
-            config.setDomain(source.getRealm().toLowerCase());
+            config.setDomain(source.getRealm().toLowerCase(Locale.ROOT));
         }
         return config;
     }
@@ -83,7 +85,7 @@ public class CreateKerberosConfigRequestToKerberosConfigConverter {
         if (StringUtils.isNotBlank(source.getDomain())) {
             config.setDomain(source.getDomain());
         } else if (StringUtils.isNotBlank(source.getRealm())) {
-            config.setDomain(source.getRealm().toLowerCase());
+            config.setDomain(source.getRealm().toLowerCase(Locale.ROOT));
         }
         return config;
     }

@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -91,7 +92,7 @@ public class InstanceTypeCollectorServiceTest {
 
             Assertions.assertTrue(clusterCostDto.isPresent());
             Assertions.assertEquals("AVAILABLE", clusterCostDto.get().getStatus());
-            Assertions.assertEquals(REGION.toLowerCase(), clusterCostDto.get().getRegion());
+            Assertions.assertEquals(REGION.toLowerCase(Locale.ROOT), clusterCostDto.get().getRegion());
             Optional<InstanceGroupCostDto> instanceGroupCostDtoOptional = clusterCostDto.get().getInstanceGroups().stream().findFirst();
             Assertions.assertTrue(instanceGroupCostDtoOptional.isPresent());
             InstanceGroupCostDto instanceGroupCostDto = instanceGroupCostDtoOptional.get();

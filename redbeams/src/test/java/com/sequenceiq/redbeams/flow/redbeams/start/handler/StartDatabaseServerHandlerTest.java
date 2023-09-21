@@ -12,6 +12,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Locale;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -102,7 +104,7 @@ class StartDatabaseServerHandlerTest {
         victim.accept(anEvent());
 
         verify(resourceConnector, times(1)).startDatabaseServer(authenticatedContext, dbStack);
-        verify(eventBus, times(1)).notify(eq(StartDatabaseServerSuccess.class.getSimpleName().toUpperCase()), any(Event.class));
+        verify(eventBus, times(1)).notify(eq(StartDatabaseServerSuccess.class.getSimpleName().toUpperCase(Locale.ROOT)), any(Event.class));
     }
 
     @Test
@@ -114,7 +116,7 @@ class StartDatabaseServerHandlerTest {
         victim.accept(anEvent());
 
         verify(resourceConnector, times(1)).startDatabaseServer(authenticatedContext, dbStack);
-        verify(eventBus, times(1)).notify(eq(StartDatabaseServerSuccess.class.getSimpleName().toUpperCase()), any(Event.class));
+        verify(eventBus, times(1)).notify(eq(StartDatabaseServerSuccess.class.getSimpleName().toUpperCase(Locale.ROOT)), any(Event.class));
     }
 
     @Test
@@ -123,7 +125,7 @@ class StartDatabaseServerHandlerTest {
 
         victim.accept(anEvent());
 
-        verify(eventBus).notify(eq(StartDatabaseServerSuccess.class.getSimpleName().toUpperCase()), any(Event.class));
+        verify(eventBus).notify(eq(StartDatabaseServerSuccess.class.getSimpleName().toUpperCase(Locale.ROOT)), any(Event.class));
         verify(resourceConnector).getDatabaseServerStatus(any(AuthenticatedContext.class), eq(dbStack));
         verifyNoMoreInteractions(resourceConnector);
         verifyNoInteractions(statusCheckFactory, externalDatabaseStatusSyncPollingScheduler);
@@ -136,7 +138,7 @@ class StartDatabaseServerHandlerTest {
 
         victim.accept(anEvent());
 
-        verify(eventBus).notify(eq(StartDatabaseServerFailed.class.getSimpleName().toUpperCase()), any(Event.class));
+        verify(eventBus).notify(eq(StartDatabaseServerFailed.class.getSimpleName().toUpperCase(Locale.ROOT)), any(Event.class));
     }
 
     private Event<StartDatabaseServerRequest> anEvent() {

@@ -51,6 +51,6 @@ public class CsdParcelNameMatcher {
     private boolean matchingString(String csdUrl, String component) {
         return !Strings.isNullOrEmpty(csdUrl)
                 && !Strings.isNullOrEmpty(component)
-                && csdUrl.toLowerCase().contains(component.toLowerCase());
+                && csdUrl.toLowerCase(Locale.ROOT).contains(component.toLowerCase(Locale.ROOT));
     }
 }

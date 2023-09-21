@@ -3,6 +3,7 @@ package com.sequenceiq.mock.aspect;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -97,7 +98,7 @@ public class ResponseModifierAspect {
             if (annotation.value().length > 0 && !StringUtils.isEmpty(annotation.value())) {
                 String method = "";
                 if (annotation.method().length > 0) {
-                    method = annotation.method()[0].name().toLowerCase() + "_";
+                    method = annotation.method()[0].name().toLowerCase(Locale.ROOT) + "_";
                 }
                 sb.insert(0, method).append(annotation.value()[0]);
             }

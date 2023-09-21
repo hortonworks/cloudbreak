@@ -4,6 +4,7 @@ import static org.springframework.util.StringUtils.hasText;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -105,6 +106,7 @@ public class PreWarmParcelLocationFilter implements PackageLocationFilter {
 
     private Predicate<List<String>> filterByStackRelatedParcel(String requiredParcel) {
         return parcelList -> parcelList.stream()
-                .anyMatch(relatedParcel -> hasText(relatedParcel) && relatedParcel.toLowerCase().startsWith(requiredParcel.toLowerCase()));
+                .anyMatch(relatedParcel -> hasText(relatedParcel) && relatedParcel.toLowerCase(Locale.ROOT)
+                        .startsWith(requiredParcel.toLowerCase(Locale.ROOT)));
     }
 }

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -133,7 +134,7 @@ class FreeIpaConfigServiceTest {
         FreeIpaConfigView freeIpaConfigView = underTest.createFreeIpaConfigs(
                 stack, ImmutableSet.of(node));
 
-        assertEquals(DOMAIN.toUpperCase(), freeIpaConfigView.getRealm());
+        assertEquals(DOMAIN.toUpperCase(Locale.ROOT), freeIpaConfigView.getRealm());
         assertEquals(DOMAIN, freeIpaConfigView.getDomain());
         assertEquals(PASSWORD, freeIpaConfigView.getPassword());
         assertEquals(REVERSE_ZONE, freeIpaConfigView.getReverseZones());

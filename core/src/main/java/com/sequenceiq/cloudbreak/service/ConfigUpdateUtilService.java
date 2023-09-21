@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -137,7 +138,7 @@ public class ConfigUpdateUtilService {
             .run(() -> {
                 LOGGER.debug("Polling CM Service {} to check if {}", service, status);
                 Map<String, String> readResults = clusterApi.clusterModificationService().fetchServiceStatuses();
-                if (status.equals(readResults.get(service.toLowerCase()))) {
+                if (status.equals(readResults.get(service.toLowerCase(Locale.ROOT)))) {
                     return AttemptResults.justFinish();
                 }
                 return AttemptResults.justContinue();

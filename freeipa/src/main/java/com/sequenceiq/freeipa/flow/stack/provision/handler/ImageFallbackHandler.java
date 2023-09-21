@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.flow.stack.provision.handler;
 
 import static com.sequenceiq.common.model.OsType.RHEL8;
 
+import java.util.Locale;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -103,7 +105,7 @@ public class ImageFallbackHandler extends ExceptionCatcherEventHandler<ImageFall
 
     private FreeIpaImageFilterSettings createFreeIpaImageFilterSettings(Stack stack, ImageEntity currentImage) {
         return new FreeIpaImageFilterSettings(currentImage.getImageId(), currentImage.getImageCatalogUrl(), currentImage.getOs(), currentImage.getOs(),
-                stack.getRegion(), stack.getCloudPlatform().toLowerCase(), false);
+                stack.getRegion(), stack.getCloudPlatform().toLowerCase(Locale.ROOT), false);
     }
 
 }

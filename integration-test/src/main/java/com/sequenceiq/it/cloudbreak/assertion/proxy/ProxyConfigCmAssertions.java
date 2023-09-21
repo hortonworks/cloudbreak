@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.assertion.proxy;
 
+import java.util.Locale;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -71,7 +72,7 @@ class ProxyConfigCmAssertions {
 
     private static Map<String, String> getExpectedConfig(ProxyTestDto proxy) {
         ProxyRequest proxyRequest = proxy.getRequest();
-        return getExpectedConfig(proxyRequest.getHost(), proxyRequest.getPort().toString(), proxyRequest.getProtocol().toUpperCase(),
+        return getExpectedConfig(proxyRequest.getHost(), proxyRequest.getPort().toString(), proxyRequest.getProtocol().toUpperCase(Locale.ROOT),
                 proxyRequest.getUserName(), proxyRequest.getNoProxyHosts());
     }
 

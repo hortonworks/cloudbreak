@@ -113,7 +113,7 @@ public class CDPConfigService {
                         CDPConfigKey cdpConfigKey = new CDPConfigKey(cloudPlatform, sdxClusterShape, runtimeVersion);
                         String entitlementString = matcher.group(ENTITLEMENT_GROUP) != null ? StringUtils.substring(matcher.group(ENTITLEMENT_GROUP), 1) : null;
                         Optional<Entitlement> entitlementOptional = Arrays.stream(Entitlement.values()).filter(entitlement ->
-                                StringUtils.equals(entitlement.name().toLowerCase(), entitlementString)).findFirst();
+                                StringUtils.equals(entitlement.name().toLowerCase(Locale.ROOT), entitlementString)).findFirst();
                         String templateString = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8.name());
                         if (!cdpStackRequests.containsKey(cdpConfigKey)) {
                             cdpStackRequests.put(cdpConfigKey, Maps.newHashMap());

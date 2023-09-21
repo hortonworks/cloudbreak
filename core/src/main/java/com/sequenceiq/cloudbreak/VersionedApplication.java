@@ -14,6 +14,8 @@ public class VersionedApplication {
 
     public static final String SHORT_VERSION = "-v";
 
+    private static final int MAX_SIZE = 30000;
+
     private VersionedApplication() {
 
     }
@@ -39,7 +41,7 @@ public class VersionedApplication {
     }
 
     private String readVersionFromClasspath(String fileName, boolean onlyVersion) throws IOException {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(MAX_SIZE);
         try (Reader reader = new InputStreamReader(new ClassPathResource(fileName).getInputStream(), StandardCharsets.UTF_8)) {
             try (BufferedReader br = new BufferedReader(reader)) {
                 String line;
@@ -50,7 +52,10 @@ public class VersionedApplication {
                             return line;
                         }
                     } else {
-                        sb.append(line).append('\n');
+                        if (line.length() <= MAX_SIZE) {
+                            sb.append(line);
+                        }
+                        sb.append('\n');
                     }
                 }
             }

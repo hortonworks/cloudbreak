@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
@@ -56,7 +57,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         ImageCatalogTestDto dto = testContext.get(ImageCatalogTestDto.class);
         return dto.getResponse().getImages().getCdhImages().stream()
                 .filter(img -> img.getVersion().equals(currentRuntimeVersion3rdParty) && img.getImageSetsByProvider().keySet().stream().iterator().next()
-                        .equals(testContext.commonCloudProperties().getCloudProvider().toLowerCase())).iterator().next().getUuid();
+                        .equals(testContext.commonCloudProperties().getCloudProvider().toLowerCase(Locale.ROOT))).iterator().next().getUuid();
     }
 
     @Test(dataProvider = TEST_CONTEXT)

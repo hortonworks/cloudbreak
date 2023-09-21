@@ -3,6 +3,7 @@ package com.sequenceiq.it.util;
 import static java.lang.String.format;
 
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -118,7 +119,7 @@ public class TagsUtil {
     }
 
     private String sanitize(String tagValue) {
-        return tagValue.split("@")[0].toLowerCase().replaceAll("[^\\w]", "-");
+        return tagValue.split("@")[0].toLowerCase(Locale.ROOT).replaceAll("[^\\w]", "-");
     }
 
     private boolean gcpLabelTransformedValue(String tagValue, String rawValue) {
@@ -207,7 +208,7 @@ public class TagsUtil {
         String tagValue = response.getTagValue(tagKey);
 
         if (StringUtils.isBlank(tagValue)) {
-            tagValue = response.getTagValue(tagKey.toLowerCase());
+            tagValue = response.getTagValue(tagKey.toLowerCase(Locale.ROOT));
         }
         return tagValue;
     }

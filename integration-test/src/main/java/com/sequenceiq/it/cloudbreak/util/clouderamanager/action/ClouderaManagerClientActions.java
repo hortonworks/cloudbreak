@@ -4,6 +4,7 @@ import static java.lang.String.format;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -73,7 +74,7 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
                         .orElseThrow(() -> new TestFailException("Config not found with key " + configKey))
                         .getValue();
                 if (!Objects.equals(expectedConfigValue, actualConfigValue)) {
-                    String message = configKey.toLowerCase().contains("password")
+                    String message = configKey.toLowerCase(Locale.ROOT).contains("password")
                             ? String.format("Expected '%s' config value does not match found password", configKey)
                             : String.format("Expected '%s' config value to be '%s' but found '%s'", configKey, expectedConfigValue, actualConfigValue);
                     throw new TestFailException(message);

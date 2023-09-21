@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.template.views;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -212,7 +213,7 @@ public class RdsView {
     }
 
     public String getUpperCaseDatabaseEngine() {
-        return databaseVendor.databaseType().toUpperCase();
+        return databaseVendor.databaseType().toUpperCase(Locale.ROOT);
     }
 
     public String getHostWithPortWithJdbc() {

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.identitymapping;
 
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -42,7 +43,7 @@ public class AzureMockAccountMappingService {
 
     private String getSubscriptionId(CloudCredential credential) {
         String subscriptionId = (String) credential
-                .getParameter(AZURE.toLowerCase(), Map.class)
+                .getParameter(AZURE.toLowerCase(Locale.ROOT), Map.class)
                 .get(SUBSCRIPTION_ID_KEY);
         return subscriptionId;
     }

@@ -2,6 +2,7 @@ package com.sequenceiq.mock.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -39,14 +40,14 @@ public class ResponseModifierService {
     private ClouderaManagerStoreService clouderaManagerStoreService;
 
     public void addResponse(MockResponse mockResponse) {
-        String responseKey = mockResponse.getHttpMethod().toLowerCase() + "_" + mockResponse.getPath();
+        String responseKey = mockResponse.getHttpMethod().toLowerCase(Locale.ROOT) + "_" + mockResponse.getPath();
         LOGGER.info("New mock response for: {}", mockResponse);
         List<MockResponse> mockResponses = responses.computeIfAbsent(responseKey, key -> new ArrayList<>());
         mockResponses.add(mockResponse);
     }
 
     public void clearResponse(MockResponse mockResponse) {
-        String responseKey = mockResponse.getHttpMethod().toLowerCase() + "_" + mockResponse.getPath();
+        String responseKey = mockResponse.getHttpMethod().toLowerCase(Locale.ROOT) + "_" + mockResponse.getPath();
         responses.remove(responseKey);
     }
 

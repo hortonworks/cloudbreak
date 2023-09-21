@@ -11,9 +11,9 @@ public enum CdpResourceType {
         CdpResourceType cdpResourceType = DEFAULT;
         if (type == null || type.isEmpty()) {
             cdpResourceType = DEFAULT;
-        } else if (type.toLowerCase(Locale.ROOT).contains("ditrox") || type.toLowerCase().contains("workload")) {
+        } else if (type.toLowerCase(Locale.ROOT).contains("ditrox") || type.toLowerCase(Locale.ROOT).contains("workload")) {
             cdpResourceType = DATAHUB;
-        } else if (type.toLowerCase(Locale.ROOT).contains("sdx") || type.toLowerCase().contains("datalake")) {
+        } else if (type.toLowerCase(Locale.ROOT).contains("sdx") || type.toLowerCase(Locale.ROOT).contains("datalake")) {
             cdpResourceType = DATALAKE;
         }
         return cdpResourceType;

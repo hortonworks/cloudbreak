@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.updates;
 
+import java.util.Locale;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
@@ -10,7 +12,7 @@ public class HostGroupV4RequestToHostGroupConverter {
 
     public HostGroup convert(HostGroupV4Request source) {
         HostGroup hostGroup = new HostGroup();
-        hostGroup.setName(source.getName().toLowerCase());
+        hostGroup.setName(source.getName().toLowerCase(Locale.ROOT));
         hostGroup.setRecoveryMode(source.getRecoveryMode());
         return hostGroup;
     }

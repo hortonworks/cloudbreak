@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -79,7 +80,7 @@ public class CustomJUnitXMLReporter extends JUnitXMLReporter {
             context.put(Util.KEY_PERFORMANCE_INDICATOR, getPerformanceIndicator());
 
             try {
-                generateFile(new File(outputDirectory, String.join("_", commonCloudProperties.getCloudProvider().toLowerCase(),
+                generateFile(new File(outputDirectory, String.join("_", commonCloudProperties.getCloudProvider().toLowerCase(Locale.ROOT),
                         results.getTestClassName(), RESULTS_FILE)), "custom." + RESULTS_FILE + TEMPLATE_EXTENSION, context);
             } catch (Exception ex) {
                 throw new ReportNGException("Failed generating JUnit XML report.", ex);
@@ -162,7 +163,7 @@ public class CustomJUnitXMLReporter extends JUnitXMLReporter {
                 Throwable testResultException = testResult.getThrowable();
                 String methodName = testResult.getName();
                 int status = testResult.getStatus();
-                String testName = String.join("_", commonCloudProperties.getCloudProvider().toLowerCase(), methodName);
+                String testName = String.join("_", commonCloudProperties.getCloudProvider().toLowerCase(Locale.ROOT), methodName);
 
                 if (testResultException != null) {
                     try {

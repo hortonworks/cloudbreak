@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.ldap;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -77,10 +78,10 @@ public class LdapConfigService {
     }
 
     private LdapView convert(DescribeLdapConfigResponse describeLdapConfigResponse) {
-        String protocol = describeLdapConfigResponse.getProtocol().toLowerCase();
+        String protocol = describeLdapConfigResponse.getProtocol().toLowerCase(Locale.ROOT);
         String connectionUrl = protocol + "://" + describeLdapConfigResponse.getHost();
         if (describeLdapConfigResponse.getPort() != null) {
-            connectionUrl = connectionUrl.toLowerCase() + ':' + describeLdapConfigResponse.getPort();
+            connectionUrl = connectionUrl.toLowerCase(Locale.ROOT) + ':' + describeLdapConfigResponse.getPort();
         }
         return LdapViewBuilder.aLdapView()
                 .withProtocol(protocol)

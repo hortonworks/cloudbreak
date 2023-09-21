@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -226,7 +227,7 @@ class SssdConfigProviderTest {
 
         Map<String, Object> sssdConfig = (Map<String, Object>) properties.get("sssd-ipa");
         assertEquals(kerberosConfig.getPrincipal(), sssdConfig.get("principal"));
-        assertEquals(kerberosConfig.getRealm().toUpperCase(), sssdConfig.get("realm"));
+        assertEquals(kerberosConfig.getRealm().toUpperCase(Locale.ROOT), sssdConfig.get("realm"));
         assertEquals(kerberosConfig.getDomain(), sssdConfig.get("domain"));
         assertEquals(kerberosConfig.getPassword(), sssdConfig.get("password"));
         assertEquals(kerberosConfig.getUrl(), sssdConfig.get("server"));

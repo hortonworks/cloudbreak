@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.recovery;
 
+import java.util.Locale;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -54,7 +55,7 @@ public class RdsRecoverySetupService {
     private void modifyRecoverRole(Long stackId, GrainOperation operation) throws CloudbreakOrchestratorFailedException {
         StackDto stackDto = stackDtoService.getById(stackId);
         OrchestratorGrainRunnerParams stateParams = createRecoverGrainRunnerParams(stackDto, operation);
-        LOGGER.debug("{} 'recover' role with params {}", operation.name().toLowerCase(), stateParams);
+        LOGGER.debug("{} 'recover' role with params {}", operation.name().toLowerCase(Locale.ROOT), stateParams);
         hostOrchestrator.runOrchestratorGrainRunner(stateParams);
     }
 

@@ -51,6 +51,6 @@ public class PlatformStringTransformer {
     }
 
     private boolean govCloudSegmentRequired(String cloudPlatform) {
-        return !cloudPlatform.toLowerCase().endsWith(CommonGovService.GOV);
+        return !cloudPlatform.toLowerCase(Locale.ROOT).endsWith(CommonGovService.GOV);
     }
 }

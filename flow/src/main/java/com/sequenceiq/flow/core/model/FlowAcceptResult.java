@@ -3,6 +3,7 @@ package com.sequenceiq.flow.core.model;
 import static com.sequenceiq.flow.core.model.ResultType.ALREADY_EXISTING_FLOW;
 
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -74,7 +75,7 @@ public class FlowAcceptResult implements AcceptResult {
                 body = "flowChainId=" + pollableId;
                 break;
             case ALREADY_EXISTING_FLOW:
-                body = ALREADY_EXISTING_FLOW.name().toLowerCase();
+                body = ALREADY_EXISTING_FLOW.name().toLowerCase(Locale.ROOT);
                 break;
             default:
                 body = "resultType=" + resultType + ", pollableId=" + pollableId;

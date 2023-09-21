@@ -8,6 +8,7 @@ import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -118,7 +119,7 @@ public class GcpClient {
             JsonNode credNode = JsonUtil.readTree(new String(Base64.decodeBase64(credentialJson)));
             JsonNode projectId = credNode.get("project_id");
             if (projectId != null) {
-                return projectId.asText().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "-");
+                return projectId.asText().toLowerCase(Locale.ROOT).replaceAll("[^A-Za-z0-9 ]", "-");
             }
         } catch (IOException ioException) {
             LOGGER.warn("Unable to read credential JSON into a tree.", ioException);

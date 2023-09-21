@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.api.v1.operation.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Locale;
+
 import org.junit.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -20,7 +22,7 @@ public class OperationTypeTest {
     @ParameterizedTest
     @EnumSource(value = OperationType.class)
     void testLowerCaseName(OperationType operationType) {
-        assertEquals(operationType.name().toLowerCase(), operationType.getLowerCaseName());
+        assertEquals(operationType.name().toLowerCase(Locale.ROOT), operationType.getLowerCaseName());
     }
 
 }

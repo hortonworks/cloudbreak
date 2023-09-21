@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.client.model;
 
+import java.util.Locale;
+
 public enum Right {
     WRITE,
     READ,
@@ -12,7 +14,7 @@ public enum Right {
     private String value;
 
     Right() {
-        value = name().toLowerCase();
+        value = name().toLowerCase(Locale.ROOT);
     }
 
     public String getValue() {

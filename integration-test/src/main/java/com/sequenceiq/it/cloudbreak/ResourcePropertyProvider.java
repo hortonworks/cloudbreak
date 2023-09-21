@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -56,13 +57,13 @@ public class ResourcePropertyProvider {
     }
 
     public String prefix() {
-        return commonCloudProperties.getCloudProvider().toLowerCase() + "-test";
+        return commonCloudProperties.getCloudProvider().toLowerCase(Locale.ROOT) + "-test";
     }
 
     public String prefix(CloudPlatform cloudPlatform) {
-        String cloudPlatformPrefix = commonCloudProperties.getCloudProvider().toLowerCase();
+        String cloudPlatformPrefix = commonCloudProperties.getCloudProvider().toLowerCase(Locale.ROOT);
         if (cloudPlatform != null) {
-            cloudPlatformPrefix = cloudPlatform.name().toLowerCase();
+            cloudPlatformPrefix = cloudPlatform.name().toLowerCase(Locale.ROOT);
         }
         return cloudPlatformPrefix + "-test";
     }

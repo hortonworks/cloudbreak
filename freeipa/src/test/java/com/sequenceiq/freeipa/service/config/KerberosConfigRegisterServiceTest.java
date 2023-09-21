@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -86,7 +87,7 @@ class KerberosConfigRegisterServiceTest {
         assertEquals(instanceMetaData.getPrivateIp(), kerberosConfig.getNameServers());
         assertEquals(freeIpa.getAdminPassword(), kerberosConfig.getPassword());
         assertEquals(freeIpa.getDomain(), kerberosConfig.getDomain());
-        assertEquals(freeIpa.getDomain().toUpperCase(), kerberosConfig.getRealm());
+        assertEquals(freeIpa.getDomain().toUpperCase(Locale.ROOT), kerberosConfig.getRealm());
         assertEquals(KerberosType.FREEIPA, kerberosConfig.getType());
         assertEquals(KerberosConfigRegisterService.FREEIPA_DEFAULT_ADMIN, kerberosConfig.getPrincipal());
     }

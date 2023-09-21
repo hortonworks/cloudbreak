@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -311,7 +312,7 @@ public class CloudResourceAdvisor {
      * Logic from UI.
      */
     private boolean fallbackGatewayFilter(String hostGroupName) {
-        String lowerName = hostGroupName.toLowerCase();
+        String lowerName = hostGroupName.toLowerCase(Locale.ROOT);
         return lowerName.contains("master")
                 || lowerName.contains("services")
                 || lowerName.contains("manager");
@@ -338,13 +339,13 @@ public class CloudResourceAdvisor {
     }
 
     private boolean fallbackScaleUpFilter(String hostGroupName) {
-        String lowerCaseName = hostGroupName.toLowerCase();
+        String lowerCaseName = hostGroupName.toLowerCase(Locale.ROOT);
         return !lowerCaseName.contains("master")
                 && !lowerCaseName.contains("manager");
     }
 
     private boolean fallbackScaleDownFilter(String hostGroupName) {
-        String lowerCaseName = hostGroupName.toLowerCase();
+        String lowerCaseName = hostGroupName.toLowerCase(Locale.ROOT);
         return !lowerCaseName.contains("master")
                 && !lowerCaseName.contains("manager");
     }
@@ -377,12 +378,12 @@ public class CloudResourceAdvisor {
     }
 
     private boolean fallbackTimeBasedAutoscaleFilter(String hostGroupName) {
-        String lowerCaseName = hostGroupName.toLowerCase();
+        String lowerCaseName = hostGroupName.toLowerCase(Locale.ROOT);
         return lowerCaseName.contains("compute");
     }
 
     private boolean fallbackLoadBasedAutoscaleFilter(String hostGroupName) {
-        String lowerCaseName = hostGroupName.toLowerCase();
+        String lowerCaseName = hostGroupName.toLowerCase(Locale.ROOT);
         return lowerCaseName.contains("compute");
     }
 
@@ -404,7 +405,7 @@ public class CloudResourceAdvisor {
     }
 
     private boolean isThereMasterComponents(ClusterManagerType clusterManagerType, String hostGroupName, Collection<String> components) {
-        return hostGroupName.toLowerCase().contains("master");
+        return hostGroupName.toLowerCase(Locale.ROOT).contains("master");
     }
 
     private VmType getDefaultVmType(String availabilityZone, CloudVmTypes vmtypes) {
@@ -446,7 +447,7 @@ public class CloudResourceAdvisor {
 
     private VmRecommendation getVmRecommendation(VmRecommendation defaultRecommendation, String group, VmRecommendation[] recommendations) {
         for (VmRecommendation recommendation : recommendations) {
-            if (recommendation.getType().equals(group.toLowerCase())) {
+            if (recommendation.getType().equals(group.toLowerCase(Locale.ROOT))) {
                 defaultRecommendation = recommendation;
                 break;
             }

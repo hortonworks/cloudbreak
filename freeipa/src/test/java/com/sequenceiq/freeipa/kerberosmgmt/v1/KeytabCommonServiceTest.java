@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -88,7 +89,7 @@ class KeytabCommonServiceTest {
 
         String result = underTest.getRealm(stack);
 
-        assertEquals(DOMAIN.toUpperCase(), result);
+        assertEquals(DOMAIN.toUpperCase(Locale.ROOT), result);
     }
 
     @Test

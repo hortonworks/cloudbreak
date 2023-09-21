@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.upgrade.image;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -95,7 +96,7 @@ public class CsdLocationFilter implements PackageLocationFilter {
     }
 
     private Predicate<String> csdUrlContainsParcelName(String parcelName) {
-        return preWarmCsd -> preWarmCsd.toLowerCase().contains(parcelName.toLowerCase());
+        return preWarmCsd -> preWarmCsd.toLowerCase(Locale.ROOT).contains(parcelName.toLowerCase(Locale.ROOT));
     }
 
 }

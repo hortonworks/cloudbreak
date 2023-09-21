@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak;
 
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.hibernate.resource.jdbc.spi.StatementInspector;
@@ -19,7 +20,7 @@ public class SqlStatementInspector implements StatementInspector {
     @Override
     public String inspect(String sql) {
         LOGGER.info(" Inspect the statement: " + sql);
-        if (sql.toLowerCase().startsWith("select")) {
+        if (sql.toLowerCase(Locale.ROOT).startsWith("select")) {
             SELECT_STATEMENTS.incrementAndGet();
         }
 

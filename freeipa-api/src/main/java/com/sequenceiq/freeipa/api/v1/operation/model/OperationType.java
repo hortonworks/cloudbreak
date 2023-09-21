@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.operation.model;
 
+import java.util.Locale;
+
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
 
 public enum OperationType {
@@ -18,7 +20,7 @@ public enum OperationType {
     private final String lowerCaseName;
 
     OperationType() {
-        lowerCaseName = name().toLowerCase();
+        lowerCaseName = name().toLowerCase(Locale.ROOT);
     }
 
     public static OperationType fromSyncOperationType(SyncOperationType syncOperationType) {

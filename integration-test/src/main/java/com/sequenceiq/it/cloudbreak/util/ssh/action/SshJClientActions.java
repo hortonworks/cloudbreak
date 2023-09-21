@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -412,12 +413,12 @@ public class SshJClientActions extends SshJClient {
                             if (acceptableNokNames.stream()
                                     .anyMatch(nokAccepted -> nokAccepted.equalsIgnoreCase(service))) {
                                 Log.log(LOGGER, format(" Found Monitoring '%s' where %s' is 'Not OK' at '%s' instance. " +
-                                        "However this is acceptable! ", statusCategory.toUpperCase(), service, monitoringStatusReport.getKey()));
+                                        "However this is acceptable! ", statusCategory.toUpperCase(Locale.ROOT), service, monitoringStatusReport.getKey()));
                             } else {
-                                Log.error(LOGGER, format(" Found Monitoring '%s' where '%s' is 'Not OK' at '%s' instance! ", statusCategory.toUpperCase(),
-                                        service, monitoringStatusReport.getKey()));
+                                Log.error(LOGGER, format(" Found Monitoring '%s' where '%s' is 'Not OK' at '%s' instance! ",
+                                        statusCategory.toUpperCase(Locale.ROOT), service, monitoringStatusReport.getKey()));
                                 throw new TestFailException(format("Found Monitoring '%s' where '%s' is 'Not OK' at '%s' instance!",
-                                        statusCategory.toUpperCase(), service, monitoringStatusReport.getKey()));
+                                        statusCategory.toUpperCase(Locale.ROOT), service, monitoringStatusReport.getKey()));
                             }
                         });
                     }

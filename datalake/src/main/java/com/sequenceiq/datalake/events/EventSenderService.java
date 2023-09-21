@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -92,7 +93,7 @@ public class EventSenderService {
 
     private CDPStructuredNotificationEvent getStructuredEvent(AccountAwareResource resource, ResourceEvent resourceEvent, Object payload,
             Collection<?> messageArgs, String message) {
-        String resourceType = resource.getClass().getSimpleName().toLowerCase();
+        String resourceType = resource.getClass().getSimpleName().toLowerCase(Locale.ROOT);
         String resourceCrn = resource.getResourceCrn();
         CDPOperationDetails operationDetails = new CDPOperationDetails(
                 System.currentTimeMillis(),

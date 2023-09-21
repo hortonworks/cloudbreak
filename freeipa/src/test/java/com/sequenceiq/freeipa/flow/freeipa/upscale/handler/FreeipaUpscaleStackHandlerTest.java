@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -105,7 +106,7 @@ class FreeipaUpscaleStackHandlerTest {
         underTest.accept(new Event<>(request));
 
         ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(eq(UpscaleStackResult.class.getSimpleName().toUpperCase()), eventArgumentCaptor.capture());
+        verify(eventBus).notify(eq(UpscaleStackResult.class.getSimpleName().toUpperCase(Locale.ROOT)), eventArgumentCaptor.capture());
         Event actualEvent = eventArgumentCaptor.getValue();
         assertNotNull(actualEvent);
         assertEquals(ResourceStatus.UPDATED, ((UpscaleStackResult) actualEvent.getData()).getResourceStatus());
@@ -119,7 +120,7 @@ class FreeipaUpscaleStackHandlerTest {
         underTest.accept(new Event<>(request));
 
         ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(eq(UpscaleStackImageFallbackResult.class.getSimpleName().toUpperCase()), eventArgumentCaptor.capture());
+        verify(eventBus).notify(eq(UpscaleStackImageFallbackResult.class.getSimpleName().toUpperCase(Locale.ROOT)), eventArgumentCaptor.capture());
         Event actualEvent = eventArgumentCaptor.getValue();
         assertNotNull(actualEvent);
         assertEquals(ResourceStatus.FAILED, ((UpscaleStackImageFallbackResult) actualEvent.getData()).getResourceStatus());
@@ -133,7 +134,7 @@ class FreeipaUpscaleStackHandlerTest {
         underTest.accept(new Event<>(request));
 
         ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(eq(UpscaleStackResult.class.getSimpleName().toUpperCase() + "_ERROR"), eventArgumentCaptor.capture());
+        verify(eventBus).notify(eq(UpscaleStackResult.class.getSimpleName().toUpperCase(Locale.ROOT) + "_ERROR"), eventArgumentCaptor.capture());
         Event actualEvent = eventArgumentCaptor.getValue();
         assertNotNull(actualEvent);
         assertEquals(ResourceStatus.FAILED, ((UpscaleStackResult) actualEvent.getData()).getResourceStatus());

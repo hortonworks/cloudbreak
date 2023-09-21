@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.streaming.processor;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -45,7 +46,7 @@ public class RoundRobinStreamProcessingQueues
 
     private void initProcessingQueuesAndWorkers() {
         for (int workerIndex = 0; workerIndex < this.numberOfQueues; workerIndex++) {
-            String threadName = String.format("%s-record-worker-%d", recordProcessor.getServiceName().toLowerCase(), workerIndex);
+            String threadName = String.format("%s-record-worker-%d", recordProcessor.getServiceName().toLowerCase(Locale.ROOT), workerIndex);
             BlockingDeque<R> processingQueue = new LinkedBlockingDeque<>();
             processingQueueList.add(processingQueue);
             W recordWorker = recordProcessor.createWorker(threadName, processingQueue);

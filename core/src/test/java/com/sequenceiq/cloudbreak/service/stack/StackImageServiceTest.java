@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -163,7 +164,7 @@ public class StackImageServiceTest {
         when(targetImageCatalog.getName()).thenReturn(TARGET_IMAGE_CATALOG);
         when(targetImageCatalog.getImageCatalogUrl()).thenReturn(TARGET_IMAGE_CATALOG_URL);
         when(imageCatalogService.getImage(WORKSPACE_ID, TARGET_IMAGE_CATALOG_URL, TARGET_IMAGE_CATALOG, IMAGE_ID)).thenReturn(targetStatedImage);
-        when(imageService.determineImageName(stack.getCloudPlatform().toLowerCase(), imageCatalogPlatform,
+        when(imageService.determineImageName(stack.getCloudPlatform().toLowerCase(Locale.ROOT), imageCatalogPlatform,
                 stack.getRegion(), targetStatedImage.getImage())).thenReturn(IMAGE_NAME);
         when(platformStringTransformer.getPlatformStringForImageCatalog(stack.getCloudPlatform(), stack.getPlatformVariant()))
                 .thenReturn(imageCatalogPlatform);

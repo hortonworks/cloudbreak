@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -75,7 +76,7 @@ public class StackImageService {
             ImageCatalogPlatform platformString = platformStringTransformer.getPlatformStringForImageCatalog(
                     stack.getCloudPlatform(),
                     stack.getPlatformVariant());
-            String cloudPlatform = platform(stack.getCloudPlatform()).value().toLowerCase();
+            String cloudPlatform = platform(stack.getCloudPlatform()).value().toLowerCase(Locale.ROOT);
             com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetImage = targetStatedImage.getImage();
             String newImageName = imageService.determineImageName(cloudPlatform, platformString, stack.getRegion(), targetImage);
             userDataService.createOrUpdateUserData(stack.getId(), currentImage.getUserdata());

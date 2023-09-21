@@ -47,7 +47,7 @@ public class RestLoggerFilter extends OncePerRequestFilter {
             DateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
             formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
             Date end = new Date(System.currentTimeMillis());
-            String log = new StringBuilder()
+            String log = new StringBuilder(MAX_SIZE)
                     .append(appendLine(RestLoggerField.START_TIME, formatter.format(start)))
                     .append(appendLine(RestLoggerField.END_TIME, formatter.format(end)))
                     .append(appendLine(RestLoggerField.DURATION, Math.abs(end.getTime() - start.getTime()) + " ms"))
@@ -106,6 +106,10 @@ public class RestLoggerFilter extends OncePerRequestFilter {
     }
 
     private String appendLine(RestLoggerField key, String value) {
-        return String.format("%s: %s %s", key.field(), value, "\n");
+        String returnValue = String.format("%s: %s %s", key.field(), value, "\n");
+        if (returnValue.length() <= MAX_SIZE) {
+            return returnValue;
+        }
+        return "";
     }
 }

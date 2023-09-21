@@ -8,6 +8,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Locale;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -96,7 +98,7 @@ class StopDatabaseServerHandlerTest {
         victim.accept(anEvent());
 
         verify(resourceConnector).stopDatabaseServer(authenticatedContext, dbStack);
-        verify(eventBus).notify(eq(StopDatabaseServerSuccess.class.getSimpleName().toUpperCase()), Mockito.any(Event.class));
+        verify(eventBus).notify(eq(StopDatabaseServerSuccess.class.getSimpleName().toUpperCase(Locale.ROOT)), Mockito.any(Event.class));
         verifyNoInteractions(statusCheckFactory, externalDatabaseStatusSyncPollingScheduler);
     }
 
@@ -109,7 +111,7 @@ class StopDatabaseServerHandlerTest {
         victim.accept(anEvent());
 
         verify(resourceConnector).stopDatabaseServer(authenticatedContext, dbStack);
-        verify(eventBus).notify(eq(StopDatabaseServerSuccess.class.getSimpleName().toUpperCase()), Mockito.any(Event.class));
+        verify(eventBus).notify(eq(StopDatabaseServerSuccess.class.getSimpleName().toUpperCase(Locale.ROOT)), Mockito.any(Event.class));
     }
 
     @Test
@@ -118,7 +120,7 @@ class StopDatabaseServerHandlerTest {
 
         victim.accept(anEvent());
 
-        verify(eventBus).notify(eq(StopDatabaseServerSuccess.class.getSimpleName().toUpperCase()), Mockito.any(Event.class));
+        verify(eventBus).notify(eq(StopDatabaseServerSuccess.class.getSimpleName().toUpperCase(Locale.ROOT)), Mockito.any(Event.class));
         verify(resourceConnector).getDatabaseServerStatus(any(AuthenticatedContext.class), eq(dbStack));
         verifyNoMoreInteractions(resourceConnector);
         verifyNoInteractions(statusCheckFactory, externalDatabaseStatusSyncPollingScheduler);
@@ -131,7 +133,7 @@ class StopDatabaseServerHandlerTest {
 
         victim.accept(anEvent());
 
-        verify(eventBus).notify(eq(StopDatabaseServerFailed.class.getSimpleName().toUpperCase()), Mockito.any(Event.class));
+        verify(eventBus).notify(eq(StopDatabaseServerFailed.class.getSimpleName().toUpperCase(Locale.ROOT)), Mockito.any(Event.class));
     }
 
     private Event<StopDatabaseServerRequest> anEvent() {

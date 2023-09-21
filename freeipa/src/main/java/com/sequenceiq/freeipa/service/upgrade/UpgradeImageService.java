@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -112,6 +113,6 @@ public class UpgradeImageService {
 
     private FreeIpaImageFilterSettings createFreeIpaImageFilterSettings(Stack stack, ImageInfoResponse currentImage, String catalog) {
         return new FreeIpaImageFilterSettings(currentImage.getId(), catalog, currentImage.getOs(), currentImage.getOs(), stack.getRegion(),
-                stack.getCloudPlatform().toLowerCase(), false);
+                stack.getCloudPlatform().toLowerCase(Locale.ROOT), false);
     }
 }

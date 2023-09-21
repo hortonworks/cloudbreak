@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -111,7 +112,7 @@ class MockGroupManagementService {
     }
 
     String generateWorkloadGroupName(String umsRight) {
-        String groupNamePostfix = umsRight.replaceAll("/", "_").toLowerCase();
+        String groupNamePostfix = umsRight.replaceAll("/", "_").toLowerCase(Locale.ROOT);
         return "_c_" + groupNamePostfix;
     }
 

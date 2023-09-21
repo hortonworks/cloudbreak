@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.common.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Locale;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.params.ParameterizedTest;
@@ -55,7 +56,7 @@ class PlatformStringTransformerTest {
     @ParameterizedTest
     @MethodSource("variantFlags")
     public void testGetPlatformStringForImageCatalog(String platform, String variant, String expected) {
-        assertEquals(expected.toLowerCase(), underTest.getPlatformStringForImageCatalog(platform, variant).nameToLowerCase());
+        assertEquals(expected.toLowerCase(Locale.ROOT), underTest.getPlatformStringForImageCatalog(platform, variant).nameToLowerCase());
     }
 
     private static Stream<Arguments> regionSource() {
@@ -87,7 +88,7 @@ class PlatformStringTransformerTest {
     @ParameterizedTest
     @MethodSource("regionSource")
     public void testGetPlatformStringForImageCatalogByRegion(String platform, String region, String expected) {
-        assertEquals(expected.toLowerCase(), underTest.getPlatformStringForImageCatalogByRegion(platform, region).nameToLowerCase());
+        assertEquals(expected.toLowerCase(Locale.ROOT), underTest.getPlatformStringForImageCatalogByRegion(platform, region).nameToLowerCase());
     }
 
 }

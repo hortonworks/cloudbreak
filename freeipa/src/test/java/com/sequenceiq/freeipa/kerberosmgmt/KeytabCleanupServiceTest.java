@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -48,7 +49,7 @@ public class KeytabCleanupServiceTest {
 
     private static final String DOMAIN = "cloudera.com";
 
-    private static final String REALM = DOMAIN.toUpperCase();
+    private static final String REALM = DOMAIN.toUpperCase(Locale.ROOT);
 
     private static final String SERVICE = "service1";
 

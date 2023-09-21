@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.controller.mapper;
 
 import static ch.qos.logback.classic.Level.INFO;
 
+import java.util.Locale;
+
 import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
@@ -31,7 +33,7 @@ public class DuplicatedKeyValueExceptionMapper extends BaseExceptionMapper<Dupli
 
     public static String errorMessage(DuplicateKeyValueException exception) {
         return String.format("The %s name '%s' is already taken, please choose a different one",
-                exception.getResourceType().toString().toLowerCase(),
+                exception.getResourceType().toString().toLowerCase(Locale.ROOT),
                 exception.getValue());
     }
 }

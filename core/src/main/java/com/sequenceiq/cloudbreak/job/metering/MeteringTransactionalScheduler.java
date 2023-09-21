@@ -16,7 +16,7 @@ public class MeteringTransactionalScheduler extends TransactionalScheduler {
     private Scheduler scheduler;
 
     @Override
-    protected Scheduler scheduler() {
+    protected Scheduler getScheduler() {
         return scheduler;
     }
 }

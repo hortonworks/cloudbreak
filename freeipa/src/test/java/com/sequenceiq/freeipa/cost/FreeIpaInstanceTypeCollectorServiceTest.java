@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -79,7 +80,7 @@ public class FreeIpaInstanceTypeCollectorServiceTest {
 
             Assertions.assertTrue(clusterCostDto.isPresent());
             Assertions.assertEquals("AVAILABLE", clusterCostDto.get().getStatus());
-            Assertions.assertEquals(REGION.toLowerCase(), clusterCostDto.get().getRegion());
+            Assertions.assertEquals(REGION.toLowerCase(Locale.ROOT), clusterCostDto.get().getRegion());
             InstanceGroupCostDto instanceGroupCostDto = clusterCostDto.get().getInstanceGroups().get(0);
             Assertions.assertEquals(1.0, instanceGroupCostDto.getTotalProviderPrice());
             Assertions.assertEquals(1.0, instanceGroupCostDto.getTotalClouderaPrice());

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.secret.service;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -44,7 +45,7 @@ public class SecretAspectService {
                         if (value != null && value.getRaw() != null && value.getSecret() == null) {
                             String accountId = findAccountId(entity);
                             String path = String.format("%s/%s/%s/%s-%s", accountId,
-                                    entity.getClass().getSimpleName().toLowerCase(), field.getName().toLowerCase(),
+                                    entity.getClass().getSimpleName().toLowerCase(Locale.ROOT), field.getName().toLowerCase(Locale.ROOT),
                                     UUID.randomUUID(), Long.toHexString(System.currentTimeMillis()));
                             String secret = secretService.put(path, value.getRaw());
                             LOGGER.debug("Field: '{}' is saved at path: {}", field.getName(), path);

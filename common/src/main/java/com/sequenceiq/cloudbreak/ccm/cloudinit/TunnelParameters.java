@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.ccm.cloudinit;
 
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
@@ -32,7 +33,7 @@ public interface TunnelParameters {
      * @param model the template model map
      */
     default void addToTemplateModel(Map<String, Object> model) {
-        String knownServiceName = getKnownServiceIdentifier().name().toLowerCase();
+        String knownServiceName = getKnownServiceIdentifier().name().toLowerCase(Locale.ROOT);
         String portKey = String.format(CcmParameterConstants.SERVICE_PORT_KEY_FORMAT, knownServiceName.charAt(0), knownServiceName.substring(1));
         model.put(portKey, getPort());
     }

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.database;
 import static com.sequenceiq.cloudbreak.quartz.configuration.SchedulerFactoryConfig.METERING_QUARTZ_EXECUTOR_THREAD_NAME_PREFIX;
 import static com.sequenceiq.cloudbreak.quartz.configuration.SchedulerFactoryConfig.QUARTZ_EXECUTOR_THREAD_NAME_PREFIX;
 
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -39,10 +40,10 @@ public class RoutingDataSource extends AbstractRoutingDataSource {
 
     @Override
     protected Object determineCurrentLookupKey() {
-        String threadName = Thread.currentThread().getName().toLowerCase();
+        String threadName = Thread.currentThread().getName().toLowerCase(Locale.ROOT);
         boolean quartzThread = threadName.startsWith(QUARTZ_THREAD_NAME_PREFIX)
-                || threadName.startsWith(QUARTZ_EXECUTOR_THREAD_NAME_PREFIX.toLowerCase())
-                || threadName.startsWith(METERING_QUARTZ_EXECUTOR_THREAD_NAME_PREFIX.toLowerCase());
+                || threadName.startsWith(QUARTZ_EXECUTOR_THREAD_NAME_PREFIX.toLowerCase(Locale.ROOT))
+                || threadName.startsWith(METERING_QUARTZ_EXECUTOR_THREAD_NAME_PREFIX.toLowerCase(Locale.ROOT));
         return quartzThread ? QUARTZ_DATASOURCE_KEY : DEFAULT_DATASOURCE_KEY;
     }
 }

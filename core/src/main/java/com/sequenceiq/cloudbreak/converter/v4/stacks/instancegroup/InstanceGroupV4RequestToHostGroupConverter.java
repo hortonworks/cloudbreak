@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup;
 
+import java.util.Locale;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -34,7 +35,7 @@ public class InstanceGroupV4RequestToHostGroupConverter {
 
     public HostGroup convert(InstanceGroupV4Request source) {
         HostGroup hostGroup = new HostGroup();
-        hostGroup.setName(source.getName().toLowerCase());
+        hostGroup.setName(source.getName().toLowerCase(Locale.ROOT));
         hostGroup.setRecoveryMode(source.getRecoveryMode());
         Set<String> recipeNames = source.getRecipeNames();
         if (!CollectionUtils.isEmpty(recipeNames)) {

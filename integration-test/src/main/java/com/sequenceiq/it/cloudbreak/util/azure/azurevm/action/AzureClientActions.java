@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -66,7 +67,7 @@ public class AzureClientActions {
                 id ->  {
                     String resourceGroup = getResourceGroupName(clusterName, id);
                     return Optional.ofNullable(azure.virtualMachines()).orElseThrow()
-                            .getByResourceGroup(resourceGroup, id).size().toString().toLowerCase();
+                            .getByResourceGroup(resourceGroup, id).size().toString().toLowerCase(Locale.ROOT);
                 }
         ).collect(Collectors.toList());
     }

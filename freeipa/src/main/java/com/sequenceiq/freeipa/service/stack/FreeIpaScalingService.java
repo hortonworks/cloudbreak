@@ -6,6 +6,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVer
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -127,7 +128,8 @@ public class FreeIpaScalingService {
     }
 
     private String handleFlowException(Operation operation, Exception e, Stack stack) {
-        String message = String.format("Couldn't start %s flow (operation-id): %s", operation.getOperationType().name().toLowerCase(), e.getMessage());
+        String message = String.format("Couldn't start %s flow (operation-id): %s",
+                operation.getOperationType().name().toLowerCase(Locale.ROOT), e.getMessage());
         LOGGER.error(message, e);
         operationService.failOperation(stack.getAccountId(), operation.getOperationId(), message);
         return message;
@@ -166,7 +168,7 @@ public class FreeIpaScalingService {
         Operation operation = operationService.startOperation(accountId, operationType, List.of(envCrn), List.of());
         if (RUNNING != operation.getStatus()) {
             LOGGER.warn("{} operation couldn't be started: {}", operationType.name(), operation);
-            throw new BadRequestException(operationType.name().toLowerCase() + " operation couldn't be started with: " + operation.getError());
+            throw new BadRequestException(operationType.name().toLowerCase(Locale.ROOT) + " operation couldn't be started with: " + operation.getError());
         }
         return operation;
     }

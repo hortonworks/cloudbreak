@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -209,7 +210,7 @@ public class StackCreatorService {
         StackType stackType = determineStackTypeBasedOnTheUsedApi(stackStub, distroxRequest);
         stackStub.setType(stackType);
         stackStub.setMultiAz(stackRequest.isEnableMultiAz());
-        String platformString = stackStub.getCloudPlatform().toLowerCase();
+        String platformString = stackStub.getCloudPlatform().toLowerCase(Locale.ROOT);
 
         measure(() -> assignOwnerRoleOnDataHub(stackType, crn),
                 LOGGER,

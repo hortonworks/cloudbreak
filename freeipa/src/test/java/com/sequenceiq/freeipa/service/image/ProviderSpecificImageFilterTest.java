@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -56,8 +57,8 @@ class ProviderSpecificImageFilterTest {
         List<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> coreImageList = List.of(coreImage, coreImageToBeFiltered);
         String platform = CloudPlatform.AZURE.name();
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
-                Platform.platform(platform.toUpperCase()),
-                Variant.variant(platform.toUpperCase()));
+                Platform.platform(platform.toUpperCase(Locale.ROOT)),
+                Variant.variant(platform.toUpperCase(Locale.ROOT)));
 
         when(cloudPlatformConnectors.get(cloudPlatformVariant)).thenReturn(connector);
         when(connector.parameters()).thenReturn(platformParameters);
@@ -81,8 +82,8 @@ class ProviderSpecificImageFilterTest {
         List<Image> imageList = List.of(image, imageToBeFiltered);
         String platform = CloudPlatform.AZURE.name() + "xyz";
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
-                Platform.platform(platform.toUpperCase()),
-                Variant.variant(platform.toUpperCase()));
+                Platform.platform(platform.toUpperCase(Locale.ROOT)),
+                Variant.variant(platform.toUpperCase(Locale.ROOT)));
 
         when(cloudPlatformConnectors.get(cloudPlatformVariant)).thenReturn(null);
 

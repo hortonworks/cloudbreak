@@ -5,6 +5,7 @@ import static java.lang.String.format;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +84,7 @@ public class EventSenderService {
 
     private CDPStructuredNotificationEvent getStructuredEvent(AccountAwareResource resource, ResourceEvent resourceEvent, Object payload,
             Collection<?> messageArgs) {
-        String resourceType = resource.getClass().getSimpleName().toLowerCase();
+        String resourceType = resource.getClass().getSimpleName().toLowerCase(Locale.ROOT);
         String resourceCrn = resource.getResourceCrn();
         CDPOperationDetails operationDetails = new CDPOperationDetails(
                 System.currentTimeMillis(),
@@ -104,7 +105,7 @@ public class EventSenderService {
     }
 
     private CDPStructuredNotificationEvent createStructureEventForMissingEnvironment(BaseNamedFlowEvent payload, ResourceEvent resourceEvent, String userCrn) {
-        String resourceType = payload.getClass().getSimpleName().toLowerCase();
+        String resourceType = payload.getClass().getSimpleName().toLowerCase(Locale.ROOT);
         String resourceCrn = payload.getResourceCrn();
         CDPOperationDetails operationDetails = new CDPOperationDetails(
                 System.currentTimeMillis(),

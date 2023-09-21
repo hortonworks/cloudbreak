@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -44,7 +45,7 @@ public class CloudStorageConfigDetails {
                         .filter(configQueryEntry -> configQueryEntry.getRelatedServices().stream().
                                 anyMatch(relatedService -> relatedService.equalsIgnoreCase(service)))
                         .filter(configQueryEntry -> configQueryEntry.isRequiredForAttachedCluster() || !attachedCluster)
-                        .filter(configQueryEntry -> configQueryEntry.getSupportedStorages().contains(request.getFileSystemType().toUpperCase()))
+                        .filter(configQueryEntry -> configQueryEntry.getSupportedStorages().contains(request.getFileSystemType().toUpperCase(Locale.ROOT)))
                         .collect(Collectors.toSet());
                 filtered.addAll(collectedEntries);
             }

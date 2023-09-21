@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -398,7 +399,7 @@ public class ImageServiceTest {
     @Test
     public void testDetermineImageNameFoundYCloud() {
         Image image = mock(Image.class);
-        String platform = CloudPlatform.YARN.name().toLowerCase();
+        String platform = CloudPlatform.YARN.name().toLowerCase(Locale.ROOT);
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(platform);
         when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(false);
 

@@ -3,6 +3,7 @@ package com.sequenceiq.sdx.api.model;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Locale;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ public class SdxClusterShapeTest {
     @Test
     void testVerifyShapeNames() {
         for (SdxClusterShape shape : SdxClusterShape.values()) {
-            assertTrue(EXPECTED_SHAPES.contains(shape.name().toLowerCase()));
+            assertTrue(EXPECTED_SHAPES.contains(shape.name().toLowerCase(Locale.ROOT)));
         }
     }
 
