@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_NOT_NEEDED;
 import static java.lang.String.format;
 
 import java.util.Optional;
@@ -13,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -20,12 +24,15 @@ import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeSuccess;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
+import com.sequenceiq.cloudbreak.service.parcel.UpgradeCandidateProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -49,6 +56,15 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
     @Inject
     private ClusterBuilderService clusterBuilderService;
 
+    @Inject
+    private UpgradeCandidateProvider upgradeCandidateProvider;
+
+    @Inject
+    private ClusterService clusterService;
+
+    @Inject
+    private FlowMessageService flowMessageService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ClusterUpgradeRequest.class);
@@ -61,30 +77,29 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
 
     @Override
     protected Selectable doAccept(HandlerEvent<ClusterUpgradeRequest> event) {
-        LOGGER.debug("Accepting Cluster upgrade event..");
+        LOGGER.debug("Accepting Cluster upgrade event {}", event);
         ClusterUpgradeRequest request = event.getData();
         Long stackId = request.getResourceId();
-        Selectable result;
         try {
             StackDto stackDto = stackDtoService.getById(stackId);
-            StackView stack = stackDto.getStack();
-            Optional<String> remoteDataContext = getRemoteDataContext(stack);
-            ClusterApi connector = clusterApiConnectors.getConnector(stackDto);
             Set<ClusterComponentView> components = parcelService.getParcelComponentsByBlueprint(stackDto);
-            connector.upgradeClusterRuntime(components, request.isPatchUpgrade(), remoteDataContext, request.isRollingUpgradeEnabled());
-            ParcelOperationStatus parcelOperationStatus = parcelService.removeUnusedParcelComponents(stackDto, components);
-            if (parcelOperationStatus.getFailed().isEmpty()) {
-                result = new ClusterUpgradeSuccess(request.getResourceId());
+            ClusterApi connector = clusterApiConnectors.getConnector(stackDto);
+            Set<ClouderaManagerProduct> upgradeCandidateProducts = upgradeCandidateProvider.getRequiredProductsForUpgrade(connector, stackDto, components);
+            if (upgradeCandidateProducts.isEmpty()) {
+                LOGGER.debug("Skip cluster runtime upgrade because all required product is present on the cluster.");
+                flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_UPGRADE_NOT_NEEDED);
+                return new ClusterUpgradeSuccess(stackId);
             } else {
-                LOGGER.info("There are failed parcel removals: {}", parcelOperationStatus);
-                CloudbreakException exception = new CloudbreakException(format("Failed to remove the following parcels: %s", parcelOperationStatus.getFailed()));
-                result = new ClusterUpgradeFailedEvent(request.getResourceId(), exception, DetailedStackStatus.CLUSTER_UPGRADE_FAILED);
+                clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_UPGRADE_IN_PROGRESS);
+                flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_UPGRADE);
+                Optional<String> remoteDataContext = getRemoteDataContext(stackDto.getStack());
+                connector.upgradeClusterRuntime(upgradeCandidateProducts, request.isPatchUpgrade(), remoteDataContext, request.isRollingUpgradeEnabled());
+                return removeUnusedParcelsAfterRuntimeUpgrade(stackDto, components);
             }
         } catch (Exception e) {
             LOGGER.error("Cluster upgrade event failed", e);
-            result = new ClusterUpgradeFailedEvent(request.getResourceId(), e, DetailedStackStatus.CLUSTER_UPGRADE_FAILED);
+            return new ClusterUpgradeFailedEvent(request.getResourceId(), e, DetailedStackStatus.CLUSTER_UPGRADE_FAILED);
         }
-        return result;
     }
 
     private Optional<String> getRemoteDataContext(StackView stack) {
@@ -94,5 +109,16 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
             remoteDataContext = clusterBuilderService.getSdxContextOptional(stack.getDatalakeCrn());
         }
         return remoteDataContext;
+    }
+
+    private Selectable removeUnusedParcelsAfterRuntimeUpgrade(StackDto stackDto, Set<ClusterComponentView> components) throws CloudbreakException {
+        ParcelOperationStatus parcelOperationStatus = parcelService.removeUnusedParcelComponents(stackDto, components);
+        if (parcelOperationStatus.getFailed().isEmpty()) {
+            return new ClusterUpgradeSuccess(stackDto.getId());
+        } else {
+            LOGGER.info("There are failed parcel removals: {}", parcelOperationStatus);
+            CloudbreakException exception = new CloudbreakException(format("Failed to remove the following parcels: %s", parcelOperationStatus.getFailed()));
+            return new ClusterUpgradeFailedEvent(stackDto.getId(), exception, DetailedStackStatus.CLUSTER_UPGRADE_FAILED);
+        }
     }
 }

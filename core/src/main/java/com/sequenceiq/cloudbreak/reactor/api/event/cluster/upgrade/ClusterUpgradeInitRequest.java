@@ -5,17 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class ClusterUpgradeInitRequest extends StackEvent {
-    private final boolean patchUpgrade;
 
     @JsonCreator
     public ClusterUpgradeInitRequest(
-            @JsonProperty("resourceId") Long stackId,
-            @JsonProperty("patchUpgrade") boolean patchUpgrade) {
+            @JsonProperty("resourceId") Long stackId) {
         super(stackId);
-        this.patchUpgrade = patchUpgrade;
-    }
-
-    public boolean isPatchUpgrade() {
-        return patchUpgrade;
     }
 }

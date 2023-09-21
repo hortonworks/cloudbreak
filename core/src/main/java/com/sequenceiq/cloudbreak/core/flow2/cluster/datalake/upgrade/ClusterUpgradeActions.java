@@ -1,13 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade;
 
-import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.STACK;
-
 import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -72,8 +69,7 @@ public class ClusterUpgradeActions {
                     variables.put(ROLLING_UPGRADE_ENABLED, payload.isRollingUpgradeEnabled());
                     clusterUpgradeTargetImageService.saveImage(context.getStackId(), images.targetStatedImage());
                     clusterUpgradeService.initUpgradeCluster(context.getStackId(), getTargetImage(variables), payload.isRollingUpgradeEnabled());
-                    Selectable event = new ClusterUpgradeInitRequest(context.getStackId(), isPatchUpgrade(images.currentImage(),
-                            images.targetStatedImage().getImage()));
+                    Selectable event = new ClusterUpgradeInitRequest(context.getStackId());
                     sendEvent(context, event.selector(), event);
                 } catch (Exception e) {
                     LOGGER.error("Error during updating cluster components with image id: [{}]", payload.getImageId(), e);
@@ -108,13 +104,10 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeInitSuccess payload, Map<Object, Object> variables) {
-                com.sequenceiq.cloudbreak.cloud.model.Image currentImage = retrieveCurrentImageFromVariables(variables, payload.getResourceId());
                 StatedImage targetStatedImage = getTargetImage(variables);
-                Image targetImage = targetStatedImage.getImage();
                 imageComponentUpdaterService.updateComponentsForUpgrade(targetStatedImage, payload.getResourceId());
                 boolean rollingUpgradeEnabled = (boolean) variables.get(ROLLING_UPGRADE_ENABLED);
-                Selectable event = new ClusterManagerUpgradeRequest(context.getStackId(),
-                        !clusterUpgradeService.isClusterRuntimeUpgradeNeeded(currentImage.getPackageVersions(), targetImage), rollingUpgradeEnabled);
+                Selectable event = new ClusterManagerUpgradeRequest(context.getStackId(), rollingUpgradeEnabled);
                 sendEvent(context, event.selector(), event);
             }
 
@@ -141,14 +134,9 @@ public class ClusterUpgradeActions {
                 StatedImage targetStatedImage = getTargetImage(variables);
                 Image targetImage = targetStatedImage.getImage();
                 imageComponentUpdaterService.updateComponentsForUpgrade(targetStatedImage, payload.getResourceId());
-                boolean clusterRuntimeUpgradeNeeded = clusterUpgradeService.upgradeCluster(context.getStackId(), currentImage.getPackageVersions(), targetImage);
-                Selectable event;
-                if (clusterRuntimeUpgradeNeeded) {
-                    boolean rollingUpgradeEnabled = (boolean) variables.get(ROLLING_UPGRADE_ENABLED);
-                    event = new ClusterUpgradeRequest(context.getStackId(), isPatchUpgrade(currentImage, targetImage), rollingUpgradeEnabled);
-                } else {
-                    event = new ClusterUpgradeSuccess(context.getStackId());
-                }
+                boolean rollingUpgradeEnabled = (boolean) variables.get(ROLLING_UPGRADE_ENABLED);
+                boolean patchUpgrade = clusterUpgradeService.isPatchUpgrade(currentImage.getPackageVersions(), targetImage.getPackageVersions());
+                Selectable event = new ClusterUpgradeRequest(context.getStackId(), patchUpgrade, rollingUpgradeEnabled);
                 sendEvent(context, event.selector(), event);
             }
 
@@ -225,13 +213,4 @@ public class ClusterUpgradeActions {
             }
         };
     }
-
-    private boolean isPatchUpgrade(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image targetImage) {
-        Map<String, String> currentImagePackages = currentImage.getPackageVersions();
-        Map<String, String> targetImagePackages = targetImage.getPackageVersions();
-        return currentImagePackages != null && targetImagePackages != null
-                && StringUtils.isNoneBlank(currentImagePackages.get(STACK.getKey()), targetImagePackages.get(STACK.getKey()))
-                && currentImagePackages.get(STACK.getKey()).equals(targetImagePackages.get(STACK.getKey()));
-    }
-
 }
