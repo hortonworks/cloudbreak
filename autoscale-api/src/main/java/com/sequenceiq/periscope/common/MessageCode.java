@@ -30,6 +30,8 @@ public class MessageCode {
 
     public static final String AUTOSCALING_ACTIVITY_NOT_REQUIRED = "autoscale.activity.not.required";
 
+    public static final String AUTOSCALING_TRIGGER_FOR_MIN_NODE = "autoscaling.trigger.for.min.node";
+
     public static final String AUTOSCALING_ACTIVITY_SUCCESS = "autoscale.activity.success";
 
     public static final String AUTOSCALING_ACTIVITY_NODE_LIMIT_EXCEEDED = "autoscale.activity.nodelimitexceeded";

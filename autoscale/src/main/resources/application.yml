@@ -44,6 +44,8 @@ periscope:
     read.timeout: 10000
     core: 8
     memory: 1
+  impala:
+    minimum.executor.nodes: 1
   cert:
     dir: /certs/
   db:

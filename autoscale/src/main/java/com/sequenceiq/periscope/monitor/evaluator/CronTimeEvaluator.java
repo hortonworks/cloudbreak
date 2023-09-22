@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ActivityStatus;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.common.MessageCode;
+import com.sequenceiq.periscope.config.ImpalaConfig;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingActivity;
@@ -67,6 +68,8 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
     private static final Long UPDATE_FAILED_INTERVAL_MINUTES = 60L;
 
     private static final String YARN_NODEMANAGER = "NODEMANAGER";
+
+    private static final String IMPALA_IMPALAD = "IMPALAD";
 
     @Inject
     private TimeAlertRepository alertRepository;
@@ -106,6 +109,9 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
 
     @Inject
     private Clock clock;
+
+    @Inject
+    private ImpalaConfig impalaConfig;
 
     private long clusterId;
 
@@ -188,7 +194,8 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
         scalingActivityMsg = messagesService.getMessageWithArgs(AUTOSCALE_SCHEDULE_BASED_UPSCALE, targetIncrementNodeCount);
 
         if (targetIncrementNodeCount < 0) {
-            populateDecommissionCandidates(event, stackV4Response, alert.getCluster(), alert.getScalingPolicy(), -targetIncrementNodeCount);
+            populateDecommissionCandidates(event, stackV4Response, alert.getCluster(), alert.getScalingPolicy(),
+                    -targetIncrementNodeCount, desiredAbsoluteNodeCount, alert);
             status = SCHEDULE_BASED_DOWNSCALE;
             scalingActivityMsg = messagesService.getMessageWithArgs(AUTOSCALE_SCHEDULE_BASED_DOWNSCALE, event.getDecommissionNodeIds());
         }
@@ -199,7 +206,7 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
     }
 
     private void populateDecommissionCandidates(ScalingEvent event, StackV4Response stackV4Response, Cluster cluster,
-        ScalingPolicy policy, int mandatoryDownScaleCount) {
+        ScalingPolicy policy, int mandatoryDownScaleCount, int desiredAbsoluteNodeCount, TimeAlert alert) {
         try {
             List<String> decommissionNodes = Collections.emptyList();
 
@@ -215,6 +222,12 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
                 decommissionNodes = yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(yarnResponse,
                         hostFqdnsToInstanceId).stream().limit(allowedDownscale).collect(Collectors.toList());
             } else {
+                if (roleTypesOnHostGroup.contains(IMPALA_IMPALAD) && desiredAbsoluteNodeCount < impalaConfig.getMinimumNodes()) {
+                    Integer minimumNodesRequired = impalaConfig.getMinimumNodes();
+                    event.setDesiredAbsoluteHostGroupNodeCount(minimumNodesRequired);
+                    historyService.createEntry(ScalingStatus.CONFIG_UPDATED, messagesService.getMessageWithArgs(MessageCode.AUTOSCALING_TRIGGER_FOR_MIN_NODE,
+                            alert.getAlertType(), alert.getScalingPolicy().getHostGroup(), desiredAbsoluteNodeCount, minimumNodesRequired), cluster);
+                }
                 LOGGER.debug("Since YARN is not running so downscaling triggered with Random Nodes.");
             }
             event.setDecommissionNodeIds(decommissionNodes);

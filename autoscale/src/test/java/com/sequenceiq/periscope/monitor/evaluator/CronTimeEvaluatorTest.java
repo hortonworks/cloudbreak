@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ActivityStatus;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
+import com.sequenceiq.periscope.config.ImpalaConfig;
 import com.sequenceiq.periscope.controller.validation.AlertValidator;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterPertain;
@@ -116,6 +117,9 @@ class CronTimeEvaluatorTest {
     @Mock
     private AlertValidator alertValidator;
 
+    @Mock
+    private ImpalaConfig impalaConfig;
+
     @Test
     void testRunCallsFinished() {
         underTest.setContext(new ClusterIdEvaluatorContext(CLUSTER_ID));
@@ -162,6 +166,30 @@ class CronTimeEvaluatorTest {
 
         assertEquals(expectedScalingCount.intValue(), scalingEvent.getDesiredAbsoluteHostGroupNodeCount().intValue(),
                 "Scheduled-Based Autoscaling Expeced Node Count should match.");
+    }
+
+    static Stream<Arguments> scheduleBasedDownScalingToZeroNodesWithImpalaOnly() {
+        return Stream.of(
+                //TestCase, CurrentHostGroupCount,DesiredNodeCount,YarnGivenDecommissionCount,ExpectedNodeCount
+                Arguments.of("SCALE_DOWN_YARN_NODE_COUNT_MATCH  ", 10, 0, 4, 1),
+                Arguments.of("SCALE_DOWN_YARN_NODE_COUNT_EXTRA  ", 12, 0, 12, 1)
+        );
+    }
+
+    @ParameterizedTest(name = "{0}: With currentHostGroupCount={1}, desiredNodeCount ={2}, yarnGivenDecommissionCount={3}, expectedNodeCount={4} ")
+    @MethodSource("scheduleBasedDownScalingToZeroNodesWithImpalaOnly")
+    void testPublishIfNeededForDownScalingWithImpalaOnlyAndZeroNodes(String testType, Integer currentHostGroupCount,
+            Integer desiredNodeCount, Integer yarnGivenDecommissionCount, Integer expectedScalingCount) throws Exception {
+
+        when(impalaConfig.getMinimumNodes()).thenReturn(1);
+        ScalingEvent scalingEvent = validateScheduleBasedScalingWithImpalaOnly("SCALE_DOWN_MODE", currentHostGroupCount,
+                desiredNodeCount, Optional.of(yarnGivenDecommissionCount));
+
+        int targetNodeCount = currentHostGroupCount - desiredNodeCount;
+        assertEquals(expectedScalingCount, scalingEvent.getDesiredAbsoluteHostGroupNodeCount().intValue(),
+                "Scheduled-Based Autoscaling Expeced Node Count should match.");
+        assertEquals(0, scalingEvent.getDecommissionNodeIds().size(),
+                "Yarn Service Not Present. So recommodations from Yarn:.");
     }
 
     static Stream<Arguments> scheduleBasedDownScaling() {
