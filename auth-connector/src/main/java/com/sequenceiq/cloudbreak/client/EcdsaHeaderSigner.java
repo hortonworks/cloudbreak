@@ -15,6 +15,8 @@ import java.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
+
 public class EcdsaHeaderSigner extends HeaderSigner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EcdsaHeaderSigner.class);
@@ -54,7 +56,7 @@ public class EcdsaHeaderSigner extends HeaderSigner {
                 .replaceAll(System.lineSeparator(), "")
                 .replace("-----END PRIVATE KEY-----", "");
 
-        byte[] encoded = Base64.getDecoder().decode(privateKeyPEM);
+        byte[] encoded = Base64Util.decodeAsByteArray(privateKeyPEM);
 
         KeyFactory keyFactory = KeyFactory.getInstance("EC");
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);

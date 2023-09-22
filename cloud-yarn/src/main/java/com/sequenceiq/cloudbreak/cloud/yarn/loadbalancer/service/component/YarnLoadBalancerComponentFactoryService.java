@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.yarn.loadbalancer.service.component;
 
 import static com.sequenceiq.cloudbreak.cloud.yarn.YarnApplicationCreationService.ARTIFACT_TYPE_DOCKER;
 
-import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.yarn.client.model.core.ConfigFileType;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.core.Configuration;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.core.Resource;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.core.YarnComponent;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Service
@@ -126,7 +126,7 @@ public class YarnLoadBalancerComponentFactoryService {
      */
     private String createLoadBalancerLaunchCommand(CloudStack cloudStack) {
         return String.format("/bootstrap/start-systemd '%s' '%s' '%s'",
-                Base64.getEncoder().encodeToString(cloudStack.getUserDataByType(InstanceGroupType.CORE).getBytes()),
+                Base64Util.encode(cloudStack.getUserDataByType(InstanceGroupType.CORE)),
                 cloudStack.getLoginUserName(), cloudStack.getPublicKey());
     }
 

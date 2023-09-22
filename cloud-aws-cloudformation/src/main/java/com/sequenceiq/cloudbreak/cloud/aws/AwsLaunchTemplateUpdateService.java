@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.LaunchTemplateSpecification;
@@ -186,7 +186,7 @@ public class AwsLaunchTemplateUpdateService {
                     asg.autoScalingGroupName(), launchTemplateSpecification.launchTemplateId(), launchTemplateSpecification.version());
             return null;
         }
-        return new String(Base64.getDecoder().decode(launchTemplateVersions.get(0).launchTemplateData().userData()));
+        return Base64Util.decode(launchTemplateVersions.get(0).launchTemplateData().userData());
     }
 
     private LaunchTemplateSpecification getLaunchTemplateSpecification(AutoScalingGroup autoScalingGroup) {

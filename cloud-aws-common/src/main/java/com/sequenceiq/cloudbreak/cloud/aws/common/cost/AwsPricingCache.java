@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.cost;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -166,7 +166,7 @@ public class AwsPricingCache implements PricingCache {
                 .withActions(new Action("pricing:GetProducts"));
         policy.setStatements(List.of(statement));
         String policyString = new JsonPolicyWriter().writePolicyToString(policy);
-        return Base64.getEncoder().encodeToString(policyString.getBytes());
+        return Base64Util.encode(policyString);
     }
 
     private Optional<VmTypeMeta> getVmMetadata(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential) {

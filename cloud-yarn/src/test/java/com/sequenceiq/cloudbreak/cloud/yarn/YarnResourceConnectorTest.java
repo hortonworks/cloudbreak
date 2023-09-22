@@ -11,7 +11,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.MalformedURLException;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,6 +52,7 @@ import com.sequenceiq.cloudbreak.cloud.yarn.client.model.request.ApplicationDeta
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.request.CreateApplicationRequest;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationDetailResponse;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ResponseContext;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -78,7 +78,7 @@ public class YarnResourceConnectorTest {
 
     private static final String USER_DATA = "userData";
 
-    private static final String USER_DATA_BASE64 = Base64.getEncoder().encodeToString(USER_DATA.getBytes());
+    private static final String USER_DATA_BASE64 = Base64Util.encode(USER_DATA);
 
     @InjectMocks
     private YarnResourceConnector underTest;

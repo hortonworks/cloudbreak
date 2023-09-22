@@ -2,11 +2,10 @@ package com.sequenceiq.environment.credential.v1.converter.azure;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Base64;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.common.api.credential.AppAuthenticationType;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialResponseParameters;
 import com.sequenceiq.environment.credential.attributes.azure.AppBasedAttributes;
@@ -38,7 +37,7 @@ public class AzureCredentialAttributesToAzureCredentialResponseParametersConvert
 
         assertEquals(input.getAppBased().getCertificate().getStatus(), response.getCertificate().getStatus());
         assertEquals(input.getAppBased().getCertificate().getSha512(), response.getCertificate().getSha512());
-        assertEquals(Base64.getEncoder().encodeToString(input.getAppBased().getCertificate().getCertificate().getBytes()),
+        assertEquals(Base64Util.encode(input.getAppBased().getCertificate().getCertificate()),
                 response.getCertificate().getBase64());
         assertEquals(input.getAppBased().getCertificate().getExpiration(), response.getCertificate().getExpiration());
         assertEquals("accessKey", response.getAccessKey());

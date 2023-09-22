@@ -3,12 +3,12 @@ package com.sequenceiq.cloudbreak.telemetry.common;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 
 public class AnonymizationRuleResolverTest {
@@ -28,7 +28,7 @@ public class AnonymizationRuleResolverTest {
         rule1.setReplacement("replace1");
         AnonymizationRule rule2 = new AnonymizationRule();
         rule2.setReplacement("replace2");
-        rule2.setValue(Base64.getEncoder().encodeToString("value2".getBytes()));
+        rule2.setValue(Base64Util.encode("value2"));
         rules.add(rule1);
         rules.add(rule2);
         // WHEN

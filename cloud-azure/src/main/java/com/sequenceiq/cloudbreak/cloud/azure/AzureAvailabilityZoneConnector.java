@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;

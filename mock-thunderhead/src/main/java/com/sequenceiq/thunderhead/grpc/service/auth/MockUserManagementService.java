@@ -112,7 +112,6 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -234,6 +233,7 @@ import com.sequenceiq.cloudbreak.auth.altus.service.UmsResourceRole;
 import com.sequenceiq.cloudbreak.auth.altus.service.UmsRole;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 import com.sequenceiq.thunderhead.grpc.GrpcActorContext;
 import com.sequenceiq.thunderhead.model.AltusToken;
@@ -1330,12 +1330,12 @@ public class MockUserManagementService extends UserManagementImplBase {
                 try {
                     String publicKey = Files.readString(Path.of(sshPublicKeyFilePath));
                     if (publicKey.matches(SSH_PUBLIC_KEY_PATTERN)) {
-                        byte[] keyData = Base64.getDecoder().decode(publicKey.trim().split(" ")[1]);
+                        byte[] keyData = Base64Util.decodeAsByteArray(publicKey.trim().split(" ")[1]);
 
                         try {
                             MessageDigest digest = MessageDigest.getInstance("SHA-256");
                             byte[] keyDigest = digest.digest(keyData);
-                            String fingerprint = Base64.getEncoder().encodeToString(keyDigest);
+                            String fingerprint = Base64Util.encode(keyDigest);
                             while (fingerprint.endsWith("=")) {
                                 fingerprint = fingerprint.substring(0, fingerprint.length() - 1);
                             }

@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.common.api.telemetry.model.Features;
@@ -51,12 +51,12 @@ public class AccountTelemetryServiceTest {
         AnonymizationRule rule1 = new AnonymizationRule();
         rule1.setReplacement("[REDACTED]");
         String pattern1 = "\\d{4}[^\\w]\\d{4}[^\\w]\\d{4}[^\\w]\\d{4}";
-        String encodedPattern1 = new String(Base64.getEncoder().encode(pattern1.getBytes()));
+        String encodedPattern1 = Base64Util.encode(pattern1.getBytes());
         rule1.setValue(encodedPattern1);
         AnonymizationRule rule2 = new AnonymizationRule();
         rule2.setReplacement("[REDACTED]");
         String pattern2 = "\\d{5}[^\\w]\\d{5}";
-        String encodedPattern2 = new String(Base64.getEncoder().encode(pattern2.getBytes()));
+        String encodedPattern2 = Base64Util.encode(pattern2.getBytes());
         rule2.setValue(encodedPattern2);
         rules.add(rule1);
         rules.add(rule2);
@@ -74,7 +74,7 @@ public class AccountTelemetryServiceTest {
         AnonymizationRule rule = new AnonymizationRule();
         rule.setReplacement("[REDACTED]");
         String pattern = "\\d{8}[^\\w]\\d{8}[^\\w]\\d{8}[^\\w]\\d{8}";
-        String encodedPattern = new String(Base64.getEncoder().encode(pattern.getBytes()));
+        String encodedPattern = Base64Util.encode(pattern.getBytes());
         rule.setValue(encodedPattern);
         rules.add(rule);
         String output = underTest.testRulePatterns(rules, input);
@@ -90,7 +90,7 @@ public class AccountTelemetryServiceTest {
         AnonymizationRule rule = new AnonymizationRule();
         rule.setReplacement("[REDACTED]");
         String pattern = "\\d{8}[^[[";
-        String encodedPattern = new String(Base64.getEncoder().encode(pattern.getBytes()));
+        String encodedPattern = Base64Util.encode(pattern.getBytes());
         rule.setValue(encodedPattern);
         rules.add(rule);
         // THEN
@@ -108,7 +108,7 @@ public class AccountTelemetryServiceTest {
         AnonymizationRule rule = new AnonymizationRule();
         rule.setReplacement("[REDACTED]");
         String pattern = "\\d{4}[^\\w]\\d{4}[^\\w]\\d{4}[^\\w]\\d{4}";
-        String encodedPattern = new String(Base64.getEncoder().encode(pattern.getBytes()));
+        String encodedPattern = Base64Util.encode(pattern.getBytes());
         rule.setValue(encodedPattern);
         rules.add(rule);
         telemetry.setRules(rules);
@@ -132,7 +132,7 @@ public class AccountTelemetryServiceTest {
         AnonymizationRule rule = new AnonymizationRule();
         rule.setReplacement("[REDACTED]");
         String pattern = "invalidrule{";
-        String encodedPattern = new String(Base64.getEncoder().encode(pattern.getBytes()));
+        String encodedPattern = Base64Util.encode(pattern.getBytes());
         rule.setValue(encodedPattern);
         rules.add(rule);
         telemetry.setRules(rules);
@@ -217,8 +217,7 @@ public class AccountTelemetryServiceTest {
 
     private void testPatternWithOutput(AnonymizationRule rule, String input, String startsWith) {
         if (rule.getReplacement().startsWith(startsWith)) {
-            Pattern p = new Pattern(
-                    new String(Base64.getDecoder().decode(rule.getValue().getBytes())));
+            Pattern p = new Pattern(Base64Util.decode(rule.getValue()));
             boolean found = p.matcher(input).find();
             assertThat(found).isEqualTo(true);
         }

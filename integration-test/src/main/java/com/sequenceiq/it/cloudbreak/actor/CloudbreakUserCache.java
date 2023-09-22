@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -150,7 +150,7 @@ public class CloudbreakUserCache {
 
     private void formatEcdsaSecretKey(CloudbreakUser user) {
         try {
-            Base64.getDecoder().decode(user.getSecretKey());
+            Base64Util.decode(user.getSecretKey());
             LOGGER.debug("Real UMS user has v2 key format (SHA-512) for singing the request header.");
         } catch (IllegalArgumentException e) {
             LOGGER.info("Real UMS user has v3 key format (SHA512withECDSA) for singing the request header. So the key is needed to be formatted!");

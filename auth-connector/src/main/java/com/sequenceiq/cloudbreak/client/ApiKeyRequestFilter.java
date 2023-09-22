@@ -5,7 +5,6 @@ import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Base64;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.client.ClientRequestContext;
@@ -15,6 +14,8 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.apache.http.entity.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 
 public class ApiKeyRequestFilter implements ClientRequestFilter {
 
@@ -54,7 +55,7 @@ public class ApiKeyRequestFilter implements ClientRequestFilter {
 
     private HeaderSigner getHeaderSigner(String privateKey) {
         try {
-            Base64.getDecoder().decode(privateKey);
+            Base64Util.decodeAsByteArray(privateKey);
             return new Ed25519HeaderSigner();
         } catch (IllegalArgumentException e) {
             LOGGER.debug("Error during decoding v2 key format for singing the request header, trying v3 format.", e);

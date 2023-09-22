@@ -6,7 +6,6 @@ import static java.util.stream.Collectors.joining;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -25,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagemen
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsPermissionMissingException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 
 import software.amazon.awssdk.core.auth.policy.Action;
 import software.amazon.awssdk.core.auth.policy.Condition;
@@ -52,7 +52,7 @@ public class AwsCredentialVerifier {
     @Cacheable(value = AwsCredentialCachingConfig.TEMPORARY_AWS_CREDENTIAL_VERIFIER_CACHE,
             unless = "#awsCredential == null")
     public void validateAws(AwsCredentialView awsCredential, String policyJson) throws AwsPermissionMissingException {
-        String policies = new String(Base64.getDecoder().decode(policyJson));
+        String policies = Base64Util.decode(policyJson);
         try {
             List<RequiredAction> resourcesWithActions = getRequiredActions(policies);
             AmazonIdentityManagementClient amazonIdentityManagement = awsClient.createAmazonIdentityManagement(awsCredential);

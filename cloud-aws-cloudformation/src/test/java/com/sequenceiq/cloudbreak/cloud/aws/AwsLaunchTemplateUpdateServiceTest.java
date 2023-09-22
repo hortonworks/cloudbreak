@@ -12,7 +12,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.common.api.type.ResourceType;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
@@ -68,7 +68,7 @@ class AwsLaunchTemplateUpdateServiceTest {
 
     private static final String DESCRIPTION = "description";
 
-    private static final String USER_DATA = Base64.getEncoder().encodeToString("userdata".getBytes());
+    private static final String USER_DATA = Base64Util.encode("userdata");
 
     private static final String USERDATA_B64 = "dXNlckRhdGFPblByb3ZpZGVy";
 

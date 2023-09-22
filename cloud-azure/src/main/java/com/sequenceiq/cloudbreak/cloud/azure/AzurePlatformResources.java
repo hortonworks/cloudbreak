@@ -12,7 +12,6 @@ import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.SAME_ZONE;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.ZONE_REDUNDANT;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 
-
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collection;

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -38,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
@@ -74,7 +74,7 @@ public class AwsInstanceConnector implements InstanceConnector {
         GetConsoleOutputRequest getConsoleOutputRequest = GetConsoleOutputRequest.builder().instanceId(vm.getInstanceId()).build();
         GetConsoleOutputResponse getConsoleOutputResponse = amazonEC2Client.getConsoleOutput(getConsoleOutputRequest);
         try {
-            return getConsoleOutputResponse.output() == null ? "" : new String(Base64.getDecoder().decode(getConsoleOutputResponse.output()));
+            return getConsoleOutputResponse.output() == null ? "" : Base64Util.decode(getConsoleOutputResponse.output());
         } catch (Exception ex) {
             LOGGER.warn(ex.getMessage(), ex);
             return "";

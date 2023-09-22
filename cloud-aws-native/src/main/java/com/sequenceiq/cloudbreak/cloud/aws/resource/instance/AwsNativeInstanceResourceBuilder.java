@@ -5,7 +5,6 @@ import static java.util.Collections.singletonList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AwsDiskType;
@@ -283,7 +283,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         String userdata = cloudStack.getUserDataByType(group.getType());
         String base64EncodedUserData = "";
         if (StringUtils.isNotEmpty(userdata)) {
-            base64EncodedUserData = Base64.getEncoder().encodeToString(userdata.getBytes());
+            base64EncodedUserData = Base64Util.encode(userdata);
         }
         return base64EncodedUserData;
     }

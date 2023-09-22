@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Base64;
 import java.util.Optional;
 
 import org.junit.Test;
@@ -17,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -46,7 +46,7 @@ public class KeytabConfigurationHandlerTest {
 
     private static final byte[] KEYTAB = new byte[] {1, 2, 3, 4, 5, 6};
 
-    private static final String KEYTABS_IN_BASE64 = Base64.getEncoder().encodeToString(KEYTAB);
+    private static final String KEYTABS_IN_BASE64 = Base64Util.encode(KEYTAB);
 
     @Mock
     private StackService stackService;

@@ -4,7 +4,6 @@ import static java.lang.String.format;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.aws.amazoncf.action.CfClientActions;
@@ -286,7 +286,7 @@ public class EC2ClientActions extends EC2Client {
                         .versions(String.valueOf(launchTemplate.latestVersionNumber()))
                         .build());
                 LaunchTemplateVersion launchTemplateVersion = ver.launchTemplateVersions().get(0);
-                String userData = new String(Base64.getDecoder().decode(launchTemplateVersion.launchTemplateData().userData()));
+                String userData = Base64Util.decode(launchTemplateVersion.launchTemplateData().userData());
                 result.put(launchTemplate.launchTemplateId(), userData);
             }
         }

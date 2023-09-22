@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.service.freeipa.user.kerberos;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.List;
 
 import org.bouncycastle.asn1.ASN1Encodable;
@@ -13,6 +12,7 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 
 /**
  * Kerberos key set encoder - This class is responsible for encoding kerberos key sets using ASN.1 encoding based on UTF-8 character set.
@@ -92,7 +92,7 @@ public final class KrbKeySetEncoder {
 
         for (int i = 0; i < keys.size(); i++) {
             ActorKerberosKey key = keys.get(i);
-            byte[] byteValue = Base64.getDecoder().decode(key.getKeyValue().getBytes(StandardCharsets.UTF_8));
+            byte[] byteValue = Base64Util.decodeAsByteArray(key.getKeyValue().getBytes(StandardCharsets.UTF_8));
             asn1Encodables[i] = makeKrbKey(makeSalt(key.getSaltType(), key.getSaltValue()), makeEncryptionKey(key.getKeyType(), byteValue));
         }
 
@@ -113,6 +113,6 @@ public final class KrbKeySetEncoder {
 
             new DERTaggedObject(true, TAG_KEYS, krbKeys)
         });
-        return Base64.getEncoder().encodeToString(krbKeySet.getEncoded());
+        return Base64Util.encode(krbKeySet.getEncoded());
     }
 }

@@ -8,7 +8,6 @@ import static java.util.Collections.singletonMap;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import java.util.Base64;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,6 +20,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
@@ -79,7 +79,7 @@ public class ClusterTemplateLoaderServiceTest {
     public void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenTemplateContentsAreSame() {
         DefaultClusterTemplateV4Request clusterTemplateFromDefault = sameClusterTemplateRequest();
         ClusterTemplate clusterTemplate = sameClusterTemplate();
-        clusterTemplate.setTemplateContent(Base64.getEncoder().encodeToString(writeValueAsStringSilent(clusterTemplateFromDefault).getBytes()));
+        clusterTemplate.setTemplateContent(Base64Util.encode(writeValueAsStringSilent(clusterTemplateFromDefault)));
 
         Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequests())
                 .thenReturn(singletonMap(clusterTemplateFromDefault.getName(), encode(clusterTemplateFromDefault)));
@@ -94,7 +94,7 @@ public class ClusterTemplateLoaderServiceTest {
         DefaultClusterTemplateV4Request clusterTemplateFromDefault = sameClusterTemplateRequest();
         ClusterTemplate clusterTemplate = sameClusterTemplate();
         clusterTemplate.setResourceCrn(null);
-        clusterTemplate.setTemplateContent(Base64.getEncoder().encodeToString(writeValueAsStringSilent(clusterTemplateFromDefault).getBytes()));
+        clusterTemplate.setTemplateContent(Base64Util.encode(writeValueAsStringSilent(clusterTemplateFromDefault)));
 
         Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequests())
                 .thenReturn(singletonMap(clusterTemplateFromDefault.getName(), encode(clusterTemplateFromDefault)));
@@ -179,6 +179,6 @@ public class ClusterTemplateLoaderServiceTest {
     }
 
     private String encode(DefaultClusterTemplateV4Request s) {
-        return new String(Base64.getEncoder().encode(writeValueAsStringSilent(s).getBytes()));
+        return new String(Base64Util.encode(writeValueAsStringSilent(s)));
     }
 }

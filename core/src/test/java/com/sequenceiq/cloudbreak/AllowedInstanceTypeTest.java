@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.DistroxEnabledInstanceTypes.GC
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +22,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
@@ -50,7 +50,7 @@ public class AllowedInstanceTypeTest {
         Map<String, String> stringClusterTemplateMap = templateCache.defaultClusterTemplateRequests();
         stringClusterTemplateMap.entrySet()
                 .stream()
-                .map(ct -> templateCache.getDefaultClusterTemplate(new String(Base64.getDecoder().decode(ct.getValue()))))
+                .map(ct -> templateCache.getDefaultClusterTemplate(Base64Util.decode(ct.getValue())))
                 .filter(ct -> CloudPlatform.AWS.name().equalsIgnoreCase(ct.getCloudPlatform()))
                 .forEach(ctr -> validateClusterTemplate(ctr, AWS_ENABLED_TYPES_LIST));
         assertNotNull(AWS_ENABLED_TYPES_LIST);
@@ -61,7 +61,7 @@ public class AllowedInstanceTypeTest {
         Map<String, String> stringClusterTemplateMap = templateCache.defaultClusterTemplateRequests();
         stringClusterTemplateMap.entrySet()
                 .stream()
-                .map(ct -> templateCache.getDefaultClusterTemplate(new String(Base64.getDecoder().decode(ct.getValue()))))
+                .map(ct -> templateCache.getDefaultClusterTemplate(Base64Util.decode(ct.getValue())))
                 .filter(ct -> CloudPlatform.AZURE.name().equalsIgnoreCase(ct.getCloudPlatform()))
                 .forEach(ctr -> validateClusterTemplate(ctr, AZURE_ENABLED_TYPES_LIST));
         assertNotNull(AZURE_ENABLED_TYPES_LIST);
@@ -72,7 +72,7 @@ public class AllowedInstanceTypeTest {
         Map<String, String> stringClusterTemplateMap = templateCache.defaultClusterTemplateRequests();
         stringClusterTemplateMap.entrySet()
                 .stream()
-                .map(ct -> templateCache.getDefaultClusterTemplate(new String(Base64.getDecoder().decode(ct.getValue()))))
+                .map(ct -> templateCache.getDefaultClusterTemplate(Base64Util.decode(ct.getValue())))
                 .filter(ct -> CloudPlatform.GCP.name().equalsIgnoreCase(ct.getCloudPlatform()))
                 .forEach(ctr -> validateClusterTemplate(ctr, GCP_ENABLED_TYPES_LIST));
         assertNotNull(GCP_ENABLED_TYPES_LIST);

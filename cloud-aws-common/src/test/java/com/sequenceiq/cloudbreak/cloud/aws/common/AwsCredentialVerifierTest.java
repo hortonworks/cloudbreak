@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsPermissionMissing
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialSettings;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 
 import software.amazon.awssdk.services.iam.model.EvaluationResult;
 import software.amazon.awssdk.services.iam.model.OrganizationsDecisionDetail;
@@ -57,7 +57,7 @@ public class AwsCredentialVerifierTest {
     public void verifyCredentialAndThrowFailExceptionTest() throws IOException {
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
         String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
-        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
+        String encodedAwsEnvPolicy = Base64Util.encode(awsEnvPolicy);
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
@@ -115,7 +115,7 @@ public class AwsCredentialVerifierTest {
     public void verifyCredentialTest() throws IOException, AwsPermissionMissingException {
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
         String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
-        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
+        String encodedAwsEnvPolicy = Base64Util.encode(awsEnvPolicy);
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
@@ -155,7 +155,7 @@ public class AwsCredentialVerifierTest {
     public void verifyCredentialAndThrowFailExceptionBecauseOrganizatioRuleTest() throws IOException {
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
         String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
-        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
+        String encodedAwsEnvPolicy = Base64Util.encode(awsEnvPolicy);
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
@@ -213,7 +213,7 @@ public class AwsCredentialVerifierTest {
     public void verifyCredentialAndSkipOrganizationErrorsWhenSkipOrgPolicyDecisionsIsTrue() throws IOException, AwsPermissionMissingException {
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
         String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
-        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
+        String encodedAwsEnvPolicy = Base64Util.encode(awsEnvPolicy);
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
@@ -260,7 +260,7 @@ public class AwsCredentialVerifierTest {
     public void verifyCredentialAndOrganizatioDecisionDetailIsNullTest() throws IOException {
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
         String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
-        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
+        String encodedAwsEnvPolicy = Base64Util.encode(awsEnvPolicy);
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");

@@ -14,8 +14,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import java.util.Base64;
-import java.util.Base64.Encoder;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -40,6 +38,7 @@ import com.google.api.services.compute.model.CustomerEncryptionKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.GcpInstanceTemplate;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 @Service
@@ -96,8 +95,7 @@ public class CustomGcpDiskEncryptionCreatorService {
     }
 
     private String encode(byte[] data) {
-        Encoder encoder = Base64.getEncoder();
-        return encoder.encodeToString(data);
+        return Base64Util.encode(data);
     }
 
     private CustomerEncryptionKey rsaEncryptedKey(String encryptionKey) {

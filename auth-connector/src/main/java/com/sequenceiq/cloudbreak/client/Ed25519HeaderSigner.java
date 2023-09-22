@@ -14,6 +14,8 @@ import java.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
+
 import net.i2p.crypto.eddsa.EdDSAEngine;
 import net.i2p.crypto.eddsa.EdDSAPrivateKey;
 import net.i2p.crypto.eddsa.spec.EdDSAPrivateKeySpec;
@@ -24,7 +26,7 @@ public class Ed25519HeaderSigner extends HeaderSigner {
 
     @Override
     protected String urlsafeSignature(String seedBase64, String contentType, String method, String path, String date) {
-        byte[] seed = Base64.getDecoder().decode(seedBase64);
+        byte[] seed = Base64Util.decodeAsByteArray(seedBase64);
         EdDSAPrivateKeySpec privKeySpec = new EdDSAPrivateKeySpec(seed, ED_25519_CURVE_SPEC);
         PrivateKey privateKey = new EdDSAPrivateKey(privKeySpec);
         try {

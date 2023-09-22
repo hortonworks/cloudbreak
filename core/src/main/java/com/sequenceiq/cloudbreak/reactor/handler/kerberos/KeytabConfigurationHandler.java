@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.handler.kerberos;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -12,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -100,7 +100,7 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
 
     private KeytabModel buildKeytabModel(ServiceKeytabResponse serviceKeytabResponse) {
         String keytabInBase64 = secretService.getByResponse(serviceKeytabResponse.getKeytab());
-        byte[] keytab = Base64.getDecoder().decode(keytabInBase64.getBytes(StandardCharsets.UTF_8));
+        byte[] keytab = Base64Util.decodeAsByteArray(keytabInBase64.getBytes(StandardCharsets.UTF_8));
         String principal = secretService.getByResponse(serviceKeytabResponse.getServicePrincipal());
         return new KeytabModel("CM", "/etc/cloudera-scm-server", "cmf.keytab", principal, keytab);
     }

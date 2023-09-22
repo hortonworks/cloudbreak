@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.kerberosmgmt.v1;
 import static java.util.Objects.requireNonNull;
 
 import java.nio.ByteBuffer;
-import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 
 /**
@@ -47,7 +47,7 @@ public class UserKeytabGenerator {
         requireNonNull(actorKerberosKey, "actorKerberosKey must not be null");
 
         EncryptionType encryptionType = EncryptionType.getTypeByValue(actorKerberosKey.getKeyType());
-        byte[] key = Base64.getDecoder().decode(actorKerberosKey.getKeyValue());
+        byte[] key = Base64Util.decodeAsByteArray(actorKerberosKey.getKeyValue());
         EncryptionKey encryptionKey = new EncryptionKey(encryptionType, key);
 
         KerberosTime time = new KerberosTime(clock.getCurrentTimeMillis());
@@ -70,6 +70,6 @@ public class UserKeytabGenerator {
         KeytabEncoder encoder = new KeytabEncoder();
         ByteBuffer keyByteBuffer = encoder.write(keytab.getKeytabVersion(), keytab.getEntries());
 
-        return Base64.getEncoder().encodeToString(keyByteBuffer.array());
+        return Base64Util.encode(keyByteBuffer.array());
     }
 }

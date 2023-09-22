@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.common.api.type.CommonResourceType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -107,7 +107,7 @@ public class AwsUpdateService {
             stack.getGroups().forEach(group -> {
                 String groupUserData = userData.get(group.getType());
                 if (StringUtils.isNotEmpty(groupUserData)) {
-                    String encodedGroupUserData = Base64.getEncoder().encodeToString(groupUserData.getBytes());
+                    String encodedGroupUserData = Base64Util.encode(groupUserData);
                     Map<LaunchTemplateField, String> updatableFields = Map.of(LaunchTemplateField.USER_DATA, encodedGroupUserData);
                     awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group, stack);
                 } else {

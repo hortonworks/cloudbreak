@@ -66,7 +66,7 @@ public final class FileReaderUtils {
         if (path == null) {
             throw new IOException("File path must not be null");
         }
-        return new String(Files.readAllBytes(path));
+        return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
     }
 
     public static String readFileFromCustomPath(Path filePath) throws IOException {

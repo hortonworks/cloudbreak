@@ -6,7 +6,6 @@ import static com.sequenceiq.common.api.type.ResourceType.YARN_LOAD_BALANCER;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationDet
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ResponseContext;
 import com.sequenceiq.cloudbreak.cloud.yarn.loadbalancer.service.launch.YarnLoadBalancerLaunchService;
 import com.sequenceiq.cloudbreak.cloud.yarn.status.YarnApplicationStatus;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -140,7 +140,7 @@ public class YarnResourceConnector implements ResourceConnector {
         component.setName(group.getName());
         component.setNumberOfContainers(group.getInstancesSize());
         String userData = stack.getUserDataByType(group.getType());
-        component.setLaunchCommand(String.format("/bootstrap/start-systemd '%s' '%s' '%s'", Base64.getEncoder().encodeToString(userData.getBytes()),
+        component.setLaunchCommand(String.format("/bootstrap/start-systemd '%s' '%s' '%s'", Base64Util.encode(userData),
                 stack.getLoginUserName(), stack.getPublicKey()));
         component.setArtifact(artifact);
         component.setDependencies(new ArrayList<>());
@@ -154,7 +154,7 @@ public class YarnResourceConnector implements ResourceConnector {
         Configuration configuration = new Configuration();
         Map<String, String> propsMap = Maps.newHashMap();
         propsMap.put("conf.cb-conf.per.component", "true");
-        propsMap.put("site.cb-conf.userData", '\'' + Base64.getEncoder().encodeToString(userData.getBytes()) + '\'');
+        propsMap.put("site.cb-conf.userData", '\'' + Base64Util.encode(userData) + '\'');
         propsMap.put("site.cb-conf.sshUser", '\'' + stack.getLoginUserName() + '\'');
         propsMap.put("site.cb-conf.groupname", '\'' + group.getName() + '\'');
         propsMap.put("site.cb-conf.sshPubKey", '\'' + stack.getPublicKey() + '\'');

@@ -5,6 +5,7 @@ import java.util.Base64;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.thunderhead.model.AltusKey;
 
 public class CrnHelper {
@@ -32,7 +33,7 @@ public class CrnHelper {
     }
 
     public static AltusKey generateAltusApiKey(String tenant, String user) {
-        return new AltusKey(Base64.getEncoder().encodeToString(generateCrn(tenant, user).getBytes()));
+        return new AltusKey(Base64Util.encode(generateCrn(tenant, user)));
 
     }
 }

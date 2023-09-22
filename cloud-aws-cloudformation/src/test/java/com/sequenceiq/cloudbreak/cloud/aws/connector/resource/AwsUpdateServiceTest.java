@@ -8,7 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -159,10 +159,10 @@ class AwsUpdateServiceTest {
 
         underTest.updateUserData(ac, stack, List.of(cf), userData);
 
-        String encodedCoreUserData = Base64.getEncoder().encodeToString(userData.get(InstanceGroupType.CORE).getBytes());
+        String encodedCoreUserData = Base64Util.encode(userData.get(InstanceGroupType.CORE));
         Map<LaunchTemplateField, String> coreFields = Map.of(LaunchTemplateField.USER_DATA, encodedCoreUserData);
         verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(coreFields, ac, cf.getName(), coreGroup, stack);
-        String encodedGatewayUserData = Base64.getEncoder().encodeToString(userData.get(InstanceGroupType.GATEWAY).getBytes());
+        String encodedGatewayUserData = Base64Util.encode(userData.get(InstanceGroupType.GATEWAY));
         Map<LaunchTemplateField, String> gatewayFields = Map.of(LaunchTemplateField.USER_DATA, encodedGatewayUserData);
         verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(gatewayFields, ac, cf.getName(), gatewayGroup, stack);
     }

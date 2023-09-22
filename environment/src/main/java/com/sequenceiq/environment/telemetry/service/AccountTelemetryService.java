@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.telemetry.service;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.common.api.telemetry.model.Features;
@@ -129,7 +129,7 @@ public class AccountTelemetryService {
                 .stream()
                 .map(rule -> {
                     AnonymizationRule encodedRule = new AnonymizationRule();
-                    encodedRule.setValue(Base64.getEncoder().encodeToString(rule.getValue().getBytes()));
+                    encodedRule.setValue(Base64Util.encode(rule.getValue()));
                     encodedRule.setReplacement(rule.getReplacement());
                     return encodedRule;
                 }).collect(Collectors.toList());
@@ -145,7 +145,7 @@ public class AccountTelemetryService {
     public String testRulePatterns(List<AnonymizationRule> rules, String input) {
         String output = input;
         for (AnonymizationRule rule : rules) {
-            String decodedRule = new String(Base64.getDecoder().decode(rule.getValue().getBytes()));
+            String decodedRule = Base64Util.decode(rule.getValue());
             Pattern p = createAndCheckPattern(decodedRule);
             Replacer replacer = p.replacer(rule.getReplacement());
             output = replacer.replace(output);
@@ -156,7 +156,7 @@ public class AccountTelemetryService {
     void validateAnonymizationRules(AccountTelemetry telemetry) {
         Optional.ofNullable(telemetry.getRules()).orElse(new ArrayList<>())
                 .forEach(rule -> {
-                    String decodedRule = new String(Base64.getDecoder().decode(rule.getValue().getBytes()));
+                    String decodedRule = Base64Util.decode(rule.getValue());
                     createAndCheckPattern(decodedRule);
                 });
     }

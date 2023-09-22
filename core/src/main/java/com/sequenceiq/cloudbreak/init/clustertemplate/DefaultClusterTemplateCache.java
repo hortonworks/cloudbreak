@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -147,7 +147,7 @@ public class DefaultClusterTemplateCache {
             }
             defaultClusterTemplates.put(
                     clusterTemplateRequest.getName(),
-                    Base64.getEncoder().encodeToString(templateAsString.getBytes()));
+                    Base64Util.encode(templateAsString));
         }
     }
 
@@ -211,7 +211,7 @@ public class DefaultClusterTemplateCache {
     public Map<String, ClusterTemplate> defaultClusterTemplates() {
         Map<String, ClusterTemplate> defaultTemplates = new HashMap<>();
         defaultClusterTemplateRequests().forEach((key, value) -> {
-            String defaultTemplateJson = new String(Base64.getDecoder().decode(value));
+            String defaultTemplateJson = Base64Util.decode(value);
             DefaultClusterTemplateV4Request defaultClusterTemplate = getDefaultClusterTemplate(defaultTemplateJson);
             ClusterTemplate clusterTemplate = defaultClusterTemplateV4RequestToClusterTemplateConverter.convert(defaultClusterTemplate);
             defaultTemplates.put(key, clusterTemplate);
@@ -227,7 +227,7 @@ public class DefaultClusterTemplateCache {
         boolean internalTenant = entitlementService.internalTenant(workspace.getTenant().getName());
         defaultClusterTemplateRequests().forEach((key, value) -> {
             if (templateNamesMissingFromDb.contains(key)) {
-                String defaultTemplateJson = new String(Base64.getDecoder().decode(value));
+                String defaultTemplateJson = Base64Util.decode(value);
                 DefaultClusterTemplateV4Request defaultClusterTemplate = getDefaultClusterTemplate(defaultTemplateJson);
                 if (internalClusterTemplateValidator.shouldPopulate(defaultClusterTemplate, internalTenant)) {
                     ClusterTemplate clusterTemplate = defaultClusterTemplateV4RequestToClusterTemplateConverter.convert(defaultClusterTemplate);

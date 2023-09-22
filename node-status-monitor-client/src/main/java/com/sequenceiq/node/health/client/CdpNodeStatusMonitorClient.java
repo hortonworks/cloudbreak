@@ -1,7 +1,6 @@
 package com.sequenceiq.node.health.client;
 
 import java.net.URL;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,6 +25,7 @@ import com.google.protobuf.util.JsonFormat;
 import com.sequenceiq.cloudbreak.client.RPCMessage;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.client.RpcListener;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.node.health.client.model.CdpNodeStatusRequest;
 import com.sequenceiq.node.health.client.model.CdpNodeStatuses;
 
@@ -54,7 +54,7 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
 
     private void addBasicAuthHeader(Optional<String> username, Optional<String> password) {
         if (username.isPresent() && password.isPresent()) {
-            String base64AuthStr = Base64.getEncoder().encodeToString(String.format("%s:%s", username.get(), password.get()).getBytes());
+            String base64AuthStr = Base64Util.encode(String.format("%s:%s", username.get(), password.get()));
             this.headers.add("Authorization", "Basic " + base64AuthStr);
         }
     }

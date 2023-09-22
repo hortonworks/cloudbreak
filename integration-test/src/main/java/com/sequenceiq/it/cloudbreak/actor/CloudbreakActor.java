@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.actor;
 
-import java.util.Base64;
 import java.util.Locale;
 
 import javax.inject.Inject;
@@ -10,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
 import com.sequenceiq.it.util.TestParameter;
 
@@ -43,7 +43,7 @@ public class CloudbreakActor extends CloudbreakUserCache implements Actor {
     public CloudbreakUser create(String tenantName, String username) {
         String secretKey = testParameter.get(CloudbreakTest.SECRET_KEY);
         String crn = String.format("crn:cdp:iam:us-west-1:%s:user:%s", tenantName, username);
-        String accessKey = Base64.getEncoder().encodeToString(crn.getBytes());
+        String accessKey = Base64Util.encode(crn.getBytes());
         checkNonEmpty("integrationtest.user.secretkey", secretKey);
         return new CloudbreakUser(accessKey, secretKey, username + " at tenant " + tenantName);
     }
