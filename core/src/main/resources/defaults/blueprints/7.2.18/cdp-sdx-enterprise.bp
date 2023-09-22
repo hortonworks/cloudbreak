@@ -432,10 +432,6 @@
               {
                 "name": "regionserver_tls_keystore_password",
                 "value": "{{CM_AUTO_TLS}}"
-              },
-              {
-                "name": "hbase.rpc.tls.keystore.location",
-                "value": "{{CM_AUTO_TLS}}"
               }
             ]
           },
