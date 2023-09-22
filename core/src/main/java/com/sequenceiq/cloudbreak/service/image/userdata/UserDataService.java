@@ -124,6 +124,11 @@ public class UserDataService {
         }
     }
 
+    public void makeSureUserDataIsMigrated(Long stackId) {
+        Map<InstanceGroupType, String> userData = getUserData(stackId);
+        createOrUpdateUserData(stackId, userData);
+    }
+
     public Userdata createOrUpdateUserData(Long stackId, Map<InstanceGroupType, String> userdata) {
         Stack stack = stackService.get(stackId);
         Userdata result;

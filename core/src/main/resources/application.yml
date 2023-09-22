@@ -761,6 +761,8 @@ existing-stack-patcher:
       related-stacks:
     collect-db-engine-version:
       enabled: true
+    user-data-migration:
+      enabled: true
 
 clusterdns:
   host: localhost
