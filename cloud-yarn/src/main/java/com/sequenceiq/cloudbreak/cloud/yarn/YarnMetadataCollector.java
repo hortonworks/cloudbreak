@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTypeMetadata;
 import com.sequenceiq.cloudbreak.cloud.yarn.auth.YarnClientUtil;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.YarnClient;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.api.YarnResourceConstants;
@@ -39,6 +40,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class YarnMetadataCollector implements MetadataCollector {
+
     @Inject
     private YarnClientUtil yarnClientUtil;
 
@@ -177,5 +179,10 @@ public class YarnMetadataCollector implements MetadataCollector {
     @Override
     public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
         return new InstanceStoreMetadata();
+    }
+
+    @Override
+    public InstanceTypeMetadata collectInstanceTypes(AuthenticatedContext ac, List<String> instanceIds) {
+        return new InstanceTypeMetadata();
     }
 }

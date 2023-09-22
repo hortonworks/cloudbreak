@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsInstanceCommonService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsLifeCycleMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -40,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTypeMetadata;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
@@ -76,6 +78,9 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private AwsInstanceCommonService awsInstanceCommonService;
 
     @Value("${cb.aws.native.instance.fetch.max.item:100}")
     private int instanceFetchMaxBatchSize;
@@ -122,6 +127,11 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
     public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
         return awsPlatformResources.collectInstanceStorageCount(ac, instanceTypes,
                 entitlementService.getEntitlements(ac.getCloudCredential().getAccountId()));
+    }
+
+    @Override
+    public InstanceTypeMetadata collectInstanceTypes(AuthenticatedContext ac, List<String> instanceIds) {
+        return awsInstanceCommonService.collectInstanceTypes(ac, instanceIds);
     }
 
     private List<CloudVmMetaDataStatus> collectInstances(List<CloudInstance> vms, List<CloudResource> resources, AmazonEc2Client ec2Client) {

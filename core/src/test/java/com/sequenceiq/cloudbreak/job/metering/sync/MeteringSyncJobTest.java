@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.job.metering;
+package com.sequenceiq.cloudbreak.job.metering.sync;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
 
 @ExtendWith(MockitoExtension.class)
-class MeteringJobTest {
+class MeteringSyncJobTest {
 
     private static final Long LOCAL_ID = 1L;
 
@@ -34,13 +34,13 @@ class MeteringJobTest {
     private MeteringService meteringService;
 
     @Mock
-    private MeteringJobService meteringJobService;
+    private MeteringSyncJobService meteringJobService;
 
     @Mock
     private JobExecutionContext jobExecutionContext;
 
     @InjectMocks
-    private MeteringJob underTest;
+    private MeteringSyncJob underTest;
 
     @BeforeEach
     public void setUp() {

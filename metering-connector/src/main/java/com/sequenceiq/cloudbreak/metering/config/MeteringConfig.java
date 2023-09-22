@@ -11,7 +11,11 @@ public class MeteringConfig {
 
     private static final int DEFAULT_PORT = 8982;
 
-    private static final int DEFAULT_INTERVAL_IN_SECONDS = 600;
+    private static final int DEFAULT_SYNC_INTERVAL_IN_SECONDS = 600;
+
+    private static final int DEFAULT_INSTANCE_CHECKER_INTERVAL_IN_HOURS = 6;
+
+    private static final int DEFAULT_INSTANCE_CHECKER_DELAY_IN_SECONDS = 7200;
 
     private static final int DEFAULT_GRPC_TIMEOUT_IN_SECONDS = 10;
 
@@ -21,7 +25,13 @@ public class MeteringConfig {
 
     private boolean enabled;
 
-    private int intervalInSeconds = DEFAULT_INTERVAL_IN_SECONDS;
+    private boolean instanceCheckerEnabled = true;
+
+    private int syncIntervalInSeconds = DEFAULT_SYNC_INTERVAL_IN_SECONDS;
+
+    private int instanceCheckerIntervalInHours = DEFAULT_INSTANCE_CHECKER_INTERVAL_IN_HOURS;
+
+    private int instanceCheckerDelayInSeconds = DEFAULT_INSTANCE_CHECKER_DELAY_IN_SECONDS;
 
     private int grpcTimeoutInSeconds = DEFAULT_GRPC_TIMEOUT_IN_SECONDS;
 
@@ -49,12 +59,36 @@ public class MeteringConfig {
         this.enabled = enabled;
     }
 
-    public int getIntervalInSeconds() {
-        return intervalInSeconds;
+    public boolean isInstanceCheckerEnabled() {
+        return instanceCheckerEnabled;
     }
 
-    public void setIntervalInSeconds(int intervalInSeconds) {
-        this.intervalInSeconds = intervalInSeconds;
+    public void setInstanceCheckerEnabled(boolean instanceCheckerEnabled) {
+        this.instanceCheckerEnabled = instanceCheckerEnabled;
+    }
+
+    public int getSyncIntervalInSeconds() {
+        return syncIntervalInSeconds;
+    }
+
+    public void setSyncIntervalInSeconds(int syncIntervalInSeconds) {
+        this.syncIntervalInSeconds = syncIntervalInSeconds;
+    }
+
+    public int getInstanceCheckerIntervalInHours() {
+        return instanceCheckerIntervalInHours;
+    }
+
+    public void setInstanceCheckerIntervalInHours(int instanceCheckerIntervalInHours) {
+        this.instanceCheckerIntervalInHours = instanceCheckerIntervalInHours;
+    }
+
+    public int getInstanceCheckerDelayInSeconds() {
+        return instanceCheckerDelayInSeconds;
+    }
+
+    public void setInstanceCheckerDelayInSeconds(int instanceCheckerDelayInSeconds) {
+        this.instanceCheckerDelayInSeconds = instanceCheckerDelayInSeconds;
     }
 
     public int getGrpcTimeoutInSeconds() {

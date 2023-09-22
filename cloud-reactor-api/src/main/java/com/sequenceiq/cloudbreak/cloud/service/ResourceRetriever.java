@@ -28,8 +28,4 @@ public interface ResourceRetriever {
     default List<CloudResource> findAllByStatusAndTypeAndStack(CommonStatus status, ResourceType resourceType, Long stackId) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
-
-    default Optional<CloudResource> findFirstByStatusAndTypeAndStack(CommonStatus status, ResourceType resourceType, Long stackId) {
-        throw new UnsupportedOperationException("Interface not implemented.");
-    }
 }

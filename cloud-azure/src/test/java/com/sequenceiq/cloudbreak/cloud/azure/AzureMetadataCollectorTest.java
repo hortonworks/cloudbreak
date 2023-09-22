@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.common.api.type.CommonStatus.CREATED;
+import static com.sequenceiq.common.api.type.ResourceType.ARM_TEMPLATE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -7,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -15,6 +18,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.azure.resourcemanager.compute.models.VirtualMachine;
+import com.azure.resourcemanager.compute.models.VirtualMachineSizeTypes;
 import com.azure.resourcemanager.network.models.NetworkInterface;
 import com.azure.resourcemanager.network.models.NicIpConfiguration;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -39,9 +44,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTypeMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
@@ -69,6 +76,8 @@ class AzureMetadataCollectorTest {
     private static final String RESOURCE_GROUP_NAME = "resourceGroup-1";
 
     private static final String STACK_NAME = "test-stack";
+
+    private static final Long STACK_ID = 1L;
 
     private static final String SUBNET_NAME = "subnet-1";
 
@@ -119,6 +128,9 @@ class AzureMetadataCollectorTest {
 
     @Mock
     private AzureLoadBalancerMetadataCollector azureLbMetadataCollector;
+
+    @Mock
+    private ResourceRetriever resourceRetriever;
 
     @Test
     void testCollectShouldReturnsTheAllVmMetadata() {
@@ -176,11 +188,13 @@ class AzureMetadataCollectorTest {
         VirtualMachine virtualMachine = mock(VirtualMachine.class);
         NetworkInterface networkInterface = mock(NetworkInterface.class);
         NicIpConfiguration nicIPConfiguration = mock(NicIpConfiguration.class);
-        when(virtualMachine.name()).thenReturn(name);
-        when(virtualMachine.getPrimaryNetworkInterface()).thenReturn(networkInterface);
-        when(networkInterface.primaryIPConfiguration()).thenReturn(nicIPConfiguration);
-        when(networkInterface.primaryPrivateIP()).thenReturn(PRIVATE_IP);
-        when(nicIPConfiguration.subnetName()).thenReturn(SUBNET_NAME);
+        lenient().when(virtualMachine.name()).thenReturn(name);
+        lenient().when(virtualMachine.getPrimaryNetworkInterface()).thenReturn(networkInterface);
+        lenient().when(networkInterface.primaryIPConfiguration()).thenReturn(nicIPConfiguration);
+        lenient().when(networkInterface.primaryPrivateIP()).thenReturn(PRIVATE_IP);
+        lenient().when(nicIPConfiguration.subnetName()).thenReturn(SUBNET_NAME);
+        lenient().when(virtualMachine.size()).thenReturn(VirtualMachineSizeTypes.BASIC_A1);
+        lenient().when(virtualMachine.id()).thenReturn(String.format("microsoft/%s/%s", RESOURCE_GROUP_NAME, name));
         return virtualMachine;
     }
 
@@ -420,5 +434,29 @@ class AzureMetadataCollectorTest {
         List<CloudLoadBalancerMetadata> result = underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.PRIVATE), resources);
 
         assertEquals(0, result.size());
+    }
+
+    @Test
+    void testCollectInstanceTypes() {
+        CloudResource cloudResource = CloudResource.builder().withName(RESOURCE_GROUP_NAME).withType(ARM_TEMPLATE).withStatus(CREATED)
+                .withParameters(new HashMap<>()).build();
+        CloudContext cloudContext = mock(CloudContext.class);
+        when(cloudContext.getId()).thenReturn(STACK_ID);
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(resourceRetriever.findByStatusAndTypeAndStack(eq(CREATED), eq(ARM_TEMPLATE), eq(STACK_ID))).thenReturn(Optional.of(cloudResource));
+        when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        Map<String, VirtualMachine> machines = getMachines();
+        when(azureVirtualMachineService.getVirtualMachinesByName(eq(azureClient), eq(RESOURCE_GROUP_NAME), eq(List.of(INSTANCE_1, INSTANCE_2, INSTANCE_3))))
+                .thenReturn(machines);
+
+        InstanceTypeMetadata result = underTest.collectInstanceTypes(authenticatedContext, List.of(INSTANCE_1, INSTANCE_2, INSTANCE_3));
+
+        verify(azureVirtualMachineService, times(1))
+                .getVirtualMachinesByName(eq(azureClient), eq(RESOURCE_GROUP_NAME), eq(List.of(INSTANCE_1, INSTANCE_2, INSTANCE_3)));
+        Map<String, String> instanceTypes = result.getInstanceTypes();
+        assertThat(instanceTypes).hasSize(3);
+        assertThat(instanceTypes).containsEntry(INSTANCE_1, VirtualMachineSizeTypes.BASIC_A1.toString());
+        assertThat(instanceTypes).containsEntry(INSTANCE_2, VirtualMachineSizeTypes.BASIC_A1.toString());
+        assertThat(instanceTypes).containsEntry(INSTANCE_3, VirtualMachineSizeTypes.BASIC_A1.toString());
     }
 }

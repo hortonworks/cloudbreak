@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTypeMetadata;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 /**
@@ -31,4 +32,6 @@ public interface MetadataCollector {
             List<CloudResource> resources);
 
     InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes);
+
+    InstanceTypeMetadata collectInstanceTypes(AuthenticatedContext ac, List<String> instanceIds);
 }

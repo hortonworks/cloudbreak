@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.job.metering;
+package com.sequenceiq.cloudbreak.job.metering.sync;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -21,19 +21,19 @@ import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
-class MeteringJobInitializerTest {
+class MeteringSyncJobInitializerTest {
 
     @Mock
     private StackService stackService;
 
     @Mock
-    private MeteringJobService meteringJobService;
+    private MeteringSyncJobService meteringJobService;
 
     @Mock
     private MeteringConfig meteringConfig;
 
     @InjectMocks
-    private MeteringJobInitializer underTest;
+    private MeteringSyncJobInitializer underTest;
 
     @Test
     void testInitJobsWithAliveDatahubs() {

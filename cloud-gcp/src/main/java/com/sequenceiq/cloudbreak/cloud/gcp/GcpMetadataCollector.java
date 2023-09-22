@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import static com.sequenceiq.common.api.type.CommonStatus.CREATED;
+import static com.sequenceiq.common.api.type.ResourceType.GCP_INSTANCE;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -20,9 +24,12 @@ import com.google.api.services.compute.model.AccessConfig;
 import com.google.api.services.compute.model.BackendService;
 import com.google.api.services.compute.model.ForwardingRule;
 import com.google.api.services.compute.model.ForwardingRuleList;
+import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.NetworkInterface;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer.GcpLoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
@@ -36,6 +43,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTypeMetadata;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -56,6 +65,12 @@ public class GcpMetadataCollector implements MetadataCollector {
 
     @Inject
     private GcpLoadBalancerTypeConverter gcpLoadBalancerTypeConverter;
+
+    @Inject
+    private ResourceRetriever resourceRetriever;
+
+    @Inject
+    private GcpInstanceProvider gcpInstanceProvider;
 
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms,
@@ -79,7 +94,7 @@ public class GcpMetadataCollector implements MetadataCollector {
     private Map<String, CloudResource> groupByInstanceName(Iterable<CloudResource> resources) {
         Map<String, CloudResource> instanceNameMap = new HashMap<>();
         for (CloudResource resource : resources) {
-            if (ResourceType.GCP_INSTANCE == resource.getType()) {
+            if (GCP_INSTANCE == resource.getType()) {
                 String resourceName = resource.getName();
                 instanceNameMap.put(resourceName, resource);
             }
@@ -90,7 +105,7 @@ public class GcpMetadataCollector implements MetadataCollector {
     private Map<Long, CloudResource> groupByPrivateId(Iterable<CloudResource> resources) {
         Map<Long, CloudResource> privateIdMap = new HashMap<>();
         for (CloudResource resource : resources) {
-            if (ResourceType.GCP_INSTANCE == resource.getType()) {
+            if (GCP_INSTANCE == resource.getType()) {
                 String resourceName = resource.getName();
                 Long privateId = gcpStackUtil.getPrivateId(resourceName);
                 if (privateId != null) {
@@ -220,5 +235,18 @@ public class GcpMetadataCollector implements MetadataCollector {
     @Override
     public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
         return new InstanceStoreMetadata();
+    }
+
+    @Override
+    public InstanceTypeMetadata collectInstanceTypes(AuthenticatedContext ac, List<String> instanceIds) {
+        CloudContext cloudContext = ac.getCloudContext();
+        CloudResource instanceResource = resourceRetriever.findByStatusAndTypeAndStack(CREATED, GCP_INSTANCE, cloudContext.getId())
+                .orElseThrow(() -> new CloudConnectorException(String.format("No GCP_INSTANCE resource found: %s", cloudContext.getId())));
+        String instanceNamePrefix = gcpInstanceProvider.getInstanceNamePrefix(List.of(instanceResource));
+        List<Instance> instances = gcpInstanceProvider.getInstances(ac, instanceNamePrefix);
+        Map<String, String> instanceTypes = instances.stream()
+                .filter(instance -> instanceIds.contains(instance.getName()))
+                .collect(Collectors.toMap(Instance::getName, instance -> StringUtils.substringAfterLast(instance.getMachineType(), "/")));
+        return new InstanceTypeMetadata(instanceTypes);
     }
 }

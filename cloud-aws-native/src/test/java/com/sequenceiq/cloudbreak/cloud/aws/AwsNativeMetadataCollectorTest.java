@@ -13,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,6 +38,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsInstanceCommonService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsLifeCycleMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeLbMetadataCollector;
@@ -50,6 +53,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTypeMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
@@ -92,6 +96,9 @@ class AwsNativeMetadataCollectorTest {
     @Mock
     private AwsNativeLbMetadataCollector awsNativeLbMetadataCollector;
 
+    @Mock
+    private AwsInstanceCommonService awsInstanceCommonService;
+
     @InjectMocks
     private AwsNativeMetadataCollector underTest;
 
@@ -110,8 +117,8 @@ class AwsNativeMetadataCollectorTest {
         Map<String, Object> credentialParams = Map.of("aws",
                 Map.of("keyBased", Map.of("accessKey", "mo", "secretKey", "su")));
         CloudCredential credential = new CloudCredential("id", "alma", credentialParams, "acc");
-        when(authenticatedContext.getCloudContext()).thenReturn(context);
-        when(authenticatedContext.getCloudCredential()).thenReturn(credential);
+        lenient().when(authenticatedContext.getCloudContext()).thenReturn(context);
+        lenient().when(authenticatedContext.getCloudCredential()).thenReturn(credential);
     }
 
     @Test
@@ -469,6 +476,19 @@ class AwsNativeMetadataCollectorTest {
         assertThat(cloudConnectorException).hasCauseReference(runtimeException);
 
         verify(loadBalancingClient, times(1)).describeLoadBalancers(any());
+    }
+
+    @Test
+    void testCollectInstanceTypes() {
+        List<String> instanceIds = List.of("instanceId1", "instanceId2");
+        when(awsInstanceCommonService.collectInstanceTypes(eq(authenticatedContext), eq(instanceIds)))
+                .thenReturn(new InstanceTypeMetadata(Map.of("instance1", "large", "instance2", "large")));
+        InstanceTypeMetadata result = underTest.collectInstanceTypes(authenticatedContext, instanceIds);
+        verify(awsInstanceCommonService, times(1)).collectInstanceTypes(eq(authenticatedContext), eq(instanceIds));
+        Map<String, String> instanceTypes = result.getInstanceTypes();
+        assertThat(instanceTypes).hasSize(2);
+        assertThat(instanceTypes).containsEntry("instance1", "large");
+        assertThat(instanceTypes).containsEntry("instance2", "large");
     }
 
     private CloudResource getCloudResource(String reference, String name, String instanceId, ResourceType resourceType) {

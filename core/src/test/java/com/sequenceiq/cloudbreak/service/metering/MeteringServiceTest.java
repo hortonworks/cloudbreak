@@ -22,8 +22,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.metrics.CommonMetricService;
 import com.sequenceiq.cloudbreak.converter.StackDtoToMeteringEventConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.job.metering.MeteringJobAdapter;
-import com.sequenceiq.cloudbreak.job.metering.MeteringJobService;
+import com.sequenceiq.cloudbreak.job.metering.instancechecker.MeteringInstanceCheckerJobAdapter;
+import com.sequenceiq.cloudbreak.job.metering.instancechecker.MeteringInstanceCheckerJobService;
+import com.sequenceiq.cloudbreak.job.metering.sync.MeteringSyncJobAdapter;
+import com.sequenceiq.cloudbreak.job.metering.sync.MeteringSyncJobService;
 import com.sequenceiq.cloudbreak.metering.GrpcMeteringClient;
 import com.sequenceiq.cloudbreak.service.metrics.MeteringMetricTag;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
@@ -47,10 +49,13 @@ class MeteringServiceTest {
     private StackDtoService stackDtoService;
 
     @Mock
-    private MeteringJobService meteringJobService;
+    private MeteringSyncJobService meteringSyncJobService;
 
     @Mock
     private CommonMetricService metricService;
+
+    @Mock
+    private MeteringInstanceCheckerJobService meteringInstanceCheckerJobService;
 
     @InjectMocks
     private MeteringService underTest;
@@ -131,7 +136,8 @@ class MeteringServiceTest {
         StackView stack = getStack(WORKLOAD, "AWS");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.scheduleSync(STACK_ID);
-        verify(meteringJobService, times(1)).schedule(eq(STACK_ID), eq(MeteringJobAdapter.class));
+        verify(meteringSyncJobService, times(1)).schedule(eq(STACK_ID), eq(MeteringSyncJobAdapter.class));
+        verify(meteringInstanceCheckerJobService, times(1)).schedule(eq(STACK_ID), eq(MeteringInstanceCheckerJobAdapter.class));
     }
 
     @Test
@@ -139,7 +145,8 @@ class MeteringServiceTest {
         StackView stack = getStack(DATALAKE, "AWS");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.scheduleSync(STACK_ID);
-        verify(meteringJobService, never()).schedule(eq(STACK_ID), eq(MeteringJobAdapter.class));
+        verify(meteringSyncJobService, never()).schedule(eq(STACK_ID), eq(MeteringSyncJobAdapter.class));
+        verify(meteringInstanceCheckerJobService, never()).schedule(eq(STACK_ID), eq(MeteringInstanceCheckerJobAdapter.class));
     }
 
     @Test
@@ -147,7 +154,8 @@ class MeteringServiceTest {
         StackView stack = getStack(WORKLOAD, "YARN");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.scheduleSync(STACK_ID);
-        verify(meteringJobService, never()).schedule(eq(STACK_ID), eq(MeteringJobAdapter.class));
+        verify(meteringSyncJobService, never()).schedule(eq(STACK_ID), eq(MeteringSyncJobAdapter.class));
+        verify(meteringInstanceCheckerJobService, never()).schedule(eq(STACK_ID), eq(MeteringInstanceCheckerJobAdapter.class));
     }
 
     @Test
@@ -155,7 +163,8 @@ class MeteringServiceTest {
         StackView stack = getStack(WORKLOAD, "AWS");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.unscheduleSync(STACK_ID);
-        verify(meteringJobService, times(1)).unschedule(eq(String.valueOf(STACK_ID)));
+        verify(meteringSyncJobService, times(1)).unschedule(eq(String.valueOf(STACK_ID)));
+        verify(meteringInstanceCheckerJobService, times(1)).unschedule(eq(String.valueOf(STACK_ID)));
     }
 
     @Test
@@ -163,7 +172,8 @@ class MeteringServiceTest {
         StackView stack = getStack(DATALAKE, "AWS");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.unscheduleSync(STACK_ID);
-        verify(meteringJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
+        verify(meteringSyncJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
+        verify(meteringInstanceCheckerJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
     }
 
     @Test
@@ -171,7 +181,8 @@ class MeteringServiceTest {
         StackView stack = getStack(DATALAKE, "YARN");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
         underTest.unscheduleSync(STACK_ID);
-        verify(meteringJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
+        verify(meteringSyncJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
+        verify(meteringInstanceCheckerJobService, never()).unschedule(eq(String.valueOf(STACK_ID)));
     }
 
     private Stack getStack(StackType stackType, String cloudPlatform) {

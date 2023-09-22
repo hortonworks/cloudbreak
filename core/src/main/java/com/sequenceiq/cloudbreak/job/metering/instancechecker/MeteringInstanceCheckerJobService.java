@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.job.metering;
+package com.sequenceiq.cloudbreak.job.metering.instancechecker;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -19,19 +19,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.job.metering.MeteringTransactionalScheduler;
 import com.sequenceiq.cloudbreak.metering.config.MeteringConfig;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
 
 @Service
-public class MeteringJobService implements JobSchedulerService {
+public class MeteringInstanceCheckerJobService implements JobSchedulerService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MeteringJobService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MeteringInstanceCheckerJobService.class);
 
-    private static final String JOB_GROUP = "metering-sync-jobs";
+    private static final String JOB_GROUP = "metering-instance-checker-jobs";
 
-    private static final String TRIGGER_GROUP = "metering-sync-triggers";
+    private static final String TRIGGER_GROUP = "metering-instance-checker-triggers";
 
     @Inject
     private MeteringConfig meteringConfig;
@@ -48,7 +49,7 @@ public class MeteringJobService implements JobSchedulerService {
             JobResourceAdapter resourceAdapter = c.newInstance(id, applicationContext);
             schedule(resourceAdapter);
         } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
-            LOGGER.error("Error during scheduling quartz job: {}", id, e);
+            LOGGER.error("Error during scheduling metering instance checker job: {}", id, e);
         }
     }
 
@@ -59,16 +60,16 @@ public class MeteringJobService implements JobSchedulerService {
     }
 
     private <T> void schedule(String id, JobDetail jobDetail, Trigger trigger) {
-        if (meteringConfig.isEnabled()) {
+        if (meteringConfig.isEnabled() && meteringConfig.isInstanceCheckerEnabled()) {
             JobKey jobKey = JobKey.jobKey(id, JOB_GROUP);
             try {
                 if (scheduler.getJobDetail(jobKey) != null) {
                     unschedule(jobKey);
                 }
-                LOGGER.info("Scheduling metering event sending job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
+                LOGGER.info("Scheduling metering instance checker job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
                 scheduler.scheduleJob(jobDetail, trigger);
             } catch (Exception e) {
-                LOGGER.error("Error during scheduling metering event sending job for stack with key: '{}' and group: '{}'",
+                LOGGER.error("Error during scheduling metering instance checker job for stack with key: '{}' and group: '{}'",
                         jobKey.getName(), jobKey.getGroup(), e);
             }
         }
@@ -80,12 +81,12 @@ public class MeteringJobService implements JobSchedulerService {
 
     private void unschedule(JobKey jobKey) {
         try {
-            LOGGER.info("Unscheduling metering event sending job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
+            LOGGER.info("Unscheduling metering instance checker job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
             if (scheduler.getJobDetail(jobKey) != null) {
                 scheduler.deleteJob(jobKey);
             }
         } catch (Exception e) {
-            LOGGER.error("Error during unscheduling metering event sending job for stack with key: '{}' and group: '{}'",
+            LOGGER.error("Error during unscheduling metering instance checker job for stack with key: '{}' and group: '{}'",
                     jobKey.getName(), jobKey.getGroup(), e);
         }
     }
@@ -93,7 +94,7 @@ public class MeteringJobService implements JobSchedulerService {
     private <T> JobDetail buildJobDetail(JobResourceAdapter<T> resource) {
         return JobBuilder.newJob(resource.getJobClassForResource())
                 .withIdentity(resource.getJobResource().getLocalId(), JOB_GROUP)
-                .withDescription("Metering event sending job")
+                .withDescription("Metering instance checker job")
                 .usingJobData(resource.toJobDataMap())
                 .storeDurably()
                 .build();
@@ -104,10 +105,10 @@ public class MeteringJobService implements JobSchedulerService {
                 .forJob(jobDetail)
                 .usingJobData(jobDetail.getJobDataMap())
                 .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
-                .withDescription("Metering event sending trigger")
-                .startAt(delayedStart(meteringConfig.getIntervalInSeconds()))
+                .withDescription("Metering instance checker trigger")
+                .startAt(delayedStart(meteringConfig.getInstanceCheckerDelayInSeconds()))
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-                        .withIntervalInSeconds(meteringConfig.getIntervalInSeconds())
+                        .withIntervalInHours(meteringConfig.getInstanceCheckerIntervalInHours())
                         .repeatForever()
                         .withMisfireHandlingInstructionNextWithExistingCount())
                 .build();
@@ -121,4 +122,5 @@ public class MeteringJobService implements JobSchedulerService {
     public String getJobGroup() {
         return JOB_GROUP;
     }
+
 }

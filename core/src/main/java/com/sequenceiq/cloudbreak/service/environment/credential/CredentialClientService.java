@@ -12,7 +12,9 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.AuthorizationResourceCrnProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
@@ -30,6 +32,9 @@ public class CredentialClientService implements AuthorizationResourceCrnProvider
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
+    private CredentialToCloudCredentialConverter cloudCredentialConverter;
 
     public Credential getByName(String name) {
         try {
@@ -67,6 +72,10 @@ public class CredentialClientService implements AuthorizationResourceCrnProvider
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }
+    }
+
+    public CloudCredential getCloudCredential(String environmentCrn) {
+        return cloudCredentialConverter.convert(getByEnvironmentCrn(environmentCrn));
     }
 
     @Override

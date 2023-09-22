@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsInstanceCommonService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
@@ -47,6 +48,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTypeMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -60,6 +62,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer
 
 @Service
 public class AwsMetadataCollector implements MetadataCollector {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsMetadataCollector.class);
 
     @Inject
@@ -82,6 +85,9 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private AwsInstanceCommonService awsInstanceCommonService;
 
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms,
@@ -376,5 +382,10 @@ public class AwsMetadataCollector implements MetadataCollector {
     public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
         return awsPlatformResources.collectInstanceStorageCount(ac, instanceTypes,
                 entitlementService.getEntitlements(ac.getCloudCredential().getAccountId()));
+    }
+
+    @Override
+    public InstanceTypeMetadata collectInstanceTypes(AuthenticatedContext ac, List<String> instanceIds) {
+        return awsInstanceCommonService.collectInstanceTypes(ac, instanceIds);
     }
 }

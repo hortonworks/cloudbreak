@@ -67,7 +67,7 @@ public class DeleteCloudFormationHandler implements CloudPlatformEventHandler<De
             CloudStack cloudStack = request.getCloudStack();
             AuthenticatedContext ac = awsAuthenticator.authenticate(cloudContext, cloudCredential);
             Optional<CloudResource> cfCloudResource = resourceRetriever
-                    .findFirstByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.CLOUDFORMATION_STACK, request.getResourceId());
+                    .findByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.CLOUDFORMATION_STACK, request.getResourceId());
             boolean cloudFormationTemplateDeleted = false;
             if (cfCloudResource.isPresent()) {
                 if (awsMigrationUtil.allInstancesDeletedFromCloudFormation(ac, cfCloudResource.get())) {

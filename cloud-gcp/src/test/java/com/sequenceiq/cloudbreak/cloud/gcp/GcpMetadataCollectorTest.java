@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import static com.sequenceiq.common.api.type.CommonStatus.CREATED;
+import static com.sequenceiq.common.api.type.ResourceType.GCP_INSTANCE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
@@ -12,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +31,7 @@ import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.AccessConfig;
 import com.google.api.services.compute.model.ForwardingRule;
 import com.google.api.services.compute.model.ForwardingRuleList;
+import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.NetworkInterface;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -42,8 +47,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTypeMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
@@ -67,6 +74,8 @@ class GcpMetadataCollectorTest {
 
     private static final String INSTANCE_NAME_6 = "testcluster-w-6";
 
+    private static final String INSTANCE_NAME_PREFIX = "testcluster";
+
     private static final String NETWORK_NAME = "testcluster-w-disc";
 
     private static final String DISC_NAME = "testcluster-w-network";
@@ -87,6 +96,8 @@ class GcpMetadataCollectorTest {
 
     private static final String REGION = "region";
 
+    private static final Long STACK_ID = 1L;
+
     @InjectMocks
     private GcpMetadataCollector underTest;
 
@@ -101,6 +112,12 @@ class GcpMetadataCollectorTest {
 
     @Mock
     private GcpLoadBalancerTypeConverter gcpLoadBalancerTypeConverter;
+
+    @Mock
+    private ResourceRetriever resourceRetriever;
+
+    @Mock
+    private GcpInstanceProvider gcpInstanceProvider;
 
     private AuthenticatedContext authenticatedContext;
 
@@ -243,6 +260,29 @@ class GcpMetadataCollectorTest {
         assertThat(result).map(CloudLoadBalancerMetadata::getType).containsExactlyInAnyOrder(LoadBalancerType.GATEWAY_PRIVATE, LoadBalancerType.PRIVATE);
     }
 
+    @Test
+    void testCollectInstanceTypes() {
+        CloudResource cloudResource = CloudResource.builder().withName(INSTANCE_NAME_1).withType(GCP_INSTANCE).withStatus(CREATED)
+                .withParameters(new HashMap<>()).build();
+        when(resourceRetriever.findByStatusAndTypeAndStack(eq(CREATED), eq(GCP_INSTANCE), eq(STACK_ID))).thenReturn(Optional.of(cloudResource));
+        when(gcpInstanceProvider.getInstanceNamePrefix(anyList())).thenReturn(INSTANCE_NAME_PREFIX);
+        when(gcpInstanceProvider.getInstances(eq(authenticatedContext), eq(INSTANCE_NAME_PREFIX)))
+                .thenReturn(List.of(instance("instanceId1"), instance("instanceId2"), instance("instanceId3")));
+        InstanceTypeMetadata result = underTest.collectInstanceTypes(authenticatedContext, List.of("instanceId1", "instanceId2"));
+
+        Map<String, String> instanceTypes = result.getInstanceTypes();
+        assertThat(instanceTypes).hasSize(2);
+        assertThat(instanceTypes).containsEntry("instanceId1", "large");
+        assertThat(instanceTypes).containsEntry("instanceId2", "large");
+    }
+
+    private Instance instance(String instanceId) {
+        Instance instance = new Instance();
+        instance.setName(instanceId);
+        instance.setMachineType("gcp/test/large");
+        return instance;
+    }
+
     private CloudVmMetaDataStatus getVm(String name, List<CloudVmMetaDataStatus> actual) {
         return actual.stream()
                 .filter(vm -> vm.getCloudVmInstanceStatus().getCloudInstance().getInstanceId().equals(name))
@@ -309,6 +349,7 @@ class GcpMetadataCollectorTest {
                 .withName("test-cluster")
                 .withLocation(location)
                 .withUserName("")
+                .withId(STACK_ID)
                 .build();
     }
 

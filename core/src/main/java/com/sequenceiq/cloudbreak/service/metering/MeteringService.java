@@ -14,8 +14,10 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.metrics.CommonMetricService;
 import com.sequenceiq.cloudbreak.converter.StackDtoToMeteringEventConverter;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
-import com.sequenceiq.cloudbreak.job.metering.MeteringJobAdapter;
-import com.sequenceiq.cloudbreak.job.metering.MeteringJobService;
+import com.sequenceiq.cloudbreak.job.metering.instancechecker.MeteringInstanceCheckerJobAdapter;
+import com.sequenceiq.cloudbreak.job.metering.instancechecker.MeteringInstanceCheckerJobService;
+import com.sequenceiq.cloudbreak.job.metering.sync.MeteringSyncJobAdapter;
+import com.sequenceiq.cloudbreak.job.metering.sync.MeteringSyncJobService;
 import com.sequenceiq.cloudbreak.metering.GrpcMeteringClient;
 import com.sequenceiq.cloudbreak.service.metrics.MeteringMetricTag;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
@@ -39,7 +41,10 @@ public class MeteringService {
     private StackDtoService stackDtoService;
 
     @Inject
-    private MeteringJobService meteringJobService;
+    private MeteringSyncJobService meteringSyncJobService;
+
+    @Inject
+    private MeteringInstanceCheckerJobService meteringInstanceCheckerJobService;
 
     @Inject
     private CommonMetricService metricsService;
@@ -67,14 +72,16 @@ public class MeteringService {
     public void scheduleSync(long stackId) {
         StackView stack = stackDtoService.getStackViewById(stackId);
         if (shouldSendMeteringEventForStack(stack)) {
-            meteringJobService.schedule(stackId, MeteringJobAdapter.class);
+            meteringSyncJobService.schedule(stackId, MeteringSyncJobAdapter.class);
+            meteringInstanceCheckerJobService.schedule(stackId, MeteringInstanceCheckerJobAdapter.class);
         }
     }
 
     public void unscheduleSync(long stackId) {
         StackView stack = stackDtoService.getStackViewById(stackId);
         if (shouldSendMeteringEventForStack(stack)) {
-            meteringJobService.unschedule(String.valueOf(stackId));
+            meteringSyncJobService.unschedule(String.valueOf(stackId));
+            meteringInstanceCheckerJobService.unschedule(String.valueOf(stackId));
         }
     }
 

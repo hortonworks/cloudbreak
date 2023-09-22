@@ -63,7 +63,7 @@ public class CloudResourceRetrieverService implements ResourceRetriever {
     }
 
     @Override
-    public Optional<CloudResource> findFirstByStatusAndTypeAndStack(CommonStatus status, ResourceType resourceType, Long stackId) {
+    public Optional<CloudResource> findByStatusAndTypeAndStack(CommonStatus status, ResourceType resourceType, Long stackId) {
         Optional<Resource> optionalResource = resourceService.findFirstByStatusAndTypeAndStack(status, resourceType, stackId);
         LOGGER.debug("Resource retrieved by optionalResource status: {}, type: {}, stackId: {}. Is present: {}", status, resourceType, stackId,
                 optionalResource.isPresent());

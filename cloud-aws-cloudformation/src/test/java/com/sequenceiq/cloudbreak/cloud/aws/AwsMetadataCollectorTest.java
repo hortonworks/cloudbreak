@@ -34,6 +34,7 @@ import org.mockito.quality.Strictness;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsInstanceCommonService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsLifeCycleMapper;
@@ -52,6 +53,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTypeMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
@@ -74,7 +76,7 @@ import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 
 @ExtendWith(MockitoExtension.class)
-public class AwsMetaDataCollectorTest {
+public class AwsMetadataCollectorTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
@@ -126,14 +128,17 @@ public class AwsMetaDataCollectorTest {
     @Mock
     private AwsLoadBalancerMetadataCollector awsLoadBalancerMetadataCollector;
 
+    @Mock
+    private AwsInstanceCommonService awsInstanceCommonService;
+
     @InjectMocks
-    private AwsMetadataCollector awsMetadataCollector;
+    private AwsMetadataCollector underTest;
 
     @Captor
     private ArgumentCaptor<DescribeSubnetsRequest> describeSubnetsRequestCaptor;
 
     @Test
-    public void collectMigratedExistingOneGroup() {
+    void collectMigratedExistingOneGroup() {
         List<CloudInstance> vms = new ArrayList<>();
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
@@ -172,7 +177,7 @@ public class AwsMetaDataCollectorTest {
         initSubnetsQuery(Map.ofEntries(entry(SUBNET_ID_1, AVAILABILITY_ZONE_1)));
 
         AuthenticatedContext ac = authenticatedContext();
-        List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, Collections.emptyList(), vms, vms);
+        List<CloudVmMetaDataStatus> statuses = underTest.collect(ac, Collections.emptyList(), vms, vms);
 
         assertEquals(1L, statuses.size());
         assertEquals("i-1", statuses.get(0).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
@@ -223,7 +228,7 @@ public class AwsMetaDataCollectorTest {
     }
 
     @Test
-    public void collectInCaseOfRepairButVolumesAreDeleted() {
+    void collectInCaseOfRepairButVolumesAreDeleted() {
         List<CloudInstance> vms = new ArrayList<>();
         List<Volume> volumes = new ArrayList<>();
         List<CloudResource> resources = new ArrayList<>();
@@ -274,7 +279,7 @@ public class AwsMetaDataCollectorTest {
         initSubnetsQuery(Map.ofEntries(entry(SUBNET_ID_1, AVAILABILITY_ZONE_1), entry(SUBNET_ID_2, AVAILABILITY_ZONE_2)));
 
         AuthenticatedContext ac = authenticatedContext();
-        List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, resources, vms, Collections.emptyList());
+        List<CloudVmMetaDataStatus> statuses = underTest.collect(ac, resources, vms, Collections.emptyList());
         assertEquals(1L, statuses.size());
         assertEquals("i-1", statuses.get(0).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
         assertEquals("privateIp1", statuses.get(0).getMetaData().getPrivateIp());
@@ -282,7 +287,7 @@ public class AwsMetaDataCollectorTest {
     }
 
     @Test
-    public void collectUnknownInstances() {
+    void collectUnknownInstances() {
         List<CloudInstance> vms = new ArrayList<>();
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
@@ -336,7 +341,7 @@ public class AwsMetaDataCollectorTest {
         initSubnetsQuery(Map.ofEntries(entry(SUBNET_ID_1, AVAILABILITY_ZONE_1), entry(SUBNET_ID_2, AVAILABILITY_ZONE_2)));
 
         AuthenticatedContext ac = authenticatedContext();
-        List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, Collections.emptyList(), vms, Collections.emptyList());
+        List<CloudVmMetaDataStatus> statuses = underTest.collect(ac, Collections.emptyList(), vms, Collections.emptyList());
 
         assertEquals(3L, statuses.size());
         assertEquals("i-0", statuses.get(0).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
@@ -355,7 +360,7 @@ public class AwsMetaDataCollectorTest {
     }
 
     @Test
-    public void collectNewAndExistingOne() {
+    void collectNewAndExistingOne() {
         List<CloudInstance> vms = new ArrayList<>();
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
@@ -408,7 +413,7 @@ public class AwsMetaDataCollectorTest {
         initSubnetsQuery(Map.ofEntries(entry(SUBNET_ID_1, AVAILABILITY_ZONE_1)));
 
         AuthenticatedContext ac = authenticatedContext();
-        List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, Collections.emptyList(), vms, vms);
+        List<CloudVmMetaDataStatus> statuses = underTest.collect(ac, Collections.emptyList(), vms, vms);
 
         assertEquals(2L, statuses.size());
         assertTrue(statuses.stream().anyMatch(predicate -> "i-1".equals(predicate.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())));
@@ -427,7 +432,7 @@ public class AwsMetaDataCollectorTest {
     }
 
     @Test
-    public void collectNewNodes() {
+    void collectNewNodes() {
         List<CloudInstance> everyVms = new ArrayList<>();
         List<CloudInstance> newVms = new ArrayList<>();
         List<Volume> volumes = new ArrayList<>();
@@ -480,7 +485,7 @@ public class AwsMetaDataCollectorTest {
         initSubnetsQuery(Map.ofEntries(entry(SUBNET_ID_2, AVAILABILITY_ZONE_2)));
 
         AuthenticatedContext ac = authenticatedContext();
-        List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, Collections.emptyList(), newVms, everyVms);
+        List<CloudVmMetaDataStatus> statuses = underTest.collect(ac, Collections.emptyList(), newVms, everyVms);
 
         assertEquals(1L, statuses.size());
         assertTrue(statuses.stream().anyMatch(predicate -> "i-2".equals(predicate.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())));
@@ -494,10 +499,10 @@ public class AwsMetaDataCollectorTest {
     }
 
     @Test
-    public void testCollectLoadBalancers() {
+    void testCollectLoadBalancers() {
         setupMethodsForLoadBalancer(true);
         AuthenticatedContext ac = authenticatedContext();
-        List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
+        List<CloudLoadBalancerMetadata> metadata = underTest.collectLoadBalancer(ac,
                 List.of(LoadBalancerType.PRIVATE, LoadBalancerType.PUBLIC), null);
 
         assertEquals(2, metadata.size());
@@ -517,11 +522,11 @@ public class AwsMetaDataCollectorTest {
 
     @MockitoSettings(strictness = Strictness.LENIENT)
     @Test
-    public void testCollectLoadBalancerOnlyDefaultGateway() {
+    void testCollectLoadBalancerOnlyDefaultGateway() {
         setupMethodsForLoadBalancer(true);
         when(awsLoadBalancerMetadataCollector.getParameters(any(), any(), any())).thenReturn(Map.of());
         AuthenticatedContext ac = authenticatedContext();
-        List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
+        List<CloudLoadBalancerMetadata> metadata = underTest.collectLoadBalancer(ac,
                 List.of(LoadBalancerType.PRIVATE), null);
 
         assertEquals(1, metadata.size());
@@ -535,11 +540,11 @@ public class AwsMetaDataCollectorTest {
 
     @MockitoSettings(strictness = Strictness.LENIENT)
     @Test
-    public void testCollectLoadBalancerOnlyEndpointAccessGateway() {
+    void testCollectLoadBalancerOnlyEndpointAccessGateway() {
         setupMethodsForLoadBalancer(true);
         when(awsLoadBalancerMetadataCollector.getParameters(any(), any(), any())).thenReturn(Map.of());
         AuthenticatedContext ac = authenticatedContext();
-        List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
+        List<CloudLoadBalancerMetadata> metadata = underTest.collectLoadBalancer(ac,
                 List.of(LoadBalancerType.PUBLIC), null);
 
         assertEquals(1, metadata.size());
@@ -552,11 +557,11 @@ public class AwsMetaDataCollectorTest {
     }
 
     @Test
-    public void testCollectLoadBalancerMissingMetadata() {
+    void testCollectLoadBalancerMissingMetadata() {
         setupMethodsForLoadBalancer(false);
         when(awsLoadBalancerMetadataCollector.getParameters(any(), any(), any())).thenReturn(Map.of());
         AuthenticatedContext ac = authenticatedContext();
-        List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
+        List<CloudLoadBalancerMetadata> metadata = underTest.collectLoadBalancer(ac,
                 List.of(LoadBalancerType.PRIVATE, LoadBalancerType.PUBLIC), null);
 
         assertEquals(1, metadata.size());
@@ -621,7 +626,7 @@ public class AwsMetaDataCollectorTest {
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenThrow(exception);
 
         AuthenticatedContext ac = authenticatedContext();
-        CloudConnectorException result = assertThrows(CloudConnectorException.class, () -> awsMetadataCollector.collect(ac,
+        CloudConnectorException result = assertThrows(CloudConnectorException.class, () -> underTest.collect(ac,
                 Collections.emptyList(), vms, vms));
 
         assertThat(result).hasMessage("Serious problem");
@@ -629,7 +634,7 @@ public class AwsMetaDataCollectorTest {
     }
 
     @Test
-    public void testCollectWhenAutoscalingGroupEmptyForAGroupThatHasMetadataOnOurSide() {
+    void testCollectWhenAutoscalingGroupEmptyForAGroupThatHasMetadataOnOurSide() {
         List<CloudInstance> vms = new ArrayList<>();
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
@@ -648,11 +653,25 @@ public class AwsMetaDataCollectorTest {
         initSubnetsQuery(Map.ofEntries(entry(SUBNET_ID_1, AVAILABILITY_ZONE_1)));
         AuthenticatedContext ac = authenticatedContext();
 
-        List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, Collections.emptyList(), vms, vms);
+        List<CloudVmMetaDataStatus> statuses = underTest.collect(ac, Collections.emptyList(), vms, vms);
 
         assertEquals(0L, statuses.size());
         assertTrue(statuses.stream().allMatch(predicate -> CLOUD_INSTANCE_LIFE_CYCLE.equals(predicate.getMetaData().getLifeCycle())));
         verify(cloudFormationStackUtil, times(0)).createDescribeInstancesRequest(any());
         verify(amazonEC2Client, times(0)).retryableDescribeInstances(any());
+    }
+
+    @Test
+    void testCollectInstanceTypes() {
+        AuthenticatedContext ac = authenticatedContext();
+        List<String> instanceIds = List.of("instance1", "instance2");
+        when(awsInstanceCommonService.collectInstanceTypes(eq(ac), eq(instanceIds)))
+                .thenReturn(new InstanceTypeMetadata(Map.of("instance1", "large", "instance2", "large")));
+        InstanceTypeMetadata result = underTest.collectInstanceTypes(ac, instanceIds);
+        verify(awsInstanceCommonService, times(1)).collectInstanceTypes(eq(ac), eq(instanceIds));
+        Map<String, String> instanceTypes = result.getInstanceTypes();
+        assertThat(instanceTypes).hasSize(2);
+        assertThat(instanceTypes).containsEntry("instance1", "large");
+        assertThat(instanceTypes).containsEntry("instance2", "large");
     }
 }

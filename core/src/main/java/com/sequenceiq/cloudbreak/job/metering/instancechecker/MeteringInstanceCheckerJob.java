@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.job.metering;
+package com.sequenceiq.cloudbreak.job.metering.instancechecker;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETED_ON_PROVIDER_SIDE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
@@ -17,26 +17,26 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
-import com.sequenceiq.cloudbreak.service.metering.MeteringService;
+import com.sequenceiq.cloudbreak.service.metering.MeteringInstanceCheckerService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.view.StackView;
 
 @DisallowConcurrentExecution
 @Component
-public class MeteringJob extends StatusCheckerJob {
+public class MeteringInstanceCheckerJob extends StatusCheckerJob {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MeteringJob.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MeteringInstanceCheckerJob.class);
 
     @Inject
     private StackDtoService stackDtoService;
 
     @Inject
-    private MeteringService meteringService;
+    private MeteringInstanceCheckerService meteringInstanceCheckerService;
 
     @Inject
-    private MeteringJobService meteringJobService;
+    private MeteringInstanceCheckerJobService meteringInstanceCheckerJobService;
 
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
@@ -45,12 +45,12 @@ public class MeteringJob extends StatusCheckerJob {
 
     @Override
     protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
-        StackView stack = stackDtoService.getStackViewById(getLocalIdAsLong());
+        StackDto stack = stackDtoService.getById(getLocalIdAsLong());
         if (Sets.union(Status.getUnschedulableStatuses(), Set.of(STOPPED, DELETED_ON_PROVIDER_SIDE)).contains(stack.getStatus())) {
-            LOGGER.info("Metering sync job will be unscheduled, stack state is {}", stack.getStatus());
-            meteringJobService.unschedule(getLocalId());
+            LOGGER.info("Metering instance checker job will be unscheduled, stack state is {}", stack.getStatus());
+            meteringInstanceCheckerJobService.unschedule(getLocalId());
         } else {
-            meteringService.sendMeteringSyncEventForStack(getLocalIdAsLong());
+            meteringInstanceCheckerService.checkInstanceTypes(stack);
         }
     }
 }

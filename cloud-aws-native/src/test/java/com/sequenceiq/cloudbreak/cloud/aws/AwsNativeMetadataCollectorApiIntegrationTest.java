@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AwsApacheClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.config.AwsConfig;
+import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsInstanceCommonService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsRegionEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsServiceEndpointProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
@@ -184,7 +185,8 @@ class AwsNativeMetadataCollectorApiIntegrationTest {
             AwsConfig.class,
             AwsPageCollector.class,
             AwsRegionEndpointProvider.class,
-            AwsServiceEndpointProvider.class
+            AwsServiceEndpointProvider.class,
+            AwsInstanceCommonService.class
     })
     static class AwsNativeMetadataCollectorTestConfig {
 

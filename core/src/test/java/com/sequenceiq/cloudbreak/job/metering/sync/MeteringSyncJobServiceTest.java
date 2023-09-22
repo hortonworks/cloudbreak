@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.job.metering;
+package com.sequenceiq.cloudbreak.job.metering.sync;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -17,11 +17,12 @@ import org.quartz.impl.JobDetailImpl;
 import org.springframework.context.ApplicationContext;
 
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.job.metering.MeteringTransactionalScheduler;
 import com.sequenceiq.cloudbreak.metering.config.MeteringConfig;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 
 @ExtendWith(MockitoExtension.class)
-class MeteringJobServiceTest {
+class MeteringSyncJobServiceTest {
 
     private static final String LOCAL_ID = "LOCAL_ID";
 
@@ -35,15 +36,15 @@ class MeteringJobServiceTest {
     private ApplicationContext applicationContext;
 
     @InjectMocks
-    private MeteringJobService underTest;
+    private MeteringSyncJobService underTest;
 
     @Test
     void testScheduleWhenEnabled() throws TransactionService.TransactionExecutionException {
         when(meteringConfig.isEnabled()).thenReturn(Boolean.TRUE);
         JobResource jobResource = mock(JobResource.class);
         when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
-        when(meteringConfig.getIntervalInSeconds()).thenReturn(10);
-        underTest.schedule(new MeteringJobAdapter(jobResource));
+        when(meteringConfig.getSyncIntervalInSeconds()).thenReturn(10);
+        underTest.schedule(new MeteringSyncJobAdapter(jobResource));
         verify(scheduler, times(1)).scheduleJob(any(), any());
     }
 
@@ -52,8 +53,8 @@ class MeteringJobServiceTest {
         when(meteringConfig.isEnabled()).thenReturn(Boolean.FALSE);
         JobResource jobResource = mock(JobResource.class);
         when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
-        when(meteringConfig.getIntervalInSeconds()).thenReturn(10);
-        underTest.schedule(new MeteringJobAdapter(jobResource));
+        when(meteringConfig.getSyncIntervalInSeconds()).thenReturn(10);
+        underTest.schedule(new MeteringSyncJobAdapter(jobResource));
         verify(scheduler, never()).scheduleJob(any(), any());
     }
 

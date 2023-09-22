@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 @Service
 public class GcpBucketRegisterService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GcpProvisionSetup.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GcpBucketRegisterService.class);
 
     private static final int NOT_FOUND = 404;
 

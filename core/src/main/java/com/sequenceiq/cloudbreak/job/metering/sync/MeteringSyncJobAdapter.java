@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.job.metering;
+package com.sequenceiq.cloudbreak.job.metering.sync;
 
 import org.quartz.Job;
 import org.springframework.context.ApplicationContext;
@@ -8,19 +8,19 @@ import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
-public class MeteringJobAdapter extends JobResourceAdapter<Stack> {
+public class MeteringSyncJobAdapter extends JobResourceAdapter<Stack> {
 
-    public MeteringJobAdapter(Long id, ApplicationContext context) {
+    public MeteringSyncJobAdapter(Long id, ApplicationContext context) {
         super(id, context);
     }
 
-    public MeteringJobAdapter(JobResource jobResource) {
+    public MeteringSyncJobAdapter(JobResource jobResource) {
         super(jobResource);
     }
 
     @Override
     public Class<? extends Job> getJobClassForResource() {
-        return MeteringJob.class;
+        return MeteringSyncJob.class;
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+import static com.sequenceiq.common.api.type.CommonStatus.CREATED;
+import static com.sequenceiq.common.api.type.ResourceType.ARM_TEMPLATE;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
@@ -35,6 +38,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTypeMetadata;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @Service
@@ -58,6 +63,12 @@ public class AzureMetadataCollector implements MetadataCollector {
 
     @Inject
     private AzurePlatformResources azurePlatformResources;
+
+    @Inject
+    private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
+
+    @Inject
+    private ResourceRetriever resourceRetriever;
 
     @Override
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
@@ -221,6 +232,19 @@ public class AzureMetadataCollector implements MetadataCollector {
     @Override
     public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
         return azurePlatformResources.collectInstanceStorageCount(ac, instanceTypes);
+    }
+
+    @Override
+    public InstanceTypeMetadata collectInstanceTypes(AuthenticatedContext ac, List<String> instanceIds) {
+        CloudContext cloudContext = ac.getCloudContext();
+        Optional<CloudResource> armTemplateResource = resourceRetriever.findByStatusAndTypeAndStack(CREATED, ARM_TEMPLATE, cloudContext.getId());
+        String resourceGroupName = armTemplateResource
+                .orElseThrow(() -> new CloudConnectorException(String.format("No ARM_TEMPALTE resource found: %s", cloudContext.getId()))).getName();
+        AzureClient azureClient = ac.getParameter(AzureClient.class);
+        Map<String, VirtualMachine> virtualMachinesByName = azureVirtualMachineService.getVirtualMachinesByName(azureClient, resourceGroupName, instanceIds);
+        Map<String, String> instanceTypes = virtualMachinesByName.values().stream()
+                .collect(Collectors.toMap(vm -> StringUtils.substringAfterLast(vm.id(), "/"), vm -> vm.size().toString()));
+        return new InstanceTypeMetadata(instanceTypes);
     }
 
     private Optional<String> lookupPrivateIp(String resourceGroup, AzureClient azureClient, String loadBalancerName, LoadBalancerType type) {
