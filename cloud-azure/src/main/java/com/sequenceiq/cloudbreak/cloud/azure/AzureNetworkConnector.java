@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_NAME;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -220,7 +222,7 @@ public class AzureNetworkConnector implements NetworkConnector {
     }
 
     @Override
-    public void createProviderSpecificNetworkResources(NetworkResourcesCreationRequest request) {
+    public List<CloudResource> createProviderSpecificNetworkResources(NetworkResourcesCreationRequest request) {
         PrivateDatabaseVariant privateEndpointVariant = request.getPrivateEndpointVariant();
         if (privateEndpointVariant.isZoneManagedByCdp()) {
             LOGGER.debug("DNS zone is managed by CDP. Checking the presence of DNS Zones and Network links..");
@@ -234,13 +236,16 @@ public class AzureNetworkConnector implements NetworkConnector {
             networkView.setNetworkId(request.getNetworkId());
             networkView.setResourceGroupName(request.getNetworkResourceGroup());
             Set<AzureManagedPrivateDnsZoneService> servicesWithExistingDnsZone = getServicesWithExistingDnsZone(request);
-            azureDnsZoneService.checkOrCreateDnsZones(authenticatedContext, azureClient, networkView, resourceGroup, tags, servicesWithExistingDnsZone,
-                    privateEndpointVariant);
-            azureNetworkLinkService.checkOrCreateNetworkLinks(authenticatedContext, azureClient, networkView, resourceGroup, tags, servicesWithExistingDnsZone,
-                    privateEndpointVariant);
+            List<CloudResource> createdResources = new ArrayList<>(azureDnsZoneService.checkOrCreateDnsZones(
+                    authenticatedContext, azureClient, networkView, resourceGroup, tags, servicesWithExistingDnsZone, privateEndpointVariant));
+            createdResources.addAll(azureNetworkLinkService.checkOrCreateNetworkLinks(
+                    authenticatedContext, azureClient, networkView, resourceGroup, tags, servicesWithExistingDnsZone, privateEndpointVariant));
+            return createdResources;
         } else {
             LOGGER.debug("Private endpoints setting is {}, there is nothing to do.", privateEndpointVariant);
+            return List.of();
         }
+
     }
 
     private Set<AzureManagedPrivateDnsZoneService> getServicesWithExistingDnsZone(NetworkResourcesCreationRequest request) {

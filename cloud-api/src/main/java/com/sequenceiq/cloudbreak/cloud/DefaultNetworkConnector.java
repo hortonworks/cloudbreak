@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
@@ -67,7 +68,7 @@ public interface DefaultNetworkConnector extends NetworkConnector {
     }
 
     @Override
-    default void createProviderSpecificNetworkResources(NetworkResourcesCreationRequest networkResourcesCreationRequest) {
+    default List<CloudResource> createProviderSpecificNetworkResources(NetworkResourcesCreationRequest networkResourcesCreationRequest) {
         throw new UnsupportedOperationException("No cloud provider specific resources exist on this cloud platform!");
     }
 

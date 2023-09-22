@@ -80,27 +80,11 @@ public class AzureCloudResourceService {
 
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
     private CommonStatus convertProvisioningState(String provisioningState) {
-        CommonStatus status;
-        switch (provisioningState.toLowerCase(Locale.ROOT)) {
-            case "succeeded":
-            case "created":
-                status = CommonStatus.CREATED;
-                break;
-            case "accepted":
-            case "creating":
-            case "running":
-            case "registering":
-                status = CommonStatus.REQUESTED;
-                break;
-            case "failed":
-            case "canceled":
-            case "deleting":
-            case "deleted":
-            case "notspecified":
-            default:
-                status = CommonStatus.FAILED;
-        }
-        return status;
+        return switch (provisioningState.toLowerCase(Locale.ROOT)) {
+            case "succeeded", "created" -> CommonStatus.CREATED;
+            case "accepted", "creating", "running", "registering" -> CommonStatus.REQUESTED;
+            default -> CommonStatus.FAILED;
+        };
     }
 
     @SuppressWarnings("checkstyle:CyclomaticComplexity")

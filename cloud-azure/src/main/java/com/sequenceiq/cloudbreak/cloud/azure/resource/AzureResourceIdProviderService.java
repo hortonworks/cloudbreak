@@ -37,16 +37,24 @@ public class AzureResourceIdProviderService {
         return resourceReference;
     }
 
-    public String generateNetworkLinkId(String subscriptionId, String resourceGroup, String service, String networkid) {
+    public String generateDnsZoneId(String subscriptionId, String resourceGroup, String service) {
         Assert.hasText(subscriptionId, "Subscription id must not be null or empty.");
         Assert.hasText(resourceGroup, "Resource group must not be null or empty.");
         Assert.hasText(service, "Service name must not be null or empty.");
-        Assert.hasText(networkid, "Network id must not be null or empty.");
 
-        String resourceReference = String.format("%s/providers/Microsoft.Network/privateDnsZones/%s/virtualNetworkLinks/%s",
+        String resourceReference = String.format("%s/providers/Microsoft.Network/privateDnsZones/%s",
                 generateCommonPart(subscriptionId, resourceGroup),
-                service,
-                networkid);
+                service);
+        LOGGER.info("Generated resourceReferenceId: {}", resourceReference);
+        return resourceReference;
+    }
+
+    public String generateNetworkLinkId(String subscriptionId, String resourceGroup, String service, String networkId) {
+        String dnsZoneId = generateDnsZoneId(subscriptionId, resourceGroup, service);
+        Assert.hasText(networkId, "Network id must not be null or empty.");
+        String resourceReference = String.format("%s/virtualNetworkLinks/%s",
+                dnsZoneId,
+                networkId);
         LOGGER.info("Generated resourceReferenceId: {}", resourceReference);
         return resourceReference;
     }

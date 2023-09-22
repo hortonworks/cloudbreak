@@ -62,6 +62,9 @@ public class AzureNetworkLinkServiceTest {
     @Mock
     private AzurePrivateEndpointServicesProvider azurePrivateEndpointServicesProvider;
 
+    @Mock
+    private AzureCloudResourceService azureCloudResourceService;
+
     @InjectMocks
     private AzureNetworkLinkService underTest;
 
@@ -87,8 +90,9 @@ public class AzureNetworkLinkServiceTest {
     @ParameterizedTest
     @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE, names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE"})
     public void testCheckOrCreateWhenNetworkLinkExists(PrivateDatabaseVariant variant) {
-
         when(client.checkIfNetworkLinksDeployed(any(), any(), any())).thenReturn(true);
+        when(client.getCurrentSubscription()).thenReturn(mock(Subscription.class));
+        when(client.getCurrentSubscription().subscriptionId()).thenReturn(SUBSCRIPTION_ID);
 
         underTest.checkOrCreateNetworkLinks(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of(), variant);
 

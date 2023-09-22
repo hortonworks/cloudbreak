@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_NETWORK_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_PUBLICKEY_CREATION_EVENT;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -15,9 +16,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
@@ -28,6 +32,7 @@ import com.sequenceiq.environment.environment.service.network.NetworkMetadataVal
 import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.EnvironmentNetworkService;
 import com.sequenceiq.environment.network.NetworkService;
+import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -132,8 +137,17 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private void createProviderSpecificNetworkResourcesIfNeeded(EnvironmentDto environmentDto, BaseNetwork network) {
         if (AZURE.equalsIgnoreCase(environmentDto.getCloudPlatform())) {
-            environmentNetworkService.createProviderSpecificNetworkResources(environmentDto, network);
+            List<CloudResource> createdResources = environmentNetworkService.createProviderSpecificNetworkResources(environmentDto, network);
+            createdResources.stream()
+                    .filter(cloudResource -> cloudResource.getType() == ResourceType.AZURE_PRIVATE_DNS_ZONE)
+                    .filter(cloudResource -> cloudResource.getReference().endsWith(AzureManagedPrivateDnsZoneService.POSTGRES_FLEXIBLE.getDnsZoneName("")))
+                    .findFirst()
+                    .ifPresent(cloudResource -> setProviderSpecificNetworkResource(network, cloudResource));
         }
+    }
+
+    private void setProviderSpecificNetworkResource(BaseNetwork network, CloudResource resource) {
+        ((AzureNetwork) network).setDatabasePrivateDnsZoneId(resource.getReference());
     }
 
     private boolean hasNetwork(Environment environment) {

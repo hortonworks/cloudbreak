@@ -18,8 +18,10 @@ import org.springframework.stereotype.Service;
 
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.network.models.Network;
+import com.azure.resourcemanager.resources.models.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureDnsZoneDeploymentParameters;
+import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.azure.task.dnszone.AzureDnsZoneCreationCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.azure.task.dnszone.AzureDnsZoneCreationPoller;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -51,18 +53,20 @@ public class AzureResourceDeploymentHelperService {
     @Inject
     private AzureUtils azureUtils;
 
-    public void pollForCreation(AuthenticatedContext authenticatedContext, AzureDnsZoneCreationCheckerContext checkerContext) {
+    public Deployment pollForCreation(AuthenticatedContext authenticatedContext, AzureDnsZoneCreationCheckerContext checkerContext) {
         try {
             azureDnsZoneCreationPoller.startPolling(authenticatedContext, checkerContext);
         } catch (CloudConnectorException e) {
             LOGGER.warn("Exception during polling: {}", e.getMessage());
         } finally {
             AzureClient azureClient = checkerContext.getAzureClient();
-            CommonStatus deploymentStatus = azureClient.getTemplateDeploymentCommonStatus(
+            Deployment templateDeployment = azureClient.getTemplateDeployment(
                     checkerContext.getResourceGroupName(), checkerContext.getDeploymentName());
+            CommonStatus deploymentStatus = AzureStatusMapper.mapCommonStatus(templateDeployment.provisioningState());
             ResourceType resourceType = StringUtils.isEmpty(checkerContext.getNetworkId()) ? AZURE_PRIVATE_DNS_ZONE : AZURE_VIRTUAL_NETWORK_LINK;
             azureResourcePersistenceHelperService.updateCloudResource(
                     authenticatedContext, checkerContext.getDeploymentName(), checkerContext.getDeploymentId(), deploymentStatus, resourceType);
+            return templateDeployment;
         }
     }
 
@@ -75,7 +79,7 @@ public class AzureResourceDeploymentHelperService {
         return azureNetwork;
     }
 
-    public void deployTemplate(AzureClient azureClient, AzureDnsZoneDeploymentParameters parameters) {
+    public Deployment deployTemplate(AzureClient azureClient, AzureDnsZoneDeploymentParameters parameters) {
         List<AzureManagedPrivateDnsZoneService> enabledPrivateEndpointServices = parameters.getEnabledPrivateEndpointServices();
         String resourceGroup = parameters.getResourceGroupName();
 
@@ -89,7 +93,7 @@ public class AzureResourceDeploymentHelperService {
             String parametersMapAsString = new Json(Map.of()).getValue();
 
             LOGGER.debug("Creating deployment with name {} in resource group {}", deploymentName, resourceGroup);
-            azureClient.createTemplateDeployment(resourceGroup, deploymentName, template, parametersMapAsString);
+            return azureClient.createTemplateDeployment(resourceGroup, deploymentName, template, parametersMapAsString);
         } catch (ManagementException e) {
             LOGGER.info("Provisioning error, cloud exception happened: ", e);
             throw azureUtils.convertToCloudConnectorException(e, "DNS Zone and network link template deployment");

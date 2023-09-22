@@ -92,13 +92,12 @@ public class AzureScaleUtilService {
             LOGGER.info("TemplateDeployment with resourceGroupName {} and deploymentName {} is obsolete. Rollback cancelled.", resourceGroupName, stackName);
             return;
         }
-        List<CloudResource> templateResources = new ArrayList<>();
-        List<CloudResource> newInstances = new ArrayList<>();
         List<CloudResource> osDiskResources = new ArrayList<>();
 
-        templateResources.addAll(azureCloudResourceService.getDeploymentCloudResources(templateDeployment));
+        List<CloudResource> templateResources = new ArrayList<>(azureCloudResourceService.getDeploymentCloudResources(templateDeployment));
         List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
-        newInstances.addAll(azureCloudResourceService.getInstanceCloudResources(stackName, templateResources, scaledGroups, resourceGroupName));
+        List<CloudResource> newInstances = new ArrayList<>(azureCloudResourceService.getInstanceCloudResources(
+                stackName, templateResources, scaledGroups, resourceGroupName));
         if (!newInstances.isEmpty()) {
             osDiskResources.addAll(azureCloudResourceService.getAttachedOsDiskResources(newInstances, resourceGroupName, client));
         } else {

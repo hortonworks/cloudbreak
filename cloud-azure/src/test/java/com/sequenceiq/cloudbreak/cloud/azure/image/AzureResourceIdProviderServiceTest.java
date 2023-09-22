@@ -52,6 +52,16 @@ public class AzureResourceIdProviderServiceTest {
     }
 
     @Test
+    public void testGenerateDnsZoneIdShouldCreateValidDnsZoneId() {
+        String expected = "/subscriptions/subscription-id/resourceGroups/resource-group/providers/Microsoft.Network/privateDnsZones/"
+                + "privatelink.postgres.database.azure.com";
+
+        String actual = underTest.generateDnsZoneId(SUBSCRIPTION_ID, RESOURCE_GROUP, SERVICE_ID);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testGenerateImageIdShouldThrowExceptionWhenSubscriptionIdIsNull() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             underTest.generateImageId(null, RESOURCE_GROUP, IMAGE_NAME);

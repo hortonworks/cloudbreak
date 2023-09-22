@@ -62,6 +62,9 @@ public class AzureDnsZoneServiceTest {
     @Mock
     private AzurePrivateEndpointServicesProvider azurePrivateEndpointServicesProvider;
 
+    @Mock
+    private AzureCloudResourceService azureCloudResourceService;
+
     @InjectMocks
     private AzureDnsZoneService underTest;
 

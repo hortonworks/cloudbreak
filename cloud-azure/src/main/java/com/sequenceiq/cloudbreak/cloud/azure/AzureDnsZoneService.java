@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
+import com.azure.resourcemanager.resources.models.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureDnsZoneDeploymentParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureResourceIdProviderService;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.task.dnszone.AzureDnsZoneCreationCh
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.network.PrivateDatabaseVariant;
 import com.sequenceiq.common.api.type.CommonStatus;
 
@@ -42,7 +44,10 @@ public class AzureDnsZoneService {
     @Inject
     private AzurePrivateEndpointServicesProvider azurePrivateEndpointServicesProvider;
 
-    public void checkOrCreateDnsZones(AuthenticatedContext authenticatedContext, AzureClient azureClient, AzureNetworkView networkView,
+    @Inject
+    private AzureCloudResourceService azureCloudResourceService;
+
+    public List<CloudResource> checkOrCreateDnsZones(AuthenticatedContext authenticatedContext, AzureClient azureClient, AzureNetworkView networkView,
             String resourceGroup, Map<String, String> tags, Set<AzureManagedPrivateDnsZoneService> servicesWithExistingPrivateDnsZone,
             PrivateDatabaseVariant privateEndpointVariant) {
 
@@ -50,12 +55,13 @@ public class AzureDnsZoneService {
         List<AzureManagedPrivateDnsZoneService> cdpManagedDnsZones = azurePrivateEndpointServicesProvider
                 .getCdpManagedDnsZoneServices(servicesWithExistingPrivateDnsZone, privateEndpointVariant);
         boolean dnsZonesDeployed = azureClient.checkIfDnsZonesDeployed(resourceGroup, cdpManagedDnsZones);
+        String deploymentName = azureResourceDeploymentHelperService.generateDeploymentName(cdpManagedDnsZones, DNS_ZONES);
 
         if (!dnsZonesDeployed) {
             LOGGER.debug("Dns zones are not deployed yet!");
+            String subscriptionId = azureClient.getCurrentSubscription().subscriptionId();
             String networkResourceGroup = networkView.getResourceGroupName();
-            String deploymentName = azureResourceDeploymentHelperService.generateDeploymentName(cdpManagedDnsZones, DNS_ZONES);
-            String dnsZoneDeploymentId = azureResourceIdProviderService.generateDeploymentId(azureClient.getCurrentSubscription().subscriptionId(),
+            String dnsZoneDeploymentId = azureResourceIdProviderService.generateDeploymentId(subscriptionId,
                     resourceGroup, deploymentName);
             String azureNetworkId = azureResourceDeploymentHelperService.getAzureNetwork(azureClient, networkId, networkResourceGroup).id();
             AzureDnsZoneCreationCheckerContext checkerContext = new AzureDnsZoneCreationCheckerContext(
@@ -63,15 +69,16 @@ public class AzureDnsZoneService {
             try {
                 if (azureResourcePersistenceHelperService.isRequested(dnsZoneDeploymentId, AZURE_PRIVATE_DNS_ZONE)) {
                     LOGGER.debug("Dns zones ({}) already requested in resource group {}", cdpManagedDnsZones, resourceGroup);
-                    azureResourceDeploymentHelperService.pollForCreation(authenticatedContext, checkerContext);
+                    return azureCloudResourceService.getDeploymentCloudResources(azureResourceDeploymentHelperService.pollForCreation(
+                            authenticatedContext, checkerContext));
                 } else {
                     LOGGER.debug("Dns zones ({}) are not requested yet in resource group {}, creating them..", cdpManagedDnsZones, resourceGroup);
 
                     persistResource(authenticatedContext, deploymentName, dnsZoneDeploymentId);
-                    createDnsZonesAndNetworkLinks(azureClient, azureNetworkId, resourceGroup, tags, cdpManagedDnsZones);
+                    Deployment deployment = createDnsZonesAndNetworkLinks(azureClient, azureNetworkId, resourceGroup, tags, cdpManagedDnsZones);
                     azureResourcePersistenceHelperService.updateCloudResource(
                             authenticatedContext, deploymentName, dnsZoneDeploymentId, CommonStatus.CREATED, AZURE_PRIVATE_DNS_ZONE);
-
+                    return azureCloudResourceService.getDeploymentCloudResources(deployment);
                 }
             } catch (CloudConnectorException e) {
                 LOGGER.warn("Deployment {} failed due to {}", deploymentName, e.getMessage());
@@ -82,8 +89,12 @@ public class AzureDnsZoneService {
                 // would cause edge case of inserting multiple db record violating the unique constraint
             } catch (DataAccessException e) {
                 LOGGER.warn("Polling {} deployment due to db unique constraint violation: {}", deploymentName, e.getMessage());
-                azureResourceDeploymentHelperService.pollForCreation(authenticatedContext, checkerContext);
+                return azureCloudResourceService.getDeploymentCloudResources(azureResourceDeploymentHelperService.pollForCreation(
+                        authenticatedContext, checkerContext));
             }
+        } else {
+            Deployment templateDeployment = azureClient.getTemplateDeployment(resourceGroup, deploymentName);
+            return azureCloudResourceService.getDeploymentCloudResources(templateDeployment);
         }
     }
 
@@ -98,13 +109,13 @@ public class AzureDnsZoneService {
         }
     }
 
-    private void createDnsZonesAndNetworkLinks(AzureClient azureClient, String azureNetworkId, String resourceGroup,
+    private Deployment createDnsZonesAndNetworkLinks(AzureClient azureClient, String azureNetworkId, String resourceGroup,
             Map<String, String> tags, List<AzureManagedPrivateDnsZoneService> enabledPrivateEndpointServices) {
         AzureDnsZoneDeploymentParameters parameters = new AzureDnsZoneDeploymentParameters(azureNetworkId,
                 false,
                 enabledPrivateEndpointServices,
                 resourceGroup,
                 tags);
-        azureResourceDeploymentHelperService.deployTemplate(azureClient, parameters);
+        return azureResourceDeploymentHelperService.deployTemplate(azureClient, parameters);
     }
 }

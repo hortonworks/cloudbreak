@@ -14,28 +14,15 @@ public class AzureStatusMapper {
     }
 
     public static ResourceStatus mapResourceStatus(String status) {
-        ResourceStatus mappedStatus;
-        switch (status) {
-            case "Ready":
-                mappedStatus =  ResourceStatus.UPDATED;
-                break;
-            case "Canceled":
-            case "Failed":
-                mappedStatus =  ResourceStatus.FAILED;
-                break;
-            case "Deleted":
-                mappedStatus =  ResourceStatus.DELETED;
-                break;
-            case "Succeeded":
-                mappedStatus =  ResourceStatus.CREATED;
-                break;
-            case "Accepted":
-            case "Running":
-            default:
-                mappedStatus =  ResourceStatus.IN_PROGRESS;
-                break;
-        }
-        LOGGER.debug("Mapping status {} to resource status {}", status, mappedStatus.toString());
+        ResourceStatus mappedStatus = switch (status) {
+            case "Ready" -> ResourceStatus.UPDATED;
+            case "Canceled", "Failed" -> ResourceStatus.FAILED;
+            case "Deleted" -> ResourceStatus.DELETED;
+            case "Succeeded" -> ResourceStatus.CREATED;
+            case "Accepted", "Running" -> ResourceStatus.IN_PROGRESS;
+            default -> ResourceStatus.IN_PROGRESS;
+        };
+        LOGGER.debug("Mapping status {} to resource status {}", status, mappedStatus);
         return mappedStatus;
     }
 
@@ -56,7 +43,7 @@ public class AzureStatusMapper {
                 mappedStatus = CommonStatus.FAILED;
                 break;
         }
-        LOGGER.debug("Mapped status {} to common status {}", status, mappedStatus.toString());
+        LOGGER.debug("Mapped status {} to common status {}", status, mappedStatus);
         return mappedStatus;
     }
 }

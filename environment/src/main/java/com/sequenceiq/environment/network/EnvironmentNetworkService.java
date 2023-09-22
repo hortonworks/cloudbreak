@@ -2,6 +2,7 @@ package com.sequenceiq.environment.network;
 
 import static com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern.USE_MULTIPLE;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -14,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -69,11 +71,11 @@ public class EnvironmentNetworkService {
         return converter.setCreatedCloudNetwork(baseNetwork, createdCloudNetwork);
     }
 
-    public void createProviderSpecificNetworkResources(EnvironmentDto environment, BaseNetwork baseNetwork) {
+    public List<CloudResource> createProviderSpecificNetworkResources(EnvironmentDto environment, BaseNetwork baseNetwork) {
         NetworkConnector networkConnector = getNetworkConnector(environment.getCloudPlatform());
         NetworkResourcesCreationRequest networkResourcesCreationRequest =
                 networkCreationRequestFactory.createProviderSpecificNetworkResources(environment, baseNetwork);
-        networkConnector.createProviderSpecificNetworkResources(networkResourcesCreationRequest);
+        return networkConnector.createProviderSpecificNetworkResources(networkResourcesCreationRequest);
     }
 
     public NetworkCidr getNetworkCidr(Network network, String cloudPlatform, Credential credential) {

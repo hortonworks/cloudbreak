@@ -27,22 +27,26 @@ public class AzureResourcePersistenceHelperService {
     private PersistenceNotifier persistenceNotifier;
 
     public boolean isRequested(String dnsZoneDeploymentId, ResourceType resourceType) {
-        return findDeploymentByStatus(dnsZoneDeploymentId, CommonStatus.REQUESTED, resourceType).isPresent();
+        return findResourceByStatus(dnsZoneDeploymentId, CommonStatus.REQUESTED, resourceType).isPresent();
     }
 
     public boolean isCreated(String dnsZoneDeploymentId, ResourceType resourceType) {
-        return findDeploymentByStatus(dnsZoneDeploymentId, CommonStatus.CREATED, resourceType).isPresent();
+        return findResourceByStatus(dnsZoneDeploymentId, CommonStatus.CREATED, resourceType).isPresent();
     }
 
-    public void persistCloudResource(AuthenticatedContext ac, String deploymentName, String deploymentId, ResourceType resourceType) {
+    public CloudResource persistCloudResource(AuthenticatedContext ac, String deploymentName, String deploymentId, ResourceType resourceType) {
         LOGGER.debug("Persisting {} deployment with REQUESTED status: {} and name {}", resourceType, deploymentId, deploymentName);
-        persistenceNotifier.notifyAllocation(buildCloudResource(deploymentName, deploymentId, CommonStatus.REQUESTED, resourceType), ac.getCloudContext());
+        CloudResource cloudResource = buildCloudResource(deploymentName, deploymentId, CommonStatus.REQUESTED, resourceType);
+        persistenceNotifier.notifyAllocation(cloudResource, ac.getCloudContext());
+        return cloudResource;
     }
 
-    public void updateCloudResource(AuthenticatedContext ac, String deploymentName, String deploymentId, CommonStatus commonStatus,
+    public CloudResource updateCloudResource(AuthenticatedContext ac, String deploymentName, String deploymentId, CommonStatus commonStatus,
             ResourceType resourceType) {
         LOGGER.debug("Updating {} deployment to {}: {}", resourceType, commonStatus, deploymentId);
-        persistenceNotifier.notifyUpdate(buildCloudResource(deploymentName, deploymentId, commonStatus, resourceType), ac.getCloudContext());
+        CloudResource cloudResource = buildCloudResource(deploymentName, deploymentId, commonStatus, resourceType);
+        persistenceNotifier.notifyUpdate(cloudResource, ac.getCloudContext());
+        return cloudResource;
     }
 
     private CloudResource buildCloudResource(String name, String reference, CommonStatus status, ResourceType resourceType) {
@@ -55,7 +59,7 @@ public class AzureResourcePersistenceHelperService {
                 .build();
     }
 
-    private Optional<CloudResource> findDeploymentByStatus(String reference, CommonStatus status, ResourceType resourceType) {
+    public Optional<CloudResource> findResourceByStatus(String reference, CommonStatus status, ResourceType resourceType) {
         return resourcePersistenceRetriever.notifyRetrieve(reference, status, resourceType);
     }
 }

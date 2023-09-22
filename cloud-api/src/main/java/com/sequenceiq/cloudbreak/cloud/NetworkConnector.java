@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
@@ -32,5 +34,5 @@ public interface NetworkConnector extends CloudPlatformAware {
 
     SubnetSelectionResult chooseSubnetsForPrivateEndpoint(Collection<CloudSubnet> subnetMetas, boolean existingNetwork);
 
-    void createProviderSpecificNetworkResources(NetworkResourcesCreationRequest networkResourcesCreationRequest);
+    List<CloudResource> createProviderSpecificNetworkResources(NetworkResourcesCreationRequest networkResourcesCreationRequest);
 }
