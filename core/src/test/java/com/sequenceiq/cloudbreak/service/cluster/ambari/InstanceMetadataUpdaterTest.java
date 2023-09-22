@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.Userdata;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -83,7 +82,6 @@ public class InstanceMetadataUpdaterTest {
     @BeforeEach
     public void setUp() throws CloudbreakException, JsonProcessingException, CloudbreakOrchestratorFailedException {
         when(gatewayConfigService.getPrimaryGatewayConfig(any(Stack.class))).thenReturn(gatewayConfig);
-        when(userDataService.createOrUpdateUserData(anyLong(), any())).thenReturn(new Userdata());
 
         Package packageByName = new Package();
         packageByName.setName("packageByName");
@@ -120,6 +118,7 @@ public class InstanceMetadataUpdaterTest {
         underTest.updatePackageVersionsOnAllInstances(1L);
 
         verify(cloudbreakEventService, times(0)).fireCloudbreakEvent(anyLong(), anyString(), any(ResourceEvent.class));
+        verify(userDataService, times(2)).makeSureUserDataIsMigrated(anyLong());
     }
 
     @Test
@@ -143,6 +142,7 @@ public class InstanceMetadataUpdaterTest {
                         .anyMatch(instanceMetaData -> StringUtils.equals(instanceMetaData.getDiscoveryFQDN(), "hostByCmd")))
                 .findFirst()
                 .get().getInstanceMetaData().iterator().next().getInstanceStatus());
+        verify(userDataService, times(1)).makeSureUserDataIsMigrated(anyLong());
     }
 
     @Test
@@ -159,6 +159,7 @@ public class InstanceMetadataUpdaterTest {
 
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(),
                 eq(ResourceEvent.CLUSTER_PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING), anyCollection());
+        verify(userDataService, times(2)).makeSureUserDataIsMigrated(anyLong());
     }
 
     @Test
@@ -175,6 +176,7 @@ public class InstanceMetadataUpdaterTest {
 
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(),
                 eq(ResourceEvent.CLUSTER_PACKAGES_ON_INSTANCES_ARE_DIFFERENT), anyCollection());
+        verify(userDataService, times(2)).makeSureUserDataIsMigrated(anyLong());
     }
 
     private Map<String, String> packageMap() {

@@ -4,7 +4,6 @@ import static com.sequenceiq.common.model.OsType.RHEL8;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -27,7 +26,6 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @Service
@@ -76,7 +74,7 @@ public class ImageFallbackService {
         StatedImage image = imageCatalogService.getImage(stackView.getWorkspaceId(), currentImage.getImageCatalogUrl(),
                 currentImage.getImageCatalogName(), currentImage.getImageId());
         String imageName = imageService.determineImageNameByRegion(stackView.getCloudPlatform(), platformString, stackView.getRegion(), image.getImage());
-        Map<InstanceGroupType, String> userData = userDataService.getUserData(stackView.getId());
+        userDataService.makeSureUserDataIsMigrated(stackView.getId());
 
         component.setAttributes(new Json(new Image(imageName,
                 new HashMap<>(),
@@ -89,7 +87,6 @@ public class ImageFallbackService {
                 currentImage.getDate(),
                 currentImage.getCreated())));
 
-        userDataService.createOrUpdateUserData(stackId, userData);
         componentConfigProviderService.store(component);
     }
 }

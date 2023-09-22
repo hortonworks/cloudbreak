@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -39,7 +40,6 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
-import com.sequenceiq.cloudbreak.domain.Userdata;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -141,6 +141,7 @@ public class StackImageServiceTest {
 
         ArgumentCaptor<Component> captor = ArgumentCaptor.forClass(Component.class);
         verify(componentConfigProviderService).replaceImageComponentWithNew(captor.capture());
+        verify(userDataService, times(1)).makeSureUserDataIsMigrated(anyLong());
         assertEquals(ComponentType.IMAGE, captor.getValue().getComponentType());
         assertEquals(ComponentType.IMAGE.name(), captor.getValue().getName());
         assertEquals(IMAGE_NAME, captor.getValue().getAttributes().get(com.sequenceiq.cloudbreak.cloud.model.Image.class).getImageName());
@@ -168,7 +169,6 @@ public class StackImageServiceTest {
                 stack.getRegion(), targetStatedImage.getImage())).thenReturn(IMAGE_NAME);
         when(platformStringTransformer.getPlatformStringForImageCatalog(stack.getCloudPlatform(), stack.getPlatformVariant()))
                 .thenReturn(imageCatalogPlatform);
-        when(userDataService.createOrUpdateUserData(anyLong(), any())).thenReturn(new Userdata());
 
         victim.changeImageCatalog(stack, TARGET_IMAGE_CATALOG);
 
@@ -178,6 +178,7 @@ public class StackImageServiceTest {
         assertEquals(TARGET_IMAGE_CATALOG, newImage.getImageCatalogName());
         assertEquals(TARGET_IMAGE_CATALOG_URL, newImage.getImageCatalogUrl());
         assertEquals(IMAGE_ID, newImage.getImageId());
+        verify(userDataService, times(1)).makeSureUserDataIsMigrated(anyLong());
     }
 
     @Test
@@ -191,6 +192,7 @@ public class StackImageServiceTest {
         when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), TARGET_IMAGE_CATALOG)).thenThrow(new NotFoundException(""));
 
         assertThrows(NotFoundException.class, () -> victim.changeImageCatalog(stack, TARGET_IMAGE_CATALOG));
+        verify(userDataService, times(0)).makeSureUserDataIsMigrated(anyLong());
     }
 
     @Test
@@ -210,6 +212,7 @@ public class StackImageServiceTest {
                 .thenThrow(new CloudbreakImageNotFoundException(""));
 
         assertThrows(NotFoundException.class, () -> victim.changeImageCatalog(stack, TARGET_IMAGE_CATALOG));
+        verify(userDataService, times(0)).makeSureUserDataIsMigrated(anyLong());
     }
 
     @Test

@@ -10,5 +10,6 @@ public enum StackPatchType {
     MOCK,
     DISABLE_REGION_FOR_FLUENTD,
     COLLECT_DB_ENGINE_VERSION,
+    USER_DATA_MIGRATION,
     UNKNOWN
 }

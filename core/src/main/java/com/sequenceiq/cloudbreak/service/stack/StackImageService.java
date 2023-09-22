@@ -79,7 +79,7 @@ public class StackImageService {
             String cloudPlatform = platform(stack.getCloudPlatform()).value().toLowerCase(Locale.ROOT);
             com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetImage = targetStatedImage.getImage();
             String newImageName = imageService.determineImageName(cloudPlatform, platformString, stack.getRegion(), targetImage);
-            userDataService.createOrUpdateUserData(stack.getId(), currentImage.getUserdata());
+            userDataService.makeSureUserDataIsMigrated(stack.getId());
             return new Image(newImageName, new HashMap<>(), targetImage.getOs(), targetImage.getOsType(), targetStatedImage.getImageCatalogUrl(),
                     targetStatedImage.getImageCatalogName(), targetImage.getUuid(), targetImage.getPackageVersions(), targetImage.getDate(),
                     targetImage.getCreated());
