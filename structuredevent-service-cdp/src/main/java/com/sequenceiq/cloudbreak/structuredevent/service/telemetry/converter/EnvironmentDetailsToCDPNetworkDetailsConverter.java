@@ -5,7 +5,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -54,6 +54,11 @@ public class EnvironmentDetailsToCDPNetworkDetailsConverter {
             setupLoadBalancer(cdpNetworkDetails, network);
             cdpNetworkDetails.setPublicEndpointAccessGateway(network.getPublicEndpointAccessGateway() != null ?
                     network.getPublicEndpointAccessGateway().name() : PublicEndpointAccessGateway.DISABLED.name());
+            cdpNetworkDetails.setNumberFlexibleServerSubnetIds(Optional.ofNullable(network.getAzure())
+                    .map(n -> Optional.ofNullable(n.getFlexibleServerSubnetIds())
+                            .map(Set::size)
+                            .orElse(0))
+                    .orElse(0));
         }
         cdpNetworkDetails.setSecurityAccessType(defaultIfEmpty(environmentDetails.getSecurityAccessType(), ""));
         cdpNetworkDetails.setProxyDetails(convertProxy(environmentDetails.getProxyDetails()));
@@ -72,17 +77,17 @@ public class EnvironmentDetailsToCDPNetworkDetailsConverter {
                 cdpNetworkDetails.setNumberPublicSubnets(0);
             } else {
                 List<SubnetType> types = network.getSubnetMetas().values().stream().map(CloudSubnet::getType)
-                        .filter(Objects::nonNull).sorted().collect(Collectors.toUnmodifiableList());
+                        .filter(Objects::nonNull).sorted().toList();
                 if (!types.isEmpty()) {
                     cdpNetworkDetails.setNumberPrivateSubnets(
                             types.stream()
                                     .filter(e -> e.equals(SubnetType.PRIVATE) || e.equals(SubnetType.MLX) || e.equals(SubnetType.DWX))
-                                    .collect(Collectors.toList())
+                                    .toList()
                                     .size());
                     cdpNetworkDetails.setNumberPublicSubnets(
                             types.stream()
                                     .filter(e -> e.equals(SubnetType.PUBLIC))
-                                    .collect(Collectors.toList())
+                                    .toList()
                                     .size());
                 }
             }
@@ -96,17 +101,17 @@ public class EnvironmentDetailsToCDPNetworkDetailsConverter {
                 cdpNetworkDetails.setNumberPublicLoadBalancerSubnets(0);
             } else {
                 List<SubnetType> types = network.getEndpointGatewaySubnetMetas().values().stream().map(CloudSubnet::getType)
-                        .filter(Objects::nonNull).sorted().collect(Collectors.toUnmodifiableList());
+                        .filter(Objects::nonNull).sorted().toList();
                 cdpNetworkDetails.setNumberPrivateLoadBalancerSubnets(
                         types.stream()
                                 .filter(e -> e.equals(SubnetType.PRIVATE))
-                                .collect(Collectors.toList())
+                                .toList()
                                 .size()
                 );
                 cdpNetworkDetails.setNumberPublicLoadBalancerSubnets(
                         types.stream()
                                 .filter(e -> e.equals(SubnetType.PUBLIC))
-                                .collect(Collectors.toList())
+                                .toList()
                                 .size()
                 );
             }

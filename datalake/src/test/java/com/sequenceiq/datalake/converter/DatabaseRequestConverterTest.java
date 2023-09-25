@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
 class DatabaseRequestConverterTest {
 
@@ -30,6 +31,7 @@ class DatabaseRequestConverterTest {
 
         assertEquals(DatabaseAvailabilityType.NONE, result.getAvailabilityType());
         assertNull(result.getDatabaseEngineVersion());
+        assertEquals(DatabaseAvailabilityType.NONE, result.getDatalakeDatabaseAvailabilityType());
     }
 
     @Test
@@ -51,7 +53,9 @@ class DatabaseRequestConverterTest {
         when(sdxCluster.getDatabaseEngineVersion()).thenReturn(DB_VERSION);
         SdxDatabase sdxDatabase = new SdxDatabase();
         sdxDatabase.setAttributes(new Json("{\"AZURE_DATABASE_TYPE\":\"SINGLE_SERVER\"}"));
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
         when(sdxCluster.getSdxDatabase()).thenReturn(sdxDatabase);
+        when(sdxCluster.getDatabaseAvailabilityType()).thenReturn(sdxDatabase.getDatabaseAvailabilityType());
 
         DatabaseRequest result = underTest.createExternalDbRequest(sdxCluster);
 
@@ -59,6 +63,7 @@ class DatabaseRequestConverterTest {
         assertEquals(DB_VERSION, result.getDatabaseEngineVersion());
         assertEquals(DatabaseAvailabilityType.NONE, result.getAvailabilityType());
         assertEquals(AzureDatabaseType.SINGLE_SERVER, result.getDatabaseAzureRequest().getAzureDatabaseType());
+        assertEquals(DatabaseAvailabilityType.HA, result.getDatalakeDatabaseAvailabilityType());
         verify(sdxCluster).getDatabaseEngineVersion();
     }
 

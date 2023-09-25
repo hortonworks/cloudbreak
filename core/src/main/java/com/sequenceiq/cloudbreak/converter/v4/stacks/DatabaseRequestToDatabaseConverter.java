@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -10,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAzureRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -32,15 +32,17 @@ public class DatabaseRequestToDatabaseConverter {
     public Database convert(CloudPlatform cloudPlatform, DatabaseRequest source) {
         Database database = new Database();
         if (source != null) {
-            database.setExternalDatabaseAvailabilityType(source.getAvailabilityType());
+            database.setExternalDatabaseAvailabilityType(Optional.ofNullable(source.getAvailabilityType()).orElse(DatabaseAvailabilityType.NONE));
             database.setExternalDatabaseEngineVersion(source.getDatabaseEngineVersion());
-            database.setAttributes(configureAzureDatabaseIfNeeded(cloudPlatform, source).orElse(null));
+            database.setAttributes(configureAzureDatabaseIfNeeded(cloudPlatform, source, source.getAvailabilityType()).orElse(null));
+            database.setDatalakeDatabaseAvailabilityType(source.getDatalakeDatabaseAvailabilityType());
         }
         return database;
     }
 
-    private Optional<Json> configureAzureDatabaseIfNeeded(CloudPlatform cloudPlatform, DatabaseRequest databaseRequest) {
-        if (cloudPlatform == CloudPlatform.AZURE) {
+    private Optional<Json> configureAzureDatabaseIfNeeded(CloudPlatform cloudPlatform, DatabaseRequest databaseRequest,
+            DatabaseAvailabilityType availabilityType) {
+        if (cloudPlatform == CloudPlatform.AZURE && availabilityType != null && !availabilityType.isEmbedded()) {
             String accountId = ThreadBasedUserCrnProvider.getAccountId();
             boolean azureDatabaseFlexibleServerEnabled = entitlementService.isAzureDatabaseFlexibleServerEnabled(accountId);
             AzureDatabaseType azureDatabaseType = Optional.ofNullable(databaseRequest)
@@ -52,8 +54,12 @@ public class DatabaseRequestToDatabaseConverter {
                 throw new BadRequestException("You are not entitled to use Flexible Database Server on Azure for your cluster." +
                         " Please contact Cloudera to enable " + Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER + " for your account");
             }
-            Map<String, Object> params = new HashMap<>();
-            params.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, azureDatabaseType.name());
+            Map<String, Object> params = Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, azureDatabaseType.name());
+            return Optional.of(new Json(params));
+        } else if (cloudPlatform == CloudPlatform.AZURE && databaseRequest.getDatabaseAzureRequest() != null
+                && databaseRequest.getDatabaseAzureRequest().getAzureDatabaseType() != null) {
+            Map<String, Object> params = Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY,
+                    databaseRequest.getDatabaseAzureRequest().getAzureDatabaseType().name());
             return Optional.of(new Json(params));
         } else {
             return Optional.empty();

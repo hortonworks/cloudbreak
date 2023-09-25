@@ -1,12 +1,16 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,14 +19,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsService;
+import com.sequenceiq.cloudbreak.service.database.DatabaseService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.structuredevent.event.CustomConfigurationsDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
@@ -51,6 +58,9 @@ public class StackToStackDetailsConverterTest {
     @Mock
     private CustomConfigurationsService customConfigurationsService;
 
+    @Mock
+    private DatabaseService databaseService;
+
     @InjectMocks
     private StackToStackDetailsConverter underTest;
 
@@ -61,11 +71,12 @@ public class StackToStackDetailsConverterTest {
         // WHEN
         StackDetails actual = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
         // THEN
-        Assertions.assertEquals(stack.getName(), actual.getName());
-        Assertions.assertEquals(stack.getTunnel().name(), actual.getTunnel());
-        Assertions.assertEquals(stack.getType().name(), actual.getType());
-        Assertions.assertEquals("ON_ROOT_VOLUME", actual.getDatabaseType());
-        Assertions.assertEquals(stack.getJavaVersion(), actual.getJavaVersion());
+        assertEquals(stack.getName(), actual.getName());
+        assertEquals(stack.getTunnel().name(), actual.getTunnel());
+        assertEquals(stack.getType().name(), actual.getType());
+        assertEquals("ON_ROOT_VOLUME", actual.getDatabaseType());
+        assertEquals(stack.getJavaVersion(), actual.getJavaVersion());
+        assertNotNull(actual.getDatabaseDetails());
     }
 
     @Test
@@ -76,7 +87,7 @@ public class StackToStackDetailsConverterTest {
         // WHEN
         StackDetails actual = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
         // THEN
-        Assertions.assertEquals("EXTERNAL_DB", actual.getDatabaseType());
+        assertEquals("EXTERNAL_DB", actual.getDatabaseType());
     }
 
     @Test
@@ -87,7 +98,7 @@ public class StackToStackDetailsConverterTest {
         // WHEN
         StackDetails actual = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
         // THEN
-        Assertions.assertEquals("ON_ATTACHED_VOLUME", actual.getDatabaseType());
+        assertEquals("ON_ATTACHED_VOLUME", actual.getDatabaseType());
     }
 
     @Test
@@ -98,7 +109,7 @@ public class StackToStackDetailsConverterTest {
         // WHEN
         StackDetails actual = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
         // THEN
-        Assertions.assertEquals("UNKNOWN", actual.getDatabaseType());
+        assertEquals("UNKNOWN", actual.getDatabaseType());
     }
 
     @Test
@@ -120,8 +131,8 @@ public class StackToStackDetailsConverterTest {
         StackDetails actual = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
 
         // THEN
-        Assertions.assertNotNull(actual.getCustomConfigurations());
-        Assertions.assertEquals(customConfigurationsDetails, actual.getCustomConfigurations());
+        assertNotNull(actual.getCustomConfigurations());
+        assertEquals(customConfigurationsDetails, actual.getCustomConfigurations());
     }
 
     @Test
@@ -135,7 +146,145 @@ public class StackToStackDetailsConverterTest {
         StackDetails actual = underTest.convert(stack, cluster, stack.getInstanceGroupDtos());
 
         // THEN
-        Assertions.assertNull(actual.getCustomConfigurations());
+        assertNull(actual.getCustomConfigurations());
+    }
+
+    @Test
+    void testConvertDatabaseDetailsWhenNoDatabaseFound() {
+        Stack stack = mock(Stack.class);
+        when(stack.getDatabaseId()).thenReturn(1L);
+        when(stack.getTunnel()).thenReturn(Tunnel.DIRECT);
+        when(stack.getType()).thenReturn(StackType.DATALAKE);
+        when(stack.getStatus()).thenReturn(Status.AVAILABLE);
+        Cluster cluster = new Cluster();
+        when(databaseService.findById(1L)).thenReturn(Optional.empty());
+
+        StackDetails result = underTest.convert(stack, cluster, List.of());
+
+        assertNotNull(result.getDatabaseDetails());
+        assertNull(result.getDatabaseDetails().getAttributes());
+        assertNull(result.getDatabaseDetails().getAvailabilityType());
+        assertNull(result.getDatabaseDetails().getEngineVersion());
+    }
+
+    @Test
+    void testConvertDatabaseDetailsWhenDatalakeAndTypeSet() {
+        Stack stack = mock(Stack.class);
+        when(stack.getDatabaseId()).thenReturn(1L);
+        when(stack.getTunnel()).thenReturn(Tunnel.DIRECT);
+        when(stack.getType()).thenReturn(StackType.DATALAKE);
+        when(stack.isDatalake()).thenReturn(true);
+        when(stack.getStatus()).thenReturn(Status.AVAILABLE);
+        Cluster cluster = new Cluster();
+        Database database = new Database();
+        database.setExternalDatabaseEngineVersion("14");
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NON_HA);
+        database.setDatalakeDatabaseAvailabilityType(DatabaseAvailabilityType.HA);
+        database.setAttributes(Json.silent("test"));
+        when(databaseService.findById(1L)).thenReturn(Optional.of(database));
+
+        StackDetails result = underTest.convert(stack, cluster, List.of());
+
+        assertNotNull(result.getDatabaseDetails());
+        assertEquals(database.getAttributes().getValue(), result.getDatabaseDetails().getAttributes());
+        assertEquals(database.getDatalakeDatabaseAvailabilityType().name(), result.getDatabaseDetails().getAvailabilityType());
+        assertEquals(database.getExternalDatabaseEngineVersion(), result.getDatabaseDetails().getEngineVersion());
+    }
+
+    @Test
+    void testConvertDatabaseDetailsWhenDatalakeAndTypeNotSetAndExternal() {
+        Stack stack = mock(Stack.class);
+        when(stack.getDatabaseId()).thenReturn(1L);
+        when(stack.getTunnel()).thenReturn(Tunnel.DIRECT);
+        when(stack.getType()).thenReturn(StackType.DATALAKE);
+        when(stack.isDatalake()).thenReturn(true);
+        when(stack.getStatus()).thenReturn(Status.AVAILABLE);
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn("dbservercrn");
+        Database database = new Database();
+        database.setExternalDatabaseEngineVersion("14");
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NON_HA);
+        database.setAttributes(Json.silent("test"));
+        when(databaseService.findById(1L)).thenReturn(Optional.of(database));
+        when(dbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())).thenReturn(true);
+
+        StackDetails result = underTest.convert(stack, cluster, List.of());
+
+        assertNotNull(result.getDatabaseDetails());
+        assertEquals(database.getAttributes().getValue(), result.getDatabaseDetails().getAttributes());
+        assertEquals("EXTERNAL_DB", result.getDatabaseDetails().getAvailabilityType());
+        assertEquals(database.getExternalDatabaseEngineVersion(), result.getDatabaseDetails().getEngineVersion());
+    }
+
+    @Test
+    void testConvertDatabaseDetailsWhenDatalakeAndTypeNotSetAndNotExternal() {
+        Stack stack = mock(Stack.class);
+        when(stack.getDatabaseId()).thenReturn(1L);
+        when(stack.getTunnel()).thenReturn(Tunnel.DIRECT);
+        when(stack.getType()).thenReturn(StackType.DATALAKE);
+        when(stack.isDatalake()).thenReturn(true);
+        when(stack.getStatus()).thenReturn(Status.AVAILABLE);
+        Cluster cluster = new Cluster();
+        Database database = new Database();
+        database.setExternalDatabaseEngineVersion("14");
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NON_HA);
+        database.setAttributes(Json.silent("test"));
+        when(databaseService.findById(1L)).thenReturn(Optional.of(database));
+        when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(false);
+
+        StackDetails result = underTest.convert(stack, cluster, List.of());
+
+        assertNotNull(result.getDatabaseDetails());
+        assertEquals(database.getAttributes().getValue(), result.getDatabaseDetails().getAttributes());
+        assertEquals(DatabaseAvailabilityType.NON_HA.name(), result.getDatabaseDetails().getAvailabilityType());
+        assertEquals(database.getExternalDatabaseEngineVersion(), result.getDatabaseDetails().getEngineVersion());
+    }
+
+    @Test
+    void testConvertDatabaseDetailsWhenDatalakeAndTypeNotSetAndNotExternalAndAvailabilityDefault() {
+        Stack stack = mock(Stack.class);
+        when(stack.getDatabaseId()).thenReturn(1L);
+        when(stack.getTunnel()).thenReturn(Tunnel.DIRECT);
+        when(stack.getType()).thenReturn(StackType.DATALAKE);
+        when(stack.isDatalake()).thenReturn(true);
+        when(stack.getStatus()).thenReturn(Status.AVAILABLE);
+        Cluster cluster = new Cluster();
+        Database database = new Database();
+        database.setExternalDatabaseEngineVersion("14");
+        database.setAttributes(Json.silent("test"));
+        when(databaseService.findById(1L)).thenReturn(Optional.of(database));
+        when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(false);
+
+        StackDetails result = underTest.convert(stack, cluster, List.of());
+
+        assertNotNull(result.getDatabaseDetails());
+        assertEquals(database.getAttributes().getValue(), result.getDatabaseDetails().getAttributes());
+        assertEquals(DatabaseAvailabilityType.NONE.name(), result.getDatabaseDetails().getAvailabilityType());
+        assertEquals(database.getExternalDatabaseEngineVersion(), result.getDatabaseDetails().getEngineVersion());
+    }
+
+    @Test
+    void testConvertDatabaseDetailsWhenDatahubAndTypeSet() {
+        Stack stack = mock(Stack.class);
+        when(stack.getDatabaseId()).thenReturn(1L);
+        when(stack.getTunnel()).thenReturn(Tunnel.DIRECT);
+        when(stack.getType()).thenReturn(StackType.WORKLOAD);
+        when(stack.isDatalake()).thenReturn(false);
+        when(stack.getStatus()).thenReturn(Status.AVAILABLE);
+        Cluster cluster = new Cluster();
+        Database database = new Database();
+        database.setExternalDatabaseEngineVersion("14");
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NON_HA);
+        database.setDatalakeDatabaseAvailabilityType(DatabaseAvailabilityType.HA);
+        database.setAttributes(Json.silent("test"));
+        when(databaseService.findById(1L)).thenReturn(Optional.of(database));
+
+        StackDetails result = underTest.convert(stack, cluster, List.of());
+
+        assertNotNull(result.getDatabaseDetails());
+        assertEquals(database.getAttributes().getValue(), result.getDatabaseDetails().getAttributes());
+        assertEquals(database.getExternalDatabaseAvailabilityType().name(), result.getDatabaseDetails().getAvailabilityType());
+        assertEquals(database.getExternalDatabaseEngineVersion(), result.getDatabaseDetails().getEngineVersion());
     }
 
     private Stack createStack() {

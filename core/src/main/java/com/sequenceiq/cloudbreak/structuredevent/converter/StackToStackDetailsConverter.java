@@ -16,11 +16,14 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsService;
+import com.sequenceiq.cloudbreak.service.database.DatabaseService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
+import com.sequenceiq.cloudbreak.structuredevent.event.DatabaseDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
@@ -60,6 +63,9 @@ public class StackToStackDetailsConverter {
     @Inject
     private CustomConfigurationsService customConfigurationsService;
 
+    @Inject
+    private DatabaseService databaseService;
+
     public StackDetails convert(StackView source, ClusterView cluster, List<InstanceGroupDto> instanceGroupDtos) {
         StackDetails stackDetails = new StackDetails();
         stackDetails.setId(source.getId());
@@ -89,8 +95,28 @@ public class StackToStackDetailsConverter {
                         .collect(Collectors.toList()));
         stackDetails.setTags(source.getTags());
         convertComponents(stackDetails, source);
-        convertDatabaseType(stackDetails, cluster, getGatewayGroup(instanceGroupDtos));
+        stackDetails.setDatabaseType(convertDatabaseType(cluster, getGatewayGroup(instanceGroupDtos)));
+        stackDetails.setDatabaseDetails(convertDatabaseDetails(source, cluster));
         return stackDetails;
+    }
+
+    private DatabaseDetails convertDatabaseDetails(StackView source, ClusterView cluster) {
+        DatabaseDetails databaseDetails = new DatabaseDetails();
+        if (source.getDatabaseId() != null) {
+            Optional<Database> database = databaseService.findById(source.getDatabaseId());
+            database.ifPresent(db -> {
+                databaseDetails.setEngineVersion(db.getExternalDatabaseEngineVersion());
+                databaseDetails.setAttributes(Optional.ofNullable(db.getAttributes()).map(Json::getValue).orElse(""));
+                if (source.isDatalake() && db.getDatalakeDatabaseAvailabilityType() != null) {
+                    databaseDetails.setAvailabilityType(db.getDatalakeDatabaseAvailabilityType().name());
+                } else if (source.isDatalake() && dbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
+                    databaseDetails.setAvailabilityType(EXTERNAL_DB);
+                } else {
+                    databaseDetails.setAvailabilityType(Optional.ofNullable(db.getExternalDatabaseAvailabilityType()).map(Enum::name).orElse(UNKNONW));
+                }
+            });
+        }
+        return databaseDetails;
     }
 
     private boolean getMultiAz(List<InstanceGroupDto> instanceGroupDtos) {
@@ -121,20 +147,20 @@ public class StackToStackDetailsConverter {
         }
     }
 
-    private void convertDatabaseType(StackDetails stackDetails, ClusterView cluster, Optional<InstanceGroupView> gatewayGroup) {
+    private String convertDatabaseType(ClusterView cluster, Optional<InstanceGroupView> gatewayGroup) {
         try {
             if (dbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
-                stackDetails.setDatabaseType(EXTERNAL_DB);
+                return EXTERNAL_DB;
             } else {
                 if (embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(cluster, gatewayGroup)) {
-                    stackDetails.setDatabaseType(ON_ATTACHED_VOLUME);
+                    return ON_ATTACHED_VOLUME;
                 } else {
-                    stackDetails.setDatabaseType(ON_ROOT_VOLUME);
+                    return ON_ROOT_VOLUME;
                 }
             }
         } catch (Exception ex) {
             LOGGER.warn("Database type cannot be found: {}", ex.getMessage());
-            stackDetails.setDatabaseType(UNKNONW);
+            return UNKNONW;
         }
     }
 

@@ -26,7 +26,11 @@ public class Database implements ProvisionEntity {
     private Long id;
 
     @Convert(converter = DatabaseAvailabilityTypeConverter.class)
-    private DatabaseAvailabilityType externalDatabaseAvailabilityType;
+    private DatabaseAvailabilityType externalDatabaseAvailabilityType = DatabaseAvailabilityType.NONE;
+
+    @Convert(converter = DatabaseAvailabilityTypeConverter.class)
+    @Column(name = "datalake_db_availabilitytype")
+    private DatabaseAvailabilityType datalakeDatabaseAvailabilityType;
 
     private String externalDatabaseEngineVersion;
 
@@ -66,11 +70,20 @@ public class Database implements ProvisionEntity {
         this.attributes = attributes;
     }
 
+    public DatabaseAvailabilityType getDatalakeDatabaseAvailabilityType() {
+        return datalakeDatabaseAvailabilityType;
+    }
+
+    public void setDatalakeDatabaseAvailabilityType(DatabaseAvailabilityType datalakeDatabaseAvailabilityType) {
+        this.datalakeDatabaseAvailabilityType = datalakeDatabaseAvailabilityType;
+    }
+
     @Override
     public String toString() {
         return "Database{" +
                 "id=" + id +
                 ", externalDatabaseAvailabilityType=" + externalDatabaseAvailabilityType +
+                ", datalakeDatabaseAvailabilityType=" + datalakeDatabaseAvailabilityType +
                 ", externalDatabaseEngineVersion='" + externalDatabaseEngineVersion + '\'' +
                 ", attributes=" + attributes +
                 '}';

@@ -14,6 +14,8 @@ public abstract class DatabaseBase implements Serializable {
     @NotNull
     private DatabaseAvailabilityType availabilityType;
 
+    private DatabaseAvailabilityType datalakeDatabaseAvailabilityType;
+
     @Pattern(regexp = POSTGRES_VERSION_REGEX, message = "Not a valid database major version")
     private String databaseEngineVersion;
 
@@ -33,10 +35,19 @@ public abstract class DatabaseBase implements Serializable {
         this.databaseEngineVersion = databaseEngineVersion;
     }
 
+    public DatabaseAvailabilityType getDatalakeDatabaseAvailabilityType() {
+        return datalakeDatabaseAvailabilityType;
+    }
+
+    public void setDatalakeDatabaseAvailabilityType(DatabaseAvailabilityType datalakeDatabaseAvailabilityType) {
+        this.datalakeDatabaseAvailabilityType = datalakeDatabaseAvailabilityType;
+    }
+
     @Override
     public String toString() {
         return "DatabaseBase{" +
                 "availabilityType=" + availabilityType +
+                ", datalakeDatabaseAvailabilityType=" + datalakeDatabaseAvailabilityType +
                 ", databaseEngineVersion='" + databaseEngineVersion + '\'' +
                 '}';
     }

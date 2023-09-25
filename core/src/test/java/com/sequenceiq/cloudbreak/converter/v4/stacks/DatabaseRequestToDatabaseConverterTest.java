@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAzureRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -35,10 +36,12 @@ class DatabaseRequestToDatabaseConverterTest {
     @Test
     void testConvertWithAzureSingleServer() {
         DatabaseRequest databaseRequest = new DatabaseRequest();
+        databaseRequest.setAvailabilityType(DatabaseAvailabilityType.NON_HA);
 
         Database database = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> service.convert(CloudPlatform.AZURE, databaseRequest));
 
         assertEquals(AzureDatabaseType.SINGLE_SERVER.name(), database.getAttributes().getMap().get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY));
+        assertNull(database.getDatalakeDatabaseAvailabilityType());
     }
 
     @Test
@@ -48,6 +51,8 @@ class DatabaseRequestToDatabaseConverterTest {
         Database database = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> service.convert(CloudPlatform.AWS, databaseRequest));
 
         assertNull(database.getAttributes());
+        assertEquals(DatabaseAvailabilityType.NONE, database.getExternalDatabaseAvailabilityType());
+        assertNull(database.getDatalakeDatabaseAvailabilityType());
     }
 
     @Test
@@ -56,6 +61,7 @@ class DatabaseRequestToDatabaseConverterTest {
         DatabaseAzureRequest databaseAzureRequest = new DatabaseAzureRequest();
         databaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
         databaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
+        databaseRequest.setAvailabilityType(DatabaseAvailabilityType.HA);
         when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
 
         Database database = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> service.convert(CloudPlatform.AZURE, databaseRequest));
@@ -69,10 +75,26 @@ class DatabaseRequestToDatabaseConverterTest {
         DatabaseAzureRequest databaseAzureRequest = new DatabaseAzureRequest();
         databaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
         databaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
+        databaseRequest.setAvailabilityType(DatabaseAvailabilityType.NON_HA);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(ACTOR, () -> service.convert(CloudPlatform.AZURE, databaseRequest)));
 
         assertTrue(exception.getMessage().contains("You are not entitled to use Flexible Database Server on Azure for your cluster."));
+    }
+
+    @Test
+    void testMapAzureAttributesInCaseOfEmbedded() {
+        DatabaseRequest databaseRequest = new DatabaseRequest();
+        DatabaseAzureRequest databaseAzureRequest = new DatabaseAzureRequest();
+        databaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
+        databaseRequest.setAvailabilityType(DatabaseAvailabilityType.NONE);
+        databaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
+
+        Database result = service.convert(CloudPlatform.AZURE, databaseRequest);
+
+        assertEquals(AzureDatabaseType.FLEXIBLE_SERVER.name(), result.getAttributes().getMap().get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY));
+        assertEquals(DatabaseAvailabilityType.NONE, result.getExternalDatabaseAvailabilityType());
+        assertNull(result.getDatalakeDatabaseAvailabilityType());
     }
 }

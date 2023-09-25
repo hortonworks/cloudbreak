@@ -108,8 +108,7 @@ public class StructuredEventToCDPClusterShapeConverter {
             }
         } catch (JSONException e) {
             LOGGER.debug("Failed to fetch services from cluster template {}", blueprintJson);
-        } finally {
-            return templateDetails.toString();
         }
+        return templateDetails.toString();
     }
 }

@@ -137,7 +137,6 @@ public class StackDtoService {
 
     private StackDto getStackProxy(StackView stackView, boolean fetchResources) {
         Map<String, InstanceGroupDto> groupListMap = new HashMap<>();
-        List<InstanceMetadataView> imDto = instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(stackView.getId());
         Map<Long, Map<InstanceGroupView, List<InstanceMetadataView>>> group = new HashMap<>();
         List<InstanceGroupView> instanceGroups = instanceGroupService.getInstanceGroupViewByStackId(stackView.getId());
         instanceGroups.forEach(it -> group.put(it.getId(), new HashMap<>()));
@@ -149,6 +148,7 @@ public class StackDtoService {
                         ig.getTemplate(),
                         ig.getInstanceGroupNetwork()))
                 .collect(Collectors.toList());
+        List<InstanceMetadataView> imDto = instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(stackView.getId());
         LOGGER.debug("Fetched groups: {} by stack: {}", Joiner.on(",").join(groupString), stackView.getId());
         List<String> instanceMetadataString = imDto.stream()
                 .map(im -> String.format("The %s with id: %s add to group of %s with id: %s",

@@ -1073,6 +1073,11 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return multiAz;
     }
 
+    @Override
+    public Long getDatabaseId() {
+        return Optional.ofNullable(database).map(Database::getId).orElse(null);
+    }
+
     public void setJavaVersion(Integer javaVersion) {
         this.javaVersion = javaVersion;
     }

@@ -23,6 +23,7 @@ public class StackToExternalDatabaseRequestConverter {
         DatabaseRequest databaseRequest = new DatabaseRequest();
         databaseRequest.setAvailabilityType(source.getExternalDatabaseCreationType());
         databaseRequest.setDatabaseEngineVersion(source.getExternalDatabaseEngineVersion());
+        databaseRequest.setDatalakeDatabaseAvailabilityType(database.getDatalakeDatabaseAvailabilityType());
         return databaseRequest;
     }
 

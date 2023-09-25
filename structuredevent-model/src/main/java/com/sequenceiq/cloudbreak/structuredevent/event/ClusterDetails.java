@@ -25,15 +25,11 @@ public class ClusterDetails implements Serializable {
     @JsonDeserialize(using = Base64Deserializer.class)
     private String statusReason;
 
-    private String kerberosType;
-
     private Boolean gatewayEnabled;
 
     private String gatewayType;
 
     private String ssoType;
-
-    private String ambariVersion;
 
     private String clusterType;
 
@@ -48,8 +44,6 @@ public class ClusterDetails implements Serializable {
     private List<RdsDetails> databases;
 
     private String fileSystemType;
-
-    private Boolean defaultFileSystem;
 
     private Long creationStarted;
 
@@ -109,14 +103,6 @@ public class ClusterDetails implements Serializable {
         this.statusReason = statusReason;
     }
 
-    public String getKerberosType() {
-        return kerberosType;
-    }
-
-    public void setKerberosType(String kerberosType) {
-        this.kerberosType = kerberosType;
-    }
-
     public Boolean getGatewayEnabled() {
         return gatewayEnabled;
     }
@@ -135,14 +121,6 @@ public class ClusterDetails implements Serializable {
 
     public String getSsoType() {
         return ssoType;
-    }
-
-    public String getAmbariVersion() {
-        return ambariVersion;
-    }
-
-    public void setAmbariVersion(String ambariVersion) {
-        this.ambariVersion = ambariVersion;
     }
 
     public void setSsoType(String ssoType) {

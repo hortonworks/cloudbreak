@@ -1,10 +1,11 @@
 syntax = "proto3";
 
 package usage;
-
 option java_package = "com.cloudera.thunderhead.service.common.usage";
 option java_outer_classname = "UsageProto";
 option go_package = "com/cloudera/cdp/protobuf";
+
+
 
 // This proto defines the Altus usage event schema. Find the usage system design
 // at docs/usage_reporting.md. This proto file is meant to be the documentation
@@ -125,6 +126,8 @@ message Event {
     CDPDFDeploymentUpgradeStatusChanged cdpDFDeploymentUpgradeStatusChanged = 94;
     // A CDP DataFlow Deployment was requested to upgrade
     CDPDFDeploymentUpgradeRequested cdpDFDeploymentUpgradeRequested = 97;
+    // A CDP DataFlow Service component is failing
+    CDPDFInfrastructureEvent cdpDFInfrastructureEvent = 139;
     // A CDP Liftie cluster was requested to create / update / upgrade / delete.
     CDPLiftieRequested cdpLiftieRequested = 52;
     // A CDP Liftie cluster's status changed.
@@ -285,7 +288,15 @@ message Event {
     // A CDP CDE usage event that reports heartbeats of active virtual clusters
     CDPCDEActiveVCHeartbeat cdpCDEActiveVCHeartbeat  = 138;
     // A secret rotation started/finished/failed.
-    CDPSecretRotationEvent cdpSecretRotationEvent = 139;
+    CDPSecretRotationEvent cdpSecretRotationEvent = 140;
+    // A CML specific resource status change event
+    CDPCMLResourceStatusChanged cdpCMLResourceStatusChanged = 141;
+    // A CDP CML resource was requested to create.
+    CDPCMLResourceRequested cdpCMLResourceRequested = 142;
+    // A CDP DataFlow Project lifecycle event was triggered.
+    CDPDFProjectLifecycle cdpDFProjectLifecycle = 143;
+    // A CDP DataFlow Proeject Resource was reassigned to another project.
+    CDPDFProjectResourceAssigned cdpDFProjectResourceAssigned = 144;
   }
 }
 
@@ -944,6 +955,168 @@ message CDPCMLWorkspaceStatus {
   }
 }
 
+// The status of a CDP Cloudbreak CML Resource.
+message CDPCMLResourceStatus {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // The status when a resource is trying to create a kubernetes cluster.
+    PROVISION_STARTED = 1;
+    // The status when a resource is done creating a kubernetes cluster.
+    PROVISION_FINISHED = 2;
+    // The status when a resource failed to provision a kubernetes cluster.
+    PROVISION_FAILED = 3;
+
+    // The status when a resource is trying to install or upgrade resource on a running kubernetes cluster.
+    INSTALLATION_STARTED = 4;
+    // The status when a resource is done with installing or upgrading resource and ready to be used.
+    INSTALLATION_FINISHED = 5;
+    // The status when a resource failed to install resource.
+    INSTALLATION_FAILED = 6;
+
+    // The status when a resource is trying to deprovision the running kubernetes cluster.
+    DEPROVISION_STARTED = 7;
+    // The status when a resource is done deprovisioning the kubernetes cluster.
+    DEPROVISION_FINISHED = 8;
+    // The status when a resource failed to deprovision the kubernetes cluster.
+    DEPROVISION_FAILED = 9;
+
+    // The status when a resource is trying to renew the certificate of a running resource.
+    RENEW_STARTED = 10;
+    // The status when a resource is done renewing the certificate of a running resource.
+    RENEW_FINISHED = 11;
+    // The status when a resource could not renew the certificate, but the resource cluster still is usable.
+    RENEW_WARNING = 12;
+
+    // The status when a resource is trying to suspend.
+    SUSPEND_STARTED = 13;
+    // The status when a resource is suspended.
+    SUSPEND_FINISHED = 14;
+    // The status when a resource failed to suspend.
+    SUSPEND_FAILED = 15;
+
+    // The status when a resource is trying to resume.
+    RESUME_STARTED = 16;
+    // The status when a resource completed resuming.
+    RESUME_FINISHED = 17;
+    // The status when a resource failed to resume.
+    RESUME_FAILED = 18;
+    // The status when a resource failed to resume, but the nodes is up and running.
+    RESUME_WARNING = 19;
+
+    // The status when a resource is trying to upgrade.
+    UPGRADE_STARTED = 20;
+    // The status when a resource is upgraded.
+    UPGRADE_FINISHED = 21;
+    // The status when a resource failed to upgrade.
+    UPGRADE_FAILED = 22;
+
+    // The status when the pre-flight validation of a resource request is started.
+    VALIDATION_STARTED = 23;
+    // The status when the pre-flight validation of a resource results in validation success.
+    VALIDATION_SUCCEEDED = 24;
+    // The status when the pre-flight validation of a resource results in validation failure.
+    VALIDATION_FAILED = 25;
+
+    // The status when the pre-install validation of a resource request is started.
+    PRE_INSTALL_VALIDATION_STARTED = 26;
+    // The status when the pre-install validation of a resource results in validation success.
+    PRE_INSTALL_VALIDATION_SUCCEEDED = 27;
+    // The status when the pre-install validation of a resource results in validation failure.
+    PRE_INSTALL_VALIDATION_FAILED = 28;
+
+    // The status when the mount of a volume to a resource is started.
+    MOUNT_STARTED = 29;
+    // The status when the mount of a volume to a resource is finished.
+    MOUNT_FINISHED = 30;
+    // The status when the mount of a volume to a resource has failed.
+    MOUNT_FAILED = 31;
+
+    // The status when the renewing the certificate of a resource running resource has failed.
+    RENEW_FAILED = 32;
+
+    // The status when a modification of a resource is started.
+    MODIFY_STARTED = 33;
+    // The status when a modification of a resource is finished.
+    MODIFY_FINISHED = 34;
+    // The status when a modification of a resource has failed.
+    MODIFY_FAILED = 35;
+
+    // The status when the unmount of a volume to a resource is started.
+    UNMOUNT_STARTED = 36;
+    // The status when the unmount of a volume to a resource is finished.
+    UNMOUNT_FINISHED = 37;
+    // The status when the unmount of a volume to a resource has failed.
+    UNMOUNT_FAILED = 38;
+
+    // The status when the operation to shutdown the resource to initiate a backup is started.
+    SHUTDOWN_FOR_BACKUP_STARTED = 39;
+    // The status when the operation to shutdown the resource to initiate a backup is finished.
+    SHUTDOWN_FOR_BACKUP_FINISHED = 40;
+    // The status when the operation to shutdown the resource to initiate a backup has failed.
+    SHUTDOWN_FOR_BACKUP_FAILED = 41;
+
+    // The status when the operation to restart the resource (after the backup operation was completed) is started.
+    RESTART_AFTER_BACKUP_STARTED = 42;
+    // The status when the operation to restart the resource (after the backup operation was completed) is finished.
+    RESTART_AFTER_BACKUP_FINISHED = 43;
+    // The status when the operation to restart the resource (after the backup operation was completed) has failed.
+    RESTART_AFTER_BACKUP_FAILED = 44;
+
+    // The status when the operation to backup the resource is started.
+    BACKUP_STARTED = 45;
+    // The status when the operation to backup the resource is finished.
+    BACKUP_FINISHED = 46;
+    // The status when the operation to backup the resource has failed.
+    BACKUP_FAILED = 47;
+
+    // The status when the operation to restore the storage has started.
+    RESTORE_STARTED = 48;
+    // The status when the operation to restore the storage has finished.
+    RESTORE_FINISHED = 49;
+    // The status when the operation to restore the storage has failed.
+    RESTORE_FAILED = 50;
+
+    // The status when the operation to scale down for upgrading the storage has started.
+    SCALE_DOWN_FOR_UPGRADE_STARTED = 51;
+    // The status when the operation to scale down for upgrading the storage has finished.
+    SCALE_DOWN_FOR_UPGRADE_FINISHED = 52;
+    // The status when the operation to scale down for upgrading the storage has failed.
+    SCALE_DOWN_FOR_UPGRADE_FAILED = 53;
+
+    // The status when the operation to scale up after upgrading the storage has started.
+    SCALE_UP_AFTER_UPGRADE_STARTED = 54;
+    // The status when the operation to scale up after upgrading the storage has finished.
+    SCALE_UP_AFTER_UPGRADE_FINISHED = 55;
+    // The status when the operation to scale up after upgrading the storage has failed.
+    SCALE_UP_AFTER_UPGRADE_FAILED = 56;
+
+    // The status when the resource migration has started.
+    MIGRATION_STARTED = 57;
+    // The status when the resource migration has finished.
+    MIGRATION_FINISHED = 58;
+    // The status when the resource migration has failed.
+    MIGRATION_FAILED = 59;
+
+    // The status when the resource migration readiness check has started.
+    MIGRATION_READINESS_CHECK_STARTED = 60;
+    // The status when the resource migration readiness check has finished.
+    MIGRATION_READINESS_CHECK_FINISHED = 61;
+    // The status when the resource migration readiness check has failed.
+    MIGRATION_READINESS_CHECK_FAILED = 62;
+
+    // The status when the validate resource migration has started.
+    VALIDATE_MIGRATION_STARTED = 63;
+    // The status when the validate resource migration has finished.
+    VALIDATE_MIGRATION_FINISHED = 64;
+    // The status when the validate resource migration has failed.
+    VALIDATE_MIGRATION_FAILED = 65;
+
+    // The status when the healthpoller is not able to reach the KubeAPI server of a resource.
+    CONNECTION_FAILED = 66;
+  }
+}
+
 // The status of the Cloudera Machine Learning workspace backups.
 message CDPCMLWorkspaceBackupStatus {
   enum Value {
@@ -1071,6 +1244,64 @@ message CDPCMLWorkspaceRequested {
   string tenantType = 18;
   // Flag to identify if workspace is created to serve as model registry.
   bool isModelRegistry = 19;
+}
+
+
+// Generated when a valid CDP CML resource creation request has been made.
+message CDPCMLResourceRequested {
+  // The CDP resource CRN of the CML resource.
+  string crn = 1;
+  // The CDP account ID of the CML resource.
+  string accountId = 2;
+  // The user-supplied resource name.
+  string resourceName = 3;
+  // The environment type.
+  CDPEnvironmentsEnvironmentType.Value environmentType = 4;
+  // The CRN of the CML resource's environment.
+  string environmentCrn = 5;
+  // The CML crud app version.
+  string cdpdVersion = 6;
+  // The CRN of the CML resource's creator.
+  string creatorCrn = 7;
+  // The resource type of CML. (model-registry, ml-serving)
+  string resourceType= 8;
+  // The CML resource version deployed.
+  string resourceVersion = 9;
+  // the request id of the create event
+  string requestId = 10;
+  // The user-defined tags for the resource. These should not include automatically
+  // added tags that are product-specific. The format of this is a map serialized
+  // into a string as json. e.g.:   "tags": "{\"key1\":\"value1\",\"key2\":\"value2\"}"
+  string userTags = 11;
+  // private cluster.
+  bool privateCluster = 12;
+  // Tenant type to identify the formfactor i.e. Saas or Paas
+  string tenantType = 13;
+}
+
+// Generated when a CDP CML resource's status changed.
+message CDPCMLResourceStatusChanged {
+  // The CDP resource CRN of the A CML resource type.
+  string crn = 1;
+  // The resource Type ex: ModelRegistry, MLServing
+  string resourceType = 2;
+  // the CML resource's status before the change.
+  CDPCMLResourceStatus.Value oldStatus = 3;
+  // the CML resource's status after the change.
+  CDPCMLResourceStatus.Value newStatus = 4;
+  // A failure message for the CML resource. This will only be set if newStatus is
+  // *_FAILED.
+  string failureReason = 5;
+  string fromVersion = 6;
+  string toVersion = 7;
+  // the request id to track the whole event.  Can be any event. (delete, update, create, install, etc)
+  string requestId = 8;
+  // the liftie cluster id to use when watching the cluster logs
+  string liftieId = 9;
+  // Tenant type to identify the formfactor i.e. Saas or Paas
+  string tenantType = 10;
+  // Tags if the resource has any
+  string tags = 11;
 }
 
 // Generated when a CDP CML workspace's status changed.
@@ -1578,6 +1809,12 @@ message CDPLiftieClusterPodStatesHeartbeatSummary {
   string workloadRegion = 10;
   // The CDP environment CRN.
   string environmentCrn = 11;
+  // CDP Control Plane Liftie Version.
+  string liftieVersion = 13;
+  // The Kubernetes version.
+  string kubernetesVersion = 14;
+  // workload CRN for which this cluster
+  string workloadCRN = 15;
 }
 
 message CDPLiftieClusterPodSummmary {
@@ -1588,14 +1825,18 @@ message CDPLiftieClusterPodSummmary {
 }
 
 message CDPLiftieClusterPodStatesHeartbeat {
-  // List of all the pods in each cluster
+  // List of all the pods in each cluster. (Deprecated: Use unhealthyPodStates instead).
   repeated CDPLiftieClusterPodState podStates = 1;
+  // List of unhealthy pods in each cluster
+  repeated CDPLiftieClusterPodState unhealthyPodStates = 6;
   // The Compute Cluster CRN
   string clusterCrn = 2;
   // Indicates the cluster id
   string clusterId = 3;
   // The CDP environment CRN.
   string environmentCrn = 4;
+  // The workload region of the cluster
+  string workloadRegion = 5;
 }
 
 // The status of a CDP request
@@ -2042,6 +2283,8 @@ message CDPNetworkDetails {
   int32 numberPublicLoadBalancerSubnets = 12;
   // How many private loadbalancer subnets are used
   int32 numberPrivateLoadBalancerSubnets = 13;
+  // Count of user provided flexibleServerSubnetId
+  int32 numberFlexibleServerSubnetIds = 14;
 }
 
 message CDPCredentialDetails {
@@ -2196,6 +2439,19 @@ message CDPVersionDetails {
   bool javaVersionForced = 8;
 }
 
+message CDPDatabaseDetails {
+  // DB engine version, eg. 11
+  string engineVersion = 1;
+  // DB availability type:
+  //     NONE - embedded DB on volume
+  //     NON_HA - non HA external DB
+  //     HA - HA external DB
+  //     ON_ROOT_VOLUME - embedded DB on root volume
+  string availabilityType = 2;
+  // various provider specific attributes. eg: {"AZURE_DATABASE_TYPE":"FLEXIBLE_SERVER"}
+  string attributes = 3;
+}
+
 message CDPClusterDetails {
   // Shape of the cluster
   CDPClusterShape clusterShape = 1;
@@ -2220,6 +2476,8 @@ message CDPClusterDetails {
   bool usingExternalDatabase = 10;
   // If the SSL connection is being used upon the database communication.
   bool sslEnabled = 11;
+  // Database details related to cluster
+  CDPDatabaseDetails databaseDetails = 12;
 }
 
 message CDPStatusDetails {
@@ -2593,6 +2851,11 @@ message CDPDFServiceRequested {
   bool customPodCidr = 17;
   // Is a custom Service CIDR range defined for assigning IPs to services in the kubernetes cluster
   bool customServiceCidr = 18;
+  // The user-defined tags that are defined at the CDF service level during enablement.
+  // These should not include automatically added tags that are product-specific.
+  // The format of this is a map serialized into a string as json.
+  // e.g.:   "tags": "{\"key1\":\"value1\",\"key2\":\"value2\"}"
+  string userTags = 19;
 }
 
 message CDPDFServiceStatusChanged {
@@ -2712,13 +2975,13 @@ message CDPDFDeploymentStatus {
     CANCEL_NIFI_VERSION_UPDATE_COMPLETED = 19;
     // The status of a deployment that has failed to cancel the update the version of NiFi.
     CANCEL_NIFI_VERSION_UPDATE_FAILED = 20;
-    // The status of a deployment that is suspending the running NiFi flow.
+    // Deprecated: The status of a deployment that is suspending the running NiFi flow.
     SUSPEND_FLOW_REQUESTED = 21;
-    // The status of a deployment that is suspending the running NiFi flow.
+    // Deprecated: The status of a deployment that is suspending the running NiFi flow.
     SUSPEND_FLOW_IN_PROGRESS = 22;
-    // The status of a deployment that successfully suspended the running NiFi flow.
+    // Deprecated: The status of a deployment that successfully suspended the running NiFi flow.
     SUSPEND_FLOW_COMPLETED = 23;
-    // The status of a deployment that failed to suspend the running NiFi flow.
+    // Deprecated: The status of a deployment that failed to suspend the running NiFi flow.
     SUSPEND_FLOW_FAILED = 24;
     // The status of a deployment that is starting the NiFi flow.
     START_FLOW_REQUESTED = 25;
@@ -2744,6 +3007,30 @@ message CDPDFDeploymentStatus {
     ROLLBACK_FAILED = 35;
     // The status of a deployment that is successfully rolled back.
     ROLLBACK_COMPLETED = 36;
+    // The status of a deployment that is stopping the NiFi flow.
+    STOP_FLOW_REQUESTED = 37;
+    // The status of a deployment that is stopping the NiFi flow.
+    STOP_FLOW_IN_PROGRESS = 38;
+    // The status of a deployment that successfully stopped the NiFi flow.
+    STOP_FLOW_COMPLETED = 39;
+    // The status of a deployment that failed to stop the NiFi flow.
+    STOP_FLOW_FAILED = 40;
+    // the status of deployment that has suspend NiFi cluster initiated
+    SUSPEND_REQUESTED = 41;
+    // The status of a deployment that is suspending NiFi cluster.
+    SUSPEND_IN_PROGRESS = 42;
+    // The status of a deployment that successfully completed suspending NiFi cluster.
+    SUSPEND_COMPLETED = 43;
+    // The status of a deployment that failed to suspend NiFi cluster.
+    SUSPEND_FAILED = 44;
+    // the status of deployment that has resume NiFi cluster initiated
+    RESUME_REQUESTED = 45;
+    // The status of a deployment that is resuming NiFi cluster.
+    RESUME_IN_PROGRESS = 46;
+    // The status of a deployment that successfully resumed the NiFi cluster .
+    RESUME_COMPLETED = 47;
+    // The status of a deployment that failed to resume NiFi cluster.
+    RESUME_FAILED = 48;
   }
 }
 
@@ -2788,6 +3075,12 @@ message CDPDFDeploymentRequested {
   string username = 19;
   // The crn of the DataFlow Service.
   string dataFlowServiceCrn = 20;
+  // Deprecated: Duplicate of nodeType. The t-shirt size of the deployment
+  string deploymentSize = 21;
+  // The node storage profile
+  string nodeStorageProfile = 22;
+  // Is flow metrics autoscaling enabled?
+  bool flowMetricsAutoscalingEnabled = 23;
 }
 
 message CDPDFDeploymentStatusChanged {
@@ -2877,6 +3170,24 @@ message CDPDFDeploymentUpgradeStatusChanged {
   // The version of NiFi that deployment is upgraded to
   string newNifiVersion = 11;
 
+}
+
+// Generate when a DFX component is failing
+message CDPDFInfrastructureEvent {
+  // The crn of the CDP environment.
+  string environmentCrn = 1;
+  // The crn of the dataflow service.
+  string dataflowCrn = 2;
+  // The name of the CDP environment.
+  string environmentName =3;
+  // The CDP account ID.
+  string accountId = 4;
+  // The type of alert.
+  string alertType = 5;
+  // The description of alert
+  string description = 6;
+  // The crn of one of the deployments affected
+  string activeDeploymentCrn = 7;
 }
 
 // Generated when users initiate diagnostics collection
@@ -3017,6 +3328,84 @@ message CDPDFDeploymentNifiVersionUpdateRequested {
   string flowVersionCrn = 8;
   // Deployment name
   string deploymentName = 9;
+}
+
+// The various lifecycle actions that can be taken on data flow projects.
+message CDPDFProjectAction {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // A value indicating the project was created.
+    CREATED = 1;
+    // A value indicating the project was deleted.
+    DELETED = 2;
+    // A value indicating the project was updated.
+    UPDATED = 3;
+  }
+}
+
+// Events generated when users create, update, or delete data flow projects.
+message CDPDFProjectLifecycle {
+  // The id of the project.
+  string projectId = 1;
+  // The crn of the project.
+  string projectCrn = 2;
+  // Action taken that is producing the event.
+  CDPDFProjectAction.Value action = 3;
+  // The crn of the data flow service.
+  string dfServiceCrn = 4;
+  // The id of the data flow service.
+  string dfServiceId = 5;
+  // The crn of the CDP environment where project resources reside.
+  string environmentCrn = 6;
+  // The CDP account ID.
+  string accountId = 7;
+  // Actor crn of the user taking the action.
+  string actorCrn = 8;
+  // The source API that triggered the event.
+  CDPDFEventSource.Value eventSource = 9;
+}
+
+message CDPDFProjectResourceType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // A value indicating a deployment resource.
+    DEPLOYMENT = 1;
+    // A value indicating a custom nar configuration resource.
+    CUSTOM_NAR_CONFIGURATION = 2;
+    // A value indicating an inbound connection resource.
+    INBOUND_CONNECTION = 3;
+    // A value indicating a flow draft resource.
+    FLOW_DRAFT = 4;
+    // A value indicating a test session resource.
+    TEST_SESSION = 5;
+    // A value indicating a test session configuration resource.
+    TEST_SESSION_CONFIGURATION = 6;
+  }
+}
+
+message CDPDFProjectResourceAssigned {
+  // Id of the project resource assigned to a project.
+  string resourceId = 1;
+  // Crn of the project resource assigned to a project.
+  CDPDFProjectResourceType.Value resourceType = 2;
+  // Optional: ProjectId where the resource now lives. Not included if it is unassigned.
+  string projectId = 3;
+  // Optional: ProjectCrn where the resource now lives. Not included if it is unassigned.
+  string projectCrn = 4;
+  // Optional: Previous ProjectId where the resource lived. Not included if it was unassigned.
+  string prevProjectId = 5;
+  // Optional: Previous ProjectCrn where the resource lived. Not included if it was unassigned.
+  string prevProjectCrn = 6;
+  // The crn of the data flow service.
+  string dfServiceCrn = 7;
+  // The id of the data flow service.
+  string dfServiceId = 8;
+  // The crn of the CDP environment where project resources reside.
+  string environmentCrn = 9;
+  // The CDP account ID.
+  string accountId = 10;
 }
 
 //Autoscale Policy Type
@@ -3686,6 +4075,8 @@ message CDPCDEJobRunStatusChanged {
   int32 duration = 9;
   // cde-client header
   string client = 10;
+  // Metadata
+  CDPCDEMetadata metadata = 11;
 }
 
 // Generated when a CDP CDE job is created or is modified.
@@ -3700,6 +4091,8 @@ message CDPCDEJobCreated {
   CDPCDEEventType.Value eventType = 4;
   // cde-client header
   string client = 5;
+  // Metadata
+  CDPCDEMetadata metadata = 11;
 }
 
 // Generated when a CDP CDE session is requested.
@@ -3728,6 +4121,8 @@ message CDPCDESessionRequested {
   string client = 11;
   // Creation time
   uint64 created = 12;
+  // Metadata
+  CDPCDEMetadata metadata = 13;
 }
 
 // Details specific to a CDE interactive spark session
@@ -3774,6 +4169,8 @@ message CDPCDESessionStateChanged {
   uint64 duration = 8;
   // Client trigerring the status change event. nil if due to internal triggers.
   string client = 9;
+  // Metadata
+  CDPCDEMetadata metadata = 11;
 }
 
 message CDPCDESessionStatementExecuted {
@@ -3829,6 +4226,18 @@ message CDPCDEResourceCreated {
   CDPCDEEventType.Value eventType = 4;
   // cde-client header
   string client = 5;
+  // Metadata
+  CDPCDEMetadata metadata = 11;
+}
+
+message CDPCDEMetadata {
+  CDPCDECliMetadata cliMetadata = 1;
+}
+
+// CDE CLI Metadata
+message CDPCDECliMetadata {
+  // cde cli version
+  string version = 1;
 }
 
 // Metadata about AWS CDE service when it was created or updated.
@@ -3900,6 +4309,26 @@ message CDPCDEResourceDetails {
   string name = 1;
   // Resource type, eg file, pythonEnv, etc
   string type = 2;
+  // Details separate for each distinct resource type
+  oneof details {
+    // Pyenv specific resource details
+    CDPCDEPyenvResourceDetails pyenvDetails = 3;
+  }
+}
+
+message CDPCDEPyenvResourceDetails {
+  // Number of packages in pyenv
+  int64 numberOfPackages = 1;
+  // Status failed/ready
+  string status = 2;
+  // Info related to the status, e.g failure reason
+  string statusReason = 3;
+  // Time it took to build the pyenv in seconds
+  int64 buildDurationSeconds = 4;
+  // Size of the pyenv in megabytes
+  int64 sizeMb = 5;
+  // Number of files stored for pyenv
+  int64 numberOfFiles = 6;
 }
 
 // Cloudera Data Visualization Usage Event detected.

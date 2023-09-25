@@ -37,6 +37,7 @@ class StackToExternalDatabaseRequestConverterTest {
 
         assertEquals(TEST_DB_ENGINE_VERSION, result.getDatabaseEngineVersion());
         assertNull(result.getAvailabilityType());
+        assertNull(result.getDatalakeDatabaseAvailabilityType());
     }
 
     @Test
@@ -47,15 +48,18 @@ class StackToExternalDatabaseRequestConverterTest {
 
         assertEquals(TEST_EXTERNAL_DB_CREATION_TYPE, result.getAvailabilityType());
         assertNull(result.getDatabaseEngineVersion());
+        assertNull(result.getDatalakeDatabaseAvailabilityType());
     }
 
     @Test
     void testWhenBothFieldsAreFilledThenBothFieldsShouldBeFilledInTheResult() {
         Stack stack = getStack(TEST_DB_ENGINE_VERSION, TEST_EXTERNAL_DB_CREATION_TYPE);
+        stack.getDatabase().setDatalakeDatabaseAvailabilityType(TEST_EXTERNAL_DB_CREATION_TYPE);
 
         DatabaseRequest result = underTest.convert(stack);
 
         assertEquals(TEST_EXTERNAL_DB_CREATION_TYPE, result.getAvailabilityType());
+        assertEquals(TEST_EXTERNAL_DB_CREATION_TYPE, result.getDatalakeDatabaseAvailabilityType());
         assertEquals(TEST_DB_ENGINE_VERSION, result.getDatabaseEngineVersion());
     }
 

@@ -47,47 +47,11 @@ public class StackDetails implements Serializable {
     @JsonDeserialize(using = Base64Deserializer.class)
     private String statusReason;
 
-    /**
-     * @deprecated this is value is not set anymore, since it is a duplicated information
-     */
-    @Deprecated
-    private String cloudbreakVersion;
-
-    /**
-     * @deprecated this is value is not set anymore, since it is a duplicated information
-     */
-    @Deprecated
-    private String imageIdentifier;
-
-    /**
-     * @deprecated this is value is not set anymore
-     */
-    @Deprecated
-    private String ambariVersion;
-
     private ImageDetails image;
 
     private String clusterType;
 
     private String clusterVersion;
-
-    /**
-     * @deprecated this is value is not set anymore, use imageDetails
-     */
-    @Deprecated
-    private Boolean prewarmedImage;
-
-    /**
-     * @deprecated this is value is not set anymore, it is always considered as existing network from CB perspective
-     */
-    @Deprecated
-    private Boolean existingNetwork;
-
-    /**
-     * @deprecated this is value is not set anymore, it is always considered as existing network from CB perspective
-     */
-    @Deprecated
-    private Boolean existingSubnet;
 
     private List<InstanceGroupDetails> instanceGroups;
 
@@ -96,8 +60,6 @@ public class StackDetails implements Serializable {
      */
     @Deprecated
     private Long datalakeId;
-
-    private Long datalakeResourceId;
 
     private Json tags;
 
@@ -108,6 +70,8 @@ public class StackDetails implements Serializable {
     private CustomConfigurationsDetails customConfigurations;
 
     private Integer javaVersion;
+
+    private DatabaseDetails databaseDetails;
 
     public Long getId() {
         return id;
@@ -205,30 +169,6 @@ public class StackDetails implements Serializable {
         this.statusReason = statusReason;
     }
 
-    public String getCloudbreakVersion() {
-        return cloudbreakVersion;
-    }
-
-    public void setCloudbreakVersion(String cloudbreakVersion) {
-        this.cloudbreakVersion = cloudbreakVersion;
-    }
-
-    public String getImageIdentifier() {
-        return imageIdentifier;
-    }
-
-    public void setImageIdentifier(String imageIdentifier) {
-        this.imageIdentifier = imageIdentifier;
-    }
-
-    public String getAmbariVersion() {
-        return ambariVersion;
-    }
-
-    public void setAmbariVersion(String ambariVersion) {
-        this.ambariVersion = ambariVersion;
-    }
-
     public String getClusterType() {
         return clusterType;
     }
@@ -245,30 +185,6 @@ public class StackDetails implements Serializable {
         this.clusterVersion = clusterVersion;
     }
 
-    public Boolean getPrewarmedImage() {
-        return prewarmedImage;
-    }
-
-    public void setPrewarmedImage(Boolean prewarmedImage) {
-        this.prewarmedImage = prewarmedImage;
-    }
-
-    public Boolean getExistingNetwork() {
-        return existingNetwork;
-    }
-
-    public void setExistingNetwork(Boolean existingNetwork) {
-        this.existingNetwork = existingNetwork;
-    }
-
-    public Boolean getExistingSubnet() {
-        return existingSubnet;
-    }
-
-    public void setExistingSubnet(Boolean existingSubnet) {
-        this.existingSubnet = existingSubnet;
-    }
-
     public List<InstanceGroupDetails> getInstanceGroups() {
         return instanceGroups;
     }
@@ -283,14 +199,6 @@ public class StackDetails implements Serializable {
 
     public void setDatalakeId(Long datalakeId) {
         this.datalakeId = datalakeId;
-    }
-
-    public Long getDatalakeResourceId() {
-        return datalakeResourceId;
-    }
-
-    public void setDatalakeResourceId(Long datalakeResourceId) {
-        this.datalakeResourceId = datalakeResourceId;
     }
 
     public ImageDetails getImage() {
@@ -347,5 +255,13 @@ public class StackDetails implements Serializable {
 
     public void setJavaVersion(Integer javaVersion) {
         this.javaVersion = javaVersion;
+    }
+
+    public DatabaseDetails getDatabaseDetails() {
+        return databaseDetails;
+    }
+
+    public void setDatabaseDetails(DatabaseDetails databaseDetails) {
+        this.databaseDetails = databaseDetails;
     }
 }

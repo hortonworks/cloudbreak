@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
@@ -267,6 +268,7 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
 
         assertEquals(0, networkDetails.getNumberPrivateSubnets());
         assertEquals(1, networkDetails.getNumberPublicSubnets());
+        assertEquals(0, networkDetails.getNumberFlexibleServerSubnetIds());
     }
 
     @Test
@@ -274,6 +276,7 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
         NetworkDto networkDto = NetworkDto.builder()
                 .withAzure(AzureParams.builder()
                         .withDatabasePrivateDnsZoneId("privateDnsZoneId")
+                        .withFlexibleServerSubnetIds(Set.of("subnet1", "subnet2"))
                         .build()
                 )
                 .withRegistrationType(RegistrationType.EXISTING)
@@ -286,6 +289,7 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
 
         assertNotNull(networkDetails.getOwnDnsZones());
         assertTrue(networkDetails.getOwnDnsZones().getPostgres());
+        assertEquals(2, networkDetails.getNumberFlexibleServerSubnetIds());
     }
 
     @Test
@@ -305,6 +309,7 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
 
         assertNotNull(networkDetails.getOwnDnsZones());
         assertFalse(networkDetails.getOwnDnsZones().getPostgres());
+        assertEquals(0, networkDetails.getNumberFlexibleServerSubnetIds());
     }
 
     @Test
@@ -321,6 +326,7 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
 
         assertNotNull(networkDetails.getOwnDnsZones());
         assertFalse(networkDetails.getOwnDnsZones().getPostgres());
+        assertEquals(0, networkDetails.getNumberFlexibleServerSubnetIds());
     }
 
     @Test

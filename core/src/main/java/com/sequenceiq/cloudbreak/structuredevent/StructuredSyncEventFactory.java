@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventTyp
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -30,7 +29,6 @@ import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.ha.NodeConfig;
 
 @Component
-@Transactional
 public class StructuredSyncEventFactory {
 
     @Inject

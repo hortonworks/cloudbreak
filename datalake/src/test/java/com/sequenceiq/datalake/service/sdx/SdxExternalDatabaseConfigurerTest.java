@@ -6,7 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Assertions;
@@ -107,6 +111,23 @@ public class SdxExternalDatabaseConfigurerTest {
         assertTrue(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
+        verify(azureDatabaseAttributesService).configureAzureDatabase(isNull(), eq(dbRequest), any(SdxDatabase.class));
+    }
+
+    @Test
+    public void whenPlatformIsAzureWithoutRuntimeVerionSetEmbeddedRequested() {
+        CloudPlatform cloudPlatform = CloudPlatform.AZURE;
+        SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
+        dbRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName("clusterName");
+
+        SdxDatabase sdxDatabase = underTest.configure(cloudPlatform, null, null, dbRequest, sdxCluster, false);
+
+        assertFalse(sdxDatabase.isCreateDatabase());
+        assertEquals(SdxDatabaseAvailabilityType.NONE, sdxDatabase.getDatabaseAvailabilityType());
+        assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
+        verifyNoInteractions(azureDatabaseAttributesService);
     }
 
     @Test

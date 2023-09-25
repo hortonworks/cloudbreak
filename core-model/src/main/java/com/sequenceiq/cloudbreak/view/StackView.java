@@ -130,6 +130,8 @@ public interface StackView extends MdcContextInfoProvider {
 
     boolean isMultiAz();
 
+    Long getDatabaseId();
+
     default boolean isDatalake() {
         return getType() == StackType.DATALAKE;
     }

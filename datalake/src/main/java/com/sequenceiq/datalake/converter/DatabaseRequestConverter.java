@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.converter;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -11,6 +13,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
 @Component
 public class DatabaseRequestConverter {
@@ -22,6 +25,8 @@ public class DatabaseRequestConverter {
         request.setAvailabilityType(DatabaseAvailabilityType.NONE);
         request.setDatabaseEngineVersion(sdxCluster.getDatabaseEngineVersion());
         request.setDatabaseAzureRequest(convertDatabaseAzureRequest(sdxCluster.getSdxDatabase()));
+        request.setDatalakeDatabaseAvailabilityType(DatabaseAvailabilityType.valueOf(Optional.ofNullable(sdxCluster.getDatabaseAvailabilityType())
+                .orElse(SdxDatabaseAvailabilityType.NONE).name()));
         LOGGER.debug("Created DB request: {}", request);
         return request;
     }

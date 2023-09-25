@@ -111,12 +111,14 @@ public class SdxExternalDatabaseConfigurer {
             if (StringUtils.isBlank(runtime)) {
                 LOGGER.info("Runtime is not specified, external DB is permitted on Azure");
                 return true;
+            } else {
+                boolean permitted = isVersionNewerOrEqualThan(sdxCluster::getRuntime, () -> AZURE_EXT_DB_MIN_RUNTIME_VERSION);
+                LOGGER.info("External DB {} permitted on Azure with runtime version: {}", permitted ? "is" : "is NOT", runtime);
+                return permitted;
             }
-            boolean permitted = isVersionNewerOrEqualThan(sdxCluster::getRuntime, () -> AZURE_EXT_DB_MIN_RUNTIME_VERSION);
-            LOGGER.info("External DB {} permitted on Azure with runtime version: {}", permitted ? "is" : "is NOT", runtime);
-            return permitted;
+        } else {
+            return true;
         }
-        return true;
     }
 
     private boolean isVersionNewerOrEqualThan(Versioned currentVersion, Versioned baseVersion) {
@@ -136,7 +138,7 @@ public class SdxExternalDatabaseConfigurer {
 
     private void configureAzureDatabase(CloudPlatform cloudPlatform, DatabaseRequest internalDatabaseRequest, SdxDatabaseRequest databaseRequest,
             SdxDatabase sdxDatabase) {
-        if (CloudPlatform.AZURE == cloudPlatform) {
+        if (CloudPlatform.AZURE == cloudPlatform && sdxDatabase.hasExternalDatabase()) {
             azureDatabaseAttributesService.configureAzureDatabase(internalDatabaseRequest, databaseRequest, sdxDatabase);
         }
     }

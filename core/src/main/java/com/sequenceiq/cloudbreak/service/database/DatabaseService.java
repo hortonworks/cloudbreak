@@ -74,4 +74,8 @@ public class DatabaseService {
     public Database save(Database database) {
         return databaseRepository.save(database);
     }
+
+    public Optional<Database> findById(Long id) {
+        return databaseRepository.findById(id);
+    }
 }

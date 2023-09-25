@@ -28,6 +28,7 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPVersionDetail
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.DatabaseDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
@@ -242,6 +243,42 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
         CDPClusterDetails result = underTest.convert(event);
 
         assertTrue(result.getUsingExternalDatabase());
+    }
+
+    @Test
+    void testDatabaseDetailsConversionFlow() {
+        StackDetails stackDetails = new StackDetails();
+        DatabaseDetails databaseDetails = new DatabaseDetails();
+        databaseDetails.setAvailabilityType("HA");
+        databaseDetails.setEngineVersion("14");
+        databaseDetails.setAttributes("attr");
+        stackDetails.setDatabaseDetails(databaseDetails);
+        StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
+        structuredFlowEvent.setStack(stackDetails);
+
+        CDPClusterDetails result = underTest.convert(structuredFlowEvent);
+
+        assertEquals(databaseDetails.getAttributes(), result.getDatabaseDetails().getAttributes());
+        assertEquals(databaseDetails.getEngineVersion(), result.getDatabaseDetails().getEngineVersion());
+        assertEquals(databaseDetails.getAvailabilityType(), result.getDatabaseDetails().getAvailabilityType());
+    }
+
+    @Test
+    void testDatabaseDetailsConversionSync() {
+        StackDetails stackDetails = new StackDetails();
+        DatabaseDetails databaseDetails = new DatabaseDetails();
+        databaseDetails.setAvailabilityType("HA");
+        databaseDetails.setEngineVersion("14");
+        databaseDetails.setAttributes("attr");
+        stackDetails.setDatabaseDetails(databaseDetails);
+        StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
+        structuredSyncEvent.setStack(stackDetails);
+
+        CDPClusterDetails result = underTest.convert(structuredSyncEvent);
+
+        assertEquals(databaseDetails.getAttributes(), result.getDatabaseDetails().getAttributes());
+        assertEquals(databaseDetails.getEngineVersion(), result.getDatabaseDetails().getEngineVersion());
+        assertEquals(databaseDetails.getAvailabilityType(), result.getDatabaseDetails().getAvailabilityType());
     }
 
 }
