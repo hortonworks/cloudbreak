@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stackpatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -73,6 +74,16 @@ class ExistingStackPatchServiceTest {
     }
 
     @Test
+    void applyShouldSucceedWhenLastFlowRetryableButItShouldNotCheck() throws ExistingStackPatchApplyException {
+        lenient().when(flowRetryService.getLastRetryableFailedFlow(stack.getId())).thenReturn(Optional.of(new FlowLog()));
+        underTest.setShouldCheckForFailedRetryableFlow(false);
+
+        boolean result = underTest.apply(stack);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
     void shouldNotSaveStackPatchWhenApplyDoesNotSucceed() throws ExistingStackPatchApplyException {
         underTest.setResult(false);
 
@@ -95,6 +106,8 @@ class ExistingStackPatchServiceTest {
 
         private boolean result = true;
 
+        private boolean shouldCheckForFailedRetryableFlow = true;
+
         @Override
         public StackPatchType getStackPatchType() {
             return StackPatchType.UNKNOWN;
@@ -112,6 +125,15 @@ class ExistingStackPatchServiceTest {
 
         public void setResult(boolean result) {
             this.result = result;
+        }
+
+        @Override
+        protected boolean shouldCheckForFailedRetryableFlow() {
+            return shouldCheckForFailedRetryableFlow;
+        }
+
+        public void setShouldCheckForFailedRetryableFlow(boolean shouldCheckForFailedRetryableFlow) {
+            this.shouldCheckForFailedRetryableFlow = shouldCheckForFailedRetryableFlow;
         }
     }
 
