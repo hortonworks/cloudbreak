@@ -25,7 +25,7 @@ newpassword="{{ rotationvalues['newPassword'] }}"
 set -e
 
 if [[ "$rotationphase" == "rotation" ]];then
-    echo "Create user $newusername."
+    echo "$(date '+%d/%m/%Y %H:%M:%S') - Create user $newusername."
     if [ -z "$(PGPASSWORD={{ values['remote_admin_pw'] }} psql --host={{ values['remote_db_url'] }} --port={{ values['remote_db_port'] }} --username={{ values['remote_admin'] }} -d {{ values['database'] }} -tXAc "SELECT rolname FROM pg_roles" | grep {{ rotationvalues['newUser'] }} )" ]; then
         echo "CREATE USER $newusername WITH PASSWORD '$newpassword';" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
     fi
@@ -36,6 +36,7 @@ if [[ "$rotationphase" == "rotation" ]];then
 fi
 
 if [[ "$rotationphase" == "rollback" ]];then
+    echo "$(date '+%d/%m/%Y %H:%M:%S') - Rolling back old user $oldusername."
     echo "ALTER SCHEMA public OWNER TO $oldusername" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
     if [ ! -z "$(PGPASSWORD={{ values['remote_admin_pw'] }} psql --host={{ values['remote_db_url'] }} --port={{ values['remote_db_port'] }} --username={{ values['remote_admin'] }} -d {{ values['database'] }} -tXAc "SELECT rolname FROM pg_roles" | grep {{ rotationvalues['newUser'] }} )" ]; then
         echo "REASSIGN OWNED BY $newusername TO $oldusername" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
@@ -46,6 +47,7 @@ if [[ "$rotationphase" == "rollback" ]];then
 fi
 
 if [[ "$rotationphase" == "finalize" ]];then
+    echo "$(date '+%d/%m/%Y %H:%M:%S') - Removing old user $oldusername."
     if [ ! -z "$(PGPASSWORD={{ values['remote_admin_pw'] }} psql --host={{ values['remote_db_url'] }} --port={{ values['remote_db_port'] }} --username={{ values['remote_admin'] }} -d {{ values['database'] }} -tXAc "SELECT rolname FROM pg_roles" | grep {{ rotationvalues['oldUser'] }} )" ]; then
         echo "REVOKE $oldusername FROM $admin_username" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
         echo "REVOKE ALL PRIVILEGES ON DATABASE $dbname FROM $oldusername;" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
@@ -54,11 +56,16 @@ if [[ "$rotationphase" == "finalize" ]];then
 fi
 
 if [[ "$rotationphase" == "prevalidate" ]];then
-    echo "Check if $oldusername exists."
+    echo "$(date '+%d/%m/%Y %H:%M:%S') - Check for possible locks/blocking processes in database $dbname."
+    LOCK_COUNT=$(PGPASSWORD={{ values['remote_admin_pw'] }} psql --host={{ values['remote_db_url'] }} --port={{ values['remote_db_port'] }} --username={{ values['remote_admin'] }} -d {{ values['database'] }} -tXAc "select count(*) from pg_stat_activity where cardinality(pg_blocking_pids(pid)) > 0;")
+    if [[ ${LOCK_COUNT} > 0 ]]; then
+        echo "$(date '+%d/%m/%Y %H:%M:%S') - There is at least one active lock for database $dbname, thus rotation would fail."
+        return 1
+    fi
 fi
 
 if [[ "$rotationphase" == "postvalidate" ]];then
-    echo "Check if $newusername exists."
+    echo "$(date '+%d/%m/%Y %H:%M:%S') - No post validation for secrets rotation of database $dbname."
 fi
 
 set +e

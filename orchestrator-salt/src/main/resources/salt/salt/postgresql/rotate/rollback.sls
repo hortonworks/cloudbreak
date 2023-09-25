@@ -10,6 +10,7 @@
     - mode: 750
     - source: salt://postgresql/rotate/scripts/rotate_db_secrets_remote.sh
     - template: jinja
+    - replace: True
 
 rollback-db-secrets-remote:
   cmd.run:
@@ -27,6 +28,7 @@ rollback-db-secrets-remote:
     - group: postgres
     - source: salt://postgresql/rotate/scripts/rotate_db_secrets.sh
     - template: jinja
+    - replace: True
 
 rollback-db-secrets:
   cmd.run:
