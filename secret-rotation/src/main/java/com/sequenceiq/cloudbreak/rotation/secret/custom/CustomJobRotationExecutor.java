@@ -11,27 +11,27 @@ public class CustomJobRotationExecutor extends AbstractRotationExecutor<CustomJo
 
     @Override
     protected void rotate(CustomJobRotationContext rotationContext) throws Exception {
-        rotationContext.getRotationJob().stream().forEach(Runnable::run);
+        rotationContext.getRotationJob().ifPresent(Runnable::run);
     }
 
     @Override
     protected void rollback(CustomJobRotationContext rotationContext) throws Exception {
-        rotationContext.getRollbackJob().stream().forEach(Runnable::run);
+        rotationContext.getRollbackJob().ifPresent(Runnable::run);
     }
 
     @Override
     protected void finalize(CustomJobRotationContext rotationContext) throws Exception {
-        rotationContext.getFinalizeJob().stream().forEach(Runnable::run);
+        rotationContext.getFinalizeJob().ifPresent(Runnable::run);
     }
 
     @Override
     protected void preValidate(CustomJobRotationContext rotationContext) throws Exception {
-
+        rotationContext.getPreValidateJob().ifPresent(Runnable::run);
     }
 
     @Override
     protected void postValidate(CustomJobRotationContext rotationContext) throws Exception {
-
+        rotationContext.getPostValidateJob().ifPresent(Runnable::run);
     }
 
     @Override

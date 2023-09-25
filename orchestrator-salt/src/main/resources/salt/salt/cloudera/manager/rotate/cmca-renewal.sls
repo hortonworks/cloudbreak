@@ -1,17 +1,10 @@
-/opt/salt/scripts/rotate/searchreplace.py:
-  file.managed:
-    - makedirs: True
-    - mode: 700
-    - source: salt://cloudera/manager/scripts/searchreplace.py
-
 /opt/salt/scripts/rotate/cmca_renewal.sh:
   file.managed:
     - makedirs: True
     - mode: 700
     - source: salt://cloudera/manager/scripts/cmca_renewal.sh
     - template: jinja
-    - require:
-          - file: /opt/salt/scripts/rotate/searchreplace.py
+    - replace: True
 
 renew-cmca:
   cmd.run:

@@ -40,8 +40,12 @@ public class DatalakeSecretRotationFlowEventProvider implements SecretRotationFl
 
     private static Function<DatalakeSecretType, SdxStartCertRotationEvent> secretTypeToPostFlowEvent(SecretRotationFlowChainTriggerEvent event) {
         return datalakeSecretType -> switch (datalakeSecretType) {
-            case DATALAKE_CM_INTERMEDIATE_CA_CERT -> new SdxStartCertRotationEvent(SdxCertRotationEvent.ROTATE_CERT_EVENT.event(), event.getResourceId(),
-                    ThreadBasedUserCrnProvider.getUserCrn(), new CertificatesRotationV4Request());
+            case DATALAKE_CM_INTERMEDIATE_CA_CERT -> {
+                CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
+                certificatesRotationV4Request.setSkipSaltUpdate(Boolean.TRUE);
+                yield new SdxStartCertRotationEvent(SdxCertRotationEvent.ROTATE_CERT_EVENT.event(), event.getResourceId(),
+                        ThreadBasedUserCrnProvider.getUserCrn(), certificatesRotationV4Request);
+            }
             default -> null;
         };
     }

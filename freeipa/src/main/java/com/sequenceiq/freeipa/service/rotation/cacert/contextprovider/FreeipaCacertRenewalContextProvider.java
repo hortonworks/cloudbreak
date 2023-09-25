@@ -64,10 +64,11 @@ public class FreeipaCacertRenewalContextProvider implements RotationContextProvi
             List<GatewayConfig> notDeletedGatewayConfigs = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
             orchestrator.runCommandOnHosts(notDeletedGatewayConfigs, Set.of(stack.getPrimaryGateway().orElseThrow().getDiscoveryFQDN()),
                     FREEIPA_ROOT_CERT_RENEW_COMMAND);
-            String newRootCertFromServer = RootCertRegisterService.convertToPemFormat(rootCertRegisterService.getRootCertFromFreeIpa(stack));
-            Optional<RootCert> originalRootCertInDb = rootCertService.findByStackId(stack.getId());
-            originalRootCertInDb.ifPresentOrElse(rootCert -> {
-                String extendedRootCert = String.join("\n", rootCert.getCert(), newRootCertFromServer);
+            String newRootCertFromFreeIpa = rootCertRegisterService.getRootCertFromFreeIpa(stack);
+            String newRootCertInPem = rootCertRegisterService.convertToPemFormat(newRootCertFromFreeIpa);
+            Optional<RootCert> oldRootCertFromDb = rootCertService.findByStackId(stack.getId());
+            oldRootCertFromDb.ifPresentOrElse(rootCert -> {
+                String extendedRootCert = String.join("\n", rootCert.getCert(), newRootCertInPem);
                 rootCert.setCert(extendedRootCert);
                 rootCertService.save(rootCert);
             }, () -> {
@@ -81,10 +82,11 @@ public class FreeipaCacertRenewalContextProvider implements RotationContextProvi
     private void clearOldCert(String resourceCrn) {
         try {
             Stack stack = stackService.getByEnvironmentCrnAndAccountId(resourceCrn, ThreadBasedUserCrnProvider.getAccountId());
-            String newRootCertFromServer = RootCertRegisterService.convertToPemFormat(rootCertRegisterService.getRootCertFromFreeIpa(stack));
+            String newRootCertFromFreeIpa = rootCertRegisterService.getRootCertFromFreeIpa(stack);
+            String newRootCertInPem = rootCertRegisterService.convertToPemFormat(newRootCertFromFreeIpa);
             Optional<RootCert> originalRootCertInDb = rootCertService.findByStackId(stack.getId());
             originalRootCertInDb.ifPresentOrElse(rootCert -> {
-                rootCert.setCert(newRootCertFromServer);
+                rootCert.setCert(newRootCertInPem);
                 rootCertService.save(rootCert);
             }, () -> {
                 throw new CloudbreakServiceException("Root certificate cannot be found for stack.");

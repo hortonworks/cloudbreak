@@ -17,12 +17,23 @@ public class CertificatesRotationV4Request implements JsonEntity {
     @ApiModelProperty(value = ClusterModelDescription.CERTIFICATE_ROTATION_TYPE, allowableValues = "HOST_CERTS")
     private CertificateRotationType certificateRotationType = CertificateRotationType.HOST_CERTS;
 
+    @ApiModelProperty(value = ClusterModelDescription.FLAG_SKIP_SALT_UPDATE)
+    private Boolean skipSaltUpdate = Boolean.FALSE;
+
     public CertificateRotationType getCertificateRotationType() {
         return certificateRotationType;
     }
 
     public void setCertificateRotationType(CertificateRotationType certificateRotationType) {
         this.certificateRotationType = certificateRotationType;
+    }
+
+    public Boolean getSkipSaltUpdate() {
+        return skipSaltUpdate;
+    }
+
+    public void setSkipSaltUpdate(Boolean skipSaltUpdate) {
+        this.skipSaltUpdate = skipSaltUpdate;
     }
 
     @Override

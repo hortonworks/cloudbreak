@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.rotation.cacert.contextprovider;
 
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,7 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
@@ -65,7 +65,7 @@ public class FreeipaCacertRenewalContextProviderTest {
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(ENVIRONMENT_CRN);
 
         assertEquals(1, contexts.size());
-        assertEquals(CommonSecretRotationStep.CUSTOM_JOB, contexts.keySet().iterator().next());
+        assertEquals(CUSTOM_JOB, contexts.keySet().iterator().next());
     }
 
     @Test
@@ -81,7 +81,7 @@ public class FreeipaCacertRenewalContextProviderTest {
         when(rootCertService.findByStackId(any())).thenReturn(Optional.of(new RootCert()));
         when(rootCertService.save(any())).thenReturn(new RootCert());
 
-        ((CustomJobRotationContext) underTest.getContexts(ENVIRONMENT_CRN).values().iterator().next()).getRotationJob().ifPresent(job ->
+        ((CustomJobRotationContext) underTest.getContexts(ENVIRONMENT_CRN).get(CUSTOM_JOB)).getRotationJob().ifPresent(job ->
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, job::run));
 
         verify(rootCertService).save(any());
@@ -100,7 +100,7 @@ public class FreeipaCacertRenewalContextProviderTest {
         when(rootCertRegisterService.getRootCertFromFreeIpa(any())).thenReturn("fake");
         when(rootCertService.findByStackId(any())).thenReturn(Optional.empty());
 
-        assertThrows(SecretRotationException.class, () -> ((CustomJobRotationContext) underTest.getContexts(ENVIRONMENT_CRN).values().iterator().next())
+        assertThrows(SecretRotationException.class, () -> ((CustomJobRotationContext) underTest.getContexts(ENVIRONMENT_CRN).get(CUSTOM_JOB))
                 .getRotationJob().ifPresent(job -> ThreadBasedUserCrnProvider.doAs(USER_CRN, job::run)));
 
         verify(rootCertService, times(0)).save(any());
@@ -115,7 +115,7 @@ public class FreeipaCacertRenewalContextProviderTest {
         when(rootCertService.findByStackId(any())).thenReturn(Optional.of(new RootCert()));
         when(rootCertService.save(any())).thenReturn(new RootCert());
 
-        ((CustomJobRotationContext) underTest.getContexts(ENVIRONMENT_CRN).values().iterator().next()).getFinalizeJob().ifPresent(job ->
+        ((CustomJobRotationContext) underTest.getContexts(ENVIRONMENT_CRN).get(CUSTOM_JOB)).getFinalizeJob().ifPresent(job ->
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, job::run));
 
         verify(rootCertService).save(any());
@@ -128,7 +128,7 @@ public class FreeipaCacertRenewalContextProviderTest {
         when(rootCertRegisterService.getRootCertFromFreeIpa(any())).thenReturn("fake");
         when(rootCertService.findByStackId(any())).thenReturn(Optional.empty());
 
-        assertThrows(SecretRotationException.class, () -> ((CustomJobRotationContext) underTest.getContexts(ENVIRONMENT_CRN).values().iterator().next())
+        assertThrows(SecretRotationException.class, () -> ((CustomJobRotationContext) underTest.getContexts(ENVIRONMENT_CRN).get(CUSTOM_JOB))
                 .getFinalizeJob().ifPresent(job -> ThreadBasedUserCrnProvider.doAs(USER_CRN, job::run)));
 
         verify(rootCertService, times(0)).save(any());

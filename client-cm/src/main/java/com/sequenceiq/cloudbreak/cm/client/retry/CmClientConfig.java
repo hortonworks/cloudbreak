@@ -10,6 +10,7 @@ import com.cloudera.api.swagger.AllHostsResourceApi;
 import com.cloudera.api.swagger.AuthRolesResourceApi;
 import com.cloudera.api.swagger.BatchResourceApi;
 import com.cloudera.api.swagger.CdpResourceApi;
+import com.cloudera.api.swagger.CertManagerResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.CommandsResourceApi;
@@ -144,6 +145,11 @@ public class CmClientConfig {
         return this::batchResourceApi;
     }
 
+    @Bean
+    public Function<ApiClient, CertManagerResourceApi> certManagerResourceApiFactory() {
+        return this::certManagerResourceApi;
+    }
+
     // prototype bean declarations:
     // CHECKSTYLE:OFF
     @Bean
@@ -276,6 +282,12 @@ public class CmClientConfig {
     @Scope(value = "prototype")
     public BatchResourceApi batchResourceApi(ApiClient apiClient) {
         return new BatchResourceApi(apiClient);
+    }
+
+    @Bean
+    @Scope(value = "prototype")
+    public CertManagerResourceApi certManagerResourceApi(ApiClient apiClient) {
+        return new CertManagerResourceApi(apiClient);
     }
     // CHECKSTYLE:ON
 }

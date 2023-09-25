@@ -2,8 +2,9 @@
 set -x
 
 CERTMANAGER_DIR="/etc/cloudera-scm-server/certs"
-rm -rf ${CERTMANAGER_DIR}_bkp
+CM_SETTINGS_FILE=/etc/cloudera-scm-server/cm.settings
 
-target_file=/etc/cloudera-scm-server/cm.settings
-rm ${target_file}_bkp
+echo "$(date '+%d/%m/%Y %H:%M:%S') - Cleaning up leftover after CMCA renewal."
+rm -rf ${CERTMANAGER_DIR}_bkp
+rm -f ${CM_SETTINGS_FILE}_bkp
 

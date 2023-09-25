@@ -12,11 +12,18 @@ public class CustomJobRotationContext extends RotationContext {
 
     private Optional<Runnable> finalizeJob;
 
-    CustomJobRotationContext(String resourceCrn, Optional<Runnable> rotationJob, Optional<Runnable> rollbackJob, Optional<Runnable> finalizeJob) {
+    private Optional<Runnable> preValidateJob;
+
+    private Optional<Runnable> postValidateJob;
+
+    CustomJobRotationContext(String resourceCrn, Optional<Runnable> rotationJob, Optional<Runnable> rollbackJob, Optional<Runnable> finalizeJob,
+            Optional<Runnable> preValidateJob, Optional<Runnable> postValidateJob) {
         super(resourceCrn);
         this.rotationJob = rotationJob;
         this.rollbackJob = rollbackJob;
         this.finalizeJob = finalizeJob;
+        this.postValidateJob = postValidateJob;
+        this.preValidateJob = preValidateJob;
     }
 
     public Optional<Runnable> getRotationJob() {
@@ -29,6 +36,14 @@ public class CustomJobRotationContext extends RotationContext {
 
     public Optional<Runnable> getFinalizeJob() {
         return finalizeJob;
+    }
+
+    public Optional<Runnable> getPreValidateJob() {
+        return preValidateJob;
+    }
+
+    public Optional<Runnable> getPostValidateJob() {
+        return postValidateJob;
     }
 
     public static CustomJobRotationContextBuilder builder() {
@@ -44,6 +59,10 @@ public class CustomJobRotationContext extends RotationContext {
         private Optional<Runnable> rollbackJob = Optional.empty();
 
         private Optional<Runnable> finalizeJob = Optional.empty();
+
+        private Optional<Runnable> preValidateJob = Optional.empty();
+
+        private Optional<Runnable> postValidateJob = Optional.empty();
 
         public CustomJobRotationContextBuilder withResourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
@@ -65,8 +84,18 @@ public class CustomJobRotationContext extends RotationContext {
             return this;
         }
 
+        public CustomJobRotationContextBuilder withPreValidateJob(Runnable preValidateJob) {
+            this.preValidateJob = Optional.ofNullable(preValidateJob);
+            return this;
+        }
+
+        public CustomJobRotationContextBuilder withPostValidateJob(Runnable postValidateJob) {
+            this.postValidateJob = Optional.ofNullable(postValidateJob);
+            return this;
+        }
+
         public CustomJobRotationContext build() {
-            return new CustomJobRotationContext(resourceCrn, rotationJob, rollbackJob, finalizeJob);
+            return new CustomJobRotationContext(resourceCrn, rotationJob, rollbackJob, finalizeJob, preValidateJob, postValidateJob);
         }
     }
 }

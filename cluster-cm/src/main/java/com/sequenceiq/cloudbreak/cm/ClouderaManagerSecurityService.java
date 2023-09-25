@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.security.KeyPair;
 import java.util.List;
 import java.util.Optional;
@@ -8,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.BatchResourceApi;
+import com.cloudera.api.swagger.CertManagerResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.ToolsResourceApi;
 import com.cloudera.api.swagger.UsersResourceApi;
@@ -323,6 +326,21 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         try {
             ldapService.setupLdap(stack.getStack(), stack.getCluster(), clientConfig, ldapConfig, virtualGroupRequest);
         } catch (ApiException | ClouderaManagerClientInitException e) {
+            throw new CloudbreakException(e);
+        }
+    }
+
+    @Override
+    public String getTrustStore() throws CloudbreakException {
+        try {
+            ClusterView cluster = stack.getCluster();
+            String user = cluster.getCloudbreakAmbariUser();
+            String password = cluster.getCloudbreakAmbariPassword();
+            ApiClient client = clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig,
+                    stack.getGatewayPort(), user, password, ClouderaManagerApiClientProvider.API_V_45);
+            CertManagerResourceApi certManagerResourceApi = clouderaManagerApiFactory.getCertManagerResourceApi(client);
+            return FileUtils.readFileToString(certManagerResourceApi.getTruststore("PEM"), Charset.defaultCharset());
+        } catch (Exception e) {
             throw new CloudbreakException(e);
         }
     }

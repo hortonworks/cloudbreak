@@ -105,7 +105,7 @@ public class RootCertRegisterService extends AbstractConfigRegister {
         return rootCertService.save(rootCert);
     }
 
-    public static String convertToPemFormat(String certificate) {
+    public String convertToPemFormat(String certificate) {
         return String.join("\n",
                 BEGIN_CERTIFICATE,
                 String.join("\n",

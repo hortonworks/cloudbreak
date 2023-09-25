@@ -10,6 +10,7 @@ import com.cloudera.api.swagger.AllHostsResourceApi;
 import com.cloudera.api.swagger.AuthRolesResourceApi;
 import com.cloudera.api.swagger.BatchResourceApi;
 import com.cloudera.api.swagger.CdpResourceApi;
+import com.cloudera.api.swagger.CertManagerResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.CommandsResourceApi;
@@ -99,6 +100,9 @@ public class ClouderaManagerApiFactory {
     @Inject
     private Function<ApiClient, BatchResourceApi> batchResourceApiFactory;
 
+    @Inject
+    private Function<ApiClient, CertManagerResourceApi> certManagerResourceApiFactory;
+
     public ClouderaManagerResourceApi getClouderaManagerResourceApi(ApiClient apiClient) {
         return clouderaManagerResourceApiFactory.apply(apiClient);
     }
@@ -185,5 +189,9 @@ public class ClouderaManagerApiFactory {
 
     public BatchResourceApi getBatchResourceApi(ApiClient client) {
         return batchResourceApiFactory.apply(client);
+    }
+
+    public CertManagerResourceApi getCertManagerResourceApi(ApiClient client) {
+        return certManagerResourceApiFactory.apply(client);
     }
 }

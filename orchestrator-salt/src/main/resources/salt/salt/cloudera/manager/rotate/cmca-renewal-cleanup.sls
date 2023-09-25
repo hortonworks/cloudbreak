@@ -4,6 +4,7 @@
     - mode: 700
     - source: salt://cloudera/manager/scripts/cmca_renewal_cleanup.sh
     - template: jinja
+    - replace: True
 
 renew-cmca:
   cmd.run:

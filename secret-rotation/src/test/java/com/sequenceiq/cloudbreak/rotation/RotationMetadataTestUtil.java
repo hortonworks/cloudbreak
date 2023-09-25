@@ -21,4 +21,8 @@ public class RotationMetadataTestUtil {
     public static RotationMetadata metadataForFinalize(String crn, SecretType secretType) {
         return new RotationMetadata(secretType, RotationFlowExecutionType.FINALIZE, null, crn, Optional.empty());
     }
+
+    public static RotationMetadata metadataForPreValidate(String crn, SecretType secretType) {
+        return new RotationMetadata(secretType, RotationFlowExecutionType.PREVALIDATE, null, crn, Optional.empty());
+    }
 }
