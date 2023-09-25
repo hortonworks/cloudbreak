@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stackpatch;
 
+import java.util.Date;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -13,6 +14,8 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Component
 public class UserDataMigrationPatchService extends ExistingStackPatchService {
+
+    public static final int MAX_START_DELAY_IN_HOURS = 3;
 
     @Inject
     private UserDataService userDataService;
@@ -36,5 +39,21 @@ public class UserDataMigrationPatchService extends ExistingStackPatchService {
     boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
         userDataService.updateJumpgateFlagOnly(stack.getId());
         return true;
+    }
+
+    /**
+     * This patcher does not start a flow, so it does not matter if the stack has a retryable flow
+     */
+    @Override
+    protected boolean shouldCheckForFailedRetryableFlow() {
+        return false;
+    }
+
+    /**
+     * Start these stack patchers with a shorter delay as it affects just a few stacks, and also it is a quick operation
+     */
+    @Override
+    public Date getFirstStart() {
+        return randomDelayWithMaxHours(MAX_START_DELAY_IN_HOURS);
     }
 }
