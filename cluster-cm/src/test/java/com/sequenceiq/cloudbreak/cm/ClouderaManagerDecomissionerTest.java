@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -186,6 +187,34 @@ class ClouderaManagerDecomissionerTest {
         assertTrue(removableInstances.contains(failed2));
         assertTrue(removableInstances.contains(healthy2));
         assertTrue(removableInstances.contains(bad1));
+    }
+
+    @Test
+    public void testDecommissionComparisonMethodViolatesShouldNotBeThrown() throws ApiException {
+        HostTemplatesResourceApi hostTemplatesResourceApi = mock(HostTemplatesResourceApi.class);
+        ApiHostTemplateList apiHostTemplateList = new ApiHostTemplateList();
+        apiHostTemplateList.setItems(new ArrayList<>());
+        when(hostTemplatesResourceApi.readHostTemplates(any())).thenReturn(apiHostTemplateList);
+        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(client)).thenReturn(hostTemplatesResourceApi);
+
+        HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
+        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        ApiHostList apiHostList = new ApiHostList();
+        Set<InstanceMetadataView> instanceMetaDataSet = new HashSet<>();
+
+        // we need this size (as I observed >= 201) to have "java.lang.IllegalArgumentException: Comparison method violates its general contract!"
+        int nodeCount = 500;
+
+        for (int i = 0; i < nodeCount; i++) {
+            apiHostList.addItemsItem(createApiHostRef("host" + i + ".example.com", i % 2 == 0 ? ApiHealthSummary.BAD : ApiHealthSummary.GOOD));
+            instanceMetaDataSet.add(createInstanceMetadata(InstanceStatus.SERVICES_UNHEALTHY, "host" + i + ".example.com", "compute"));
+        }
+        when(hostsResourceApi.readHosts(any(), any(), any())).thenReturn(apiHostList);
+
+        StackDtoDelegate stack = getStack();
+
+        Set<InstanceMetadataView> removableInstances = underTest.collectDownscaleCandidates(client, stack, "compute", nodeCount, instanceMetaDataSet);
+        assertEquals(nodeCount, removableInstances.size());
     }
 
     @Test

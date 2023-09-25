@@ -89,8 +89,10 @@ public class ClouderaManagerDecomissioner {
             return host2.getHostname().compareTo(host1.getHostname());
         } else if (host1Healthy) {
             return 1;
-        } else {
+        } else if (host2Healthy) {
             return -1;
+        } else {
+            return host2.getHostname().compareTo(host1.getHostname());
         }
     };
 
