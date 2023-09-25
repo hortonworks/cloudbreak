@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.stack.cluster;
 
+import java.util.Optional;
+
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -38,9 +40,19 @@ public class IdBroker implements ProvisionEntity, WorkspaceAwareResource {
     @SecretValue
     private Secret signKey = Secret.EMPTY;
 
+    @Deprecated
     private String signPub;
 
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret signPubSecret = Secret.EMPTY;
+
+    @Deprecated
     private String signCert;
+
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret signCertSecret = Secret.EMPTY;
 
     public IdBroker copy() {
         IdBroker copy = new IdBroker();
@@ -48,7 +60,9 @@ public class IdBroker implements ProvisionEntity, WorkspaceAwareResource {
         copy.cluster = cluster;
         copy.workspace = workspace;
         copy.signCert = signCert;
+        copy.signCertSecret = signCertSecret;
         copy.signPub = signPub;
+        copy.signPubSecret = signPubSecret;
         copy.signKey = signKey;
         copy.masterSecret = masterSecret;
 
@@ -102,23 +116,63 @@ public class IdBroker implements ProvisionEntity, WorkspaceAwareResource {
         return signKey;
     }
 
+    public Secret getSignCertSecret() {
+        return signCertSecret;
+    }
+
+    public Secret getSignPubSecret() {
+        return signPubSecret;
+    }
+
+    @Deprecated
+    public String getSignCertDeprecated() {
+        return signCert;
+    }
+
+    @Deprecated
+    public String getSignPubDeprecated() {
+        return signPub;
+    }
+
+    @Deprecated
+    public void setSignCertDeprecated(String signCertDeprecated) {
+        this.signCert = signCertDeprecated;
+    }
+
+    @Deprecated
+    public void setSignPubDeprecated(String signPubDeprecated) {
+        this.signPub = signPubDeprecated;
+    }
+
     public void setSignKey(String signKey) {
         this.signKey = new Secret(signKey);
     }
 
     public String getSignPub() {
-        return signPub;
+        return Optional.ofNullable(signPubSecret)
+                .map(Secret::getRaw)
+                .orElse(signPub);
     }
 
     public void setSignPub(String signPub) {
+        if (signPub != null) {
+            this.signPubSecret = new Secret(signPub);
+        }
+        //remove this in future releases
         this.signPub = signPub;
     }
 
     public String getSignCert() {
-        return signCert;
+        return Optional.ofNullable(signCertSecret)
+                .map(Secret::getRaw)
+                .orElse(signCert);
     }
 
     public void setSignCert(String signCert) {
+        if (signCert != null) {
+            this.signCertSecret = new Secret(signCert);
+        }
+        //remove this in future releases
         this.signCert = signCert;
     }
 

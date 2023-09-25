@@ -6,9 +6,11 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SA
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.IDBROKER_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
+import static java.lang.String.format;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -24,6 +26,8 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext.CustomJobRotationContextBuilder;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
@@ -58,32 +62,34 @@ public class IdBrokerCertRotationContextProvider extends AbstractKnoxCertRotatio
         Map<SecretRotationStep, RotationContext> result = new HashMap<>();
         StackDto stack = stackService.getByCrn(resourceId);
 
-        final IdBroker idBroker = idBrokerService.getByCluster(stack.getCluster().getId());
+        final IdBroker idBroker = Optional.ofNullable(idBrokerService.getByCluster(stack.getCluster().getId()))
+                .map(IdBroker::getId)
+                .map(idBrokerService::putLegacyFieldsIntoVaultIfNecessary)
+                .orElseThrow(() -> new CloudbreakRuntimeException(format("Cannot find IdBroker in database, cluster id %s", stack.getCluster().getId())));
         final IdBroker newIdBroker = idBrokerConverterUtil.generateIdBrokerSignKeys(stack.getCluster().getId(), stack.getWorkspace());
         //not yet supported in CM - OPSAPS-65182
         newIdBroker.setMasterSecret(idBroker.getMasterSecret());
 
-        result.put(VAULT, getVaultRotationContext(stack.getResourceCrn(), Map.of(idBroker.getSignKeySecret().getSecret(), newIdBroker.getSignKey())));
+        result.put(VAULT, getVaultRotationContext(stack.getResourceCrn(), Map.of(idBroker.getSignKeySecret().getSecret(), newIdBroker.getSignKey(),
+                idBroker.getSignPubSecret().getSecret(), newIdBroker.getSignPub(),
+                idBroker.getSignCertSecret().getSecret(), newIdBroker.getSignCert())));
         result.put(SALT_PILLAR, getSaltPillarRotationContext(stack.getResourceCrn(), clusterHostServiceRunner.getIdBrokerPillarProperties(newIdBroker)));
         result.put(SALT_STATE_APPLY, getSaltStateApplyRotationContext(stack, gatewayConfigService, exitCriteriaProvider.get(stack)));
         result.put(CM_SERVICE_ROLE_RESTART, getCMServiceRoleRestartRotationContext(stack.getResourceCrn()));
-        result.put(CUSTOM_JOB, getCustomJobRotationContext(stack.getResourceCrn(), newIdBroker, idBroker));
+        result.put(CUSTOM_JOB, getCustomJobRotationContext(stack.getResourceCrn(), idBroker));
         return result;
     }
 
-    private CustomJobRotationContext getCustomJobRotationContext(String resourceCrn, IdBroker newIdBroker, IdBroker oldIdBroker) {
-        CustomJobRotationContext.CustomJobRotationContextBuilder customJobRotationContextBuilder = CustomJobRotationContext.builder()
+    private RotationContext getCustomJobRotationContext(String resourceCrn, IdBroker idBroker) {
+        CustomJobRotationContextBuilder customJobRotationContextBuilder = CustomJobRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withRotationJob(() -> idBrokerService.save(updateIdBroker(oldIdBroker, newIdBroker)))
-                .withRollbackJob(() -> idBrokerService.save(oldIdBroker));
+                .withRotationJob(() -> {
+                    idBrokerService.setLegacyFieldsForServiceRollback(idBroker.getId());
+                })
+                .withRollbackJob(() -> {
+                    idBrokerService.setLegacyFieldsForServiceRollback(idBroker.getId());
+                });
         return customJobRotationContextBuilder.build();
-    }
-
-    private IdBroker updateIdBroker(IdBroker oldIdBroker, IdBroker newIdBroker) {
-        IdBroker result = oldIdBroker.copy();
-        result.setSignPub(newIdBroker.getSignPub());
-        result.setSignCert(newIdBroker.getSignCert());
-        return result;
     }
 
     @Override

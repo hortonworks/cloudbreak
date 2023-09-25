@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.IdBrokerConverterUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
@@ -45,5 +46,25 @@ public class IdBrokerService {
         } else {
             LOGGER.debug("IdBroker sign keysh have already been created");
         }
+    }
+
+    public IdBroker putLegacyFieldsIntoVaultIfNecessary(Long idBrokerId) {
+        IdBroker idBroker = repository.findById(idBrokerId)
+                .orElseThrow(NotFoundException.notFound(String.format("IdBroker should exist, id: %d", idBrokerId)));
+        if (idBroker.getSignCertSecret() == null || idBroker.getSignCertSecret().getRaw() == null) {
+            idBroker.setSignCert(idBroker.getSignCertDeprecated());
+        }
+        if (idBroker.getSignPubSecret() == null || idBroker.getSignPubSecret().getRaw() == null) {
+            idBroker.setSignPub(idBroker.getSignPubDeprecated());
+        }
+        return save(idBroker);
+    }
+
+    public void setLegacyFieldsForServiceRollback(Long idBrokerId) {
+        IdBroker idBroker = repository.findById(idBrokerId)
+                .orElseThrow(NotFoundException.notFound(String.format("IdBroker should exist, id: %d", idBrokerId)));
+        idBroker.setSignCertDeprecated(idBroker.getSignCert());
+        idBroker.setSignPubDeprecated(idBroker.getSignPub());
+        save(idBroker);
     }
 }

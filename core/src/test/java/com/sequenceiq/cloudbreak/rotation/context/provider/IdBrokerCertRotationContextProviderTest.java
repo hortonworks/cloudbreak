@@ -84,6 +84,7 @@ class IdBrokerCertRotationContextProviderTest {
         IdBroker newIdBroker = getIdBroker("New");
         when(idBrokerService.getByCluster(any())).thenReturn(oldIdBroker);
         when(idBrokerConverterUtil.generateIdBrokerSignKeys(any(), any())).thenReturn(newIdBroker);
+        when(idBrokerService.putLegacyFieldsIntoVaultIfNecessary(any())).thenReturn(oldIdBroker);
 
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
 
@@ -110,6 +111,12 @@ class IdBrokerCertRotationContextProviderTest {
         lenient().when(result.getSignPub()).thenReturn(String.format("signPub%s", suffix));
         lenient().when(result.getSignKeySecret()).thenReturn(secret);
         lenient().when(secret.getSecret()).thenReturn("secret");
+        Secret signPubSecret = mock(Secret.class);
+        lenient().when(result.getSignPubSecret()).thenReturn(signPubSecret);
+        lenient().when(signPubSecret.getSecret()).thenReturn("signPub");
+        Secret signCertSecret = mock(Secret.class);
+        lenient().when(result.getSignCertSecret()).thenReturn(signCertSecret);
+        lenient().when(signCertSecret.getSecret()).thenReturn("signCert");
         return result;
     }
 }

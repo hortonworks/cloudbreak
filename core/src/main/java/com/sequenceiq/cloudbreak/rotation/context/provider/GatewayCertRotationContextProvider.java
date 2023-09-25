@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.CM
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.GATEWAY_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
+import static java.lang.String.format;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +46,7 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
 
         final GatewayView gateway = gatewayService.getByClusterId(stack.getCluster().getId())
                 .map(gatewayService::putLegacyFieldsIntoVaultIfNecessary)
-                .orElseThrow(() -> new CloudbreakRuntimeException(""));
+                .orElseThrow(() -> new CloudbreakRuntimeException(format("Cannot find Gateway in database, cluster id %s", stack.getCluster().getId())));
         final GatewayView newGatewaySecrets = gatewayService.generateSignKeys(new Gateway());
 
         result.put(VAULT, getVaultRotationContext(stack.getResourceCrn(),
