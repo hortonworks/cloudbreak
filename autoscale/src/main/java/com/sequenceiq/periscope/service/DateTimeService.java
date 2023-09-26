@@ -1,7 +1,5 @@
 package com.sequenceiq.periscope.service;
 
-import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -12,10 +10,6 @@ public class DateTimeService {
 
     public ZonedDateTime getDefaultZonedDateTime() {
         return ZonedDateTime.now();
-    }
-
-    public ZonedDateTime getZonedDateTime(Instant instant, String timeZone) {
-        return ZonedDateTime.ofInstant(instant, ZoneId.of(timeZone));
     }
 
     public ZonedDateTime getNextSecound(ZonedDateTime now) {

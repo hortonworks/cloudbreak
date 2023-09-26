@@ -67,12 +67,12 @@ public class CronTest {
     public void test(String input, String expected, Class<? extends Exception> exception) throws ParseException {
 
         if (expected != null) {
-            CronSequenceGenerator cronExpression = underTest.getCronExpression(input);
+            CronSequenceGenerator cronExpression = underTest.getCronExpression(input, "UTC");
             assertEquals(String.format("CronSequenceGenerator: %s", expected), cronExpression.toString());
         }
 
         if (exception != null) {
-            assertThrows(exception, () -> underTest.getCronExpression(input));
+            assertThrows(exception, () -> underTest.getCronExpression(input, "UTC"));
         }
     }
 }

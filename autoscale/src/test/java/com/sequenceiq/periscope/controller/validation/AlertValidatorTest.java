@@ -170,6 +170,7 @@ public class AlertValidatorTest {
     public void testValidateScheduleWhenInvalidCron() {
         TimeAlertRequest request = new TimeAlertRequest();
         request.setCron("2 22 22243 333");
+        request.setTimeZone("GMT");
 
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("Cron expression must consist of 6 fields (found 4 in \"2 22 22243 333\")");

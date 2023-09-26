@@ -142,7 +142,7 @@ public class AlertValidator {
     public void validateSchedule(TimeAlertRequest json) {
         try {
             dateService.validateTimeZone(json.getTimeZone());
-            dateService.getCronExpression(json.getCron());
+            dateService.getCronExpression(json.getCron(), json.getTimeZone());
         } catch (ParseException parseException) {
             throw new BadRequestException(parseException.getMessage(), parseException);
         }

@@ -1,7 +1,6 @@
 package com.sequenceiq.periscope.service;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.text.ParseException;
@@ -9,18 +8,26 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.TimeAlert;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class DateServiceTest {
+
+    private static final boolean SHOULD_NOT_TRIGGER = false;
+
+    private static final boolean SHOULD_TRIGGER = true;
 
     @Mock
     private DateTimeService dateTimeService;
@@ -28,102 +35,58 @@ public class DateServiceTest {
     @InjectMocks
     private DateService underTest;
 
-    @BeforeEach
-    public void setUp() {
+    // @formatter:off
+    // CHECKSTYLE:OFF
+    static Object[][] isTriggerScenarios() {
+        return new Object[][] {
+            { "Current time is before the next trigger more than the monitor update rate, different time zone",
+                "America/New_York", 2017, 12, 19, 16, 59, 58, 0, "UTC", 1000L, SHOULD_NOT_TRIGGER },
 
+            { "Current time is before the next trigger less than the monitor update rate, different time zone",
+                "America/New_York", 2017, 12, 19, 16, 59, 58, 0, "UTC", 5000L, SHOULD_NOT_TRIGGER },
+
+            { "Current time is after the next trigger more than the monitor update rate, different time zone",
+                "America/New_York", 2017, 12, 19, 17, 0, 10, 0, "UTC", 5000L, SHOULD_NOT_TRIGGER },
+
+            { "Current time is after the next trigger less than the monitor update rate, different time zone",
+                "America/New_York", 2017, 12, 19, 17, 0, 4, 0, "UTC", 5000L, SHOULD_TRIGGER },
+
+            { "Current time is after the next trigger exactly with the monitor update rate, different time zone",
+                "America/New_York", 2017, 12, 19, 17, 0, 5, 0, "UTC", 5000L, SHOULD_NOT_TRIGGER },
+
+            { "Current time equals with the next trigger, different time zone",
+                "America/New_York", 2017, 12, 19, 17, 0, 0, 0, "UTC", 60000L, SHOULD_TRIGGER },
+
+            { "Current time is before the next trigger more than the monitor update rate, same time zone",
+                "UTC", 2017, 12, 19, 11, 59, 58, 0, "UTC", 1000L, SHOULD_NOT_TRIGGER },
+
+            { "Current time is before the next trigger less than the monitor update rate, same time zone",
+                "UTC", 2017, 12, 19, 11, 59, 58, 0, "UTC", 5000L, SHOULD_NOT_TRIGGER },
+
+            { "Current time is after the next trigger more than the monitor update rate, same time zone",
+                "UTC", 2017, 12, 19, 12, 0, 10, 0, "UTC", 5000L, SHOULD_NOT_TRIGGER },
+
+            { "Current time is after the next trigger less than the monitor update rate, same time zone",
+                "UTC", 2017, 12, 19, 12, 0, 4, 0, "UTC", 5000L, SHOULD_TRIGGER },
+
+            { "Current time is after the next trigger exactly with the monitor update rate, same time zone",
+                "UTC", 2017, 12, 19, 12, 0, 5, 0, "UTC", 5000L, SHOULD_NOT_TRIGGER },
+
+            { "Current time equals with the next trigger, same time zone",
+                "UTC", 2017, 12, 19, 12, 0, 0, 0, "UTC", 60000L, SHOULD_TRIGGER }
+        };
     }
+    // CHECKSTYLE:ON
+    // @formatter:on
 
-    @Test
-    public void testIsTriggerWhenTheCurrentTimeIsBeforeTheNextTriggerMoreThanTheMonitorUpdateRateThenItShouldNotTriggerAnEvent() {
-        String timeZone = "America/Denver";
-        ZoneId zoneId = ZoneId.of(timeZone);
-        ZonedDateTime currentTime = ZonedDateTime.of(2017, 12, 19, 13, 15, 0, 0, zoneId);
-        long monitorUpdateRate = 1000L;
-
+    @ParameterizedTest
+    @MethodSource("isTriggerScenarios")
+    void testIsTrigger(String testCaseName, String alertTimeZone, int year, int month, int day, int hour, int min, int sec, int nano, String currentTimeZone,
+        long updateRate, boolean expectedIsTrigger) {
+        ZonedDateTime currentTime = ZonedDateTime.of(year, month, day, hour, min, sec, nano, ZoneId.of(currentTimeZone));
         when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentTime);
-        when(dateTimeService.getZonedDateTime(currentTime.toInstant(), timeZone)).thenReturn(currentTime);
-        TimeAlert timeAlert = createTimeAlert(timeZone);
-        assertFalse(underTest.isTrigger(timeAlert, monitorUpdateRate));
-    }
-
-    @Test
-    public void testIsTriggerWhenTheCurrentTimeIsBeforeTheNextTriggerLessThanTheMonitorUpdateRateThenItShouldNotTriggerAnEvent() {
-        String timeZone = "America/New_York";
-        ZoneId zoneId = ZoneId.of(timeZone);
-        ZonedDateTime currentZonedTime = ZonedDateTime.of(2017, 12, 20, 11, 59, 10, 0, zoneId);
-        long monitorUpdateRate = 1000L;
-
-        when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentZonedTime);
-        when(dateTimeService.getZonedDateTime(currentZonedTime.toInstant(), timeZone)).thenReturn(currentZonedTime);
-        TimeAlert timeAlert = createTimeAlert(timeZone);
-        assertFalse(underTest.isTrigger(timeAlert, monitorUpdateRate));
-    }
-
-    @Test
-    public void testIsTriggerWhenTheCurrentTimeIsAfterTheNextTriggerMoreThanTheMonitorUpdateRateThenItShouldNotTriggerAnEvent() {
-        String timeZone = "UTC";
-        ZoneId zoneId = ZoneId.of(timeZone);
-        ZonedDateTime currentZonedTime = ZonedDateTime.of(2017, 12, 20, 12, 59, 10, 0, zoneId);
-        long monitorUpdateRate = 1000L;
-
-        when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentZonedTime);
-        when(dateTimeService.getZonedDateTime(currentZonedTime.toInstant(), timeZone)).thenReturn(currentZonedTime);
-        TimeAlert timeAlert = createTimeAlert(timeZone);
-        assertFalse(underTest.isTrigger(timeAlert, monitorUpdateRate));
-    }
-
-    @Test
-    public void testIsTriggerWhenTheCurrentTimeIsAfterTheNextTriggerLessThanTheMonitorUpdateRateThenItShouldTriggerAnEvent() {
-        String timeZone = "America/New_York";
-        ZoneId zoneId = ZoneId.of(timeZone);
-        ZonedDateTime currentTime = ZonedDateTime.of(2017, 12, 20, 20, 1, 10, 0, ZoneId.systemDefault());
-        ZonedDateTime currentZonedTime = ZonedDateTime.of(2017, 12, 20, 12, 1, 10, 0, zoneId);
-        long monitorUpdateRate = 90000L;
-
-        when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentTime);
-        when(dateTimeService.getZonedDateTime(currentTime.toInstant(), timeZone)).thenReturn(currentZonedTime);
-        TimeAlert timeAlert = createTimeAlert(timeZone);
-        assertTrue(underTest.isTrigger(timeAlert, monitorUpdateRate));
-    }
-
-    @Test
-    public void testIsTriggerWhenTheCurrentTimeIsAfterTheNextTriggerWithSizeOfTheMonitorUpdateRateThenItShouldNotTriggerAnEvent() {
-        String timeZone = "America/New_York";
-        ZoneId zoneId = ZoneId.of(timeZone);
-        ZonedDateTime currentZonedTime = ZonedDateTime.of(2017, 12, 20, 12, 0, 10, 0, zoneId);
-        long monitorUpdateRate = 10000L;
-
-        when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentZonedTime);
-        when(dateTimeService.getZonedDateTime(currentZonedTime.toInstant(), timeZone)).thenReturn(currentZonedTime);
-        TimeAlert timeAlert = createTimeAlert(timeZone);
-        assertFalse(underTest.isTrigger(timeAlert, monitorUpdateRate));
-    }
-
-    @Test
-    public void testIsTriggerWhenTheCurrentTimeEqualsWithTheNextTriggerThenItShouldTriggerAnEvent() {
-        String timeZone = "America/New_York";
-        ZoneId zoneId = ZoneId.of(timeZone);
-        ZonedDateTime currentTime = ZonedDateTime.of(2017, 12, 20, 20, 0, 0, 0, ZoneId.systemDefault());
-        ZonedDateTime currentZonedTime = ZonedDateTime.of(2017, 12, 20, 12, 0, 0, 0, zoneId);
-        long monitorUpdateRate = 60000L;
-
-        when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentTime);
-        when(dateTimeService.getZonedDateTime(currentTime.toInstant(), timeZone)).thenReturn(currentZonedTime);
-        TimeAlert timeAlert = createTimeAlert(timeZone);
-        assertTrue(underTest.isTrigger(timeAlert, monitorUpdateRate));
-    }
-
-    @Test
-    public void testIsTriggerWhenTheCurrentTimeEqualsWithTheNextTriggerAndZonesAreEquivalentThenItShouldTriggerAnEvent() {
-        ZoneId zone = ZoneId.systemDefault();
-        String timeZone = zone.getId();
-        ZonedDateTime currentZonedTime = ZonedDateTime.of(2017, 12, 20, 12, 0, 0, 0, zone.normalized());
-        long monitorUpdateRate = 60000L;
-
-        when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentZonedTime);
-        when(dateTimeService.getZonedDateTime(currentZonedTime.toInstant(), timeZone)).thenReturn(currentZonedTime);
-        TimeAlert timeAlert = createTimeAlert(timeZone);
-        assertTrue(underTest.isTrigger(timeAlert, monitorUpdateRate));
+        TimeAlert timeAlert = createTimeAlert(alertTimeZone);
+        assertThat(underTest.isTrigger(timeAlert, updateRate)).isEqualTo(expectedIsTrigger);
     }
 
     @Test

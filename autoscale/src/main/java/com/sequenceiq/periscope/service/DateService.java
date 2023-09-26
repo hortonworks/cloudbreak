@@ -2,11 +2,11 @@ package com.sequenceiq.periscope.service;
 
 import java.text.ParseException;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.TimeZone;
 
 import javax.inject.Inject;
 
@@ -32,19 +32,18 @@ public class DateService {
 
     public boolean isTrigger(TimeAlert alert, long monitorUpdateRate, ZonedDateTime currentTime) {
         try {
-            String timeZone = alert.getTimeZone();
-            CronSequenceGenerator cronExpression = getCronExpression(alert.getCron());
-            ZonedDateTime zonedCurrentTime = dateTimeService.getZonedDateTime(currentTime.toInstant(), timeZone);
-            LocalDateTime startTimeOfTheMonitorInterval = zonedCurrentTime.toLocalDateTime().minus(monitorUpdateRate, ChronoUnit.MILLIS);
-            Date startDate = Date.from(startTimeOfTheMonitorInterval.toInstant(currentTime.getOffset()));
-            Date nextTime = cronExpression.next(startDate);
-            ZonedDateTime zonedNextTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(nextTime.getTime()), currentTime.getZone()).atZone(ZoneId.of(timeZone));
-            long interval = (zonedCurrentTime.toEpochSecond() - zonedNextTime.toEpochSecond()) * TimeUtil.SECOND_TO_MILLISEC;
+            String alertTimeZone = alert.getTimeZone();
+            CronSequenceGenerator cronExpression = getCronExpression(alert.getCron(), alertTimeZone);
+            ZonedDateTime currentTimeAtAlertZone = currentTime.withZoneSameInstant(ZoneId.of(alertTimeZone));
+            ZonedDateTime startTimeOfTheMonitorInterval = currentTimeAtAlertZone.minus(monitorUpdateRate, ChronoUnit.MILLIS);
+            Date nextTime = cronExpression.next(Date.from(startTimeOfTheMonitorInterval.toInstant()));
+            ZonedDateTime zonedNextTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(nextTime.getTime()), ZoneId.of(alertTimeZone));
+            long interval = (currentTimeAtAlertZone.toEpochSecond() - zonedNextTime.toEpochSecond()) * TimeUtil.SECOND_TO_MILLISEC;
 
             boolean triggerReady = interval >= 0L && interval < monitorUpdateRate;
             if (triggerReady) {
                 LOGGER.info("Time alert '{}', cluster '{}' firing at '{}' compared to current time '{}' in timezone '{}'",
-                        alert.getName(), alert.getCluster().getStackCrn(), zonedNextTime, zonedCurrentTime, timeZone);
+                        alert.getName(), alert.getCluster().getStackCrn(), zonedNextTime, currentTimeAtAlertZone, alertTimeZone);
             }
             return triggerReady;
         } catch (ParseException e) {
@@ -53,9 +52,9 @@ public class DateService {
         }
     }
 
-    public CronSequenceGenerator getCronExpression(String cron) throws ParseException {
+    public CronSequenceGenerator getCronExpression(String cron, String alertTimeZone) throws ParseException {
         try {
-            return new CronSequenceGenerator(cron);
+            return new CronSequenceGenerator(cron, TimeZone.getTimeZone(alertTimeZone));
         } catch (Exception ex) {
             throw new ParseException(ex.getMessage(), 0);
         }
