@@ -51,6 +51,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAzureRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -103,6 +105,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.CertExpirationState;
+import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.flow.core.FlowLogService;
 
 @ExtendWith(MockitoExtension.class)
@@ -270,7 +273,7 @@ class StackServiceTest {
                 .when(imageService)
                 .create(eq(stack), nullable(StatedImage.class));
 
-        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace)))
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, null)))
                 .hasCause(imageNotFound);
         verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
     }
@@ -296,7 +299,102 @@ class StackServiceTest {
         when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion, CloudPlatform.MOCK, false, false))
                 .thenReturn(calculatedDbVersion);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, null));
+
+        verify(stack).setStackVersion(stackVersion);
+        verify(stackRepository, times(2)).save(stack);
+        assertEquals(calculatedDbVersion, database.getExternalDatabaseEngineVersion());
+    }
+
+    @Test
+    void testCreateWithRuntimeFlexibleEnabledSingleRequested() throws Exception {
+        when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
+        when(variant.value()).thenReturn(VARIANT_VALUE);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
+        String os = "redhat8";
+        when(image.getOs()).thenReturn(os);
+        ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
+        String stackVersion = "7.2.16";
+        cdhProduct.setVersion(stackVersion);
+        Component cdhComponent = new Component(CDH_PRODUCT_DETAILS, CDH_PRODUCT_DETAILS.name(), new Json(cdhProduct), stack);
+        when(imageService.create(stack, statedImage)).thenReturn(Set.of(cdhComponent));
+        String dbVersion = "10";
+        when(stack.getExternalDatabaseEngineVersion()).thenReturn(dbVersion);
+        Database database = new Database();
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NON_HA);
+        when(stack.getDatabase()).thenReturn(database);
+        String calculatedDbVersion = "11";
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion, CloudPlatform.MOCK, true, false))
+                .thenReturn(calculatedDbVersion);
+        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
+        DatabaseRequest databaseRequest = new DatabaseRequest();
+        DatabaseAzureRequest databaseAzureRequest = new DatabaseAzureRequest();
+        databaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.SINGLE_SERVER);
+        databaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, databaseRequest));
+
+        verify(stack).setStackVersion(stackVersion);
+        verify(stackRepository, times(2)).save(stack);
+        assertEquals(calculatedDbVersion, database.getExternalDatabaseEngineVersion());
+    }
+
+    @Test
+    void testCreateWithRuntimeFlexibleEnabledFlexibleRequested() throws Exception {
+        when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
+        when(variant.value()).thenReturn(VARIANT_VALUE);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
+        String os = "redhat8";
+        when(image.getOs()).thenReturn(os);
+        ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
+        String stackVersion = "7.2.16";
+        cdhProduct.setVersion(stackVersion);
+        Component cdhComponent = new Component(CDH_PRODUCT_DETAILS, CDH_PRODUCT_DETAILS.name(), new Json(cdhProduct), stack);
+        when(imageService.create(stack, statedImage)).thenReturn(Set.of(cdhComponent));
+        String dbVersion = "10";
+        when(stack.getExternalDatabaseEngineVersion()).thenReturn(dbVersion);
+        Database database = new Database();
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NON_HA);
+        when(stack.getDatabase()).thenReturn(database);
+        String calculatedDbVersion = "11";
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion, CloudPlatform.MOCK, true, true))
+                .thenReturn(calculatedDbVersion);
+        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
+        DatabaseRequest databaseRequest = new DatabaseRequest();
+        DatabaseAzureRequest databaseAzureRequest = new DatabaseAzureRequest();
+        databaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
+        databaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, databaseRequest));
+
+        verify(stack).setStackVersion(stackVersion);
+        verify(stackRepository, times(2)).save(stack);
+        assertEquals(calculatedDbVersion, database.getExternalDatabaseEngineVersion());
+    }
+
+    @Test
+    void testCreateWithRuntimeFlexibleEnabledWithoutDbRequest() throws Exception {
+        when(connector.checkAndGetPlatformVariant(stack)).thenReturn(variant);
+        when(variant.value()).thenReturn(VARIANT_VALUE);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
+        String os = "redhat8";
+        when(image.getOs()).thenReturn(os);
+        ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
+        String stackVersion = "7.2.16";
+        cdhProduct.setVersion(stackVersion);
+        Component cdhComponent = new Component(CDH_PRODUCT_DETAILS, CDH_PRODUCT_DETAILS.name(), new Json(cdhProduct), stack);
+        when(imageService.create(stack, statedImage)).thenReturn(Set.of(cdhComponent));
+        String dbVersion = "10";
+        when(stack.getExternalDatabaseEngineVersion()).thenReturn(dbVersion);
+        Database database = new Database();
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NON_HA);
+        when(stack.getDatabase()).thenReturn(database);
+        String calculatedDbVersion = "11";
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion, CloudPlatform.MOCK, true, true))
+                .thenReturn(calculatedDbVersion);
+        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, null));
 
         verify(stack).setStackVersion(stackVersion);
         verify(stackRepository, times(2)).save(stack);
@@ -320,7 +418,7 @@ class StackServiceTest {
         when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(null, os, dbVersion, CloudPlatform.MOCK, false, false))
                 .thenReturn(calculatedDbVersion);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, null));
 
         verify(stack, never()).setStackVersion(any());
         verify(stackRepository, times(2)).save(stack);
@@ -338,7 +436,7 @@ class StackServiceTest {
 
         try {
             stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                    () -> underTest.create(stack, statedImage, user, workspace));
+                    () -> underTest.create(stack, statedImage, user, workspace, null));
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
             verify(stackUpdater, times(0)).updateStackStatus(eq(Long.MAX_VALUE), eq(DetailedStackStatus.PROVISION_FAILED), anyString());
@@ -357,7 +455,7 @@ class StackServiceTest {
         when(stack.getDatabase()).thenReturn(database);
 
         stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.create(stack, statedImage, user, workspace));
+                () -> underTest.create(stack, statedImage, user, workspace, null));
 
         verify(connector, never()).checkAndGetPlatformVariant(any(Stack.class));
         verify(stack, never()).setPlatformVariant(anyString());
@@ -383,7 +481,7 @@ class StackServiceTest {
         when(stack.getDatabase()).thenReturn(database);
 
         stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.create(stack, statedImage, user, workspace));
+                () -> underTest.create(stack, statedImage, user, workspace, null));
 
         verify(connector, never()).checkAndGetPlatformVariant(any(Stack.class));
         verify(stack, never()).setPlatformVariant(anyString());

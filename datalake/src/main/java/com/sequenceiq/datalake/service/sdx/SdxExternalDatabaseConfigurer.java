@@ -13,18 +13,21 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.DatabaseBase;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAzureRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
+import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.service.sdx.database.AzureDatabaseAttributesService;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseParameterFallbackUtil;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAzureRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 @Component
@@ -57,15 +60,38 @@ public class SdxExternalDatabaseConfigurer {
         LOGGER.debug("Create database configuration from internal request {} and database request {}", internalDatabaseRequest, databaseRequest);
         SdxDatabaseAvailabilityType databaseAvailabilityType = getDatabaseAvailabilityType(internalDatabaseRequest, databaseRequest, cloudPlatform, sdxCluster);
         String requestedDbEngineVersion = getDbEngineVersion(internalDatabaseRequest, databaseRequest);
+        boolean singleServerRequested = isSingleServerRequested(internalDatabaseRequest, databaseRequest);
         String dbEngineVersion =
                 databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(sdxCluster.getRuntime(), os, requestedDbEngineVersion,
-                        cloudPlatform, SdxDatabaseAvailabilityType.hasExternalDatabase(databaseAvailabilityType), flexibleServerEnabled);
+                        cloudPlatform, SdxDatabaseAvailabilityType.hasExternalDatabase(databaseAvailabilityType),
+                        flexibleServerEnabled && !singleServerRequested);
         SdxDatabase sdxDatabase = DatabaseParameterFallbackUtil.setupDatabaseInitParams(databaseAvailabilityType, dbEngineVersion);
         configureAzureDatabase(cloudPlatform, internalDatabaseRequest, databaseRequest, sdxDatabase);
         LOGGER.debug("Set database availability type to {}, and engine version to {}", sdxDatabase.getDatabaseAvailabilityType(),
                 sdxDatabase.getDatabaseEngineVersion());
         validate(cloudPlatform, sdxCluster.getClusterName(), sdxDatabase);
         return sdxDatabase;
+    }
+
+    private boolean isSingleServerRequested(DatabaseRequest internalDatabaseRequest, SdxDatabaseRequest databaseRequest) {
+        boolean singleServerRequestedInternal = isSingleServerRequestedInternal(internalDatabaseRequest);
+        boolean singleServerRequestedExternal = isSingleServerRequestedExternal(databaseRequest);
+        LOGGER.debug("Single server requested internally [{}] or externally [{}]", singleServerRequestedInternal, singleServerRequestedExternal);
+        return singleServerRequestedInternal || singleServerRequestedExternal;
+    }
+
+    private boolean isSingleServerRequestedExternal(SdxDatabaseRequest databaseRequest) {
+        return Optional.ofNullable(databaseRequest)
+                .map(SdxDatabaseRequest::getSdxDatabaseAzureRequest)
+                .map(SdxDatabaseAzureRequest::getAzureDatabaseType)
+                .map(AzureDatabaseType::isSingleServer).orElse(Boolean.FALSE);
+    }
+
+    private boolean isSingleServerRequestedInternal(DatabaseRequest internalDatabaseRequest) {
+        return Optional.ofNullable(internalDatabaseRequest)
+                .map(DatabaseRequest::getDatabaseAzureRequest)
+                .map(DatabaseAzureRequest::getAzureDatabaseType)
+                .map(AzureDatabaseType::isSingleServer).orElse(Boolean.FALSE);
     }
 
     private String getDbEngineVersion(DatabaseRequest internalDatabaseRequest, SdxDatabaseRequest databaseRequest) {

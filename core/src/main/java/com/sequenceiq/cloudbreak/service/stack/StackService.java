@@ -43,6 +43,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAzureRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.aspect.Measure;
@@ -127,6 +129,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 
@@ -544,7 +547,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     }
 
     @Measure(StackService.class)
-    public Stack create(Stack stack, StatedImage imgFromCatalog, User user, Workspace workspace) {
+    public Stack create(Stack stack, StatedImage imgFromCatalog, User user, Workspace workspace, DatabaseRequest databaseRequest) {
         if (stack.getGatewayPort() == null) {
             stack.setGatewayPort(nginxPort);
         }
@@ -594,7 +597,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
         try {
             Set<Component> components = imageService.create(stack, imgFromCatalog);
-            Stack savedStackWithRuntimeAndDbVersion = setRuntimeAndDbVersion(savedStack, components, imgFromCatalog.getImage().getOs());
+            Stack savedStackWithRuntimeAndDbVersion = setRuntimeAndDbVersion(savedStack, components, imgFromCatalog.getImage().getOs(), databaseRequest);
             measure(() -> addTemplateForStack(savedStackWithRuntimeAndDbVersion, connector.waitGetTemplate(templateRequest)),
                     LOGGER, "Save cluster template took {} ms for stack {}", stackName);
             return savedStackWithRuntimeAndDbVersion;
@@ -607,18 +610,11 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         }
     }
 
-    private Stack setRuntimeAndDbVersion(Stack stack, Set<Component> components, String os) {
-        ClouderaManagerProduct runtime = ComponentConfigProviderService.getComponent(components, ClouderaManagerProduct.class, CDH_PRODUCT_DETAILS);
-        String stackVersion = null;
-        if (Objects.nonNull(runtime)) {
-            stackVersion = substringBefore(runtime.getVersion(), "-");
-            LOGGER.debug("Setting runtime version {} for stack", stackVersion);
-            stack.setStackVersion(stackVersion);
-        } else {
-            // happens for base images
-            LOGGER.warn("Product component is not present amongst components, runtime could not be set!");
-        }
-        boolean flexibleServerEnabled = entitlementService.isAzureDatabaseFlexibleServerEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId());
+    private Stack setRuntimeAndDbVersion(Stack stack, Set<Component> components, String os, DatabaseRequest databaseRequest) {
+        String stackVersion = calculateStackVersion(components);
+        Optional.ofNullable(stackVersion).ifPresent(stack::setStackVersion);
+        boolean flexibleServerEnabled = entitlementService.isAzureDatabaseFlexibleServerEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
+                && !isSingleServerRequested(databaseRequest);
         String dbEngineVersion = databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(
                 stackVersion, os, stack.getExternalDatabaseEngineVersion(), CloudPlatform.valueOf(stack.getCloudPlatform()),
                 !Optional.ofNullable(stack.getDatabase().getExternalDatabaseAvailabilityType()).orElse(DatabaseAvailabilityType.NONE).isEmbedded(),
@@ -627,6 +623,25 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
             stack.getDatabase().setExternalDatabaseEngineVersion(dbEngineVersion);
         }
         return stackRepository.save(stack);
+    }
+
+    private boolean isSingleServerRequested(DatabaseRequest databaseRequest) {
+        return Optional.ofNullable(databaseRequest)
+                .map(DatabaseRequest::getDatabaseAzureRequest)
+                .map(DatabaseAzureRequest::getAzureDatabaseType)
+                .map(AzureDatabaseType::isSingleServer).orElse(Boolean.FALSE);
+    }
+
+    private String calculateStackVersion(Set<Component> components) {
+        ClouderaManagerProduct runtime = ComponentConfigProviderService.getComponent(components, ClouderaManagerProduct.class, CDH_PRODUCT_DETAILS);
+        if (Objects.nonNull(runtime)) {
+            String stackVersion = substringBefore(runtime.getVersion(), "-");
+            LOGGER.debug("Setting runtime version {} for stack", stackVersion);
+            return stackVersion;
+        } else {
+            LOGGER.warn("Product component is not present amongst components, runtime could not be set! This is normal in case of base images");
+            return null;
+        }
     }
 
     public StackViewService getStackViewService() {

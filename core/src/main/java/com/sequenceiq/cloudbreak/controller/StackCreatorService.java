@@ -271,7 +271,7 @@ public class StackCreatorService {
                 javaVersionValidator.validateImage(imgFromCatalog.getImage(), stackRequest.getJavaVersion(), ThreadBasedUserCrnProvider.getAccountId());
                 stackRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
                 Stack newStack = measure(() -> stackService.create(
-                            stack, imgFromCatalog, user, workspace),
+                            stack, imgFromCatalog, user, workspace, stackRequest.getExternalDatabase()),
                             LOGGER,
                         "Save the remaining stack data took {} ms"
                         );

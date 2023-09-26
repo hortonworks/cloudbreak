@@ -22,15 +22,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAzureRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
+import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.service.sdx.database.AzureDatabaseAttributesService;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAzureRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 @ExtendWith(MockitoExtension.class)
@@ -193,6 +196,112 @@ public class SdxExternalDatabaseConfigurerTest {
         assertTrue(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
+    }
+
+    @Test
+    public void testFlexibleEnabledButSingleRequestedInternal() {
+        CloudPlatform cloudPlatform = CloudPlatform.AZURE;
+        when(platformConfig.isExternalDatabaseSupportedFor(cloudPlatform)).thenReturn(true);
+        when(platformConfig.isExternalDatabaseSupportedOrExperimental(CloudPlatform.AZURE)).thenReturn(true);
+        SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName("clusterName");
+        sdxCluster.setRuntime("7.2.0");
+        DatabaseRequest internalDatabaseRequest = new DatabaseRequest();
+        DatabaseAzureRequest databaseAzureRequest = new DatabaseAzureRequest();
+        databaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.SINGLE_SERVER);
+        internalDatabaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
+
+        SdxDatabase sdxDatabase = underTest.configure(cloudPlatform, "sles", internalDatabaseRequest, null, sdxCluster, true);
+
+        assertTrue(sdxDatabase.isCreateDatabase());
+        assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
+        assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
+        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null, CloudPlatform.AZURE, true, false);
+    }
+
+    @Test
+    public void testFlexibleEnabledFlexibleRequestedInternal() {
+        CloudPlatform cloudPlatform = CloudPlatform.AZURE;
+        when(platformConfig.isExternalDatabaseSupportedFor(cloudPlatform)).thenReturn(true);
+        when(platformConfig.isExternalDatabaseSupportedOrExperimental(CloudPlatform.AZURE)).thenReturn(true);
+        SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName("clusterName");
+        sdxCluster.setRuntime("7.2.0");
+        DatabaseRequest internalDatabaseRequest = new DatabaseRequest();
+        DatabaseAzureRequest databaseAzureRequest = new DatabaseAzureRequest();
+        databaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
+        internalDatabaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
+
+        SdxDatabase sdxDatabase = underTest.configure(cloudPlatform, "sles", internalDatabaseRequest, null, sdxCluster, true);
+
+        assertTrue(sdxDatabase.isCreateDatabase());
+        assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
+        assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
+        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null, CloudPlatform.AZURE, true, true);
+    }
+
+    @Test
+    public void testFlexibleEnabledButSingleRequestedExternal() {
+        CloudPlatform cloudPlatform = CloudPlatform.AZURE;
+        when(platformConfig.isExternalDatabaseSupportedFor(cloudPlatform)).thenReturn(true);
+        when(platformConfig.isExternalDatabaseSupportedOrExperimental(CloudPlatform.AZURE)).thenReturn(true);
+        SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName("clusterName");
+        sdxCluster.setRuntime("7.2.0");
+        SdxDatabaseRequest databaseRequest = new SdxDatabaseRequest();
+        SdxDatabaseAzureRequest sdxDatabaseAzureRequest = new SdxDatabaseAzureRequest();
+        sdxDatabaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.SINGLE_SERVER);
+        databaseRequest.setSdxDatabaseAzureRequest(sdxDatabaseAzureRequest);
+
+        SdxDatabase sdxDatabase = underTest.configure(cloudPlatform, "sles", null, databaseRequest, sdxCluster, true);
+
+        assertTrue(sdxDatabase.isCreateDatabase());
+        assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
+        assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
+        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null, CloudPlatform.AZURE, true, false);
+    }
+
+    @Test
+    public void testFlexibleEnabledFlexibleRequestedExternal() {
+        CloudPlatform cloudPlatform = CloudPlatform.AZURE;
+        when(platformConfig.isExternalDatabaseSupportedFor(cloudPlatform)).thenReturn(true);
+        when(platformConfig.isExternalDatabaseSupportedOrExperimental(CloudPlatform.AZURE)).thenReturn(true);
+        SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName("clusterName");
+        sdxCluster.setRuntime("7.2.0");
+        SdxDatabaseRequest databaseRequest = new SdxDatabaseRequest();
+        SdxDatabaseAzureRequest sdxDatabaseAzureRequest = new SdxDatabaseAzureRequest();
+        sdxDatabaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
+        databaseRequest.setSdxDatabaseAzureRequest(sdxDatabaseAzureRequest);
+
+        SdxDatabase sdxDatabase = underTest.configure(cloudPlatform, "sles", null, databaseRequest, sdxCluster, true);
+
+        assertTrue(sdxDatabase.isCreateDatabase());
+        assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
+        assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
+        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null, CloudPlatform.AZURE, true, true);
+    }
+
+    @Test
+    public void testFlexibleEnabledNoDbRequest() {
+        CloudPlatform cloudPlatform = CloudPlatform.AZURE;
+        when(platformConfig.isExternalDatabaseSupportedFor(cloudPlatform)).thenReturn(true);
+        when(platformConfig.isExternalDatabaseSupportedOrExperimental(CloudPlatform.AZURE)).thenReturn(true);
+        SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName("clusterName");
+        sdxCluster.setRuntime("7.2.0");
+
+        SdxDatabase sdxDatabase = underTest.configure(cloudPlatform, "sles", null, null, sdxCluster, true);
+
+        assertTrue(sdxDatabase.isCreateDatabase());
+        assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
+        assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
+        verify(databaseDefaultVersionProvider).calculateDbVersionBasedOnRuntimeAndOsIfMissing("7.2.0", "sles", null, CloudPlatform.AZURE, true, true);
     }
 
     @Test
