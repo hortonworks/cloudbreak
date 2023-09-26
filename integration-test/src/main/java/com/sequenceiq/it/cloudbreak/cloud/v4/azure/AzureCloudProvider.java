@@ -282,6 +282,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         environmentNetworkAzureParams.setResourceGroupName(network.getResourceGroupName());
         environmentNetworkAzureParams.setDatabasePrivateDnsZoneId(network.getDatabasePrivateDnsZoneId());
         environmentNetworkAzureParams.setNoOutboundLoadBalancer(false);
+        environmentNetworkAzureParams.setFlexibleServerSubnetIds(network.getFlexibleServerSubnetIds());
         return environmentNetworkAzureParams;
     }
 

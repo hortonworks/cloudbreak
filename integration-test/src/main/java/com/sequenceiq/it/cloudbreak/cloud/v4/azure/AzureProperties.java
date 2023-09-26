@@ -340,6 +340,8 @@ public class AzureProperties {
 
         private String databasePrivateDnsZoneId;
 
+        private Set<String> flexibleServerSubnetIds;
+
         public String getDatabasePrivateDnsZoneId() {
             return databasePrivateDnsZoneId;
         }
@@ -378,6 +380,14 @@ public class AzureProperties {
 
         public void setNoPublicIp(Boolean noPublicIp) {
             this.noPublicIp = noPublicIp;
+        }
+
+        public Set<String> getFlexibleServerSubnetIds() {
+            return flexibleServerSubnetIds;
+        }
+
+        public void setFlexibleServerSubnetIds(Set<String> flexibleServerSubnetIds) {
+            this.flexibleServerSubnetIds = flexibleServerSubnetIds;
         }
     }
 
