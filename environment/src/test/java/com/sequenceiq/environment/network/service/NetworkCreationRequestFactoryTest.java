@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkResourcesCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.PrivateDatabaseVariant;
 import com.sequenceiq.cloudbreak.converter.ServiceEndpointCreationToEndpointTypeConverter;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -156,7 +157,12 @@ class NetworkCreationRequestFactoryTest {
         assertEquals(cloudCredential, request.getCloudCredential());
         assertEquals(REGION, request.getRegion().getRegionName());
         assertEquals(SINGLE_RG, request.getResourceGroup());
-        assertEquals(serviceEndpointCreation == ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT, request.isPrivateEndpointsEnabled());
+        switch (serviceEndpointCreation) {
+            case ENABLED, DISABLED -> assertEquals(PrivateDatabaseVariant.NONE, request.getPrivateEndpointVariant());
+            case ENABLED_PRIVATE_ENDPOINT -> assertEquals(PrivateDatabaseVariant.POSTGRES_WITH_NEW_DNS_ZONE, request.getPrivateEndpointVariant());
+            // Needed for checkstyle
+            default -> { }
+        }
     }
 
     private EnvironmentDto.Builder createEnvironmentDtoWithoutAzureParams() {

@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.network.PrivateDatabaseVariant;
 import com.sequenceiq.common.model.PrivateEndpointType;
 
 public class AzureNetworkView {
@@ -111,5 +114,12 @@ public class AzureNetworkView {
 
     public String getFlexibleServerDelegatedSubnetId() {
         return network.getStringParameter(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID);
+    }
+
+    public PrivateDatabaseVariant getPrivateDatabaseVariant() {
+        boolean hasFlexibleServerSubnets = StringUtils.isNotEmpty(getFlexibleServerDelegatedSubnetId());
+        boolean hasPrivateEndpointEnabled = PrivateEndpointType.USE_PRIVATE_ENDPOINT == getEndpointType();
+        boolean hasExistingDnsZone = StringUtils.isNotEmpty(getExistingDatabasePrivateDnsZoneId());
+        return PrivateDatabaseVariant.fromPrivateEndpointSettings(hasPrivateEndpointEnabled, hasExistingDnsZone, hasFlexibleServerSubnets);
     }
 }

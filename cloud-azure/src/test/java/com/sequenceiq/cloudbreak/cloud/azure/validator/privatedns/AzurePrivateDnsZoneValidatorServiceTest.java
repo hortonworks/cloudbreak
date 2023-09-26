@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.validator.privatedns;
 
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService.POSTGRES;
 import static com.sequenceiq.cloudbreak.cloud.azure.validator.privatedns.PrivateDnsZoneValidationTestConstants.A_RESOURCE_GROUP_NAME;
 import static com.sequenceiq.cloudbreak.cloud.azure.validator.privatedns.PrivateDnsZoneValidationTestConstants.NETWORK_NAME;
 import static com.sequenceiq.cloudbreak.cloud.azure.validator.privatedns.PrivateDnsZoneValidationTestConstants.NETWORK_RESOURCE_GROUP_NAME;
@@ -36,7 +37,6 @@ import com.azure.resourcemanager.privatedns.fluent.models.VirtualNetworkLinkInne
 import com.azure.resourcemanager.privatedns.models.PrivateDnsZone;
 import com.azure.resourcemanager.privatedns.models.ProvisioningState;
 import com.azure.resourcemanager.resources.fluentcore.arm.ResourceId;
-import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandlerParameters;
@@ -64,22 +64,22 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
     @Test
     void testExistingPrivateDnsZoneNamesAreSupportedWhenSupportedDnsZoneName() {
         ResourceId privateDnsZoneResourceId = getPrivateDnsZoneResourceId();
-        when(azurePrivateDnsZoneMatcherService.zoneNameMatchesPattern(AzurePrivateDnsZoneServiceEnum.POSTGRES, privateDnsZoneResourceId.name()))
+        when(azurePrivateDnsZoneMatcherService.zoneNameMatchesPattern(POSTGRES, privateDnsZoneResourceId.name()))
                 .thenReturn(true);
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
 
-        resultBuilder = underTest.existingPrivateDnsZoneNameIsSupported(AzurePrivateDnsZoneServiceEnum.POSTGRES, privateDnsZoneResourceId, resultBuilder);
+        resultBuilder = underTest.existingPrivateDnsZoneNameIsSupported(POSTGRES, privateDnsZoneResourceId, resultBuilder);
 
         assertFalse(resultBuilder.build().hasError());
     }
 
     @Test
     void testExistingPrivateDnsZoneNamesAreSupportedWhenUnsupportedDnsZoneName() {
-        when(azurePrivateDnsZoneMatcherService.zoneNameMatchesPattern(AzurePrivateDnsZoneServiceEnum.POSTGRES, UNKNOWN_SERVICE_ZONE_NAME))
+        when(azurePrivateDnsZoneMatcherService.zoneNameMatchesPattern(POSTGRES, UNKNOWN_SERVICE_ZONE_NAME))
                 .thenReturn(false);
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
 
-        resultBuilder = underTest.existingPrivateDnsZoneNameIsSupported(AzurePrivateDnsZoneServiceEnum.POSTGRES,
+        resultBuilder = underTest.existingPrivateDnsZoneNameIsSupported(POSTGRES,
                 getPrivateDnsZoneResourceId(A_RESOURCE_GROUP_NAME, UNKNOWN_SERVICE_ZONE_NAME), resultBuilder);
 
         ValidationTestUtil.checkErrorsPresent(resultBuilder, List.of(

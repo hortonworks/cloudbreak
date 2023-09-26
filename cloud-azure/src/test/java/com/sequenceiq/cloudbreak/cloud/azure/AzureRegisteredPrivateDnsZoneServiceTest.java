@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneRegistrationEnum.AKS;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureRegisteredPrivateDnsZoneService.AKS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class AzurePrivateDnsZoneRegistrationEnumTest {
+public class AzureRegisteredPrivateDnsZoneServiceTest {
     @Test
     void testNumberOfZoneTypes() {
         assertEquals(1, testServicesSource().count(), "Please add tests for missing enums");
@@ -28,7 +28,7 @@ public class AzurePrivateDnsZoneRegistrationEnumTest {
 
     @ParameterizedTest
     @MethodSource("testZoneNamePatterns")
-    void testPatterns(AzurePrivateDnsZoneRegistrationEnum serviceEnum, String testZoneName, Boolean shouldMatch) {
+    void testPatterns(AzureRegisteredPrivateDnsZoneService serviceEnum, String testZoneName, Boolean shouldMatch) {
         boolean zoneNameMatchedByPattern = serviceEnum.getDnsZoneNamePatterns().stream()
                 .map(pattern -> pattern.matcher(testZoneName))
                 .anyMatch(Matcher::matches);
@@ -59,18 +59,18 @@ public class AzurePrivateDnsZoneRegistrationEnumTest {
 
     @ParameterizedTest
     @MethodSource(value = "testServicesSource")
-    void testRegistrationEnumValues(Pair<AzurePrivateDnsZoneRegistrationEnum, AzurePrivateDnsZoneRegistrationEnumValues> serviceEnumAndExpectedValues) {
-        AzurePrivateDnsZoneRegistrationEnum serviceEnum = serviceEnumAndExpectedValues.getKey();
+    void testRegistrationEnumValues(Pair<AzureRegisteredPrivateDnsZoneService, AzurePrivateDnsZoneRegistrationEnumValues> serviceEnumAndExpectedValues) {
+        AzureRegisteredPrivateDnsZoneService serviceEnum = serviceEnumAndExpectedValues.getKey();
         AzurePrivateDnsZoneRegistrationEnumValues expectedValues = serviceEnumAndExpectedValues.getValue();
 
         assertEquals(expectedValues.getResourceType(), serviceEnum.getResourceType());
         assertEquals(expectedValues.getSubResource(), serviceEnum.getSubResource());
-        assertEquals(expectedValues.getDnsZoneName(), serviceEnum.getDnsZoneName());
+        assertEquals(expectedValues.getDnsZoneName(), serviceEnum.getDnsZoneName("aResourceGroup"));
         List<String> dnsZoneNamePatterns = serviceEnum.getDnsZoneNamePatterns().stream().map(Pattern::pattern).collect(Collectors.toList());
         assertThat(dnsZoneNamePatterns).asList().hasSameElementsAs(expectedValues.getDnsZoneNameRegexPatterns());
     }
 
-    private static Stream<Pair<AzurePrivateDnsZoneRegistrationEnum, AzurePrivateDnsZoneRegistrationEnumValues>> testServicesSource() {
+    private static Stream<Pair<AzureRegisteredPrivateDnsZoneService, AzurePrivateDnsZoneRegistrationEnumValues>> testServicesSource() {
         return Stream.of(
                 Pair.of(AKS, new AzurePrivateDnsZoneRegistrationEnumValues(
                         "Microsoft.ContainerService/managedClusters",

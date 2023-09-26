@@ -76,11 +76,11 @@ public class AzureResourceDeploymentHelperService {
     }
 
     public void deployTemplate(AzureClient azureClient, AzureDnsZoneDeploymentParameters parameters) {
-        List<AzurePrivateDnsZoneServiceEnum> enabledPrivateEndpointServices = parameters.getEnabledPrivateEndpointServices();
+        List<AzureManagedPrivateDnsZoneService> enabledPrivateEndpointServices = parameters.getEnabledPrivateEndpointServices();
         String resourceGroup = parameters.getResourceGroupName();
 
         LOGGER.debug("Deploying Private DNS Zones and applying network link for services {}",
-                enabledPrivateEndpointServices.stream().map(AzurePrivateDnsZoneServiceEnum::getSubResource).collect(Collectors.toList()));
+                enabledPrivateEndpointServices.stream().map(AzureManagedPrivateDnsZoneService::getSubResource).collect(Collectors.toList()));
         String suffix = getDeploymentSuffix(parameters);
         String deploymentName = generateDeploymentName(enabledPrivateEndpointServices, suffix);
 
@@ -100,9 +100,9 @@ public class AzureResourceDeploymentHelperService {
         }
     }
 
-    public String generateDeploymentName(List<AzurePrivateDnsZoneServiceEnum> enabledPrivateEndpointServices, String suffix) {
+    public String generateDeploymentName(List<AzureManagedPrivateDnsZoneService> enabledPrivateEndpointServices, String suffix) {
         String fullDeploymentName = enabledPrivateEndpointServices.stream()
-                .map(AzurePrivateDnsZoneServiceEnum::getSubResource)
+                .map(AzureManagedPrivateDnsZoneService::getSubResource)
                 .collect(Collectors.joining("-", "", suffix))
                 .toLowerCase(Locale.ROOT);
         String deploymentName = StringUtils.left(fullDeploymentName, DEPLOYMENT_LENGTH_LIMIT);

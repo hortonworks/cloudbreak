@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.conf;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -44,12 +44,12 @@ class ExternalDatabaseConfigTest {
     @Test
     void testDatabaseConfigsAzure() throws IOException {
         Map<DatabaseStackConfigKey, DatabaseStackConfig> actualResult =  underTest.databaseConfigs();
-        Assertions.assertEquals(2, actualResult.size());
+        assertEquals(2, actualResult.size());
         DatabaseStackConfig singleDatabaseStackConfig = actualResult.get(new DatabaseStackConfigKey(CloudPlatform.AZURE, AzureDatabaseType.SINGLE_SERVER));
-        Assertions.assertEquals("MO_Gen5_4", singleDatabaseStackConfig.getInstanceType());
-        Assertions.assertEquals(100, singleDatabaseStackConfig.getVolumeSize());
+        assertEquals("MO_Gen5_4", singleDatabaseStackConfig.getInstanceType());
+        assertEquals(100, singleDatabaseStackConfig.getVolumeSize());
         DatabaseStackConfig flexibleDatabaseStackConfig = actualResult.get(new DatabaseStackConfigKey(CloudPlatform.AZURE, AzureDatabaseType.FLEXIBLE_SERVER));
-        Assertions.assertEquals("Standard_E4ds_v4", flexibleDatabaseStackConfig.getInstanceType());
-        Assertions.assertEquals(128, flexibleDatabaseStackConfig.getVolumeSize());
+        assertEquals("Standard_E4ds_v4", flexibleDatabaseStackConfig.getInstanceType());
+        assertEquals(128, flexibleDatabaseStackConfig.getVolumeSize());
     }
 }

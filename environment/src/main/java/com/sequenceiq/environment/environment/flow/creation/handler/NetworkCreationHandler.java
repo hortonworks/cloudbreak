@@ -82,8 +82,8 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
             environmentService.findEnvironmentById(environmentDto.getId())
                     .ifPresent(environment -> {
                         setChildEnvironmentNetworkIfItHasParentWithTheSameCloudProvider(environmentDto);
-                        Map<String, CloudSubnet> subnetMetas = null;
-                        Map<String, CloudSubnet> endpointGatewaySubnetMetas = null;
+                        Map<String, CloudSubnet> subnetMetas;
+                        Map<String, CloudSubnet> endpointGatewaySubnetMetas;
                         if (environmentDto.getNetwork() != null) {
                             LOGGER.debug("Environment ({}) dto has network, hence we're filling it's related subnet fields", environment.getName());
                             subnetMetas = cloudNetworkService.retrieveSubnetMetadata(environmentDto, environmentDto.getNetwork());

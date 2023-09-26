@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -36,7 +36,7 @@ public class AzureDnsZoneCreationCheckerTask extends PollBooleanStateTask {
         String resourceGroupName = context.getResourceGroupName();
         AzureClient azureClient = context.getAzureClient();
         String networkId = context.getNetworkId();
-        List<AzurePrivateDnsZoneServiceEnum> enabledPrivateEndpointServices = context.getEnabledPrivateEndpointServices();
+        List<AzureManagedPrivateDnsZoneService> enabledPrivateEndpointServices = context.getEnabledPrivateEndpointServices();
         LOGGER.info("Waiting for DNS zone deployment to be created: {}", deploymentName);
 
         ResourceStatus templateDeploymentStatus = azureClient.getTemplateDeploymentStatus(resourceGroupName, deploymentName);

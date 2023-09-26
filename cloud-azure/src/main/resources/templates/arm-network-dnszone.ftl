@@ -28,12 +28,12 @@
   	"variables" : {
   	},
     "resources": [
-        <#list privateEndpointServices as privateEndpointService>
+        <#list privateEndpointServices?values as privateEndpointServiceDnsZoneName>
         <#if !deployOnlyNetworkLinks>
         {
             "type": "Microsoft.Network/privateDnsZones",
             "apiVersion": "2020-06-01",
-            "name": "${privateEndpointService.dnsZoneName}",
+            "name": "${privateEndpointServiceDnsZoneName}",
             "location": "global",
             "tags": "[parameters('serverTags')]"
         },
@@ -41,12 +41,12 @@
         {
             "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
             "apiVersion": "2020-06-01",
-            "name": "[concat('${privateEndpointService.dnsZoneName}', '/', parameters('virtualNetworkName'))]",
+            "name": "[concat('${privateEndpointServiceDnsZoneName}', '/', parameters('virtualNetworkName'))]",
             "location": "global",
             "tags": "[parameters('serverTags')]",
             <#if !deployOnlyNetworkLinks>
             "dependsOn": [
-                "[resourceId('Microsoft.Network/privateDnsZones', '${privateEndpointService.dnsZoneName}')]"
+                "[resourceId('Microsoft.Network/privateDnsZones', '${privateEndpointServiceDnsZoneName}')]"
             ],
             </#if>
             "properties": {
@@ -55,7 +55,7 @@
                     "id": "[parameters('virtualNetworkId')]"
                 }
             }
-        }<#if privateEndpointService_has_next>,</#if>
+        }<#if privateEndpointServiceDnsZoneName_has_next>,</#if>
         </#list>
     ]
 }

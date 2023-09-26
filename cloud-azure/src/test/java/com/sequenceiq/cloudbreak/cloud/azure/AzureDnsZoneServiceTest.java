@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_DNS_ZONE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.EnumSource.Mode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -15,8 +16,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.network.PrivateDatabaseVariant;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureDnsZoneServiceTest {
@@ -78,16 +81,17 @@ public class AzureDnsZoneServiceTest {
         CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "", "account");
         ac = new AuthenticatedContext(cloudContext, cloudCredential);
 
-        when(azurePrivateEndpointServicesProvider.getCdpManagedDnsZones(any()))
-                .thenReturn(List.of(AzurePrivateDnsZoneServiceEnum.STORAGE, AzurePrivateDnsZoneServiceEnum.POSTGRES));
+        when(azurePrivateEndpointServicesProvider.getCdpManagedDnsZoneServices(any(), any(PrivateDatabaseVariant.class)))
+                .thenReturn(List.of(AzureManagedPrivateDnsZoneService.STORAGE, AzureManagedPrivateDnsZoneService.POSTGRES));
     }
 
-    @Test
-    public void testCheckOrCreateWhenAllResourceExists() {
+    @ParameterizedTest
+    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE, names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE"})
+    public void testCheckOrCreateWhenAllResourceExists(PrivateDatabaseVariant variant) {
 
         when(client.checkIfDnsZonesDeployed(any(), any())).thenReturn(true);
 
-        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of());
+        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of(), variant);
 
         verify(azureResourcePersistenceHelperService, times(0)).persistCloudResource(any(), any(), any(), any());
         verify(azureResourcePersistenceHelperService, times(0)).updateCloudResource(any(), any(), any(), any(), any());
@@ -97,8 +101,9 @@ public class AzureDnsZoneServiceTest {
 
     }
 
-    @Test
-    public void testCheckOrCreateWhenDnsZoneResourceNotExistsButRequested() {
+    @ParameterizedTest
+    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE, names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE"})
+    public void testCheckOrCreateWhenDnsZoneResourceNotExistsButRequested(PrivateDatabaseVariant variant) {
         when(azureResourceIdProviderService.generateDeploymentId(any(), any(), any())).thenReturn(DEPLOYMENT_ID);
         when(azureResourceDeploymentHelperService.getAzureNetwork(any(), any(), any())).thenReturn(mock(Network.class));
         when(client.getCurrentSubscription()).thenReturn(mock(Subscription.class));
@@ -106,7 +111,7 @@ public class AzureDnsZoneServiceTest {
         when(client.checkIfDnsZonesDeployed(any(), any())).thenReturn(false);
         when(azureResourcePersistenceHelperService.isRequested(DEPLOYMENT_ID, AZURE_PRIVATE_DNS_ZONE)).thenReturn(true);
 
-        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of());
+        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of(), variant);
 
         verify(azureResourcePersistenceHelperService, times(0)).persistCloudResource(any(), any(), any(), any());
         verify(azureResourcePersistenceHelperService, times(0)).updateCloudResource(any(), any(), any(), any(), any());
@@ -115,8 +120,9 @@ public class AzureDnsZoneServiceTest {
         verify(azureResourceDeploymentHelperService, times(1)).pollForCreation(any(), any());
     }
 
-    @Test
-    public void testCheckOrCreateWhenDnsZoneResourceNotExistsAndNotRequestedButAlreadyCreatedInDatabase() {
+    @ParameterizedTest
+    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE, names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE"})
+    public void testCheckOrCreateWhenDnsZoneResourceNotExistsAndNotRequestedButAlreadyCreatedInDatabase(PrivateDatabaseVariant variant) {
         when(azureResourceIdProviderService.generateDeploymentId(any(), any(), any())).thenReturn(DEPLOYMENT_ID);
         when(azureResourceDeploymentHelperService.getAzureNetwork(any(), any(), any())).thenReturn(mock(Network.class));
         when(client.getCurrentSubscription()).thenReturn(mock(Subscription.class));
@@ -125,7 +131,7 @@ public class AzureDnsZoneServiceTest {
         when(azureResourcePersistenceHelperService.isRequested(DEPLOYMENT_ID, AZURE_PRIVATE_DNS_ZONE)).thenReturn(false);
         when(azureResourcePersistenceHelperService.isCreated(DEPLOYMENT_ID, AZURE_PRIVATE_DNS_ZONE)).thenReturn(true);
 
-        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of());
+        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of(), variant);
 
         verify(azureResourcePersistenceHelperService, times(0)).persistCloudResource(any(), any(), any(), any());
         verify(azureResourcePersistenceHelperService, times(2)).updateCloudResource(any(), any(), any(), any(), any());
@@ -134,8 +140,9 @@ public class AzureDnsZoneServiceTest {
         verify(azureResourceDeploymentHelperService, times(0)).pollForCreation(any(), any());
     }
 
-    @Test
-    public void testCheckOrCreateWhenDnsZoneResourceNotExistsAndNotRequestedAndNotCreatedInDatabase() {
+    @ParameterizedTest
+    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE, names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE"})
+    public void testCheckOrCreateWhenDnsZoneResourceNotExistsAndNotRequestedAndNotCreatedInDatabase(PrivateDatabaseVariant variant) {
         when(azureResourceIdProviderService.generateDeploymentId(any(), any(), any())).thenReturn(DEPLOYMENT_ID);
         when(azureResourceDeploymentHelperService.getAzureNetwork(any(), any(), any())).thenReturn(mock(Network.class));
         when(client.getCurrentSubscription()).thenReturn(mock(Subscription.class));
@@ -144,7 +151,7 @@ public class AzureDnsZoneServiceTest {
         when(azureResourcePersistenceHelperService.isRequested(DEPLOYMENT_ID, AZURE_PRIVATE_DNS_ZONE)).thenReturn(false);
         when(azureResourcePersistenceHelperService.isCreated(DEPLOYMENT_ID, AZURE_PRIVATE_DNS_ZONE)).thenReturn(false);
 
-        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of());
+        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of(), variant);
 
         verify(azureResourcePersistenceHelperService, times(1)).persistCloudResource(any(), any(), any(), any());
         verify(azureResourcePersistenceHelperService, times(1)).updateCloudResource(any(), any(), any(), any(), any());
@@ -153,8 +160,9 @@ public class AzureDnsZoneServiceTest {
         verify(azureResourceDeploymentHelperService, times(0)).pollForCreation(any(), any());
     }
 
-    @Test
-    public void testCheckOrCreateWhenDnsZoneResourceNotExistsAndNotRequestedAndNotCreatedInDatabaseAndError() {
+    @ParameterizedTest
+    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE, names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE"})
+    public void testCheckOrCreateWhenDnsZoneResourceNotExistsAndNotRequestedAndNotCreatedInDatabaseAndError(PrivateDatabaseVariant variant) {
         when(azureResourceIdProviderService.generateDeploymentId(any(), any(), any())).thenReturn(DEPLOYMENT_ID);
         when(azureResourceDeploymentHelperService.getAzureNetwork(any(), any(), any())).thenReturn(mock(Network.class));
         when(client.getCurrentSubscription()).thenReturn(mock(Subscription.class));
@@ -165,7 +173,7 @@ public class AzureDnsZoneServiceTest {
         doThrow(new CloudConnectorException("some message", null)).when(azureResourceDeploymentHelperService).deployTemplate(any(), any());
 
         CloudConnectorException exception = assertThrows(CloudConnectorException.class, () -> {
-            underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of());
+            underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of(), variant);
         });
 
         assertEquals("some message", exception.getMessage());
@@ -178,7 +186,9 @@ public class AzureDnsZoneServiceTest {
     }
 
     private AzureNetworkView getNetworkView() {
-        AzureNetworkView networkView = new AzureNetworkView();
+        com.sequenceiq.cloudbreak.cloud.model.Network network = new com.sequenceiq.cloudbreak.cloud.model.Network(null);
+        network.putParameter("subnets", "subnet");
+        AzureNetworkView networkView = new AzureNetworkView(network);
         networkView.setExistingNetwork(false);
         networkView.setNetworkId(NETWORK_ID);
         networkView.setResourceGroupName(NETWORK_RG);

@@ -9,7 +9,7 @@ public interface AzurePrivateDnsZoneDescriptor {
 
     String getSubResource();
 
-    String getDnsZoneName();
+    String getDnsZoneName(String resourceGroupName);
 
     List<Pattern> getDnsZoneNamePatterns();
 

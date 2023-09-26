@@ -24,7 +24,7 @@ public class NetworkResourcesCreationRequest {
 
     private final String resourceGroup;
 
-    private final boolean privateEndpointsEnabled;
+    private final PrivateDatabaseVariant privateDatabaseVariant;
 
     private final Set<String> servicesWithExistingPrivateDnsZone;
 
@@ -38,7 +38,7 @@ public class NetworkResourcesCreationRequest {
         cloudContext = builder.cloudContext;
         region = builder.region;
         resourceGroup = builder.resourceGroup;
-        privateEndpointsEnabled = builder.privateEndpointsEnabled;
+        privateDatabaseVariant = builder.privateDatabaseVariant;
         servicesWithExistingPrivateDnsZone = builder.servicesWithExistingPrivateDnsZones;
         tags = builder.tags;
     }
@@ -71,8 +71,8 @@ public class NetworkResourcesCreationRequest {
         return resourceGroup;
     }
 
-    public boolean isPrivateEndpointsEnabled() {
-        return privateEndpointsEnabled;
+    public PrivateDatabaseVariant getPrivateEndpointVariant() {
+        return privateDatabaseVariant;
     }
 
     public Set<String> getServicesWithExistingPrivateDnsZone() {
@@ -99,7 +99,7 @@ public class NetworkResourcesCreationRequest {
 
         private String resourceGroup;
 
-        private boolean privateEndpointsEnabled;
+        private PrivateDatabaseVariant privateDatabaseVariant;
 
         private Set<String> servicesWithExistingPrivateDnsZones;
 
@@ -140,8 +140,8 @@ public class NetworkResourcesCreationRequest {
             return this;
         }
 
-        public Builder withPrivateEndpointsEnabled(boolean privateEndpointsEnabled) {
-            this.privateEndpointsEnabled = privateEndpointsEnabled;
+        public Builder withPrivateEndpointVariant(PrivateDatabaseVariant privateEndpointsEnabled) {
+            this.privateDatabaseVariant = privateEndpointsEnabled;
             return this;
         }
 

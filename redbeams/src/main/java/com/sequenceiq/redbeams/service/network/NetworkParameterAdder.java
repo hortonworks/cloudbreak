@@ -56,17 +56,12 @@ public class NetworkParameterAdder {
 
     public Map<String, Object> addSubnetIds(Map<String, Object> parameters, List<String> subnetIds, List<String> azs, CloudPlatform cloudPlatform) {
         switch (cloudPlatform) {
-            case AWS:
-            case GCP:
-            case MOCK:
+            case AWS, GCP, MOCK -> {
                 parameters.put(SUBNET_ID, String.join(",", subnetIds));
                 parameters.put(AVAILABILITY_ZONE, String.join(",", azs));
-                break;
-            case AZURE:
-                parameters.put(SUBNETS, String.join(",", subnetIds));
-                break;
-            default:
-                throw new RedbeamsException(String.format("Support for cloud platform %s not yet added", cloudPlatform.name()));
+            }
+            case AZURE -> parameters.put(SUBNETS, String.join(",", subnetIds));
+            default -> throw new RedbeamsException(String.format("Support for cloud platform %s not yet added", cloudPlatform.name()));
         }
         return parameters;
     }

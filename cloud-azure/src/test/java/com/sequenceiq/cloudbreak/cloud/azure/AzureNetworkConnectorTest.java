@@ -4,10 +4,12 @@ import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.EnumSource.Mode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -28,6 +30,8 @@ import javax.ws.rs.BadRequestException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -59,6 +63,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkResourcesCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.PrivateDatabaseVariant;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -169,12 +174,13 @@ public class AzureNetworkConnectorTest {
         assertEquals(ENV_NAME, actual.getNetworkId());
         assertTrue(actual.getSubnets().stream().anyMatch(cloudSubnet -> cloudSubnet.getSubnetId().equals(SUBNET_ID_0)));
         assertTrue(actual.getSubnets().stream().anyMatch(cloudSubnet -> cloudSubnet.getSubnetId().equals(SUBNET_ID_1)));
-        assertTrue(actual.getSubnets().size() == 2);
+        assertEquals(2, actual.getSubnets().size());
     }
 
-    @Test
-    public void testCreateProviderSpecificNetworkResourcesWhenPrivateEndpoint() {
-        NetworkResourcesCreationRequest request = createProviderSpecificNetworkResources(true);
+    @ParameterizedTest
+    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE, names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE"})
+    public void testCreateProviderSpecificNetworkResourcesWhenPrivateEndpoint(PrivateDatabaseVariant variant) {
+        NetworkResourcesCreationRequest request = createProviderSpecificNetworkResources(variant);
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(request.getCloudContext(), request.getCloudCredential());
 
         when(azureClientService.getClient(request.getCloudCredential())).thenReturn(azureClient);
@@ -187,27 +193,28 @@ public class AzureNetworkConnectorTest {
                 getNetworkView(),
                 RESOURCE_GROUP,
                 getTags(),
-                Set.of(AzurePrivateDnsZoneServiceEnum.POSTGRES)
-        );
+                Set.of(AzureManagedPrivateDnsZoneService.POSTGRES),
+                variant);
         verify(azureNetworkLinkService).checkOrCreateNetworkLinks(
                 authenticatedContext,
                 azureClient,
                 getNetworkView(),
                 RESOURCE_GROUP,
                 getTags(),
-                Set.of(AzurePrivateDnsZoneServiceEnum.POSTGRES)
-        );
+                Set.of(AzureManagedPrivateDnsZoneService.POSTGRES),
+                variant);
     }
 
-    @Test
-    public void testCreateProviderSpecificNetworkResourcesWhenNotPrivateEndpoint() {
-        NetworkResourcesCreationRequest request = createProviderSpecificNetworkResources(false);
+    @ParameterizedTest
+    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.EXCLUDE, names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE"})
+    public void testCreateProviderSpecificNetworkResourcesWhenNotPrivateEndpoint(PrivateDatabaseVariant variant) {
+        NetworkResourcesCreationRequest request = createProviderSpecificNetworkResources(variant);
 
         underTest.createProviderSpecificNetworkResources(request);
 
         verify(azureClientService, never()).getClient(any());
-        verify(azureDnsZoneService, never()).checkOrCreateDnsZones(any(), any(), any(), any(), any(), any());
-        verify(azureNetworkLinkService, never()).checkOrCreateNetworkLinks(any(), any(), any(), any(), any(), any());
+        verify(azureDnsZoneService, never()).checkOrCreateDnsZones(any(), any(), any(), any(), any(), any(), eq(variant));
+        verify(azureNetworkLinkService, never()).checkOrCreateNetworkLinks(any(), any(), any(), any(), any(), any(), eq(variant));
     }
 
     @Test
@@ -430,14 +437,14 @@ public class AzureNetworkConnectorTest {
                 .build();
     }
 
-    private NetworkResourcesCreationRequest createProviderSpecificNetworkResources(boolean usePrivateEndpoint) {
+    private NetworkResourcesCreationRequest createProviderSpecificNetworkResources(PrivateDatabaseVariant privateDatabaseVariant) {
         return new NetworkResourcesCreationRequest.Builder()
                 .withNetworkId(NETWORK_ID)
                 .withNetworkResourceGroup(NETWORK_RG)
                 .withCloudCredential(getCredential())
                 .withCloudContext(createCloudContext())
                 .withRegion(REGION)
-                .withPrivateEndpointsEnabled(usePrivateEndpoint)
+                .withPrivateEndpointVariant(privateDatabaseVariant)
                 .withTags(getTags())
                 .withServicesWithExistingPrivateDnsZones(Set.of("POSTGRES"))
                 .withResourceGroup(RESOURCE_GROUP).build();

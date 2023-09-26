@@ -1,6 +1,9 @@
 package com.sequenceiq.environment.environment.validation.network.azure;
 
 
+import static com.sequenceiq.cloudbreak.cloud.model.network.PrivateDatabaseVariant.NONE;
+import static com.sequenceiq.cloudbreak.cloud.model.network.PrivateDatabaseVariant.POSTGRES_WITH_EXISTING_DNS_ZONE;
+import static com.sequenceiq.cloudbreak.cloud.model.network.PrivateDatabaseVariant.POSTGRES_WITH_NEW_DNS_ZONE;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -124,7 +127,8 @@ public class AzurePrivateEndpointValidatorTest {
         EnvironmentDto environmentDto = getEnvironmentDto(MY_SINGLE_RG, ResourceGroupUsagePattern.USE_SINGLE);
         AzureParams azureParams = getAzureParams();
         NetworkDto networkDto = getNetworkDto(azureParams);
-        when(azureNewPrivateDnsZoneValidatorService.zonesNotConnectedToNetwork(any(), any(), eq(MY_SINGLE_RG), any(), any())).
+        when(azureNewPrivateDnsZoneValidatorService.zonesNotConnectedToNetwork(any(), any(), eq(MY_SINGLE_RG), any(),
+                eq(POSTGRES_WITH_NEW_DNS_ZONE), any())).
                 thenReturn(envValidationResultBuilder.error(message));
 
         underTest.checkNewPrivateDnsZone(envValidationResultBuilder, environmentDto, networkDto);
@@ -138,14 +142,14 @@ public class AzurePrivateEndpointValidatorTest {
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         EnvironmentDto environmentDto = getEnvironmentDto(MY_SINGLE_RG, ResourceGroupUsagePattern.USE_SINGLE);
         AzureParams azureParams = getAzureParams();
-        when(azureNewPrivateDnsZoneValidatorService.zonesNotConnectedToNetwork(any(), any(), eq(MY_SINGLE_RG), any(), any())).
+        when(azureNewPrivateDnsZoneValidatorService.zonesNotConnectedToNetwork(any(), any(), eq(MY_SINGLE_RG), any(), eq(POSTGRES_WITH_NEW_DNS_ZONE), any())).
                 thenReturn(null);
 
         underTest.checkNewPrivateDnsZone(validationResultBuilder, environmentDto, getNetworkDto(azureParams));
 
         verify(credentialToCloudCredentialConverter).convert(any());
         verify(azureClientService).getClient(any());
-        verify(azureNewPrivateDnsZoneValidatorService).zonesNotConnectedToNetwork(any(), any(), eq(MY_SINGLE_RG), any(), any());
+        verify(azureNewPrivateDnsZoneValidatorService).zonesNotConnectedToNetwork(any(), any(), eq(MY_SINGLE_RG), any(), eq(POSTGRES_WITH_NEW_DNS_ZONE), any());
         assertFalse(validationResultBuilder.build().hasError());
     }
 
@@ -160,7 +164,7 @@ public class AzurePrivateEndpointValidatorTest {
 
         verify(credentialToCloudCredentialConverter, never()).convert(any());
         verify(azureClientService, never()).getClient(any());
-        verify(azureNewPrivateDnsZoneValidatorService, never()).zonesNotConnectedToNetwork(any(), any(), any(), any(), any());
+        verify(azureNewPrivateDnsZoneValidatorService, never()).zonesNotConnectedToNetwork(any(), any(), any(), any(), eq(NONE), any());
         assertFalse(validationResultBuilder.build().hasError());
     }
 
@@ -174,7 +178,7 @@ public class AzurePrivateEndpointValidatorTest {
 
         verify(credentialToCloudCredentialConverter, never()).convert(any());
         verify(azureClientService, never()).getClient(any());
-        verify(azureNewPrivateDnsZoneValidatorService, never()).zonesNotConnectedToNetwork(any(), any(), any(), any(), any());
+        verify(azureNewPrivateDnsZoneValidatorService, never()).zonesNotConnectedToNetwork(any(), any(), any(), any(), eq(POSTGRES_WITH_NEW_DNS_ZONE), any());
         assertFalse(validationResultBuilder.build().hasError());
     }
 
@@ -189,7 +193,7 @@ public class AzurePrivateEndpointValidatorTest {
         verify(credentialToCloudCredentialConverter).convert(any());
         verify(azureClientService).getClient(any());
         verify(azureNewPrivateDnsZoneValidatorService).zonesNotConnectedToNetwork(any(), eq(NETWORK_ID), eq(MY_SINGLE_RG),
-                any(), eq(validationResultBuilder));
+                any(), eq(POSTGRES_WITH_EXISTING_DNS_ZONE), eq(validationResultBuilder));
         assertFalse(validationResultBuilder.build().hasError());
     }
 

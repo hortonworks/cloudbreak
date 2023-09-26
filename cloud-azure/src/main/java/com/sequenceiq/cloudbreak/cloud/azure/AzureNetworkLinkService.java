@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.task.dnszone.AzureDnsZoneCreationCh
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.network.PrivateDatabaseVariant;
 import com.sequenceiq.common.api.type.CommonStatus;
 
 @Service
@@ -46,12 +47,12 @@ public class AzureNetworkLinkService {
 
     public void checkOrCreateNetworkLinks(AuthenticatedContext authenticatedContext, AzureClient azureClient, AzureNetworkView networkView,
             String resourceGroup, Map<String, String> tags,
-            Set<AzurePrivateDnsZoneServiceEnum> servicesWithExistingPrivateDnsZone) {
+            Set<AzureManagedPrivateDnsZoneService> servicesWithExistingPrivateDnsZone, PrivateDatabaseVariant privateEndpointVariant) {
 
         String networkId = networkView.getNetworkId();
         String networkResourceGroup = networkView.getResourceGroupName();
-        List<AzurePrivateDnsZoneServiceEnum> cdpManagedDnsZones = azurePrivateEndpointServicesProvider
-                .getCdpManagedDnsZones(servicesWithExistingPrivateDnsZone);
+        List<AzureManagedPrivateDnsZoneService> cdpManagedDnsZones = azurePrivateEndpointServicesProvider
+                .getCdpManagedDnsZoneServices(servicesWithExistingPrivateDnsZone, privateEndpointVariant);
 
         boolean networkLinksDeployed = azureClient.checkIfNetworkLinksDeployed(resourceGroup, networkId, cdpManagedDnsZones);
 
@@ -106,9 +107,10 @@ public class AzureNetworkLinkService {
     }
 
     private void createMissingNetworkLinks(AzureClient azureClient, String azureNetworkId, String resourceGroup,
-            Map<String, String> tags, List<AzurePrivateDnsZoneServiceEnum> enabledPrivateEndpointServices) {
-        for (AzurePrivateDnsZoneServiceEnum service : enabledPrivateEndpointServices) {
-            AzureListResult<VirtualNetworkLinkInner> networkLinks = azureClient.listNetworkLinksByPrivateDnsZoneName(resourceGroup, service.getDnsZoneName());
+            Map<String, String> tags, List<AzureManagedPrivateDnsZoneService> enabledPrivateEndpointServices) {
+        for (AzureManagedPrivateDnsZoneService service : enabledPrivateEndpointServices) {
+            AzureListResult<VirtualNetworkLinkInner> networkLinks = azureClient.listNetworkLinksByPrivateDnsZoneName(
+                    resourceGroup, service.getDnsZoneName(resourceGroup));
             boolean networkLinkCreated = azureClient.isNetworkLinkCreated(StringUtils.substringAfterLast(azureNetworkId, "/"), networkLinks);
             if (!networkLinkCreated) {
                 LOGGER.debug("Network links for service {} not yet created, creating them now", service.getSubResource());

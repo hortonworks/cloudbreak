@@ -26,20 +26,12 @@ public enum RecipeExecutionPhase {
     }
 
     public static RecipeExecutionPhase convert(RecipeType recipeType) {
-        switch (recipeType) {
-            case PRE_CLOUDERA_MANAGER_START:
-            case PRE_SERVICE_DEPLOYMENT:
-                return PRE_SERVICE_DEPLOYMENT;
-            case PRE_TERMINATION:
-                return PRE_TERMINATION;
-            case POST_CLOUDERA_MANAGER_START:
-                return POST_CLOUDERA_MANAGER_START;
-            case POST_CLUSTER_INSTALL:
-            case POST_SERVICE_DEPLOYMENT:
-                return POST_SERVICE_DEPLOYMENT;
-            default:
-                throw new UnsupportedOperationException("Unsupported Execution Phase: " + recipeType);
-        }
+        return switch (recipeType) {
+            case PRE_CLOUDERA_MANAGER_START, PRE_SERVICE_DEPLOYMENT -> PRE_SERVICE_DEPLOYMENT;
+            case PRE_TERMINATION -> PRE_TERMINATION;
+            case POST_CLOUDERA_MANAGER_START -> POST_CLOUDERA_MANAGER_START;
+            case POST_CLUSTER_INSTALL, POST_SERVICE_DEPLOYMENT -> POST_SERVICE_DEPLOYMENT;
+        };
     }
 
     public RecipeExecutionPhase oldRecipeExecutionPhase() {

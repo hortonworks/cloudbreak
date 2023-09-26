@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.task.dnszone;
 
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 
 public class AzureDnsZoneCreationCheckerContext {
@@ -17,10 +17,10 @@ public class AzureDnsZoneCreationCheckerContext {
 
     private final String networkId;
 
-    private final List<AzurePrivateDnsZoneServiceEnum> enabledPrivateEndpointServices;
+    private final List<AzureManagedPrivateDnsZoneService> enabledPrivateEndpointServices;
 
     public AzureDnsZoneCreationCheckerContext(AzureClient azureClient, String resourceGroupName, String deploymentName, String deploymentId, String networkId,
-            List<AzurePrivateDnsZoneServiceEnum> enabledPrivateEndpointServices) {
+            List<AzureManagedPrivateDnsZoneService> enabledPrivateEndpointServices) {
         this.azureClient = azureClient;
         this.resourceGroupName = resourceGroupName;
         this.deploymentName = deploymentName;
@@ -49,7 +49,7 @@ public class AzureDnsZoneCreationCheckerContext {
         return networkId;
     }
 
-    public List<AzurePrivateDnsZoneServiceEnum> getEnabledPrivateEndpointServices() {
+    public List<AzureManagedPrivateDnsZoneService> getEnabledPrivateEndpointServices() {
         return enabledPrivateEndpointServices;
     }
 }

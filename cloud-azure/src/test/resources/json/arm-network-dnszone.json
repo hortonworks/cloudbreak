@@ -25,29 +25,6 @@
     {
       "type": "Microsoft.Network/privateDnsZones",
       "apiVersion": "2020-06-01",
-      "name": "privatelink.blob.core.windows.net",
-      "location": "global",
-      "tags": "[parameters('serverTags')]"
-    },
-    {
-      "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
-      "apiVersion": "2020-06-01",
-      "name": "[concat('privatelink.blob.core.windows.net', '/', parameters('virtualNetworkName'))]",
-      "location": "global",
-      "tags":"[parameters('serverTags')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.blob.core.windows.net')]"
-      ],
-      "properties": {
-        "registrationEnabled": false,
-        "virtualNetwork": {
-          "id": "[parameters('virtualNetworkId')]"
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Network/privateDnsZones",
-      "apiVersion": "2020-06-01",
       "name": "privatelink.postgres.database.azure.com",
       "location": "global",
       "tags": "[parameters('serverTags')]"
@@ -60,6 +37,52 @@
       "tags": "[parameters('serverTags')]",
       "dependsOn": [
         "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.postgres.database.azure.com')]"
+      ],
+      "properties": {
+        "registrationEnabled": false,
+        "virtualNetwork": {
+          "id": "[parameters('virtualNetworkId')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones",
+      "apiVersion": "2020-06-01",
+      "name": "resourceGroup.flexible.postgres.database.azure.com",
+      "location": "global",
+      "tags": "[parameters('serverTags')]"
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "apiVersion": "2020-06-01",
+      "name": "[concat('resourceGroup.flexible.postgres.database.azure.com', '/', parameters('virtualNetworkName'))]",
+      "location": "global",
+      "tags": "[parameters('serverTags')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones', 'resourceGroup.flexible.postgres.database.azure.com')]"
+      ],
+      "properties": {
+        "registrationEnabled": false,
+        "virtualNetwork": {
+          "id": "[parameters('virtualNetworkId')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones",
+      "apiVersion": "2020-06-01",
+      "name": "privatelink.blob.core.windows.net",
+      "location": "global",
+      "tags": "[parameters('serverTags')]"
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "apiVersion": "2020-06-01",
+      "name": "[concat('privatelink.blob.core.windows.net', '/', parameters('virtualNetworkName'))]",
+      "location": "global",
+      "tags": "[parameters('serverTags')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.blob.core.windows.net')]"
       ],
       "properties": {
         "registrationEnabled": false,
