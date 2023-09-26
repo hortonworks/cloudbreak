@@ -19,6 +19,9 @@ public class AuthDistributorConfig {
     @Value("${authdistributor.port:8982}")
     private int port;
 
+    @Value("${authdistributor.grpc.timeout.sec:120}")
+    private long grpcTimeoutSec;
+
     @Bean
     public ManagedChannelWrapper authDistributorManagedChannelWrapper() {
         return newManagedChannelWrapper(endpoint, port);
@@ -32,4 +35,7 @@ public class AuthDistributorConfig {
                         .build());
     }
 
+    public long getGrpcTimeoutSec() {
+        return grpcTimeoutSec;
+    }
 }

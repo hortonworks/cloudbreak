@@ -21,6 +21,9 @@ public class ServiceDiscoveryChannelConfig {
     @Value("${saas.servicediscovery.port:8982}")
     private int port;
 
+    @Value("${saas.servicediscovery.grpc.timeout.sec:120}")
+    private long grpcTimeoutSec;
+
     @Bean
     public ManagedChannelWrapper discoveryManagedChannelWrapper() {
         return newManagedChannelWrapper(host, port);
@@ -40,6 +43,10 @@ public class ServiceDiscoveryChannelConfig {
 
     public int getPort() {
         return port;
+    }
+
+    public long getGrpcTimeoutSec() {
+        return grpcTimeoutSec;
     }
 
     public boolean isConfigured() {

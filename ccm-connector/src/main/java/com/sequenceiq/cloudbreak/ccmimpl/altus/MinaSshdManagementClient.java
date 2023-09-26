@@ -27,6 +27,7 @@ import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementPro
 import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.UnregisterSshTunnelingKeyResponse;
 import com.sequenceiq.cloudbreak.ccm.exception.CcmException;
 import com.sequenceiq.cloudbreak.ccmimpl.altus.config.MinaSshdManagementClientConfig;
+import com.sequenceiq.cloudbreak.ccmimpl.altus.config.MinaSshdManagementConfig;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
@@ -48,10 +49,14 @@ public class MinaSshdManagementClient {
 
     private final MinaSshdManagementClientConfig minaSshdManagementClientConfig;
 
-    MinaSshdManagementClient(ManagedChannel channel, String actorCrn, MinaSshdManagementClientConfig minaSshdManagementClientConfig) {
+    private final MinaSshdManagementConfig minaSshdManagementConfig;
+
+    MinaSshdManagementClient(ManagedChannel channel, String actorCrn, MinaSshdManagementClientConfig minaSshdManagementClientConfig,
+            MinaSshdManagementConfig minaSshdManagementConfig) {
         this.channel = checkNotNull(channel, "channel is null");
         this.actorCrn = checkNotNull(actorCrn, "actorCrn is null");
         this.minaSshdManagementClientConfig = checkNotNull(minaSshdManagementClientConfig);
+        this.minaSshdManagementConfig = checkNotNull(minaSshdManagementConfig);
     }
 
     /**
@@ -329,6 +334,8 @@ public class MinaSshdManagementClient {
     private MinaSshdManagementBlockingStub newStub(String requestId) {
         checkNotNull(requestId, "requestId should not be null.");
         return MinaSshdManagementGrpc.newBlockingStub(channel)
-                .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
+                .withInterceptors(
+                        GrpcUtil.getTimeoutInterceptor(minaSshdManagementConfig.getGrpcTimeoutSec()),
+                        new AltusMetadataInterceptor(requestId, actorCrn));
     }
 }

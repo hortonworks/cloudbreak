@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserState;
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.authdistributor.config.AuthDistributorConfig;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
 @Component
@@ -28,10 +29,14 @@ public class GrpcAuthDistributorClient {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public static GrpcAuthDistributorClient createClient(ManagedChannelWrapper channelWrapper,
+    @Inject
+    private AuthDistributorConfig authDistributorConfig;
+
+    public static GrpcAuthDistributorClient createClient(ManagedChannelWrapper channelWrapper, AuthDistributorConfig authDistributorConfig,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         GrpcAuthDistributorClient client = new GrpcAuthDistributorClient();
         client.channelWrapper = Preconditions.checkNotNull(channelWrapper, "channelWrapper should not be null.");
+        client.authDistributorConfig = Preconditions.checkNotNull(authDistributorConfig, "authDistributorConfig should not be null.");
         client.regionAwareInternalCrnGeneratorFactory = Preconditions.checkNotNull(regionAwareInternalCrnGeneratorFactory,
                 "regionAwareInternalCrnGeneratorFactory should not be null.");
         return client;
@@ -60,6 +65,6 @@ public class GrpcAuthDistributorClient {
 
     private AuthDistributorClient makeClient(ManagedChannelWrapper channelWrapper,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
-        return new AuthDistributorClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
+        return new AuthDistributorClient(channelWrapper.getChannel(), authDistributorConfig, regionAwareInternalCrnGeneratorFactory);
     }
 }

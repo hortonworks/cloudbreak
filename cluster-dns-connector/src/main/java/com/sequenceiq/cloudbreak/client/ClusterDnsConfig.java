@@ -20,6 +20,9 @@ public class ClusterDnsConfig {
     @Value("${clusterdns.port:8982}")
     private int port;
 
+    @Value("${clusterdns.grpc.timeout.sec:120}")
+    private long grpcTimeoutSec;
+
     @Bean
     public ManagedChannelWrapper clusterDnsManagedChannelWrapper() {
         return new ManagedChannelWrapper(
@@ -35,6 +38,10 @@ public class ClusterDnsConfig {
 
     public int getPort() {
         return port;
+    }
+
+    public long getGrpcTimeoutSec() {
+        return grpcTimeoutSec;
     }
 
     public boolean isConfigured() {

@@ -21,6 +21,7 @@ import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointM
 import com.google.protobuf.ByteString;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
+import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
 
@@ -30,9 +31,12 @@ public class ClusterDnsClient {
 
     private final String actorCrn;
 
-    public ClusterDnsClient(ManagedChannel channel, String actorCrn) {
+    private final ClusterDnsConfig clusterDnsConfig;
+
+    public ClusterDnsClient(ManagedChannel channel, String actorCrn, ClusterDnsConfig clusterDnsConfig) {
         this.channel = channel;
         this.actorCrn = actorCrn;
+        this.clusterDnsConfig = clusterDnsConfig;
     }
 
     public String signCertificate(String requestId, String accountId, String environment, byte[] csr, Crn crn) {
@@ -158,6 +162,8 @@ public class ClusterDnsClient {
     private PublicEndpointManagementBlockingStub newStub(String requestId) {
         checkNotNull(requestId, "requestId should not be null.");
         return PublicEndpointManagementGrpc.newBlockingStub(channel)
-                .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
+                .withInterceptors(
+                        GrpcUtil.getTimeoutInterceptor(clusterDnsConfig.getGrpcTimeoutSec()),
+                        new AltusMetadataInterceptor(requestId, actorCrn));
     }
 }

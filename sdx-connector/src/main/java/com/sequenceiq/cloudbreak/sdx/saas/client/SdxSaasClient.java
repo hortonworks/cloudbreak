@@ -14,7 +14,9 @@ import com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
+import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.sdx.saas.client.config.SdxSaasChannelConfig;
 
 import io.grpc.ManagedChannel;
 
@@ -24,18 +26,23 @@ public class SdxSaasClient {
 
     private final ManagedChannel channel;
 
+    private final SdxSaasChannelConfig sdxSaasChannelConfig;
+
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    SdxSaasClient(ManagedChannel channel,
+    SdxSaasClient(ManagedChannel channel, SdxSaasChannelConfig sdxSaasChannelConfig,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.channel = checkNotNull(channel, "channel should not be null.");
+        this.sdxSaasChannelConfig = sdxSaasChannelConfig;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     private SDXSvcAdminGrpc.SDXSvcAdminBlockingStub newStub() {
         String requestId = MDCBuilder.getOrGenerateRequestId();
         return SDXSvcAdminGrpc.newBlockingStub(channel)
-                .withInterceptors(new AltusMetadataInterceptor(requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()));
+                .withInterceptors(
+                        GrpcUtil.getTimeoutInterceptor(sdxSaasChannelConfig.getGrpcTimeoutSec()),
+                        new AltusMetadataInterceptor(requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()));
     }
 
     public SDXSvcCommonProto.Instance createInstance(String sdxInstanceName, String environmentCrn, String region) {

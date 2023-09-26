@@ -21,6 +21,9 @@ public class MinaSshdManagementConfig {
     @Value("${altus.minasshdmgmt.port:80}")
     private int port;
 
+    @Value("${altus.minasshdmgmt.grpc.timeout.sec:120}")
+    private long grpcTimeoutSec;
+
     @Bean
     public ManagedChannelWrapper minaSshdManagedChannelWrapper() {
         return new ManagedChannelWrapper(
@@ -36,6 +39,10 @@ public class MinaSshdManagementConfig {
 
     public int getPort() {
         return port;
+    }
+
+    public long getGrpcTimeoutSec() {
+        return grpcTimeoutSec;
     }
 
     public boolean isConfigured() {

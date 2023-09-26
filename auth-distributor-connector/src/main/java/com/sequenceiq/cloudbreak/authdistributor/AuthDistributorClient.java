@@ -15,7 +15,9 @@ import com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.Rem
 import com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UpdateAuthViewForEnvironmentRequest;
 import com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserState;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.authdistributor.config.AuthDistributorConfig;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
+import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 import io.grpc.ManagedChannel;
@@ -28,10 +30,14 @@ public class AuthDistributorClient {
 
     private final ManagedChannel channel;
 
+    private AuthDistributorConfig authDistributorConfig;
+
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public AuthDistributorClient(ManagedChannel channel, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+    public AuthDistributorClient(ManagedChannel channel, AuthDistributorConfig authDistributorConfig,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.channel = channel;
+        this.authDistributorConfig = authDistributorConfig;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
@@ -78,6 +84,7 @@ public class AuthDistributorClient {
         String requestId = MDCBuilder.getOrGenerateRequestId();
         return AuthDistributorGrpc.newBlockingStub(channel)
                 .withInterceptors(
+                        GrpcUtil.getTimeoutInterceptor(authDistributorConfig.getGrpcTimeoutSec()),
                         new AltusMetadataInterceptor(requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()));
     }
 }

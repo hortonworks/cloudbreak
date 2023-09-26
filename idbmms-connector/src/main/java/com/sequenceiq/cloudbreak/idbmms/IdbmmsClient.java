@@ -7,6 +7,8 @@ import java.util.Map;
 import com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementGrpc;
 import com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
+import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
+import com.sequenceiq.cloudbreak.idbmms.config.IdbmmsConfig;
 import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
 
 import io.grpc.ManagedChannel;
@@ -27,9 +29,12 @@ class IdbmmsClient {
 
     private final String actorCrn;
 
-    IdbmmsClient(ManagedChannel channel, String actorCrn) {
+    private IdbmmsConfig idbmmsConfig;
+
+    IdbmmsClient(ManagedChannel channel, String actorCrn, IdbmmsConfig idbmmsConfig) {
         this.channel = checkNotNull(channel, "channel should not be null.");
         this.actorCrn = checkNotNull(actorCrn, "actorCrn should not be null.");
+        this.idbmmsConfig = checkNotNull(idbmmsConfig, "idbmmsConfig should not be null.");
     }
 
     /**
@@ -80,7 +85,9 @@ class IdbmmsClient {
     private IdBrokerMappingManagementGrpc.IdBrokerMappingManagementBlockingStub newStub(String requestId) {
         checkNotNull(requestId, "requestId should not be null.");
         return IdBrokerMappingManagementGrpc.newBlockingStub(channel)
-                .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
+                .withInterceptors(
+                        GrpcUtil.getTimeoutInterceptor(idbmmsConfig.getGrpcTimeoutSec()),
+                        new AltusMetadataInterceptor(requestId, actorCrn));
     }
 
 }

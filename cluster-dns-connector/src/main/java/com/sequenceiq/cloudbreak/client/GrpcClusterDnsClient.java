@@ -31,6 +31,9 @@ public class GrpcClusterDnsClient {
     private ManagedChannelWrapper channelWrapper;
 
     @Inject
+    private ClusterDnsConfig clusterDnsConfig;
+
+    @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public String signCertificate(String accountId, String environment, byte[] csr, Optional<String> requestId, String resourceCrn) {
@@ -110,6 +113,6 @@ public class GrpcClusterDnsClient {
     }
 
     private ClusterDnsClient makeClient(ManagedChannel channel, String accountId) {
-        return new ClusterDnsClient(channel, accountId);
+        return new ClusterDnsClient(channel, accountId, clusterDnsConfig);
     }
 }

@@ -43,6 +43,9 @@ public class SdxSaasItClient<E extends Enum<E>, W extends WaitObject> extends Mi
         Field port = ReflectionUtils.findField(SdxSaasChannelConfig.class, "port");
         ReflectionUtils.makeAccessible(port);
         ReflectionUtils.setField(port, sdxSaasChannelConfig, 8982);
+        Field grpcTimeoutSec = ReflectionUtils.findField(SdxSaasChannelConfig.class, "grpcTimeoutSec");
+        ReflectionUtils.makeAccessible(grpcTimeoutSec);
+        ReflectionUtils.setField(grpcTimeoutSec, sdxSaasChannelConfig, 120);
         clientEntity.sdxSaasClient = GrpcSdxSaasClient.createClient(SdxSaasChannelConfig.newManagedChannelWrapper(host, 8982), sdxSaasChannelConfig);
         Field crnFactory = ReflectionUtils.findField(GrpcSdxSaasClient.class, "regionAwareInternalCrnGeneratorFactory");
         ReflectionUtils.makeAccessible(crnFactory);

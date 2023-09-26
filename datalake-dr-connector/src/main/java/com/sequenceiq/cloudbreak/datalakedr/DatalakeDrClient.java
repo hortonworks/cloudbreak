@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeOperationStatus;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
+import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
 
@@ -353,7 +354,9 @@ public class DatalakeDrClient {
     private datalakeDRBlockingStub newStub(ManagedChannel channel, String requestId, String actorCrn) {
         checkNotNull(requestId, "requestId should not be null.");
         return datalakeDRGrpc.newBlockingStub(channel)
-                .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
+                .withInterceptors(
+                        GrpcUtil.getTimeoutInterceptor(datalakeDrConfig.getGrpcTimeoutSec()),
+                        new AltusMetadataInterceptor(requestId, actorCrn));
     }
 
     private DatalakeBackupStatusResponse missingConnectorResponseOnBackup() {

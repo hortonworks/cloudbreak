@@ -25,6 +25,9 @@ public class GrpcCcmV2Config {
     @Value("${altus.ccmv2mgmt.client.timeout_ms:300000}")
     private int timeoutMs;
 
+    @Value("${altus.ccmv2mgmt.grpc.timeout.sec:120}")
+    private long grpcTimeoutSec;
+
     @Bean
     public ManagedChannelWrapper ccmV2ManagedChannelWrapper() {
         return new ManagedChannelWrapper(
@@ -48,5 +51,9 @@ public class GrpcCcmV2Config {
 
     public int getTimeoutMs() {
         return timeoutMs;
+    }
+
+    public long getGrpcTimeoutSec() {
+        return grpcTimeoutSec;
     }
 }

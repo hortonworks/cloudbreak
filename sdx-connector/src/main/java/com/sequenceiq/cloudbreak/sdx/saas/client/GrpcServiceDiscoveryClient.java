@@ -39,6 +39,6 @@ public class GrpcServiceDiscoveryClient {
     }
 
     ServiceDiscoveryClient makeClient() {
-        return new ServiceDiscoveryClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
+        return new ServiceDiscoveryClient(channelWrapper.getChannel(), serviceDiscoveryChannelConfig, regionAwareInternalCrnGeneratorFactory);
     }
 }

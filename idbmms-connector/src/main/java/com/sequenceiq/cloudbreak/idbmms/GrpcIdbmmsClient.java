@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
+import com.sequenceiq.cloudbreak.idbmms.config.IdbmmsConfig;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
 import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
 
@@ -29,6 +30,9 @@ public class GrpcIdbmmsClient {
     @Qualifier("idbmmsManagedChannelWrapper")
     @Inject
     private ManagedChannelWrapper channelWrapper;
+
+    @Inject
+    private IdbmmsConfig idbmmsConfig;
 
     /**
      * Retrieves IDBroker mappings from IDBMMS for a particular environment.
@@ -81,7 +85,7 @@ public class GrpcIdbmmsClient {
     }
 
     private IdbmmsClient makeClient(ManagedChannel channel, String actorCrn) {
-        return new IdbmmsClient(channel, actorCrn);
+        return new IdbmmsClient(channel, actorCrn, idbmmsConfig);
     }
 
 }

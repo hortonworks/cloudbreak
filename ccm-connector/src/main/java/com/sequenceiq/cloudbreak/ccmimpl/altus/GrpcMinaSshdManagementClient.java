@@ -23,6 +23,7 @@ import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementPro
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.ccm.exception.CcmException;
 import com.sequenceiq.cloudbreak.ccmimpl.altus.config.MinaSshdManagementClientConfig;
+import com.sequenceiq.cloudbreak.ccmimpl.altus.config.MinaSshdManagementConfig;
 import com.sequenceiq.cloudbreak.ccmimpl.util.RetryUtil;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
@@ -43,6 +44,9 @@ public class GrpcMinaSshdManagementClient {
 
     @Inject
     private MinaSshdManagementClientConfig minaSshdManagementClientConfig;
+
+    @Inject
+    private MinaSshdManagementConfig minaSshdManagementConfig;
 
     /**
      * Attempts to acquire a minasshd service for the specified account. If it is not available immediately,
@@ -282,6 +286,6 @@ public class GrpcMinaSshdManagementClient {
     }
 
     private MinaSshdManagementClient makeClient(ManagedChannel channel, String actorCrn) {
-        return new MinaSshdManagementClient(channel, actorCrn, minaSshdManagementClientConfig);
+        return new MinaSshdManagementClient(channel, actorCrn, minaSshdManagementClientConfig, minaSshdManagementConfig);
     }
 }

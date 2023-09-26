@@ -23,6 +23,9 @@ public class IdbmmsConfig {
     @Value("${altus.idbmms.port:8990}")
     private int port;
 
+    @Value("${altus.idbmms.grpc.timeout.sec:120}")
+    private long grpcTimeoutSec;
+
     @Bean
     public ManagedChannelWrapper idbmmsManagedChannelWrapper() {
         return new ManagedChannelWrapper(
@@ -38,6 +41,10 @@ public class IdbmmsConfig {
 
     public int getPort() {
         return port;
+    }
+
+    public long getGrpcTimeoutSec() {
+        return grpcTimeoutSec;
     }
 
     public boolean isConfigured() {

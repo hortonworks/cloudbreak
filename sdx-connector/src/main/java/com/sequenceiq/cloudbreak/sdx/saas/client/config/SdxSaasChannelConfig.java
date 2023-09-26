@@ -21,6 +21,9 @@ public class SdxSaasChannelConfig {
     @Value("${saas.sdx.port:8982}")
     private int port;
 
+    @Value("${saad.sdx.grpc.timeout.sec:120}")
+    private long grpcTimeoutSec;
+
     @Bean
     public ManagedChannelWrapper sdxSaasManagedChannelWrapper() {
         return newManagedChannelWrapper(host, port);
@@ -40,6 +43,10 @@ public class SdxSaasChannelConfig {
 
     public int getPort() {
         return port;
+    }
+
+    public long getGrpcTimeoutSec() {
+        return grpcTimeoutSec;
     }
 
     public boolean isConfigured() {

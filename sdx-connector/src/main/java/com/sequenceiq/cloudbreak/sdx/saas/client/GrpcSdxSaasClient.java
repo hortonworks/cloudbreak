@@ -50,6 +50,6 @@ public class GrpcSdxSaasClient {
     }
 
     SdxSaasClient makeClient() {
-        return new SdxSaasClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
+        return new SdxSaasClient(channelWrapper.getChannel(), sdxSaasChannelConfig, regionAwareInternalCrnGeneratorFactory);
     }
 }

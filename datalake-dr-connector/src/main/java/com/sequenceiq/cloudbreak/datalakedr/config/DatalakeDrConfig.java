@@ -26,6 +26,9 @@ public class DatalakeDrConfig {
     @Value("${altus.datalakedr.enabled}")
     private boolean enabled;
 
+    @Value("${altus.datalakedr.grpc.timeout.sec:120}")
+    private long grpcTimeoutSec;
+
     private String host;
 
     private int port;
@@ -70,6 +73,10 @@ public class DatalakeDrConfig {
 
     public int getPort() {
         return port;
+    }
+
+    public long getGrpcTimeoutSec() {
+        return grpcTimeoutSec;
     }
 
     public boolean isConfigured() {

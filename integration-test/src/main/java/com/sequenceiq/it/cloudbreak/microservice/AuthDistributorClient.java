@@ -1,6 +1,9 @@
 package com.sequenceiq.it.cloudbreak.microservice;
 
+import java.lang.reflect.Field;
 import java.util.Set;
+
+import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.authdistributor.GrpcAuthDistributorClient;
@@ -33,8 +36,12 @@ public class AuthDistributorClient<E extends Enum<E>, W extends WaitObject> exte
     public static synchronized AuthDistributorClient createProxyAuthDistributorClient(
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory, String host) {
         AuthDistributorClient clientEntity = new AuthDistributorClient();
+        AuthDistributorConfig authDistributorConfig = new AuthDistributorConfig();
+        Field grpcTimeoutSec = ReflectionUtils.findField(AuthDistributorConfig.class, "grpcTimeoutSec");
+        ReflectionUtils.makeAccessible(grpcTimeoutSec);
+        ReflectionUtils.setField(grpcTimeoutSec, authDistributorConfig, 120);
         clientEntity.grpcAuthDistributorClient = GrpcAuthDistributorClient.createClient(
-                AuthDistributorConfig.newManagedChannelWrapper(host, 8982), regionAwareInternalCrnGeneratorFactory);
+                AuthDistributorConfig.newManagedChannelWrapper(host, 8982), authDistributorConfig, regionAwareInternalCrnGeneratorFactory);
         return clientEntity;
     }
 
