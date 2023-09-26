@@ -5,6 +5,9 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
@@ -16,6 +19,7 @@ import com.sequenceiq.cloudbreak.service.stack.DependentRolesHealthCheckService;
 
 @Component
 public class StackToDependentHostGroupV4ResponseConverter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackToDependentHostGroupV4ResponseConverter.class);
 
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
@@ -24,10 +28,16 @@ public class StackToDependentHostGroupV4ResponseConverter {
     private DependentRolesHealthCheckService dependentRolesHealthCheckService;
 
     public DependentHostGroupsV4Response convert(StackDto stack, Set<String> hostGroups) {
-        CmTemplateProcessor processor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintText());
         Map<String, Set<String>> dependentHostGroupsForHostGroup = Maps.newHashMap();
+        if (stack.getBlueprint() != null && StringUtils.isNotEmpty(stack.getBlueprint().getBlueprintText())) {
+            LOGGER.debug("Adding dependent hostgroups with roles health to response");
+            CmTemplateProcessor processor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintText());
+            hostGroups.forEach(hg -> dependentHostGroupsForHostGroup.put(hg,
+                    dependentRolesHealthCheckService.getDependentHostGroupsForHostGroup(processor, hg)));
+        } else {
+            LOGGER.info("No blueprint for stack: '{}', returning with empty response", stack.getName());
+        }
         DependentHostGroupsV4Response dependentHostGroupsResponse = new DependentHostGroupsV4Response();
-        hostGroups.forEach(hg -> dependentHostGroupsForHostGroup.put(hg, dependentRolesHealthCheckService.getDependentHostGroupsForHostGroup(processor, hg)));
         dependentHostGroupsResponse.setDependentHostGroups(dependentHostGroupsForHostGroup);
         return dependentHostGroupsResponse;
     }
