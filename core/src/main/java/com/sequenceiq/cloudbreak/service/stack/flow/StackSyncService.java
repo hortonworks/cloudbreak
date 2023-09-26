@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRu
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.metering.MeteringService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -63,6 +64,9 @@ public class StackSyncService {
 
     @Inject
     private ImageService imageService;
+
+    @Inject
+    private MeteringService meteringService;
 
     public void updateInstances(StackView stack, Iterable<InstanceMetadataView> instanceMetaDataList,
             Collection<CloudVmInstanceStatus> instanceStatuses, SyncConfig syncConfig) {
@@ -222,6 +226,7 @@ public class StackSyncService {
             } else if (status != UNREACHABLE) {
                 updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_MANAGER_NOT_RESPONDING, CM_SERVER_NOT_RESPONDING);
             }
+            meteringService.scheduleSyncIfNotScheduled(stack.getId());
         } else if (isAllStopped(instanceStateCounts, instances.size()) && status != STOPPED) {
             updateStackStatus(stack.getId(), DetailedStackStatus.STOPPED, SYNC_STATUS_REASON);
         } else if (isAllDeletedOnProvider(instanceStateCounts, instances.size()) && status != DELETE_FAILED) {

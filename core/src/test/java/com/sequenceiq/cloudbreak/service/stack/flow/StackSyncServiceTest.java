@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_MANAGER_NOT_RESPONDING;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.NODE_FAILURE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.metering.MeteringService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +42,9 @@ class StackSyncServiceTest {
 
     @Mock
     private StackUpdater stackUpdater;
+
+    @Mock
+    private MeteringService meteringService;
 
     @ParameterizedTest(name = "{0}: currentStatus={1} and expectedStatus={6}")
     @MethodSource("stackStatusForSync")
@@ -71,6 +76,9 @@ class StackSyncServiceTest {
             }
             if (!currentStatus.equals(expectedStatus.getStatus())) {
                 verify(stackUpdater).updateStackStatus(1L, expectedStatus, statusReason);
+                if (running > 0) {
+                    verify(meteringService).scheduleSyncIfNotScheduled(1L);
+                }
             } else {
                 verifyNoInteractions(stackUpdater);
             }
@@ -150,6 +158,16 @@ class StackSyncServiceTest {
                         0,
                         new SyncConfig(true, false),
                         CLUSTER_MANAGER_NOT_RESPONDING
+                ),
+                Arguments.of(
+                        "Stack was stopped and now all nodes running and CM is running",
+                        STOPPED,
+                        5,
+                        5,
+                        0,
+                        0,
+                        new SyncConfig(true, true),
+                        DetailedStackStatus.AVAILABLE
                 )
         );
     }

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.job.metering.sync;
+package com.sequenceiq.cloudbreak.job.metering.instancechecker;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 @ExtendWith(MockitoExtension.class)
-class MeteringSyncJobServiceTest {
+class MeteringInstanceCheckerJobServiceTest {
 
     private static final String LOCAL_ID = "1";
 
@@ -41,15 +41,17 @@ class MeteringSyncJobServiceTest {
     private ApplicationContext applicationContext;
 
     @InjectMocks
-    private MeteringSyncJobService underTest;
+    private MeteringInstanceCheckerJobService underTest;
 
     @Test
     void testScheduleWhenEnabled() throws TransactionService.TransactionExecutionException {
         when(meteringConfig.isEnabled()).thenReturn(Boolean.TRUE);
+        when(meteringConfig.isInstanceCheckerEnabled()).thenReturn(Boolean.TRUE);
         JobResource jobResource = mock(JobResource.class);
         when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
-        when(meteringConfig.getSyncIntervalInSeconds()).thenReturn(10);
-        underTest.schedule(new MeteringSyncJobAdapter(jobResource));
+        when(meteringConfig.getInstanceCheckerIntervalInHours()).thenReturn(10);
+        when(meteringConfig.getInstanceCheckerDelayInSeconds()).thenReturn(10);
+        underTest.schedule(new MeteringInstanceCheckerJobAdapter(jobResource));
         verify(scheduler, times(1)).scheduleJob(any(), any());
     }
 
@@ -58,8 +60,9 @@ class MeteringSyncJobServiceTest {
         when(meteringConfig.isEnabled()).thenReturn(Boolean.FALSE);
         JobResource jobResource = mock(JobResource.class);
         when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
-        when(meteringConfig.getSyncIntervalInSeconds()).thenReturn(10);
-        underTest.schedule(new MeteringSyncJobAdapter(jobResource));
+        when(meteringConfig.getInstanceCheckerIntervalInHours()).thenReturn(10);
+        when(meteringConfig.getInstanceCheckerDelayInSeconds()).thenReturn(10);
+        underTest.schedule(new MeteringInstanceCheckerJobAdapter(jobResource));
         verify(scheduler, never()).scheduleJob(any(), any());
     }
 
@@ -80,23 +83,27 @@ class MeteringSyncJobServiceTest {
     @Test
     void testScheduleIfNotScheduledWhenAlreadyScheduled() throws TransactionService.TransactionExecutionException, SchedulerException {
         lenient().when(meteringConfig.isEnabled()).thenReturn(Boolean.TRUE);
+        lenient().when(meteringConfig.isInstanceCheckerEnabled()).thenReturn(Boolean.TRUE);
         StackRepository jobResourceRepository = mock(StackRepository.class);
         when(scheduler.getJobDetail(any())).thenReturn(new JobDetailImpl());
-        underTest.scheduleIfNotScheduled(Long.valueOf(LOCAL_ID), MeteringSyncJobAdapter.class);
+        underTest.scheduleIfNotScheduled(Long.valueOf(LOCAL_ID), MeteringInstanceCheckerJobAdapter.class);
         verify(scheduler, never()).scheduleJob(any(), any());
     }
 
     @Test
     void testScheduleIfNotScheduledWhenNotScheduled() throws TransactionService.TransactionExecutionException, SchedulerException {
         when(meteringConfig.isEnabled()).thenReturn(Boolean.TRUE);
+        when(meteringConfig.isInstanceCheckerEnabled()).thenReturn(Boolean.TRUE);
         StackRepository jobResourceRepository = mock(StackRepository.class);
         when(applicationContext.getBean(StackRepository.class)).thenReturn(jobResourceRepository);
         JobResource jobResource = mock(JobResource.class);
         when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
         when(jobResourceRepository.getJobResource(eq(Long.valueOf(LOCAL_ID)))).thenReturn(Optional.of(jobResource));
         when(scheduler.getJobDetail(any())).thenReturn(null);
-        when(meteringConfig.getSyncIntervalInSeconds()).thenReturn(10);
-        underTest.scheduleIfNotScheduled(Long.valueOf(LOCAL_ID), MeteringSyncJobAdapter.class);
+        when(meteringConfig.getInstanceCheckerIntervalInHours()).thenReturn(10);
+        when(meteringConfig.getInstanceCheckerDelayInSeconds()).thenReturn(10);
+        underTest.scheduleIfNotScheduled(Long.valueOf(LOCAL_ID), MeteringInstanceCheckerJobAdapter.class);
         verify(scheduler, times(1)).scheduleJob(any(), any());
     }
+
 }

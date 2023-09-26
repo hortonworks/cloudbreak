@@ -80,6 +80,7 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.metering.MeteringService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
@@ -187,6 +188,9 @@ class StackStatusIntegrationTest {
     @Mock
     private DetailedEnvironmentResponse environment;
 
+    @MockBean
+    private MeteringService meteringService;
+
     @BeforeEach
     void setUp() {
         setUpRunningInstances();
@@ -274,6 +278,7 @@ class StackStatusIntegrationTest {
         verify(instanceMetaDataService, never()).save(any());
         verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), any(DetailedStackStatus.class));
         verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), any(), any());
+        verify(meteringService, times(1)).scheduleSyncIfNotScheduled(eq(STACK_ID));
     }
 
     @Test
@@ -306,6 +311,7 @@ class StackStatusIntegrationTest {
 
         verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), any(DetailedStackStatus.class));
         verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), any(), any());
+        verify(meteringService, times(1)).scheduleSyncIfNotScheduled(eq(STACK_ID));
     }
 
     @Test
@@ -340,6 +346,7 @@ class StackStatusIntegrationTest {
                 INSTANCE_2, InstanceStatus.DELETED_BY_PROVIDER));
 
         verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DELETED_ON_PROVIDER_SIDE), any());
+        verify(meteringService, never()).scheduleSyncIfNotScheduled(eq(STACK_ID));
     }
 
     @Test
@@ -374,6 +381,7 @@ class StackStatusIntegrationTest {
                 INSTANCE_2, InstanceStatus.DELETED_BY_PROVIDER));
 
         verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DELETED_ON_PROVIDER_SIDE), any());
+        verify(meteringService, never()).scheduleSyncIfNotScheduled(eq(STACK_ID));
     }
 
     private void assertInstancesSavedWithStatuses(Map<String, InstanceStatus> instanceStatuses) {

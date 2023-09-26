@@ -77,6 +77,14 @@ public class MeteringService {
         }
     }
 
+    public void scheduleSyncIfNotScheduled(long stackId) {
+        StackView stack = stackDtoService.getStackViewById(stackId);
+        if (shouldSendMeteringEventForStack(stack)) {
+            meteringSyncJobService.scheduleIfNotScheduled(stackId, MeteringSyncJobAdapter.class);
+            meteringInstanceCheckerJobService.scheduleIfNotScheduled(stackId, MeteringInstanceCheckerJobAdapter.class);
+        }
+    }
+
     public void unscheduleSync(long stackId) {
         StackView stack = stackDtoService.getStackViewById(stackId);
         if (shouldSendMeteringEventForStack(stack)) {

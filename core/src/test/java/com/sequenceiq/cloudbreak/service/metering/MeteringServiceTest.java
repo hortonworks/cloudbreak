@@ -159,6 +159,33 @@ class MeteringServiceTest {
     }
 
     @Test
+    void scheduleSyncIfNotScheduledShouldScheduleJobWhenDatahub() {
+        StackView stack = getStack(WORKLOAD, "AWS");
+        when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
+        underTest.scheduleSyncIfNotScheduled(STACK_ID);
+        verify(meteringSyncJobService, times(1)).scheduleIfNotScheduled(eq(STACK_ID), eq(MeteringSyncJobAdapter.class));
+        verify(meteringInstanceCheckerJobService, times(1)).scheduleIfNotScheduled(eq(STACK_ID), eq(MeteringInstanceCheckerJobAdapter.class));
+    }
+
+    @Test
+    void scheduleSyncIfNotScheduledShouldNotScheduleJobWhenNotDatahub() {
+        StackView stack = getStack(DATALAKE, "AWS");
+        when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
+        underTest.scheduleSyncIfNotScheduled(STACK_ID);
+        verify(meteringSyncJobService, never()).scheduleIfNotScheduled(eq(STACK_ID), eq(MeteringSyncJobAdapter.class));
+        verify(meteringInstanceCheckerJobService, never()).scheduleIfNotScheduled(eq(STACK_ID), eq(MeteringInstanceCheckerJobAdapter.class));
+    }
+
+    @Test
+    void scheduleSyncIfNotScheduledShouldNotScheduleJobWhenDatahubButYarn() {
+        StackView stack = getStack(WORKLOAD, "YARN");
+        when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);
+        underTest.scheduleSyncIfNotScheduled(STACK_ID);
+        verify(meteringSyncJobService, never()).scheduleIfNotScheduled(eq(STACK_ID), eq(MeteringSyncJobAdapter.class));
+        verify(meteringInstanceCheckerJobService, never()).scheduleIfNotScheduled(eq(STACK_ID), eq(MeteringInstanceCheckerJobAdapter.class));
+    }
+
+    @Test
     void unscheduleSyncShouldScheduleJobWhenDatahub() {
         StackView stack = getStack(WORKLOAD, "AWS");
         when(stackDtoService.getStackViewById(eq(STACK_ID))).thenReturn(stack);

@@ -43,6 +43,19 @@ public class MeteringSyncJobService implements JobSchedulerService {
     @Inject
     private ApplicationContext applicationContext;
 
+    public void scheduleIfNotScheduled(Long id, Class<? extends JobResourceAdapter<?>> resourceAdapterClass) {
+        JobKey jobKey = JobKey.jobKey(String.valueOf(id), JOB_GROUP);
+        try {
+            if (scheduler.getJobDetail(jobKey) == null) {
+                schedule(id, resourceAdapterClass);
+            } else {
+                LOGGER.info("Metering sync job already scheduled with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
+            }
+        } catch (Exception e) {
+            LOGGER.error("Checking metering sync job details failed for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup(), e);
+        }
+    }
+
     public void schedule(Long id, Class<? extends JobResourceAdapter<?>> resourceAdapterClass) {
         try {
             Constructor<? extends JobResourceAdapter> c = resourceAdapterClass.getConstructor(Long.class, ApplicationContext.class);
