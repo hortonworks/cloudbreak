@@ -122,10 +122,22 @@ public class GCPLoadBalancerMetadataCollectorTest {
     }
 
     @Test
-    public void testCollectLoadBalancerWhenGcpReturnsWithNullForwardingRule() {
+    public void testCollectLoadBalancerWhenGcpResponseReturnsWithEmptyResponse() {
         List<CloudResource> resources = new ArrayList<>();
         resources.add(createCloudResource(FORWARDING_RULE_NAME_1, ResourceType.GCP_FORWARDING_RULE));
         when(forwardingRuleListResponse.isEmpty()).thenReturn(Boolean.TRUE);
+
+        List<CloudLoadBalancerMetadata> result = underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.PUBLIC), resources);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testCollectLoadBalancerWhenGcpResponseReturnsWithNotEmptyResponseButTheGetItemsReturnWithNull() {
+        List<CloudResource> resources = new ArrayList<>();
+        resources.add(createCloudResource(FORWARDING_RULE_NAME_1, ResourceType.GCP_FORWARDING_RULE));
+        when(forwardingRuleListResponse.isEmpty()).thenReturn(Boolean.FALSE);
+        when(forwardingRuleListResponse.getItems()).thenReturn(null);
 
         List<CloudLoadBalancerMetadata> result = underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.PUBLIC), resources);
 
