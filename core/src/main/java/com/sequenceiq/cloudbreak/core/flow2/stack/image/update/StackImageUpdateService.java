@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
+import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentOSToRedHatUpgradeImageFilter.isCentOSToRedHatUpgradableVersion;
+import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentOSToRedHatUpgradeImageFilter.isCentOSToRedhatUpgrade;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -80,7 +83,9 @@ public class StackImageUpdateService {
                 throw new OperationException(message);
             }
 
-            if (!isOsVersionsMatch(currentImage, newImage)) {
+            if (!isOsVersionsMatch(currentImage, newImage) &&
+                    !(isCentOSToRedhatUpgrade(currentImage.getOs(), currentImage.getOsType(), newImage.getImage()) &&
+                            isCentOSToRedHatUpgradableVersion(currentImage, newImage.getImage()))) {
                 String message = messagesService.getMessage(Msg.OSVERSION_DIFFERENT.code(),
                         Lists.newArrayList(newImage.getImage().getOs(), newImage.getImage().getOsType(), currentImage.getOs(), currentImage.getOsType()));
                 LOGGER.debug(message);

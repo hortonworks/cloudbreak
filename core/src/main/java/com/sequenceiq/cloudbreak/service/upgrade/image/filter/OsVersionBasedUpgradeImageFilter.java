@@ -40,7 +40,8 @@ public class OsVersionBasedUpgradeImageFilter implements UpgradeImageFilter {
     private List<Image> filterImages(ImageFilterResult imageFilterResult, String currentOs, String currentOsType) {
         return imageFilterResult.getImages()
                 .stream()
-                .filter(image -> isOsVersionsMatch(currentOs, currentOsType, image))
+                .filter(image -> isOsVersionsMatch(currentOs, currentOsType, image)
+                        || CentOSToRedHatUpgradeImageFilter.isCentOSToRedhatUpgrade(currentOs, currentOsType, image))
                 .collect(Collectors.toList());
     }
 
