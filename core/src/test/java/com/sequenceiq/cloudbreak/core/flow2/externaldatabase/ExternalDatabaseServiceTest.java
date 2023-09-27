@@ -22,7 +22,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -39,11 +38,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.dyngr.core.AttemptResults;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
@@ -59,8 +60,9 @@ import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseOperation;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseServerParameterDecorator;
 import com.sequenceiq.cloudbreak.service.externaldatabase.PollingConfig;
@@ -85,6 +87,9 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.UpgradeDatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseResponse;
 
 @ExtendWith(MockitoExtension.class)
 class ExternalDatabaseServiceTest {
@@ -125,9 +130,10 @@ class ExternalDatabaseServiceTest {
     private RedbeamsClientService redbeamsClient;
 
     @Mock
-    private ClusterRepository clusterRepository;
+    private ClusterService clusterService;
 
-    private final Map<DatabaseStackConfigKey, DatabaseStackConfig> dbConfigs = new HashMap<>();
+    @Mock
+    private Map<DatabaseStackConfigKey, DatabaseStackConfig> dbConfigs;
 
     @Mock
     private Map<CloudPlatform, DatabaseServerParameterDecorator> parameterDecoratorMap;
@@ -150,6 +156,10 @@ class ExternalDatabaseServiceTest {
     @Mock
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
+    @Mock
+    private SdxClientService sdxClientService;
+
+    @InjectMocks
     private ExternalDatabaseService underTest;
 
     private DetailedEnvironmentResponse environmentResponse;
@@ -162,12 +172,11 @@ class ExternalDatabaseServiceTest {
     @BeforeEach
     void setUp() {
         mockShortPollConfig();
-        underTest = new ExternalDatabaseService(redbeamsClient, clusterRepository, dbConfigs, parameterDecoratorMap, databaseObtainerService,
-                externalDatabaseConfig, cmTemplateProcessorFactory, dbPollConfig);
         environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCloudPlatform(CLOUD_PLATFORM.name());
         environmentResponse.setCrn(ENV_CRN);
-        dbConfigs.put(new DatabaseStackConfigKey(CLOUD_PLATFORM, null), new DatabaseStackConfig(INSTANCE_TYPE, VENDOR, VOLUME_SIZE));
+        lenient().when(dbConfigs.get(new DatabaseStackConfigKey(CLOUD_PLATFORM, null)))
+                .thenReturn(new DatabaseStackConfig(INSTANCE_TYPE, VENDOR, VOLUME_SIZE));
         lenient().when(parameterDecoratorMap.get(CLOUD_PLATFORM)).thenReturn(dbServerParameterDecorator);
         databaseServerV4StackRequest = new DatabaseServerV4StackRequest();
     }
@@ -207,7 +216,7 @@ class ExternalDatabaseServiceTest {
         verify(redbeamsClient).create(any(AllocateDatabaseServerV4Request.class));
         verify(cluster).setDatabaseServerCrn(RDBMS_CRN);
         verify(dbServerParameterDecorator).setParameters(any(), serverParameterCaptor.capture(), eq(environmentResponse), eq(true));
-        verify(clusterRepository).save(cluster);
+        verify(clusterService).save(cluster);
         DatabaseServerParameter paramValue = serverParameterCaptor.getValue();
         assertThat(paramValue.getAvailabilityType()).isEqualTo(availability);
     }
@@ -237,7 +246,7 @@ class ExternalDatabaseServiceTest {
         verify(redbeamsClient).create(any(AllocateDatabaseServerV4Request.class));
         verify(cluster).setDatabaseServerCrn(RDBMS_CRN);
         verify(dbServerParameterDecorator).setParameters(any(), serverParameterCaptor.capture(), eq(environmentResponse), eq(false));
-        verify(clusterRepository).save(cluster);
+        verify(clusterService).save(cluster);
         DatabaseServerParameter paramValue = serverParameterCaptor.getValue();
         assertThat(paramValue.getAvailabilityType()).isEqualTo(availability);
     }
@@ -278,7 +287,7 @@ class ExternalDatabaseServiceTest {
         verify(redbeamsClient, never()).create(any(AllocateDatabaseServerV4Request.class));
         verify(dbServerParameterDecorator, never()).setParameters(any(), any(), any(), anyBoolean());
         verify(cluster).setDatabaseServerCrn(RDBMS_CRN);
-        verify(clusterRepository).save(cluster);
+        verify(clusterService).save(cluster);
     }
 
     @Test
@@ -315,7 +324,7 @@ class ExternalDatabaseServiceTest {
         underTest.provisionDatabase(stack, environmentResponse);
 
         assertThat(cluster.getDatabaseServerCrn()).isEqualTo(RDBMS_CRN);
-        verify(clusterRepository).save(cluster);
+        verify(clusterService).save(cluster);
 
         ArgumentCaptor<DatabaseServerV4StackRequest> databaseServerCaptor = ArgumentCaptor.forClass(DatabaseServerV4StackRequest.class);
         ArgumentCaptor<DatabaseServerParameter> serverParameterCaptor = ArgumentCaptor.forClass(DatabaseServerParameter.class);
@@ -550,7 +559,8 @@ class ExternalDatabaseServiceTest {
 
     @ParameterizedTest
     @MethodSource("dbUpgradeMigrationScenarios")
-    void testMigrateDatabaseSettingsAzureBothConditionsMetThenMigration(String platform, String current, String target, boolean migrationRequired) {
+    void testMigrateDatabaseSettingsAzureBothConditionsMetThenMigration(String platform, String current, String target, boolean migrationRequired,
+            boolean datalake) {
         StackDto stack = mock(StackDto.class);
         TargetMajorVersion majorVersion = mock(TargetMajorVersion.class);
 
@@ -558,10 +568,16 @@ class ExternalDatabaseServiceTest {
         when(majorVersion.getMajorVersion()).thenReturn(target);
         when(stack.getExternalDatabaseEngineVersion()).thenReturn(current);
         if (migrationRequired) {
-            when(stack.getExternalDatabaseCreationType()).thenReturn(DatabaseAvailabilityType.HA);
+            lenient().when(stack.getExternalDatabaseCreationType()).thenReturn(DatabaseAvailabilityType.HA);
             Stack realStack = new Stack();
             realStack.setMultiAz(true);
+            realStack.setType(datalake ? StackType.DATALAKE : StackType.WORKLOAD);
             when(stack.getStack()).thenReturn(realStack);
+            SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
+            SdxDatabaseResponse databaseResponse = new SdxDatabaseResponse();
+            databaseResponse.setAvailabilityType(SdxDatabaseAvailabilityType.HA);
+            sdxClusterResponse.setSdxDatabaseResponse(databaseResponse);
+            lenient().when(sdxClientService.getByCrnInternal(any())).thenReturn(sdxClusterResponse);
         }
 
         DatabaseServerV4StackRequest result = underTest.migrateDatabaseSettingsIfNeeded(stack, majorVersion, environmentResponse);
@@ -581,16 +597,17 @@ class ExternalDatabaseServiceTest {
     }
 
     private static Object[][] dbUpgradeMigrationScenarios() {
-        return new Object[][] {
+        return new Object[][]{
                 // Platform, currentVersion, targetVersion, migrationRequired
-                {"AZURE", "10", "11", false},
-                {"AZURE", "10", "14", true},
-                {"AZURE", "14", "14", false},
-                {"AZURE", "14", "11", false},
-                {"AWS", "10", "11", false},
-                {"AWS", "10", "14", false},
-                {"AWS", "14", "14", false},
-                {"AWS", "14", "11", false},
+                {"AZURE", "10", "11", false, true},
+                {"AZURE", "10", "14", true, true},
+                {"AZURE", "10", "14", true, false},
+                {"AZURE", "14", "14", false, false},
+                {"AZURE", "14", "11", false, false},
+                {"AWS", "10", "11", false, false},
+                {"AWS", "10", "14", false, false},
+                {"AWS", "14", "14", false, false},
+                {"AWS", "14", "11", false, false},
         };
     }
 
@@ -722,6 +739,12 @@ class ExternalDatabaseServiceTest {
         verify(redbeamsClient, never()).upgradeByCrn(anyString(), any());
     }
 
+    @ParameterizedTest
+    @EnumSource(SdxDatabaseAvailabilityType.class)
+    void testEnumConversionPossible(SdxDatabaseAvailabilityType input) {
+        DatabaseAvailabilityType.valueOf(input.name());
+    }
+
     private void mockShortPollConfig() {
         PollingConfig config = PollingConfig.builder()
                 .withSleepTime(10)
@@ -730,7 +753,7 @@ class ExternalDatabaseServiceTest {
                 .withTimeoutTimeUnit(TimeUnit.MILLISECONDS)
                 .withStopPollingIfExceptionOccured(false)
                 .build();
-        when(dbPollConfig.getConfig()).thenReturn(config);
+        lenient().when(dbPollConfig.getConfig()).thenReturn(config);
     }
 
     private Database createDatabase(DatabaseAvailabilityType databaseAvailabilityType) {

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
@@ -36,10 +37,11 @@ import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseOperation;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseServerParameterDecorator;
 import com.sequenceiq.cloudbreak.service.externaldatabase.PollingConfig;
@@ -49,6 +51,7 @@ import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackCon
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.DatabaseType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -64,6 +67,9 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeTa
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.UpgradeDatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseResponse;
 
 @Service
 public class ExternalDatabaseService {
@@ -72,35 +78,32 @@ public class ExternalDatabaseService {
 
     private static final String SSL_ENFORCEMENT_MIN_RUNTIME_VERSION = "7.2.2";
 
-    private final PollingConfig dbPollingConfig;
+    @Inject
+    private ExternalDatabasePollingConfig dbPollingConfig;
 
-    private final RedbeamsClientService redbeamsClient;
+    @Inject
+    private RedbeamsClientService redbeamsClient;
 
-    private final ClusterRepository clusterRepository;
+    @Inject
+    private ClusterService clusterService;
 
-    private final Map<DatabaseStackConfigKey, DatabaseStackConfig> dbConfigs;
+    @Inject
+    private Map<DatabaseStackConfigKey, DatabaseStackConfig> dbConfigs;
 
-    private final Map<CloudPlatform, DatabaseServerParameterDecorator> parameterDecoratorMap;
+    @Inject
+    private Map<CloudPlatform, DatabaseServerParameterDecorator> parameterDecoratorMap;
 
-    private final DatabaseObtainerService databaseObtainerService;
+    @Inject
+    private DatabaseObtainerService databaseObtainerService;
 
-    private final ExternalDatabaseConfig externalDatabaseConfig;
+    @Inject
+    private ExternalDatabaseConfig externalDatabaseConfig;
 
-    private final CmTemplateProcessorFactory cmTemplateProcessorFactory;
+    @Inject
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
-    public ExternalDatabaseService(RedbeamsClientService redbeamsClient, ClusterRepository clusterRepository,
-            Map<DatabaseStackConfigKey, DatabaseStackConfig> dbConfigs, Map<CloudPlatform, DatabaseServerParameterDecorator> parameterDecoratorMap,
-            DatabaseObtainerService databaseObtainerService, ExternalDatabaseConfig externalDatabaseConfig,
-            CmTemplateProcessorFactory cmTemplateProcessorFactory, ExternalDatabasePollingConfig config) {
-        this.redbeamsClient = redbeamsClient;
-        this.clusterRepository = clusterRepository;
-        this.dbConfigs = dbConfigs;
-        this.parameterDecoratorMap = parameterDecoratorMap;
-        this.databaseObtainerService = databaseObtainerService;
-        this.externalDatabaseConfig = externalDatabaseConfig;
-        this.cmTemplateProcessorFactory = cmTemplateProcessorFactory;
-        this.dbPollingConfig = config.getConfig();
-    }
+    @Inject
+    private SdxClientService sdxClientService;
 
     public void provisionDatabase(Stack stack, DetailedEnvironmentResponse environment) {
         String databaseCrn;
@@ -224,9 +227,10 @@ public class ExternalDatabaseService {
 
     private void pollUntilFlowFinished(String databaseCrn, FlowIdentifier flowIdentifier) {
         try {
-            Boolean success = Polling.waitPeriodly(dbPollingConfig.getSleepTime(), dbPollingConfig.getSleepTimeUnit())
-                    .stopIfException(dbPollingConfig.getStopPollingIfExceptionOccured())
-                    .stopAfterDelay(dbPollingConfig.getTimeout(), dbPollingConfig.getTimeoutTimeUnit())
+            PollingConfig pollingConfig = dbPollingConfig.getConfig();
+            Boolean success = Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
+                    .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
+                    .stopAfterDelay(pollingConfig.getTimeout(), pollingConfig.getTimeoutTimeUnit())
                     .run(() -> pollFlowState(flowIdentifier));
             if (success == null || !success) {
                 String errorDescription;
@@ -290,7 +294,7 @@ public class ExternalDatabaseService {
 
     private void updateClusterWithDatabaseServerCrn(Cluster cluster, String databaseServerCrn) {
         cluster.setDatabaseServerCrn(databaseServerCrn);
-        clusterRepository.save(cluster);
+        clusterService.save(cluster);
     }
 
     private AllocateDatabaseServerV4Request getDatabaseRequest(Stack stack, DetailedEnvironmentResponse environment) {
@@ -363,30 +367,31 @@ public class ExternalDatabaseService {
 
     private DatabaseServerV4StackRequest getDatabaseServerStackRequest(CloudPlatform cloudPlatform, DatabaseAvailabilityType externalDatabase,
             String databaseEngineVersion, Map<String, Object> attributes, DetailedEnvironmentResponse environment, boolean multiAz) {
-        DatabaseStackConfig databaseStackConfig = dbConfigs.get(new DatabaseStackConfigKey(cloudPlatform,
-                parameterDecoratorMap.get(cloudPlatform).getDatabaseType(attributes).orElse(null)));
+        DatabaseType databaseType = parameterDecoratorMap.get(cloudPlatform).getDatabaseType(attributes).orElse(null);
+        DatabaseStackConfig databaseStackConfig = dbConfigs.get(new DatabaseStackConfigKey(cloudPlatform, databaseType));
         if (databaseStackConfig == null) {
             throw new BadRequestException("Database config for cloud platform " + cloudPlatform + " not found");
+        } else {
+            DatabaseServerV4StackRequest request = new DatabaseServerV4StackRequest();
+            request.setInstanceType(databaseStackConfig.getInstanceType());
+            request.setDatabaseVendor(databaseStackConfig.getVendor());
+            request.setStorageSize(databaseStackConfig.getVolumeSize());
+            DatabaseServerParameter serverParameter = DatabaseServerParameter.builder()
+                    .withAvailabilityType(externalDatabase)
+                    .withEngineVersion(databaseEngineVersion)
+                    .withAttributes(attributes)
+                    .build();
+            parameterDecoratorMap.get(cloudPlatform).setParameters(request, serverParameter, environment, multiAz);
+            if (Objects.isNull(request.getCloudPlatform())) {
+                request.setCloudPlatform(cloudPlatform);
+            }
+            return request;
         }
-        DatabaseServerV4StackRequest request = new DatabaseServerV4StackRequest();
-        request.setInstanceType(databaseStackConfig.getInstanceType());
-        request.setDatabaseVendor(databaseStackConfig.getVendor());
-        request.setStorageSize(databaseStackConfig.getVolumeSize());
-        DatabaseServerParameter serverParameter = DatabaseServerParameter.builder()
-                .withAvailabilityType(externalDatabase)
-                .withEngineVersion(databaseEngineVersion)
-                .withAttributes(attributes)
-                .build();
-        parameterDecoratorMap.get(cloudPlatform).setParameters(request, serverParameter, environment, multiAz);
-        if (Objects.isNull(request.getCloudPlatform())) {
-            request.setCloudPlatform(cloudPlatform);
-        }
-        return request;
     }
 
     private void waitAndGetDatabase(ClusterView cluster, String databaseCrn,
             DatabaseOperation databaseOperation, boolean cancellable) {
-        waitAndGetDatabase(cluster, databaseCrn, dbPollingConfig, databaseOperation, cancellable);
+        waitAndGetDatabase(cluster, databaseCrn, dbPollingConfig.getConfig(), databaseOperation, cancellable);
     }
 
     private void waitAndGetDatabase(ClusterView cluster, String databaseCrn, PollingConfig pollingConfig, DatabaseOperation databaseOperation,
@@ -410,11 +415,13 @@ public class ExternalDatabaseService {
         if (cloudPlatform == CloudPlatform.AZURE
                 && upgradeTargetVersionImpliesFlexibleServerMigration
                 && currentVersionImpliesFlexibleServerMigration) {
+            DatabaseAvailabilityType databaseAvailabilityType = fetchDatabaseAvailabilityType(stack);
+
             Map<String, Object> attributes = getAttributes(stack.getDatabase());
             attributes.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name());
             DatabaseServerV4StackRequest modifiedRequest = getDatabaseServerStackRequest(
                     cloudPlatform,
-                    stack.getExternalDatabaseCreationType(),
+                    databaseAvailabilityType,
                     majorVersion.getMajorVersion(),
                     attributes, environment, stack.getStack().isMultiAz());
             LOGGER.debug("Migration resulted in request: {}", modifiedRequest);
@@ -425,5 +432,27 @@ public class ExternalDatabaseService {
                 targetVersion,
                 cloudPlatform);
         return null;
+    }
+
+    private DatabaseAvailabilityType fetchDatabaseAvailabilityType(StackDto stack) {
+        if (stack.getStack().isDatalake()) {
+            SdxDatabaseAvailabilityType sdxDatabaseAvailabilityType = fetchAvailabilityTypeFromDl(stack);
+            return DatabaseAvailabilityType.valueOf(sdxDatabaseAvailabilityType.name());
+        } else {
+            return stack.getExternalDatabaseCreationType();
+        }
+    }
+
+    private SdxDatabaseAvailabilityType fetchAvailabilityTypeFromDl(StackDto stack) {
+        try {
+            SdxClusterResponse datalake = sdxClientService.getByCrnInternal(stack.getResourceCrn());
+            return Optional.ofNullable(datalake)
+                    .map(SdxClusterResponse::getSdxDatabaseResponse)
+                    .map(SdxDatabaseResponse::getAvailabilityType)
+                    .orElse(SdxDatabaseAvailabilityType.NONE);
+        } catch (Exception e) {
+            LOGGER.error("Fetching database availability type from DL service failed", e);
+            return SdxDatabaseAvailabilityType.NONE;
+        }
     }
 }

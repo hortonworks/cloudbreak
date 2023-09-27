@@ -45,6 +45,8 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
                     .withEnableMultiAz(sdxClusterResponse.isEnableMultiAz())
                     .withDatabaseEngineVersion(sdxClusterResponse.getDatabaseEngineVersion())
                     .withDatabaseServerCrn(sdxClusterResponse.getDatabaseServerCrn())
+                    .withDatabaseAvailabilityType(Optional.ofNullable(sdxClusterResponse.getSdxDatabaseResponse()).map(SdxDatabaseResponse::getAvailabilityType)
+                            .orElse(SdxDatabaseAvailabilityType.NONE))
                     .withCreated(sdxClusterResponse.getCreated());
         }
         return builder.withStackV4Response(stackV4Response).build();
@@ -119,6 +121,8 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
         private boolean detached;
 
         private String databaseEngineVersion;
+
+        private SdxDatabaseAvailabilityType databaseAvailabilityType;
 
         private Builder() {
         }
@@ -237,6 +241,11 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
             return this;
         }
 
+        public Builder withDatabaseAvailabilityType(SdxDatabaseAvailabilityType databaseAvailabilityType) {
+            this.databaseAvailabilityType = databaseAvailabilityType;
+            return this;
+        }
+
         public SdxClusterDetailResponse build() {
             SdxClusterDetailResponse sdxClusterDetailResponse = new SdxClusterDetailResponse();
             sdxClusterDetailResponse.setStackV4Response(stackV4Response);
@@ -261,6 +270,11 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
             sdxClusterDetailResponse.setSdxClusterServiceVersion(sdxClusterServiceVersion);
             sdxClusterDetailResponse.setDetached(detached);
             sdxClusterDetailResponse.setDatabaseEngineVersion(databaseEngineVersion);
+            SdxDatabaseResponse sdxDatabaseResponse = new SdxDatabaseResponse();
+            sdxDatabaseResponse.setAvailabilityType(databaseAvailabilityType);
+            sdxDatabaseResponse.setDatabaseEngineVersion(databaseEngineVersion);
+            sdxDatabaseResponse.setDatabaseServerCrn(databaseServerCrn);
+            sdxClusterDetailResponse.setSdxDatabaseResponse(sdxDatabaseResponse);
             return sdxClusterDetailResponse;
         }
     }
