@@ -218,7 +218,6 @@ public class RdsUpgradeOrchestratorService {
         if (primaryGwResult == null) {
             logErrorAndThrow("Orchestrator engine checking database size did not return any results on the primary gateway");
         }
-
         Iterable<String> fieldNames = primaryGwResult::fieldNames;
         String fieldName = StreamSupport
                 .stream(fieldNames.spliterator(), false)
@@ -227,15 +226,16 @@ public class RdsUpgradeOrchestratorService {
                 .orElse("");
 
         JsonNode dbSizeCommandOutput = primaryGwResult.get(fieldName);
-        if (dbSizeCommandOutput == null || dbSizeCommandOutput.get("changes") == null) {
+        JsonNode changes = dbSizeCommandOutput.get("changes");
+        if (dbSizeCommandOutput == null || changes == null) {
             logErrorAndThrow("Orchestrator engine could not run database size checking");
         }
 
-        JsonNode stdErr = dbSizeCommandOutput.get("changes").get("stderr");
+        JsonNode stdErr = changes.get("stderr");
         if (stdErr != null && !stdErr.textValue().isEmpty()) {
             logErrorAndThrow(String.format("Could not determine database size, because of the following error: %s", stdErr.textValue()));
         }
-        JsonNode dbSize = dbSizeCommandOutput.get("changes").get("stdout");
+        JsonNode dbSize = changes.get("stdout");
         if (dbSize == null || dbSize.textValue().isEmpty()) {
             logErrorAndThrow("Could not determine database size, because orchestration engine did not have return value");
         }
