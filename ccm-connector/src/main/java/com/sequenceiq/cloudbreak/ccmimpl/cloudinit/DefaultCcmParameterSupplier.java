@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto;
 import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.GenerateAndRegisterSshTunnelingKeyPairResponse;
@@ -79,8 +80,8 @@ public class DefaultCcmParameterSupplier implements CcmParameterSupplier {
     public Optional<CcmParameters> getCcmParameters(
             @Nullable CcmParameters baseCcmParameters,
             @Nullable Map<KnownServiceIdentifier, Integer> tunneledServicePorts) {
-        return (baseCcmParameters == null || tunneledServicePorts == null || tunneledServicePorts.isEmpty()) ? Optional.empty() : Optional.of(
-                new DefaultCcmParameters(
+        return (baseCcmParameters == null || tunneledServicePorts == null || CollectionUtils.isEmpty(tunneledServicePorts)) ?
+                Optional.empty() : Optional.of(new DefaultCcmParameters(
                         baseCcmParameters.getServerParameters(),
                         baseCcmParameters.getInstanceParameters(),
                         tunneledServicePorts.entrySet().stream()
