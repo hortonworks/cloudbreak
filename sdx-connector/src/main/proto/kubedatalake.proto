@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package kubedatalake;
+
+option java_package = "com.cloudera.thunderhead.service.kubedatalake";
+option java_outer_classname = "KubeDataLakeProto";
+
+import "version.proto";
+import "options.proto";
+import "resources.proto";
+
+// For future compatibility, all rpcs must take a request and return a response
+// even if there is initially no content for these messages.
+service KubeDataLake {
+
+  // Create a Datalake
+  rpc CreateDatalake (CreateDatalakeRequest)
+      returns (CreateDatalakeResponse) {}
+
+  // Delete a Datalake
+  rpc DeleteDatalake (DeleteDatalakeRequest)
+      returns (DeleteDatalakeResponse) {}
+
+  // Describe a Datalake
+  rpc DescribeDatalake (DescribeDatalakeRequest)
+      returns (DescribeDatalakeResponse) {}
+}
+
+// Database availability type
+message DatabaseAvailabilityType {
+  enum Value {
+    // Field is not set
+    UNSET = 0;
+    // None
+    NONE = 1;
+    // Not Highly Available
+    NON_HA = 2;
+    // Highly Available
+    HA = 3;
+  }
+}
+// Create Datalake request
+message CreateDatalakeRequest {
+  // Name of the Datalake
+  string name = 1;
+  // CRN of the environment in which the cluster is created
+  string env = 2;
+  // The database availability type
+  DatabaseAvailabilityType.Value type = 3;
+}
+
+// Create Datalake response
+message CreateDatalakeResponse {
+  // CRN of the Datalake
+  string crn = 1;
+  // Status of the Datalake
+  string status = 2;
+}
+
+// Delete Datalake request
+message DeleteDatalakeRequest {
+  // Name or CRN of the Datalake
+  string datalake = 1;
+}
+
+// Delete Datalake response
+message DeleteDatalakeResponse {
+  // CRN of the Datalake
+  string crn = 1;
+  // Status of the Datalake
+  string status = 2;
+}
+
+// Describe Datalake request
+message DescribeDatalakeRequest {
+  // Name or CRN of the Datalake
+  string datalake = 1;
+}
+
+// Describe Datalake response
+message DescribeDatalakeResponse {}
