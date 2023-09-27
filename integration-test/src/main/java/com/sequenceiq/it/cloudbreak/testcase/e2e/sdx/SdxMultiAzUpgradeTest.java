@@ -103,10 +103,6 @@ public class SdxMultiAzUpgradeTest extends PreconditionSdxE2ETest {
                         return testDto;
                     })
                     .when(sdxTestClient.osUpgrade(cdhImages.get(cdhImages.size() - 1).getUuid()), key(sdx))
-                    .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
-                    .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                    .awaitForHealthyInstances()
-                    .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
                     .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                     .awaitForHealthyInstances()
                     .then((tc, testDto, client) -> {
