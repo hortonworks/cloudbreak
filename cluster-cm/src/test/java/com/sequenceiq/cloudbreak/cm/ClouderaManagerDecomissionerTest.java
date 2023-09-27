@@ -326,6 +326,36 @@ class ClouderaManagerDecomissionerTest {
         verify(clouderaManagerResourceApi, times(0)).hostsStopRolesCommand(any());
     }
 
+    @Test
+    public void testEnterMaintenanceMode() throws ApiException {
+        Set<String> hostList = new HashSet<>(Arrays.asList("host1", "host2", "host3"));
+        ApiHost host1 = new ApiHost().hostname("host1").hostId("host1Id");
+        ApiHost host2 = new ApiHost().hostname("host2").hostId("host2Id");
+        List<ApiHost> apiHostList = Arrays.asList(host1, host2);
+        ApiHostList hostListResponse = new ApiHostList().items(apiHostList);
+
+        when(clouderaManagerApiFactory.getHostsResourceApi(any())).thenReturn(hostsResourceApi);
+        when(hostsResourceApi.readHosts(null, null, "SUMMARY")).thenReturn(hostListResponse);
+        when(hostsResourceApi.enterMaintenanceMode(any())).thenReturn(null);
+
+        underTest.enterMaintenanceMode(hostList, client);
+
+        verify(hostsResourceApi, times(2)).enterMaintenanceMode(any());
+    }
+
+    @Test
+    public void testEnterMaintenanceModeWhenNull() throws ApiException {
+        Set<String> hostList = new HashSet<>(Arrays.asList("host1", "host2", "host3"));
+        ApiHostList hostListResponse = new ApiHostList().items(null);
+
+        when(clouderaManagerApiFactory.getHostsResourceApi(any())).thenReturn(hostsResourceApi);
+        when(hostsResourceApi.readHosts(null, null, "SUMMARY")).thenReturn(hostListResponse);
+
+        underTest.enterMaintenanceMode(hostList, client);
+
+        verify(hostsResourceApi, times(0)).enterMaintenanceMode(any());
+    }
+
     private InstanceGroup createInstanceGroup() {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceMetaData(Set.of(createDeletedInstanceMetadata(), createRunningInstanceMetadata()));

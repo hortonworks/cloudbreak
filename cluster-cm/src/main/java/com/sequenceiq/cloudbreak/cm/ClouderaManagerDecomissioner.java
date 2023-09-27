@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
@@ -305,16 +306,23 @@ public class ClouderaManagerDecomissioner {
         LOGGER.debug("Attempting to put {} instances into CM maintenance mode", hostList == null ? 0 : hostList.size());
         try {
             ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, SUMMARY_REQUEST_VIEW);
-            availableHostsIdsFromCm = hostRefList.getItems().stream()
-                    .filter(apiHostRef -> hostList.contains(apiHostRef.getHostname()))
-                    .parallel()
-                    .map(ApiHost::getHostId)
-                    .collect(Collectors.toList());
+            List<ApiHost> items = hostRefList.getItems();
+            if (!CollectionUtils.isEmpty(items)) {
+                availableHostsIdsFromCm = items.stream()
+                        .filter(apiHostRef -> hostList.contains(apiHostRef.getHostname()))
+                        .parallel()
+                        .map(ApiHost::getHostId)
+                        .collect(Collectors.toList());
+            }
 
-            for (String hostId : availableHostsIdsFromCm) {
-                currentHostId = hostId;
-                hostsResourceApi.enterMaintenanceMode(hostId);
-                successCount++;
+            if (!CollectionUtils.isEmpty(availableHostsIdsFromCm)) {
+                for (String hostId : availableHostsIdsFromCm) {
+                    currentHostId = hostId;
+                    hostsResourceApi.enterMaintenanceMode(hostId);
+                    successCount++;
+                }
+            } else {
+                LOGGER.info("availableHostsIdsFromCm property null which means CM API could not return back any host.");
             }
             LOGGER.debug("Finished putting {} instances into CM maintenance mode. Initial request size: {}, CM availableCount: {}",
                     successCount, hostList == null ? 0 : hostList.size(), availableHostsIdsFromCm == null ? "null" : availableHostsIdsFromCm);
