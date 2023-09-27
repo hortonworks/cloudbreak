@@ -32,4 +32,16 @@ class EventGenerationIdsCheckerTest {
 
         assertTrue(underTest.isInSync(userSyncStatus, currentEventGenerationIds));
     }
+
+    @Test
+    void testIsNotInSyncWhenCrnAndAccountIdNull() {
+        Stack stack = new Stack();
+        stack.setAccountId(null);
+        stack.setEnvironmentCrn(null);
+        UmsEventGenerationIds currentEventGenerationIds = UserSyncTestUtils.createUniqueUmsEventGenerationIds();
+        UserSyncStatus userSyncStatus = UserSyncTestUtils.createUserSyncStatus(stack);
+        userSyncStatus.setUmsEventGenerationIds(new Json(UserSyncTestUtils.createUniqueUmsEventGenerationIds()));
+
+        assertFalse(underTest.isInSync(userSyncStatus, currentEventGenerationIds));
+    }
 }

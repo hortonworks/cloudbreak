@@ -15,7 +15,6 @@ public class EventGenerationIdsChecker {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventGenerationIdsChecker.class);
 
     public boolean isInSync(UserSyncStatus userSyncStatus, UmsEventGenerationIds currentGeneration) {
-        Stack stack = userSyncStatus.getStack();
         boolean inSync = userSyncStatus != null &&
                 userSyncStatus.getUmsEventGenerationIds() != null;
         if (inSync) {
@@ -24,12 +23,28 @@ public class EventGenerationIdsChecker {
                 inSync = currentGeneration.equals(lastUmsEventGenerationIds);
             } catch (IOException e) {
                 LOGGER.warn("Failed to retrieve UmsEventGenerationIds for Environment {} in Account {}. Assuming not in sync",
-                        stack.getEnvironmentCrn(), stack.getAccountId());
+                        getEnvironmentCrn(userSyncStatus), getAccountId(userSyncStatus));
                 inSync = false;
             }
         }
-        LOGGER.debug("Environment {} in Account {} {} in sync", stack.getEnvironmentCrn(), stack.getAccountId(), inSync ? "is" : "is not");
+        LOGGER.debug("Environment {} in Account {} {} in sync", getEnvironmentCrn(userSyncStatus), getAccountId(userSyncStatus), inSync ? "is" : "is not");
         return inSync;
+    }
+
+    private String getEnvironmentCrn(UserSyncStatus userSyncStatus) {
+        Stack stack = userSyncStatus != null ? userSyncStatus.getStack() : null;
+        if (stack != null) {
+            return stack.getEnvironmentCrn();
+        }
+        return null;
+    }
+
+    private String getAccountId(UserSyncStatus userSyncStatus) {
+        Stack stack = userSyncStatus != null ? userSyncStatus.getStack() : null;
+        if (stack != null) {
+            return stack.getAccountId();
+        }
+        return null;
     }
 
 }
