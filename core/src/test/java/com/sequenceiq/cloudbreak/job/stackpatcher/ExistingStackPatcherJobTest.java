@@ -16,6 +16,8 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -140,6 +142,18 @@ class ExistingStackPatcherJobTest {
 
         verify(existingStackPatchService).apply(stack);
         verify(stackPatchService).updateStatusAndReportUsage(stackPatch, StackPatchStatus.AFFECTED);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = StackPatchStatus.class, names = {"FAILED", "SKIPPED", "AFFECTED", "UNKNOWN"})
+    void shouldApplyButNotReportWhenStackPatchWasAlreadyTried(StackPatchStatus stackPatchStatus) throws Exception {
+        stackPatch.setStatus(stackPatchStatus);
+        when(existingStackPatchService.isAffected(stack)).thenReturn(true);
+
+        underTest.executeTracedJob(context);
+
+        verify(existingStackPatchService).apply(stack);
+        verify(stackPatchService).updateStatus(stackPatch, StackPatchStatus.AFFECTED);
     }
 
     @Test
