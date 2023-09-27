@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowEventProvider;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
+import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationValidationService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -46,6 +47,9 @@ public class FreeIpaSecretRotationService implements SecretRotationFlowEventProv
     @Inject
     private MultiClusterRotationValidationService multiClusterRotationValidationService;
 
+    @Inject
+    private MultiClusterRotationService multiClusterRotationService;
+
     public FlowIdentifier rotateSecretsByCrn(String accountId, String environmentCrn, FreeIpaSecretRotationRequest request) {
         LOGGER.info("Requested secret rotation. Account id: {}, environment crn: {}, request: {}", accountId, environmentCrn, request);
         if (!entitlementService.isSecretRotationEnabled(accountId)) {
@@ -60,6 +64,10 @@ public class FreeIpaSecretRotationService implements SecretRotationFlowEventProv
         Acceptable triggerEvent = new SecretRotationFlowChainTriggerEvent(
                 selector, stack.getId(), stack.getEnvironmentCrn(), secretTypes, request.getExecutionType());
         return flowManager.notify(selector, triggerEvent);
+    }
+
+    public void deleteMultiClusterRotationMarks(String environmentCrn) {
+        multiClusterRotationService.deleteAllByCrn(environmentCrn);
     }
 
     @Override

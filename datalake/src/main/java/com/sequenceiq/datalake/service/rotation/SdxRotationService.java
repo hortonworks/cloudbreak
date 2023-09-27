@@ -175,8 +175,13 @@ public class SdxRotationService {
         }
     }
 
+    public void deleteMultiClusterRotationMarks(String datalakeCrn) {
+        multiClusterRotationService.deleteAllByCrn(datalakeCrn);
+    }
+
     private Set<String> getSdxCrnsByEnvironmentCrn(String parentCrn) {
         return sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsFalse(
                 Crn.safeFromString(parentCrn).getAccountId(), parentCrn).stream().map(SdxCluster::getCrn).collect(Collectors.toSet());
     }
+
 }

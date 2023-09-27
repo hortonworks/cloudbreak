@@ -44,6 +44,10 @@ public class MultiClusterRotationService {
                 metadata.multiSecretType().orElseThrow(), type);
     }
 
+    public void deleteAllByCrn(String crn) {
+        multiClusterRotationResourceRepository.deleteAllByResourceCrn(crn);
+    }
+
     public void updateMultiRotationEntriesAfterRotate(RotationMetadata metadata) {
         metadata.multiSecretType().ifPresent(secretType -> {
             CrnResourceDescriptor crnResourceDescriptor = CrnResourceDescriptor.getByCrnString(metadata.resourceCrn());

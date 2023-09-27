@@ -21,6 +21,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.rotation.SdxRotationService;
 import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -46,6 +47,9 @@ public class SdxDeleteService {
     @Inject
     private DistroxService distroxService;
 
+    @Inject
+    private SdxRotationService sdxRotationService;
+
     public FlowIdentifier deleteSdxByClusterCrn(String accountId, String clusterCrn, boolean forced) {
         LOGGER.info("Deleting SDX {}", clusterCrn);
         return sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountId, clusterCrn)
@@ -67,6 +71,7 @@ public class SdxDeleteService {
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxDeletion(sdxCluster, forced);
         flowCancelService.cancelRunningFlows(sdxCluster.getId());
+        sdxRotationService.deleteMultiClusterRotationMarks(sdxCluster.getCrn());
         return flowIdentifier;
     }
 

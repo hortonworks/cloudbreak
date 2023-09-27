@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,6 +44,7 @@ import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState;
 import com.sequenceiq.freeipa.flow.stack.termination.event.TerminationEvent;
 import com.sequenceiq.freeipa.nodestatus.NodeStatusJobService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.rotation.FreeIpaSecretRotationService;
 import com.sequenceiq.freeipa.sync.FreeipaJobService;
 
 @ExtendWith(MockitoExtension.class)
@@ -84,6 +86,9 @@ class FreeIpaDeletionServiceTest {
     private ApplicationFlowInformation applicationFlowInformation;
 
     @Mock
+    private FreeIpaSecretRotationService freeIpaSecretRotationService;
+
+    @Mock
     private Clock clock;
 
     private Stack stack;
@@ -96,6 +101,7 @@ class FreeIpaDeletionServiceTest {
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.AVAILABLE);
         stack.setStackStatus(stackStatus);
+        lenient().doNothing().when(freeIpaSecretRotationService).deleteMultiClusterRotationMarks(anyString());
     }
 
     @Test

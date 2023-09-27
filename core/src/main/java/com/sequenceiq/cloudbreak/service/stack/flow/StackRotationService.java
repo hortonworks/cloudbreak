@@ -80,6 +80,10 @@ public class StackRotationService {
         multiClusterRotationService.markChildrenMultiRotationEntriesLocally(crns, secret);
     }
 
+    public void deleteMultiClusterRotationMakes(String crn) {
+        multiClusterRotationService.deleteAllByCrn(crn);
+    }
+
     private Set<String> getCrnsByParentCrn(String parentCrn) {
         Set<String> crns = Set.of();
         if (CrnResourceDescriptor.getByCrnString(parentCrn).equals(ENVIRONMENT)) {

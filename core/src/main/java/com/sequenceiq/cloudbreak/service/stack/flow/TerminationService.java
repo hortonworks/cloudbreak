@@ -78,6 +78,9 @@ public class TerminationService {
     @Inject
     private FinalizationCleanUpService cleanUpService;
 
+    @Inject
+    private StackRotationService stackRotationService;
+
     public void finalizeTermination(Long stackId, boolean force) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Date now = new Date();
@@ -154,6 +157,7 @@ public class TerminationService {
             });
             if (stack.getType().equals(StackType.WORKLOAD)) {
                 ownerAssignmentService.notifyResourceDeleted(stack.getResourceCrn());
+                stackRotationService.deleteMultiClusterRotationMakes(stack.getResourceCrn());
             }
         } catch (TransactionService.TransactionExecutionException e) {
             throw e.getCause();

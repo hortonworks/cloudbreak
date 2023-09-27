@@ -29,6 +29,7 @@ import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState;
 import com.sequenceiq.freeipa.flow.stack.termination.event.TerminationEvent;
 import com.sequenceiq.freeipa.nodestatus.NodeStatusJobService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.rotation.FreeIpaSecretRotationService;
 import com.sequenceiq.freeipa.sync.FreeipaJobService;
 
 @Service
@@ -63,6 +64,9 @@ public class FreeIpaDeletionService {
     @Inject
     private Clock clock;
 
+    @Inject
+    private FreeIpaSecretRotationService freeIpaSecretRotationService;
+
     public void delete(String environmentCrn, String accountId, boolean forced) {
         List<Stack> stacks = stackService.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         if (stacks.isEmpty()) {
@@ -70,6 +74,7 @@ public class FreeIpaDeletionService {
         }
         stacks.forEach(stack -> validateDeletion(stack, accountId));
         stacks.forEach(stack -> unscheduleAndTriggerTerminate(stack, forced));
+        freeIpaSecretRotationService.deleteMultiClusterRotationMarks(environmentCrn);
     }
 
     private void unscheduleAndTriggerTerminate(Stack stack, boolean forced) {
