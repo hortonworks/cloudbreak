@@ -172,8 +172,11 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
             Long requestTime = (Long) context.getProperty(REQUEST_TIME);
             RestRequestDetails restRequest = (RestRequestDetails) context.getProperty(REQUEST_DETAILS);
             RestResponseDetails restResponse = (RestResponseDetails) context.getProperty(RESPONSE_DETAILS);
-            String responseBody = ((LoggingStream) context.getProperty(RESPONSE_LOGGING_STREAM)).getStringBuilder(
-                    MessageUtils.getCharset(context.getMediaType())).toString();
+            LoggingStream responseLoggingStream = (LoggingStream) context.getProperty(RESPONSE_LOGGING_STREAM);
+            String responseBody = null;
+            if (responseLoggingStream != null) {
+                responseBody = responseLoggingStream.getStringBuilder(MessageUtils.getCharset(context.getMediaType())).toString();
+            }
             Map<String, String> restParams = (Map<String, String>) context.getProperty(REST_PARAMS);
             if (restParams == null) {
                 restParams = new HashMap<>();
@@ -317,10 +320,21 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
             resourceCrn = restParams.get(LegacyRestUrlParser.RESOURCE_CRN);
             resourceEvent = restParams.get(LegacyRestUrlParser.RESOURCE_EVENT);
         }
-        return new OperationDetails(requestTime, REST, resourceType, StringUtils.isNotEmpty(resourceId) ? Long.valueOf(resourceId) : null, resourceName,
-                nodeConfig.getId(), cbVersion, workspaceId,
-                cloudbreakUser != null ? cloudbreakUser.getUserId() : "", cloudbreakUser != null ? cloudbreakUser.getUsername() : "",
-                cloudbreakUser.getTenant(), resourceCrn, cloudbreakUser.getUserCrn(), null, resourceEvent);
+        return new OperationDetails(requestTime,
+                REST,
+                resourceType,
+                StringUtils.isNotEmpty(resourceId) ? Long.valueOf(resourceId) : null,
+                resourceName,
+                nodeConfig.getId(),
+                cbVersion,
+                workspaceId,
+                cloudbreakUser != null ? cloudbreakUser.getUserId() : "",
+                cloudbreakUser != null ? cloudbreakUser.getUsername() : "",
+                cloudbreakUser != null ? cloudbreakUser.getTenant() : "",
+                resourceCrn,
+                cloudbreakUser != null ? cloudbreakUser.getUserCrn() : "",
+                null,
+                resourceEvent);
 
     }
 }
