@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
@@ -28,6 +29,8 @@ import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.AbstractRedbeamsProvisionAction;
 import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionState;
+import com.sequenceiq.redbeams.flow.redbeams.provision.event.RedbeamsEventToTriggerRedbeamsProvisionEventPayloadConverter;
+import com.sequenceiq.redbeams.flow.redbeams.provision.event.TriggerRedbeamsProvisionEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.UpdateDatabaseServerRegistrationRequest;
@@ -57,22 +60,23 @@ public class RedbeamsProvisionActions {
 
     @Bean(name = "ALLOCATE_DATABASE_SERVER_STATE")
     public Action<?, ?> allocateDatabaseServer() {
-        return new AbstractRedbeamsProvisionAction<>(RedbeamsEvent.class) {
+        return new AbstractRedbeamsProvisionAction<>(TriggerRedbeamsProvisionEvent.class) {
 
             @Override
-            protected void prepareExecution(RedbeamsEvent payload, Map<Object, Object> variables) {
+            protected void prepareExecution(TriggerRedbeamsProvisionEvent payload, Map<Object, Object> variables) {
                 dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.CREATING_INFRASTRUCTURE);
             }
 
             @Override
-            protected Selectable createRequest(RedbeamsContext context) {
-                return new AllocateDatabaseServerRequest(
-                        context.getCloudContext(),
-                        context.getCloudCredential(),
-                        context.getDatabaseStack()
-                );
+            protected void doExecute(RedbeamsContext context, TriggerRedbeamsProvisionEvent payload, Map<Object, Object> variables) {
+                sendEvent(context, new AllocateDatabaseServerRequest(context.getCloudContext(), context.getCloudCredential(), context.getDatabaseStack(),
+                        payload.getNetworkParameters()));
             }
 
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<TriggerRedbeamsProvisionEvent>> payloadConverters) {
+                payloadConverters.add(new RedbeamsEventToTriggerRedbeamsProvisionEventPayloadConverter());
+            }
         };
     }
 
@@ -93,7 +97,6 @@ public class RedbeamsProvisionActions {
                         )
                 );
             }
-
         };
     }
 

@@ -163,7 +163,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
         if (validationResult.hasError()) {
             throw new IllegalArgumentException(validationResult.getFormattedErrors());
         }
-        DBStack savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack, request.getClusterCrn());
+        DBStack savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack, request.getClusterCrn(), request.getNetwork());
         return dbStackToDatabaseServerStatusV4ResponseConverter.convert(savedDBStack);
     }
 

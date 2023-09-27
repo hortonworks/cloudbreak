@@ -17,8 +17,8 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
+import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.service.EnvironmentService;
@@ -52,23 +52,21 @@ public class NetworkBuilderService {
     @Inject
     private NetworkService networkService;
 
-    public Network buildNetwork(NetworkV4StackRequest source, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform,
-            DBStack dbStack) {
+    public Network buildNetwork(ProviderParametersBase source, DetailedEnvironmentResponse environmentResponse, DBStack dbStack) {
         Network network = new Network();
         network.setName(generateNetworkName());
 
-        Map<String, Object> parameters = source != null
+        Map<String, Object> parameters = new HashMap<>(source != null
                 ? providerParameterCalculator.get(source).asMap()
-                : getSubnetsFromEnvironment(environmentResponse, cloudPlatform, dbStack);
+                : getSubnetsFromEnvironment(environmentResponse, dbStack));
 
-        networkParameterAdder.addParameters(parameters, environmentResponse, cloudPlatform, dbStack);
+        parameters.putAll(networkParameterAdder.addParameters(environmentResponse, dbStack));
 
-        if (parameters != null) {
-            try {
-                network.setAttributes(new Json(parameters));
-            } catch (IllegalArgumentException e) {
-                throw new BadRequestException("Invalid network parameters", e);
-            }
+        try {
+            LOGGER.debug("Set up network parameters: {}", parameters);
+            network.setAttributes(new Json(parameters));
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid network parameters", e);
         }
         return networkService.save(network);
     }
@@ -77,7 +75,7 @@ public class NetworkBuilderService {
         String cloudPlatform = dbStack.getCloudPlatform();
         if (cloudParameterCache.isDbSubnetsUpdateEnabled(cloudPlatform)) {
             DetailedEnvironmentResponse environment = environmentService.getByCrn(dbStack.getEnvironmentId());
-            Map<String, Object> envSubnets = getSubnetsFromEnvironment(environment, CloudPlatform.valueOf(cloudPlatform), dbStack);
+            Map<String, Object> envSubnets = getSubnetsFromEnvironment(environment,  dbStack);
             Network network = networkService.getById(dbStack.getNetwork());
             Map<String, Object> networkAttributes = network.getAttributes().getMap();
             networkAttributes.putAll(envSubnets);
@@ -89,10 +87,10 @@ public class NetworkBuilderService {
         }
     }
 
-    private Map<String, Object> getSubnetsFromEnvironment(DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform,
-            DBStack dbStack) {
+    private Map<String, Object> getSubnetsFromEnvironment(DetailedEnvironmentResponse environmentResponse, DBStack dbStack) {
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(dbStack.getCloudPlatform());
         List<CloudSubnet> subnets = subnetListerService.listSubnets(environmentResponse, cloudPlatform);
-        List<CloudSubnet> chosenSubnet = subnetChooserService.chooseSubnets(subnets, cloudPlatform, dbStack);
+        List<CloudSubnet> chosenSubnet = subnetChooserService.chooseSubnets(subnets, dbStack);
 
         List<String> chosenSubnetIds = chosenSubnet
                 .stream()
@@ -103,7 +101,7 @@ public class NetworkBuilderService {
                 .map(CloudSubnet::getAvailabilityZone)
                 .collect(Collectors.toList());
 
-        return networkParameterAdder.addSubnetIds(new HashMap<>(), chosenSubnetIds, chosenAzs, cloudPlatform);
+        return networkParameterAdder.addSubnetIds(chosenSubnetIds, chosenAzs, cloudPlatform);
     }
 
     private String generateNetworkName() {

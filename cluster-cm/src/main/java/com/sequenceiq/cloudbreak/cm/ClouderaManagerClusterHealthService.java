@@ -67,13 +67,13 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 @Scope("prototype")
 public class ClouderaManagerClusterHealthService implements ClusterHealthService {
 
-    static final String HOST_SCM_HEALTH = "HOST_SCM_HEALTH";
+    private static final String HOST_SCM_HEALTH = "HOST_SCM_HEALTH";
 
-    static final String FULL_WITH_HEALTH_CHECK_EXPLANATION = "FULL_WITH_HEALTH_CHECK_EXPLANATION";
+    private static final String FULL_WITH_HEALTH_CHECK_EXPLANATION = "FULL_WITH_HEALTH_CHECK_EXPLANATION";
 
-    static final String HOST_AGENT_CERTIFICATE_EXPIRY = "HOST_AGENT_CERTIFICATE_EXPIRY";
+    private static final String HOST_AGENT_CERTIFICATE_EXPIRY = "HOST_AGENT_CERTIFICATE_EXPIRY";
 
-    static final String NODE_MANAGER_CONNECTIVITY = "NODE_MANAGER_CONNECTIVITY";
+    private static final String NODE_MANAGER_CONNECTIVITY = "NODE_MANAGER_CONNECTIVITY";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClusterHealthService.class);
 
@@ -131,7 +131,7 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
         List<ApiHost> apiHosts = getHostsFromCM();
         Map<HostName, Optional<DetailedHostHealthCheck>> hostsHealth = apiHosts.stream().collect(Collectors.toMap(
                 apiHost -> hostName(apiHost.getHostname()),
-                ClouderaManagerClusterHealthService::getDetailedHostHealthCheck));
+                this::getDetailedHostHealthCheck));
 
         Map<HostName, Optional<DetailedServicesHealthCheck>> servicesHealth = apiHosts.stream().collect(Collectors.toMap(
                 apiHost -> hostName(apiHost.getHostname()),
@@ -139,7 +139,7 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
 
         Map<HostName, Optional<DetailedCertHealthCheck>>  certHealth = apiHosts.stream().collect(Collectors.toMap(
                 apiHost -> hostName(apiHost.getHostname()),
-                ClouderaManagerClusterHealthService::getDetailedCertificateCheck));
+                this::getDetailedCertificateCheck));
 
         DetailedHostStatuses detailedHostStatuses = new DetailedHostStatuses(hostsHealth, servicesHealth, certHealth);
 
@@ -179,7 +179,7 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
         }
     }
 
-    private static Optional<DetailedHostHealthCheck> getDetailedHostHealthCheck(ApiHost apiHost) {
+    private Optional<DetailedHostHealthCheck> getDetailedHostHealthCheck(ApiHost apiHost) {
         return emptyIfNull(apiHost.getHealthChecks()).stream()
                 .filter(health -> HOST_SCM_HEALTH.equals(health.getName()))
                 .filter(health -> !IGNORED_HEALTH_SUMMARIES.contains(health.getSummary()))
@@ -189,7 +189,7 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
                         HostCommissionState.valueOf(apiHost.getCommissionState().getValue()), apiHost.getLastHeartbeat()));
     }
 
-    private static Optional<DetailedServicesHealthCheck> getDetailedServicesHealthCheck(ApiHost apiHost, Optional<String> runtimeVersion) {
+    private Optional<DetailedServicesHealthCheck> getDetailedServicesHealthCheck(ApiHost apiHost, Optional<String> runtimeVersion) {
         if (CMRepositoryVersionUtil.isCmServicesHealthCheckAllowed(runtimeVersion)) {
             Set<String> servicesWithBadHealth = emptyIfNull(apiHost.getRoleRefs()).stream()
                     .filter(roleRef -> nonNull(roleRef.getHealthSummary()))
@@ -227,7 +227,7 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
         return emptyIfNull(role.getHealthChecks()).stream().anyMatch(disconnectedNMCheck);
     }
 
-    private static Optional<DetailedCertHealthCheck> getDetailedCertificateCheck(ApiHost apiHost) {
+    private Optional<DetailedCertHealthCheck> getDetailedCertificateCheck(ApiHost apiHost) {
         return emptyIfNull(apiHost.getHealthChecks()).stream()
                 .filter(health -> HOST_AGENT_CERTIFICATE_EXPIRY.equals(health.getName()))
                 .findFirst()
@@ -235,14 +235,14 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
                         new DetailedCertHealthCheck(healthSummaryToHealthCheckResult(apiHealthCheck.getSummary()), apiHealthCheck.getExplanation()));
     }
 
-    private static HealthCheckResult healthSummaryToHealthCheckResult(ApiHealthSummary apiHealthSummary) {
+    private HealthCheckResult healthSummaryToHealthCheckResult(ApiHealthSummary apiHealthSummary) {
         if (GOOD.equals(apiHealthSummary)) {
             return HEALTHY;
         }
         return UNHEALTHY;
     }
 
-    private static boolean isRoleStopped(ApiRoleState apiRoleState) {
+    private boolean isRoleStopped(ApiRoleState apiRoleState) {
         return switch (apiRoleState) {
             case STOPPED, STOPPING -> true;
             default -> false;

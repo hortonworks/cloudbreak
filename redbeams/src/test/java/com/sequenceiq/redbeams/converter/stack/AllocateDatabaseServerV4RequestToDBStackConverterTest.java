@@ -2,12 +2,12 @@ package com.sequenceiq.redbeams.converter.stack;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -61,14 +61,12 @@ import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
-import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
 import com.sequenceiq.redbeams.service.AccountTagService;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.UuidGeneratorService;
 import com.sequenceiq.redbeams.service.crn.CrnService;
-import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 import com.sequenceiq.redbeams.service.sslcertificate.SslConfigService;
 
 @ExtendWith(MockitoExtension.class)
@@ -140,9 +138,6 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     private AccountTagService accountTagService;
 
     @Mock
-    private NetworkBuilderService networkBuilderService;
-
-    @Mock
     private SslConfigService sslConfigService;
 
     @Mock
@@ -202,9 +197,6 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                 .withTag(new TagResponse())
                 .build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
-        Network network = new Network();
-        network.setId(NETWORK_ID);
-        when(networkBuilderService.buildNetwork(eq(networkRequest), eq(environment), eq(AWS_CLOUD_PLATFORM), any(DBStack.class))).thenReturn(network);
 
         SslConfig sslConfig = new SslConfig();
         sslConfig.setId(16L);
@@ -229,7 +221,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals(DetailedDBStackStatus.PROVISION_REQUESTED, dbStack.getDbStackStatus().getDetailedDBStackStatus());
         assertEquals(NOW.toEpochMilli(), dbStack.getDbStackStatus().getCreated().longValue());
         assertEquals(databaseServer, dbStack.getDatabaseServer());
-        assertEquals(NETWORK_ID, dbStack.getNetwork());
+        assertNull(dbStack.getNetwork());
         assertEquals(dbStack.getTags().get(StackTags.class).getUserDefinedTags().get("DistroXKey1"), "DistroXValue1");
 
         verifySsl(dbStack, sslConfig.getId());
@@ -268,9 +260,6 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                 .build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         when(userGeneratorService.generateUserName()).thenReturn(USERNAME);
-        Network network = new Network();
-        network.setId(NETWORK_ID);
-        when(networkBuilderService.buildNetwork(isNull(), eq(environment), eq(AWS_CLOUD_PLATFORM), any(DBStack.class))).thenReturn(network);
         SslConfig sslConfig = new SslConfig();
         sslConfig.setId(16L);
         when(sslConfigService.createSslConfig(eq(allocateRequest), any(DBStack.class))).thenReturn(sslConfig);

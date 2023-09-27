@@ -27,13 +27,17 @@ import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.OperationException;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
+import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
+import com.sequenceiq.redbeams.service.EnvironmentService;
+import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificatePrescriptionService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
@@ -62,6 +66,15 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
     @Inject
     private DBStackService dbStackService;
 
+    @Inject
+    private NetworkBuilderService networkBuilderService;
+
+    @Inject
+    private EnvironmentService environmentService;
+
+    @Inject
+    private DBStackToDatabaseStackConverter dbStackToDatabaseStackConverter;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(AllocateDatabaseServerRequest.class);
@@ -78,8 +91,8 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             CloudCredential cloudCredential = request.getCloudCredential();
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
-            DatabaseStack databaseStack = request.getDatabaseStack();
             DBStack dbStack = dbStackService.getById(request.getResourceId());
+            DatabaseStack databaseStack = setupNetworkIfMissing(request, dbStack);
             databaseServerSslCertificatePrescriptionService.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
             List<CloudResourceStatus> resourceStatuses = connector.resources().launchDatabaseServer(ac, databaseStack, persistenceNotifier);
             List<CloudResource> resources = ResourceLists.transform(resourceStatuses);
@@ -97,6 +110,20 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
             LOGGER.warn("Error launching the database stack:", e);
         }
         return response;
+    }
+
+    private DatabaseStack setupNetworkIfMissing(AllocateDatabaseServerRequest request, DBStack dbStack) {
+        DatabaseStack databaseStack = request.getDatabaseStack();
+        if (dbStack.getNetwork() == null) {
+            LOGGER.debug("Network is missing for DBStack, setting up");
+            DetailedEnvironmentResponse environment = environmentService.getByCrn(dbStack.getEnvironmentId());
+            dbStack.setNetwork(networkBuilderService.buildNetwork(request.getNetworkParameters(), environment, dbStack).getId());
+            dbStackService.save(dbStack);
+            return new DatabaseStack(dbStackToDatabaseStackConverter.buildNetwork(dbStack), databaseStack.getDatabaseServer(), databaseStack.getTags(),
+                    databaseStack.getTemplate());
+        } else {
+            return databaseStack;
+        }
     }
 
     @Override

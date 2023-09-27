@@ -2,12 +2,19 @@ package com.sequenceiq.redbeams.service.network;
 
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.net.util.SubnetUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
@@ -23,6 +30,8 @@ import com.sequenceiq.redbeams.exception.RedbeamsException;
 
 @Service
 public class NetworkParameterAdder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetworkParameterAdder.class);
 
     // These constants must match those in AwsNetworkView, AzureNetworkView and/or GcpDatabaseNetworkView
     private static final String VPC_ID = "vpcId";
@@ -54,57 +63,69 @@ public class NetworkParameterAdder {
     @Inject
     private SubnetChooserService subnetChooserService;
 
-    public Map<String, Object> addSubnetIds(Map<String, Object> parameters, List<String> subnetIds, List<String> azs, CloudPlatform cloudPlatform) {
+    public Map<String, Object> addSubnetIds(List<String> subnetIds, List<String> azs, CloudPlatform cloudPlatform) {
         switch (cloudPlatform) {
             case AWS, GCP, MOCK -> {
-                parameters.put(SUBNET_ID, String.join(",", subnetIds));
-                parameters.put(AVAILABILITY_ZONE, String.join(",", azs));
-            }
-            case AZURE -> parameters.put(SUBNETS, String.join(",", subnetIds));
-            default -> throw new RedbeamsException(String.format("Support for cloud platform %s not yet added", cloudPlatform.name()));
-        }
-        return parameters;
-    }
-
-    public Map<String, Object> addParameters(
-            Map<String, Object> parameters, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform, DBStack dbStack) {
-        EnvironmentNetworkResponse network = environmentResponse.getNetwork();
-        switch (cloudPlatform) {
-            case AWS -> {
-                parameters.put(VPC_CIDR, network.getNetworkCidr());
-                parameters.put(VPC_CIDRS, network.getNetworkCidrs());
-                parameters.put(VPC_ID, network.getAws().getVpcId());
+                return Map.of(SUBNET_ID, String.join(",", subnetIds),
+                        AVAILABILITY_ZONE, String.join(",", azs));
             }
             case AZURE -> {
-                PrivateEndpointType privateEndpointType
-                        = serviceEndpointCreationToEndpointTypeConverter.convert(
-                        network.getServiceEndpointCreation(), cloudPlatform.name());
-                parameters.put(ENDPOINT_TYPE, privateEndpointType);
-                Optional<String> databasePrivateDnsZoneId = Optional.ofNullable(network.getAzure())
-                        .map(EnvironmentNetworkAzureParams::getDatabasePrivateDnsZoneId);
-                if (PrivateEndpointType.USE_PRIVATE_ENDPOINT == privateEndpointType) {
-                    parameters.put(SUBNET_FOR_PRIVATE_ENDPOINT, getAzureSubnetToUseWithPrivateEndpoint(environmentResponse, dbStack));
-                    databasePrivateDnsZoneId.ifPresent(dnsZoneId -> parameters.put(EXISTING_PRIVATE_DNS_ZONE_ID, dnsZoneId));
-                }
-                Optional<String> delegatedSubnet = Optional.ofNullable(network.getAzure())
-                        .map(EnvironmentNetworkAzureParams::getFlexibleServerSubnetIds)
-                        .flatMap(subnetIds -> subnetIds.stream().findFirst());
-                delegatedSubnet
-                        .map(subnetId -> {
-                            String subscriptionId = subnetListerService.getAzureSubscriptionId(environmentResponse.getCrn());
-                            return subnetListerService.expandAzureResourceId(subnetId, environmentResponse, subscriptionId);
-                        })
-                        .ifPresent(subnetId -> parameters.put(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID, subnetId));
-                databasePrivateDnsZoneId.ifPresent(dnsZoneId -> parameters.put(EXISTING_PRIVATE_DNS_ZONE_ID, dnsZoneId));
+                return Map.of(SUBNETS, String.join(",", subnetIds));
+            }
+            default -> throw new RedbeamsException(String.format("Support for cloud platform %s not yet added", cloudPlatform.name()));
+        }
+    }
+
+    public Map<String, Object> addParameters(DetailedEnvironmentResponse environmentResponse, DBStack dbStack) {
+        EnvironmentNetworkResponse network = environmentResponse.getNetwork();
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(dbStack.getCloudPlatform());
+        switch (cloudPlatform) {
+            case AWS -> {
+                return Map.of(VPC_CIDR, network.getNetworkCidr(),
+                        VPC_CIDRS, network.getNetworkCidrs(),
+                        VPC_ID, network.getAws().getVpcId());
+            }
+            case AZURE -> {
+                return provideAzureParameters(environmentResponse, dbStack, network, cloudPlatform);
             }
             case GCP -> {
                 if (!Strings.isNullOrEmpty(network.getGcp().getSharedProjectId())) {
-                    parameters.put(SHARED_PROJECT_ID, network.getGcp().getSharedProjectId());
+                    return Map.of(SHARED_PROJECT_ID, network.getGcp().getSharedProjectId());
+                } else {
+                    return Map.of();
                 }
             }
-            case MOCK -> parameters.put(VPC_ID, network.getMock().getVpcId());
+            case MOCK -> {
+                return Map.of(VPC_ID, network.getMock().getVpcId());
+            }
             default -> throw new RedbeamsException(String.format("Support for cloud platform %s not yet added", cloudPlatform.name()));
         }
+    }
+
+    private Map<String, Object> provideAzureParameters(DetailedEnvironmentResponse environmentResponse, DBStack dbStack, EnvironmentNetworkResponse network,
+            CloudPlatform cloudPlatform) {
+        Map<String, Object> parameters = new HashMap<>();
+        PrivateEndpointType privateEndpointType
+                = serviceEndpointCreationToEndpointTypeConverter.convert(
+                network.getServiceEndpointCreation(), cloudPlatform.name());
+        parameters.put(ENDPOINT_TYPE, privateEndpointType);
+        Optional<String> databasePrivateDnsZoneId = Optional.ofNullable(network.getAzure())
+                .map(EnvironmentNetworkAzureParams::getDatabasePrivateDnsZoneId);
+        if (PrivateEndpointType.USE_PRIVATE_ENDPOINT == privateEndpointType) {
+            parameters.put(SUBNET_FOR_PRIVATE_ENDPOINT, getAzureSubnetToUseWithPrivateEndpoint(environmentResponse, dbStack));
+            databasePrivateDnsZoneId.ifPresent(dnsZoneId -> parameters.put(EXISTING_PRIVATE_DNS_ZONE_ID, dnsZoneId));
+        }
+        String subscriptionId = subnetListerService.getAzureSubscriptionId(environmentResponse.getCrn());
+        Optional<Set<String>> delegatedSubnetIds = Optional.ofNullable(network.getAzure())
+                .map(EnvironmentNetworkAzureParams::getFlexibleServerSubnetIds);
+        Set<CloudSubnet> delegatedSubnets = delegatedSubnetIds.map(dsIds -> subnetListerService.fetchNetworksFiltered(dbStack, dsIds)).orElse(Set.of());
+        LOGGER.info("Fetched delegated subnets: {}", delegatedSubnets);
+        delegatedSubnets.stream()
+                .filter(subnet -> StringUtils.isNotBlank(subnet.getCidr()))
+                .max(Comparator.comparingLong(subnet -> new SubnetUtils(subnet.getCidr()).getInfo().getAddressCountLong()))
+                .map(subnet -> subnetListerService.expandAzureResourceId(subnet, environmentResponse, subscriptionId))
+                .ifPresent(subnet -> parameters.put(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID, subnet.getId()));
+        databasePrivateDnsZoneId.ifPresent(dnsZoneId -> parameters.put(EXISTING_PRIVATE_DNS_ZONE_ID, dnsZoneId));
         return parameters;
     }
 

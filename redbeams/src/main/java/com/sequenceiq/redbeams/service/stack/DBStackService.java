@@ -38,7 +38,6 @@ public class DBStackService implements PayloadContextProvider, ResourceIdProvide
 
     public Optional<DBStack> findByNameAndEnvironmentCrn(String name, String environmentCrn) {
         return dbStackRepository.findByNameAndEnvironmentId(name, environmentCrn);
-
     }
 
     public DBStack getByCrn(String crn) {

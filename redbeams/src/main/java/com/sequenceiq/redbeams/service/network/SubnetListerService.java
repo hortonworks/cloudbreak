@@ -1,7 +1,10 @@
 package com.sequenceiq.redbeams.service.network;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -12,11 +15,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
+import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
+import com.sequenceiq.redbeams.converter.cloud.CredentialToExtendedCloudCredentialConverter;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.dto.Credential;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.service.CredentialService;
@@ -31,6 +40,12 @@ public class SubnetListerService {
 
     @Inject
     private CredentialService credentialService;
+
+    @Inject
+    private CloudParameterService cloudParameterService;
+
+    @Inject
+    private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
     public List<CloudSubnet> listSubnets(DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform) {
         EnvironmentNetworkResponse environmentNetworkResponse = environmentResponse.getNetwork();
@@ -55,7 +70,7 @@ public class SubnetListerService {
         }
     }
 
-    String getAzureSubscriptionId(String environmentCrn) {
+    public String getAzureSubscriptionId(String environmentCrn) {
         Credential credential = credentialService.getCredentialByEnvCrn(environmentCrn);
         LOGGER.info("Found credential {} for environment {}", credential.getName(), environmentCrn);
         if (credential.getAzure().isPresent()) {
@@ -66,13 +81,12 @@ public class SubnetListerService {
         }
     }
 
-    @VisibleForTesting
-    CloudSubnet expandAzureResourceId(CloudSubnet meta, DetailedEnvironmentResponse environmentResponse, String subscriptionId) {
+    public CloudSubnet expandAzureResourceId(CloudSubnet meta, DetailedEnvironmentResponse environmentResponse, String subscriptionId) {
         String expandedSubnetID = expandAzureResourceId(meta.getId(), environmentResponse, subscriptionId);
         return meta.withId(expandedSubnetID);
     }
 
-    String expandAzureResourceId(String subnetID, DetailedEnvironmentResponse environmentResponse, String subscriptionId) {
+    public String expandAzureResourceId(String subnetID, DetailedEnvironmentResponse environmentResponse, String subscriptionId) {
         if (isValidAzureSubnetResourceId(subnetID)) {
             LOGGER.debug("Subnet id: {} is a valid Azure subnet resource id.", subnetID);
             return subnetID;
@@ -86,6 +100,22 @@ public class SubnetListerService {
             LOGGER.debug("Subnet id: {} expanded to Azure subnet resource id: {}", subnetID, expandedId);
             return expandedId.toString();
         }
+    }
+
+    public Set<CloudSubnet> fetchNetworksFiltered(DBStack dbStack, Collection<String> subnetIds) {
+        Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());
+        ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(credential, dbStack.getCloudPlatform());
+        CloudNetworks cloudNetworks = cloudParameterService.getCloudNetworks(cloudCredential, dbStack.getRegion(), dbStack.getPlatformVariant(),
+                Map.of(NetworkConstants.SUBNET_IDS, String.join(",", subnetIds)));
+        LOGGER.debug("Received networks after applying filter {}: {}", subnetIds, cloudNetworks);
+        Set<CloudSubnet> cloudSubnets = cloudNetworks.getCloudNetworkResponses().values().stream()
+                .flatMap(Collection::stream)
+                .map(CloudNetwork::getSubnetsMeta)
+                .flatMap(Collection::stream)
+                .filter(subnet -> subnetIds.contains(subnet.getId()))
+                .collect(Collectors.toSet());
+        LOGGER.debug("Subnets: {}", cloudSubnets);
+        return cloudSubnets;
     }
 
     private boolean isValidAzureSubnetResourceId(String input) {

@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -42,11 +43,17 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.OperationException;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandlerTestSupport;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
+import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
+import com.sequenceiq.redbeams.service.EnvironmentService;
+import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificatePrescriptionService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
@@ -62,6 +69,10 @@ class AllocateDatabaseServerHandlerTest {
     private static final long PRIVATE_ID_1 = 78L;
 
     private static final long PRIVATE_ID_2 = 56L;
+
+    private static final String ENV_CRN = "envcrn";
+
+    private static final Long NETWORK_ID = 765L;
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -114,6 +125,15 @@ class AllocateDatabaseServerHandlerTest {
     @Mock
     private ResourcesStatePollerResult statePollerResult;
 
+    @Mock
+    private NetworkBuilderService networkBuilderService;
+
+    @Mock
+    private EnvironmentService environmentService;
+
+    @Mock
+    private DBStackToDatabaseStackConverter dbStackToDatabaseStackConverter;
+
     private DBStack dbStack;
 
     private DatabaseStack databaseStack;
@@ -122,6 +142,7 @@ class AllocateDatabaseServerHandlerTest {
     void setUp() {
         dbStack = new DBStack();
         dbStack.setCloudPlatform(CloudPlatform.AWS.name());
+        dbStack.setEnvironmentId(ENV_CRN);
         lenient().when(dbStackService.getById(anyLong())).thenReturn(dbStack);
         databaseStack = new DatabaseStack(null, null, Map.of(), "");
     }
@@ -281,6 +302,8 @@ class AllocateDatabaseServerHandlerTest {
         verify(syncPollingScheduler, never()).schedule(task);
 
         verify(databaseServerSslCertificatePrescriptionService).prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+        verify(dbStackService).save(dbStack);
+        assertEquals(NETWORK_ID, dbStack.getNetwork());
     }
 
     @Test
@@ -303,19 +326,28 @@ class AllocateDatabaseServerHandlerTest {
         verify(syncPollingScheduler).schedule(task);
 
         verify(databaseServerSslCertificatePrescriptionService).prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+        verify(dbStackService).save(dbStack);
+        assertEquals(NETWORK_ID, dbStack.getNetwork());
     }
 
     private void initCommon() {
         when(cloudContext.getId()).thenReturn(RESOURCE_ID);
         when(cloudContext.getPlatformVariant()).thenReturn(cloudPlatformVariant);
 
-        AllocateDatabaseServerRequest request = new AllocateDatabaseServerRequest(cloudContext, cloudCredential, databaseStack);
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        lenient().when(environmentService.getByCrn(ENV_CRN)).thenReturn(environmentResponse);
+        NetworkV4StackRequest networkParameters = new NetworkV4StackRequest();
+        Network network = new Network();
+        network.setId(NETWORK_ID);
+        lenient().when(networkBuilderService.buildNetwork(networkParameters, environmentResponse, dbStack)).thenReturn(network);
+        AllocateDatabaseServerRequest request = new AllocateDatabaseServerRequest(cloudContext, cloudCredential, databaseStack, networkParameters);
         when(event.getData()).thenReturn(request);
 
         when(cloudPlatformConnectors.get(cloudPlatformVariant)).thenReturn(cloudConnector);
         when(cloudConnector.authentication()).thenReturn(authenticator);
         when(authenticator.authenticate(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
         when(cloudConnector.resources()).thenReturn(resourceConnector);
+        lenient().when(dbStackToDatabaseStackConverter.convert(dbStack)).thenReturn(databaseStack);
     }
 
 }

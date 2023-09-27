@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,6 +52,8 @@ public class NetworkParameterAdderTest {
 
     private static final String EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID = "existingDatabasePrivateDnsZoneId";
 
+    private static final String FLEXIBLE_SERVER_DELEGATED_SUBNET_ID = "flexibleServerDelegatedSubnetId";
+
     private static final String SUBNETS = "subnets";
 
     private static final String SUBNET_RESOURCE_ID =
@@ -77,9 +78,7 @@ public class NetworkParameterAdderTest {
 
     @Test
     public void testAddSubnetIdsWhenAws() {
-        Map<String, Object> parameters = new HashMap<>();
-
-        parameters = underTest.addSubnetIds(parameters, List.of("subnet1", "subnet2"), List.of("az1", "az2"), CloudPlatform.AWS);
+        Map<String, Object> parameters = underTest.addSubnetIds(List.of("subnet1", "subnet2"), List.of("az1", "az2"), CloudPlatform.AWS);
 
         assertThat(parameters, IsMapContaining.hasEntry(SUBNET_ID, "subnet1,subnet2"));
         assertThat(parameters, IsMapContaining.hasEntry(AVAILABILITY_ZONE, "az1,az2"));
@@ -87,18 +86,14 @@ public class NetworkParameterAdderTest {
 
     @Test
     public void testAddSubnetIdsWhenAzure() {
-        Map<String, Object> parameters = new HashMap<>();
-
-        parameters = underTest.addSubnetIds(parameters, List.of("subnet1", "subnet2"), List.of(), CloudPlatform.AZURE);
+        Map<String, Object> parameters = underTest.addSubnetIds(List.of("subnet1", "subnet2"), List.of(), CloudPlatform.AZURE);
 
         assertThat(parameters, IsMapContaining.hasEntry(SUBNETS, "subnet1,subnet2"));
     }
 
     @Test
     public void testAddSubnetIdsWhenGcp() {
-        Map<String, Object> parameters = new HashMap<>();
-
-        parameters = underTest.addSubnetIds(parameters, List.of("subnet1", "subnet2"), List.of("az1", "az2"), CloudPlatform.GCP);
+        Map<String, Object> parameters = underTest.addSubnetIds(List.of("subnet1", "subnet2"), List.of("az1", "az2"), CloudPlatform.GCP);
 
         assertThat(parameters, IsMapContaining.hasEntry(SUBNET_ID, "subnet1,subnet2"));
         assertThat(parameters, IsMapContaining.hasEntry(AVAILABILITY_ZONE, "az1,az2"));
@@ -106,11 +101,11 @@ public class NetworkParameterAdderTest {
 
     @Test
     public void testAddParametersWhenAws() {
-        Map<String, Object> parameters = new HashMap<>();
         DBStack dbStack = new DBStack();
+        dbStack.setCloudPlatform("AWS");
         DetailedEnvironmentResponse environment = getAwsDetailedEnvironmentResponse();
 
-        parameters = underTest.addParameters(parameters, environment, CloudPlatform.AWS, dbStack);
+        Map<String, Object> parameters = underTest.addParameters(environment, dbStack);
 
         assertThat(parameters, IsMapContaining.hasEntry(VPC_ID, TEST_VPC_ID));
         assertThat(parameters, IsMapContaining.hasEntry(VPC_CIDR, TEST_VPC_CIDR));
@@ -119,8 +114,8 @@ public class NetworkParameterAdderTest {
 
     @Test
     public void testAddParametersWhenAzure() {
-        Map<String, Object> parameters = new HashMap<>();
         DBStack dbStack = new DBStack();
+        dbStack.setCloudPlatform("AZURE");
         DetailedEnvironmentResponse environment = getAzureDetailedEnvironmentResponse();
         CloudSubnet subnetForPrivateEndpoint = new CloudSubnet("mySubnet", "");
         when(subnetListerService.getAzureSubscriptionId(any())).thenReturn("mySubscription");
@@ -129,7 +124,7 @@ public class NetworkParameterAdderTest {
         CloudSubnet cloudSubnet = new CloudSubnet(SUBNET_RESOURCE_ID, SUBNET_ID);
         when(subnetListerService.expandAzureResourceId(any(CloudSubnet.class), any(), anyString())).thenReturn(cloudSubnet);
 
-        parameters = underTest.addParameters(parameters, environment, CloudPlatform.AZURE, dbStack);
+        Map<String, Object> parameters = underTest.addParameters(environment, dbStack);
 
         assertThat(parameters, IsMapContaining.hasEntry(ENDPOINT_TYPE, PrivateEndpointType.USE_PRIVATE_ENDPOINT));
         assertThat(parameters, IsMapContaining.hasEntry(SUBNET_FOR_PRIVATE_ENDPOINT,
@@ -138,12 +133,54 @@ public class NetworkParameterAdderTest {
     }
 
     @Test
-    public void testAddParametersWhenGcp() {
-        Map<String, Object> parameters = new HashMap<>();
+    public void testAddParametersWhenAzureWithFlexibleDelegated() {
         DBStack dbStack = new DBStack();
+        dbStack.setCloudPlatform("AZURE");
+        Set<String> delegatedSubnetIds = Set.of("flexSubnetSmall", "flexSubnetLarge", "flexWithoutCidr");
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
+                .withCloudPlatform(CloudPlatform.AZURE.name())
+                .withNetwork(EnvironmentNetworkResponse.builder()
+                        .withSubnetMetas(Map.of())
+                        .withAzure(
+                                EnvironmentNetworkAzureParams.EnvironmentNetworkAzureParamsBuilder.anEnvironmentNetworkAzureParams()
+                                        .withResourceGroupName("myResourceGroup")
+                                        .withNetworkId("networkId")
+                                        .withDatabasePrivateDnsZoneId("databasePrivateDsZoneId")
+                                        .withFlexibleServerSubnetIds(delegatedSubnetIds)
+                                        .build()
+                        )
+                        .build())
+                .build();
+        CloudSubnet subnetForPrivateEndpoint = new CloudSubnet("mySubnet", "");
+        when(subnetListerService.getAzureSubscriptionId(any())).thenReturn("mySubscription");
+        when(subnetChooserService.chooseSubnetForPrivateEndpoint(any(), any(), anyBoolean())).thenReturn(List.of(subnetForPrivateEndpoint));
+        when(serviceEndpointCreationToEndpointTypeConverter.convert(any(), any())).thenReturn(PrivateEndpointType.USE_PRIVATE_ENDPOINT);
+        CloudSubnet cloudSubnet = new CloudSubnet(SUBNET_RESOURCE_ID, SUBNET_ID);
+        when(subnetListerService.expandAzureResourceId(subnetForPrivateEndpoint, environment, "mySubscription")).thenReturn(cloudSubnet);
+        CloudSubnet cloudSubnetLarge = new CloudSubnet("flexSubnetLarge", "flexSubnetLarge", "az", "10.3.0.0/16");
+        when(subnetListerService.expandAzureResourceId(cloudSubnetLarge, environment, "mySubscription"))
+                .thenReturn(new CloudSubnet("flexSubnetLargeExpanded", "flexSubnetLargeExpanded"));
+        when(subnetListerService.fetchNetworksFiltered(dbStack, delegatedSubnetIds))
+                .thenReturn(Set.of(new CloudSubnet("flexSubnetSmall", "flexSubnetSmall", "az", "192.168.1.0/24"),
+                        cloudSubnetLarge,
+                        new CloudSubnet("flexWithoutCidr", "flexWithoutCidr")));
+
+        Map<String, Object> parameters = underTest.addParameters(environment, dbStack);
+
+        assertThat(parameters, IsMapContaining.hasEntry(ENDPOINT_TYPE, PrivateEndpointType.USE_PRIVATE_ENDPOINT));
+        assertThat(parameters, IsMapContaining.hasEntry(SUBNET_FOR_PRIVATE_ENDPOINT,
+                SUBNET_RESOURCE_ID));
+        assertThat(parameters, IsMapContaining.hasEntry(EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID, "databasePrivateDsZoneId"));
+        assertThat(parameters, IsMapContaining.hasEntry(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID, "flexSubnetLargeExpanded"));
+    }
+
+    @Test
+    public void testAddParametersWhenGcp() {
+        DBStack dbStack = new DBStack();
+        dbStack.setCloudPlatform("GCP");
         DetailedEnvironmentResponse environment = getGcpDetailedEnvironmentResponse();
 
-        parameters = underTest.addParameters(parameters, environment, CloudPlatform.GCP, dbStack);
+        Map<String, Object> parameters = underTest.addParameters(environment, dbStack);
 
         assertThat(parameters, IsMapContaining.hasEntry(SHARED_PROJECT_ID, "sharedProjectId"));
     }
