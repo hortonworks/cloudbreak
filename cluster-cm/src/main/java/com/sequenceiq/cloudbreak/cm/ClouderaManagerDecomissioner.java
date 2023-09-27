@@ -16,10 +16,10 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
@@ -307,7 +307,7 @@ public class ClouderaManagerDecomissioner {
         try {
             ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, SUMMARY_REQUEST_VIEW);
             List<ApiHost> items = hostRefList.getItems();
-            if (!CollectionUtils.isEmpty(items)) {
+            if (CollectionUtils.isNotEmpty(items)) {
                 availableHostsIdsFromCm = items.stream()
                         .filter(apiHostRef -> hostList.contains(apiHostRef.getHostname()))
                         .parallel()
@@ -315,7 +315,7 @@ public class ClouderaManagerDecomissioner {
                         .collect(Collectors.toList());
             }
 
-            if (!CollectionUtils.isEmpty(availableHostsIdsFromCm)) {
+            if (CollectionUtils.isNotEmpty(availableHostsIdsFromCm)) {
                 for (String hostId : availableHostsIdsFromCm) {
                     currentHostId = hostId;
                     hostsResourceApi.enterMaintenanceMode(hostId);

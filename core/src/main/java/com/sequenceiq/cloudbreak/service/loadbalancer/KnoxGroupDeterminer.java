@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -29,7 +30,7 @@ public class KnoxGroupDeterminer {
         Cluster cluster = stack.getCluster();
         if (cluster != null) {
             LOGGER.debug("Checking if Knox gateway is explicitly defined");
-            CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(cluster.getBlueprint().getBlueprintText());
+            CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(getBlueprintTest(cluster));
             groupNames = cmTemplateProcessor.getHostGroupsWithComponent(KnoxRoles.KNOX_GATEWAY);
         }
         Set<String> gatewayGroupNames = stack.getInstanceGroups().stream()
@@ -41,11 +42,11 @@ public class KnoxGroupDeterminer {
             LOGGER.debug("Knox gateway is not explicitly defined; searching for CM gateway hosts");
             groupNames = gatewayGroupNames;
         } else if (!gatewayGroupNames.containsAll(groupNames)) {
-            LOGGER.error("KNOX can only be installed on instance group where type is GATEWAY. As per the template " + cluster.getBlueprint().getName() +
+            LOGGER.error("KNOX can only be installed on instance group where type is GATEWAY. As per the template " + getBlueprintName(cluster) +
                     " KNOX_GATEWAY role config is present in groups " + groupNames  + " while the GATEWAY nodeType is available for instance group " +
                     gatewayGroupNames);
             throw new CloudbreakServiceException("KNOX can only be installed on instance group where type is GATEWAY. As per the template " +
-                    cluster.getBlueprint().getName() + " KNOX_GATEWAY role config is present in groups " + groupNames  +
+                    getBlueprintName(cluster) + " KNOX_GATEWAY role config is present in groups " + groupNames  +
                     " while the GATEWAY nodeType is available for instance group " + gatewayGroupNames);
         }
 
@@ -53,6 +54,26 @@ public class KnoxGroupDeterminer {
             LOGGER.info("No Knox gateway instance groups found");
         }
         return groupNames;
+    }
+
+    private String getBlueprintName(Cluster cluster) {
+        if (cluster != null) {
+            Blueprint blueprint = cluster.getBlueprint();
+            if (blueprint != null) {
+                return blueprint.getName();
+            }
+        }
+        return null;
+    }
+
+    private String getBlueprintTest(Cluster cluster) {
+        if (cluster != null) {
+            Blueprint blueprint = cluster.getBlueprint();
+            if (blueprint != null) {
+                return blueprint.getBlueprintText();
+            }
+        }
+        return null;
     }
 
 }

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.downscale;
 
-
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FORCE_REMOVING_NODES;
@@ -21,10 +20,10 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -80,7 +79,7 @@ public class ClusterDownscaleService {
         Map<String, Set<Long>> hostGroupsWithPrivateIds = payload.getHostGroupsWithPrivateIds();
         Set<String> hostGroups = hostGroupsWithAdjustment.size() > 0 ? hostGroupsWithAdjustment.keySet() : hostGroupsWithPrivateIds.keySet();
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_DOWN, String.join(", ", hostGroups));
-        if (!CollectionUtils.isEmpty(hostGroupsWithAdjustment)) {
+        if (MapUtils.isNotEmpty(hostGroupsWithAdjustment)) {
             LOGGER.info("Decommissioning hosts '{}'", hostGroupsWithAdjustment);
             Integer nodeCount = hostGroupsWithAdjustment.values().stream().reduce(0, Integer::sum);
             flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_REMOVING_NODES, String.valueOf(Math.abs(nodeCount)));

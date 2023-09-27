@@ -62,6 +62,35 @@ class KnoxGroupDeterminerTest {
     }
 
     @Test
+    void testGetKnoxGatewayWhenMoreGatewayGroupPresentedThenShouldLogBlueprintName() {
+        Set<String> groups = Set.of("master");
+        Cluster cluster = new Cluster();
+        cluster.setBlueprint(blueprint);
+        Stack stack = new Stack();
+        Workspace workspace = new Workspace();
+        workspace.setName("tenant");
+        Tenant tenant = new Tenant();
+        tenant.setName("tenant");
+        workspace.setTenant(tenant);
+        stack.setWorkspace(workspace);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("master");
+        InstanceGroup instanceGroup1 = new InstanceGroup();
+        instanceGroup1.setGroupName("gateway");
+        instanceGroup1.setInstanceGroupType(InstanceGroupType.GATEWAY);
+        stack.setInstanceGroups(Set.of(instanceGroup, instanceGroup1));
+        stack.setCluster(cluster);
+
+        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
+        when(blueprint.getName()).thenReturn("dummy");
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.getKnoxGatewayGroupNames(stack));
+        assertEquals(exception.getMessage(), "KNOX can only be installed on instance group where type is GATEWAY. As per the template " +
+                "dummy" + " KNOX_GATEWAY role config is present in groups " + groups +
+                " while the GATEWAY nodeType is available for instance group " + Set.of("gateway"));
+    }
+
+    @Test
     void testGetKnoxGatewayWhenKnoxExplicitlyDefined() {
         Set<String> groups = Set.of("master");
         Cluster cluster = new Cluster();
