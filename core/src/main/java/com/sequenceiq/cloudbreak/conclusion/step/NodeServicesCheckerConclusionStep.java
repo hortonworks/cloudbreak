@@ -37,18 +37,21 @@ public class NodeServicesCheckerConclusionStep extends ConclusionStep {
         RPCResponse<NodeStatusReport> servicesReport;
         try {
             servicesReport = nodeStatusService.getServicesReport(resourceId);
-            LOGGER.debug("Node services report response: {}", servicesReport.getFirstTextMessage());
+            LOGGER.debug("Node services report response: {}", servicesReport == null ? null : servicesReport.getFirstTextMessage());
         } catch (Exception e) {
             LOGGER.warn("Node services report failed, error: {}", e.getMessage());
             return failed(cloudbreakMessagesService.getMessage(NODE_STATUS_MONITOR_UNREACHABLE), e.getMessage());
         }
-        if (servicesReport.getResult() == null) {
+        if (servicesReport != null && servicesReport.getResult() == null) {
             LOGGER.info("Node services report result was null");
             return succeeded();
         }
 
-        Multimap<String, String> nodesWithUnhealthyServices = collectNodesWithUnhealthyServices(servicesReport);
-        if (nodesWithUnhealthyServices.isEmpty()) {
+        Multimap<String, String> nodesWithUnhealthyServices = null;
+        if (servicesReport != null) {
+            nodesWithUnhealthyServices = collectNodesWithUnhealthyServices(servicesReport);
+        }
+        if (nodesWithUnhealthyServices == null || nodesWithUnhealthyServices.isEmpty()) {
             return succeeded();
         } else {
             String conclusion = cloudbreakMessagesService.getMessageWithArgs(NODE_STATUS_MONITOR_FAILED, nodesWithUnhealthyServices.keySet());
