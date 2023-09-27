@@ -38,7 +38,7 @@ public class ExternalDatabaseConfig {
     @Value("${cb.externaldatabase.experimental.platform:AZURE,MOCK}")
     private Set<CloudPlatform> dbServiceExperimentalPlatforms;
 
-    @Value("${cb.externaldatabase.pause.supported.platform:AWS,GCP}")
+    @Value("${cb.externaldatabase.pause.supported.platform:AWS,AZURE,GCP}")
     private Set<CloudPlatform> dbServicePauseSupportedPlatforms;
 
     @Value("${cb.externaldatabase.sslenforcement.supported.platform:AWS,AZURE}")
@@ -55,8 +55,9 @@ public class ExternalDatabaseConfig {
         return dbServiceSupportedPlatforms.contains(cloudPlatform);
     }
 
-    public boolean isExternalDatabasePauseSupportedFor(CloudPlatform cloudPlatform) {
-        return dbServicePauseSupportedPlatforms.contains(cloudPlatform);
+    public boolean isExternalDatabasePauseSupportedFor(CloudPlatform cloudPlatform, DatabaseType databaseType) {
+        return dbServicePauseSupportedPlatforms.contains(cloudPlatform) &&
+                Optional.ofNullable(databaseType).map(DatabaseType::isDatabasePauseSupported).orElse(true);
     }
 
     public boolean isExternalDatabaseSslEnforcementSupportedFor(CloudPlatform cloudPlatform) {

@@ -40,7 +40,7 @@ public class PlatformConfig {
     @Value("${datalake.experimental.externaldb.platform:MOCK}")
     private Set<CloudPlatform> dbServiceExperimentalPlatforms;
 
-    @Value("${datalake.supported.externaldb.pause.platform:AWS,GCP,MOCK}")
+    @Value("${datalake.supported.externaldb.pause.platform:AWS,GCP,AZURE,MOCK}")
     private Set<CloudPlatform> dbServicePauseSupportedPlatforms;
 
     @Value("${datalake.supported.externaldb.sslenforcement.platform:AWS,AZURE,MOCK}")

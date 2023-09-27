@@ -6,17 +6,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfig;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfigKey;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.DatabaseType;
 
 class ExternalDatabaseConfigTest {
 
@@ -27,6 +31,7 @@ class ExternalDatabaseConfigTest {
         underTest = new ExternalDatabaseConfig();
         ReflectionTestUtils.setField(underTest, "dbServiceSslEnforcementSupportedPlatforms", Set.of(CloudPlatform.AWS, CloudPlatform.AZURE));
         ReflectionTestUtils.setField(underTest, "allPossibleExternalDbPlatforms", Set.of(CloudPlatform.AZURE));
+        ReflectionTestUtils.setField(underTest, "dbServicePauseSupportedPlatforms", Set.of(CloudPlatform.AWS, CloudPlatform.AZURE));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -41,6 +46,12 @@ class ExternalDatabaseConfigTest {
         assertThat(underTest.isExternalDatabaseSslEnforcementSupportedFor(cloudPlatform)).isFalse();
     }
 
+    @ParameterizedTest
+    @MethodSource("pauseSupportParameters")
+    void testIsExternalDatabasePauseSupportedFor(CloudPlatform cloudPlatform, DatabaseType databaseType, boolean pauseSupported) {
+        assertThat(underTest.isExternalDatabasePauseSupportedFor(cloudPlatform, databaseType)).isEqualTo(pauseSupported);
+    }
+
     @Test
     void testDatabaseConfigsAzure() throws IOException {
         Map<DatabaseStackConfigKey, DatabaseStackConfig> actualResult =  underTest.databaseConfigs();
@@ -51,5 +62,14 @@ class ExternalDatabaseConfigTest {
         DatabaseStackConfig flexibleDatabaseStackConfig = actualResult.get(new DatabaseStackConfigKey(CloudPlatform.AZURE, AzureDatabaseType.FLEXIBLE_SERVER));
         assertEquals("Standard_E4ds_v4", flexibleDatabaseStackConfig.getInstanceType());
         assertEquals(128, flexibleDatabaseStackConfig.getVolumeSize());
+    }
+
+    private static Stream<Arguments> pauseSupportParameters() {
+        return Stream.of(
+                Arguments.of(CloudPlatform.AWS, null, true),
+                Arguments.of(CloudPlatform.GCP, null, false),
+                Arguments.of(CloudPlatform.AZURE, AzureDatabaseType.SINGLE_SERVER, false),
+                Arguments.of(CloudPlatform.AZURE, AzureDatabaseType.FLEXIBLE_SERVER, true)
+        );
     }
 }

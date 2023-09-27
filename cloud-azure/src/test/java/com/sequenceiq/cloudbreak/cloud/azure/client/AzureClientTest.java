@@ -111,6 +111,9 @@ class AzureClientTest {
     @Mock
     private PostgreSqlManager postgreSqlManager;
 
+    @Mock
+    private com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager postgreSqlFlexibleManager;
+
     private AzureClient underTest;
 
     @Mock(extraInterfaces = Disk.DefinitionStages.WithCreate.class)

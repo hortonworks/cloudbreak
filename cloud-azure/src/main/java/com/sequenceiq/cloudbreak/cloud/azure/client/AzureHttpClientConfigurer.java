@@ -72,6 +72,14 @@ public class AzureHttpClientConfigurer {
         return client;
     }
 
+    public com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager.Configurable configureDefault(
+            com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager.Configurable configurable) {
+        com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager.Configurable client =
+                configurable.withLogOptions(getHttpLogOptions()).withHttpClient(newHttpClient());
+        AzureQuartzRetryUtils.reconfigureHttpClientRetryPolicyIfNeeded(client::withRetryPolicy);
+        return client;
+    }
+
     public HttpClient newHttpClient() {
         return new OkHttpAsyncHttpClientBuilder(okHttpClient).build();
     }

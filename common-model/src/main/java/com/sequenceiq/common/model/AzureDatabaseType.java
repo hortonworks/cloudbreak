@@ -4,24 +4,33 @@ import org.apache.commons.lang3.StringUtils;
 
 public enum AzureDatabaseType implements DatabaseType {
 
-    SINGLE_SERVER("postgresqlServer"),
+    SINGLE_SERVER("postgresqlServer", false),
 
-    FLEXIBLE_SERVER("flexiblePostgresqlServer");
+    FLEXIBLE_SERVER("flexiblePostgresqlServer", true);
 
     public static final String AZURE_DATABASE_TYPE_KEY = "AZURE_DATABASE_TYPE";
 
     private final String shortName;
 
-    AzureDatabaseType(String shortName) {
+    private final boolean databasePauseSupported;
+
+    AzureDatabaseType(String shortName, boolean databasePauseSupported) {
         this.shortName = shortName;
+        this.databasePauseSupported = databasePauseSupported;
     }
 
     public boolean isSingleServer() {
         return this == SINGLE_SERVER;
     }
 
+    @Override
     public String shortName() {
         return shortName;
+    }
+
+    @Override
+    public boolean isDatabasePauseSupported() {
+        return databasePauseSupported;
     }
 
     public static AzureDatabaseType safeValueOf(String databaseTypeString) {

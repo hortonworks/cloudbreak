@@ -1,31 +1,45 @@
 package com.sequenceiq.datalake.service.pause;
 
+import java.util.Map;
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.model.DatabaseType;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseServerParameterSetter;
 
 @Component
 public class DatabasePauseSupportService {
-
     @Inject
     private EnvironmentClientService environmentClientService;
 
     @Inject
     private PlatformConfig platformConfig;
 
+    @Inject
+    private Map<CloudPlatform, DatabaseServerParameterSetter> databaseServerParameterSetters;
+
     public boolean isDatabasePauseSupported(SdxCluster sdxCluster) {
         if (sdxCluster.hasExternalDatabase() && StringUtils.isNotEmpty(sdxCluster.getDatabaseCrn())) {
-            DetailedEnvironmentResponse environment = environmentClientService.getByCrn(sdxCluster.getEnvCrn());
-
-            return platformConfig.isExternalDatabasePauseSupportedFor(CloudPlatform.valueOf(environment.getCloudPlatform()));
+            CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentClientService.getByCrn(sdxCluster.getEnvCrn()).getCloudPlatform());
+            return platformConfig.isExternalDatabasePauseSupportedFor(cloudPlatform) && isDatabaseTypeSupported(cloudPlatform, sdxCluster.getSdxDatabase());
+        } else {
+            return false;
         }
-        return false;
+    }
+
+    private boolean isDatabaseTypeSupported(CloudPlatform cloudPlatform, SdxDatabase sdxDatabase) {
+        return Optional.ofNullable(databaseServerParameterSetters.get(cloudPlatform))
+                .flatMap(parameterSetter -> parameterSetter.getDatabaseType(sdxDatabase))
+                .map(DatabaseType::isDatabasePauseSupported)
+                .orElse(true);
     }
 }

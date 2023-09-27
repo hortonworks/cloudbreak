@@ -4,4 +4,8 @@ public interface DatabaseType {
     String name();
 
     String shortName();
+
+    default boolean isDatabasePauseSupported() {
+        return true;
+    }
 }

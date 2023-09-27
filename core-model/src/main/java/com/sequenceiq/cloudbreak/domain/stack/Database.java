@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.domain.stack;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -64,6 +68,10 @@ public class Database implements ProvisionEntity {
 
     public Json getAttributes() {
         return attributes;
+    }
+
+    public Map<String, Object> getAttributesMap() {
+        return Optional.ofNullable(attributes).map(Json::getMap).orElse(new HashMap<>());
     }
 
     public void setAttributes(Json attributes) {

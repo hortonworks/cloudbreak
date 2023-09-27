@@ -139,6 +139,8 @@ public class AzureClient {
 
     private final PostgreSqlManager postgreSqlManager;
 
+    private final com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager postgreSqlFlexibleManager;
+
     private final AzureClientFactory azureClientFactory;
 
     private final AzureExceptionHandler azureExceptionHandler;
@@ -153,6 +155,7 @@ public class AzureClient {
         privateDnsZoneManager = azureClientCredentials.getPrivateDnsManager();
         marketplaceOrderingManager = azureClientCredentials.getMarketplaceOrderingManager();
         postgreSqlManager = azureClientCredentials.getPostgreSqlManager();
+        postgreSqlFlexibleManager = azureClientCredentials.getPostgreSqlFlexibleManager();
         computeManager = azureClientCredentials.getComputeManager();
         this.azureExceptionHandler = azureExceptionHandler;
         this.azureListResultFactory = azureListResultFactory;
@@ -1055,5 +1058,9 @@ public class AzureClient {
 
     public List<RoleAssignment> listRoleAssignmentsByServicePrincipal(String servicePrincipalId) {
         return azureListResultFactory.create(getRoleAssignments().listByServicePrincipal(servicePrincipalId)).getAll();
+    }
+
+    public AzureFlexibleServerClient getFlexibleServerClient() {
+        return new AzureFlexibleServerClient(postgreSqlFlexibleManager, azureExceptionHandler);
     }
 }

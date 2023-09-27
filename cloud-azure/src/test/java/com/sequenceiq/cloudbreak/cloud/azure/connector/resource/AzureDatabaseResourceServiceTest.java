@@ -30,10 +30,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
@@ -44,6 +48,7 @@ import com.azure.core.exception.AzureException;
 import com.azure.core.http.HttpResponse;
 import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerState;
 import com.azure.resourcemanager.resources.models.Deployment;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
@@ -52,6 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.ResourceGroupUsage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureFlexibleServerClient;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureFlexibleServerPermissionValidator;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -70,6 +76,7 @@ import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.model.AzureDatabaseType;
 
 @ExtendWith(MockitoExtension.class)
 class AzureDatabaseResourceServiceTest {
@@ -133,7 +140,7 @@ class AzureDatabaseResourceServiceTest {
 
     @BeforeEach
     void initTests() {
-        when(ac.getCloudContext()).thenReturn(cloudContext);
+        lenient().when(ac.getCloudContext()).thenReturn(cloudContext);
         lenient().when(ac.getParameter(AzureClient.class)).thenReturn(client);
     }
 
@@ -141,6 +148,7 @@ class AzureDatabaseResourceServiceTest {
     void shouldReturnDeletedStatusInCaseOfMissingResourceGroup() {
         when(client.getResourceGroup(RESOURCE_GROUP_NAME)).thenReturn(null);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().build());
 
         ExternalDatabaseStatus actual = underTest.getDatabaseServerStatus(ac, databaseStack);
 
@@ -151,10 +159,37 @@ class AzureDatabaseResourceServiceTest {
     void shouldReturnStartedStatusInCaseOfExistingResourceGroup() {
         when(client.getResourceGroup(RESOURCE_GROUP_NAME)).thenReturn(resourceGroup);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().build());
 
         ExternalDatabaseStatus actual = underTest.getDatabaseServerStatus(ac, databaseStack);
 
         assertEquals(ExternalDatabaseStatus.STARTED, actual);
+    }
+
+    @ParameterizedTest
+    @MethodSource("flexibleServerStates")
+    void testGetDatabaseServerStatusWhenFlexibleServer(ServerState serverState, ExternalDatabaseStatus externalDatabaseStatus) {
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        Map<String, Object> params = Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name());
+        when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId(SERVER_NAME).withParams(params).build());
+        AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
+        when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
+        when(flexibleServerClientMock.getFlexibleServerStatus(RESOURCE_GROUP_NAME, SERVER_NAME)).thenReturn(serverState);
+        ExternalDatabaseStatus actual = underTest.getDatabaseServerStatus(ac, databaseStack);
+        assertEquals(externalDatabaseStatus, actual);
+    }
+
+    private static Stream<Arguments> flexibleServerStates() {
+        return Stream.of(
+                Arguments.of(ServerState.DISABLED, ExternalDatabaseStatus.DELETED),
+                Arguments.of(ServerState.READY, ExternalDatabaseStatus.STARTED),
+                Arguments.of(ServerState.DROPPING, ExternalDatabaseStatus.DELETE_IN_PROGRESS),
+                Arguments.of(ServerState.STOPPING, ExternalDatabaseStatus.STOP_IN_PROGRESS),
+                Arguments.of(ServerState.STOPPED, ExternalDatabaseStatus.STOPPED),
+                Arguments.of(ServerState.STARTING, ExternalDatabaseStatus.START_IN_PROGRESS),
+                Arguments.of(ServerState.UPDATING, ExternalDatabaseStatus.UPDATE_IN_PROGRESS),
+                Arguments.of(null, ExternalDatabaseStatus.DELETED)
+        );
     }
 
     @Test
@@ -664,6 +699,42 @@ class AzureDatabaseResourceServiceTest {
         assertEquals("error", cloudConnectorException.getMessage());
         verify(azureResourceGroupMetadataProvider, times(1)).getResourceGroupName(eq(cloudContext), eq(databaseStack));
         verify(client, times(1)).updateAdministratorLoginPassword(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME), eq(NEW_PASSWORD));
+    }
+
+    @Test
+    void testStartDatabaseServerFlexible() {
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        Map<String, Object> params = Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name());
+        when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId(SERVER_NAME).withParams(params).build());
+        AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
+        when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
+        underTest.startDatabaseServer(ac, databaseStack);
+        verify(flexibleServerClientMock, times(1)).startFlexibleServer(RESOURCE_GROUP_NAME, SERVER_NAME);
+    }
+
+    @Test
+    void testStartDatabaseServerSingle() {
+        when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().build());
+        underTest.startDatabaseServer(ac, databaseStack);
+        verify(client, never()).getFlexibleServerClient();
+    }
+
+    @Test
+    void testStopDatabaseServerFlexible() {
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        Map<String, Object> params = Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name());
+        when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId(SERVER_NAME).withParams(params).build());
+        AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
+        when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
+        underTest.stopDatabaseServer(ac, databaseStack);
+        verify(flexibleServerClientMock, times(1)).stopFlexibleServer(RESOURCE_GROUP_NAME, SERVER_NAME);
+    }
+
+    @Test
+    void testStopDatabaseServerSingle() {
+        when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().build());
+        underTest.stopDatabaseServer(ac, databaseStack);
+        verify(client, never()).getFlexibleServerClient();
     }
 
     private CloudResource buildResource(ResourceType resourceType) {

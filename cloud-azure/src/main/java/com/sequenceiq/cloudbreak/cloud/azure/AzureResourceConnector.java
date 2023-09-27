@@ -315,6 +315,16 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
+    public void startDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        azureDatabaseResourceService.startDatabaseServer(authenticatedContext, stack);
+    }
+
+    @Override
+    public void stopDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        azureDatabaseResourceService.stopDatabaseServer(authenticatedContext, stack);
+    }
+
+    @Override
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
         UpdateType type, Optional<String> group) throws QuotaExceededException {
         LOGGER.info("The update method which will be followed is {}.", type);

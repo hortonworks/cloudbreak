@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.core.flow2.externaldatabase.stop.handler;
 import static com.sequenceiq.cloudbreak.core.flow2.externaldatabase.stop.config.ExternalDatabaseStopEvent.EXTERNAL_DATABASE_STOPPED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.externaldatabase.stop.config.ExternalDatabaseStopEvent.EXTERNAL_DATABASE_STOP_FAILED_EVENT;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -21,6 +23,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.conf.ExternalDatabaseConfig;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseService;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -28,7 +31,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StopExternal
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StopExternalDatabaseRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StopExternalDatabaseResult;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseServerParameterDecorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.common.model.DatabaseType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -52,6 +57,9 @@ public class StopExternalDatabaseHandler extends ExceptionCatcherEventHandler<St
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private Map<CloudPlatform, DatabaseServerParameterDecorator> databaseServerParameterDecoratorMap;
 
     @Override
     public String selector() {
@@ -86,7 +94,7 @@ public class StopExternalDatabaseHandler extends ExceptionCatcherEventHandler<St
                 updateStackToStopped(stack, "External database was not requested, stop is not possible");
                 result = new StopExternalDatabaseResult(stack.getId(), EXTERNAL_DATABASE_STOPPED_EVENT.event(),
                         stack.getName(), null);
-            } else if (!externalDatabaseConfig.isExternalDatabasePauseSupportedFor(CloudPlatform.valueOf(environment.getCloudPlatform()))) {
+            } else if (!isExternalDatabasePauseSupported(CloudPlatform.valueOf(environment.getCloudPlatform()), stack.getDatabase())) {
                 LOGGER.debug("External database pause is not supported for '{}' cloud platform.", environment.getCloudPlatform());
                 updateStackToStopped(stack, "External database stop is not supported by the cloud platform");
                 result = new StopExternalDatabaseResult(stack.getId(), EXTERNAL_DATABASE_STOPPED_EVENT.event(),
@@ -124,5 +132,10 @@ public class StopExternalDatabaseHandler extends ExceptionCatcherEventHandler<St
     private Selectable stopFailedEvent(Stack stack, Exception e) {
         return new StopExternalDatabaseFailed(stack.getId(), EXTERNAL_DATABASE_STOP_FAILED_EVENT.event(),
                 stack.getName(), stack.getCluster().getDatabaseServerCrn(), e);
+    }
+
+    private boolean isExternalDatabasePauseSupported(CloudPlatform cloudPlatform, Database database) {
+        DatabaseType databaseType = databaseServerParameterDecoratorMap.get(cloudPlatform).getDatabaseType(database.getAttributesMap()).orElse(null);
+        return externalDatabaseConfig.isExternalDatabasePauseSupportedFor(cloudPlatform, databaseType);
     }
 }

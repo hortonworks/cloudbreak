@@ -106,6 +106,11 @@ public class AzureClientFactory {
         return azureHttpClientConfigurer.configureDefault(PostgreSqlManager.configure()).authenticate(azureCredential, azureProfile);
     }
 
+    public com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager getPostgreSqlFlexibleManager() {
+        return azureHttpClientConfigurer.configureDefault(com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager.configure())
+                .authenticate(azureCredential, azureProfile);
+    }
+
     public Optional<String> getAccessToken() {
         return Optional.of(azureCredential.getTokenSync(new TokenRequestContext().addScopes("https://management.azure.com//.default")).getToken());
     }

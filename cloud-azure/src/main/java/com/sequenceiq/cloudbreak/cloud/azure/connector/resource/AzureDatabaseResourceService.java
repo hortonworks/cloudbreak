@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerState;
 import com.azure.resourcemanager.resources.models.Deployment;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.google.common.collect.Lists;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTransientDeploymentService;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureFlexibleServerPermissionValidator;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -49,6 +51,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.model.AzureDatabaseType;
 
 @Service
 public class AzureDatabaseResourceService {
@@ -59,6 +62,15 @@ public class AzureDatabaseResourceService {
     private static final int POSTGRESQL_SERVER_PORT = 5432;
 
     private static final String DATABASE_SERVER_FQDN = "databaseServerFQDN";
+
+    private static final Map<ServerState, ExternalDatabaseStatus> FLEXIBLESERVER_STATE_MAP = Map.of(
+            ServerState.DISABLED, ExternalDatabaseStatus.DELETED,
+            ServerState.READY, ExternalDatabaseStatus.STARTED,
+            ServerState.DROPPING, ExternalDatabaseStatus.DELETE_IN_PROGRESS,
+            ServerState.STOPPING, ExternalDatabaseStatus.STOP_IN_PROGRESS,
+            ServerState.STOPPED, ExternalDatabaseStatus.STOPPED,
+            ServerState.STARTING, ExternalDatabaseStatus.START_IN_PROGRESS,
+            ServerState.UPDATING, ExternalDatabaseStatus.UPDATE_IN_PROGRESS);
 
     @Inject
     private AzureDatabaseTemplateBuilder azureDatabaseTemplateBuilder;
@@ -152,6 +164,30 @@ public class AzureDatabaseResourceService {
                 .withType(type)
                 .withName(name)
                 .build();
+    }
+
+    public void startDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        AzureDatabaseServerView azureDatabaseServerView = new AzureDatabaseServerView(stack.getDatabaseServer());
+        if (azureDatabaseServerView.getAzureDatabaseType() == AzureDatabaseType.FLEXIBLE_SERVER) {
+            String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(authenticatedContext.getCloudContext(), stack);
+            AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+            LOGGER.debug("Starting flexible database server {} in resourcegroup {}", stack.getDatabaseServer().getServerId(), resourceGroupName);
+            client.getFlexibleServerClient().startFlexibleServer(resourceGroupName, stack.getDatabaseServer().getServerId());
+        } else {
+            LOGGER.debug("Start database server is not supported for {} database type", azureDatabaseServerView.getAzureDatabaseType());
+        }
+    }
+
+    public void stopDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        AzureDatabaseServerView azureDatabaseServerView = new AzureDatabaseServerView(stack.getDatabaseServer());
+        if (azureDatabaseServerView.getAzureDatabaseType() == AzureDatabaseType.FLEXIBLE_SERVER) {
+            String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(authenticatedContext.getCloudContext(), stack);
+            AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+            LOGGER.debug("Stopping flexible database server {} in resourcegroup {}", stack.getDatabaseServer().getServerId(), resourceGroupName);
+            client.getFlexibleServerClient().stopFlexibleServer(resourceGroupName, stack.getDatabaseServer().getServerId());
+        } else {
+            LOGGER.debug("Stop database server is not supported for {} database type", azureDatabaseServerView.getAzureDatabaseType());
+        }
     }
 
     public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext ac, DatabaseStack stack,
@@ -277,15 +313,25 @@ public class AzureDatabaseResourceService {
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
 
         try {
-            ResourceGroup resourceGroup = client.getResourceGroup(resourceGroupName);
-            if (resourceGroup == null) {
-                return ExternalDatabaseStatus.DELETED;
+            AzureDatabaseServerView databaseServerView = new AzureDatabaseServerView(stack.getDatabaseServer());
+            if (databaseServerView.getAzureDatabaseType() == AzureDatabaseType.FLEXIBLE_SERVER) {
+                return convertFlexibleStatus(
+                        client.getFlexibleServerClient().getFlexibleServerStatus(resourceGroupName, stack.getDatabaseServer().getServerId()));
+            } else {
+                ResourceGroup resourceGroup = client.getResourceGroup(resourceGroupName);
+                if (resourceGroup == null) {
+                    return ExternalDatabaseStatus.DELETED;
+                }
+                return ExternalDatabaseStatus.STARTED;
             }
-            return ExternalDatabaseStatus.STARTED;
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw new CloudConnectorException(e);
         }
+    }
+
+    private ExternalDatabaseStatus convertFlexibleStatus(ServerState serverState) {
+        return Optional.ofNullable(serverState).map(FLEXIBLESERVER_STATE_MAP::get).orElse(ExternalDatabaseStatus.DELETED);
     }
 
     public String getDBStackTemplate(DatabaseStack databaseStack) {

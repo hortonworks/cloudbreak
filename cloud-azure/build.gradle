@@ -27,17 +27,18 @@ dependencies {
   implementation group: 'com.squareup.okhttp3',          name: 'okhttp-urlconnection',       version: okhttpVersion
   implementation group: 'com.squareup.okhttp3',          name: 'logging-interceptor',        version: okhttpVersion
 
-  implementation group: 'com.azure',                    name: 'azure-core-http-okhttp',                     version: azureSdkOkHttpVersion
-  implementation group: 'com.azure',                    name: 'azure-core',                                 version: azureSdkCoreVersion
-  implementation group: 'com.azure',                    name: 'azure-identity',                             version: azureSdkIdentityVersion
-  implementation group: 'com.azure',                    name: 'azure-storage-blob',                         version: azureSdkStorageBlobVersion
-  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager',                      version: azureSdkResourceManagerVersion
-  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-storage',              version: azureSdkResourceManagerVersion
-  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-privatedns',           version: azureSdkResourceManagerVersion
-  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-sql',                  version: azureSdkResourceManagerVersion
-  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-postgresql',           version: azureSdkResourceManagerPostgresqlVersion
-  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-marketplaceordering',  version: azureSdkResourceManagerMarketplaceVersion
-  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-datalakestore',        version: azureSdkResourceManagerDataLakeStoreVersion
+  implementation group: 'com.azure',                    name: 'azure-core-http-okhttp',                         version: azureSdkOkHttpVersion
+  implementation group: 'com.azure',                    name: 'azure-core',                                     version: azureSdkCoreVersion
+  implementation group: 'com.azure',                    name: 'azure-identity',                                 version: azureSdkIdentityVersion
+  implementation group: 'com.azure',                    name: 'azure-storage-blob',                             version: azureSdkStorageBlobVersion
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager',                          version: azureSdkResourceManagerVersion
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-storage',                  version: azureSdkResourceManagerVersion
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-privatedns',               version: azureSdkResourceManagerVersion
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-sql',                      version: azureSdkResourceManagerVersion
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-postgresql',               version: azureSdkResourceManagerPostgresqlVersion
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-postgresqlflexibleserver', version: azureSdkResourceManagerFlexiblePostgresqlVersion
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-marketplaceordering',      version: azureSdkResourceManagerMarketplaceVersion
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-datalakestore',            version: azureSdkResourceManagerDataLakeStoreVersion
 
   implementation group: 'io.micrometer',                name: 'micrometer-core',                            version: micrometerVersion
 
