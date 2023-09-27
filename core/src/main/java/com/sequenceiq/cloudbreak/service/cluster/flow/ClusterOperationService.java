@@ -293,7 +293,9 @@ public class ClusterOperationService {
                 if (stack != null && !stack.getStatus().isInProgress()) {
                     handleHealthChange(failedNodes, newHealthyNodes, stack);
                 } else {
-                    LOGGER.debug("Stack [{}] status is {}, thus we do not handle failure report.", stack.getName(), stack.getStatus());
+                    LOGGER.debug("Stack [{}] status is {}, thus we do not handle failure report.",
+                            stack != null ? stack.getName() : "",
+                            stack != null ? stack.getStatus() : "");
                 }
                 return null;
             });

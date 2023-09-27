@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -65,6 +67,9 @@ public class ClusterDownscaleServiceTest {
 
     @Mock
     private ClusterDownscaleDetails details;
+
+    @Mock
+    private InstanceMetaDataService instanceMetaDataService;
 
     @InjectMocks
     private ClusterDownscaleService underTest;
@@ -100,6 +105,25 @@ public class ClusterDownscaleServiceTest {
                 Map.of(HOST_GROUP_NAME, PRIVATE_IDS), Map.of(), null, details));
 
         verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID,
+                Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_REMOVING_NODES, "1");
+        verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(),
+                ResourceEvent.CLUSTER_SCALING_DOWN, "worker");
+        verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
+        verify(stackDtoService, times(0)).getById(anyLong());
+        verify(stackDtoService, times(0)).getById(STACK_ID);
+        verify(flowMessageService, times(0)).fireInstanceGroupEventAndLog(eq(STACK_ID), anyString(), anyString(),
+                any(ResourceEvent.class), anyString());
+    }
+
+    @Test
+    public void testClusterDownscaleStartedWhenScalingAdjustmentIsNullAndItIsNegativeThenInstanceGroupEventWillBeCalledWithTheAbsoluteValueOfThisNumber() {
+        doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_SCALING_DOWN);
+        when(instanceMetaDataService.getAllAvailableHostNamesByPrivateIds(anyLong(), any())).thenReturn(List.of("host1"));
+
+        underTest.clusterDownscaleStarted(STACK_ID, new ClusterDownscaleTriggerEvent(null, STACK_ID, null,
+                Map.of(HOST_GROUP_NAME, PRIVATE_IDS), Map.of(), null, details));
+
+        verify(flowMessageService, times(0)).fireEventAndLog(STACK_ID,
                 Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_REMOVING_NODES, "1");
         verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(),
                 ResourceEvent.CLUSTER_SCALING_DOWN, "worker");

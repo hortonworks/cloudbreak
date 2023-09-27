@@ -24,6 +24,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -79,13 +80,13 @@ public class ClusterDownscaleService {
         Map<String, Set<Long>> hostGroupsWithPrivateIds = payload.getHostGroupsWithPrivateIds();
         Set<String> hostGroups = hostGroupsWithAdjustment.size() > 0 ? hostGroupsWithAdjustment.keySet() : hostGroupsWithPrivateIds.keySet();
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_DOWN, String.join(", ", hostGroups));
-        if (hostGroupsWithAdjustment.size() > 0) {
+        if (!CollectionUtils.isEmpty(hostGroupsWithAdjustment)) {
             LOGGER.info("Decommissioning hosts '{}'", hostGroupsWithAdjustment);
             Integer nodeCount = hostGroupsWithAdjustment.values().stream().reduce(0, Integer::sum);
             flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_REMOVING_NODES, String.valueOf(Math.abs(nodeCount)));
         } else {
             LOGGER.info("Decommissioning hosts '{}'", hostGroupsWithPrivateIds);
-            ResourceEvent resourceEvent = details.isForced() ? CLUSTER_FORCE_REMOVING_NODES : CLUSTER_REMOVING_NODES;
+            ResourceEvent resourceEvent = (details != null && details.isForced()) ? CLUSTER_FORCE_REMOVING_NODES : CLUSTER_REMOVING_NODES;
             List<Long> privateIds = hostGroupsWithPrivateIds.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
             List<String> decommissionedHostNames = instanceMetaDataService.getAllAvailableHostNamesByPrivateIds(stackId, privateIds);
             flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), resourceEvent,
