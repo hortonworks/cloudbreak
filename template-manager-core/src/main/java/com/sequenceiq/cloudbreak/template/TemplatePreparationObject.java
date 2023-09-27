@@ -322,16 +322,25 @@ public class TemplatePreparationObject {
                     int localSsdCount = getLocalSsdCount(template, ephemeralVolumeWhichMustBeProvisioned);
                     int localSsdSize = getLocalSsdSize(template, ephemeralVolumeWhichMustBeProvisioned);
                     TemporaryStorage temporaryStorage = template == null ? null : template.getTemporaryStorage();
-                    int instanceStorageCount = template.getInstanceStorageCount() == null ? 0 : template.getInstanceStorageCount();
-                    int instanceStorageSize = template.getInstanceStorageSize() == null ? 0 : template.getInstanceStorageSize();
+                    int instanceStorageCount = 0;
+                    int instanceStorageSize = 0;
+                    int volumeCount = 0;
+                    Set<VolumeTemplate> volumeTemplates = new HashSet<>();
+                    if (template != null) {
+                        instanceStorageCount = template.getInstanceStorageCount() == null ? 0 : template.getInstanceStorageCount();
+                        instanceStorageSize = template.getInstanceStorageSize() == null ? 0 : template.getInstanceStorageSize();
+                        volumeCount = getVolumeCount(template, ephemeralVolumeWhichMustBeProvisioned);
+                        volumeTemplates = getVolumeTemplates(template);
+                    }
                     Integer temporaryStorageVolumeCount = template == null ? null : Math.max(instanceStorageCount, localSsdCount);
                     Integer temporaryStorageVolumeSize = template == null ? null : Math.max(instanceStorageSize, localSsdSize);
+
                     hostgroupViews.add(new HostgroupView(
                             hostGroup.getName(),
-                            getVolumeCount(template, ephemeralVolumeWhichMustBeProvisioned),
+                            volumeCount,
                             instanceGroup.getInstanceGroupType(),
                             getFqdns(instanceGroup),
-                            getVolumeTemplates(template),
+                            volumeTemplates,
                             temporaryStorage,
                             temporaryStorageVolumeCount,
                             temporaryStorageVolumeSize)
