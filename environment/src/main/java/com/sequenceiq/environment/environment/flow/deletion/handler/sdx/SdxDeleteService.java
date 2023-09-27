@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.saas.sdx.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceDeletionService;
 import com.sequenceiq.environment.exception.SdxOperationFailedException;

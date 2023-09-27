@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.saas.sdx.PlatformAwareSdxConnector;
-import com.sequenceiq.cloudbreak.saas.sdx.status.StatusCheckResult;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageOsService;

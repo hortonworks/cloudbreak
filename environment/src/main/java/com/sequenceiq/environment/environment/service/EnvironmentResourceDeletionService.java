@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplate
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.saas.sdx.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;

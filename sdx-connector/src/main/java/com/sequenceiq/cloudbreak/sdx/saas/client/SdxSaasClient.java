@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.saas.client.sdx;
+package com.sequenceiq.cloudbreak.sdx.saas.client;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

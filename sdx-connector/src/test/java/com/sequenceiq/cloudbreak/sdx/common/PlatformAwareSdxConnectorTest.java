@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.saas.sdx;
+package com.sequenceiq.cloudbreak.sdx.common;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,8 +22,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.util.FieldUtils;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.saas.sdx.polling.PollingResult;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
+import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
+import com.sequenceiq.cloudbreak.sdx.paas.PaasSdxService;
+import com.sequenceiq.cloudbreak.sdx.saas.SaasSdxService;
 
 @ExtendWith(MockitoExtension.class)
 public class PlatformAwareSdxConnectorTest {

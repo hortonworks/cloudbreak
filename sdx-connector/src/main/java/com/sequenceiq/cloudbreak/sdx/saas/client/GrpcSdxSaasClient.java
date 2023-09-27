@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.saas.client.sdx;
+package com.sequenceiq.cloudbreak.sdx.saas.client;
 
 import java.util.Set;
 
@@ -11,7 +11,7 @@ import com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto;
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
-import com.sequenceiq.cloudbreak.saas.client.sdx.config.SdxSaasChannelConfig;
+import com.sequenceiq.cloudbreak.sdx.saas.client.config.SdxSaasChannelConfig;
 
 @Component
 public class GrpcSdxSaasClient {

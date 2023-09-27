@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.saas.sdx;
+package com.sequenceiq.cloudbreak.sdx.paas;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,8 +18,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.saas.sdx.polling.PollingResult;
-import com.sequenceiq.cloudbreak.saas.sdx.status.StatusCheckResult;
+import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
+import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.saas.sdx;
+package com.sequenceiq.cloudbreak.sdx.saas;
 
 import static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.InstanceHighLevelStatus.Value.UNHEALTHY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS_SDX_INTEGRATION;
@@ -19,11 +19,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.saas.client.sdx.GrpcSdxSaasClient;
-import com.sequenceiq.cloudbreak.saas.client.sdx.GrpcServiceDiscoveryClient;
-import com.sequenceiq.cloudbreak.saas.sdx.polling.PollingResult;
-import com.sequenceiq.cloudbreak.saas.sdx.status.StatusCheckResult;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
+import com.sequenceiq.cloudbreak.sdx.common.AbstractSdxService;
+import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
+import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
+import com.sequenceiq.cloudbreak.sdx.saas.client.GrpcSdxSaasClient;
+import com.sequenceiq.cloudbreak.sdx.saas.client.GrpcServiceDiscoveryClient;
 
 @Service
 public class SaasSdxService extends AbstractSdxService<SDXSvcCommonProto.InstanceHighLevelStatus.Value> {

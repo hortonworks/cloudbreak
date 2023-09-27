@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.saas.sdx.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;

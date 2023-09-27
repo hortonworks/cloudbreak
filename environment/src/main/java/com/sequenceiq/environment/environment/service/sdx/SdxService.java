@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.saas.sdx.PaasRemoteDataContextSupplier;
+import com.sequenceiq.cloudbreak.sdx.paas.PaasRemoteDataContextSupplier;
 import com.sequenceiq.environment.exception.SdxOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.operation.OperationView;

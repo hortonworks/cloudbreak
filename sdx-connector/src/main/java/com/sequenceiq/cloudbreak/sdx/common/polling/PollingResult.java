@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.saas.sdx.polling;
+package com.sequenceiq.cloudbreak.sdx.common.polling;
 
 public enum PollingResult {
     IN_PROGRESS,

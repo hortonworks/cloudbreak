@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.saas.sdx.status;
+package com.sequenceiq.cloudbreak.sdx.common.status;
 
 public enum StatusCheckResult {
     AVAILABLE,

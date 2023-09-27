@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.saas.sdx;
+package com.sequenceiq.cloudbreak.sdx.common;
 
 import java.util.Map;
 import java.util.Optional;
@@ -17,9 +17,9 @@ import com.dyngr.core.AttemptResults;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.saas.sdx.polling.PollingResult;
-import com.sequenceiq.cloudbreak.saas.sdx.status.StatusCheckResult;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
+import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
+import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 
 @Service
 public class PlatformAwareSdxConnector {

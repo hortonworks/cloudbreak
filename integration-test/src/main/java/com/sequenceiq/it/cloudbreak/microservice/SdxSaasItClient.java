@@ -6,8 +6,8 @@ import java.util.Set;
 import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.saas.client.sdx.GrpcSdxSaasClient;
-import com.sequenceiq.cloudbreak.saas.client.sdx.config.SdxSaasChannelConfig;
+import com.sequenceiq.cloudbreak.sdx.saas.client.GrpcSdxSaasClient;
+import com.sequenceiq.cloudbreak.sdx.saas.client.config.SdxSaasChannelConfig;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxSaasTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;

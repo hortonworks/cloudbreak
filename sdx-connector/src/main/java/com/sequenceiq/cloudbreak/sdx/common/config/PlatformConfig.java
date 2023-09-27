@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.saas.config;
+package com.sequenceiq.cloudbreak.sdx.common.config;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.saas.sdx.SdxService;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
+import com.sequenceiq.cloudbreak.sdx.common.SdxService;
 
 @Configuration
 public class PlatformConfig {

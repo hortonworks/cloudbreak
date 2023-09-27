@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.saas.sdx;
+package com.sequenceiq.cloudbreak.sdx.saas;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,8 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.saas.client.sdx.GrpcSdxSaasClient;
-import com.sequenceiq.cloudbreak.saas.sdx.polling.PollingResult;
+import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
+import com.sequenceiq.cloudbreak.sdx.saas.client.GrpcSdxSaasClient;
 
 @ExtendWith(MockitoExtension.class)
 public class SaasSdxServiceTest {

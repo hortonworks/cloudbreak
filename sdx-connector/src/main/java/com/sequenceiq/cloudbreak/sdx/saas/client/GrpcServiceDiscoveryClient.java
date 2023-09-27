@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.saas.client.sdx;
+package com.sequenceiq.cloudbreak.sdx.saas.client;
 
 import javax.inject.Inject;
 
@@ -10,7 +10,7 @@ import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
-import com.sequenceiq.cloudbreak.saas.client.sdx.config.ServiceDiscoveryChannelConfig;
+import com.sequenceiq.cloudbreak.sdx.saas.client.config.ServiceDiscoveryChannelConfig;
 
 @Component
 public class GrpcServiceDiscoveryClient {

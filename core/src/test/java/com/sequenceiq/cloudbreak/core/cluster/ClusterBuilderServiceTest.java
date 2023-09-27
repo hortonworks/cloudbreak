@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.saas.sdx.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;

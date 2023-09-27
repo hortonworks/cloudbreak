@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.saas.sdx;
+package com.sequenceiq.cloudbreak.sdx.common;
 
 import java.util.Map;
 import java.util.Optional;
@@ -10,9 +10,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.saas.sdx.polling.PollingResult;
-import com.sequenceiq.cloudbreak.saas.sdx.status.StatusCheckResult;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
+import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
+import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 
 public interface SdxService<S> {
 

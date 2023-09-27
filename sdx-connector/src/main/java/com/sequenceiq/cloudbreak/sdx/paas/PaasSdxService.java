@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.saas.sdx;
+package com.sequenceiq.cloudbreak.sdx.paas;
 
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETE_FAILED;
 
@@ -14,9 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.saas.sdx.polling.PollingResult;
-import com.sequenceiq.cloudbreak.saas.sdx.status.StatusCheckResult;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
+import com.sequenceiq.cloudbreak.sdx.common.AbstractSdxService;
+import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
+import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
