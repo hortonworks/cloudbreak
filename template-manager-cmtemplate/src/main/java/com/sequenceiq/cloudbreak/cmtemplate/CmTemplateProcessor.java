@@ -11,6 +11,7 @@ import static java.util.stream.Collectors.toSet;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -767,7 +768,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 if (config.getName().endsWith("_safety_valve")) {
                     String currentValue = configIfExists.get().getValue();
                     String valueToBeAppended = config.getValue();
-                    config.setValue(currentValue + '\n' + valueToBeAppended);
+                    currentValue = currentValue + '\n' + String.join("\n", Arrays.asList(valueToBeAppended.split("\\\\n")));
+                    config.setValue(currentValue);
                 }
                 currentConfigs.set(currentConfigs.indexOf(configIfExists.get()), config);
             } else {

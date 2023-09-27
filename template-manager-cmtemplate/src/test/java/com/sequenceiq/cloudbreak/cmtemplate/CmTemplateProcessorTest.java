@@ -759,6 +759,86 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
+    public void testIfSingleValuedCustomRoleConfigAreMerged() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/de.bp"));
+
+        // config not present in template
+        List<ApiClusterTemplateConfig> sparkConfigs = List.of(
+                new ApiClusterTemplateConfig().name("spark-conf/spark-defaults.conf_client_config_safety_valve")
+                        .value("spark.acls.enable=true"));
+        List<ApiClusterTemplateRoleConfigGroup> apiClusterTemplateRoleConfigGroupList = List.of(new ApiClusterTemplateRoleConfigGroup()
+                .roleType("GATEWAY").configs(sparkConfigs));
+
+        ApiClusterTemplateService sparkOnYarn = underTest.getTemplate().getServices()
+                .stream()
+                .filter(service -> "SPARK_ON_YARN".equals(service.getServiceType()))
+                .findFirst().get();
+
+        underTest.mergeCustomRoleConfigs(sparkOnYarn, apiClusterTemplateRoleConfigGroupList);
+        String expectedValue = "spark.hadoop.fs.s3a.ssl.channel.mode=openssl\n" +
+                "spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version=1\nspark.acls.enable=true";
+
+        String finalValue = sparkOnYarn.getRoleConfigGroups().stream()
+                .filter(i -> i.getRoleType().equals("GATEWAY")).findAny().get().getConfigs().get(0).getValue();
+
+        assertEquals(expectedValue, finalValue);
+    }
+
+    @Test
+    public void testIfMultipleValuedCustomRoleConfigAreMerged() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/de.bp"));
+
+        // config not present in template
+        List<ApiClusterTemplateConfig> sparkConfigs = List.of(
+                new ApiClusterTemplateConfig().name("spark-conf/spark-defaults.conf_client_config_safety_valve")
+                        .value("spark.acls.enable=true\nspark.ui.view.acls=*\nspark.ui.view.acls.groups=*"));
+        List<ApiClusterTemplateRoleConfigGroup> apiClusterTemplateRoleConfigGroupList = List.of(new ApiClusterTemplateRoleConfigGroup()
+                .roleType("GATEWAY").configs(sparkConfigs));
+
+        ApiClusterTemplateService sparkOnYarn = underTest.getTemplate().getServices()
+                .stream()
+                .filter(service -> "SPARK_ON_YARN".equals(service.getServiceType()))
+                .findFirst().get();
+
+        underTest.mergeCustomRoleConfigs(sparkOnYarn, apiClusterTemplateRoleConfigGroupList);
+        String expectedValue = "spark.hadoop.fs.s3a.ssl.channel.mode=openssl\n" +
+                "spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version=1\n" +
+                "spark.acls.enable=true\nspark.ui.view.acls=*\nspark.ui.view.acls.groups=*";
+
+        String finalValue = sparkOnYarn.getRoleConfigGroups().stream()
+                .filter(i -> i.getRoleType().equals("GATEWAY")).findAny().get().getConfigs().get(0).getValue();
+
+        assertEquals(expectedValue, finalValue);
+    }
+
+    @Test
+    public void testIfMultipleValuedCustomRoleConfigAreMergedInDifferentManner() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/de.bp"));
+
+        // config not present in template
+        List<ApiClusterTemplateConfig> sparkConfigs = List.of(
+                new ApiClusterTemplateConfig().name("spark-conf/spark-defaults.conf_client_config_safety_valve")
+                        .value("spark.acls.enable=true\\nspark.ui.view.acls=*\\nspark.ui.view.acls.groups=*"));
+        List<ApiClusterTemplateRoleConfigGroup> apiClusterTemplateRoleConfigGroupList = List.of(new ApiClusterTemplateRoleConfigGroup()
+                .roleType("GATEWAY").configs(sparkConfigs));
+
+        ApiClusterTemplateService sparkOnYarn = underTest.getTemplate().getServices()
+                .stream()
+                .filter(service -> "SPARK_ON_YARN".equals(service.getServiceType()))
+                .findFirst().get();
+
+        underTest.mergeCustomRoleConfigs(sparkOnYarn, apiClusterTemplateRoleConfigGroupList);
+        String expectedValue = "spark.hadoop.fs.s3a.ssl.channel.mode=openssl\n" +
+                "spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version=1\n" +
+                "spark.acls.enable=true\nspark.ui.view.acls=*\nspark.ui.view.acls.groups=*";
+
+        String finalValue = sparkOnYarn.getRoleConfigGroups().stream()
+                .filter(i -> i.getRoleType().equals("GATEWAY")).findAny().get().getConfigs().get(0).getValue();
+
+        assertEquals(expectedValue, finalValue);
+    }
+
+    @Test
     public void testIfCustomRoleConfigsAreMerged() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
         // present in cluster template/blueprint
