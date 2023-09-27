@@ -200,4 +200,18 @@ public class AwsRdsInstanceViewTest {
         assertThat(underTest.getSslCertificateIdentifier()).isEqualTo(SSL_CERTIFICATE_IDENTIFIER);
     }
 
+    @Test
+    void isKmsCustomWhenNull() {
+        when(server.getStringParameter("key")).thenReturn(null);
+
+        assertThat(underTest.isKmsCustom()).isEqualTo(false);
+    }
+
+    @Test
+    void isKmsCustomWhenEmtpy() {
+        when(server.getStringParameter("key")).thenReturn("");
+
+        assertThat(underTest.isKmsCustom()).isEqualTo(false);
+    }
+
 }

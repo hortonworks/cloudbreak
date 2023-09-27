@@ -88,7 +88,7 @@ public class AwsRdsInstanceView {
 
     public boolean isKmsCustom() {
         String encryptionKeyArn = databaseServer.getStringParameter("key");
-        return !encryptionKeyArn.isEmpty() && encryptionKeyArn != null;
+        return encryptionKeyArn != null && !encryptionKeyArn.isEmpty();
     }
 
     public String getEncryptionKeyArn() {
