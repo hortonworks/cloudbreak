@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale;
 
-import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ClusterStatus.Value.VERTICAL_SCALE;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleResult;
-import com.sequenceiq.cloudbreak.service.metering.MeteringService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -57,9 +56,6 @@ class CoreVerticalScaleActionsTest {
 
     @Mock
     private ResourceToCloudResourceConverter cloudResourceConverter;
-
-    @Mock
-    private MeteringService meteringService;
 
     @Mock
     private FlowParameters flowParameters;
@@ -94,7 +90,7 @@ class CoreVerticalScaleActionsTest {
         CoreVerticalScaleResult payload = new CoreVerticalScaleResult(1L, ResourceStatus.CREATED, new ArrayList<>(), null);
 
         new AbstractActionTestSupport<>(action).doExecute(clusterViewContext, payload, Collections.emptyMap());
-        verify(meteringService, times(1)).sendMeteringStatusChangeEventForStack(eq(1L), eq(VERTICAL_SCALE));
+        verify(coreVerticalScaleService, times(1)).finishVerticalScale(eq(1L), any());
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {
