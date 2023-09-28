@@ -14,6 +14,7 @@ import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseResponse;
 
 @Service
 public class SdxClusterConverter {
@@ -49,6 +50,11 @@ public class SdxClusterConverter {
         sdxClusterResponse.setDetached(sdxCluster.isDetached());
         sdxClusterResponse.setEnableMultiAz(sdxCluster.isEnableMultiAz());
         sdxClusterResponse.setDatabaseEngineVersion(sdxCluster.getDatabaseEngineVersion());
+        SdxDatabaseResponse sdxDatabaseResponse = new SdxDatabaseResponse();
+        sdxDatabaseResponse.setAvailabilityType(sdxCluster.getDatabaseAvailabilityType());
+        sdxDatabaseResponse.setDatabaseEngineVersion(sdxCluster.getDatabaseEngineVersion());
+        sdxDatabaseResponse.setDatabaseServerCrn(sdxCluster.getDatabaseCrn());
+        sdxClusterResponse.setSdxDatabaseResponse(sdxDatabaseResponse);
         return sdxClusterResponse;
     }
 }

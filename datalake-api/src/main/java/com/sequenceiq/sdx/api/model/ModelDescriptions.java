@@ -218,6 +218,8 @@ public class ModelDescriptions {
 
     public static final String FORCED = "Force operation. It will disable some of the validation.";
 
+    public static final String DATABASE = "Database details";
+
     private ModelDescriptions() {
     }
 }

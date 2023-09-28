@@ -80,6 +80,9 @@ public class SdxClusterResponse {
     @ApiModelProperty(ModelDescriptions.DATABASE_ENGINE_VERSION)
     private String databaseEngineVersion;
 
+    @ApiModelProperty(ModelDescriptions.DATABASE)
+    private SdxDatabaseResponse sdxDatabaseResponse;
+
     public String getCrn() {
         return crn;
     }
@@ -248,6 +251,18 @@ public class SdxClusterResponse {
         return databaseEngineVersion;
     }
 
+    public boolean isRangerRazEnabled() {
+        return rangerRazEnabled;
+    }
+
+    public SdxDatabaseResponse getSdxDatabaseResponse() {
+        return sdxDatabaseResponse;
+    }
+
+    public void setSdxDatabaseResponse(SdxDatabaseResponse sdxDatabaseResponse) {
+        this.sdxDatabaseResponse = sdxDatabaseResponse;
+    }
+
     @Override
     public String toString() {
         return "SdxClusterResponse{" +
@@ -266,12 +281,13 @@ public class SdxClusterResponse {
                 ", runtime='" + runtime + '\'' +
                 ", flowIdentifier=" + flowIdentifier +
                 ", rangerRazEnabled=" + rangerRazEnabled +
+                ", enableMultiAz=" + enableMultiAz +
                 ", tags=" + tags +
                 ", certExpirationState=" + certExpirationState +
-                ", sdxClusterServiceVersion=" + sdxClusterServiceVersion +
-                ", Detached=" + detached +
-                ", enableMultiAz=" + enableMultiAz +
-                ", databaseEngineVersion=" + databaseEngineVersion +
+                ", sdxClusterServiceVersion='" + sdxClusterServiceVersion + '\'' +
+                ", detached=" + detached +
+                ", databaseEngineVersion='" + databaseEngineVersion + '\'' +
+                ", sdxDatabaseResponse=" + sdxDatabaseResponse +
                 '}';
     }
 }
