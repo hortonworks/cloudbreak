@@ -54,6 +54,11 @@ public class SdxClientService {
         return sdxEndpoint.getByCrn(crn);
     }
 
+    public SdxClusterResponse getByCrnInternal(String crn) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> sdxEndpoint.getByCrn(crn));
+    }
+
     public List<SdxClusterResponse> list() {
         try {
             return sdxEndpoint.list(null, false);
