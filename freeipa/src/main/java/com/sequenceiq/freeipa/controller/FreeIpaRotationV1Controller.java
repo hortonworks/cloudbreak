@@ -1,6 +1,11 @@
 package com.sequenceiq.freeipa.controller;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ROTATE_FREEIPA_SECRETS;
+import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -14,15 +19,17 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
+import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeipaSecretTypeResponse;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.service.rotation.FreeIpaSecretRotationService;
 
 @Controller
@@ -37,12 +44,26 @@ public class FreeIpaRotationV1Controller implements FreeIpaRotationV1Endpoint {
     @Inject
     private MultiClusterRotationService multiClusterRotationService;
 
+    @Inject
+    private SecretRotationNotificationService notificationService;
+
     @Override
     @CheckPermissionByResourceCrn(action = ROTATE_FREEIPA_SECRETS)
     public FlowIdentifier rotateSecretsByCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn,
+            @ValidCrn(resource = ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn,
             @Valid @NotNull FreeIpaSecretRotationRequest request) {
         String accountId = Crn.safeFromString(environmentCrn).getAccountId();
         return freeIpaSecretRotationService.rotateSecretsByCrn(accountId, environmentCrn, request);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = ROTATE_FREEIPA_SECRETS)
+    public List<FreeipaSecretTypeResponse> listRotatableFreeipaSecretType(
+            @ValidCrn(resource = ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn) {
+        // further improvement needed to query secret types for resource
+        return Arrays.stream(FreeIpaSecretType.values())
+                .filter(Predicate.not(FreeIpaSecretType::internal))
+                .map(type -> new FreeipaSecretTypeResponse(type.value(), notificationService.getMessage(type)))
+                .toList();
     }
 }

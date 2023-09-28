@@ -3,7 +3,10 @@ package com.sequenceiq.distrox.api.v1.distrox.endpoint;
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
 
+import java.util.List;
+
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -13,12 +16,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidMultiSecretType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXChildResourceMarkingRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretRotationRequest;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretTypeResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 import io.swagger.annotations.Api;
@@ -53,4 +58,12 @@ public interface DistroXV1RotationEndpoint {
             nickname = "markResourcesDistroXMultiSecretsByParent")
     void markMultiClusterChildrenResourcesByParent(@Valid DistroXChildResourceMarkingRequest request,
             @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @GET
+    @Path("list_secret_types")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "List rotatable secret types for distroX", produces = MediaType.APPLICATION_JSON,
+            nickname = "listRotatableDistroXSecretType")
+    List<DistroXSecretTypeResponse> listRotatableDistroXSecretType(
+            @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @QueryParam("datahubCrn") @NotEmpty String datahubCrn);
 }

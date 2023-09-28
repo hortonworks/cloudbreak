@@ -2,7 +2,10 @@ package com.sequenceiq.sdx.api.endpoint;
 
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
 
+import java.util.List;
+
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -14,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.springframework.validation.annotation.Validated;
 
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidMultiSecretType;
@@ -21,6 +25,7 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.SdxChildResourceMarkingRequest;
 import com.sequenceiq.sdx.api.model.SdxSecretRotationRequest;
+import com.sequenceiq.sdx.api.model.SdxSecretTypeResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -54,4 +59,12 @@ public interface SdxRotationEndpoint {
             nickname = "markResourcesSDXMultiSecretsByParent")
     void markMultiClusterChildrenResourcesByParent(@Valid SdxChildResourceMarkingRequest request,
             @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @GET
+    @Path("list_secret_types")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "List rotatable secret types for SDX", produces = MediaType.APPLICATION_JSON,
+            nickname = "listRotatableSdxSecretType")
+    List<SdxSecretTypeResponse> listRotatableSdxSecretType(
+            @ValidCrn(resource = CrnResourceDescriptor.DATALAKE) @QueryParam("datalakeCrn") @NotEmpty String datalakeCrn);
 }

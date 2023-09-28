@@ -31,6 +31,16 @@ public class SecretRotationNotificationService {
         createNotificationMessage(metadata.secretType(), step, metadata.currentExecution()).ifPresent(message -> send(metadata.resourceCrn(), message));
     }
 
+    public String getMessage(SerializableRotationEnum rotationEnum) {
+        String code = rotationEnum.getClazz().getSimpleName() + "." + rotationEnum.value();
+        try {
+            return cloudbreakMessagesService.getMessage(code);
+        } catch (Exception e) {
+            LOGGER.error("Failed to get message for property: {}", code, e);
+            return rotationEnum.value();
+        }
+    }
+
     private Optional<String> createNotificationMessage(SecretType secretType, SecretRotationStep step, RotationFlowExecutionType executionType) {
         if (step.skipNotification() || !NOTIFIABLE_EXECUTION_TYPES.contains(executionType)) {
             return Optional.empty();
@@ -39,15 +49,5 @@ public class SecretRotationNotificationService {
     }
 
     protected void send(String resourceCrn, String message) {
-    }
-
-    private String getMessage(SerializableRotationEnum rotationEnum) {
-        String code = rotationEnum.getClazz().getSimpleName() + "." + rotationEnum.value();
-        try {
-            return cloudbreakMessagesService.getMessage(code);
-        } catch (Exception e) {
-            LOGGER.error("Failed to get message for property: {}", code, e);
-            return rotationEnum.value();
-        }
     }
 }
