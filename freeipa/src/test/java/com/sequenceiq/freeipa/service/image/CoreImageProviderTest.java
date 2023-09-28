@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.image;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -48,8 +49,6 @@ public class CoreImageProviderTest {
 
     private static final String VM_IMAGE_REFERENCE = "vm image";
 
-    private static final String ACCOUNT_ID = "cloudera";
-
     private static final Map<String, Map<String, String>> VM_IMAGES = Collections.singletonMap(PLATFORM, Collections.singletonMap(REGION, VM_IMAGE_REFERENCE));
 
     @Mock
@@ -58,12 +57,18 @@ public class CoreImageProviderTest {
     @Mock
     private WebApplicationExceptionMessageExtractor messageExtractor;
 
+    @Mock
+    private ProviderSpecificImageFilter providerSpecificImageFilter;
+
+    @Mock
+    private FreeIpaImageFilter freeIpaImageFilter;
+
     @InjectMocks
     private CoreImageProvider victim;
 
     @Test
     public void shouldReturnEmptyInCaseOfException() throws Exception {
-        when(imageCatalogV4Endpoint.getSingleImageByCatalogNameAndImageId(WORKSPACE_ID_DEFAULT, CATALOG_NAME, IMAGE_ID)).thenThrow(new RuntimeException());
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false)).thenThrow(new RuntimeException());
 
         Optional<ImageWrapper> actual = victim.getImage(createImageFilterSettings());
 
@@ -72,7 +77,7 @@ public class CoreImageProviderTest {
 
     @Test
     public void shouldReturnEmptyInCaseOfNullResponse() throws Exception {
-        when(imageCatalogV4Endpoint.getSingleImageByCatalogNameAndImageId(WORKSPACE_ID_DEFAULT, CATALOG_NAME, IMAGE_ID)).thenReturn(null);
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false)).thenReturn(null);
 
         Optional<ImageWrapper> actual = victim.getImage(createImageFilterSettings());
 
@@ -81,7 +86,12 @@ public class CoreImageProviderTest {
 
     @Test
     public void shouldReturnResult() throws Exception {
-        when(imageCatalogV4Endpoint.getSingleImageByCatalogNameAndImageId(WORKSPACE_ID_DEFAULT, CATALOG_NAME, IMAGE_ID)).thenReturn(anImageResponse());
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false)).thenReturn(anImagesResponse());
+        when(freeIpaImageFilter.filterImages(any(), any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(freeIpaImageFilter.findMostRecentImage(any())).thenAnswer(invocation -> {
+            List<Image> images = invocation.getArgument(0);
+            return images.stream().findFirst();
+        });
 
         Optional<ImageWrapper> actual = victim.getImage(createImageFilterSettings());
 
@@ -161,5 +171,11 @@ public class CoreImageProviderTest {
         response.setImageSetsByProvider(VM_IMAGES);
 
         return response;
+    }
+
+    private ImagesV4Response anImagesResponse() {
+        ImagesV4Response imagesV4Response = new ImagesV4Response();
+        imagesV4Response.setFreeipaImages(List.of(anImageResponse()));
+        return imagesV4Response;
     }
 }

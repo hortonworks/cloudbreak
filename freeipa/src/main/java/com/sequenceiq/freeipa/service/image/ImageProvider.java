@@ -9,7 +9,5 @@ public interface ImageProvider {
 
     Optional<ImageWrapper> getImage(FreeIpaImageFilterSettings imageFilterParams);
 
-    Optional<ImageWrapper> getImage(FreeIpaImageFilterSettings imageFilterParams, String accountId);
-
     List<ImageWrapper> getImages(FreeIpaImageFilterSettings imageFilterParams);
 }

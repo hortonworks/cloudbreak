@@ -16,7 +16,6 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -68,15 +67,9 @@ public class FreeIpaImageProviderTest {
 
     private static final String IMAGE_UUID = "61851893-8340-411d-afb7-e1b55107fb10";
 
-    private static final String REDHAT8_IMAGE_UUID = "b465c893-fe04-44b1-ae8e-0452bbb39c99";
-
     private static final String NON_DEFAULT_OS_IMAGE_UUID = "91851893-8340-411d-afb7-e1b55107fb10";
 
     private static final String REDHAT8_OS_IMAGE_UUID = "b465c893-fe04-44b1-ae8e-0452bbb39c99";
-
-    private static final String ACCOUNT_ID = "cloudera";
-
-    private static final String ACCOUNT_ID_REDHAT8 = "cloudera_rhel8";
 
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
@@ -85,13 +78,13 @@ public class FreeIpaImageProviderTest {
     private ProviderSpecificImageFilter providerSpecificImageFilter;
 
     @Mock
-    private FreeIpaImageFilter freeIpaImageFilter;
-
-    @Mock
     private PreferredOsService preferredOsService;
 
     @Mock
     private SupportedOsService supportedOsService;
+
+    @InjectMocks
+    private FreeIpaImageFilter freeIpaImageFilter;
 
     @InjectMocks
     private FreeIpaImageProvider underTest;
@@ -103,14 +96,13 @@ public class FreeIpaImageProviderTest {
     public void setup() throws Exception {
         setupImageCatalogProvider();
         lenient().when(providerSpecificImageFilter.filterImages(any(), anyList())).then(returnsSecondArg());
-        lenient().when(freeIpaImageFilter.filterImages(any(), any())).thenAnswer(invocation -> invocation.getArgument(0));
-        lenient().when(freeIpaImageFilter.filterPlatformAndRegion(any(), any())).thenReturn(true);
         lenient().when(preferredOsService.getPreferredOs()).thenReturn(DEFAULT_OS);
         lenient().when(supportedOsService.isSupported(any())).thenReturn(true);
         lenient().when(supportedOsService.isSupported(REDHAT8)).thenReturn(false);
 
         ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "defaultCatalogUrl", DEFAULT_CATALOG_URL, null);
         ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "freeIpaVersion", DEFAULT_VERSION, null);
+        ReflectionTestUtils.setField(underTest, "freeIpaImageFilter", freeIpaImageFilter);
     }
 
     @Test
@@ -126,6 +118,7 @@ public class FreeIpaImageProviderTest {
     @Test
     public void testGetImagePreferNewerImageWithOs() {
         when(preferredOsService.getPreferredOs()).thenReturn(REDHAT8);
+        when(supportedOsService.isSupported(REDHAT8)).thenReturn(true);
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, null, false);
 
         Image image = underTest.getImage(imageFilterSettings).get().getImage();
@@ -150,7 +143,6 @@ public class FreeIpaImageProviderTest {
     public void testGetImagesGivenNoInputWithInvalidAppVersion() {
         ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "freeIpaVersion", "2.21.0-dcv.1", null);
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, CENTOS7, false);
-        when(freeIpaImageFilter.filterImages(any(), any())).thenReturn(Collections.emptyList());
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
 
@@ -170,7 +162,6 @@ public class FreeIpaImageProviderTest {
     @Test
     public void testGetImageGivenAllInput() {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, null, DEFAULT_OS, false);
-        //when(freeIpaImageFilter.filterRegion(any(), any())).thenReturn(true);
 
         ImageWrapper imageWrapper = underTest.getImage(imageFilterSettings).get();
         assertEquals(CUSTOM_IMAGE_CATALOG_URL, imageWrapper.getCatalogUrl());
@@ -200,6 +191,7 @@ public class FreeIpaImageProviderTest {
 
     @Test
     public void testGetImagesWhenMajorOsUpgradeIsEnabled() {
+        when(supportedOsService.isSupported(REDHAT8)).thenReturn(true);
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, CUSTOM_IMAGE_CATALOG_URL, DEFAULT_OS, REDHAT8, true);
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
@@ -251,7 +243,6 @@ public class FreeIpaImageProviderTest {
     @Test
     public void testGetImagesGivenIdInputFound() {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, null, null, null, false);
-        //when(freeIpaImageFilter.filterImages())
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
 
@@ -328,6 +319,7 @@ public class FreeIpaImageProviderTest {
 
     @Test
     public void testGetImagesNoInput() {
+        when(supportedOsService.isSupported(any())).thenReturn(true);
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, null, false);
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);

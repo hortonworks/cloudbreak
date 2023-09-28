@@ -164,13 +164,6 @@ public class ImageService {
                         Optional.ofNullable(imageFilterParams.targetOs()).orElse(defaultOs)));
     }
 
-    public ImageWrapper getImage(FreeIpaImageFilterSettings imageFilterParams, String accountId) {
-        return imageProviderFactory.getImageProvider(imageFilterParams.catalog())
-                .getImage(imageFilterParams, accountId)
-                .orElseThrow(() -> throwImageNotFoundException(imageFilterParams.region(), imageFilterParams.currentImageId(),
-                        Optional.ofNullable(imageFilterParams.targetOs()).orElse(defaultOs)));
-    }
-
     private List<ImageWrapper> getImages(FreeIpaImageFilterSettings imageFilterParams) {
         return imageProviderFactory.getImageProvider(imageFilterParams.catalog()).getImages(imageFilterParams);
     }
@@ -266,7 +259,7 @@ public class ImageService {
 
     public Image getImageForStack(Stack stack) {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettingsFromImageEntity(stack);
-        ImageWrapper imageWrapper = getImage(imageFilterSettings, stack.getAccountId());
+        ImageWrapper imageWrapper = getImage(imageFilterSettings);
 
         return imageWrapper.getImage();
     }

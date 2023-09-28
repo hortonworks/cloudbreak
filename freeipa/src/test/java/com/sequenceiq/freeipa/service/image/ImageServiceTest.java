@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -260,12 +258,12 @@ public class ImageServiceTest {
         when(imageProviderFactory.getImageProvider(IMAGE_CATALOG)).thenReturn(imageProvider);
         Image image = new Image(123L, "now", "desc", DEFAULT_OS, IMAGE_UUID, Map.of(), "os", Map.of(), true);
         ImageWrapper imageWrapper = ImageWrapper.ofCoreImage(image, IMAGE_CATALOG);
-        when(imageProvider.getImage(any(), anyString())).thenReturn(Optional.of(imageWrapper));
+        when(imageProvider.getImage(any())).thenReturn(Optional.of(imageWrapper));
         when(platformStringTransformer.getPlatformString(stack)).thenReturn("aws");
 
         ImageCatalog result = underTest.generateImageCatalogForStack(stack);
 
-        verify(imageProvider).getImage(imageFilterSettingsCaptor.capture(), eq("account"));
+        verify(imageProvider).getImage(imageFilterSettingsCaptor.capture());
         assertThat(imageFilterSettingsCaptor.getValue())
                 .returns(IMAGE_CATALOG, FreeIpaImageFilterSettings::catalog)
                 .returns(IMAGE_UUID, FreeIpaImageFilterSettings::currentImageId)
