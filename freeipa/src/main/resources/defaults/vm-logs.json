@@ -101,7 +101,7 @@
   },
   {
     "path": "/var/log/rotate-ccm.log",
-    "label": "upgrade_ccm"
+    "label": "rotate_ccm"
   },
   {
     "path": "/cdp/ipahealthagent/ipahealthagent.log",
