@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,12 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
@@ -41,14 +42,18 @@ public class TelemetryApiConverterTest {
 
     private static final String ACCOUNT_ID = "accId";
 
+    private static final String STORAGE_LOCATION = "storageLocation";
+
     private TelemetryApiConverter underTest;
 
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private StorageLocationDecorator storageLocationDecorator;
+
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration("", "", true, "****", "****");
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null, false);
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null, false);
@@ -56,7 +61,7 @@ public class TelemetryApiConverterTest {
         monitoringConfig.setRemoteWriteUrl("http://myaddress/api/v1/receive");
         TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(
                 altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
-        underTest = new TelemetryApiConverter(telemetryConfiguration, new MonitoringUrlResolver(monitoringConfig), entitlementService);
+        underTest = new TelemetryApiConverter(telemetryConfiguration, new MonitoringUrlResolver(monitoringConfig), entitlementService, storageLocationDecorator);
     }
 
     @Test
@@ -174,6 +179,39 @@ public class TelemetryApiConverterTest {
         EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
         // THEN
         assertFalse(result.getFeatures().getWorkloadAnalytics().getEnabled());
+    }
+
+    @Test
+    void convertTestTelemetryRequestTestWhenNullTelemetry() {
+        EnvironmentTelemetry result = underTest.convert(null, new Features(), ACCOUNT_ID);
+
+        assertThat(result).isNull();
+    }
+
+    @Test
+    void convertTestTelemetryRequestTestWhenNullLogging() {
+        TelemetryRequest request = new TelemetryRequest();
+        request.setLogging(null);
+
+        EnvironmentTelemetry result = underTest.convert(request, new Features(), ACCOUNT_ID);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getLogging()).isNull();
+    }
+
+    @Test
+    void convertTestTelemetryRequestTestWhenLoggingStorageLocation() {
+        TelemetryRequest request = new TelemetryRequest();
+        LoggingRequest loggingRequest = new LoggingRequest();
+        request.setLogging(loggingRequest);
+        loggingRequest.setStorageLocation(STORAGE_LOCATION);
+
+        EnvironmentTelemetry result = underTest.convert(request, new Features(), ACCOUNT_ID);
+
+        assertThat(result).isNotNull();
+        EnvironmentLogging logging = result.getLogging();
+        assertThat(logging).isNotNull();
+        verify(storageLocationDecorator).setLoggingStorageLocationFromRequest(logging, STORAGE_LOCATION);
     }
 
     @Test

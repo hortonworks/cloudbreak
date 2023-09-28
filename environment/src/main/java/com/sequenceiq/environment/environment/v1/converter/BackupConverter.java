@@ -17,7 +17,10 @@ import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParame
 @Component
 public class BackupConverter {
 
-    public BackupConverter() {
+    private final StorageLocationDecorator storageLocationDecorator;
+
+    public BackupConverter(StorageLocationDecorator storageLocationDecorator) {
+        this.storageLocationDecorator = storageLocationDecorator;
     }
 
     public EnvironmentBackup convert(BackupRequest request) {
@@ -27,7 +30,7 @@ public class BackupConverter {
     public EnvironmentBackup convert(TelemetryRequest request) {
         EnvironmentBackup backup = null;
         if (request != null) {
-            return createBackupFromRequest(request.getLogging());
+            backup = createBackupFromRequest(request.getLogging());
         }
         return backup;
     }
@@ -74,10 +77,10 @@ public class BackupConverter {
         EnvironmentBackup backup = null;
         if (backupRequest != null) {
             backup = new EnvironmentBackup();
-            backup.setStorageLocation(backupRequest.getStorageLocation());
             backup.setS3(convertS3(backupRequest.getS3()));
             backup.setAdlsGen2(convertAdlsV2(backupRequest.getAdlsGen2()));
             backup.setGcs(convertGcs(backupRequest.getGcs()));
+            storageLocationDecorator.setBackupStorageLocationFromRequest(backup, backupRequest.getStorageLocation());
             backup.setCloudwatch(BackupCloudwatchParams.copy(backupRequest.getCloudwatch()));
         }
         return backup;
@@ -87,10 +90,10 @@ public class BackupConverter {
         EnvironmentBackup backup = null;
         if (loggingRequest != null) {
             backup = new EnvironmentBackup();
-            backup.setStorageLocation(loggingRequest.getStorageLocation());
             backup.setS3(convertS3(loggingRequest.getS3()));
             backup.setAdlsGen2(convertAdlsV2(loggingRequest.getAdlsGen2()));
             backup.setGcs(convertGcs(loggingRequest.getGcs()));
+            storageLocationDecorator.setBackupStorageLocationFromRequest(backup, loggingRequest.getStorageLocation());
             backup.setCloudwatch(convertBackupCloudwatchParams(loggingRequest.getCloudwatch()));
         }
         return backup;
@@ -101,7 +104,6 @@ public class BackupConverter {
         if (s3 != null) {
             s3CloudStorageParameters = new S3CloudStorageParameters();
             s3CloudStorageParameters.setInstanceProfile(s3.getInstanceProfile());
-            return s3CloudStorageParameters;
         }
         return s3CloudStorageParameters;
     }
@@ -111,7 +113,6 @@ public class BackupConverter {
         if (s3 != null) {
             s3CloudStorageV1Parameters = new S3CloudStorageV1Parameters();
             s3CloudStorageV1Parameters.setInstanceProfile(s3.getInstanceProfile());
-            return s3CloudStorageV1Parameters;
         }
         return s3CloudStorageV1Parameters;
     }
@@ -147,4 +148,5 @@ public class BackupConverter {
         }
         return newCloudwatchParams;
     }
+
 }

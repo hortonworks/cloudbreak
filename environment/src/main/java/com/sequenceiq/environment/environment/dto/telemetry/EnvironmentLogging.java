@@ -7,10 +7,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
+import com.sequenceiq.environment.environment.dto.StorageLocationAware;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class EnvironmentLogging implements Serializable {
+public class EnvironmentLogging implements Serializable, StorageLocationAware {
 
     private String storageLocation;
 
@@ -26,10 +27,12 @@ public class EnvironmentLogging implements Serializable {
         return storageLocation;
     }
 
+    @Override
     public void setStorageLocation(String storageLocation) {
         this.storageLocation = storageLocation;
     }
 
+    @Override
     public S3CloudStorageParameters getS3() {
         return s3;
     }
@@ -38,6 +41,7 @@ public class EnvironmentLogging implements Serializable {
         this.s3 = s3;
     }
 
+    @Override
     public AdlsGen2CloudStorageV1Parameters getAdlsGen2() {
         return adlsGen2;
     }
@@ -46,6 +50,7 @@ public class EnvironmentLogging implements Serializable {
         this.adlsGen2 = adlsGen2;
     }
 
+    @Override
     public GcsCloudStorageV1Parameters getGcs() {
         return gcs;
     }

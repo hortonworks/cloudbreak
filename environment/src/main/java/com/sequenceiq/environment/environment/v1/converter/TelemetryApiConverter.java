@@ -42,11 +42,15 @@ public class TelemetryApiConverter {
 
     private final EntitlementService entitlementService;
 
-    public TelemetryApiConverter(TelemetryConfiguration configuration, MonitoringUrlResolver monitoringUrlResolver, EntitlementService entitlementService) {
-        this.clusterLogsCollection = configuration.getClusterLogsCollectionConfiguration().isEnabled();
+    private final StorageLocationDecorator storageLocationDecorator;
+
+    public TelemetryApiConverter(TelemetryConfiguration configuration, MonitoringUrlResolver monitoringUrlResolver, EntitlementService entitlementService,
+            StorageLocationDecorator storageLocationDecorator) {
+        clusterLogsCollection = configuration.getClusterLogsCollectionConfiguration().isEnabled();
         this.entitlementService = entitlementService;
         this.monitoringUrlResolver = monitoringUrlResolver;
-        this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
+        useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
+        this.storageLocationDecorator = storageLocationDecorator;
     }
 
     public EnvironmentTelemetry convert(TelemetryRequest request, Features accountFeatures, String accountId) {
@@ -139,10 +143,10 @@ public class TelemetryApiConverter {
         EnvironmentLogging logging = null;
         if (loggingRequest != null) {
             logging = new EnvironmentLogging();
-            logging.setStorageLocation(loggingRequest.getStorageLocation());
             logging.setS3(convertS3(loggingRequest.getS3()));
             logging.setAdlsGen2(convertAdlsV2(loggingRequest.getAdlsGen2()));
             logging.setGcs(convertGcs(loggingRequest.getGcs()));
+            storageLocationDecorator.setLoggingStorageLocationFromRequest(logging, loggingRequest.getStorageLocation());
             logging.setCloudwatch(CloudwatchParams.copy(loggingRequest.getCloudwatch()));
         }
         return logging;
@@ -249,7 +253,6 @@ public class TelemetryApiConverter {
         if (s3 != null) {
             s3CloudStorageParameters = new S3CloudStorageParameters();
             s3CloudStorageParameters.setInstanceProfile(s3.getInstanceProfile());
-            return s3CloudStorageParameters;
         }
         return s3CloudStorageParameters;
     }
@@ -290,7 +293,6 @@ public class TelemetryApiConverter {
         if (s3 != null) {
             s3CloudStorageV1Parameters = new S3CloudStorageV1Parameters();
             s3CloudStorageV1Parameters.setInstanceProfile(s3.getInstanceProfile());
-            return s3CloudStorageV1Parameters;
         }
         return s3CloudStorageV1Parameters;
     }
@@ -315,4 +317,5 @@ public class TelemetryApiConverter {
         }
         return gcsCloudStorageV1Parameters;
     }
+
 }

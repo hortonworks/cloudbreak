@@ -11,7 +11,7 @@ import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParame
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class EnvironmentBackup implements Serializable {
+public class EnvironmentBackup implements Serializable, StorageLocationAware {
 
     private String storageLocation;
 
@@ -27,10 +27,12 @@ public class EnvironmentBackup implements Serializable {
         return storageLocation;
     }
 
+    @Override
     public void setStorageLocation(String storageLocation) {
         this.storageLocation = storageLocation;
     }
 
+    @Override
     public S3CloudStorageParameters getS3() {
         return s3;
     }
@@ -39,6 +41,7 @@ public class EnvironmentBackup implements Serializable {
         this.s3 = s3;
     }
 
+    @Override
     public AdlsGen2CloudStorageV1Parameters getAdlsGen2() {
         return adlsGen2;
     }
@@ -47,6 +50,7 @@ public class EnvironmentBackup implements Serializable {
         this.adlsGen2 = adlsGen2;
     }
 
+    @Override
     public GcsCloudStorageV1Parameters getGcs() {
         return gcs;
     }
