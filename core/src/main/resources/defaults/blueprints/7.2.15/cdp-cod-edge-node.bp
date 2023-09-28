@@ -3,6 +3,7 @@
   "blueprint": {
     "cdhVersion": "7.2.15",
     "displayName": "opdb",
+    "blueprintUpgradeOption": "GA",
     "cmVersion": null,
     "repositories": [],
     "products": [],
