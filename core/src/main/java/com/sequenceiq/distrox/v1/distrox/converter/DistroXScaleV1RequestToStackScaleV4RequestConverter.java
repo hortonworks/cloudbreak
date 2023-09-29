@@ -16,6 +16,7 @@ public class DistroXScaleV1RequestToStackScaleV4RequestConverter {
         stackScaleV4Request.setGroup(source.getGroup());
         stackScaleV4Request.setAdjustmentType(source.getAdjustmentType());
         stackScaleV4Request.setThreshold(source.getThreshold());
+        stackScaleV4Request.setForced(source.getForced());
         setStackNetworkScaleRequest(source.getNetworkScaleRequest(), stackScaleV4Request);
         return stackScaleV4Request;
     }

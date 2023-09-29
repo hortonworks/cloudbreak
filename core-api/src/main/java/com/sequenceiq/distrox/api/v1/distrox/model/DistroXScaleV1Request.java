@@ -28,6 +28,9 @@ public class DistroXScaleV1Request implements JsonEntity {
     @ApiModelProperty(value = InstanceGroupNetworkScaleModelDescription.NETWORK_SCALE_REQUEST)
     private NetworkScaleV1Request networkScaleRequest;
 
+    @ApiModelProperty(InstanceGroupAdjustmentModelDescription.FORCE)
+    private Boolean forced;
+
     @ApiModelProperty(value = InstanceGroupAdjustmentModelDescription.ADJUSTMENT_TYPE)
     private AdjustmentType adjustmentType = AdjustmentType.EXACT;
 
@@ -56,6 +59,14 @@ public class DistroXScaleV1Request implements JsonEntity {
 
     public void setNetworkScaleRequest(NetworkScaleV1Request networkScaleRequest) {
         this.networkScaleRequest = networkScaleRequest;
+    }
+
+    public Boolean getForced() {
+        return forced;
+    }
+
+    public void setForced(Boolean forced) {
+        this.forced = forced;
     }
 
     public void setAdjustmentType(AdjustmentType adjustmentType) {
