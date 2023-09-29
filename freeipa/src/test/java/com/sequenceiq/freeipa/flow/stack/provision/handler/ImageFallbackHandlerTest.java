@@ -67,10 +67,15 @@ class ImageFallbackHandlerTest {
         when(stackService.getStackById(123L)).thenReturn(stack);
         when(stack.getCloudPlatform()).thenReturn("AWS");
 
+        ImageEntity currentImage = mock(ImageEntity.class);
+        when(currentImage.getImageName()).thenReturn("cloudera:image");
+        when(imageService.getByStack(stack)).thenReturn(currentImage);
+
         Selectable result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> imageFallbackHandler.doAccept(event));
 
         assertTrue(result instanceof ImageFallbackFailed);
-        assertEquals("Image fallback is only supported on the Azure cloud platform", ((ImageFallbackFailed) result).getException().getMessage());
+        assertEquals("Failed to start instances with the designated image: cloudera:image. Image fallback is only supported on the Azure cloud platform",
+                ((ImageFallbackFailed) result).getException().getMessage());
     }
 
     @Test
@@ -93,7 +98,8 @@ class ImageFallbackHandlerTest {
         Selectable result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> imageFallbackHandler.doAccept(event));
 
         assertTrue(result instanceof ImageFallbackFailed);
-        assertEquals("No valid fallback path from redhat8 VHD image.", ((ImageFallbackFailed) result).getException().getMessage());
+        assertEquals("Failed to start instances with image: http://redhat8.vhd. No valid fallback path from Redhat 8 VHD image.",
+                ((ImageFallbackFailed) result).getException().getMessage());
     }
 
     @Test

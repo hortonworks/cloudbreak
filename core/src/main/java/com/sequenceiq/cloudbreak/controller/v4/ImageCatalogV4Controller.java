@@ -7,12 +7,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
@@ -31,9 +33,11 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageRecommendationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.UpdateImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.RuntimeVersionsV4Response;
@@ -44,6 +48,7 @@ import com.sequenceiq.cloudbreak.authorization.ImageCatalogFiltering;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
+import com.sequenceiq.cloudbreak.controller.validation.RecommendedImageValidator;
 import com.sequenceiq.cloudbreak.converter.UpdateImageCatalogRequestToImageCatalogConverter;
 import com.sequenceiq.cloudbreak.converter.v4.imagecatalog.ImageCatalogToImageCatalogV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.imagecatalog.ImageCatalogToImageCatalogV4ResponseConverter;
@@ -94,6 +99,9 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Inject
     private PlatformStringTransformer platformStringTransformer;
+
+    @Inject
+    private RecommendedImageValidator recommendedImageValidator;
 
     @Override
     @FilterListBasedOnPermissions
@@ -177,8 +185,8 @@ public class ImageCatalogV4Controller extends NotificationController implements 
         notify(ResourceEvent.IMAGE_CATALOG_DELETED);
         return new ImageCatalogV4Responses(
                 deleted.stream()
-                .map(i -> imageCatalogToImageCatalogV4ResponseConverter.convert(i))
-                .collect(Collectors.toSet())
+                        .map(i -> imageCatalogToImageCatalogV4ResponseConverter.convert(i))
+                        .collect(Collectors.toSet())
         );
     }
 
@@ -214,7 +222,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
     public ImagesV4Response getImagesByName(Long workspaceId, @ResourceName String name, String stackName, String platform,
-        String runtimeVersion, String imageType, boolean govCloud) throws Exception {
+            String runtimeVersion, String imageType, boolean govCloud) throws Exception {
         Images images = imageCatalogService.getImagesByCatalogName(
                 restRequestThreadLocalService.getRequestedWorkspaceId(),
                 name,
@@ -294,7 +302,27 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @AccountIdNotNeeded
     @DisableCheckPermissions
     public RuntimeVersionsV4Response getRuntimeVersionsFromDefault(Long workspaceId) throws Exception {
-        List<String> runtimeVersions =  imageCatalogService.getRuntimeVersionsFromDefault();
+        List<String> runtimeVersions = imageCatalogService.getRuntimeVersionsFromDefault();
         return new RuntimeVersionsV4Response(runtimeVersions);
+    }
+
+    @Override
+    @AccountIdNotNeeded
+    @DisableCheckPermissions
+    public ImageRecommendationV4Response validateRecommendedImageWithProvider(Long workspaceId, ImageRecommendationV4Request request) {
+        RecommendedImageValidator.ValidationResult validationResult = recommendedImageValidator.validateRecommendedImage(workspaceId,
+                restRequestThreadLocalService.getCloudbreakUser(),
+                request.getImage(),
+                request.getEnvironmentCrn(),
+                request.getRegion(),
+                request.getPlatform(),
+                request.getBlueprintName());
+        ImageRecommendationV4Response response = new ImageRecommendationV4Response();
+        response.setHasValidationError(StringUtils.hasText(validationResult.getErrorMsg()));
+        Stream.of(validationResult.getErrorMsg(), validationResult.getWarningMsg())
+                .filter(StringUtils::hasText)
+                .findFirst()
+                .ifPresent(response::setValidationMessage);
+        return response;
     }
 }

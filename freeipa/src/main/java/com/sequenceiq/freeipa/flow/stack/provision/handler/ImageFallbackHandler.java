@@ -68,33 +68,44 @@ public class ImageFallbackHandler extends ExceptionCatcherEventHandler<ImageFall
         Long stackId = event.getData().getResourceId();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Stack stack = stackService.getStackById(stackId);
+        ImageEntity currentImage = imageService.getByStack(stack);
         if (!CloudPlatform.AZURE.name().equals(stack.getCloudPlatform())) {
-            String msg = "Image fallback is only supported on the Azure cloud platform";
+            String msg = String.format("Failed to start instances with the designated image: %s. Image fallback is only supported on the Azure cloud platform",
+                    currentImage.getImageName());
             LOGGER.warn(msg);
             return new ImageFallbackFailed(stackId, new CloudbreakServiceException(msg));
         }
         if (entitlementService.azureOnlyMarketplaceImagesEnabled(accountId)) {
-            return new ImageFallbackFailed(stackId, new CloudbreakServiceException("Cannot fallback to VHD image. Only Azure Marketplace images allowed."));
+            String message = String.format("Azure Marketplace image terms were not accepted, cannot start instances with image: %s. " +
+                    "Fallback to VHD image is not possible, only Azure Marketplace images allowed. " +
+                    "Please accept image terms or turn on automatic image terms acceptance.",
+                    currentImage.getImageName()
+            );
+            return new ImageFallbackFailed(stackId, new CloudbreakServiceException(message));
         }
 
         try {
-            ImageEntity currentImage = imageService.getByStack(stack);
-
             if (RHEL8.getOs().equalsIgnoreCase(currentImage.getOsType()) && azureImageFormatValidator.isVhdImageFormat(currentImage.getImageName())) {
-                throw new CloudbreakServiceException("No valid fallback path from redhat8 VHD image.");
+                String message = String.format("Failed to start instances with image: %s. No valid fallback path from Redhat 8 VHD image.",
+                        currentImage.getImageName());
+                throw new CloudbreakServiceException(message);
             }
 
             ImageProvider imageProvider = imageProviderFactory.getImageProvider(currentImage.getImageCatalogName());
             FreeIpaImageFilterSettings imageFilterSettings = createFreeIpaImageFilterSettings(stack, currentImage);
-            String imgNotFoundMsg = String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
+            LOGGER.debug("Azure Marketplace image terms were not accepted. " +
+                            "VHD image couldn't be found in image entry: '{}' for the selected platform: '{}' and region: '{}'. ",
                     imageFilterSettings.catalog(), stack.getCloudPlatform(), stack.getRegion());
+            String imgNotFoundMsg = String.format("Azure Marketplace image terms were not accepted. " +
+                    "Attempted to fallback to VHD image, but failed. No VHD image found for image id %s and region %s.",
+                    currentImage.getImageId(), stack.getRegion());
             ImageWrapper imageWrapper = imageProvider.getImage(imageFilterSettings)
                     .orElseThrow(() -> new ImageNotFoundException(imgNotFoundMsg));
             String newImageName = imageService.determineImageNameByRegion(stack.getCloudPlatform(), stack.getRegion(), imageWrapper.getImage());
             currentImage.setImageName(newImageName);
             currentImage.setAccountId(stack.getAccountId());
             imageService.save(currentImage);
-            LOGGER.info("Selected image to fallback to: {}", currentImage);
+            LOGGER.info("Selected image to fallback to: {}", currentImage.getImageName());
         } catch (Exception e) {
             LOGGER.error("Image fallback failed", e);
             return new ImageFallbackFailed(stackId, e);
