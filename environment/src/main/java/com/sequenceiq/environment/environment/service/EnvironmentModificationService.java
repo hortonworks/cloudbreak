@@ -6,12 +6,14 @@ import java.util.Optional;
 
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -28,6 +30,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentTagsDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
@@ -90,6 +93,8 @@ public class EnvironmentModificationService {
 
     private final EnvironmentReactorFlowManager environmentReactorFlowManager;
 
+    private final EnvironmentTagsDtoConverter environmentTagsDtoConverter;
+
     public EnvironmentModificationService(
             EnvironmentDtoConverter environmentDtoConverter,
             EnvironmentService environmentService,
@@ -104,7 +109,8 @@ public class EnvironmentModificationService {
             DnsV1Endpoint dnsV1Endpoint,
             ProxyConfigService proxyConfigService,
             ProxyConfigModificationService proxyConfigModificationService,
-            EnvironmentReactorFlowManager environmentReactorFlowManager) {
+            EnvironmentReactorFlowManager environmentReactorFlowManager,
+            EnvironmentTagsDtoConverter environmentTagsDtoConverter) {
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentService = environmentService;
         this.credentialService = credentialService;
@@ -119,82 +125,72 @@ public class EnvironmentModificationService {
         this.proxyConfigService = proxyConfigService;
         this.proxyConfigModificationService = proxyConfigModificationService;
         this.environmentReactorFlowManager = environmentReactorFlowManager;
+        this.environmentTagsDtoConverter = environmentTagsDtoConverter;
     }
 
-    public EnvironmentDto editByName(String environmentName, EnvironmentEditDto editDto) {
-        Environment env = environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(environmentName, editDto.getAccountId())
-                .orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", environmentName)));
-        return edit(editDto, env);
-    }
-
-    public EnvironmentDto editByCrn(String crn, EnvironmentEditDto editDto) {
-        Environment env = environmentService
-                .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, editDto.getAccountId())
-                .orElseThrow(() -> new NotFoundException(String.format("No environment found with crn '%s'", crn)));
-        return edit(editDto, env);
+    public EnvironmentDto edit(Environment environment, EnvironmentEditDto editDto) {
+        editDescriptionIfChanged(environment, editDto);
+        editTelemetryIfChanged(environment, editDto);
+        editNetworkIfChanged(environment, editDto);
+        editAdminGroupNameIfChanged(environment, editDto);
+        editAuthenticationIfChanged(editDto, environment);
+        editSecurityAccessIfChanged(editDto, environment);
+        editIdBrokerMappingSource(editDto, environment);
+        editCloudStorageValidation(editDto, environment);
+        editTunnelIfChanged(editDto, environment);
+        editEnvironmentParameters(editDto, environment);
+        editFreeIPA(editDto, environment);
+        editTags(editDto, environment);
+        Environment saved = environmentService.save(environment);
+        triggerEditProxyIfChanged(editDto, saved);
+        return environmentDtoConverter.environmentToDto(saved);
     }
 
     public EnvironmentDto changeCredentialByEnvironmentName(String accountId, String environmentName, EnvironmentChangeCredentialDto dto) {
-        Environment environment = environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId)
-                .orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", environmentName)));
+        Environment environment = getEnvironment(accountId, NameOrCrn.ofName(environmentName));
         return changeCredential(accountId, environmentName, dto, environment);
     }
 
     public EnvironmentDto changeCredentialByEnvironmentCrn(String accountId, String crn, EnvironmentChangeCredentialDto dto) {
-        Environment environment = environmentService
-                .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId)
-                .orElseThrow(() -> new NotFoundException(String.format("No environment found with CRN '%s'", crn)));
+        Environment environment = getEnvironment(accountId, NameOrCrn.ofCrn(crn));
         return changeCredential(accountId, crn, dto, environment);
     }
 
     public EnvironmentDto updateAzureResourceEncryptionParametersByEnvironmentName(String accountId, String environmentName,
             UpdateAzureResourceEncryptionDto dto) {
-        Environment environment = environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId)
-                .orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", environmentName)));
+        Environment environment = getEnvironment(accountId, NameOrCrn.ofName(environmentName));
         return updateAzureResourceEncryptionParameters(accountId, environmentName, dto.getAzureResourceEncryptionParametersDto(), environment);
     }
 
     public EnvironmentDto updateAzureResourceEncryptionParametersByEnvironmentCrn(String accountId, String crn, UpdateAzureResourceEncryptionDto dto) {
-        Environment environment = environmentService
-                .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId)
-                .orElseThrow(() -> new NotFoundException(String.format("No environment found with CRN '%s'", crn)));
+        Environment environment = getEnvironment(accountId, NameOrCrn.ofCrn(crn));
         return updateAzureResourceEncryptionParameters(accountId, crn, dto.getAzureResourceEncryptionParametersDto(), environment);
     }
 
     public EnvironmentDto changeTelemetryFeaturesByEnvironmentName(String accountId, String environmentName,
             EnvironmentFeatures features) {
-        Environment environment = environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId)
-                .orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", environmentName)));
+        Environment environment = getEnvironment(accountId, NameOrCrn.ofName(environmentName));
         return changeTelemetryFeatures(features, environment);
     }
 
     public EnvironmentDto changeTelemetryFeaturesByEnvironmentCrn(String accountId, String crn,
             EnvironmentFeatures features) {
-        Environment environment = environmentService
-                .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId)
-                .orElseThrow(() -> new NotFoundException(String.format("No environment found with CRN '%s'", crn)));
+        Environment environment = getEnvironment(accountId, NameOrCrn.ofCrn(crn));
         return changeTelemetryFeatures(features, environment);
     }
 
-    private EnvironmentDto edit(EnvironmentEditDto editDto, Environment env) {
-        editDescriptionIfChanged(env, editDto);
-        editTelemetryIfChanged(env, editDto);
-        editNetworkIfChanged(env, editDto);
-        editAdminGroupNameIfChanged(env, editDto);
-        editAuthenticationIfChanged(editDto, env);
-        editSecurityAccessIfChanged(editDto, env);
-        editIdBrokerMappingSource(editDto, env);
-        editCloudStorageValidation(editDto, env);
-        editTunnelIfChanged(editDto, env);
-        editEnvironmentParameters(editDto, env);
-        editFreeIPA(editDto, env);
-        Environment saved = environmentService.save(env);
-        triggerEditProxyIfChanged(editDto, saved);
-        return environmentDtoConverter.environmentToDto(saved);
+    public Environment getEnvironment(String accountId, NameOrCrn nameOrCrn) {
+        if (nameOrCrn.hasCrn()) {
+            return getEnvironmentByCrn(accountId, nameOrCrn.getCrn());
+        } else {
+            return getEnvironmentByName(accountId, nameOrCrn.getName());
+        }
+    }
+
+    private void editTags(EnvironmentEditDto editDto, Environment environment) {
+        if (MapUtils.isNotEmpty(editDto.getUserDefinedTags())) {
+            environment.setTags(environmentTagsDtoConverter.getTags(editDto));
+        }
     }
 
     private EnvironmentDto changeCredential(String accountId, String environmentName, EnvironmentChangeCredentialDto dto, Environment environment) {
@@ -471,4 +467,15 @@ public class EnvironmentModificationService {
             }
         }
     }
+
+    private Environment getEnvironmentByName(String accountId, String environmentName) {
+        return environmentService.findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId)
+                .orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", environmentName)));
+    }
+
+    private Environment getEnvironmentByCrn(String accountId, String environmentCrn) {
+        return environmentService.findByResourceCrnAndAccountIdAndArchivedIsFalse(environmentCrn, accountId)
+                .orElseThrow(() -> new NotFoundException(String.format("No environment found with crn '%s'", environmentCrn)));
+    }
+
 }

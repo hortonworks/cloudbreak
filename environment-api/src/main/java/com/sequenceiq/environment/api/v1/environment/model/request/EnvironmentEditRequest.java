@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
@@ -65,6 +67,10 @@ public class EnvironmentEditRequest implements Serializable {
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.GCP_PARAMETERS)
     private GcpEnvironmentParameters gcp;
+
+    @Valid
+    @ApiModelProperty(EnvironmentModelDescription.TAGS)
+    private Map<String, String> tags = new HashMap<>();
 
     public String getDescription() {
         return description;
@@ -170,6 +176,14 @@ public class EnvironmentEditRequest implements Serializable {
         this.gcp = gcp;
     }
 
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Map<String, String> tags) {
+        this.tags = tags;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentEditRequest{" +
@@ -186,6 +200,7 @@ public class EnvironmentEditRequest implements Serializable {
                 ", aws=" + aws +
                 ", azure=" + azure +
                 ", gcp=" + gcp +
+                ", tags=" + tags +
                 '}';
     }
 }

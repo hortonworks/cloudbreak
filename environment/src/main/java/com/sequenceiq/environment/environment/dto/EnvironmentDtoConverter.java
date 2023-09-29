@@ -3,8 +3,6 @@ package com.sequenceiq.environment.environment.dto;
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 import static com.sequenceiq.environment.environment.EnvironmentDeletionType.NONE;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -15,16 +13,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
-import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
-import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto.Builder;
@@ -36,7 +28,6 @@ import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConvert
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
-import com.sequenceiq.environment.tags.domain.AccountTag;
 import com.sequenceiq.environment.tags.service.AccountTagService;
 import com.sequenceiq.environment.tags.service.DefaultInternalAccountTagService;
 import com.sequenceiq.environment.tags.v1.converter.AccountTagToAccountTagResponsesConverter;
@@ -68,6 +59,8 @@ public class EnvironmentDtoConverter {
 
     private final CredentialDetailsConverter credentialDetailsConverter;
 
+    private final EnvironmentTagsDtoConverter environmentTagsDtoConverter;
+
     public EnvironmentDtoConverter(Map<CloudPlatform,
             EnvironmentNetworkConverter> environmentNetworkConverterMap,
             Map<CloudPlatform, EnvironmentParametersConverter> environmentParamsConverterMap,
@@ -80,7 +73,8 @@ public class EnvironmentDtoConverter {
             CrnUserDetailsService crnUserDetailsService,
             EnvironmentRecipeService environmentRecipeService,
             FreeIpaInstanceCountByGroupProvider ipaInstanceCountByGroupProvider,
-            CredentialDetailsConverter credentialDetailsConverter) {
+            CredentialDetailsConverter credentialDetailsConverter,
+            EnvironmentTagsDtoConverter environmentTagsDtoConverter) {
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
         this.environmentParamsConverterMap = environmentParamsConverterMap;
         this.authenticationDtoConverter = authenticationDtoConverter;
@@ -93,6 +87,7 @@ public class EnvironmentDtoConverter {
         this.environmentRecipeService = environmentRecipeService;
         this.ipaInstanceCountByGroupProvider = ipaInstanceCountByGroupProvider;
         this.credentialDetailsConverter = credentialDetailsConverter;
+        this.environmentTagsDtoConverter = environmentTagsDtoConverter;
     }
 
     public EnvironmentViewDto environmentViewToViewDto(EnvironmentView environmentView) {
@@ -212,7 +207,7 @@ public class EnvironmentDtoConverter {
         environment.setFreeIpaImageOs(creationDto.getFreeIpaCreation().getImageOs());
         environment.setAdminGroupName(creationDto.getAdminGroupName());
         environment.setCreated(System.currentTimeMillis());
-        environment.setTags(getTags(creationDto));
+        environment.setTags(environmentTagsDtoConverter.getTags(creationDto));
         environment.setExperimentalFeaturesJson(creationDto.getExperimentalFeatures());
         setRegions(creationDto, environment);
         return environment;
@@ -254,49 +249,12 @@ public class EnvironmentDtoConverter {
                 .build();
     }
 
-    private String getUserNameFromCrn(String crn) {
-        return crnUserDetailsService.loadUserByUsername(crn).getUsername();
-    }
-
     private SecurityAccessDto environmentToSecurityAccessDto(String cidr, String securityGroupIdForKnox, String defaultSecurityGroupId) {
         return SecurityAccessDto.builder()
                 .withCidr(cidr)
                 .withSecurityGroupIdForKnox(securityGroupIdForKnox)
                 .withDefaultSecurityGroupId(defaultSecurityGroupId)
                 .build();
-    }
-
-    private Json getTags(EnvironmentCreationDto creationDto) {
-        boolean internalTenant = entitlementService.internalTenant(creationDto.getAccountId());
-        Map<String, String> userDefinedTags = creationDto.getTags();
-        Set<AccountTag> accountTags = accountTagService.get(creationDto.getAccountId());
-        List<AccountTagResponse> accountTagResponses = accountTags.stream()
-                .map(accountTagToAccountTagResponsesConverter::convert)
-                .collect(Collectors.toList());
-        defaultInternalAccountTagService.merge(accountTagResponses);
-        Map<String, String> accountTagsMap = accountTagResponses
-                .stream()
-                .collect(Collectors.toMap(AccountTagResponse::getKey, AccountTagResponse::getValue));
-        CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
-                .withCreatorCrn(creationDto.getCreator())
-                .withEnvironmentCrn(creationDto.getCrn())
-                .withAccountId(creationDto.getAccountId())
-                .withPlatform(creationDto.getCloudPlatform())
-                .withResourceCrn(creationDto.getCrn())
-                .withIsInternalTenant(internalTenant)
-                .withUserName(getUserNameFromCrn(creationDto.getCreator()))
-                .withAccountTags(accountTagsMap)
-                .withUserDefinedTags(userDefinedTags)
-                .build();
-
-        try {
-            Map<String, String> defaultTags = costTagging.prepareDefaultTags(request);
-            return new Json(new EnvironmentTags(Objects.requireNonNullElseGet(userDefinedTags, HashMap::new), defaultTags));
-        } catch (AccountTagValidationFailed aTVF) {
-            throw new BadRequestException(aTVF.getMessage());
-        } catch (Exception e) {
-            throw new BadRequestException("Failed to convert dynamic tags. " + e.getMessage(), e);
-        }
     }
 
     private FreeIpaCreationDto environmentToFreeIpaCreationDto(Environment environment) {

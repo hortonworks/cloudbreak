@@ -46,6 +46,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResour
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
+import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
@@ -368,11 +369,15 @@ public class EnvironmentApiConverter {
                 .build();
     }
 
-    public EnvironmentEditDto initEditDto(EnvironmentEditRequest request) {
+    public EnvironmentEditDto initEditDto(Environment currentEnvironmentFromDatabase, EnvironmentEditRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentEditDto.Builder builder = EnvironmentEditDto.builder()
                 .withDescription(request.getDescription())
                 .withAccountId(accountId)
+                .withUserDefinedTags(request.getTags())
+                .withCreator(currentEnvironmentFromDatabase.getCreator())
+                .withCloudPlatform(currentEnvironmentFromDatabase.getCloudPlatform())
+                .withCrn(currentEnvironmentFromDatabase.getResourceCrn())
                 .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
                 .withCloudStorageValidation(request.getCloudStorageValidation())
                 .withAdminGroupName(request.getAdminGroupName());

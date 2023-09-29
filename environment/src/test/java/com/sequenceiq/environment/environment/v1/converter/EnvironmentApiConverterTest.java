@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -26,7 +27,6 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -60,6 +60,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResour
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
+import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
@@ -126,7 +127,12 @@ public class EnvironmentApiConverterTest {
 
     @BeforeEach
     void init() {
-        CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
+        lenient().when(regionAwareCrnGenerator.getPartition()).thenReturn("cdp");
+        lenient().when(regionAwareCrnGenerator.getRegion()).thenReturn("us-west-1");
+        lenient().when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenCallRealMethod();
+        lenient().when(regionAwareCrnGenerator.generateCrnWithUuid(any(), anyString())).thenCallRealMethod();
+        lenient().when(regionAwareCrnGenerator.generateCrnString(any(), anyString(), anyString())).thenCallRealMethod();
+        lenient().when(regionAwareCrnGenerator.generateCrn(any(), anyString(), anyString())).thenCallRealMethod();
     }
 
     @ParameterizedTest
@@ -183,17 +189,21 @@ public class EnvironmentApiConverterTest {
         EnvironmentEditRequest request = createEditEnvironmentRequest();
         EnvironmentTelemetry environmentTelemetry = mock(EnvironmentTelemetry.class);
         AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
+        Environment environment = mock(Environment.class);
         Features features = mock(Features.class);
         NetworkDto networkDto = mock(NetworkDto.class);
         ProxyConfig proxyConfig = mock(ProxyConfig.class);
 
         when(accountTelemetry.getFeatures()).thenReturn(features);
+        when(environment.getAccountId()).thenReturn("accountId");
+        when(environment.getCreator()).thenReturn("creator");
+        when(environment.getResourceCrn()).thenReturn("crn");
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
         when(telemetryApiConverter.convert(eq(request.getTelemetry()), any(), anyString())).thenReturn(environmentTelemetry);
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
         when(proxyRequestToProxyConfigConverter.convert(request.getProxy())).thenReturn(proxyConfig);
 
-        EnvironmentEditDto actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.initEditDto(request));
+        EnvironmentEditDto actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.initEditDto(environment, request));
 
         assertEquals("test-aws", actual.getAccountId());
         assertEquals(request.getDescription(), actual.getDescription());

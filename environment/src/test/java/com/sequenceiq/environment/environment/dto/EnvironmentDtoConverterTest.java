@@ -13,11 +13,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -27,13 +26,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -157,6 +153,9 @@ class EnvironmentDtoConverterTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private EnvironmentTagsDtoConverter environmentTagsDtoConverter;
 
     @Mock
     private DefaultInternalAccountTagService defaultInternalAccountTagService;
@@ -729,11 +728,8 @@ class EnvironmentDtoConverterTest {
                 .withCrn(RESOURCE_CRN)
                 .build();
 
-        when(entitlementService.internalTenant(ACCOUNT_ID)).thenReturn(INTERNAL_TENANT);
-        when(accountTagService.get(ACCOUNT_ID)).thenReturn(Set.of(accountTag));
-        when(accountTagToAccountTagResponsesConverter.convert(accountTag)).thenReturn(accountTagResponse);
-        when(crnUserDetailsService.loadUserByUsername(CREATOR)).thenReturn(new CrnUser(null, CREATOR, USER_NAME, null, ACCOUNT_ID, null));
-        when(costTagging.prepareDefaultTags(any(CDPTagGenerationRequest.class))).thenReturn(defaultTags);
+        when(environmentTagsDtoConverter.getTags(any(EnvironmentCreationDto.class)))
+                .thenReturn(new Json(new EnvironmentTags(userDefinedTags, defaultTags)));
 
         Environment result = underTest.creationDtoToEnvironment(creationDto);
 
@@ -781,21 +777,6 @@ class EnvironmentDtoConverterTest {
         assertThat(environmentTags.getUserDefinedTags()).isEqualTo(userDefinedTags);
         assertThat(environmentTags.getDefaultTags()).isEqualTo(defaultTags);
 
-        verify(defaultInternalAccountTagService).merge(List.of(accountTagResponse));
-        verify(costTagging).prepareDefaultTags(cdpTagGenerationRequestCaptor.capture());
-
-        CDPTagGenerationRequest cdpTagGenerationRequest = cdpTagGenerationRequestCaptor.getValue();
-        assertThat(cdpTagGenerationRequest).isNotNull();
-        assertThat(cdpTagGenerationRequest.getCreatorCrn()).isEqualTo(CREATOR);
-        assertThat(cdpTagGenerationRequest.getEnvironmentCrn()).isEqualTo(RESOURCE_CRN);
-        assertThat(cdpTagGenerationRequest.getAccountId()).isEqualTo(ACCOUNT_ID);
-        assertThat(cdpTagGenerationRequest.getPlatform()).isEqualTo(CLOUD_PLATFORM_AWS);
-        assertThat(cdpTagGenerationRequest.getResourceCrn()).isEqualTo(RESOURCE_CRN);
-        assertThat(cdpTagGenerationRequest.isInternalTenant()).isEqualTo(INTERNAL_TENANT);
-        assertThat(cdpTagGenerationRequest.getUserName()).isEqualTo(USER_NAME);
-        assertThat(cdpTagGenerationRequest.getAccountTags()).isEqualTo(Map.ofEntries(entry("accountKey", "accountValue")));
-        assertThat(cdpTagGenerationRequest.getUserDefinedTags()).isEqualTo(userDefinedTags);
-
         Set<Region> regionSet = result.getRegionSet();
         assertThat(regionSet).isNotNull();
         assertThat(regionSet.stream()
@@ -824,8 +805,8 @@ class EnvironmentDtoConverterTest {
                 .withCrn(RESOURCE_CRN)
                 .build();
 
-        when(crnUserDetailsService.loadUserByUsername(CREATOR)).thenReturn(new CrnUser(null, CREATOR, USER_NAME, null, ACCOUNT_ID, null));
-        when(costTagging.prepareDefaultTags(any(CDPTagGenerationRequest.class))).thenReturn(defaultTags);
+        when(environmentTagsDtoConverter.getTags(any(EnvironmentCreationDto.class)))
+                .thenReturn(new Json(new EnvironmentTags(new HashMap<>(), defaultTags)));
 
         Environment result = underTest.creationDtoToEnvironment(creationDto);
 
@@ -840,66 +821,6 @@ class EnvironmentDtoConverterTest {
         assertThat(environmentTags.getUserDefinedTags()).isNotNull();
         assertThat(environmentTags.getUserDefinedTags()).isEmpty();
         assertThat(environmentTags.getDefaultTags()).isEqualTo(defaultTags);
-    }
-
-    @Test
-    void creationDtoToEnvironmentTestWhenErrorAndAccountTagValidationFailed() {
-        LocationDto location = LocationDto.builder()
-                .withLatitude(LATITUDE)
-                .withLongitude(LONGITUDE)
-                .withName(LOCATION)
-                .withDisplayName(LOCATION_DISPLAY_NAME)
-                .build();
-        FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP)
-                .build();
-        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
-                .withAccountId(ACCOUNT_ID)
-                .withCreator(CREATOR)
-                .withCloudPlatform(CLOUD_PLATFORM_AWS)
-                .withLocation(location)
-                .withFreeIpaCreation(freeIpaCreation)
-                .withTags(null)
-                .withCrn(RESOURCE_CRN)
-                .build();
-
-        when(crnUserDetailsService.loadUserByUsername(CREATOR)).thenReturn(new CrnUser(null, CREATOR, USER_NAME, null, ACCOUNT_ID, null));
-        when(costTagging.prepareDefaultTags(any(CDPTagGenerationRequest.class))).thenThrow(new AccountTagValidationFailed("Error validating tags"));
-
-        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.creationDtoToEnvironment(creationDto));
-
-        assertThat(badRequestException).hasMessage("Error validating tags");
-    }
-
-    @Test
-    void creationDtoToEnvironmentTestWhenErrorAndOtherException() {
-        LocationDto location = LocationDto.builder()
-                .withLatitude(LATITUDE)
-                .withLongitude(LONGITUDE)
-                .withName(LOCATION)
-                .withDisplayName(LOCATION_DISPLAY_NAME)
-                .build();
-        FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP)
-                .build();
-        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
-                .withAccountId(ACCOUNT_ID)
-                .withCreator(CREATOR)
-                .withCloudPlatform(CLOUD_PLATFORM_AWS)
-                .withLocation(location)
-                .withFreeIpaCreation(freeIpaCreation)
-                .withTags(null)
-                .withCrn(RESOURCE_CRN)
-                .build();
-
-        when(crnUserDetailsService.loadUserByUsername(CREATOR)).thenReturn(new CrnUser(null, CREATOR, USER_NAME, null, ACCOUNT_ID, null));
-        UnsupportedOperationException unsupportedOperationException = new UnsupportedOperationException("This operation is not supported");
-        when(costTagging.prepareDefaultTags(any(CDPTagGenerationRequest.class))).thenThrow(unsupportedOperationException);
-
-        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.creationDtoToEnvironment(creationDto));
-
-        assertThat(badRequestException).hasMessage("Failed to convert dynamic tags. This operation is not supported");
-        assertThat(badRequestException).hasCauseReference(unsupportedOperationException);
     }
 
     @Test

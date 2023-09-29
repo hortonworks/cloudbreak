@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.dto;
 
+import java.util.Map;
+
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
@@ -13,6 +15,10 @@ public class EnvironmentEditDto {
     private final String description;
 
     private final String accountId;
+
+    private final String crn;
+
+    private final String creator;
 
     private final EnvironmentTelemetry telemetry;
 
@@ -36,6 +42,10 @@ public class EnvironmentEditDto {
 
     private final ProxyConfig proxyConfig;
 
+    private final Map<String, String> userDefinedTags;
+
+    private final String cloudPlatform;
+
     public EnvironmentEditDto(Builder builder) {
         this.description = builder.description;
         this.accountId = builder.accountId;
@@ -50,6 +60,10 @@ public class EnvironmentEditDto {
         this.adminGroupName = builder.adminGroupName;
         this.parameters = builder.parameters;
         this.proxyConfig = builder.proxyConfig;
+        this.userDefinedTags = builder.userDefinedTags;
+        this.creator = builder.creator;
+        this.crn = builder.crn;
+        this.cloudPlatform = builder.cloudPlatform;
     }
 
     public String getDescription() {
@@ -104,6 +118,22 @@ public class EnvironmentEditDto {
         return proxyConfig;
     }
 
+    public Map<String, String> getUserDefinedTags() {
+        return userDefinedTags;
+    }
+
+    public String getCrn() {
+        return crn;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -124,6 +154,10 @@ public class EnvironmentEditDto {
                 ", adminGroupName='" + adminGroupName + '\'' +
                 ", parameters=" + parameters +
                 ", proxyConfig=" + proxyConfig +
+                ", tags=" + userDefinedTags +
+                ", creator=" + creator +
+                ", crn=" + crn +
+                ", cloudPlatform=" + cloudPlatform +
                 '}';
     }
 
@@ -154,6 +188,14 @@ public class EnvironmentEditDto {
 
         private ProxyConfig proxyConfig;
 
+        private Map<String, String> userDefinedTags;
+
+        private String crn;
+
+        private String creator;
+
+        private String cloudPlatform;
+
         private Builder() {
         }
 
@@ -169,6 +211,11 @@ public class EnvironmentEditDto {
 
         public Builder withNetwork(NetworkDto network) {
             this.network = network;
+            return this;
+        }
+
+        public Builder withUserDefinedTags(Map<String, String> userDefinedTags) {
+            this.userDefinedTags = userDefinedTags;
             return this;
         }
 
@@ -219,6 +266,21 @@ public class EnvironmentEditDto {
 
         public Builder withProxyConfig(ProxyConfig proxyConfig) {
             this.proxyConfig = proxyConfig;
+            return this;
+        }
+
+        public Builder withCrn(String crn) {
+            this.crn = crn;
+            return this;
+        }
+
+        public Builder withCloudPlatform(String cloudPlatform) {
+            this.cloudPlatform = cloudPlatform;
+            return this;
+        }
+
+        public Builder withCreator(String creator) {
+            this.creator = creator;
             return this;
         }
 

@@ -1,7 +1,5 @@
 package com.sequenceiq.environment.environment.service;
 
-import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
-import static com.sequenceiq.cloudbreak.util.TestConstants.CRN;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -44,6 +44,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentTagsDtoConverter;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
@@ -76,6 +77,12 @@ import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
 
 @ExtendWith(SpringExtension.class)
 class EnvironmentModificationServiceTest {
+
+    private static final String ACCOUNT_ID = "accid";
+
+    private static final String USER = UUID.randomUUID().toString();
+
+    private static final String CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":user:" + USER;
 
     @Inject
     private EnvironmentModificationService environmentModificationServiceUnderTest;
@@ -125,6 +132,9 @@ class EnvironmentModificationServiceTest {
     @MockBean
     private EnvironmentReactorFlowManager environmentReactorFlowManager;
 
+    @MockBean
+    private EnvironmentTagsDtoConverter environmentTagsDtoConverter;
+
     @Mock
     private EnvironmentValidatorService validatorService;
 
@@ -141,7 +151,7 @@ class EnvironmentModificationServiceTest {
                 .build();
         when(environmentService
                 .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.edit(environmentMock(), environmentDto);
         verify(environmentService).save(any());
     }
 
@@ -152,9 +162,7 @@ class EnvironmentModificationServiceTest {
                 .withAccountId(ACCOUNT_ID)
                 .withDescription(description)
                 .build();
-        when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.edit(environmentMock(), environmentDto);
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentService).save(environmentArgumentCaptor.capture());
@@ -168,13 +176,13 @@ class EnvironmentModificationServiceTest {
                 .withAccountId(ACCOUNT_ID)
                 .withNetwork(network)
                 .build();
-        Environment value = new Environment();
+        Environment environment = new Environment();
         when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
         when(networkService.findByEnvironment(any())).thenReturn(Optional.empty());
         when(networkService.saveNetwork(any(), any(), anyString(), any(), any())).thenReturn(new AwsNetwork());
 
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.edit(environmentMock(), environmentDto);
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentService).save(environmentArgumentCaptor.capture());
@@ -185,15 +193,13 @@ class EnvironmentModificationServiceTest {
         EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
                 .withAccountId(ACCOUNT_ID)
                 .build();
-        Environment value = new Environment();
+        Environment environment = new Environment();
         EnvironmentDto environmentDto = new EnvironmentDto();
 
-        when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
-        when(environmentDtoConverter.environmentToDto(value)).thenReturn(environmentDto);
-        when(environmentService.save(value)).thenReturn(value);
+        when(environmentDtoConverter.environmentToDto(environment)).thenReturn(environmentDto);
+        when(environmentService.save(environment)).thenReturn(environment);
 
-        EnvironmentDto actual = environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentEditDto);
+        EnvironmentDto actual = environmentModificationServiceUnderTest.edit(environment, environmentEditDto);
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentService).save(environmentArgumentCaptor.capture());
@@ -207,18 +213,16 @@ class EnvironmentModificationServiceTest {
                 .withAccountId(ACCOUNT_ID)
                 .withSecurityAccess(securityAccessDto)
                 .build();
-        Environment value = new Environment();
-        when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
+        Environment environment = new Environment();
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(validatorService.validateSecurityAccessModification(any(), any())).thenReturn(validationResult);
         when(validatorService.validateSecurityGroups(any(), any())).thenReturn(validationResult);
 
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.edit(environment, environmentDto);
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentService).save(environmentArgumentCaptor.capture());
-        verify(environmentService).editSecurityAccess(eq(value), eq(securityAccessDto));
+        verify(environmentService).editSecurityAccess(eq(environment), eq(securityAccessDto));
     }
 
     @Test
@@ -229,17 +233,17 @@ class EnvironmentModificationServiceTest {
                 .withAccountId(ACCOUNT_ID)
                 .withSecurityAccess(securityAccessDto)
                 .build();
-        Environment value = new Environment();
+        Environment environment = new Environment();
         when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(validatorService.validateSecurityAccessModification(any(), any())).thenReturn(validationResultError);
 
         BadRequestException actual = assertThrows(BadRequestException.class,
-                () -> environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto));
+                () -> environmentModificationServiceUnderTest.edit(environmentMock(), environmentDto));
 
         assertEquals("sec access error", actual.getMessage());
-        verify(environmentService, times(0)).editSecurityAccess(eq(value), eq(securityAccessDto));
+        verify(environmentService, times(0)).editSecurityAccess(eq(environment), eq(securityAccessDto));
     }
 
     @Test
@@ -250,18 +254,18 @@ class EnvironmentModificationServiceTest {
                 .withAccountId(ACCOUNT_ID)
                 .withSecurityAccess(securityAccessDto)
                 .build();
-        Environment value = new Environment();
+        Environment environment = new Environment();
         when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(validatorService.validateSecurityAccessModification(any(), any())).thenReturn(validationResult);
         when(validatorService.validateSecurityGroups(any(), any())).thenReturn(validationResultError);
 
         BadRequestException actual = assertThrows(BadRequestException.class,
-                () -> environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto));
+                () -> environmentModificationServiceUnderTest.edit(environmentMock(), environmentDto));
 
         assertEquals("sec group error", actual.getMessage());
-        verify(environmentService, times(0)).editSecurityAccess(eq(value), eq(securityAccessDto));
+        verify(environmentService, times(0)).editSecurityAccess(eq(environment), eq(securityAccessDto));
     }
 
     @Test
@@ -274,15 +278,13 @@ class EnvironmentModificationServiceTest {
                                 .build())
                         .build())
                 .build();
-        Environment value = new Environment();
+        Environment environment = new Environment();
         AwsParameters awsParameters = new AwsParameters();
         int originalFreeIpaSpotPercentage = 100;
         awsParameters.setFreeIpaSpotPercentage(originalFreeIpaSpotPercentage);
-        value.setParameters(awsParameters);
-        when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
+        environment.setParameters(awsParameters);
 
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.edit(environment, environmentDto);
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentService).save(environmentArgumentCaptor.capture());
@@ -300,7 +302,7 @@ class EnvironmentModificationServiceTest {
         when(environmentService
                 .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(CRN), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
 
-        environmentModificationServiceUnderTest.editByCrn(CRN, environmentDto);
+        environmentModificationServiceUnderTest.edit(environmentMock(), environmentDto);
         verify(environmentService).save(any());
     }
 
@@ -321,11 +323,9 @@ class EnvironmentModificationServiceTest {
         environment.setAccountId(ACCOUNT_ID);
         BaseParameters baseParameters = new AwsParameters();
 
-        when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
         when(parametersService.saveParameters(environment, parameters)).thenReturn(baseParameters);
 
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.edit(environment, environmentDto);
 
         verify(parametersService).saveParameters(environment, parameters);
         assertEquals(baseParameters, environment.getParameters());
@@ -353,11 +353,9 @@ class EnvironmentModificationServiceTest {
         when(environmentFlowValidatorService.validateParameters(any(), any())).thenReturn(validationResult);
         when(validationResult.hasError()).thenReturn(false);
         when(parametersService.findByEnvironment(any())).thenReturn(Optional.of(baseParameters));
-        when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
         when(parametersService.saveParameters(environment, parameters)).thenReturn(baseParameters);
 
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.edit(environment, environmentDto);
 
         verify(parametersService).saveParameters(environment, parameters);
         assertEquals(baseParameters, environment.getParameters());
@@ -389,7 +387,7 @@ class EnvironmentModificationServiceTest {
                 .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
         when(parametersService.saveParameters(environment, parameters)).thenReturn(baseParameters);
 
-        assertThrows(BadRequestException.class, () -> environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto));
+        assertThrows(BadRequestException.class, () -> environmentModificationServiceUnderTest.edit(environmentMock(), environmentDto));
 
         verify(parametersService, never()).saveParameters(environment, parameters);
     }
@@ -418,7 +416,7 @@ class EnvironmentModificationServiceTest {
         when(parametersService.findByEnvironment(any())).thenReturn(Optional.of(baseParameters));
         when(environmentService
                 .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
-        assertThrows(BadRequestException.class, () -> environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto));
+        assertThrows(BadRequestException.class, () -> environmentModificationServiceUnderTest.edit(environmentMock(), environmentDto));
 
         verify(parametersService, never()).saveParameters(environment, parameters);
     }
@@ -446,11 +444,9 @@ class EnvironmentModificationServiceTest {
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(validatorService.validateEncryptionKey("dummyEncryptionKey", ACCOUNT_ID)).thenReturn(ValidationResult.builder().build());
         when(parametersService.findByEnvironment(any())).thenReturn(Optional.of(baseParameters));
-        when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
         when(parametersService.saveParameters(environment, parameters)).thenReturn(baseParameters);
 
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.edit(environment, environmentDto);
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentService).save(environmentArgumentCaptor.capture());
@@ -837,8 +833,6 @@ class EnvironmentModificationServiceTest {
                                 .build())
                 .build();
         Environment environment = new Environment();
-        when(environmentService.findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID)))
-                .thenReturn(Optional.of(environment));
         when(networkService.validate(any(), any(), any()))
                 .thenReturn(awsNetwork);
         when(networkService.refreshMetadataFromCloudProvider(any(), any(), any()))
@@ -853,9 +847,8 @@ class EnvironmentModificationServiceTest {
         when(environmentDtoConverter.networkToNetworkDto(any()))
                 .thenReturn(NetworkDto.builder().withNetworkId("abs-123").build());
 
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.edit(environment, environmentDto);
 
-        verify(environmentService, times(1)).findByNameAndAccountIdAndArchivedIsFalse(any(), anyString());
         verify(networkService, times(1)).validate(any(), any(), any());
         verify(networkService, times(1)).refreshMetadataFromCloudProvider(any(), any(), any());
         verify(networkService, times(1)).refreshProviderSpecificParameters(any(), any(), any());
@@ -879,8 +872,6 @@ class EnvironmentModificationServiceTest {
         ProxyConfig oldProxyConfig = new ProxyConfig();
         oldProxyConfig.setName("old-proxy-name");
         environment.setProxyConfig(oldProxyConfig);
-        when(environmentService.findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID)))
-                .thenReturn(Optional.of(environment));
         when(environmentService.save(environment)).thenReturn(environment);
         EnvironmentDto environmentDto = new EnvironmentDto();
         when(environmentDtoConverter.environmentToDto(environment))
@@ -888,14 +879,21 @@ class EnvironmentModificationServiceTest {
         when(proxyConfigService.getByNameForAccountId(eq(newProxyConfig.getName()), eq(ACCOUNT_ID))).thenReturn(newProxyConfig);
         when(proxyConfigModificationService.shouldModify(environment, newProxyConfig)).thenReturn(true);
 
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentEditDto);
+        environmentModificationServiceUnderTest.edit(environment, environmentEditDto);
 
-
-        verify(environmentService, times(1)).findByNameAndAccountIdAndArchivedIsFalse(any(), anyString());
         verify(environmentService, times(1)).save(any());
         verify(proxyConfigModificationService, times(1)).shouldModify(environment, newProxyConfig);
         verify(proxyConfigModificationService, times(1)).validateModify(environmentDto);
         verify(environmentReactorFlowManager, times(1)).triggerEnvironmentProxyConfigModification(environmentDto, newProxyConfig);
+    }
+
+    private Environment environmentMock() {
+        Environment environment = mock(Environment.class);
+        when(environment.getAccountId()).thenReturn("accountId");
+        when(environment.getCreator()).thenReturn("creator");
+        when(environment.getResourceCrn()).thenReturn("crn");
+        when(environment.getDescription()).thenReturn("test");
+        return environment;
     }
 
     @Configuration
