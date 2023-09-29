@@ -89,12 +89,12 @@ integrationtest:
   cloudProvider: MOCK
   runtimeVersion: 7.2.17
   upgrade:
-    currentHARuntimeVersion: 7.2.15
-    currentRuntimeVersion: 7.2.15
+    currentHARuntimeVersion: 7.2.16
+    currentRuntimeVersion: 7.2.16
     targetRuntimeVersion: 7.2.17
-    distroXUpgradeCurrentVersion: 7.2.15
+    distroXUpgradeCurrentVersion: 7.2.16
     distroXUpgradeTargetVersion: 7.2.17
-    distroXUpgrade3rdPartyCurrentVersion: 7.2.15
+    distroXUpgrade3rdPartyCurrentVersion: 7.2.16
     distroXUpgrade3rdPartyTargetVersion: 7.2.17
     imageCatalogUrl3rdParty: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-prod-cb-image-catalog.json
   upgradeDatabaseServer:
