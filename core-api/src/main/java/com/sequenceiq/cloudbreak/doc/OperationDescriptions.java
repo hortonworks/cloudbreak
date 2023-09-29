@@ -223,6 +223,7 @@ public class OperationDescriptions {
         public static final String GET_IMAGE_FROM_DEFAULT = "returns an image from the default catalog based on the provided filter";
         public static final String GET_IMAGE_FROM_DEFAULT_BY_ID = "returns an image from the default catalog by id";
         public static final String GET_DEFAULT_IMAGE_CATALOG_RUNTIME_VERSIONS = "get runtime versions from the default catalog";
+        public static final String VALIDATE_RECOMMENDED_IMAGE_WITH_PROVIDER = "validate recommended image with provider";
     }
 
     public static class CustomImageCatalogOpDescription {

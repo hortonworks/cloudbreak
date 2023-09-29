@@ -1,13 +1,21 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_IMAGE_VALIDATION_WARNING;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -15,20 +23,28 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageRecommendationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.service.RetryService;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.converter.VmTypeConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformVmtypesResponse;
@@ -43,6 +59,8 @@ public class SdxRecommendationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxRecommendationService.class);
 
+    private static final int IMAGE_VALIDATION_TIMEOUT = 30;
+
     @Inject
     private CDPConfigService cdpConfigService;
 
@@ -51,6 +69,18 @@ public class SdxRecommendationService {
 
     @Inject
     private VmTypeConverter vmTypeConverter;
+
+    @Inject
+    private ImageCatalogV4Endpoint imageCatalogV4Endpoint;
+
+    @Inject
+    private EventSenderService eventSenderService;
+
+    @Inject
+    private RetryService retryService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public SdxDefaultTemplateResponse getDefaultTemplateResponse(SdxClusterShape clusterShape, String runtimeVersion, String cloudPlatform) {
         StackV4Request defaultTemplate = getDefaultTemplate(clusterShape, runtimeVersion, cloudPlatform);
@@ -222,4 +252,70 @@ public class SdxRecommendationService {
         return vmTypeMetaData.getCPU() >= defaultVmTypeMetaData.getCPU() && vmTypeMetaData.getMemoryInGb() >= defaultVmTypeMetaData.getMemoryInGb();
     }
 
+    public void validateRecommendedImage(DetailedEnvironmentResponse environmentResponse, SdxCluster sdxCluster) {
+        boolean azureMarketplaceImagesEnabled = isAzureMarketplaceImagesEnabled();
+        if (!(CloudPlatform.AZURE.equalsIgnoreCase(environmentResponse.getCloudPlatform()) && azureMarketplaceImagesEnabled)) {
+            LOGGER.debug("Skipping image validation on platforms other than Azure or Azure marketplace image entitlement is not enabled. " +
+                    "Platform: [{}], AzureMarketplaceImagesEnabled entitlement: [{}]", environmentResponse.getCloudPlatform(), azureMarketplaceImagesEnabled);
+            return;
+        }
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        ImageRecommendationV4Response response =
+                retryService.testWith1SecDelayMax5Times(() -> executeImageValidationWithTimeout(environmentResponse, sdxCluster, executor));
+        if (response.hasValidationError()) {
+            LOGGER.debug("Validation finished with an error: {}", response.hasValidationError());
+            throw new BadRequestException(response.getValidationMessage());
+        } else if (StringUtils.isNotEmpty(response.getValidationMessage())) {
+            LOGGER.debug("Validation finished with a warning: {}", response.getValidationMessage());
+            eventSenderService.sendEventAndNotification(sdxCluster, DATALAKE_IMAGE_VALIDATION_WARNING, List.of(response.getValidationMessage()));
+        }
+    }
+
+    private boolean isAzureMarketplaceImagesEnabled() {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        return entitlementService.azureMarketplaceImagesEnabled(accountId);
+    }
+
+    private ImageRecommendationV4Response executeImageValidationWithTimeout(DetailedEnvironmentResponse environmentResponse, SdxCluster sdxCluster,
+            ExecutorService executor) {
+        Future<ImageRecommendationV4Response> responseFuture = executor.submit(() -> doImageValidation(environmentResponse, sdxCluster));
+        try {
+            return responseFuture.get(IMAGE_VALIDATION_TIMEOUT, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            LOGGER.debug("Image validation request timeout [{}s] happened. Cancelling request thread", IMAGE_VALIDATION_TIMEOUT);
+            responseFuture.cancel(true);
+        } catch (ExecutionException | InterruptedException e) {
+            LOGGER.warn("An error occurred while executing the image validation request.", e);
+        } finally {
+            executor.shutdownNow();
+        }
+        return new ImageRecommendationV4Response();
+    }
+
+    private ImageRecommendationV4Response doImageValidation(DetailedEnvironmentResponse environmentResponse, SdxCluster sdxCluster) {
+        try {
+            ImageRecommendationV4Request request = createImageValidationRequest(environmentResponse, sdxCluster);
+            LOGGER.debug("Calling recommended image validation with: {}", request);
+            return imageCatalogV4Endpoint.validateRecommendedImageWithProvider(SdxService.WORKSPACE_ID_DEFAULT, request);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to validate recommended image for Data Lake.", e);
+            return new ImageRecommendationV4Response();
+        }
+    }
+
+    @NotNull
+    private ImageRecommendationV4Request createImageValidationRequest(DetailedEnvironmentResponse environmentResponse, SdxCluster sdxCluster)
+            throws IOException {
+        StackV4Request stackV4Request = JsonUtil.readValue(sdxCluster.getStackRequest(), StackV4Request.class);
+        String cloudPlatform = environmentResponse.getCloudPlatform();
+        String region = environmentResponse.getRegions().getNames().stream().findFirst().orElse(null);
+        StackV4Request defaultTemplate = getDefaultTemplate(sdxCluster.getClusterShape(), sdxCluster.getRuntime(), cloudPlatform);
+        ImageRecommendationV4Request request = new ImageRecommendationV4Request();
+        request.setBlueprintName(defaultTemplate.getCluster().getBlueprintName());
+        request.setPlatform(cloudPlatform);
+        request.setEnvironmentCrn(sdxCluster.getEnvCrn());
+        request.setRegion(region);
+        request.setImage(stackV4Request.getImage());
+        return request;
+    }
 }

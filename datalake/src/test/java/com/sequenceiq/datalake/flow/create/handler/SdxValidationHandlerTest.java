@@ -62,6 +62,7 @@ class SdxValidationHandlerTest {
 
         underTest.accept(receivedEvent);
         verify(sdxRecommendationService, times(1)).validateVmTypeOverride(eq(detailedEnvironmentResponse), eq(sdxCluster));
+        verify(sdxRecommendationService, times(1)).validateRecommendedImage(eq(detailedEnvironmentResponse), eq(sdxCluster));
         final ArgumentCaptor<String> eventSelector = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<Event> sentEvent = ArgumentCaptor.forClass(Event.class);
         verify(eventBus, times(1)).notify(eventSelector.capture(), sentEvent.capture());

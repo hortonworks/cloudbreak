@@ -640,6 +640,7 @@ public enum ResourceEvent {
     DISK_RESIZE_FAILED("cluster.disk.resize.failed"),
     DISK_RESIZE_STARTED("cluster.disk.resize.started"),
     DISK_RESIZE_COMPLETE("cluster.disk.resize.complete"),
+    DATALAKE_IMAGE_VALIDATION_WARNING("datalake.image.validation.warning"),
 
     // deprecated
     STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.skipped"),

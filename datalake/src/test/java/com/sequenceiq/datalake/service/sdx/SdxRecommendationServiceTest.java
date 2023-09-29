@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_IMAGE_VALIDATION_WARNING;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,6 +14,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -20,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,15 +31,22 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.service.RetryService;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.converter.VmTypeConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
@@ -52,6 +62,8 @@ import com.sequenceiq.sdx.api.model.SdxRecommendationResponse;
 @ExtendWith(MockitoExtension.class)
 class SdxRecommendationServiceTest {
 
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:username";
+
     @Mock
     private CDPConfigService cdpConfigService;
 
@@ -60,6 +72,18 @@ class SdxRecommendationServiceTest {
 
     @Spy
     private VmTypeConverter vmTypeConverter;
+
+    @Mock
+    private ImageCatalogV4Endpoint imageCatalogV4Endpoint;
+
+    @Mock
+    private EventSenderService eventSenderService;
+
+    @Mock
+    private RetryService retryService;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private SdxRecommendationService underTest;
@@ -200,6 +224,7 @@ class SdxRecommendationServiceTest {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         CredentialResponse credential = new CredentialResponse();
         credential.setCrn("cred");
+        environment.setCrn("env");
         environment.setCredential(credential);
         CompactRegionResponse regions = new CompactRegionResponse();
         regions.setNames(List.of("eu-central-1"));
@@ -244,6 +269,90 @@ class SdxRecommendationServiceTest {
         template.setInstanceType(instanceType);
         instanceGroup.setTemplate(template);
         return instanceGroup;
+    }
+
+    @Test
+    void testValidateRecommendedImageNoError() throws Exception {
+        when(entitlementService.azureMarketplaceImagesEnabled(anyString())).thenReturn(true);
+        when(retryService.testWith1SecDelayMax5Times(any(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
+        StackV4Request defaultTemplate = createStackRequest();
+        ClusterV4Request cluster = new ClusterV4Request();
+        cluster.setBlueprintName("7.2.14 Light Duty Data Lake");
+        defaultTemplate.setCluster(cluster);
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(defaultTemplate);
+        DetailedEnvironmentResponse environmentResponse = createEnvironment("AZURE");
+        StackV4Request stackRequest = createStackRequest();
+        SdxCluster sdxCluster = createSdxCluster(stackRequest, LIGHT_DUTY);
+        ImageRecommendationV4Response response = new ImageRecommendationV4Response();
+        when(imageCatalogV4Endpoint.validateRecommendedImageWithProvider(any(), any())).thenReturn(response);
+
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRecommendedImage(environmentResponse, sdxCluster)));
+
+        verify(imageCatalogV4Endpoint).validateRecommendedImageWithProvider(eq(SdxService.WORKSPACE_ID_DEFAULT), any());
+        verifyNoInteractions(eventSenderService);
+    }
+
+    @Test
+    void testValidateRecommendedImageValidationError() throws Exception {
+        when(entitlementService.azureMarketplaceImagesEnabled(anyString())).thenReturn(true);
+        when(retryService.testWith1SecDelayMax5Times(any(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
+        StackV4Request defaultTemplate = createStackRequest();
+        ClusterV4Request cluster = new ClusterV4Request();
+        cluster.setBlueprintName("7.2.14 Light Duty Data Lake");
+        defaultTemplate.setCluster(cluster);
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(defaultTemplate);
+        DetailedEnvironmentResponse environmentResponse = createEnvironment("AZURE");
+        StackV4Request stackRequest = createStackRequest();
+        SdxCluster sdxCluster = createSdxCluster(stackRequest, LIGHT_DUTY);
+        ImageRecommendationV4Response response = new ImageRecommendationV4Response();
+        response.setHasValidationError(true);
+        response.setValidationMessage("Validation error message");
+        when(imageCatalogV4Endpoint.validateRecommendedImageWithProvider(any(), any())).thenReturn(response);
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRecommendedImage(environmentResponse, sdxCluster)));
+
+        verify(imageCatalogV4Endpoint).validateRecommendedImageWithProvider(eq(SdxService.WORKSPACE_ID_DEFAULT), any());
+        verifyNoInteractions(eventSenderService);
+
+        assertEquals("Validation error message", exception.getMessage());
+    }
+
+    @Test
+    void testValidateRecommendedImageValidationWarning() throws Exception {
+        when(entitlementService.azureMarketplaceImagesEnabled(anyString())).thenReturn(true);
+        when(retryService.testWith1SecDelayMax5Times(any(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
+        StackV4Request defaultTemplate = createStackRequest();
+        ClusterV4Request cluster = new ClusterV4Request();
+        cluster.setBlueprintName("7.2.14 Light Duty Data Lake");
+        defaultTemplate.setCluster(cluster);
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(defaultTemplate);
+        DetailedEnvironmentResponse environmentResponse = createEnvironment("AZURE");
+        StackV4Request stackRequest = createStackRequest();
+        SdxCluster sdxCluster = createSdxCluster(stackRequest, LIGHT_DUTY);
+        ImageRecommendationV4Response response = new ImageRecommendationV4Response();
+        response.setHasValidationError(false);
+        response.setValidationMessage("Validation warning message");
+        when(imageCatalogV4Endpoint.validateRecommendedImageWithProvider(any(), any())).thenReturn(response);
+
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRecommendedImage(environmentResponse, sdxCluster)));
+
+        verify(imageCatalogV4Endpoint).validateRecommendedImageWithProvider(eq(SdxService.WORKSPACE_ID_DEFAULT), any());
+        verify(eventSenderService).sendEventAndNotification(eq(sdxCluster), eq(DATALAKE_IMAGE_VALIDATION_WARNING), eq(List.of("Validation warning message")));
+    }
+
+    @Test
+    void testValidateRecommendedImageValidationSkippedNoEntitlement() throws Exception {
+        when(entitlementService.azureMarketplaceImagesEnabled(anyString())).thenReturn(false);
+        DetailedEnvironmentResponse environmentResponse = createEnvironment("AZURE");
+        StackV4Request stackRequest = createStackRequest();
+        SdxCluster sdxCluster = createSdxCluster(stackRequest, LIGHT_DUTY);
+
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRecommendedImage(environmentResponse, sdxCluster)));
+
+        verify(imageCatalogV4Endpoint, never()).validateRecommendedImageWithProvider(eq(SdxService.WORKSPACE_ID_DEFAULT), any());
+        verify(eventSenderService, never()).sendEventAndNotification(eq(sdxCluster), eq(DATALAKE_IMAGE_VALIDATION_WARNING),
+                eq(List.of("Validation warning message")));
     }
 
 }
