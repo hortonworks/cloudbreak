@@ -194,6 +194,8 @@ subprojects {
         )
       })
     }
+    dependsOn processResources
+    dependsOn compileJava
   }
 
   test {
@@ -211,6 +213,7 @@ subprojects {
       destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
       classDumpDir = file("$buildDir/jacoco/classpathdumps")
     }
+    finalizedBy jacocoTestReport
   }
 
   tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
@@ -240,6 +243,7 @@ subprojects {
       showStandardStreams false
       events "failed", "standardError"
     }
+    finalizedBy jacocoTestReport
   }
 
   task allDeps(type: DependencyReportTask) {}
