@@ -167,6 +167,19 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "FROM Stack s "
             + "LEFT JOIN s.cluster c "
             + "LEFT JOIN s.stackStatus ss "
+            + "WHERE s.terminated > :since")
+    List<StackClusterStatusView> getDeletedStacks(@Param("since") Long since);
+
+    @Query("SELECT s.id as id, "
+            + "s.resourceCrn as crn, "
+            + "ss.status as status, "
+            + "ss.statusReason as statusReason, "
+            + "c.status as clusterStatus, "
+            + "c.statusReason as clusterStatusReason, "
+            + "c.certExpirationState as certExpirationState "
+            + "FROM Stack s "
+            + "LEFT JOIN s.cluster c "
+            + "LEFT JOIN s.stackStatus ss "
             + "WHERE s.resourceCrn = :crn AND s.workspace.id= :workspaceId")
     Optional<StackClusterStatusView> getStatusByCrnAndWorkspace(@Param("crn") String crn, @Param("workspaceId") Long workspaceId);
 

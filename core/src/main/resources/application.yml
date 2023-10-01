@@ -706,6 +706,8 @@ cluster:
       processing:
         workers: 1
         queueSizeLimit: 2000
+  fetch.deleted.maxDaysLimit: 2
+
 
 clusterProxy:
   url: http://localhost:10180/cluster-proxy

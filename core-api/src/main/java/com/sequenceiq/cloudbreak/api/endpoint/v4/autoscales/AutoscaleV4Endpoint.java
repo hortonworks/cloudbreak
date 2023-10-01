@@ -125,6 +125,12 @@ public interface AutoscaleV4Endpoint {
     StackStatusV4Response getStatusByCrn(@PathParam("crn") String crn);
 
     @GET
+    @Path("/stack/deleted")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.GET_DELETED_STACKS_SINCE_TS, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "getDeletedStacks")
+    List<StackStatusV4Response> getDeletedStacks(@QueryParam("since") Long since);
+
+    @GET
     @Path("/stack/crn/{crn}/authorize/{userId}/{tenant}/{permission}")
     @Produces(APPLICATION_JSON)
     AuthorizeForAutoscaleV4Response authorizeForAutoscale(@PathParam("crn") String crn, @PathParam("userId") String userId, @PathParam("tenant") String tenant,

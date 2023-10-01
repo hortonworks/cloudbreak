@@ -518,4 +518,10 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     public FlowIdentifier putDeleteVolumes(@NotNull NameOrCrn nameOrCrn, String accountId, @Valid StackDeleteVolumesRequest deleteRequest) {
         return stackCommonService.putDeleteVolumesInWorkspace(nameOrCrn, accountId, deleteRequest);
     }
+
+    public List<StackStatusV4Response> getDeletedStacks(@NotNull Long since) {
+        return stackService.getDeletedStacks(since).stream()
+                .map(stackClusterStatusViewToStatusConverter::convert)
+                .collect(Collectors.toList());
+    }
 }

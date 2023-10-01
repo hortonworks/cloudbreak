@@ -213,6 +213,12 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @InternalOnly
+    public List<StackStatusV4Response> getDeletedStacks(Long since) {
+        return stackOperations.getDeletedStacks(since);
+    }
+
+    @Override
+    @InternalOnly
     public AuthorizeForAutoscaleV4Response authorizeForAutoscale(@TenantAwareParam String crn, String userId, String tenant, String permission) {
         AuthorizeForAutoscaleV4Response response = new AuthorizeForAutoscaleV4Response();
         try {

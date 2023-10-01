@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
@@ -45,6 +46,7 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackClusterStatusViewToStatusConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.UserNamePasswordV4RequestToUpdateClusterV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackViewV4ResponseConverter;
+import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
@@ -302,6 +304,23 @@ public class StackOperationsTest {
         FlowIdentifier result = underTest.sync(nameOrCrn, ACCOUNT_ID, permittedStackTypes);
 
         assertThat(result).isSameAs(flowIdentifier);
+    }
+
+    @Test
+    void testGetDeletedStacks() {
+        StackClusterStatusView stackClusterStatusView1 = mock(StackClusterStatusView.class);
+        StackClusterStatusView stackClusterStatusView2 = mock(StackClusterStatusView.class);
+        StackStatusV4Response stackStatusV4Response1 = mock(StackStatusV4Response.class);
+        StackStatusV4Response stackStatusV4Response2 = mock(StackStatusV4Response.class);
+        Long since = 100L;
+        when(stackService.getDeletedStacks(since)).thenReturn(List.of(stackClusterStatusView1, stackClusterStatusView2));
+        when(stackClusterStatusViewToStatusConverter.convert(stackClusterStatusView1)).thenReturn(stackStatusV4Response1);
+        when(stackClusterStatusViewToStatusConverter.convert(stackClusterStatusView2)).thenReturn(stackStatusV4Response2);
+        List<StackStatusV4Response> deletedStacks = underTest.getDeletedStacks(since);
+        verify(stackService).getDeletedStacks(since);
+        assertEquals(2, deletedStacks.size());
+        assertEquals(stackStatusV4Response1, deletedStacks.get(0));
+        assertEquals(stackStatusV4Response2, deletedStacks.get(1));
     }
 
 }

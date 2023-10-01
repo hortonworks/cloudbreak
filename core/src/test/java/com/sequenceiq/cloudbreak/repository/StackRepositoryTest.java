@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackImageView;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -110,6 +112,12 @@ class StackRepositoryTest {
                 .anyMatch(imageIdEquals(ALIVE_STACK_IMAGE))
                 .anyMatch(imageIdEquals(TERMINATED_STACK_IMAGE))
                 .anyMatch(imageIdEquals(LONG_TERMINATED_STACK_IMAGE));
+    }
+
+    @Test
+    void testGetDeletedStacks() {
+        List<StackClusterStatusView> deletedStacks = stackRepository.getDeletedStacks(TERMINATED_STACK_TIME - 1);
+        assertEquals(1, deletedStacks.size());
     }
 
     private static Predicate<StackImageView> imageIdEquals(String imageId) {
