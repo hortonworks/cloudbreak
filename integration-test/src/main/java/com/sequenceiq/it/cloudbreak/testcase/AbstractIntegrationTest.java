@@ -176,9 +176,13 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .validate();
     }
 
-    protected void initiateDatalakeCreationWithAutoTls(TestContext testContext) {
+    protected void initiateDatalakeCreationWithAutoTlsAndExternalDb(TestContext testContext) {
+        SdxDatabaseRequest databaseRequest = new SdxDatabaseRequest();
+        databaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+
         testContext
                 .given(SdxInternalTestDto.class)
+                    .withDatabase(databaseRequest)
                     .withAutoTls()
                     .withCloudStorage(getCloudStorageRequest(testContext))
                     .withEnableMultiAz()
@@ -218,8 +222,8 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         waitForDefaultDatahubCreation(testContext);
     }
 
-    protected void createDefaultDatahubWithAutoTlsForExistingDatalake(TestContext testContext) {
-        initiateDefaultDatahubCreationWithAutoTls(testContext);
+    protected void createDefaultDatahubWithAutoTlsAndExternalDbForExistingDatalake(TestContext testContext) {
+        initiateDefaultDatahubCreationWithAutoTlsAndExternalDb(testContext);
         waitForDefaultDatahubCreation(testContext);
     }
 
@@ -228,9 +232,9 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         createDefaultDatahubForExistingDatalake(testContext);
     }
 
-    protected void createDefaultDatahubWithAutoTls(TestContext testContext) {
-        createDefaultDatalakeWithAutoTls(testContext);
-        createDefaultDatahubWithAutoTlsForExistingDatalake(testContext);
+    protected void createDefaultDatahubWithAutoTlsAndExternalDb(TestContext testContext) {
+        createDefaultDatalakeWithAutoTlsAndExternalDb(testContext);
+        createDefaultDatahubWithAutoTlsAndExternalDbForExistingDatalake(testContext);
     }
 
     protected void createStorageOptimizedDatahub(TestContext testContext) {
@@ -246,10 +250,14 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .validate();
     }
 
-    protected void initiateDefaultDatahubCreationWithAutoTls(TestContext testContext) {
+    protected void initiateDefaultDatahubCreationWithAutoTlsAndExternalDb(TestContext testContext) {
+        DistroXDatabaseRequest databaseRequest = new DistroXDatabaseRequest();
+        databaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA);
+
         testContext
                 .given(DistroXTestDto.class)
                 .withAutoTls()
+                .withExternalDatabase(databaseRequest)
                 .when(distroXTestClient.create())
                 .validate();
     }
@@ -375,9 +383,9 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         waitForDatalakeCreation(testContext);
     }
 
-    protected void createDefaultDatalakeWithAutoTls(TestContext testContext) {
+    protected void createDefaultDatalakeWithAutoTlsAndExternalDb(TestContext testContext) {
         initiateEnvironmentCreation(testContext);
-        initiateDatalakeCreationWithAutoTls(testContext);
+        initiateDatalakeCreationWithAutoTlsAndExternalDb(testContext);
         waitForEnvironmentCreation(testContext);
         waitForUserSync(testContext);
         waitForDatalakeCreation(testContext);

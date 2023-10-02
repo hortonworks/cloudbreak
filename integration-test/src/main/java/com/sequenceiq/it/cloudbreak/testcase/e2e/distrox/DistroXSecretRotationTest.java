@@ -7,9 +7,11 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CM
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_MGMT_CM_ADMIN_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_CM_INTERMEDIATE_CA_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_CM_SERVICE_SHARED_DB;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CB_CM_ADMIN_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_INTERMEDIATE_CA_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_SERVICE_SHARED_DB;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_MGMT_CM_ADMIN_PASSWORD;
 
 import java.util.List;
@@ -48,7 +50,7 @@ public class DistroXSecretRotationTest extends AbstractE2ETest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
-        createDefaultDatahubWithAutoTls(testContext);
+        createDefaultDatahubWithAutoTlsAndExternalDb(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -59,11 +61,11 @@ public class DistroXSecretRotationTest extends AbstractE2ETest {
     public void testSecretRotation(TestContext testContext, ITestContext iTestContext) {
         testContext
                 .given(SdxInternalTestDto.class)
-                .when(sdxTestClient.rotateSecret(Set.of(DATALAKE_MGMT_CM_ADMIN_PASSWORD, DATALAKE_CB_CM_ADMIN_PASSWORD)))
+                .when(sdxTestClient.rotateSecret(Set.of(DATALAKE_MGMT_CM_ADMIN_PASSWORD, DATALAKE_CB_CM_ADMIN_PASSWORD, DATALAKE_DATABASE_ROOT_PASSWORD)))
                 .awaitForFlow()
                 .given(DistroXTestDto.class)
                 .when(distroXTestClient.rotateSecret(Set.of(CLUSTER_MGMT_CM_ADMIN_PASSWORD, CLUSTER_CB_CM_ADMIN_PASSWORD,
-                        CLUSTER_CM_SERVICES_DB_PASSWORD, CLUSTER_CM_DB_PASSWORD)))
+                        CLUSTER_CM_SERVICES_DB_PASSWORD, CLUSTER_CM_DB_PASSWORD, DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD)))
                 .awaitForFlow()
                 .validate();
     }
