@@ -248,7 +248,7 @@ public class DatalakeUpgradeActions {
         };
     }
 
-    @Bean(name = "SDX_UPGRADE_COULD_NOT_START_STATE")
+    @Bean(name = "DATALAKE_UPGRADE_COULD_NOT_START_STATE")
     public Action<?, ?> upgradeCouldNotStart() {
         return new AbstractSdxAction<>(DatalakeUpgradeCouldNotStartEvent.class) {
             @Override
