@@ -1,7 +1,9 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion;
 
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.CCMV2_JUMPGATE_AGENT_ACCESS_KEY;
 import static java.lang.String.format;
 
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,6 +16,9 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -22,20 +27,24 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaHealthDetailsDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaRotationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.EnvironmentUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class DatalakeCcmUpgradeTest extends AbstractE2ETest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeCcmUpgradeTest.class);
+public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeCcmUpgradeAndRotationTest.class);
 
     private static final String EXPORT_IS_CCM_V_2_JUMPGATE_ENABLED_TRUE = "export IS_CCM_V2_JUMPGATE_ENABLED=true";
 
@@ -64,11 +73,12 @@ public class DatalakeCcmUpgradeTest extends AbstractE2ETest {
     @Description(
             given = "There is a running environment with datalake connected via CCMv1",
             when = "CCM Upgrade called on the environment - CCMv1 to the latest (JUMPGATE)",
-            then = "environment CCM Upgrade should be successful, along with datalake.")
+            then = "environment CCM Upgrade should be successful, along with datalake then CCM V2 Jumpgate agent access key rotation should be successful.")
     public void testCcmV1Upgrade(TestContext testContext) {
         createEnvironmentWithCcm(testContext, Tunnel.CCM);
         createSdxForEnvironment(testContext);
         upgradeCcmOnEnvironment(testContext);
+        rotateCcmV2JumpgateAgentAccessKey(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -117,6 +127,34 @@ public class DatalakeCcmUpgradeTest extends AbstractE2ETest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .then(validateCcmUpgradeOnEnvironment())
                 .validate();
+    }
+
+    private void rotateCcmV2JumpgateAgentAccessKey(TestContext testContext) {
+        testContext
+                .given(FreeIpaRotationTestDto.class)
+                .withSecrets(List.of(CCMV2_JUMPGATE_AGENT_ACCESS_KEY.value()))
+                .when(freeIpaTestClient.rotateSecret())
+                .awaitForFlow()
+                .given(FreeIpaHealthDetailsDto.class)
+                .then(validateCcmV2JumpgateAgentAccessKeyRotation())
+                .validate();
+    }
+
+    private static Assertion<FreeIpaHealthDetailsDto, FreeIpaClient> validateCcmV2JumpgateAgentAccessKeyRotation() {
+        return (testContext, freeIpaHealthDetailsDto, freeIpaClient) -> {
+            HealthDetailsFreeIpaResponse healthDetailsResponse = freeIpaHealthDetailsDto.getResponse();
+            if (Status.AVAILABLE != healthDetailsResponse.getStatus()) {
+                throw new TestFailException(format("FreeIPA status should be AVAILABLE but actual status is: %s", healthDetailsResponse.getStatus()));
+            }
+            List<String> unhealthyInstances = healthDetailsResponse.getNodeHealthDetails().stream()
+                    .filter(nodeHealthDetails -> !nodeHealthDetails.getStatus().isAvailable())
+                    .map(NodeHealthDetails::getInstanceId)
+                    .toList();
+            if (!unhealthyInstances.isEmpty()) {
+                throw new TestFailException(format("FreeIPA unhealthy instances: %s", unhealthyInstances));
+            }
+            return freeIpaHealthDetailsDto;
+        };
     }
 
     private Assertion<EnvironmentTestDto, EnvironmentClient> validateCcmUpgradeOnEnvironment() {
