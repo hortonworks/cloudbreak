@@ -46,7 +46,7 @@ public class CentOSToRedHatUpgradeImageFilter implements UpgradeImageFilter {
 
     @Override
     public String getMessage(ImageFilterParams imageFilterParams) {
-        return "There are no ";
+        return "There are no eligible images to upgrade.";
     }
 
     @Override
