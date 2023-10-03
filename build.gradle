@@ -139,8 +139,8 @@ subprojects {
   //apply plugin: org.sonarqube.gradle.SonarQubePlugin
 
   java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
   }
 
   configurations {
@@ -216,9 +216,8 @@ subprojects {
   test {
     minHeapSize = "512m"
     maxHeapSize = "1g"
-    jvmArgs += ['--add-opens','java.base/java.lang=ALL-UNNAMED',
-                '--add-opens','java.base/java.lang.reflect=ALL-UNNAMED',
-                '--add-opens','java.base/java.util.concurrent=ALL-UNNAMED']
+    jvmArgs += ['--add-opens','java.base/java.util.concurrent=ALL-UNNAMED',
+                '-XX:+EnableDynamicAgentLoading']
     useJUnitPlatform()
     testlogger {
       showSummary false

@@ -14,7 +14,7 @@ services:
     - ../mock-thunderhead/build/libs/mock-thunderhead.jar:/mock-thunderhead.jar
     - ./integcb/etc:/etc/auth
     command: java -jar /mock-thunderhead.jar
-    image: docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-17-runtime-cis:1.15-1.1679485208-cis-25042023
+    image: docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-21-runtime-cis:1.18-2.1705519635-stig-05022024
     deploy:
       resources:
         limits:
@@ -104,7 +104,7 @@ services:
       - INTEGRATIONTEST_PROXY_PASSWORD
       - INTEGRATIONTEST_PROXY_USER2
       - INTEGRATIONTEST_PROXY_PASSWORD2
-    image: docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-17-runtime-cis:1.15-1.1679485208-cis-25042023
+    image: docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-21-runtime-cis:1.18-2.1705519635-stig-05022024
     deploy:
       resources:
         limits:

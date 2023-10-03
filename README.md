@@ -39,7 +39,7 @@
 # Local Development Setup
 As of now this document focuses on setting up your development environment on macOS. You'll need Homebrew to install certain components in case you don't have them already. To get Homebrew please follow the installation instructions on the Homebrew homepage: https://brew.sh
 
-As a prerequisite, you need to have Java 17 installed. You can choose from many options, including the Oracle JDK, Oracle OpenJDK, or an OpenJDK from any of several providers. For help in choosing your JDK, consult [Java is Still Free](https://medium.com/@javachampions/java-is-still-free-2-0-0-6b9aa8d6d244).
+As a prerequisite, you need to have Java 21 installed. You can choose from many options, including the Oracle JDK, Oracle OpenJDK, or an OpenJDK from any of several providers. For help in choosing your JDK, consult [Java is Still Free](https://medium.com/@javachampions/java-is-still-free-2-0-0-6b9aa8d6d244).
 
 You'll need Docker. For Mac, use [Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/install/). Please allocate at least 6 CPU and 12 GB Memory to the process. (Depends on that how many service running in your IntelliJ and in Docker containers)
 
@@ -224,17 +224,17 @@ In IDEA set your SDK to your Java version under:
 
 Set project SDK
 ```
-File -> Project Structure -> Project Settings -> Project -> Project SDK -> 17
+File -> Project Structure -> Project Settings -> Project -> Project SDK -> 21
 ```
 
 Set project Language level
 ```
-File -> Project Structure -> Project Settings -> Project -> Project Language Level -> 17
+File -> Project Structure -> Project Settings -> Project -> Project Language Level -> 21
 ```
 
 Set Gradle JVM
 ```
-IntelliJ IDEA -> Preferences -> Build, Execution, Deployment -> Gradle -> Gradle JVM -> 17
+IntelliJ IDEA -> Preferences -> Build, Execution, Deployment -> Gradle -> Gradle JVM -> 21
 ```
 
 Set Import Order

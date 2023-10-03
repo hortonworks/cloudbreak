@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 import java.util.TimeZone;
 
 import jakarta.servlet.FilterChain;
@@ -35,8 +36,16 @@ public class RestLoggerFilter extends OncePerRequestFilter {
 
     private final boolean restLoggerEnabled;
 
+    private final Logger loggerOverride;
+
     public RestLoggerFilter(boolean restLoggerEnabled) {
         this.restLoggerEnabled = restLoggerEnabled;
+        this.loggerOverride = null;
+    }
+
+    public RestLoggerFilter(boolean restLoggerEnabled, Logger loggerOverride) {
+        this.restLoggerEnabled = restLoggerEnabled;
+        this.loggerOverride = loggerOverride;
     }
 
     @Override
@@ -65,9 +74,13 @@ public class RestLoggerFilter extends OncePerRequestFilter {
                     .append(appendLine(RestLoggerField.RESPONSE,
                             logContent(wrappedResponse.getContentAsByteArray(), request.getCharacterEncoding(), isUberSensitive(requestPath))))
                     .toString();
-            LOGGER.atLevel(calculateLogLevel(request, response)).log(log);
+            loggerWrapper().atLevel(calculateLogLevel(request, response)).log(log);
         }
         wrappedResponse.copyBodyToResponse();
+    }
+
+    private Logger loggerWrapper() {
+        return Objects.requireNonNullElse(loggerOverride, LOGGER);
     }
 
     private Level calculateLogLevel(HttpServletRequest request, HttpServletResponse response) {

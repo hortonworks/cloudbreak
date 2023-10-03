@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.helper.HttpHelper;
 
 @ExtendWith(MockitoExtension.class)
-public class HttpContentSizeValidatorTest {
+class HttpContentSizeValidatorTest {
 
     private static final String INVALID_MESSAGE = "The value should be a valid URL and start with 'http(s)'!";
 
@@ -48,7 +48,7 @@ public class HttpContentSizeValidatorTest {
     private ContentSizeProvider contentSizeProvider;
 
     @Test
-    public void testUrlWrongProtocol() {
+    void testUrlWrongProtocol() {
         when(constraintValidatorContext.buildConstraintViolationWithTemplate(anyString())).thenReturn(constraintViolationBuilder);
 
         assertFalse(underTest.isValid("ftp://protocol.com", constraintValidatorContext));
@@ -58,7 +58,7 @@ public class HttpContentSizeValidatorTest {
     }
 
     @Test
-    public void testUrlWithoutProtocol() {
+    void testUrlWithoutProtocol() {
         when(constraintValidatorContext.buildConstraintViolationWithTemplate(anyString())).thenReturn(constraintViolationBuilder);
 
         assertFalse(underTest.isValid("without.protocol.com", constraintValidatorContext));
@@ -68,7 +68,7 @@ public class HttpContentSizeValidatorTest {
     }
 
     @Test
-    public void testUrlNotSuccessful() {
+    void testUrlNotSuccessful() {
         when(httpHelper.getContentLength(anyString())).thenReturn(new ImmutablePair<>(statusType, MAX_SIZE));
         when(constraintValidatorContext.buildConstraintViolationWithTemplate(anyString())).thenReturn(constraintViolationBuilder);
 
@@ -83,7 +83,7 @@ public class HttpContentSizeValidatorTest {
     }
 
     @Test
-    public void testUrlFailsWithException() {
+    void testUrlFailsWithException() {
         when(httpHelper.getContentLength(anyString())).thenReturn(new ImmutablePair<>(statusType, MAX_SIZE));
         when(constraintValidatorContext.buildConstraintViolationWithTemplate(anyString())).thenReturn(constraintViolationBuilder);
 
@@ -97,7 +97,7 @@ public class HttpContentSizeValidatorTest {
     }
 
     @Test
-    public void testUrlFailsWithMinusOne() {
+    void testUrlFailsWithMinusOne() {
         when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
         when(httpHelper.getContentLength(anyString())).thenReturn(new ImmutablePair<>(statusType, MAX_SIZE));
         when(contentSizeProvider.getMaxSizeInBytes()).thenReturn(MAX_SIZE);
@@ -112,7 +112,7 @@ public class HttpContentSizeValidatorTest {
     }
 
     @Test
-    public void testUrlFailsWithZero() {
+    void testUrlFailsWithZero() {
         when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
         when(httpHelper.getContentLength(anyString())).thenReturn(new ImmutablePair<>(statusType, MAX_SIZE));
         when(contentSizeProvider.getMaxSizeInBytes()).thenReturn(MAX_SIZE);
@@ -127,7 +127,7 @@ public class HttpContentSizeValidatorTest {
     }
 
     @Test
-    public void testUrlFailsWithMoreThanMax() {
+    void testUrlFailsWithMoreThanMax() {
         when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
         when(httpHelper.getContentLength(anyString())).thenReturn(new ImmutablePair<>(statusType, MAX_SIZE));
         when(contentSizeProvider.getMaxSizeInBytes()).thenReturn(MAX_SIZE);
@@ -142,14 +142,14 @@ public class HttpContentSizeValidatorTest {
     }
 
     @Test
-    public void testUrlNull() {
+    void testUrlNull() {
         assertTrue(underTest.isValid(null, constraintValidatorContext));
 
         verify(constraintValidatorContext, times(0)).buildConstraintViolationWithTemplate(anyString());
     }
 
     @Test
-    public void testUrlOk() {
+    void testUrlOk() {
         when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
         when(httpHelper.getContentLength(anyString())).thenReturn(new ImmutablePair<>(statusType, MAX_SIZE));
         when(contentSizeProvider.getMaxSizeInBytes()).thenReturn(MAX_SIZE);

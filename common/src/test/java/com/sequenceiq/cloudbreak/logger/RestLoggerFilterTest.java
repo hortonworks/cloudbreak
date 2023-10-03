@@ -21,11 +21,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
-
-import com.sequenceiq.cloudbreak.util.StaticFieldManipulationTestHelper;
 
 @ExtendWith(MockitoExtension.class)
 class RestLoggerFilterTest {
@@ -33,7 +30,7 @@ class RestLoggerFilterTest {
     private RestLoggerFilter underTest;
 
     @Mock
-    private Logger logger;
+    private LogVerifier logger;
 
     @Mock
     private LoggingEventBuilder loggingEventBuilder;
@@ -49,8 +46,7 @@ class RestLoggerFilterTest {
 
     @BeforeEach
     public void init() throws Exception {
-        StaticFieldManipulationTestHelper.setFinalStatic(RestLoggerFilter.class.getDeclaredField("LOGGER"), logger);
-        underTest = new RestLoggerFilter(true);
+        underTest = new RestLoggerFilter(true, logger);
     }
 
     @Test

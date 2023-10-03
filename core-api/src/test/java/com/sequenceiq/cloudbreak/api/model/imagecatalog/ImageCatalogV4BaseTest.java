@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.api.helper.HttpHelper;
 import com.sequenceiq.cloudbreak.validation.HttpContentSizeValidator;
 
 @ExtendWith(MockitoExtension.class)
-public class ImageCatalogV4BaseTest extends ValidatorTestHelper {
+class ImageCatalogV4BaseTest extends ValidatorTestHelper {
 
     public static final String FAILED_TO_GET_BY_FAMILY_TYPE = "Failed to get response by the specified URL '%s' due to: '%s'!";
 
@@ -51,7 +51,7 @@ public class ImageCatalogV4BaseTest extends ValidatorTestHelper {
     }
 
     @Test
-    public void testContentNotAvailable() {
+    void testContentNotAvailable() {
         String url = "http://protocol.com";
         String reasonPhrase = "Invalid reason phrase";
         when(statusType.getFamily()).thenReturn(Family.OTHER);
@@ -70,7 +70,7 @@ public class ImageCatalogV4BaseTest extends ValidatorTestHelper {
     }
 
     @Test
-    public void testContentStructureNotValid() {
+    void testContentStructureNotValid() {
         when(httpHelper.getContent(anyString())).thenReturn(new ImmutablePair<>(statusType, "{}"));
         when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
 
@@ -86,7 +86,7 @@ public class ImageCatalogV4BaseTest extends ValidatorTestHelper {
     }
 
     @Test
-    public void testContentNotAValidJSON() {
+    void testContentNotAValidJSON() {
         when(httpHelper.getContent(anyString())).thenReturn(new ImmutablePair<>(statusType, "{[]}"));
         when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
 
@@ -101,7 +101,7 @@ public class ImageCatalogV4BaseTest extends ValidatorTestHelper {
     }
 
     @Test
-    public void testWhenWebTargetFailsWithException() {
+    void testWhenWebTargetFailsWithException() {
         when(httpHelper.getContent(anyString())).thenThrow(ProcessingException.class);
 
         ImageCatalogV4Base i = new ImageCatalogV4Base();
@@ -116,7 +116,7 @@ public class ImageCatalogV4BaseTest extends ValidatorTestHelper {
     }
 
     @Test
-    public void testWhenContentIsTooBig() {
+    void testWhenContentIsTooBig() {
         when(httpContentSizeValidator.isValid(anyString(), any(ConstraintValidatorContext.class))).thenReturn(false);
 
         ImageCatalogV4Base i = new ImageCatalogV4Base();

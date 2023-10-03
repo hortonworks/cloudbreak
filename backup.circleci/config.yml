@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/openjdk:17-jdk-buster
+      - image: circleci/openjdk:21-jdk-bookworm
     steps:
       - checkout
       - restore_cache:
@@ -31,7 +31,7 @@ jobs:
 
   checkstyle-test:
     docker:
-      - image: circleci/openjdk:17-jdk-buster
+      - image: circleci/openjdk:21-jdk-bookworm
     environment:
       _JAVA_OPTIONS: "-Xmx1536m"
     steps:
@@ -55,7 +55,7 @@ jobs:
 
   checkstyle-main:
     docker:
-      - image: circleci/openjdk:17-jdk-buster
+      - image: circleci/openjdk:21-jdk-bookworm
     environment:
       _JAVA_OPTIONS: "-Xmx1536m"
     steps:
@@ -79,7 +79,7 @@ jobs:
 
   spotbugs-main:
     docker:
-      - image: circleci/openjdk:17-jdk-buster
+      - image: circleci/openjdk:21-jdk-bookworm
     environment:
       _JAVA_OPTIONS: "-Xmx1536m"
     steps:
@@ -103,7 +103,7 @@ jobs:
 
   spotbugs-test:
     docker:
-      - image: circleci/openjdk:17-jdk-buster
+      - image: circleci/openjdk:21-jdk-bookworm
     environment:
       _JAVA_OPTIONS: "-Xmx1536m"
     steps:
@@ -127,7 +127,7 @@ jobs:
 
   unit-test:
     docker:
-      - image: circleci/openjdk:17-jdk-buster
+      - image: circleci/openjdk:21-jdk-bookworm
     environment:
       _JAVA_OPTIONS: "-XX:+UseContainerSupport"
     steps:

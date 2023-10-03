@@ -1,4 +1,4 @@
-FROM docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-17-runtime-cis:1.18-2.1705573231-stig-05022024
+FROM docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-21-runtime-cis:1.18-2.1705519635-stig-05022024
 # We can not use alpine based image because of https://github.com/grpc/grpc-java/issues/8751
 MAINTAINER info@cloudera.com
 
@@ -25,6 +25,9 @@ RUN ( unzip externalized-compute.jar schema/* -d / ) || \
 COPY bootstrap/start_externalizedcompute_app.sh /
 COPY bootstrap/wait_for_externalizedcompute_api.sh /
 
+# Copy NSS DB config for non-FIPS
+COPY bootstrap/nss.cfg $JAVA_HOME/conf/security/nss.cfg
+
 ENV JAVA_SECURITY_POLICY_FILE $JAVA_HOME/conf/security/java.security
 
 # Add OpenSSL provider to Java security policy file (FIPS enabled mode only).
@@ -45,11 +48,5 @@ RUN if [[ "${TARGETARCH}" != "arm64" ]]; then \
 #Set PKCS11 as keystore type for non FIPS
 RUN sed -i -e "s/^keystore.type=.*/keystore.type=PKCS11/g" \
 -e "s/\(^security\.provider\.[0-9]*=SunPKCS11$\)/\1 \$\{java\.home\}\/conf\/security\/nss.cfg/" $JAVA_SECURITY_POLICY_FILE
-
-#Set NSS DB configs for non FIPS
-RUN sed -i -e "s/^nssDbMode =.*/nssDbMode = readOnly/g" \
--e '/^nssDbMode =.*/a nssSecmodDirectory = sql:/etc/pki/nssdb\nnssModule = keystore' \
--e 's/handleStartupErrors = ignoreMultipleInitialisation$//g' \
-$JAVA_HOME/conf/security/nss.cfg
 
 ENTRYPOINT ["/start_externalizedcompute_app.sh"]
