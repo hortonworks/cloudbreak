@@ -34,6 +34,7 @@ import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingS
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.DataServicesResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentBaseResponse;
@@ -73,7 +74,7 @@ import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyResponseConverter;
 
 @ExtendWith(SpringExtension.class)
-public class EnvironmentResponseConverterTest {
+class EnvironmentResponseConverterTest {
 
     private static final String REGION = "us-west";
 
@@ -106,6 +107,9 @@ public class EnvironmentResponseConverterTest {
     @Mock
     private NetworkDtoToResponseConverter networkDtoToResponseConverter;
 
+    @Mock
+    private DataServicesConverter dataServicesConverter;
+
     @ParameterizedTest
     @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE", "GCP"})
     void testDtoToDetailedResponse(CloudPlatform cloudPlatform) {
@@ -117,6 +121,7 @@ public class EnvironmentResponseConverterTest {
         BackupResponse backupResponse = mock(BackupResponse.class);
         ProxyResponse proxyResponse = mock(ProxyResponse.class);
         EnvironmentNetworkResponse environmentNetworkResponse = mock(EnvironmentNetworkResponse.class);
+        DataServicesResponse dataServicesResponse = mock(DataServicesResponse.class);
 
         when(credentialConverter.convert(environment.getCredential())).thenReturn(credentialResponse);
         when(freeIpaConverter.convert(environment.getFreeIpaCreation())).thenReturn(freeIpaResponse);
@@ -126,6 +131,7 @@ public class EnvironmentResponseConverterTest {
         when(proxyConfigToProxyResponseConverter.convert((ProxyConfig) environment.getProxyConfig())).thenReturn(proxyResponse);
         when(networkDtoToResponseConverter.convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), true))
                 .thenReturn(environmentNetworkResponse);
+        when(dataServicesConverter.convertToResponse(environment.getDataServices())).thenReturn(dataServicesResponse);
 
         DetailedEnvironmentResponse actual = underTest.dtoToDetailedResponse(environment);
 
@@ -158,6 +164,7 @@ public class EnvironmentResponseConverterTest {
         assertEquals(environment.getParentEnvironmentCloudPlatform(), actual.getParentEnvironmentCloudPlatform());
         assertEquals(proxyResponse, actual.getProxyConfig());
         assertEquals(environmentNetworkResponse, actual.getNetwork());
+        assertEquals(dataServicesResponse, actual.getDataServices());
         assertSecurityAccess(environment.getSecurityAccess(), actual.getSecurityAccess());
 
         verify(credentialConverter).convert(environment.getCredential());
@@ -166,6 +173,7 @@ public class EnvironmentResponseConverterTest {
         verify(telemetryApiConverter).convert(eq(environment.getTelemetry()), any());
         verify(proxyConfigToProxyResponseConverter).convert(environment.getProxyConfig());
         verify(networkDtoToResponseConverter).convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), true);
+        verify(dataServicesConverter).convertToResponse(environment.getDataServices());
     }
 
     @ParameterizedTest
@@ -178,6 +186,7 @@ public class EnvironmentResponseConverterTest {
         TelemetryResponse telemetryResponse = mock(TelemetryResponse.class);
         ProxyViewResponse proxyResponse = mock(ProxyViewResponse.class);
         EnvironmentNetworkResponse environmentNetworkResponse = mock(EnvironmentNetworkResponse.class);
+        DataServicesResponse dataServicesResponse = mock(DataServicesResponse.class);
 
         when(credentialViewConverter.convertResponse(environmentDto.getCredential())).thenReturn(credentialResponse);
         when(freeIpaConverter.convert(environmentDto.getFreeIpaCreation())).thenReturn(freeIpaResponse);
@@ -186,6 +195,7 @@ public class EnvironmentResponseConverterTest {
         when(proxyConfigToProxyResponseConverter.convertToView(environmentDto.getProxyConfig())).thenReturn(proxyResponse);
         when(networkDtoToResponseConverter.convert(environmentDto.getNetwork(), environmentDto.getExperimentalFeatures().getTunnel(), false))
                 .thenReturn(environmentNetworkResponse);
+        when(dataServicesConverter.convertToResponse(environmentDto.getDataServices())).thenReturn(dataServicesResponse);
 
         SimpleEnvironmentResponse actual = underTest.dtoToSimpleResponse(environmentDto, true, true);
 
@@ -213,6 +223,7 @@ public class EnvironmentResponseConverterTest {
         assertEquals(environmentDto.getParentEnvironmentName(), actual.getParentEnvironmentName());
         assertEquals(proxyResponse, actual.getProxyConfig());
         assertEquals(environmentNetworkResponse, actual.getNetwork());
+        assertEquals(dataServicesResponse, actual.getDataServices());
 
         verify(credentialViewConverter).convertResponse(environmentDto.getCredential());
         verify(freeIpaConverter).convert(environmentDto.getFreeIpaCreation());
@@ -220,6 +231,7 @@ public class EnvironmentResponseConverterTest {
         verify(telemetryApiConverter).convert(eq(environmentDto.getTelemetry()), any());
         verify(proxyConfigToProxyResponseConverter).convertToView(environmentDto.getProxyConfig());
         verify(networkDtoToResponseConverter).convert(environmentDto.getNetwork(), environmentDto.getExperimentalFeatures().getTunnel(), false);
+        verify(dataServicesConverter).convertToResponse(environmentDto.getDataServices());
     }
 
     private void assertParameters(EnvironmentDto environment, EnvironmentBaseResponse actual, CloudPlatform cloudPlatform) {

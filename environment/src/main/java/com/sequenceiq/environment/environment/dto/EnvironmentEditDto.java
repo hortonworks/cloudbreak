@@ -5,6 +5,7 @@ import java.util.Map;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.environment.dto.dataservices.EnvironmentDataServices;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -46,6 +47,8 @@ public class EnvironmentEditDto {
 
     private final String cloudPlatform;
 
+    private final EnvironmentDataServices dataServices;
+
     public EnvironmentEditDto(Builder builder) {
         this.description = builder.description;
         this.accountId = builder.accountId;
@@ -64,6 +67,7 @@ public class EnvironmentEditDto {
         this.creator = builder.creator;
         this.crn = builder.crn;
         this.cloudPlatform = builder.cloudPlatform;
+        this.dataServices = builder.dataServices;
     }
 
     public String getDescription() {
@@ -134,6 +138,10 @@ public class EnvironmentEditDto {
         return cloudPlatform;
     }
 
+    public EnvironmentDataServices getDataServices() {
+        return dataServices;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -158,6 +166,7 @@ public class EnvironmentEditDto {
                 ", creator=" + creator +
                 ", crn=" + crn +
                 ", cloudPlatform=" + cloudPlatform +
+                ", dataServices=" + dataServices +
                 '}';
     }
 
@@ -195,6 +204,8 @@ public class EnvironmentEditDto {
         private String creator;
 
         private String cloudPlatform;
+
+        private EnvironmentDataServices dataServices;
 
         private Builder() {
         }
@@ -281,6 +292,11 @@ public class EnvironmentEditDto {
 
         public Builder withCreator(String creator) {
             this.creator = creator;
+            return this;
+        }
+
+        public Builder withDataServices(EnvironmentDataServices dataServices) {
+            this.dataServices = dataServices;
             return this;
         }
 

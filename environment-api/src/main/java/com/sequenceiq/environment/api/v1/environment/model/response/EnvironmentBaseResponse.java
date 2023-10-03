@@ -132,6 +132,9 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
     @ApiModelProperty(EnvironmentModelDescription.ENVIRONMENT_DOMAIN_NAME)
     private String environmentDomain;
 
+    @ApiModelProperty(EnvironmentModelDescription.DATA_SERVICES)
+    private DataServicesResponse dataServices;
+
     @JsonIgnore
     public boolean isCloudStorageLoggingEnabled() {
         return telemetry != null && telemetry.getFeatures() != null && telemetry.getFeatures().getCloudStorageLogging() != null
@@ -443,6 +446,14 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
         this.accountId = accountId;
     }
 
+    public DataServicesResponse getDataServices() {
+        return dataServices;
+    }
+
+    public void setDataServices(DataServicesResponse dataServices) {
+        this.dataServices = dataServices;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentBaseResponse{" +
@@ -477,9 +488,10 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
                 ", gcp=" + gcp +
                 ", yarn=" + yarn +
                 ", environmentServiceVersion='" + environmentServiceVersion + '\'' +
-                ", ccmV2TlsType='" + ccmV2TlsType + '\'' +
-                ", deletionType='" + deletionType + '\'' +
+                ", ccmV2TlsType=" + ccmV2TlsType +
+                ", deletionType=" + deletionType +
                 ", environmentDomain='" + environmentDomain + '\'' +
+                ", dataServices=" + dataServices +
                 '}';
     }
 }

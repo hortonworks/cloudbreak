@@ -10,6 +10,7 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import com.sequenceiq.environment.api.v1.environment.model.request.CredentialAwareEnvRequest;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
+import com.sequenceiq.environment.environment.dto.dataservices.EnvironmentDataServices;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -65,6 +66,8 @@ public class EnvironmentCreationDto {
 
     private final String proxyConfigName;
 
+    private final EnvironmentDataServices dataServices;
+
     private EnvironmentCreationDto(Builder builder) {
         name = builder.name;
         description = builder.description;
@@ -92,6 +95,7 @@ public class EnvironmentCreationDto {
         crn = builder.crn;
         parentEnvironmentName = builder.parentEnvironmentName;
         proxyConfigName = builder.proxyConfigName;
+        dataServices = builder.dataServices;
     }
 
     public static Builder builder() {
@@ -191,6 +195,10 @@ public class EnvironmentCreationDto {
         return proxyConfigName;
     }
 
+    public EnvironmentDataServices getDataServices() {
+        return dataServices;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentCreationDto{" +
@@ -251,6 +259,8 @@ public class EnvironmentCreationDto {
         private String parentEnvironmentName;
 
         private String proxyConfigName;
+
+        private EnvironmentDataServices dataServices;
 
         private Builder() {
         }
@@ -367,6 +377,11 @@ public class EnvironmentCreationDto {
 
         public Builder withProxyConfigName(String proxyConfigName) {
             this.proxyConfigName = proxyConfigName;
+            return this;
+        }
+
+        public Builder withDataServices(EnvironmentDataServices dataServices) {
+            this.dataServices = dataServices;
             return this;
         }
 

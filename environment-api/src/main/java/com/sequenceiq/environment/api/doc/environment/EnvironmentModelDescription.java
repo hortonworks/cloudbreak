@@ -157,6 +157,8 @@ public class EnvironmentModelDescription {
 
     public static final String NO_OUTBOUND_LOAD_BALANCER = "Flag that marks the request to not create an outbound load balancer";
 
+    public static final String DATA_SERVICES = "Data Services parameters of the environment";
+
     private EnvironmentModelDescription() {
     }
 }

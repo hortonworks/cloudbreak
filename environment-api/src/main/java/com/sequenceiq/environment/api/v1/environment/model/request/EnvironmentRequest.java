@@ -123,6 +123,10 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     private CcmV2TlsType ccmV2TlsType;
 
+    @Valid
+    @ApiModelProperty(EnvironmentModelDescription.DATA_SERVICES)
+    private DataServicesRequest dataServices;
+
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
     }
@@ -322,6 +326,14 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
         this.ccmV2TlsType = ccmV2TlsType;
     }
 
+    public DataServicesRequest getDataServices() {
+        return dataServices;
+    }
+
+    public void setDataServices(DataServicesRequest dataServices) {
+        this.dataServices = dataServices;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentRequest{" +
@@ -332,11 +344,12 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
                 ", location=" + location +
                 ", network=" + network +
                 ", telemetry=" + telemetry +
-                ", backupRequest=" + backup +
+                ", backup=" + backup +
                 ", authentication=" + authentication +
                 ", freeIpa=" + freeIpa +
                 ", securityAccess=" + securityAccess +
                 ", tunnel=" + tunnel +
+                ", overrideTunnel=" + overrideTunnel +
                 ", idBrokerMappingSource=" + idBrokerMappingSource +
                 ", cloudStorageValidation=" + cloudStorageValidation +
                 ", adminGroupName='" + adminGroupName + '\'' +
@@ -347,7 +360,8 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
                 ", tags=" + tags +
                 ", parentEnvironmentName='" + parentEnvironmentName + '\'' +
                 ", environmentServiceVersion='" + environmentServiceVersion + '\'' +
-                ", ccmV2TlsType='" + ccmV2TlsType + '\'' +
-                '}';
+                ", ccmV2TlsType=" + ccmV2TlsType +
+                ", dataServices=" + dataServices +
+                "} " + super.toString();
     }
 }

@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -47,6 +48,8 @@ import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentTagsDtoConverter;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
+import com.sequenceiq.environment.environment.dto.dataservices.AzureDataServiceParameters;
+import com.sequenceiq.environment.environment.dto.dataservices.EnvironmentDataServices;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.encryption.EnvironmentEncryptionService;
@@ -149,8 +152,6 @@ class EnvironmentModificationServiceTest {
         EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
                 .withAccountId(ACCOUNT_ID)
                 .build();
-        when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
         environmentModificationServiceUnderTest.edit(environmentMock(), environmentDto);
         verify(environmentService).save(any());
     }
@@ -177,8 +178,6 @@ class EnvironmentModificationServiceTest {
                 .withNetwork(network)
                 .build();
         Environment environment = new Environment();
-        when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
         when(networkService.findByEnvironment(any())).thenReturn(Optional.empty());
         when(networkService.saveNetwork(any(), any(), anyString(), any(), any())).thenReturn(new AwsNetwork());
 
@@ -234,8 +233,6 @@ class EnvironmentModificationServiceTest {
                 .withSecurityAccess(securityAccessDto)
                 .build();
         Environment environment = new Environment();
-        when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(validatorService.validateSecurityAccessModification(any(), any())).thenReturn(validationResultError);
 
@@ -255,8 +252,6 @@ class EnvironmentModificationServiceTest {
                 .withSecurityAccess(securityAccessDto)
                 .build();
         Environment environment = new Environment();
-        when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(validatorService.validateSecurityAccessModification(any(), any())).thenReturn(validationResult);
         when(validatorService.validateSecurityGroups(any(), any())).thenReturn(validationResultError);
@@ -299,8 +294,6 @@ class EnvironmentModificationServiceTest {
         EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
                 .withAccountId(ACCOUNT_ID)
                 .build();
-        when(environmentService
-                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(CRN), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
 
         environmentModificationServiceUnderTest.edit(environmentMock(), environmentDto);
         verify(environmentService).save(any());
@@ -383,8 +376,6 @@ class EnvironmentModificationServiceTest {
         when(environmentFlowValidatorService.validateParameters(any(), any())).thenReturn(validationResult);
         when(validationResult.hasError()).thenReturn(true);
         when(parametersService.findByEnvironment(any())).thenReturn(Optional.of(baseParameters));
-        when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
         when(parametersService.saveParameters(environment, parameters)).thenReturn(baseParameters);
 
         assertThrows(BadRequestException.class, () -> environmentModificationServiceUnderTest.edit(environmentMock(), environmentDto));
@@ -414,8 +405,6 @@ class EnvironmentModificationServiceTest {
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(validatorService.validateEncryptionKey("dummyEncryptionKey", ACCOUNT_ID)).thenReturn(validationResultError);
         when(parametersService.findByEnvironment(any())).thenReturn(Optional.of(baseParameters));
-        when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
         assertThrows(BadRequestException.class, () -> environmentModificationServiceUnderTest.edit(environmentMock(), environmentDto));
 
         verify(parametersService, never()).saveParameters(environment, parameters);
@@ -885,6 +874,30 @@ class EnvironmentModificationServiceTest {
         verify(proxyConfigModificationService, times(1)).shouldModify(environment, newProxyConfig);
         verify(proxyConfigModificationService, times(1)).validateModify(environmentDto);
         verify(environmentReactorFlowManager, times(1)).triggerEnvironmentProxyConfigModification(environmentDto, newProxyConfig);
+    }
+
+    @Test
+    void editDataServices() {
+        String newIdentity = "newIdentity";
+        AzureDataServiceParameters azureDataServiceParams = AzureDataServiceParameters.builder()
+                .withSharedManagedIdentity(newIdentity)
+                .build();
+        EnvironmentDataServices dataServices = EnvironmentDataServices.builder().withAzure(azureDataServiceParams).build();
+        EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withDataServices(dataServices)
+                .build();
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+
+        environmentModificationServiceUnderTest.edit(environment, environmentDto);
+
+        ArgumentCaptor<Environment> savedCaptor = ArgumentCaptor.forClass(Environment.class);
+        verify(environmentService).save(savedCaptor.capture());
+        Environment saved = savedCaptor.getValue();
+        assertThat(saved.getDataServices()).isNotNull();
+        assertThat(saved.getDataServices().azure()).isNotNull();
+        assertThat(saved.getDataServices().azure().sharedManagedIdentity()).isEqualTo(newIdentity);
     }
 
     private Environment environmentMock() {

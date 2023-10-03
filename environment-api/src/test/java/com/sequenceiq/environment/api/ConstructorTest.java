@@ -23,7 +23,7 @@ public class ConstructorTest {
         for (String clazz : reflections.getAll(SubTypes)) {
             if (!clazz.endsWith("Test")
                     && requestOrResponse(clazz) && !clazz.contains(".Valid")
-                    && !Class.forName(clazz).isInterface()) {
+                    && !Class.forName(clazz).isInterface() && !Class.forName(clazz).isRecord()) {
                 try {
                     Constructor<?> declaredConstructor = Class.forName(clazz).getDeclaredConstructor();
                     if (declaredConstructor == null || !declaredConstructor.getDeclaringClass().getName().equals(clazz)) {

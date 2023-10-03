@@ -116,6 +116,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private String environmentDomain;
 
+        private DataServicesResponse dataServices;
+
         private Builder() {
         }
 
@@ -274,6 +276,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withDataServices(DataServicesResponse dataServices) {
+            this.dataServices = dataServices;
+            return this;
+        }
+
         public SimpleEnvironmentResponse build() {
             SimpleEnvironmentResponse simpleEnvironmentResponse = new SimpleEnvironmentResponse();
             simpleEnvironmentResponse.setCrn(crn);
@@ -306,6 +313,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setCcmV2TlsType(ccmV2TlsType);
             simpleEnvironmentResponse.setDeletionType(deletionType);
             simpleEnvironmentResponse.setEnvironmentDomain(environmentDomain);
+            simpleEnvironmentResponse.setDataServices(dataServices);
             return simpleEnvironmentResponse;
         }
     }

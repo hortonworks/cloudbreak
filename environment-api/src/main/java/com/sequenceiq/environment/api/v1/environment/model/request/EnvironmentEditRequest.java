@@ -72,6 +72,10 @@ public class EnvironmentEditRequest implements Serializable {
     @ApiModelProperty(EnvironmentModelDescription.TAGS)
     private Map<String, String> tags = new HashMap<>();
 
+    @Valid
+    @ApiModelProperty(EnvironmentModelDescription.DATA_SERVICES)
+    private DataServicesRequest dataServices;
+
     public String getDescription() {
         return description;
     }
@@ -184,6 +188,14 @@ public class EnvironmentEditRequest implements Serializable {
         this.tags = tags;
     }
 
+    public DataServicesRequest getDataServices() {
+        return dataServices;
+    }
+
+    public void setDataServices(DataServicesRequest dataServices) {
+        this.dataServices = dataServices;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentEditRequest{" +
@@ -196,11 +208,12 @@ public class EnvironmentEditRequest implements Serializable {
                 ", idBrokerMappingSource=" + idBrokerMappingSource +
                 ", cloudStorageValidation=" + cloudStorageValidation +
                 ", adminGroupName='" + adminGroupName + '\'' +
-                ", proxy='" + proxy + '\'' +
+                ", proxy=" + proxy +
                 ", aws=" + aws +
                 ", azure=" + azure +
                 ", gcp=" + gcp +
                 ", tags=" + tags +
+                ", dataServices=" + dataServices +
                 '}';
     }
 }

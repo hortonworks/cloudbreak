@@ -27,6 +27,7 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentDeletionType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
+import com.sequenceiq.environment.environment.dto.dataservices.EnvironmentDataServices;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.parameters.dao.converter.EnvironmentDeletionTypeConverter;
@@ -70,6 +71,10 @@ public class Environment implements AuthResource, AccountAwareResource {
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json backup;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json dataServices;
 
     @Column(nullable = false)
     private String location;
@@ -326,6 +331,19 @@ public class Environment implements AuthResource, AccountAwareResource {
     public void setTelemetry(EnvironmentTelemetry telemetry) {
         if (telemetry != null) {
             this.telemetry = new Json(telemetry);
+        }
+    }
+
+    public EnvironmentDataServices getDataServices() {
+        if (dataServices != null && dataServices.getValue() != null) {
+            return JsonUtil.readValueOpt(dataServices.getValue(), EnvironmentDataServices.class).orElse(null);
+        }
+        return null;
+    }
+
+    public void setDataServices(EnvironmentDataServices dataServices) {
+        if (dataServices != null) {
+            this.dataServices = new Json(dataServices);
         }
     }
 

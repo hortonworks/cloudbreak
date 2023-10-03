@@ -94,6 +94,8 @@ public class EnvironmentApiConverter {
 
     private final RegionAwareCrnGenerator regionAwareCrnGenerator;
 
+    private final DataServicesConverter dataServicesConverter;
+
     public EnvironmentApiConverter(TelemetryApiConverter telemetryApiConverter,
             BackupConverter backupConverter,
             TunnelConverter tunnelConverter,
@@ -102,7 +104,8 @@ public class EnvironmentApiConverter {
             FreeIpaConverter freeIpaConverter,
             NetworkRequestToDtoConverter networkRequestToDtoConverter,
             ProxyRequestToProxyConfigConverter proxyRequestToProxyConfigConverter,
-            RegionAwareCrnGenerator regionAwareCrnGenerator) {
+            RegionAwareCrnGenerator regionAwareCrnGenerator,
+            DataServicesConverter dataServicesConverter) {
         this.backupConverter = backupConverter;
         this.telemetryApiConverter = telemetryApiConverter;
         this.accountTelemetryService = accountTelemetryService;
@@ -112,6 +115,7 @@ public class EnvironmentApiConverter {
         this.networkRequestToDtoConverter = networkRequestToDtoConverter;
         this.proxyRequestToProxyConfigConverter = proxyRequestToProxyConfigConverter;
         this.regionAwareCrnGenerator = regionAwareCrnGenerator;
+        this.dataServicesConverter = dataServicesConverter;
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
@@ -130,7 +134,7 @@ public class EnvironmentApiConverter {
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
                         accountTelemetryService.getOrDefault(accountId).getFeatures(), accountId))
-                .withBackup((request.getBackup() != null && isNotEmpty(request.getBackup().getStorageLocation())) ?
+                .withBackup(request.getBackup() != null && isNotEmpty(request.getBackup().getStorageLocation()) ?
                         backupConverter.convert(request.getBackup()) : backupConverter.convert(request.getTelemetry()))
                 .withRegions(locationRequestToRegions(request.getLocation(), cloudPlatform))
                 .withAuthentication(authenticationRequestToDto(request.getAuthentication()))
@@ -146,7 +150,8 @@ public class EnvironmentApiConverter {
                         .build())
                 .withParameters(paramsToParametersDto(request, cloudPlatform))
                 .withParentEnvironmentName(request.getParentEnvironmentName())
-                .withProxyConfigName(request.getProxyConfigName());
+                .withProxyConfigName(request.getProxyConfigName())
+                .withDataServices(dataServicesConverter.convertToDto(request.getDataServices()));
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> {
             NetworkDto networkDto = networkRequestToDto(network);
@@ -389,6 +394,7 @@ public class EnvironmentApiConverter {
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
         NullUtil.doIfNotNull(request.getAws(), awsParams -> builder.withParameters(awsParamsToParametersDto(awsParams, null)));
         NullUtil.doIfNotNull(request.getProxy(), proxyRequest -> builder.withProxyConfig(proxyRequestToProxyConfigConverter.convert(proxyRequest)));
+        NullUtil.doIfNotNull(request.getDataServices(), dataServices -> builder.withDataServices(dataServicesConverter.convertToDto(dataServices)));
         return builder.build();
     }
 

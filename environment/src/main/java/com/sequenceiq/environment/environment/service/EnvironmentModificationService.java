@@ -34,6 +34,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentTagsDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
+import com.sequenceiq.environment.environment.dto.dataservices.EnvironmentDataServices;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.encryption.EnvironmentEncryptionService;
@@ -140,6 +141,7 @@ public class EnvironmentModificationService {
         editTunnelIfChanged(editDto, environment);
         editEnvironmentParameters(editDto, environment);
         editFreeIPA(editDto, environment);
+        editDataServices(editDto, environment);
         editTags(editDto, environment);
         Environment saved = environmentService.save(environment);
         triggerEditProxyIfChanged(editDto, saved);
@@ -224,7 +226,7 @@ public class EnvironmentModificationService {
                 throw new BadRequestException(validateKey.getFormattedErrors());
             }
         } else if (azureParameters.getEncryptionKeyUrl().equals(dto.getEncryptionKeyUrl())) {
-            LOGGER.info("Encryption Key '%s' is already set for the environment '%s'. ", azureParameters.getEncryptionKeyUrl(), environmentName);
+            LOGGER.info("Encryption Key '{}' is already set for the environment '{}'.", azureParameters.getEncryptionKeyUrl(), environmentName);
         } else {
             throw new BadRequestException(String.format("Encryption Key '%s' is already set for the environment '%s'. " +
                     "Modifying the encryption key is not allowed.", azureParameters.getEncryptionKeyUrl(), environmentName));
@@ -430,8 +432,7 @@ public class EnvironmentModificationService {
             if (original.isPresent()) {
                 BaseParameters originalParameters = original.get();
                 parametersDto.setId(originalParameters.getId());
-                if (originalParameters instanceof AwsParameters) {
-                    AwsParameters awsOriginalParameters = (AwsParameters) originalParameters;
+                if (originalParameters instanceof AwsParameters awsOriginalParameters) {
                     parametersDto.getAwsParametersDto().setFreeIpaSpotPercentage(awsOriginalParameters.getFreeIpaSpotPercentage());
                     validateAwsParameters(environment, parametersDto);
                 }
@@ -476,6 +477,13 @@ public class EnvironmentModificationService {
     private Environment getEnvironmentByCrn(String accountId, String environmentCrn) {
         return environmentService.findByResourceCrnAndAccountIdAndArchivedIsFalse(environmentCrn, accountId)
                 .orElseThrow(() -> new NotFoundException(String.format("No environment found with crn '%s'", environmentCrn)));
+    }
+
+    private void editDataServices(EnvironmentEditDto editDto, Environment environment) {
+        EnvironmentDataServices dataServices = editDto.getDataServices();
+        if (dataServices != null) {
+            environment.setDataServices(dataServices);
+        }
     }
 
 }

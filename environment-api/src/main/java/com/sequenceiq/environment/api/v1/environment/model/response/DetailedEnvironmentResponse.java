@@ -139,6 +139,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private String accountId;
 
+        private DataServicesResponse dataServices;
+
         private Builder() {
         }
 
@@ -332,6 +334,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withDataServices(DataServicesResponse dataServices) {
+            this.dataServices = dataServices;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -371,6 +378,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setDeletionType(deletionType);
             detailedEnvironmentResponse.setEnvironmentDomain(environmentDomain);
             detailedEnvironmentResponse.setAccountId(accountId);
+            detailedEnvironmentResponse.setDataServices(dataServices);
             return detailedEnvironmentResponse;
         }
     }

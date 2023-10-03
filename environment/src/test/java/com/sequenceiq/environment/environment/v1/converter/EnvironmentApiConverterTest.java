@@ -38,6 +38,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.DataServicesRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
@@ -71,6 +72,7 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
+import com.sequenceiq.environment.environment.dto.dataservices.EnvironmentDataServices;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -81,7 +83,7 @@ import com.sequenceiq.environment.telemetry.domain.AccountTelemetry;
 import com.sequenceiq.environment.telemetry.service.AccountTelemetryService;
 
 @ExtendWith(SpringExtension.class)
-public class EnvironmentApiConverterTest {
+class EnvironmentApiConverterTest {
 
     private static final String CREDENTIAL_NAME = "my-credential";
 
@@ -125,6 +127,9 @@ public class EnvironmentApiConverterTest {
     @Mock
     private ProxyRequestToProxyConfigConverter proxyRequestToProxyConfigConverter;
 
+    @Mock
+    private DataServicesConverter dataServicesConverter;
+
     @BeforeEach
     void init() {
         lenient().when(regionAwareCrnGenerator.getPartition()).thenReturn("cdp");
@@ -144,6 +149,7 @@ public class EnvironmentApiConverterTest {
         AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
         Features features = mock(Features.class);
         NetworkDto networkDto = mock(NetworkDto.class);
+        EnvironmentDataServices dataServices = mock(EnvironmentDataServices.class);
 
         when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(cloudPlatform.name());
         when(freeIpaConverter.convert(request.getFreeIpa(), "test-aws", cloudPlatform.name())).thenReturn(freeIpaCreationDto);
@@ -152,6 +158,7 @@ public class EnvironmentApiConverterTest {
         when(telemetryApiConverter.convert(eq(request.getTelemetry()), any(), anyString())).thenReturn(environmentTelemetry);
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
+        when(dataServicesConverter.convertToDto(request.getDataServices())).thenReturn(dataServices);
 
         EnvironmentCreationDto actual = testInitCreationDto(request);
 
@@ -173,6 +180,7 @@ public class EnvironmentApiConverterTest {
         assertEquals(request.getProxyConfigName(), actual.getProxyConfigName());
         assertEquals(networkDto, actual.getNetwork());
         assertSecurityAccess(request.getSecurityAccess(), actual.getSecurityAccess());
+        assertEquals(dataServices, actual.getDataServices());
 
         verify(credentialService).getCloudPlatformByCredential(anyString(), anyString(), any());
         verify(freeIpaConverter).convert(request.getFreeIpa(), "test-aws", cloudPlatform.name());
@@ -187,12 +195,14 @@ public class EnvironmentApiConverterTest {
     @Test
     void testInitEditDto() {
         EnvironmentEditRequest request = createEditEnvironmentRequest();
+        request.setDataServices(new DataServicesRequest());
         EnvironmentTelemetry environmentTelemetry = mock(EnvironmentTelemetry.class);
         AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
         Environment environment = mock(Environment.class);
         Features features = mock(Features.class);
         NetworkDto networkDto = mock(NetworkDto.class);
         ProxyConfig proxyConfig = mock(ProxyConfig.class);
+        EnvironmentDataServices dataServices = mock(EnvironmentDataServices.class);
 
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(environment.getAccountId()).thenReturn("accountId");
@@ -202,6 +212,7 @@ public class EnvironmentApiConverterTest {
         when(telemetryApiConverter.convert(eq(request.getTelemetry()), any(), anyString())).thenReturn(environmentTelemetry);
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
         when(proxyRequestToProxyConfigConverter.convert(request.getProxy())).thenReturn(proxyConfig);
+        when(dataServicesConverter.convertToDto(request.getDataServices())).thenReturn(dataServices);
 
         EnvironmentEditDto actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.initEditDto(environment, request));
 
@@ -212,6 +223,7 @@ public class EnvironmentApiConverterTest {
         assertEquals(request.getAdminGroupName(), actual.getAdminGroupName());
         assertSecurityAccess(request.getSecurityAccess(), actual.getSecurityAccess());
         assertEquals(proxyConfig, actual.getProxyConfig());
+        assertEquals(dataServices, actual.getDataServices());
 
         verify(accountTelemetry).getFeatures();
         verify(accountTelemetryService).getOrDefault(any());

@@ -13,6 +13,7 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.domain.Region;
+import com.sequenceiq.environment.environment.dto.dataservices.EnvironmentDataServices;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -86,6 +87,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
     private EnvironmentDeletionType deletionType;
 
     private String domain;
+
+    private EnvironmentDataServices dataServices;
 
     @Override
     public Long getResourceId() {
@@ -385,6 +388,14 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         this.originalName = originalName;
     }
 
+    public EnvironmentDataServices getDataServices() {
+        return dataServices;
+    }
+
+    public void setDataServices(EnvironmentDataServices dataServices) {
+        this.dataServices = dataServices;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentDtoBase{"
@@ -464,6 +475,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         private EnvironmentDeletionType deletionType;
 
         private String domain;
+
+        private EnvironmentDataServices dataServices;
 
         protected EnvironmentDtoBaseBuilder() {
         }
@@ -628,6 +641,11 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             return (B) this;
         }
 
+        public B withDataServices(EnvironmentDataServices dataServices) {
+            this.dataServices = dataServices;
+            return (B) this;
+        }
+
         protected void build(T environmentDto) {
             environmentDto.setId(id);
             environmentDto.setLocation(locationDto);
@@ -660,6 +678,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             environmentDto.setEnvironmentServiceVersion(environmentServiceVersion);
             environmentDto.setDeletionType(deletionType);
             environmentDto.setDomain(domain);
+            environmentDto.setDataServices(dataServices);
         }
 
         public abstract T build();

@@ -70,11 +70,14 @@ public class EnvironmentResponseConverter {
 
     private final NetworkDtoToResponseConverter networkDtoToResponseConverter;
 
+    private final DataServicesConverter dataServicesConverter;
+
     public EnvironmentResponseConverter(CredentialToCredentialV1ResponseConverter credentialConverter,
             RegionConverter regionConverter, CredentialViewConverter credentialViewConverter,
             ProxyConfigToProxyResponseConverter proxyConfigToProxyResponseConverter,
             FreeIpaConverter freeIpaConverter, TelemetryApiConverter telemetryApiConverter,
-            BackupConverter backupConverter, NetworkDtoToResponseConverter networkDtoToResponseConverter) {
+            BackupConverter backupConverter, NetworkDtoToResponseConverter networkDtoToResponseConverter,
+            DataServicesConverter dataServicesConverter) {
         this.credentialConverter = credentialConverter;
         this.regionConverter = regionConverter;
         this.credentialViewConverter = credentialViewConverter;
@@ -83,6 +86,7 @@ public class EnvironmentResponseConverter {
         this.telemetryApiConverter = telemetryApiConverter;
         this.backupConverter = backupConverter;
         this.networkDtoToResponseConverter = networkDtoToResponseConverter;
+        this.dataServicesConverter = dataServicesConverter;
     }
 
     public DetailedEnvironmentResponse dtoToDetailedResponse(EnvironmentDto environmentDto) {
@@ -120,7 +124,8 @@ public class EnvironmentResponseConverter {
                 .withDeletionType(deletionType(environmentDto.getDeletionType()))
                 .withCcmV2TlsType(environmentDto.getExperimentalFeatures().getCcmV2TlsType())
                 .withAccountId(environmentDto.getAccountId())
-                .withEnvironmentDomain(environmentDto.getDomain());
+                .withEnvironmentDomain(environmentDto.getDomain())
+                .withDataServices(dataServicesConverter.convertToResponse(environmentDto.getDataServices()));
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convert(environmentDto.getProxyConfig())));
@@ -162,7 +167,8 @@ public class EnvironmentResponseConverter {
                 .withDeletionType(deletionType(environmentViewDto.getDeletionType()))
                 .withParentEnvironmentName(environmentViewDto.getParentEnvironmentName())
                 .withCcmV2TlsType(environmentViewDto.getExperimentalFeatures().getCcmV2TlsType())
-                .withEnvironmentDomain(environmentViewDto.getDomain());
+                .withEnvironmentDomain(environmentViewDto.getDomain())
+                .withDataServices(dataServicesConverter.convertToResponse(environmentViewDto.getDataServices()));
 
         NullUtil.doIfNotNull(environmentViewDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentViewDto.getProxyConfig())));
@@ -198,7 +204,8 @@ public class EnvironmentResponseConverter {
                 .withDeletionType(deletionType(environmentDto.getDeletionType()))
                 .withParentEnvironmentName(environmentDto.getParentEnvironmentName())
                 .withCcmV2TlsType(environmentDto.getExperimentalFeatures().getCcmV2TlsType())
-                .withEnvironmentDomain(environmentDto.getDomain());
+                .withEnvironmentDomain(environmentDto.getDomain())
+                .withDataServices(dataServicesConverter.convertToResponse(environmentDto.getDataServices()));
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentDto.getProxyConfig())));
@@ -346,4 +353,5 @@ public class EnvironmentResponseConverter {
                 .withLongitude(locationDto.getLongitude())
                 .build();
     }
+
 }

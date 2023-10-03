@@ -164,7 +164,8 @@ public class EnvironmentDtoConverter {
                 .withProxyConfig(environment.getProxyConfig())
                 .withEnvironmentDeletionType(environment.getDeletionType())
                 .withEnvironmentServiceVersion(environment.getEnvironmentServiceVersion())
-                .withEnvironmentDomain(environment.getDomain());
+                .withEnvironmentDomain(environment.getDomain())
+                .withDataServices(environment.getDataServices());
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         builder.withCredentialDetails(credentialDetailsConverter.credentialToCredentialDetails(cloudPlatform, environment.getCredential()));
@@ -209,6 +210,7 @@ public class EnvironmentDtoConverter {
         environment.setCreated(System.currentTimeMillis());
         environment.setTags(environmentTagsDtoConverter.getTags(creationDto));
         environment.setExperimentalFeaturesJson(creationDto.getExperimentalFeatures());
+        environment.setDataServices(creationDto.getDataServices());
         setRegions(creationDto, environment);
         return environment;
     }
