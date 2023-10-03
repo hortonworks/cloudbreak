@@ -59,6 +59,15 @@ public class ServiceEndpointConfig {
     @Value("${cb.sdx.serviceid:}")
     private String sdxServiceId;
 
+    @Value("${cb.periscope.url}")
+    private String autoscaleServiceUrl;
+
+    @Value("${cb.periscope.contextPath}")
+    private String autoscaleContextPath;
+
+    @Value("${cb.periscope.serviceid:}")
+    private String autoscaleServiceId;
+
     @Value("${cb.consumption.url:}")
     private String consumptionServiceUrl;
 
@@ -96,6 +105,11 @@ public class ServiceEndpointConfig {
     @Bean
     public String sdxServerUrl() throws ServiceAddressResolvingException {
         return serviceAddressResolver().resolveUrl(sdxServiceUrl + sdxContextPath, "http", sdxServiceId);
+    }
+
+    @Bean
+    public String autoscaleServerUrl() throws ServiceAddressResolvingException {
+        return serviceAddressResolver().resolveUrl(autoscaleServiceUrl + autoscaleContextPath, "http", autoscaleServiceId);
     }
 
     @Bean

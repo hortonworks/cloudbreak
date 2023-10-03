@@ -152,6 +152,10 @@ cb:
     contextPath: /consumption
     enabled: false
   periscope:
+    url: http://localhost:8085
+    contextPath: /as
+    connection.timeout: 2000
+    read.timeout: 10000
     skipEntitlementCheckPlatforms: MOCK
   runtimes:
     latest: "7.2.18"

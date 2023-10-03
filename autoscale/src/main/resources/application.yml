@@ -40,8 +40,8 @@ management:
 
 periscope:
   yarn:
-    connection.timeout: 5000
-    read.timeout: 10000
+    connection.timeout: 2000
+    read.timeout: 9000
     core: 8
     memory: 1
   impala:

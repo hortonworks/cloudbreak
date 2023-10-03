@@ -6,10 +6,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class YarnConfig {
 
-    @Value("${periscope.yarn.connection.timeout:5000}")
+    @Value("${periscope.yarn.connection.timeout:2000}")
     private Integer connectionTimeOutMs;
 
-    @Value("${periscope.yarn.read.timeout:10000}")
+    @Value("${periscope.yarn.read.timeout:9000}")
     private Integer readTimeOutMs;
 
     @Value("${periscope.yarn.core:8}")

@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -57,6 +58,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartDownscaleDecommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartDownscaleDecommissionViaCMResult;
+import com.sequenceiq.cloudbreak.service.autoscale.PeriscopeClientService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -69,6 +71,8 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
     private static final String INSTANCE_GROUP_NAME = "compute";
 
     private static final Long STACK_ID = 100L;
+
+    private static final String RESOURCE_CRN = "resource_crn";
 
     private static final Long CLUSTER_ID = 101L;
 
@@ -85,6 +89,9 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
 
     @Mock
     private StackService stackService;
+
+    @Mock
+    private PeriscopeClientService periscopeClientService;
 
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
@@ -120,23 +127,28 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
     }
 
     @Test
-    void testAllDecommissioned() {
+    void testAllDecommissioned() throws Exception {
         testCollectDecommissionCombinationsInternal(5, 5, 5);
     }
 
     @Test
-    void testCmHasMissingNodes() {
+    void testCmHasMissingNodes() throws Exception {
         testCollectDecommissionCombinationsInternal(5, 4, 4);
     }
 
     @Test
-    void testCollectAndDecommissionReturnFewerNodes() {
+    void testCollectAndDecommissionReturnFewerNodes() throws Exception {
         testCollectDecommissionCombinationsInternal(5, 4, 3);
     }
 
     @Test
-    void testDecommissionReturnsFewerNodes() {
+    void testDecommissionReturnsFewerNodes() throws Exception {
         testCollectDecommissionCombinationsInternal(5, 5, 3);
+    }
+
+    @Test
+    void testAllDecommissionedWithYarnRecommendation() throws Exception {
+        testCollectDecommissionCombinationsInternalWithYarnRecommendation(5, 5, 4);
     }
 
     @Test
@@ -180,7 +192,7 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
     }
 
     @Test
-    void testNoNodesFromCMDecommission() {
+    void testNoNodesFromCMDecommission() throws Exception {
         int instancesToDecommissionCount = 5;
         int expcetedInstanceToCollectCount = 4;
         int expectedInstancesDecommissionedCount = 0;
@@ -202,6 +214,9 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
 
         StopStartDownscaleDecommissionViaCMRequest request =
                 new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME, instanceIdsToDecommission, emptyList());
+
+        when(periscopeClientService.getYarnRecommendedInstanceIds(RESOURCE_CRN)).thenThrow(new TimeoutException());
+
         HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
         Selectable selectable = underTest.doAccept(handlerEvent);
 
@@ -348,7 +363,7 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
     }
 
     @Test
-    void testAdditionalInstancesWithServicesNotRunningToDecommission() {
+    void testAdditionalInstancesWithServicesNotRunningToDecommission() throws Exception {
         int instancesToDecommissionCount = 5;
         int expectedInstanceToCollectCount = 5;
         int expectedInstancesDecommissionedCount = 5;
@@ -380,6 +395,7 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
                 new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME, instanceIdsToDecommission, recoveryCandidatesCloudInstances);
 
         doReturn(combinedDecommissionList).when(stack).getNotTerminatedInstanceMetaData();
+        when(periscopeClientService.getYarnRecommendedInstanceIds(RESOURCE_CRN)).thenThrow(new TimeoutException());
         doCallRealMethod().when(stackService).getInstanceMetadata(any(), any());
 
         Set<String> rcHostIds = recoveryCandidatesCloudInstances.stream().map(CloudInstance::getInstanceId).collect(Collectors.toSet());
@@ -414,7 +430,7 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
     }
 
     @Test
-    void testExcludeLostNodesFromCmDecommission() {
+    void testExcludeLostNodesFromCmDecommission() throws Exception {
         int instancesToDecommissionCount = 5;
         int lostInstancesToExcludeCount = 2;
         List<InstanceMetadataView> instancesToDecommission = getInstancesWithStatus(0, instancesToDecommissionCount, INSTANCE_ID_PREFIX, FQDN_PREFIX,
@@ -431,6 +447,7 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
 
         setupAdditionalMocks(INSTANCE_GROUP_NAME, combined, collected, fqdnsDecommissioned);
         when(clusterHealthService.getDisconnectedNodeManagers()).thenReturn(lostHostNames);
+        when(periscopeClientService.getYarnRecommendedInstanceIds(RESOURCE_CRN)).thenThrow(new TimeoutException());
 
         Set<Long> instanceIdsToDecommission = combined.stream().map(InstanceMetadataView::getPrivateId).collect(Collectors.toSet());
         Set<String> hostnamesToDecommission = combined.stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toSet());
@@ -467,7 +484,7 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
     }
 
     private void testCollectDecommissionCombinationsInternal(int instancesToDecommissionCount, int expcetedInstanceToCollectCount,
-            int expectedInstancesDecommissionedCount) {
+            int expectedInstancesDecommissionedCount) throws Exception {
         List<InstanceMetadataView> instancesToDecommission = getInstancesWithStatus(0, instancesToDecommissionCount, INSTANCE_ID_PREFIX, FQDN_PREFIX,
                 InstanceStatus.SERVICES_HEALTHY);
         Map<String, InstanceMetadataView> collected =
@@ -479,6 +496,7 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
                 .collect(Collectors.toUnmodifiableSet());
 
         setupAdditionalMocks(INSTANCE_GROUP_NAME, instancesToDecommission, collected, fqdnsDecommissioned);
+        when(periscopeClientService.getYarnRecommendedInstanceIds(RESOURCE_CRN)).thenThrow(new TimeoutException());
 
         Set<Long> instanceIdsToDecommission = instancesToDecommission.stream().map(InstanceMetadataView::getPrivateId).collect(Collectors.toUnmodifiableSet());
         Set<String> hostnamesToDecommission = instancesToDecommission.stream()
@@ -516,10 +534,66 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
         verifyNoMoreInteractions(clusterDecomissionService);
     }
 
+    private void testCollectDecommissionCombinationsInternalWithYarnRecommendation(int instancesToDecommissionCount, int expcetedInstanceToCollectCount,
+            int expectedInstancesDecommissionedCount) throws Exception {
+        List<InstanceMetadataView> instancesToDecommission = getInstancesWithStatus(0, instancesToDecommissionCount, INSTANCE_ID_PREFIX, FQDN_PREFIX,
+                InstanceStatus.SERVICES_HEALTHY);
+        Map<String, InstanceMetadataView> collected =
+                instancesToDecommission.stream().limit(expcetedInstanceToCollectCount).collect(Collectors.toMap(i -> i.getDiscoveryFQDN(), i -> i));
+        List<InstanceMetadataView> decommissionedMetadataList =
+                collected.values().stream().filter(i -> !i.getDiscoveryFQDN().equals("fqdn-0")).collect(Collectors.toList());
+        List<InstanceMetadataView> initialDecommissionedMetadataList =
+                collected.values().stream().limit(instancesToDecommissionCount).collect(Collectors.toList());
+        Set<String> fqdnsDecommissioned = initialDecommissionedMetadataList.stream()
+                .filter(i -> !i.getDiscoveryFQDN().equals("fqdn-0"))
+                .map(InstanceMetadataView::getDiscoveryFQDN)
+                .collect(Collectors.toUnmodifiableSet());
+
+        List<String> instanceIds = instancesToDecommission.stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toList());
+        instanceIds.remove(0);
+        setupAdditionalMocks(INSTANCE_GROUP_NAME, instancesToDecommission, collected, fqdnsDecommissioned);
+        when(periscopeClientService.getYarnRecommendedInstanceIds(RESOURCE_CRN)).thenReturn(instanceIds);
+
+        Set<Long> instanceIdsToDecommission = instancesToDecommission.stream().map(InstanceMetadataView::getPrivateId).collect(Collectors.toUnmodifiableSet());
+        Set<String> hostnamesToDecommission = instancesToDecommission.stream()
+                .map(InstanceMetadataView::getDiscoveryFQDN)
+                .collect(Collectors.toUnmodifiableSet());
+
+        StopStartDownscaleDecommissionViaCMRequest request =
+                new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME, instanceIdsToDecommission, emptyList());
+        HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
+        Selectable selectable = underTest.doAccept(handlerEvent);
+
+        assertThat(selectable).isInstanceOf(StopStartDownscaleDecommissionViaCMResult.class);
+
+        StopStartDownscaleDecommissionViaCMResult result = (StopStartDownscaleDecommissionViaCMResult) selectable;
+        assertThat(result.getDecommissionedHostFqdns()).hasSize(expectedInstancesDecommissionedCount);
+
+        List<Long> decommissionedMetadataIdList = decommissionedMetadataList.stream()
+                .map(InstanceMetadataView::getId)
+                .sorted()
+                .collect(Collectors.toList());
+        ArgumentCaptor<List<Long>> argCap = ArgumentCaptor.forClass(List.class);
+        verify(instanceMetaDataService).updateInstanceStatuses(argCap.capture(), eq(InstanceStatus.DECOMMISSIONED), anyString());
+        assertThat(decommissionedMetadataIdList).hasSameElementsAs(argCap.getValue());
+
+        verify(clusterDecomissionService).collectHostsToRemove(eq(INSTANCE_GROUP_NAME), eq(hostnamesToDecommission));
+        verify(clusterDecomissionService).decommissionClusterNodesStopStart(eq(collected), anyLong());
+
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
+                eq(CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTERINGCMMAINTMODE), eq(String.valueOf(fqdnsDecommissioned.size())));
+        verify(clusterDecomissionService).enterMaintenanceMode(eq(fqdnsDecommissioned));
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
+                eq(CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTEREDCMMAINTMODE), eq(String.valueOf(fqdnsDecommissioned.size())));
+        verifyNoMoreInteractions(flowMessageService);
+        verifyNoMoreInteractions(clusterDecomissionService);
+    }
+
     private void setupBasicMocks() {
         lenient().when(stack.getId()).thenReturn(STACK_ID);
         lenient().when(stack.getCluster()).thenReturn(cluster);
         lenient().when(cluster.getId()).thenReturn(CLUSTER_ID);
+        lenient().when(stack.getResourceCrn()).thenReturn(RESOURCE_CRN);
 
         lenient().when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
         lenient().when(clusterApi.clusterDecomissionService()).thenReturn(clusterDecomissionService);

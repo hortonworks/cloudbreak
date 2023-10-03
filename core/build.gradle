@@ -257,6 +257,7 @@ dependencies {
   implementation project(':freeipa-api')
   implementation project(':redbeams-api')
   implementation project(':datalake-api')
+  implementation project(':autoscale-api')
   implementation project(':usage-collection')
   implementation project(':cluster-dns-connector')
   implementation project(':cluster-proxy')

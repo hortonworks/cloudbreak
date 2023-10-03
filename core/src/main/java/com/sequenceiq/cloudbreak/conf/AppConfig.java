@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.environment.client.internal.EnvironmentApiClientParams;
 import com.sequenceiq.freeipa.api.client.internal.FreeIpaApiClientParams;
+import com.sequenceiq.periscope.client.internal.AutoscaleApiClientParams;
 import com.sequenceiq.redbeams.client.internal.RedbeamsApiClientParams;
 import com.sequenceiq.sdx.client.internal.SdxApiClientParams;
 
@@ -94,6 +95,12 @@ public class AppConfig implements ResourceLoaderAware {
     @Value("${cb.delayed.threadpool.core.size:10}")
     private int delayedCorePoolSize;
 
+    @Value("${cb.periscope.connection.timeout:2000}")
+    private Integer periscopeConnectionTimeout;
+
+    @Value("${cb.periscope.read.timeout:10000}")
+    private Integer periscopeReadTimeout;
+
     @Value("${rest.debug}")
     private boolean restDebug;
 
@@ -127,6 +134,10 @@ public class AppConfig implements ResourceLoaderAware {
     @Inject
     @Named("sdxServerUrl")
     private String sdxServerUrl;
+
+    @Inject
+    @Named("autoscaleServerUrl")
+    private String autoscaleServerUrl;
 
     @Inject
     private List<EnvironmentNetworkConverter> environmentNetworkConverters;
@@ -231,6 +242,12 @@ public class AppConfig implements ResourceLoaderAware {
     @Bean
     public SdxApiClientParams sdxApiClientParams() {
         return new SdxApiClientParams(restDebug, certificateValidation, ignorePreValidation, sdxServerUrl);
+    }
+
+    @Bean
+    public AutoscaleApiClientParams autoscaleApiClientParams() {
+        return new AutoscaleApiClientParams(restDebug, certificateValidation, ignorePreValidation, autoscaleServerUrl,
+                periscopeConnectionTimeout, periscopeReadTimeout);
     }
 
     @Bean
