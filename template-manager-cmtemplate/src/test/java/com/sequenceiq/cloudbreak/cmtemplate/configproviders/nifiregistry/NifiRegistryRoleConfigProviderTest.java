@@ -19,6 +19,8 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
@@ -49,35 +51,38 @@ class NifiRegistryRoleConfigProviderTest {
         assertThat(serviceConfigs).isEmpty();
     }
 
-    @Test
-    void testGetRoleConfigs720() {
-        String inputJson = loadBlueprint("7.2.0");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor);
-
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(NifiRegistryRoles.NIFI_REGISTRY_SERVER, preparationObject);
-
-        assertThat(roleConfigs).hasSameElementsAs(
-                List.of(config("nifi.registry.db.url", "jdbc:postgresql://testhost:5432/nifi_registry"),
-                        config("nifi.registry.db.username", "nifi_registry_server_user"),
-                        config("nifi.registry.db.password", "nifi_registry_server_password"),
-                        config("nifi.registry.db.driver.class", "org.postgresql.Driver"),
-                        config("nifi.registry.db.driver.directory", "/usr/share/java/")));
+    static Object[][] testGetRoleConfigsDataProvider() {
+        return new Object[][] {
+                {"2.2.4.0", false},
+                {"2.2.7.0", true},
+                {"2.2.6.200", true},
+                {"2.2.6.100", false},
+                {"2.2.5.300", true}
+        };
     }
 
-    @Test
-    void testGetRoleConfigsWhenUsingParcelEmbeddedJdbcDriversIfAvailable() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("testGetRoleConfigsDataProvider")
+    void testGetRoleConfigs(String cfmVersion, boolean useParcelEmbeddedJdbcDrivers) {
         String inputJson = loadBlueprint("7.2.0");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor, "2.2.7.0");
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor, cfmVersion);
 
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(NifiRegistryRoles.NIFI_REGISTRY_SERVER, preparationObject);
 
-        assertThat(roleConfigs).hasSameElementsAs(
-                List.of(config("nifi.registry.db.url", "jdbc:postgresql://testhost:5432/nifi_registry"),
-                        config("nifi.registry.db.username", "nifi_registry_server_user"),
-                        config("nifi.registry.db.password", "nifi_registry_server_password"),
-                        config("nifi.registry.db.driver.class", "org.postgresql.Driver")));
+        Builder<ApiClusterTemplateConfig> expectedRoleConfigs =
+                ImmutableList
+                        .<ApiClusterTemplateConfig>builder()
+                        .add(config("nifi.registry.db.url", "jdbc:postgresql://testhost:5432/nifi_registry"))
+                        .add(config("nifi.registry.db.username", "nifi_registry_server_user"))
+                        .add(config("nifi.registry.db.password", "nifi_registry_server_password"))
+                        .add(config("nifi.registry.db.driver.class", "org.postgresql.Driver"));
+
+        if (!useParcelEmbeddedJdbcDrivers) {
+            expectedRoleConfigs.add(config("nifi.registry.db.driver.directory", "/usr/share/java/"));
+        }
+
+        assertThat(roleConfigs).hasSameElementsAs(expectedRoleConfigs.build());
     }
 
     static Object[][] getRoleConfigsTestWhenSslDataProvider() {

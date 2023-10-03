@@ -98,6 +98,8 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CFM_VERSION_2_2_6_200 = () -> "2.2.6.200";
 
+    public static final Versioned CFM_VERSION_2_2_5_300 = () -> "2.2.5.300";
+
     public static final Versioned FLINK_VERSION_1_15_1 = () -> "1.15.1";
 
     public static final Versioned CDPD_VERSION_7_2_11 = () -> "7.2.11";
@@ -265,5 +267,17 @@ public class CMRepositoryVersionUtil {
         LOGGER.info("isVersionOlderThanLimited Compared: String version {} with Versioned {}",
                 currentVersion, limitedAPIVersion.getVersion());
         return isVersionOlderThanLimited(() -> currentVersion, limitedAPIVersion);
+    }
+
+    public static boolean isVersionEqualToLimited(Versioned currentVersion, Versioned limitedAPIVersion) {
+        LOGGER.info("isVersionEqualToLimited Compared: Versioned {} with Versioned {}", currentVersion.getVersion(), limitedAPIVersion.getVersion());
+        Comparator<Versioned> versionComparator = new VersionComparator();
+        return versionComparator.compare(currentVersion, limitedAPIVersion) == 0;
+    }
+
+    public static boolean isVersionEqualToLimited(String currentVersion, Versioned limitedAPIVersion) {
+        LOGGER.info("isVersionEqualToLimited Compared: String {} with Versioned {}", currentVersion, limitedAPIVersion.getVersion());
+        Comparator<Versioned> versionComparator = new VersionComparator();
+        return versionComparator.compare(() -> currentVersion, limitedAPIVersion) == 0;
     }
 }
