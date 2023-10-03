@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -34,14 +35,16 @@ import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.config.ClusterUpgradeDiskSpaceValidationEventToClusterUpgradeImageValidationFinishedEventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.config.ClusterUpgradeUpdateCheckFailedToClusterUpgradeValidationFailureEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.config.ClusterUpgradeValidationEventToClusterUpgradeDiskSpaceValidationEventConverter;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.config.ClusterUpgradeValidationEventToClusterUpgradeImageValidationFinishedEventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeExistingUpgradeCommandValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeFreeIpaStatusValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeFreeIpaStatusValidationFinishedEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeImageValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeS3guardValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeS3guardValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeServiceValidationEvent;
@@ -107,6 +110,9 @@ public class ClusterUpgradeValidationActions {
 
     @Inject
     private StackUpdater stackUpdater;
+
+    @Inject
+    private CloudbreakEventService eventService;
 
     @Bean(name = "CLUSTER_UPGRADE_VALIDATION_INIT_STATE")
     public Action<?, ?> initClusterUpgradeValidation() {
@@ -189,10 +195,11 @@ public class ClusterUpgradeValidationActions {
 
     @Bean(name = "CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_STATE")
     public Action<?, ?> clusterUpgradeDiskSpaceValidation() {
-        return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeDiskSpaceValidationEvent.class) {
+        return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeImageValidationFinishedEvent.class) {
 
             @Override
-            protected void doExecute(StackContext context, ClusterUpgradeDiskSpaceValidationEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackContext context, ClusterUpgradeImageValidationFinishedEvent payload, Map<Object, Object> variables) {
+                handleValidationWarnings(payload);
                 LOGGER.info("Starting disk space validation.");
                 ClusterUpgradeDiskSpaceValidationEvent event = new ClusterUpgradeDiskSpaceValidationEvent(VALIDATE_DISK_SPACE_EVENT.name(),
                         payload.getResourceId(), payload.getRequiredFreeSpace());
@@ -200,13 +207,21 @@ public class ClusterUpgradeValidationActions {
             }
 
             @Override
-            protected Object getFailurePayload(ClusterUpgradeDiskSpaceValidationEvent payload, Optional<StackContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(ClusterUpgradeImageValidationFinishedEvent payload, Optional<StackContext> flowContext, Exception ex) {
                 return new ClusterUpgradeDiskSpaceValidationFinishedEvent(payload.getResourceId());
             }
 
             @Override
-            protected void initPayloadConverterMap(List<PayloadConverter<ClusterUpgradeDiskSpaceValidationEvent>> payloadConverters) {
-                payloadConverters.add(new ClusterUpgradeValidationEventToClusterUpgradeDiskSpaceValidationEventConverter());
+            protected void initPayloadConverterMap(List<PayloadConverter<ClusterUpgradeImageValidationFinishedEvent>> payloadConverters) {
+                payloadConverters.add(new ClusterUpgradeValidationEventToClusterUpgradeImageValidationFinishedEventConverter());
+                payloadConverters.add(new ClusterUpgradeDiskSpaceValidationEventToClusterUpgradeImageValidationFinishedEventConverter());
+            }
+
+            private void handleValidationWarnings(ClusterUpgradeImageValidationFinishedEvent payload) {
+                if (!CollectionUtils.isEmpty(payload.getWarningMessages())) {
+                    eventService.fireCloudbreakEvent(payload.getResourceId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLOUD_PROVIDER_VALIDATION_WARNING,
+                            payload.getWarningMessages());
+                }
             }
         };
     }
