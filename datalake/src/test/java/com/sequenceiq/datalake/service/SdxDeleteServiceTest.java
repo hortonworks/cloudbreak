@@ -89,7 +89,7 @@ class SdxDeleteServiceTest {
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxReactorFlowManager.triggerSdxDeletion(any(SdxCluster.class), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
         mockCBCallForDistroXClusters(Sets.newHashSet());
-        doNothing().when(sdxRotationService).deleteMultiClusterRotationMarks(any());
+        doNothing().when(sdxRotationService).cleanupSecretRotationEntries(any());
         underTest.deleteSdx(ACCOUNT_ID, "sdx-cluster-name", true);
         verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, true);
         ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
@@ -123,7 +123,7 @@ class SdxDeleteServiceTest {
         sdxStatusEntity.setStatus(DatalakeStatusEnum.PROVISIONING_FAILED);
         when(sdxReactorFlowManager.triggerSdxDeletion(eq(sdxCluster), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "id"));
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
-        doNothing().when(sdxRotationService).deleteMultiClusterRotationMarks(any());
+        doNothing().when(sdxRotationService).cleanupSecretRotationEntries(any());
         underTest.deleteSdx(ACCOUNT_ID, "sdx-cluster-name", false);
         verify(sdxClusterRepository, times(1)).save(sdxCluster);
         verify(sdxStatusService, times(1))

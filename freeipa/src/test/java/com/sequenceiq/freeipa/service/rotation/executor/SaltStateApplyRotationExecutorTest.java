@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -13,7 +12,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +23,6 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.rotation.RotationMetadataTestUtil;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
-import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.freeipa.service.rotation.context.SaltStateApplyRotationContext;
 import com.sequenceiq.freeipa.service.rotation.context.SaltStateApplyRotationContext.SaltStateApplyRotationContextBuilder;
 
@@ -36,18 +33,10 @@ public class SaltStateApplyRotationExecutorTest {
     private HostOrchestrator hostOrchestrator;
 
     @Mock
-    private SecretRotationStepProgressService secretRotationProgressService;
-
-    @Mock
     private SecretRotationNotificationService secretRotationNotificationService;
 
     @InjectMocks
     private SaltStateApplyRotationExecutor underTest;
-
-    @BeforeEach
-    public void mockProgressService() {
-        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
-    }
 
     @Test
     public void testPreValidation() throws CloudbreakOrchestratorFailedException {
@@ -75,7 +64,7 @@ public class SaltStateApplyRotationExecutorTest {
     public void testPostValidation() throws CloudbreakOrchestratorFailedException {
         doNothing().when(hostOrchestrator).executeSaltState(any(), any(), any(), any(), any(), any());
 
-        underTest.executePostValidation(createContext(List.of("state"), Optional.empty(), Optional.empty()));
+        underTest.executePostValidation(createContext(List.of("state"), Optional.empty(), Optional.empty()), null);
 
         verify(hostOrchestrator).executeSaltState(any(), any(), eq(List.of("postValidate")), any(), any(), any());
     }

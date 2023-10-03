@@ -14,9 +14,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,7 +29,6 @@ import com.sequenceiq.cloudbreak.rotation.RotationMetadataTestUtil;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.CMUserRotationContext;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
-import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
@@ -60,16 +56,8 @@ public class CMUserRotationExecutorTest {
     @Mock
     private SecretRotationNotificationService secretRotationNotificationService;
 
-    @Mock
-    private SecretRotationStepProgressService secretRotationProgressService;
-
     @InjectMocks
     private CMUserRotationExecutor underTest;
-
-    @BeforeEach
-    public void mockProgressService() {
-        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
-    }
 
     @Test
     public void testRotation() throws Exception {
@@ -122,7 +110,7 @@ public class CMUserRotationExecutorTest {
                 new RotationSecret(String.valueOf(i.getArguments()[0]), null));
 
         CMUserRotationContext rotationContext = getRotationContext();
-        assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(rotationContext));
+        assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(rotationContext, null));
 
         verifyNoInteractions(clusterSecurityService);
     }
@@ -133,7 +121,7 @@ public class CMUserRotationExecutorTest {
         doThrow(new CloudbreakException("something")).when(clusterSecurityService).checkUser(anyString(), anyString(), anyString());
 
         CMUserRotationContext rotationContext = getRotationContext();
-        assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(rotationContext));
+        assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(rotationContext, null));
 
         verify(clusterSecurityService, times(1)).checkUser(
                 eq(USER),
@@ -221,7 +209,7 @@ public class CMUserRotationExecutorTest {
         CMUserRotationContext rotationContext = getRotationContext();
         doNothing().when(clusterSecurityService).testUser(anyString(), anyString());
 
-        underTest.executePostValidation(rotationContext);
+        underTest.executePostValidation(rotationContext, null);
 
         verify(clusterSecurityService).checkUser(eq(USER), anyString(), anyString());
         verify(clusterSecurityService).testUser(eq(USER), eq(PASS));
@@ -234,7 +222,7 @@ public class CMUserRotationExecutorTest {
         doNothing().when(clusterSecurityService).checkUser(anyString(), anyString(), anyString());
         doThrow(new UnauthorizedException("something")).when(clusterSecurityService).testUser(anyString(), anyString());
 
-        assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(rotationContext));
+        assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(rotationContext, null));
 
         verify(clusterSecurityService).checkUser(eq(USER), anyString(), anyString());
         verify(clusterSecurityService).testUser(eq(USER), eq(PASS));
@@ -246,7 +234,7 @@ public class CMUserRotationExecutorTest {
         CMUserRotationContext rotationContext = getRotationContext();
         doThrow(new CloudbreakException("something")).when(clusterSecurityService).checkUser(anyString(), anyString(), anyString());
 
-        assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(rotationContext));
+        assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(rotationContext, null));
 
         verify(clusterSecurityService).checkUser(eq(USER), anyString(), anyString());
         verifyNoMoreInteractions(clusterSecurityService);

@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.rotation.common;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.INTERNAL;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_UPDATE;
 import static com.sequenceiq.cloudbreak.rotation.common.TestSecretRotationStep.STEP;
+import static com.sequenceiq.cloudbreak.rotation.common.TestSecretRotationStep.STEP2;
+import static com.sequenceiq.cloudbreak.rotation.common.TestSecretRotationStep.STEP3;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +37,7 @@ public enum TestSecretType implements SecretType {
 
     @Override
     public List<SecretRotationStep> getSteps() {
-        return List.of(STEP);
+        return List.of(STEP, STEP2, STEP3);
     }
 
     @Override

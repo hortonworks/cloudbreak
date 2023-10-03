@@ -28,22 +28,21 @@ public class SecretRotationStepProgress {
     private SecretRotationStep secretRotationStep;
 
     @Convert(converter = RotationFlowExecutionTypeConverter.class)
-    private RotationFlowExecutionType executionType;
+    private RotationFlowExecutionType currentExecutionType;
 
-    private Long created;
-
-    private Long finished;
+    @Convert(converter = SecretRotationStepProgressStatusConverter.class)
+    private SecretRotationStepProgressStatus status;
 
     public SecretRotationStepProgress() {
     }
 
     public SecretRotationStepProgress(String resourceCrn, SecretType secretType, SecretRotationStep secretRotationStep,
-            RotationFlowExecutionType executionType, Long created) {
+            RotationFlowExecutionType currentExecutionType, SecretRotationStepProgressStatus status) {
         this.resourceCrn = resourceCrn;
         this.secretType = secretType;
         this.secretRotationStep = secretRotationStep;
-        this.executionType = executionType;
-        this.created = created;
+        this.currentExecutionType = currentExecutionType;
+        this.status = status;
     }
 
     public Long getId() {
@@ -78,27 +77,19 @@ public class SecretRotationStepProgress {
         this.secretRotationStep = secretRotationStep;
     }
 
-    public RotationFlowExecutionType getExecutionType() {
-        return executionType;
+    public RotationFlowExecutionType getCurrentExecutionType() {
+        return currentExecutionType;
     }
 
-    public void setExecutionType(RotationFlowExecutionType executionType) {
-        this.executionType = executionType;
+    public void setCurrentExecutionType(RotationFlowExecutionType currentExecutionType) {
+        this.currentExecutionType = currentExecutionType;
     }
 
-    public Long getCreated() {
-        return created;
+    public SecretRotationStepProgressStatus getStatus() {
+        return status;
     }
 
-    public void setCreated(Long created) {
-        this.created = created;
-    }
-
-    public Long getFinished() {
-        return finished;
-    }
-
-    public void setFinished(Long finished) {
-        this.finished = finished;
+    public void setStatus(SecretRotationStepProgressStatus status) {
+        this.status = status;
     }
 }

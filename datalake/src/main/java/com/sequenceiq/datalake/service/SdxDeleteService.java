@@ -71,7 +71,7 @@ public class SdxDeleteService {
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxDeletion(sdxCluster, forced);
         flowCancelService.cancelRunningFlows(sdxCluster.getId());
-        sdxRotationService.deleteMultiClusterRotationMarks(sdxCluster.getCrn());
+        sdxRotationService.cleanupSecretRotationEntries(sdxCluster.getCrn());
         return flowIdentifier;
     }
 

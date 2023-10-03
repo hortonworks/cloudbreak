@@ -101,7 +101,7 @@ class FreeIpaDeletionServiceTest {
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.AVAILABLE);
         stack.setStackStatus(stackStatus);
-        lenient().doNothing().when(freeIpaSecretRotationService).deleteMultiClusterRotationMarks(anyString());
+        lenient().doNothing().when(freeIpaSecretRotationService).cleanupSecretRotationEntries(anyString());
     }
 
     @Test

@@ -3,10 +3,9 @@ package com.sequenceiq.cloudbreak.rotation.service;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.PREVALIDATE;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -14,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
@@ -32,7 +30,7 @@ public class SecretRotationValidationService {
     public void validateExecutionType(String resourceCrn, Collection<SecretType> secretTypes, RotationFlowExecutionType requestedExecutionType) {
         for (SecretType secretType : secretTypes) {
             if (!secretType.multiSecret()) {
-                List<SecretRotationStepProgress> progress = secretRotationStepProgressService.listSteps(resourceCrn, secretType);
+                Optional<SecretRotationStepProgress> progress = secretRotationStepProgressService.getProgress(resourceCrn, secretType);
                 CloudbreakServiceException alreadyRunningRotationException =
                         new CloudbreakServiceException(String.format("There is already a running rotation for %s secret type.", secretType));
                 if (progress.isEmpty()) {
@@ -42,7 +40,7 @@ public class SecretRotationValidationService {
                 } else {
                     switch (requestedExecutionType) {
                         case ROTATE -> expectStepsWithExecutionTypes(progress, PREVALIDATE);
-                        case ROLLBACK, FINALIZE -> expectStepsWithExecutionTypes(progress, PREVALIDATE, ROTATE);
+                        case ROLLBACK, FINALIZE -> expectStepsWithExecutionTypes(progress, ROTATE);
                         default -> throw alreadyRunningRotationException;
                     }
                 }
@@ -60,10 +58,9 @@ public class SecretRotationValidationService {
         }
     }
 
-    private void expectStepsWithExecutionTypes(List<SecretRotationStepProgress> progress, RotationFlowExecutionType... expectedExecutionTypes) {
-        Set<RotationFlowExecutionType> executionTypesInDatabase =
-                progress.stream().map(SecretRotationStepProgress::getExecutionType).collect(Collectors.toSet());
-        if (!Sets.newHashSet(expectedExecutionTypes).equals(executionTypesInDatabase)) {
+    private void expectStepsWithExecutionTypes(Optional<SecretRotationStepProgress> progress, RotationFlowExecutionType... expectedExecutionTypes) {
+        Optional<RotationFlowExecutionType> executionTypeInDatabase = progress.map(SecretRotationStepProgress::getCurrentExecutionType);
+        if (executionTypeInDatabase.isEmpty() || !Arrays.asList(expectedExecutionTypes).contains(executionTypeInDatabase.get())) {
             throw new CloudbreakServiceException("Requested execution type is not allowed based on the progress " +
                     "of the current rotation for the given secret type");
         }

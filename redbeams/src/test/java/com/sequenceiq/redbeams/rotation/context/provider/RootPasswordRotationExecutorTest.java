@@ -12,9 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
-import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,7 +31,6 @@ import com.sequenceiq.cloudbreak.rotation.RotationMetadataTestUtil;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
-import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
@@ -84,18 +81,10 @@ class RootPasswordRotationExecutorTest {
     private DatabaseServerConfigService databaseServerConfigService;
 
     @Mock
-    private SecretRotationStepProgressService secretRotationProgressService;
-
-    @Mock
     private SecretRotationNotificationService secretRotationNotificationService;
 
     @InjectMocks
     private RootPasswordRotationExecutor underTest;
-
-    @BeforeEach
-    void mockProgressService() {
-        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
-    }
 
     @Test
     void preValidationShouldSucceed() throws Exception {
@@ -122,7 +111,7 @@ class RootPasswordRotationExecutorTest {
         ResourceConnector resourceConnector = mockResourceConnector(mockDbStack());
         when(resourceConnector.getDatabaseServerStatus(any(), any())).thenReturn(ExternalDatabaseStatus.STARTED);
 
-        underTest.executePostValidation(new RotationContext(RESOURCE_CRN));
+        underTest.executePostValidation(new RotationContext(RESOURCE_CRN), null);
 
         verify(resourceConnector).getDatabaseServerStatus(any(), any());
     }
@@ -132,7 +121,7 @@ class RootPasswordRotationExecutorTest {
         ResourceConnector resourceConnector = mockResourceConnector(mockDbStack());
         when(resourceConnector.getDatabaseServerStatus(any(), any())).thenReturn(ExternalDatabaseStatus.STOPPED);
 
-        assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(new RotationContext(RESOURCE_CRN)));
+        assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(new RotationContext(RESOURCE_CRN), null));
 
         verify(resourceConnector).getDatabaseServerStatus(any(), any());
     }

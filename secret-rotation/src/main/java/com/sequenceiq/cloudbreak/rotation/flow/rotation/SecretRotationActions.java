@@ -1,9 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.flow.rotation;
 
-import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.FINALIZE;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
 
-import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,7 +27,6 @@ import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RollbackRotationTr
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RotationEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RotationFailedEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.SecretRotationTriggerEvent;
-import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.rotation.service.status.SecretRotationStatusService;
 import com.sequenceiq.cloudbreak.rotation.service.usage.SecretRotationUsageService;
 import com.sequenceiq.flow.core.AbstractAction;
@@ -48,9 +45,6 @@ public class SecretRotationActions {
 
     @Inject
     private SecretRotationUsageService secretRotationUsageService;
-
-    @Inject
-    private SecretRotationStepProgressService secretRotationStepProgressService;
 
     @Bean(name = "PRE_VALIDATE_ROTATION_STATE")
     public Action<?, ?> executePreValidationAction() {
@@ -179,9 +173,6 @@ public class SecretRotationActions {
                     LOGGER.debug("Execution type is not set or not explicit ROLLBACK, set flow failed for: {}", context.getResourceCrn());
                     Flow flow = getFlow(context.getFlowId());
                     flow.setFlowFailed(exception);
-                }
-                if (payload.getExecutionType() == null || EnumSet.of(ROLLBACK, FINALIZE).contains(payload.getExecutionType())) {
-                    secretRotationStepProgressService.deleteAllForCurrentRotation(context.getResourceCrn(), context.getSecretType());
                 }
                 secretRotationUsageService.rotationFailed(context.getSecretType(), resourceCrn, message, context.getExecutionType());
                 secretRotationStatusService.rotationFailed(resourceCrn, payload.getSecretType(), message);

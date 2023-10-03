@@ -1,15 +1,10 @@
 package com.sequenceiq.cloudbreak.rotation.secret.custom;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,7 +15,6 @@ import com.sequenceiq.cloudbreak.rotation.RotationMetadataTestUtil;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
-import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 
 @ExtendWith(MockitoExtension.class)
 class CustomJobRotationExecutorTest {
@@ -41,18 +35,10 @@ class CustomJobRotationExecutorTest {
     private Runnable postValidateCustomJob;
 
     @Mock
-    private SecretRotationStepProgressService secretRotationProgressService;
-
-    @Mock
     private SecretRotationNotificationService secretRotationNotificationService;
 
     @InjectMocks
     private CustomJobRotationExecutor underTest;
-
-    @BeforeEach
-    public void mockProgressService() {
-        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
-    }
 
     @Test
     public void testRotation() throws Exception {
@@ -152,7 +138,8 @@ class CustomJobRotationExecutorTest {
 
     @Test
     public void testPostValidate() throws Exception {
-        underTest.executePostValidation(createContext(rotateCustomJob, null, null, null, postValidateCustomJob));
+        underTest.executePostValidation(
+                createContext(rotateCustomJob, null, null, null, postValidateCustomJob), null);
 
         verify(postValidateCustomJob).run();
         verify(rotateCustomJob, times(0)).run();
@@ -166,7 +153,8 @@ class CustomJobRotationExecutorTest {
         doThrow(new RuntimeException("something")).when(postValidateCustomJob).run();
 
         assertThrows(SecretRotationException.class, () ->
-                underTest.executePostValidation(createContext(rotateCustomJob, null, null, null, postValidateCustomJob)));
+                underTest.executePostValidation(
+                        createContext(rotateCustomJob, null, null, null, postValidateCustomJob), null));
 
         verify(postValidateCustomJob).run();
         verify(rotateCustomJob, times(0)).run();

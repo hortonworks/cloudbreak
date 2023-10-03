@@ -6,17 +6,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -32,7 +29,6 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
-import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.freeipa.service.rotation.context.saltboot.SaltBootConfigRotationContext;
 import com.sequenceiq.freeipa.service.rotation.context.saltboot.SaltBootUpdateConfiguration;
 
@@ -60,9 +56,6 @@ class SaltBootConfigRotationExecutorTest {
     @Mock
     private HostOrchestrator hostOrchestrator;
 
-    @Mock
-    private SecretRotationStepProgressService secretRotationProgressService;
-
     @InjectMocks
     private SaltBootConfigRotationExecutor underTest;
 
@@ -70,11 +63,6 @@ class SaltBootConfigRotationExecutorTest {
     private ArgumentCaptor<GatewayConfig> gatewayConfigCaptor;
 
     private GatewayConfig gatewayConfig = GatewayConfig.builder().build();
-
-    @BeforeEach
-    public void setUp() {
-        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
-    }
 
     @Test
     public void rotateWithOldSaltBootSecrets() throws Exception {

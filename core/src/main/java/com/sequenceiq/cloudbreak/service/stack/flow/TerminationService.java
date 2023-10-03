@@ -157,7 +157,7 @@ public class TerminationService {
             });
             if (stack.getType().equals(StackType.WORKLOAD)) {
                 ownerAssignmentService.notifyResourceDeleted(stack.getResourceCrn());
-                stackRotationService.deleteMultiClusterRotationMakes(stack.getResourceCrn());
+                stackRotationService.cleanupSecretRotationEntries(stack.getResourceCrn());
             }
         } catch (TransactionService.TransactionExecutionException e) {
             throw e.getCause();

@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataSecretModifier;
-import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
@@ -126,13 +125,9 @@ class UserDataRotationExecutorTest {
     @Mock
     private CloudStack cloudStack;
 
-    @Mock
-    private SecretRotationStepProgressService secretRotationProgressService;
-
     @BeforeEach
     public void setUp() throws IllegalAccessException {
         lenient().when(cloudStackConverter.convert(any())).thenReturn(cloudStack);
-        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
     }
 
     @Test

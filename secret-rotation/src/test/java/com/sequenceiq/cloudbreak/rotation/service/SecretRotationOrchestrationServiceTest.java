@@ -144,7 +144,7 @@ public class SecretRotationOrchestrationServiceTest {
         }).when(transactionService).required(any(Runnable.class));
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.TRUE);
         doNothing().when(finalizeService).finalize(any());
-        doNothing().when(secretRotationStepProgressService).deleteAllForCurrentRotation(any(), any());
+        doNothing().when(secretRotationStepProgressService).deleteCurrentRotation(any());
         doNothing().when(multiClusterRotationService).updateMultiRotationEntriesAfterFinalize(any());
 
         underTest.finalizeIfNeeded(TEST, RESOURCE, null);

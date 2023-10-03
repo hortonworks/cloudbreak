@@ -4,11 +4,8 @@ import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTAT
 import static com.sequenceiq.cloudbreak.rotation.common.TestSecretType.TEST;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
@@ -23,18 +20,13 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.common.TestSecretRotationStep;
-import com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgress;
 import com.sequenceiq.cloudbreak.rotation.service.RotationMetadata;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
-import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 
 @ExtendWith(MockitoExtension.class)
 public class AbstractRotationExecutorTest {
 
     private static final RotationMetadata METADATA = new RotationMetadata(TEST, ROTATE, null, "", Optional.empty());
-
-    @Mock
-    private SecretRotationStepProgressService secretRotationProgressService;
 
     @Mock
     private SecretRotationNotificationService secretRotationNotificationService;
@@ -43,89 +35,73 @@ public class AbstractRotationExecutorTest {
     private TestExecutor underTest;
 
     @Test
-    public void testRotateWhenNoProgress() {
-        when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
-
+    public void testRotate() {
         underTest.executeRotate(new RotationContext(""), METADATA);
 
-        verify(secretRotationProgressService, times(1)).latestStep(any(), any());
-        verify(secretRotationProgressService, times(0)).finished(any());
-        verify(secretRotationNotificationService, times(1))
-                .sendNotification(METADATA, TestSecretRotationStep.STEP);
+        verify(secretRotationNotificationService).sendNotification(any(), any());
     }
 
     @Test
-    public void testRotateWhenStepOngoing() {
-        when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.of(new SecretRotationStepProgress("",
-                TEST, TestSecretRotationStep.STEP, ROTATE, System.currentTimeMillis())));
-        doNothing().when(secretRotationProgressService).finished(any());
-
-        underTest.executeRotate(new RotationContext(""), METADATA);
-
-        verify(secretRotationProgressService, times(1)).latestStep(any(), any());
-        verify(secretRotationProgressService, times(1)).finished(any());
-        verify(secretRotationNotificationService, times(1))
-                .sendNotification(METADATA, TestSecretRotationStep.STEP);
-    }
-
-    @Test
-    public void testRotateFailureWhenStepOngoing() {
-        when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.of(new SecretRotationStepProgress("",
-                TEST, TestSecretRotationStep.STEP, ROTATE, System.currentTimeMillis())));
-        doNothing().when(secretRotationProgressService).finished(any());
-
+    public void testRotateFailure() {
         assertThrows(SecretRotationException.class, () -> underTest.executeRotate(new RotationContext(null), METADATA));
 
-        verify(secretRotationProgressService, times(1)).latestStep(any(), any());
-        verify(secretRotationProgressService, times(1)).finished(any());
-        verify(secretRotationNotificationService, times(1))
-                .sendNotification(METADATA, TestSecretRotationStep.STEP);
+        verify(secretRotationNotificationService).sendNotification(any(), any());
     }
 
     @Test
-    public void testRotateWhenStepAlreadyFinished() {
-        SecretRotationStepProgress progress = new SecretRotationStepProgress("", TEST, TestSecretRotationStep.STEP,
-                ROTATE, System.currentTimeMillis());
-        progress.setFinished(System.currentTimeMillis());
-        when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.of(progress));
+    public void testRollback() {
+        underTest.executeRollback(new RotationContext(""), METADATA);
 
-        underTest.executeRotate(new RotationContext(""), METADATA);
+        verify(secretRotationNotificationService).sendNotification(any(), any());
+    }
 
-        verify(secretRotationProgressService, times(1)).latestStep(any(), any());
-        verify(secretRotationProgressService, times(0)).finished(any());
+    @Test
+    public void testRollbackFailure() {
+        assertThrows(SecretRotationException.class, () -> underTest.executeRollback(new RotationContext(null), METADATA));
+
+        verify(secretRotationNotificationService).sendNotification(any(), any());
+    }
+
+    @Test
+    public void testFinalize() {
+        underTest.executeFinalize(new RotationContext(""), METADATA);
+
+        verify(secretRotationNotificationService).sendNotification(any(), any());
+    }
+
+    @Test
+    public void testFinalizeFailure() {
+        assertThrows(SecretRotationException.class, () -> underTest.executeFinalize(new RotationContext(null), METADATA));
+
+        verify(secretRotationNotificationService).sendNotification(any(), any());
+    }
+
+    @Test
+    public void testPreValidate() {
+        underTest.executePreValidation(new RotationContext(""), METADATA);
+
+        verify(secretRotationNotificationService).sendNotification(any(), any());
+    }
+
+    @Test
+    public void testPreValidateFailure() {
+        assertThrows(SecretRotationException.class, () -> underTest.executePreValidation(new RotationContext(null), METADATA));
+
+        verify(secretRotationNotificationService).sendNotification(any(), any());
+    }
+
+    @Test
+    public void testPostValidate() {
+        underTest.executePostValidation(new RotationContext(""), METADATA);
+
         verify(secretRotationNotificationService, times(0)).sendNotification(any(), any());
     }
 
     @Test
-    public void testPreValidation() {
-        when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
+    public void testPostValidateFailure() {
+        assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(new RotationContext(null), METADATA));
 
-        underTest.executePreValidation(new RotationContext(""), null);
-
-        verify(secretRotationProgressService, times(1)).latestStep(any(), any());
-    }
-
-    @Test
-    public void testPreValidationFailure() {
-        when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
-
-        assertThrows(SecretRotationException.class, () -> underTest.executePreValidation(new RotationContext(null), METADATA));
-
-        verify(secretRotationProgressService, times(1)).latestStep(any(), any());
-    }
-
-    @Test
-    public void testPostValidation() {
-        underTest.executePostValidation(new RotationContext(""));
-
-        verifyNoInteractions(secretRotationProgressService);
-    }
-
-    @Test
-    public void testPostValidationFailure() {
-        assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(new RotationContext(null)));
-
-        verifyNoInteractions(secretRotationProgressService);
+        verify(secretRotationNotificationService, times(0)).sendNotification(any(), any());
     }
 
     private static class TestExecutor extends AbstractRotationExecutor<RotationContext> {

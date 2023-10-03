@@ -8,8 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +24,6 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.CMServiceRoleRestartRotationContext;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
-import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
@@ -38,9 +35,6 @@ class CMServiceRoleRestartRotationExecutorTest {
     private static final String SERVICE_TYPE = "serviceType";
 
     private static final String ROLE_TYPE = "roleType";
-
-    @Mock
-    private SecretRotationStepProgressService secretRotationProgressService;
 
     @Mock
     private StackDtoService stackDtoService;
@@ -68,7 +62,6 @@ class CMServiceRoleRestartRotationExecutorTest {
 
     @BeforeEach
     public void mockProgressService() {
-        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
         lenient().when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         lenient().when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         lenient().when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);

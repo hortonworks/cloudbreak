@@ -16,7 +16,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Assertions;
@@ -39,7 +38,6 @@ import com.sequenceiq.cloudbreak.rotation.RotationMetadataTestUtil;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
-import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
@@ -63,9 +61,6 @@ class SaltPillarRotationExecutorTest {
     private ExitCriteriaProvider exitCriteriaProvider;
 
     @Mock
-    private SecretRotationStepProgressService secretRotationProgressService;
-
-    @Mock
     private SecretRotationNotificationService secretRotationNotificationService;
 
     @InjectMocks
@@ -74,7 +69,6 @@ class SaltPillarRotationExecutorTest {
     @BeforeEach
     void setup() {
         lenient().when(exitCriteriaProvider.get(any())).thenReturn(ClusterDeletionBasedExitCriteriaModel.nonCancellableModel());
-        lenient().when(secretRotationProgressService.latestStep(any(), any())).thenReturn(Optional.empty());
     }
 
     @Test

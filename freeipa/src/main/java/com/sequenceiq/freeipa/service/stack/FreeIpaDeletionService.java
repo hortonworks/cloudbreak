@@ -74,7 +74,7 @@ public class FreeIpaDeletionService {
         }
         stacks.forEach(stack -> validateDeletion(stack, accountId));
         stacks.forEach(stack -> unscheduleAndTriggerTerminate(stack, forced));
-        freeIpaSecretRotationService.deleteMultiClusterRotationMarks(environmentCrn);
+        freeIpaSecretRotationService.cleanupSecretRotationEntries(environmentCrn);
     }
 
     private void unscheduleAndTriggerTerminate(Stack stack, boolean forced) {

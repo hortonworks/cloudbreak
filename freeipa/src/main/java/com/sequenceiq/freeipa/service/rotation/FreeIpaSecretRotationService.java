@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowEventProv
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationValidationService;
+import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
@@ -50,6 +51,9 @@ public class FreeIpaSecretRotationService implements SecretRotationFlowEventProv
     @Inject
     private MultiClusterRotationService multiClusterRotationService;
 
+    @Inject
+    private SecretRotationStepProgressService stepProgressService;
+
     public FlowIdentifier rotateSecretsByCrn(String accountId, String environmentCrn, FreeIpaSecretRotationRequest request) {
         LOGGER.info("Requested secret rotation. Account id: {}, environment crn: {}, request: {}", accountId, environmentCrn, request);
         if (!entitlementService.isSecretRotationEnabled(accountId)) {
@@ -66,8 +70,9 @@ public class FreeIpaSecretRotationService implements SecretRotationFlowEventProv
         return flowManager.notify(selector, triggerEvent);
     }
 
-    public void deleteMultiClusterRotationMarks(String environmentCrn) {
+    public void cleanupSecretRotationEntries(String environmentCrn) {
         multiClusterRotationService.deleteAllByCrn(environmentCrn);
+        stepProgressService.deleteAllForResource(environmentCrn);
     }
 
     @Override

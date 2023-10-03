@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationValidationService;
+import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
@@ -89,6 +90,9 @@ public class SdxRotationService {
 
     @Inject
     private SecretRotationValidationService secretRotationValidationService;
+
+    @Inject
+    private SecretRotationStepProgressService stepProgressService;
 
     public boolean checkOngoingMultiSecretChildrenRotations(String parentCrn, String secret) {
         MultiSecretType multiSecretType = MultiSecretType.valueOf(secret);
@@ -175,8 +179,9 @@ public class SdxRotationService {
         }
     }
 
-    public void deleteMultiClusterRotationMarks(String datalakeCrn) {
+    public void cleanupSecretRotationEntries(String datalakeCrn) {
         multiClusterRotationService.deleteAllByCrn(datalakeCrn);
+        stepProgressService.deleteAllForResource(datalakeCrn);
     }
 
     private Set<String> getSdxCrnsByEnvironmentCrn(String parentCrn) {

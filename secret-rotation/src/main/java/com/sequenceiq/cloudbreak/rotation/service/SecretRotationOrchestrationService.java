@@ -90,7 +90,7 @@ public class SecretRotationOrchestrationService {
                 secretRotationStatusService.rollbackStarted(resourceCrn, secretType);
                 secretRotationUsageService.rollbackStarted(secretType, resourceCrn, executionType);
                 rollbackService.rollback(rotationMetadata);
-                secretRotationProgressService.deleteAllForCurrentRotation(resourceCrn, secretType);
+                secretRotationProgressService.deleteCurrentRotation(rotationMetadata);
                 secretRotationStatusService.rollbackFinished(resourceCrn, secretType);
                 secretRotationUsageService.rollbackFinished(secretType, resourceCrn, executionType);
             } catch (Exception e) {
@@ -108,9 +108,9 @@ public class SecretRotationOrchestrationService {
                 secretRotationStatusService.finalizeStarted(resourceCrn, secretType);
                 finalizeService.finalize(rotationMetadata);
                 transactionService.required(() -> {
-                            secretRotationProgressService.deleteAllForCurrentRotation(resourceCrn, secretType);
-                            multiClusterRotationService.updateMultiRotationEntriesAfterFinalize(rotationMetadata);
-                        });
+                    secretRotationProgressService.deleteCurrentRotation(rotationMetadata);
+                    multiClusterRotationService.updateMultiRotationEntriesAfterFinalize(rotationMetadata);
+                });
                 secretRotationStatusService.finalizeFinished(resourceCrn, secretType);
                 secretRotationUsageService.rotationFinished(secretType, resourceCrn, executionType);
             } catch (TransactionService.TransactionExecutionException te) {

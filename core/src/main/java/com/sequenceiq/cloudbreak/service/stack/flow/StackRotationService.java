@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationValidationService;
+import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -51,6 +52,9 @@ public class StackRotationService {
 
     @Inject
     private MultiClusterRotationService multiClusterRotationService;
+
+    @Inject
+    private SecretRotationStepProgressService stepProgressService;
 
     @Inject
     private SecretRotationValidationService secretRotationValidationService;
@@ -80,8 +84,9 @@ public class StackRotationService {
         multiClusterRotationService.markChildrenMultiRotationEntriesLocally(crns, secret);
     }
 
-    public void deleteMultiClusterRotationMakes(String crn) {
+    public void cleanupSecretRotationEntries(String crn) {
         multiClusterRotationService.deleteAllByCrn(crn);
+        stepProgressService.deleteAllForResource(crn);
     }
 
     private Set<String> getCrnsByParentCrn(String parentCrn) {
