@@ -19,3 +19,54 @@ mock:
       createDummyCluster: false
     dwx:
       createDummyCluster: false
+  config:
+    testMode: REGULAR
+    loadTestConfig:
+      "[/**/cm/version]":
+        delay: 1
+        errorRate: 1
+      "[/**/resourcemanager/**/cluster/scaling]":
+        delay: 10-15
+        errorRate: 1
+      "[/**/hosts]":
+        delay: 1-2
+        errorRate: 1
+      "[/**/hosts/**/enterMaintenanceMode]":
+        delay: 1-2
+        errorRate: 1
+      "[/**/cm/service/roleTypes]":
+        delay: 1
+        errorRate: 1
+      "[/**/spi/add_instance]":
+        delay: 45-60
+        errorRate: 1
+      "[/**/cm/service/commands/start]":
+        delay: 1-2
+        errorRate: 1
+      "[/**/clusters/**/services/yarn/roles]":
+        delay: 1-2
+        errorRate: 1
+      "[/**/spi/start_instances]":
+        delay: 10-15
+        errorRate: 1
+      "[/**/spi/cloud_instance_statuses]":
+        delay: 1
+        errorRate: 1
+      "[/**/cm/service/roles]":
+        delay: 1-2
+        errorRate: 1
+      "[/**/spi/stop_instances]":
+        delay: 60-90
+        errorRate: 1
+      "[/**/spi/cloud_metadata_statuses]":
+        delay: 2
+        errorRate: 1
+      "[/**/cm/commands/hostsRecommissionAndExitMaintenanceMode]":
+        delay: 3-5
+        errorRate: 1
+      "[/**/cm/commands/hostsDecommission]":
+        delay: 2-3
+        errorRate: 1
+
+
+
