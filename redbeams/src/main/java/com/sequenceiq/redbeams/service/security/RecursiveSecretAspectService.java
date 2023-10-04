@@ -50,7 +50,7 @@ public class RecursiveSecretAspectService {
                                         UUID.randomUUID().toString(), Long.toHexString(System.currentTimeMillis()));
                                 String secret = secretService.put(path, value.getRaw());
                                 LOGGER.info("Field: '{}' is saved at path: {}", field.getName(), path);
-                                field.set(entity, new SecretProxy(secretService, secret));
+                                field.set(entity, new SecretProxy(secret));
                             }
                         } else {
                             entities.add(fieldValue);

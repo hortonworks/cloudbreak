@@ -1,19 +1,18 @@
 package com.sequenceiq.cloudbreak.service.secret.domain;
 
+import com.sequenceiq.cloudbreak.app.StaticApplicationContext;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 public class SecretProxy extends Secret {
 
     private static final long serialVersionUID = 1L;
 
-    private final transient SecretService secretService;
-
-    public SecretProxy(SecretService secretService, String secret) {
+    public SecretProxy(String secret) {
         super(null, secret);
-        this.secretService = secretService;
     }
 
     public String getRaw() {
+        SecretService secretService = StaticApplicationContext.getApplicationContext().getBean(SecretService.class);
         return secretService.get(getSecret());
     }
 }

@@ -49,7 +49,7 @@ public class SecretAspectService {
                                     UUID.randomUUID(), Long.toHexString(System.currentTimeMillis()));
                             String secret = secretService.put(path, value.getRaw());
                             LOGGER.debug("Field: '{}' is saved at path: {}", field.getName(), path);
-                            field.set(entity, new SecretProxy(secretService, secret));
+                            field.set(entity, new SecretProxy(secret));
                         }
                     }
                 }
