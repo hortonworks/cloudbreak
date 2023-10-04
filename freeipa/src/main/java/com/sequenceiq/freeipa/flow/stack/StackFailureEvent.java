@@ -24,4 +24,11 @@ public class StackFailureEvent extends StackEvent {
     public Exception getException() {
         return exception;
     }
+
+    @Override
+    public String toString() {
+        return "StackFailureEvent{" +
+                "exception=" + exception +
+                "} " + super.toString();
+    }
 }
