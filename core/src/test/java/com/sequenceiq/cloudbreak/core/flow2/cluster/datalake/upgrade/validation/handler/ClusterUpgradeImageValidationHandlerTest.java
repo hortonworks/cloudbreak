@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.ValidatorType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudPlatformValidationWarningException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
@@ -37,7 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeImageValidationEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeImageValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.ParcelSizeService;
@@ -93,12 +95,28 @@ public class ClusterUpgradeImageValidationHandlerTest {
         Selectable nextFlowStepSelector = underTest.doAccept(event);
 
         assertEquals(START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
-        assertEquals(REQUIRED_FREE_SPACE, ((ClusterUpgradeDiskSpaceValidationEvent) nextFlowStepSelector).getRequiredFreeSpace());
+        assertEquals(REQUIRED_FREE_SPACE, ((ClusterUpgradeImageValidationFinishedEvent) nextFlowStepSelector).getRequiredFreeSpace());
         verify(parcelAvailabilityService).validateAvailability(request.getTargetImage(), request.getResourceId());
         verify(parcelSizeService).getRequiredFreeSpace(responses);
         verify(cloudContext).getPlatformVariant();
         verify(cloudPlatformConnectors).get(CLOUD_PLATFORM_VARIANT);
         verify(imageValidator).validate(authenticatedContext, cloudStack);
+    }
+
+    @Test
+    void testDoAcceptWhenValidatorWarning() {
+        setupCloudContext();
+        setupCloudConnector(cloudContext, cloudCredential);
+        Validator imageValidator = new ValidatorBuilder(cloudConnector).withImageValidatorWarning().build().get();
+        HandlerEvent<ClusterUpgradeImageValidationEvent> event = getHandlerEvent();
+        ClusterUpgradeImageValidationEvent request = event.getData();
+        Set<Response> responses = Collections.emptySet();
+        when(parcelAvailabilityService.validateAvailability(request.getTargetImage(), request.getResourceId())).thenReturn(responses);
+        when(parcelSizeService.getRequiredFreeSpace(responses)).thenReturn(REQUIRED_FREE_SPACE);
+
+        ClusterUpgradeImageValidationFinishedEvent nextFlowStepSelector = (ClusterUpgradeImageValidationFinishedEvent) underTest.doAccept(event);
+
+        assertTrue(nextFlowStepSelector.getWarningMessages().contains(VALIDATION_EXCEPTION_MESSAGE));
     }
 
     @Test
@@ -197,6 +215,11 @@ public class ClusterUpgradeImageValidationHandlerTest {
             return this;
         }
 
+        ValidatorBuilder withImageValidatorWarning() {
+            setupImageValidatorWithWarningException();
+            return this;
+        }
+
         Optional<Validator> build() {
             return imageValidatorOptional;
         }
@@ -210,5 +233,11 @@ public class ClusterUpgradeImageValidationHandlerTest {
             }
         }
 
+        private void setupImageValidatorWithWarningException() {
+            Validator imageValidator = mock(Validator.class);
+            imageValidatorOptional = Optional.of(imageValidator);
+            when(cloudConnector.validators(ValidatorType.IMAGE)).thenReturn(List.of(imageValidator));
+            doThrow(new CloudPlatformValidationWarningException(VALIDATION_EXCEPTION_MESSAGE)).when(imageValidator).validate(any(), any());
+        }
     }
 }
