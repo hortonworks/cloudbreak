@@ -199,11 +199,11 @@ cb:
       safe:
         cm: 400
         infrastructure: 500
-        upgrade: 200
+        upgrade: 400
       experimental:
         cm: 800
         infrastructure: 800
-        upgrade: 200
+        upgrade: 800
 
   aws:
     stopStart.batch.size: 10
