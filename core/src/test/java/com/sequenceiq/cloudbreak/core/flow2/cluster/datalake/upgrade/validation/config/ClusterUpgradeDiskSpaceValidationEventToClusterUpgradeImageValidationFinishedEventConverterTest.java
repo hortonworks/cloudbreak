@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_DISK_SPACE_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,23 +10,22 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeImageValidationFinishedEvent;
 
 @ExtendWith(MockitoExtension.class)
-public class ClusterUpgradeValidationEventToClusterUpgradeDiskSpaceValidationEventConverterTest {
-
+class ClusterUpgradeDiskSpaceValidationEventToClusterUpgradeImageValidationFinishedEventConverterTest {
     private static final long RESOURCE_ID = 25L;
 
     @InjectMocks
-    private ClusterUpgradeValidationEventToClusterUpgradeDiskSpaceValidationEventConverter underTest;
+    private ClusterUpgradeDiskSpaceValidationEventToClusterUpgradeImageValidationFinishedEventConverter underTest;
 
     @Test
     public void testConvertShouldCreateAClusterUpgradeDiskSpaceValidationEvent() {
-        ClusterUpgradeValidationEvent sourceEvent = new ClusterUpgradeValidationEvent(VALIDATE_DISK_SPACE_EVENT.event(), RESOURCE_ID, "image-id");
-        ClusterUpgradeDiskSpaceValidationEvent actual = underTest.convert(sourceEvent);
+        ClusterUpgradeDiskSpaceValidationEvent sourceEvent = new ClusterUpgradeDiskSpaceValidationEvent(VALIDATE_DISK_SPACE_EVENT.event(), RESOURCE_ID, 10L);
+        ClusterUpgradeImageValidationFinishedEvent actual = underTest.convert(sourceEvent);
 
         assertEquals(RESOURCE_ID, actual.getResourceId());
-        assertEquals(1L, actual.getRequiredFreeSpace());
+        assertEquals(10L, actual.getRequiredFreeSpace());
+        assertTrue(actual.getWarningMessages().isEmpty());
     }
-
 }
