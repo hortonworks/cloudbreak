@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_RETRY_FLOW_STA
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -164,10 +165,6 @@ public class StackCommonService {
                 : stackService.getByCrnInWorkspaceWithEntries(nameOrCrn.getCrn(), entries, stackType, withResources);
     }
 
-    private StackV4Response findStackByCrnAndWorkspaceId(String crn, Set<String> entries, StackType stackType) {
-        return stackService.getByCrnInWorkspaceWithEntries(crn, entries, stackType, false);
-    }
-
     public FlowIdentifier putInDefaultWorkspace(String crn, UpdateStackV4Request updateRequest) {
         LOGGER.info("Received putStack on crn: {}, updateRequest: {}", crn, updateRequest);
         StackDto stack = stackDtoService.getByCrn(crn);
@@ -198,9 +195,19 @@ public class StackCommonService {
         return put(stack, updateStackJson);
     }
 
-    public FlowIdentifier syncInWorkspace(NameOrCrn nameOrCrn, String accountId) {
+    public FlowIdentifier syncInWorkspace(NameOrCrn nameOrCrn, String accountId, Set<StackType> permittedStackTypes) {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
+        StackType stackType = stack.getStack().getType();
+        if (!permittedStackTypes.contains(stackType)) {
+            String resourceType = stackType.getResourceType();
+            String permittedResourceTypes = permittedStackTypes.stream()
+                    .map(StackType::getResourceType)
+                    .collect(Collectors.joining(", "));
+            throw new BadRequestException(
+                    String.format("Sync is not supported for stack '%s'. Its type is '%s', whereas the operation is permitted only for the following types: %s.",
+                            nameOrCrn, resourceType, permittedResourceTypes));
+        }
         UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
         updateStackJson.setStatus(StatusRequest.FULL_SYNC);
         updateStackJson.setWithClusterEvent(true);

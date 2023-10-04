@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.EnumSet;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
@@ -120,7 +125,7 @@ class StackV4ControllerTest {
 
         SaltPasswordStatusResponse response = underTest.getSaltPasswordStatus(WORKSPACE_ID, stackCrn);
 
-        Assertions.assertEquals(SaltPasswordStatus.OK, response.getStatus());
+        assertEquals(SaltPasswordStatus.OK, response.getStatus());
     }
 
     @Test
@@ -145,4 +150,16 @@ class StackV4ControllerTest {
 
         assertEquals(flowIdentifier, result);
     }
+
+    @Test
+    void syncTest() {
+        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
+        FlowIdentifier flowIdentifier = mock(FlowIdentifier.class);
+        when(stackOperations.sync(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID, EnumSet.of(StackType.WORKLOAD, StackType.DATALAKE))).thenReturn(flowIdentifier);
+
+        FlowIdentifier result = underTest.sync(WORKSPACE_ID, STACK_NAME, "dummyAccountId");
+
+        assertThat(result).isSameAs(flowIdentifier);
+    }
+
 }

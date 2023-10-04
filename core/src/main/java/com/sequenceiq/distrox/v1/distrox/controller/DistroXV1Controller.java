@@ -13,6 +13,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME_LIST;
 
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -50,7 +51,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRota
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
@@ -264,14 +264,14 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SYNC_DATAHUB)
     public void syncByName(@ResourceName String name) {
         String accountId = restRequestThreadLocalService.getAccountId();
-        stackOperations.sync(NameOrCrn.ofName(name), accountId);
+        stackOperations.sync(NameOrCrn.ofName(name), accountId, EnumSet.of(StackType.WORKLOAD));
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SYNC_DATAHUB)
     public void syncByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn) {
         String accountId = restRequestThreadLocalService.getAccountId();
-        stackOperations.sync(NameOrCrn.ofCrn(crn), accountId);
+        stackOperations.sync(NameOrCrn.ofCrn(crn), accountId, EnumSet.of(StackType.WORKLOAD));
     }
 
     @Override
@@ -550,10 +550,6 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         throw new UnsupportedOperationException("not supported request");
     }
 
-    private StackV4Request getStackV4Request(NameOrCrn nameOrCrn) {
-        return stackOperations.getRequest(nameOrCrn, getWorkspaceIdForCurrentUser());
-    }
-
     @Override
     @CheckPermissionByRequestProperty(path = "stackCrn", type = CRN, action = DESCRIBE_DATAHUB)
     public FlowIdentifier collectDiagnostics(@RequestObject @Valid DiagnosticsCollectionV1Request request) {
@@ -708,7 +704,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    @CheckPermissionByResourceName(action = DESCRIBE_DATAHUB)
     public DistroXGenerateImageCatalogV1Response generateImageCatalog(@ResourceName String name) {
         CloudbreakImageCatalogV3 imageCatalog = stackOperations.generateImageCatalog(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId());
         return new DistroXGenerateImageCatalogV1Response(imageCatalog);

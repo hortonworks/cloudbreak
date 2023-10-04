@@ -243,7 +243,7 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     }
 
     public StackStatusV4Responses getStatusForInternalCrns(List<String> crns, StackType stackType) {
-        LOGGER.info("Get stackstatuses against internal user.");
+        LOGGER.info("Get stack statuses against internal user.");
         List<StackClusterStatusView> statuses = stackService.getStatusesByCrnsInternal(crns, stackType);
         LOGGER.info("Query Stack (status) successfully finished with crns {}", crns);
         return stackClusterStatusViewToStatusConverter.convert(statuses);
@@ -257,8 +257,8 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return stackCommonService.deleteMultipleInstancesInWorkspace(nameOrCrn, accountId, instanceIds, forced);
     }
 
-    public FlowIdentifier sync(NameOrCrn nameOrCrn, String accountId) {
-        return stackCommonService.syncInWorkspace(nameOrCrn, accountId);
+    public FlowIdentifier sync(NameOrCrn nameOrCrn, String accountId, Set<StackType> permittedStackTypes) {
+        return stackCommonService.syncInWorkspace(nameOrCrn, accountId, permittedStackTypes);
     }
 
     public FlowIdentifier syncComponentVersionsFromCm(NameOrCrn nameOrCrn, String accountId, Set<String> candidateImageUuids) {
@@ -379,10 +379,6 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return clusterCommonService.getHostNamesAsIniString(stack, loginUser);
     }
 
-    public Stack getStackByName(String name) {
-        return stackService.getByNameInWorkspace(name, workspaceService.getForCurrentUser().getId());
-    }
-
     public Stack getStackByCrn(String crn) {
         return stackService.getNotTerminatedByCrnInWorkspace(crn, workspaceService.getForCurrentUser().getId());
     }
@@ -452,7 +448,7 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
 
     public CertificatesRotationV4Response rotateAutoTlsCertificates(@NotNull NameOrCrn nameOrCrn, String accountId,
                                                                     CertificatesRotationV4Request certificatesRotationV4Request) {
-        LOGGER.debug("Starting cluster autotls certificates rotation: " + nameOrCrn);
+        LOGGER.debug("Starting cluster AutoTLS certificates rotation: " + nameOrCrn);
         return clusterCommonService.rotateAutoTlsCertificates(nameOrCrn, accountId, certificatesRotationV4Request);
     }
 

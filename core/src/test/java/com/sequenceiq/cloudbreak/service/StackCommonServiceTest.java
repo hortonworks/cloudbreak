@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,17 +15,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy;
@@ -55,12 +55,9 @@ import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackScaleV4RequestToUpdateStackV4RequestConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
-import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -339,7 +336,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testvalidateNetworkScaleRequestWhenVariantIsNotSupportedForMultiAzButAzHasBeenPreferredInTheRequest() {
+    public void testValidateNetworkScaleRequestWhenVariantIsNotSupportedForMultiAzButAzHasBeenPreferredInTheRequest() {
         StackDto stack = mock(StackDto.class);
         String variant = AwsConstants.AwsVariant.AWS_VARIANT.name();
         when(stack.getPlatformVariant()).thenReturn(variant);
@@ -347,10 +344,10 @@ class StackCommonServiceTest {
         NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
         networkScaleV4Request.setPreferredSubnetIds(List.of(SUBNET_ID));
 
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.validateNetworkScaleRequest(stack, networkScaleV4Request));
+        assertThrows(BadRequestException.class, () -> underTest.validateNetworkScaleRequest(stack, networkScaleV4Request));
 
-        Mockito.verify(multiAzValidator, times(1)).supportedVariant(variant);
-        Mockito.verify(multiAzValidator, times(0)).collectSubnetIds(any());
+        verify(multiAzValidator, times(1)).supportedVariant(variant);
+        verify(multiAzValidator, times(0)).collectSubnetIds(any());
     }
 
     @Test
@@ -363,10 +360,10 @@ class StackCommonServiceTest {
         NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
         networkScaleV4Request.setPreferredSubnetIds(List.of(SUBNET_ID));
 
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.validateNetworkScaleRequest(stack, networkScaleV4Request));
+        assertThrows(BadRequestException.class, () -> underTest.validateNetworkScaleRequest(stack, networkScaleV4Request));
 
-        Mockito.verify(multiAzValidator, times(1)).supportedVariant(variant);
-        Mockito.verify(multiAzValidator, times(1)).collectSubnetIds(any());
+        verify(multiAzValidator, times(1)).supportedVariant(variant);
+        verify(multiAzValidator, times(1)).collectSubnetIds(any());
     }
 
     @Test
@@ -397,7 +394,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testRotateSaltPassword() throws CloudbreakOrchestratorException {
+    public void testRotateSaltPassword() {
         ThreadBasedUserCrnProvider.doAs(ACTOR_CRN, () -> underTest.rotateSaltPassword(STACK_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL));
 
         verify(stackOperationService).rotateSaltPassword(STACK_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
@@ -489,8 +486,6 @@ class StackCommonServiceTest {
         when(stackView.getResourceCrn()).thenReturn("CRN");
         when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stack);
         when(stackDtoService.getStackViewByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stackView);
-        Template template = new Template();
-        template.setInstanceStorageCount(1);
 
         StackDeleteVolumesRequest stackDeleteVolumesRequest = new StackDeleteVolumesRequest();
         stackDeleteVolumesRequest.setStackId(1L);
@@ -509,8 +504,6 @@ class StackCommonServiceTest {
         when(stackView.getResourceCrn()).thenReturn("CRN");
         when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stack);
         when(stackDtoService.getStackViewByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stackView);
-        Template template = new Template();
-        template.setInstanceStorageCount(1);
         doThrow(new BadRequestException("Deleting volumes is not supported on MOCK cloudplatform")).when(verticalScalingValidatorService)
                 .validateProviderForDelete(any(), anyString(), eq(false));
         StackDeleteVolumesRequest stackDeleteVolumesRequest = new StackDeleteVolumesRequest();
@@ -523,11 +516,40 @@ class StackCommonServiceTest {
         assertEquals("Deleting volumes is not supported on MOCK cloudplatform", exception.getMessage());
     }
 
-    private InstanceGroup instanceGroup(String name, String instanceType, Template template) {
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setGroupName(name);
-        template.setInstanceType(instanceType);
-        instanceGroup.setTemplate(template);
-        return instanceGroup;
+    @Test
+    void syncInWorkspaceTestWhenSuccess() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("myStack");
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stack);
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackView.getType()).thenReturn(StackType.DATALAKE);
+
+        FlowIdentifier flowIdentifier = mock(FlowIdentifier.class);
+        when(stackOperationService.updateStatus(stack, StatusRequest.FULL_SYNC, true)).thenReturn(flowIdentifier);
+
+        FlowIdentifier result = underTest.syncInWorkspace(nameOrCrn, ACCOUNT_ID, EnumSet.of(StackType.DATALAKE));
+
+        assertThat(result).isSameAs(flowIdentifier);
     }
+
+    @Test
+    void syncInWorkspaceTestWhenWrongType() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("myStack");
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stack);
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackView.getType()).thenReturn(StackType.TEMPLATE);
+
+        Set<StackType> permittedStackTypes = new LinkedHashSet<>();
+        permittedStackTypes.add(StackType.DATALAKE);
+        permittedStackTypes.add(StackType.WORKLOAD);
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.syncInWorkspace(nameOrCrn, ACCOUNT_ID, permittedStackTypes));
+
+        assertThat(exception).hasMessage("Sync is not supported for stack '[NameOrCrn of name: 'myStack']'. " +
+                "Its type is 'template', whereas the operation is permitted only for the following types: datalake, datahub.");
+    }
+
 }

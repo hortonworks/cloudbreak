@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -7,12 +8,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +24,10 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -54,8 +58,10 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowLogService;
 
+@ExtendWith(MockitoExtension.class)
 public class StackOperationsTest {
 
     private static final StackType STACK_TYPE = StackType.WORKLOAD;
@@ -118,12 +124,14 @@ public class StackOperationsTest {
 
     private User user;
 
+    @Mock
+    private FlowIdentifier flowIdentifier;
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
         user = TestUtil.user(1L, "someUserId");
         stack = TestUtil.stack();
-        when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
+        lenient().when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
     }
 
     @Test
@@ -173,7 +181,6 @@ public class StackOperationsTest {
 
     @Test
     void testGetForInternalCrn() {
-        when(cloudbreakUser.getUserCrn()).thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
         when(stackApiViewService.retrieveStackByCrnAndType(anyString(), any(StackType.class))).thenReturn(new StackApiView());
         when(stackApiViewToStackViewV4ResponseConverter.convert(any(StackApiView.class))).thenReturn(new StackViewV4Response());
         doNothing().when(environmentServiceDecorator).prepareEnvironment(any(StackViewV4Response.class));
@@ -284,6 +291,17 @@ public class StackOperationsTest {
         underTest.putDeleteVolumes(nameOrCrn, ACCOUNT_ID, stackDeleteVolumesRequest);
 
         verify(stackCommonService).putDeleteVolumesInWorkspace(nameOrCrn, ACCOUNT_ID, stackDeleteVolumesRequest);
+    }
+
+    @Test
+    void syncTest() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("stackName");
+        Set<StackType> permittedStackTypes = EnumSet.of(StackType.DATALAKE);
+        when(stackCommonService.syncInWorkspace(nameOrCrn, ACCOUNT_ID, permittedStackTypes)).thenReturn(flowIdentifier);
+
+        FlowIdentifier result = underTest.sync(nameOrCrn, ACCOUNT_ID, permittedStackTypes);
+
+        assertThat(result).isSameAs(flowIdentifier);
     }
 
 }

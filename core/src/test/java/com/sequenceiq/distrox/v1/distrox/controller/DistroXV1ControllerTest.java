@@ -1,12 +1,14 @@
 package com.sequenceiq.distrox.v1.distrox.controller;
 
-import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.EnumSet;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +20,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
@@ -40,6 +43,8 @@ class DistroXV1ControllerTest {
     private static final String CRN = "crn";
 
     private static final String NAME = "name";
+
+    private static final String ACCOUNT_ID = "accountId";
 
     private static final String IMAGE_CATALOG = "image catalog";
 
@@ -89,7 +94,7 @@ class DistroXV1ControllerTest {
 
         distroXV1Controller.changeImageCatalog(NAME, request);
 
-        verify(stackOperations).changeImageCatalog(nameOrCrnArgumentCaptor.capture(), Mockito.eq(WORKSPACE_ID), Mockito.eq(IMAGE_CATALOG));
+        verify(stackOperations).changeImageCatalog(nameOrCrnArgumentCaptor.capture(), eq(WORKSPACE_ID), eq(IMAGE_CATALOG));
         assertEquals(NAME, nameOrCrnArgumentCaptor.getValue().getName());
     }
 
@@ -99,7 +104,7 @@ class DistroXV1ControllerTest {
 
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
         when(workspace.getId()).thenReturn(WORKSPACE_ID);
-        when(stackOperations.generateImageCatalog(nameOrCrnArgumentCaptor.capture(), Mockito.eq(WORKSPACE_ID))).thenReturn(imageCatalog);
+        when(stackOperations.generateImageCatalog(nameOrCrnArgumentCaptor.capture(), eq(WORKSPACE_ID))).thenReturn(imageCatalog);
 
         DistroXGenerateImageCatalogV1Response actual = distroXV1Controller.generateImageCatalog(NAME);
 
@@ -173,4 +178,23 @@ class DistroXV1ControllerTest {
 
         verify(stackOperations).putDeleteVolumes(NameOrCrn.ofCrn(CRN), ACCOUNT_ID, stackDeleteVolumesRequest);
     }
+
+    @Test
+    void syncByNameTest() {
+        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
+
+        distroXV1Controller.syncByName(NAME);
+
+        verify(stackOperations).sync(NameOrCrn.ofName(NAME), ACCOUNT_ID, EnumSet.of(StackType.WORKLOAD));
+    }
+
+    @Test
+    void syncByCrnTest() {
+        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
+
+        distroXV1Controller.syncByCrn(CRN);
+
+        verify(stackOperations).sync(NameOrCrn.ofCrn(CRN), ACCOUNT_ID, EnumSet.of(StackType.WORKLOAD));
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -186,7 +187,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier sync(Long workspaceId, String name, @AccountId String accountId) {
-        return stackOperations.sync(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId());
+        return stackOperations.sync(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), EnumSet.of(StackType.WORKLOAD, StackType.DATALAKE));
     }
 
     @Override
