@@ -92,6 +92,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATALAKE_HO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_RHEL8_IMAGES;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_RMS_ON_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
@@ -561,5 +562,9 @@ public class EntitlementService {
                 .anyMatch(e -> e.equalsIgnoreCase(entitlement.name()));
         LOGGER.debug("Entitlement result {}={}", entitlement, entitled);
         return entitled;
+    }
+
+    public boolean isRmsEnabledOnDatalake(String accountId) {
+        return isEntitlementRegistered(accountId, ENABLE_RMS_ON_DATALAKE);
     }
 }
