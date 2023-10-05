@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.converter.AvailabilityZoneConverter;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -70,6 +71,9 @@ public class InstanceMetadataServiceComponentTest {
 
     @Captor
     private ArgumentCaptor<InstanceMetaData> instanceMetaDataArgumentCaptor;
+
+    @Inject
+    private Clock clock;
 
     @Test
     public void saveInstanceAndGetUpdatedStack() {
@@ -229,5 +233,8 @@ public class InstanceMetadataServiceComponentTest {
 
         @MockBean
         private AvailabilityZoneConverter availabilityZoneConverter;
+
+        @MockBean
+        private Clock clock;
     }
 }

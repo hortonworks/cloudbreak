@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -17,6 +18,8 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
@@ -77,6 +81,12 @@ public class InstanceMetaDataServiceTest {
 
     @Mock
     private ImageService imageService;
+
+    @Mock
+    private Clock clock;
+
+    @Captor
+    private ArgumentCaptor<Set<InstanceMetaData>> instanceMetadataCaptor;
 
     private Set<InstanceMetaData> getInstancesFromStack() {
         Stack stack = initializeStackWithInstanceGroup();
@@ -187,7 +197,6 @@ public class InstanceMetaDataServiceTest {
 
     @Test
     public void testSaveInstanceAndGetUpdatedStackWhenAvailabilityZoneDataIsInheritedFromInstances() {
-
         InstanceMetaData im1 = new InstanceMetaData();
         im1.setAvailabilityZone("old-az1");
         im1.setSubnetId("old-s1");
@@ -231,7 +240,6 @@ public class InstanceMetaDataServiceTest {
 
     @Test
     public void testGetNonPrimaryGwInstances() {
-
         Set<InstanceMetaData> nonPrimaryGwInstances = underTest.getNonPrimaryGwInstances(createValidImSet());
         assertEquals(2, nonPrimaryGwInstances.size());
         assertTrue(nonPrimaryGwInstances.stream().anyMatch(im -> im.getInstanceId().equals("im2")));
@@ -241,10 +249,44 @@ public class InstanceMetaDataServiceTest {
 
     @Test
     public void testGetPrimaryGwInstance() {
-
         InstanceMetaData primaryGwInstance = underTest.getPrimaryGwInstance(createValidImSet());
         assertEquals("pgw", primaryGwInstance.getInstanceId());
         assertEquals(InstanceMetadataType.GATEWAY_PRIMARY, primaryGwInstance.getInstanceMetadataType());
+    }
+
+    @Test
+    public void testUpdateInstanceStatusOnUpscaleFailureShouldSetInstanceStatusToTerminated() {
+        underTest.updateInstanceStatusOnUpscaleFailure(Set.of(new InstanceMetaData()));
+
+        verify(clock).getCurrentTimeMillis();
+        verify(instanceMetaDataRepository).saveAll(instanceMetadataCaptor.capture());
+        Set<InstanceMetaData> savedInstanceMetadataSet = instanceMetadataCaptor.getValue();
+        assertEquals(InstanceStatus.TERMINATED, savedInstanceMetadataSet.iterator().next().getInstanceStatus());
+    }
+
+    @Test
+    public void testUpdateInstanceStatusOnUpscaleFailureShouldSetInstanceStatusToFailed() {
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setInstanceId(INSTANCE_ID_1);
+        underTest.updateInstanceStatusOnUpscaleFailure(Set.of(instanceMetaData));
+
+        verifyNoInteractions(clock);
+        verify(instanceMetaDataRepository).saveAll(instanceMetadataCaptor.capture());
+        Set<InstanceMetaData> savedInstanceMetadataSet = instanceMetadataCaptor.getValue();
+        assertEquals(InstanceStatus.FAILED, savedInstanceMetadataSet.iterator().next().getInstanceStatus());
+        assertEquals(INSTANCE_ID_1, savedInstanceMetadataSet.iterator().next().getInstanceId());
+    }
+
+    @Test
+    public void testUpdateInstanceStatusOnUpscaleFailureShouldNotModifyInstance() {
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setInstanceId(INSTANCE_ID_1);
+        instanceMetaData.setPrivateIp("private-ip");
+        instanceMetaData.setDiscoveryFQDN("fqdn");
+        instanceMetaData.setInstanceStatus(InstanceStatus.CREATED);
+        underTest.updateInstanceStatusOnUpscaleFailure(Set.of(instanceMetaData));
+
+        verifyNoInteractions(clock, instanceMetaDataRepository);
     }
 
     private Stack initializeStackWithInstanceGroup() {

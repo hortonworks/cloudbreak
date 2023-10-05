@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.common.model.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
@@ -56,6 +57,9 @@ public class InstanceMetaDataService {
 
     @Inject
     private ImageService imageService;
+
+    @Inject
+    private Clock clock;
 
     public void saveInstanceRequests(Stack stack, List<Group> groups) {
         Set<InstanceGroup> instanceGroups = stack.getInstanceGroups();
@@ -98,20 +102,12 @@ public class InstanceMetaDataService {
         return instanceMetaDataRepository.save(instanceMetaData);
     }
 
-    public Set<InstanceMetaData> getByInstanceId(Long stackId, String instanceId) {
-        return instanceMetaDataRepository.findAllByInstanceIdIn(stackId, Set.of(instanceId));
-    }
-
     public Set<InstanceMetaData> getByInstanceIds(Long stackId, Iterable<String> instanceIds) {
         return instanceMetaDataRepository.findAllByInstanceIdIn(stackId, instanceIds);
     }
 
     public Set<InstanceMetaData> getNotTerminatedByInstanceIds(Long stackId, Iterable<String> instanceIds) {
         return instanceMetaDataRepository.findAllNotTerminatedByInstanceIdIn(stackId, instanceIds);
-    }
-
-    public Optional<InstanceMetaData> getById(Long id) {
-        return instanceMetaDataRepository.findById(id);
     }
 
     private InstanceGroup getInstanceGroup(Collection<InstanceGroup> instanceGroups, String groupName) {
@@ -196,5 +192,27 @@ public class InstanceMetaDataService {
         List<SubnetIdWithResourceNameAndCrn> usedSubnets = instanceMetaDataRepository.findAllUsedSubnetsByEnvironmentCrn(environmentCrn);
         LOGGER.info("All used subnets ({}) for environment: {}", usedSubnets, environmentCrn);
         return usedSubnets;
+    }
+
+    public void updateInstanceStatusOnUpscaleFailure(Set<InstanceMetaData> notDeletedInstanceMetaDataSet) {
+        LOGGER.debug("Updating instance metadata status after failed upscale. Available instance metadatas: {}", notDeletedInstanceMetaDataSet);
+        Set<InstanceMetaData> instancesToUpdate = new HashSet<>();
+        notDeletedInstanceMetaDataSet.forEach(im -> {
+            if (StringUtils.isBlank(im.getInstanceId())) {
+                im.setInstanceStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.TERMINATED);
+                im.setTerminationDate(clock.getCurrentTimeMillis());
+                instancesToUpdate.add(im);
+            } else if (StringUtils.isAnyBlank(im.getPrivateIp(), im.getDiscoveryFQDN())
+                    || com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED == im.getInstanceStatus()) {
+                im.setInstanceStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.FAILED);
+                instancesToUpdate.add(im);
+            }
+        });
+        if (instancesToUpdate.isEmpty()) {
+            LOGGER.debug("There are no instances to update.");
+        } else {
+            LOGGER.warn("Updating the following instances status during failed upscale: {}", instancesToUpdate);
+            saveAll(instancesToUpdate);
+        }
     }
 }
