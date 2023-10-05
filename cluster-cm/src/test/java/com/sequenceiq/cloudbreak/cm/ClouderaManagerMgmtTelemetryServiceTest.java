@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -203,6 +204,77 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
     }
 
     @Test
+    public void testBuildTelemetryConfigListWithEnvironmentMetadataForWorkloadStack() {
+        // GIVEN
+        Stack stack = new Stack();
+        Cluster cluster = new Cluster();
+        cluster.setId(1L);
+        cluster.setName("cl1");
+        stack.setType(StackType.WORKLOAD);
+        stack.setCluster(cluster);
+        stack.setEnvironmentCrn("envCrn");
+        stack.setDatalakeCrn("datalakeCrn");
+        stack.setResourceCrn("datahubCrn");
+        stack.setName("datahubName");
+        stack.setCloudPlatform("AWS");
+        stack.setRegion("us-west-1");
+        String sdxContextName = "sdxName";
+        String sdxCrn = "crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId";
+        WorkloadAnalytics wa = new WorkloadAnalytics();
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("databus.header.environment.crn", "envCrn");
+        attributes.put("databus.header.environment.name", "envName");
+        attributes.put("databus.header.datalake.crn", "datalakeCrn");
+        attributes.put("databus.header.datalake.name", "datalakeName");
+        wa.setAttributes(attributes);
+        // WHEN
+        ApiConfigList result = underTest.buildTelemetryConfigList(stack, wa, sdxContextName, sdxCrn, null);
+        // THEN
+        assertTrue(containsSafatyValveWithValue(result, "databus.header.environment.crn", "envCrn"));
+        assertTrue(containsSafatyValveWithValue(result, "databus.header.environment.name", "envName"));
+        assertTrue(containsSafatyValveWithValue(result, "databus.header.datalake.crn", "datalakeCrn"));
+        assertTrue(containsSafatyValveWithValue(result, "databus.header.datalake.name", "datalakeName"));
+        assertTrue(containsSafatyValveWithValue(result, "databus.header.datahub.crn", "datahubCrn"));
+        assertTrue(containsSafatyValveWithValue(result, "databus.header.datahub.name", "datahubName"));
+        assertTrue(containsSafatyValveWithValue(result, "databus.header.cloudprovider.name", "AWS"));
+        assertTrue(containsSafatyValveWithValue(result, "databus.header.cloudprovider.region", "us-west-1"));
+    }
+
+    @Test
+    public void testBuildTelemetryConfigListWithEnvironmentMetadataForDatalakeStack() {
+        // GIVEN
+        Stack stack = new Stack();
+        Cluster cluster = new Cluster();
+        cluster.setId(1L);
+        cluster.setName("cl1");
+        String sdxCrn = "crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId";
+        String sdxContextName = "sdxName";
+        stack.setType(StackType.DATALAKE);
+        stack.setCluster(cluster);
+        stack.setEnvironmentCrn("envCrn");
+        stack.setResourceCrn(sdxCrn);
+        stack.setName(sdxContextName);
+        stack.setCloudPlatform("AWS");
+        stack.setRegion("us-west-1");
+        WorkloadAnalytics wa = new WorkloadAnalytics();
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("databus.header.environment.crn", "envCrn");
+        attributes.put("databus.header.environment.name", "envName");
+        attributes.put("databus.header.datalake.crn", sdxCrn);
+        attributes.put("databus.header.datalake.name", sdxContextName);
+        wa.setAttributes(attributes);
+        // WHEN
+        ApiConfigList result = underTest.buildTelemetryConfigList(stack, wa, sdxContextName, sdxCrn, null);
+        // THEN
+        assertTrue(containsSafatyValveWithValue(result, "databus.header.environment.crn", "envCrn"));
+        assertTrue(containsSafatyValveWithValue(result, "databus.header.environment.name", "envName"));
+        assertTrue(containsSafatyValveWithValue(result, "databus.header.datalake.crn", sdxCrn));
+        assertTrue(containsSafatyValveWithValue(result, "databus.header.datalake.name", sdxContextName));
+        assertTrue(containsSafatyValveWithValue(result, "databus.header.cloudprovider.name", "AWS"));
+        assertTrue(containsSafatyValveWithValue(result, "databus.header.cloudprovider.region", "us-west-1"));
+    }
+
+    @Test
     public void testBuildTelemetryConfigList() {
         // GIVEN
         Stack stack = new Stack();
@@ -225,16 +297,29 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         Cluster cluster = new Cluster();
         cluster.setId(1L);
         cluster.setName("cl1");
+        stack.setType(StackType.WORKLOAD);
         stack.setCluster(cluster);
+        stack.setEnvironmentCrn("envCrn");
+        stack.setDatalakeCrn("datalakeCrn");
+        stack.setResourceCrn("datahubCrn");
+        stack.setName("datahubName");
+        stack.setCloudPlatform("AWS");
+        stack.setRegion("us-west-1");
         Map<String, String> safetyValveMap = new HashMap<>();
         WorkloadAnalytics workloadAnalytics = new WorkloadAnalytics();
         workloadAnalytics.setDatabusEndpoint("customEndpoint");
         // WHEN
-        underTest.enrichWithSdxData(null, null, stack, workloadAnalytics, safetyValveMap);
+        underTest.enrichWithEnvironmentMetadata(null, null, stack, workloadAnalytics, safetyValveMap);
         // THEN
         assertTrue(safetyValveMap.containsKey("databus.header.sdx.id"));
         assertTrue(safetyValveMap.containsKey("databus.header.sdx.name"));
         assertEquals(safetyValveMap.get("databus.header.sdx.name"), "cl1-1");
+        assertEquals(safetyValveMap.get("databus.header.environment.crn"), "envCrn");
+        assertEquals(safetyValveMap.get("databus.header.datalake.crn"), "datalakeCrn");
+        assertEquals(safetyValveMap.get("databus.header.datahub.crn"), "datahubCrn");
+        assertEquals(safetyValveMap.get("databus.header.datahub.name"), "datahubName");
+        assertEquals(safetyValveMap.get("databus.header.cloudprovider.name"), "AWS");
+        assertEquals(safetyValveMap.get("databus.header.cloudprovider.region"), "us-west-1");
     }
 
     @Test
@@ -244,7 +329,7 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         WorkloadAnalytics workloadAnalytics = new WorkloadAnalytics();
         workloadAnalytics.setDatabusEndpoint("customEndpoint");
         // WHEN
-        underTest.enrichWithSdxData("mySdxName", "crn:cdp:iam:us-west-1:accountId:user:mySdxId", null, workloadAnalytics, safetyValveMap);
+        underTest.enrichWithEnvironmentMetadata("mySdxName", "crn:cdp:iam:us-west-1:accountId:user:mySdxId", null, workloadAnalytics, safetyValveMap);
         // THEN
         assertTrue(safetyValveMap.containsKey("databus.header.sdx.id"));
         assertTrue(safetyValveMap.containsKey("databus.header.sdx.name"));
@@ -259,19 +344,38 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         Cluster cluster = new Cluster();
         cluster.setId(1L);
         cluster.setName("cl1");
+        stack.setType(StackType.WORKLOAD);
         stack.setCluster(cluster);
+        stack.setEnvironmentCrn("envCrn");
+        stack.setDatalakeCrn("datalakeCrn");
+        stack.setResourceCrn("datahubCrn");
+        stack.setName("datahubName");
+        stack.setCloudPlatform("AWS");
+        stack.setRegion("us-west-1");
         Map<String, String> safetyValveMap = new HashMap<>();
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("databus.header.sdx.id", "mySdxId");
         attributes.put("databus.header.sdx.name", "mySdxName");
+        attributes.put("databus.header.environment.crn", "envCrn");
+        attributes.put("databus.header.environment.name", "envName");
+        attributes.put("databus.header.datalake.crn", "datalakeCrn");
+        attributes.put("databus.header.datalake.name", "datalakeName");
         WorkloadAnalytics workloadAnalytics = new WorkloadAnalytics();
         workloadAnalytics.setDatabusEndpoint("customEndpoint");
         workloadAnalytics.setAttributes(attributes);
         // WHEN
-        underTest.enrichWithSdxData(null, null, stack, workloadAnalytics, safetyValveMap);
+        underTest.enrichWithEnvironmentMetadata(null, null, stack, workloadAnalytics, safetyValveMap);
         // THEN
         assertEquals(safetyValveMap.get("databus.header.sdx.id"), "mySdxId");
         assertEquals(safetyValveMap.get("databus.header.sdx.name"), "mySdxName");
+        assertEquals(safetyValveMap.get("databus.header.sdx.id"), "mySdxId");
+        assertEquals(safetyValveMap.get("databus.header.sdx.name"), "mySdxName");
+        assertEquals(safetyValveMap.get("databus.header.environment.crn"), "envCrn");
+        assertEquals(safetyValveMap.get("databus.header.datalake.crn"), "datalakeCrn");
+        assertEquals(safetyValveMap.get("databus.header.datahub.crn"), "datahubCrn");
+        assertEquals(safetyValveMap.get("databus.header.datahub.name"), "datahubName");
+        assertEquals(safetyValveMap.get("databus.header.cloudprovider.name"), "AWS");
+        assertEquals(safetyValveMap.get("databus.header.cloudprovider.region"), "us-west-1");
     }
 
     @Test
@@ -309,5 +413,19 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
     private boolean containsConfigWithValue(ApiConfigList configList, String configKey, String configValue) {
         return configList.getItems().stream()
                 .anyMatch(c -> configKey.equals(c.getName()) && configValue.equals(c.getValue()));
+    }
+
+    private boolean containsSafatyValveWithValue(ApiConfigList configList, String configKey, String configValue) {
+        String safetyValve = configList.getItems()
+                .stream()
+                .filter(config -> "telemetrypublisher_safety_valve".equals(config.getName()))
+                .map(ApiConfig::getValue)
+                .findFirst()
+                .orElse("");
+
+        return Arrays.stream(safetyValve.split("\n"))
+                .map(line -> line.split("="))
+                .filter(parts -> parts.length == 2)
+                .anyMatch(parts -> parts[0].equals(configKey) && parts[1].equals(configValue));
     }
 }

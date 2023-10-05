@@ -83,6 +83,20 @@ public class ClouderaManagerMgmtTelemetryService {
     private static final String TELEMETRY_PROXY_PASSWORD = "telemetrypublisher_proxy_password";
 
     // Telemetry publisher - Safety valve settings
+    private static final String DATABUS_HEADER_ENVIRONMENT_CRN = "databus.header.environment.crn";
+
+    private static final String DATABUS_HEADER_DATALAKE_CRN = "databus.header.datalake.crn";
+
+    private static final String DATABUS_HEADER_DATALAKE_NAME = "databus.header.datalake.name";
+
+    private static final String DATABUS_HEADER_DATAHUB_CRN = "databus.header.datahub.crn";
+
+    private static final String DATABUS_HEADER_DATAHUB_NAME = "databus.header.datahub.name";
+
+    private static final String DATABUS_HEADER_CLOUDPROVIDER_NAME = "databus.header.cloudprovider.name";
+
+    private static final String DATABUS_HEADER_CLOUDPROVIDER_REGION = "databus.header.cloudprovider.region";
+
     private static final String DATABUS_HEADER_SDX_ID = "databus.header.sdx.id";
 
     private static final String DATABUS_HEADER_SDX_NAME = "databus.header.sdx.name";
@@ -200,7 +214,7 @@ public class ClouderaManagerMgmtTelemetryService {
         Map<String, String> telemetrySafetyValveMap = new HashMap<>();
         telemetrySafetyValveMap.put(TELEMETRY_WA_CLUSTER_TYPE_HEADER,
                 TELEMETRY_WA_DEFAULT_CLUSTER_TYPE);
-        enrichWithSdxData(sdxContextName, sdxCrn, stack, wa, telemetrySafetyValveMap);
+        enrichWithEnvironmentMetadata(sdxContextName, sdxCrn, stack, wa, telemetrySafetyValveMap);
         telemetrySafetyValveMap.put(TELEMETRY_UPLOAD_LOGS, "true");
         configsToUpdate.put(TELEMETRY_SAFETY_VALVE, createStringFromSafetyValveMap(telemetrySafetyValveMap));
         if (proxyConfig != null) {
@@ -230,18 +244,64 @@ public class ClouderaManagerMgmtTelemetryService {
     }
 
     @VisibleForTesting
-    void enrichWithSdxData(String sdxContextName, String sdxCrn, StackDtoDelegate stack, WorkloadAnalytics workloadAnalytics,
+    void enrichWithEnvironmentMetadata(
+            String sdxContextName,
+            String sdxCrn,
+            StackDtoDelegate stack,
+            WorkloadAnalytics workloadAnalytics,
             Map<String, String> telemetrySafetyValveMap) {
-        sdxContextName = StringUtils.isNotEmpty(sdxContextName)
-                ? sdxContextName : String.format("%s-%s", stack.getCluster().getName(), stack.getCluster().getId().toString());
-        String sdxId = sdxCrn != null && Crn.fromString(sdxCrn) != null
-                ? Crn.fromString(sdxCrn).getResource() : UUID.nameUUIDFromBytes(sdxContextName.getBytes()).toString();
+
+        String sdxName = getSdxName(stack, sdxContextName);
+        String sdxId = getSdxId(sdxCrn, sdxName);
+        telemetrySafetyValveMap.put(DATABUS_HEADER_SDX_NAME, sdxName);
         telemetrySafetyValveMap.put(DATABUS_HEADER_SDX_ID, sdxId);
-        telemetrySafetyValveMap.put(DATABUS_HEADER_SDX_NAME, sdxContextName);
-        if (workloadAnalytics.getAttributes() != null) {
+
+        addStackMetadata(stack, telemetrySafetyValveMap);
+        addWorkloadAnalyticsAttributes(workloadAnalytics, telemetrySafetyValveMap);
+    }
+
+    private String getSdxId(String sdxCrn, String sdxContextName) {
+        if (StringUtils.isNotEmpty(sdxCrn) && Crn.fromString(sdxCrn) != null) {
+            return Crn.fromString(sdxCrn).getResource();
+        }
+        return UUID.nameUUIDFromBytes(sdxContextName.getBytes()).toString();
+    }
+
+    private String getSdxName(StackDtoDelegate stack, String sdxContextName) {
+        if (StringUtils.isNotEmpty(sdxContextName)) {
+            return sdxContextName;
+        }
+        return String.format("%s-%s", stack.getCluster().getName(), stack.getCluster().getId().toString());
+    }
+
+    private void addStackMetadata(StackDtoDelegate stack, Map<String, String> telemetrySafetyValveMap) {
+        if (stack == null) {
+            return;
+        }
+        addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_ENVIRONMENT_CRN, stack.getEnvironmentCrn());
+        addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_CLOUDPROVIDER_NAME, stack.getCloudPlatform());
+        addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_CLOUDPROVIDER_REGION, stack.getRegion());
+
+        if (stack.getType() == StackType.WORKLOAD) {
+            addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_DATAHUB_CRN, stack.getResourceCrn());
+            addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_DATAHUB_NAME, stack.getName());
+            addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_DATALAKE_CRN, stack.getDatalakeCrn());
+        } else if (stack.getType() == StackType.DATALAKE) {
+            addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_DATALAKE_CRN, stack.getResourceCrn());
+        }
+    }
+
+    private void addWorkloadAnalyticsAttributes(WorkloadAnalytics workloadAnalytics, Map<String, String> telemetrySafetyValveMap) {
+        if (workloadAnalytics != null && workloadAnalytics.getAttributes() != null) {
             for (Map.Entry<String, Object> entry : workloadAnalytics.getAttributes().entrySet()) {
                 telemetrySafetyValveMap.put(entry.getKey(), ObjectUtils.defaultIfNull(entry.getValue().toString(), ""));
             }
+        }
+    }
+
+    private void addIfNotEmpty(Map<String, String> map, String key, String value) {
+        if (StringUtils.isNotEmpty(value)) {
+            map.put(key, value);
         }
     }
 

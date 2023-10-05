@@ -286,8 +286,11 @@ public class TelemetryConverterTest {
         loggingResponse.setS3(s3Params);
         response.setLogging(loggingResponse);
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
-        sdxClusterResponse.setCrn("crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId");
+        String sdxCrn = "crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId";
+        sdxClusterResponse.setCrn(sdxCrn);
         sdxClusterResponse.setName("sdxName");
+        sdxClusterResponse.setEnvironmentCrn("envCrn");
+        sdxClusterResponse.setEnvironmentName("envName");
         // WHEN
         TelemetryRequest result = underTest.convert(response, sdxClusterResponse);
         // THEN
@@ -295,6 +298,10 @@ public class TelemetryConverterTest {
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
         assertEquals("sdxId", result.getWorkloadAnalytics().getAttributes().get("databus.header.sdx.id").toString());
         assertEquals("sdxName", result.getWorkloadAnalytics().getAttributes().get("databus.header.sdx.name").toString());
+        assertEquals("envCrn", result.getWorkloadAnalytics().getAttributes().get("databus.header.environment.crn").toString());
+        assertEquals("envName", result.getWorkloadAnalytics().getAttributes().get("databus.header.environment.name").toString());
+        assertEquals("sdxName", result.getWorkloadAnalytics().getAttributes().get("databus.header.datalake.name").toString());
+        assertEquals(sdxCrn, result.getWorkloadAnalytics().getAttributes().get("databus.header.datalake.crn").toString());
     }
 
     @Test
@@ -302,14 +309,21 @@ public class TelemetryConverterTest {
         // GIVEN
         TelemetryResponse response = new TelemetryResponse();
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
-        sdxClusterResponse.setCrn("crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId");
+        String sdxCrn = "crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId";
+        sdxClusterResponse.setCrn(sdxCrn);
         sdxClusterResponse.setName("sdxName");
+        sdxClusterResponse.setEnvironmentCrn("envCrn");
+        sdxClusterResponse.setEnvironmentName("envName");
         // WHEN
         TelemetryRequest result = underTest.convert(response, sdxClusterResponse);
         // THEN
         assertTrue(result.getFeatures().getWorkloadAnalytics().getEnabled());
         assertEquals("sdxId", result.getWorkloadAnalytics().getAttributes().get("databus.header.sdx.id").toString());
         assertEquals("sdxName", result.getWorkloadAnalytics().getAttributes().get("databus.header.sdx.name").toString());
+        assertEquals("envCrn", result.getWorkloadAnalytics().getAttributes().get("databus.header.environment.crn").toString());
+        assertEquals("envName", result.getWorkloadAnalytics().getAttributes().get("databus.header.environment.name").toString());
+        assertEquals("sdxName", result.getWorkloadAnalytics().getAttributes().get("databus.header.datalake.name").toString());
+        assertEquals(sdxCrn, result.getWorkloadAnalytics().getAttributes().get("databus.header.datalake.crn").toString());
     }
 
     @Test
@@ -319,6 +333,8 @@ public class TelemetryConverterTest {
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
         sdxClusterResponse.setCrn("crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId");
         sdxClusterResponse.setName("sdxName");
+        sdxClusterResponse.setEnvironmentCrn("envCrn");
+        sdxClusterResponse.setEnvironmentName("envName");
         FeaturesResponse featuresResponse = new FeaturesResponse();
         featuresResponse.addWorkloadAnalytics(false);
         response.setFeatures(featuresResponse);
@@ -336,6 +352,8 @@ public class TelemetryConverterTest {
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
         sdxClusterResponse.setCrn("crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId");
         sdxClusterResponse.setName("sdxName");
+        sdxClusterResponse.setEnvironmentCrn("envCrn");
+        sdxClusterResponse.setEnvironmentName("envName");
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, false, "", null);
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, null, null, false);
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null, false);

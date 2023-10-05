@@ -45,6 +45,14 @@ public class TelemetryConverter {
 
     private static final String DATABUS_HEADER_SDX_NAME = "databus.header.sdx.name";
 
+    private static final String DATABUS_HEADER_ENVIRONMENT_CRN = "databus.header.environment.crn";
+
+    private static final String DATABUS_HEADER_ENVIRONMENT_NAME = "databus.header.environment.name";
+
+    private static final String DATABUS_HEADER_DATALAKE_CRN = "databus.header.datalake.crn";
+
+    private static final String DATABUS_HEADER_DATALAKE_NAME = "databus.header.datalake.name";
+
     private final EntitlementService entitlementService;
 
     private final boolean telemetryPublisherEnabled;
@@ -209,7 +217,7 @@ public class TelemetryConverter {
             if (response.getFeatures().getWorkloadAnalytics().getEnabled()) {
                 LOGGER.debug("Workload analytics feature is enabled. Filling telemetry request with datalake details.");
                 workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
-                workloadAnalyticsRequest.setAttributes(enrichWithSdxData(waDefaultAttributes, sdxClusterResponse));
+                workloadAnalyticsRequest.setAttributes(enrichWithEnvironmentMetadata(waDefaultAttributes, sdxClusterResponse));
             } else {
                 LOGGER.debug("Workload analytics feature is disabled.");
             }
@@ -217,7 +225,7 @@ public class TelemetryConverter {
             if (telemetryPublisherDefaultValue) {
                 LOGGER.debug("Filling workload analytics request (default).");
                 workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
-                workloadAnalyticsRequest.setAttributes(enrichWithSdxData(waDefaultAttributes, sdxClusterResponse));
+                workloadAnalyticsRequest.setAttributes(enrichWithEnvironmentMetadata(waDefaultAttributes, sdxClusterResponse));
             } else {
                 LOGGER.debug("Workload analytics feature is disabled (default value is false).");
             }
@@ -418,16 +426,24 @@ public class TelemetryConverter {
         return monitoringRequest;
     }
 
-    private Map<String, Object> enrichWithSdxData(Map<String, Object> attributes,
+    private Map<String, Object> enrichWithEnvironmentMetadata(Map<String, Object> attributes,
             SdxClusterResponse sdxClusterResponse) {
         Map<String, Object> newAttributes = new HashMap<>(attributes);
         if (sdxClusterResponse != null) {
             if (StringUtils.isNotEmpty(sdxClusterResponse.getCrn())) {
                 newAttributes.put(DATABUS_HEADER_SDX_ID,
                         Crn.fromString(sdxClusterResponse.getCrn()).getResource());
+                newAttributes.put(DATABUS_HEADER_DATALAKE_CRN, sdxClusterResponse.getCrn());
             }
             if (StringUtils.isNotEmpty(sdxClusterResponse.getName())) {
                 newAttributes.put(DATABUS_HEADER_SDX_NAME, sdxClusterResponse.getName());
+                newAttributes.put(DATABUS_HEADER_DATALAKE_NAME, sdxClusterResponse.getName());
+            }
+            if (StringUtils.isNotEmpty(sdxClusterResponse.getEnvironmentCrn())) {
+                newAttributes.put(DATABUS_HEADER_ENVIRONMENT_CRN, sdxClusterResponse.getEnvironmentCrn());
+            }
+            if (StringUtils.isNotEmpty(sdxClusterResponse.getEnvironmentName())) {
+                newAttributes.put(DATABUS_HEADER_ENVIRONMENT_NAME, sdxClusterResponse.getEnvironmentName());
             }
         }
         return newAttributes;
