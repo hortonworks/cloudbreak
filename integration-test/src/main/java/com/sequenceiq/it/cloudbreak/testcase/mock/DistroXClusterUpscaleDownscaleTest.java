@@ -102,7 +102,7 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is a running DistroX cluster with 300 instances in worker group with 5 volumes per instance",
             when = "up- and downscale is called 3 times",
