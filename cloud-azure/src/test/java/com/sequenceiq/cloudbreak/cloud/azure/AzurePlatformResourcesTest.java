@@ -78,6 +78,9 @@ class AzurePlatformResourcesTest {
     private AzureClientService azureClientService;
 
     @Mock
+    private AzureAddressPrefixProvider azureAddressPrefixProvider;
+
+    @Mock
     private AzureCloudSubnetParametersService azureCloudSubnetParametersService;
 
     @InjectMocks
@@ -426,6 +429,7 @@ class AzurePlatformResourcesTest {
                 .withDelegations(List.of())
                 .withPrivateEndpointNetworkPolicies(VirtualNetworkPrivateEndpointNetworkPolicies.fromString("")));
         when(network.subnets()).thenReturn(Map.of("subnet", subnet));
+        when(azureAddressPrefixProvider.getAddressPrefix(any())).thenReturn("10.0.0.0/16");
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureClient.getNetworkByResourceGroup("resourcegroup", "networkid")).thenReturn(network);
         CloudNetworks actualNetworks = underTest.networks(cloudCredential, region, filter);
