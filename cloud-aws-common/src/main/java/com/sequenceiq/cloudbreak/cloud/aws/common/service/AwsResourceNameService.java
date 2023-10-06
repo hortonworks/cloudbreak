@@ -86,8 +86,9 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         String name;
         String resourceNameWithScheme = "LB" + scheme;
         int numberOfAppends = 2;
+        int stackNameLength = stackName.length();
         int maxLengthOfStackName = maxLoadBalancerResourceNameLength - getDefaultHashLength() - resourceNameWithScheme.length() - numberOfAppends;
-        String reducedStackName = String.valueOf(stackName).substring(0, maxLengthOfStackName);
+        String reducedStackName = String.valueOf(stackName).substring(0, stackNameLength < maxLengthOfStackName ? stackNameLength : maxLengthOfStackName);
         name = normalize(reducedStackName);
         name = adjustPartLength(name);
         name = appendPart(name, resourceNameWithScheme);
