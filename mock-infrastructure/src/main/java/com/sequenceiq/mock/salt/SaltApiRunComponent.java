@@ -74,7 +74,7 @@ public class SaltApiRunComponent {
             if (split1.length == 2) {
                 value = split1[1];
             }
-            if (split1[0].equals("tgt")) {
+            if (split1[0].equals("tgt") || split1[0].equals("match")) {
                 List<String> values = Arrays.asList(value.split(","));
                 params.put(split1[0], values);
             } else {

@@ -104,6 +104,15 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
+            given = "there is a running DistroX cluster with 300 instances in worker group with 5 volumes per instance",
+            when = "up- and downscale is called 3 times",
+            then = "the cluster should be available")
+    public void testScaleDownAndUpWithLargeNodes(MockedTestContext testContext, ITestContext testNgContext) {
+        scalingTestWithManyNodes(testContext, 300, 150, 125, 3);
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
             given = "there is a running DistroX cluster with 398 instances in worker group",
             when = "up- and downscale is called 30 times",
             then = "the cluster should be available")
