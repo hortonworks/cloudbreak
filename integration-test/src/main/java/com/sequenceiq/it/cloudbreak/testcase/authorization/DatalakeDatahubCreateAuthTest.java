@@ -12,11 +12,11 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
+import com.sequenceiq.it.cloudbreak.config.user.TestUserSelectors;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -48,9 +48,6 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
     private UmsTestClient umsTestClient;
 
     @Inject
-    private CloudbreakActor cloudbreakActor;
-
-    @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
@@ -58,10 +55,11 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN);
-        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_B);
-        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
-        useRealUmsUser(testContext, AuthUserKeys.ZERO_RIGHTS);
+        testContext.getTestUsers().setSelector(TestUserSelectors.UMS_ONLY);
+        testContext.as(AuthUserKeys.ACCOUNT_ADMIN);
+        testContext.as(AuthUserKeys.ENV_CREATOR_B);
+        testContext.as(AuthUserKeys.ENV_CREATOR_A);
+        testContext.as(AuthUserKeys.ZERO_RIGHTS);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -75,7 +73,7 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
         String clouderaManager = "cm";
         String cluster = "cmcluster";
 
-        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
+        testContext.as(AuthUserKeys.ENV_CREATOR_A);
         createDefaultImageCatalog(testContext);
         testContext
                 .given(CredentialTestDto.class)
@@ -103,12 +101,12 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                     .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_A)))
-                .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(testContext.getTestUsers().getUserByLabel(AuthUserKeys.ENV_CREATOR_A)))
+                .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(testContext.getTestUsers().getUserByLabel(AuthUserKeys.ENV_CREATOR_B)))
                 .whenException(sdxTestClient.detailedDescribeInternal(), ForbiddenException.class, expectedMessage("Doesn't have " +
                         "'datalake/describeDetailedDatalake' right on any of the environment[(]s[)] " + environmentDatalakePattern(testContext) +
                         " or on " + datalakePattern(testContext.get(sdxInternal).getName()))
-                        .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
+                        .withWho(testContext.getTestUsers().getUserByLabel(AuthUserKeys.ZERO_RIGHTS)))
                 .validate();
 
         testContext
@@ -117,7 +115,7 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                 .whenException(sdxTestClient.renewDatalakeCertificateV4(), ForbiddenException.class, expectedMessage("Doesn't have 'datalake/repairDatalake'" +
                         " right on any of the environment[(]s[)] " + environmentDatalakePattern(testContext) + " or on " +
                         datalakePattern(testContext.get(sdxInternal).getName()))
-                        .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
+                        .withWho(testContext.getTestUsers().getUserByLabel(AuthUserKeys.ZERO_RIGHTS)))
                 .validate();
     }
 

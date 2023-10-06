@@ -28,7 +28,7 @@ public class AssignResourceRoleUserAction extends AbstractUmsAction<UmsTestDto> 
 
     @Override
     protected UmsTestDto umsAction(TestContext testContext, UmsTestDto testDto, UmsClient client) throws Exception {
-        CloudbreakUser user = testContext.getRealUmsUserByKey(userKey);
+        CloudbreakUser user = testContext.getTestUsers().getUserByLabel(userKey);
         String userCrn = user.getCrn();
         String resourceCrn = testDto.getRequest().getResourceCrn();
         String resourceRole = UmsClientUtils.getResourceRoleCrn(testDto, client, regionAwareInternalCrnGeneratorFactory);

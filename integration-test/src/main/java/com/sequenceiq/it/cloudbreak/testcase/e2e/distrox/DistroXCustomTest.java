@@ -17,15 +17,11 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
-import com.sequenceiq.it.util.TestParameter;
 
 public class DistroXCustomTest extends AbstractE2ETest {
 
     @Inject
     private DistroXTestClient distroXTestClient;
-
-    @Inject
-    private TestParameter testParameter;
 
     @Inject
     private CredentialTestClient credentialTestClient;

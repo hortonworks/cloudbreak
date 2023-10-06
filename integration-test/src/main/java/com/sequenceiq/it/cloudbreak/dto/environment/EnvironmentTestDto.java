@@ -1,8 +1,6 @@
 package com.sequenceiq.it.cloudbreak.dto.environment;
 
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ARCHIVED;
-import static com.sequenceiq.it.cloudbreak.config.azure.AzureMarketplaceImageProperties.AZURE_MARKETPLACE_FREEIPA_CATALOG_URL;
-import static com.sequenceiq.it.cloudbreak.config.azure.AzureMarketplaceImageProperties.AZURE_MARKETPLACE_FREEIPA_IMAGE_UUID;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static java.util.Objects.isNull;
@@ -43,10 +41,11 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnviro
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.it.cloudbreak.Prototype;
-import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.assign.Assignable;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
+import com.sequenceiq.it.cloudbreak.config.azure.AzureMarketplaceImageProperties;
+import com.sequenceiq.it.cloudbreak.config.azure.ResourceGroupProperties;
 import com.sequenceiq.it.cloudbreak.context.Clue;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -70,6 +69,12 @@ public class EnvironmentTestDto
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
+
+    @Inject
+    private ResourceGroupProperties resourceGroupProperties;
+
+    @Inject
+    private AzureMarketplaceImageProperties azureMarketplaceImageProperties;
 
     private Collection<SimpleEnvironmentResponse> simpleResponses;
 
@@ -107,7 +112,7 @@ public class EnvironmentTestDto
                 .withAuthentication(getTestContext().given(EnvironmentAuthenticationTestDto.class))
                 .withCloudplatform(getCloudPlatform().toString())
                 .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)
-                .withResourceGroup(getResourceGroupUsage(), getResourceGroupName())
+                .withResourceGroup(resourceGroupProperties.getResourceGroupUsage(), resourceGroupProperties.getResourceGroupName())
                 .withNetwork()
                 .withCloudStorageValidation(CloudStorageValidation.ENABLED)
                 .withTunnel(getTestContext().getTunnel());
@@ -427,20 +432,12 @@ public class EnvironmentTestDto
         return this;
     }
 
-    private String getResourceGroupName() {
-        return getTestParameter().get(ResourceGroupTest.AZURE_RESOURCE_GROUP_NAME);
-    }
-
-    private String getResourceGroupUsage() {
-        return getTestParameter().get(ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE);
-    }
-
     private String getMarketplaceFreeIpaCatalogUrl() {
-        return getTestParameter().get(AZURE_MARKETPLACE_FREEIPA_CATALOG_URL);
+        return azureMarketplaceImageProperties.getCatalogUrl();
     }
 
     private String getMarketplaceFreeIpaImageUuid() {
-        return getTestParameter().get(AZURE_MARKETPLACE_FREEIPA_IMAGE_UUID);
+        return azureMarketplaceImageProperties.getImageUuid();
     }
 
     @Override

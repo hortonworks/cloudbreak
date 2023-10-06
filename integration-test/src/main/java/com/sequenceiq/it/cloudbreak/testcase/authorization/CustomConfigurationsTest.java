@@ -11,8 +11,10 @@ import javax.ws.rs.ForbiddenException;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.CustomConfigurationPropertyParameters;
-import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
+import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.client.CustomConfigurationsTestClient;
+import com.sequenceiq.it.cloudbreak.config.user.TestUserSelectors;
+import com.sequenceiq.it.cloudbreak.config.user.TestUsers;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.customconfigs.CustomConfigurationsTestDto;
@@ -28,15 +30,13 @@ public class CustomConfigurationsTest extends AbstractIntegrationTest {
     @Inject
     private CustomConfigurationsTestClient testClient;
 
-    @Inject
-    private CloudbreakActor cloudbreakActor;
-
     @Override
     protected void setupTest(TestContext testContext) {
-        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
-        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_B);
-        useRealUmsUser(testContext, AuthUserKeys.ZERO_RIGHTS);
-        useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN);
+        testContext.getTestUsers().setSelector(TestUserSelectors.UMS_ONLY);
+        testContext.as(AuthUserKeys.ENV_CREATOR_A);
+        testContext.as(AuthUserKeys.ENV_CREATOR_B);
+        testContext.as(AuthUserKeys.ZERO_RIGHTS);
+        testContext.as(AuthUserKeys.ACCOUNT_ADMIN);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -46,8 +46,12 @@ public class CustomConfigurationsTest extends AbstractIntegrationTest {
             then = "only owner of the custom configurations should be able to delete or describe it"
     )
     public void testCustomConfigurationsAction(TestContext testContext) {
-        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
-        testContext
+        TestUsers testUsers = testContext.getTestUsers();
+        CloudbreakUser envCreatorB = testUsers.getUserByLabel(AuthUserKeys.ENV_CREATOR_B);
+        CloudbreakUser envCreatorA = testUsers.getUserByLabel(AuthUserKeys.ENV_CREATOR_A);
+        CloudbreakUser zeroRights = testUsers.getUserByLabel(AuthUserKeys.ZERO_RIGHTS);
+
+        testContext.as(AuthUserKeys.ENV_CREATOR_A)
                 .given(CustomConfigurationsTestDto.class)
                 .withConfigurations(PROPERTIES)
                 .when(testClient.createV4())
@@ -61,11 +65,11 @@ public class CustomConfigurationsTest extends AbstractIntegrationTest {
                     assertThat(dto.getCustomConfigsResponses().getResponses()).isNotEmpty();
                     return dto;
                 })
-                .whenException(testClient.getV4(), ForbiddenException.class, who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .whenException(testClient.deleteV4(), ForbiddenException.class, who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .whenException(testClient.getV4(), ForbiddenException.class, who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
-                .whenException(testClient.deleteV4(), ForbiddenException.class, who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
-                .when(testClient.deleteV4(), who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_A)))
+                .whenException(testClient.getV4(), ForbiddenException.class, who(envCreatorB))
+                .whenException(testClient.deleteV4(), ForbiddenException.class, who(envCreatorB))
+                .whenException(testClient.getV4(), ForbiddenException.class, who(zeroRights))
+                .whenException(testClient.deleteV4(), ForbiddenException.class, who(zeroRights))
+                .when(testClient.deleteV4(), who(envCreatorA))
                 .when(testClient.listV4())
                 .then((tc, dto, client) -> {
                     assertThat(dto.getCustomConfigsResponses()

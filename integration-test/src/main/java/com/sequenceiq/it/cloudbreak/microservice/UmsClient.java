@@ -19,6 +19,18 @@ public class UmsClient<E extends Enum<E>, W extends WaitObject> extends Microser
 
     private GrpcUmsClient umsClient;
 
+    public UmsClient(String umsHost, int umsPort) {
+        UmsClientConfig clientConfig = new UmsClientConfig();
+        Field callingServiceName = ReflectionUtils.findField(UmsClientConfig.class, "callingServiceName");
+        ReflectionUtils.makeAccessible(callingServiceName);
+        ReflectionUtils.setField(callingServiceName, clientConfig, "cloudbreak");
+        Field grpcTimeoutSec = ReflectionUtils.findField(UmsClientConfig.class, "grpcTimeoutSec");
+        ReflectionUtils.makeAccessible(grpcTimeoutSec);
+        ReflectionUtils.setField(grpcTimeoutSec, clientConfig, 60L);
+        umsClient = GrpcUmsClient.createClient(
+                UmsChannelConfig.newManagedChannelWrapper(umsHost, umsPort), clientConfig);
+    }
+
     @Override
     public FlowPublicEndpoint flowPublicEndpoint() {
         throw new TestFailException("Flow does not support by ums client");
@@ -34,18 +46,8 @@ public class UmsClient<E extends Enum<E>, W extends WaitObject> extends Microser
         return umsClient;
     }
 
-    public static synchronized UmsClient createUmsClient(String umsHost, int umsPort) {
-        UmsClient clientEntity = new UmsClient();
-        UmsClientConfig clientConfig = new UmsClientConfig();
-        Field callingServiceName = ReflectionUtils.findField(UmsClientConfig.class, "callingServiceName");
-        ReflectionUtils.makeAccessible(callingServiceName);
-        ReflectionUtils.setField(callingServiceName, clientConfig, "cloudbreak");
-        Field grpcTimeoutSec = ReflectionUtils.findField(UmsClientConfig.class, "grpcTimeoutSec");
-        ReflectionUtils.makeAccessible(grpcTimeoutSec);
-        ReflectionUtils.setField(grpcTimeoutSec, clientConfig, 60L);
-        clientEntity.umsClient = GrpcUmsClient.createClient(
-                UmsChannelConfig.newManagedChannelWrapper(umsHost, umsPort), clientConfig);
-        return clientEntity;
+    public static UmsClient createUmsClient(String umsHost, int umsPort) {
+        return new UmsClient(umsHost, umsPort);
     }
 
     @Override

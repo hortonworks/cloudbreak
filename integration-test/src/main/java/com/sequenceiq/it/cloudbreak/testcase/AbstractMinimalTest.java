@@ -18,8 +18,6 @@ import org.springframework.boot.test.context.ConfigDataApplicationContextInitial
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.ITestContext;
-import org.testng.ITestResult;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -31,6 +29,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
+import com.sequenceiq.it.cloudbreak.config.testinformation.TestInformation;
+import com.sequenceiq.it.cloudbreak.config.testinformation.TestInformationService;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.E2ETestContext;
 import com.sequenceiq.it.cloudbreak.context.MeasuredTestContext;
@@ -40,11 +40,9 @@ import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription.TestCaseDescriptionBuilder;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.exception.TestCaseDescriptionMissingException;
-import com.sequenceiq.it.cloudbreak.mock.ThreadLocalProfiles;
 import com.sequenceiq.it.config.AuditBeanConfig;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
-import com.sequenceiq.it.util.TestParameter;
 
 @ContextConfiguration(classes = {IntegrationTestConfiguration.class, AuditBeanConfig.class},
         initializers = ConfigDataApplicationContextInitializer.class)
@@ -83,7 +81,7 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
     private CommonClusterManagerProperties commonClusterManagerProperties;
 
     @Inject
-    private TestParameter testParameter;
+    private TestInformationService testInformationService;
 
     @Value("${integrationtest.cleanup.purge:false}")
     private boolean purge;
@@ -104,25 +102,12 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
         }
     }
 
-    /**
-     * It is invoked before the execution of each test case, where defining all the required test parameters and contexts.
-     *
-     * Note:
-     * Test Label has been defined also as Test Parameter (as a backup solution for local test runs), because of the MDC
-     * is beeing lost in case of local run in IDEA.
-     * This is a special case and only occur when we are running one of the E2E test in IDEA with the IDEA Play option.
-     * When the request processed by multiple threads. This means that setting the MDC context at the beginning of the
-     * request is not anymore an option.
-     *
-     * @param method the name of the test case
-     * @param params all the available test parameters
-     */
     @BeforeMethod
     public void beforeTest(Method method, Object[] params) {
-        LOGGER.info("Creating Test Label at Mapped Diagnostic Context and Test Parameter. " +
+        LOGGER.info("Creating Test Label at Mapped Diagnostic Context. " +
                 "This label is used for the Cloud Storage path of the E2E tests', based on " +
                 "suite and case names...");
-        testParameter.put("testlabel", method.getDeclaringClass().getSimpleName() + '.' + method.getName());
+        testInformationService.setTestInformation(new TestInformation(method.getDeclaringClass().getSimpleName(), method.getName()));
         MDC.put("testlabel", method.getDeclaringClass().getSimpleName() + '.' + method.getName());
         TestContext testContext = (TestContext) params[0];
         testContext.setTestMethodName(method.getName());
@@ -158,20 +143,12 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
                 .orElseThrow(() -> new TestCaseDescriptionMissingException(method.getName()));
     }
 
-    @AfterMethod
-    public void afterMethod(Method method, ITestResult testResult) {
-        MDC.put("testlabel", null);
-    }
-
     @AfterMethod(alwaysRun = true)
     public void tearDown(Object[] data) {
+        MDC.put("testlabel", null);
+        testInformationService.removeTestInformation();
         LOGGER.info("Tear down context");
         ((TestContext) data[0]).cleanupTestContext();
-    }
-
-    @AfterClass(alwaysRun = true)
-    public void cleanSharedObjects() {
-        ThreadLocalProfiles.clearProfiles();
     }
 
     @DataProvider(name = TEST_CONTEXT_WITH_MOCK)

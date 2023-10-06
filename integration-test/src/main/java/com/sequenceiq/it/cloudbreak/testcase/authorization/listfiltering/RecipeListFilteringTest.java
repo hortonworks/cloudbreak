@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4R
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
+import com.sequenceiq.it.cloudbreak.config.user.TestUserSelectors;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
@@ -38,9 +39,11 @@ public class RecipeListFilteringTest extends AbstractIntegrationTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        useRealUmsUser(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN);
-        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_A);
-        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_B);
+        testContext.getTestUsers().setSelector(TestUserSelectors.UMS_ONLY);
+
+        testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
+        testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
+        testContext.as(AuthUserKeys.USER_ENV_CREATOR_B);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -49,10 +52,10 @@ public class RecipeListFilteringTest extends AbstractIntegrationTest {
             when = "users share with each other",
             then = "they see the other's recipe in the list")
     public void testRecipeListFiltering(TestContext testContext) {
-        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_A);
+        testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
         RecipeTestDto recipeA = resourceCreator.createDefaultRecipe(testContext);
 
-        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_B);
+        testContext.as(AuthUserKeys.USER_ENV_CREATOR_B);
         RecipeTestDto recipeB = resourceCreator.createNewRecipe(testContext);
 
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, recipeA.getName());
@@ -82,11 +85,11 @@ public class RecipeListFilteringTest extends AbstractIntegrationTest {
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, recipeA.getName(), recipeB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, recipeA.getName(), recipeB.getName());
 
-        useRealUmsUser(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN);
+        testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
     }
 
     private void assertUserDoesNotSeeAnyOf(TestContext testContext, String user, String... names) {
-        useRealUmsUser(testContext, user);
+        testContext.as(user);
         Assertions.assertThat(testContext.given(RecipeTestDto.class).getAll(testContext.getMicroserviceClient(CloudbreakClient.class))
                 .stream()
                 .map(RecipeViewV4Response::getName)
@@ -95,7 +98,7 @@ public class RecipeListFilteringTest extends AbstractIntegrationTest {
     }
 
     private void assertUserSeesAll(TestContext testContext, String user, String... names) {
-        useRealUmsUser(testContext, user);
+        testContext.as(user);
         List<String> visibleNames = testContext.given(RecipeTestDto.class).getAll(testContext.getMicroserviceClient(CloudbreakClient.class))
                 .stream()
                 .map(RecipeViewV4Response::getName)

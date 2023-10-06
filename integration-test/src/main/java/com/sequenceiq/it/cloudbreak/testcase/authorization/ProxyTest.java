@@ -21,9 +21,9 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
-import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
+import com.sequenceiq.it.cloudbreak.config.user.TestUserSelectors;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -37,9 +37,6 @@ public class ProxyTest extends AbstractIntegrationTest {
     private ProxyTestClient proxyTestClient;
 
     @Inject
-    private CloudbreakActor cloudbreakActor;
-
-    @Inject
     private UmsTestClient umsTestClient;
 
     @Inject
@@ -47,9 +44,11 @@ public class ProxyTest extends AbstractIntegrationTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        useRealUmsUser(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN);
-        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_A);
-        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_B);
+        testContext.getTestUsers().setSelector(TestUserSelectors.UMS_ONLY);
+
+        testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
+        testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
+        testContext.as(AuthUserKeys.USER_ENV_CREATOR_B);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -70,7 +69,7 @@ public class ProxyTest extends AbstractIntegrationTest {
     private void createTest(TestContext testContext, String owner, String other, Map<String, Pair<Crn, String>> proxyMap) {
         testContext.given(ProxyTestDto.class)
                 .withGeneratedName()
-                .when(proxyTestClient.create(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.USER_ACCOUNT_ADMIN)))
+                .when(proxyTestClient.create(), RunningParameter.who(testContext.getTestUsers().getUserByLabel(AuthUserKeys.USER_ACCOUNT_ADMIN)))
                 .then((context, dto, client) -> {
                     Pair<Crn, String> crnNamePair = Pair.of(Crn.safeFromString(dto.getCrn()), dto.getName());
                     proxyMap.put(owner, crnNamePair);
@@ -82,32 +81,32 @@ public class ProxyTest extends AbstractIntegrationTest {
                 .when(umsTestClient.assignResourceRole(owner, regionAwareInternalCrnGeneratorFactory))
                 .given(ProxyTestDto.class)
                 .withName(proxyMap.get(owner).getValue())
-                .when(proxyTestClient.get(), RunningParameter.who(cloudbreakActor.useRealUmsUser(owner)))
+                .when(proxyTestClient.get(), RunningParameter.who(testContext.getTestUsers().getUserByLabel((owner))))
                 .then((context, dto, client) -> {
                     Assertions.assertThat(dto.getResponse().getName()).isEqualTo(context.get(ProxyTestDto.class).getName());
                     return dto;
                 })
                 .whenException(proxyTestClient.get(), ForbiddenException.class,
                         expectedMessage("Doesn't have 'environments/useSharedResource' right on proxyConfig " +
-                                proxyConfigPattern(testContext.get(ProxyTestDto.class).getName())).withWho(cloudbreakActor.useRealUmsUser(other)))
+                                proxyConfigPattern(testContext.get(ProxyTestDto.class).getName())).withWho(testContext.getTestUsers().getUserByLabel((other))))
                 .whenException(proxyTestClient.delete(), ForbiddenException.class,
                         expectedMessage("Doesn't have 'environments/deleteProxyConfig' right on proxyConfig " +
-                                proxyConfigPattern(testContext.get(ProxyTestDto.class).getName())).withWho(cloudbreakActor.useRealUmsUser(other)))
+                                proxyConfigPattern(testContext.get(ProxyTestDto.class).getName())).withWho(testContext.getTestUsers().getUserByLabel((other))))
                 .validate();
     }
 
     private void deleteTest(TestContext testContext, String creator, Map<String, Pair<Crn, String>> proxyMap) {
         testContext.given(ProxyTestDto.class)
                 .withName(proxyMap.get(creator).getValue())
-                .when(proxyTestClient.delete(), RunningParameter.who(cloudbreakActor.useRealUmsUser(creator)))
+                .when(proxyTestClient.delete(), RunningParameter.who(testContext.getTestUsers().getUserByLabel(creator)))
                 .validate();
     }
 
     private void listTest(TestContext testContext, String creator, Map<String, Pair<Crn, String>> proxyMap) {
         testContext.given(ProxyTestDto.class)
-                .when(proxyTestClient.list(), RunningParameter.who(cloudbreakActor.useRealUmsUser(creator)))
+                .when(proxyTestClient.list(), RunningParameter.who(testContext.getTestUsers().getUserByLabel((creator))))
                 .then((context, dto, client) -> envCreatorListAssertion(creator, proxyMap, dto))
-                .when(proxyTestClient.list(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.USER_ACCOUNT_ADMIN)))
+                .when(proxyTestClient.list(), RunningParameter.who(testContext.getTestUsers().getUserByLabel((AuthUserKeys.USER_ACCOUNT_ADMIN))))
                 .then((context, dto, client) -> adminListAssertion(proxyMap, dto))
                 .validate();
     }

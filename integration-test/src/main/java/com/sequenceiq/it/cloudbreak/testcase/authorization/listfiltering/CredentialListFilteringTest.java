@@ -10,10 +10,10 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
-import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
+import com.sequenceiq.it.cloudbreak.config.user.TestUserSelectors;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -35,9 +35,6 @@ public class CredentialListFilteringTest extends AbstractIntegrationTest {
     private UmsTestClient umsTestClient;
 
     @Inject
-    private CloudbreakActor actor;
-
-    @Inject
     private ResourceCreator resourceCreator;
 
     @Inject
@@ -45,9 +42,11 @@ public class CredentialListFilteringTest extends AbstractIntegrationTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        useRealUmsUser(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN);
-        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_A);
-        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_B);
+        testContext.getTestUsers().setSelector(TestUserSelectors.UMS_ONLY);
+
+        testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
+        testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
+        testContext.as(AuthUserKeys.USER_ENV_CREATOR_B);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -56,10 +55,10 @@ public class CredentialListFilteringTest extends AbstractIntegrationTest {
             when = "users share with each other",
             then = "they see the other's credential in the list")
     public void testCredentialListFiltering(TestContext testContext) {
-        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_A);
+        testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
         CredentialTestDto credentialA = resourceCreator.createDefaultCredential(testContext);
 
-        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_B);
+        testContext.as(AuthUserKeys.USER_ENV_CREATOR_B);
         CredentialTestDto credentialB = resourceCreator.createNewCredential(testContext);
 
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, credentialA.getName());
@@ -85,12 +84,12 @@ public class CredentialListFilteringTest extends AbstractIntegrationTest {
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, credentialA.getName(), credentialB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, credentialA.getName(), credentialB.getName());
 
-        useRealUmsUser(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN);
+        testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
     }
 
     private void assertUserDoesNotSeeAnyOf(TestContext testContext, String user, String... names) {
         testContext.given(CredentialTestDto.class)
-                .when(credentialTestClient.list(), RunningParameter.who(actor.useRealUmsUser(user)))
+                .when(credentialTestClient.list(), RunningParameter.who(testContext.getTestUsers().getUserByLabel(user)))
                 .then((tc, dto, client) -> {
                     Assertions.assertThat(dto.getResponses()
                             .stream()
@@ -103,7 +102,7 @@ public class CredentialListFilteringTest extends AbstractIntegrationTest {
 
     private void assertUserSeesAll(TestContext testContext, String user, String... names) {
         testContext.given(CredentialTestDto.class)
-                .when(credentialTestClient.list(), RunningParameter.who(actor.useRealUmsUser(user)))
+                .when(credentialTestClient.list(), RunningParameter.who(testContext.getTestUsers().getUserByLabel(user)))
                 .then((tc, dto, client) -> {
                     Assertions.assertThat(dto.getResponses()
                             .stream()

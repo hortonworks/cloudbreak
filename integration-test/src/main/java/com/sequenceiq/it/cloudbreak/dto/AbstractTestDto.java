@@ -44,12 +44,8 @@ import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 import com.sequenceiq.it.cloudbreak.search.KibanaSearchUrl;
 import com.sequenceiq.it.cloudbreak.search.SearchUrl;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
-import com.sequenceiq.it.util.TestParameter;
 
 public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U extends MicroserviceClient> implements CloudbreakTestDto {
-
-    @Inject
-    private TestParameter testParameter;
 
     @Inject
     @Qualifier("cloudProviderProxy")
@@ -116,10 +112,6 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
 
     public S getResponse() {
         return response;
-    }
-
-    public TestParameter getTestParameter() {
-        return testParameter;
     }
 
     protected CloudProvider getCloudProvider() {

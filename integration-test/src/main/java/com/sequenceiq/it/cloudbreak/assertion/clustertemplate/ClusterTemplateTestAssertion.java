@@ -42,10 +42,6 @@ public class ClusterTemplateTestAssertion {
 
             ClusterTemplateV4Response clusterTemplateV4Response = first.get();
 
-//            if (clusterTemplateV4Response.getStackTemplate() == null) {
-//                throw new IllegalArgumentException("Stack template is empty");
-//            }
-
             if (!OTHER.equals(clusterTemplateV4Response.getType())) {
                 throw new IllegalArgumentException(String
                         .format("Mismatch type result, OTHER expected but got %s", clusterTemplateV4Response.getType()));

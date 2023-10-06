@@ -16,7 +16,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.UserSyncState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
-import com.sequenceiq.it.cloudbreak.FreeIpaTest;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -40,13 +39,23 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaUserSyncWai
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.freeipa.FreeIpaInstanceWaitObject;
-import com.sequenceiq.it.util.TestParameter;
 
 public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.sequenceiq.freeipa.api.client.FreeIpaClient, FreeIpaApiUserCrnEndpoint, E,
         WaitObject> {
     private com.sequenceiq.freeipa.api.client.FreeIpaClient freeIpaClient;
 
     private FreeipaInternalCrnClient freeipaInternalCrnClient;
+
+    public FreeIpaClient(CloudbreakUser cloudbreakUser, RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator,
+            String freeipaAddress, String freeipaInternalAddress) {
+        setActing(cloudbreakUser);
+        freeIpaClient = new FreeIpaApiKeyClient(freeipaAddress,
+                new ConfigKey(false, true, true, TIMEOUT))
+                .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
+        freeipaInternalCrnClient = createFreeipaInternalClient(
+                freeipaInternalAddress,
+                regionAwareInternalCrnGenerator);
+    }
 
     @Override
     public FlowPublicEndpoint flowPublicEndpoint() {
@@ -82,20 +91,7 @@ public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.seq
         return freeIpaClient;
     }
 
-    public static synchronized FreeIpaClient createProxyFreeIpaClient(TestParameter testParameter, CloudbreakUser cloudbreakUser,
-        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
-        FreeIpaClient clientEntity = new FreeIpaClient();
-        clientEntity.setActing(cloudbreakUser);
-        clientEntity.freeIpaClient = new FreeIpaApiKeyClient(testParameter.get(FreeIpaTest.FREEIPA_SERVER_ROOT),
-                new ConfigKey(false, true, true, TIMEOUT))
-                .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
-        clientEntity.freeipaInternalCrnClient = createFreeipaInternalClient(
-                testParameter.get(FreeIpaTest.FREEIPA_SERVER_INTERNAL_ROOT),
-                regionAwareInternalCrnGenerator);
-        return clientEntity;
-    }
-
-    public static synchronized FreeipaInternalCrnClient createFreeipaInternalClient(String serverRoot,
+    public FreeipaInternalCrnClient createFreeipaInternalClient(String serverRoot,
         RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
         FreeIpaApiUserCrnClient freeIpaApiUserCrnClient = new FreeIpaApiUserCrnClientBuilder(serverRoot)
                 .withCertificateValidation(false)

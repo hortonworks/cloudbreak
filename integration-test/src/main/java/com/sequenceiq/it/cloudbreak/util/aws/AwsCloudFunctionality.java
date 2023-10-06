@@ -30,9 +30,6 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     @Inject
     private AmazonS3Util amazonS3Util;
 
-//    @Inject
-//    private AmazonCloudFormation
-
     @Inject
     private SshEnaDriverCheckActions sshEnaDriverCheckActions;
 
