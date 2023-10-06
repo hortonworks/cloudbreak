@@ -12,7 +12,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -122,9 +121,9 @@ public class CloudFormationStackUtil {
                 .stackName(cFStackName)
                 .build());
         List<StackResourceSummary> summaries = listStackResourcesResponse.stackResourceSummaries();
-        Optional<StackResourceSummary> loadBalancerSummary = summaries.stream()
+        List<StackResourceSummary> loadBalancerSummary = summaries.stream()
                 .filter(stackResourceSummary -> stackResourceSummary.resourceType().equals("AWS::ElasticLoadBalancingV2::LoadBalancer"))
-                .findFirst();
+                .collect(Collectors.toList());
         return loadBalancerSummary.stream()
                 .map(e -> e.physicalResourceId())
                 .collect(Collectors.toList());
