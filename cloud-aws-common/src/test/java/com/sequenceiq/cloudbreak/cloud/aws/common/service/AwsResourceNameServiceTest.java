@@ -71,9 +71,21 @@ public class AwsResourceNameServiceTest {
     }
 
     @Test
+    void testLoadBalancerShorterThankSixCharacter() {
+        String resourceName = underTest.loadBalancer("sdfsd", SCHEME);
+        assertTrue(resourceName.matches("sdfsd-LBscheme-\\d{14}"));
+    }
+
+    @Test
     void testLoadBalancerTargetGroup() {
         String resourceName = underTest.loadBalancerTargetGroup(STACK_NAME, SCHEME, PORT);
         assertTrue(resourceName.matches("stac-TG8080scheme-\\d{14}"));
+    }
+
+    @Test
+    void testLoadBalancerTargetGroupShorterThankSixCharacter() {
+        String resourceName = underTest.loadBalancerTargetGroup("sdfsd", SCHEME, PORT);
+        assertTrue(resourceName.matches("sdfs-TG8080scheme-\\d{14}"));
     }
 
     @Test
