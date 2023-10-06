@@ -118,6 +118,9 @@ public class AzurePlatformResources implements PlatformResources {
     @Inject
     private AzureCloudSubnetParametersService azureCloudSubnetParametersService;
 
+    @Inject
+    private AzureAddressPrefixProvider azureAddressPrefixProvider;
+
     @Override
     public CloudNetworks networks(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
@@ -168,7 +171,8 @@ public class AzurePlatformResources implements PlatformResources {
     private CloudNetwork convertToCloudNetwork(Network network) {
         Set<CloudSubnet> subnets = new HashSet<>();
         for (Entry<String, Subnet> subnet : network.subnets().entrySet()) {
-            CloudSubnet cloudSubnet = new CloudSubnet(subnet.getKey(), subnet.getKey(), null, subnet.getValue().addressPrefix());
+            String addressPrefix = azureAddressPrefixProvider.getAddressPrefix(subnet.getValue());
+            CloudSubnet cloudSubnet = new CloudSubnet(subnet.getKey(), subnet.getKey(), null, addressPrefix);
             azureCloudSubnetParametersService.addPrivateEndpointNetworkPolicies(cloudSubnet, subnet.getValue().innerModel().privateEndpointNetworkPolicies());
             azureCloudSubnetParametersService.addFlexibleServerDelegatedSubnet(cloudSubnet, subnet.getValue().innerModel().delegations());
             subnets.add(cloudSubnet);
