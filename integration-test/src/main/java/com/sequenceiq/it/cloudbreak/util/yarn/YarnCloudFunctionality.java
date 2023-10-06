@@ -31,8 +31,13 @@ public class YarnCloudFunctionality implements CloudFunctionality {
     private TestParameter testParameter;
 
     @Override
-    public List<String> listInstanceVolumeIds(String clusterName, List<String> instanceIds) {
+    public List<String> listInstancesVolumeIds(String clusterName, List<String> instanceIds) {
         return Collections.emptyList();
+    }
+
+    @Override
+    public Map<String, Set<String>> listInstanceVolumeIds(String clusterName, String instanceId) {
+        return Collections.emptyMap();
     }
 
     @Override

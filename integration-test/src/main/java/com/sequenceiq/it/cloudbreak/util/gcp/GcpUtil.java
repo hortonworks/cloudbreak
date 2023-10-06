@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.util.gcp;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -27,8 +28,12 @@ public class GcpUtil {
     private GcpUtil() {
     }
 
-    public List<String> listInstanceDiskNames(List<String> instanceIds) {
-        return gcpClientActions.listInstanceDiskNames(instanceIds);
+    public List<String> listInstancesDiskNames(List<String> instanceIds) {
+        return gcpClientActions.getSelectedInstancesDiskNames(instanceIds);
+    }
+
+    public Map<String, Set<String>> listInstanceVolumeIds(String instanceId) {
+        return gcpClientActions.getInstanceDiskNames(instanceId);
     }
 
     public List<String> listInstanceTypes(List<String> instanceIds) {

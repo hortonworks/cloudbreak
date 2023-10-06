@@ -40,8 +40,13 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     private SshJUtil sshJUtil;
 
     @Override
-    public List<String> listInstanceVolumeIds(String clusterName, List<String> instanceIds) {
-        return amazonEC2Util.listInstanceVolumeIds(instanceIds);
+    public List<String> listInstancesVolumeIds(String clusterName, List<String> instanceIds) {
+        return amazonEC2Util.listInstancesVolumeIds(instanceIds);
+    }
+
+    @Override
+    public Map<String, Set<String>> listInstanceVolumeIds(String clusterName, String instanceId) {
+        return amazonEC2Util.listInstanceVolumeIds(instanceId);
     }
 
     @Override

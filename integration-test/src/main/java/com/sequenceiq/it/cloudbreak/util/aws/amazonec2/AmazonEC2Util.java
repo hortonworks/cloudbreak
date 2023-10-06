@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.util.aws.amazonec2;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -19,8 +20,12 @@ public class AmazonEC2Util {
     private AmazonEC2Util() {
     }
 
-    public List<String> listInstanceVolumeIds(List<String> instanceIds) {
-        return ec2ClientActions.getInstanceVolumeIds(instanceIds, false);
+    public List<String> listInstancesVolumeIds(List<String> instanceIds) {
+        return ec2ClientActions.getSelectedInstancesVolumeIds(instanceIds, false);
+    }
+
+    public Map<String, Set<String>> listInstanceVolumeIds(String instanceId) {
+        return ec2ClientActions.getInstanceVolumeIds(instanceId, false);
     }
 
     public List<String> listInstanceTypes(List<String> instanceIds) {

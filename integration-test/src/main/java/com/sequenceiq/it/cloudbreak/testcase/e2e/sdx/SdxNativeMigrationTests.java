@@ -104,7 +104,7 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
                 .then((tc, testDto, client) -> {
                     List<String> instances = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                     instances.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
-                    expectedVolumeIds.addAll(cloudFunctionality.listInstanceVolumeIds(testDto.getName(), instances));
+                    expectedVolumeIds.addAll(cloudFunctionality.listInstancesVolumeIds(testDto.getName(), instances));
                     return testDto;
                 })
                 .then(cloudformationTemplateForStackDoesExist())
@@ -115,7 +115,7 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
                 .then((tc, testDto, client) -> {
                     List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                     instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
-                    actualVolumeIds.addAll(cloudFunctionality.listInstanceVolumeIds(testDto.getName(), instanceIds));
+                    actualVolumeIds.addAll(cloudFunctionality.listInstancesVolumeIds(testDto.getName(), instanceIds));
                     return testDto;
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))

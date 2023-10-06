@@ -66,7 +66,7 @@ public class EC2ClientActions extends EC2Client {
     @Inject
     private CfClientActions cfClientActions;
 
-    public List<String> getInstanceVolumeIds(List<String> instanceIds, boolean rootVolumes) {
+    private Map<String, Set<String>> getInstancesVolumes(List<String> instanceIds, boolean rootVolumes) {
         String centosRootVolume = "/dev/xvda";
         String rhelRootVolume = "/dev/sda1";
         String deviceName;
@@ -109,11 +109,20 @@ public class EC2ClientActions extends EC2Client {
                 ));
         instanceIdVolumeIdMap.forEach((instanceId, volumeIds) -> Log.log(LOGGER, format(" Attached volume IDs are %s for [%s] EC2 instance ",
                 volumeIds.toString(), instanceId)));
+        return instanceIdVolumeIdMap;
+    }
+
+    public List<String> getSelectedInstancesVolumeIds(List<String> instanceIds, boolean rootVolumes) {
+        Map<String, Set<String>> instanceIdVolumeIdMap = getInstancesVolumes(instanceIds, rootVolumes);
         return instanceIdVolumeIdMap
                 .values()
                 .stream()
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
+    }
+
+    public Map<String, Set<String>> getInstanceVolumeIds(String instanceId, boolean rootVolumes) {
+        return getInstancesVolumes(List.of(instanceId), rootVolumes);
     }
 
     public List<String> listInstanceTypes(List<String> instanceIds) {
@@ -165,9 +174,9 @@ public class EC2ClientActions extends EC2Client {
                                 + actualInstanceState.name());
                     }
                 } catch (Ec2UnexpectedException e) {
-                    LOGGER.error("EC2 Instance {} termination has not been successful, because of EC2UnexpectedException: {}", instanceId, e);
+                    LOGGER.error("EC2 Instance {} termination has not been successful, because of EC2UnexpectedException: ", instanceId, e);
                 } catch (Throwable e) {
-                    LOGGER.error("EC2 Instance {} termination has not been successful, because of Exception: {}", instanceId, e);
+                    LOGGER.error("EC2 Instance {} termination has not been successful, because of Exception: ", instanceId, e);
                 }
             }
         }
@@ -210,9 +219,9 @@ public class EC2ClientActions extends EC2Client {
                                 + actualInstanceState.name());
                     }
                 } catch (Ec2UnexpectedException e) {
-                    LOGGER.error("EC2 Instance {} stop has not been successful, because of EC2UnexpectedException: {}", instanceId, e);
+                    LOGGER.error("EC2 Instance {} stop has not been successful, because of EC2UnexpectedException: ", instanceId, e);
                 } catch (Throwable e) {
-                    LOGGER.error("EC2 Instance {} termination has not been successful, because of Exception: {}", instanceId, e);
+                    LOGGER.error("EC2 Instance {} termination has not been successful, because of Exception: ", instanceId, e);
                 }
             }
         }
@@ -252,7 +261,7 @@ public class EC2ClientActions extends EC2Client {
     }
 
     public List<String> getRootVolumesKmsKeys(List<String> instanceIds) {
-        List<String> volumeIds = getInstanceVolumeIds(instanceIds, true);
+        List<String> volumeIds = getSelectedInstancesVolumeIds(instanceIds, true);
         if (volumeIds.isEmpty()) {
             LOGGER.info("Unable to get KMS keys because there are no volume found for instances {}", instanceIds);
             return Collections.emptyList();

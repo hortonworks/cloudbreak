@@ -36,8 +36,13 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     private SshJUtil sshJUtil;
 
     @Override
-    public List<String> listInstanceVolumeIds(String clusterName, List<String> instanceIds) {
-        return azureClientActions.listInstanceVolumeIds(clusterName, instanceIds);
+    public List<String> listInstancesVolumeIds(String clusterName, List<String> instanceIds) {
+        return azureClientActions.getSelectedInstancesVolumeIds(clusterName, instanceIds);
+    }
+
+    @Override
+    public Map<String, Set<String>> listInstanceVolumeIds(String clusterName, String instanceId) {
+        return azureClientActions.getInstanceVolumeIds(clusterName, instanceId);
     }
 
     @Override

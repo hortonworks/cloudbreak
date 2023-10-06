@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.util.azure.azurevm.action;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -48,18 +49,30 @@ public class AzureClientActions {
     @Inject
     private CommonCloudProperties commonCloudProperties;
 
-    public List<String> listInstanceVolumeIds(String clusterName, List<String> instanceIds) {
-        List<String> diskIds = new ArrayList<>();
+    private Map<String, Set<String>> listInstancesVolumeIds(String clusterName, List<String> instanceIds) {
+        Map<String, Set<String>> dataDiskMap = new HashMap<>();
         instanceIds.forEach(id -> {
             String resourceGroup = getResourceGroupName(clusterName, id);
             VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
-            Map<Integer, VirtualMachineDataDisk> dataDiskMap = vm.dataDisks();
-            if (dataDiskMap != null && !dataDiskMap.isEmpty()) {
-                diskIds.addAll(dataDiskMap.values().stream().map(HasId::id).toList());
-                LOGGER.info("Instance '{}' has attached volumes [{}].", id, diskIds);
-            }
+            dataDiskMap.put(id, vm.dataDisks().values()
+                    .stream()
+                    .map(HasId::id)
+                    .collect(Collectors.toSet()));
         });
-        return diskIds;
+        return dataDiskMap;
+    }
+
+    public List<String> getSelectedInstancesVolumeIds(String clusterName, List<String> instanceIds) {
+        Map<String, Set<String>> dataDiskMap = listInstancesVolumeIds(clusterName, instanceIds);
+        return dataDiskMap
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+    public Map<String, Set<String>> getInstanceVolumeIds(String clusterName, String instanceId) {
+        return listInstancesVolumeIds(clusterName, List.of(instanceId));
     }
 
     public List<String> listInstanceTypes(String clusterName, List<String> instanceIds) {

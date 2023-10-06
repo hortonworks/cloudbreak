@@ -92,7 +92,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .then((tc, testDto, client) -> {
                     List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                     instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
-                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instancesToDelete));
+                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instancesToDelete));
                     getCloudFunctionality(tc).deleteInstances(testDto.getName(), instancesToDelete);
                     return testDto;
                 })
@@ -108,7 +108,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .then((tc, testDto, client) -> {
                     List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                     instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
-                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instanceIds));
+                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instanceIds));
                     return testDto;
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
@@ -189,7 +189,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .then((tc, testDto, client) -> {
                     List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, "gateway");
                     instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, "idbroker"));
-                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instancesToDelete));
+                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instancesToDelete));
                     getCloudFunctionality(tc).deleteInstances(testDto.getName(), instancesToDelete);
                     return testDto;
                 })
@@ -204,7 +204,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .then((tc, testDto, client) -> {
                     List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, "gateway");
                     instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, "idbroker"));
-                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instanceIds));
+                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instanceIds));
                     return testDto;
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
@@ -241,7 +241,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .then((tc, testDto, client) -> {
                     List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, gatewayHostGroupName);
                     instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, idBrokerHostGroupName));
-                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instancesToDelete));
+                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instancesToDelete));
                     getCloudFunctionality(tc).deleteInstances(testDto.getName(), instancesToDelete);
                     return testDto;
                 })
@@ -256,7 +256,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .then((tc, testDto, client) -> {
                     List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, gatewayHostGroupName);
                     instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, idBrokerHostGroupName));
-                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instanceIds));
+                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instanceIds));
                     return testDto;
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
@@ -270,7 +270,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
         sdxTestDto
                 .then((tc, testDto, client) -> {
                     List<String> instancesToStop = sdxUtil.getInstanceIds(testDto, client, hostgroupName);
-                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instancesToStop));
+                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instancesToStop));
                     getCloudFunctionality(tc).stopInstances(testDto.getName(), instancesToStop);
                     return testDto;
                 })
@@ -282,7 +282,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
                     List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, hostgroupName);
-                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instanceIds));
+                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instanceIds));
                     return testDto;
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto,

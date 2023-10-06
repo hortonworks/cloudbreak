@@ -26,7 +26,13 @@ public interface CloudFunctionality {
             maxAttempts = ATTEMPTS,
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
     )
-    List<String> listInstanceVolumeIds(String clusterName, List<String> instanceIds);
+    List<String> listInstancesVolumeIds(String clusterName, List<String> instanceIds);
+
+    @Retryable(
+            maxAttempts = ATTEMPTS,
+            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
+    )
+    Map<String, Set<String>> listInstanceVolumeIds(String clusterName, String instanceId);
 
     @Retryable(
             maxAttempts = ATTEMPTS,

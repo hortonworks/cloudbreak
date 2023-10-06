@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -79,9 +80,9 @@ public class GcpClientActions extends GcpClient {
         }).collect(Collectors.toList());
     }
 
-    public List<String> listInstanceDiskNames(List<String> instanceIds) {
+    private Map<String, Set<String>> listInstancesDiskNames(List<String> instanceIds) {
         LOGGER.info("Collect disk names for instance ids: '{}'", String.join(", ", instanceIds));
-        Map<String, List<String>> instanceIdDiskNamesMap = new HashMap<>();
+        Map<String, Set<String>> instanceIdDiskNamesMap = new HashMap<>();
         Compute compute = buildCompute();
         for (String instanceId : instanceIds) {
             try {
@@ -89,12 +90,12 @@ public class GcpClientActions extends GcpClient {
                         .instances()
                         .get(getProjectId(), getAvailabilityZone(), instanceId)
                         .execute();
-                List<String> attachedDiskNames = instance
+                Set<String> attachedDiskNames = instance
                         .getDisks()
                         .stream()
                         .filter(ad -> !ad.getBoot())
                         .map(AttachedDisk::getDeviceName)
-                        .collect(Collectors.toList());
+                        .collect(Collectors.toSet());
                 instanceIdDiskNamesMap.put(instanceId, attachedDiskNames);
             } catch (Exception e) {
                 LOGGER.warn(format("Failed to get the details of the instance from Gcp with instance id: '%s'", instanceId), e);
@@ -102,11 +103,20 @@ public class GcpClientActions extends GcpClient {
         }
         instanceIdDiskNamesMap.forEach((instanceId, diskNames) -> Log.log(LOGGER, format(" Attached disk names are %s for [%s] instance ",
                 diskNames.toString(), instanceId)));
+        return instanceIdDiskNamesMap;
+    }
+
+    public List<String> getSelectedInstancesDiskNames(List<String> instanceIds) {
+        Map<String, Set<String>> instanceIdDiskNamesMap = listInstancesDiskNames(instanceIds);
         return instanceIdDiskNamesMap
                 .values()
                 .stream()
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
+    }
+
+    public Map<String, Set<String>> getInstanceDiskNames(String instanceId) {
+        return listInstancesDiskNames(List.of(instanceId));
     }
 
     public List<String> listVolumeEncryptionKey(List<String> instanceIds) {

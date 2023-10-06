@@ -106,7 +106,7 @@ public class SdxMultiAzUpgradeTest extends PreconditionSdxE2ETest {
                     .then((tc, testDto, client) -> {
                         List<String> instances = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                         instances.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
-                        expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instances));
+                        expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instances));
                         return testDto;
                     })
                     .withUpgradeRequestByImageId(cdhImages.get(cdhImages.size() - 1).getUuid())
@@ -116,7 +116,7 @@ public class SdxMultiAzUpgradeTest extends PreconditionSdxE2ETest {
                     .then((tc, testDto, client) -> {
                         List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                         instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
-                        actualVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instanceIds));
+                        actualVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instanceIds));
                         return testDto;
                     })
                     .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
