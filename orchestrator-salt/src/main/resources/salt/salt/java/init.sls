@@ -59,6 +59,7 @@ install_safelogic_binaries:
     - require:
         - file: /opt/salt/scripts/install_safelogic_binaries.sh
     - failhard: True
+    - unless: test -f /var/log/safelogic_binaries_installed
 
 {% set java_policy_file = java_home ~ '/jre/lib/security/java.policy' %}
 {% set java_security_file = java_home ~ '/jre/lib/security/java.security' %}
