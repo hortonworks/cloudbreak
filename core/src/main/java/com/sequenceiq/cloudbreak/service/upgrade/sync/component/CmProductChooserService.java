@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.upgrade.sync.component;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -60,7 +58,7 @@ public class CmProductChooserService {
 
     private Optional<ClouderaManagerProduct> findMatchingClouderaManagerProduct(Set<ClouderaManagerProduct> candidateProducts, ParcelInfo activeParcel) {
         List<ClouderaManagerProduct> candidateVersionsForProduct = candidateProducts.stream()
-                .filter(cp -> activeParcel.getName().equals(cp.getName()) && isVersionNewerOrEqualThanLimited(cp.getVersion(), activeParcel::getVersion))
+                .filter(cp -> activeParcel.getName().equals(cp.getName()) && activeParcel.getVersion().equals(cp.getVersion()))
                 .sorted((o1, o2) -> new VersionComparator().compare(o2::getVersion, o1::getVersion))
                 .toList();
         LOGGER.debug("The following candidate versions are available {} for active parcel: {}", candidateProducts, activeParcel);

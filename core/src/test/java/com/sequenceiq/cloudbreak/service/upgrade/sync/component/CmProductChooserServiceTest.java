@@ -118,8 +118,7 @@ public class CmProductChooserServiceTest {
 
         Set<ClouderaManagerProduct> foundProducts = underTest.chooseParcelProduct(activeParcels, candidateProducts);
 
-        assertThat(foundProducts, hasSize(1));
-        assertEquals(PARCEL_VERSION_2, foundProducts.iterator().next().getVersion());
+        assertTrue(foundProducts.isEmpty());
     }
 
     @Test
