@@ -35,8 +35,11 @@ public class CloudbreakUserConfiguratorFilter extends OncePerRequestFilter {
         if (cloudbreakUser != null) {
             userService.getOrCreate(cloudbreakUser);
         }
-        legacyRestRequestThreadLocalService.setCloudbreakUser(cloudbreakUser);
-        filterChain.doFilter(request, response);
-        legacyRestRequestThreadLocalService.removeCloudbreakUser();
+        try {
+            legacyRestRequestThreadLocalService.setCloudbreakUser(cloudbreakUser);
+            filterChain.doFilter(request, response);
+        } finally {
+            legacyRestRequestThreadLocalService.removeCloudbreakUser();
+        }
     }
 }

@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
 @Component
-public class SpringBadRequestExceptionMapper extends BaseExceptionMapper<BadRequestException> {
+public class BadRequestExceptionMapper extends BaseExceptionMapper<BadRequestException> {
 
     @Override
     public Status getResponseStatus(BadRequestException exception) {

@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
     }
 
     @Override
-    protected boolean logException() {
+    protected boolean logException(PermanentlyFailedException exception) {
         return false;
     }
 }

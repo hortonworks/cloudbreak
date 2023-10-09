@@ -2,10 +2,13 @@ package com.sequenceiq.cloudbreak.conf;
 
 import static com.sequenceiq.cloudbreak.api.CoreApi.API_ROOT_CONTEXT;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,8 +23,10 @@ import org.springframework.security.config.annotation.method.configuration.Globa
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
@@ -30,6 +35,7 @@ import org.springframework.security.web.authentication.preauth.RequestHeaderAuth
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
+import com.sequenceiq.cloudbreak.exception.ErrorResponseHandler;
 import com.sequenceiq.cloudbreak.service.security.TenantBasedPermissionEvaluator;
 
 @Configuration
@@ -72,6 +78,9 @@ public class SecurityConfig {
 
         @Inject
         private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+        @Inject
+        private ErrorResponseHandler errorResponseHandler;
 
         @Bean
         public RequestHeaderAuthenticationFilter headerAuthenticationFilter() throws Exception {
@@ -135,7 +144,21 @@ public class SecurityConfig {
             http.csrf().disable();
             http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
             http.headers().contentTypeOptions();
+            http.exceptionHandling().authenticationEntryPoint(new CloudbreakAuthenticationEntryPoint(errorResponseHandler));
         }
     }
 
+    private static class CloudbreakAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+        private ErrorResponseHandler errorResponseHandler;
+
+        CloudbreakAuthenticationEntryPoint(ErrorResponseHandler errorResponseHandler) {
+            this.errorResponseHandler = errorResponseHandler;
+        }
+
+        @Override
+        public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authenticationException) throws IOException {
+            errorResponseHandler.handleErrorResponse(response, authenticationException);
+        }
+    }
 }

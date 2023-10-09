@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.exception.mapper;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
+import org.springframework.stereotype.Component;
+
+@Component
 @Provider
 public class DefaultExceptionMapper extends BaseExceptionMapper<Exception> {
 

@@ -18,7 +18,7 @@ public abstract class SearchCauseExceptionMapper<T extends Throwable> extends En
         Response.Status defaultResponse = Response.Status.BAD_REQUEST;
         if (exception != null) {
             Pair<BaseExceptionMapper, ? extends Throwable> pair = searchRecursively(exception);
-            if (pair.getKey() != null && pair.getKey() != this && !(pair.getKey() instanceof DefaultExceptionMapper)) {
+            if (pair.getKey() != null && pair.getKey() != this && !(pair.getKey() instanceof DefaultEnvironmentExceptionMapper)) {
                 defaultResponse = pair.getKey().getResponseStatus(pair.getValue());
             }
         }
@@ -31,7 +31,7 @@ public abstract class SearchCauseExceptionMapper<T extends Throwable> extends En
             return Pair.of(exceptionMapper, exception);
         }
         BaseExceptionMapper<? extends Throwable> exceptionMapper = getExceptionMapper(exception.getCause());
-        if (exceptionMapper == null || exceptionMapper instanceof DefaultExceptionMapper) {
+        if (exceptionMapper == null || exceptionMapper instanceof DefaultEnvironmentExceptionMapper) {
             return searchRecursively(exception.getCause());
         }
         return Pair.of(exceptionMapper, exception.getCause());

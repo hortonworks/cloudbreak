@@ -13,7 +13,7 @@ public class CloudUnauthorizedExceptionMapper extends SearchCauseExceptionMapper
     }
 
     @Override
-    protected boolean logException() {
+    protected boolean logException(CloudUnauthorizedException exception) {
         return false;
     }
 }

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.controller.mapper;
 
 import java.util.List;
 
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
@@ -13,8 +12,6 @@ import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 @Component
 public class TransactionRuntimeExecutionExceptionMapper extends SendNotificationExceptionMapper<TransactionRuntimeExecutionException> {
 
-    private static final ThreadLocal<TransactionRuntimeExecutionException> CURRENT_EXCEPTION = new ThreadLocal<>();
-
     private final List<BaseExceptionMapper<?>> exceptionMappers;
 
     public TransactionRuntimeExecutionExceptionMapper(List<BaseExceptionMapper<?>> exceptionMappers) {
@@ -22,18 +19,8 @@ public class TransactionRuntimeExecutionExceptionMapper extends SendNotification
     }
 
     @Override
-    public Response toResponse(TransactionRuntimeExecutionException exception) {
-        try {
-            CURRENT_EXCEPTION.set(exception);
-            return super.toResponse(exception);
-        } finally {
-            CURRENT_EXCEPTION.remove();
-        }
-    }
-
-    @Override
     public Status getResponseStatus(TransactionRuntimeExecutionException exception) {
-        TransactionRuntimeExecutionException deepest = getDeepestTransactionException(CURRENT_EXCEPTION.get());
+        TransactionRuntimeExecutionException deepest = getDeepestTransactionException(exception);
         return exceptionMappers.stream()
                 .filter(m -> m.getExceptionType().equals(deepest.getOriginalCause().getClass()))
                 .map(m -> ((BaseExceptionMapper) m).getResponseStatus(deepest.getOriginalCause()))
@@ -62,9 +49,9 @@ public class TransactionRuntimeExecutionExceptionMapper extends SendNotification
     }
 
     @Override
-    protected boolean logException() {
+    protected boolean logException(TransactionRuntimeExecutionException exception) {
         boolean logException = true;
-        TransactionRuntimeExecutionException deepest = getDeepestTransactionException(CURRENT_EXCEPTION.get());
+        TransactionRuntimeExecutionException deepest = getDeepestTransactionException(exception);
         if (deepest.getOriginalCause().getClass().getSimpleName().contains("NotFound")) {
             logException = false;
         }

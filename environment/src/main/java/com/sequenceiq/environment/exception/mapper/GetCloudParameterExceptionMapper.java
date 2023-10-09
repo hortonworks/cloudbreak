@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
     }
 
     @Override
-    protected boolean logException() {
+    protected boolean logException(GetCloudParameterException exception) {
         return false;
     }
 }

@@ -1,16 +1,19 @@
-package com.sequenceiq.datalake.controller.mapper;
+package com.sequenceiq.freeipa.controller.mapper;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.Provider;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
-@Provider
 @Component
-public class SpringBadRequestExceptionMapper extends BaseExceptionMapper<BadRequestException> {
+public class JaxWsBadRequestExceptionMapper extends BaseExceptionMapper<BadRequestException> {
+
+    @Override
+    protected String getErrorMessage(BadRequestException exception) {
+        return exception.getMessage();
+    }
 
     @Override
     public Status getResponseStatus(BadRequestException exception) {
@@ -21,5 +24,4 @@ public class SpringBadRequestExceptionMapper extends BaseExceptionMapper<BadRequ
     public Class<BadRequestException> getExceptionType() {
         return BadRequestException.class;
     }
-
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.filter;
 
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -8,6 +10,8 @@ import org.springframework.context.annotation.Configuration;
 import com.sequenceiq.cloudbreak.auth.CrnFilter;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.RequestHeaderMetricFilter;
+import com.sequenceiq.cloudbreak.exception.ErrorResponseHandler;
+import com.sequenceiq.cloudbreak.exception.ExceptionHandlerFilter;
 import com.sequenceiq.cloudbreak.logger.MDCContextFilter;
 import com.sequenceiq.cloudbreak.logger.MDCRequestIdOnlyFilter;
 import com.sequenceiq.cloudbreak.logger.RestLoggerFilter;
@@ -17,6 +21,18 @@ public class CommonFilterConfiguration {
 
     @Value("${rest.logger.enabled:true}")
     private boolean restLoggerEnabled;
+
+    @Inject
+    private ErrorResponseHandler errorResponseHandler;
+
+    @Bean
+    public FilterRegistrationBean<ExceptionHandlerFilter> exceptionHandlerFilterRegistrationBean() {
+        FilterRegistrationBean<ExceptionHandlerFilter> registrationBean = new FilterRegistrationBean<>();
+        ExceptionHandlerFilter filter = new ExceptionHandlerFilter(errorResponseHandler);
+        registrationBean.setFilter(filter);
+        registrationBean.setOrder(FilterOrderConstants.EXCEPTION_HANDLER_FILTER_ORDER);
+        return registrationBean;
+    }
 
     @Bean
     public FilterRegistrationBean<CrnFilter> crnFilterRegistrationBean() {

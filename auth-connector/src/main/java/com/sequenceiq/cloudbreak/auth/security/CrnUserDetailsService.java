@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.auth.security;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,8 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 @Service
 public class CrnUserDetailsService implements UserDetailsService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CrnUserDetailsService.class);
+
     private final UmsAuthenticationService umsAuthenticationService;
 
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
@@ -26,7 +30,12 @@ public class CrnUserDetailsService implements UserDetailsService {
 
     @Override
     public CrnUser loadUserByUsername(String crn) throws UsernameNotFoundException {
-        return getUmsUser(crn);
+        try {
+            return getUmsUser(crn);
+        } catch (Exception e) {
+            LOGGER.warn("Loading UMS user failed", e);
+            throw new UsernameNotFoundException("Loading UMS user failed", e);
+        }
     }
 
     private CrnUser getUmsUser(String crnText) {

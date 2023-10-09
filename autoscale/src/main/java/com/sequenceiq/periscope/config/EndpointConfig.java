@@ -30,7 +30,6 @@ import com.sequenceiq.periscope.controller.mapper.NotFoundExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.ParseExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.RuntimeExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.SpringAccessDeniedExceptionMapper;
-import com.sequenceiq.periscope.controller.mapper.SpringBadRequestExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.TypeMismatchExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.UnsupportedOperationFailedExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.WebApplicaitonExceptionMapper;
@@ -79,7 +78,6 @@ public class EndpointConfig extends ResourceConfig {
         register(HttpRequestMethodNotSupportedExceptionMapper.class);
         register(NotFoundExceptionMapper.class);
         register(SpringAccessDeniedExceptionMapper.class);
-        register(SpringBadRequestExceptionMapper.class);
         register(TypeMismatchExceptionMapper.class);
         register(UnsupportedOperationFailedExceptionMapper.class);
         register(DataIntegrityViolationExceptionMapper.class);

@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.experience;
 
 import static com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint.CRN_HEADER;
-import static com.sequenceiq.cloudbreak.logger.MDCContextFilter.REQUEST_ID_HEADER;
+import static com.sequenceiq.cloudbreak.logger.MDCRequestIdOnlyFilter.REQUEST_ID_HEADER;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import javax.inject.Inject;

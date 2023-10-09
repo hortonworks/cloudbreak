@@ -1,16 +1,20 @@
 package com.sequenceiq.cloudbreak.auth.security;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -52,6 +56,16 @@ public class CrnUserDetailsServiceTest {
         when(mockedUmsClient.getUserDetails(eq(userCrn), any())).thenReturn(user);
         UserDetails userDetails = underTest.loadUserByUsername(userCrn);
         assertTrue(userDetails.getAuthorities().iterator().next().getAuthority().equals("CRN_USER"));
+    }
+
+    @Test
+    public void loadUserByCrnWhenLoadingUMSUserFailed() {
+        User user = User.newBuilder().setCrn("userCrn").setEmail("dummyuser@cloudera.com").setUserId("1").build();
+        when(mockedUmsClient.getUserDetails(eq(userCrn), any())).thenThrow(new RuntimeException("error"));
+        UsernameNotFoundException usernameNotFoundException = Assertions.assertThrows(UsernameNotFoundException.class,
+                () -> underTest.loadUserByUsername(userCrn));
+        assertEquals("Loading UMS user failed", usernameNotFoundException.getMessage());
+        assertThat(usernameNotFoundException.getCause()).isInstanceOf(RuntimeException.class);
     }
 
 }

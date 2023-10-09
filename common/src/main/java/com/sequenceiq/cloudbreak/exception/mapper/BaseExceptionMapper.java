@@ -23,7 +23,7 @@ public abstract class BaseExceptionMapper<E extends Throwable> implements Except
 
     @Override
     public Response toResponse(E exception) {
-        if (logException()) {
+        if (logException(exception)) {
             String errorMessage = getErrorMessage(exception);
             switch (getLogLevel().levelInt) {
                 case ERROR_INT:
@@ -67,7 +67,7 @@ public abstract class BaseExceptionMapper<E extends Throwable> implements Except
      * Entity class: ValidationResult -> {"validationErrors":{"getByCrn.arg0":"Invalid request object"}}
      * It is very hard to process on the client side. So we should respond with the ExceptionResponse and add the payload if it is available.
      */
-    protected final ExceptionResponse getEntity(E exception) {
+    public final ExceptionResponse getEntity(E exception) {
         return new ExceptionResponse(getErrorMessage(exception), getPayload(exception));
     }
 
@@ -75,7 +75,7 @@ public abstract class BaseExceptionMapper<E extends Throwable> implements Except
         return null;
     }
 
-    protected boolean logException() {
+    protected boolean logException(E exception) {
         return true;
     }
 

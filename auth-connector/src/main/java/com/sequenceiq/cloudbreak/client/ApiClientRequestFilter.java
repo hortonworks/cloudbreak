@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.logger.MDCContextFilter;
+import com.sequenceiq.cloudbreak.logger.MDCRequestIdOnlyFilter;
 
 @Component
 public class ApiClientRequestFilter implements ClientRequestFilter {
@@ -17,6 +17,6 @@ public class ApiClientRequestFilter implements ClientRequestFilter {
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
         requestContext.getHeaders().putSingle(AbstractUserCrnServiceEndpoint.CRN_HEADER, ThreadBasedUserCrnProvider.getUserCrn());
-        requestContext.getHeaders().putSingle(MDCContextFilter.REQUEST_ID_HEADER, MDCBuilder.getOrGenerateRequestId());
+        requestContext.getHeaders().putSingle(MDCRequestIdOnlyFilter.REQUEST_ID_HEADER, MDCBuilder.getOrGenerateRequestId());
     }
 }

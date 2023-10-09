@@ -23,7 +23,7 @@ public class GetCloudParameterExceptionMapper extends BaseExceptionMapper<GetClo
     }
 
     @Override
-    protected boolean logException() {
+    protected boolean logException(GetCloudParameterException exception) {
         return false;
     }
 }

@@ -1,10 +1,10 @@
 package com.sequenceiq.freeipa.controller.mapper;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
 @Component
@@ -16,8 +16,8 @@ public class BadRequestExceptionMapper extends BaseExceptionMapper<BadRequestExc
     }
 
     @Override
-    public Status getResponseStatus(BadRequestException exception) {
-        return Status.BAD_REQUEST;
+    public Response.Status getResponseStatus(BadRequestException exception) {
+        return Response.Status.BAD_REQUEST;
     }
 
     @Override

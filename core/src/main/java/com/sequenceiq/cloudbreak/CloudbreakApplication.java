@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.VersionedApplication.versionedApplicatio
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.metrics.web.servlet.WebMvcMetricsAutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.FilterType;
@@ -26,7 +27,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableJpaAuditing
 @EnableJpaRepositories(basePackages = "com.sequenceiq", repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
-@EnableAutoConfiguration(exclude = WebMvcMetricsAutoConfiguration.class)
+@EnableAutoConfiguration(exclude = {WebMvcMetricsAutoConfiguration.class, ErrorMvcAutoConfiguration.class})
 public class CloudbreakApplication {
     public static void main(String[] args) {
         OpenSSLLoaderUtil.registerOpenSSLJniProvider();
