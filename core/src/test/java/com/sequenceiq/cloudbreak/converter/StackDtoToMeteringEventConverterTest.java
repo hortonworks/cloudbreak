@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.MeteringEvent;
@@ -39,6 +40,8 @@ import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
 class StackDtoToMeteringEventConverterTest {
 
     private static final String OPDB_CRN = "crn:cdp:datahub:us-west-1:e7b1345f-4ae1-4594-9113-fc91f22ef8bd:cluster:e7b1345f-4ae1-4594-9113-xc91322esi7t";
+
+    private static final String SERVICE_FEATURE_VALUE = "Nifi";
 
     private StackDtoToMeteringEventConverter underTest = new StackDtoToMeteringEventConverter();
 
@@ -116,7 +119,21 @@ class StackDtoToMeteringEventConverterTest {
     }
 
     @Test
-    void testConvertWhenTagsContainsIncalidClouderaExternalResourceName() {
+    void testConvertWhenServiceFeatureTagExists() {
+        StackDto stack = stack(new Json(new StackTags(Map.of(), Map.of(ClusterTemplateApplicationTag.SERVICE_FEATURE.key(), SERVICE_FEATURE_VALUE), Map.of())));
+        MeteringEvent meteringEvent = underTest.convertToStatusChangeEvent(stack, SCALE_UP);
+        assertEquals(SERVICE_FEATURE_VALUE, meteringEvent.getServiceFeature());
+    }
+
+    @Test
+    void testConvertWhenServiceFeatureTagDoesNotExist() {
+        StackDto stack = stack(new Json(new StackTags(Map.of(), Map.of(), Map.of())));
+        MeteringEvent meteringEvent = underTest.convertToStatusChangeEvent(stack, SCALE_UP);
+        assertEquals(StringUtils.EMPTY, meteringEvent.getServiceFeature());
+    }
+
+    @Test
+    void testConvertWhenTagsContainsInvalidClouderaExternalResourceName() {
         StackDto stack = stack(new Json(new StackTags(Map.of(),
                 Map.of(ClusterTemplateApplicationTag.SERVICE_TYPE.key(), OPERATIONAL_DB.name(), CLOUDERA_EXTERNAL_RESOURCE_NAME_TAG, "invalidcrn"), Map.of())));
         MeteringEvent meteringEvent = underTest.convertToStatusChangeEvent(stack, SCALE_UP);

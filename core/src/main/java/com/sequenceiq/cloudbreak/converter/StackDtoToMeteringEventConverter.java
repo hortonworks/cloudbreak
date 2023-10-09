@@ -86,23 +86,28 @@ public class StackDtoToMeteringEventConverter {
     }
 
     private MeteringEvent.Builder convertBase(StackDtoDelegate stack) {
+        Map<String, String> applicationTags = getApplicationTags(stack);
         return MeteringEvent.newBuilder()
                 .setId(UUID.randomUUID().toString())
                 .setTimestamp(System.currentTimeMillis())
                 .setVersion(DEFAULT_VERSION)
-                .setServiceType(getServiceType(stack, DATAHUB))
-                .setResourceCrn(getResourceCrn(stack))
+                .setServiceType(getServiceType(applicationTags, DATAHUB))
+                .setServiceFeature(getServiceFeature(applicationTags))
+                .setResourceCrn(getResourceCrn(stack, applicationTags))
                 .setEnvironmentCrn(stack.getEnvironmentCrn());
     }
 
-    private ServiceType.Value getServiceType(StackDtoDelegate stack, ServiceType.Value defaultServiceType) {
-        Map<String, String> applicationTags = getApplicationTags(stack);
+    private ServiceType.Value getServiceType(Map<String, String> applicationTags, ServiceType.Value defaultServiceType) {
         String serviceTypeName = applicationTags.get(ClusterTemplateApplicationTag.SERVICE_TYPE.key());
         return EnumUtils.getEnum(ServiceType.Value.class, serviceTypeName, defaultServiceType);
     }
 
-    private String getResourceCrn(StackDtoDelegate stack) {
-        Map<String, String> applicationTags = getApplicationTags(stack);
+    private String getServiceFeature(Map<String, String> applicationTags) {
+        String serviceFeature = applicationTags.get(ClusterTemplateApplicationTag.SERVICE_FEATURE.key());
+        return serviceFeature != null ? serviceFeature : StringUtils.EMPTY;
+    }
+
+    private String getResourceCrn(StackDtoDelegate stack, Map<String, String> applicationTags) {
         String externalCrn = applicationTags.get(CLOUDERA_EXTERNAL_RESOURCE_NAME_TAG);
         if (StringUtils.isNotEmpty(externalCrn) && Crn.isCrn(externalCrn)) {
             return externalCrn;
