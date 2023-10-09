@@ -44,9 +44,7 @@ public class SdxRangerRazEnabledTests extends PreconditionSdxE2ETest {
                 .validate();
     }
 
-
-    //disabled due to cloudera runtime downgrade
-    @Test(dataProvider = TEST_CONTEXT, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running Cloudbreak",
             when = "enableRangerRaz is called when Raz is installed",
