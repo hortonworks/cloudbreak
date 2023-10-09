@@ -95,7 +95,7 @@ public class MeteringService {
 
     private void sendPeriodicMeteringEvent(MeteringEvent meteringEvent) {
         try {
-            grpcMeteringClient.sendMeteringEventWithoutRetry(meteringEvent);
+            grpcMeteringClient.sendMeteringEventWithShortRetry(meteringEvent);
             metricsService.incrementMetricCounter(MetricType.METERING_REPORT_SUCCESSFUL,
                     MeteringMetricTag.REPORT_TYPE.name(), SYNC);
         } catch (Exception e) {

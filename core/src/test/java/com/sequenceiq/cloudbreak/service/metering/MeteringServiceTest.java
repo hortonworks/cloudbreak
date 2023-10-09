@@ -65,7 +65,7 @@ class MeteringServiceTest {
         MeteringEvent meteringEvent = MeteringEvent.newBuilder().build();
         when(stackDtoToMeteringEventConverter.convertToSyncEvent(any())).thenReturn(meteringEvent);
         underTest.sendMeteringSyncEventForStack(getStack(WORKLOAD, "AWS"));
-        verify(grpcMeteringClient, times(1)).sendMeteringEventWithoutRetry(eq(meteringEvent));
+        verify(grpcMeteringClient, times(1)).sendMeteringEventWithShortRetry(eq(meteringEvent));
         verify(metricService, times(0)).incrementMetricCounter(MetricType.METERING_REPORT_FAILED,
                 MeteringMetricTag.REPORT_TYPE.name(), SYNC);
         verify(metricService, times(1)).incrementMetricCounter(MetricType.METERING_REPORT_SUCCESSFUL,
@@ -101,9 +101,9 @@ class MeteringServiceTest {
     void failedSendMeteringSyncEventShouldIncreaseFailureCountWhenDatahub() {
         MeteringEvent meteringEvent = MeteringEvent.newBuilder().build();
         when(stackDtoToMeteringEventConverter.convertToSyncEvent(any())).thenReturn(meteringEvent);
-        doThrow(new RuntimeException("Inject Failure")).when(grpcMeteringClient).sendMeteringEventWithoutRetry(meteringEvent);
+        doThrow(new RuntimeException("Inject Failure")).when(grpcMeteringClient).sendMeteringEventWithShortRetry(meteringEvent);
         underTest.sendMeteringSyncEventForStack(getStack(WORKLOAD, "AWS"));
-        verify(grpcMeteringClient, times(1)).sendMeteringEventWithoutRetry(eq(meteringEvent));
+        verify(grpcMeteringClient, times(1)).sendMeteringEventWithShortRetry(eq(meteringEvent));
         verify(metricService, times(1)).incrementMetricCounter(MetricType.METERING_REPORT_FAILED,
                 MeteringMetricTag.REPORT_TYPE.name(), SYNC);
         verify(metricService, times(0)).incrementMetricCounter(MetricType.METERING_REPORT_SUCCESSFUL,

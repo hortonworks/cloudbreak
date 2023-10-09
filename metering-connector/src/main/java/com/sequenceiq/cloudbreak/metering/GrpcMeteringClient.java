@@ -54,7 +54,8 @@ public class GrpcMeteringClient {
         }
     }
 
-    public void sendMeteringEventWithoutRetry(MeteringEvent meteringEvent) {
+    @Retryable(value = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 5000))
+    public void sendMeteringEventWithShortRetry(MeteringEvent meteringEvent) {
         sendMeteringEvent(meteringEvent);
     }
 
