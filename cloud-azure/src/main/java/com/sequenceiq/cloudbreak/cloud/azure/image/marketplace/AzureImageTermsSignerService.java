@@ -9,9 +9,11 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestOperationsService;
@@ -80,12 +82,24 @@ public class AzureImageTermsSignerService {
 
             AzureImageTerms responseImageTerms = azureRestOperationsService.httpPut(agreementUri, azureImageTerms, AzureImageTerms.class, token);
             LOGGER.debug("Image terms and conditions received for image {} is : {}", azureMarketplaceImage, responseImageTerms);
+        } catch (AzureRestResponseException azureException) {
+            if (azureException.getCause() instanceof HttpStatusCodeException statusException && statusException.getStatusCode() == HttpStatus.FORBIDDEN) {
+                String message = errorMessageBuilder.buildWithReason(String.format(
+                        "authorization error when signing vm image terms and conditions, message is '%s', skipping it", azureException.getMessage()));
+                LOGGER.warn(message, azureException);
+            } else {
+                throwCloudImageException(errorMessageBuilder, azureException);
+            }
         } catch (Exception e) {
-            String message =
-                    errorMessageBuilder.buildWithReason(String.format("error when signing vm image terms and conditions, message is '%s'", e.getMessage()));
-            LOGGER.warn(message, e);
-            throw new CloudImageException(message, e);
+            throwCloudImageException(errorMessageBuilder, e);
         }
+    }
+
+    private void throwCloudImageException(ErrorMessageBuilder errorMessageBuilder, Exception exception) {
+        String message = errorMessageBuilder.buildWithReason(String.format("error when signing vm image terms and conditions, message is '%s'",
+                exception.getMessage()));
+        LOGGER.warn(message, exception);
+        throw new CloudImageException(message, exception);
     }
 
     private String getToken(AzureClient azureClient, ErrorMessageBuilder errorMessageBuilder) {
