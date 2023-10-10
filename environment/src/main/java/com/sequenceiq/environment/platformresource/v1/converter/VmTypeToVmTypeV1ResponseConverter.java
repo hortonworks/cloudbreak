@@ -2,7 +2,10 @@ package com.sequenceiq.environment.platformresource.v1.converter;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.stereotype.Component;
 
@@ -24,8 +27,11 @@ public class VmTypeToVmTypeV1ResponseConverter {
         convertVolumeConfig(configs, source.getMetaData().getSsdConfig());
         convertVolumeConfig(configs, source.getMetaData().getSt1Config());
 
+        Map<String, Object> properties = new HashMap<>(source.getMetaData().getProperties());
+        properties.put("AvailabilityZones", Objects.requireNonNullElse(source.getMetaData().getAvailabilityZones(), new ArrayList<>()));
+
         VmTypeMetaJson vmTypeMetaJson = new VmTypeMetaJson();
-        vmTypeMetaJson.setProperties(source.getMetaData().getProperties());
+        vmTypeMetaJson.setProperties(properties);
         vmTypeMetaJson.setConfigs(configs);
 
         vmTypeResponse.setVmTypeMetaJson(vmTypeMetaJson);
