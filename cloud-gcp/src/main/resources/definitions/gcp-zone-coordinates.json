@@ -179,6 +179,18 @@
       "displayName": "Santiago, Chile",
       "latitude": "-33.44",
       "longitude": "-70.67"
+    },
+    {
+      "name": "me-central1",
+      "displayName": "Doha, Qatar, Middle East",
+      "latitude": "25.286106",
+      "longitude": "51.534817"
+    },
+    {
+      "name": "me-central2",
+      "displayName": "Dammam, Saudi Arabia, Middle East",
+      "latitude": "26.43442",
+      "longitude": "50.10326"
     }
   ]
 }
