@@ -1,18 +1,28 @@
 package com.sequenceiq.it.cloudbreak.mock;
 
+import static com.sequenceiq.it.cloudbreak.CloudbreakTest.CLOUDBREAK_SERVER_ROOT;
+import static com.sequenceiq.it.cloudbreak.CloudbreakTest.IMAGE_CATALOG_MOCK_SERVER_ROOT;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
-import com.sequenceiq.it.cloudbreak.config.server.ServerProperties;
+import com.sequenceiq.it.util.TestParameter;
 
 @Component
-@DependsOn("serverProperties")
+@DependsOn("cloudbreakServer")
 public class ImageCatalogMockServerSetup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogMockServerSetup.class);
@@ -23,17 +33,42 @@ public class ImageCatalogMockServerSetup {
 
     private String mockImageCatalogServer;
 
+    @Value("${integrationtest.cloudbreak.server}")
+    private String defaultCloudbreakServer;
+
     @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
 
     @Inject
-    private ServerProperties serverProperties;
+    private TestParameter testParameter;
 
     @PostConstruct
     void initImageCatalogIfNecessary() {
-        mockImageCatalogServer = serverProperties.getMockImageCatalogAddr();
-        cbVersion = serverProperties.getCbVersion();
+        mockImageCatalogServer = testParameter.get(IMAGE_CATALOG_MOCK_SERVER_ROOT);
+        cbVersion = getCloudbreakUnderTestVersion(testParameter.get(CLOUDBREAK_SERVER_ROOT));
         cdhRuntime = commonClusterManagerProperties.getRuntimeVersion();
+    }
+
+    private String getCloudbreakUnderTestVersion(String cbServerAddress) {
+        WebTarget target;
+        Client client = RestClientUtil.get();
+        if (cbServerAddress.contains("dps.mow") || cbServerAddress.contains("cdp.mow") || cbServerAddress.contains("cdp-priv.mow")) {
+            target = client.target(defaultCloudbreakServer + "/cloud/cb/info");
+        } else {
+            target = client.target(cbServerAddress + "/info");
+        }
+        Invocation.Builder request = target.request();
+        try (Response response = request.get()) {
+            CBVersion cbVersion = response.readEntity(CBVersion.class);
+            String appVersion = cbVersion.getApp().getVersion();
+            LOGGER.info("CB version: Appname: {}, version: {}", cbVersion.getApp().getName(), appVersion);
+            testParameter.put("cbversion", appVersion);
+            MDC.put("cbversion", appVersion);
+            return appVersion;
+        } catch (Exception e) {
+            LOGGER.error(String.format("Cannot fetch the CB version at '%s'", cbServerAddress), e);
+            throw e;
+        }
     }
 
     // DYNAMIC address http://localhost:10080/thunderhead/mock-image-catalog?catalog-name=cb-catalog&cb-version=CB-2.29.0&runtime=7.2.2

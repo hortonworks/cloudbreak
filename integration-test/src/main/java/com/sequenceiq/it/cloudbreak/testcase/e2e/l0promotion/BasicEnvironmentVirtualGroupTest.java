@@ -80,8 +80,8 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
             then = "FreeIPA should be successfully synced with new users and theirs resource roles.")
     public void testAddUsersToEnvironment(TestContext testContext) {
         AtomicReference<Map<UmsVirtualGroupRight, String>> environmentVirtualGroups = new AtomicReference<>();
-        String workloadUsernameEnvAdminA = testContext.getTestUsers().getUserByLabel(L0UserKeys.ENV_ADMIN_A).getWorkloadUserName();
-        String workloadUsernameEnvCreatorB =  testContext.getTestUsers().getUserByLabel(L0UserKeys.ENV_CREATOR_B).getWorkloadUserName();
+        String workloadUsernameEnvAdminA = testContext.getRealUmsUserByKey(L0UserKeys.ENV_ADMIN_A).getWorkloadUserName();
+        String workloadUsernameEnvCreatorB =  testContext.getRealUmsUserByKey(L0UserKeys.ENV_CREATOR_B).getWorkloadUserName();
 
         useRealUmsUser(testContext, L0UserKeys.ENV_CREATOR_A);
 
@@ -147,9 +147,9 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
             then = "FreeIPA should be successfully synced with new groups and theirs resource roles.")
     public void testAddGroupsToEnvironment(TestContext testContext) {
         AtomicReference<Map<UmsVirtualGroupRight, String>> environmentVirtualGroups = new AtomicReference<>();
-        CloudbreakUser userEnvAdminA = testContext.getTestUsers().getUserByLabel(L0UserKeys.ENV_ADMIN_A);
-        CloudbreakUser userEnvCreatorB =  testContext.getTestUsers().getUserByLabel(L0UserKeys.ENV_CREATOR_B);
-        CloudbreakUser userEnvCreatorA =  testContext.getTestUsers().getUserByLabel(L0UserKeys.ENV_CREATOR_A);
+        CloudbreakUser userEnvAdminA = testContext.getRealUmsUserByKey(L0UserKeys.ENV_ADMIN_A);
+        CloudbreakUser userEnvCreatorB =  testContext.getRealUmsUserByKey(L0UserKeys.ENV_CREATOR_B);
+        CloudbreakUser userEnvCreatorA =  testContext.getRealUmsUserByKey(L0UserKeys.ENV_CREATOR_A);
 
         useRealUmsUser(testContext, L0UserKeys.ENV_CREATOR_A);
 

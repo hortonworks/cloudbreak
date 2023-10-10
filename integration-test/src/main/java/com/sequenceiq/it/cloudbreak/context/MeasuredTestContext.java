@@ -1,10 +1,12 @@
 package com.sequenceiq.it.cloudbreak.context;
 
 import java.time.Duration;
+import java.util.Date;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
+import org.testng.ITestResult;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -13,18 +15,17 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
-import com.sequenceiq.it.cloudbreak.config.user.TestUsers;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
 import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
-import com.sequenceiq.it.cloudbreak.microservice.TestClients;
 import com.sequenceiq.it.cloudbreak.performance.Measure;
 import com.sequenceiq.it.cloudbreak.performance.MeasureAll;
 import com.sequenceiq.it.cloudbreak.performance.PerformanceIndicator;
 import com.sequenceiq.it.cloudbreak.util.wait.service.ResourceAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceAwait;
+import com.sequenceiq.it.util.TestParameter;
 
 public class MeasuredTestContext extends MockedTestContext {
     private TestContext wrappedTestContext;
@@ -55,13 +56,28 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
-    public TestUsers getTestUsers() {
-        return wrappedTestContext.getTestUsers();
+    public String getMockUmsPassword() {
+        return wrappedTestContext.getMockUmsPassword();
     }
 
     @Override
-    public TestClients getTestClients() {
-        return wrappedTestContext.getTestClients();
+    public TestParameter getTestParameter() {
+        return wrappedTestContext.getTestParameter();
+    }
+
+    @Override
+    public ITestResult getCurrentTestResult() {
+        return wrappedTestContext.getCurrentTestResult();
+    }
+
+    @Override
+    public Date getTestStartTime() {
+        return wrappedTestContext.getTestStartTime();
+    }
+
+    @Override
+    public Date getTestEndTime() {
+        return wrappedTestContext.getTestEndTime();
     }
 
     @Override
@@ -87,6 +103,21 @@ public class MeasuredTestContext extends MockedTestContext {
     @Override
     public void setShutdown(boolean shutdown) {
         wrappedTestContext.setShutdown(shutdown);
+    }
+
+    @Override
+    public void useUmsUserCache(boolean useUmsStore) {
+        wrappedTestContext.useUmsUserCache(useUmsStore);
+    }
+
+    @Override
+    public boolean umsUserCacheInUse() {
+        return wrappedTestContext.umsUserCacheInUse();
+    }
+
+    @Override
+    public boolean realUmsUserCacheReadyToUse() {
+        return wrappedTestContext.realUmsUserCacheReadyToUse();
     }
 
     @Override
@@ -145,6 +176,11 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
+    public CloudbreakUser getRealUmsUserByKey(String userKey) {
+        return wrappedTestContext.getRealUmsUserByKey(userKey);
+    }
+
+    @Override
     public String getActingUserOwnerTag() {
         return wrappedTestContext.getActingUserOwnerTag();
     }
@@ -152,6 +188,11 @@ public class MeasuredTestContext extends MockedTestContext {
     @Override
     public String getWorkloadUserName() {
         return wrappedTestContext.getWorkloadUserName();
+    }
+
+    @Override
+    public String getWorkloadPassword() {
+        return wrappedTestContext.getWorkloadPassword();
     }
 
     @Override
@@ -300,7 +341,7 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
-    public boolean getSafeLogicValidation() {
+    public String getSafeLogicValidation() {
         return wrappedTestContext.getSafeLogicValidation();
     }
 

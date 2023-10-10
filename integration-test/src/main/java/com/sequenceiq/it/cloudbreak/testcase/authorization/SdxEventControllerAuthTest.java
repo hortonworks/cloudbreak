@@ -3,9 +3,6 @@ package com.sequenceiq.it.cloudbreak.testcase.authorization;
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.NOTIFICATION;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-import static com.sequenceiq.it.cloudbreak.testcase.authorization.AuthUserKeys.ENV_CREATOR_A;
-import static com.sequenceiq.it.cloudbreak.testcase.authorization.AuthUserKeys.ENV_CREATOR_B;
-import static com.sequenceiq.it.cloudbreak.testcase.authorization.AuthUserKeys.ZERO_RIGHTS;
 import static com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil.environmentPattern;
 
 import java.util.List;
@@ -17,13 +14,12 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
+import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
-import com.sequenceiq.it.cloudbreak.config.user.TestUserSelectors;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -50,6 +46,9 @@ public class SdxEventControllerAuthTest extends AbstractIntegrationTest {
     private UmsTestClient umsTestClient;
 
     @Inject
+    private CloudbreakActor cloudbreakActor;
+
+    @Inject
     private EnvironmentTestClient environmentTestClient;
 
     @Inject
@@ -63,12 +62,10 @@ public class SdxEventControllerAuthTest extends AbstractIntegrationTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        testContext.getTestUsers().setSelector(TestUserSelectors.UMS_ONLY);
-
-        testContext.as(AuthUserKeys.ACCOUNT_ADMIN);
-        testContext.as(AuthUserKeys.ENV_CREATOR_B);
-        testContext.as(AuthUserKeys.ZERO_RIGHTS);
-        testContext.as(ENV_CREATOR_A);
+        useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN);
+        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_B);
+        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
+        useRealUmsUser(testContext, AuthUserKeys.ZERO_RIGHTS);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -82,11 +79,8 @@ public class SdxEventControllerAuthTest extends AbstractIntegrationTest {
         String stack = resourcePropertyProvider().getName();
         String clouderaManager = "cm";
         String cluster = "cmcluster";
-        CloudbreakUser envCreatorB = testContext.getTestUsers().getUserByLabel(ENV_CREATOR_B);
-        CloudbreakUser envCreatorA = testContext.getTestUsers().getUserByLabel(ENV_CREATOR_A);
-        CloudbreakUser zeroRights = testContext.getTestUsers().getUserByLabel(ZERO_RIGHTS);
 
-        testContext.as(AuthUserKeys.ENV_CREATOR_A);
+        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
         createDefaultImageCatalog(testContext);
         testContext
                 .given(CredentialTestDto.class)
@@ -117,18 +111,18 @@ public class SdxEventControllerAuthTest extends AbstractIntegrationTest {
                 .withTypes(List.of(NOTIFICATION))
                 .withPage(0)
                 .withSize(1)
-                .when(sdxTestClient.getAuditEvents(), RunningParameter.who(envCreatorA))
-                .when(sdxTestClient.getAuditEvents(), RunningParameter.who(envCreatorB))
+                .when(sdxTestClient.getAuditEvents(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_A)))
+                .when(sdxTestClient.getAuditEvents(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .whenException(
                         sdxTestClient.getAuditEvents(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment' " +
                                 "right on environment " + environmentPattern(testContext)
-                        ).withWho(zeroRights)
+                        ).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS))
                 )
-                .when(sdxTestClient.getDatalakeEventsZip(), RunningParameter.who(envCreatorA))
+                .when(sdxTestClient.getDatalakeEventsZip(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_A)))
                 .then(checkZipEndpointStatusManually(200))
-                .when(sdxTestClient.getDatalakeEventsZip(), RunningParameter.who(envCreatorB))
+                .when(sdxTestClient.getDatalakeEventsZip(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .then(checkZipEndpointStatusManually(200))
-                .when(sdxTestClient.getDatalakeEventsZip(), RunningParameter.who(zeroRights))
+                .when(sdxTestClient.getDatalakeEventsZip(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .then(checkZipEndpointStatusManually(403))
                 .validate();
     }

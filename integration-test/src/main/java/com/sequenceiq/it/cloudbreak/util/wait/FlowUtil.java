@@ -4,6 +4,8 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,11 +20,15 @@ import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
+import com.sequenceiq.it.util.TestParameter;
 
 @Component
 public class FlowUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowUtil.class);
+
+    @Inject
+    private TestParameter testParameter;
 
     @Value("${integrationtest.testsuite.pollingInterval:1000}")
     private long pollingInterval;

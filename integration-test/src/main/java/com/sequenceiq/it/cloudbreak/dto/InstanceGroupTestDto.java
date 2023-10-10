@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.dto;
 
+import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription.RECOVERY_MODE;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.ATLAS_SCALE_OUT;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.AUXILIARY;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.COMPUTE;
@@ -32,6 +33,10 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 @Prototype
 public class InstanceGroupTestDto extends AbstractCloudbreakTestDto<InstanceGroupV4Request, InstanceGroupV4Response, InstanceGroupTestDto> {
 
+    private static final String AUTO = "auto";
+
+    private static final String MANUAL = "manual";
+
     protected InstanceGroupTestDto(InstanceGroupV4Request request, TestContext testContext) {
         super(request, testContext);
     }
@@ -47,8 +52,8 @@ public class InstanceGroupTestDto extends AbstractCloudbreakTestDto<InstanceGrou
     public InstanceGroupTestDto withHostGroup(HostGroupType hostGroupType) {
         final String instanceTemplateName = String.format("%s-%s-%s",
                 InstanceTemplateV4TestDto.class.getSimpleName(), getCloudPlatform(), hostGroupType.getName());
-        return withRecoveryMode(RecoveryMode.MANUAL)
-                .withNodeCount(hostGroupType.determineInstanceCount())
+        return withRecoveryMode(getRecoveryModeParam(hostGroupType))
+                .withNodeCount(hostGroupType.determineInstanceCount(getTestParameter()))
                 .withGroup(hostGroupType.getName())
                 .withSecurityGroup(getTestContext().init(SecurityGroupTestDto.class))
                 .withType(hostGroupType.getInstanceGroupType())
@@ -100,13 +105,13 @@ public class InstanceGroupTestDto extends AbstractCloudbreakTestDto<InstanceGrou
 
     private static InstanceGroupTestDto create(TestContext testContext, HostGroupType hostGroupType) {
         InstanceGroupTestDto entity = testContext.init(InstanceGroupTestDto.class);
-        return create(testContext, hostGroupType, hostGroupType.determineInstanceCount());
+        return create(testContext, hostGroupType, hostGroupType.determineInstanceCount(entity.getTestParameter()));
     }
 
     private static InstanceGroupTestDto create(TestContext testContext, HostGroupType hostGroupType, int nodeCount) {
         InstanceGroupTestDto entity = testContext.init(InstanceGroupTestDto.class);
         return entity
-                .withRecoveryMode(RecoveryMode.MANUAL)
+                .withRecoveryMode(entity.getRecoveryModeParam(hostGroupType))
                 .withNodeCount(nodeCount)
                 .withGroup(hostGroupType.getName())
                 .withSecurityGroup(testContext.given(SecurityGroupTestDto.class))
@@ -173,5 +178,11 @@ public class InstanceGroupTestDto extends AbstractCloudbreakTestDto<InstanceGrou
     @Override
     public String getName() {
         return getRequest().getName();
+    }
+
+    private RecoveryMode getRecoveryModeParam(HostGroupType hostGroupType) {
+        String argumentName = String.join("", hostGroupType.getName(), RECOVERY_MODE);
+        String argumentValue = getTestParameter().getWithDefault(argumentName, MANUAL);
+        return argumentValue.equals(AUTO) ? RecoveryMode.AUTO : RecoveryMode.MANUAL;
     }
 }

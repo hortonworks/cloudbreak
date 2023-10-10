@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
+import com.sequenceiq.it.cloudbreak.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -46,11 +47,14 @@ import com.sequenceiq.it.cloudbreak.dto.util.VersionCheckTestDto;
 import com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak.CloudbreakWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.cloudbreak.CloudbreakInstanceWaitObject;
+import com.sequenceiq.it.util.TestParameter;
 
 public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbreak.client.CloudbreakClient, CloudbreakServiceCrnEndpoints, Status,
         CloudbreakWaitObject> {
 
-    private static final long WORKSPACE_ID = 0L;
+    private static com.sequenceiq.cloudbreak.client.CloudbreakClient singletonCloudbreakClient;
+
+    private static CloudbreakInternalCrnClient singletonCloudbreakInternalCrnClient;
 
     private com.sequenceiq.cloudbreak.client.CloudbreakClient cloudbreakClient;
 
@@ -59,19 +63,6 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
     private WebTarget rawClient;
 
     private Long workspaceId;
-
-    public CloudbreakClient(CloudbreakUser cloudbreakUser, RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator, String serviceAddress,
-            String internalAddress) {
-        setActing(cloudbreakUser);
-        ConfigKey configKey = new ConfigKey(false, true, true);
-        cloudbreakClient = new CloudbreakApiKeyClient(serviceAddress, configKey)
-                .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
-        cloudbreakInternalCrnClient = createCloudbreakInternalCrnClient(
-                internalAddress,
-                regionAwareInternalCrnGenerator);
-        rawClient = createRawWebTarget(configKey, serviceAddress, CoreApi.API_ROOT_CONTEXT,
-                cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
-    }
 
     @Override
     public FlowPublicEndpoint flowPublicEndpoint() {
@@ -89,7 +80,7 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
         return cloudbreakClient;
     }
 
-    private WebTarget createRawWebTarget(ConfigKey configKey, String serviceAddress, String apiRoot,
+    private static synchronized WebTarget createRawWebTarget(ConfigKey configKey, String serviceAddress, String apiRoot,
             String accessKey, String secretKey) {
         Client client = RestClientUtil.get(configKey);
         WebTarget webTarget = client.target(serviceAddress).path(apiRoot);
@@ -97,7 +88,23 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
         return webTarget;
     }
 
-    public CloudbreakInternalCrnClient createCloudbreakInternalCrnClient(String serverRoot,
+    public static synchronized CloudbreakClient createCloudbreakClient(TestParameter testParameter,
+        CloudbreakUser cloudbreakUser, RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
+        CloudbreakClient clientEntity = new CloudbreakClient();
+        clientEntity.setActing(cloudbreakUser);
+        ConfigKey configKey = new ConfigKey(false, true, true);
+        String serviceAddress = testParameter.get(CloudbreakTest.CLOUDBREAK_SERVER_ROOT);
+        clientEntity.cloudbreakClient = new CloudbreakApiKeyClient(serviceAddress, configKey)
+                .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
+        clientEntity.cloudbreakInternalCrnClient = createCloudbreakInternalCrnClient(
+                testParameter.get(CloudbreakTest.CLOUDBREAK_SERVER_INTERNAL_ROOT),
+                regionAwareInternalCrnGenerator);
+        clientEntity.rawClient = createRawWebTarget(configKey, serviceAddress, CoreApi.API_ROOT_CONTEXT,
+                cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
+        return clientEntity;
+    }
+
+    public static synchronized CloudbreakInternalCrnClient createCloudbreakInternalCrnClient(String serverRoot,
         RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
         CloudbreakServiceUserCrnClient cbUserCrnClient = new CloudbreakUserCrnClientBuilder(serverRoot)
                 .withCertificateValidation(false)
@@ -108,7 +115,11 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
     }
 
     public Long getWorkspaceId() {
-        return WORKSPACE_ID;
+        return workspaceId;
+    }
+
+    public void setWorkspaceId(Long workspaceId) {
+        this.workspaceId = workspaceId;
     }
 
     public WebTarget getRawClient() {

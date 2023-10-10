@@ -22,11 +22,11 @@ import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.assertion.ums.VirtualGroupTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
-import com.sequenceiq.it.cloudbreak.config.user.TestUserSelectors;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -77,6 +77,9 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
     private SshSudoCommandActions sshSudoCommandActions;
 
     @Inject
+    private CloudbreakActor cloudbreakActor;
+
+    @Inject
     private EnvironmentUtil environmentUtil;
 
     @Inject
@@ -84,13 +87,11 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        testContext.getTestUsers().setSelector(TestUserSelectors.UMS_ONLY);
         assertSupportedCloudPlatform(CloudPlatform.AWS);
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
-        testContext.as(L0UserKeys.USER_ACCOUNT_ADMIN);
-
+        useRealUmsUser(testContext, L0UserKeys.USER_ACCOUNT_ADMIN);
         initializeDefaultBlueprints(testContext);
-        testContext.as(L0UserKeys.ENV_CREATOR_A);
+        useRealUmsUser(testContext, L0UserKeys.ENV_CREATOR_A);
         createDefaultCredential(testContext);
         createRecipeAndApplyOnFreeIpaAndMasterNodes(testContext);
         createDefaultDatalake(testContext);
@@ -112,8 +113,8 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
                 .when(umsTestClient.assignResourceRole(L0UserKeys.USER_ENV_CREATOR, regionAwareInternalCrnGeneratorFactory))
                 .validate();
 
-        String workloadUsernameEnvCreator = testContext.getTestUsers().getUserByLabel(L0UserKeys.USER_ENV_CREATOR).getWorkloadUserName();
-        testContext.as(L0UserKeys.USER_ENV_CREATOR);
+        String workloadUsernameEnvCreator = testContext.getRealUmsUserByKey(L0UserKeys.USER_ENV_CREATOR).getWorkloadUserName();
+        useRealUmsUser(testContext, L0UserKeys.USER_ENV_CREATOR);
 
         testContext
                 .given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName())
@@ -149,10 +150,10 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
                             CHANGE_USER_TO_ROOT_COMMAND);
                     return testDto;
                 }, TestFailException.class, expectedMessage("sudo command failed on '.*' for user '" + workloadUsernameEnvCreator + "'.")
-                        .withWho(testContext.getTestUsers().getUserByLabel(L0UserKeys.USER_ENV_CREATOR)))
+                        .withWho(cloudbreakActor.useRealUmsUser(L0UserKeys.USER_ENV_CREATOR)))
                 .validate();
 
-        testContext.as(L0UserKeys.ENV_CREATOR_A);
+        useRealUmsUser(testContext, L0UserKeys.ENV_CREATOR_A);
 
         testContext
                 .given(FreeIpaTestDto.class)

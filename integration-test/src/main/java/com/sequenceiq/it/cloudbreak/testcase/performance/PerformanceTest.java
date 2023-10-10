@@ -119,7 +119,9 @@ public class PerformanceTest extends AbstractMockTest {
 
     protected void waitForDatahubCreation(TestContext testContext, String dhKey) {
         testContext.given(dhKey, DistroXTestDto.class)
+                //.await(STACK_AVAILABLE, RunningParameter.pollingInterval(Duration.ofSeconds(3)))
                 .await(STACK_AVAILABLE)
+                //.awaitForHealthyInstances()
                 .when(distroXTestClient.get())
                 .validate();
     }

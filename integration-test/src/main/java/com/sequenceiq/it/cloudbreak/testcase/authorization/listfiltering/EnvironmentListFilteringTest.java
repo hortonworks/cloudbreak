@@ -10,9 +10,9 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
+import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
-import com.sequenceiq.it.cloudbreak.config.user.TestUserSelectors;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -32,6 +32,9 @@ public class EnvironmentListFilteringTest extends AbstractIntegrationTest {
     private UmsTestClient umsTestClient;
 
     @Inject
+    private CloudbreakActor actor;
+
+    @Inject
     private ResourceCreator resourceCreator;
 
     @Inject
@@ -39,14 +42,12 @@ public class EnvironmentListFilteringTest extends AbstractIntegrationTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        testContext.getTestUsers().setSelector(TestUserSelectors.UMS_ONLY);
-
-        testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
-        testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_A);
         //hacky way to let access to image catalog
         initializeDefaultBlueprints(testContext);
         resourceCreator.createDefaultImageCatalog(testContext);
-        testContext.as(AuthUserKeys.USER_ENV_CREATOR_B);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_B);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -55,11 +56,11 @@ public class EnvironmentListFilteringTest extends AbstractIntegrationTest {
             when = "users share with each other",
             then = "they see the other's environment in the list")
     public void testEnvironmentListFiltering(TestContext testContext) {
-        testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_A);
         resourceCreator.createDefaultCredential(testContext);
         EnvironmentTestDto environmentA = resourceCreator.createDefaultEnvironment(testContext);
 
-        testContext.as(AuthUserKeys.USER_ENV_CREATOR_B);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_B);
         CredentialTestDto credential = resourceCreator.createNewCredential(testContext);
         EnvironmentTestDto environmentB = resourceCreator.createNewEnvironment(testContext, credential);
 
@@ -86,12 +87,12 @@ public class EnvironmentListFilteringTest extends AbstractIntegrationTest {
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, environmentA.getName(), environmentB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, environmentA.getName(), environmentB.getName());
 
-        testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN);
     }
 
     private void assertUserDoesNotSeeAnyOf(TestContext testContext, String user, String... names) {
         testContext.given(EnvironmentTestDto.class)
-                .when(environmentTestClient.list(), RunningParameter.who(testContext.getTestUsers().getUserByLabel(user)))
+                .when(environmentTestClient.list(), RunningParameter.who(actor.useRealUmsUser(user)))
                 .then((tc, dto, client) -> {
                     Assertions.assertThat(dto.getResponseSimpleEnvSet()
                             .stream()
@@ -104,7 +105,7 @@ public class EnvironmentListFilteringTest extends AbstractIntegrationTest {
 
     private void assertUserSeesAll(TestContext testContext, String user, String... names) {
         testContext.given(EnvironmentTestDto.class)
-                .when(environmentTestClient.list(), RunningParameter.who(testContext.getTestUsers().getUserByLabel(user)))
+                .when(environmentTestClient.list(), RunningParameter.who(actor.useRealUmsUser(user)))
                 .then((tc, dto, client) -> {
                     Assertions.assertThat(dto.getResponseSimpleEnvSet()
                             .stream()

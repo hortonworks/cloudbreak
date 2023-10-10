@@ -12,14 +12,15 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
-import com.sequenceiq.it.cloudbreak.config.server.ServerProperties;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
+import com.sequenceiq.it.util.TestParameter;
 
 @Component
 public class YarnCloudFunctionality implements CloudFunctionality {
@@ -27,7 +28,7 @@ public class YarnCloudFunctionality implements CloudFunctionality {
     private static final Logger LOGGER = LoggerFactory.getLogger(YarnCloudFunctionality.class);
 
     @Inject
-    private ServerProperties serverProperties;
+    private TestParameter testParameter;
 
     @Override
     public List<String> listInstanceVolumeIds(String clusterName, List<String> instanceIds) {
@@ -51,14 +52,17 @@ public class YarnCloudFunctionality implements CloudFunctionality {
 
     @Override
     public void deleteInstances(String clusterName, List<String> instanceIds) {
+
     }
 
     @Override
     public void stopInstances(String clusterName, List<String> instanceIds) {
+
     }
 
     @Override
     public void cloudStorageInitialize() {
+
     }
 
     @Override
@@ -68,14 +72,17 @@ public class YarnCloudFunctionality implements CloudFunctionality {
 
     @Override
     public void cloudStorageListContainerFreeIpa(String baseLocation, String clusterName, String crn) {
+
     }
 
     @Override
     public void cloudStorageListContainerDataLake(String baseLocation, String clusterName, String crn) {
+
     }
 
     @Override
     public void cloudStorageDeleteContainer(String baseLocation) {
+
     }
 
     @Override
@@ -94,9 +101,9 @@ public class YarnCloudFunctionality implements CloudFunctionality {
     }
 
     public String getFreeIpaS3LogsUrl(String crn) {
-        if (StringUtils.isNotBlank(serverProperties.getCbVersion())) {
+        if (StringUtils.isNotBlank(getCbVersion())) {
             return format("https://s3.console.aws.amazon.com/s3/buckets/" +
-                    "jenkins-e2e-artifacts?region=eu-central-1&prefix=ycloud-freeipa-logs/%s/&showversions=false", serverProperties.getCbVersion());
+                    "jenkins-e2e-artifacts?region=eu-central-1&prefix=ycloud-freeipa-logs/%s/&showversions=false", getCbVersion());
         } else {
             Log.error(LOGGER, format(" CB Version is not available for freeipa '%s'. So cannot determine the version at " +
                     "cluster logs path: https://s3.console.aws.amazon.com/s3/buckets/" +
@@ -111,9 +118,9 @@ public class YarnCloudFunctionality implements CloudFunctionality {
     }
 
     public String getDataLakeS3LogsUrl(String crn) {
-        if (StringUtils.isNotBlank(serverProperties.getCbVersion())) {
+        if (StringUtils.isNotBlank(getCbVersion())) {
             return format("https://s3.console.aws.amazon.com/s3/buckets/" +
-                    "jenkins-e2e-artifacts?region=eu-central-1&prefix=ycloud-sdx-logs/%s/&showversions=false", serverProperties.getCbVersion());
+                    "jenkins-e2e-artifacts?region=eu-central-1&prefix=ycloud-sdx-logs/%s/&showversions=false", getCbVersion());
         } else {
             Log.error(LOGGER, format(" CB Version is not available for datalake '%s'. So cannot determine the version at " +
                     "cluster logs path: https://s3.console.aws.amazon.com/s3/buckets/" +
@@ -128,9 +135,9 @@ public class YarnCloudFunctionality implements CloudFunctionality {
     }
 
     public String getDataHubS3LogsUrl(String crn) {
-        if (StringUtils.isNotBlank(serverProperties.getCbVersion())) {
+        if (StringUtils.isNotBlank(getCbVersion())) {
             return format("https://s3.console.aws.amazon.com/s3/buckets/" +
-                    "jenkins-e2e-artifacts?region=eu-central-1&prefix=ycloud-distrox-logs/%s/&showversions=false", serverProperties.getCbVersion());
+                    "jenkins-e2e-artifacts?region=eu-central-1&prefix=ycloud-distrox-logs/%s/&showversions=false", getCbVersion());
         } else {
             Log.error(LOGGER, format(" CB Version is not available for datahub '%s'. So cannot determine the version at " +
                     "cluster logs path: https://s3.console.aws.amazon.com/s3/buckets/" +
@@ -167,5 +174,9 @@ public class YarnCloudFunctionality implements CloudFunctionality {
     @Override
     public Boolean isFreeipaCfStackExistForEnvironment(String environmentCrn) {
         return false;
+    }
+
+    private String getCbVersion() {
+        return StringUtils.isBlank(MDC.get("cbversion")) ? testParameter.get("cbversion") : MDC.get("cbversion");
     }
 }

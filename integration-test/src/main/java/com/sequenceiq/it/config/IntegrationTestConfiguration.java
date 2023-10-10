@@ -3,8 +3,10 @@ package com.sequenceiq.it.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.kohsuke.randname.RandomNameGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertyResourceConfigurer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +22,8 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.util.StringUtils;
 import org.testng.TestNG;
 
+import com.sequenceiq.it.util.TestParameter;
+
 @Configuration
 @ComponentScan(basePackages = { "com.sequenceiq.it", "com.sequenceiq.cloudbreak.cloud.gcp.util", "com.sequenceiq.cloudbreak.auth.crn" })
 @EnableConfigurationProperties
@@ -29,6 +33,9 @@ public class IntegrationTestConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationTestConfiguration.class);
 
+    @Value("${mock.infrastructure.host:localhost}")
+    private String mockInfrastructureHost;
+
     @Bean
     public static PropertyResourceConfigurer propertySourcesPlaceholderConfigurer() {
         return new PropertySourcesPlaceholderConfigurer();
@@ -37,6 +44,21 @@ public class IntegrationTestConfiguration {
     @Bean
     public TestNG testNG() {
         return new TestNG();
+    }
+
+    @Bean
+    public RandomNameGenerator nameGenerator() {
+        int seed = (int) System.currentTimeMillis();
+        LOGGER.info("Created random name generator with Seed: {}", seed);
+        return new RandomNameGenerator(seed);
+    }
+
+    @Bean
+    public TestParameter testParameter(Environment environment) {
+        TestParameter testParameter = new TestParameter();
+        LOGGER.info("Application.yml based parameters ::: ");
+        testParameter.putAll(getAllKnownProperties(environment));
+        return testParameter;
     }
 
     private Map<String, String> getAllKnownProperties(Environment env) {

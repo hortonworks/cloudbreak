@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
@@ -20,8 +21,8 @@ import org.testng.annotations.Listeners;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.assertion.safelogic.SafeLogicAssertions;
-import com.sequenceiq.it.cloudbreak.config.azure.ResourceGroupProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
@@ -50,9 +51,6 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     private AzureCloudFunctionality azureCloudFunctionality;
 
     @Inject
-    private ResourceGroupProperties resourceGroupProperties;
-
-    @Inject
     private SafeLogicAssertions safeLogicAssertions;
 
     @Override
@@ -77,7 +75,8 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
         if (MapUtils.isEmpty(testContext.getExceptionMap())) {
             LOGGER.info("Validating default tags on the created and tagged test resources...");
             testContext.getResourceNames().values().forEach(value -> tagsUtil.verifyTags(value, testContext));
-            if (testContext.getSafeLogicValidation()) {
+            if (StringUtils.isBlank(testContext.getSafeLogicValidation())
+                    || !StringUtils.equalsIgnoreCase(testContext.getSafeLogicValidation(), "false")) {
                 LOGGER.info("Validating SafeLogic installation of created resources...");
                 safeLogicAssertions.validate(testContext);
             }
@@ -180,7 +179,8 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
         if (CloudPlatform.AZURE.name().equalsIgnoreCase(cloudProvider)) {
             Map<String, String> tags = Map.of("owner", testContext.getActingUserOwnerTag(),
                     "creation-timestamp", testContext.getCreationTimestampTag());
-            ResourceGroup temporaryResourceGroup = azureCloudFunctionality.createResourceGroup(resourceGroupProperties.getResourceGroupName(), tags);
+            ResourceGroup temporaryResourceGroup = azureCloudFunctionality.createResourceGroup(testContext.getTestParameter()
+                    .get(ResourceGroupTest.AZURE_RESOURCE_GROUP_NAME), tags);
             LOGGER.info("The temporary single resource group '{}' for E2E tests has been provisioned with status '{}' before test has been started!",
                     temporaryResourceGroup.name(), temporaryResourceGroup.provisioningState());
         } else {

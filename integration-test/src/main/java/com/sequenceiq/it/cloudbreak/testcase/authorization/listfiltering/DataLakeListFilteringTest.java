@@ -12,7 +12,6 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
-import com.sequenceiq.it.cloudbreak.config.user.TestUserSelectors;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
@@ -42,14 +41,12 @@ public class DataLakeListFilteringTest extends AbstractIntegrationTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        testContext.getTestUsers().setSelector(TestUserSelectors.UMS_ONLY);
-
-        testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
-        testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_A);
         //hacky way to let access to image catalog
         initializeDefaultBlueprints(testContext);
         resourceCreator.createDefaultImageCatalog(testContext);
-        testContext.as(AuthUserKeys.USER_ENV_CREATOR_B);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_B);
         testContext.given(UmsTestDto.class)
                 .assignTarget(ImageCatalogTestDto.class.getSimpleName())
                 .withSharedResourceUser()
@@ -63,14 +60,14 @@ public class DataLakeListFilteringTest extends AbstractIntegrationTest {
             when = "users share with each other",
             then = "they see the other's datalake in the list")
     public void testDataLakeListFiltering(TestContext testContext) {
-        testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_A);
         resourceCreator.createDefaultCredential(testContext);
         resourceCreator.createDefaultEnvironment(testContext);
         EnvironmentTestDto environment = testContext.get(EnvironmentTestDto.class);
         resourceCreator.createNewFreeIpa(testContext, environment);
         SdxInternalTestDto dataLakeA = resourceCreator.createDefaultDataLake(testContext);
 
-        testContext.as(AuthUserKeys.USER_ENV_CREATOR_B);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_B);
         CredentialTestDto credential = resourceCreator.createNewCredential(testContext);
         EnvironmentTestDto environmentB = resourceCreator.createNewEnvironment(testContext, credential);
         resourceCreator.createNewFreeIpa(testContext, environmentB);
@@ -99,11 +96,11 @@ public class DataLakeListFilteringTest extends AbstractIntegrationTest {
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, dataLakeA.getName(), dataLakeB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, dataLakeA.getName(), dataLakeB.getName());
 
-        testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN);
     }
 
     private void assertUserDoesNotSeeAnyOf(TestContext testContext, String user, String... names) {
-        testContext.as(user);
+        useRealUmsUser(testContext, user);
         Assertions.assertThat(testContext.given(SdxInternalTestDto.class)
                 .getAll(testContext.getMicroserviceClient(SdxClient.class))
                 .stream()
@@ -113,7 +110,7 @@ public class DataLakeListFilteringTest extends AbstractIntegrationTest {
     }
 
     private void assertUserSeesAll(TestContext testContext, String user, String... names) {
-        testContext.as(user);
+        useRealUmsUser(testContext, user);
         List<String> visibleNames = testContext.given(SdxInternalTestDto.class)
                 .getAll(testContext.getMicroserviceClient(SdxClient.class))
                 .stream()

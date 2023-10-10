@@ -1,5 +1,8 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.environment;
 
+import static com.sequenceiq.it.cloudbreak.config.azure.AzureMarketplaceImageProperties.AZURE_MARKETPLACE_FREEIPA_CATALOG_URL;
+import static com.sequenceiq.it.cloudbreak.config.azure.AzureMarketplaceImageProperties.AZURE_MARKETPLACE_FREEIPA_IMAGE_UUID;
+
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
@@ -13,7 +16,6 @@ import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
-import com.sequenceiq.it.cloudbreak.config.azure.AzureMarketplaceImageProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
@@ -24,6 +26,7 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.it.util.TestParameter;
 
 public class AzureMarketplaceImageTest extends AbstractE2ETest {
 
@@ -32,9 +35,6 @@ public class AzureMarketplaceImageTest extends AbstractE2ETest {
 
     @Inject
     private CredentialTestClient credentialTestClient;
-
-    @Inject
-    private AzureMarketplaceImageProperties azureMarketplaceImageProperties;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -74,10 +74,13 @@ public class AzureMarketplaceImageTest extends AbstractE2ETest {
                 .validate();
     }
 
-    public Assertion<EnvironmentTestDto, EnvironmentClient> assertMarketplaceImage() {
+    public static Assertion<EnvironmentTestDto, EnvironmentClient> assertMarketplaceImage() {
         return (testContext, testDto, environmentClient) -> {
-            String catalogUrl = azureMarketplaceImageProperties.getCatalogUrl();
-            String imageUuid = azureMarketplaceImageProperties.getImageUuid();
+            TestParameter testParameter = testContext
+                    .given(EnvironmentTestDto.class)
+                    .getTestParameter();
+            String catalogUrl = testParameter.get(AZURE_MARKETPLACE_FREEIPA_CATALOG_URL);
+            String imageUuid = testParameter.get(AZURE_MARKETPLACE_FREEIPA_IMAGE_UUID);
 
             DetailedEnvironmentResponse environment = environmentClient.getDefaultClient().environmentV1Endpoint().getByName(testDto.getName());
             FreeIpaImageResponse image = environment.getFreeIpa().getImage();

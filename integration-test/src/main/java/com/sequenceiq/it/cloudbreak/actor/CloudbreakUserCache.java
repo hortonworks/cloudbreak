@@ -1,8 +1,8 @@
-package com.sequenceiq.it.cloudbreak.config.user;
+package com.sequenceiq.it.cloudbreak.actor;
 
-import static com.sequenceiq.it.cloudbreak.config.user.UmsUserConfig.UMS_USER;
 import static java.lang.String.format;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,15 +32,12 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
-import com.sequenceiq.it.cloudbreak.actor.UmsUserStoreConfig;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
-@Component(UMS_USER)
-class UmsUserConfig implements TestUserConfig {
-    public static final String UMS_USER = "umsUser";
+@Component
+public class CloudbreakUserCache {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UmsUserConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakUserCache.class);
 
     private Map<String, List<CloudbreakUser>> usersByAccount;
 
@@ -57,9 +54,6 @@ class UmsUserConfig implements TestUserConfig {
 
     @Value("${integrationtest.outputdir:.}")
     private String workspace;
-
-    @Value("${integrationtest.user.workloadPassword:}")
-    private String workloadPassword;
 
     @PostConstruct
     private void initRealUmsUserCache() {
@@ -87,10 +81,7 @@ class UmsUserConfig implements TestUserConfig {
                         .flatMap(selectedEnv -> selectedEnv.getValue().entrySet().stream()
                                 .filter(mowAccs -> mowAccs.getKey().equalsIgnoreCase(realUmsUserAccount))
                                 .flatMap(selectedAcc -> selectedAcc.getValue().stream())).collect(Collectors.toList());
-                cloudbreakUsers.forEach(user -> {
-                    accountIds.add(Objects.requireNonNull(Crn.fromString(user.getCrn())).getAccountId());
-                    user.setWorkloadPassword(workloadPassword);
-                });
+                cloudbreakUsers.forEach(user -> accountIds.add(Objects.requireNonNull(Crn.fromString(user.getCrn())).getAccountId()));
             } catch (Exception e) {
                 throw new TestFailException(" Can't read UMS user store! It's possible you did run 'make fetch-secrets'. ", e);
             }
@@ -127,9 +118,8 @@ class UmsUserConfig implements TestUserConfig {
             String credentialsFile = StringUtils.substringAfterLast(umsUserStoreConfig.getFetchedFilePath(), "/");
             String credentialsFolder = credentialsFilePathElements[credentialsFilePathElements.length - 2];
             umsUserStoreConfig.setClassFilePath(StringUtils.join(List.of(credentialsFolder, credentialsFile), "/"));
-            try {
-                Stream<Path> foundFiles = Files.find(Paths.get(umsUserStoreConfig.getWorkspace()), Integer.MAX_VALUE,
-                        (filePath, fileAttr) -> filePath.toString().endsWith(credentialsFile));
+            try (Stream<Path> foundFiles = Files.find(Paths.get(umsUserStoreConfig.getWorkspace()), Integer.MAX_VALUE,
+                        (filePath, fileAttr) -> filePath.toString().endsWith(credentialsFile))) {
                 umsUserStoreConfig.setCustomFilePath(foundFiles
                         .filter(path -> path.getFileName().toString().equalsIgnoreCase(credentialsFile))
                         .findFirst().get());
@@ -138,7 +128,7 @@ class UmsUserConfig implements TestUserConfig {
                     umsUserStoreConfig.setAtCustomPath(true);
                     umsUserStoreConfig.setFilePresent(true);
                 }
-            } catch (NoSuchElementException e) {
+            } catch (NoSuchElementException | IOException e) {
                 if (new ClassPathResource(umsUserStoreConfig.getClassFilePath()).exists()) {
                     LOGGER.info("Found UMS user store file at classpath: '{}'", umsUserStoreConfig.getClassFilePath());
                     umsUserStoreConfig.setFilePresent(true);
@@ -180,15 +170,14 @@ class UmsUserConfig implements TestUserConfig {
 
             formatEcdsaSecretKey(user);
 
-            LOGGER.info(" Real UMS user has been found:: \nDisplay name: {} \nCrn: {} \nAccess key: {} \nSecret key: {} \nAdmin: {} ",
-                    user.getDisplayName(), user.getCrn(), user.getAccessKey(), user.getSecretKey(), user.getAdmin());
+            LOGGER.info(format(" Real UMS user has been found:: %nDisplay name: %s %nCrn: %s %nAccess key: %s %nSecret key: %s %nAdmin: %s ",
+                    user.getDisplayName(), user.getCrn(), user.getAccessKey(), user.getSecretKey(), user.getAdmin()));
             return user;
         } else {
             throw new TestFailException("Cannot get real UMS user by name, because of 'ums-users/api-credentials.json' is not available.");
         }
     }
 
-    @Override
     public CloudbreakUser getAdminByAccountId(String accountId) {
         if (!usersByAccount.containsKey(accountId)) {
             throw new TestFailException("Real UMS '" + accountId + "' account ID is missing from 'ums-users/api-credentials.json' file." +
@@ -202,23 +191,13 @@ class UmsUserConfig implements TestUserConfig {
 
                 formatEcdsaSecretKey(adminUser);
 
-                LOGGER.info(" Real UMS account admin has been found:: \nDisplay name: {} \nCrn: {} \nAccess key: {} \nSecret key: {} \nAdmin: {} ",
-                        adminUser.getDisplayName(), adminUser.getCrn(), adminUser.getAccessKey(), adminUser.getSecretKey(), adminUser.getAdmin());
+                LOGGER.info(format(" Real UMS account admin has been found:: %nDisplay name: %s %nCrn: %s %nAccess key: %s %nSecret key: %s %nAdmin: %s ",
+                        adminUser.getDisplayName(), adminUser.getCrn(), adminUser.getAccessKey(), adminUser.getSecretKey(), adminUser.getAdmin()));
                 return adminUser;
             } catch (Exception e) {
                 throw new TestFailException(format("Cannot get the real UMS admin in account: %s, because of: %s", accountId, e.getMessage()), e);
             }
         }
-    }
-
-    @Override
-    public CloudbreakUser getDefaultUser() {
-        return usersByAccount.values().stream().filter(c -> !c.isEmpty()).findFirst().get().stream().findFirst().get();
-    }
-
-    @Override
-    public CloudbreakUser getCloudbreakUserByLabel(String label) {
-        return getUserByDisplayName(label);
     }
 
     public boolean isInitialized() {

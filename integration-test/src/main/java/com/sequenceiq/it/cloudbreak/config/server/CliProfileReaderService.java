@@ -28,7 +28,6 @@ public class CliProfileReaderService {
             LOGGER.info("Could not find cb profile file at location {}, falling back to application.yml", cbProfileLocation);
             return Map.of();
         }
-        LOGGER.info("At {} profile is found.", cbProfileLocation);
 
         byte[] encoded = Files.readAllBytes(Paths.get(userHome, ".dp", "config"));
         String profileString = new String(encoded, Charset.defaultCharset());

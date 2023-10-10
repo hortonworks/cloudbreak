@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
-import com.sequenceiq.it.cloudbreak.config.user.TestUserSelectors;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
@@ -41,11 +40,9 @@ public class FreeIpaListFilteringTest extends AbstractMockTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        testContext.getTestUsers().setSelector(TestUserSelectors.UMS_ONLY);
-
-        testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
-        testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
-        testContext.as(AuthUserKeys.USER_ENV_CREATOR_B);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_A);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_B);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -54,12 +51,12 @@ public class FreeIpaListFilteringTest extends AbstractMockTest {
             when = "users share with each other",
             then = "they see the other's freeipa in the list")
     public void testFreeIpaListFiltering(TestContext testContext) {
-        testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_A);
         resourceCreator.createDefaultCredential(testContext);
         EnvironmentTestDto environmentA = resourceCreator.createDefaultEnvironment(testContext);
         resourceCreator.createDefaultFreeIpa(testContext);
 
-        testContext.as(AuthUserKeys.USER_ENV_CREATOR_B);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_B);
         CredentialTestDto credential = resourceCreator.createNewCredential(testContext);
         EnvironmentTestDto environmentB = resourceCreator.createNewEnvironment(testContext, credential);
         resourceCreator.createNewFreeIpa(testContext, environmentB);
@@ -87,11 +84,11 @@ public class FreeIpaListFilteringTest extends AbstractMockTest {
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, environmentA.getCrn(), environmentB.getCrn());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, environmentA.getCrn(), environmentB.getCrn());
 
-        testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN);
     }
 
     private void assertUserDoesNotSeeAnyOf(TestContext testContext, String user, String... envCrns) {
-        testContext.as(user);
+        useRealUmsUser(testContext, user);
         Assertions.assertThat(testContext.given(FreeIpaTestDto.class)
                 .getAll(testContext.getMicroserviceClient(FreeIpaClient.class))
                 .stream()
@@ -101,7 +98,7 @@ public class FreeIpaListFilteringTest extends AbstractMockTest {
     }
 
     private void assertUserSeesAll(TestContext testContext, String user, String... envCrns) {
-        testContext.as(user);
+        useRealUmsUser(testContext, user);
         List<String> visibleEnvCrns = testContext.given(FreeIpaTestDto.class)
                 .getAll(testContext.getMicroserviceClient(FreeIpaClient.class))
                 .stream()

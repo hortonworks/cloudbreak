@@ -4,8 +4,8 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
-import com.sequenceiq.it.cloudbreak.config.user.TestUserCreator;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -18,11 +18,11 @@ public class MockSdxBlueprintLoadTests extends AbstractMockTest {
     private SdxTestClient sdxTestClient;
 
     @Inject
-    private TestUserCreator testUserCreator;
+    private CloudbreakActor cloudbreakActor;
 
     @Override
     protected void setupTest(TestContext testContext) {
-        testContext.as(testUserCreator.create("sdxbploadtenant10", "sdxbpload@cloudera.com"));
+        testContext.as(cloudbreakActor.create("sdxbploadtenant10", "sdxbpload@cloudera.com"));
         createDefaultCredential(testContext);
         createEnvironmentWithFreeIpa(testContext);
         createDefaultImageCatalog(testContext);

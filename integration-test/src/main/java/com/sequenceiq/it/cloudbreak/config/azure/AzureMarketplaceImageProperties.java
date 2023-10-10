@@ -1,10 +1,19 @@
 package com.sequenceiq.it.cloudbreak.config.azure;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.it.util.TestParameter;
+
 @Configuration
 public class AzureMarketplaceImageProperties {
+
+    public static final String AZURE_MARKETPLACE_FREEIPA_CATALOG_URL = "AZURE_MARKETPLACE_FREEIPA_CATALOG_URL";
+
+    public static final String AZURE_MARKETPLACE_FREEIPA_IMAGE_UUID = "AZURE_MARKETPLACE_FREEIPA_IMAGE_UUID";
 
     @Value("${integrationtest.azure.marketplace.freeipa.catalog.url}")
     private String catalogUrl;
@@ -12,19 +21,12 @@ public class AzureMarketplaceImageProperties {
     @Value("${integrationtest.azure.marketplace.freeipa.image.uuid}")
     private String imageUuid;
 
-    public String getCatalogUrl() {
-        return catalogUrl;
-    }
+    @Inject
+    private TestParameter testParameter;
 
-    public void setCatalogUrl(String catalogUrl) {
-        this.catalogUrl = catalogUrl;
-    }
-
-    public String getImageUuid() {
-        return imageUuid;
-    }
-
-    public void setImageUuid(String imageUuid) {
-        this.imageUuid = imageUuid;
+    @PostConstruct
+    private void init() {
+        testParameter.put(AZURE_MARKETPLACE_FREEIPA_CATALOG_URL, catalogUrl);
+        testParameter.put(AZURE_MARKETPLACE_FREEIPA_IMAGE_UUID, imageUuid);
     }
 }

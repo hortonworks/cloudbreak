@@ -1,9 +1,8 @@
 package com.sequenceiq.it.cloudbreak.testcase.authorization.listfiltering;
 
-import static com.sequenceiq.it.cloudbreak.testcase.authorization.AuthUserKeys.USER_ENV_CREATOR_B;
-
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -15,7 +14,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
-import com.sequenceiq.it.cloudbreak.config.user.TestUserSelectors;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
@@ -43,18 +41,16 @@ public class DataHubListFilteringTest extends AbstractIntegrationTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        testContext.getTestUsers().setSelector(TestUserSelectors.UMS_ONLY);
-
-        testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
-        testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_A);
         //hacky way to let access to image catalog
         initializeDefaultBlueprints(testContext);
         resourceCreator.createDefaultImageCatalog(testContext);
-        testContext.as(USER_ENV_CREATOR_B)
-                .given(UmsTestDto.class)
+        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_B);
+        testContext.given(UmsTestDto.class)
                 .assignTarget(ImageCatalogTestDto.class.getSimpleName())
                 .withSharedResourceUser()
-                .when(umsTestClient.assignResourceRole(USER_ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .validate();
     }
 
@@ -64,49 +60,47 @@ public class DataHubListFilteringTest extends AbstractIntegrationTest {
             when = "users share with each other",
             then = "they see the other's datahub in the list")
     public void testDataHubListFiltering(TestContext testContext) {
-        testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_A);
         resourceCreator.createDefaultCredential(testContext);
         EnvironmentTestDto environment = resourceCreator.createDefaultEnvironment(testContext);
         resourceCreator.createNewFreeIpa(testContext, environment);
         resourceCreator.createDefaultDataLake(testContext);
-        DistroXTestDto datahubA = resourceCreator
-                .createDefaultDataHubAndWaitAs(testContext, testContext.getTestUsers().getUserByLabel(AuthUserKeys.USER_ACCOUNT_ADMIN));
+        DistroXTestDto datahubA = resourceCreator.createDefaultDataHubAndWaitAs(testContext, Optional.of(AuthUserKeys.USER_ACCOUNT_ADMIN));
 
         testContext.given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withDatahubCreator()
-                .when(umsTestClient.assignResourceRole(USER_ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .withEnvironmentUser()
-                .when(umsTestClient.assignResourceRole(USER_ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .validate();
 
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, datahubA.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, datahubA.getName());
-        assertUserSeesAll(testContext, USER_ENV_CREATOR_B, datahubA.getName());
+        assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, datahubA.getName());
 
-        testContext.as(USER_ENV_CREATOR_B);
-        DistroXTestDto dataHubB = resourceCreator.createNewDataHubAndWaitAs(testContext,
-                testContext.getTestUsers().getUserByLabel(AuthUserKeys.USER_ACCOUNT_ADMIN));
+        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_B);
+        DistroXTestDto dataHubB = resourceCreator.createNewDataHubAndWaitAs(testContext, Optional.of(AuthUserKeys.USER_ACCOUNT_ADMIN));
 
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, datahubA.getName(), dataHubB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, datahubA.getName(), dataHubB.getName());
-        assertUserSeesAll(testContext, USER_ENV_CREATOR_B, datahubA.getName(), dataHubB.getName());
+        assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, datahubA.getName(), dataHubB.getName());
 
         testContext.given(UmsTestDto.class)
                 .assignTarget(DistroXTestDto.class.getSimpleName())
                 .withDatahubAdmin()
-                .when(umsTestClient.assignResourceRole(USER_ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .validate();
 
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, datahubA.getName(), dataHubB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, datahubA.getName(), dataHubB.getName());
-        assertUserSeesAll(testContext, USER_ENV_CREATOR_B, datahubA.getName(), dataHubB.getName());
+        assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, datahubA.getName(), dataHubB.getName());
 
-        testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
+        useRealUmsUser(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN);
     }
 
     private void assertUserDoesNotSeeAnyOf(TestContext testContext, String user, String... names) {
-        testContext.as(user);
+        useRealUmsUser(testContext, user);
         Assertions.assertThat(testContext.given(DistroXTestDto.class).getAll(testContext.getMicroserviceClient(CloudbreakClient.class))
                 .stream()
                 .map(StackV4Response::getName)
@@ -115,7 +109,7 @@ public class DataHubListFilteringTest extends AbstractIntegrationTest {
     }
 
     private void assertUserSeesAll(TestContext testContext, String user, String... names) {
-        testContext.as(user);
+        useRealUmsUser(testContext, user);
         List<String> visibleNames = testContext.given(DistroXTestDto.class).getAll(testContext.getMicroserviceClient(CloudbreakClient.class))
                 .stream()
                 .map(StackV4Response::getName)

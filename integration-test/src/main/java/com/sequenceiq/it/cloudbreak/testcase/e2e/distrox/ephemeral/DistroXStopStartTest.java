@@ -22,6 +22,7 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.clouderamanager.ClouderaManagerUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.it.util.TestParameter;
 
 public class DistroXStopStartTest extends AbstractE2ETest {
 
@@ -29,6 +30,9 @@ public class DistroXStopStartTest extends AbstractE2ETest {
 
     @Inject
     private DistroXTestClient distroXTestClient;
+
+    @Inject
+    private TestParameter testParameter;
 
     @Inject
     private ClouderaManagerUtil clouderaManagerUtil;

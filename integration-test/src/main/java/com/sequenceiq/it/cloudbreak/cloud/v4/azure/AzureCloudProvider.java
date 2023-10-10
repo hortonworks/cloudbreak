@@ -41,7 +41,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.azure.AzureProperties.Network;
-import com.sequenceiq.it.cloudbreak.config.azure.ResourceGroupProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
@@ -84,9 +83,6 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Inject
     private AzureCloudFunctionality azureCloudFunctionality;
-
-    @Inject
-    private ResourceGroupProperties resourceGroupProperties;
 
     @Override
     public CredentialTestDto credential(CredentialTestDto credential) {
@@ -259,7 +255,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public ServiceEndpointCreation serviceEndpoint() {
         ServiceEndpointCreation serviceEndpointCreation =
-                ResourceGroupTest.isSingleResourceGroup(resourceGroupProperties.getResourceGroupUsage())
+                ResourceGroupTest.isSingleResourceGroup(getTestParameter().get(ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE))
                         ? ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT
                         : ServiceEndpointCreation.DISABLED;
         LOGGER.debug("Azure service endpoint creation: {}", serviceEndpointCreation);
