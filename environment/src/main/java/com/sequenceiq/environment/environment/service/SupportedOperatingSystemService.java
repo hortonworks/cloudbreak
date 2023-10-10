@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.environment.api.v1.environment.OsTypeToOsTypeResponseConverter;
@@ -36,7 +37,7 @@ public class SupportedOperatingSystemService {
         this.osTypeToOsTypeResponseConverter = osTypeToOsTypeResponseConverter;
     }
 
-    public SupportedOperatingSystemResponse listSupportedOperatingSystem(String accountId) {
+    public SupportedOperatingSystemResponse listSupportedOperatingSystem(String accountId, String cloudPlatform) {
         SupportedOperatingSystemResponse response = new SupportedOperatingSystemResponse();
 
         if (providerPreferencesService.isGovCloudDeployment()) {
@@ -44,7 +45,8 @@ public class SupportedOperatingSystemService {
             response.setDefaultOs(RHEL8.getOs());
             LOGGER.info("List of supported OS for gov cloud response: {}", response);
         } else {
-            boolean rhel8Enabled = entitlementService.isRhel8ImageSupportEnabled(accountId);
+            boolean rhel8Enabled = entitlementService.isRhel8ImageSupportEnabled(accountId)
+                    && enableRhel8OnAzureForInternalTenants(accountId, cloudPlatform);
             List<OsTypeResponse> supportedOs = Arrays.stream(OsType.values()).filter(r -> rhel8Enabled || r != RHEL8)
                     .map(osTypeToOsTypeResponseConverter::convert).collect(Collectors.toList());
             response.setOsTypes(supportedOs);
@@ -59,5 +61,10 @@ public class SupportedOperatingSystemService {
         }
 
         return response;
+    }
+
+    // This is temporary, until we publish RHEL 8 images to marketplace
+    private boolean enableRhel8OnAzureForInternalTenants(String accountId, String cloudPlatform) {
+        return !CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform) || entitlementService.internalTenant(accountId);
     }
 }

@@ -42,7 +42,7 @@ class SupportedOperatingSystemServiceTest {
         when(entitlementService.isRhel8ImageSupportEnabled((any()))).thenReturn(false);
         when(entitlementService.isRhel8ImagePreferred((any()))).thenReturn(false);
 
-        SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id");
+        SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", null);
 
         assertEquals("centos7", response.getDefaultOs());
         assertEquals(CENTOS7.getOs(), response.getDefaultOs());
@@ -56,7 +56,7 @@ class SupportedOperatingSystemServiceTest {
         when(entitlementService.isRhel8ImageSupportEnabled((any()))).thenReturn(false);
         when(entitlementService.isRhel8ImagePreferred((any()))).thenReturn(true);
 
-        SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id");
+        SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", null);
 
         assertEquals("centos7", response.getDefaultOs());
         assertEquals(CENTOS7.getOs(), response.getDefaultOs());
@@ -69,7 +69,7 @@ class SupportedOperatingSystemServiceTest {
         when(entitlementService.isRhel8ImageSupportEnabled((any()))).thenReturn(true);
         when(entitlementService.isRhel8ImagePreferred((any()))).thenReturn(false);
 
-        SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id");
+        SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", null);
 
         assertEquals("centos7", response.getDefaultOs());
         assertEquals(CENTOS7.getOs(), response.getDefaultOs());
@@ -82,7 +82,7 @@ class SupportedOperatingSystemServiceTest {
         when(entitlementService.isRhel8ImageSupportEnabled((any()))).thenReturn(true);
         when(entitlementService.isRhel8ImagePreferred((any()))).thenReturn(true);
 
-        SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id");
+        SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", null);
 
         assertEquals("redhat8", response.getDefaultOs());
         assertEquals(RHEL8.getOs(), response.getDefaultOs());
@@ -93,10 +93,49 @@ class SupportedOperatingSystemServiceTest {
     void listSupportedOperatingSystemGovCloudOnly() {
         when(providerPreferencesService.isGovCloudDeployment()).thenReturn(true);
 
-        SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id");
+        SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", null);
 
         assertEquals("redhat8", response.getDefaultOs());
         assertEquals(RHEL8.getOs(), response.getDefaultOs());
         assertEquals(response.getOsTypes(), List.of(osTypeToOsTypeResponseConverter.convert(RHEL8)));
+    }
+
+    @Test
+    void listSupportedOperatingSystemRHEL8EnabledOnAzure() {
+        when(providerPreferencesService.isGovCloudDeployment()).thenReturn(false);
+        when(entitlementService.isRhel8ImagePreferred((any()))).thenReturn(false);
+
+        SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", "Azure");
+
+        assertEquals("centos7", response.getDefaultOs());
+        assertEquals(CENTOS7.getOs(), response.getDefaultOs());
+        assertEquals(List.of(osTypeToOsTypeResponseConverter.convert(CENTOS7)), response.getOsTypes());
+    }
+
+    @Test
+    void listSupportedOperatingSystemInternalTenant() {
+        when(providerPreferencesService.isGovCloudDeployment()).thenReturn(false);
+        when(entitlementService.isRhel8ImageSupportEnabled((any()))).thenReturn(true);
+        when(entitlementService.isRhel8ImagePreferred((any()))).thenReturn(false);
+        when(entitlementService.internalTenant((any()))).thenReturn(true);
+
+        SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", "Azure");
+
+        assertEquals("centos7", response.getDefaultOs());
+        assertEquals(CENTOS7.getOs(), response.getDefaultOs());
+        assertEquals(List.of(osTypeToOsTypeResponseConverter.convert(CENTOS7), osTypeToOsTypeResponseConverter.convert(RHEL8)), response.getOsTypes());
+    }
+
+    @Test
+    void listSupportedOperatingSystemRHEL8EnabledOnAWS() {
+        when(providerPreferencesService.isGovCloudDeployment()).thenReturn(false);
+        when(entitlementService.isRhel8ImageSupportEnabled((any()))).thenReturn(true);
+        when(entitlementService.isRhel8ImagePreferred((any()))).thenReturn(false);
+
+        SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", "AWS");
+
+        assertEquals("centos7", response.getDefaultOs());
+        assertEquals(CENTOS7.getOs(), response.getDefaultOs());
+        assertEquals(List.of(osTypeToOsTypeResponseConverter.convert(CENTOS7), osTypeToOsTypeResponseConverter.convert(RHEL8)), response.getOsTypes());
     }
 }
