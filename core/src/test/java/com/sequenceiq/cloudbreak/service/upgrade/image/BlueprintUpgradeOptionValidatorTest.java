@@ -55,15 +55,6 @@ public class BlueprintUpgradeOptionValidatorTest {
     }
 
     @Test
-    public void testIsValidBlueprintShouldReturnFalseWhenTheUpgradeOptionIsDisabledOnDefaultBlueprintAndTheUpgradeIsRuntimeUpgrade() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, BlueprintUpgradeOption.DISABLED);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, true);
-        assertFalse(actual.isValid());
-        assertEquals("The cluster template is not eligible for upgrade", actual.getReason());
-        verifyNoInteractions(customTemplateUpgradeValidator);
-    }
-
-    @Test
     public void testIsValidBlueprintShouldReturnTrueWhenTheUpgradeOptionIsDisabledOnDefaultBlueprintAndTheUpgradeIsRuntimeUpgradeWithInternal() {
         Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, BlueprintUpgradeOption.DISABLED);
         BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, true, true);
@@ -173,24 +164,6 @@ public class BlueprintUpgradeOptionValidatorTest {
         BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, false);
         assertTrue(actual.isValid());
         assertNull(actual.getReason());
-        verifyNoInteractions(customTemplateUpgradeValidator);
-    }
-
-    @Test
-    public void testIsValidBlueprintShouldReturnFalseWhenTheUpgradeOptionIsEnabledOnDefaultBlueprintAndTheUpgradeIsRuntimeUpgradeAndNoEntitlement() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, BlueprintUpgradeOption.ENABLED);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, false);
-        assertFalse(actual.isValid());
-        assertEquals(actual.getReason(), "The cluster template is not eligible for upgrade");
-        verifyNoInteractions(customTemplateUpgradeValidator);
-    }
-
-    @Test
-    public void testIsValidBlueprintShouldReturnFalseWhenTheUpgradeOptionIsOSEnabledOnDefaultBlueprintAndTheUpgradeIsRuntimeUpgradeAndNoEntitlement() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, BlueprintUpgradeOption.OS_UPGRADE_ENABLED);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, false);
-        assertFalse(actual.isValid());
-        assertEquals(actual.getReason(), "The cluster template is not eligible for upgrade");
         verifyNoInteractions(customTemplateUpgradeValidator);
     }
 

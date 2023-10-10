@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.BlueprintBasedUpgradeOption;
-import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 
 @Component
@@ -22,14 +21,8 @@ public class BlueprintViewToBlueprintV4ViewResponseConverter {
         blueprintV4ViewResponse.setTags(entity.getTags().getMap());
         blueprintV4ViewResponse.setCrn(entity.getResourceCrn());
         blueprintV4ViewResponse.setCreated(entity.getCreated());
-        blueprintV4ViewResponse.setUpgradeable(getBlueprintBasedUpgradeOption(entity));
+        blueprintV4ViewResponse.setUpgradeable(BlueprintBasedUpgradeOption.UPGRADE_ENABLED);
         blueprintV4ViewResponse.setLastUpdated(entity.getLastUpdated());
         return blueprintV4ViewResponse;
-    }
-
-    private BlueprintBasedUpgradeOption getBlueprintBasedUpgradeOption(BlueprintView entity) {
-        return entity.getBlueprintUpgradeOption() == BlueprintUpgradeOption.GA
-                ? BlueprintBasedUpgradeOption.UPGRADE_ENABLED
-                : BlueprintBasedUpgradeOption.UPGRADE_DISABLED;
     }
 }

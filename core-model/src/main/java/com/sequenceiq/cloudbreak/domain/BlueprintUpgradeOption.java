@@ -44,8 +44,4 @@ public enum BlueprintUpgradeOption {
     public boolean isOsUpgradeEnabled() {
         return OS_UPGRADE_ENABLED.equals(this) || ENABLED.equals(this) || MAINTENANCE_UPGRADE_GA.equals(this) || GA.equals(this);
     }
-
-    public boolean isRuntimeUpgradeEnabled(boolean dataHubUpgradeEntitled) {
-        return dataHubUpgradeEntitled ? !DISABLED.equals(this) : (MAINTENANCE_UPGRADE_GA.equals(this) || GA.equals(this));
-    }
 }

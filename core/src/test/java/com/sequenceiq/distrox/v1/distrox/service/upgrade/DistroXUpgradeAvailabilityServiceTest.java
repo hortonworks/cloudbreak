@@ -371,61 +371,8 @@ public class DistroXUpgradeAvailabilityServiceTest {
 
     @Test
     @DisplayName("this test simulates that a Data Hub runtime upgrade entitlement is disabled"
-            + " and all the image candidates are filtered for maintenance upgrade so empty response should be returned")
-    public void testCheckForUpgradeWhenDataHubUpgradeIsDisabledAnNoMaintenanceUpgradeCandidatesAreAvaiable() {
-        Cluster datalakeCluster = TestUtil.cluster();
-        datalakeCluster.setRangerRazEnabled(false);
-        UpgradeV4Request request = new UpgradeV4Request();
-        UpgradeV4Response response = new UpgradeV4Response();
-        ImageInfoV4Response current = createImageResponse(1L, "7.1.0");
-        ImageInfoV4Response image1 = createImageResponse(STACK_ID, "7.2.0");
-        ImageInfoV4Response image2 = createImageResponse(8L, "7.3.0");
-        ImageInfoV4Response image3 = createImageResponse(6L, "7.4.0");
-        response.setUpgradeCandidates(List.of(image1, image2, image3));
-        response.setCurrent(current);
-        when(clusterService.getClusterByStackResourceCrn(any())).thenReturn(datalakeCluster);
-        when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
-        when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
-        when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(false);
-        when(currentImageUsageCondition.currentImageUsedOnInstances(any(), any())).thenReturn(true);
-
-        UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
-
-        String expectedMessage = "No image is available for maintenance upgrade, CDP version: 7.1.0";
-        assertEquals(0, result.getUpgradeCandidates().size());
-        assertEquals(expectedMessage, result.getReason());
-    }
-
-    @Test
-    @DisplayName("this test simulates that a Data Hub runtime upgrade entitlement is disabled"
-            + " and there is 1 image candidate for maintenance upgrade")
-    public void testCheckForUpgradeWhenDataHubUpgradeIsDisabledAnOneMaintenanceUpgradeCandidateIsAvaiable() {
-        Cluster datalakeCluster = TestUtil.cluster();
-        datalakeCluster.setRangerRazEnabled(false);
-        UpgradeV4Request request = new UpgradeV4Request();
-        UpgradeV4Response response = new UpgradeV4Response();
-        ImageInfoV4Response current = createImageResponse(1L, "7.1.0");
-        ImageInfoV4Response image1 = createImageResponse(STACK_ID, "7.1.0");
-        ImageInfoV4Response image2 = createImageResponse(8L, "7.2.0");
-        ImageInfoV4Response image3 = createImageResponse(6L, "7.3.0");
-        response.setUpgradeCandidates(List.of(image1, image2, image3));
-        response.setCurrent(current);
-        when(clusterService.getClusterByStackResourceCrn(any())).thenReturn(datalakeCluster);
-        when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
-        when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
-        when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(false);
-        when(currentImageUsageCondition.currentImageUsedOnInstances(any(), any())).thenReturn(true);
-
-        UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
-
-        assertEquals(1, result.getUpgradeCandidates().size());
-        assertTrue(result.getUpgradeCandidates().stream().anyMatch(img -> img.getCreated() == STACK_ID && "7.1.0".equals(img.getComponentVersions().getCdp())));
-    }
-
-    @Test
-    @DisplayName("this test simulates that a Data Hub runtime upgrade entitlement is disabled"
             + " and there are 2 image candidates for maintenance upgrade and the latest should be returned with dry-run")
-    public void testCheckForUpgradeWhenDataHubUpgradeIsDisabledAnMultipleMaintenanceUpgradeCandidatesAreAvaiable() {
+    public void testCheckForUpgradeWhenDataHubUpgradeIsDisabledAnMultipleMaintenanceUpgradeCandidatesAreAvailable() {
         Cluster datalakeCluster = TestUtil.cluster();
         datalakeCluster.setRangerRazEnabled(false);
         UpgradeV4Request request = new UpgradeV4Request();
@@ -455,14 +402,14 @@ public class DistroXUpgradeAvailabilityServiceTest {
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
 
         assertEquals(1, result.getUpgradeCandidates().size());
-        verify(entitlementService, times(2)).datahubRuntimeUpgradeEnabled(ACCOUNT_ID);
+        verify(entitlementService, times(1)).datahubRuntimeUpgradeEnabled(ACCOUNT_ID);
         assertTrue(result.getUpgradeCandidates().stream().anyMatch(img -> img.getCreated() == 3L && "7.1.0".equals(img.getComponentVersions().getCdp())));
     }
 
     @Test
     @DisplayName("this test simulates that a Data Hub blueprint is GA for upgrade "
             + " and there 3 image candidates for upgrade")
-    public void testCheckForUpgradeWhenDataHubUpgradeIsGaAndOneMaintenanceUpgradeCandidateIsAvaiable() {
+    public void testCheckForUpgradeWhenDataHubUpgradeIsGaAndOneMaintenanceUpgradeCandidateIsAvailable() {
         Cluster datalakeCluster = TestUtil.cluster();
         datalakeCluster.setRangerRazEnabled(false);
         UpgradeV4Request request = new UpgradeV4Request();
@@ -488,7 +435,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
     @Test
     @DisplayName("this test simulates that a Data Hub blueprint upgrade option is not checked for custom "
             + " blueprints and there 3 image candidates for upgrade")
-    public void testCheckForUpgradeWhenDataHubUpgradeIsNotGaAndOneMaintenanceUpgradeCandidateIsAvaiable() {
+    public void testCheckForUpgradeWhenDataHubUpgradeIsNotGaAndOneMaintenanceUpgradeCandidateIsAvailable() {
         Cluster datalakeCluster = TestUtil.cluster();
         datalakeCluster.setRangerRazEnabled(false);
         UpgradeV4Request request = new UpgradeV4Request();

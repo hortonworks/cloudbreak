@@ -24,7 +24,7 @@ class BlueprintUpgradeOptionValidator {
     BlueprintValidationResult isValidBlueprint(Blueprint blueprint, boolean lockComponents, boolean skipValidations, boolean dataHubUpgradeEntitled) {
         LOGGER.debug("Validating blueprint upgrade option. Name: {}, type: {}, upgradeOption: {}, lockComponents: {}", blueprint.getName(),
                 blueprint.getStatus(), blueprint.getBlueprintUpgradeOption(), lockComponents);
-        return isDefaultBlueprint(blueprint) ? isEnabledForDefaultBlueprint(lockComponents, blueprint, skipValidations, dataHubUpgradeEntitled)
+        return isDefaultBlueprint(blueprint) ? isEnabledForDefaultBlueprint(lockComponents, blueprint, skipValidations)
                 : isEnabledForCustomBlueprint(blueprint, skipValidations, dataHubUpgradeEntitled);
     }
 
@@ -32,32 +32,14 @@ class BlueprintUpgradeOptionValidator {
         return blueprint.getStatus().isDefault();
     }
 
-    private BlueprintValidationResult isEnabledForDefaultBlueprint(boolean lockComponents, Blueprint blueprint, boolean skipValidations,
-            boolean dataHubUpgradeEntitled) {
+    private BlueprintValidationResult isEnabledForDefaultBlueprint(boolean lockComponents, Blueprint blueprint, boolean skipValidations) {
         BlueprintUpgradeOption upgradeOption = getBlueprintUpgradeOption(blueprint);
-        BlueprintValidationResult result;
         if (skipValidations) {
             LOGGER.debug("Blueprint options are not validated if the request is internal");
-            result = createResult(true);
-        } else if (upgradeOption == BlueprintUpgradeOption.GA) {
-            LOGGER.debug("Blueprint marks this GA so upgrade is enabled.");
-            result = createResult(true);
+            return createResult(true);
         } else {
-            result = createResult(lockComponents ? upgradeOption.isOsUpgradeEnabled() : isRuntimeUpgradeEnabled(upgradeOption, dataHubUpgradeEntitled));
+            return createResult(!lockComponents || upgradeOption.isOsUpgradeEnabled());
         }
-        return result;
-    }
-
-    private boolean isRuntimeUpgradeEnabled(BlueprintUpgradeOption upgradeOption, boolean dataHubUpgradeEntitled) {
-        boolean runtimeUpgradeEnabled = upgradeOption.isRuntimeUpgradeEnabled(dataHubUpgradeEntitled);
-        if (dataHubUpgradeEntitled) {
-            LOGGER.info("Data Hub upgrade entitlement is enabled, check the upgrade option to see if the template"
-                    + " is eligible for upgrade or not, upgrade option: {}, eligible: {}", upgradeOption, runtimeUpgradeEnabled);
-        } else {
-            LOGGER.info("Data Hub upgrade entitlement is disabled, check the upgrade option to see if the template"
-                    + " is eligible for maintenance upgrade or not, upgrade option: {}, eligible: {}", upgradeOption, runtimeUpgradeEnabled);
-        }
-        return runtimeUpgradeEnabled;
     }
 
     private BlueprintUpgradeOption getBlueprintUpgradeOption(Blueprint blueprint) {

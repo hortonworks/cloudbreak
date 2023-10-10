@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.Ordere
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.component.PreparedImages;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -71,9 +70,6 @@ public class StackUpgradeOperations {
 
     @Inject
     private ClusterUpgradeAvailabilityService clusterUpgradeAvailabilityService;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Inject
     private UpgradePreconditionService upgradePreconditionService;
@@ -170,9 +166,6 @@ public class StackUpgradeOperations {
                     + "Data lake runtime upgrade is enabled in [{}] account on [{}] cluster.", accountId, stack.getName());
             List<? extends StackDtoDelegate> datahubsInEnvironment = stackDtoService.findAllByEnvironmentCrnAndStackType(stack.getEnvironmentCrn(),
                     List.of(StackType.WORKLOAD));
-            if (!entitlementService.datahubRuntimeUpgradeEnabled(accountId)) {
-                upgradeResponse.appendReason(upgradePreconditionService.checkForNonUpgradeableAttachedClusters(datahubsInEnvironment));
-            }
             boolean rollingUpgradeEnabled = isRollingUpgradeEnabled(request);
             upgradeResponse.appendReason(upgradePreconditionService.checkForRunningAttachedClusters(datahubsInEnvironment, request.
                     isSkipDataHubValidation(), rollingUpgradeEnabled, accountId));

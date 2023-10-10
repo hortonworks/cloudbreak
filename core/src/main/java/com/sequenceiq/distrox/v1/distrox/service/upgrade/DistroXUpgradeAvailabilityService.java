@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
@@ -29,7 +28,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -142,12 +140,6 @@ public class DistroXUpgradeAvailabilityService {
     }
 
     private List<ImageInfoV4Response> filterCandidates(String accountId, Stack stack, UpgradeV4Request request, UpgradeV4Response upgradeV4Response) {
-        BlueprintUpgradeOption upgradeOption = stack.getCluster().getBlueprint().getBlueprintUpgradeOption();
-        ResourceStatus resourceStatus = stack.getCluster().getBlueprint().getStatus();
-        if (ResourceStatus.USER_MANAGED != resourceStatus && upgradeOption != BlueprintUpgradeOption.GA) {
-            LOGGER.debug("Running filtering logic as upgrade option is {}, not GA", upgradeOption);
-            filterOnlyPatchUpgradesIfRuntimeUpgradeDisabled(accountId, stack.getName(), upgradeV4Response);
-        }
         List<ImageInfoV4Response> filteredCandidates;
         String stackName = stack.getName();
         boolean differentDataHubAndDataLakeVersionAllowed = entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(accountId);
@@ -166,33 +158,6 @@ public class DistroXUpgradeAvailabilityService {
             }
         }
         return filteredCandidates;
-    }
-
-    private void filterOnlyPatchUpgradesIfRuntimeUpgradeDisabled(String accountId, String clusterName, UpgradeV4Response upgradeV4Response) {
-        if (!isRuntimeUpgradeEnabledByAccountId(accountId)) {
-            if (upgradeV4Response.getCurrent() != null) {
-                List<ImageInfoV4Response> upgradeCandidates = upgradeV4Response.getUpgradeCandidates();
-                String currentCdpVersion = upgradeV4Response.getCurrent().getComponentVersions().getCdp();
-                LOGGER.debug("Only patch upgrade is possible on [{}] cluster for [{}] runtime as CDP_RUNTIME_UPGRADE is disabled in [{}] account.",
-                        clusterName, currentCdpVersion, accountId);
-                upgradeCandidates = upgradeCandidates.stream()
-                        .filter(upgradeCandidate -> upgradeCandidate.getComponentVersions().getCdp().equals(currentCdpVersion))
-                        .collect(Collectors.toList());
-                upgradeV4Response.setUpgradeCandidates(upgradeCandidates);
-                if (upgradeCandidates.isEmpty()) {
-                    upgradeV4Response.appendReason("No image is available for maintenance upgrade, CDP version: " + currentCdpVersion);
-                }
-                LOGGER.debug("Patch upgrade candidates for [{}] cluster: [{}]", clusterName, upgradeCandidates);
-            } else {
-                String message = String.format("No information about current image, cannot filter patch upgrade candidates based on it on [%s] cluster.",
-                        clusterName);
-                LOGGER.debug(message);
-                upgradeV4Response.appendReason(message);
-                upgradeV4Response.setUpgradeCandidates(List.of());
-            }
-        } else {
-            LOGGER.debug("Data Hub Runtime upgrade is enabled, not filtering for patch upgrade.");
-        }
     }
 
     private List<ImageInfoV4Response> filterForLatestImage(List<ImageInfoV4Response> candidates) {

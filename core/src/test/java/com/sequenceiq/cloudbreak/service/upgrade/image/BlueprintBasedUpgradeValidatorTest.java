@@ -20,8 +20,6 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 @ExtendWith(MockitoExtension.class)
 class BlueprintBasedUpgradeValidatorTest {
 
-    private static final String ACCOUNT_ID = "account-id";
-
     @InjectMocks
     private BlueprintBasedUpgradeValidator underTest;
 
@@ -37,7 +35,7 @@ class BlueprintBasedUpgradeValidatorTest {
         ImageFilterParams params = createImageFilterParams("7.2.14 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie", StackType.WORKLOAD);
         when(blueprintUpgradeOptionValidator.isValidBlueprint(params.getBlueprint(), true, true, true)).thenReturn(expected);
 
-        BlueprintValidationResult actual = underTest.isValidBlueprint(params, ACCOUNT_ID);
+        BlueprintValidationResult actual = underTest.isValidBlueprint(params);
 
         assertEquals(expected, actual);
         verify(blueprintUpgradeOptionValidator).isValidBlueprint(params.getBlueprint(), true, true, true);
@@ -48,7 +46,7 @@ class BlueprintBasedUpgradeValidatorTest {
     public void testIsValidBlueprintShouldReturnValidResultWhenTheStackTypeIsDataLakeMediumDuty() {
         ImageFilterParams params = createImageFilterParams("7.2.14 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas", StackType.DATALAKE);
 
-        BlueprintValidationResult actual = underTest.isValidBlueprint(params, ACCOUNT_ID);
+        BlueprintValidationResult actual = underTest.isValidBlueprint(params);
 
         assertTrue(actual.isValid());
         verifyNoInteractions(blueprintUpgradeOptionValidator);
@@ -58,7 +56,7 @@ class BlueprintBasedUpgradeValidatorTest {
     public void testIsValidBlueprintShouldReturnValidResultWhenTheStackTypeIsDataLakeLightDuty() {
         ImageFilterParams params = createImageFilterParams("7.2.14 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas", StackType.DATALAKE);
 
-        BlueprintValidationResult actual = underTest.isValidBlueprint(params, ACCOUNT_ID);
+        BlueprintValidationResult actual = underTest.isValidBlueprint(params);
 
         assertTrue(actual.isValid());
         verifyNoInteractions(entitlementService);

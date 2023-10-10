@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -142,8 +141,7 @@ public class ClusterUpgradeAvailabilityService {
     }
 
     private ImageFilterResult filterImages(Stack stack, String imageCatalogName, ImageFilterParams imageFilterParams) {
-        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
-        return clusterUpgradeImageFilter.filter(accountId, stack.getWorkspace().getId(), imageCatalogName, imageFilterParams);
+        return clusterUpgradeImageFilter.filter(stack.getWorkspace().getId(), imageCatalogName, imageFilterParams);
     }
 
     private UpgradeV4Response createResponse(Image currentImage, ImageFilterResult filteredImages, String cloudPlatform, String region,

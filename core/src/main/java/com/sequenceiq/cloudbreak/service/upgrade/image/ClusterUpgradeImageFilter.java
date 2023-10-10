@@ -25,8 +25,8 @@ public class ClusterUpgradeImageFilter {
     @Inject
     private ImageCatalogService imageCatalogService;
 
-    public ImageFilterResult filter(String accountId, Long workspaceId, String imageCatalogName, ImageFilterParams imageFilterParams) {
-        BlueprintValidationResult blueprintValidationResult = isValidBlueprint(imageFilterParams, accountId);
+    public ImageFilterResult filter(Long workspaceId, String imageCatalogName, ImageFilterParams imageFilterParams) {
+        BlueprintValidationResult blueprintValidationResult = isValidBlueprint(imageFilterParams);
         return blueprintValidationResult.isValid() ? getImageFilterResult(workspaceId, imageCatalogName, imageFilterParams)
                 : createEmptyResult(blueprintValidationResult.getReason());
     }
@@ -47,8 +47,8 @@ public class ClusterUpgradeImageFilter {
         return imageFilterUpgradeService.filterImages(imageFilterResult, imageFilterParams);
     }
 
-    private BlueprintValidationResult isValidBlueprint(ImageFilterParams imageFilterParams, String accountId) {
-        return blueprintBasedUpgradeValidator.isValidBlueprint(imageFilterParams, accountId);
+    private BlueprintValidationResult isValidBlueprint(ImageFilterParams imageFilterParams) {
+        return blueprintBasedUpgradeValidator.isValidBlueprint(imageFilterParams);
     }
 
     private ImageFilterResult createEmptyResult(String reason) {

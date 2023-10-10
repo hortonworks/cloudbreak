@@ -78,7 +78,7 @@ public class BlueprintV4RequestToBlueprintConverter {
                 blueprint.setStackName(blueprintUtils.getCDHDisplayName(blueprintJson));
                 blueprint.setHostGroupCount(blueprintUtils.countHostTemplates(blueprintJson));
                 blueprint.setStackVersion(blueprintUtils.getCDHStackVersion(blueprintJson));
-                blueprint.setBlueprintUpgradeOption(blueprintUtils.getBlueprintUpgradeOptionForGA());
+                blueprint.setBlueprintUpgradeOption(blueprintUtils.getBlueprintUpgradeOptionForEnabled());
                 blueprint.setStackType("CDH");
             } else {
                 throw new BadRequestException("Failed to determine cluster template format");

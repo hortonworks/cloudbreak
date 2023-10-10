@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -261,7 +260,6 @@ class StackUpgradeOperationsTest {
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false);
         verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(upgradeResponse, request, true);
         verify(upgradePreconditionService).checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation(), false, ACCOUNT_ID);
-        verify(upgradePreconditionService).checkForNonUpgradeableAttachedClusters(List.of(stackDto));
         verifyNoInteractions(clusterDBValidationService);
     }
 
@@ -303,7 +301,7 @@ class StackUpgradeOperationsTest {
         StackDto stackDto = new StackDto();
         UpgradeV4Response upgradeResponseToReturn = createUpgradeResponse();
         UpgradeV4Response expectedResponse = createUpgradeResponse();
-        expectedResponse.setReason("There are attached Data Hub clusters that are non-upgradeable There are attached Data Hub clusters in incorrect state");
+        expectedResponse.setReason("There are attached Data Hub clusters in incorrect state");
         when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
         when(upgradeService.isOsUpgrade(request)).thenReturn(false);
         StackInstanceCount instanceCount = mock(StackInstanceCount.class);
@@ -315,8 +313,6 @@ class StackUpgradeOperationsTest {
                 .thenReturn(upgradeResponseToReturn);
         when(upgradePreconditionService.checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation(), false, ACCOUNT_ID))
                 .thenReturn("There are attached Data Hub clusters in incorrect state");
-        when(upgradePreconditionService.checkForNonUpgradeableAttachedClusters(List.of(stackDto)))
-                .thenReturn("There are attached Data Hub clusters that are non-upgradeable");
         when(stackDtoService.findAllByEnvironmentCrnAndStackType(ENVIRONMENT_CRN, List.of(StackType.WORKLOAD))).thenReturn(List.of(stackDto));
 
         UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, request);
@@ -330,7 +326,6 @@ class StackUpgradeOperationsTest {
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false);
         verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(upgradeResponseToReturn, request, true);
         verify(upgradePreconditionService).checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation(), false, ACCOUNT_ID);
-        verify(upgradePreconditionService).checkForNonUpgradeableAttachedClusters(List.of(stackDto));
         verifyNoInteractions(clusterDBValidationService);
     }
 
@@ -352,7 +347,6 @@ class StackUpgradeOperationsTest {
         when(clusterUpgradeAvailabilityService
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false))
                 .thenReturn(upgradeResponseToReturn);
-        when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
         when(upgradePreconditionService.checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation(), false, ACCOUNT_ID))
                 .thenReturn("There are attached Data Hub clusters in incorrect state");
         when(stackDtoService.findAllByEnvironmentCrnAndStackType(ENVIRONMENT_CRN, List.of(StackType.WORKLOAD))).thenReturn(List.of(stackDto));
@@ -368,7 +362,6 @@ class StackUpgradeOperationsTest {
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false);
         verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(upgradeResponseToReturn, request, true);
         verify(upgradePreconditionService).checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation(), false, ACCOUNT_ID);
-        verify(upgradePreconditionService, times(0)).checkForNonUpgradeableAttachedClusters(List.of(stackDto));
         verifyNoInteractions(clusterDBValidationService);
     }
 

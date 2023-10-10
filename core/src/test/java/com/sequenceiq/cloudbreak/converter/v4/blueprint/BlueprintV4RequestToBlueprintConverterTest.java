@@ -114,15 +114,15 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         String blueprint = FileReaderUtils.readFileFromClasspathQuietly("test/defaults/blueprints/blueprint-with-upgrade-option.bp");
         request.setBlueprint(blueprint);
         Blueprint bp = underTest.convert(request);
-        Assertions.assertEquals(BlueprintUpgradeOption.GA, bp.getBlueprintUpgradeOption());
+        Assertions.assertEquals(BlueprintUpgradeOption.ENABLED, bp.getBlueprintUpgradeOption());
     }
 
     @Test
-    public void testConvertNullBlueprintUpgradeOptionSetToGA() {
+    public void testConvertNullBlueprintUpgradeOptionSetToENABLED() {
         BlueprintV4Request request = new BlueprintV4Request();
         String blueprint = FileReaderUtils.readFileFromClasspathQuietly("test/defaults/blueprints/blueprint-with-repositories.bp");
         request.setBlueprint(blueprint);
         Blueprint bp = underTest.convert(request);
-        Assertions.assertEquals(BlueprintUpgradeOption.GA, bp.getBlueprintUpgradeOption());
+        Assertions.assertEquals(BlueprintUpgradeOption.ENABLED, bp.getBlueprintUpgradeOption());
     }
 }

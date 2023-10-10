@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -11,11 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
@@ -48,27 +44,6 @@ public class UpgradePreconditionService {
 
     private boolean skipValidation(Boolean skipDataHubValidation, boolean rollingUpgradeEnabled, String accountId) {
         return rollingUpgradeEnabled || Boolean.TRUE.equals(skipDataHubValidation) || entitlementService.isUpgradeAttachedDatahubsCheckSkipped(accountId);
-    }
-
-    public String checkForNonUpgradeableAttachedClusters(List<? extends StackDtoDelegate> datahubsInEnvironment) {
-        String notUpgradeableAttachedClusters = getNotUpgradeableAttachedClusters(datahubsInEnvironment);
-        if (!notUpgradeableAttachedClusters.isEmpty()) {
-            return String.format("There are attached Data Hub clusters that are non-upgradeable: %s. "
-                    + "Please delete those to be able to perform the upgrade.", notUpgradeableAttachedClusters);
-        }
-        return "";
-    }
-
-    private String getNotUpgradeableAttachedClusters(List<? extends StackDtoDelegate> datahubsInEnvironment) {
-        return datahubsInEnvironment
-                .stream()
-                .filter(stackDto -> BlueprintUpgradeOption.GA != Optional.ofNullable(stackDto.getBlueprint())
-                        .map(Blueprint::getBlueprintUpgradeOption)
-                        .orElse(null) && ResourceStatus.USER_MANAGED != Optional.ofNullable(stackDto.getBlueprint())
-                        .map(Blueprint::getStatus).orElse(null))
-                .map(StackDtoDelegate::getName)
-                .sorted()
-                .collect(Collectors.joining(","));
     }
 
     private String getNotStoppedAttachedClusters(List<? extends StackDtoDelegate> datahubsInEnvironment) {

@@ -16,7 +16,7 @@ public class BlueprintBasedUpgradeValidator {
     @Inject
     private BlueprintUpgradeOptionValidator blueprintUpgradeOptionValidator;
 
-    public BlueprintValidationResult isValidBlueprint(ImageFilterParams imageFilterParams, String accountId) {
+    public BlueprintValidationResult isValidBlueprint(ImageFilterParams imageFilterParams) {
         String blueprintName = imageFilterParams.getBlueprint().getName();
         LOGGER.debug("Validating blueprint for upgrade: {}", blueprintName);
         if (imageFilterParams.getStackType().equals(StackType.DATALAKE)) {

@@ -6,11 +6,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -37,9 +35,6 @@ public class BlueprintUtils {
     @Inject
     private JsonHelper jsonHelper;
 
-    // regex for alphanumeric characters and underscores
-    private final Pattern validHostGroupNamePattern = Pattern.compile("^\\w+$");
-
     public String readDefaultBlueprintFromFile(String version, String[] split) throws IOException {
         return FileReaderUtils.readFileFromClasspath(String.format("defaults/blueprints/%s/%s.bp", version, split.length == 2
                 ? split[1].trim() : split[0].trim()));
@@ -65,10 +60,6 @@ public class BlueprintUtils {
         return hostTemplateCount;
     }
 
-    public boolean isValidHostGroupName(String hostGroupName) {
-        return StringUtils.isNotEmpty(hostGroupName) && validHostGroupNamePattern.matcher(hostGroupName).matches();
-    }
-
     public String getBlueprintVariant(String blueprint) {
         return ClusterApi.CLOUDERA_MANAGER;
     }
@@ -79,10 +70,6 @@ public class BlueprintUtils {
 
     public boolean isClouderaManagerClusterTemplate(JsonNode blueprint) {
         return blueprint.path(CDH_VERSION_JSON_NODE_TEXT).isValueNode() && blueprint.path(BLUEPRINTS_JSON_NODE_TEXT).isMissingNode();
-    }
-
-    public boolean isAmbariBlueprint(String blueprint) {
-        return isAmbariBlueprint(convertStringToJsonNode(blueprint));
     }
 
     public boolean isAmbariBlueprint(JsonNode blueprint) {
@@ -145,8 +132,8 @@ public class BlueprintUtils {
         return blueprint.getTags() != null && blueprint.getTags().getMap().containsKey("shared_services_ready");
     }
 
-    public BlueprintUpgradeOption getBlueprintUpgradeOptionForGA() {
-        return BlueprintUpgradeOption.GA;
+    public BlueprintUpgradeOption getBlueprintUpgradeOptionForEnabled() {
+        return BlueprintUpgradeOption.ENABLED;
     }
 
     public boolean isEnterpriseDatalake(Stack stack) {
