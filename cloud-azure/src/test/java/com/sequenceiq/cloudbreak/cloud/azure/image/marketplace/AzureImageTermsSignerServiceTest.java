@@ -26,6 +26,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -54,8 +56,9 @@ public class AzureImageTermsSignerServiceTest {
 
     static Object[][] exceptionsFromHttpMethod() {
         return new Object[][]{
-                {new AzureRestResponseException("myMessage"), "myMessage"},
-                {new RestClientException("myMessage"), "myMessage"}
+                {new AzureRestResponseException("myMessage", new HttpClientErrorException(HttpStatus.PAYMENT_REQUIRED)), "myMessage"},
+                {new RestClientException("myMessage"), "myMessage"},
+                {new AzureRestResponseException("myMessage"), "myMessage"}
         };
     }
 
@@ -190,6 +193,32 @@ public class AzureImageTermsSignerServiceTest {
         verify(azureClient).getAccessToken();
         verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
         verify(azureRestOperationsService).httpPut(any(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
+    }
+
+    @Test
+    void testSignWhenGetTermsThrowsForbiddenException() {
+        when(azureClient.getAccessToken()).thenReturn(Optional.of(ACCESS_TOKEN));
+        when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenThrow(
+                new AzureRestResponseException("myMessage", new HttpClientErrorException(HttpStatus.FORBIDDEN)));
+
+        underTest.sign(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient);
+
+        verify(azureClient).getAccessToken();
+        verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
+        verify(azureRestOperationsService, never()).httpPut(any(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
+    }
+
+    @Test
+    void testSignWhenPutTermsThrowsForbiddenException() {
+        when(azureClient.getAccessToken()).thenReturn(Optional.of(ACCESS_TOKEN));
+        when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenThrow(
+                new AzureRestResponseException("myMessage", new HttpClientErrorException(HttpStatus.FORBIDDEN)));
+
+        underTest.sign(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient);
+
+        verify(azureClient).getAccessToken();
+        verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
+        verify(azureRestOperationsService, never()).httpPut(any(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
     }
 
     private AzureImageTerms setupAzureImageTerms() {

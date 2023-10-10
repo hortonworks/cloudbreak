@@ -87,7 +87,7 @@ ext {
   bouncycastleVersion = '1.70'
 
   // Cloudera
-  cmClientVersion = '7.10.0'
+  cmClientVersion = '7.10.1'
   clouderaCryptoOpenSslProviderVersion = '1.0.1-b2'
 
   // Testing
