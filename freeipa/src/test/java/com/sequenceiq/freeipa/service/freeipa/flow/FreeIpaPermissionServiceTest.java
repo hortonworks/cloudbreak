@@ -81,7 +81,8 @@ class FreeIpaPermissionServiceTest {
         verify(freeIpaClient).addPermissionsToPrivilege(HOST_ENROLLMENT_PRIVILEGE, List.of(REMOVE_HOSTS_PERMISSION));
         verify(freeIpaClient).addPermissionsToPrivilege(HOST_ENROLLMENT_PRIVILEGE, List.of(REMOVE_SERVICES_PERMISSION));
         verify(freeIpaClient).addRolePrivileges(ENROLLMENT_ADMINISTRATOR_ROLE, Set.of(DNS_ADMINISTRATORS_PRIVILEGE));
-        verifyNoInteractions(freeIpaClientFactory, poller);
+        verifyNoInteractions(poller);
+        verify(freeIpaClientFactory, times(1)).createClientForAllInstances(stack);
     }
 
     @Test
@@ -101,11 +102,9 @@ class FreeIpaPermissionServiceTest {
         instanceGroup.setInstanceMetaData(Set.of(instanceMetaData1, instanceMetaData2, instanceMetaData3));
         stack.setInstanceGroups(Set.of(instanceGroup));
         FreeIpaClient freeIpaClient1 = mock(FreeIpaClient.class);
-        when(freeIpaClientFactory.getFreeIpaClientForInstance(stack, instanceMetaData1.getDiscoveryFQDN())).thenReturn(freeIpaClient1);
         FreeIpaClient freeIpaClient2 = mock(FreeIpaClient.class);
-        when(freeIpaClientFactory.getFreeIpaClientForInstance(stack, instanceMetaData2.getDiscoveryFQDN())).thenReturn(freeIpaClient2);
         FreeIpaClient freeIpaClient3 = mock(FreeIpaClient.class);
-        when(freeIpaClientFactory.getFreeIpaClientForInstance(stack, instanceMetaData3.getDiscoveryFQDN())).thenReturn(freeIpaClient3);
+        when(freeIpaClientFactory.createClientForAllInstances(stack)).thenReturn(List.of(freeIpaClient1, freeIpaClient2, freeIpaClient3));
 
         underTest.setPermissions(stack, freeIpaClient);
 

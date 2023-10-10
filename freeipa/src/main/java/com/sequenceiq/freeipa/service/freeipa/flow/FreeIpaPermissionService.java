@@ -1,13 +1,10 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.polling.Poller;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 
@@ -49,7 +45,7 @@ public class FreeIpaPermissionService {
     private Poller<Void> poller;
 
     public void setPermissions(Stack stack, FreeIpaClient freeIpaClient) throws FreeIpaClientException {
-        List<FreeIpaClient> clientForAllInstances = createClientForAllInstances(stack);
+        List<FreeIpaClient> clientForAllInstances = freeIpaClientFactory.createClientForAllInstances(stack);
         freeIpaClient.addPermissionsToPrivilege(HOST_ENROLLMENT_PRIVILEGE, List.of(ADD_HOSTS_PERMISSION));
         waitForPermissionToReplicate(clientForAllInstances, ADD_HOSTS_PERMISSION);
         freeIpaClient.addPermissionsToPrivilege(HOST_ENROLLMENT_PRIVILEGE, List.of(REMOVE_HOSTS_PERMISSION));
@@ -66,22 +62,6 @@ public class FreeIpaPermissionService {
                     new FreeIpaPermissionReplicatedPoller(clientForAllInstances, HOST_ENROLLMENT_PRIVILEGE, permission));
         } else {
             LOGGER.info("Polling is skipped for non HA FreeIPA deployment");
-        }
-    }
-
-    private List<FreeIpaClient> createClientForAllInstances(Stack stack) throws FreeIpaClientException {
-        Set<String> freeIpaInstancesFqdn = stack.getNotDeletedInstanceMetaDataSet().stream()
-                .map(InstanceMetaData::getDiscoveryFQDN)
-                .filter(StringUtils::isNotBlank)
-                .collect(Collectors.toSet());
-        if (freeIpaInstancesFqdn.size() > 1) {
-            List<FreeIpaClient> freeIpaClients = new ArrayList<>(freeIpaInstancesFqdn.size());
-            for (String fqdn : freeIpaInstancesFqdn) {
-                freeIpaClients.add(freeIpaClientFactory.getFreeIpaClientForInstance(stack, fqdn));
-            }
-            return freeIpaClients;
-        } else {
-            return List.of();
         }
     }
 }

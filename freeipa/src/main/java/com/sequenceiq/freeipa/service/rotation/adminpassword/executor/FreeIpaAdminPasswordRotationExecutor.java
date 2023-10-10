@@ -63,6 +63,8 @@ public class FreeIpaAdminPasswordRotationExecutor extends AbstractRotationExecut
                         throw new CloudbreakRuntimeException("Freeipa client can not be created for admin password update", e);
                     }
                 });
+                ThreadBasedVaultReadFieldProvider.doWithNewSecret(Set.of(rotationContext.getAdminPasswordSecret()),
+                        () -> adminUserService.waitAdminUserPasswordReplication(stack));
             } catch (Exception e) {
                 LOGGER.info("Rotation of freeipa admin password failed", e);
                 throw new SecretRotationException("Freeipa admin password rotation failed", e);
@@ -96,6 +98,8 @@ public class FreeIpaAdminPasswordRotationExecutor extends AbstractRotationExecut
                     throw new CloudbreakRuntimeException("The attempt to revert the rotation has been unsuccessful. We are unable to create a client using " +
                             "either the new password or the old password.", exceptionWithNewSecret);
                 }
+                ThreadBasedVaultReadFieldProvider.doWithBackup(Set.of(rotationContext.getAdminPasswordSecret()),
+                        () -> adminUserService.waitAdminUserPasswordReplication(stack));
             });
         }
     }

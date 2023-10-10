@@ -67,7 +67,8 @@ class FreeIpaAdminPasswordRotationExecutorTest {
         when(secretService.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
         when(freeIpaClientFactory.getFreeIpaClientForStack(eq(stack))).thenReturn(freeIpaClient);
         rotationExecutor.rotate(rotationContext);
-        verify(adminUserService).updateAdminUserPassword(eq(newPassword), eq(freeIpaClient));
+        verify(adminUserService, times(1)).updateAdminUserPassword(eq(newPassword), eq(freeIpaClient));
+        verify(adminUserService, times(1)).waitAdminUserPasswordReplication(eq(stack));
     }
 
     @Test
@@ -114,6 +115,7 @@ class FreeIpaAdminPasswordRotationExecutorTest {
 
         SecretRotationException e = assertThrows(SecretRotationException.class, () -> rotationExecutor.rotate(rotationContext));
         assertEquals("error", e.getCause().getMessage());
+        verify(adminUserService, never()).waitAdminUserPasswordReplication(eq(stack));
     }
 
     @Test
@@ -139,6 +141,7 @@ class FreeIpaAdminPasswordRotationExecutorTest {
         // Assert
         verify(freeIpaClientFactory, times(1)).getFreeIpaClientForStack(eq(stack));
         verify(adminUserService, never()).updateAdminUserPassword(eq(oldPassword), any(FreeIpaClient.class));
+        verify(adminUserService, never()).waitAdminUserPasswordReplication(eq(stack));
     }
 
     @Test
@@ -162,6 +165,7 @@ class FreeIpaAdminPasswordRotationExecutorTest {
         doThrow(exception).doReturn(freeIpaClient).when(freeIpaClientFactory).getFreeIpaClientForStack(eq(stack));
         rotationExecutor.rollback(rotationContext);
         verify(adminUserService, times(1)).updateAdminUserPassword(oldPassword, freeIpaClient);
+        verify(adminUserService, times(1)).waitAdminUserPasswordReplication(eq(stack));
     }
 
     @Test

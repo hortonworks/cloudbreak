@@ -1,14 +1,17 @@
 package com.sequenceiq.freeipa.service.freeipa;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -162,6 +165,22 @@ public class FreeIpaClientFactory {
                 .filter(im -> forceCheckUnreachable || im.isAvailable())
                 .sorted(new PrimaryGatewayFirstThenSortByFqdnComparator())
                 .collect(Collectors.toList());
+    }
+
+    public List<FreeIpaClient> createClientForAllInstances(Stack stack) throws FreeIpaClientException {
+        Set<String> freeIpaInstancesFqdn = stack.getNotDeletedInstanceMetaDataSet().stream()
+                .map(InstanceMetaData::getDiscoveryFQDN)
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toSet());
+        if (freeIpaInstancesFqdn.size() > 1) {
+            List<FreeIpaClient> freeIpaClients = new ArrayList<>(freeIpaInstancesFqdn.size());
+            for (String fqdn : freeIpaInstancesFqdn) {
+                freeIpaClients.add(getFreeIpaClientForInstance(stack, fqdn));
+            }
+            return freeIpaClients;
+        } else {
+            return List.of();
+        }
     }
 
     public FreeIpaClient getFreeIpaClientForStack(Stack stack) throws FreeIpaClientException {
