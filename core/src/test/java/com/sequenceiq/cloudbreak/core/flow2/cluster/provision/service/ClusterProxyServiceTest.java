@@ -85,6 +85,8 @@ class ClusterProxyServiceTest {
 
     private static final String CLOUDERA_MANAGER_SERVICE = "cloudera-manager";
 
+    private static final String SECRET_PATH = "secretPath";
+
     @Mock
     private StackService stackService;
 
@@ -382,6 +384,17 @@ class ClusterProxyServiceTest {
 
         underTest.registerGatewayConfiguration(STACK_ID);
         verify(clusterProxyRegistrationClient, times(0)).updateConfig(any());
+    }
+
+    @Test
+    void updateClusterConfigWithKnoxSecretLocationTest() throws JsonProcessingException {
+        Stack stack = testStack();
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        ArgumentCaptor<ConfigUpdateRequest> configUpdateRequestArgumentCaptor = ArgumentCaptor.forClass(ConfigUpdateRequest.class);
+        underTest.updateClusterConfigWithKnoxSecretLocation(STACK_ID, SECRET_PATH);
+        verify(clusterProxyRegistrationClient, times(1)).updateConfig(configUpdateRequestArgumentCaptor.capture());
+        ConfigUpdateRequest configUpdateRequest = configUpdateRequestArgumentCaptor.getValue();
+        assertEquals(SECRET_PATH, configUpdateRequest.getKnoxSecretRef());
     }
 
     @Test

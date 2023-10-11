@@ -83,7 +83,20 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
     @SecretValue
     private Secret signCertSecret = Secret.EMPTY;
 
+    @Deprecated
     private String tokenCert;
+
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret tokenCertSecret = Secret.EMPTY;
+
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret tokenKeySecret = Secret.EMPTY;
+
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret tokenPubSecret = Secret.EMPTY;
 
     @ManyToOne
     private Workspace workspace;
@@ -94,6 +107,9 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         Gateway gateway = new Gateway();
         gateway.topologies = topologies.stream().map(GatewayTopology::copy).collect(Collectors.toSet());
         gateway.tokenCert = tokenCert;
+        gateway.tokenCertSecret = tokenCertSecret;
+        gateway.tokenKeySecret = tokenKeySecret;
+        gateway.tokenPubSecret = tokenPubSecret;
         gateway.signCert = signCert;
         gateway.signCertSecret = signCertSecret;
         gateway.signKey = signKey;
@@ -206,6 +222,11 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         this.signPub = signPub;
     }
 
+    @Deprecated
+    public void setTokenCertDeprecated(String tokenCert) {
+        this.tokenCert = tokenCert;
+    }
+
     public void setSsoProvider(String ssoProvider) {
         this.ssoProvider = ssoProvider;
     }
@@ -243,11 +264,53 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
     }
 
     public String getTokenCert() {
-        return tokenCert;
+        return Optional.ofNullable(tokenCertSecret)
+                .map(Secret::getRaw)
+                .orElse(tokenCert);
     }
 
     public void setTokenCert(String tokenCert) {
+        setTokenCertSecret(tokenCert);
         this.tokenCert = tokenCert;
+    }
+
+    public void setTokenKeySecret(String tokenPrivateKey) {
+        if (tokenPrivateKey != null) {
+            this.tokenKeySecret = new Secret(tokenPrivateKey);
+        }
+    }
+
+    public void setTokenPubSecret(String tokenPublicKey) {
+        if (tokenPublicKey != null) {
+            this.tokenPubSecret = new Secret(tokenPublicKey);
+        }
+    }
+
+    public void setTokenCertSecret(String tokenCert) {
+        if (tokenCert != null) {
+            this.tokenCertSecret = new Secret(tokenCert);
+        }
+    }
+
+    public Secret getTokenCertSecret() {
+        return tokenCertSecret;
+    }
+
+    @Deprecated
+    public String getTokenCertDeprecated() {
+        return tokenCert;
+    }
+
+    public Secret getTokenPubSecret() {
+        return tokenPubSecret;
+    }
+
+    public Secret getTokenKeySecret() {
+        return tokenKeySecret;
+    }
+
+    public String getTokenKeyPath() {
+        return tokenKeySecret.getSecret();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service;
 
 import static com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterConstants.CCMV2_BACKEND_ID_FORMAT;
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
@@ -74,6 +75,10 @@ public class ClusterProxyService {
     @Inject
     private ClusterProxyConfiguration clusterProxyConfiguration;
 
+    public ReadConfigResponse readConfig(StackView stack) {
+        return clusterProxyRegistrationClient.readConfig(stack.getResourceCrn());
+    }
+
     public ConfigRegistrationResponse registerCluster(Stack stack) {
         ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack);
         ConfigRegistrationResponse configRegistrationResponse = clusterProxyRegistrationClient.registerConfig(proxyConfigRequest);
@@ -84,6 +89,13 @@ public class ClusterProxyService {
     public ConfigRegistrationResponse reRegisterCluster(Stack stack) {
         ConfigRegistrationRequest proxyConfigRequest = createProxyConfigReRegisterRequest(stack);
         return clusterProxyRegistrationClient.registerConfig(proxyConfigRequest);
+    }
+
+    public void updateClusterConfigWithKnoxSecretLocation(Long stackId, String knoxSecretPath) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        String knoxUrl = stack.getTunnel().useCcmV2OrJumpgate() ? knoxUrlForCcmV2(stack) : knoxUrlForNoCcmAndCcmV1(stack);
+        ConfigUpdateRequest request = new ConfigUpdateRequest(stack.getResourceCrn(), knoxUrl, knoxSecretPath);
+        clusterProxyRegistrationClient.updateConfig(request);
     }
 
     public void registerGatewayConfiguration(Long stackId) {
@@ -173,7 +185,7 @@ public class ClusterProxyService {
 
     private ClusterServiceConfig createClusterServiceConfigFromGWMetadata(Stack stack, InstanceMetadataView gatewayInstanceMetadata, boolean preferPrivateIp) {
         String gatewayIp = gatewayInstanceMetadata.getIpWrapper(preferPrivateIp);
-        String internalAdminUrl = String.format("https://%s:%d", gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort());
+        String internalAdminUrl = format("https://%s:%d", gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort());
         return cmServiceConfig(stack, clientCertificates(stack),
                 CB_INTERNAL + "-" + gatewayInstanceMetadata.getInstanceId(), internalAdminUrl);
     }
@@ -203,7 +215,7 @@ public class ClusterProxyService {
                         stack.getCcmV2AgentCrn(),
                         instanceMetaData.getPrivateIp(),
                         ServiceFamilies.GATEWAY.getDefaultPort(),
-                        String.format(CCMV2_BACKEND_ID_FORMAT, stack.getCcmV2AgentCrn(), instanceMetaData.getInstanceId()),
+                        format(CCMV2_BACKEND_ID_FORMAT, stack.getCcmV2AgentCrn(), instanceMetaData.getInstanceId()),
                         CLOUDERA_MANAGER_SERVICE_NAME))
                 .collect(Collectors.toList());
     }
@@ -242,7 +254,7 @@ public class ClusterProxyService {
     private String knoxUrlForNoCcmAndCcmV1(Stack stack) {
         String gatewayIp = stack.getPrimaryGatewayInstance().getIpWrapper(stack.getTunnel().useCcmV1());
         Cluster cluster = stack.getCluster();
-        String knoxUrl = String.format("https://%s/%s", gatewayIp, cluster.getGateway().getPath());
+        String knoxUrl = format("https://%s/%s", gatewayIp, cluster.getGateway().getPath());
         LOGGER.info("The generated URL for Knox when the tunnel is direct ClusterProxy or CCMv1: '{}'", knoxUrl);
         return knoxUrl;
     }
@@ -250,7 +262,7 @@ public class ClusterProxyService {
     private String knoxUrlForCcmV2(Stack stack) {
         String gatewayIp = stack.getPrimaryGatewayInstance().getPrivateIp();
         Cluster cluster = stack.getCluster();
-        String knoxUrl = String.format("https://%s:%d/%s/%s", gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort(),
+        String knoxUrl = format("https://%s:%d/%s/%s", gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort(),
                 KnownServiceIdentifier.KNOX.toString().toLowerCase(Locale.ROOT),
                 cluster.getGateway().getPath());
         LOGGER.info("The generated URL for Knox in case of CCMv2(.x): '{}'", knoxUrl);
@@ -263,7 +275,7 @@ public class ClusterProxyService {
 
     private String internalAdminUrl(Stack stack, int port, boolean preferPrivateIp) {
         String gatewayIp = stack.getPrimaryGatewayInstance().getIpWrapper(preferPrivateIp);
-        return String.format("https://%s:%d", gatewayIp, port);
+        return format("https://%s:%d", gatewayIp, port);
     }
 
     public String getProxyPath(String crn, String internalIdentity) {
@@ -271,10 +283,10 @@ public class ClusterProxyService {
         LOGGER.info("Get proxy path for crn: {} and internal identity: {}", crn, internalIdentity);
         if (isServiceEndpointWithIdentityIsRegistered(crn, endpointWithIdentity)) {
             LOGGER.debug("Internal endpoint with identity is registered");
-            return String.format("%s/proxy/%s/%s", clusterProxyConfiguration.getClusterProxyBasePath(), crn, endpointWithIdentity);
+            return format("%s/proxy/%s/%s", clusterProxyConfiguration.getClusterProxyBasePath(), crn, endpointWithIdentity);
         } else {
             LOGGER.debug("Internal endpoint with identity is NOT registered");
-            return String.format("%s/proxy/%s/%s", clusterProxyConfiguration.getClusterProxyBasePath(), crn, CB_INTERNAL);
+            return format("%s/proxy/%s/%s", clusterProxyConfiguration.getClusterProxyBasePath(), crn, CB_INTERNAL);
         }
     }
 
@@ -290,7 +302,7 @@ public class ClusterProxyService {
             String path = JsonUtil.readValue(vaultSecretJsonString, VaultSecret.class).getPath() + ":secret";
             return base64 ? path + ":base64" : path;
         } catch (IOException e) {
-            throw new VaultConfigException(String.format("Could not parse vault secret string '%s'", vaultSecretJsonString), e);
+            throw new VaultConfigException(format("Could not parse vault secret string '%s'", vaultSecretJsonString), e);
         }
     }
 

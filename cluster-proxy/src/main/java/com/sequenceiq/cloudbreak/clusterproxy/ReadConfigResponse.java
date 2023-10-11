@@ -12,6 +12,8 @@ public class ReadConfigResponse {
 
     private String uriOfKnox;
 
+    private String knoxSecretRef;
+
     private List<ReadConfigService> services;
 
     public String getCrn() {
@@ -46,6 +48,14 @@ public class ReadConfigResponse {
         this.uriOfKnox = uriOfKnox;
     }
 
+    public String getKnoxSecretRef() {
+        return knoxSecretRef;
+    }
+
+    public void setKnoxSecretRef(String knoxSecretRef) {
+        this.knoxSecretRef = knoxSecretRef;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -58,12 +68,13 @@ public class ReadConfigResponse {
         return Objects.equals(crn, that.crn) &&
                 Objects.equals(aliases, that.aliases) &&
                 Objects.equals(uriOfKnox, that.uriOfKnox) &&
+                Objects.equals(knoxSecretRef, that.knoxSecretRef) &&
                 Objects.equals(services, that.services);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(crn, aliases, uriOfKnox, services);
+        return Objects.hash(crn, aliases, uriOfKnox, knoxSecretRef, services);
     }
 
     @Override
@@ -72,6 +83,7 @@ public class ReadConfigResponse {
                 "crn='" + crn + '\'' +
                 ", aliases=" + aliases +
                 ", uriOfKnox='" + uriOfKnox + '\'' +
+                ", knoxSecretRef='" + knoxSecretRef + '\'' +
                 ", services=" + services +
                 '}';
     }
@@ -80,6 +92,7 @@ public class ReadConfigResponse {
         return "ClusterProxy for crn: [" + crn + "], " +
                 "services: [" + services.stream().map(ReadConfigService::toHumanReadableString).collect(Collectors.joining(", ")) + "], " +
                 "aliases: [" + aliases + "], " +
-                "Knox URI: [" + uriOfKnox +  "]";
+                "Knox secret location: [" + knoxSecretRef + "]" +
+                "Knox URI: [" + uriOfKnox + "]";
     }
 }

@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.context.CMUserRotationContext;
-import com.sequenceiq.cloudbreak.rotation.context.ClusterProxyRotationContext;
+import com.sequenceiq.cloudbreak.rotation.context.ClusterProxyReRegisterRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -60,11 +60,11 @@ public abstract class CMUserRotationContextProvider implements RotationContextPr
                 .withResourceCrn(stack.getResourceCrn())
                 .build();
 
-        ClusterProxyRotationContext clusterProxyRotationContext = ClusterProxyRotationContext.builder()
+        ClusterProxyReRegisterRotationContext clusterProxyReRegisterRotationContext = ClusterProxyReRegisterRotationContext.builder()
                 .withResourceCrn(stack.getResourceCrn())
                 .build();
 
-        result.put(CloudbreakSecretRotationStep.CLUSTER_PROXY, clusterProxyRotationContext);
+        result.put(CloudbreakSecretRotationStep.CLUSTER_PROXY_REREGISTER, clusterProxyReRegisterRotationContext);
         result.put(CommonSecretRotationStep.VAULT, vaultRotationContext);
         result.put(CloudbreakSecretRotationStep.CM_USER, cmUserRotationContext);
         return result;

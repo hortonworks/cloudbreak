@@ -28,9 +28,17 @@ public interface GatewayView {
 
     Secret getSignPubSecret();
 
+    Secret getTokenCertSecret();
+
+    Secret getTokenPubSecret();
+
+    Secret getTokenKeySecret();
+
     String getSignCertDeprecated();
 
     String getSignPubDeprecated();
+
+    String getTokenCertDeprecated();
 
     Secret getKnoxMasterSecret();
 
@@ -38,7 +46,13 @@ public interface GatewayView {
 
     Integer getGatewayPort();
 
-    String getTokenCert();
+    default String getTokenCert() {
+        return Optional.ofNullable(getIfNotNull(getTokenCertSecret(), Secret::getRaw)).orElse(getTokenCertDeprecated());
+    }
+
+    default String getTokenKey() {
+        return getIfNotNull(getTokenKeySecret(), Secret::getRaw);
+    }
 
     default String getSignKey() {
         return getIfNotNull(getSignKeySecret(), Secret::getRaw);

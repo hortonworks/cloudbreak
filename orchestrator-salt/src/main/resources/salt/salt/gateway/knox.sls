@@ -35,6 +35,7 @@
     - source: salt://gateway/config/cm/cdp-token.xml.j2
     - template: jinja
     - mode: 644
+    - replace: True
 {% endif %}
 
 {% for topology in salt['pillar.get']('gateway:topologies') -%}

@@ -134,6 +134,18 @@ public class SecretService {
      * @return Secret content or null if the secret secret is not found.
      */
     public String get(String secret) {
+        return get(secret, ThreadBasedVaultReadFieldProvider.getFieldName(secret));
+    }
+
+    /**
+     * Fetches the field of the secret from Secret's store. If the secret is not found then null is returned.
+     * If the secret is null then null is returned.
+     *
+     * @param secret Key-value secret in Secret
+     * @param field  The key of the key-value secret in Secret
+     * @return Secret content or null if the secret secret is not found.
+     */
+    private String get(String secret, String field) {
         if (secret == null) {
             return null;
         }
@@ -142,7 +154,7 @@ public class SecretService {
 
         String response = vaultRetryService.tryReadingVault(() -> {
             return getFirstEngineStream(secret)
-                    .map(e -> e.get(secret, ThreadBasedVaultReadFieldProvider.getFieldName(secret)))
+                    .map(e -> e.get(secret, field))
                     .filter(Objects::nonNull)
                     .orElse(null);
         });
@@ -166,6 +178,23 @@ public class SecretService {
         VaultSecret vaultSecret = new VaultSecret(secretResponse.getEnginePath(), VaultKvV2Engine.class.getCanonicalName(), secretResponse.getSecretPath());
         String secretAsJson = new Gson().toJson(vaultSecret);
         return get(secretAsJson);
+    }
+
+    /**
+     * Fetches the secret from Secret's store. If the secret is not found then null is returned.
+     * If the secret is null then null is returned.
+     *
+     * @param secretResponse SecretResponse that refers to a Secret in the Secret engine
+     * @param field  The key of the key-value secret in Secret
+     * @return Secret content or null if the secret secret is not found.
+     */
+    public String getByResponse(SecretResponse secretResponse, String field) {
+        if (secretResponse == null) {
+            return null;
+        }
+        VaultSecret vaultSecret = new VaultSecret(secretResponse.getEnginePath(), VaultKvV2Engine.class.getCanonicalName(), secretResponse.getSecretPath());
+        String secretAsJson = new Gson().toJson(vaultSecret);
+        return get(secretAsJson, field);
     }
 
     private Optional<SecretEngine> getFirstEngineStream(String secret) {

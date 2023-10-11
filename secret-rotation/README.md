@@ -60,7 +60,7 @@ Rotation framework has been created based on this idea.
   - we should have an implemention of `RotationContextProvider`, let's say CBCMUAdminserRotationContextProvider, where we construct a 3 size map of rotation contexts:
     - VaultRotationContext: contains data about the path of affected secrets and about the new values of the given secrets
     - CMUserRotationContext: contains data about the path of affected secrets and about path of user/pass secrets which will be used for the API client
-    - ClusterProxyRotationContext: contains no more extra data
+    - ClusterProxyReRegisterRotationContext: contains no more extra data
   - every rotation steps will have an `AbstractRotationExecutor`
     - VaultRotationExecutor:
       - rotate: adds new value to the existing path and store the old one in a different field of the path
