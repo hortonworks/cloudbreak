@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.flow.datalake.scale;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_HORIZONTAL_SCALE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_HORIZONTAL_SCALE_IN_PROGRESS;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT;
@@ -61,8 +62,16 @@ public class DatalakeHorizontalScaleActions {
                         "Validation In Progress", sdxCluster);
                 eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_HORIZONTAL_SCALE_VALIDATION_IN_PROGRESS, List.of());
                 LOGGER.info("Datalake horizontal scale started!");
-                sdxHorizontalScalingService.validateHorizontalScaleRequest(sdxCluster, payload.getScaleRequest());
-                sendEvent(context, DATALAKE_HORIZONTAL_SCALE_START_EVENT.selector(), payload);
+                try {
+                    sdxHorizontalScalingService.validateHorizontalScaleRequest(sdxCluster, payload.getScaleRequest());
+                    sendEvent(context, DATALAKE_HORIZONTAL_SCALE_START_EVENT.selector(), payload);
+                } catch (Exception e) {
+                    LOGGER.warn("Datalake horizontal scale validation failed. Datalake {}. Error message: {}", payload.getResourceId(), e.getMessage());
+                    DatalakeHorizontalScaleFlowEvent failedPayload = new DatalakeHorizontalScaleFlowEvent(DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT.selector(),
+                            payload.getResourceId(), payload.getSdxName(), payload.getResourceCrn(), payload.getUserId(), payload.getFlowId(),
+                            payload.getScaleRequest(), payload.getCommandId(), e);
+                    sendEvent(context, DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT.selector(), failedPayload);
+                }
             }
 
             @Override
@@ -165,10 +174,14 @@ public class DatalakeHorizontalScaleActions {
         return new AbstractDatalakeHorizontalScaleAction<>(DatalakeHorizontalScaleFlowEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DatalakeHorizontalScaleFlowEvent payload, Map<Object, Object> variables) {
-                LOGGER.error("Datalake horizontal scale failed!");
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
-                        String.format("Scale failed with: %s. Go back to RUNNING state", payload.getException().getMessage()), payload.getResourceId());
-                String selector = DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT.selector();
+                LOGGER.warn("Datalake horizontal scale failed!");
+                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_HORIZONTAL_SCALE_FAILED,
+                        "Datalake Horizontal Scaling failed.", payload.getResourceId());
+                if (null != payload.getException()) {
+                    SdxCluster sdxCluster = sdxService.getByCrn(payload.getResourceCrn());
+                    eventSenderService.sendEventAndNotification(sdxCluster, DATALAKE_HORIZONTAL_SCALE_FAILED, List.of(payload.getException().getMessage()));
+                }
+                String selector = DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT.selector();
                 DatalakeHorizontalScaleFlowEventBuilder resultEventBuilder = DatalakeHorizontalScaleFlowEvent
                         .datalakeHorizontalScaleFlowEventBuilderFactory(payload)
                         .setSelector(selector);

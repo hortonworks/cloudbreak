@@ -35,7 +35,7 @@ public class DatalakeHorizontalScaleFlowConfig extends AbstractFlowConfiguration
                     .from(INIT_STATE)
                     .to(DATALAKE_HORIZONTAL_SCALE_VALIDATION_STATE)
                     .event(DATALAKE_HORIZONTAL_SCALE_EVENT)
-                    .noFailureEvent()
+                    .defaultFailureEvent()
 
                     .from(DATALAKE_HORIZONTAL_SCALE_VALIDATION_STATE)
                     .to(DATALAKE_HORIZONTAL_SCALE_START_STATE)
@@ -53,11 +53,6 @@ public class DatalakeHorizontalScaleFlowConfig extends AbstractFlowConfiguration
                     .defaultFailureEvent()
 
                     .from(DATALAKE_HORIZONTAL_SCALE_FINISHED_STATE)
-                    .to(FINAL_STATE)
-                    .event(DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT)
-                    .noFailureEvent()
-
-                    .from(DATALAKE_HORIZONTAL_SCALE_FAILED_STATE)
                     .to(FINAL_STATE)
                     .event(DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT)
                     .noFailureEvent()

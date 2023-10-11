@@ -46,7 +46,8 @@ public class DatalakeHorizontalScaleFlowEvent extends BaseNamedFlowEvent {
                 .setResourceCrn(event.getResourceCrn())
                 .setUserId(event.getUserId())
                 .setFlowId(event.getFlowId())
-                .setSelector(event.selector());
+                .setSelector(event.selector())
+                .setException(event.getException());
     }
 
     public String getUserId() {
