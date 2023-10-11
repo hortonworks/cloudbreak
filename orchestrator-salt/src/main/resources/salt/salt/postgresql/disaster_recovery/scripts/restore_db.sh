@@ -103,6 +103,8 @@ run_kinit() {
     doLog "Successful kinit using atlas principal"
   elif kinit_as knox "$KNOX_KEYTAB"; then
     doLog "Successful kinit using knox principal"
+  else
+    errorExit "Unable to kinit as any principal, something is wrong with the Kerberos connection. Please check logs for additional info."
   fi
 }
 
