@@ -4,10 +4,11 @@ import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATAL
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_DATABASE_RESTORE_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_DATABASE_RESTORE_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT;
-import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_DATABASE_RESTORE_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_DATABASE_RESTORE_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_FULL_RESTORE_IN_PROGRESS_EVENT;
+import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_RESTORE_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_RESTORE_FAILURE_HANDLED_EVENT;
+import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_RESTORE_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_RESTORE_SERVICES_STOPPED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_RESTORE_SUCCESS_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_TRIGGER_RESTORE_EVENT;
@@ -36,7 +37,7 @@ public class DatalakeRestoreFlowConfig extends AbstractFlowConfiguration<Datalak
 
     private static final List<Transition<DatalakeRestoreState, DatalakeRestoreEvent>> TRANSITIONS =
             new Transition.Builder<DatalakeRestoreState, DatalakeRestoreEvent>()
-                    .defaultFailureEvent(DATALAKE_DATABASE_RESTORE_FAILED_EVENT)
+                    .defaultFailureEvent(DATALAKE_RESTORE_FAILED_EVENT)
 
                     .from(INIT_STATE)
                     .to(DATALAKE_TRIGGERING_RESTORE_STATE)
@@ -81,7 +82,7 @@ public class DatalakeRestoreFlowConfig extends AbstractFlowConfiguration<Datalak
 
                     .from(DATALAKE_RESTORE_FINISHED_STATE)
                     .to(FINAL_STATE)
-                    .event(DATALAKE_DATABASE_RESTORE_FINALIZED_EVENT)
+                    .event(DATALAKE_RESTORE_FINALIZED_EVENT)
                     .defaultFailureEvent()
 
                     .from(DATALAKE_DATABASE_RESTORE_FAILED_STATE)

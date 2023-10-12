@@ -3,8 +3,8 @@ package com.sequenceiq.datalake.flow.dr.backup;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_CANCEL_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FAILURE_HANDLED_EVENT;
+import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT;
-import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_IN_PROGRESS_EVENT;
 
 import java.util.Collections;
@@ -32,6 +32,7 @@ import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupAwaitServicesStoppedRequest;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupCancelledEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupFailedEvent;
+import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupFailureHandledEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupCouldNotStartEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupFailedEvent;
@@ -164,7 +165,7 @@ public class DatalakeBackupActions {
     }
 
     @Bean(name = "DATALAKE_DATABASE_BACKUP_IN_PROGRESS_STATE")
-    public Action<?, ?> datalakeBackupInProgress() {
+    public Action<?, ?> datalakeDatabaseBackupInProgress() {
         return new AbstractSdxAction<>(SdxEvent.class) {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
@@ -241,7 +242,7 @@ public class DatalakeBackupActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeBackupSuccessEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Sdx backup is finalized with sdx id: {}", payload.getResourceId());
-                sendEvent(context, DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT.event(), payload);
+                sendEvent(context, DATALAKE_BACKUP_FINALIZED_EVENT.event(), payload);
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_BACKUP_FINISHED,
                         "Datalake backup finished, Datalake is running", payload.getResourceId());
@@ -250,7 +251,7 @@ public class DatalakeBackupActions {
 
             @Override
             protected Object getFailurePayload(DatalakeBackupSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return DatalakeDatabaseBackupFailedEvent.from(payload, ex);
+                return DatalakeBackupFailedEvent.from(payload, ex);
             }
         };
     }
@@ -271,7 +272,7 @@ public class DatalakeBackupActions {
 
             @Override
             protected Object getFailurePayload(DatalakeBackupCancelledEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return DatalakeDatabaseBackupFailedEvent.from(payload, ex);
+                return DatalakeBackupFailedEvent.from(payload, ex);
             }
         };
     }
@@ -320,7 +321,8 @@ public class DatalakeBackupActions {
 
             @Override
             protected Object getFailurePayload(DatalakeBackupFailedEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return DatalakeDatabaseBackupFailedEvent.from(payload, ex);
+                LOGGER.error("Failed to run proper backup failure actions. This will be ignored in order to properly terminate the flow.", ex);
+                return DatalakeBackupFailureHandledEvent.from(flowContext, payload);
             }
 
             private String getFailureReason(Map<Object, Object> variables, Exception exception) {

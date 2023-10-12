@@ -1,10 +1,10 @@
 package com.sequenceiq.datalake.flow.dr.restore;
 
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT;
-import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_DATABASE_RESTORE_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_DATABASE_RESTORE_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_RESTORE_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_RESTORE_FAILURE_HANDLED_EVENT;
+import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_RESTORE_FINALIZED_EVENT;
 
 import java.util.Map;
 import java.util.Optional;
@@ -38,6 +38,7 @@ import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreWait
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeFullRestoreWaitRequest;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreAwaitServicesStoppedRequest;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreFailedEvent;
+import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreFailureHandledEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
 import com.sequenceiq.datalake.metric.MetricType;
@@ -279,12 +280,12 @@ public class DatalakeRestoreActions {
                         ResourceEvent.DATALAKE_RESTORE_FINISHED,
                         "Datalake restore finished, Datalake is running", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_RESTORE_FINISHED, sdxCluster);
-                sendEvent(context, DATALAKE_DATABASE_RESTORE_FINALIZED_EVENT.event(), payload);
+                sendEvent(context, DATALAKE_RESTORE_FINALIZED_EVENT.event(), payload);
             }
 
             @Override
             protected Object getFailurePayload(DatalakeRestoreSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return DatalakeDatabaseRestoreFailedEvent.from(payload, ex);
+                return DatalakeRestoreFailedEvent.from(flowContext, payload, ex);
             }
         };
     }
@@ -336,7 +337,8 @@ public class DatalakeRestoreActions {
 
             @Override
             protected Object getFailurePayload(DatalakeRestoreFailedEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return null;
+                LOGGER.error("Failed to perform normal restore failure actions. This will be ignored to properly end the flow.", ex);
+                return DatalakeRestoreFailureHandledEvent.from(flowContext, payload);
             }
 
             private String getFailureReason(Map<Object, Object> variables, Exception exception) {

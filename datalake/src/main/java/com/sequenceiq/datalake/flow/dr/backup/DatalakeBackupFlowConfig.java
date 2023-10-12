@@ -2,14 +2,15 @@ package com.sequenceiq.datalake.flow.dr.backup;
 
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_CANCELLED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_CANCEL_HANDLED_EVENT;
+import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FAILURE_HANDLED_EVENT;
+import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_SERVICES_STOPPED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_SUCCESS_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_COULD_NOT_START_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT;
-import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_FULL_BACKUP_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_TRIGGER_BACKUP_EVENT;
@@ -39,11 +40,12 @@ public class DatalakeBackupFlowConfig extends AbstractFlowConfiguration<Datalake
 
     private static final List<Transition<DatalakeBackupState, DatalakeBackupEvent>> TRANSITIONS =
             new Transition.Builder<DatalakeBackupState, DatalakeBackupEvent>()
-                    .defaultFailureEvent(DATALAKE_DATABASE_BACKUP_FAILED_EVENT)
+                    .defaultFailureEvent(DATALAKE_BACKUP_FAILED_EVENT)
 
                     .from(INIT_STATE)
                     .to(DATALAKE_TRIGGERING_BACKUP_STATE)
-                    .event(DATALAKE_TRIGGER_BACKUP_EVENT).noFailureEvent()
+                    .event(DATALAKE_TRIGGER_BACKUP_EVENT)
+                    .noFailureEvent()
 
                     .from(DATALAKE_TRIGGERING_BACKUP_STATE)
                     .to(DATALAKE_BACKUP_AWAIT_SERVICES_STOPPED_STATE)
@@ -57,7 +59,8 @@ public class DatalakeBackupFlowConfig extends AbstractFlowConfiguration<Datalake
 
                     .from(INIT_STATE)
                     .to(DATALAKE_DATABASE_BACKUP_START_STATE)
-                    .event(DATALAKE_DATABASE_BACKUP_EVENT).noFailureEvent()
+                    .event(DATALAKE_DATABASE_BACKUP_EVENT)
+                    .noFailureEvent()
 
                     .from(DATALAKE_DATABASE_BACKUP_START_STATE)
                     .to(DATALAKE_DATABASE_BACKUP_IN_PROGRESS_STATE)
@@ -74,7 +77,8 @@ public class DatalakeBackupFlowConfig extends AbstractFlowConfiguration<Datalake
                     .from(DATALAKE_DATABASE_BACKUP_IN_PROGRESS_STATE)
                     .to(DATALAKE_FULL_BACKUP_IN_PROGRESS_STATE)
                     .event(DATALAKE_FULL_BACKUP_IN_PROGRESS_EVENT)
-                    .defaultFailureEvent()
+                    .failureState(DATALAKE_DATABASE_BACKUP_FAILED_STATE)
+                    .failureEvent(DATALAKE_DATABASE_BACKUP_FAILED_EVENT)
 
                     .from(DATALAKE_FULL_BACKUP_IN_PROGRESS_STATE)
                     .to(DATALAKE_BACKUP_FINISHED_STATE)
@@ -88,11 +92,13 @@ public class DatalakeBackupFlowConfig extends AbstractFlowConfiguration<Datalake
 
                     .from(DATALAKE_BACKUP_FINISHED_STATE)
                     .to(FINAL_STATE)
-                    .event(DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT).defaultFailureEvent()
+                    .event(DATALAKE_BACKUP_FINALIZED_EVENT)
+                    .defaultFailureEvent()
 
                     .from(DATALAKE_BACKUP_CANCELLED_STATE)
                     .to(FINAL_STATE)
-                    .event(DATALAKE_BACKUP_CANCEL_HANDLED_EVENT).defaultFailureEvent()
+                    .event(DATALAKE_BACKUP_CANCEL_HANDLED_EVENT)
+                    .defaultFailureEvent()
 
                     .from(DATALAKE_DATABASE_BACKUP_FAILED_STATE)
                     .to(DATALAKE_FULL_BACKUP_IN_PROGRESS_STATE)
