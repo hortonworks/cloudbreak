@@ -87,10 +87,48 @@ class SdxDeleteServiceTest {
     void testDeleteSdxWhenNameIsProvidedShouldInitiateSdxDeletionFlow() {
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
         when(sdxReactorFlowManager.triggerSdxDeletion(any(SdxCluster.class), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
         mockCBCallForDistroXClusters(Sets.newHashSet());
         doNothing().when(sdxRotationService).cleanupSecretRotationEntries(any());
         underTest.deleteSdx(ACCOUNT_ID, "sdx-cluster-name", true);
+        verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, true);
+        ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        verify(sdxClusterRepository, times(1)).save(captor.capture());
+        verify(sdxStatusService, times(1))
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
+    }
+
+    @Test
+    void testDeleteSdxWhenIsDetachedShouldInitiateSdxDeletionFlow() {
+        SdxCluster sdxCluster = getSdxCluster();
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxReactorFlowManager.triggerSdxDeletion(any(SdxCluster.class), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        mockCBCallForDistroXClusters(Sets.newHashSet());
+        doNothing().when(sdxRotationService).cleanupSecretRotationEntries(any());
+        underTest.deleteSdx(ACCOUNT_ID, "sdx-cluster-name", true);
+        verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, true);
+        ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        verify(sdxClusterRepository, times(1)).save(captor.capture());
+        verify(sdxStatusService, times(1))
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
+    }
+
+    @Test
+    void testDeleteSdxWhenDetachedDLExistsShouldInitiateSDXDeletionFlow() {
+        SdxCluster sdxCluster = getSdxCluster();
+        SdxCluster detachedCluster = getSdxCluster();
+        detachedCluster.setCrn(ENVIRONMENT_CRN);
+
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.of(detachedCluster));
+        when(sdxReactorFlowManager.triggerSdxDeletion(any(SdxCluster.class), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        doNothing().when(sdxRotationService).cleanupSecretRotationEntries(any());
+
+        underTest.deleteSdx(ACCOUNT_ID, "sdx-cluster-name", true);
+        verify(sdxStatusService, times(0)).getActualStatusForSdx(sdxCluster);
+        verify(distroxService, times(0)).getAttachedDistroXClusters(ENVIRONMENT_CRN);
         verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, true);
         ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
@@ -104,6 +142,23 @@ class SdxDeleteServiceTest {
         sdxCluster.getSdxDatabase().setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
         sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
+        sdxStatusEntity.setStatus(DatalakeStatusEnum.RUNNING);
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.deleteSdx(ACCOUNT_ID, "sdx-cluster-name", false));
+        assertEquals(String.format("Can not find external database for Data Lake, but it was requested: %s. Please use force delete.",
+                sdxCluster.getClusterName()), badRequestException.getMessage());
+    }
+
+    @Test
+    void testDeleteSdxWhenDetachedSdxHasExternalDatabaseButCrnIsMissingShouldThrowNotFoundException() {
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.getSdxDatabase().setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
         sdxStatusEntity.setStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
@@ -119,6 +174,27 @@ class SdxDeleteServiceTest {
         sdxCluster.getSdxDatabase().setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
         sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
+        sdxStatusEntity.setStatus(DatalakeStatusEnum.PROVISIONING_FAILED);
+        when(sdxReactorFlowManager.triggerSdxDeletion(eq(sdxCluster), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "id"));
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
+        doNothing().when(sdxRotationService).cleanupSecretRotationEntries(any());
+        underTest.deleteSdx(ACCOUNT_ID, "sdx-cluster-name", false);
+        verify(sdxClusterRepository, times(1)).save(sdxCluster);
+        verify(sdxStatusService, times(1))
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
+        verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, false);
+        verify(flowCancelService, times(1)).cancelRunningFlows(SDX_ID);
+    }
+
+    @Test
+    void testDeleteSdxWhenDetachedSdxHasExternalDatabaseButCrnIsMissingShouldNotThrowNotFoundException() {
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.getSdxDatabase().setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
         sdxStatusEntity.setStatus(DatalakeStatusEnum.PROVISIONING_FAILED);
         when(sdxReactorFlowManager.triggerSdxDeletion(eq(sdxCluster), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "id"));
@@ -144,6 +220,29 @@ class SdxDeleteServiceTest {
 
         mockCBCallForDistroXClusters(Sets.newHashSet(stackViewV4Response));
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.deleteSdx(ACCOUNT_ID, "sdx-cluster-name", true));
+
+        assertEquals("The following Data Hub(s) cluster(s) must be terminated before deletion of SDX cluster: [existingDistroXCluster].",
+                badRequestException.getMessage());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Status.class, names = {"AVAILABLE", "BACKUP_IN_PROGRESS", "STOPPED", "BACKUP_FAILED"})
+    void testDeleteDetachedSdxWhenSdxHasAttachedDataHubsShouldThrowBadRequest(Status dhStatus) {
+        SdxCluster sdxCluster = getSdxCluster();
+        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
+        sdxStatusEntity.setStatus(DatalakeStatusEnum.RUNNING);
+        StackViewV4Response stackViewV4Response = new StackViewV4Response();
+        stackViewV4Response.setName("existingDistroXCluster");
+        stackViewV4Response.setStatus(dhStatus);
+
+        mockCBCallForDistroXClusters(Sets.newHashSet(stackViewV4Response));
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
@@ -159,6 +258,7 @@ class SdxDeleteServiceTest {
 
     private SdxCluster getSdxCluster() {
         SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setAccountId(ACCOUNT_ID);
         sdxCluster.setId(SDX_ID);
         sdxCluster.setCrn(SDX_CRN);
         sdxCluster.setEnvCrn(ENVIRONMENT_CRN);

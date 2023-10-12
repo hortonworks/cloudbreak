@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFo
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.PROVISIONING_FAILED;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -76,6 +77,12 @@ public class SdxDeleteService {
     }
 
     private void checkIfSdxIsDeletable(SdxCluster sdxCluster, boolean forced) {
+        Optional<SdxCluster> detachedCluster = sdxClusterRepository
+                .findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(sdxCluster.getAccountId(), sdxCluster.getEnvCrn());
+        if (forced && detachedCluster.isPresent() && !detachedCluster.get().getCrn().equals(sdxCluster.getCrn())) {
+            return;
+        }
+
         SdxStatusEntity actualStatusForSdx = sdxStatusService.getActualStatusForSdx(sdxCluster);
         if (!forced && actualStatusForSdx.getStatus() != PROVISIONING_FAILED &&
                 sdxCluster.hasExternalDatabase() && StringUtils.isEmpty(sdxCluster.getDatabaseCrn())) {

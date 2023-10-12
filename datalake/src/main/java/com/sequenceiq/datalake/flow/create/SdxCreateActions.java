@@ -28,6 +28,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
+import com.sequenceiq.datalake.flow.chain.DatalakeResizeFlowEventChainFactory;
 import com.sequenceiq.datalake.flow.create.event.EnvWaitRequest;
 import com.sequenceiq.datalake.flow.create.event.EnvWaitSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.RdsWaitRequest;
@@ -50,8 +51,11 @@ import com.sequenceiq.datalake.service.sdx.status.DatalakeStatusUpdateException;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
+import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
 @Configuration
 public class SdxCreateActions {
@@ -78,6 +82,12 @@ public class SdxCreateActions {
 
     @Inject
     private EventSenderService eventSenderService;
+
+    @Inject
+    private FlowLogService flowLogService;
+
+    @Inject
+    private FlowChainLogService flowChainLogService;
 
     @Bean(name = "SDX_CREATION_VALIDATION_STATE")
     public Action<?, ?> sdxValidation() {
@@ -299,6 +309,14 @@ public class SdxCreateActions {
                 }
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 flow.setFlowFailed(payload.getException());
+
+                Optional<FlowLogWithoutPayload> lastFlowLog = flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId());
+                if (flowChainLogService.isFlowTriggeredByFlowChain(
+                        DatalakeResizeFlowEventChainFactory.class.getSimpleName(),
+                        lastFlowLog)) {
+                    eventSenderService.notifyEvent(context, ResourceEvent.DATALAKE_RESIZE_FAILED_DURING_CREATION);
+                }
+
                 sendEvent(context, SDX_CREATE_FAILED_HANDLED_EVENT.event(), payload);
             }
 
