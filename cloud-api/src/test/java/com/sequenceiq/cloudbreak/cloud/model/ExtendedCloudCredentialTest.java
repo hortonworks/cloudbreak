@@ -30,7 +30,7 @@ class ExtendedCloudCredentialTest {
         when(cloudCredential.getCredentialSettings()).thenReturn(new CloudCredentialSettings(true, false));
 
         ExtendedCloudCredential underTest = new ExtendedCloudCredential(cloudCredential, "AWS",
-                "myCred", "myUser", "accountId", new ArrayList<>());
+                "myCred", "accountId", new ArrayList<>());
         String result = underTest.toString();
 
         assertThat(underTest.getStringParameter(CONFIDENTIAL)).isEqualTo(SECRET);

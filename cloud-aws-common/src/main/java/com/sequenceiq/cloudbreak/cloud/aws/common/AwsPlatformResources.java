@@ -1108,7 +1108,6 @@ public class AwsPlatformResources implements PlatformResources {
                     ac.getCloudCredential(),
                     ac.getCloudContext().getPlatform().value(),
                     "",
-                    ac.getCloudContext().getCrn(),
                     accountId,
                     entitlements
             );

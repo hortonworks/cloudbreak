@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.common.metrics.CommonMetricService;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.converter.StackDtoToMeteringEventConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.job.metering.instancechecker.MeteringInstanceCheckerJobAdapter;
@@ -52,7 +52,7 @@ class MeteringServiceTest {
     private MeteringSyncJobService meteringSyncJobService;
 
     @Mock
-    private CommonMetricService metricService;
+    private MetricService metricService;
 
     @Mock
     private MeteringInstanceCheckerJobService meteringInstanceCheckerJobService;

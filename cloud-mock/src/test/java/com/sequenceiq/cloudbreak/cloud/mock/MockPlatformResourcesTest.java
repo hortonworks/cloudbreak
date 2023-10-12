@@ -58,7 +58,6 @@ public class MockPlatformResourcesTest {
                 cloudCredential,
                 "MOCK",
                 "",
-                "crn",
                 "account",
                 new ArrayList<>()
         );

@@ -267,8 +267,8 @@ class ProviderBasedMultiAzSetupValidatorTest {
         detailedEnvironmentResponse.setLocation(locationResponse);
         when(environmentClientService.getByCrn(any())).thenReturn(detailedEnvironmentResponse);
         when(credentialConverter.convert(any(CredentialResponse.class))).thenReturn(Credential.builder().build());
-        when(extendedCloudCredentialConverter.convert(any(), any()))
-                .thenReturn(new ExtendedCloudCredential(new CloudCredential(), null, null, null, null, null));
+        when(extendedCloudCredentialConverter.convert(any()))
+                .thenReturn(new ExtendedCloudCredential(new CloudCredential(), null, null, null, null));
         return zoneConnector;
     }
 }

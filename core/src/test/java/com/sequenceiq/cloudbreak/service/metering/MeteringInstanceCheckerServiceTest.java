@@ -65,6 +65,9 @@ class MeteringInstanceCheckerServiceTest {
     @Mock
     private CloudContextProvider cloudContextProvider;
 
+    @Mock
+    private MismatchedInstanceHandlerService mismatchedInstanceHandlerService;
+
     @InjectMocks
     private MeteringInstanceCheckerService underTest;
 
@@ -82,15 +85,15 @@ class MeteringInstanceCheckerServiceTest {
         verify(gatewayConfigService, times(1)).getPrimaryGatewayConfig(eq(stack));
         verify(hostOrchestrator, times(1)).getGrainOnAllHosts(any(), anyString());
         verify(instanceGroup, times(1)).getTemplate();
-        verifyNoInteractions(cloudContextProvider);
-        verifyNoInteractions(credentialClientService);
-        verifyNoInteractions(cloudPlatformConnectors);
+        verifyNoInteractions(cloudContextProvider, credentialClientService, cloudPlatformConnectors);
+        verify(mismatchedInstanceHandlerService, times(1)).handleMismatchingInstanceTypes(eq(stack), eq(Set.of()));
     }
 
     @Test
     void checkInstanceTypesWithSaltSuccessfullyWithMismatchingInstanceTypes() throws CloudbreakOrchestratorFailedException, IOException {
         StackDto stack = mock(StackDto.class);
         InstanceGroupView instanceGroup = mock(InstanceGroupView.class);
+        when(instanceGroup.getGroupName()).thenReturn("master");
         JsonNode saltResponse = JsonUtil.readTree(SALT_RESPONSE);
         prepareStackMocks(stack, instanceGroup, "medium");
         when(hostOrchestrator.getGrainOnAllHosts(any(), anyString())).thenReturn(Map.of("host1", saltResponse, "host2", saltResponse));
@@ -102,9 +105,9 @@ class MeteringInstanceCheckerServiceTest {
         verify(gatewayConfigService, times(1)).getPrimaryGatewayConfig(eq(stack));
         verify(hostOrchestrator, times(1)).getGrainOnAllHosts(any(), anyString());
         verify(instanceGroup, times(1)).getTemplate();
-        verifyNoInteractions(cloudContextProvider);
-        verifyNoInteractions(credentialClientService);
-        verifyNoInteractions(cloudPlatformConnectors);
+        verifyNoInteractions(cloudContextProvider, credentialClientService, cloudPlatformConnectors);
+        verify(mismatchedInstanceHandlerService, times(1)).handleMismatchingInstanceTypes(eq(stack),
+                eq(Set.of(new MismatchingInstanceGroup("master", "medium", Map.of("instanceId1", "large", "instanceId2", "large")))));
     }
 
     @Test
@@ -127,6 +130,7 @@ class MeteringInstanceCheckerServiceTest {
         verify(cloudPlatformConnectors, times(1)).get(any());
         verify(metadataCollector, times(1)).collectInstanceTypes(any(), eq(List.of("instanceId1", "instanceId2")));
         verify(instanceGroup, times(1)).getTemplate();
+        verify(mismatchedInstanceHandlerService, times(1)).handleMismatchingInstanceTypes(eq(stack), eq(Set.of()));
     }
 
     @Test
@@ -148,6 +152,7 @@ class MeteringInstanceCheckerServiceTest {
         verify(cloudPlatformConnectors, times(1)).get(any());
         verify(metadataCollector, times(1)).collectInstanceTypes(any(), eq(List.of("instanceId1", "instanceId2")));
         verify(instanceGroup, times(1)).getTemplate();
+        verify(mismatchedInstanceHandlerService, times(1)).handleMismatchingInstanceTypes(eq(stack), eq(Set.of()));
     }
 
     private void prepeareProviderMocks(StackDto stack, MetadataCollector metadataCollector) {

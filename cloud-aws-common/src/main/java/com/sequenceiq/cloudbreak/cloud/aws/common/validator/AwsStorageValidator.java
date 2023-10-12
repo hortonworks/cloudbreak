@@ -85,7 +85,6 @@ public class AwsStorageValidator implements Validator {
                 ac.getCloudCredential(),
                 ac.getCloudContext().getPlatform().value(),
                 "",
-                ac.getCloudContext().getCrn(),
                 accountId,
                 entitlementService.getEntitlements(accountId));
         CloudVmTypes cloudVmTypes = awsPlatformResources.virtualMachines(extendedCloudCredential, location.getRegion(), Map.of());

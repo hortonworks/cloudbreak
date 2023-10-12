@@ -53,7 +53,7 @@ class GetPlatformNoSqlTablesHandlerTest {
 
         CloudCredential cloudCredential = new CloudCredential("id", "name", "acc");
         ExtendedCloudCredential extendedCloudCredential = new ExtendedCloudCredential(
-                cloudCredential, "aws", "desc", "crn", "account", new ArrayList<>());
+                cloudCredential, "aws", "desc", "account", new ArrayList<>());
         GetPlatformNoSqlTablesRequest request = spy(new GetPlatformNoSqlTablesRequest(cloudCredential,
                 extendedCloudCredential,
                 "aws",

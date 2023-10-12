@@ -29,8 +29,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -50,6 +52,7 @@ import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -73,7 +76,7 @@ class StackUpscaleServiceTest {
     private CloudbreakFlowMessageService flowMessageService;
 
     @InjectMocks
-    private StackUpscaleService stackUpscaleService;
+    private StackUpscaleService underTest;
 
     @Mock
     private StackDto stackDto;
@@ -87,7 +90,7 @@ class StackUpscaleServiceTest {
                 .thenReturn(Set.of(instanceMetaData(1L, 1L, InstanceStatus.CREATED, false, instanceGroup),
                         instanceMetaData(2L, 1L, InstanceStatus.CREATED, false, instanceGroup)));
 
-        int instanceCountToCreate = stackUpscaleService.getInstanceCountToCreate(stackDto, "worker", 3, true);
+        int instanceCountToCreate = underTest.getInstanceCountToCreate(stackDto, "worker", 3, true);
         assertEquals(3, instanceCountToCreate);
     }
 
@@ -100,7 +103,7 @@ class StackUpscaleServiceTest {
                 .thenReturn(Set.of(instanceMetaData(1L, 1L, InstanceStatus.CREATED, false, instanceGroup),
                         instanceMetaData(2L, 1L, InstanceStatus.CREATED, false, instanceGroup)));
 
-        int instanceCountToCreate = stackUpscaleService.getInstanceCountToCreate(stackDto, "worker", 3, false);
+        int instanceCountToCreate = underTest.getInstanceCountToCreate(stackDto, "worker", 3, false);
         assertEquals(1, instanceCountToCreate);
     }
 
@@ -113,7 +116,7 @@ class StackUpscaleServiceTest {
                 .thenReturn(Set.of(instanceMetaData(1L, 1L, InstanceStatus.CREATED, false, instanceGroup),
                         instanceMetaData(2L, 1L, InstanceStatus.CREATED, false, instanceGroup)));
 
-        int instanceCountToCreate = stackUpscaleService.getInstanceCountToCreate(stackDto, "worker", 3, false);
+        int instanceCountToCreate = underTest.getInstanceCountToCreate(stackDto, "worker", 3, false);
         assertEquals(0, instanceCountToCreate);
 
     }
@@ -158,7 +161,7 @@ class StackUpscaleServiceTest {
                 mock(InstanceAuthentication.class), "username", "publickey", mock(SpiFileSystem.class), null, null);
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
-        stackUpscaleService.upscale(mock(AuthenticatedContext.class), upscaleStackRequest, connector);
+        underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest, connector);
         verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 "quota error");
         ArgumentCaptor<CloudStack> cloudStackArgumentCaptor = ArgumentCaptor.forClass(CloudStack.class);
@@ -206,7 +209,7 @@ class StackUpscaleServiceTest {
                 mock(InstanceAuthentication.class), "username", "publickey", mock(SpiFileSystem.class), null, null);
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
-        Assertions.assertThrows(CloudConnectorException.class, () -> stackUpscaleService.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
+        Assertions.assertThrows(CloudConnectorException.class, () -> underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
                 connector));
         verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 "quota error");
@@ -248,7 +251,7 @@ class StackUpscaleServiceTest {
                 mock(InstanceAuthentication.class), "username", "publickey", mock(SpiFileSystem.class), null, null);
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
-        Assertions.assertThrows(CloudConnectorException.class, () -> stackUpscaleService.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
+        Assertions.assertThrows(CloudConnectorException.class, () -> underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
                 connector));
         verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 "quota error");
@@ -292,7 +295,7 @@ class StackUpscaleServiceTest {
                 mock(InstanceAuthentication.class), "username", "publickey", mock(SpiFileSystem.class), null, null);
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
-        stackUpscaleService.upscale(mock(AuthenticatedContext.class), upscaleStackRequest, connector);
+        underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest, connector);
         verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 "quota error");
         ArgumentCaptor<CloudStack> cloudStackArgumentCaptor = ArgumentCaptor.forClass(CloudStack.class);
@@ -340,7 +343,7 @@ class StackUpscaleServiceTest {
                 mock(InstanceAuthentication.class), "username", "publickey", mock(SpiFileSystem.class), null, null);
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
-        Assertions.assertThrows(CloudConnectorException.class, () -> stackUpscaleService.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
+        Assertions.assertThrows(CloudConnectorException.class, () -> underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
                 connector));
         verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 "quota error");
@@ -383,7 +386,7 @@ class StackUpscaleServiceTest {
                 mock(InstanceAuthentication.class), "username", "publickey", mock(SpiFileSystem.class), null, null);
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
-        stackUpscaleService.upscale(mock(AuthenticatedContext.class), upscaleStackRequest, connector);
+        underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest, connector);
         verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 "quota error");
         ArgumentCaptor<CloudStack> cloudStackArgumentCaptor = ArgumentCaptor.forClass(CloudStack.class);
@@ -395,5 +398,25 @@ class StackUpscaleServiceTest {
                 .filter(cloudInstance -> cloudInstance.getInstanceId() == null).collect(Collectors.toList());
         assertEquals(4, cloudInstances.size());
         assertEquals(2, cloudInstancesWithoutInstanceId.size());
+    }
+
+    @Test
+    void testVerticalScale() throws Exception {
+        CloudConnector cloudConnector = mock(CloudConnector.class);
+        ResourceConnector resourceConnector = mock(ResourceConnector.class);
+        when(cloudConnector.resources()).thenReturn(resourceConnector);
+        underTest.verticalScale(mock(AuthenticatedContext.class), new CoreVerticalScaleRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
+                mock(CloudStack.class), new ArrayList<>(), new StackVerticalScaleV4Request()), cloudConnector, "master");
+        verify(resourceConnector, times(1)).update(any(), any(), any(), eq(UpdateType.VERTICAL_SCALE), eq(Optional.of("master")));
+    }
+
+    @Test
+    void testVerticalScaleWithoutInstances() throws Exception {
+        CloudConnector cloudConnector = mock(CloudConnector.class);
+        ResourceConnector resourceConnector = mock(ResourceConnector.class);
+        when(cloudConnector.resources()).thenReturn(resourceConnector);
+        underTest.verticalScaleWithoutInstances(mock(AuthenticatedContext.class), new CoreVerticalScaleRequest<>(mock(CloudContext.class),
+                mock(CloudCredential.class), mock(CloudStack.class), new ArrayList<>(), new StackVerticalScaleV4Request()), cloudConnector, "master");
+        verify(resourceConnector, times(1)).update(any(), any(), any(), eq(UpdateType.VERTICAL_SCALE_WITHOUT_INSTANCES), eq(Optional.of("master")));
     }
 }

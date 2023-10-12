@@ -403,7 +403,6 @@ public class VerticalScalingValidatorServiceTest {
                 new CloudCredential(),
                 "aws",
                 "",
-                "user",
                 "accountId",
                 List.of());
     }

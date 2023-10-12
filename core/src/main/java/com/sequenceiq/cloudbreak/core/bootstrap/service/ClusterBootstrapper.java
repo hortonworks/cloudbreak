@@ -337,8 +337,7 @@ public class ClusterBootstrapper {
         int result = BootstrapParams.DEFAULT_WORKER_THREADS;
         if (pricingCache.isPresent()) {
             Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
-            ExtendedCloudCredential extendedCloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential,
-                    Optional.ofNullable(stack.getCreator()));
+            ExtendedCloudCredential extendedCloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
             Optional<Integer> cpuCountForInstanceType =
                     pricingCache.get().getCpuCountForInstanceType(stack.getRegion(), masterInstanceType, extendedCloudCredential);
             if (cpuCountForInstanceType.isPresent()) {

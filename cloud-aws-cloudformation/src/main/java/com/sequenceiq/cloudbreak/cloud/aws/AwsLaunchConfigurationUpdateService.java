@@ -41,16 +41,16 @@ public class AwsLaunchConfigurationUpdateService {
 
     public void updateLaunchConfigurations(AuthenticatedContext authenticatedContext, CloudStack stack, CloudResource cfResource,
             Map<LaunchTemplateField, String> updatableFields) {
-        updateLaunchConfigurationsForGroupsOrAll(authenticatedContext, stack, cfResource, updatableFields, null);
+        updateLaunchConfigurationsForGroupsOrAll(authenticatedContext, stack, cfResource, updatableFields, null, true);
     }
 
     public void updateLaunchConfigurations(AuthenticatedContext authenticatedContext, CloudStack stack, CloudResource cfResource,
-            Map<LaunchTemplateField, String> updatableFields, Group group) {
-        updateLaunchConfigurationsForGroupsOrAll(authenticatedContext, stack, cfResource, updatableFields, group);
+            Map<LaunchTemplateField, String> updatableFields, Group group, boolean updateInstances) {
+        updateLaunchConfigurationsForGroupsOrAll(authenticatedContext, stack, cfResource, updatableFields, group, updateInstances);
     }
 
     private void updateLaunchConfigurationsForGroupsOrAll(AuthenticatedContext authenticatedContext, CloudStack stack, CloudResource cfResource,
-            Map<LaunchTemplateField, String> updatableFields, Group group) {
+            Map<LaunchTemplateField, String> updatableFields, Group group, boolean updateInstances) {
         AwsCredentialView credentialView = new AwsCredentialView(authenticatedContext.getCloudCredential());
         String regionName = authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName();
         AmazonCloudFormationClient cloudFormationClient = awsClient.createCloudFormationClient(credentialView, regionName);
@@ -63,7 +63,7 @@ public class AwsLaunchConfigurationUpdateService {
         for (LaunchConfiguration oldLaunchConfiguration : oldLaunchConfigurations) {
             changelaunchConfigurationInAutoscalingGroup(authenticatedContext, stack, autoScalingClient, scalingGroups, oldLaunchConfiguration, updatableFields);
         }
-        if (group != null) {
+        if (group != null && updateInstances) {
             AmazonEc2Client ec2Client = awsClient.createEc2Client(credentialView, regionName);
             scalingGroups.keySet().forEach(autoScalingGroup -> instanceUpdater.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group));
         }

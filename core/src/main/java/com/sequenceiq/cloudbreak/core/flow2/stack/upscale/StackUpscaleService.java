@@ -223,12 +223,22 @@ public class StackUpscaleService {
 
     public List<CloudResourceStatus> verticalScale(AuthenticatedContext ac, CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
             CloudConnector connector, String group) throws Exception {
+        return verticalScale(ac, request, connector, group, UpdateType.VERTICAL_SCALE);
+    }
+
+    public List<CloudResourceStatus> verticalScaleWithoutInstances(AuthenticatedContext ac, CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
+            CloudConnector connector, String group) throws Exception {
+        return verticalScale(ac, request, connector, group, UpdateType.VERTICAL_SCALE_WITHOUT_INSTANCES);
+    }
+
+    private List<CloudResourceStatus> verticalScale(AuthenticatedContext ac, CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
+            CloudConnector connector, String group, UpdateType updateType) throws Exception {
         CloudStack cloudStack = request.getCloudStack();
         try {
-            return connector.resources().update(ac, cloudStack, request.getResourceList(), UpdateType.VERTICAL_SCALE,
+            return connector.resources().update(ac, cloudStack, request.getResourceList(), updateType,
                     Optional.ofNullable(group));
         } catch (Exception e) {
-            return handleExceptionAndRetryUpdate(request, connector, ac, cloudStack, e, UpdateType.VERTICAL_SCALE, group);
+            return handleExceptionAndRetryUpdate(request, connector, ac, cloudStack, e, updateType, group);
         }
     }
 

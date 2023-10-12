@@ -190,7 +190,6 @@ public class AwsPlatformResourcesTest {
                 new CloudCredential("crn", "aws-credential", "account"),
                 "AWS",
                 null,
-                "crn",
                 "id",
                 new ArrayList<>());
 

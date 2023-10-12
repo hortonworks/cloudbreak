@@ -5,16 +5,13 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
@@ -100,22 +97,6 @@ public class CredentialToCredentialV1ResponseConverter {
         } catch (IOException e) {
             throw new BadRequestException("Cannot deserialize the credential's attributes", e);
         }
-    }
-
-    public Credential convert(ExtendedCloudCredential source) {
-        if (source == null) {
-            return null;
-        }
-        Credential credential = new Credential();
-        credential.setName(source.getName());
-        credential.setDescription(source.getDescription());
-        credential.setCloudPlatform(source.getCloudPlatform());
-        credential.setCreator(source.getUserCrn());
-        credential.setAccountId(source.getAccountId());
-
-        Map<String, Object> attributes = source.getParameters() == null ? new HashMap<>() : source.getParameters();
-        credential.setAttributes(new Json(attributes).getValue());
-        return credential;
     }
 
     private void coverSensitiveData(Json json) {

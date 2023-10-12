@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.environment.credential;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -8,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,8 +20,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
@@ -42,6 +45,9 @@ class CredentialClientServiceTest {
     @Spy
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
+    @Mock
+    private CredentialToExtendedCloudCredentialConverter credentialToExtendedCloudCredentialConverter;
+
     @InjectMocks
     private CredentialClientService underTest;
 
@@ -60,9 +66,23 @@ class CredentialClientServiceTest {
         verify(regionAwareInternalCrnGeneratorFactory, times(1)).iam();
         verify(regionAwareInternalCrnGenerator, times(1)).getInternalCrnForServiceAsString();
         verify(credentialEndpoint, times(1)).getByEnvironmentCrn(eq(ENVIRONMENT_CRN));
-        Assertions.assertEquals("crn", cloudCredential.getId());
-        Assertions.assertEquals("name", cloudCredential.getName());
-        Assertions.assertEquals("account", cloudCredential.getAccountId());
+        assertEquals("crn", cloudCredential.getId());
+        assertEquals("name", cloudCredential.getName());
+        assertEquals("account", cloudCredential.getAccountId());
     }
 
+    @Test
+    void testExtendedCloudCredential() {
+        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internalCrn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        CredentialResponse credentialResponse = new CredentialResponse();
+        when(credentialEndpoint.getByEnvironmentCrn(eq(ENVIRONMENT_CRN))).thenReturn(credentialResponse);
+        ExtendedCloudCredential extendedCloudCredential = mock(ExtendedCloudCredential.class);
+        when(credentialToExtendedCloudCredentialConverter.convert(any())).thenReturn(extendedCloudCredential);
+
+        ExtendedCloudCredential response = underTest.getExtendedCloudCredential(ENVIRONMENT_CRN);
+        assertEquals(extendedCloudCredential, response);
+        verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
+    }
 }

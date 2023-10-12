@@ -92,7 +92,6 @@ public class EncryptionKeyArnValidator {
                 cloudCredential,
                 environmentDto.getCloudPlatform(),
                 environmentDto.getDescription(),
-                environmentDto.getCreator(),
                 environmentDto.getAccountId(),
                 entitlementService.getEntitlements(environmentDto.getAccountId()));
         Region region = region(environmentDto.getLocation().getName());

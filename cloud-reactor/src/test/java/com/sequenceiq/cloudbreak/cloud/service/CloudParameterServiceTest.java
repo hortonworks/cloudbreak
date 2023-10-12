@@ -50,12 +50,8 @@ class CloudParameterServiceTest {
             return null;
         }).when(eventBus).notify(anyString(), any(Event.class));
         CloudNoSqlTables noSqlTables = underTest.getNoSqlTables(
-                new ExtendedCloudCredential(
-                        new CloudCredential("id", "name", "acc"), "aws", "desc", "crn",
-                        "account", new ArrayList<>()),
-                "region",
-                "aws",
-                null);
+                new ExtendedCloudCredential(new CloudCredential("id", "name", "acc"),
+                        "aws", "desc", "account", new ArrayList<>()), "region", "aws", null);
         assertEquals(expected, noSqlTables);
     }
 
@@ -69,12 +65,8 @@ class CloudParameterServiceTest {
             return null;
         }).when(eventBus).notify(anyString(), any(Event.class));
         PlatformDatabaseCapabilities platformDatabaseCapabilities = underTest.getDatabaseCapabilities(
-                new ExtendedCloudCredential(
-                        new CloudCredential("id", "name", "acc"), "aws", "desc", "crn",
-                        "account", new ArrayList<>()),
-                "region",
-                "aws",
-                null);
+                new ExtendedCloudCredential(new CloudCredential("id", "name", "acc"),
+                        "aws", "desc", "account", new ArrayList<>()), "region", "aws", null);
         assertEquals(expected, platformDatabaseCapabilities);
     }
 }

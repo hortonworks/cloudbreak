@@ -161,10 +161,10 @@ class AwsUpdateServiceTest {
 
         String encodedCoreUserData = Base64Util.encode(userData.get(InstanceGroupType.CORE));
         Map<LaunchTemplateField, String> coreFields = Map.of(LaunchTemplateField.USER_DATA, encodedCoreUserData);
-        verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(coreFields, ac, cf.getName(), coreGroup, stack);
+        verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(coreFields, ac, cf.getName(), coreGroup, stack, true);
         String encodedGatewayUserData = Base64Util.encode(userData.get(InstanceGroupType.GATEWAY));
         Map<LaunchTemplateField, String> gatewayFields = Map.of(LaunchTemplateField.USER_DATA, encodedGatewayUserData);
-        verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(gatewayFields, ac, cf.getName(), gatewayGroup, stack);
+        verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(gatewayFields, ac, cf.getName(), gatewayGroup, stack, true);
     }
 
     @Test
@@ -193,7 +193,38 @@ class AwsUpdateServiceTest {
                 "m42.xxxl",
                 LaunchTemplateField.ROOT_DISK,
                 "100");
-        verify(awsLaunchTemplateUpdateService, times(1)).updateLaunchTemplate(eq(updatableFields), any(), eq("cf"), eq(gatewayGroup), eq(stack));
+        verify(awsLaunchTemplateUpdateService, times(1)).updateLaunchTemplate(eq(updatableFields), any(), eq("cf"), eq(gatewayGroup),
+                eq(stack), eq(Boolean.TRUE));
+    }
+
+    @Test
+    void verticalScaleWithoutInstancesLaunchTemplate() {
+        CloudResource cloudResource = CloudResource.builder()
+                .withName("cf")
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .withParameters(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
+                .build();
+        Group gatewayGroup = mock(Group.class);
+        when(gatewayGroup.getName()).thenReturn("gwGroup");
+        InstanceTemplate instanceTemplate = mock(InstanceTemplate.class);
+        when(instanceTemplate.getFlavor()).thenReturn("m42.xxxl");
+        when(gatewayGroup.getRootVolumeSize()).thenReturn(100);
+        CloudInstance cloudInstance = mock(CloudInstance.class);
+        when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
+        when(gatewayGroup.getReferenceInstanceConfiguration()).thenReturn(cloudInstance);
+        when(stack.getGroups()).thenReturn(List.of(gatewayGroup));
+        when(stack.getTemplate()).thenReturn("AWS::EC2::LaunchTemplate");
+
+
+        underTest.update(ac, stack, Collections.singletonList(cloudResource), UpdateType.VERTICAL_SCALE_WITHOUT_INSTANCES, Optional.of("gwGroup"));
+
+        Map<LaunchTemplateField, String> updatableFields = Map.of(
+                LaunchTemplateField.INSTANCE_TYPE,
+                "m42.xxxl",
+                LaunchTemplateField.ROOT_DISK,
+                "100");
+        verify(awsLaunchTemplateUpdateService, times(1)).updateLaunchTemplate(eq(updatableFields), any(), eq("cf"), eq(gatewayGroup),
+                eq(stack), eq(Boolean.FALSE));
     }
 
     @Test
@@ -216,7 +247,8 @@ class AwsUpdateServiceTest {
                 "m42.xxxl",
                 LaunchTemplateField.ROOT_DISK,
                 "100");
-        verify(awsLaunchTemplateUpdateService, times(0)).updateLaunchTemplate(eq(updatableFields), any(), eq("cf"), eq(gatewayGroup), eq(stack));
+        verify(awsLaunchTemplateUpdateService, times(0)).updateLaunchTemplate(eq(updatableFields), any(), eq("cf"), eq(gatewayGroup),
+                eq(stack), eq(Boolean.TRUE));
         verify(launchConfigurationUpdateService, times(0)).updateLaunchConfigurations(any(), any(), any(), any());
     }
 
@@ -247,6 +279,6 @@ class AwsUpdateServiceTest {
                 LaunchTemplateField.ROOT_DISK,
                 "100");
         verify(launchConfigurationUpdateService, times(1))
-                .updateLaunchConfigurations(any(), eq(stack), eq(cloudResource), eq(updatableFields), eq(gatewayGroup));
+                .updateLaunchConfigurations(any(), eq(stack), eq(cloudResource), eq(updatableFields), eq(gatewayGroup), eq(Boolean.TRUE));
     }
 }

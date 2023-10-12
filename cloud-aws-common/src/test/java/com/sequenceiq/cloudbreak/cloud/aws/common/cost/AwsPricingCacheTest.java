@@ -77,7 +77,7 @@ public class AwsPricingCacheTest {
         doThrow(new AwsPermissionMissingException()).when(awsCredentialVerifier).validateAws(any(), anyString());
 
         Optional<Double> price = underTest.getPriceForInstanceType(REGION, INSTANCE_TYPE,
-                new ExtendedCloudCredential(new CloudCredential(), "", "", "", "", List.of()));
+                new ExtendedCloudCredential(new CloudCredential(), "", "", "", List.of()));
 
         Assertions.assertTrue(price.isEmpty());
     }
@@ -85,7 +85,7 @@ public class AwsPricingCacheTest {
     @Test
     void getUsdPrice() {
         Optional<Double> price = underTest.getPriceForInstanceType(REGION, INSTANCE_TYPE,
-                new ExtendedCloudCredential(new CloudCredential(), "", "", "", "", List.of()));
+                new ExtendedCloudCredential(new CloudCredential(), "", "", "", List.of()));
 
         Assertions.assertTrue(price.isPresent());
         Assertions.assertEquals(0.69, price.get());
@@ -96,7 +96,7 @@ public class AwsPricingCacheTest {
         when(cloudParameterService.getVmTypesV2(any(), any(), any(), any(), any())).thenReturn(getCloudVmTypes());
 
         Optional<Integer> cpu = underTest.getCpuCountForInstanceType(REGION, INSTANCE_TYPE,
-                new ExtendedCloudCredential(new CloudCredential(), "", "", "", "", List.of()));
+                new ExtendedCloudCredential(new CloudCredential(), "", "", "", List.of()));
 
         Assertions.assertTrue(cpu.isPresent());
         Assertions.assertEquals(69, cpu.get());
@@ -107,7 +107,7 @@ public class AwsPricingCacheTest {
         when(cloudParameterService.getVmTypesV2(any(), any(), any(), any(), any())).thenReturn(getCloudVmTypes());
 
         Optional<Integer> memory = underTest.getMemoryForInstanceType(REGION, INSTANCE_TYPE,
-                new ExtendedCloudCredential(new CloudCredential(), "", "", "", "", List.of()));
+                new ExtendedCloudCredential(new CloudCredential(), "", "", "", List.of()));
 
         Assertions.assertTrue(memory.isPresent());
         Assertions.assertEquals(420, memory.get());
@@ -116,9 +116,9 @@ public class AwsPricingCacheTest {
     @Test
     void getUsdPriceAlreadyInCache() {
         Optional<Double> price1 = underTest.getPriceForInstanceType(REGION, INSTANCE_TYPE,
-                new ExtendedCloudCredential(new CloudCredential(), "", "", "", "", List.of()));
+                new ExtendedCloudCredential(new CloudCredential(), "", "", "", List.of()));
         Optional<Double> price2 = underTest.getPriceForInstanceType(REGION, INSTANCE_TYPE,
-                new ExtendedCloudCredential(new CloudCredential(), "", "", "", "", List.of()));
+                new ExtendedCloudCredential(new CloudCredential(), "", "", "", List.of()));
 
         Assertions.assertTrue(price1.isPresent());
         Assertions.assertTrue(price2.isPresent());

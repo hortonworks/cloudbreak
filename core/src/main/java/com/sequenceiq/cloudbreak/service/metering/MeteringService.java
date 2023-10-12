@@ -6,12 +6,13 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.MeteringEvent;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.metrics.CommonMetricService;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.converter.StackDtoToMeteringEventConverter;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.job.metering.instancechecker.MeteringInstanceCheckerJobAdapter;
@@ -46,8 +47,9 @@ public class MeteringService {
     @Inject
     private MeteringInstanceCheckerJobService meteringInstanceCheckerJobService;
 
+    @Qualifier("CommonMetricService")
     @Inject
-    private CommonMetricService metricsService;
+    private MetricService metricService;
 
     public void sendMeteringSyncEventForStack(long stackId) {
         sendMeteringSyncEventForStack(stackDtoService.getByIdWithoutResources(stackId));
@@ -96,10 +98,10 @@ public class MeteringService {
     private void sendPeriodicMeteringEvent(MeteringEvent meteringEvent) {
         try {
             grpcMeteringClient.sendMeteringEventWithShortRetry(meteringEvent);
-            metricsService.incrementMetricCounter(MetricType.METERING_REPORT_SUCCESSFUL,
+            metricService.incrementMetricCounter(MetricType.METERING_REPORT_SUCCESSFUL,
                     MeteringMetricTag.REPORT_TYPE.name(), SYNC);
         } catch (Exception e) {
-            metricsService.incrementMetricCounter(MetricType.METERING_REPORT_FAILED,
+            metricService.incrementMetricCounter(MetricType.METERING_REPORT_FAILED,
                     MeteringMetricTag.REPORT_TYPE.name(), SYNC);
             LOGGER.warn("Periodic Metering event send failed.", e);
         }
@@ -108,10 +110,10 @@ public class MeteringService {
     private void sendMeteringEvent(MeteringEvent meteringEvent) {
         try {
             grpcMeteringClient.sendMeteringEvent(meteringEvent);
-            metricsService.incrementMetricCounter(MetricType.METERING_REPORT_SUCCESSFUL,
+            metricService.incrementMetricCounter(MetricType.METERING_REPORT_SUCCESSFUL,
                     MeteringMetricTag.REPORT_TYPE.name(), meteringEvent.getStatusChange().getStatus().name());
         } catch (Exception e) {
-            metricsService.incrementMetricCounter(MetricType.METERING_REPORT_FAILED,
+            metricService.incrementMetricCounter(MetricType.METERING_REPORT_FAILED,
                     MeteringMetricTag.REPORT_TYPE.name(), meteringEvent.getStatusChange().getStatus().name());
             LOGGER.warn("Metering event send failed.", e);
         }

@@ -10,16 +10,13 @@ public class ExtendedCloudCredential extends CloudCredential {
 
     private final String cloudPlatform;
 
-    private final String userCrn;
-
     private final String accountId;
 
     private final List<String> entitlements;
 
     private final CloudCredential cloudCredential;
 
-    public ExtendedCloudCredential(CloudCredential cloudCredential, String cloudPlatform, String description,
-        String userCrn, String accountId, List<String> entitlements) {
+    public ExtendedCloudCredential(CloudCredential cloudCredential, String cloudPlatform, String description, String accountId, List<String> entitlements) {
         super(cloudCredential.getId(), cloudCredential.getName(), accountId, cloudCredential.getCredentialSettings());
         Map<String, Object> parameters = cloudCredential.getParameters();
         for (Entry<String, Object> parameter : parameters.entrySet()) {
@@ -27,7 +24,6 @@ public class ExtendedCloudCredential extends CloudCredential {
         }
         this.cloudPlatform = cloudPlatform;
         this.description = description;
-        this.userCrn = userCrn;
         this.accountId = accountId;
         this.entitlements = entitlements;
         this.cloudCredential = cloudCredential;
@@ -39,10 +35,6 @@ public class ExtendedCloudCredential extends CloudCredential {
 
     public String getCloudPlatform() {
         return cloudPlatform;
-    }
-
-    public String getUserCrn() {
-        return userCrn;
     }
 
     public String getAccountId() {
@@ -63,7 +55,6 @@ public class ExtendedCloudCredential extends CloudCredential {
         final StringBuilder sb = new StringBuilder("ExtendedCloudCredential{");
         sb.append("description='").append(description).append('\'');
         sb.append(", cloudPlatform='").append(cloudPlatform).append('\'');
-        sb.append(", userCrn='").append(userCrn).append('\'');
         sb.append(", accountId='").append(accountId).append('\'');
         sb.append(", cloudCredential=").append(super.toString());
         sb.append('}');

@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.common.api.type.CdpResourceType.fromStackType;
 import static org.slf4j.LoggerFactory.getLogger;
 
-import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -99,7 +98,6 @@ public class ValidateCloudConfigHandler extends ExceptionCatcherEventHandler<Val
                         instanceGroup,
                         stack,
                         fromStackType(type == null ? null : type.name()),
-                        Optional.of(stack.getCreator()),
                         validationBuilder);
 
             }

@@ -8,16 +8,12 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.freeipa.dto.Credential;
-import com.sequenceiq.freeipa.util.CrnService;
 
 @Component
 public class CredentialToExtendedCloudCredentialConverter {
 
     @Inject
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
-
-    @Inject
-    private CrnService crnService;
 
     @Inject
     private EntitlementService entitlementService;
@@ -28,7 +24,6 @@ public class CredentialToExtendedCloudCredentialConverter {
                 cloudCredential,
                 credential.getCloudPlatform(),
                 "",
-                crnService.getCurrentUserId(),
                 cloudCredential.getAccountId(),
                 entitlementService.getEntitlements(cloudCredential.getAccountId()));
     }

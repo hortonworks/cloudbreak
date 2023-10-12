@@ -122,7 +122,6 @@ public abstract class AwsSetup implements Setup {
                 cloudCredential,
                 CloudPlatform.AWS.name(),
                 "",
-                null,
                 cloudCredential.getAccountId(),
                 entitlements);
         CloudRegions regions = awsPlatformResources.regions(extendedCloudCredential, location.getRegion(), Collections.emptyMap(), true);

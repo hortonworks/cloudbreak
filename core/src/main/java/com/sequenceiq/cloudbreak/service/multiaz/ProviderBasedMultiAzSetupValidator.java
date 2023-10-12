@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.multiaz;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -34,7 +33,6 @@ import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConver
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
@@ -116,9 +114,8 @@ public class ProviderBasedMultiAzSetupValidator {
 
     private void validateWithAvailabilityZoneConnector(ValidationResultBuilder validationBuilder, Stack stack, AvailabilityZoneConnector azConnector) {
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
-        Optional<User> creator = Optional.of(stack.getCreator());
         Credential credential = credentialConverter.convert(environment.getCredential());
-        ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(credential, creator);
+        ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(credential);
         Set<String> environmentZones = environment.getNetwork()
                 .getAvailabilityZones(CloudPlatform.valueOf(stack.getCloudPlatform()));
         if (CollectionUtils.isEmpty(environmentZones) && stack.isMultiAz()) {

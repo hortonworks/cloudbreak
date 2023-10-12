@@ -116,7 +116,7 @@ public class AwsLaunchTemplateUpdateService {
     }
 
     public void updateLaunchTemplate(Map<LaunchTemplateField, String> updatableFields, AuthenticatedContext ac, String stackName, Group group,
-            CloudStack cloudStack) {
+            CloudStack cloudStack, boolean updateInstances) {
         AmazonCloudFormationClient amazonCloudFormationClient = getAmazonCloudFormationClient(ac);
         AmazonAutoScalingClient autoScalingClient = getAutoScalingClient(ac);
         AmazonEc2Client ec2Client = getEc2Client(ac);
@@ -139,8 +139,10 @@ public class AwsLaunchTemplateUpdateService {
                     autoScalingGroup,
                     launchTemplateSpecification,
                     newLaunchTemplate);
-            LOGGER.info("Update all instance for {} autoscaling group", autoScalingGroup.autoScalingGroupName());
-            instanceUpdater.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group);
+            if (updateInstances) {
+                LOGGER.info("Update all instance for {} autoscaling group", autoScalingGroup.autoScalingGroupName());
+                instanceUpdater.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group);
+            }
         }
     }
 

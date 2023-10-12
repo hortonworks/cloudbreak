@@ -51,7 +51,7 @@ public class AwsUpdateService {
     private AwsLaunchConfigurationUpdateService launchConfigurationUpdateService;
 
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
-        UpdateType type, Optional<String> targetGroupName) {
+            UpdateType type, Optional<String> targetGroupName) {
         ArrayList<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
         LOGGER.info("The update method which will be followed is {}.", type);
         if (!resources.isEmpty()) {
@@ -69,14 +69,16 @@ public class AwsUpdateService {
                             cloudResourceStatuses.add(new CloudResourceStatus(cloudResource, ResourceStatus.UPDATED)));
                 }
             } else if (type.equals(UpdateType.VERTICAL_SCALE)) {
-                updateWithVerticalScaling(authenticatedContext, stack, resources, targetGroupName);
+                updateWithVerticalScaling(authenticatedContext, stack, resources, targetGroupName, true);
+            } else if (type.equals(UpdateType.VERTICAL_SCALE_WITHOUT_INSTANCES)) {
+                updateWithVerticalScaling(authenticatedContext, stack, resources, targetGroupName, false);
             }
         }
         return cloudResourceStatuses;
     }
 
     private void updateWithVerticalScaling(AuthenticatedContext authenticatedContext, CloudStack stack,
-        List<CloudResource> resources, Optional<String> groupName) {
+            List<CloudResource> resources, Optional<String> groupName, boolean updateInstances) {
         String cfTemplate = stack.getTemplate();
         CloudResource cfResource = getCloudFormationStack(resources);
         for (Group group : stack.getGroups()) {
@@ -89,10 +91,12 @@ public class AwsUpdateService {
                 );
                 if (cfTemplate.contains(LAUNCH_TEMPLATE)) {
                     LOGGER.info("Update fields on launchtemplate {} on group {} on cf {}", updatableFields, group.getName(), cfResource.getName());
-                    awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group, stack);
+                    awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group, stack,
+                            updateInstances);
                 } else {
                     LOGGER.info("Update fields on launchconfiguration {} on group {} on cf {}", updatableFields, group.getName(), cfResource.getName());
-                    launchConfigurationUpdateService.updateLaunchConfigurations(authenticatedContext, stack, cfResource, updatableFields, group);
+                    launchConfigurationUpdateService.updateLaunchConfigurations(authenticatedContext, stack, cfResource, updatableFields, group,
+                            updateInstances);
                 }
             }
         }
@@ -109,7 +113,7 @@ public class AwsUpdateService {
                 if (StringUtils.isNotEmpty(groupUserData)) {
                     String encodedGroupUserData = Base64Util.encode(groupUserData);
                     Map<LaunchTemplateField, String> updatableFields = Map.of(LaunchTemplateField.USER_DATA, encodedGroupUserData);
-                    awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group, stack);
+                    awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group, stack, true);
                 } else {
                     String msg = String.format("The user data is empty for group '%s' and group type '%s' which should not happen!",
                             group.getName(), group.getType());
