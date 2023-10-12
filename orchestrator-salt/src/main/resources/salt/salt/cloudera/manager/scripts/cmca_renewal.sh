@@ -5,7 +5,6 @@
 {%- set internal_loadbalancer_san = salt['pillar.get']('cloudera-manager:communication:internal_loadbalancer_san') %}
 {%- set gov_cloud = salt['pillar.get']('cluster:gov_cloud', False) %}
 #!/usr/bin/env bash
-set -x
 
 HOSTNAME={{ manager_server_hostname }}
 FQDN={{ manager_server_fqdn }}
@@ -26,7 +25,7 @@ OVERRIDES="--override ca_dn=CN=${HOSTNAME} "
 {% endif %}
 
 echo "$(date '+%d/%m/%Y %H:%M:%S') - Generating new CMCA."
-mv ${CERTMANAGER_DIR} ${CERTMANAGER_DIR}_bkp
+mv ${CERTMANAGER_DIR} ${CERTMANAGER_DIR}_bkp_$(date '+%d%m%Y%H%M%S')
 /opt/cloudera/cm-agent/bin/certmanager --location ${CERTMANAGER_DIR} setup --skip-invalid-ca-certs --configure-services ${CERTMANAGER_ARGS} ${OVERRIDES} --stop-at-csr ${ALTNAME} --trusted-ca-certs ${CACERTS_DIR}/cacerts.pem
 kinit -kt ${CM_KEYTAB_FILE} ${CM_PRINCIPAL}
 /opt/cloudera/cm/bin/generate_intermediate_ca_ipa.sh ${CM_PRINCIPAL} ${CERTMANAGER_DIR}/CMCA/private/ca_csr.pem ${OUT_FILE}
@@ -35,6 +34,18 @@ kinit -kt ${CM_KEYTAB_FILE} ${CM_PRINCIPAL}
 echo "$(date '+%d/%m/%Y %H:%M:%S') - Updating cm.settings."
 source_file=${CERTMANAGER_DIR}/auto-tls.init.txt
 target_file=/etc/cloudera-scm-server/cm.settings
-cp ${target_file} ${target_file}_bkp
-echo "# Updated Auto-tls related configurations $(date '+%d/%m/%Y %H:%M:%S')" >> ${target_file}
-cat ${source_file} >> ${target_file}
+cp ${target_file} ${target_file}.bkp.$(date '+%d%m%Y%H%M%S')
+while IFS= read -r line
+do
+  stringarray=($line)
+{% raw %}
+  if [ ${#stringarray[@]} -eq 3 ]; then
+{% endraw %}
+    variable=${stringarray[1]}
+    newvalue=${stringarray[2]}
+    if ! grep -q "setsettings ${variable} ${newvalue}" ${target_file}; then
+      echo "updating value of ${variable} in cm.settings"
+      sed -i 's/^.*setsettings '"$variable"' .*$/setsettings '"$variable"' '"$newvalue"'/' ${target_file}
+    fi
+  fi
+done < "$source_file"
