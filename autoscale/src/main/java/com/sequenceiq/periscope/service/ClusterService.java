@@ -155,6 +155,15 @@ public class ClusterService {
         return  clusterRepository.findByStackCrnAndTenant(stackCrn, tenant);
     }
 
+    public Optional<Cluster> findOneByStackCrn(String stackCrn) {
+        LoggingUtils.buildMdcContextWithCrn(stackCrn);
+        return  clusterRepository.findByStackCrn(stackCrn);
+    }
+
+    public List<Cluster> findByDeleteRetryCount(int maxDeleteRetryCount) {
+        return  clusterRepository.findByDeleteRetryCount(maxDeleteRetryCount);
+    }
+
     public Optional<Cluster> findOneByStackNameAndTenant(String stackName, String tenant) {
         LoggingUtils.buildMdcContextWithName(stackName);
         return  clusterRepository.findByStackNameAndTenant(stackName, tenant);
@@ -319,5 +328,9 @@ public class ClusterService {
                 clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(RUNNING, true, periscopeNodeConfig.getId()));
         periscopeMetricService.gauge(MetricType.CLUSTER_STATE_SUSPENDED,
                 clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(SUSPENDED, true, periscopeNodeConfig.getId()));
+    }
+
+    public void updateClusterDeleted(Long clusterId, ClusterState state, int deleteRetryCount) {
+        clusterRepository.updateClusterDeleted(clusterId, state, deleteRetryCount);
     }
 }

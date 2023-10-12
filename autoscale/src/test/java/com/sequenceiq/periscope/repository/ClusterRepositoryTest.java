@@ -39,7 +39,11 @@ class ClusterRepositoryTest {
 
     private static final String CLOUDBREAK_STACK_CRN_2 = "crn:cdp:datahub:us-west-1:tenant:cluster:35ae1d9d-4c4b-4d11-a714-91eadcc5be8a";
 
+    private static final String CLOUDBREAK_STACK_CRN_3 = "crn:cdp:datahub:us-west-1:tenant:cluster:35ae1d9d-4c4b-4d11-a714-91eadcc5be8b";
+
     private static final String TEST_ENV_CRN = "crn:cdp:environments:us-west-1:tenant:environment:c11d716f-8b87-432b-98ef-14a46399ea74";
+
+    private static final String TEST_ENV_CRN_1 = "crn:cdp:environments:us-west-1:tenant:environment:c11d716f-8b87-432b-98ef-14a46399ea75";
 
     private static final int TEST_HOSTGROUP_MIN_SIZE = 3;
 
@@ -68,6 +72,8 @@ class ClusterRepositoryTest {
 
     private Cluster timeCluster;
 
+    private Cluster deletedCluster;
+
     @BeforeEach
     void setUp() {
         loadCluster = getAClusterWithLoadAlerts();
@@ -75,6 +81,7 @@ class ClusterRepositoryTest {
 
         timeCluster = getAClusterWithTimeAlerts();
         saveWithTimeAlerts(timeCluster);
+
     }
 
     @Test
@@ -234,6 +241,25 @@ class ClusterRepositoryTest {
         assertThat(result).hasSize(2).hasSameElementsAs(Arrays.asList(loadClusterWithAutoscalingDisabled.getId(), timeClusterWithAutoscalingDisabled.getId()));
     }
 
+    @Test
+    void testFindByDeleteRetryCountRetryCountLessThanGiven() {
+        deletedCluster = getDeletedCluster();
+        underTest.save(deletedCluster);
+        List<Cluster> result = underTest.findByDeleteRetryCount(5);
+
+        assertThat(result).hasSize(1).hasSameElementsAs(Arrays.asList(deletedCluster));
+    }
+
+    @Test
+    void testFindByDeleteRetryCountRetryCountEqualToGiven() {
+        deletedCluster = getDeletedCluster();
+        deletedCluster.setDeleteRetryCount(5);
+        underTest.save(deletedCluster);
+        List<Cluster> result = underTest.findByDeleteRetryCount(5);
+
+        assertThat(result).hasSize(0);
+    }
+
     private Cluster getAClusterWithLoadAlerts() {
         Cluster cluster = new Cluster();
         cluster.setStackCrn(CLOUDBREAK_STACK_CRN_1);
@@ -262,6 +288,18 @@ class ClusterRepositoryTest {
         cluster.setLoadAlerts(Set.of(loadAlert));
         cluster.setLastScalingActivity(Instant.now()
                 .minus(45, ChronoUnit.MINUTES).toEpochMilli());
+        return cluster;
+    }
+
+    private Cluster getDeletedCluster() {
+        Cluster cluster = new Cluster();
+        cluster.setStackCrn(CLOUDBREAK_STACK_CRN_3);
+        cluster.setState(ClusterState.DELETED);
+        cluster.setAutoscalingEnabled(Boolean.TRUE);
+        cluster.setStackType(StackType.WORKLOAD);
+        cluster.setDeleteRetryCount(1);
+        cluster.setEnvironmentCrn(TEST_ENV_CRN_1);
+
         return cluster;
     }
 

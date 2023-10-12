@@ -111,6 +111,8 @@ public final class Cluster implements Monitored, Clustered {
     @Column(name = "blueprinttext")
     private String bluePrintText;
 
+    private Integer deleteRetryCount;
+
     public Cluster() {
     }
 
@@ -363,6 +365,14 @@ public final class Cluster implements Monitored, Clustered {
 
     public void setMachineUserCrn(String machineUserCrn) {
         this.machineUserCrn = machineUserCrn;
+    }
+
+    public Integer getDeleteRetryCount() {
+        return deleteRetryCount;
+    }
+
+    public void setDeleteRetryCount(Integer deleteRetryCount) {
+        this.deleteRetryCount = deleteRetryCount;
     }
 
     public UpdateFailedDetails getUpdateFailedDetails() {

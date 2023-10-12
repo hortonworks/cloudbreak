@@ -9,7 +9,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -73,38 +72,6 @@ class ClusterStatusSyncHandlerTest {
 
     @InjectMocks
     private ClusterStatusSyncHandler underTest;
-
-    @Test
-    void testOnApplicationEventWhenCBStatusDeleted() {
-        Cluster cluster = getACluster(ClusterState.RUNNING);
-        when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getBasicMockStackResponse(Status.DELETE_COMPLETED));
-        when(clusterService.countByEnvironmentCrn("testEnvironmentCrn")).thenReturn(2);
-
-        underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
-
-        verify(clusterService).removeById(AUTOSCALE_CLUSTER_ID);
-        verify(clusterService, never()).save(cluster);
-        verify(cloudbreakCommunicator).getByCrn(CLOUDBREAK_STACK_CRN);
-        verify(altusMachineUserService, never()).deleteMachineUserForEnvironment(anyString(), anyString(), anyString());
-    }
-
-    @Test
-    void testOnApplicationEventWhenCBStatusDeletedAndNoMoreEnvironmentClusters() {
-        Cluster cluster = getACluster(ClusterState.RUNNING);
-        cluster.setMachineUserCrn("testMachineUserCrn");
-        when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(clusterService.countByEnvironmentCrn("testEnvironmentCrn")).thenReturn(1);
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getBasicMockStackResponse(Status.DELETE_COMPLETED));
-
-        underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
-
-        verify(clusterService).removeById(AUTOSCALE_CLUSTER_ID);
-        verify(clusterService, never()).save(cluster);
-        verify(cloudbreakCommunicator).getByCrn(CLOUDBREAK_STACK_CRN);
-        verify(altusMachineUserService, times(1))
-                .deleteMachineUserForEnvironment("testTenant", cluster.getMachineUserCrn(), "testEnvironmentCrn");
-    }
 
     @Test
     void testOnApplicationEventWhenCBStatusStoppedAndPeriscopeClusterRunning() {

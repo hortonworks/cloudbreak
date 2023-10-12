@@ -71,6 +71,10 @@ public class CloudbreakCommunicator {
         return cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getStatusByCrn(stackCrn);
     }
 
+    public List<StackStatusV4Response> getDeletedClusters(Long since) {
+        return cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getDeletedStacks(since);
+    }
+
     public FlowIdentifier decommissionInstancesForCluster(Cluster cluster, List<String> decommissionNodeIds) {
         ScalingStrategy scalingStrategy = STOPSTART;
         return requestLogging.logResponseTime(() -> cloudbreakInternalCrnClient.withInternalCrn()

@@ -1,6 +1,5 @@
 package com.sequenceiq.periscope.monitor.handler;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
 import static com.sequenceiq.periscope.api.model.ClusterState.SUSPENDED;
 import static java.util.stream.Collectors.toSet;
@@ -88,11 +87,7 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
     }
 
     private void updateClusterState(Cluster cluster, StackV4Response stackResponse, boolean clusterAvailable) {
-        if (DELETE_COMPLETED.equals(stackResponse.getStatus())) {
-            beforeDeleteCleanup(cluster);
-            clusterService.removeById(cluster.getId());
-            LOGGER.info("Deleted cluster '{}', CB Stack Status '{}'.", cluster.getStackCrn(), stackResponse.getStatus());
-        } else if (clusterAvailable && !RUNNING.equals(cluster.getState())) {
+        if (clusterAvailable && !RUNNING.equals(cluster.getState())) {
             clusterService.setState(cluster.getId(), ClusterState.RUNNING);
             LOGGER.info("Updated cluster '{}' to Running, CB Stack Status '{}', CB Cluster Status '{}'.",
                     cluster.getStackCrn(), stackResponse.getStatus(), stackResponse.getCluster().getStatus());

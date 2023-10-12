@@ -1,25 +1,31 @@
 package com.sequenceiq.periscope.monitor.handler;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationListener;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
+import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
-import com.sequenceiq.periscope.monitor.event.ClusterDeleteEvent;
 import com.sequenceiq.periscope.service.AltusMachineUserService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.utils.LoggingUtils;
 
 @Component
-public class ClusterDeleteHandler implements ApplicationListener<ClusterDeleteEvent> {
+public class ClusterDeleteHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterDeleteHandler.class);
+
+    private static final long SLEEP_DURATION_FOR_WAIT_DELETE_CLUSTERS = 500;
 
     @Inject
     private ClusterService clusterService;
@@ -30,21 +36,70 @@ public class ClusterDeleteHandler implements ApplicationListener<ClusterDeleteEv
     @Inject
     private AltusMachineUserService altusMachineUserService;
 
-    @Override
-    public void onApplicationEvent(ClusterDeleteEvent event) {
-        Cluster cluster = clusterService.findById(event.getClusterId());
-        if (cluster == null) {
-            return;
+    @Inject
+    @Qualifier("periscopeDeleteScheduledExecutorService")
+    private ExecutorService deleteExecutorService;
+
+    @Value("${periscope.maxDeleteRetryCount:5}")
+    private int maxDeleteRetryCount;
+
+    public void deleteClusters(Long since) {
+        LOGGER.info("Fetch Clusters deleted since {} from CB", since);
+        List<StackStatusV4Response> stacks = cloudbreakCommunicator.getDeletedClusters(since);
+        LOGGER.info("Clusters to delete based on response from CB {}", stacks);
+        List<Future<String>> clustersToBeDeleted = new ArrayList<>();
+        for (StackStatusV4Response stack : stacks) {
+            Cluster cluster = clusterService.findOneByStackCrn(stack.getCrn()).orElse(null);
+            if (cluster != null) {
+                clustersToBeDeleted.add(deleteExecutorService.submit(() -> deleteCluster(cluster)));
+            } else {
+                LOGGER.info("cluster: {} fetched from CB but does not exist", stack.getCrn());
+            }
         }
+        List<Cluster> clustersToRetry = clusterService.findByDeleteRetryCount(maxDeleteRetryCount);
+        LOGGER.info("number of clusters to retry : {} ", clustersToRetry.size());
+        clustersToRetry.forEach(cluster -> {
+            clustersToBeDeleted.add(deleteExecutorService.submit(() -> deleteCluster(cluster)));
+        });
+        waitForClustersToDelete(clustersToBeDeleted);
+    }
+
+    private void waitForClustersToDelete(List<Future<String>> clustersToBeDeleted) {
+        while (!clustersToBeDeleted.isEmpty()) {
+            List<Future<String>> done = new ArrayList<>();
+            for (Future<String> future : clustersToBeDeleted) {
+                if (future.isDone()) {
+                    done.add(future);
+                    try {
+                        future.get();
+                    } catch (Exception e) {
+                        LOGGER.error("Error during deleting cluster {}", e.getMessage());
+                    }
+                }
+            }
+            clustersToBeDeleted.removeAll(done);
+            if (!clustersToBeDeleted.isEmpty()) {
+                try {
+                    Thread.sleep(SLEEP_DURATION_FOR_WAIT_DELETE_CLUSTERS);
+                } catch (InterruptedException e) {
+                    LOGGER.error("InterruptedException encountered during sleep");
+                }
+            }
+        }
+    }
+
+    public String deleteCluster(Cluster cluster) {
         LoggingUtils.buildMdcContext(cluster);
-
-        StackStatusV4Response statusResponse = cloudbreakCommunicator.getStackStatusByCrn(cluster.getStackCrn());
-
-        if (DELETE_COMPLETED.equals(statusResponse.getStatus())) {
+        try {
             beforeDeleteCleanup(cluster);
-            clusterService.removeById(event.getClusterId());
-            LOGGER.info("Deleted cluster: {}, CB Stack status: {}", cluster.getStackCrn(), statusResponse.getStatus());
+            clusterService.removeById(cluster.getId());
+            LOGGER.info("Deleted cluster: {}", cluster.getStackCrn());
+        } catch (Exception e) {
+            LOGGER.info("Deletion failed for cluster: {} with reason: {}", cluster.getStackCrn(), e.getMessage());
+            clusterService.updateClusterDeleted(cluster.getId(), ClusterState.DELETED,
+                    (cluster.getDeleteRetryCount() == null ? 0 : cluster.getDeleteRetryCount()) + 1);
         }
+        return cluster.getStackCrn();
     }
 
     protected void beforeDeleteCleanup(Cluster cluster) {

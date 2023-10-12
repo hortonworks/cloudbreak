@@ -27,6 +27,14 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     Optional<Cluster> findByStackCrnAndTenant(@Param("stackCrn") String stackCrn, @Param("tenant") String tenant);
 
     @Query(" SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain " +
+            " WHERE c.stackCrn = :stackCrn ")
+    Optional<Cluster> findByStackCrn(@Param("stackCrn") String stackCrn);
+
+    @Query(" SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain " +
+            " WHERE c.state = 'DELETED' and c.deleteRetryCount < :maxRetryCount ")
+    List<Cluster> findByDeleteRetryCount(@Param("maxRetryCount") int maxRetryCount);
+
+    @Query(" SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain " +
             " WHERE c.stackName = :stackName and c.clusterPertain.tenant = :tenant")
     Optional<Cluster> findByStackNameAndTenant(@Param("stackName") String stackName, @Param("tenant") String tenant);
 
@@ -106,4 +114,8 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     @Modifying
     @Query("UPDATE Cluster c SET c.updateFailedDetails = :updateFailedDetails WHERE c.id = :clusterId")
     void setClusterUpdateFailedDetails(@Param("clusterId") Long clusterId, @Param("updateFailedDetails") UpdateFailedDetails updateFailedDetails);
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.state = :state, c.deleteRetryCount = :deleteRetryCount  WHERE c.id = :clusterId")
+    void updateClusterDeleted(@Param("clusterId") Long clusterId, @Param("state") ClusterState state, @Param("deleteRetryCount") int deleteRetryCount);
 }
