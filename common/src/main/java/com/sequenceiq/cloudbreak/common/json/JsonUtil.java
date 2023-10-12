@@ -129,7 +129,7 @@ public class JsonUtil {
                 }
                 return MAPPER.writeValueAsString(object);
             } catch (JsonProcessingException e) {
-                LOGGER.warn("JSON serialization went wrong in silent mode:", e);
+                LOGGER.warn("JSON serialization went wrong in silent mode. Root cause: {}", e.getCause(), e);
                 logObject(object);
             }
         }
