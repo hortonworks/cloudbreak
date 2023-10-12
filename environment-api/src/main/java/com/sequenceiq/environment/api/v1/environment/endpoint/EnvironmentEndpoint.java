@@ -344,6 +344,6 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.LIST_SUPPORTED_OS, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "listSupportedOperatingSystemV1")
-    SupportedOperatingSystemResponse listSupportedOperatingSystem();
+    SupportedOperatingSystemResponse listSupportedOperatingSystem(@QueryParam("cloudPlatform") String cloudPlatform);
 
 }

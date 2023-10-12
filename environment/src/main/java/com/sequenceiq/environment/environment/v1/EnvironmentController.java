@@ -531,8 +531,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     // We can disable permission since it does not contain sensitive information
     @DisableCheckPermissions
-    public SupportedOperatingSystemResponse listSupportedOperatingSystem() {
+    public SupportedOperatingSystemResponse listSupportedOperatingSystem(String cloudPlatform) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        return supportedOperatingSystemService.listSupportedOperatingSystem(accountId);
+        return supportedOperatingSystemService.listSupportedOperatingSystem(accountId, cloudPlatform);
     }
 }
