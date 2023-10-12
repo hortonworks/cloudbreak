@@ -5,7 +5,6 @@ import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -107,25 +106,17 @@ public class SdxHorizontalScalingServiceTest {
     void testDatalakeHorizontalScaleValidation() {
         SdxCluster sdxCluster = getSdxCluster();
 
-        DetailedEnvironmentResponse detailedEnvironmentResponse = getEnvironmentDetailedResponse();
-        when(environmentClientService.getByName(eq(sdxCluster.getEnvName()))).thenReturn(detailedEnvironmentResponse);
-        StackV4Response stackV4Response = getStackV4Response();
-        when(stackV4Endpoint.getByCrn(any(), eq(sdxCluster.getStackCrn()), anySet())).thenReturn(stackV4Response);
         DatalakeHorizontalScaleRequest scaleRequest = new DatalakeHorizontalScaleRequest();
         scaleRequest.setGroup(DatalakeInstanceGroupScalingDetails.AUXILIARY.getName());
         scaleRequest.setDesiredCount(0);
         assertThrows(BadRequestException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
         scaleRequest.setGroup(DatalakeInstanceGroupScalingDetails.CORE.getName());
         scaleRequest.setDesiredCount(3);
-        underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest);
+        assertThrows(BadRequestException.class, () -> underTest.validateHorizontalScaleRequest(sdxCluster, scaleRequest));
     }
 
     @Test
     void testDatalakeHorizontalScaleValidationNotAllowedGroups() {
-        DetailedEnvironmentResponse environmentDetailedResponse = getEnvironmentDetailedResponse();
-        when(environmentClientService.getByName(anyString())).thenReturn(environmentDetailedResponse);
-        StackV4Response stackV4Response = getStackV4Response();
-        when(stackV4Endpoint.getByCrn(any(), any(), any())).thenReturn(stackV4Response);
         SdxCluster sdxCluster = getSdxCluster();
         DatalakeHorizontalScaleRequest scaleRequest = new DatalakeHorizontalScaleRequest();
         scaleRequest.setGroup(DatalakeInstanceGroupScalingDetails.ATLAS_SCALE_OUT.getName());
