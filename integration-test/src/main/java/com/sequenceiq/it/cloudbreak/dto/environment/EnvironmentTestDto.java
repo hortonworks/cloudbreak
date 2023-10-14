@@ -103,7 +103,8 @@ public class EnvironmentTestDto
         return getCloudProvider()
                 .environment(withName(getResourcePropertyProvider().getEnvironmentName(getCloudPlatform()))
                         .withDescription(getResourcePropertyProvider().getDescription("environment")))
-                .withCredentialName(getTestContext().get(CredentialTestDto.class).getName())
+                .withCredentialName(getTestContext().get(CredentialTestDto.class) == null ?  null :
+                        getTestContext().get(CredentialTestDto.class).getName())
                 .withAuthentication(getTestContext().given(EnvironmentAuthenticationTestDto.class))
                 .withCloudplatform(getCloudPlatform().toString())
                 .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)
@@ -359,7 +360,7 @@ public class EnvironmentTestDto
     @Override
     public EnvironmentTestDto refresh() {
         LOGGER.info("Refresh Environment with name: {}", getName());
-        return when(environmentTestClient.refresh(), key("refresh-environment-" + getName()));
+        return when(environmentTestClient.refresh(), key("refresh-environment-" + getName()).withWho(getUser()));
     }
 
     @Override

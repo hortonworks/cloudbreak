@@ -61,6 +61,7 @@ import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
+import com.sequenceiq.it.cloudbreak.microservice.PeriscopeClient;
 import com.sequenceiq.it.cloudbreak.microservice.RedbeamsClient;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.microservice.SdxSaasItClient;
@@ -510,12 +511,14 @@ public abstract class TestContext implements ApplicationContextAware {
             AuthDistributorClient authDistributorClient = AuthDistributorClient.createProxyAuthDistributorClient(
                     regionAwareInternalCrnGeneratorFactory, authDistributorHost);
             RedbeamsClient redbeamsClient = RedbeamsClient.createRedbeamsClient(getTestParameter(), cloudbreakUser);
+            PeriscopeClient periscopeClient = PeriscopeClient.createPeriscopeClient(getTestParameter(), cloudbreakUser);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(
                     CloudbreakClient.class, cloudbreakClient,
                     FreeIpaClient.class, freeIpaClient,
                     EnvironmentClient.class, environmentClient,
                     SdxClient.class, sdxClient,
                     RedbeamsClient.class, redbeamsClient,
+                    PeriscopeClient.class, periscopeClient,
                     UmsClient.class, umsClient,
                     SdxSaasItClient.class, sdxSaasItClient,
                     AuthDistributorClient.class, authDistributorClient);
@@ -539,12 +542,14 @@ public abstract class TestContext implements ApplicationContextAware {
             AuthDistributorClient authDistributorClient = AuthDistributorClient.createProxyAuthDistributorClient(
                     regionAwareInternalCrnGeneratorFactory, authDistributorHost);
             RedbeamsClient redbeamsClient = RedbeamsClient.createRedbeamsClient(getTestParameter(), accountAdmin);
+            PeriscopeClient periscopeClient = PeriscopeClient.createPeriscopeClient(getTestParameter(), accountAdmin);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(
                     CloudbreakClient.class, cloudbreakClient,
                     FreeIpaClient.class, freeIpaClient,
                     EnvironmentClient.class, environmentClient,
                     SdxClient.class, sdxClient,
                     RedbeamsClient.class, redbeamsClient,
+                    PeriscopeClient.class, periscopeClient,
                     UmsClient.class, umsClient,
                     SdxSaasItClient.class, sdxSaasItClient,
                     AuthDistributorClient.class, authDistributorClient);
@@ -1154,7 +1159,7 @@ public abstract class TestContext implements ApplicationContextAware {
             awaitEntity = entity;
         }
         if (runningParameter.isWaitForFlow()) {
-            awaitForFlow(awaitEntity, runningParameter);
+            awaitForFlow(awaitEntity, runningParameter, client);
         }
 
         try {
@@ -1204,6 +1209,10 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <T extends CloudbreakTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
+        return awaitForFlow(entity, runningParameter, null);
+    }
+
+    public <T extends CloudbreakTestDto> T awaitForFlow(T entity, RunningParameter runningParameter, MicroserviceClient msClient) {
         checkShutdown();
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         if (StringUtils.isBlank(key)) {
@@ -1221,8 +1230,10 @@ public abstract class TestContext implements ApplicationContextAware {
             Log.await(LOGGER, String.format(" Cloudbreak await for flow on resource: %s at account: %s - for entity: %s ", awaitEntity.getCrn(),
                     Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn())).getAccountId(), awaitEntity));
 
-            MicroserviceClient msClient = getAdminMicroserviceClient(awaitEntity.getClass(), Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn()))
-                    .getAccountId());
+            if (msClient == null) {
+                msClient = getAdminMicroserviceClient(awaitEntity.getClass(), Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn()))
+                        .getAccountId());
+            }
             flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, msClient, getTestContext(), runningParameter);
         }
         entity.setLastKnownFlowId(null);

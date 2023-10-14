@@ -191,7 +191,7 @@ public class SdxCustomTestDto extends AbstractSdxTestDto<SdxCustomClusterRequest
     @Override
     public CloudbreakTestDto refresh() {
         LOGGER.info("Refresh SDX with name: {}", getName());
-        return when(sdxTestClient.refreshCustom(), key("refresh-sdx-" + getName()));
+        return when(sdxTestClient.refreshCustom(), key("refresh-sdx-" + getName()).withWho(getUser()));
     }
 
     @Override

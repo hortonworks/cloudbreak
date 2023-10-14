@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
@@ -77,6 +78,8 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
 
     private CloudPlatform cloudPlatform;
 
+    private CloudbreakUser user;
+
     protected AbstractTestDto(R request, TestContext testContext) {
         this.request = request;
         this.testContext = testContext;
@@ -92,6 +95,14 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
 
     public String getName() {
         return name;
+    }
+
+    public CloudbreakUser getUser() {
+        return user;
+    }
+
+    public void setUser(CloudbreakUser user) {
+        this.user = user;
     }
 
     public void setName(String name) {
