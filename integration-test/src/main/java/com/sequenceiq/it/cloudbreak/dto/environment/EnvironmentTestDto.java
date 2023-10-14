@@ -103,7 +103,8 @@ public class EnvironmentTestDto
         return getCloudProvider()
                 .environment(withName(getResourcePropertyProvider().getEnvironmentName(getCloudPlatform()))
                         .withDescription(getResourcePropertyProvider().getDescription("environment")))
-                .withCredentialName(getTestContext().get(CredentialTestDto.class).getName())
+                .withCredentialName(getTestContext().get(CredentialTestDto.class) == null ?  null :
+                        getTestContext().get(CredentialTestDto.class).getName())
                 .withAuthentication(getTestContext().given(EnvironmentAuthenticationTestDto.class))
                 .withCloudplatform(getCloudPlatform().toString())
                 .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)

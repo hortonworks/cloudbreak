@@ -31,6 +31,7 @@ integrationtest:
     server: http://localhost
   periscope:
     server: http://localhost
+    port: 8085
   freeipa:
     server: http://localhost
   environment:
@@ -398,3 +399,13 @@ altus:
   audit:
     endpoint: localhost:8982
     enabled: false
+loadtest:
+  config:
+    numThreads: 40
+    numTenants: 1
+    numEnvironmentsPerTenant: 2
+    numDataHubsPerEnvironment: 2
+    minNodes: 1
+    maxNodes: 5
+    imageCatalogId: f6e778fc-7f17-4535-9021-515351df3691
+

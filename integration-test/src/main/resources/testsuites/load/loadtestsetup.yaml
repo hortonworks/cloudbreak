@@ -1,0 +1,5 @@
+name: "load-test-setup"
+tests:
+  - name: "load test setup"
+    classes:
+      - com.sequenceiq.it.cloudbreak.testcase.load.PeriscopeLoadSetupTest
