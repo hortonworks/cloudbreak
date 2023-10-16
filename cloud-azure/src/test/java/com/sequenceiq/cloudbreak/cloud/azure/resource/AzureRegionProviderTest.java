@@ -18,8 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.azure.core.management.Region;
-import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureRegionCoordinateSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
+import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -53,7 +53,6 @@ public class AzureRegionProviderTest {
 
         assertRegionNames(actual, azureRegions);
         assertCoordinates(actual);
-        assertFlexible(actual);
         Assertions.assertEquals("North Europe", actual.getDefaultRegion());
     }
 
@@ -89,7 +88,7 @@ public class AzureRegionProviderTest {
     }
 
     private void assertCoordinates(CloudRegions actual) throws IOException {
-        AzureRegionCoordinateSpecifications regionCoordinateSpecifications = getRegionsFromFile();
+        RegionCoordinateSpecifications regionCoordinateSpecifications = getRegionsFromFile();
         Assertions.assertTrue(actual.getCoordinates().values().stream()
                 .allMatch(coordinate -> regionCoordinateSpecifications.getItems().stream()
                         .anyMatch(region -> region.getLatitude().equals(coordinate.getLatitude().toString()) &&
@@ -97,16 +96,8 @@ public class AzureRegionProviderTest {
 
     }
 
-    private void assertFlexible(CloudRegions actual) throws IOException {
-        AzureRegionCoordinateSpecifications regionCoordinateSpecifications = getRegionsFromFile();
-        Assertions.assertTrue(actual.getCoordinates().values().stream()
-                .allMatch(coordinate -> regionCoordinateSpecifications.getItems().stream()
-                        .anyMatch(region -> region.getFlexible() != null &&
-                                !region.getFlexible().isZoneRedundantEnabled() && region.getFlexible().isSameZoneEnabled())));
-    }
-
-    private AzureRegionCoordinateSpecifications getRegionsFromFile() throws IOException {
-        return JsonUtil.readValue(testRegionsJson, AzureRegionCoordinateSpecifications.class);
+    private RegionCoordinateSpecifications getRegionsFromFile() throws IOException {
+        return JsonUtil.readValue(testRegionsJson, RegionCoordinateSpecifications.class);
 
     }
 

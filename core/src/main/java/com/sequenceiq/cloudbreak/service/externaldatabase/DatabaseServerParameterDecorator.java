@@ -12,6 +12,10 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackReque
 public interface DatabaseServerParameterDecorator {
     void setParameters(DatabaseServerV4StackRequest request, DatabaseServerParameter serverParameter, DetailedEnvironmentResponse env, boolean multiAz);
 
+    default void validate(DatabaseServerV4StackRequest request, DatabaseServerParameter serverParameter, DetailedEnvironmentResponse env, boolean multiAz) {
+
+    }
+
     default Optional<? extends DatabaseType> getDatabaseType(Map<String, Object> attributes) {
         return Optional.empty();
     }

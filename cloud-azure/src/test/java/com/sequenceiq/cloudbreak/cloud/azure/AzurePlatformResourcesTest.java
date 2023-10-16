@@ -309,23 +309,25 @@ class AzurePlatformResourcesTest {
 
     @Test
     void collectDatabaseCapabilitiesTest() {
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+        when(azureClient.zoneRedundantFlexibleSupported(any())).thenReturn(true);
         Region region = Region.region("us-west-1");
         CloudContext cloudContext = new CloudContext.Builder()
                 .withLocation(Location.location(region, availabilityZone("us-west-1")))
                 .build();
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
         when(azureRegionProvider.enabledRegions()).thenReturn(Map.of(
-                Region.region("A"), azureCoordinate("az1", true, true),
-                Region.region("B"), azureCoordinate("az2", true, false)
+                Region.region("us-west-1"), azureCoordinate("us-west-1"),
+                Region.region("us-west-2"), azureCoordinate("us-west-2")
         ));
 
         PlatformDatabaseCapabilities databaseCapabilities = underTest.databaseCapabilities(cloudCredential, region, new HashMap<>());
 
-        assertEquals(4, databaseCapabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).size());
+        assertEquals(2, databaseCapabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).size());
         assertEquals(2, databaseCapabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).size());
     }
 
-    private AzureCoordinate azureCoordinate(String name, boolean flexibleSameZoneEnabled, boolean flexibleZoneRedundantEnabled) {
+    private AzureCoordinate azureCoordinate(String name) {
         return AzureCoordinate.AzureCoordinateBuilder.builder()
                 .longitude("1")
                 .latitude("1")
@@ -333,8 +335,6 @@ class AzurePlatformResourcesTest {
                 .key(name + "key")
                 .k8sSupported(false)
                 .entitlements(List.of())
-                .flexibleSameZoneEnabled(flexibleSameZoneEnabled)
-                .flexibleZoneRedundantEnabled(flexibleZoneRedundantEnabled)
                 .build();
     }
 

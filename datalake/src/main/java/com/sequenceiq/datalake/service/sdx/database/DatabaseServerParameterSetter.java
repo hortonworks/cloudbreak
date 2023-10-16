@@ -12,6 +12,10 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackReque
 public interface DatabaseServerParameterSetter {
     void setParameters(DatabaseServerV4StackRequest request, SdxCluster sdxCluster, DetailedEnvironmentResponse env, String initiatorUserCrn);
 
+    default void validate(DatabaseServerV4StackRequest request, SdxCluster sdxCluster, DetailedEnvironmentResponse env, String initiatorUserCrn) {
+
+    }
+
     default Optional<? extends DatabaseType> getDatabaseType(SdxDatabase sdxDatabase) {
         return Optional.empty();
     }

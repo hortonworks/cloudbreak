@@ -14,11 +14,15 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.AzureHighAvailabiltyMode;
@@ -33,6 +37,8 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
 @Component
 public class AzureDatabaseServerParameterSetter implements DatabaseServerParameterSetter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureDatabaseServerParameterSetter.class);
 
     @VisibleForTesting
     @Value("${sdx.db.azure.ha.backupretentionperiod}")
@@ -55,6 +61,9 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
 
     @Inject
     private EnvironmentPlatformResourceEndpoint environmentPlatformResourceEndpoint;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Override
     public void setParameters(DatabaseServerV4StackRequest request, SdxCluster sdxCluster, DetailedEnvironmentResponse env, String initiatorUserCrn) {
@@ -80,6 +89,31 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
         parameters.setGeoRedundantBackup(isGeoRedundantBackup(availabilityType));
         parameters.setDbVersion(StringUtils.isNotEmpty(databaseEngineVersion) ? databaseEngineVersion : null);
         request.setAzure(parameters);
+    }
+
+    @Override
+    public void validate(DatabaseServerV4StackRequest request, SdxCluster sdxCluster, DetailedEnvironmentResponse env, String initiatorUserCrn) {
+        AzureDatabaseServerV4Parameters azure = request.getAzure();
+        boolean localDevelopment = entitlementService.localDevelopment(env.getAccountId());
+        if (sdxCluster.isEnableMultiAz() && azure != null && !localDevelopment) {
+            if (!sdxCluster.getSdxDatabase().hasExternalDatabase()) {
+                String message = String.format("Azure Data Lake which requested in multi availability zone option must use external database.");
+                LOGGER.debug(message);
+                throw new BadRequestException(message);
+            } else if (!FLEXIBLE_SERVER.equals(azure.getAzureDatabaseType())) {
+                String message = String.format("Azure Data Lake which requested in multi availability zone option must use Flexible server.");
+                LOGGER.debug(message);
+                throw new BadRequestException(message);
+            } else if (!ZONE_REDUNDANT.equals(azure.getHighAvailabilityMode())) {
+                String region = env.getLocation().getName();
+                String message = String.format("Azure Data Lake which requested with multi availability zone option " +
+                        "must use Zone redundant Flexible server and the %s region currently does not support that. " +
+                        "You can see the limitations on the following url https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/overview. " +
+                        "Please contact Microsoft support that you need Zone Redundant Flexible Server option in the given region.", region);
+                LOGGER.debug(message);
+                throw new BadRequestException(message);
+            }
+        }
     }
 
     private boolean isZoneRedundantHaEnabled(DetailedEnvironmentResponse env, String initiatorUserCrn) {

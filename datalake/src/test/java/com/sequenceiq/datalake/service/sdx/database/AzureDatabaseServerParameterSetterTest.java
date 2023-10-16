@@ -4,8 +4,11 @@ import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.SAME_ZONE;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.ZONE_REDUNDANT;
 import static com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType.HA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -14,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +30,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.AzureHighAvailabiltyMode;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -45,6 +51,9 @@ public class AzureDatabaseServerParameterSetterTest {
 
     @Mock
     private DatabaseServerV4StackRequest request;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @Mock
     private AzureDatabaseAttributesService azureDatabaseAttributesService;
@@ -166,6 +175,131 @@ public class AzureDatabaseServerParameterSetterTest {
                         () -> underTest.setParameters(request, createSdxCluster(SdxDatabaseAvailabilityType.NONE, null), null, "crn"));
 
         assertEquals("NONE database availability type is not supported on Azure.", result.getMessage());
+    }
+
+    @Test
+    public void testAzureValidateWhenLocalAndMultiAzAndAzureParametersNotNullThenValidationShouldNotHappen() {
+        DatabaseServerV4StackRequest databaseServerV4StackRequest = mock(DatabaseServerV4StackRequest.class);
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
+        AzureDatabaseServerV4Parameters azureDatabaseServerV4Parameters = mock(AzureDatabaseServerV4Parameters.class);
+
+        when(databaseServerV4StackRequest.getAzure()).thenReturn(azureDatabaseServerV4Parameters);
+        when(sdxCluster.isEnableMultiAz()).thenReturn(true);
+        when(environmentResponse.getAccountId()).thenReturn("accountId");
+        when(entitlementService.localDevelopment(anyString())).thenReturn(true);
+
+        underTest.validate(databaseServerV4StackRequest, sdxCluster, environmentResponse, "initiatorUserCrn");
+    }
+
+    @Test
+    public void testAzureValidateWhenNotLocalAndNotMultiAzAndAzureParametersNotNullThenValidationShouldNotHappen() {
+        DatabaseServerV4StackRequest databaseServerV4StackRequest = mock(DatabaseServerV4StackRequest.class);
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
+        AzureDatabaseServerV4Parameters azureDatabaseServerV4Parameters = mock(AzureDatabaseServerV4Parameters.class);
+
+        when(databaseServerV4StackRequest.getAzure()).thenReturn(azureDatabaseServerV4Parameters);
+        when(sdxCluster.isEnableMultiAz()).thenReturn(false);
+        when(environmentResponse.getAccountId()).thenReturn("accountId");
+        when(entitlementService.localDevelopment(anyString())).thenReturn(false);
+
+        underTest.validate(databaseServerV4StackRequest, sdxCluster, environmentResponse, "initiatorUserCrn");
+    }
+
+    @Test
+    public void testValidateWhenValidationShouldHappenAndUsingMultiAzAndEmbeddedDatabaseShouldThrowBadRequestException() {
+        DatabaseServerV4StackRequest databaseServerV4StackRequest = mock(DatabaseServerV4StackRequest.class);
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
+        AzureDatabaseServerV4Parameters azureDatabaseServerV4Parameters = mock(AzureDatabaseServerV4Parameters.class);
+        SdxDatabase sdxDatabase = mock(SdxDatabase.class);
+
+        when(databaseServerV4StackRequest.getAzure()).thenReturn(azureDatabaseServerV4Parameters);
+        when(sdxCluster.isEnableMultiAz()).thenReturn(true);
+        when(sdxDatabase.hasExternalDatabase()).thenReturn(false);
+        when(sdxCluster.getSdxDatabase()).thenReturn(sdxDatabase);
+        when(environmentResponse.getAccountId()).thenReturn("accountId");
+        when(entitlementService.localDevelopment(anyString())).thenReturn(false);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () ->
+                underTest.validate(databaseServerV4StackRequest, sdxCluster, environmentResponse, "initiatorUserCrn"));
+
+        Assert.assertEquals(exception.getMessage(),
+                "Azure Data Lake which requested in multi availability zone option must use external database.");
+    }
+
+    @Test
+    public void testValidateWhenValidationShouldHappenAndUsingMultiAzAndNonFlexibleServerShouldThrowBadRequestException() {
+        DatabaseServerV4StackRequest databaseServerV4StackRequest = mock(DatabaseServerV4StackRequest.class);
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
+        AzureDatabaseServerV4Parameters azureDatabaseServerV4Parameters = mock(AzureDatabaseServerV4Parameters.class);
+        SdxDatabase sdxDatabase = mock(SdxDatabase.class);
+
+        when(azureDatabaseServerV4Parameters.getAzureDatabaseType()).thenReturn(AzureDatabaseType.SINGLE_SERVER);
+        when(databaseServerV4StackRequest.getAzure()).thenReturn(azureDatabaseServerV4Parameters);
+        when(sdxCluster.isEnableMultiAz()).thenReturn(true);
+        when(sdxDatabase.hasExternalDatabase()).thenReturn(true);
+        when(sdxCluster.getSdxDatabase()).thenReturn(sdxDatabase);
+        when(environmentResponse.getAccountId()).thenReturn("accountId");
+        when(entitlementService.localDevelopment(anyString())).thenReturn(false);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () ->
+                underTest.validate(databaseServerV4StackRequest, sdxCluster, environmentResponse, "initiatorUserCrn"));
+
+        Assert.assertEquals(exception.getMessage(),
+                "Azure Data Lake which requested in multi availability zone option must use Flexible server.");
+    }
+
+    @Test
+    public void testValidateWhenValidationShouldHappenAndUsingMultiAzAndNonZoneRedundantServerShouldThrowBadRequestException() {
+        DatabaseServerV4StackRequest databaseServerV4StackRequest = mock(DatabaseServerV4StackRequest.class);
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        LocationResponse locationResponse = mock(LocationResponse.class);
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
+        AzureDatabaseServerV4Parameters azureDatabaseServerV4Parameters = mock(AzureDatabaseServerV4Parameters.class);
+        SdxDatabase sdxDatabase = mock(SdxDatabase.class);
+
+        when(azureDatabaseServerV4Parameters.getAzureDatabaseType()).thenReturn(AzureDatabaseType.FLEXIBLE_SERVER);
+        when(locationResponse.getName()).thenReturn("eu-west-1");
+        when(environmentResponse.getLocation()).thenReturn(locationResponse);
+        when(azureDatabaseServerV4Parameters.getHighAvailabilityMode()).thenReturn(SAME_ZONE);
+        when(databaseServerV4StackRequest.getAzure()).thenReturn(azureDatabaseServerV4Parameters);
+        when(sdxDatabase.hasExternalDatabase()).thenReturn(true);
+        when(sdxCluster.isEnableMultiAz()).thenReturn(true);
+        when(sdxCluster.getSdxDatabase()).thenReturn(sdxDatabase);
+        when(environmentResponse.getAccountId()).thenReturn("accountId");
+        when(entitlementService.localDevelopment(anyString())).thenReturn(false);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () ->
+                underTest.validate(databaseServerV4StackRequest, sdxCluster, environmentResponse, "initiatorUserCrn"));
+
+        Assert.assertEquals(exception.getMessage(),
+                "Azure Data Lake which requested with multi availability zone option must use Zone redundant " +
+                        "Flexible server and the eu-west-1 region currently does not support that. " +
+                        "You can see the limitations on the following url https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/overview. " +
+                        "Please contact Microsoft support that you need Zone Redundant Flexible Server option in the given region.");
+    }
+
+    @Test
+    public void testValidateWhenValidationShouldHappenAndUsingMultiAzAndEverythingLooksOk() {
+        DatabaseServerV4StackRequest databaseServerV4StackRequest = mock(DatabaseServerV4StackRequest.class);
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
+        AzureDatabaseServerV4Parameters azureDatabaseServerV4Parameters = mock(AzureDatabaseServerV4Parameters.class);
+        SdxDatabase sdxDatabase = mock(SdxDatabase.class);
+
+        when(azureDatabaseServerV4Parameters.getAzureDatabaseType()).thenReturn(AzureDatabaseType.FLEXIBLE_SERVER);
+        when(azureDatabaseServerV4Parameters.getHighAvailabilityMode()).thenReturn(ZONE_REDUNDANT);
+        when(databaseServerV4StackRequest.getAzure()).thenReturn(azureDatabaseServerV4Parameters);
+        when(sdxDatabase.hasExternalDatabase()).thenReturn(true);
+        when(sdxCluster.isEnableMultiAz()).thenReturn(true);
+        when(sdxCluster.getSdxDatabase()).thenReturn(sdxDatabase);
+        when(environmentResponse.getAccountId()).thenReturn("accountId");
+        when(entitlementService.localDevelopment(anyString())).thenReturn(false);
+
+        underTest.validate(databaseServerV4StackRequest, sdxCluster, environmentResponse, "initiatorUserCrn");
     }
 
     private SdxCluster createSdxCluster(SdxDatabaseAvailabilityType sdxDatabaseAvailabilityType, String databaseEngineVersion) {

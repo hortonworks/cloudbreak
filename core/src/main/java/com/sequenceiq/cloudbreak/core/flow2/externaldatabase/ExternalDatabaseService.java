@@ -367,7 +367,8 @@ public class ExternalDatabaseService {
 
     private DatabaseServerV4StackRequest getDatabaseServerStackRequest(CloudPlatform cloudPlatform, DatabaseAvailabilityType externalDatabase,
             String databaseEngineVersion, Map<String, Object> attributes, DetailedEnvironmentResponse environment, boolean multiAz) {
-        DatabaseType databaseType = parameterDecoratorMap.get(cloudPlatform).getDatabaseType(attributes).orElse(null);
+        DatabaseServerParameterDecorator databaseServerParameterDecorator = parameterDecoratorMap.get(cloudPlatform);
+        DatabaseType databaseType = databaseServerParameterDecorator.getDatabaseType(attributes).orElse(null);
         DatabaseStackConfig databaseStackConfig = dbConfigs.get(new DatabaseStackConfigKey(cloudPlatform, databaseType));
         if (databaseStackConfig == null) {
             throw new BadRequestException("Database config for cloud platform " + cloudPlatform + " not found");
@@ -381,7 +382,8 @@ public class ExternalDatabaseService {
                     .withEngineVersion(databaseEngineVersion)
                     .withAttributes(attributes)
                     .build();
-            parameterDecoratorMap.get(cloudPlatform).setParameters(request, serverParameter, environment, multiAz);
+            databaseServerParameterDecorator.setParameters(request, serverParameter, environment, multiAz);
+            databaseServerParameterDecorator.validate(request, serverParameter, environment, multiAz);
             if (Objects.isNull(request.getCloudPlatform())) {
                 request.setCloudPlatform(cloudPlatform);
             }

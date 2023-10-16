@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
-import static com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 import java.io.IOException;
@@ -22,13 +21,13 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
-import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureRegionCoordinateSpecification;
-import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureRegionCoordinateSpecifications;
 import com.sequenceiq.cloudbreak.cloud.azure.util.RegionUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
@@ -109,8 +108,8 @@ public class AzureRegionProvider {
         String displayNames = resourceDefinition();
         Map<Region, AzureCoordinate> regionCoordinates = new HashMap<>();
         try {
-            AzureRegionCoordinateSpecifications regionCoordinateSpecifications = JsonUtil.readValue(displayNames, AzureRegionCoordinateSpecifications.class);
-            for (AzureRegionCoordinateSpecification regionCoordinateSpecification : regionCoordinateSpecifications.getItems()) {
+            RegionCoordinateSpecifications regionCoordinateSpecifications = JsonUtil.readValue(displayNames, RegionCoordinateSpecifications.class);
+            for (RegionCoordinateSpecification regionCoordinateSpecification : regionCoordinateSpecifications.getItems()) {
                 regionCoordinates.put(region(regionCoordinateSpecification.getName()),
                         AzureCoordinate.AzureCoordinateBuilder.builder()
                                 .longitude(regionCoordinateSpecification.getLongitude())
@@ -119,8 +118,6 @@ public class AzureRegionProvider {
                                 .key(RegionUtil.findByLabelOrName(regionCoordinateSpecification.getName()).name())
                                 .k8sSupported(regionCoordinateSpecification.isK8sSupported())
                                 .entitlements(regionCoordinateSpecification.getEntitlements())
-                                .flexibleSameZoneEnabled(regionCoordinateSpecification.getFlexible().isSameZoneEnabled())
-                                .flexibleZoneRedundantEnabled(regionCoordinateSpecification.getFlexible().isZoneRedundantEnabled())
                                 .build());
             }
         } catch (IOException ignored) {

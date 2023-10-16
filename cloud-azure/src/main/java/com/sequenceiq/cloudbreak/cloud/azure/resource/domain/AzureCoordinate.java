@@ -7,22 +7,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 
 public class AzureCoordinate extends Coordinate {
 
-    private final boolean flexibleSameZoneEnabled;
-
-    private final boolean flexibleZoneRedundantEnabled;
-
     public AzureCoordinate(AzureCoordinateBuilder builder) {
         super(builder.longitude, builder.latitude, builder.displayName, builder.key, builder.k8sSupported, builder.entitlements);
-        this.flexibleSameZoneEnabled = builder.flexibleSameZoneEnabled;
-        this.flexibleZoneRedundantEnabled = builder.flexibleZoneRedundantEnabled;
-    }
-
-    public boolean isFlexibleSameZoneEnabled() {
-        return flexibleSameZoneEnabled;
-    }
-
-    public boolean isFlexibleZoneRedundantEnabled() {
-        return flexibleZoneRedundantEnabled;
     }
 
     public static AzureCoordinate coordinate(AzureCoordinateBuilder builder) {
@@ -42,10 +28,6 @@ public class AzureCoordinate extends Coordinate {
         private boolean k8sSupported;
 
         private List<String> entitlements = new ArrayList<>();
-
-        private boolean flexibleSameZoneEnabled;
-
-        private boolean flexibleZoneRedundantEnabled;
 
         public AzureCoordinateBuilder longitude(Double longitude) {
             this.longitude = longitude;
@@ -87,16 +69,6 @@ public class AzureCoordinate extends Coordinate {
             return this;
         }
 
-        public AzureCoordinateBuilder flexibleSameZoneEnabled(boolean flexibleSameZoneEnabled) {
-            this.flexibleSameZoneEnabled = flexibleSameZoneEnabled;
-            return this;
-        }
-
-        public AzureCoordinateBuilder flexibleZoneRedundantEnabled(boolean flexibleZoneRedundantEnabled) {
-            this.flexibleZoneRedundantEnabled = flexibleZoneRedundantEnabled;
-            return this;
-        }
-
         public static AzureCoordinateBuilder builder() {
             return new AzureCoordinateBuilder();
         }
@@ -112,9 +84,7 @@ public class AzureCoordinate extends Coordinate {
                     .displayName("California (West US)")
                     .key("us-west-1")
                     .k8sSupported(false)
-                    .entitlements(new ArrayList<>())
-                    .flexibleSameZoneEnabled(false)
-                    .flexibleZoneRedundantEnabled(false);
+                    .entitlements(new ArrayList<>());
         }
     }
 

@@ -37,6 +37,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.azure.core.http.rest.PagedIterable;
+import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.compute.models.VirtualMachineSize;
 import com.azure.resourcemanager.msi.models.Identity;
 import com.azure.resourcemanager.network.models.Network;
@@ -45,6 +46,7 @@ import com.azure.resourcemanager.network.models.Subnet;
 import com.azure.resourcemanager.privatedns.models.PrivateDnsZone;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
@@ -329,30 +331,43 @@ public class AzurePlatformResources implements PlatformResources {
     }
 
     @Override
+    @Cacheable(cacheNames = "databaseCapabilities", key = "#cloudCredential?.id + #region.getRegionName() + 'database'")
     public PlatformDatabaseCapabilities databaseCapabilities(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        AzureClient client = azureClientService.getClient(cloudCredential);
         Map<DatabaseAvailabiltyType, Collection<Region>> enabledRegions = new HashMap<>();
         Map<Region, AzureCoordinate> regions = azureRegionProvider.enabledRegions();
+        if (region != null && !Strings.isNullOrEmpty(region.value())) {
+            regions = regions.entrySet()
+                    .stream()
+                    .filter(e ->
+                            e.getValue().getKey().equals(region.getRegionName()) || e.getValue().getDisplayName().equals(region.getRegionName()))
+                    .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
+        }
         addSameZoneSupport(enabledRegions, regions);
-        addZoneRedundantSupport(enabledRegions, regions);
+        addZoneRedundantSupport(client, enabledRegions, regions);
         return new PlatformDatabaseCapabilities(enabledRegions);
     }
 
-    private void addZoneRedundantSupport(Map<DatabaseAvailabiltyType, Collection<Region>> enabledRegions, Map<Region, AzureCoordinate> regions) {
+    private void addZoneRedundantSupport(AzureClient client, Map<DatabaseAvailabiltyType, Collection<Region>> enabledRegions,
+        Map<Region, AzureCoordinate> regions) {
         Collection<Region> zoneRedundantRegions = new ArrayList<>();
         for (Entry<Region, AzureCoordinate> entry : regions.entrySet()) {
-            if (entry.getValue().isFlexibleZoneRedundantEnabled()) {
-                addRegion(zoneRedundantRegions, entry);
+            try {
+                if (client.zoneRedundantFlexibleSupported(entry.getValue().getKey())) {
+                    addRegion(zoneRedundantRegions, entry);
+                }
+            } catch (ManagementException e) {
+                LOGGER.debug("We were not able to query flexible supported capability because of: " + e.getMessage());
             }
         }
         enabledRegions.put(databaseAvailabiltyType(ZONE_REDUNDANT.name()), zoneRedundantRegions);
     }
 
-    private void addSameZoneSupport(Map<DatabaseAvailabiltyType, Collection<Region>> enabledRegions, Map<Region, AzureCoordinate> regions) {
+    private void addSameZoneSupport(Map<DatabaseAvailabiltyType, Collection<Region>> enabledRegions,
+        Map<Region, AzureCoordinate> regions) {
         Collection<Region> sameZoneRegions = new ArrayList<>();
         for (Entry<Region, AzureCoordinate> entry : regions.entrySet()) {
-            if (entry.getValue().isFlexibleSameZoneEnabled()) {
-                addRegion(sameZoneRegions, entry);
-            }
+            addRegion(sameZoneRegions, entry);
         }
         enabledRegions.put(databaseAvailabiltyType(SAME_ZONE.name()), sameZoneRegions);
     }

@@ -221,8 +221,9 @@ public class DatabaseService {
 
     private DatabaseServerV4StackRequest getDatabaseServerRequest(CloudPlatform cloudPlatform, SdxCluster sdxCluster,
             DetailedEnvironmentResponse env, String initiatorUserCrn) {
+        DatabaseServerParameterSetter databaseServerParameterSetter = databaseServerParameterSetterMap.get(cloudPlatform);
         DatabaseConfig databaseConfig = dbConfigs.get(new DatabaseConfigKey(cloudPlatform, sdxCluster.getClusterShape(),
-                databaseServerParameterSetterMap.get(cloudPlatform).getDatabaseType(sdxCluster.getSdxDatabase()).orElse(null)));
+                databaseServerParameterSetter.getDatabaseType(sdxCluster.getSdxDatabase()).orElse(null)));
         if (databaseConfig == null) {
             throw new BadRequestException("Database config for cloud platform " + cloudPlatform + ", cluster shape "
                     + sdxCluster.getClusterShape() + " not found");
@@ -231,7 +232,8 @@ public class DatabaseService {
         req.setInstanceType(databaseConfig.getInstanceType());
         req.setDatabaseVendor(databaseConfig.getVendor());
         req.setStorageSize(databaseConfig.getVolumeSize());
-        databaseServerParameterSetterMap.get(cloudPlatform).setParameters(req, sdxCluster, env, initiatorUserCrn);
+        databaseServerParameterSetter.setParameters(req, sdxCluster, env, initiatorUserCrn);
+        databaseServerParameterSetter.validate(req, sdxCluster, env, initiatorUserCrn);
         return req;
     }
 
