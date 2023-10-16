@@ -90,7 +90,7 @@ class CoreVerticalScaleActionsTest {
         CoreVerticalScaleResult payload = new CoreVerticalScaleResult(1L, ResourceStatus.CREATED, new ArrayList<>(), null);
 
         new AbstractActionTestSupport<>(action).doExecute(clusterViewContext, payload, Collections.emptyMap());
-        verify(coreVerticalScaleService, times(1)).finishVerticalScale(eq(1L), any());
+        verify(coreVerticalScaleService, times(1)).finishVerticalScale(eq(1L), any(), any());
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {

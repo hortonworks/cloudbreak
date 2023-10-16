@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCAL
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,17 +37,26 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleResult;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
 @Configuration
 public class CoreVerticalScaleActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(CoreVerticalScaleActions.class);
+
+    private static final String PREVIOUS_INSTANCE_TYPE = "PREVIOUS_INSTANCE_TYPE";
+
+    private static final String TARGET_INSTANCE_TYPE = "TARGET_INSTANCE_TYPE";
+
+    private static final String GROUP_BEING_SCALED = "GROUP_BEING_SCALED";
 
     @Inject
     private CoreVerticalScaleService coreVerticalScaleService;
@@ -66,13 +76,27 @@ public class CoreVerticalScaleActions {
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
 
+    @Inject
+    private InstanceGroupService instanceGroupService;
+
     @Bean(name = "STACK_VERTICALSCALE_STATE")
     public Action<?, ?> stackVerticalScale() {
         return new AbstractClusterAction<>(CoreVerticalScalingTriggerEvent.class) {
             @Override
+            protected void prepareExecution(CoreVerticalScalingTriggerEvent payload, Map<Object, Object> variables) {
+                Optional<InstanceGroupView> optionalGroup =
+                        instanceGroupService.findInstanceGroupViewByStackIdAndGroupName(payload.getRequest().getStackId(), payload.getRequest().getGroup());
+                String previousInstanceType = optionalGroup.map(InstanceGroupView::getTemplate).map(Template::getInstanceType).orElse("unknown");
+                variables.put(PREVIOUS_INSTANCE_TYPE, previousInstanceType);
+                variables.put(TARGET_INSTANCE_TYPE, payload.getRequest().getTemplate().getInstanceType());
+                variables.put(GROUP_BEING_SCALED, payload.getRequest().getGroup());
+            }
+
+            @Override
             protected void doExecute(ClusterViewContext ctx, CoreVerticalScalingTriggerEvent payload, Map<Object, Object> variables) {
                 StackVerticalScaleV4Request stackVerticalScaleV4Request = payload.getRequest();
-                coreVerticalScaleService.verticalScale(ctx.getStackId(), stackVerticalScaleV4Request);
+                String previousInstanceType = (String) variables.getOrDefault(PREVIOUS_INSTANCE_TYPE, "unknown");
+                coreVerticalScaleService.verticalScale(ctx.getStackId(), stackVerticalScaleV4Request, previousInstanceType);
                 StackDto stack = stackDtoService.getById(payload.getResourceId());
                 Set<Resource> resources = stack.getResources();
                 List<CloudResource> cloudResources =
@@ -107,8 +131,9 @@ public class CoreVerticalScaleActions {
         return new AbstractClusterAction<>(CoreVerticalScaleResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, CoreVerticalScaleResult payload, Map<Object, Object> variables) {
+                String previousInstanceType = (String) variables.getOrDefault(PREVIOUS_INSTANCE_TYPE, "unknown");
                 coreVerticalScaleService.updateTemplateWithVerticalScaleInformation(context.getStackId(), payload.getStackVerticalScaleV4Request());
-                coreVerticalScaleService.finishVerticalScale(context.getStackId(), payload.getStackVerticalScaleV4Request());
+                coreVerticalScaleService.finishVerticalScale(context.getStackId(), payload.getStackVerticalScaleV4Request(), previousInstanceType);
                 sendEvent(context);
             }
 
@@ -125,10 +150,13 @@ public class CoreVerticalScaleActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Exception during vertical scaling!: {}", payload.getException().getMessage());
+                String groupBeingScaled = (String) variables.getOrDefault(GROUP_BEING_SCALED, "unknown");
+                String previousInstanceType = (String) variables.getOrDefault(PREVIOUS_INSTANCE_TYPE, "unknown");
+                String targetInstanceType = (String) variables.getOrDefault(TARGET_INSTANCE_TYPE, "unknown");
                 flowMessageService.fireEventAndLog(payload.getResourceId(),
                         UPDATE_FAILED.name(),
                         CLUSTER_VERTICALSCALED_FAILED,
-                        payload.getException().getMessage());
+                        groupBeingScaled, previousInstanceType, targetInstanceType, payload.getException().getMessage());
                 sendEvent(context);
             }
 

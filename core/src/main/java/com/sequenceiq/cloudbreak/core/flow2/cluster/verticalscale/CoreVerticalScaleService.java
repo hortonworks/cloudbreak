@@ -38,20 +38,22 @@ public class CoreVerticalScaleService {
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
 
-    public void verticalScale(Long stackId, StackVerticalScaleV4Request payload) {
+    public void verticalScale(Long stackId, StackVerticalScaleV4Request payload, String previousInstanceType) {
         flowMessageService.fireEventAndLog(stackId,
                 Status.UPDATE_IN_PROGRESS.name(),
                 CLUSTER_VERTICALSCALING,
                 payload.getGroup(),
+                previousInstanceType,
                 payload.getTemplate().getInstanceType());
     }
 
-    public void finishVerticalScale(Long stackId, StackVerticalScaleV4Request payload) {
+    public void finishVerticalScale(Long stackId, StackVerticalScaleV4Request payload, String previousInstanceType) {
         clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.STOPPED);
         flowMessageService.fireEventAndLog(stackId,
                 Status.STOPPED.name(),
                 CLUSTER_VERTICALSCALED,
                 payload.getGroup(),
+                previousInstanceType,
                 payload.getTemplate().getInstanceType());
     }
 
