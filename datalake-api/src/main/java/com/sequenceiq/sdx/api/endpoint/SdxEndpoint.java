@@ -134,7 +134,7 @@ public interface SdxEndpoint {
     @POST
     @Path("{datalakeName}/refresh")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Restart and reload all configurations of the data hub by name", produces = "applicaton/json", nickname = "refreshDatahubs")
+    @ApiOperation(value = "Restart and reload all configurations of the data hub by name", produces = "application/json", nickname = "refreshDatahubs")
     SdxRefreshDatahubResponse refreshDataHubs(@PathParam("datalakeName") String name, @QueryParam("datahubName") String datahubName);
 
     @DELETE
