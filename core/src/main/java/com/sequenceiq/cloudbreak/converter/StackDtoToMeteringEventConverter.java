@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStat
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -26,11 +27,11 @@ import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.Resource;
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ServiceType;
 import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.StatusChange;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
+import com.sequenceiq.cloudbreak.tag.DefaultApplicationTag;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
@@ -86,14 +87,16 @@ public class StackDtoToMeteringEventConverter {
     }
 
     private MeteringEvent.Builder convertBase(StackDtoDelegate stack) {
-        Map<String, String> applicationTags = getApplicationTags(stack);
+        StackTags stackTags = getStackTags(stack);
+        Map<String, String> applicationTags = getApplicationTags(stackTags);
+        Map<String, String> defaultTags = getDefaultTags(stackTags);
         return MeteringEvent.newBuilder()
                 .setId(UUID.randomUUID().toString())
                 .setTimestamp(System.currentTimeMillis())
                 .setVersion(DEFAULT_VERSION)
                 .setServiceType(getServiceType(applicationTags, DATAHUB))
                 .setServiceFeature(getServiceFeature(applicationTags))
-                .setResourceCrn(getResourceCrn(stack, applicationTags))
+                .setResourceCrn(getResourceCrn(stack, applicationTags, defaultTags))
                 .setEnvironmentCrn(stack.getEnvironmentCrn());
     }
 
@@ -107,26 +110,37 @@ public class StackDtoToMeteringEventConverter {
         return serviceFeature != null ? serviceFeature : StringUtils.EMPTY;
     }
 
-    private String getResourceCrn(StackDtoDelegate stack, Map<String, String> applicationTags) {
-        String externalCrn = applicationTags.get(CLOUDERA_EXTERNAL_RESOURCE_NAME_TAG);
-        if (StringUtils.isNotEmpty(externalCrn) && Crn.isCrn(externalCrn)) {
-            return externalCrn;
+    private String getResourceCrn(StackDtoDelegate stack, Map<String, String> applicationTags, Map<String, String> defaultTags) {
+        String clouderaExternalResourceNameTag = applicationTags.get(CLOUDERA_EXTERNAL_RESOURCE_NAME_TAG);
+        String clouderaExternalResourceNameTagLowerCase = applicationTags.get(CLOUDERA_EXTERNAL_RESOURCE_NAME_TAG.toLowerCase(Locale.ROOT));
+        String clouderaResourceName = defaultTags.get(DefaultApplicationTag.RESOURCE_CRN.key());
+        if (StringUtils.isNotEmpty(clouderaExternalResourceNameTag)) {
+            return clouderaExternalResourceNameTag;
+        } else if (StringUtils.isNotEmpty(clouderaExternalResourceNameTagLowerCase)) {
+            return clouderaExternalResourceNameTagLowerCase;
+        } else if (StringUtils.isNotEmpty(clouderaResourceName)) {
+            return clouderaResourceName;
         } else {
             return stack.getResourceCrn();
         }
     }
 
-    private Map<String, String> getApplicationTags(StackDtoDelegate stack) {
+    private Map<String, String> getApplicationTags(StackTags stackTags) {
+        return stackTags != null && stackTags.getApplicationTags() != null ? stackTags.getApplicationTags() : new HashMap<>();
+    }
+
+    private Map<String, String> getDefaultTags(StackTags stackTags) {
+        return stackTags != null && stackTags.getDefaultTags() != null ? stackTags.getDefaultTags() : new HashMap<>();
+    }
+
+    private StackTags getStackTags(StackDtoDelegate stack) {
         if (stack.getTags() != null) {
             try {
-                StackTags stackTags = stack.getTags().get(StackTags.class);
-                if (stackTags != null) {
-                    return stackTags.getApplicationTags();
-                }
+                return stack.getTags().get(StackTags.class);
             } catch (IOException e) {
-                LOGGER.warn("Stack related application tags cannot be parsed.", e);
+                LOGGER.warn("Stack related tags cannot be parsed.", e);
             }
         }
-        return new HashMap<>();
+        return null;
     }
 }

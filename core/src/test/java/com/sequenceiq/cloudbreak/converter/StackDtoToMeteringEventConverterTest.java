@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -36,12 +37,15 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
+import com.sequenceiq.cloudbreak.tag.DefaultApplicationTag;
 
 class StackDtoToMeteringEventConverterTest {
 
-    private static final String OPDB_CRN = "crn:cdp:datahub:us-west-1:e7b1345f-4ae1-4594-9113-fc91f22ef8bd:cluster:e7b1345f-4ae1-4594-9113-xc91322esi7t";
+    private static final String OPDB_CRN = "crn:cdp:opdb:us-west-1:e7b1345f-4ae1-4594-9113-fc91f22ef8bd:opdb:e7b1345f-4ae1-4594-9113-xc91322esi7t";
 
     private static final String SERVICE_FEATURE_VALUE = "Nifi";
+
+    private static final String RESOURCE_CRN = "resourceCrn";
 
     private StackDtoToMeteringEventConverter underTest = new StackDtoToMeteringEventConverter();
 
@@ -106,43 +110,46 @@ class StackDtoToMeteringEventConverterTest {
     }
 
     @Test
-    void testConvertWhenTagsContainsValidClouderaExternalResourceName() {
-        StackDto stack = stack(new Json(new StackTags(Map.of(),
-                Map.of(ClusterTemplateApplicationTag.SERVICE_TYPE.key(), OPERATIONAL_DB.name(), CLOUDERA_EXTERNAL_RESOURCE_NAME_TAG, OPDB_CRN), Map.of())));
-        MeteringEvent meteringEvent = underTest.convertToStatusChangeEvent(stack, SCALE_UP);
-        assertBase(stack, meteringEvent, OPERATIONAL_DB);
-        assertEquals(OPDB_CRN, meteringEvent.getResourceCrn());
-        StatusChange statusChange = meteringEvent.getStatusChange();
-        assertNotNull(statusChange);
-        assertEquals(SCALE_UP, statusChange.getStatus());
-        assertResources(statusChange.getResourcesList());
-    }
-
-    @Test
-    void testConvertWhenServiceFeatureTagExists() {
+    void testConvertServiceFeatureWhenServiceFeatureTagExists() {
         StackDto stack = stack(new Json(new StackTags(Map.of(), Map.of(ClusterTemplateApplicationTag.SERVICE_FEATURE.key(), SERVICE_FEATURE_VALUE), Map.of())));
         MeteringEvent meteringEvent = underTest.convertToStatusChangeEvent(stack, SCALE_UP);
         assertEquals(SERVICE_FEATURE_VALUE, meteringEvent.getServiceFeature());
     }
 
     @Test
-    void testConvertWhenServiceFeatureTagDoesNotExist() {
+    void testConvertServiceFeatureWhenServiceFeatureTagDoesNotExist() {
         StackDto stack = stack(new Json(new StackTags(Map.of(), Map.of(), Map.of())));
         MeteringEvent meteringEvent = underTest.convertToStatusChangeEvent(stack, SCALE_UP);
         assertEquals(StringUtils.EMPTY, meteringEvent.getServiceFeature());
     }
 
     @Test
-    void testConvertWhenTagsContainsInvalidClouderaExternalResourceName() {
+    void testConvertResourceCrnWhenApplicationTagsContainsClouderaExternalResourceName() {
         StackDto stack = stack(new Json(new StackTags(Map.of(),
-                Map.of(ClusterTemplateApplicationTag.SERVICE_TYPE.key(), OPERATIONAL_DB.name(), CLOUDERA_EXTERNAL_RESOURCE_NAME_TAG, "invalidcrn"), Map.of())));
+                Map.of(ClusterTemplateApplicationTag.SERVICE_TYPE.key(), OPERATIONAL_DB.name(), CLOUDERA_EXTERNAL_RESOURCE_NAME_TAG, OPDB_CRN), Map.of())));
         MeteringEvent meteringEvent = underTest.convertToStatusChangeEvent(stack, SCALE_UP);
-        assertBase(stack, meteringEvent, OPERATIONAL_DB);
-        assertEquals(stack.getResourceCrn(), meteringEvent.getResourceCrn());
-        StatusChange statusChange = meteringEvent.getStatusChange();
-        assertNotNull(statusChange);
-        assertEquals(SCALE_UP, statusChange.getStatus());
-        assertResources(statusChange.getResourcesList());
+        assertEquals(OPDB_CRN, meteringEvent.getResourceCrn());
+    }
+
+    @Test
+    void testConvertResourceCrnWhenApplicationTagsContainsLowerCaseClouderaExternalResourceNameOnly() {
+        StackDto stack = stack(new Json(new StackTags(Map.of(), Map.of(CLOUDERA_EXTERNAL_RESOURCE_NAME_TAG.toLowerCase(Locale.ROOT), OPDB_CRN), Map.of())));
+        MeteringEvent meteringEvent = underTest.convertToStatusChangeEvent(stack, SCALE_UP);
+        assertEquals(OPDB_CRN, meteringEvent.getResourceCrn());
+    }
+
+    @Test
+    void testConvertResourceCrnWhenDefaultTagsContainsClouderaResourceNameOnly() {
+        StackDto stack = stack(new Json(new StackTags(Map.of(), Map.of(), Map.of(DefaultApplicationTag.RESOURCE_CRN.key(), RESOURCE_CRN))));
+        MeteringEvent meteringEvent = underTest.convertToStatusChangeEvent(stack, SCALE_UP);
+        assertEquals(RESOURCE_CRN, meteringEvent.getResourceCrn());
+    }
+
+    @Test
+    void testConvertResourceCrnWhenNoTags() {
+        StackDto stack = stack(new Json(new StackTags(Map.of(), Map.of(), Map.of())));
+        MeteringEvent meteringEvent = underTest.convertToStatusChangeEvent(stack, SCALE_UP);
+        assertEquals(RESOURCE_CRN, meteringEvent.getResourceCrn());
     }
 
     private void assertBase(StackDto stack, MeteringEvent meteringEvent, ServiceType.Value serviceType) {
@@ -173,7 +180,7 @@ class StackDtoToMeteringEventConverterTest {
 
     private StackDto stack(Json tags) {
         Stack stack = new Stack();
-        stack.setResourceCrn("resourceCrn");
+        stack.setResourceCrn(RESOURCE_CRN);
         stack.setEnvironmentCrn("environmentCrn");
         Map<String, InstanceGroupDto> instanceGroups = new HashMap<>();
         instanceGroups.put("master", new InstanceGroupDto(instanceGroup("xl"),
