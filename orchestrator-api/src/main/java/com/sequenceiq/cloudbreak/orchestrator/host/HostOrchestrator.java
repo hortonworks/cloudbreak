@@ -113,8 +113,11 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     byte[] getStateConfigZip() throws IOException;
 
-    Map<String, Map<String, String>> formatAndMountDisksOnNodes(OrchestratorAware stack, List<GatewayConfig> allGateway, Set<Node> targets, Set<Node> allNodes,
+    void updateMountDiskPillar(OrchestratorAware stack, List<GatewayConfig> allGateway, Set<Node> nodesWithDiskData,
             ExitCriteriaModel exitModel, String platformVariant) throws CloudbreakOrchestratorFailedException;
+
+    Map<String, Map<String, String>> formatAndMountDisksOnNodes(OrchestratorAware stack, List<GatewayConfig> allGateway, Set<Node> targets, Set<Node> allNodes,
+            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
 
     void stopClusterManagerAgent(OrchestratorAware stack, GatewayConfig gatewayConfig, Set<Node> allNodes, Set<Node> stoppedNodes,
             ExitCriteriaModel exitCriteriaModel, CmAgentStopFlags flags) throws CloudbreakOrchestratorFailedException;

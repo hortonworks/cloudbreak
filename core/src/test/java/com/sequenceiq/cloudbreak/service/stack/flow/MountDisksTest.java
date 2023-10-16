@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -91,7 +90,7 @@ public class MountDisksTest {
 
         underTest.mountDisksOnNewNodes(1L, newNodeAddresses, reachableNodes);
         verify(stackUtil).collectNewNodesWithDiskData(stack, newNodeAddresses);
-        verify(hostOrchestrator).formatAndMountDisksOnNodes(any(), any(), targetsCaptor.capture(), allNodesCaptor.capture(), any(), eq(CloudConstants.MOCK));
+        verify(hostOrchestrator).formatAndMountDisksOnNodes(any(), any(), targetsCaptor.capture(), allNodesCaptor.capture(), any());
         Set<Node> capturedTargets = targetsCaptor.getValue();
         Set<Node> capturedAllNode = allNodesCaptor.getValue();
         assertTrue(capturedTargets.contains(node1));

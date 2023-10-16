@@ -68,33 +68,28 @@ public class MountDisks {
     private ComponentConfigProviderService componentConfigProviderService;
 
     public void mountAllDisks(Long stackId) throws CloudbreakException {
-        LOGGER.debug("Mount all disks");
+        LOGGER.debug("Mount all disks for stack.");
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        ResourceType diskResourceType = stack.getDiskResourceType();
-        if (diskResourceType != null) {
-            stack.setResources(new HashSet<>(resourceService.findAllByStackIdAndResourceTypeIn(stackId, List.of(diskResourceType))));
-        }
-        if (!StackService.REATTACH_COMPATIBLE_PLATFORMS.contains(stack.getPlatformVariant())) {
-            return;
-        }
-
+        updateResourceForStack(stackId, stack);
         Set<Node> allNodes = stackUtil.collectNodes(stack);
-        Set<Node> nodesWithDiskData = stackUtil.collectNodesWithDiskData(stack);
-        mountDisks(stack, nodesWithDiskData, allNodes);
+        Set<Node> allNodesWithDiskData = stackUtil.collectNodesWithDiskData(stack);
+        mountDisks(stack, allNodesWithDiskData, allNodes);
     }
 
-    public void mountDisksOnNewNodes(Long stackId, Set<String> upscaleCandidateAddresses, Set<Node> allNodes) throws CloudbreakException {
+    public void mountDisksOnNewNodes(Long stackId, Set<String> upscaleCandidateAddresses, Set<Node> targetNodes) throws CloudbreakException {
         LOGGER.debug("Mount disks on new nodes: {}", upscaleCandidateAddresses);
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        updateResourceForStack(stackId, stack);
+        Set<Node> newNodesWithDiskData = stackUtil.collectNewNodesWithDiskData(stack, upscaleCandidateAddresses);
+        mountDisks(stack, newNodesWithDiskData, targetNodes);
+    }
+
+    private void updateResourceForStack(Long stackId, Stack stack) {
         ResourceType diskResourceType = stack.getDiskResourceType();
         if (diskResourceType != null) {
             stack.setResources(new HashSet<>(resourceService.findAllByStackIdAndResourceTypeIn(stackId, List.of(diskResourceType))));
+            LOGGER.debug("Retrieved stack resources of type: {}, resources: {}", diskResourceType, stack.getResources());
         }
-        if (!StackService.REATTACH_COMPATIBLE_PLATFORMS.contains(stack.getPlatformVariant())) {
-            return;
-        }
-        Set<Node> nodesWithDiskData = stackUtil.collectNewNodesWithDiskData(stack, upscaleCandidateAddresses);
-        mountDisks(stack, nodesWithDiskData, allNodes);
     }
 
     private void mountDisks(Stack stack, Set<Node> nodesWithDiskData, Set<Node> allNodes) throws CloudbreakException {
@@ -105,9 +100,12 @@ public class MountDisks {
 
             Map<String, Map<String, String>> mountInfo;
             if (isCbVersionPostOptimisation(stack)) {
-                mountInfo = hostOrchestrator.formatAndMountDisksOnNodes(stack, gatewayConfigs, nodesWithDiskData, allNodes, exitCriteriaModel,
+                hostOrchestrator.updateMountDiskPillar(stack, gatewayConfigs, stackUtil.collectNodesWithDiskData(stack), exitCriteriaModel,
                         stack.getPlatformVariant());
+                LOGGER.debug("Execute format and mount states.");
+                mountInfo = hostOrchestrator.formatAndMountDisksOnNodes(stack, gatewayConfigs, nodesWithDiskData, allNodes, exitCriteriaModel);
             } else {
+                LOGGER.debug("Legacy execute format and mount states.");
                 mountInfo = hostOrchestrator.formatAndMountDisksOnNodesLegacy(gatewayConfigs, nodesWithDiskData, allNodes, exitCriteriaModel,
                         stack.getPlatformVariant());
             }
@@ -123,6 +121,7 @@ public class MountDisks {
                     String uuids = value.getOrDefault("uuids", "");
                     String fstab = value.getOrDefault("fstab", "");
                     if (!StringUtils.isEmpty(uuids) && !StringUtils.isEmpty(fstab)) {
+                        LOGGER.debug("Persisting fstab and uuids for instance: {}, uuids: {}, fstab: {}", instanceIdOptional.get(), uuids, fstab);
                         persistUuidAndFstab(stack, instanceIdOptional.get(), hostname, uuids, fstab);
                     }
                 }

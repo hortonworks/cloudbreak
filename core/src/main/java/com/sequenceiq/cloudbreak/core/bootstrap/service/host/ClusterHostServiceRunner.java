@@ -122,6 +122,7 @@ import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MountDisks;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
@@ -345,7 +346,10 @@ public class ClusterHostServiceRunner {
         modifyStartupMountRole(stackDto, reachableNodes, GrainOperation.ADD);
         hostOrchestrator.initServiceRun(stackDto, gatewayConfigs, allNodes, reachableNodes, saltConfig,
                 exitCriteriaModel, stack.getCloudPlatform());
-        mountDisks(stackDto.getStack(), candidateAddresses, allNodes, reachableNodes);
+        if (StackService.REATTACH_COMPATIBLE_PLATFORMS.contains(stack.getPlatformVariant())) {
+            LOGGER.debug("Platform is reattach compatible: {}", stack.getPlatformVariant());
+            mountDisks(stackDto.getStack(), candidateAddresses, allNodes, reachableNodes);
+        }
         if (runPreServiceDeploymentRecipe) {
             recipeEngine.executePreServiceDeploymentRecipes(stackDto, candidateAddresses, hostGroupService.getByClusterWithRecipes(stack.getClusterId()));
         }

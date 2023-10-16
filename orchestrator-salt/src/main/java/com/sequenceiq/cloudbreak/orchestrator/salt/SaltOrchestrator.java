@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
 import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.PRE_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.PRE_SERVICE_DEPLOYMENT;
 import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.convert;
 import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
 import static java.util.function.Predicate.not;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -305,60 +307,43 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
-    public Map<String, Map<String, String>> formatAndMountDisksOnNodes(OrchestratorAware stack, List<GatewayConfig> allGateway, Set<Node> nodesWithDiskData,
-            Set<Node> allNodes, ExitCriteriaModel exitModel, String platformVariant) throws CloudbreakOrchestratorFailedException {
+    public void updateMountDiskPillar(OrchestratorAware stack, List<GatewayConfig> allGateway, Set<Node> allNodesWithDiskData, ExitCriteriaModel exitModel,
+            String platformVariant) throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
         Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGateway);
-        Target<String> allHosts = new HostList(nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toSet()));
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             saveHostsPillar(stack, exitModel, gatewayTargetIpAddresses, sc);
-            Callable<Boolean> saltPillarRunner;
+            updateMountDataPillar(allNodesWithDiskData, exitModel, platformVariant, gatewayTargetIpAddresses, sc);
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during the salt bootstrap", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
 
-            Map<String, String> dataVolumeMap = nodesWithDiskData.stream()
-                    .collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getDataVolumes()));
-            Map<String, String> dataVolumesWithDataLossMap = nodesWithDiskData.stream()
-                    .collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getDataVolumesWithDataLoss()));
-            Map<String, String> serialIdMap = nodesWithDiskData.stream()
-                    .collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getSerialIds()));
-            Map<String, String> serialIdWithDataLossMap = nodesWithDiskData.stream()
-                    .collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getSerialIdsWithDataLoss()));
-            Map<String, String> fstabMap = nodesWithDiskData.stream()
-                    .collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getFstab()));
-            Map<String, String> temporaryStorageMap = nodesWithDiskData.stream()
-                    .collect(Collectors.toMap(Node::getHostname, node -> node.getTemporaryStorage().name()));
-            Map<String, Integer> dataBaseVolumeIndexMap =
-                    nodesWithDiskData.stream().collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getDatabaseVolumeIndex()));
-
-            Map<String, Object> hostnameDiskMountMap = nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toMap(hn -> hn, hn -> Map.of(
-                    "attached_volume_name_list", dataVolumeMap.getOrDefault(hn, ""),
-                    "attached_volume_name_with_dataloss_list", dataVolumesWithDataLossMap.getOrDefault(hn, ""),
-                    "attached_volume_serial_list", serialIdMap.getOrDefault(hn, ""),
-                    "attached_volume_serial_with_dataloss_list", serialIdWithDataLossMap.getOrDefault(hn, ""),
-                    "cloud_platform", platformVariant,
-                    "previous_fstab", fstabMap.getOrDefault(hn, ""),
-                    "database_volume_index", dataBaseVolumeIndexMap.getOrDefault(hn, -1),
-                    "temporary_storage", temporaryStorageMap.getOrDefault(hn, TemporaryStorage.ATTACHED_VOLUMES.name())
-            )));
-
-            SaltPillarProperties mounDiskProperties =
-                    new SaltPillarProperties("/mount/disk.sls", Collections.singletonMap("mount_data", hostnameDiskMountMap));
-
-            OrchestratorBootstrap pillarSave = PillarSave.createCustomPillar(sc, gatewayTargetIpAddresses, mounDiskProperties);
-            saltPillarRunner = saltRunner.runnerWithConfiguredErrorCount(pillarSave, exitCriteria, exitModel);
-            saltPillarRunner.call();
-
+    @Override
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public Map<String, Map<String, String>> formatAndMountDisksOnNodes(OrchestratorAware stack, List<GatewayConfig> allGateway, Set<Node> nodesWithDiskData,
+            Set<Node> allNodes, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
+        Set<String> allHostNames = nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toSet());
+        Target<String> allHosts = new HostList(allHostNames);
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            LOGGER.debug("Adding 'mount_disks' grain on target nodes: {}", allHostNames);
             saltCommandRunner.runModifyGrainCommand(sc,
-                    new GrainAddRunner(saltStateService, hostnameDiskMountMap.keySet(), allNodes, "mount_disks"), exitModel, exitCriteria);
+                    new GrainAddRunner(saltStateService, allHostNames, allNodes, "mount_disks"), exitModel, exitCriteria);
 
-            StateAllRunner stateAllRunner = new StateAllRunner(saltStateService, gatewayTargetIpAddresses, allNodes, "disks.format-and-mount");
-            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateAllRunner);
-            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel);
-            saltJobRunBootstrapRunner.call();
+            LOGGER.debug("Executing 'disks.format-and-mount' state on target nodes: {}", allHostNames);
+            StateRunner stateRunner = new StateRunner(saltStateService, allHostNames, "disks.format-and-mount");
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner);
+            saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel).call();
 
             Map<String, String> uuidResponse = saltStateService.getUuidList(sc);
 
+            LOGGER.debug("Removing 'mount_disks' grain on target nodes: {}", allHostNames);
             saltCommandRunner.runModifyGrainCommand(sc,
-                    new GrainRemoveRunner(saltStateService, hostnameDiskMountMap.keySet(), allNodes, "mount_disks"), exitModel, exitCriteria);
+                    new GrainRemoveRunner(saltStateService, allHostNames, allNodes, "mount_disks"), exitModel, exitCriteria);
+
+            LOGGER.debug("Fetching '/etc/fstab' from all nodes");
             Map<String, String> fstabResponse = saltStateService.runCommandOnHosts(retry, sc, allHosts, "cat /etc/fstab");
             return nodesWithDiskData.stream()
                     .map(node -> {
@@ -371,6 +356,32 @@ public class SaltOrchestrator implements HostOrchestrator {
             LOGGER.info("Error occurred during the salt bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
+    }
+
+    private void updateMountDataPillar(Set<Node> allNodesWithDiskData, ExitCriteriaModel exitModel, String platformVariant,
+            Set<String> gatewayTargetIpAddresses, SaltConnector sc) throws Exception {
+        Map<String, Object> hostnameDiskMountMap = allNodesWithDiskData.stream().collect(Collectors.toMap(Node::getHostname,
+                node -> getMountDiskPillarMapForNode(platformVariant, node.getNodeVolumes(), node.getTemporaryStorage())));
+        LOGGER.debug("Built disk pillar map: {}", hostnameDiskMountMap);
+        SaltPillarProperties mountDiskProperties =
+                new SaltPillarProperties("/mount/disk.sls", Collections.singletonMap("mount_data", hostnameDiskMountMap));
+        LOGGER.debug("Saving disk pillar information on gateways: {}", gatewayTargetIpAddresses);
+        OrchestratorBootstrap pillarSave = PillarSave.createCustomPillar(sc, gatewayTargetIpAddresses, mountDiskProperties);
+        saltRunner.runnerWithConfiguredErrorCount(pillarSave, exitCriteria, exitModel).call();
+    }
+
+    private Map<String, Object> getMountDiskPillarMapForNode(String platformVariant, NodeVolumes nodeVolumes, TemporaryStorage temporaryStorage) {
+        checkNotNull(nodeVolumes, "There is no data about volumes of the node.");
+        return Map.of(
+                "attached_volume_name_list", defaultString(nodeVolumes.getDataVolumes()),
+                "attached_volume_name_with_dataloss_list", defaultString(nodeVolumes.getDataVolumesWithDataLoss()),
+                "attached_volume_serial_list", defaultString(nodeVolumes.getSerialIds()),
+                "attached_volume_serial_with_dataloss_list", defaultString(nodeVolumes.getSerialIdsWithDataLoss()),
+                "cloud_platform", platformVariant,
+                "previous_fstab", defaultString(nodeVolumes.getFstab()),
+                "database_volume_index", nodeVolumes.getDatabaseVolumeIndex(),
+                "temporary_storage", Optional.ofNullable(temporaryStorage).orElse(TemporaryStorage.ATTACHED_VOLUMES).name()
+        );
     }
 
     private void saveHostsPillar(OrchestratorAware stack, ExitCriteriaModel exitModel,

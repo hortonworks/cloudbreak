@@ -438,6 +438,7 @@ class ClusterHostServiceRunnerTest {
                 createInstanceMetadata("1.1.3.1"), createInstanceMetadata("1.1.3.2"));
         when(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(gwNodes);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
+        when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         when(stackUtil.collectReachableAndUnreachableCandidateNodes(any(), any())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
         when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), any())).thenReturn(gatewayNodes);
         KerberosConfig kerberosConfig = new KerberosConfig();
@@ -492,6 +493,8 @@ class ClusterHostServiceRunnerTest {
         setupMocksForRunClusterServices();
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3"));
+        when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
+        when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
         when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), any())).thenReturn(nodes);
         KerberosConfig kerberosConfig = new KerberosConfig();
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
@@ -522,6 +525,8 @@ class ClusterHostServiceRunnerTest {
         setupMocksForRunClusterServices();
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3"));
+        when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
+        when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
         when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), any())).thenReturn(nodes);
         KerberosConfig kerberosConfig = new KerberosConfig();
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
