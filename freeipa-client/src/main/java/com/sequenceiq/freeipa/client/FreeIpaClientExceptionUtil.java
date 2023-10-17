@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -15,12 +18,16 @@ import org.springframework.http.HttpStatus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyError;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 
 public class FreeIpaClientExceptionUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaClientExceptionUtil.class);
 
     private static final Map<Integer, FreeIpaErrorCodes> ERROR_CODES_LOOKUP = new HashMap<>();
+
+    private static final Pattern RESPONSE_CODE_PATTERN = Pattern.compile("^Server returned HTTP response code: (\\d+)");
 
     private static final Set<FreeIpaErrorCodes> RETRYABLE_ERROR_CODES = Set.of(
             FreeIpaErrorCodes.NETWORK_ERROR,
@@ -71,6 +78,8 @@ public class FreeIpaClientExceptionUtil {
             .stream()
             .map(HttpStatus::value)
             .collect(Collectors.toSet());
+
+    private static final Set<String> CLUSTERPROXY_RETRYABLE_CODES = Set.of("cluster-proxy.proxy.endpoint-or-knox-required");
 
     private static Set<Integer> clientUnusableHttpCodes = Set.of(HttpStatus.UNAUTHORIZED)
             .stream().map(HttpStatus::value).collect(Collectors.toSet());
@@ -225,5 +234,41 @@ public class FreeIpaClientExceptionUtil {
             currentException = (FreeIpaClientException) currentException.getCause();
         }
         return currentException.getCause();
+    }
+
+    public static OptionalInt extractResponseCode(Exception e) {
+        try {
+            Matcher matcher = RESPONSE_CODE_PATTERN.matcher(e.getMessage());
+            if (matcher.find()) {
+                return OptionalInt.of(Integer.parseInt(matcher.group(1)));
+            } else if (null != e.getCause() && RESPONSE_CODE_PATTERN.matcher(e.getCause().getMessage()).find()) {
+                matcher = RESPONSE_CODE_PATTERN.matcher(e.getCause().getMessage());
+                matcher.find();
+                return OptionalInt.of(Integer.parseInt(matcher.group(1)));
+            } else {
+                return OptionalInt.empty();
+            }
+        } catch (Exception ex) {
+            LOGGER.warn("Couldn't extract response code from message", ex);
+            return OptionalInt.empty();
+        }
+    }
+
+    public static OptionalInt extractResponseCode(ClusterProxyException e) {
+        try {
+            return e.getClusterProxyError()
+                    .map(ClusterProxyError::getStatus)
+                    .stream()
+                    .mapToInt(Integer::parseInt)
+                    .findAny();
+        } catch (Exception ex) {
+            LOGGER.warn("Couldn't extract response code from message", ex);
+            return OptionalInt.empty();
+        }
+    }
+
+    public static boolean isClusterProxyErrorRetryable(ClusterProxyException e) {
+        LOGGER.error("Cluster proxy exception received", e);
+        return e.getClusterProxyError().map(ClusterProxyError::getCode).map(CLUSTERPROXY_RETRYABLE_CODES::contains).orElse(Boolean.FALSE);
     }
 }

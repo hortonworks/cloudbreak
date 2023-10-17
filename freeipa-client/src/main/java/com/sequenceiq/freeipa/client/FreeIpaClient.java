@@ -15,8 +15,6 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -26,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyError;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 import com.sequenceiq.cloudbreak.util.CheckedTimeoutRunnable;
 import com.sequenceiq.freeipa.client.model.Ca;
@@ -72,8 +69,6 @@ public class FreeIpaClient {
     private static final String DEFAULT_API_VERSION = "2.230";
 
     private static final int CESSATION_OF_OPERATION = 5;
-
-    private static final Pattern RESPONSE_CODE_PATTERN = Pattern.compile("^Server returned HTTP response code: (\\d+)");
 
     private static final boolean USER_ENABLED = false;
 
@@ -580,49 +575,22 @@ public class FreeIpaClient {
         } catch (ClusterProxyException e) {
             String message = String.format("Invoke FreeIPA failed: %s", e.getLocalizedMessage());
             LOGGER.warn(message);
-            OptionalInt responseCode = extractResponseCode(e);
-            throw FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(new FreeIpaClientException(message, e, responseCode));
+            if (FreeIpaClientExceptionUtil.isClusterProxyErrorRetryable(e)) {
+                throw new RetryableFreeIpaClientException(message, e);
+            } else {
+                OptionalInt responseCode = FreeIpaClientExceptionUtil.extractResponseCode(e);
+                throw FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(new FreeIpaClientException(message, e, responseCode));
+            }
         } catch (Exception e) {
             String message = String.format("Invoke FreeIPA failed: %s", e.getLocalizedMessage());
             LOGGER.warn(message);
-            OptionalInt responseCode = extractResponseCode(e);
+            OptionalInt responseCode = FreeIpaClientExceptionUtil.extractResponseCode(e);
             throw FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(new FreeIpaClientException(message, e, responseCode));
         } catch (Throwable throwable) {
             String message = String.format("Invoke FreeIPA failed: %s", throwable.getLocalizedMessage());
             LOGGER.warn(message);
             throw new FreeIpaClientException(message, throwable);
         }
-    }
-
-    private OptionalInt extractResponseCode(Exception e) {
-        OptionalInt responseCode = OptionalInt.empty();
-        try {
-            Matcher matcher = RESPONSE_CODE_PATTERN.matcher(e.getMessage());
-            if (matcher.find()) {
-                responseCode = OptionalInt.of(Integer.parseInt(matcher.group(1)));
-            } else if (null != e.getCause() && RESPONSE_CODE_PATTERN.matcher(e.getCause().getMessage()).find()) {
-                matcher = RESPONSE_CODE_PATTERN.matcher(e.getCause().getMessage());
-                matcher.find();
-                responseCode = OptionalInt.of(Integer.parseInt(matcher.group(1)));
-            }
-        } catch (Exception ex) {
-            LOGGER.warn("Couldn't extract response code from message", ex);
-        }
-        return responseCode;
-    }
-
-    private OptionalInt extractResponseCode(ClusterProxyException e) {
-        OptionalInt responseCode = OptionalInt.empty();
-        try {
-            responseCode = e.getClusterProxyError()
-                    .map(ClusterProxyError::getStatus)
-                    .stream()
-                    .mapToInt(Integer::parseInt)
-                    .findAny();
-        } catch (Exception ex) {
-            LOGGER.warn("Couldn't extract response code from message", ex);
-        }
-        return responseCode;
     }
 
     public PasswordPolicy getPasswordPolicy() throws FreeIpaClientException {
