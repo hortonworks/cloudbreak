@@ -99,12 +99,12 @@ public class InstanceMetaDataService {
     public void updateAllInstancesToTerminated(List<Long> instanceMetadataIds) {
         String reason = "Instances terminated successfully";
         int modifiedRows = repository.updateAllInstancesToTerminated(instanceMetadataIds, InstanceStatus.TERMINATED, System.currentTimeMillis(), reason);
-        LOGGER.debug("{} row was updated to {}. Reason: {}", modifiedRows, InstanceStatus.TERMINATED, reason);
+        LOGGER.debug("Instances {} ({} row) was updated to {}. Reason: {}", instanceMetadataIds, modifiedRows, InstanceStatus.TERMINATED, reason);
     }
 
     public void updateAllInstancesToStatus(Collection<Long> instanceMetadataIds, InstanceStatus newStatus, String reason) {
         int modifiedRows = repository.updateAllToStatusByIds(instanceMetadataIds, newStatus, reason);
-        LOGGER.debug("{} row was updated to {}. Reason: {}", modifiedRows, newStatus, reason);
+        LOGGER.debug("Instances {} ({} row) was updated to {}. Reason: {}", instanceMetadataIds, modifiedRows, newStatus, reason);
     }
 
     public StackDtoDelegate saveInstanceAndGetUpdatedStack(StackDtoDelegate stack, Map<String, Integer> hostGroupsWithInstanceCountToCreate,

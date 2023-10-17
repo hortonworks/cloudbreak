@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -470,6 +471,20 @@ class ClusterHostServiceRunnerTest {
 
         verify(stackUtil, times(1)).collectReachableAndCheckNecessaryNodes(any(), any());
         verify(stackUtil, times(0)).collectReachableAndUnreachableCandidateNodes(any(), any());
+    }
+
+    @Test
+    void testTargetedCallWhenNoReachableNodesFound() throws NodesUnreachableException, CloudbreakOrchestratorException {
+        when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), any())).thenReturn(Set.of(node("gateway1")));
+        when(stackUtil.collectReachableAndUnreachableCandidateNodes(any(), any())).thenReturn(new NodeReachabilityResult(Set.of(), Set.of()));
+
+        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.runTargetedClusterServices(stack, Map.of("fqdn3", "1.1.1.1")));
+
+        assertEquals("No reachable candidates found.", cloudbreakServiceException.getMessage());
+        verify(stackUtil, times(1)).collectReachableAndCheckNecessaryNodes(any(), any());
+        verify(stackUtil, times(1)).collectReachableAndUnreachableCandidateNodes(any(), any());
+        verify(hostOrchestrator, never()).initServiceRun(any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test

@@ -68,6 +68,7 @@ public class MountDisks {
     private ComponentConfigProviderService componentConfigProviderService;
 
     public void mountAllDisks(Long stackId) throws CloudbreakException {
+        LOGGER.debug("Mount all disks");
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         ResourceType diskResourceType = stack.getDiskResourceType();
         if (diskResourceType != null) {
@@ -83,6 +84,7 @@ public class MountDisks {
     }
 
     public void mountDisksOnNewNodes(Long stackId, Set<String> upscaleCandidateAddresses, Set<Node> allNodes) throws CloudbreakException {
+        LOGGER.debug("Mount disks on new nodes: {}", upscaleCandidateAddresses);
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         ResourceType diskResourceType = stack.getDiskResourceType();
         if (diskResourceType != null) {

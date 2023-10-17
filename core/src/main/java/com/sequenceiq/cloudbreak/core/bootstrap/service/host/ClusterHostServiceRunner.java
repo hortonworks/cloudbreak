@@ -283,6 +283,7 @@ public class ClusterHostServiceRunner {
 
     public NodeReachabilityResult runClusterServices(@Nonnull StackDto stackDto,
             Map<String, String> candidateAddresses, boolean runPreServiceDeploymentRecipe) {
+        LOGGER.debug("Run cluster services on candidates: {}", candidateAddresses);
         try {
             Set<Node> allNodes = stackUtil.collectNodes(stackDto, emptySet());
             Set<Node> reachableNodes = stackUtil.collectReachableAndCheckNecessaryNodes(stackDto, candidateAddresses.keySet());
@@ -304,6 +305,7 @@ public class ClusterHostServiceRunner {
     }
 
     public NodeReachabilityResult runTargetedClusterServices(StackDto stackDto, Map<String, String> candidateAddresses) {
+        LOGGER.debug("Run targeted cluster services on candidates: {}", candidateAddresses);
         try {
             Set<String> notTerminatedAndNotZombieGateways = stackDto.getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream()
                     .map(InstanceMetadataView::getDiscoveryFQDN).filter(Objects::nonNull).collect(Collectors.toSet());
@@ -313,13 +315,16 @@ public class ClusterHostServiceRunner {
                     .collect(Collectors.toSet());
             NodeReachabilityResult candidateNodesReachabilityResult =
                     stackUtil.collectReachableAndUnreachableCandidateNodes(stackDto, candidateAddresses.keySet());
+            if (candidateNodesReachabilityResult.getReachableNodes().isEmpty()) {
+                LOGGER.warn("No reachable candidates found, unreachable candidates: {}", candidateNodesReachabilityResult.getUnreachableHosts());
+                throw new CloudbreakServiceException("No reachable candidates found.");
+            }
             Set<Node> reachableCandidates = Sets.union(candidateNodesReachabilityResult.getReachableNodes(), reachableGatewayNodes);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stackDto);
             List<GrainProperties> grainsProperties = grainPropertiesService
                     .createGrainPropertiesForTargetedUpscale(gatewayConfigs, stackDto, reachableCandidates);
             LOGGER.debug("We are about to execute cluster services (salt highstate, pre cluster manager recipe execution, mount disks, etc.) " +
-                    "for reachable candidates (targeted operation): {}",
-                    reachableCandidates.stream().map(Node::getHostname).collect(Collectors.joining(",")));
+                    "for reachable candidates (targeted operation): {}", reachableCandidates.stream().map(Node::getHostname).collect(Collectors.joining(",")));
             executeRunClusterServices(stackDto, candidateAddresses, reachableCandidates, reachableCandidates,
                     gatewayConfigs, grainsProperties, true);
             return new NodeReachabilityResult(reachableCandidates, candidateNodesReachabilityResult.getUnreachableNodes());
@@ -350,7 +355,7 @@ public class ClusterHostServiceRunner {
 
     private void mountDisks(StackView stack, Map<String, String> candidateAddresses, Set<Node> allNodes, Set<Node> reachableNodes) throws CloudbreakException {
         Set<String> reachableCandidateAddresses = reachableNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-        if (CollectionUtils.isEmpty(candidateAddresses) || CollectionUtils.isEmpty(reachableCandidateAddresses)) {
+        if (CollectionUtils.isEmpty(candidateAddresses)) {
             mountDisks.mountAllDisks(stack.getId());
         } else {
             mountDisks.mountDisksOnNewNodes(stack.getId(), reachableCandidateAddresses, allNodes);
