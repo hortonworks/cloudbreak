@@ -326,7 +326,6 @@ public class ClusterOperationService {
         Map<InstanceMetaData, Optional<String>> failedMetaData = failedInstanceMetadataMap.entrySet().stream()
                 .filter(entry -> recoveryModeMatches(hostGroupsInCluster, entry, RecoveryMode.MANUAL))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        logUnknownNodes(failedNodesWithReason, notTerminatedInstanceMetadataSet);
         handleChangedHosts(cluster, newHealthyNodes, autoRecoveryNodesMap, autoRecoveryMetadata, failedMetaData);
     }
 
@@ -334,14 +333,6 @@ public class ClusterOperationService {
             RecoveryMode recoveryMode) {
         String instanceGroupName = entry.getKey().getInstanceGroupName();
         return hostGroupsInCluster.containsKey(instanceGroupName) && recoveryMode.equals(hostGroupsInCluster.get(instanceGroupName).getRecoveryMode());
-    }
-
-    private void logUnknownNodes(Map<String, Optional<String>> failedNodes, Set<InstanceMetaData> notTerminatedInstanceMetadataSet) {
-        Set<String> unknownNodes = notTerminatedInstanceMetadataSet.stream()
-                .map(InstanceMetaData::getDiscoveryFQDN)
-                .filter(discoveryFQDN -> !failedNodes.containsKey(discoveryFQDN))
-                .collect(Collectors.toSet());
-        LOGGER.error("No metadata information for the nodes: " + unknownNodes);
     }
 
     private void handleChangedHosts(Cluster cluster, Set<String> newHealthyNodes,

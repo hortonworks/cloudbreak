@@ -234,7 +234,7 @@ public class StackUtil {
                     List<String> dataVolumesWithDataLoss = volumesWithDataLoss.stream().map(Volume::getDevice).collect(Collectors.toList());
                     List<String> serialIds = volumes.stream().map(Volume::getId).collect(Collectors.toList());
                     List<String> serialIdsWithDataLoss = volumesWithDataLoss.stream().map(Volume::getId).collect(Collectors.toList());
-                    LOGGER.debug("Datavolumes are %s, dataVolumesWithDataLoss are %s, serialIds are %s, serialIdsWithDataLoss are %s",
+                    LOGGER.debug("Datavolumes are {}, dataVolumesWithDataLoss are {}, serialIds are {}, serialIdsWithDataLoss are {}",
                             dataVolumes, dataVolumesWithDataLoss, serialIds, serialIdsWithDataLoss);
                     int dataBaseVolumeIndex = IntStream.range(0, volumes.size())
                             .filter(index -> volumes.get(index).getCloudVolumeUsageType() == CloudVolumeUsageType.DATABASE)
