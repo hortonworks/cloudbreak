@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.ws.rs.BadRequestException;
@@ -14,8 +15,10 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
@@ -42,6 +45,7 @@ import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.environment.validation.ValidationType;
+import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -96,6 +100,8 @@ public class EnvironmentModificationService {
 
     private final EnvironmentTagsDtoConverter environmentTagsDtoConverter;
 
+    private final EventSenderService eventSenderService;
+
     public EnvironmentModificationService(
             EnvironmentDtoConverter environmentDtoConverter,
             EnvironmentService environmentService,
@@ -111,7 +117,8 @@ public class EnvironmentModificationService {
             ProxyConfigService proxyConfigService,
             ProxyConfigModificationService proxyConfigModificationService,
             EnvironmentReactorFlowManager environmentReactorFlowManager,
-            EnvironmentTagsDtoConverter environmentTagsDtoConverter) {
+            EnvironmentTagsDtoConverter environmentTagsDtoConverter,
+            EventSenderService eventSenderService) {
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentService = environmentService;
         this.credentialService = credentialService;
@@ -127,6 +134,7 @@ public class EnvironmentModificationService {
         this.proxyConfigModificationService = proxyConfigModificationService;
         this.environmentReactorFlowManager = environmentReactorFlowManager;
         this.environmentTagsDtoConverter = environmentTagsDtoConverter;
+        this.eventSenderService = eventSenderService;
     }
 
     public EnvironmentDto edit(Environment environment, EnvironmentEditDto editDto) {
@@ -316,7 +324,11 @@ public class EnvironmentModificationService {
                     String oldSshKeyId = originalAuthentication.getPublicKeyId();
                     LOGGER.info("The '{}' of ssh key is replaced with {}", oldSshKeyId, environment.getAuthentication().getPublicKeyId());
                     if (originalAuthentication.isManagedKey()) {
-                        environmentResourceService.deletePublicKey(environment, oldSshKeyId);
+                        LOGGER.warn("Environment {} has managed public key. Skipping key deletion: '{}'", environment.getName(), oldSshKeyId);
+                        EnvironmentDto environmentDto = environmentDtoConverter.environmentToDto(environment);
+                        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+                        eventSenderService.sendEventAndNotification(environmentDto, userCrn, ResourceEvent.ENVIRONMENT_SSH_DELETION_SKIPPED,
+                                List.of(oldSshKeyId));
                     }
                 } else {
                     LOGGER.info("Authentication modification was unsuccessful. The authentication was reverted to the previous version.");

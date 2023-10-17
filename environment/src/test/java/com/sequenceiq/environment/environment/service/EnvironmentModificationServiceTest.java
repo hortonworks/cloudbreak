@@ -16,6 +16,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,8 +33,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
@@ -57,6 +60,7 @@ import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
+import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -138,6 +142,9 @@ class EnvironmentModificationServiceTest {
     @MockBean
     private EnvironmentTagsDtoConverter environmentTagsDtoConverter;
 
+    @MockBean
+    private EventSenderService eventSenderService;
+
     @Mock
     private EnvironmentValidatorService validatorService;
 
@@ -177,7 +184,6 @@ class EnvironmentModificationServiceTest {
                 .withAccountId(ACCOUNT_ID)
                 .withNetwork(network)
                 .build();
-        Environment environment = new Environment();
         when(networkService.findByEnvironment(any())).thenReturn(Optional.empty());
         when(networkService.saveNetwork(any(), any(), anyString(), any(), any())).thenReturn(new AwsNetwork());
 
@@ -445,7 +451,7 @@ class EnvironmentModificationServiceTest {
     @Test
     void changeCredentialByEnvironmentName() {
         String credentialName = "credentialName";
-        final Credential value = new Credential();
+        Credential value = new Credential();
         EnvironmentChangeCredentialDto environmentChangeDto = EnvironmentChangeCredentialDto.builder()
                 .withCredentialName(credentialName)
                 .build();
@@ -550,10 +556,15 @@ class EnvironmentModificationServiceTest {
         when(environmentResourceService.isRawSshKeyUpdateSupported(environment)).thenReturn(false);
         when(environmentResourceService.createAndUpdateSshKey(environment)).thenReturn(true);
 
-        environmentModificationServiceUnderTest.editAuthenticationIfChanged(environmentEditDto, environment);
+        EnvironmentDto environmentDto = EnvironmentDto.builder().build();
+        when(environmentDtoConverter.environmentToDto(environment)).thenReturn(environmentDto);
+
+        ThreadBasedUserCrnProvider.doAs(CRN, () -> environmentModificationServiceUnderTest.editAuthenticationIfChanged(environmentEditDto, environment));
 
         verify(environmentResourceService, times(1)).createAndUpdateSshKey(environment);
-        verify(environmentResourceService, times(1)).deletePublicKey(environment, "old-public-key-id");
+        verify(environmentResourceService, never()).deletePublicKey(any(Environment.class), anyString());
+        verify(eventSenderService).sendEventAndNotification(environmentDto, CRN, ResourceEvent.ENVIRONMENT_SSH_DELETION_SKIPPED,
+                List.of("old-public-key-id"));
         assertEquals(environment.getAuthentication().getPublicKey(), "new-ssh-key");
     }
 
@@ -576,9 +587,14 @@ class EnvironmentModificationServiceTest {
         when(validatorService.validateAuthenticationModification(environmentEditDto, environment)).thenReturn(validationResult);
         when(authenticationDtoConverter.dtoToAuthentication(authenticationDto)).thenReturn(newEnvironmentAuthentication);
 
-        environmentModificationServiceUnderTest.editAuthenticationIfChanged(environmentEditDto, environment);
+        EnvironmentDto environmentDto = EnvironmentDto.builder().build();
+        when(environmentDtoConverter.environmentToDto(environment)).thenReturn(environmentDto);
 
-        verify(environmentResourceService, times(1)).deletePublicKey(environment, "old-public-key-id");
+        ThreadBasedUserCrnProvider.doAs(CRN, () -> environmentModificationServiceUnderTest.editAuthenticationIfChanged(environmentEditDto, environment));
+
+        verify(environmentResourceService, never()).deletePublicKey(any(Environment.class), anyString());
+        verify(eventSenderService).sendEventAndNotification(environmentDto, CRN, ResourceEvent.ENVIRONMENT_SSH_DELETION_SKIPPED,
+                List.of("old-public-key-id"));
         verify(environmentResourceService, times(0)).createAndUpdateSshKey(environment);
     }
 
@@ -810,7 +826,7 @@ class EnvironmentModificationServiceTest {
     }
 
     @Test
-    void editByNameSubnetIdChangehange() {
+    void editByNameSubnetIdChange() {
         BaseNetwork awsNetwork = new AwsNetwork();
 
         EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()

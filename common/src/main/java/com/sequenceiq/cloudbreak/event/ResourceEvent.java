@@ -109,6 +109,7 @@ public enum ResourceEvent {
     ENVIRONMENT_SALT_PASSWORD_ROTATE_FINISHED("environment.salt.passwordrotate.finished"),
     ENVIRONMENT_SALT_PASSWORD_ROTATE_FAILED("environment.salt.passwordrotate.failed"),
 
+    ENVIRONMENT_SSH_DELETION_SKIPPED("environment.ssh.deletion.skipped"),
     ENVIRONMENT_NETWORK_DELETION_STARTED("environment.network.deletion.started"),
     ENVIRONMENT_PUBLICKEY_DELETION_STARTED("environment.publickey.deletion.started"),
     ENVIRONMENT_CLUSTER_DEFINITION_DELETE_STARTED("environment.clusterdefinition.deletion.started"),
