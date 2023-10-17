@@ -1,25 +1,27 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
+import static com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption.ENABLED;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.lenient;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BlueprintUpgradeOptionValidatorTest {
+
+    private static final BlueprintUpgradeOption BLUEPRINT_UPGRADE_OPTION = ENABLED;
 
     @InjectMocks
     private BlueprintUpgradeOptionValidator underTest;
@@ -27,151 +29,54 @@ public class BlueprintUpgradeOptionValidatorTest {
     @Mock
     private CustomTemplateUpgradeValidator customTemplateUpgradeValidator;
 
-    @Test
-    public void testIsValidBlueprintShouldReturnTrueWhenTheUpgradeOptionIsEnabledOnDefaultBlueprintAndTheUpgradeIsRuntimeUpgrade() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, BlueprintUpgradeOption.ENABLED);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, true);
-        assertTrue(actual.isValid());
-        assertNull(actual.getReason());
-        verifyNoInteractions(customTemplateUpgradeValidator);
+    @Mock
+    private BlueprintUpgradeOptionCondition blueprintUpgradeOptionCondition;
+
+    private static Object[][] testScenariosProvider() {
+        return new Object[][] {
+                {DEFAULT, true, false, true},
+                {DEFAULT, false,  false, true},
+
+                {DEFAULT, false,  false, true},
+                {DEFAULT, false,  false, false},
+
+                {USER_MANAGED, false, false, false},
+                {USER_MANAGED, false, false, true},
+                {USER_MANAGED, false, true, true},
+        };
     }
 
-    @Test
-    public void testIsValidBlueprintShouldReturnTrueWhenTheUpgradeOptionIsGaOnDefaultBlueprintAndTheUpgradeIsRuntimeUpgrade() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, BlueprintUpgradeOption.GA);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, true);
-        assertTrue(actual.isValid());
-        assertNull(actual.getReason());
-        verifyNoInteractions(customTemplateUpgradeValidator);
+    @ParameterizedTest(name = "Blueprint type: {0}, skipValidations: {1}, dataHubUpgradeEntitled: {2}, expected: {3}")
+    @MethodSource("testScenariosProvider")
+    public void test(ResourceStatus resourceStatus, boolean skipValidations, boolean dataHubUpgradeEntitled, boolean expectedValue) {
+        String errorMessage = "The cluster template is not eligible for upgrade";
+        Blueprint blueprint = createBlueprint(resourceStatus);
+        ImageFilterParams imageFilterParams = createImageFilterParams(blueprint, skipValidations, dataHubUpgradeEntitled);
+
+        lenient().when(customTemplateUpgradeValidator.isValid(blueprint)).thenReturn(createValidationResult(expectedValue, errorMessage));
+        lenient().when(blueprintUpgradeOptionCondition.validate(imageFilterParams, BLUEPRINT_UPGRADE_OPTION))
+                .thenReturn(createValidationResult(expectedValue, errorMessage));
+
+        BlueprintValidationResult actual = underTest.isValidBlueprint(imageFilterParams);
+
+        assertEquals(expectedValue, actual.isValid());
+        assertEquals(expectedValue ?  null : errorMessage, actual.getReason());
     }
 
-    @Test
-    public void testIsValidBlueprintShouldReturnTrueWhenTheUpgradeOptionIsGaOnDefaultBlueprintAndTheUpgradeIsOsUpgrade() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, BlueprintUpgradeOption.GA);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, true, false, true);
-        assertTrue(actual.isValid());
-        assertNull(actual.getReason());
-        verifyNoInteractions(customTemplateUpgradeValidator);
+    private BlueprintValidationResult createValidationResult(boolean expectedValue, String errorMessage) {
+        return new BlueprintValidationResult(expectedValue, expectedValue ? null : errorMessage);
     }
 
-    @Test
-    public void testIsValidBlueprintShouldReturnTrueWhenTheUpgradeOptionIsDisabledOnDefaultBlueprintAndTheUpgradeIsRuntimeUpgradeWithInternal() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, BlueprintUpgradeOption.DISABLED);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, true, true);
-        assertTrue(actual.isValid());
-        verifyNoInteractions(customTemplateUpgradeValidator);
-    }
-
-    @Test
-    public void testIsValidBlueprintShouldReturnTrueWhenTheTemplateIsAValidCustomTemplate() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.USER_MANAGED, BlueprintUpgradeOption.ENABLED);
-        when(customTemplateUpgradeValidator.isValid(blueprint)).thenReturn(new BlueprintValidationResult(true));
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, false);
-        assertTrue(actual.isValid());
-        assertNull(actual.getReason());
-        verify(customTemplateUpgradeValidator).isValid(blueprint);
-    }
-
-    @Test
-    public void testIsValidBlueprintShouldReturnFalseWhenTheTemplateIsANotValidCustomTemplate() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.USER_MANAGED, BlueprintUpgradeOption.ENABLED);
-        BlueprintValidationResult result = new BlueprintValidationResult(false, "Custom template not eligible.");
-        when(customTemplateUpgradeValidator.isValid(blueprint)).thenReturn(result);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, false);
-        assertFalse(actual.isValid());
-        assertEquals(result.getReason(), actual.getReason());
-        verify(customTemplateUpgradeValidator).isValid(blueprint);
-    }
-
-    @Test
-    public void testIsValidBlueprintShouldReturnTrueWhenTheTemplateIsANotValidCustomTemplateButTheEntitlementIsGranted() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.USER_MANAGED, BlueprintUpgradeOption.ENABLED);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, true);
-        assertTrue(actual.isValid());
-        verifyNoInteractions(customTemplateUpgradeValidator);
-    }
-
-    @Test
-    public void testIsValidBlueprintShouldReturnTrueWhenTheTemplateIsANotValidCustomTemplateButInternalApiUsed() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.USER_MANAGED, BlueprintUpgradeOption.DISABLED);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, true, false);
-        assertTrue(actual.isValid());
-        assertNull(actual.getReason());
-        verifyNoInteractions(customTemplateUpgradeValidator);
-    }
-
-    @Test
-    public void testIsValidBlueprintShouldReturnTrueWhenTheUpgradeOptionIsEnabledOnDefaultBlueprintAndTheUpgradeIsOsUpgrade() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, BlueprintUpgradeOption.ENABLED);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, true, false, true);
-        assertTrue(actual.isValid());
-        verifyNoInteractions(customTemplateUpgradeValidator);
-    }
-
-    @Test
-    public void testIsValidBlueprintShouldReturnTrueWhenTheUpgradeOptionIsOsEnabledOnDefaultBlueprintAndTheUpgradeIsOsUpgrade() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, BlueprintUpgradeOption.OS_UPGRADE_ENABLED);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, true, false, true);
-        assertTrue(actual.isValid());
-        verifyNoInteractions(customTemplateUpgradeValidator);
-    }
-
-    @Test
-    public void testIsValidBlueprintShouldReturnTrueWhenTheUpgradeOptionIsOsEnabledOnDefaultBlueprintAndTheUpgradeIsRuntimeUpgrade() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, BlueprintUpgradeOption.OS_UPGRADE_ENABLED);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, true);
-        assertTrue(actual.isValid());
-        verifyNoInteractions(customTemplateUpgradeValidator);
-    }
-
-    @Test
-    public void testIsValidBlueprintShouldReturnTrueWhenTheUpgradeOptionIsOsDisabledOnDefaultBlueprintAndTheUpgradeIsRuntimeUpgrade() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, BlueprintUpgradeOption.OS_UPGRADE_DISABLED);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, true);
-        assertTrue(actual.isValid());
-        verifyNoInteractions(customTemplateUpgradeValidator);
-    }
-
-    @Test
-    public void testIsValidBlueprintShouldReturnTrueWhenTheUpgradeOptionNullOnDefaultBlueprintAndTheUpgradeIsOsUpgrade() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, null);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, true, false, true);
-        assertTrue(actual.isValid());
-        verifyNoInteractions(customTemplateUpgradeValidator);
-    }
-
-    @Test
-    public void testIsValidBlueprintShouldReturnFalseWhenTheUpgradeOptionIsOsDisabledOnDefaultBlueprintAndTheUpgradeIsOsUpgrade() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, BlueprintUpgradeOption.OS_UPGRADE_DISABLED);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, true, false, true);
-        assertFalse(actual.isValid());
-        assertEquals("The cluster template is not eligible for upgrade", actual.getReason());
-        verifyNoInteractions(customTemplateUpgradeValidator);
-    }
-
-    @Test
-    public void testIsValidBlueprintShouldReturnFalseWhenTheUpgradeOptionIsDisabledOnDefaultBlueprintAndTheUpgradeIsOsUpgrade() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, BlueprintUpgradeOption.DISABLED);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, true, false, true);
-        assertFalse(actual.isValid());
-        assertEquals("The cluster template is not eligible for upgrade", actual.getReason());
-        verifyNoInteractions(customTemplateUpgradeValidator);
-    }
-
-    @Test
-    public void testIsValidBlueprintShouldReturnTrueWhenTheUpgradeOptionIsMaintenanceGAOnDefaultBlueprintAndTheUpgradeIsRuntimeUpgrade() {
-        Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, BlueprintUpgradeOption.MAINTENANCE_UPGRADE_GA);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, false);
-        assertTrue(actual.isValid());
-        assertNull(actual.getReason());
-        verifyNoInteractions(customTemplateUpgradeValidator);
-    }
-
-    private Blueprint createBlueprint(ResourceStatus resourceStatus, BlueprintUpgradeOption upgradeOption) {
+    private Blueprint createBlueprint(ResourceStatus resourceStatus) {
         Blueprint blueprint = new Blueprint();
         blueprint.setStatus(resourceStatus);
-        blueprint.setBlueprintUpgradeOption(upgradeOption);
+        blueprint.setBlueprintUpgradeOption(BLUEPRINT_UPGRADE_OPTION);
         return blueprint;
+    }
+
+    private ImageFilterParams createImageFilterParams(Blueprint blueprint, boolean skipValidations, boolean dataHubUpgradeEntitled) {
+        return new ImageFilterParams(null, null, false, null, null, blueprint, null,
+                new InternalUpgradeSettings(skipValidations, dataHubUpgradeEntitled, false), null, null, null, false);
     }
 
 }

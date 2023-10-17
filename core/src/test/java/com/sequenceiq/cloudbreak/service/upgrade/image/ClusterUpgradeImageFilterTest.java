@@ -44,7 +44,7 @@ public class ClusterUpgradeImageFilterTest {
     private ClusterUpgradeImageFilter underTest;
 
     @Mock
-    private BlueprintBasedUpgradeValidator blueprintBasedUpgradeValidator;
+    private BlueprintUpgradeOptionValidator blueprintUpgradeOptionValidator;
 
     @Mock
     private ImageCatalogService imageCatalogService;
@@ -62,26 +62,26 @@ public class ClusterUpgradeImageFilterTest {
 
     @Test
     void testFilterWithImageCatalogShouldReturnErrorMessageWhenTheBlueprintIsNotEligible() {
-        when(blueprintBasedUpgradeValidator.isValidBlueprint(imageFilterParams)).thenReturn(new BlueprintValidationResult(false, BLUEPRINT_ERROR));
+        when(blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams)).thenReturn(new BlueprintValidationResult(false, BLUEPRINT_ERROR));
 
-        ImageFilterResult actual = underTest.filter(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams);
+        ImageFilterResult actual = underTest.getAvailableImagesForUpgrade(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams);
 
         assertTrue(actual.getImages().isEmpty());
         assertEquals(BLUEPRINT_ERROR, actual.getReason());
-        verify(blueprintBasedUpgradeValidator).isValidBlueprint(imageFilterParams);
+        verify(blueprintUpgradeOptionValidator).isValidBlueprint(imageFilterParams);
         verifyNoInteractions(imageCatalogService);
         verifyNoInteractions(imageFilterUpgradeService);
     }
 
     @Test
     void testFilterShouldReturnErrorMessageWhenTheBlueprintIsNotEligible() {
-        when(blueprintBasedUpgradeValidator.isValidBlueprint(imageFilterParams)).thenReturn(new BlueprintValidationResult(false, BLUEPRINT_ERROR));
+        when(blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams)).thenReturn(new BlueprintValidationResult(false, BLUEPRINT_ERROR));
 
-        ImageFilterResult actual = underTest.filter(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams);
+        ImageFilterResult actual = underTest.getAvailableImagesForUpgrade(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams);
 
         assertTrue(actual.getImages().isEmpty());
         assertEquals(BLUEPRINT_ERROR, actual.getReason());
-        verify(blueprintBasedUpgradeValidator).isValidBlueprint(imageFilterParams);
+        verify(blueprintUpgradeOptionValidator).isValidBlueprint(imageFilterParams);
         verifyNoInteractions(imageCatalogService);
         verifyNoInteractions(imageFilterUpgradeService);
     }
@@ -90,12 +90,12 @@ public class ClusterUpgradeImageFilterTest {
     void testFilterWithImageCatalogShouldReturnErrorMessageWhenThereAreNoAvailableCandidateImage() throws CloudbreakImageCatalogException {
         String errorMessage = "There are no available image";
         ImageFilterResult imageFilterResult = new ImageFilterResult(Collections.emptyList(), errorMessage);
-        when(blueprintBasedUpgradeValidator.isValidBlueprint(imageFilterParams)).thenReturn(new BlueprintValidationResult(true));
+        when(blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams)).thenReturn(new BlueprintValidationResult(true));
         when(imageCatalogService
                 .getImageFilterResult(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams.getImageCatalogPlatform(), imageFilterParams.isGetAllImages()))
                 .thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams);
+        ImageFilterResult actual = underTest.getAvailableImagesForUpgrade(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams);
 
         assertTrue(actual.getImages().isEmpty());
         assertEquals(errorMessage, actual.getReason());
@@ -108,13 +108,13 @@ public class ClusterUpgradeImageFilterTest {
         List<Image> otherImages = List.of(otherImage);
         ImageFilterResult imageFilterResult = new ImageFilterResult(images, EMPTY_REASON);
         ImageFilterResult otherImageFilterResult = new ImageFilterResult(otherImages, EMPTY_REASON);
-        when(blueprintBasedUpgradeValidator.isValidBlueprint(imageFilterParams)).thenReturn(new BlueprintValidationResult(true));
+        when(blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams)).thenReturn(new BlueprintValidationResult(true));
         when(imageCatalogService
                 .getImageFilterResult(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams.getImageCatalogPlatform(), imageFilterParams.isGetAllImages()))
                 .thenReturn(imageFilterResult);
         when(imageFilterUpgradeService.filterImages(imageFilterResult, imageFilterParams)).thenReturn(otherImageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams);
+        ImageFilterResult actual = underTest.getAvailableImagesForUpgrade(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams);
 
         assertEquals(actual, otherImageFilterResult);
     }

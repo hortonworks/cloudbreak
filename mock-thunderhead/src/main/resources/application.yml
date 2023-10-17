@@ -88,6 +88,7 @@ auth:
     postgres.upgrade.skip.attached.datahubs.check.enable: false
     postgres.upgrade.skip.service.stop.enable: false
     upgrade.skip.attached.datahubs.check.enable: false
+    upgrade.skip.rolling.upgrade.validation: false
     targeting.subnets.for.endpoint.access.gateway.enable: true
     cost.calculation.enable: true
     co2.calculation.enable: true

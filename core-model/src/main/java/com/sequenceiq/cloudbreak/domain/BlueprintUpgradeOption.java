@@ -39,9 +39,20 @@ public enum BlueprintUpgradeOption {
      * A template can be upgraded without the CDP_RUNTIME_UPGRADE_DATAHUB entitlement. Maintenance upgrade means
      * the 4th digit upgrade. For example 7.2.9-b1 -> 7.2.9-b2.
      */
-    MAINTENANCE_UPGRADE_GA;
+    MAINTENANCE_UPGRADE_GA,
+
+    /**
+     * This enables the rolling upgrade for the template.
+     */
+    ROLLING_UPGRADE_ENABLED;
 
     public boolean isOsUpgradeEnabled() {
-        return OS_UPGRADE_ENABLED.equals(this) || ENABLED.equals(this) || MAINTENANCE_UPGRADE_GA.equals(this) || GA.equals(this);
+        return OS_UPGRADE_ENABLED.equals(this) || ENABLED.equals(this) || MAINTENANCE_UPGRADE_GA.equals(this) || GA.equals(this)
+                || ROLLING_UPGRADE_ENABLED.equals(this);
     }
+
+    public boolean isRollingUpgradeEnabled() {
+        return ROLLING_UPGRADE_ENABLED.equals(this);
+    }
+
 }

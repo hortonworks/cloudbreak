@@ -148,8 +148,7 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
 
     @Override
     @InternalOnly
-    public FlowIdentifier osUpgradeByUpgradeSetsInternal(@TenantAwareParam @ResourceCrn String crn,
-            OrderedOSUpgradeSetRequest orderedOsUpgradeSetRequest) {
+    public FlowIdentifier osUpgradeByUpgradeSetsInternal(@TenantAwareParam @ResourceCrn String crn, OrderedOSUpgradeSetRequest orderedOsUpgradeSetRequest) {
         Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
         return upgradeService.triggerOsUpgradeByUpgradeSets(NameOrCrn.ofCrn(crn), workspaceId, orderedOsUpgradeSetRequest.getImageId(),
                 orderedOsUpgradeSetRequest.getOrderedOsUpgradeSets());
