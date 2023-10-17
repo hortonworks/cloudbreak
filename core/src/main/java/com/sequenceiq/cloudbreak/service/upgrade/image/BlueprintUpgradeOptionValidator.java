@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 
@@ -21,44 +22,44 @@ class BlueprintUpgradeOptionValidator {
     @Inject
     private CustomTemplateUpgradeValidator customTemplateUpgradeValidator;
 
-    BlueprintValidationResult isValidBlueprint(Blueprint blueprint, boolean lockComponents, boolean skipValidations, boolean dataHubUpgradeEntitled) {
-        LOGGER.debug("Validating blueprint upgrade option. Name: {}, type: {}, upgradeOption: {}, lockComponents: {}", blueprint.getName(),
-                blueprint.getStatus(), blueprint.getBlueprintUpgradeOption(), lockComponents);
-        return isDefaultBlueprint(blueprint) ? isEnabledForDefaultBlueprint(lockComponents, blueprint, skipValidations)
-                : isEnabledForCustomBlueprint(blueprint, skipValidations, dataHubUpgradeEntitled);
+    @Inject
+    private BlueprintUpgradeOptionCondition blueprintUpgradeOptionCondition;
+
+    BlueprintValidationResult isValidBlueprint(ImageFilterParams imageFilterParams) {
+        LOGGER.debug("Validating blueprint upgrade option. {}", imageFilterParams);
+        if (isDataLake(imageFilterParams) || imageFilterParams.isSkipValidations()) {
+            return new BlueprintValidationResult(true);
+        } else {
+            Blueprint blueprint = imageFilterParams.getBlueprint();
+            return isDefaultBlueprint(blueprint) ?
+                    isEnabledForDefaultBlueprint(imageFilterParams, blueprint) :
+                    isEnabledForCustomBlueprint(blueprint, imageFilterParams.isDataHubUpgradeEntitled());
+        }
+    }
+
+    private boolean isDataLake(ImageFilterParams imageFilterParams) {
+        return StackType.DATALAKE.equals(imageFilterParams.getStackType());
     }
 
     private boolean isDefaultBlueprint(Blueprint blueprint) {
         return blueprint.getStatus().isDefault();
     }
 
-    private BlueprintValidationResult isEnabledForDefaultBlueprint(boolean lockComponents, Blueprint blueprint, boolean skipValidations) {
+    private BlueprintValidationResult isEnabledForDefaultBlueprint(ImageFilterParams imageFilterParams, Blueprint blueprint) {
         BlueprintUpgradeOption upgradeOption = getBlueprintUpgradeOption(blueprint);
-        if (skipValidations) {
-            LOGGER.debug("Blueprint options are not validated if the request is internal");
-            return createResult(true);
-        } else {
-            return createResult(!lockComponents || upgradeOption.isOsUpgradeEnabled());
-        }
+        return blueprintUpgradeOptionCondition.validate(imageFilterParams, upgradeOption);
     }
 
     private BlueprintUpgradeOption getBlueprintUpgradeOption(Blueprint blueprint) {
         return Optional.ofNullable(blueprint.getBlueprintUpgradeOption()).orElse(ENABLED);
     }
 
-    private BlueprintValidationResult isEnabledForCustomBlueprint(Blueprint blueprint, boolean skipValidations, boolean dataHubUpgradeEntitled) {
-        BlueprintValidationResult result;
-        if (skipValidations || dataHubUpgradeEntitled) {
-            LOGGER.debug("Custom blueprint options are not validated if the request is internal or the DH upgrade entitlement is granted");
-            result = createResult(true);
+    private BlueprintValidationResult isEnabledForCustomBlueprint(Blueprint blueprint, boolean dataHubUpgradeEntitled) {
+        if (dataHubUpgradeEntitled) {
+            LOGGER.debug("Custom blueprint options are not validated if the  DH upgrade entitlement is granted");
+            return new BlueprintValidationResult(true);
         } else {
-            result = customTemplateUpgradeValidator.isValid(blueprint);
+            return customTemplateUpgradeValidator.isValid(blueprint);
         }
-        return result;
-    }
-
-    private BlueprintValidationResult createResult(boolean result) {
-        return new BlueprintValidationResult(result,
-                result ? null : "The cluster template is not eligible for upgrade");
     }
 }

@@ -2,6 +2,7 @@ package com.sequenceiq.distrox.v1.distrox;
 
 import static com.sequenceiq.cloudbreak.util.TestConstants.DO_NOT_KEEP_VARIANT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,7 +33,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeS
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.component.PreparedImages;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeCandidateFilterService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -102,9 +103,6 @@ class StackUpgradeOperationsTest {
     private ClusterUpgradeAvailabilityService clusterUpgradeAvailabilityService;
 
     @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
     private UpgradePreconditionService upgradePreconditionService;
 
     @Mock
@@ -121,6 +119,9 @@ class StackUpgradeOperationsTest {
 
     @Mock
     private ClusterService clusterService;
+
+    @Mock
+    private ClusterUpgradeCandidateFilterService clusterUpgradeCandidateFilterService;
 
     private NameOrCrn nameOrCrn;
 
@@ -199,7 +200,7 @@ class StackUpgradeOperationsTest {
         verify(upgradePreconditionService).notUsingEphemeralVolume(stack);
         verify(clusterUpgradeAvailabilityService)
                 .checkForUpgradesByName(stack, false, false, request.getInternalUpgradeSettings(), false);
-        verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(upgradeResponse, request, false);
+        verify(clusterUpgradeCandidateFilterService).filterUpgradeOptions(upgradeResponse, request, false);
     }
 
     @Test
@@ -227,7 +228,7 @@ class StackUpgradeOperationsTest {
         verify(limitConfiguration).getUpgradeNodeCountLimit(any());
         verify(clusterUpgradeAvailabilityService)
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false);
-        verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(upgradeResponse, request, false);
+        verify(clusterUpgradeCandidateFilterService).filterUpgradeOptions(upgradeResponse, request, false);
         verifyNoInteractions(upgradePreconditionService);
         verifyNoInteractions(clusterDBValidationService);
     }
@@ -258,7 +259,7 @@ class StackUpgradeOperationsTest {
         verify(limitConfiguration).getUpgradeNodeCountLimit(any());
         verify(clusterUpgradeAvailabilityService)
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false);
-        verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(upgradeResponse, request, true);
+        verify(clusterUpgradeCandidateFilterService).filterUpgradeOptions(upgradeResponse, request, true);
         verify(upgradePreconditionService).checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation(), false, ACCOUNT_ID);
         verifyNoInteractions(clusterDBValidationService);
     }
@@ -289,7 +290,7 @@ class StackUpgradeOperationsTest {
         verify(limitConfiguration).getUpgradeNodeCountLimit(any());
         verify(clusterUpgradeAvailabilityService)
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false);
-        verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(upgradeResponse, request, true);
+        verify(clusterUpgradeCandidateFilterService).filterUpgradeOptions(upgradeResponse, request, true);
         verifyNoInteractions(upgradePreconditionService, clusterDBValidationService);
     }
 
@@ -324,7 +325,7 @@ class StackUpgradeOperationsTest {
         verify(limitConfiguration).getUpgradeNodeCountLimit(any());
         verify(clusterUpgradeAvailabilityService)
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false);
-        verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(upgradeResponseToReturn, request, true);
+        verify(clusterUpgradeCandidateFilterService).filterUpgradeOptions(upgradeResponseToReturn, request, true);
         verify(upgradePreconditionService).checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation(), false, ACCOUNT_ID);
         verifyNoInteractions(clusterDBValidationService);
     }
@@ -360,7 +361,7 @@ class StackUpgradeOperationsTest {
         verify(limitConfiguration).getUpgradeNodeCountLimit(any());
         verify(clusterUpgradeAvailabilityService)
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false);
-        verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(upgradeResponseToReturn, request, true);
+        verify(clusterUpgradeCandidateFilterService).filterUpgradeOptions(upgradeResponseToReturn, request, true);
         verify(upgradePreconditionService).checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation(), false, ACCOUNT_ID);
         verifyNoInteractions(clusterDBValidationService);
     }
@@ -396,7 +397,7 @@ class StackUpgradeOperationsTest {
         verify(upgradePreconditionService).notUsingEphemeralVolume(stack);
         verify(clusterUpgradeAvailabilityService)
                 .checkForUpgradesByName(stack, false, false, request.getInternalUpgradeSettings(), true);
-        verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(upgradeResponse, request, false);
+        verify(clusterUpgradeCandidateFilterService).filterUpgradeOptions(upgradeResponse, request, false);
     }
 
     @Test
@@ -409,7 +410,7 @@ class StackUpgradeOperationsTest {
                 ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES.name());
         UpgradeV4Response upgradeResponse = new UpgradeV4Response();
         upgradeResponse.setUpgradeCandidates(List.of(new ImageInfoV4Response()));
-        upgradeResponse.getUpgradeCandidates().stream().forEach(imageInfoV4Response -> imageInfoV4Response.setImageId(IMAGE_ID));
+        upgradeResponse.getUpgradeCandidates().forEach(imageInfoV4Response -> imageInfoV4Response.setImageId(IMAGE_ID));
         when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
         when(upgradeService.isOsUpgrade(request)).thenReturn(false);
         when(upgradePreconditionService.notUsingEphemeralVolume(stack)).thenReturn(false);
@@ -420,13 +421,13 @@ class StackUpgradeOperationsTest {
         UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, request);
 
         assertEquals(upgradeResponse, actual);
-        assertEquals(false, upgradeResponse.getUpgradeCandidates().get(0).isPrepared());
+        assertFalse(upgradeResponse.getUpgradeCandidates().get(0).isPrepared());
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
         verify(upgradeService).isOsUpgrade(request);
         verify(upgradePreconditionService).notUsingEphemeralVolume(stack);
         verify(clusterUpgradeAvailabilityService)
                 .checkForUpgradesByName(stack, false, false, request.getInternalUpgradeSettings(), true);
-        verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(upgradeResponse, request, false);
+        verify(clusterUpgradeCandidateFilterService).filterUpgradeOptions(upgradeResponse, request, false);
     }
 
     @Test
@@ -443,7 +444,7 @@ class StackUpgradeOperationsTest {
                 ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES.name());
         UpgradeV4Response upgradeResponse = new UpgradeV4Response();
         upgradeResponse.setUpgradeCandidates(List.of(new ImageInfoV4Response()));
-        upgradeResponse.getUpgradeCandidates().stream().forEach(imageInfoV4Response -> imageInfoV4Response.setImageId(IMAGE_ID));
+        upgradeResponse.getUpgradeCandidates().forEach(imageInfoV4Response -> imageInfoV4Response.setImageId(IMAGE_ID));
         when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
         when(upgradeService.isOsUpgrade(request)).thenReturn(false);
         when(upgradePreconditionService.notUsingEphemeralVolume(stack)).thenReturn(false);
@@ -454,13 +455,13 @@ class StackUpgradeOperationsTest {
         UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, request);
 
         assertEquals(upgradeResponse, actual);
-        assertEquals(false, upgradeResponse.getUpgradeCandidates().get(0).isPrepared());
+        assertFalse(upgradeResponse.getUpgradeCandidates().get(0).isPrepared());
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
         verify(upgradeService).isOsUpgrade(request);
         verify(upgradePreconditionService).notUsingEphemeralVolume(stack);
         verify(clusterUpgradeAvailabilityService)
                 .checkForUpgradesByName(stack, false, false, request.getInternalUpgradeSettings(), true);
-        verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(upgradeResponse, request, false);
+        verify(clusterUpgradeCandidateFilterService).filterUpgradeOptions(upgradeResponse, request, false);
     }
 
     @Test
@@ -493,7 +494,7 @@ class StackUpgradeOperationsTest {
         verify(upgradePreconditionService).notUsingEphemeralVolume(stack);
         verify(clusterUpgradeAvailabilityService)
                 .checkForUpgradesByName(stack, false, false, request.getInternalUpgradeSettings(), false);
-        verify(clusterUpgradeAvailabilityService, never()).filterUpgradeOptions(upgradeResponse, request, false);
+        verify(clusterUpgradeCandidateFilterService, never()).filterUpgradeOptions(upgradeResponse, request, false);
         verifyNoInteractions(clusterService, clusterComponentConfigProvider);
 
 

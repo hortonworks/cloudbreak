@@ -29,8 +29,7 @@ public class UpgradeV4Response {
         this.replaceVms = replaceVms;
     }
 
-    public UpgradeV4Response(ImageInfoV4Response current,
-            List<ImageInfoV4Response> upgradeCandidates, String reason) {
+    public UpgradeV4Response(ImageInfoV4Response current, List<ImageInfoV4Response> upgradeCandidates, String reason) {
         this.current = current;
         this.upgradeCandidates = upgradeCandidates;
         this.reason = reason;

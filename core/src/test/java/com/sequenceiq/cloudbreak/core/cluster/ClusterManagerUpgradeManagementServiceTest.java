@@ -118,16 +118,14 @@ public class ClusterManagerUpgradeManagementServiceTest {
             verify(clusterApiConnectors, times(expectedClusterApiCalls)).getConnector(stackDto);
             verify(clusterApi).stopCluster(true);
         }
-        if (!rollingUpgradeEnabled) {
-            verify(clusterApi).startClusterMgmtServices();
-        }
+        verify(clusterApi).startClusterMgmtServices();
         verify(cmServerQueryService, times(2)).queryCmVersion(stackDto);
         verify(clusterUpgradeService).upgradeClusterManager(STACK_ID);
         verify(clusterManagerUpgradeService).upgradeClouderaManager(stackDto, clouderaManagerRepo);
     }
 
     @Test
-    public void testUpgradeClusterManagerVersionIsDifferentAfterTheUpgrade() throws CloudbreakOrchestratorException {
+    public void testUpgradeClusterManagerVersionIsDifferentAfterTheUpgrade() throws CloudbreakOrchestratorException, CloudbreakException {
         when(clouderaManagerRepo.getFullVersion()).thenReturn(CM_VERSION);
         when(stackDto.getStack()).thenReturn(stack);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId())).thenReturn(clouderaManagerRepo);
@@ -152,6 +150,8 @@ public class ClusterManagerUpgradeManagementServiceTest {
 
         verify(clusterComponentConfigProvider).getClouderaManagerRepoDetails(cluster.getId());
         verify(cmServerQueryService).queryCmVersion(stackDto);
-        verifyNoInteractions(clusterApiConnectors, clusterUpgradeService, clusterManagerUpgradeService);
+        verify(clusterApiConnectors).getConnector(stackDto);
+        verify(clusterApi).startClusterMgmtServices();
+        verifyNoInteractions(clusterUpgradeService, clusterManagerUpgradeService);
     }
 }

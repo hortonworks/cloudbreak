@@ -71,6 +71,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS_SDX_INTEGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SKIP_ROLLING_UPGRADE_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_TARGETED_UPSCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_TRIAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_UNBOUND_ELIMINATION;
@@ -420,6 +421,10 @@ public class EntitlementService {
 
     public boolean isDatalakeZduOSUpgradeEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_DATALAKE_ZDU_OS_UPGRADE);
+    }
+
+    public boolean isSkipRollingUpgradeValidationEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_SKIP_ROLLING_UPGRADE_VALIDATION);
     }
 
     public boolean isEnvironmentPrivilegedUserEnabled(String accountId) {
