@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
@@ -103,7 +104,7 @@ public class RdsUpgradeService {
         if (dataHubWithEmbeddedDatabase) {
             LOGGER.warn("Database upgrade is not allowed for DataHubs with embedded database ");
             throw new BadRequestException("Database upgrade is not allowed for DataHubs with embedded database");
-        }  else {
+        } else {
             LOGGER.info("RDS upgrade has been initiated for stack {} to version {}, request version was {}",
                     nameOrCrn.getNameOrCrn(), calculatedVersion, targetMajorVersion);
             validate(nameOrCrn, stackView, calculatedVersion, accountId, forced);
@@ -119,6 +120,10 @@ public class RdsUpgradeService {
         boolean onAzure = CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform);
         TargetMajorVersion calculatedVersion = ObjectUtils.defaultIfNull(requestedTargetVersion, onAzure ?
                 defaultAzureTargetMajorVersion : defaultTargetMajorVersion);
+        if (onAzure && entitlementService.isAzureDatabaseFlexibleServerUpgradeEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            calculatedVersion = defaultTargetMajorVersion;
+            LOGGER.info("Azure Flexible Server upgrade is enabled, setting the target Pg version to: {}", calculatedVersion);
+        }
         LOGGER.debug("Calculated upgrade target is {}, based on requested {}, general default {} and Azure default {}",
                 calculatedVersion,
                 requestedTargetVersion,

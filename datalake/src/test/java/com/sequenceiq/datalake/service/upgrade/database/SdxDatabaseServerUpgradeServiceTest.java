@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -62,6 +65,8 @@ public class SdxDatabaseServerUpgradeServiceTest {
     private static final String SDX_CRN = "sdxCrn";
 
     private static final String DB_CRN = "dbCrn";
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 
     private static final NameOrCrn NAME_OR_CRN = NameOrCrn.ofCrn(SDX_CRN);
 
@@ -101,6 +106,9 @@ public class SdxDatabaseServerUpgradeServiceTest {
 
     @Mock
     private StackDatabaseServerResponse databaseResponse;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private SdxDatabaseServerUpgradeService underTest;
@@ -146,7 +154,8 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any())).thenReturn(true);
         when(databaseResponse.getStatus()).thenReturn(DatabaseServerStatus.AVAILABLE);
 
-        SdxUpgradeDatabaseServerResponse response = underTest.upgrade(NAME_OR_CRN, null, false);
+        SdxUpgradeDatabaseServerResponse response =
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgrade(NAME_OR_CRN, null, false));
 
         assertEquals(flowIdentifier, response.getFlowIdentifier());
 
@@ -168,7 +177,8 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any())).thenReturn(true);
         when(databaseResponse.getStatus()).thenReturn(DatabaseServerStatus.AVAILABLE);
 
-        SdxUpgradeDatabaseServerResponse response = underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false);
+        SdxUpgradeDatabaseServerResponse response =
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false));
 
         assertEquals(flowIdentifier, response.getFlowIdentifier());
         assertEquals(targetMajorVersion, response.getTargetMajorVersion());
@@ -188,7 +198,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         SdxStatusEntity status = getDatalakeStatus(datalakeStatusEnum);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(status);
 
-        Assertions.assertThatCode(() -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false))
+        Assertions.assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(String.format("Data Lake %s is not available for database server upgrade", SDX_CLUSTER_NAME));
 
@@ -203,7 +213,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         doThrow(new NotFoundException("SDX cluster 'testCluster' not found."))
                 .when(sdxService).getByNameOrCrn(any(), eq(NAME_OR_CRN));
 
-        Assertions.assertThatCode(() -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false))
+        Assertions.assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false)))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("SDX cluster 'testCluster' not found.");
 
@@ -221,7 +231,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         SdxStatusEntity status = getDatalakeStatus(datalakeStatusEnum);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(status);
 
-        Assertions.assertThatCode(() -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false))
+        Assertions.assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(String.format("Database server upgrade for Data Lake %s is already in progress", SDX_CLUSTER_NAME));
 
@@ -240,7 +250,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any())).thenReturn(false);
         when(databaseUpgradeRuntimeValidator.getMinRuntimeVersion()).thenReturn("minimumVersion");
 
-        Assertions.assertThatCode(() -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false))
+        Assertions.assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(String.format("The database upgrade of Data Lake %s is not permitted for runtime version tooLow. The minimum supported runtime " +
                         "version is minimumVersion", SDX_CLUSTER_NAME));
@@ -260,7 +270,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(databaseResponse.getStatus()).thenReturn(DatabaseServerStatus.AVAILABLE);
         doThrow(new BadRequestException("badrequest")).when(cloudbreakStackService).checkUpgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion);
 
-        Assertions.assertThatCode(() -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false))
+        Assertions.assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("badrequest");
 

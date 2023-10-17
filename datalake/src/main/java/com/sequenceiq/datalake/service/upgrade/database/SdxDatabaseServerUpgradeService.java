@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -80,6 +81,9 @@ public class SdxDatabaseServerUpgradeService {
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public SdxUpgradeDatabaseServerResponse upgrade(NameOrCrn sdxNameOrCrn, TargetMajorVersion requestedTargetMajorVersion, boolean forced) {
         LOGGER.debug("Upgrade database server called for {} with target major version {}", sdxNameOrCrn, requestedTargetMajorVersion);
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
@@ -118,6 +122,10 @@ public class SdxDatabaseServerUpgradeService {
         boolean onAzure = cluster.getCloudStorageFileSystemType() == FileSystemType.ADLS_GEN_2;
         TargetMajorVersion targetMajorVersion = ObjectUtils.defaultIfNull(
                 requestedTargetMajorVersion, onAzure ? defaultAzureTargetMajorVersion : defaultTargetMajorVersion);
+        if (onAzure && entitlementService.isAzureDatabaseFlexibleServerUpgradeEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            targetMajorVersion = defaultTargetMajorVersion;
+            LOGGER.info("Azure Flexible Server upgrade is enabled, setting the target Pg version to: {}", targetMajorVersion);
+        }
         LOGGER.debug("Calculated upgrade target is {}, based on requested {}, general default {} and Azure default {}",
                 targetMajorVersion,
                 requestedTargetMajorVersion,

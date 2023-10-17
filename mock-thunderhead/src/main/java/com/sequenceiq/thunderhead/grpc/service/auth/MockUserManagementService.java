@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_H
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
@@ -534,6 +535,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.azure.database.flexibleserver.enabled}")
     private boolean azureDatabaseFlexibleServerEnabled;
 
+    @Value("${auth.mock.azure.database.flexibleserver.upgrade.enabled}")
+    private boolean azureDatabaseFlexibleServerUpgradeEnabled;
+
     @Value("${auth.mock.secret.rotation.enabled}")
     private boolean secretRotationEnabled;
 
@@ -977,6 +981,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (azureDatabaseFlexibleServerEnabled) {
             builder.addEntitlements(createEntitlement(CDP_AZURE_DATABASE_FLEXIBLE_SERVER));
+        }
+        if (azureDatabaseFlexibleServerUpgradeEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE));
         }
         if (dlBackupCompressionEnable) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_DB_BACKUP_ENABLE_COMPRESSION));
