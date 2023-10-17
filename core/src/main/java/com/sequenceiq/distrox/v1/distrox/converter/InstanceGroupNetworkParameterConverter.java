@@ -149,22 +149,23 @@ public class InstanceGroupNetworkParameterConverter {
 
     private InstanceGroupAwsNetworkV4Parameters convertToAwsNetworkParams(Pair<InstanceGroupAwsNetworkV1Parameters,
             EnvironmentNetworkResponse> source) {
-        InstanceGroupAwsNetworkV1Parameters key = source.getKey();
+        InstanceGroupAwsNetworkV1Parameters instanceGroupAwsNetworkV1Parameters = source.getKey();
 
         InstanceGroupAwsNetworkV4Parameters response = new InstanceGroupAwsNetworkV4Parameters();
 
-        if (key != null) {
-            List<String> subnetIds = key.getSubnetIds();
+        if (instanceGroupAwsNetworkV1Parameters != null) {
+            List<String> subnetIds = instanceGroupAwsNetworkV1Parameters.getSubnetIds();
+            EnvironmentNetworkResponse environmentNetworkResponse = source.getValue();
             if (subnetIdsDefined(subnetIds)) {
                 response.setSubnetIds(subnetIds);
-            } else if (source.getValue() != null) {
-                response.setSubnetIds(List.of(source.getValue().getPreferedSubnetId()));
+            } else if (environmentNetworkResponse != null) {
+                response.setSubnetIds(List.of(environmentNetworkResponse.getPreferedSubnetId()));
             }
-            List<String> endpointGatewaySubnetIds = key.getEndpointGatewaySubnetIds();
+            List<String> endpointGatewaySubnetIds = instanceGroupAwsNetworkV1Parameters.getEndpointGatewaySubnetIds();
             if (subnetIdsDefined(endpointGatewaySubnetIds)) {
                 response.setEndpointGatewaySubnetIds(endpointGatewaySubnetIds);
-            } else if (source.getValue() != null) {
-                response.setEndpointGatewaySubnetIds(List.copyOf(source.getValue().getEndpointGatewaySubnetIds()));
+            } else if (environmentNetworkResponse != null) {
+                response.setEndpointGatewaySubnetIds(List.copyOf(environmentNetworkResponse.getEndpointGatewaySubnetIds()));
             }
         }
 
