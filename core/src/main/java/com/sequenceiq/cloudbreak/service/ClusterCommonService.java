@@ -321,8 +321,12 @@ public class ClusterCommonService {
     public FlowIdentifier updatePillarConfiguration(NameOrCrn nameOrCrn, String accountId) {
         StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
-        validateOperationOnStack(stack, "Updates to the Pillar Configuration");
-        return clusterOperationService.updatePillarConfiguration(stack.getId());
+        if (stack.isStackInDeletionOrFailedPhase() || stack.isStopped() || stack.isStopInProgress()) {
+            throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. Cannot start updates to the Pillar Configuration",
+                    stack.getName(), stack.getStatus()));
+        } else {
+            return clusterOperationService.updatePillarConfiguration(stack.getId());
+        }
     }
 
     public CertificatesRotationV4Response rotateAutoTlsCertificates(NameOrCrn nameOrCrn, String accountId,
