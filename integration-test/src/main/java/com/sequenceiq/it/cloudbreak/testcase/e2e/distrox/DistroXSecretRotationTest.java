@@ -8,11 +8,13 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_MG
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_CM_INTERMEDIATE_CA_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_CM_SERVICE_SHARED_DB;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_BOOT_SECRETS;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CB_CM_ADMIN_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_INTERMEDIATE_CA_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_SERVICE_SHARED_DB;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_MGMT_CM_ADMIN_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS;
 
 import java.util.List;
 import java.util.Set;
@@ -61,11 +63,20 @@ public class DistroXSecretRotationTest extends AbstractE2ETest {
     public void testSecretRotation(TestContext testContext, ITestContext iTestContext) {
         testContext
                 .given(SdxInternalTestDto.class)
-                .when(sdxTestClient.rotateSecret(Set.of(DATALAKE_MGMT_CM_ADMIN_PASSWORD, DATALAKE_CB_CM_ADMIN_PASSWORD, DATALAKE_DATABASE_ROOT_PASSWORD)))
+                .when(sdxTestClient.rotateSecret(Set.of(
+                        DATALAKE_SALT_BOOT_SECRETS,
+                        DATALAKE_MGMT_CM_ADMIN_PASSWORD,
+                        DATALAKE_CB_CM_ADMIN_PASSWORD,
+                        DATALAKE_DATABASE_ROOT_PASSWORD)))
                 .awaitForFlow()
                 .given(DistroXTestDto.class)
-                .when(distroXTestClient.rotateSecret(Set.of(CLUSTER_MGMT_CM_ADMIN_PASSWORD, CLUSTER_CB_CM_ADMIN_PASSWORD,
-                        CLUSTER_CM_SERVICES_DB_PASSWORD, CLUSTER_CM_DB_PASSWORD, DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD)))
+                .when(distroXTestClient.rotateSecret(Set.of(
+                        SALT_BOOT_SECRETS,
+                        CLUSTER_MGMT_CM_ADMIN_PASSWORD,
+                        CLUSTER_CB_CM_ADMIN_PASSWORD,
+                        CLUSTER_CM_SERVICES_DB_PASSWORD,
+                        CLUSTER_CM_DB_PASSWORD,
+                        DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD)))
                 .awaitForFlow()
                 .validate();
     }
