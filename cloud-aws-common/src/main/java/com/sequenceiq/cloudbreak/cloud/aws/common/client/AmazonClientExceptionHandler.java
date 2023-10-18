@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 
-import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.core.exception.SdkException;
 
 @Aspect
 public class AmazonClientExceptionHandler {
@@ -32,7 +32,7 @@ public class AmazonClientExceptionHandler {
     public Object mapException(ProceedingJoinPoint proceedingJoinPoint) {
         try {
             return proceedingJoinPoint.proceed();
-        } catch (SdkClientException e) {
+        } catch (SdkException e) {
             LOGGER.error("Cannot execute `{}`: {}", proceedingJoinPoint.getSignature().toString(), e.getMessage(), e);
             throw sdkClientExceptionMapper.map(awsCredentialView, region, e, proceedingJoinPoint.getSignature());
         } catch (Throwable e) {

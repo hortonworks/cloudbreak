@@ -110,7 +110,8 @@ public class StackSyncActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.error("Error during Stack synchronization flow:", payload.getException());
-                flowMessageService.fireEventAndLog(context.getStackId(), UPDATE_FAILED.name(), STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE);
+                flowMessageService.fireEventAndLog(context.getStackId(), UPDATE_FAILED.name(), STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE,
+                        payload.getException().getMessage());
                 sendEvent(context);
             }
 
