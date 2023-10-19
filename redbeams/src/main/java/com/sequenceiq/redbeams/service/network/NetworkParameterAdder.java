@@ -1,5 +1,6 @@
 package com.sequenceiq.redbeams.service.network;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.FLEXIBLE_SERVER_DELEGATED_SUBNET_ID;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 
 import java.util.Comparator;
@@ -49,8 +50,6 @@ public class NetworkParameterAdder {
     private static final String SUBNET_FOR_PRIVATE_ENDPOINT = "subnetForPrivateEndpoint";
 
     private static final String EXISTING_PRIVATE_DNS_ZONE_ID = "existingDatabasePrivateDnsZoneId";
-
-    private static final String FLEXIBLE_SERVER_DELEGATED_SUBNET_ID = "flexibleServerDelegatedSubnetId";
 
     private static final String SUBNETS = "subnets";
 
@@ -115,18 +114,39 @@ public class NetworkParameterAdder {
             parameters.put(SUBNET_FOR_PRIVATE_ENDPOINT, getAzureSubnetToUseWithPrivateEndpoint(environmentResponse, dbStack));
             databasePrivateDnsZoneId.ifPresent(dnsZoneId -> parameters.put(EXISTING_PRIVATE_DNS_ZONE_ID, dnsZoneId));
         }
-        String subscriptionId = subnetListerService.getAzureSubscriptionId(environmentResponse.getCrn());
-        Optional<Set<String>> delegatedSubnetIds = Optional.ofNullable(network.getAzure())
-                .map(EnvironmentNetworkAzureParams::getFlexibleServerSubnetIds);
-        Set<CloudSubnet> delegatedSubnets = delegatedSubnetIds.map(dsIds -> subnetListerService.fetchNetworksFiltered(dbStack, dsIds)).orElse(Set.of());
-        LOGGER.info("Fetched delegated subnets: {}", delegatedSubnets);
-        delegatedSubnets.stream()
-                .filter(subnet -> StringUtils.isNotBlank(subnet.getCidr()))
-                .max(Comparator.comparingLong(subnet -> new SubnetUtils(subnet.getCidr()).getInfo().getAddressCountLong()))
-                .map(subnet -> subnetListerService.expandAzureResourceId(subnet, environmentResponse, subscriptionId))
-                .ifPresent(subnet -> parameters.put(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID, subnet.getId()));
+
+        Optional<String> delegatedSubnet = getFlexibleServerSubnetIdFromRequestOrEnvironment(network, environmentResponse, dbStack);
+        delegatedSubnet.ifPresent(subnetId -> parameters.put(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID, subnetId));
+
         databasePrivateDnsZoneId.ifPresent(dnsZoneId -> parameters.put(EXISTING_PRIVATE_DNS_ZONE_ID, dnsZoneId));
         return parameters;
+    }
+
+    private Optional<String> getFlexibleServerSubnetIdFromRequestOrEnvironment(EnvironmentNetworkResponse network,
+            DetailedEnvironmentResponse environmentResponse, DBStack dbStack) {
+        Optional<String> optionalSubnetId = Optional.ofNullable(dbStack.getParameters())
+                .map(params -> params.get(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID));
+        optionalSubnetId.ifPresent(subnetId -> LOGGER.debug("Delegated subnet id from database request: {}", subnetId));
+        String subscriptionId = subnetListerService.getAzureSubscriptionId(environmentResponse.getCrn());
+        if (optionalSubnetId.isPresent() && isSubnetIdInEnvironmentNetworkParams(network, optionalSubnetId.get())) {
+            return optionalSubnetId.map(subnetId -> subnetListerService.expandAzureResourceId(subnetId, environmentResponse, subscriptionId));
+        } else {
+            Optional<Set<String>> delegatedSubnetIds = Optional.ofNullable(network.getAzure())
+                    .map(EnvironmentNetworkAzureParams::getFlexibleServerSubnetIds);
+            Set<CloudSubnet> delegatedSubnets = delegatedSubnetIds.map(dsIds -> subnetListerService.fetchNetworksFiltered(dbStack, dsIds)).orElse(Set.of());
+            LOGGER.info("Fetched delegated subnets: {}", delegatedSubnets);
+            return delegatedSubnets.stream()
+                    .filter(subnet -> StringUtils.isNotBlank(subnet.getCidr()))
+                    .max(Comparator.comparingLong(subnet -> new SubnetUtils(subnet.getCidr()).getInfo().getAddressCountLong()))
+                    .map(subnet -> subnetListerService.expandAzureResourceId(subnet, environmentResponse, subscriptionId).getId());
+        }
+    }
+
+    private static Boolean isSubnetIdInEnvironmentNetworkParams(EnvironmentNetworkResponse network, String optionalSubnetId) {
+        return Optional.ofNullable(network.getAzure())
+                .map(EnvironmentNetworkAzureParams::getFlexibleServerSubnetIds)
+                .map(subnetSet -> subnetSet.contains(optionalSubnetId))
+                .orElse(false);
     }
 
     private String getAzureSubnetToUseWithPrivateEndpoint(DetailedEnvironmentResponse environmentResponse, DBStack dbStack) {
