@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.distrox.v1.distrox.service.DistroXClusterNameNormalizerService;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -85,6 +86,9 @@ public class StackOperationsTest {
 
     @Mock
     private WorkspaceService workspaceService;
+
+    @Mock
+    private DistroXClusterNameNormalizerService clusterNameNormalizerService;
 
     @Mock
     private StackService stackService;

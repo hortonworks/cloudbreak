@@ -87,6 +87,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.distrox.v1.distrox.service.DistroXClusterNameNormalizerService;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -156,6 +157,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
 
     @Inject
     private ClusterOperationService clusterOperationService;
+
+    @Inject
+    private DistroXClusterNameNormalizerService clusterNameNormalizerService;
 
     @Inject
     private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
@@ -228,6 +232,8 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         StackViewV4Response stackViewV4Response = stackApiViewToStackViewV4ResponseConverter.convert(stackApiView);
         LOGGER.info("Adding environment name to the response.");
         environmentServiceDecorator.prepareEnvironment(stackViewV4Response);
+        LOGGER.info("Making sure name does not contain terminated timestamp for consistency.");
+        clusterNameNormalizerService.removeDeletedTimeStampFromName(stackViewV4Response);
         return stackViewV4Response;
     }
 
