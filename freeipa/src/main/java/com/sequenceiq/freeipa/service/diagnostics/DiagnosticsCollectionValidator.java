@@ -9,30 +9,35 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.telemetry.support.SupportBundleConfiguration;
 import com.sequenceiq.cloudbreak.validation.AbstractDiagnosticsCollectionValidator;
-import com.sequenceiq.cloudbreak.validation.MinAppVersionChecker;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ImageDateChecker;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.image.ImageService;
 
 @Component
 public class DiagnosticsCollectionValidator extends AbstractDiagnosticsCollectionValidator<Telemetry, Status> {
 
-    private static final int MIN_MAJOR_VERSION = 2;
-
-    private static final int MIN_MINOR_VERSION = 33;
+    private static final String MIN_IMAGE_DATE = "2021-01-28";
 
     private final EntitlementService entitlementService;
 
-    public DiagnosticsCollectionValidator(SupportBundleConfiguration supportBundleConfiguration, EntitlementService entitlementService) {
+    private final ImageService imageService;
+
+    public DiagnosticsCollectionValidator(SupportBundleConfiguration supportBundleConfiguration, EntitlementService entitlementService,
+            ImageService imageService) {
         super(supportBundleConfiguration);
         this.entitlementService = entitlementService;
+        this.imageService = imageService;
     }
 
     public void validate(BaseDiagnosticsCollectionRequest request, Stack stack) {
         checkMaintenance(stack.getResourceCrn());
-        validate(stack.getTelemetry(), request.getDestination(), stack.getStackStatus().getStatus(), stack.getName(), stack.getAppVersion());
+        ImageEntity image = imageService.getByStackId(stack.getId());
+        validate(stack.getTelemetry(), request.getDestination(), stack.getStackStatus().getStatus(), stack.getName(), image.getDate());
     }
 
     @Override
@@ -44,13 +49,13 @@ public class DiagnosticsCollectionValidator extends AbstractDiagnosticsCollectio
     }
 
     @Override
-    public MinAppVersionChecker getMinAppVersionChecker() {
-        return new MinAppVersionChecker(MIN_MAJOR_VERSION, MIN_MINOR_VERSION);
+    public ImageDateChecker getImageDateChecker() {
+        return new ImageDateChecker(MIN_IMAGE_DATE);
     }
 
     @Override
     public void validateCloudStorageSettings(Telemetry telemetry, String stackName,
-            ValidationResult.ValidationResultBuilder validationBuilder) {
+            ValidationResultBuilder validationBuilder) {
         if (telemetry.getLogging() == null) {
             validationBuilder.error(String.format("Cloud storage logging is disabled for FreeIPA (name: '%s')", stackName));
         } else if (telemetry.getLogging().getS3() == null
