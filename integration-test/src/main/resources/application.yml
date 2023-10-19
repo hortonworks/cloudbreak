@@ -129,11 +129,11 @@ integrationtest:
       freeipa:
         group: master
         instanceType: m5.2xlarge
-    vpcId: vpc-0fc0a422f82ea8eec
+    vpcId: vpc-08ebd4ef51a160824
     subnetIds:
-      - subnet-025e39ebeb6efeca8
-      - subnet-0d8756068a4e78bd1
-      - subnet-065019e58cbefd9b8
+      - subnet-072d4a31e010af1bb
+      - subnet-0f9fd28e4ce341398
+      - subnet-05bc4f37606560b18
     publicKeyId: api-e2e-test
     credential:
       type: role
@@ -160,7 +160,7 @@ integrationtest:
         instanceProfile:
       baseLocation:
       fileSystemType: S3
-    hybridCloudSecurityGroupID: sg-0c73a7f815c452e9d
+    hybridCloudSecurityGroupID: sg-02bf7840fc64073fa
     freeipa:
       upgrade:
         imageId: 9c1c8959-86a7-4b7d-af5a-be252f8b395d
@@ -269,11 +269,11 @@ integrationtest:
         group: master
         instanceType: n1-standard-16
     network:
-      sharedProjectId:
-      networkId:
-      noPublicIp:
-      noFirewallRules:
-      subnetId:
+      sharedProjectId: gcp-eng-network-enterprise
+      networkId: ent-private
+      noPublicIp: true
+      noFirewallRules: true
+      subnetId: private-us-west2
     credential:
       type: json
       json:
@@ -296,8 +296,8 @@ integrationtest:
       volumeCount: 2
       volumeType: local-ssd
     securityAccess:
-      knoxSecurityGroup:
-      defaultSecurityGroup:
+      knoxSecurityGroup: cloudbreak
+      defaultSecurityGroup: cloudbreak
     cloudstorage:
       baseLocation:
       fileSystemType: GCS
