@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.experience.config.ExperiencePathConfig;
-import com.sequenceiq.environment.experience.config.ExperiencePathPlaceholders;
 
 @Component
 public class CommonExperiencePathCreator {
@@ -34,8 +33,7 @@ public class CommonExperiencePathCreator {
     }
 
     public String createPathToExperiencePolicyProvider(CommonExperience xp) {
-        String path = createCombinedBasedAddress(xp)
-                + getTruncatedInternalEnvironmentEndpoint(xp)
+        String path = createCombinedBasedAddressForPolicy(xp)
                 + xp.getPolicyEndpoint();
         LOGGER.info("Path created to experience for policy fetch: {}", path);
         return path;
@@ -45,8 +43,8 @@ public class CommonExperiencePathCreator {
         return xp.getBaseAddress() + ":" + xp.getEnvironmentEndpointPort();
     }
 
-    private String getTruncatedInternalEnvironmentEndpoint(CommonExperience xp) {
-        return xp.getInternalEnvironmentEndpoint().replace("/" + componentsToReplace.get(ExperiencePathPlaceholders.ENVIRONMENT_CRN.getPlaceholder()), "");
+    private String createCombinedBasedAddressForPolicy(CommonExperience xp) {
+        return xp.getBaseAddress() + ":" + xp.getPolicyPort();
     }
 
 }

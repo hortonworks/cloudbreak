@@ -38,7 +38,7 @@ public class CommonExperiencePathCreatorTest {
     @Test
     void testCreatePathToExperiencePolicyProviderShouldCombineThePathCorretly() {
         CommonExperience xp = createCommonExperience();
-        String expected = xp.getBaseAddress() + ":" + xp.getEnvironmentEndpointPort() + xp.getInternalEnvironmentEndpoint() + xp.getPolicyEndpoint();
+        String expected = xp.getBaseAddress() + ":" + xp.getPolicyPort() + xp.getPolicyEndpoint();
 
         String result = underTest.createPathToExperiencePolicyProvider(xp);
 
@@ -53,7 +53,8 @@ public class CommonExperiencePathCreatorTest {
         cxp.setAddress("https://someHostAddress:somePort");
         cxp.setBaseAddress("https://someHostAddress");
         cxp.setEnvironmentEndpointPort("somePort");
-        cxp.setPolicyEndpoint("somePolicyPath");
+        cxp.setPolicyEndpoint("/somePolicyPath");
+        cxp.setPolicyPort("8081");
         cxp.setBusinessName("someBusinessName");
         return cxp;
     }
