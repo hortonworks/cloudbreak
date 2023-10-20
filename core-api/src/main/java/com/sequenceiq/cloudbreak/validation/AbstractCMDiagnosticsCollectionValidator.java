@@ -22,8 +22,7 @@ public abstract class AbstractCMDiagnosticsCollectionValidator<T>
     }
 
     @Override
-    protected MinAppVersionChecker getMinAppVersionChecker() {
+    protected ImageDateChecker getImageDateChecker() {
         return null;
     }
-
 }
