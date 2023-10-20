@@ -3,20 +3,13 @@ package com.sequenceiq.it.cloudbreak.cloud.v4;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Configuration
 @ConfigurationProperties(prefix = "integrationtest")
 public class CommonClusterManagerProperties {
 
-    private static final String FIRST_RUNTIME_VERSION_WITH_SPARK_VERSION = "7.2.18";
-
-    private static final String SPARK_VERSION = "3";
-
     private final ClouderaManager clouderamanager = new ClouderaManager();
-
-    private final VersionComparator versionComparator = new VersionComparator();
 
     private String runtimeVersion;
 
@@ -57,12 +50,10 @@ public class CommonClusterManagerProperties {
     }
 
     public String getInternalSdxBlueprintName() {
-        return String.format(internalSdxBlueprintName, runtimeVersion);
-    }
+        return String.format(internalSdxBlueprintName, runtimeVersion); }
 
     public String getInternalSdxBlueprintNameWithRuntimeVersion(String runtimeVersion) {
-        return String.format(internalSdxBlueprintName, runtimeVersion);
-    }
+        return String.format(internalSdxBlueprintName, runtimeVersion); }
 
     public void setInternalSdxBlueprintName(String internalSdxBlueprintName) {
         this.internalSdxBlueprintName = internalSdxBlueprintName;
@@ -73,11 +64,7 @@ public class CommonClusterManagerProperties {
     }
 
     public String getInternalDistroXBlueprintName() {
-        return String.format(internalDistroXBlueprintName, runtimeVersion, getSparkVersion());
-    }
-
-    private String getSparkVersion() {
-        return versionComparator.compare(() -> runtimeVersion, () -> FIRST_RUNTIME_VERSION_WITH_SPARK_VERSION) >= 0 ? SPARK_VERSION : "";
+        return String.format(internalDistroXBlueprintName, runtimeVersion);
     }
 
     public void setInternalDistroXBlueprintName(String internalDistroXBlueprintName) {
