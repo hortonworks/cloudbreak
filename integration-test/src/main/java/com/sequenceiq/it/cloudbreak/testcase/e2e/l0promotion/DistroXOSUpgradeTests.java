@@ -71,7 +71,7 @@ public class DistroXOSUpgradeTests extends AbstractE2ETest {
 
         testContext
                 .given(distroXName, DistroXTestDto.class)
-                    .withTemplate(String.format(commonClusterManagerProperties.getInternalDistroXBlueprintType(), currentRuntimeVersion))
+                    .withTemplate(commonClusterManagerProperties.getInternalDistroXBlueprintName(currentRuntimeVersion))
                 .when(distroXTestClient.create(), key(distroXName))
                 .await(STACK_AVAILABLE, key(distroXName))
                 .awaitForHealthyInstances()

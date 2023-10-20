@@ -55,7 +55,7 @@ public class DistroXAwsMigrationTest extends AbstractE2ETest {
                 .given(DistroXImageTestDto.class)
                 .withImageCatalog(imgCatalogKey)
                 .given(DistroXTestDto.class)
-                .withTemplate(String.format(commonClusterManagerProperties.getInternalDistroXBlueprintType(), commonClusterManagerProperties.getUpgrade()
+                .withTemplate(commonClusterManagerProperties.getInternalDistroXBlueprintName(commonClusterManagerProperties.getUpgrade()
                         .getDistroXUpgradeCurrentVersion()))
                 .withImageSettings()
                 .withLoadBalancer()
