@@ -10,14 +10,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -33,16 +39,19 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
+import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.dto.UpgradeDatabaseMigrationParams;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.UpgradeDatabaseServerRequest;
+import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.DBResourceService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.upgrade.DBUpgradeMigrationService;
 
 @ExtendWith(MockitoExtension.class)
 public class UpgradeDatabaseServerHandlerTest {
+    private static final String RESOURCE_CRN = "crn:cdp:datalake:us-west-1:tenant:datalake:resourceCrn";
 
     @Mock
     private DBStackService dbStackService;
@@ -76,6 +85,9 @@ public class UpgradeDatabaseServerHandlerTest {
 
     @Mock
     private DBUpgradeMigrationService dbUpgradeMigrationService;
+
+    @Mock
+    private DatabaseServerConfigService databaseServerConfigService;
 
     @InjectMocks
     private UpgradeDatabaseServerHandler underTest;
@@ -111,13 +123,15 @@ public class UpgradeDatabaseServerHandlerTest {
         assertEquals(event.getData().getTargetMajorVersion().getMajorVersion(), dbStackArgumentCaptor.getValue().getMajorVersion().getMajorVersion());
     }
 
-    @Test
-    void testDoAcceptWithMigrationRequest() {
+    @ParameterizedTest
+    @MethodSource("migratedUserNames")
+    void testDoAcceptWithMigrationRequest(String originalUserName, String migratedUserName) {
         HandlerEvent<UpgradeDatabaseServerRequest> event = getHandlerEvent(true);
         DBStack dbStack = new DBStack();
         DatabaseServer databaseServer = new DatabaseServer();
         dbStack.setDatabaseServer(databaseServer);
         dbStack.setCloudPlatform(CloudPlatform.AZURE.name());
+        dbStack.setResourceCrn(RESOURCE_CRN);
         DatabaseStack databaseStack = generateDatabaseStack();
         UpgradeDatabaseMigrationParams migrationParams = getMigrationParams();
 
@@ -128,14 +142,18 @@ public class UpgradeDatabaseServerHandlerTest {
         when(cloudConnector.resources()).thenReturn(resourceConnector);
         when(dbStackService.getById(event.getData().getResourceId())).thenReturn(dbStack);
         when(dbUpgradeMigrationService.mergeDatabaseStacks(any(DBStack.class), any(), any())).thenReturn(databaseStack);
+        DatabaseServerConfig databaseServerConfig = new DatabaseServerConfig();
+        databaseServerConfig.setConnectionUserName(originalUserName);
+        when(databaseServerConfigService.getByCrn(any(Crn.class))).thenReturn(Optional.of(databaseServerConfig));
         ArgumentCaptor<DBStack> dbStackArgumentCaptor = ArgumentCaptor.forClass(DBStack.class);
+        ArgumentCaptor<DatabaseServerConfig> databaseServerConfigArgumentCaptor = ArgumentCaptor.forClass(DatabaseServerConfig.class);
 
         Selectable nextFlowStepSelector = underTest.doAccept(event);
 
         verify(dbStackService).getById(event.getData().getResourceId());
         verify(dbStackService).save(dbStackArgumentCaptor.capture());
         verify(dbUpgradeMigrationService).mergeDatabaseStacks(any(DBStack.class), eq(migrationParams), eq(cloudConnector));
-
+        verify(databaseServerConfigService).update(databaseServerConfigArgumentCaptor.capture());
         assertEquals("UPGRADEDATABASESERVERSUCCESS", nextFlowStepSelector.selector());
         DBStack actualDbStack = dbStackArgumentCaptor.getValue();
         DatabaseServer actualDbServer = actualDbStack.getDatabaseServer();
@@ -151,6 +169,14 @@ public class UpgradeDatabaseServerHandlerTest {
         assertNull(actualDbServer.getDescription());
         assertNull(actualDbServer.getRootPassword());
         assertNull(actualDbServer.getPort());
+        DatabaseServerConfig actualDatabaseServerConfig = databaseServerConfigArgumentCaptor.getValue();
+        assertEquals(migratedUserName, actualDatabaseServerConfig.getConnectionUserName());
+    }
+
+    private static Stream<Arguments> migratedUserNames() {
+        return Stream.of(
+                Arguments.of("username@cuttable", "username"),
+                Arguments.of("username", "username"));
     }
 
     @Test

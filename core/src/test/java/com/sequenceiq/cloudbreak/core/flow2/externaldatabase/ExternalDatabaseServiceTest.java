@@ -70,6 +70,7 @@ import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseServerPa
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfig;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfigKey;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
@@ -555,6 +556,20 @@ class ExternalDatabaseServiceTest {
         verify(redbeamsClient).upgradeByCrn(eq(RDBMS_CRN), argumentCaptor.capture());
         verify(redbeamsClient, never()).hasFlowRunningByFlowId(any());
         assertEquals(targetMajorVersion, argumentCaptor.getValue().getUpgradeTargetMajorVersion());
+    }
+
+    @ParameterizedTest
+    @MethodSource("dbUpgradeMigrationScenarios")
+    void testIsMigrationNeededDuringUpgrade(String platform, String current, String target, boolean migrationRequired) {
+        StackView stack = mock(StackView.class);
+        Database database = new Database();
+        database.setExternalDatabaseEngineVersion(current);
+        TargetMajorVersion majorVersion = mock(TargetMajorVersion.class);
+
+        when(stack.getCloudPlatform()).thenReturn(platform);
+        when(majorVersion.getMajorVersion()).thenReturn(target);
+        boolean actualMigrationNeeded = underTest.isMigrationNeededDuringUpgrade(stack, database, majorVersion);
+        assertEquals(actualMigrationNeeded, migrationRequired);
     }
 
     @ParameterizedTest

@@ -62,6 +62,10 @@ public class UpgradeRdsService {
         setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_DBSERVER_UPGRADE), ResourceEvent.CLUSTER_RDS_UPGRADE_DBSERVER_UPGRADE);
     }
 
+    void migrateDatabaseSettingsState(Long stackId) {
+        setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_MIGRATE_DB_SETTINGS), ResourceEvent.CLUSTER_RDS_UPGRADE_MIGRATE_DB_SETTINGS);
+    }
+
     void restoreRdsState(Long stackId) {
         setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_RESTORE_DATA), ResourceEvent.CLUSTER_RDS_UPGRADE_RESTORE_DATA);
     }

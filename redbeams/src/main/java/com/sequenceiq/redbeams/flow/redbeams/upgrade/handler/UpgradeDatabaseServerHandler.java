@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -26,11 +27,13 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
+import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.dto.UpgradeDatabaseMigrationParams;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsUpgradeFailedEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.UpgradeDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.UpgradeDatabaseServerSuccess;
+import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.DBResourceService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.upgrade.DBUpgradeMigrationService;
@@ -54,6 +57,9 @@ public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<U
 
     @Inject
     private DBUpgradeMigrationService upgradeMigrationService;
+
+    @Inject
+    private DatabaseServerConfigService databaseServerConfigService;
 
     @Override
     public String selector() {
@@ -85,7 +91,6 @@ public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<U
             if (databaseMigrationRequired) {
                 LOGGER.debug("Migration is required, new database server attributes: {}", migrationParams.getAttributes());
                 databaseStack = upgradeMigrationService.mergeDatabaseStacks(dbStack, migrationParams, connector);
-
             } else {
                 LOGGER.debug("Migration was not needed, progressing with original databaseStack..");
             }
@@ -93,6 +98,11 @@ public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<U
 
             if (databaseMigrationRequired) {
                 updateDbStack(dbStack, targetMajorVersion, databaseStack);
+                DatabaseServerConfig dbServerConfig = databaseServerConfigService.getByCrn(Crn.safeFromString(dbStack.getResourceCrn()))
+                        .orElseThrow(() -> new IllegalStateException("Cannot find database server " + dbStack.getResourceCrn()));
+                LOGGER.debug("Updating database server connection user name after database upgrade.");
+                dbServerConfig.setConnectionUserName(dbServerConfig.getConnectionUserName().split("@")[0]);
+                databaseServerConfigService.update(dbServerConfig);
             } else {
                 updateDbVersionOnly(dbStack, targetMajorVersion);
             }

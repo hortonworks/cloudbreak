@@ -510,6 +510,7 @@ public enum ResourceEvent {
     CLUSTER_RDS_UPGRADE_STOP_SERVICES("cluster.externaldatabase.upgrade.stop.services"),
     CLUSTER_RDS_UPGRADE_BACKUP_DATA("cluster.externaldatabase.upgrade.backup.data"),
     CLUSTER_RDS_UPGRADE_DBSERVER_UPGRADE("cluster.externaldatabase.upgrade.dbserver"),
+    CLUSTER_RDS_UPGRADE_MIGRATE_DB_SETTINGS("cluster.externaldatabase.upgrade.migrate.db.settings"),
     CLUSTER_RDS_UPGRADE_RESTORE_DATA("cluster.externaldatabase.upgrade.restore.data"),
     CLUSTER_RDS_UPGRADE_START_SERVICES("cluster.externaldatabase.upgrade.start.services"),
     CLUSTER_RDS_UPGRADE_INSTALL_PG("cluster.externaldatabase.upgrade.install.pg"),

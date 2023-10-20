@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackCon
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfigKey;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.DatabaseType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -111,7 +112,7 @@ public class ExternalDatabaseService {
         DatabaseAvailabilityType externalDatabase = stack.getExternalDatabaseCreationType();
         LOGGER.info("Create external {} database server in environment {} for DataHub {}", externalDatabase.name(), environment.getName(), cluster.getName());
         try {
-            Optional<DatabaseServerV4Response> existingDatabase = findExistingDatabase(stack, environment.getCrn());
+            Optional<DatabaseServerV4Response> existingDatabase = findExistingDatabase(stack, stack.getCluster(), environment.getCrn());
             if (existingDatabase.isPresent()) {
                 databaseCrn = existingDatabase.get().getCrn();
                 LOGGER.debug("Found existing database with CRN {}", databaseCrn);
@@ -277,13 +278,13 @@ public class ExternalDatabaseService {
                 : AttemptResults.finishWith(!flowState.getLatestFlowFinalizedAndFailed());
     }
 
-    private Optional<DatabaseServerV4Response> findExistingDatabase(Stack stack, String environmentCrn) {
+    public Optional<DatabaseServerV4Response> findExistingDatabase(StackView stack, ClusterView clusterView, String environmentCrn) {
         String stackCrn = stack.getResourceCrn();
         LOGGER.debug("Trying to find existing database server for environment {} and cluster {}", environmentCrn, stackCrn);
         try {
             return Optional.ofNullable(redbeamsClient.getByClusterCrn(environmentCrn, stackCrn));
         } catch (NotFoundException ignore) {
-            LOGGER.debug("External database in environment {} for cluster {} does not exist.", environmentCrn, stack.getCluster());
+            LOGGER.debug("External database in environment {} for cluster {} does not exist.", environmentCrn, clusterView);
             return Optional.empty();
         }
     }
@@ -404,19 +405,34 @@ public class ExternalDatabaseService {
                 .run(() -> databaseObtainerService.obtainAttemptResult(cluster, databaseOperation, databaseCrn, cancellable));
     }
 
+    public boolean isMigrationNeededDuringUpgrade(StackView stack, Database database, TargetMajorVersion majorVersion) {
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(stack.getCloudPlatform());
+        Versioned currentVersion = database::getExternalDatabaseEngineVersion;
+        Versioned targetVersion = majorVersion::getMajorVersion;
+        return isMigrationNeededDuringUpgrade(currentVersion, targetVersion, cloudPlatform);
+    }
+
+    private boolean isMigrationNeededDuringUpgrade(Versioned currentVersion, Versioned targetVersion, CloudPlatform cloudPlatform) {
+        boolean upgradeTargetVersionImpliesFlexibleServerMigration =
+                CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(targetVersion, TargetMajorVersion.VERSION_14::getMajorVersion);
+        boolean currentVersionImpliesFlexibleServerMigration =
+                CMRepositoryVersionUtil.isVersionOlderThanLimited(currentVersion, TargetMajorVersion.VERSION_14::getMajorVersion);
+        boolean migrationNeeded = cloudPlatform == CloudPlatform.AZURE && upgradeTargetVersionImpliesFlexibleServerMigration &&
+                currentVersionImpliesFlexibleServerMigration;
+        String migrationNeededMsg = migrationNeeded ? "Database settings migration is needed during upgrade." :
+                "Database settings migration is not needed during upgrade.";
+        LOGGER.debug("{} Current version: {}, target version: {}, cloudPlatform: {}",
+                migrationNeededMsg, currentVersion.getVersion(), targetVersion.getVersion(), cloudPlatform);
+        return migrationNeeded;
+    }
+
     public DatabaseServerV4StackRequest migrateDatabaseSettingsIfNeeded(StackDto stack, TargetMajorVersion majorVersion,
             DetailedEnvironmentResponse environment) {
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(stack.getCloudPlatform());
         Versioned currentVersion = stack::getExternalDatabaseEngineVersion;
         Versioned targetVersion = majorVersion::getMajorVersion;
-        boolean upgradeTargetVersionImpliesFlexibleServerMigration = CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(targetVersion,
-                TargetMajorVersion.VERSION_14::getMajorVersion);
-        boolean currentVersionImpliesFlexibleServerMigration = CMRepositoryVersionUtil.isVersionOlderThanLimited(currentVersion,
-                TargetMajorVersion.VERSION_14::getMajorVersion);
 
-        if (cloudPlatform == CloudPlatform.AZURE
-                && upgradeTargetVersionImpliesFlexibleServerMigration
-                && currentVersionImpliesFlexibleServerMigration) {
+        if (isMigrationNeededDuringUpgrade(currentVersion, targetVersion, cloudPlatform)) {
             DatabaseAvailabilityType databaseAvailabilityType = fetchDatabaseAvailabilityType(stack);
 
             Map<String, Object> attributes = getAttributes(stack.getDatabase());

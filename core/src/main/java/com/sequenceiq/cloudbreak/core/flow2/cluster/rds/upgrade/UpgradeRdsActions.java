@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -24,6 +25,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsInstallPostgresPackagesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsInstallPostgresPackagesResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateDatabaseSettingsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateDatabaseSettingsResponse;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesRequest;
@@ -44,6 +47,9 @@ public class UpgradeRdsActions {
 
     @Inject
     private UpgradeRdsService upgradeRdsService;
+
+    @Inject
+    private ExternalDatabaseService externalDatabaseService;
 
     @Bean(name = "UPGRADE_RDS_STOP_SERVICES_STATE")
     public Action<?, ?> stopServicesAndCm() {
@@ -91,11 +97,32 @@ public class UpgradeRdsActions {
         };
     }
 
-    @Bean(name = "UPGRADE_RDS_DATA_RESTORE_STATE")
-    public Action<?, ?> restoreDataToRds() {
+    @Bean(name = "UPGRADE_RDS_MIGRATE_DB_SETTINGS_STATE")
+    public Action<?, ?> migrateDatabaseSettings() {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsUpgradeDatabaseServerResult.class) {
             @Override
-            protected void doExecute(UpgradeRdsContext context, UpgradeRdsUpgradeDatabaseServerResult payload, Map<Object, Object> variables) {
+            protected void doExecute(UpgradeRdsContext context, UpgradeRdsUpgradeDatabaseServerResult payload, Map<Object, Object> variables) throws Exception {
+                if (externalDatabaseService.isMigrationNeededDuringUpgrade(context.getStack(), context.getDatabase(), context.getVersion())) {
+                    upgradeRdsService.migrateDatabaseSettingsState(payload.getResourceId());
+                }
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(UpgradeRdsContext context) {
+                return externalDatabaseService.isMigrationNeededDuringUpgrade(context.getStack(), context.getDatabase(), context.getVersion()) ?
+                        new UpgradeRdsMigrateDatabaseSettingsRequest(context.getStackId(), context.getVersion()) :
+                        new UpgradeRdsMigrateDatabaseSettingsResponse(context.getStackId(), context.getVersion());
+            }
+        };
+    }
+
+    @Bean(name = "UPGRADE_RDS_DATA_RESTORE_STATE")
+    public Action<?, ?> restoreDataToRds() {
+        return new AbstractUpgradeRdsAction<>(UpgradeRdsMigrateDatabaseSettingsResponse.class) {
+            @Override
+            protected void doExecute(UpgradeRdsContext context, UpgradeRdsMigrateDatabaseSettingsResponse payload, Map<Object, Object> variables)
+                    throws Exception {
                 if (upgradeRdsService.shouldRunDataBackupRestore(context.getStack(), context.getCluster())) {
                     upgradeRdsService.restoreRdsState(payload.getResourceId());
                 }
