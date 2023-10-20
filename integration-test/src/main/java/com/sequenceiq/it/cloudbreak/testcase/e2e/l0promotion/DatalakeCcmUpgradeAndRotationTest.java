@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion;
 
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.CCMV2_JUMPGATE_AGENT_ACCESS_KEY;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static java.lang.String.format;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
@@ -39,8 +41,10 @@ import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.EnvironmentUtil;
+import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest {
 
@@ -59,6 +63,9 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest {
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
+
+    @Inject
+    private SdxUtil sdxUtil;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -79,6 +86,7 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest {
         createSdxForEnvironment(testContext);
         upgradeCcmOnEnvironment(testContext);
         rotateCcmV2JumpgateAgentAccessKey(testContext);
+        repairMasterNodes(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -91,6 +99,7 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest {
         createEnvironmentWithCcm(testContext, Tunnel.CCMV2);
         createSdxForEnvironment(testContext);
         upgradeCcmOnEnvironment(testContext);
+        repairMasterNodes(testContext);
     }
 
     private void createEnvironmentWithCcm(TestContext testContext, Tunnel ccmVersion) {
@@ -177,5 +186,25 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest {
             }
             return sdxInternalTestDto;
         };
+    }
+
+    private void repairMasterNodes(TestContext testContext) {
+        testContext
+                .given(SdxInternalTestDto.class)
+                .then((tc, testDto, client) -> {
+                    String sdxName = testDto.getName();
+                    List<String> instancesToRepair = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
+                    LOGGER.info("Gathered instance ids to repair '{}' for SDX with name '{}'", instancesToRepair, sdxName);
+                    SdxRepairRequest clusterRepairRequest = new SdxRepairRequest();
+                    clusterRepairRequest.setNodesIds(instancesToRepair);
+                    LOGGER.debug("Sending repair request to SDX: '{}'", clusterRepairRequest);
+                    FlowIdentifier flowIdentifier = client.getDefaultClient().sdxEndpoint().repairCluster(sdxName, clusterRepairRequest);
+                    LOGGER.info("Repair with flow id '{}' has been initiated on the SDX with name '{}'", flowIdentifier, sdxName);
+                    testDto.setFlow("SDX repair", flowIdentifier);
+                    return testDto;
+                })
+                .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForHealthyInstances()
+                .validate();
     }
 }
