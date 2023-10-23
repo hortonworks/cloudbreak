@@ -396,7 +396,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         } catch (TokenResponseException e) {
             throw gcpStackUtil.getMissingServiceAccountKeyError(e, context.getProjectId());
         } catch (IOException e) {
-            throw new GcpResourceException(String.format("An error occurred while stopping the vm '%s'", instanceId), e);
+            throw new GcpResourceException(String.format("An error occurred while updating the vm '%s'", instanceId), e);
         }
     }
 
@@ -573,7 +573,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         } catch (TokenResponseException e) {
             throw gcpStackUtil.getMissingServiceAccountKeyError(e, context.getProjectId());
         } catch (IOException e) {
-            throw new GcpResourceException(String.format("An error occurred while stopping the vm '%s'", instanceId), e);
+            throw new GcpResourceException(String.format("An error occurred while %s the vm '%s'", stopRequest ? "stopping" : "starting", instanceId), e);
         }
     }
 
