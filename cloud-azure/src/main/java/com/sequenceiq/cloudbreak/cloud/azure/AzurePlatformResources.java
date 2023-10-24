@@ -331,7 +331,7 @@ public class AzurePlatformResources implements PlatformResources {
     }
 
     @Override
-    @Cacheable(cacheNames = "databaseCapabilities", key = "#cloudCredential?.id + #region.getRegionName() + 'database'")
+    @Cacheable(cacheNames = "databaseCapabilities", key = "#cloudCredential?.id + #region.getRegionName() + 'databases'")
     public PlatformDatabaseCapabilities databaseCapabilities(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Map<DatabaseAvailabiltyType, Collection<Region>> enabledRegions = new HashMap<>();
