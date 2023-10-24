@@ -1073,7 +1073,7 @@ public class AzureClient {
                 .findFirst();
         if (flexibleServerCapability.isPresent()) {
             return ZoneRedundantHaSupportedEnum.ENABLED.equals(
-                    flexibleServerCapability.map(e -> e.zoneRedundantHaSupported())
+                    flexibleServerCapability.map(FlexibleServerCapability::zoneRedundantHaSupported)
                     .get());
         }
         return false;

@@ -64,7 +64,7 @@ sdx:
     azure:
       ha:
         backupretentionperiod: 30
-        georedundantbackup: true
+        georedundantbackup: false
       nonha:
         backupretentionperiod: 7
         georedundantbackup: false

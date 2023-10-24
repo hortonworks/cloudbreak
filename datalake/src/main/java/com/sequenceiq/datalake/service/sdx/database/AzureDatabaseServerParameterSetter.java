@@ -97,16 +97,16 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
         boolean localDevelopment = entitlementService.localDevelopment(env.getAccountId());
         if (sdxCluster.isEnableMultiAz() && azure != null && !localDevelopment) {
             if (!sdxCluster.getSdxDatabase().hasExternalDatabase()) {
-                String message = String.format("Azure Data Lake which requested in multi availability zone option must use external database.");
+                String message = "Azure Data Lake requested in multi availability zone setup must use external database.";
                 LOGGER.debug(message);
                 throw new BadRequestException(message);
             } else if (!FLEXIBLE_SERVER.equals(azure.getAzureDatabaseType())) {
-                String message = String.format("Azure Data Lake which requested in multi availability zone option must use Flexible server.");
+                String message = "Azure Data Lake requested in multi availability zone setup must use Flexible server.";
                 LOGGER.debug(message);
                 throw new BadRequestException(message);
             } else if (!ZONE_REDUNDANT.equals(azure.getHighAvailabilityMode())) {
                 String region = env.getLocation().getName();
-                String message = String.format("Azure Data Lake which requested with multi availability zone option " +
+                String message = String.format("Azure Data Lake requested in multi availability zone setup " +
                         "must use Zone redundant Flexible server and the %s region currently does not support that. " +
                         "You can see the limitations on the following url https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/overview. " +
                         "Please contact Microsoft support that you need Zone Redundant Flexible Server option in the given region.", region);

@@ -31,7 +31,7 @@ class AzureFlexibleServerDatabaseTemplateModelBuilderTest {
         Network network = new Network(null);
         network.putParameter("subnets", "subnet");
         Map<String, Object> serverParams = new HashMap<>();
-        serverParams.put("geoRedundantBackup", true);
+        serverParams.put("geoRedundantBackup", false);
         serverParams.put("backupRetentionDays", 3);
         serverParams.put("dbVersion", "dbversion");
         serverParams.put(AzureHighAvailabiltyMode.AZURE_HA_MODE_KEY, AzureHighAvailabiltyMode.SAME_ZONE.name());
@@ -54,7 +54,7 @@ class AzureFlexibleServerDatabaseTemplateModelBuilderTest {
         assertEquals(3, actualResult.get("backupRetentionDays"));
         assertEquals("dbname", actualResult.get("dbServerName"));
         assertEquals("dbversion", actualResult.get("dbVersion"));
-        assertEquals(true, actualResult.get("geoRedundantBackup"));
+        assertEquals(false, actualResult.get("geoRedundantBackup"));
         assertEquals("MemoryOptimized", actualResult.get("skuTier"));
         assertEquals("Standard_E4ds_v4", actualResult.get("skuName"));
         assertEquals(128L, actualResult.get("skuSizeGB"));

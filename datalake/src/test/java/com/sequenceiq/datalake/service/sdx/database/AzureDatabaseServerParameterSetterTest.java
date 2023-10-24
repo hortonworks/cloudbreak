@@ -4,6 +4,7 @@ import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.SAME_ZONE;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.ZONE_REDUNDANT;
 import static com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType.HA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -108,7 +108,7 @@ public class AzureDatabaseServerParameterSetterTest {
         assertEquals(AzureHighAvailabiltyMode.SAME_ZONE, azure.getHighAvailabilityMode());
         assertEquals(AzureDatabaseType.FLEXIBLE_SERVER, azure.getAzureDatabaseType());
         assertTrue(Set.of("3", "2", "1").contains(azure.getAvailabilityZone()));
-        assertEquals(null, azure.getStandbyAvailabilityZone());
+        assertNull(azure.getStandbyAvailabilityZone());
     }
 
     @Test
@@ -225,8 +225,7 @@ public class AzureDatabaseServerParameterSetterTest {
         BadRequestException exception = assertThrows(BadRequestException.class, () ->
                 underTest.validate(databaseServerV4StackRequest, sdxCluster, environmentResponse, "initiatorUserCrn"));
 
-        Assert.assertEquals(exception.getMessage(),
-                "Azure Data Lake which requested in multi availability zone option must use external database.");
+        assertEquals(exception.getMessage(), "Azure Data Lake requested in multi availability zone setup must use external database.");
     }
 
     @Test
@@ -248,8 +247,7 @@ public class AzureDatabaseServerParameterSetterTest {
         BadRequestException exception = assertThrows(BadRequestException.class, () ->
                 underTest.validate(databaseServerV4StackRequest, sdxCluster, environmentResponse, "initiatorUserCrn"));
 
-        Assert.assertEquals(exception.getMessage(),
-                "Azure Data Lake which requested in multi availability zone option must use Flexible server.");
+        assertEquals(exception.getMessage(), "Azure Data Lake requested in multi availability zone setup must use Flexible server.");
     }
 
     @Test
@@ -275,11 +273,10 @@ public class AzureDatabaseServerParameterSetterTest {
         BadRequestException exception = assertThrows(BadRequestException.class, () ->
                 underTest.validate(databaseServerV4StackRequest, sdxCluster, environmentResponse, "initiatorUserCrn"));
 
-        Assert.assertEquals(exception.getMessage(),
-                "Azure Data Lake which requested with multi availability zone option must use Zone redundant " +
-                        "Flexible server and the eu-west-1 region currently does not support that. " +
-                        "You can see the limitations on the following url https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/overview. " +
-                        "Please contact Microsoft support that you need Zone Redundant Flexible Server option in the given region.");
+        assertEquals(exception.getMessage(), "Azure Data Lake requested in multi availability zone setup must use Zone redundant " +
+                "Flexible server and the eu-west-1 region currently does not support that. " +
+                "You can see the limitations on the following url https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/overview. " +
+                "Please contact Microsoft support that you need Zone Redundant Flexible Server option in the given region.");
     }
 
     @Test

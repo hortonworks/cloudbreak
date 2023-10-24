@@ -69,7 +69,7 @@
     },
     "geoRedundantBackup": {
       "type": "bool",
-      "defaultValue": ${(geoRedundantBackup!true)?c},
+      "defaultValue": ${(geoRedundantBackup!false)?c},
       "metadata": {
         "description": "Enable Geo-redundant or not for server backup."
       }
