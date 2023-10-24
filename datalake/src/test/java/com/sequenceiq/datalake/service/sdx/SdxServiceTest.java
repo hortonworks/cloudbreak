@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -30,7 +31,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -48,8 +51,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -70,11 +75,14 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
+import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
@@ -87,6 +95,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -95,6 +104,9 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.sdx.api.model.SdxAwsRequest;
+import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 
 @ExtendWith(MockitoExtension.class)
@@ -172,6 +184,21 @@ class SdxServiceTest {
 
     @Mock
     private SdxDatabaseRepository sdxDatabaseRepository;
+
+    @Mock
+    private ImageCatalogService imageCatalogService;
+
+    @Mock
+    private VirtualMachineConfiguration virtualMachineConfiguration;
+
+    @Mock
+    private PlatformStringTransformer platformStringTransformer;
+
+    @Mock
+    private SdxExternalDatabaseConfigurer externalDatabaseConfigurer;
+
+    @Mock
+    private OwnerAssignmentService ownerAssignmentService;
 
     @InjectMocks
     private SdxService underTest;
@@ -1071,5 +1098,103 @@ class SdxServiceTest {
 
         verifyNoInteractions(sdxReactorFlowManager);
         assertEquals(String.format("SaltStack update cannot be initiated as datalake 'sdx-cluster-name' is currently in '%s' state.", status), ex.getMessage());
+    }
+
+    @Test
+    public void testCreateSdxFailOnCloudStorageRequest() {
+        SdxClusterRequest sdxClusterRequest = getSdxClusterRequest();
+        sdxClusterRequest.setCloudStorage(null);
+        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(Set.of(11, 13, 17, 18));
+        when(environmentClientService.getByName(anyString())).thenReturn(getDetailedEnvironmentResponse());
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
+        ImageV4Response imageV4Response = new ImageV4Response();
+        when(imageCatalogService.getImageResponseFromImageRequest(any(), any())).thenReturn(imageV4Response);
+        assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "name", sdxClusterRequest, null)));
+    }
+
+    @Test
+    public void testCreateSdxSaveFail() throws TransactionExecutionException, IOException {
+        DetailedEnvironmentResponse environmentResponse = getDetailedEnvironmentResponse();
+        when(entitlementService.isRmsEnabledOnDatalake(any())).thenReturn(true);
+        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(Set.of(11, 13, 17, 18));
+        when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        when(externalDatabaseConfigurer.configure(eq(AWS), eq("os"), any(), any(), any(), eq(false))).thenReturn(sdxDatabase);
+        ImageV4Response imageV4Response = new ImageV4Response();
+        when(imageCatalogService.getImageResponseFromImageRequest(any(), any())).thenReturn(imageV4Response);
+        String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
+        StackV4Request stackV4Request = JsonUtil.readValue(enterpriseJson, StackV4Request.class);
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(stackV4Request);
+        when(transactionService.required(any(Supplier.class))).thenThrow(TransactionExecutionException.class);
+        SdxClusterRequest sdxClusterRequest = getSdxClusterRequest();
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            assertThrows(TransactionService.TransactionRuntimeExecutionException.class, () -> underTest.createSdx(USER_CRN, "name", sdxClusterRequest, null));
+        });
+        verify(virtualMachineConfiguration, times(1)).getSupportedJavaVersions();
+        verify(imageCatalogService, times(1)).getImageResponseFromImageRequest(any(), any());
+        verify(environmentClientService, times(2)).getByName(anyString());
+        verify(cdpConfigService, times(1)).getConfigForKey(any());
+        verify(externalDatabaseConfigurer, times(1)).configure(any(), anyString(), any(), any(), any(), anyBoolean());
+        verify(sdxReactorFlowManager, times(0)).triggerSdxCreation(any());
+        verify(transactionService, times(1)).required(any(Supplier.class));
+        verify(sdxClusterRepository, times(0)).save(any(SdxCluster.class));
+        verify(sdxStatusService, times(0)).setStatusForDatalakeAndNotify(eq(DatalakeStatusEnum.REQUESTED), anyString(), any(SdxCluster.class));
+        verify(ownerAssignmentService, times(1)).assignResourceOwnerRoleIfEntitled(anyString(), any());
+        verify(ownerAssignmentService, times(1)).notifyResourceDeleted(any());
+    }
+
+    @Test
+    public void testAddRmsToSdxCluster() throws IOException, TransactionExecutionException {
+        DetailedEnvironmentResponse environmentResponse = getDetailedEnvironmentResponse();
+        when(entitlementService.isRmsEnabledOnDatalake(any())).thenReturn(true);
+        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(Set.of(11, 13, 17, 18));
+        when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        when(externalDatabaseConfigurer.configure(eq(AWS), eq("os"), any(), any(), any(), eq(false))).thenReturn(sdxDatabase);
+        ImageV4Response imageV4Response = new ImageV4Response();
+        when(imageCatalogService.getImageResponseFromImageRequest(any(), any())).thenReturn(imageV4Response);
+        String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
+        StackV4Request stackV4Request = JsonUtil.readValue(enterpriseJson, StackV4Request.class);
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(stackV4Request);
+        SdxClusterRequest sdxClusterRequest = getSdxClusterRequest();
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "name", sdxClusterRequest, null));
+
+        verify(virtualMachineConfiguration, times(1)).getSupportedJavaVersions();
+        verify(imageCatalogService, times(1)).getImageResponseFromImageRequest(any(), any());
+        verify(environmentClientService, times(2)).getByName(anyString());
+        verify(cdpConfigService, times(1)).getConfigForKey(any());
+        verify(externalDatabaseConfigurer, times(1)).configure(any(), anyString(), any(), any(), any(), anyBoolean());
+        verify(sdxReactorFlowManager, times(1)).triggerSdxCreation(any());
+        verify(transactionService, times(1)).required(any(Supplier.class));
+        verify(ownerAssignmentService, times(1)).assignResourceOwnerRoleIfEntitled(anyString(), any());
+    }
+
+    private DetailedEnvironmentResponse getDetailedEnvironmentResponse() {
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setCreator(USER_CRN);
+        environmentResponse.setCloudPlatform("AWS");
+        environmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
+        return environmentResponse;
+    }
+
+    private SdxClusterRequest getSdxClusterRequest() {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setRuntime("7.2.18");
+        sdxClusterRequest.setClusterShape(ENTERPRISE);
+        sdxClusterRequest.setAws(new SdxAwsRequest());
+        sdxClusterRequest.setEnvironment(ENVIRONMENT_CRN);
+        sdxClusterRequest.setEnableRangerRms(true);
+        sdxClusterRequest.setEnableRangerRaz(true);
+        sdxClusterRequest.setJavaVersion(11);
+        sdxClusterRequest.setOs("os");
+        SdxCloudStorageRequest sdxCloudStorageRequest = new SdxCloudStorageRequest();
+        sdxCloudStorageRequest.setBaseLocation("s3a://");
+        sdxCloudStorageRequest.setFileSystemType(FileSystemType.S3);
+        sdxCloudStorageRequest.setS3(new S3CloudStorageV1Parameters());
+        sdxClusterRequest.setCloudStorage(sdxCloudStorageRequest);
+        return sdxClusterRequest;
     }
 }

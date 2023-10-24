@@ -111,6 +111,7 @@ public class ClusterV4RequestToClusterConverter {
         extractClusterManagerAndHdpRepoConfig(cluster, source);
         cluster.setProxyConfigCrn(source.getProxyConfigCrn());
         cluster.setRangerRazEnabled(source.isRangerRazEnabled());
+        cluster.setRangerRmsEnabled(source.isRangerRmsEnabled());
         return cluster;
     }
 

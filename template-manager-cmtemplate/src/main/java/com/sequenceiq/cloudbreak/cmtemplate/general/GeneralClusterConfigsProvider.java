@@ -26,7 +26,7 @@ public class GeneralClusterConfigsProvider {
     private static final String PENDING_DEFAULT_VALUE = "pending...";
 
     public GeneralClusterConfigs generalClusterConfigs(StackDtoDelegate stack, Credential credential) {
-        ClusterView cluster = stack.getCluster();
+            ClusterView cluster = stack.getCluster();
         boolean gatewayInstanceMetadataPresented = false;
         boolean instanceMetadataPresented = false;
         if (stack.getInstanceGroupDtos() != null && !stack.getInstanceGroupDtos().isEmpty()) {
@@ -56,6 +56,7 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setKnoxUserFacingCertConfigured(userFacingCertHasBeenGenerated);
         generalClusterConfigs.setExternalFQDN(cluster.getFqdn());
         generalClusterConfigs.setEnableRangerRaz(cluster.isRangerRazEnabled());
+        generalClusterConfigs.setEnableRangerRms(cluster.isRangerRmsEnabled());
         generalClusterConfigs.setGovCloud(credential.isGovCloud());
         generalClusterConfigs.setCreatorWorkloadUserCrn(stack.getCreator().getUserCrn());
         return generalClusterConfigs;

@@ -122,6 +122,9 @@ public class SdxCluster implements AccountAwareResource {
     @Column(name = "ranger_raz_enabled")
     private boolean rangerRazEnabled;
 
+    @Column(name = "ranger_rms_enabled")
+    private boolean rangerRmsEnabled;
+
     private boolean enableMultiAz;
 
     @Convert(converter = CertExpirationStateConverter.class)
@@ -409,6 +412,14 @@ public class SdxCluster implements AccountAwareResource {
         this.sdxDatabase = sdxDatabase;
     }
 
+    public boolean isRangerRmsEnabled() {
+        return rangerRmsEnabled;
+    }
+
+    public void setRangerRmsEnabled(boolean rangerRmsEnabled) {
+        this.rangerRmsEnabled = rangerRmsEnabled;
+    }
+
     //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
@@ -434,6 +445,7 @@ public class SdxCluster implements AccountAwareResource {
                 Objects.equals(enableMultiAz, that.enableMultiAz) &&
                 cloudStorageFileSystemType == that.cloudStorageFileSystemType &&
                 rangerRazEnabled == that.rangerRazEnabled &&
+                rangerRmsEnabled == that.rangerRmsEnabled &&
                 certExpirationState == that.certExpirationState &&
                 Objects.equals(sdxClusterServiceVersion, that.sdxClusterServiceVersion) &&
                 Objects.equals(sdxDatabase, that.sdxDatabase);
@@ -443,7 +455,7 @@ public class SdxCluster implements AccountAwareResource {
     public int hashCode() {
         return Objects.hash(id, accountId, crn, clusterName, envName, envCrn, stackCrn, clusterShape, tags, stackId, stackRequest,
                 stackRequestToCloudbreak, deleted, created, cloudStorageBaseLocation, cloudStorageFileSystemType,
-                rangerRazEnabled, certExpirationState, sdxClusterServiceVersion, enableMultiAz);
+                rangerRazEnabled, rangerRmsEnabled, certExpirationState, sdxClusterServiceVersion, enableMultiAz);
     }
 
     @Override
@@ -473,6 +485,7 @@ public class SdxCluster implements AccountAwareResource {
                 ", lastCbFlowChainId='" + lastCbFlowChainId + '\'' +
                 ", lastCbFlowId='" + lastCbFlowId + '\'' +
                 ", rangerRazEnabled=" + rangerRazEnabled +
+                ", rangerRmsEnabled+" + rangerRmsEnabled +
                 ", enableMultiAz=" + enableMultiAz +
                 ", certExpirationState=" + certExpirationState +
                 ", sdxClusterServiceVersion='" + sdxClusterServiceVersion + '\'' +

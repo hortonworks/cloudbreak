@@ -22,6 +22,7 @@ public interface ClusterDtoRepository extends Repository<Cluster, Long> {
             "c.description as description, " +
             "c.databaseServerCrn as databaseServerCrn, " +
             "c.rangerRazEnabled as rangerRazEnabled, " +
+            "c.rangerRmsEnabled as rangerRmsEnabled," +
             "c.certExpirationState as certExpirationState, " +
             "c.environmentCrn as environmentCrn, " +
             "c.proxyConfigCrn as proxyConfigCrn, " +

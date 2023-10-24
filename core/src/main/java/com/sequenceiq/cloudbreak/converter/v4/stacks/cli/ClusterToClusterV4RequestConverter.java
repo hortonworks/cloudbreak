@@ -55,6 +55,7 @@ public class ClusterToClusterV4RequestConverter {
             clusterRequest.setGateway(gatewayToGatewayV4RequestConverter.convert(source.getGateway()));
         }
         clusterRequest.setRangerRazEnabled(source.isRangerRazEnabled());
+        clusterRequest.setRangerRmsEnabled(source.isRangerRmsEnabled());
         return clusterRequest;
     }
 

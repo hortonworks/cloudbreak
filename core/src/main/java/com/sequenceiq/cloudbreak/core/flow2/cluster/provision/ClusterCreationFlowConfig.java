@@ -273,7 +273,8 @@ public class ClusterCreationFlowConfig extends StackStatusFinalizerAbstractFlowC
             .build();
 
     private static final FlowEdgeConfig<ClusterCreationState, ClusterCreationEvent> EDGE_CONFIG =
-            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, CLUSTER_CREATION_FAILED_STATE, CLUSTER_CREATION_FAILURE_HANDLED_EVENT);
+            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, CLUSTER_CREATION_FAILED_STATE,
+                    CLUSTER_CREATION_FAILURE_HANDLED_EVENT);
 
     public ClusterCreationFlowConfig() {
         super(ClusterCreationState.class, ClusterCreationEvent.class);

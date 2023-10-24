@@ -131,6 +131,7 @@ public class ClusterToClusterV4ResponseConverter {
         clusterResponse.setCustomConfigurationsCrn(getIfNotNull(source.getCustomConfigurations(), configurations -> configurations.getCrn()));
         clusterResponse.setDatabaseServerCrn(source.getDatabaseServerCrn());
         clusterResponse.setRangerRazEnabled(source.isRangerRazEnabled());
+        clusterResponse.setRangerRmsEnabled(source.isRangerRmsEnabled());
         clusterResponse.setCertExpirationState(source.getCertExpirationState());
         return clusterResponse;
     }

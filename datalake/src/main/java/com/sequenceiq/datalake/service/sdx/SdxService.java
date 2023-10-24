@@ -168,6 +168,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     };
 
+    public static final Versioned MIN_RUNTIME_VERSION_FOR_RMS = () -> "7.2.18";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxService.class);
 
     @Inject
@@ -446,8 +448,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                     RangerRazEnabledV4Response response = stackV4Endpoint.rangerRazEnabledInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(), initiatorUserCrn);
                     if (response.isRangerRazEnabled()) {
                         if (!sdxCluster.isRangerRazEnabled()) {
+                            DetailedEnvironmentResponse environmentResponse = environmentClientService.getByCrn(sdxCluster.getEnvCrn());
                             validateRazEnablement(sdxCluster.getRuntime(), response.isRangerRazEnabled(),
-                                    environmentClientService.getByCrn(sdxCluster.getEnvCrn()));
+                                    environmentResponse);
                             sdxCluster.setRangerRazEnabled(true);
                             save(sdxCluster);
                         }
@@ -478,13 +481,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         validateCcmV2Requirement(environment, runtimeVersion);
 
-        SdxCluster sdxCluster = validateAndCreateNewSdxCluster(userCrn,
-                name,
-                runtimeVersion,
-                sdxClusterRequest.getClusterShape(),
-                sdxClusterRequest.isEnableRangerRaz(),
-                sdxClusterRequest.isEnableMultiAz(),
-                environment);
+        SdxCluster sdxCluster = validateAndCreateNewSdxCluster(sdxClusterRequest, runtimeVersion, name, userCrn, environment);
         setTagsSafe(sdxClusterRequest, sdxCluster);
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
@@ -506,8 +503,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 sdxCluster, entitlementService.isAzureDatabaseFlexibleServerEnabled(accountId)));
 
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(internalStackV4Request, environment.getCrn());
-        StackV4Request stackRequest = getStackRequest(sdxClusterRequest.getClusterShape(), sdxClusterRequest.isEnableRangerRaz(),
-                internalStackV4Request, cloudPlatform, runtimeVersion, imageSettingsV4Request, sdxClusterRequest.getJavaVersion());
+        StackV4Request stackRequest = getStackRequest(sdxClusterRequest.getClusterShape(), internalStackV4Request,
+                cloudPlatform, runtimeVersion, imageSettingsV4Request);
+        setStackRequestParams(stackRequest, sdxClusterRequest.getJavaVersion(), sdxClusterRequest.isEnableRangerRaz(), sdxClusterRequest.isEnableRangerRms());
+
         overrideDefaultTemplateValues(stackRequest, sdxClusterRequest.getCustomInstanceGroups());
         validateRecipes(sdxClusterRequest, stackRequest, userCrn);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
@@ -621,14 +620,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         DetailedEnvironmentResponse environment = validateAndGetEnvironment(environmentName);
 
-        SdxCluster newSdxCluster = validateAndCreateNewSdxCluster(userCrn,
-                clusterName,
-                sdxCluster.getRuntime(),
-                shape,
-                sdxCluster.isRangerRazEnabled(),
-                sdxCluster.isEnableMultiAz()
-                        || sdxClusterResizeRequest.isEnableMultiAz(),
-                environment);
+        SdxCluster newSdxCluster = validateAndCreateNewSdxCluster(sdxCluster, shape, sdxCluster.isEnableMultiAz()
+                || sdxClusterResizeRequest.isEnableMultiAz(), clusterName, userCrn, environment);
         newSdxCluster.setTags(sdxCluster.getTags());
         newSdxCluster.setCrn(sdxCluster.getCrn());
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
@@ -643,8 +636,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         newSdxCluster.setSdxDatabase(DatabaseParameterFallbackUtil.setupDatabaseInitParams(sdxCluster.getDatabaseAvailabilityType(),
                 sdxCluster.getDatabaseEngineVersion(), Optional.ofNullable(sdxCluster.getSdxDatabase()).map(SdxDatabase::getAttributes).orElse(null)));
-        StackV4Request stackRequest = getStackRequest(shape, sdxCluster.isRangerRazEnabled(), null, cloudPlatform, sdxCluster.getRuntime(), null,
-                stackV4Response.getJavaVersion());
+        StackV4Request stackRequest = getStackRequest(shape, null, cloudPlatform, sdxCluster.getRuntime(), null);
+        setStackRequestParams(stackRequest, stackV4Response.getJavaVersion(), sdxCluster.isRangerRazEnabled(), sdxCluster.isRangerRmsEnabled());
         CustomDomainSettingsV4Request customDomainSettingsV4Request = new CustomDomainSettingsV4Request();
         customDomainSettingsV4Request.setHostname(sdxCluster.getClusterName() + SDX_RESIZE_NAME_SUFFIX);
         stackRequest.setCustomDomain(customDomainSettingsV4Request);
@@ -684,15 +677,24 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return response;
     }
 
-    private SdxCluster validateAndCreateNewSdxCluster(String userCrn,
-            String clusterName,
-            String runtime,
-            SdxClusterShape shape,
-            boolean razEnabled,
-            boolean enableMultiAz,
-            DetailedEnvironmentResponse environmentResponse) {
-        validateShape(shape, runtime, environmentResponse);
-        validateRazEnablement(runtime, razEnabled, environmentResponse);
+    private void setStackRequestParams(StackV4Request stackV4Request, Integer javaVersion, boolean razEnabled, boolean rmsEnabled) {
+        if (javaVersion != null) {
+            stackV4Request.setJavaVersion(javaVersion);
+        }
+        // We have provided a --ranger-raz-enabled flag in the CLI, but it will
+        // get overwritten if you use a custom json (using --cli-json). To avoid
+        // this, we will set the raz enablement here. See CB-7474 for more details
+        stackV4Request.getCluster().setRangerRazEnabled(razEnabled);
+        stackV4Request.getCluster().setRangerRmsEnabled(rmsEnabled);
+    }
+
+    private SdxCluster validateAndCreateNewSdxCluster(SdxCluster sdxCluster, SdxClusterShape shape, boolean enableMultiAz,
+            String clusterName, String userCrn, DetailedEnvironmentResponse environmentResponse) {
+
+        validateShape(shape, sdxCluster.getRuntime(), environmentResponse);
+        validateRazEnablement(sdxCluster.getRuntime(), sdxCluster.isRangerRazEnabled(), environmentResponse);
+        validateRmsEnablement(sdxCluster.getRuntime(), sdxCluster.isRangerRazEnabled(), sdxCluster.isRangerRmsEnabled(),
+                environmentResponse.getCloudPlatform(), environmentResponse.getAccountId());
         validateMultiAz(enableMultiAz, environmentResponse, shape);
         SdxCluster newSdxCluster = new SdxCluster();
         newSdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
@@ -703,9 +705,33 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         newSdxCluster.setEnvName(environmentResponse.getName());
         newSdxCluster.setEnvCrn(environmentResponse.getCrn());
         newSdxCluster.setSdxClusterServiceVersion(sdxClusterServiceVersion);
-        newSdxCluster.setRangerRazEnabled(razEnabled);
-        newSdxCluster.setRuntime(runtime);
+        newSdxCluster.setRangerRazEnabled(sdxCluster.isRangerRazEnabled());
+        newSdxCluster.setRangerRmsEnabled(sdxCluster.isRangerRmsEnabled());
+        newSdxCluster.setRuntime(sdxCluster.getRuntime());
         newSdxCluster.setEnableMultiAz(enableMultiAz);
+        return newSdxCluster;
+    }
+
+    private SdxCluster validateAndCreateNewSdxCluster(SdxClusterRequest cluster, String version, String clusterName, String userCrn,
+            DetailedEnvironmentResponse environmentResponse) {
+        validateShape(cluster.getClusterShape(), version, environmentResponse);
+        validateRazEnablement(version, cluster.isEnableRangerRaz(), environmentResponse);
+        validateRmsEnablement(cluster.getRuntime(), cluster.isEnableRangerRaz(), cluster.isEnableRangerRms(),
+                environmentResponse.getCloudPlatform(), environmentResponse.getAccountId());
+        validateMultiAz(cluster.isEnableMultiAz(), environmentResponse, cluster.getClusterShape());
+        SdxCluster newSdxCluster = new SdxCluster();
+        newSdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
+        newSdxCluster.setClusterName(clusterName);
+        newSdxCluster.setAccountId(getAccountIdFromCrn(userCrn));
+        newSdxCluster.setClusterShape(cluster.getClusterShape());
+        newSdxCluster.setCreated(clock.getCurrentTimeMillis());
+        newSdxCluster.setEnvName(environmentResponse.getName());
+        newSdxCluster.setEnvCrn(environmentResponse.getCrn());
+        newSdxCluster.setSdxClusterServiceVersion(sdxClusterServiceVersion);
+        newSdxCluster.setRangerRazEnabled(cluster.isEnableRangerRaz());
+        newSdxCluster.setRangerRmsEnabled(cluster.isEnableRangerRms());
+        newSdxCluster.setRuntime(version);
+        newSdxCluster.setEnableMultiAz(cluster.isEnableMultiAz());
         return newSdxCluster;
     }
 
@@ -745,8 +771,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
-    private StackV4Request getStackRequest(SdxClusterShape shape, boolean razEnabled, StackV4Request internalStackV4Request, CloudPlatform cloudPlatform,
-            String runtimeVersion, ImageSettingsV4Request imageSettingsV4Request, Integer javaVersion) {
+    private StackV4Request getStackRequest(SdxClusterShape shape, StackV4Request internalStackV4Request,
+            CloudPlatform cloudPlatform, String runtimeVersion, ImageSettingsV4Request imageSettingsV4Request) {
         StackV4Request stackV4Request = internalStackV4Request;
         if (internalStackV4Request == null) {
             stackV4Request = cdpConfigService.getConfigForKey(
@@ -759,15 +785,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             if (imageSettingsV4Request != null) {
                 stackV4Request.setImage(imageSettingsV4Request);
             }
-        }
-
-        // We have provided a --ranger-raz-enabled flag in the CLI, but it will
-        // get overwritten if you use a custom json (using --cli-json). To avoid
-        // this, we will set the raz enablement here. See CB-7474 for more details
-        stackV4Request.getCluster().setRangerRazEnabled(razEnabled);
-
-        if (javaVersion != null) {
-            stackV4Request.setJavaVersion(javaVersion);
         }
 
         return stackV4Request;
@@ -1022,6 +1039,31 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             }
         }
         ValidationResult validationResult = validationBuilder.build();
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+    }
+
+    private void validateRmsEnablement(String runtime, boolean razEnabled, boolean rmsEnabled, String cloudPlatformString, String accountId) {
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        CloudPlatform cloudPlatform = EnumUtils.getEnumIgnoreCase(CloudPlatform.class, cloudPlatformString);
+        if (rmsEnabled) {
+            if (!razEnabled) {
+                validationResultBuilder.error("Ranger RMS cannot be deployed without Ranger RAZ");
+            }
+            if (AWS != cloudPlatform) {
+                validationResultBuilder.error("Ranger RMS can be deployed only on AWS.");
+            }
+            if (!entitlementService.isRmsEnabledOnDatalake(accountId)) {
+                validationResultBuilder.error("Provisioning Ranger RMS is not enabled for this account");
+            }
+            Comparator<Versioned> versionComparator = new VersionComparator();
+            if (versionComparator.compare(() -> runtime, MIN_RUNTIME_VERSION_FOR_RMS) < 0) {
+                validationResultBuilder.error(String.format("Provisioning Ranger RMS is only valid for Cloudera Runtime version greater then or equal to %s" +
+                        " and not %s", MIN_RUNTIME_VERSION_FOR_RMS.getVersion(), runtime));
+            }
+        }
+        ValidationResult validationResult = validationResultBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }

@@ -86,6 +86,9 @@ public class ClusterV4Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.ENABLE_RANGER_RAZ)
     private boolean rangerRazEnabled;
 
+    @ApiModelProperty(ClusterModelDescription.ENABLE_RANGER_RMS)
+    private boolean rangerRmsEnabled;
+
     public String getUserName() {
         return userName;
     }
@@ -206,6 +209,14 @@ public class ClusterV4Request implements JsonEntity {
         this.rangerRazEnabled = rangerRazEnabled;
     }
 
+    public boolean isRangerRmsEnabled() {
+        return rangerRmsEnabled;
+    }
+
+    public void setRangerRmsEnabled(boolean rangerRmsEnabled) {
+        this.rangerRmsEnabled = rangerRmsEnabled;
+    }
+
     @Override
     public String toString() {
         return "ClusterV4Request{" +
@@ -223,6 +234,7 @@ public class ClusterV4Request implements JsonEntity {
                 ", validateBlueprint=" + validateBlueprint +
                 ", customConfigurationsName='" + customConfigurationsName + '\'' +
                 ", rangerRazEnabled=" + rangerRazEnabled +
+                ", rangerRmsEnabled=" + rangerRmsEnabled +
                 '}';
     }
 }

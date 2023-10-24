@@ -35,6 +35,8 @@ public interface ClusterView extends MdcContextInfoProvider {
 
     boolean isRangerRazEnabled();
 
+    boolean isRangerRmsEnabled();
+
     CertExpirationState getCertExpirationState();
 
     String getEnvironmentCrn();

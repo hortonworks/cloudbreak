@@ -278,6 +278,7 @@ public class RangerRmsDatalakeConfigProviderTest {
         cmRepo.setVersion(version);
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setEnableRangerRaz(razEnabled);
+        generalClusterConfigs.setEnableRangerRms(true);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, List.of());
         HostgroupView idbroker = new HostgroupView("idbroker", 0, InstanceGroupType.CORE, List.of());
         return TemplatePreparationObject.Builder.builder()

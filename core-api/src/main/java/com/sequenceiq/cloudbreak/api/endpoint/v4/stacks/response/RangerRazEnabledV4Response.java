@@ -4,6 +4,8 @@ public class RangerRazEnabledV4Response {
 
     private boolean rangerRazEnabled;
 
+    private boolean rangerRMsEnabled;
+
     public RangerRazEnabledV4Response() {
     }
 
@@ -19,10 +21,19 @@ public class RangerRazEnabledV4Response {
         this.rangerRazEnabled = rangerRazEnabled;
     }
 
+    public boolean isRangerRMsEnabled() {
+        return rangerRMsEnabled;
+    }
+
+    public void setRangerRMsEnabled(boolean rangerRMsEnabled) {
+        this.rangerRMsEnabled = rangerRMsEnabled;
+    }
+
     @Override
     public String toString() {
         return "RangerRazEnabledV4Response{" +
                 "rangerRazEnabled=" + rangerRazEnabled +
+                ", rangerRmsEnabled=" + rangerRMsEnabled +
                 '}';
     }
 }

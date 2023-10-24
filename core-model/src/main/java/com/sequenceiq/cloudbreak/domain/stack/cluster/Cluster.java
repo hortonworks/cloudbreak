@@ -235,6 +235,9 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
     @Column(name = "ranger_raz_enabled")
     private boolean rangerRazEnabled;
 
+    @Column(name = "ranger_rms_enabled")
+    private boolean rangerRmsEnabled;
+
     @Convert(converter = CertExpirationStateConverter.class)
     private CertExpirationState certExpirationState = CertExpirationState.VALID;
 
@@ -845,8 +848,16 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         return rangerRazEnabled;
     }
 
+    public boolean isRangerRmsEnabled() {
+        return rangerRmsEnabled;
+    }
+
     public void setRangerRazEnabled(boolean rangerRazEnabled) {
         this.rangerRazEnabled = rangerRazEnabled;
+    }
+
+    public void setRangerRmsEnabled(boolean rangerRmsEnabled) {
+        this.rangerRmsEnabled = rangerRmsEnabled;
     }
 
     @Override

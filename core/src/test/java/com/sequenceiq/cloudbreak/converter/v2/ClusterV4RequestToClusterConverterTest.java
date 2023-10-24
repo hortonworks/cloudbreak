@@ -31,6 +31,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
@@ -58,6 +59,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.cloudstorage.AwsStorageParameters;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 
@@ -319,5 +321,46 @@ public class ClusterV4RequestToClusterConverterTest {
         assertAll(
                 () -> assertEquals(1, cdfs.size()),
                 () -> assertEquals(cdfJson, cdfs.iterator().next()));
+    }
+
+    @Test
+    public void testConvertClusterV4RequestToCluster() {
+        blueprint.setStackType("CDH");
+        when(blueprintService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(any(), any())).thenReturn(blueprint);
+        when(rdsConfigService.findByNamesInWorkspace(any(), any())).thenReturn(Set.of(new RDSConfig()));
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        clusterV4Request.setName("test-name");
+        clusterV4Request.setUserName("username");
+        clusterV4Request.setPassword("TestPassword123#!");
+        clusterV4Request.setDatabases(Set.of("resource-crn"));
+        clusterV4Request.setDatabaseServerCrn("resource-crn");
+        clusterV4Request.setProxyConfigCrn("resource-crn");
+        CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
+        cloudStorageRequest.setAws(new AwsStorageParameters());
+        clusterV4Request.setCloudStorage(cloudStorageRequest);
+        ClouderaManagerV4Request cm = new ClouderaManagerV4Request();
+
+        ClouderaManagerRepositoryV4Request repository = new ClouderaManagerRepositoryV4Request();
+        repository.setBaseUrl("base.url");
+        repository.setVersion("1.0");
+        repository.setGpgKeyUrl("gpg.key.url");
+        cm.setRepository(repository);
+        clusterV4Request.setCm(cm);
+        GatewayV4Request gatewayV4Request = new GatewayV4Request();
+        gatewayV4Request.setGatewayType(GatewayType.CENTRAL);
+        gatewayV4Request.setPath("/");
+        clusterV4Request.setGateway(gatewayV4Request);
+        clusterV4Request.setCustomQueue("queue");
+        clusterV4Request.setBlueprintName("bp-name");
+        clusterV4Request.setRangerRazEnabled(true);
+        clusterV4Request.setRangerRmsEnabled(true);
+
+        Cluster convert = underTest.convert(clusterV4Request);
+
+        assertEquals(convert.getName(), clusterV4Request.getName());
+        assertEquals(convert.getDatabaseServerCrn(), clusterV4Request.getDatabaseServerCrn());
+        assertEquals(convert.getProxyConfigCrn(), clusterV4Request.getProxyConfigCrn());
+        assertEquals(convert.isRangerRazEnabled(), clusterV4Request.isRangerRazEnabled());
+        assertEquals(convert.isRangerRmsEnabled(), clusterV4Request.isRangerRmsEnabled());
     }
 }

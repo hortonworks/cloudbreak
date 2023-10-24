@@ -62,6 +62,9 @@ public class SdxClusterResponse {
     @ApiModelProperty(ModelDescriptions.RANGER_RAZ_ENABLED)
     private boolean rangerRazEnabled;
 
+    @ApiModelProperty(ModelDescriptions.RANGER_RMS_ENABLED)
+    private boolean rangerRmsEnabled;
+
     @ApiModelProperty(ModelDescriptions.MULTI_AZ_ENABLED)
     private boolean enableMultiAz;
 
@@ -263,6 +266,14 @@ public class SdxClusterResponse {
         this.sdxDatabaseResponse = sdxDatabaseResponse;
     }
 
+    public boolean isRangerRmsEnabled() {
+        return rangerRmsEnabled;
+    }
+
+    public void setRangerRmsEnabled(boolean rangerRmsEnabled) {
+        this.rangerRmsEnabled = rangerRmsEnabled;
+    }
+
     @Override
     public String toString() {
         return "SdxClusterResponse{" +
@@ -281,6 +292,7 @@ public class SdxClusterResponse {
                 ", runtime='" + runtime + '\'' +
                 ", flowIdentifier=" + flowIdentifier +
                 ", rangerRazEnabled=" + rangerRazEnabled +
+                ", rangerRmsEnabled=" + rangerRmsEnabled +
                 ", enableMultiAz=" + enableMultiAz +
                 ", tags=" + tags +
                 ", certExpirationState=" + certExpirationState +

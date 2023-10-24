@@ -48,6 +48,9 @@ public class SdxClusterRequestBase implements TaggableRequest {
     @ApiModelProperty(ModelDescriptions.RANGER_RAZ_ENABLED)
     private boolean enableRangerRaz;
 
+    @ApiModelProperty(ModelDescriptions.RANGER_RMS_ENABLED)
+    private boolean enableRangerRms;
+
     @ApiModelProperty(ModelDescriptions.MULTI_AZ_ENABLED)
     private boolean enableMultiAz;
 
@@ -184,6 +187,14 @@ public class SdxClusterRequestBase implements TaggableRequest {
         this.image = image;
     }
 
+    public boolean isEnableRangerRms() {
+        return enableRangerRms;
+    }
+
+    public void setEnableRangerRms(boolean enableRangerRms) {
+        this.enableRangerRms = enableRangerRms;
+    }
+
     public void copyTo(SdxClusterRequestBase toInstance) {
         toInstance.setEnvironment(environment);
         toInstance.setClusterShape(clusterShape);
@@ -207,6 +218,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
                 ", externalDatabase=" + externalDatabase +
                 ", aws=" + aws +
                 ", enableRangerRaz=" + enableRangerRaz +
+                ", enabledRangerRms=" + enableRangerRms +
                 ", enableMultiAz=" + enableMultiAz +
                 ", javaVersion=" + javaVersion +
                 ", recipes=" + recipes +

@@ -91,6 +91,7 @@ public class RangerRmsDatalakeConfigProvider extends AbstractRoleConfigProvider 
                 && StackType.DATALAKE == source.getStackType()
                 && CloudPlatform.AWS == source.getCloudPlatform()
                 && source.getGeneralClusterConfigs().isEnableRangerRaz()
+                && source.getGeneralClusterConfigs().isEnableRangerRms()
                 && isVersionSupported(cmTemplateProcessor, source)
                 && CMRepositoryVersionUtil.isRazConfigurationSupported(
                 source.getProductDetailsView().getCm().getVersion(), source.getCloudPlatform(), source.getStackType());

@@ -45,6 +45,8 @@ public class GeneralClusterConfigs {
 
     private boolean enableRangerRaz;
 
+    private boolean enableRangerRms;
+
     private boolean multiAzEnabled;
 
     private Optional<String> loadBalancerGatewayFqdn = Optional.empty();
@@ -255,5 +257,13 @@ public class GeneralClusterConfigs {
 
     public void setOtherGatewayInstancesDiscoveryFQDN(Set<String> otherGatewayInstancesDiscoveryFQDN) {
         this.otherGatewayInstancesDiscoveryFQDN = otherGatewayInstancesDiscoveryFQDN;
+    }
+
+    public boolean isEnableRangerRms() {
+        return enableRangerRms;
+    }
+
+    public void setEnableRangerRms(boolean enableRangerRms) {
+        this.enableRangerRms = enableRangerRms;
     }
 }

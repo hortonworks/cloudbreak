@@ -53,6 +53,8 @@ public class ClusterDetails implements Serializable {
 
     private boolean razEnabled;
 
+    private boolean rmsEnabled;
+
     private Boolean dbSslEnabled;
 
     public Boolean isDbSslEnabled() {
@@ -213,5 +215,13 @@ public class ClusterDetails implements Serializable {
 
     public void setRazEnabled(boolean razEnabled) {
         this.razEnabled = razEnabled;
+    }
+
+    public boolean isRmsEnabled() {
+        return rmsEnabled;
+    }
+
+    public void setRmsEnabled(boolean rmsEnabled) {
+        this.rmsEnabled = rmsEnabled;
     }
 }

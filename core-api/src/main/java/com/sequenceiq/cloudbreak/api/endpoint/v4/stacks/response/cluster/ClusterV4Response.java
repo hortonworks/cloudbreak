@@ -127,6 +127,9 @@ public class ClusterV4Response implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.ENABLE_RANGER_RAZ)
     private boolean rangerRazEnabled;
 
+    @ApiModelProperty(ClusterModelDescription.ENABLE_RANGER_RMS)
+    private boolean rangerRmsEnabled;
+
     @ApiModelProperty(ClusterModelDescription.CERT_EXPIRATION)
     private CertExpirationState certExpirationState;
 
@@ -360,6 +363,14 @@ public class ClusterV4Response implements JsonEntity {
 
     public void setRangerRazEnabled(boolean rangerRazEnabled) {
         this.rangerRazEnabled = rangerRazEnabled;
+    }
+
+    public boolean isRangerRmsEnabled() {
+        return rangerRmsEnabled;
+    }
+
+    public void setRangerRmsEnabled(boolean rangerRmsEnabled) {
+        this.rangerRmsEnabled = rangerRmsEnabled;
     }
 
     public CertExpirationState getCertExpirationState() {

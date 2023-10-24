@@ -38,6 +38,7 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
                     .withCloudStorageFileSystemType(sdxClusterResponse.getCloudStorageFileSystemType())
                     .withRuntime(sdxClusterResponse.getRuntime())
                     .withRangerRazEnabled(sdxClusterResponse.getRangerRazEnabled())
+                    .withRangerRmsEnabled(sdxClusterResponse.isRangerRmsEnabled())
                     .withTags(sdxClusterResponse.getTags())
                     .withCertExpirationState(sdxClusterResponse.getCertExpirationState())
                     .withSdxClusterServiceVersion(sdxClusterResponse.getSdxClusterServiceVersion())
@@ -109,6 +110,8 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
         private FlowIdentifier flowIdentifier;
 
         private boolean rangerRazEnabled;
+
+        private boolean rangerRmsEnabled;
 
         private boolean enableMultiAz;
 
@@ -208,6 +211,11 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
 
         public Builder withRangerRazEnabled(boolean rangerRazEnabled) {
             this.rangerRazEnabled = rangerRazEnabled;
+            return this;
+        }
+
+        public Builder withRangerRmsEnabled(boolean rangerRmsEnabled) {
+            this.rangerRmsEnabled = rangerRmsEnabled;
             return this;
         }
 
