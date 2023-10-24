@@ -1,7 +1,10 @@
 package com.sequenceiq.freeipa.service.diagnostics;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,11 +24,13 @@ import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
+import com.sequenceiq.freeipa.service.image.ImageService;
 
 @ExtendWith(MockitoExtension.class)
-public class DiiagnosticsCollectionValidatorTest {
+public class DiagnosticsCollectionValidatorTest {
 
     @InjectMocks
     private DiagnosticsCollectionValidator underTest;
@@ -33,10 +38,19 @@ public class DiiagnosticsCollectionValidatorTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private ImageService imageService;
+
+    @Mock
+    private ImageEntity imageEntity;
+
     @BeforeEach
     public void setUp() {
         underTest = new DiagnosticsCollectionValidator(
-                new SupportBundleConfiguration(false, null, null, false), entitlementService);
+                new SupportBundleConfiguration(false, null, null, false),
+                entitlementService, imageService);
+        when(imageService.getByStackId(any())).thenReturn(imageEntity);
+        when(imageEntity.getDate()).thenReturn("2022-08-03");
     }
 
     @Test
@@ -125,11 +139,11 @@ public class DiiagnosticsCollectionValidatorTest {
         features.setClusterLogsCollection(clusterLogsCollection);
         telemetry.setFeatures(features);
         Stack stack = createStackWithTelemetry(telemetry);
-        stack.setAppVersion("2.32.0-b48");
+        when(imageEntity.getDate()).thenReturn("2020-01-01");
 
         BadRequestException thrown = assertThrows(BadRequestException.class, () ->
                 underTest.validate(request, stack));
-        assertTrue(thrown.getMessage().contains("Required FreeIPA min major/minor version is 2.33"));
+        assertEquals("Required FreeIPA min image date is 2021-01-28 for using diagnostics. Please upgrade your FreeIPA.", thrown.getMessage());
     }
 
     private Stack createStackWithTelemetry(Telemetry telemetry) {
