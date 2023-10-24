@@ -12,8 +12,14 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeReplaceVms;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
@@ -109,6 +115,72 @@ public class DistroXUpgradeTests extends AbstractMockTest {
                 .await(STACK_AVAILABLE, key(distroXName))
                 .awaitForHealthyInstances()
                 .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(given = "there is a running Cloudbreak, and an environment with SDX and DistroX cluster in available state, scale up",
+            when = "upgrade by upgrade sets called on the DistroX cluster",
+            then = "DistroX upgrade should be successful, the cluster should be up and running")
+    public void testDistroXBatchOsUpgrade(MockedTestContext testContext) {
+        String imageSettings = "imageSettingsUpgrade";
+        String upgradeImageCatalogName = resourcePropertyProvider().getName();
+        createImageCatalogForOsUpgrade(testContext, upgradeImageCatalogName);
+        String distroXName = resourcePropertyProvider().getName();
+        testContext
+                .given(imageSettings, DistroXImageTestDto.class)
+                .withImageId("aaa778fc-7f17-4535-9021-515351df3691")
+                .withImageCatalog(upgradeImageCatalogName)
+                .given(distroXName, DistroXTestDto.class)
+                .withImageSettings(imageSettings)
+                .when(distroXTestClient.create(), key(distroXName))
+                .enableVerification()
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
+                .when(distroXTestClient.scale("compute", 100))
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
+                .mockSpi().addInstances().post().bodyCheck(s -> verifyGroup(s, Map.of("compute", 99)), 1).verify()
+                .when(distroXTestClient.scale("compute", 200))
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
+                .mockSpi().addInstances().post().bodyCheck(s -> verifyGroup(s, Map.of("compute", 100)), 1).verify()
+                .given(DistroXUpgradeTestDto.class)
+                .withLockComponents(true)
+                .withRuntime(null)
+                .withReplaceVms(DistroXUpgradeReplaceVms.ENABLED)
+                .given(distroXName, DistroXTestDto.class)
+                .resetCalls()
+                .when(distroXTestClient.upgrade())
+                .await(STACK_AVAILABLE, key(distroXName))
+                .awaitForHealthyInstances()
+                .mockSpi().addInstances().post().bodyCheck(s -> verifyGroup(s, Map.of("master", 1, "worker", 3, "compute", 96)), 1).verify()
+                .mockSpi().addInstances().post().bodyCheck(s -> verifyGroup(s, Map.of("compute", 100)), 1).verify()
+                .mockSpi().addInstances().post().bodyCheck(s -> verifyGroup(s, Map.of("compute", 4)), 1).verify()
+                .validate();
+    }
+
+    private static boolean verifyGroup(String s, Map<String, Integer> groupSizeMap) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            List<Group> groups = objectMapper.readValue(s, new TypeReference<>() { });
+            if (!groups.stream().map(Group::getName).collect(Collectors.toSet()).equals(groupSizeMap.keySet())) {
+                return false;
+            }
+            for (Group group : groups) {
+                if (!groupSizeMap.containsKey(group.getName())) {
+                    return false;
+                } else {
+                    Integer groupSize = groupSizeMap.get(group.getName());
+                    if (groupSize != group.getInstances().size()) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        } catch (JsonProcessingException e) {
+            return false;
+        }
     }
 
     private String getNextRuntimeVersion(String runtime) {

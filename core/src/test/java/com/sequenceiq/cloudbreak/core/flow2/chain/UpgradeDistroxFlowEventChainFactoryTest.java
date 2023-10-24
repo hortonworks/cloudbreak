@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
@@ -33,6 +35,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
@@ -53,6 +56,9 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     @Mock
     private ClusterRepairService clusterRepairService;
 
+    @Mock
+    private ScalingHardLimitsService scalingHardLimitsService;
+
     @Test
     public void testInitEvent() {
         assertEquals(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, underTest.initEvent());
@@ -60,6 +66,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     @Test
     public void testChainQueueForNonReplaceVms() {
+        ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
         ReflectionTestUtils.setField(underTest, "upgradeValidationEnabled", true);
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
                 imageChangeDto, false, false, "variant", true);
@@ -74,6 +81,8 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     @Test
     public void testChainQueueForReplaceVms() {
+        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
+        ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
         ReflectionTestUtils.setField(underTest, "upgradeValidationEnabled", true);
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult = Result.success(new HashMap<>());
         when(clusterRepairService.validateRepair(any(), anyLong(), any(), eq(false))).thenReturn(repairStartResult);
@@ -85,7 +94,34 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertUpdateValidationEvent(flowChainQueue);
         assertSaltUpdateEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
-        assertRepairEvent(flowChainQueue);
+        assertRepairEvent(flowChainQueue, RepairType.ONE_FROM_EACH_HOSTGROUP);
+    }
+
+    @Test
+    public void testChainQueueForReplaceVmsWithHundredNodes() {
+        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
+        ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
+        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
+        ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
+        ReflectionTestUtils.setField(underTest, "upgradeValidationEnabled", true);
+        Set<InstanceMetaData> instances = new HashSet<>();
+        for (int i = 0; i < 500; i++) {
+            InstanceMetaData instanceMetaData = new InstanceMetaData();
+            instanceMetaData.setDiscoveryFQDN("compute-" + i);
+            instances.add(instanceMetaData);
+        }
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult =
+                Result.success(Map.of(HostGroupName.hostGroupName("compute"), instances));
+        when(clusterRepairService.validateRepair(any(), anyLong(), any(), eq(false))).thenReturn(repairStartResult);
+
+        DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
+                imageChangeDto, true, true, "variant", false);
+        FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
+        assertEquals(4, flowChainQueue.getQueue().size());
+        assertUpdateValidationEvent(flowChainQueue);
+        assertSaltUpdateEvent(flowChainQueue);
+        assertImageUpdateEvent(flowChainQueue);
+        assertRepairEvent(flowChainQueue, RepairType.BATCH);
     }
 
     private void assertUpdateValidationEvent(FlowTriggerEventQueue flowChainQueue) {
@@ -130,9 +166,10 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertTrue(saltUpdateEvent instanceof StackEvent);
     }
 
-    private void assertRepairEvent(FlowTriggerEventQueue flowChainQueue) {
+    private void assertRepairEvent(FlowTriggerEventQueue flowChainQueue, RepairType repairType) {
         Selectable repairEvent = flowChainQueue.getQueue().remove();
         assertEquals(CLUSTER_REPAIR_TRIGGER_EVENT, repairEvent.selector());
+        assertEquals(repairType, ((ClusterRepairTriggerEvent) repairEvent).getRepairType());
         assertEquals(STACK_ID, repairEvent.getResourceId());
         assertTrue(repairEvent instanceof ClusterRepairTriggerEvent);
     }

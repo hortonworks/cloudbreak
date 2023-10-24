@@ -5,6 +5,9 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_STARTED;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_EVENT;
+import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType.ALL_AT_ONCE;
+import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType.BATCH;
+import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType.ONE_FROM_EACH_HOSTGROUP;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -23,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus;
+import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
@@ -53,8 +57,14 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     @Value("${cb.upgrade.validation.distrox.enabled}")
     private boolean upgradeValidationEnabled;
 
+    @Value("${cb.upgrade.batch.repair.enabled:true}")
+    private boolean batchRepairEnabled;
+
     @Inject
     private ClusterRepairService clusterRepairService;
+
+    @Inject
+    private ScalingHardLimitsService scalingHardLimitsService;
 
     @Override
     public String initEvent() {
@@ -72,10 +82,26 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         flowEventChain.add(new StackImageUpdateTriggerEvent(FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT, event.getImageChangeDto()));
         if (event.isReplaceVms()) {
             Map<String, List<String>> nodeMap = getReplaceableInstancesByHostgroup(event);
+            ClusterRepairTriggerEvent.RepairType repairType = decideRepairType(event, nodeMap);
+            LOGGER.info("Repair type: {}", repairType);
             flowEventChain.add(new ClusterRepairTriggerEvent(FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT, event.getResourceId(),
-                    event.isRollingUpgradeEnabled(), nodeMap, true, event.getTriggeredStackVariant()));
+                    repairType, nodeMap, true, event.getTriggeredStackVariant()));
         }
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
+    }
+
+    private ClusterRepairTriggerEvent.RepairType decideRepairType(DistroXUpgradeTriggerEvent event, Map<String, List<String>> nodeMap) {
+        long nodeCount = nodeMap.values().stream().mapToLong(java.util.Collection::size).sum();
+        int maxUpscaleStepInNodeCount = scalingHardLimitsService.getMaxUpscaleStepInNodeCount();
+        LOGGER.info("Batch repair enabled: {}, node count: {}, max upscale step: {}",
+                batchRepairEnabled, nodeCount, maxUpscaleStepInNodeCount);
+        if (event.isRollingUpgradeEnabled()) {
+            return ONE_FROM_EACH_HOSTGROUP;
+        } else if (batchRepairEnabled && nodeCount > maxUpscaleStepInNodeCount) {
+            return BATCH;
+        } else {
+            return ALL_AT_ONCE;
+        }
     }
 
     @Override

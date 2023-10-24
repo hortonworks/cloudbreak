@@ -140,6 +140,11 @@ public class DefaultResponseConfigure<T extends CloudbreakTestDto, R> {
         return this;
     }
 
+    public DefaultResponseConfigure<T, R> bodyCheck(Predicate<String> check, int times) {
+        verifications.add(new TextBodyLambdaVerification(check, times));
+        return this;
+    }
+
     protected void pathVariableInternal(String name, String value) {
         pathVariables.put(name, value);
     }

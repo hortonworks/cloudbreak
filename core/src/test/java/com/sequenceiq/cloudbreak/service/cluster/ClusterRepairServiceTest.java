@@ -66,6 +66,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
@@ -215,7 +216,8 @@ public class ClusterRepairServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false));
 
-        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1"))), eq(false), eq(false), any(), eq(false));
+        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1"))), eq(RepairType.ALL_AT_ONCE), eq(false), any(),
+                eq(false));
     }
 
     @Test
@@ -386,7 +388,8 @@ public class ClusterRepairServiceTest {
         ArgumentCaptor<List<Resource>> saveCaptor = ArgumentCaptor.forClass(List.class);
         verify(resourceService).saveAll(saveCaptor.capture());
         assertFalse(resourceAttributeUtil.getTypedAttributes(saveCaptor.getValue().get(0), VolumeSetAttributes.class).get().getDeleteOnTermination());
-        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name.healthy"))), eq(false), eq(false), any(), eq(false));
+        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name.healthy"))), eq(RepairType.ALL_AT_ONCE),
+                eq(false), any(), eq(false));
     }
 
     @Test

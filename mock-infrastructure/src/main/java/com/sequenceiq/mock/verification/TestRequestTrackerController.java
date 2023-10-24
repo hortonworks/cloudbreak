@@ -21,4 +21,9 @@ public class TestRequestTrackerController {
     public void enableCallStorage(@RequestParam("mockUuid") String mockUuid) {
         requestResponseStorageService.enableCallStorage(mockUuid);
     }
+
+    @PostMapping("/calls/reset")
+    public void resetCallStorage(@RequestParam("mockUuid") String mockUuid) {
+        requestResponseStorageService.resetCallStorage(mockUuid);
+    }
 }

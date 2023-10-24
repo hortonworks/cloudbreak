@@ -68,6 +68,12 @@ public class RequestResponseStorageService {
         enabledCallStorage.add(mockUuid);
     }
 
+    public void resetCallStorage(String mockUuid) {
+        LOGGER.info("Reset the call storage of verification for {}", mockUuid);
+        calls.get(mockUuid).clear();
+        LOGGER.info("Calls for mock: {}", calls.get(mockUuid));
+    }
+
     public boolean isEnabledToStore(String mockUuid) {
         return enabledCallStorage.stream().anyMatch(mockUuid::contains);
     }

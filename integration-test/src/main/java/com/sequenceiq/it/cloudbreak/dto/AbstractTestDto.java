@@ -371,6 +371,12 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
         return (T) this;
     }
 
+    public T resetCalls() {
+        String crn = getCrn();
+        executeQuery.executeMethod(HttpMethod.POST, "/calls/reset", Collections.emptyMap(), null, r -> r, w -> w.queryParam("mockUuid", crn));
+        return (T) this;
+    }
+
     public SpiEndpoints<T> mockSpi() {
         if (getTestContext() instanceof MockedTestContext) {
             return new SpiEndpoints<>((T) this, (MockedTestContext) getTestContext());

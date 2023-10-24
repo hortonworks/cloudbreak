@@ -90,6 +90,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.clusterproxy.ClusterP
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datasizes.DetermineDatalakeDataSizesBaseEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.modifyproxy.ModifyProxyConfigFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.CmSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.OSUpgradeByUpgradeSetsTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
@@ -372,22 +373,22 @@ public class ReactorFlowManager {
         reactorNotifier.notify(stackId, selector, new StackRepairTriggerEvent(stackId, unhealthyInstances));
     }
 
-    public FlowIdentifier triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap, boolean oneNodeFromEachHostGroupAtOnce,
+    public FlowIdentifier triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap, RepairType repairType,
             boolean restartServices, String triggeredVariant) {
         return reactorNotifier.notify(stackId, FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT,
-                new ClusterRepairTriggerEvent(stackId, failedNodesMap, oneNodeFromEachHostGroupAtOnce, restartServices, triggeredVariant));
+                new ClusterRepairTriggerEvent(stackId, failedNodesMap, repairType, restartServices, triggeredVariant));
     }
 
-    public FlowIdentifier triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap, boolean oneNodeFromEachHostGroupAtOnce,
+    public FlowIdentifier triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap, RepairType repairType,
             boolean restartServices, String triggeredVariant, boolean upgrade) {
         return reactorNotifier.notify(stackId, FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT,
-                new ClusterRepairTriggerEvent(stackId, failedNodesMap, oneNodeFromEachHostGroupAtOnce, restartServices, triggeredVariant, upgrade));
+                new ClusterRepairTriggerEvent(stackId, failedNodesMap, repairType, restartServices, triggeredVariant, upgrade));
     }
 
     public FlowIdentifier triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap,
             boolean restartServices) {
         return reactorNotifier.notify(stackId, FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT,
-                new ClusterRepairTriggerEvent(stackId, failedNodesMap, false, restartServices, null));
+                new ClusterRepairTriggerEvent(stackId, failedNodesMap, RepairType.ALL_AT_ONCE, restartServices, null));
     }
 
     public FlowIdentifier triggerStackImageUpdate(ImageChangeDto imageChangeDto) {

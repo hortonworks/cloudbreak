@@ -11,7 +11,6 @@ echo -e "\n" >> integcb/Profile
 echo "export VAULT_AUTO_UNSEAL=true" >> integcb/Profile
 echo "export VAULT_DB_SCHEMA=inet_vault_$(date +%s)" >> integcb/Profile
 echo "export CB_UI_MAX_WAIT=600" >> integcb/Profile
-echo "export CB_JAVA_OPTS=-Dcb.statuschecker.skip.window.minutes=0 -Dstatuschecker.intervalsec=10"
 if [[ "$AWS" == true ]]; then
     echo "export AWS_ACCESS_KEY_ID=${INTEGRATIONTEST_AWS_CREDENTIAL_ACCESSKEYID}" >> integcb/Profile
     echo "export AWS_SECRET_ACCESS_KEY=${INTEGRATIONTEST_AWS_CREDENTIAL_SECRETKEY}" >> integcb/Profile

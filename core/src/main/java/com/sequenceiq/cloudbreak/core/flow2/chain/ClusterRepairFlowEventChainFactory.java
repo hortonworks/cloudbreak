@@ -5,12 +5,12 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.REPAIR_STARTED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
+import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType.ALL_AT_ONCE;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,11 +31,12 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimaps;
+import com.google.common.collect.SetMultimap;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
@@ -116,6 +117,9 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     @Inject
     private StackUpgradeService stackUpgradeService;
+
+    @Inject
+    private ScalingHardLimitsService scalingHardLimitsService;
 
     @Override
     public String initEvent() {
@@ -201,36 +205,71 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     private void addDownscaleAndUpscaleEvents(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers, Map<String,
             Set<String>> repairableGroupsWithHostNames, boolean singlePrimaryGW, StackView stackView) {
-        Crn crnById = Crn.safeFromString(stackView.getResourceCrn());
-        if (event.isOneNodeFromEachHostGroupAtOnce() && entitlementService.isDatalakeZduOSUpgradeEnabled(crnById.getAccountId())) {
-            LOGGER.info("Rolling upgrade, repairing one node from each host group at one time, for stack: '{}'", event.getStackId());
-            repairOneNodeFromEachHostGroupAtOnce(event, flowTriggers, repairableGroupsWithHostNames, stackView);
-        } else {
+        if (ALL_AT_ONCE.equals(event.getRepairType())) {
             LOGGER.info("Upgrading all the nodes by groups, upgrading all the nodes within a group at the same time, for stack: '{}'", event.getStackId());
             addRepairFlows(event, flowTriggers, repairableGroupsWithHostNames, singlePrimaryGW, stackView);
+        } else {
+            LOGGER.info("Special repair: '{}'", event.getRepairType());
+            specialRepair(event, flowTriggers, repairableGroupsWithHostNames, stackView, event.getRepairType());
         }
     }
 
-    private void repairOneNodeFromEachHostGroupAtOnce(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
-        Map<String, Set<String>> repairableGroupsWithHostNames, StackView stackView) {
+    private void specialRepair(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
+        Map<String, Set<String>> repairableGroupsWithHostNames, StackView stackView, ClusterRepairTriggerEvent.RepairType repairType) {
         Optional<String> primaryGwFQDN = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(event.getStackId())
                 .map(InstanceMetadataView::getDiscoveryFQDN);
         HashMultimap<String, String> repairableGroupsWithHostNameMultimap = HashMultimap.create();
         repairableGroupsWithHostNames.forEach(repairableGroupsWithHostNameMultimap::putAll);
-        LinkedListMultimap<String, String> hostsByHostGroupAndSortedByPgw =
-                collectHostsByHostGroupAndSortByPgw(primaryGwFQDN, repairableGroupsWithHostNameMultimap);
-        addRepairFlowsForEachGroupsWithOneNode(event, flowTriggers, hostsByHostGroupAndSortedByPgw, primaryGwFQDN, stackView);
+        LinkedHashMultimap<String, String> hostsByHostGroupAndSortedByPgw =
+                collectHostsByHostGroupAndSortByPgwAndName(primaryGwFQDN, repairableGroupsWithHostNameMultimap);
+        switch (repairType) {
+            case ONE_FROM_EACH_HOSTGROUP ->
+                    addRepairFlowsForEachGroupsWithOneNode(event, flowTriggers, hostsByHostGroupAndSortedByPgw, primaryGwFQDN, stackView);
+            case BATCH ->
+                    addBatchedRepairFlows(event, flowTriggers, hostsByHostGroupAndSortedByPgw, primaryGwFQDN, stackView);
+            default -> throw new IllegalStateException("Unknown repair type:" + repairType);
+        }
+
     }
 
-    private LinkedListMultimap<String, String> collectHostsByHostGroupAndSortByPgw(Optional<String> primaryGwFQDN,
+    private LinkedHashMultimap<String, String> collectHostsByHostGroupAndSortByPgwAndName(Optional<String> primaryGwFQDN,
         HashMultimap<String, String> repairableGroupsWithHostNameMultimap) {
         return repairableGroupsWithHostNameMultimap.entries().stream()
-                .sorted(Entry.comparingByValue(Comparator.comparing(s -> primaryGwFQDN.filter(s::equals).isEmpty())))
-                .collect(Multimaps.toMultimap(Entry::getKey, Entry::getValue, LinkedListMultimap::create));
+                .sorted(Entry.comparingByValue((o1, o2) -> {
+                    if (primaryGwFQDN.filter(o1::equals).isPresent()) {
+                        return -1;
+                    } else if (primaryGwFQDN.filter(o2::equals).isPresent()) {
+                        return +1;
+                    } else if (o1.length() > o2.length()) {
+                        return +1;
+                    } else if (o2.length() > o1.length()) {
+                        return -1;
+                    } else {
+                        return o1.compareTo(o2);
+                    }
+                }))
+                .collect(Multimaps.toMultimap(Entry::getKey, Entry::getValue, LinkedHashMultimap::create));
+    }
+
+    private void addBatchedRepairFlows(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
+            LinkedHashMultimap<String, String> orderedHostMultimap, Optional<String> primaryGwFQDNOptional, StackView stackView) {
+        int batchSize = scalingHardLimitsService.getMaxUpscaleStepInNodeCount();
+        LOGGER.info("Batch repair with batch size: {}", batchSize);
+        while (!orderedHostMultimap.values().isEmpty()) {
+            SetMultimap<String, String> repairableGroups = HashMultimap.create();
+            List<Entry<String, String>> hostsToRepairInOneBatch = orderedHostMultimap.entries().stream().limit(batchSize).toList();
+            for (Entry<String, String> hostToRepair : hostsToRepairInOneBatch) {
+                repairableGroups.put(hostToRepair.getKey(), hostToRepair.getValue());
+                orderedHostMultimap.values().remove(hostToRepair.getValue());
+            }
+            Collection<String> repairedHosts = repairableGroups.values();
+            addRepairFlows(event, flowTriggers, Multimaps.asMap(repairableGroups), isPrimaryGWInHosts(primaryGwFQDNOptional, repairedHosts), stackView);
+        }
     }
 
     private void addRepairFlowsForEachGroupsWithOneNode(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
-        Multimap<String, String> orderedHostMultimap, Optional<String> primaryGwFQDNOptional, StackView stackView) {
+            LinkedHashMultimap<String, String> orderedHostMultimap, Optional<String> primaryGwFQDNOptional, StackView stackView) {
+        LOGGER.info("Rolling upgrade, repairing one node from each host group at one time, for stack: '{}'", event.getStackId());
         while (!orderedHostMultimap.values().isEmpty()) {
             Map<String, Set<String>> repairableGroupsWithOneHostName = new HashMap<>();
             for (String hostGroup : new HashSet<>(orderedHostMultimap.keySet())) {

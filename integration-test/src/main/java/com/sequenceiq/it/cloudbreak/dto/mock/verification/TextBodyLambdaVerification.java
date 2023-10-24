@@ -12,19 +12,32 @@ public class TextBodyLambdaVerification implements Verification {
 
     private Predicate<String> check;
 
+    private Integer times;
+
     public TextBodyLambdaVerification(Predicate<String> check) {
         this.check = check;
+    }
+
+    public TextBodyLambdaVerification(Predicate<String> check, int times) {
+        this.check = check;
+        this.times = times;
     }
 
     @Override
     public void handle(String path, Method method, VerificationContext context) {
         List<Call> accepted = new ArrayList<>();
-        boolean res = false;
+        int timesMatched = 0;
         for (Call call : context.getCalls()) {
-            res |= check.test(call.getPostBody().toString());
+            boolean checkPassed = check.test(call.getPostBody().toString());
+            if (checkPassed) {
+                timesMatched++;
+            }
         }
-        if (!res) {
+        if (times == null && timesMatched < 1) {
             context.getErrors().add("The check did not find in any call");
+        }
+        if (times != null && timesMatched != times) {
+            context.getErrors().add("The check did not find with " + times + " expected times. Check found " + timesMatched + " times");
         }
         context.setCalls(accepted);
     }

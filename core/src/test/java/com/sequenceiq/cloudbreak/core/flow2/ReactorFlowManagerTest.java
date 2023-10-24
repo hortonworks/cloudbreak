@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -161,8 +162,8 @@ public class ReactorFlowManagerTest {
         underTest.triggerManualRepairFlow(STACK_ID);
         underTest.triggerStackRepairFlow(STACK_ID, new UnhealthyInstances());
         underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), false);
-        underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), true, false, "variant");
-        underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), true, false, "variant", false);
+        underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), RepairType.ONE_FROM_EACH_HOSTGROUP, false, "variant");
+        underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), RepairType.ONE_FROM_EACH_HOSTGROUP, false, "variant", false);
         underTest.triggerStackImageUpdate(new ImageChangeDto(STACK_ID, "asdf"));
         underTest.triggerMaintenanceModeValidationFlow(STACK_ID);
         underTest.triggerClusterCertificationRenewal(STACK_ID);

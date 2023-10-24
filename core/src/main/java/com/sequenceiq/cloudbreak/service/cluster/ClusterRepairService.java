@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
@@ -147,19 +148,20 @@ public class ClusterRepairService {
         }
         String userCrn = restRequestThreadLocalService.getUserCrn();
         String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(stackView, userCrn, keepVariant);
-        return triggerRepairOrThrowBadRequest(stackView.getId(), repairStart, true, false, repairableHostGroups, upgradeVariant, upgrade);
+        return triggerRepairOrThrowBadRequest(stackView.getId(), repairStart, RepairType.ONE_FROM_EACH_HOSTGROUP, false, repairableHostGroups,
+                upgradeVariant, upgrade);
     }
 
     public FlowIdentifier repairHostGroups(Long stackId, Set<String> hostGroups, boolean restartServices) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
                 validateRepair(ManualClusterRepairMode.HOST_GROUP, stackId, hostGroups, false);
-        return triggerRepairOrThrowBadRequest(stackId, repairStart, false, restartServices, hostGroups, null, false);
+        return triggerRepairOrThrowBadRequest(stackId, repairStart, RepairType.ALL_AT_ONCE, restartServices, hostGroups, null, false);
     }
 
     public FlowIdentifier repairNodes(Long stackId, Set<String> nodeIds, boolean deleteVolumes, boolean restartServices) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
                 validateRepair(ManualClusterRepairMode.NODE_ID, stackId, nodeIds, deleteVolumes);
-        return triggerRepairOrThrowBadRequest(stackId, repairStart, false, restartServices, nodeIds, null, false);
+        return triggerRepairOrThrowBadRequest(stackId, repairStart, RepairType.ALL_AT_ONCE, restartServices, nodeIds, null, false);
     }
 
     public Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairWithDryRun(Long stackId) {
@@ -466,7 +468,7 @@ public class ClusterRepairService {
     }
 
     private FlowIdentifier triggerRepairOrThrowBadRequest(Long stackId, Result<Map<HostGroupName, Set<InstanceMetaData>>,
-            RepairValidation> repairValidationResult, boolean oneNodeFromEachHostGroupAtOnce, boolean restartServices, Set<String> recoveryMessageArgument,
+            RepairValidation> repairValidationResult, RepairType repairType, boolean restartServices, Set<String> recoveryMessageArgument,
             String upgradeVariant, boolean upgrade) {
         if (repairValidationResult.isError()) {
             eventService.fireCloudbreakEvent(stackId, RECOVERY_FAILED, CLUSTER_MANUALRECOVERY_COULD_NOT_START,
@@ -475,7 +477,7 @@ public class ClusterRepairService {
         } else {
             if (!repairValidationResult.getSuccess().isEmpty()) {
                 FlowIdentifier flowIdentifier = flowManager.triggerClusterRepairFlow(stackId, toStringMap(repairValidationResult.getSuccess()),
-                        oneNodeFromEachHostGroupAtOnce, restartServices, upgradeVariant, upgrade);
+                        repairType, restartServices, upgradeVariant, upgrade);
                 eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_REQUESTED,
                         List.of(String.join(",", recoveryMessageArgument)));
                 return flowIdentifier;
