@@ -129,8 +129,13 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
         List<String> volumeIdsForInstance = volumes.stream().map(Volume::volumeId).collect(Collectors.toList());
         LOGGER.info("Volume IDs to attach {}", volumeIdsToAttach);
         if (!new HashSet<>(volumeIdsForInstance).containsAll(volumeIdsToAttach)) {
-            LOGGER.error("Volume attachment were unsuccessful.");
-            throw new CloudbreakServiceException("Volume attachment were unsuccessful. " + throwable.getMessage(), throwable);
+            String errorMessage = "Volume attachment were unsuccessful. ";
+            if (throwable.getMessage().contains("is not 'running'")) {
+                errorMessage += "The related instance is not available. Usually this happens when an AWS policy terminates the instance, " +
+                        "or because of a quota issue. Please check the AWS console! ";
+            }
+            LOGGER.error(errorMessage);
+            throw new CloudbreakServiceException(errorMessage + throwable.getMessage(), throwable);
         }
     }
 

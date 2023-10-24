@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.common.base64.Base64Util;
@@ -54,6 +55,7 @@ import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.IamInstanceProfileSpecification;
 import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceState;
 import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
@@ -229,29 +231,26 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
     }
 
     @Override
-    protected boolean isFinished(AwsContext context, AuthenticatedContext auth, CloudResource resource) {
+    protected ResourceStatus getResourceStatus(AwsContext context, AuthenticatedContext auth, CloudResource resource) {
         boolean creation = context.isBuild();
         String operation = creation ? "creation" : "termination";
-        boolean finished;
         if (StringUtils.isNotEmpty(resource.getInstanceId())) {
             try {
                 LOGGER.debug("Check instance {} for {}.", operation, resource.getInstanceId());
                 DescribeInstancesResponse describeInstancesResponse = context.getAmazonEc2Client().describeInstances(DescribeInstancesRequest.builder()
                         .instanceIds(resource.getInstanceId())
                         .build());
+                InstanceState instanceState = describeInstancesResponse.reservations().stream().flatMap(s -> s.instances().stream())
+                        .map(instance -> instance.state()).findFirst().get();
                 if (creation) {
-                    finished = describeInstancesResponse.reservations().stream()
-                            .flatMap(s -> s.instances().stream())
-                            .allMatch(this::instanceRunningOrTerminated);
+                    return getResourceStatusForCreation(resource, instanceState);
                 } else {
-                    finished = describeInstancesResponse.reservations().stream()
-                            .flatMap(s -> s.instances().stream())
-                            .allMatch(this::instanceTerminated);
+                    return getResourceStatusForDeletion(resource, instanceState);
                 }
             } catch (Ec2Exception e) {
                 if (e.awsErrorDetails().errorCode().contains("NotFound") && !creation) {
                     LOGGER.info("Aws resource does not found: {}", e.getMessage());
-                    finished = true;
+                    return ResourceStatus.DELETED;
                 } else {
                     LOGGER.error("Cannot finished instance {}: {}", operation, e.getMessage(), e);
                     throw e;
@@ -260,23 +259,35 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         } else {
             LOGGER.warn("The resource with name: '{}' doesn't have instance identifier for operation: '{}'. There is no need to poll the state of the resource",
                     resource.getName(), operation);
-            finished = true;
+            return creation ? ResourceStatus.CREATED : ResourceStatus.DELETED;
         }
-        return finished;
     }
 
-    private boolean instanceRunningOrTerminated(Instance instance) {
-        return instanceRunning(instance) || instanceTerminated(instance);
+    private static ResourceStatus getResourceStatusForDeletion(CloudResource resource, InstanceState instanceState) {
+        if (instanceState.code() == AWS_INSTANCE_TERMINATED_CODE) {
+            LOGGER.debug("Instance {} termination finished", resource.getInstanceId());
+            return ResourceStatus.DELETED;
+        } else {
+            return ResourceStatus.IN_PROGRESS;
+        }
+    }
+
+    private static ResourceStatus getResourceStatusForCreation(CloudResource resource, InstanceState instanceState) {
+        if (instanceState.code() == AWS_INSTANCE_RUNNING_CODE) {
+            LOGGER.debug("Instance {} creation finished", resource.getInstanceId());
+            return ResourceStatus.CREATED;
+        } else if (instanceState.code() == AWS_INSTANCE_TERMINATED_CODE) {
+            LOGGER.warn("Instance {} creation failed, instance is in terminated state. " +
+                    "It may have been terminated by an AWS policy or quote issue.", resource.getInstanceId());
+            return ResourceStatus.FAILED;
+        } else {
+            return ResourceStatus.IN_PROGRESS;
+        }
     }
 
     private boolean instanceRunning(Instance instance) {
         LOGGER.debug("Check running state of {}. Current: {}", instance.instanceId(), instance.state());
         return instance.state().code() == AWS_INSTANCE_RUNNING_CODE;
-    }
-
-    private boolean instanceTerminated(Instance instance) {
-        LOGGER.debug("check termination state of {}. Current: {}", instance.instanceId(), instance.state());
-        return instance.state().code() == AWS_INSTANCE_TERMINATED_CODE;
     }
 
     private String getUserData(CloudStack cloudStack, Group group) {

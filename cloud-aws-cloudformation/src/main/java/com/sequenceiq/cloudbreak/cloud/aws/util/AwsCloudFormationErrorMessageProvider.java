@@ -67,7 +67,7 @@ public class AwsCloudFormationErrorMessageProvider {
         }
 
         String errorReason = Stream.of(stackStatusReason, stackResourceStatusReasons).filter(Objects::nonNull).collect(Collectors.joining(" "));
-        LOGGER.debug("Cloudformation stack {} has the following error reason: {}. Events: {}", stackName, errorReason, cfEventsInString);
+        LOGGER.warn("Cloudformation stack {} has the following error reason: {}. Events: {}", stackName, errorReason, cfEventsInString);
         return errorReason;
     }
 
@@ -103,7 +103,7 @@ public class AwsCloudFormationErrorMessageProvider {
         if (!CollectionUtils.isEmpty(describeStacksResponse.stacks())) {
             stackStatusReason = describeStacksResponse.stacks().get(0).stackStatusReason();
         }
-        LOGGER.debug("Cloudformation stack {} has the error status reason: {}", stackName, stackStatusReason);
+        LOGGER.warn("Cloudformation stack {} has the error status reason: {}", stackName, stackStatusReason);
         return stackStatusReason;
     }
 
@@ -111,7 +111,7 @@ public class AwsCloudFormationErrorMessageProvider {
         String resourceId = stackResource.logicalResourceId();
         String statusReason = awsEncodedAuthorizationFailureMessageDecoder
                 .decodeAuthorizationFailureMessageIfNeeded(credentialView, region, stackResource.resourceStatusReason());
-        LOGGER.debug("Cloudformation resource {} has the error status reason: {}", resourceId, statusReason);
+        LOGGER.warn("Cloudformation resource {} has the error status reason: {}", resourceId, statusReason);
         return resourceId + ": " + statusReason;
     }
 }

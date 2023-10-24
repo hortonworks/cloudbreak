@@ -67,11 +67,6 @@ public class RootDiskTaggingResourceBuilder extends AbstractAwsNativeComputeBuil
     }
 
     @Override
-    protected boolean isFinished(AwsContext context, AuthenticatedContext auth, CloudResource resource) {
-        return true;
-    }
-
-    @Override
     public ResourceType resourceType() {
         return AWS_ROOT_DISK_TAGGING;
     }

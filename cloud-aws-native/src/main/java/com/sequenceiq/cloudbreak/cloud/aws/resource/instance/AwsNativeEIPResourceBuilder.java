@@ -139,11 +139,6 @@ public class AwsNativeEIPResourceBuilder extends AbstractAwsNativeComputeBuilder
     }
 
     @Override
-    protected boolean isFinished(AwsContext context, AuthenticatedContext auth, CloudResource resource) {
-        return true;
-    }
-
-    @Override
     public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
         String allocationId = resource.getReference();
         LOGGER.info("Terminate EIP with allocation id: '{}' and instance id: '{}'", allocationId, resource.getInstanceId());
