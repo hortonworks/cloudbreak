@@ -4,6 +4,7 @@ import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.SAME_ZONE;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.ZONE_REDUNDANT;
 import static com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType.HA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -99,7 +100,7 @@ public class AzureDatabaseServerParameterSetterTest {
         assertEquals(AzureHighAvailabiltyMode.SAME_ZONE, azure.getHighAvailabilityMode());
         assertEquals(AzureDatabaseType.FLEXIBLE_SERVER, azure.getAzureDatabaseType());
         assertTrue(Set.of("3", "2", "1").contains(azure.getAvailabilityZone()));
-        assertEquals(null, azure.getStandbyAvailabilityZone());
+        assertNull(azure.getStandbyAvailabilityZone());
     }
 
     @Test

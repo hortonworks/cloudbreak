@@ -245,7 +245,7 @@ cb:
     externaldatabase:
       ha:
         retentionperiod: 30
-        georedundantbackup: true
+        georedundantbackup: false
       nonha:
         retentionperiod: 7
         georedundantbackup: false
