@@ -25,6 +25,7 @@ dependencies {
     implementation group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
     implementation group: 'com.google.code.findbugs',      name: 'jsr305',                         version: '3.0.2'
     implementation group: 'com.dyngr',                     name: 'polling',                        version: dyngrPollingVersion
+    implementation group: 'com.microsoft.azure',           name: 'msal4j',                         version: '1.13.8'
 
     testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion

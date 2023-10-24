@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.microsoft.aad.msal4j.MsalServiceException;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformDatabaseCapabilityRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformDatabaseCapabilityResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNoSqlTablesRequest;
@@ -26,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTable;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,5 +73,33 @@ class CloudParameterServiceTest {
                 new ExtendedCloudCredential(new CloudCredential("id", "name", "acc"),
                         "aws", "desc", "account", new ArrayList<>()), "region", "aws", null);
         assertEquals(expected, platformDatabaseCapabilities);
+    }
+
+    @Test
+    void getDatabaseCapabilitiesFailsWithAuthorizationError() {
+        MsalServiceException errorResponse = mock(MsalServiceException.class);
+        when(errorResponse.statusCode()).thenReturn(401);
+        doAnswer(invocation -> {
+            Event<GetPlatformDatabaseCapabilityRequest> ev = invocation.getArgument(1);
+            ev.getData().getResult().onNext(new GetPlatformDatabaseCapabilityResult("Unauthorized", errorResponse, 1L));
+            return null;
+        }).when(eventBus).notify(anyString(), any(Event.class));
+        assertThrows(OperationException.class, () -> underTest.getDatabaseCapabilities(
+                new ExtendedCloudCredential(new CloudCredential("id", "name", "acc"),
+                        "aws", "desc", "account", new ArrayList<>()), "region", "aws", null));
+    }
+
+    @Test
+    void getDatabaseCapabilitiesFailsWithTooManyRequestError() {
+        MsalServiceException errorResponse = mock(MsalServiceException.class);
+        when(errorResponse.statusCode()).thenReturn(427);
+        doAnswer(invocation -> {
+            Event<GetPlatformDatabaseCapabilityRequest> ev = invocation.getArgument(1);
+            ev.getData().getResult().onNext(new GetPlatformDatabaseCapabilityResult("Unauthorized", errorResponse, 1L));
+            return null;
+        }).when(eventBus).notify(anyString(), any(Event.class));
+        assertThrows(GetCloudParameterException.class, () -> underTest.getDatabaseCapabilities(
+                new ExtendedCloudCredential(new CloudCredential("id", "name", "acc"),
+                        "aws", "desc", "account", new ArrayList<>()), "region", "aws", null));
     }
 }
