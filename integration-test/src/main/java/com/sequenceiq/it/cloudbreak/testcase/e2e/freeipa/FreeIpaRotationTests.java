@@ -125,7 +125,14 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
             when = "freeipa salt boot secrets are rotation",
             then = "rotation should be successful and clusters should be available")
     public void testFreeIpaSaltBootSecretRotation(TestContext testContext, ITestContext iTestContext) {
+        String freeIpa = resourcePropertyProvider().getName();
         testContext
+                .given(freeIpa, FreeIpaTestDto.class)
+                .withTelemetry("telemetry")
+                .withOsType(RHEL8.getOs())
+                .withFreeIpaHa(1, 2)
+                .when(freeIpaTestClient.create(), key(freeIpa))
+                .await(FREEIPA_AVAILABLE)
                 .given(FreeIpaRotationTestDto.class)
                 .withSecrets(List.of(FreeIpaSecretType.FREEIPA_SALT_BOOT_SECRETS.value()))
                 .when(freeIpaTestClient.rotateSecret())
