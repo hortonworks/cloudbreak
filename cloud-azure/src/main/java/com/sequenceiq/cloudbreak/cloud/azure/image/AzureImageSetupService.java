@@ -142,6 +142,7 @@ public class AzureImageSetupService {
                         imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName(), azureImageInfo.getImageName());
             } catch (CloudConnectorException e) {
                 LOGGER.warn("Something happened during start image copy.", e);
+                throw e;
             }
         } else {
             LOGGER.info("The image already exists in the storage account.");
