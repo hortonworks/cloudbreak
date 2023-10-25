@@ -2,9 +2,11 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_SERVICE_DEPLOYMENT;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_SALT_BOOT_SECRETS;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -20,6 +22,7 @@ import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaRotationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
@@ -85,6 +88,11 @@ public class FreeIpaTests extends AbstractE2ETest {
                 .await(FREEIPA_AVAILABLE)
                 .awaitForHealthyInstances()
                 .then(RecipeTestAssertion.validateFilesOnFreeIpa(filePath, fileName, 1, sshJUtil))
+                .given(FreeIpaRotationTestDto.class)
+                    .withSecrets(List.of(FREEIPA_SALT_BOOT_SECRETS))
+                .when(freeIpaTestClient.rotateSecret())
+                .awaitForFlow()
+                .given(freeIpa, FreeIpaTestDto.class)
                 .when(freeIpaTestClient.stop())
                 .await(Status.STOPPED)
                 .when(freeIpaTestClient.start())
