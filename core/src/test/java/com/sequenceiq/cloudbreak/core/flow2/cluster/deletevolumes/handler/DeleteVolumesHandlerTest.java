@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesService;
+import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
@@ -52,6 +53,9 @@ public class DeleteVolumesHandlerTest {
 
     @Mock
     private StackUtil stackUtil;
+
+    @Mock
+    private CloudbreakFlowMessageService flowMessageService;
 
     @Mock
     private EventBus eventBus;

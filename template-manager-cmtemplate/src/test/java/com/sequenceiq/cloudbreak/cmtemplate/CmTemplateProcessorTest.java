@@ -967,4 +967,5 @@ public class CmTemplateProcessorTest {
     private String templateToString(ApiClusterTemplate template) {
         return JsonUtil.writeValueAsStringSilent(template);
     }
+
 }

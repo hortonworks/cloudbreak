@@ -20,12 +20,14 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.BlackListedDeleteVolumesRole;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesValidationRequest;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesRequest;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -46,6 +48,9 @@ public class DeleteVolumesValidationHandler extends ExceptionCatcherEventHandler
 
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
+
+    @Inject
+    private DeleteVolumesService deleteVolumesService;
 
     @Inject
     private EventBus eventBus;
@@ -86,8 +91,18 @@ public class DeleteVolumesValidationHandler extends ExceptionCatcherEventHandler
                             && resource.getResourceType().equals(ResourceType.AWS_VOLUMESET))
                     .map(s -> cloudResourceConverter.convert(s)).collect(toList());
             String cloudPlatform = stack.getCloudPlatform();
-            return new DeleteVolumesRequest(cloudResourcesToBeDeleted, stackDeleteVolumesRequest, cloudPlatform,
+            try {
+                deleteVolumesService.stopClouderaManagerService(stack, hostTemplateServiceComponents);
+                return new DeleteVolumesRequest(cloudResourcesToBeDeleted, stackDeleteVolumesRequest, cloudPlatform,
                         hostTemplateServiceComponents);
+            } catch (Exception ex) {
+                LOGGER.error("Deleting volumes flow is being stopped, Exception while stopping CM services.");
+                return new DeleteVolumesFailedEvent(
+                        "CloudbreakException: Exception while stopping CM services",
+                        new CloudbreakException("CloudbreakException: Exception while stopping CM services"),
+                        stack.getId());
+            }
+
         }
     }
 

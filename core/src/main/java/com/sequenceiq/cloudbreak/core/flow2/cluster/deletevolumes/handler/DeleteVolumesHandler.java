@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesS
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesFinishedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesHandlerRequest;
@@ -65,6 +66,9 @@ public class DeleteVolumesHandler extends ExceptionCatcherEventHandler<DeleteVol
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
 
+    @Inject
+    private EventBus eventBus;
+
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<DeleteVolumesHandlerRequest> event) {
         return new DeleteVolumesFailedEvent(e.getMessage(), e, resourceId);
@@ -75,29 +79,39 @@ public class DeleteVolumesHandler extends ExceptionCatcherEventHandler<DeleteVol
         LOGGER.debug("Staring DeleteVolumesHandler with event: {}", deleteVolumesEvent);
         DeleteVolumesHandlerRequest payload = deleteVolumesEvent.getData();
         StackDeleteVolumesRequest stackDeleteVolumesRequest = payload.getStackDeleteVolumesRequest();
-        List<CloudResource> cloudResourcesToBeDeleted = payload.getResourcesToBeDeleted();
+        StackDto stack = stackDtoService.getById(payload.getResourceId());
         String requestGroup = stackDeleteVolumesRequest.getGroup();
         String cloudPlatform = payload.getCloudPlatform();
-        Long stackId = stackDeleteVolumesRequest.getStackId();
+        CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(Platform.platform(cloudPlatform), Variant.variant(stack.getPlatformVariant()));
+        CloudConnector cloudConnector = cloudPlatformConnectors.get(cloudPlatformVariant);
+        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
+        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(stack.getId())
+                .withName(stack.getName())
+                .withCrn(stack.getResourceCrn())
+                .withPlatform(stack.getCloudPlatform())
+                .withVariant(stack.getPlatformVariant())
+                .withLocation(location)
+                .withWorkspaceId(stack.getWorkspace().getId())
+                .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
+                .build();
+        AuthenticatedContext ac = getAuthenticatedContext(cloudCredential, cloudContext, cloudConnector);
+        List<CloudResource> cloudResourcesToBeDeleted = payload.getResourcesToBeDeleted();
         Set<ServiceComponent> hostTemplateServiceComponents = payload.getHostTemplateServiceComponents();
         try {
-            StackDto stack = stackDtoService.getById(payload.getResourceId());
-            CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(Platform.platform(cloudPlatform), Variant.variant(stack.getPlatformVariant()));
-            CloudConnector cloudConnector = cloudPlatformConnectors.get(cloudPlatformVariant);
-            CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
-            CloudContext cloudContext = getCloudContext(stack);
-            AuthenticatedContext ac = getAuthenticatedContext(cloudCredential, cloudContext, cloudConnector);
-            deleteVolumesService.stopClouderaManagerService(stack, hostTemplateServiceComponents);
-            LOGGER.debug("Starting detach volumes for resources: {}", cloudResourcesToBeDeleted);
+            LOGGER.debug("Staring detach volumes for resources: {}", cloudResourcesToBeDeleted);
             deleteVolumesService.detachResources(cloudResourcesToBeDeleted, cloudPlatformVariant, ac);
-            LOGGER.debug("Starting to delete volumes on cloud provider for stack: {}", stack);
+            LOGGER.debug("Staring to delete volumes on cloud provider for stack: {}", stack);
             deleteVolumesService.deleteVolumeResources(stack, payload);
+            LOGGER.debug("Staring CM services for stack: {}", stack);
+            deleteVolumesService.startClouderaManagerService(stack, hostTemplateServiceComponents);
             deleteVolumes(cloudResourcesToBeDeleted, cloudPlatformVariant, ac, stackDeleteVolumesRequest, requestGroup);
             return new DeleteVolumesFinishedEvent(stackDeleteVolumesRequest);
         } catch (Exception ex) {
-            LOGGER.warn("Detaching and deleting block storage disks failed for stack: {}, and group: {}, Exception:: {}",
-                    stackDeleteVolumesRequest.getStackId(), requestGroup, ex.getCause());
-            return new DeleteVolumesFailedEvent(ex.getMessage(), ex, stackId);
+            LOGGER.error("Detaching EBS disks failed for stack: {}, and group: {}, Exception:: {}", stackDeleteVolumesRequest.getStackId(),
+                    requestGroup, ex.getCause());
+            return new DeleteVolumesFailedEvent(ex.getMessage(), ex, stack.getId());
         }
     }
 
@@ -124,20 +138,6 @@ public class DeleteVolumesHandler extends ExceptionCatcherEventHandler<DeleteVol
                     requestGroup,
                     String.join(",", volumeIds));
         }
-    }
-
-    private CloudContext getCloudContext(StackDto stack) {
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        return CloudContext.Builder.builder()
-                .withId(stack.getId())
-                .withName(stack.getName())
-                .withCrn(stack.getResourceCrn())
-                .withPlatform(stack.getCloudPlatform())
-                .withVariant(stack.getPlatformVariant())
-                .withLocation(location)
-                .withWorkspaceId(stack.getWorkspace().getId())
-                .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
-                .build();
     }
 
     @Override
