@@ -23,7 +23,7 @@ public class ResourceDiskPropertyCalculator {
     @Inject
     private TemplateService templateService;
 
-    public void updateWithResourceDiskAttached(Credential credential, Template template, VmType vmType) {
+    public Template updateWithResourceDiskAttached(Credential credential, Template template, VmType vmType) {
         if (credential.cloudPlatform().equalsIgnoreCase(CloudPlatform.AZURE.name())) {
             if (vmType == null) {
                 throw new BadRequestException("The virtual machine type for Azure probably not supported in you subscription. " +
@@ -33,9 +33,10 @@ public class ResourceDiskPropertyCalculator {
                 Map<String, Object> attributes = Optional.ofNullable(attributesJson).map(Json::getMap).orElseGet(HashMap::new);
                 attributes.put(AzureInstanceTemplate.RESOURCE_DISK_ATTACHED, vmType.getMetaData().getResourceDiskAttached());
                 template.setAttributes(new Json(attributes));
-                templateService.savePure(template);
+                return templateService.savePure(template);
             }
         }
+        return template;
     }
 
 }

@@ -4,10 +4,10 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Suppliers;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
@@ -33,8 +34,6 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -96,7 +95,7 @@ public class TemplateValidatorAndUpdater {
 
     public void validate(Credential credential, InstanceGroup instanceGroup, Stack stack,
             CdpResourceType stackType, ValidationResult.ValidationResultBuilder validationBuilder) {
-        Template value = instanceGroup.getTemplate();
+        Template template = instanceGroup.getTemplate();
         CloudVmTypes cloudVmTypes = cloudParameterService.getVmTypesV2(
                 extendedCloudCredentialConverter.convert(credential),
                 stack.getRegion(),
@@ -104,44 +103,32 @@ public class TemplateValidatorAndUpdater {
                 stackType,
                 new HashMap<>());
 
-        if (isEmpty(value.getInstanceType())) {
-            validateCustomInstanceType(value, validationBuilder);
+        if (isEmpty(template.getInstanceType())) {
+            validateCustomInstanceType(template, validationBuilder);
         } else {
             VmType vmType = null;
-            Platform platform = Platform.platform(value.getCloudPlatform());
+            Platform platform = Platform.platform(template.getCloudPlatform());
             Map<String, Set<VmType>> machines = cloudVmTypes.getCloudVmResponses();
             String locationString = locationService.location(stack.getRegion(), stack.getAvailabilityZone());
             if (machines.containsKey(locationString) && !machines.get(locationString).isEmpty()) {
                 for (VmType type : machines.get(locationString)) {
-                    if (type.value().equals(value.getInstanceType())) {
+                    if (type.value().equals(template.getInstanceType())) {
                         vmType = type;
                         break;
                     }
                 }
                 if (vmType == null) {
-                    validationBuilder.error(getInvalidVmTypeErrorMessage(value.getInstanceType(), platform.value(), stack.getRegion()));
+                    validationBuilder.error(getInvalidVmTypeErrorMessage(template.getInstanceType(), platform.value(), stack.getRegion()));
                 }
             }
-
-            validateVolumeTemplates(value, vmType, platform, validationBuilder, instanceGroup, stack.getBlueprint().getBlueprintText());
-            validateMaximumVolumeSize(value, vmType, validationBuilder);
-            resourceDiskPropertyCalculator.updateWithResourceDiskAttached(credential, instanceGroup.getTemplate(), vmType);
+            template = resourceDiskPropertyCalculator.updateWithResourceDiskAttached(credential, instanceGroup.getTemplate(), vmType);
+            validateVolumeTemplates(template, vmType, platform, validationBuilder, instanceGroup, stack);
+            validateMaximumVolumeSize(template, vmType, validationBuilder);
         }
     }
 
-    private Function<Map<String, Object>, Json> toJson() {
-        return value -> {
-            try {
-                return new Json(value);
-            } catch (IllegalArgumentException e) {
-                LOGGER.info("Failed to parse template parameters as JSON.", e);
-                throw new BadRequestException("Invalid template parameter format, valid JSON expected.");
-            }
-        };
-    }
-
     private void validateVolumeTemplates(Template value, VmType vmType, Platform platform,
-        ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, String bluePrintText) {
+        ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, Stack stack) {
         for (VolumeTemplate volumeTemplate : value.getVolumeTemplates()) {
             VolumeParameterType volumeParameterType = null;
             Map<Platform, Map<String, VolumeParameterType>> disks = diskMappings.get();
@@ -154,7 +141,7 @@ public class TemplateValidatorAndUpdater {
                 }
             }
 
-            validateVolume(volumeTemplate, vmType, platform, volumeParameterType, validationBuilder, instanceGroup, bluePrintText);
+            validateVolume(volumeTemplate, vmType, platform, volumeParameterType, validationBuilder, instanceGroup, stack);
         }
     }
 
@@ -176,11 +163,11 @@ public class TemplateValidatorAndUpdater {
         }
     }
 
-    private void validateVolume(VolumeTemplate value, VmType vmType, Platform platform,
-        VolumeParameterType volumeParameterType, ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, String bluePrintText) {
+    private void validateVolume(VolumeTemplate value, VmType vmType, Platform platform, VolumeParameterType volumeParameterType,
+        ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, Stack stack) {
         validateVolumeType(value, platform, validationBuilder);
-        validateVolumeCount(value, vmType, volumeParameterType, validationBuilder, instanceGroup, bluePrintText);
-        validateVolumeSize(value, vmType, volumeParameterType, validationBuilder, instanceGroup, bluePrintText);
+        validateVolumeCount(value, vmType, volumeParameterType, validationBuilder, instanceGroup, stack);
+        validateVolumeSize(value, vmType, volumeParameterType, validationBuilder, instanceGroup, stack);
     }
 
     private void validateMaximumVolumeSize(Template value, VmType vmType, ValidationResult.ValidationResultBuilder validationBuilder) {
@@ -209,18 +196,17 @@ public class TemplateValidatorAndUpdater {
         }
     }
 
-    private boolean isIDBrokerInstanceGroup(InstanceGroup instanceGroup) {
-        return GROUP_NAME_ID_BROKER.equalsIgnoreCase(instanceGroup.getGroupName());
-    }
-
-    private boolean isComputeInstanceGroup(InstanceGroup instanceGroup) {
-        return GROUP_NAME_COMPUTE.equalsIgnoreCase(instanceGroup.getGroupName());
+    private boolean isIDBrokerInstanceGroup(InstanceGroup instanceGroup, Stack stack) {
+        return GROUP_NAME_ID_BROKER.equalsIgnoreCase(instanceGroup.getGroupName()) && datalakeOrTemplate(stack.getType());
     }
 
     private boolean isCoordinatorAndExecutorInstanceGroup(String bluePrintText) {
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(bluePrintText);
-        Set<ServiceComponent> service = processor.getAllComponents().stream()
-                .filter(serviceComponent -> ROLE_IMPALAD.equals(serviceComponent.getComponent())).collect(Collectors.toSet());
+        Set<ServiceComponent> service = new HashSet<>();
+        if (processor != null) {
+            service = processor.getAllComponents().stream()
+                    .filter(serviceComponent -> ROLE_IMPALAD.equals(serviceComponent.getComponent())).collect(Collectors.toSet());
+        }
         if (!service.isEmpty()) {
             return true;
         }
@@ -228,11 +214,11 @@ public class TemplateValidatorAndUpdater {
     }
 
     private void validateVolumeCount(VolumeTemplate value, VmType vmType, VolumeParameterType volumeParameterType,
-        ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, String bluePrintText) {
+        ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, Stack stack) {
         if (vmType != null && needToCheckVolume(volumeParameterType, value.getVolumeCount())) {
             VolumeParameterConfig config = vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
             if (config != null) {
-                validateVolumeCountInParameterConfig(config, value, vmType, validationBuilder, instanceGroup, bluePrintText);
+                validateVolumeCountInParameterConfig(config, value, vmType, validationBuilder, instanceGroup, stack);
             } else {
                 validationBuilder.error(String.format("The '%s' instance type does not support 'Ephemeral' volume type", vmType.value()));
             }
@@ -240,7 +226,7 @@ public class TemplateValidatorAndUpdater {
     }
 
     private void validateVolumeCountInParameterConfig(VolumeParameterConfig config, VolumeTemplate value, VmType vmType,
-            ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, String bluePrintText) {
+            ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup,  Stack stack) {
         // IDBroker does not use data volume, so its volume count should be zero
         // To be backward-compatible, we only check max limit and allow the min limit to be zero for IDBroker
         if (!config.possibleNumberValues().isEmpty()) {
@@ -249,23 +235,27 @@ public class TemplateValidatorAndUpdater {
             }
         } else if (value.getVolumeCount() > config.maximumNumber()) {
             validationBuilder.error(String.format("Max allowed volume count for '%s': %s", vmType.value(), config.maximumNumber()));
-        } else if (!(isIDBrokerInstanceGroup(instanceGroup) || isComputeInstanceGroup(instanceGroup)
-                || isSdxComputeInstanceHostGroup(instanceGroup) || isCoordinatorAndExecutorInstanceGroup(bluePrintText)) &&
+        } else if (shouldValidateBasedOnGroupName(instanceGroup, stack) &&
                 value.getVolumeCount() < config.minimumNumber()) {
             validationBuilder.error(String.format("Min allowed volume count for '%s': %s", vmType.value(), config.minimumNumber()));
         }
     }
 
-    private boolean isSdxComputeInstanceHostGroup(InstanceGroup instanceGroup) {
-        return SDX_COMPUTE_INSTANCES.contains(instanceGroup.getGroupName().toLowerCase(Locale.ROOT));
+    private boolean isSdxComputeInstanceHostGroup(InstanceGroup instanceGroup, StackType stackType) {
+        return SDX_COMPUTE_INSTANCES.contains(instanceGroup.getGroupName().toLowerCase(Locale.ROOT)) &&
+                datalakeOrTemplate(stackType);
+    }
+
+    private static boolean datalakeOrTemplate(StackType stackType) {
+        return StackType.DATALAKE.equals(stackType) || StackType.TEMPLATE.equals(stackType);
     }
 
     private void validateVolumeSize(VolumeTemplate value, VmType vmType, VolumeParameterType volumeParameterType,
-        ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, String bluePrintText) {
+        ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, Stack stack) {
         if (vmType != null && needToCheckVolume(volumeParameterType, value.getVolumeCount())) {
             VolumeParameterConfig config = vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
             if (config != null) {
-                validateVolumeSizeInParameterConfig(config, value, vmType, validationBuilder, instanceGroup, bluePrintText);
+                validateVolumeSizeInParameterConfig(config, value, vmType, validationBuilder, instanceGroup, stack);
             } else {
                 validationBuilder.error(String.format("The '%s' instance type does not support 'Ephemeral' volume type", vmType.value()));
             }
@@ -273,20 +263,37 @@ public class TemplateValidatorAndUpdater {
     }
 
     private void validateVolumeSizeInParameterConfig(VolumeParameterConfig config, VolumeTemplate value, VmType vmType,
-            ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, String bluePrintText) {
+            ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, Stack stack) {
         // IDBroker does not use data volume, so its volume size should be zero
         // To be backward-compatible, we only check max limit and allow the min limit to be zero for IDBroker
         if (!config.possibleSizeValues().isEmpty()) {
             if (!config.possibleSizeValues().contains(value.getVolumeSize())) {
-                validationBuilder.error(String.format("Allowed volume size(s) for '%s': %s", vmType.value(), config.possibleSizeValues()));
+                validationBuilder.error(String.format("Allowed volume size(s) for '%s': %s in case of %s volumes and the current size is %s.",
+                        vmType.value(),
+                        config.possibleSizeValues(),
+                        value.getVolumeType(),
+                        value.getVolumeSize()));
             }
         } else if (value.getVolumeSize() > config.maximumSize()) {
-            validationBuilder.error(String.format("Max allowed volume size for '%s': %s", vmType.value(), config.maximumSize()));
-        } else if (!(isIDBrokerInstanceGroup(instanceGroup) || isComputeInstanceGroup(instanceGroup)
-                || isSdxComputeInstanceHostGroup(instanceGroup) || isCoordinatorAndExecutorInstanceGroup(bluePrintText)) &&
-                value.getVolumeSize() < config.minimumSize()) {
-            validationBuilder.error(String.format("Min allowed volume size for '%s': %s", vmType.value(), config.minimumSize()));
+            validationBuilder.error(String.format("Max allowed volume size for '%s': %s GB in case of %s volumes and the current size is %s GB.",
+                    vmType.value(),
+                    config.maximumSize(),
+                    value.getVolumeType(),
+                    value.getVolumeSize()));
+        } else if (shouldValidateBasedOnGroupName(instanceGroup, stack)
+                && value.getVolumeSize() < config.minimumSize()) {
+            validationBuilder.error(String.format("Min allowed volume size for '%s': %s GB in case of %s volumes and the current size is %s GB.",
+                    vmType.value(),
+                    config.minimumSize(),
+                    value.getVolumeType(),
+                    value.getVolumeSize()));
         }
+    }
+
+    private boolean shouldValidateBasedOnGroupName(InstanceGroup instanceGroup, Stack stack) {
+        return !(isIDBrokerInstanceGroup(instanceGroup, stack)
+                || isSdxComputeInstanceHostGroup(instanceGroup, stack.getType())
+                || isCoordinatorAndExecutorInstanceGroup(stack.getBlueprint().getBlueprintText()));
     }
 
     private boolean needToCheckVolume(VolumeParameterType volumeParameterType, Object value) {

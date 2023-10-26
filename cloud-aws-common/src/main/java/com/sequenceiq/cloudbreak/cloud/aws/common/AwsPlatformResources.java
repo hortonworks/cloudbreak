@@ -187,7 +187,7 @@ public class AwsPlatformResources implements PlatformResources {
 
     private static final int MAXIMUM_SSD_SIZE = 17592;
 
-    private static final int MINIMUM_ST1_SIZE = 500;
+    private static final int MINIMUM_ST1_SIZE = 125;
 
     private static final int MAX_RESULTS = 1000;
 
