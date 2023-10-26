@@ -82,10 +82,6 @@ public class GcpStackUtil {
 
     private static final int FIRST = 0;
 
-    private static final int ONE_MINUTE_IN_MILISECOND = 60000;
-
-    private static final int MINUTES = 3;
-
     private static final String GCP_SUBNET_FORMAT = "https://www.googleapis.com/compute/v1/projects/%s/regions/%s/subnetworks/%s";
 
     private static final String GCP_NETWORK_FORMAT = "https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s";
@@ -201,8 +197,8 @@ public class GcpStackUtil {
     public HttpRequestInitializer setHttpTimeout(HttpRequestInitializer requestInitializer) {
         return httpRequest -> {
             requestInitializer.initialize(httpRequest);
-            httpRequest.setConnectTimeout(MINUTES * ONE_MINUTE_IN_MILISECOND);
-            httpRequest.setReadTimeout(MINUTES * ONE_MINUTE_IN_MILISECOND);
+            httpRequest.setConnectTimeout(GcpRequestTimeout.getTimeout());
+            httpRequest.setReadTimeout(GcpRequestTimeout.getTimeout());
         };
     }
 
