@@ -4,8 +4,9 @@ tests:
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXDeleteVolumesTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.EnvironmentStopStartTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ephemeral.DistroXStopStartTest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ephemeral.DistroXRepairTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ephemeral.DistroXEphemeralTests
+        excludedMethods:
+          - testDistroXEphemeralUpgrade
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRepairTests
         excludedMethods:
           - testSDXMediumDutyRepair

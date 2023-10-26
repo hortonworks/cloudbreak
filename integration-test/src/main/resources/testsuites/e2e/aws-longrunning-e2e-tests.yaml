@@ -8,9 +8,7 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeRecoveryTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.EnvironmentStopStartTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXUpgradeTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ephemeral.DistroXStopStartTest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ephemeral.DistroXRepairTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ephemeral.DistroXUpgradeTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ephemeral.DistroXEphemeralTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRepairTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxResizeTests
