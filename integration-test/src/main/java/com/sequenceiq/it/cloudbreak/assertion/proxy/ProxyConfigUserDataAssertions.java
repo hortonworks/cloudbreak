@@ -2,8 +2,12 @@ package com.sequenceiq.it.cloudbreak.assertion.proxy;
 
 import java.util.Map;
 
+import org.apache.commons.lang3.NotImplementedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -21,6 +25,8 @@ import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 @Component
 class ProxyConfigUserDataAssertions {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyConfigUserDataAssertions.class);
+
     private static final String EXPORT_FORMAT = "export %s=%s";
 
     private static final String EXPORT_QUOTED_FORMAT = "export %s=\"%s\"";
@@ -28,28 +34,27 @@ class ProxyConfigUserDataAssertions {
     public Assertion<FreeIpaTestDto, FreeIpaClient> validateFreeIpaUserDataProxySettings(ProxyTestDto proxy) {
         return (testContext, testDto, client) -> {
             String stackNamePrefix = getFreeipaStackNamePrefix(testContext);
-            validateUserDataProxySettings(testContext, stackNamePrefix, proxy);
+            validateUserDataProxySettings(testContext, testDto.getCloudPlatform(), stackNamePrefix, proxy);
             return testDto;
         };
     }
 
     public Assertion<SdxInternalTestDto, SdxClient> validateDatalakeUserDataProxySettings(ProxyTestDto proxy) {
         return (testContext, testDto, client) -> {
-            validateUserDataProxySettings(testContext, testDto.getName(), proxy);
+            validateUserDataProxySettings(testContext, testDto.getCloudPlatform(), testDto.getName(), proxy);
             return testDto;
         };
     }
 
     public Assertion<DistroXTestDto, CloudbreakClient> validateDatahubUserDataProxySettings(ProxyTestDto proxy) {
         return (testContext, testDto, client) -> {
-            validateUserDataProxySettings(testContext, testDto.getName(), proxy);
+            validateUserDataProxySettings(testContext, testDto.getCloudPlatform(), testDto.getName(), proxy);
             return testDto;
         };
     }
 
-    private void validateUserDataProxySettings(TestContext testContext, String stackNamePrefix, ProxyTestDto proxy) {
-        CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
-        Map<String, String> launchTemplateUserData = cloudFunctionality.getLaunchTemplateUserData(stackNamePrefix);
+    private void validateUserDataProxySettings(TestContext testContext, CloudPlatform cloudPlatform, String stackNamePrefix, ProxyTestDto proxy) {
+        Map<String, String> launchTemplateUserData = getLaunchTemplateUserData(testContext, cloudPlatform, stackNamePrefix);
         if (launchTemplateUserData != null) {
             launchTemplateUserData.forEach((launchTemplateId, userData) -> {
                 if (userData.contains("IS_GATEWAY=false")) {
@@ -72,28 +77,27 @@ class ProxyConfigUserDataAssertions {
     public Assertion<FreeIpaTestDto, FreeIpaClient> validateFreeIpaUserDataNoProxySettings() {
         return (testContext, testDto, client) -> {
             String stackNamePrefix = getFreeipaStackNamePrefix(testContext);
-            validateUserDataNoProxySettings(testContext, stackNamePrefix);
+            validateUserDataNoProxySettings(testContext, testDto.getCloudPlatform(), stackNamePrefix);
             return testDto;
         };
     }
 
     public Assertion<SdxInternalTestDto, SdxClient> validateDatalakeUserDataNoProxySettings() {
         return (testContext, testDto, client) -> {
-            validateUserDataNoProxySettings(testContext, testDto.getName());
+            validateUserDataNoProxySettings(testContext, testDto.getCloudPlatform(), testDto.getName());
             return testDto;
         };
     }
 
     public Assertion<DistroXTestDto, CloudbreakClient> validateDatahubUserDataNoProxySettings() {
         return (testContext, testDto, client) -> {
-            validateUserDataNoProxySettings(testContext, testDto.getName());
+            validateUserDataNoProxySettings(testContext, testDto.getCloudPlatform(), testDto.getName());
             return testDto;
         };
     }
 
-    private void validateUserDataNoProxySettings(TestContext testContext, String stackNamePrefix) {
-        CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
-        Map<String, String> launchTemplateUserData = cloudFunctionality.getLaunchTemplateUserData(stackNamePrefix);
+    private void validateUserDataNoProxySettings(TestContext testContext, CloudPlatform cloudPlatform, String stackNamePrefix) {
+        Map<String, String> launchTemplateUserData = getLaunchTemplateUserData(testContext, cloudPlatform, stackNamePrefix);
         if (launchTemplateUserData != null) {
             launchTemplateUserData.forEach((launchTemplateId, userData) -> {
                 if (userData.contains("IS_GATEWAY=false")) {
@@ -138,5 +142,15 @@ class ProxyConfigUserDataAssertions {
 
     private static String getFreeipaStackNamePrefix(TestContext testContext) {
         return testContext.given(EnvironmentTestDto.class).getName() + "-freeipa";
+    }
+
+    private static Map<String, String> getLaunchTemplateUserData(TestContext testContext, CloudPlatform cloudPlatform, String stackNamePrefix) {
+        try {
+            CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getDelegate(cloudPlatform).getCloudFunctionality();
+            return cloudFunctionality.getLaunchTemplateUserData(stackNamePrefix);
+        } catch (NotImplementedException e) {
+            LOGGER.warn("Launch template could not be retrieved for {} on {}", stackNamePrefix, cloudPlatform);
+            return null;
+        }
     }
 }

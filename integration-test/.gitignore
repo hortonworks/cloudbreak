@@ -28,3 +28,4 @@ test.out
 ImageId*
 /src/main/resources/ums-users/
 dumps/
+yarn_cluster_logs/

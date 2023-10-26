@@ -4,9 +4,6 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicReference;
-
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,24 +11,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.EnvironmentUserSyncState;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
+import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.UtilTestClient;
-import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerProductTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
@@ -40,46 +29,39 @@ import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXClouderaManagerProductTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
-import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.ScpDownloadClusterLogsActions;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-import net.schmizz.sshj.SSHClient;
-import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
-import net.schmizz.sshj.userauth.UserAuthException;
+public abstract class HybridCloudE2ETest extends AbstractE2ETest {
 
-public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
+    protected static final CloudPlatform CHILD_CLOUD_PLATFORM = CloudPlatform.YARN;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsYcloudHybridCloudTest.class);
+    protected static final String CHILD_ENVIRONMENT_CREDENTIAL_KEY = "childCred";
 
-    private static final CloudPlatform CHILD_CLOUD_PLATFORM = CloudPlatform.YARN;
+    protected static final String CHILD_ENVIRONMENT_NETWORK_KEY = "childNetwork";
 
-    private static final String CHILD_ENVIRONMENT_CREDENTIAL_KEY = "childCred";
+    protected static final String CHILD_ENVIRONMENT_KEY = "childEnvironment";
 
-    private static final String CHILD_ENVIRONMENT_NETWORK_KEY = "childNetwork";
+    protected static final String CHILD_SDX_KEY = "childDataLake";
 
-    private static final String CHILD_ENVIRONMENT_KEY = "childEnvironment";
+    protected static final String CHILD_DISTROX_KEY = "childDataHub";
 
-    private static final String CHILD_SDX_KEY = "childDataLake";
-
-    private static final String MOCK_UMS_PASSWORD_INVALID = "Invalid password";
+    private static final Logger LOGGER = LoggerFactory.getLogger(HybridCloudE2ETest.class);
 
     private static final String MASTER_INSTANCE_GROUP = "master";
 
     private static final String IDBROKER_INSTANCE_GROUP = "idbroker";
-
-    private static final int SSH_PORT = 22;
-
-    private static final int SSH_CONNECT_TIMEOUT = 120000;
 
     private static final String CDH = "CDH";
 
@@ -88,13 +70,6 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
     private static final String REDHAT7 = "redhat7";
 
     private static final String STACK_AUTHENTICATION = "stackAuthentication";
-
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-    private String sdxGatewayPrivateIp;
-
-    @Value("${integrationtest.aws.hybridCloudSecurityGroupID}")
-    private String hybridCloudSecurityGroupID;
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -114,6 +89,18 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
     @Inject
     private UtilTestClient utilTestClient;
 
+    @Inject
+    private DistroXTestClient distroXTestClient;
+
+    @Value("${integrationtest.aws.hybridCloudSecurityGroupID}")
+    private String hybridCloudSecurityGroupID;
+
+    private String sdxGatewayPrivateIp;
+
+    private String cdhVersion;
+
+    private String cdhParcel;
+
     @Override
     protected void setupTest(TestContext testContext) {
         assertSupportedCloudPlatform(CloudPlatform.AWS);
@@ -124,7 +111,7 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
         //Use a pre-prepared security group what allows inbound connections from ycloud
         testContext
                 .given(EnvironmentTestDto.class)
-                .withDefaultSecurityGroup(hybridCloudSecurityGroupID);
+                    .withDefaultSecurityGroup(hybridCloudSecurityGroupID);
         createEnvironmentWithFreeIpa(testContext);
 
         testContext
@@ -147,35 +134,12 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
-    @UseSpotInstances
-    @Description(
-            given = "there is a running cloudbreak with parent-child environments ",
-            when = "a valid SDX create request is sent to the child environment ",
-            then = "SDX is created and instances are accessible via ssh by valid username and password ",
-            and = "instances are not accessible via ssh by invalid username and password"
-    )
-    public void testCreateSdxOnChildEnvironment(TestContext testContext) {
+    protected void createChildDatalake(TestContext testContext) {
         String clouderaManager = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
         String cluster = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
         String cmProduct = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
         String stack = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
-
-        AtomicReference<String> cdhVersion = new AtomicReference<>();
-        AtomicReference<String> cdhParcel = new AtomicReference<>();
-        String runtimeVersion = commonClusterManagerProperties().getRuntimeVersion();
-
-        testContext
-                .given(StackMatrixTestDto.class, CHILD_CLOUD_PLATFORM)
-                    .withOs(CENTOS7)
-                .when(utilTestClient.stackMatrixV4())
-                .then((tc, dto, client) -> {
-                    ClouderaManagerStackDescriptorV4Response response = dto.getResponse().getCdh().get(runtimeVersion);
-                    cdhVersion.set(response.getVersion());
-                    cdhParcel.set(response.getRepository().getStack().get(REDHAT7));
-                    return dto;
-                })
-                .validate();
+        fetchCdhDetails(testContext);
 
         testContext
                 .given("telemetry", TelemetryTestDto.class)
@@ -183,12 +147,12 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                     .withReportClusterLogs()
                 .given(cmProduct, ClouderaManagerProductTestDto.class, CHILD_CLOUD_PLATFORM)
                     .withName(CDH)
-                    .withVersion(cdhVersion.get())
-                    .withParcel(cdhParcel.get())
+                    .withVersion(cdhVersion)
+                    .withParcel(cdhParcel)
                 .given(clouderaManager, ClouderaManagerTestDto.class, CHILD_CLOUD_PLATFORM)
                     .withClouderaManagerProduct(cmProduct)
                 .given(cluster, ClusterTestDto.class, CHILD_CLOUD_PLATFORM)
-                    .withBlueprintName(getDefaultSDXBlueprintName())
+                    .withBlueprintName(commonClusterManagerProperties().getInternalSdxBlueprintName())
                     .withValidateBlueprint(Boolean.FALSE)
                     .withClouderaManager(clouderaManager)
                 .given(MASTER_INSTANCE_GROUP, InstanceGroupTestDto.class, CHILD_CLOUD_PLATFORM)
@@ -215,22 +179,72 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                 })
                 .await(SdxClusterStatusResponse.RUNNING, key(CHILD_SDX_KEY).withWaitForFlow(Boolean.TRUE))
                 .awaitForHealthyInstances()
-                .then((tc, dto, client) -> {
-                    String environmentCrn = dto.getResponse().getEnvironmentCrn();
-                    com.sequenceiq.freeipa.api.client.FreeIpaClient freeIpaClient = tc.getMicroserviceClient(FreeIpaClient.class).getDefaultClient();
-                    checkUserSyncState(environmentCrn, freeIpaClient);
+                .validate();
+    }
 
-                    for (InstanceGroupV4Response ig : dto.getResponse().getStackV4Response().getInstanceGroups()) {
-                        for (InstanceMetaDataV4Response i : ig.getMetadata()) {
-                            String ip = i.getPublicIp();
+    private void fetchCdhDetails(TestContext testContext) {
+        if (StringUtils.isAnyBlank(cdhVersion, cdhParcel)) {
+            testContext
+                    .given(StackMatrixTestDto.class, CHILD_CLOUD_PLATFORM)
+                        .withOs(CENTOS7)
+                    .when(utilTestClient.stackMatrixV4())
+                    .then((tc, dto, client) -> {
+                        String runtimeVersion = commonClusterManagerProperties().getRuntimeVersion();
+                        ClouderaManagerStackDescriptorV4Response response = dto.getResponse().getCdh().get(runtimeVersion);
+                        cdhVersion = response.getVersion();
+                        cdhParcel = response.getRepository().getStack().get(REDHAT7);
+                        return dto;
+                    })
+                    .validate();
+        }
+    }
 
-                            LOGGER.info("Trying to ssh with user {} into instance: {}", tc.getWorkloadUserName(), OBJECT_MAPPER.writeValueAsString(i));
-                            testShhAuthenticationSuccessful(tc, ip);
-                            testShhAuthenticationFailure(tc, ip);
-                        }
-                    }
-                    return dto;
-                })
+    protected void createChildDatahubForExistingDatalake(TestContext testContext) {
+        String clouderaManager = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
+        String cluster = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
+        String cmProduct = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
+        fetchCdhDetails(testContext);
+
+        testContext
+                .given(cmProduct, DistroXClouderaManagerProductTestDto.class, CHILD_CLOUD_PLATFORM)
+                    .withName(CDH)
+                    .withVersion(cdhVersion)
+                    .withParcel(cdhParcel)
+                .given(clouderaManager, DistroXClouderaManagerTestDto.class, CHILD_CLOUD_PLATFORM)
+                    .withClouderaManagerProduct(cmProduct)
+                .given(cluster, DistroXClusterTestDto.class, CHILD_CLOUD_PLATFORM)
+                    .withBlueprintName(commonClusterManagerProperties().getInternalDistroXBlueprintName())
+                    .withValidateBlueprint(Boolean.FALSE)
+                    .withClouderaManager(clouderaManager)
+                .given(CHILD_DISTROX_KEY, DistroXTestDto.class, CHILD_CLOUD_PLATFORM)
+                    .withEnvironmentKey(CHILD_ENVIRONMENT_KEY)
+                    .withCluster(cluster)
+                .when(distroXTestClient.create(), key(CHILD_DISTROX_KEY))
+                .await(STACK_AVAILABLE, key(CHILD_DISTROX_KEY))
+                .awaitForHealthyInstances()
+                .when(distroXTestClient.get(), key(CHILD_DISTROX_KEY))
+                .validate();
+    }
+
+    /**
+     * Helper method to speed up local testing. Could be invoked to re-use an already existing environment with the given name
+     */
+    protected void useExistingChildEnvironment(TestContext testContext, String environmentName) {
+        testContext
+                .given(CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class, CHILD_CLOUD_PLATFORM)
+                .withName(environmentName)
+                .when(environmentTestClient.describe())
+                .validate();
+    }
+
+    /**
+     * Helper method to speed up local testing. Could be invoked to re-use an already existing datalake with the given name
+     */
+    protected void useExistingChildDatalake(TestContext testContext, String datalakeName) {
+        testContext
+                .given(CHILD_SDX_KEY, SdxInternalTestDto.class, CHILD_CLOUD_PLATFORM)
+                .withName(datalakeName)
+                .when(sdxTestClient.describeInternal())
                 .validate();
     }
 
@@ -256,51 +270,17 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
             }
         }
 
-        LOGGER.info("Terminating the child environment with cascading delete...");
-        testContext
-                .given(CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class, CHILD_CLOUD_PLATFORM)
-                    .withCredentialName(testContext.get(CHILD_ENVIRONMENT_CREDENTIAL_KEY).getName())
-                    .withParentEnvironment()
-                .when(environmentTestClient.cascadingDelete(), key(CHILD_ENVIRONMENT_KEY).withSkipOnFail(Boolean.FALSE))
-                .await(EnvironmentStatus.ARCHIVED, key(CHILD_ENVIRONMENT_KEY).withSkipOnFail(Boolean.FALSE));
-        LOGGER.info("Child environment has been deleted!");
+        if (testContext.shouldCleanUp()) {
+            LOGGER.info("Terminating the child environment with cascading delete...");
+            testContext
+                    .given(CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class, CHILD_CLOUD_PLATFORM)
+                        .withCredentialName(testContext.get(CHILD_ENVIRONMENT_CREDENTIAL_KEY).getName())
+                        .withParentEnvironment()
+                    .when(environmentTestClient.cascadingDelete(), key(CHILD_ENVIRONMENT_KEY).withSkipOnFail(Boolean.FALSE))
+                    .await(EnvironmentStatus.ARCHIVED, key(CHILD_ENVIRONMENT_KEY).withSkipOnFail(Boolean.FALSE));
+            LOGGER.info("Child environment has been deleted!");
+        }
 
         testContext.cleanupTestContext();
-    }
-
-    private String getDefaultSDXBlueprintName() {
-        return commonClusterManagerProperties().getInternalSdxBlueprintName();
-    }
-
-    private void checkUserSyncState(String environmentCrn, com.sequenceiq.freeipa.api.client.FreeIpaClient freeIpaClient) throws JsonProcessingException {
-        UserV1Endpoint userV1Endpoint = freeIpaClient.getUserV1Endpoint();
-        EnvironmentUserSyncState userSyncState = userV1Endpoint.getUserSyncState(environmentCrn);
-        SyncOperationStatus syncOperationStatus = userV1Endpoint.getSyncOperationStatus(userSyncState.getLastUserSyncOperationId());
-        LOGGER.info("Last user sync is in state {}, last operation: {}", userSyncState.getState(), OBJECT_MAPPER.writeValueAsString(syncOperationStatus));
-    }
-
-    private void testShhAuthenticationSuccessful(TestContext testContext, String host) {
-        try (SSHClient client = getSshClient(host)) {
-            client.authPassword(testContext.getWorkloadUserName(), testContext.getWorkloadPassword());
-        } catch (IOException e) {
-            throw new TestFailException(String.format("Failed to ssh into host %s", host), e);
-        }
-    }
-
-    private void testShhAuthenticationFailure(TestContext testContext, String host) throws IOException {
-        try (SSHClient client = getSshClient(host)) {
-            client.authPassword(testContext.getWorkloadUserName(), MOCK_UMS_PASSWORD_INVALID);
-            throw new TestFailException(String.format("SSH authentication passed with invalid password on host %s.", host));
-        } catch (UserAuthException ex) {
-            LOGGER.info("Expected: SSH authentication failure has been happend!");
-        }
-    }
-
-    private SSHClient getSshClient(String host) throws IOException {
-        SSHClient client = new SSHClient();
-        client.addHostKeyVerifier(new PromiscuousVerifier());
-        client.setConnectTimeout(SSH_CONNECT_TIMEOUT);
-        client.connect(host, SSH_PORT);
-        return client;
     }
 }

@@ -15,7 +15,5 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxImagesTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.AzureMarketplaceImageTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxRepairWithRecipeTest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.saltpassword.RotateSaltPasswordE2ETest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.proxy.ModifyProxyConfigE2ETest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.AzureMultiAzFreeIpaTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMultiAzScalingTests

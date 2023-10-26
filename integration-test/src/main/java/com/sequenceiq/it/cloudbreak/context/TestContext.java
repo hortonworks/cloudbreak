@@ -1406,6 +1406,10 @@ public abstract class TestContext implements ApplicationContextAware {
         shutdown();
     }
 
+    public boolean shouldCleanUp() {
+        return getExceptionMap().isEmpty() ? cleanUp : cleanUpOnFailure;
+    }
+
     public void shutdown() {
         setShutdown(true);
     }
