@@ -260,6 +260,10 @@
               {
                 "name": "xml.authorizers.userGroupProvider.ldap-user-group-provider.property.TLS - Truststore Password",
                 "value": "${nifi.security.truststorePasswd}"
+              },
+              {
+                "name": "nifi.python.command",
+                "value": "python3.9"
               }
             ]
           }
