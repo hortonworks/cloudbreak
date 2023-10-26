@@ -109,8 +109,7 @@ public class DeleteVolumesHandler extends ExceptionCatcherEventHandler<DeleteVol
             deleteVolumes(cloudResourcesToBeDeleted, cloudPlatformVariant, ac, stackDeleteVolumesRequest, requestGroup);
             return new DeleteVolumesFinishedEvent(stackDeleteVolumesRequest);
         } catch (Exception ex) {
-            LOGGER.error("Detaching EBS disks failed for stack: {}, and group: {}, Exception:: {}", stackDeleteVolumesRequest.getStackId(),
-                    requestGroup, ex.getCause());
+            LOGGER.error("Detaching EBS disks failed for stack: {}, and group: {}", stackDeleteVolumesRequest.getStackId(), requestGroup, ex);
             return new DeleteVolumesFailedEvent(ex.getMessage(), ex, stack.getId());
         }
     }
