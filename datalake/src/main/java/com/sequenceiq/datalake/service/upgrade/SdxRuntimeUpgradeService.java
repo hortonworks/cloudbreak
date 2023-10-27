@@ -150,7 +150,7 @@ public class SdxRuntimeUpgradeService {
 
     private SdxUpgradeResponse initSdxUpgrade(String userCrn, List<ImageInfoV4Response> upgradeCandidates, SdxUpgradeRequest request, SdxCluster cluster) {
         verifyPaywallAccess(userCrn, request);
-        validateRollingUpgrade(request, cluster);
+        validateRollingUpgrade(userCrn, request, cluster);
         String targetImageId = determineImageId(request, upgradeCandidates);
         String targetCdhVersion = getTargetCdhVersion(upgradeCandidates, targetImageId);
         FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(request, cluster, targetImageId);
@@ -177,10 +177,15 @@ public class SdxRuntimeUpgradeService {
                 rollingUpgradeEnabled, keepVariant);
     }
 
-    private void validateRollingUpgrade(SdxUpgradeRequest request, SdxCluster cluster) {
-        if (Boolean.TRUE.equals(request.getRollingUpgradeEnabled()) && !cluster.getClusterShape().isHA()) {
+    private void validateRollingUpgrade(String userCrn, SdxUpgradeRequest request, SdxCluster cluster) {
+        boolean rollingUpgradeEnabled = Boolean.TRUE.equals(request.getRollingUpgradeEnabled());
+        if (rollingUpgradeEnabled && !cluster.getClusterShape().isHA()) {
             String message = String.format("The rolling upgrade is not allowed for %s cluster shape.",
                     cluster.getClusterShape().name());
+            LOGGER.warn(message);
+            throw new BadRequestException(message);
+        } else if (rollingUpgradeEnabled && !entitlementService.isDatalakeZduOSUpgradeEnabled(sdxService.getAccountIdFromCrn(userCrn))) {
+            String message = "The rolling upgrade is not allowed because the CDP_DATALAKE_ZDU_OS_UPGRADE entitlement is not enabled for this account.";
             LOGGER.warn(message);
             throw new BadRequestException(message);
         }

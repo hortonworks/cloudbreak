@@ -255,6 +255,8 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(any(UpgradeV4Response.class))).thenReturn(sdxUpgradeResponse);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(sdxService.getAccountIdFromCrn(USER_CRN)).thenReturn(ACCOUNT_ID);
+        when(entitlementService.isDatalakeZduOSUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1L);
@@ -297,6 +299,8 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(any(UpgradeV4Response.class))).thenReturn(sdxUpgradeResponse);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(sdxService.getAccountIdFromCrn(USER_CRN)).thenReturn(ACCOUNT_ID);
+        when(entitlementService.isDatalakeZduOSUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setComponentVersions(creatExpectedPackageVersions());
@@ -387,6 +391,8 @@ public class SdxRuntimeUpgradeServiceTest {
         when(clouderaManagerLicenseProvider.getLicense(any())).thenReturn(new JsonCMLicense());
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(sdxService.getAccountIdFromCrn(USER_CRN)).thenReturn(ACCOUNT_ID);
+        when(entitlementService.isDatalakeZduOSUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1L);
@@ -488,14 +494,52 @@ public class SdxRuntimeUpgradeServiceTest {
         sdxUpgradeRequest.setRollingUpgradeEnabled(true);
         sdxCluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
 
-        try {
-            ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
-                    underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false));
-        } catch (BadRequestException e) {
-            String errorMessage = "The rolling upgrade is not allowed for LIGHT_DUTY cluster shape.";
-            assertEquals(errorMessage, e.getMessage());
-        }
+        Exception exception = assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false)));
+        assertEquals("The rolling upgrade is not allowed for LIGHT_DUTY cluster shape.", exception.getMessage());
 
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE,
+                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE,
+                SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
+        assertTrue(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
+    }
+
+    @Test
+    public void testTriggerUpgradeShouldThrowBadRequestWhenRollingUpgradeRequestedAndRollingUpgradeEntitlementIsDisabled() {
+        when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
+        ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
+        when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeV4RequestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
+        when(sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(sdxUpgradeRequest)).thenCallRealMethod();
+        when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(any(UpgradeV4Response.class))).thenReturn(sdxUpgradeResponse);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any())).thenReturn(false);
+        when(clouderaManagerLicenseProvider.getLicense(any())).thenReturn(new JsonCMLicense());
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(sdxService.getAccountIdFromCrn(USER_CRN)).thenReturn(ACCOUNT_ID);
+        when(entitlementService.isDatalakeZduOSUpgradeEnabled(ACCOUNT_ID)).thenReturn(false);
+
+        ImageInfoV4Response imageInfo = new ImageInfoV4Response();
+        imageInfo.setImageId(IMAGE_ID);
+        imageInfo.setCreated(1L);
+        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
+        lastImageInfo.setImageId(IMAGE_ID_LAST);
+        lastImageInfo.setCreated(2L);
+        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
+        sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
+
+        sdxUpgradeRequest.setLockComponents(false);
+        sdxUpgradeRequest.setImageId(null);
+        sdxUpgradeRequest.setReplaceVms(REPAIR_AFTER_UPGRADE);
+        sdxUpgradeRequest.setRollingUpgradeEnabled(true);
+        sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+
+        Exception exception = assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false)));
+        assertEquals("The rolling upgrade is not allowed because the CDP_DATALAKE_ZDU_OS_UPGRADE entitlement is not enabled for this account.",
+                exception.getMessage());
 
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE,
                 SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
