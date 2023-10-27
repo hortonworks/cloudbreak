@@ -43,9 +43,11 @@ public class SaltRunOrchestratorStateRotationExecutor extends AbstractRotationEx
 
     @Override
     protected void preValidate(SaltRunOrchestratorStateRotationContext context) throws Exception {
-        hostOrchestrator.ping(context.getTargets(), context.getGatewayConfig());
-        if (context.stateRunNeeded() && context.preValidateStateExists()) {
-            hostOrchestrator.runOrchestratorState(getStateParams(context.getPrevalidateParams(), context.getPreValidateStates(), context));
+        if (context.stateRunNeeded()) {
+            hostOrchestrator.ping(context.getTargets(), context.getGatewayConfig());
+            if (context.preValidateStateExists()) {
+                hostOrchestrator.runOrchestratorState(getStateParams(context.getPrevalidateParams(), context.getPreValidateStates(), context));
+            }
         }
     }
 
