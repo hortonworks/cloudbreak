@@ -142,7 +142,7 @@ public class InstanceMetadataServiceComponentTest {
         stack.setInstanceGroups(Set.of(workerInstanceGroup));
         when(repository.findLastPrivateIdForStack(any(), any())).thenReturn(new PageImpl(List.of(0L)));
         when(environmentClientService.getByCrn(ENV_CRN)).thenReturn(detailedEnvResponse);
-        NetworkScaleDetails networkScaleDetails = new NetworkScaleDetails(List.of("sub1", "sub2"));
+        NetworkScaleDetails networkScaleDetails = new NetworkScaleDetails(List.of("sub1", "sub2"), Set.of());
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, Map.of("worker", 42), Map.of(), false, false, networkScaleDetails);

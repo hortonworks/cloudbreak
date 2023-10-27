@@ -569,6 +569,9 @@ public class ModelDescriptions {
     public static class InstanceGroupNetworkScaleModelDescription {
         public static final String NETWORK_SCALE_REQUEST = "request to support scaling operations in multi-availability zone environments";
         public static final String PREFERRED_SUBNET_IDS = "list of subnet ids to provision the virtual machines in desired availability zones";
+
+        public static final String PREFERRED_AZS = "list of azs to provision the virtual machines in desired availability zones";
+
     }
 
     public static class HostGroupModelDescription {

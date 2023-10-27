@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
+import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -196,11 +197,13 @@ public class StackUpscaleActions {
             @Override
             protected void doExecute(StackScalingFlowContext context, UpscaleStackValidationResult payload, Map<Object, Object> variables) {
                 boolean repair = context.isRepair();
+                NetworkScaleDetails stackNetworkScaleDetails = context.getStackNetworkScaleDetails();
                 StackDto stack = stackDtoService.getById(context.getStackId());
                 Map<String, Integer> hostGroupWithInstanceCountToCreate = getHostGroupsWithInstanceCountToCreate(context, stack);
                 StackDtoDelegate updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, hostGroupWithInstanceCountToCreate,
-                        context.getHostgroupWithHostnames(), true, repair, context.getStackNetworkScaleDetails());
-                if (availabilityZoneCalculator.populateForScaling(updatedStack, hostGroupWithInstanceCountToCreate.keySet(), repair)) {
+                        context.getHostgroupWithHostnames(), true, repair, stackNetworkScaleDetails);
+                if (availabilityZoneCalculator.populateForScaling(updatedStack, hostGroupWithInstanceCountToCreate.keySet(),
+                        repair, stackNetworkScaleDetails)) {
                     updatedStack = stackDtoService.getById(context.getStackId());
                 }
                 List<CloudResource> resources = resourceService.getAllByStackId(updatedStack.getId()).stream()

@@ -25,6 +25,7 @@ public class DistroXScaleV1RequestToStackScaleV4RequestConverter {
         if (networkScaleV1Request != null) {
             NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
             networkScaleV4Request.setPreferredSubnetIds(networkScaleV1Request.getPreferredSubnetIds());
+            networkScaleV4Request.setPreferredAvailabilityZones(networkScaleV1Request.getPreferredAvailabilityZones());
             stackScaleV4Request.setStackNetworkScaleV4Request(networkScaleV4Request);
         }
     }

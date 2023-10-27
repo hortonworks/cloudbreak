@@ -22,6 +22,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.update.loadbalancer.Sta
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -475,13 +476,19 @@ public class ReactorFlowManager {
 
     private NetworkScaleDetails getStackNetworkScaleDetails(InstanceGroupAdjustmentV4Request instanceGroupAdjustment) {
         List<String> preferredSubnetIds = new ArrayList<>();
+        Set<String> preferredAvailabilityZones = new HashSet<>();
         if (instanceGroupAdjustment.getNetworkScaleRequest() != null) {
             List<String> preferredSubnetIdsFromRequest = instanceGroupAdjustment.getNetworkScaleRequest().getPreferredSubnetIds();
             if (CollectionUtils.isNotEmpty(preferredSubnetIdsFromRequest)) {
                 preferredSubnetIds.addAll(preferredSubnetIdsFromRequest);
             }
+
+            Set<String> preferredAvailabilityZonesFromRequest = instanceGroupAdjustment.getNetworkScaleRequest().getPreferredAvailabilityZones();
+            if (CollectionUtils.isNotEmpty(preferredAvailabilityZonesFromRequest)) {
+                preferredAvailabilityZones.addAll(preferredAvailabilityZonesFromRequest);
+            }
         }
-        return new NetworkScaleDetails(preferredSubnetIds);
+        return new NetworkScaleDetails(preferredSubnetIds, preferredAvailabilityZones);
     }
 
     public FlowIdentifier triggerServicesRollingRestart(Long stackId) {

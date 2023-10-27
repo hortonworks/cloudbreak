@@ -308,7 +308,7 @@ class StackUpscaleActionsTest {
         when(stackUpscaleService.getInstanceCountToCreate(stackDto, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO, repair)).thenReturn(ADJUSTMENT_ZERO);
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
         when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(eq(stackDto), anyMap(), anyMap(), anyBoolean(), anyBoolean(), any())).thenReturn(stackDto);
-        when(availabilityZoneCalculator.populateForScaling(eq(stackDto), anySet(), eq(repair))).thenReturn(zoneUpdateHappened);
+        when(availabilityZoneCalculator.populateForScaling(eq(stackDto), anySet(), eq(repair), any())).thenReturn(zoneUpdateHappened);
         when(stackUpgradeService.awsVariantMigrationIsFeasible(any(), anyString())).thenReturn(Boolean.FALSE);
         UpscaleStackValidationResult payload = new UpscaleStackValidationResult(STACK_ID);
         CloudStack convertedCloudStack = mock(CloudStack.class);

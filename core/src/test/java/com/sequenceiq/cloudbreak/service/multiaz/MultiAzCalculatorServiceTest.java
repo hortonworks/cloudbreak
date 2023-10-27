@@ -724,7 +724,7 @@ public class MultiAzCalculatorServiceTest {
         List<String> preferredSubnetIds = preferredSubnetIdIndexes.stream()
                 .map(index -> cloudSubnet(index).getName())
                 .collect(Collectors.toList());
-        NetworkScaleDetails networkScaleDetails = new NetworkScaleDetails(preferredSubnetIds);
+        NetworkScaleDetails networkScaleDetails = new NetworkScaleDetails(preferredSubnetIds, new HashSet<>());
 
         underTest.calculateByRoundRobin(
                 subnetAzPairs(subnetCount),

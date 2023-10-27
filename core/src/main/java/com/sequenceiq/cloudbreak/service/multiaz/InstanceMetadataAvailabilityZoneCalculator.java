@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -53,13 +54,14 @@ public class InstanceMetadataAvailabilityZoneCalculator {
         populate(stack);
     }
 
-    public boolean populateForScaling(StackDtoDelegate stack, Set<String> hostGroupsWithInstancesToCreate, boolean repair) {
+    public boolean populateForScaling(StackDtoDelegate stack, Set<String> hostGroupsWithInstancesToCreate,
+        boolean repair, NetworkScaleDetails networkScaleDetails) {
         boolean updateHappened = Boolean.FALSE;
         if (populateSupportedOnStack(stack)) {
             Set<InstanceMetaData> updatedInstances = new HashSet<>();
             Set<InstanceMetaData> notDeletedInstances = instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(stack.getId());
             for (String hostGroupName : hostGroupsWithInstancesToCreate) {
-                populateOnGroupForScalingAndRepair(stack, repair, hostGroupName, notDeletedInstances, updatedInstances);
+                populateOnGroupForScalingAndRepair(stack, repair, hostGroupName, notDeletedInstances, updatedInstances, networkScaleDetails);
             }
             updateInstancesMetaData(updatedInstances);
             if (CollectionUtils.isNotEmpty(updatedInstances)) {
@@ -151,15 +153,23 @@ public class InstanceMetadataAvailabilityZoneCalculator {
     }
 
     private void populateOnGroupForScalingAndRepair(StackDtoDelegate stack, boolean repair, String hostGroupName, Set<InstanceMetaData> notDeletedInstances,
-            Set<InstanceMetaData> updatedInstances) {
+            Set<InstanceMetaData> updatedInstances, NetworkScaleDetails networkScaleDetails) {
         LOGGER.debug("Populating availability zone for instances in group: '{}'", hostGroupName);
         InstanceGroupDto instanceGroupDto = getInstanceGroupDtoByGroupName(stack, hostGroupName);
         Long instanceGroupId = instanceGroupDto.getInstanceGroup().getId();
         Set<InstanceMetaData> notDeletedInstancesForGroup = getInstancesByInstanceGroupId(notDeletedInstances, instanceGroupId);
         if (repair) {
-            updatedInstances.addAll(populateOnInstancesOfGroupForRepair(stack, hostGroupName, notDeletedInstancesForGroup));
+            updatedInstances.addAll(populateOnInstancesOfGroupForRepair(
+                    stack,
+                    hostGroupName,
+                    notDeletedInstancesForGroup));
         } else {
-            updatedInstances.addAll(populateOnInstancesOfGroupForScaling(stack, hostGroupName, instanceGroupId, notDeletedInstancesForGroup));
+            updatedInstances.addAll(populateOnInstancesOfGroupForScaling(
+                    stack,
+                    hostGroupName,
+                    instanceGroupId,
+                    notDeletedInstancesForGroup,
+                    networkScaleDetails));
         }
     }
 
@@ -204,9 +214,16 @@ public class InstanceMetadataAvailabilityZoneCalculator {
     }
 
     private Set<InstanceMetaData> populateOnInstancesOfGroupForScaling(StackDtoDelegate stack, String hostGroupName, Long instanceGroupId,
-            Set<InstanceMetaData> notDeletedInstancesForGroup) {
+            Set<InstanceMetaData> notDeletedInstancesForGroup, NetworkScaleDetails networkScaleDetails) {
         LOGGER.info("Populating availability zones of instances for upscale in group: '{}'", hostGroupName);
-        Set<String> zonesOfInstanceGroup = stack.getAvailabilityZonesByInstanceGroup(instanceGroupId);
+        Set<String> zonesOfInstanceGroup = getZonesOfInstanceGroupOrFromScaleDetails(stack, instanceGroupId, networkScaleDetails);
         return populateAvailabilityZoneOfInstances(zonesOfInstanceGroup, notDeletedInstancesForGroup, hostGroupName);
+    }
+
+    private Set<String> getZonesOfInstanceGroupOrFromScaleDetails(StackDtoDelegate stack, Long instanceGroupId,
+            NetworkScaleDetails networkScaleDetails) {
+        return CollectionUtils.isEmpty(networkScaleDetails.getPreferredAvailabilityZones()) ?
+                stack.getAvailabilityZonesByInstanceGroup(instanceGroupId)
+                : networkScaleDetails.getPreferredAvailabilityZones();
     }
 }
