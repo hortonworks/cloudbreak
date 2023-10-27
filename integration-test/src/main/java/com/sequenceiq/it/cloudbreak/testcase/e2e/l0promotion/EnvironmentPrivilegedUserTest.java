@@ -50,18 +50,20 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
 
     private static final String CHANGE_USER_TO_ROOT_COMMAND = "su";
 
+    private static final String SSHD_RESTART = "systemctl restart sshd.service";
+
     private static final String SSSD_RESTART = "systemctl restart sssd.service";
 
-    private static final String SSSD_STATUS = "systemctl status sssd.service";
+    private static final String SSSD_STATUS = "systemctl status sssd.service | cat";
 
     private static final String BASH_SCRIPT = "#!/bin/bash";
 
     private static final String REPLACE_CLIENT_ALIVE_INTERVAL = "sed -i \"s/ClientAliveInterval.*/ClientAliveInterval 1800/g\" /etc/ssh/sshd_config";
 
-    private static final String SSSD_CONFIG_RECIPE_CONTENT = Base64.encodeBase64String(String.join("\n",
+    private static final String SSHD_CONFIG_RECIPE_CONTENT = Base64.encodeBase64String(String.join("\n",
             BASH_SCRIPT,
             REPLACE_CLIENT_ALIVE_INTERVAL,
-            SSSD_RESTART
+            SSHD_RESTART
     ).getBytes());
 
     @Inject
@@ -184,7 +186,7 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
         context
                 .given(recipeName, RecipeTestDto.class)
                 .withName(recipeName)
-                .withContent(SSSD_CONFIG_RECIPE_CONTENT)
+                .withContent(SSHD_CONFIG_RECIPE_CONTENT)
                 .withRecipeType(RecipeV4Type.PRE_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4(), RunningParameter.key(recipeName));
         context.given("master", InstanceGroupTestDto.class).withRecipes(recipeName);
