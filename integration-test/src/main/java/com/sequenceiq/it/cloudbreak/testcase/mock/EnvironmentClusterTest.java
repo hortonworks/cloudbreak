@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 
 import javax.inject.Inject;
@@ -9,8 +10,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
-import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
-import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -18,6 +18,7 @@ import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
@@ -26,11 +27,6 @@ import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 public class EnvironmentClusterTest extends AbstractMockTest {
 
     private static final String NEW_CREDENTIAL_KEY = "newCred";
-
-    private static final String FORBIDDEN_KEY = "forbiddenPost";
-
-    @Inject
-    private LdapTestClient ldapTestClient;
 
     @Inject
     private StackTestClient stackTestClient;
@@ -42,7 +38,7 @@ public class EnvironmentClusterTest extends AbstractMockTest {
     private CredentialTestClient credentialTestClient;
 
     @Inject
-    private ProxyTestClient proxyTestClient;
+    private FreeIpaTestClient freeIpaTestClient;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -62,6 +58,9 @@ public class EnvironmentClusterTest extends AbstractMockTest {
 
         String newStack = resourcePropertyProvider().getName();
         testContext
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.create())
+                .await(AVAILABLE)
                 .given(StackTestDto.class)
                 .withEnvironmentClass(EnvironmentTestDto.class)
                 .when(stackTestClient.createV4())
@@ -82,6 +81,9 @@ public class EnvironmentClusterTest extends AbstractMockTest {
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
                 .when(environmentTestClient.describe())
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.create())
+                .await(AVAILABLE)
                 .given(StackTestDto.class)
                 .withEnvironmentClass(EnvironmentTestDto.class)
                 .when(stackTestClient.createV4())
@@ -110,12 +112,6 @@ public class EnvironmentClusterTest extends AbstractMockTest {
                 .withEnvironmentCrn("")
                 .whenException(stackTestClient.createV4(), BadRequestException.class, expectedMessage("Environment CRN cannot be null or empty."))
                 .validate();
-    }
-
-    private void createEnvWithResources(MockedTestContext testContext) {
-        testContext.given(EnvironmentTestDto.class)
-                .when(environmentTestClient.create())
-                .when(environmentTestClient.describe());
     }
 
     private void checkCredentialAttachedToCluster(MockedTestContext testContext) {

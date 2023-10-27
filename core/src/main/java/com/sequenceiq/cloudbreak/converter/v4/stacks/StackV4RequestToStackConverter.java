@@ -166,9 +166,6 @@ public class StackV4RequestToStackConverter {
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
 
     @Inject
-    private AutoTlsFlagPreparatory autoTlsFlagPreparatory;
-
-    @Inject
     private EntitlementService entitlementService;
 
     @Inject
@@ -403,7 +400,7 @@ public class StackV4RequestToStackConverter {
                     })
                     .collect(Collectors.toSet());
             cluster.setHostGroups(hostGroups);
-            cluster.setAutoTlsEnabled(autoTlsFlagPreparatory.provideAutoTlsFlag(source.getCluster(), stack, parentEnvCloudPlatform));
+            cluster.setAutoTlsEnabled(true);
             stack.setCluster(cluster);
         }
     }

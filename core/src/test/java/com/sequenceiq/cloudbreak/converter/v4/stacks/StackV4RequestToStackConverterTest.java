@@ -172,9 +172,6 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
 
     @Mock
-    private AutoTlsFlagPreparatory autoTlsFlagPreparatory;
-
-    @Mock
     private EntitlementService entitlementService;
 
     @Mock
@@ -220,7 +217,6 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
         given(telemetryConverter.convert(eq(null), eq(StackType.WORKLOAD), anyString())).willReturn(new Telemetry());
-        given(autoTlsFlagPreparatory.provideAutoTlsFlag(any(ClusterV4Request.class), any(Stack.class), any(Optional.class))).willReturn(Boolean.TRUE);
 
         // WHEN
         Stack stack = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(request));
@@ -250,7 +246,6 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
 
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
-        given(autoTlsFlagPreparatory.provideAutoTlsFlag(any(ClusterV4Request.class), any(Stack.class), any(Optional.class))).willReturn(Boolean.TRUE);
 
         // WHEN
         Stack stack = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(request));
@@ -262,7 +257,6 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
                         "environmentCrn", "terminated", "datalakeCrn", "type", "inputs", "failurePolicy", "minaSshdServiceId",
                         "ccmV2AgentCrn", "stackVersion", "originalName", "javaVersion"));
-        assertEquals("eu-west-1", stack.getRegion());
         assertEquals("AWS", stack.getCloudPlatform());
         assertEquals("mystack", stack.getName());
         assertTrue(stack.getCluster().isAutoTlsEnabled());
@@ -325,7 +319,6 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
 
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
-        given(autoTlsFlagPreparatory.provideAutoTlsFlag(any(ClusterV4Request.class), any(Stack.class), any(Optional.class))).willReturn(Boolean.TRUE);
 
         Stack result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(request));
 

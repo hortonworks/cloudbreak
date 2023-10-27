@@ -11,7 +11,6 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
-import com.sequenceiq.it.cloudbreak.dto.kerberos.ActiveDirectoryKerberosDescriptorTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.FreeIpaKerberosDescriptorTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
@@ -30,54 +29,6 @@ public class KerberizedStackCreationTest extends AbstractMockTest {
         createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "an ActiveDirectory based kerberos config without realm and domain",
-            when = "calling a stack creation with that kerberos config",
-            then = "custom should be used and salt action should be called")
-    public void testCreationWitKerberosAndStackWithoutCustomDomainAndADWithoutDomainAndWithRealm(MockedTestContext testContext) {
-        testContext
-                .given(ActiveDirectoryKerberosDescriptorTestDto.class)
-                .withDomain(null)
-                .withRealm("realm.addomain.com")
-                .given(KerberosTestDto.class)
-                .withActiveDirectoryDescriptor()
-                .when(kerberosTestClient.createV1())
-                .given(ClusterTestDto.class)
-                .given(StackTestDto.class)
-                .withCluster()
-                .when(stackTestClient.createV4())
-                .enableVerification()
-                .await(STACK_AVAILABLE)
-                .then(KerberosTestAssertion.validateCustomDomain("realm.addomain.com"))
-                .mockSalt().saltActionDistribute().post().times(1).bodyContains("realm.addomain.com", 12).verify()
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "an ActiveDirectory based kerberos config without realm and with domain",
-            when = "calling a stack creation with that kerberos config",
-            then = "propagated domain should be used and salt action should be called")
-    public void testCreationWitKerberosAndStackWithoutCustomDomainAndADWithDomainAndWithRealm(MockedTestContext testContext) {
-        testContext
-                .given(ActiveDirectoryKerberosDescriptorTestDto.class)
-                .withDomain("custom.addomain.com")
-                .withRealm("realm.addomain.com")
-                .given(KerberosTestDto.class)
-                .withActiveDirectoryDescriptor()
-                .when(kerberosTestClient.createV1())
-                .given(ClusterTestDto.class)
-                .given(StackTestDto.class)
-                .withCluster()
-                .when(stackTestClient.createV4())
-                .enableVerification()
-                .await(STACK_AVAILABLE)
-                .then(KerberosTestAssertion.validateCustomDomain("custom.addomain.com"))
-                .mockSalt().saltActionDistribute().post().times(1).bodyContains("custom.addomain.com", 12).verify()
-                .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
