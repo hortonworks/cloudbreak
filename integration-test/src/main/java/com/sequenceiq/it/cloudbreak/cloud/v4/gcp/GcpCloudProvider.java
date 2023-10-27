@@ -459,7 +459,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (gcpProperties.getBaseimage().getImageId() == null || gcpProperties.getBaseimage().getImageId().isEmpty()) {
-            return getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.GCP.name(), false);
+            return getLatestDefaultBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.GCP.name(), false);
         } else {
             return getLatestBaseImageID();
         }
@@ -552,6 +552,6 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime) {
-        return getLatestPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.GCP.name(), false, runtime);
+        return getLatestDefaultPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.GCP.name(), false, runtime);
     }
 }

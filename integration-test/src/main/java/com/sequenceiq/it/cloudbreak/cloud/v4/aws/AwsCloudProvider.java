@@ -409,7 +409,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (awsProperties.getBaseimage().getImageId() == null || awsProperties.getBaseimage().getImageId().isEmpty()) {
-            return getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AWS.name(), getGovCloud());
+            return getLatestDefaultBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AWS.name(), getGovCloud());
         } else {
             return getLatestBaseImageID();
         }
@@ -579,6 +579,6 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime) {
-        return getLatestPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.AWS.name(), false, runtime);
+        return getLatestDefaultPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.AWS.name(), false, runtime);
     }
 }

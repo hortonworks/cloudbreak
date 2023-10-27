@@ -87,7 +87,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime) {
-        return getLatestPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.YARN.name(), false, runtime);
+        return getLatestDefaultPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.YARN.name(), false, runtime);
     }
 
     @Override
@@ -246,7 +246,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (yarnProperties.getBaseimage().getImageId() == null || yarnProperties.getBaseimage().getImageId().isEmpty()) {
-            return getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.YARN.name(), false);
+            return getLatestDefaultBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.YARN.name(), false);
         } else {
             return getLatestBaseImageID();
         }

@@ -139,7 +139,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime) {
-        return getLatestPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.MOCK.name(), false, runtime);
+        return getLatestDefaultPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.MOCK.name(), false, runtime);
     }
 
     @Override
@@ -253,7 +253,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (mockProperties.getBaseimage().getRedhat7().getImageId() == null || mockProperties.getBaseimage().getRedhat7().getImageId().isEmpty()) {
-            return getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.MOCK.name(), false);
+            return getLatestDefaultBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.MOCK.name(), false);
         } else {
             return getLatestBaseImageID();
         }

@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4;
 
+import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
 import static java.lang.String.format;
 
@@ -290,30 +291,28 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     public String getLatestPreWarmedImage(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform, boolean govCloud) {
-        return getLatestPreWarmedImageByRuntimeVersion(imageCatalogTestDto, cloudbreakClient, platform, govCloud,
+        return getLatestDefaultPreWarmedImageByRuntimeVersion(imageCatalogTestDto, cloudbreakClient, platform, govCloud,
                 commonClusterManagerProperties.getRuntimeVersion());
     }
 
-    public String getLatestPreWarmedImageByRuntimeVersion(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform,
+    public String getLatestDefaultPreWarmedImageByRuntimeVersion(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform,
             boolean govCloud, String runtimeVersion) {
-        String osType = govCloud ? RHEL8.getOs() : "redhat7";
+        String osType = govCloud ? RHEL8.getOsType() : CENTOS7.getOsType();
         try {
-            List<ImageV4Response> prewarmedImagesForRuntime = cloudbreakClient
+            ImageV4Response latestPrewarmedImage = cloudbreakClient
                     .getDefaultClient()
                     .imageCatalogV4Endpoint()
                     .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
                             platform, null, null, govCloud)
                     .getCdhImages().stream()
+                    .filter(ImageV4Response::isDefaultImage)
                     .filter(image -> StringUtils.equalsIgnoreCase(image.getStackDetails().getVersion(), runtimeVersion))
                     .filter(imageV4Response -> StringUtils.equalsIgnoreCase(imageV4Response.getOsType(), osType))
-                    .sorted(Comparator.comparing(ImageV4Response::getPublished))
-                    .toList();
+                    .max(Comparator.comparing(ImageV4Response::getPublished))
+                    .orElseThrow(() -> new TestFailException(
+                            format("Cannot find pre-warmed images at '%s' provider with os type '%s' for '%s' runtime version!",
+                                    platform, osType, runtimeVersion)));
 
-            if (prewarmedImagesForRuntime.isEmpty()) {
-                throw new TestFailException(format("Cannot find pre-warmed images at '%s' provider for '%s' runtime version!", platform,
-                        runtimeVersion));
-            }
-            ImageV4Response latestPrewarmedImage = prewarmedImagesForRuntime.get(prewarmedImagesForRuntime.size() - 1);
             Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
             Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
             Log.log(LOGGER, format(" Selected Pre-warmed Image Date: %s | ID: %s | OS: %s | Description: %s ", latestPrewarmedImage.getDate(),
@@ -327,7 +326,8 @@ public abstract class AbstractCloudProvider implements CloudProvider {
         }
     }
 
-    public String getLatestBaseImage(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform, boolean govCloud) {
+    public String getLatestDefaultBaseImage(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform, boolean govCloud) {
+        String osType = govCloud ? RHEL8.getOsType() : CENTOS7.getOsType();
         try {
             List<BaseImageV4Response> images = cloudbreakClient
                     .getDefaultClient()
@@ -338,7 +338,11 @@ public abstract class AbstractCloudProvider implements CloudProvider {
             if (images.isEmpty()) {
                 throw new TestFailException("Images are empty, there is not any base image on provider " + platform);
             }
-            BaseImageV4Response baseImage = images.get(images.size() - 1);
+            BaseImageV4Response baseImage = images.stream()
+                    .filter(ImageV4Response::isDefaultImage)
+                    .filter(imageV4Response -> StringUtils.equalsIgnoreCase(imageV4Response.getOsType(), osType))
+                    .max(Comparator.comparing(ImageV4Response::getPublished))
+                    .orElseThrow(() -> new TestFailException(format("Cannot find base images at '%s' provider with os type '%s'!", platform, osType)));
             Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
             Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
             Log.log(LOGGER, format(" Selected Base Image Date: %s | ID: %s | Description: %s ", baseImage.getDate(),

@@ -464,7 +464,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (azureProperties.getBaseimage().getImageId() == null || azureProperties.getBaseimage().getImageId().isEmpty()) {
-            return getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AZURE.name(), false);
+            return getLatestDefaultBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AZURE.name(), false);
         } else {
             return getLatestBaseImageID();
         }
@@ -575,6 +575,6 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime) {
-        return getLatestPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.AZURE.name(), false, runtime);
+        return getLatestDefaultPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.AZURE.name(), false, runtime);
     }
 }
