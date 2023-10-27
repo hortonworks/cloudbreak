@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 
 @Service
@@ -27,7 +26,7 @@ public class SubnetChooserService {
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
-    public List<CloudSubnet> chooseSubnets(List<CloudSubnet> subnetMetas, CloudPlatform cloudPlatform, DBStack dbStack) {
+    public List<CloudSubnet> chooseSubnets(List<CloudSubnet> subnetMetas, DBStack dbStack) {
         NetworkConnector networkConnector = cloudPlatformConnectors.get(new CloudPlatformVariant(dbStack.getCloudPlatform(), dbStack.getPlatformVariant()))
                 .networkConnector();
         SubnetSelectionParameters build = SubnetSelectionParameters

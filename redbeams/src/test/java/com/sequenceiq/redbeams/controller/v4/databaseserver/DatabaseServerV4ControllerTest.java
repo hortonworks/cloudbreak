@@ -232,7 +232,7 @@ public class DatabaseServerV4ControllerTest {
     public void testCreate() {
         when(dbStackConverter.convert(allocateRequest, USER_CRN)).thenReturn(dbStack);
         DBStack savedDBStack = new DBStack();
-        when(creationService.launchDatabaseServer(dbStack, CLUSTER_CRN)).thenReturn(savedDBStack);
+        when(creationService.launchDatabaseServer(dbStack, CLUSTER_CRN, null)).thenReturn(savedDBStack);
         when(dbStackToDatabaseServerStatusV4ResponseConverter.convert(savedDBStack))
             .thenReturn(allocateResponse);
         when(redBeamsTagValidator.validateTags(any(), any())).thenReturn(validationResult);
@@ -240,7 +240,7 @@ public class DatabaseServerV4ControllerTest {
         DatabaseServerStatusV4Response response = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->  underTest.create(allocateRequest));
 
         assertEquals(allocateResponse, response);
-        verify(creationService).launchDatabaseServer(dbStack, CLUSTER_CRN);
+        verify(creationService).launchDatabaseServer(dbStack, CLUSTER_CRN, null);
     }
 
     @Test

@@ -71,8 +71,14 @@ public class RedbeamsEvent implements IdempotentEvent<RedbeamsEvent> {
         return forced;
     }
 
+    @Override
     public String toString() {
-        return selector();
+        return "RedbeamsEvent{" +
+                "selector='" + selector() + '\'' +
+                ", resourceId=" + resourceId +
+                ", accepted=" + accepted +
+                ", forced=" + forced +
+                '}';
     }
 
     @Override

@@ -122,7 +122,7 @@ class RedbeamsCreationServiceTest {
         when(dbStackService.save(dbStack)).thenReturn(dbStack);
         when(databaseServerConfigService.findByEnvironmentCrnAndClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN)).thenReturn(Optional.empty());
 
-        DBStack launchedStack = underTest.launchDatabaseServer(dbStack, CLUSTER_CRN);
+        DBStack launchedStack = underTest.launchDatabaseServer(dbStack, CLUSTER_CRN, null);
         assertThat(launchedStack).isEqualTo(dbStack);
         verify(dbStackService).save(dbStack);
 
@@ -130,7 +130,7 @@ class RedbeamsCreationServiceTest {
         assertThat(dbStack.getTemplate()).isEqualTo(TEMPLATE);
 
         ArgumentCaptor<DatabaseServerConfig> databaseServerConfigCaptor = ArgumentCaptor.forClass(DatabaseServerConfig.class);
-        verify(databaseServerConfigService).create(databaseServerConfigCaptor.capture(), eq(RedbeamsCreationService.DEFAULT_WORKSPACE));
+        verify(databaseServerConfigService).create(databaseServerConfigCaptor.capture(), eq(0L));
         DatabaseServerConfig databaseServerConfig = databaseServerConfigCaptor.getValue();
         assertThat(databaseServerConfig.getResourceStatus()).isEqualTo(ResourceStatus.SERVICE_MANAGED);
         assertThat(databaseServerConfig.getAccountId()).isEqualTo(ACCOUNT_ID);
@@ -160,7 +160,7 @@ class RedbeamsCreationServiceTest {
         when(databaseServerConfigService.findByEnvironmentCrnAndClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN)).thenReturn(Optional.of(databaseServerConfig));
         when(databaseServerConfig.getDbStack()).thenReturn(Optional.of(dbStack));
 
-        DBStack launchedStack = underTest.launchDatabaseServer(dbStack, CLUSTER_CRN);
+        DBStack launchedStack = underTest.launchDatabaseServer(dbStack, CLUSTER_CRN, null);
         assertThat(launchedStack).isEqualTo(dbStack);
 
         verifyNoInteractions(flowManager);

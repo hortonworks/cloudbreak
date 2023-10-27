@@ -68,7 +68,7 @@ public class DBStackToDatabaseStackConverter {
         return new DatabaseStack(network, databaseServer, getUserDefinedTags(dbStack), dbStack.getTemplate());
     }
 
-    private Network buildNetwork(DBStack dbStack) {
+    public Network buildNetwork(DBStack dbStack) {
         if (dbStack.getNetwork() == null) {
             return null;
         } else {

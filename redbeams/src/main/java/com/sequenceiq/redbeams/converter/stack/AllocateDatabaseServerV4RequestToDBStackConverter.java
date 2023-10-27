@@ -38,7 +38,6 @@ import com.sequenceiq.redbeams.service.AccountTagService;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.UuidGeneratorService;
 import com.sequenceiq.redbeams.service.crn.CrnService;
-import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 import com.sequenceiq.redbeams.service.sslcertificate.SslConfigService;
 
 @Component
@@ -74,9 +73,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     @Inject
     private AccountTagService accountTagService;
-
-    @Inject
-    private NetworkBuilderService networkBuilderService;
 
     @Inject
     private SslConfigService sslConfigService;
@@ -120,7 +116,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
             asMap.forEach((key, value) -> parameter.put(key, value.toString()));
             dbStack.setParameters(parameter);
         }
-        dbStack.setNetwork(networkBuilderService.buildNetwork(source.getNetwork(), environment, cloudPlatform, dbStack).getId());
 
         Instant now = clock.getCurrentInstant();
         dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.PROVISION_REQUESTED, now.toEpochMilli()));

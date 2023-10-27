@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Map;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -43,6 +44,24 @@ public class DatabaseStack {
 
     public Map<String, String> getTags() {
         return tags;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            DatabaseStack that = (DatabaseStack) o;
+            return Objects.equals(network, that.network) && Objects.equals(databaseServer, that.databaseServer) && Objects.equals(template, that.template)
+                    && Objects.equals(tags, that.tags);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(network, databaseServer, template, tags);
     }
 
     @Override

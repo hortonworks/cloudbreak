@@ -1,11 +1,13 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision.action;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,18 +27,21 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.AbstractRedbeamsProvisionAction;
+import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionEvent;
+import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionState;
+import com.sequenceiq.redbeams.flow.redbeams.provision.event.TriggerRedbeamsProvisionEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.UpdateDatabaseServerRegistrationRequest;
@@ -106,7 +111,7 @@ class RedbeamsProvisionActionsTest {
 
     @Test
     void allocateDatabaseServerTestPrepareExecution() {
-        RedbeamsEvent payload = new RedbeamsEvent(RESOURCE_ID);
+        TriggerRedbeamsProvisionEvent payload = new TriggerRedbeamsProvisionEvent("selector", RESOURCE_ID, new NetworkV4StackRequest());
 
         new AbstractActionTestSupport<>(getAllocateDatabaseServerAction()).prepareExecution(payload, Map.of());
 
@@ -114,18 +119,20 @@ class RedbeamsProvisionActionsTest {
     }
 
     @Test
-    void allocateDatabaseServerTestCreateRequest() {
+    void allocateDatabaseServerTestCreateRequest() throws Exception {
         when(cloudContext.getId()).thenReturn(RESOURCE_ID);
+        AbstractRedbeamsProvisionAction<RedbeamsEvent> allocateDatabaseServerAction = getAllocateDatabaseServerAction();
+        initActionPrivateFields(allocateDatabaseServerAction);
+        TriggerRedbeamsProvisionEvent payload = new TriggerRedbeamsProvisionEvent("selector", RESOURCE_ID, new NetworkV4StackRequest());
 
-        Selectable request = new AbstractActionTestSupport<>(getAllocateDatabaseServerAction()).createRequest(context);
+        AbstractActionTestSupport<RedbeamsProvisionState, RedbeamsProvisionEvent, RedbeamsContext, RedbeamsEvent> underTest
+                = new AbstractActionTestSupport<>(allocateDatabaseServerAction);
+        underTest.doExecute(context, payload, new HashMap<>());
 
-        assertThat(request).isInstanceOf(AllocateDatabaseServerRequest.class);
-
-        AllocateDatabaseServerRequest allocateDatabaseServerRequest = (AllocateDatabaseServerRequest) request;
-        assertThat(allocateDatabaseServerRequest.getResourceId()).isEqualTo(RESOURCE_ID);
-        assertThat(allocateDatabaseServerRequest.getCloudContext()).isSameAs(cloudContext);
-        assertThat(allocateDatabaseServerRequest.getCloudCredential()).isSameAs(cloudCredential);
-        assertThat(allocateDatabaseServerRequest.getDatabaseStack()).isSameAs(databaseStack);
+        verify(reactorEventFactory).createEvent(anyMap(), payloadArgumentCaptor.capture());
+        AllocateDatabaseServerRequest request = (AllocateDatabaseServerRequest) payloadArgumentCaptor.getValue();
+        assertEquals(payload.getResourceId(), request.getResourceId());
+        assertEquals(payload.getNetworkParameters(), request.getNetworkParameters());
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {

@@ -3,7 +3,6 @@ package com.sequenceiq.redbeams.service.network;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -82,6 +81,7 @@ public class NetworkBuilderServiceTest {
     public void testBuildNetworkWhenNoNetworkRequest() {
         // GIVEN
         DBStack dbStack = new DBStack();
+        dbStack.setCloudPlatform(AWS_CLOUD_PLATFORM.name());
         List<CloudSubnet> cloudSubnets = List.of(
                 new CloudSubnet("subnet-1", "", "az-a", ""),
                 new CloudSubnet("subnet-2", "", "az-b", "")
@@ -100,12 +100,12 @@ public class NetworkBuilderServiceTest {
                 .build();
         when(uuidGeneratorService.randomUuid()).thenReturn("uuid");
         when(subnetListerService.listSubnets(any(), any())).thenReturn(cloudSubnets);
-        when(subnetChooserService.chooseSubnets(any(), any(), any())).thenReturn(cloudSubnets);
-        when(networkParameterAdder.addSubnetIds(any(), any(), any(), any())).thenReturn(SUBNET_ID_REQUEST_PARAMETERS);
+        when(subnetChooserService.chooseSubnets(any(), any())).thenReturn(cloudSubnets);
+        when(networkParameterAdder.addSubnetIds(any(), any(), any())).thenReturn(SUBNET_ID_REQUEST_PARAMETERS);
         when(networkService.save(any(Network.class))).thenAnswer(invocation -> invocation.getArgument(0, Network.class));
 
         // WHEN
-        Network network = underTest.buildNetwork(null, environment, AWS_CLOUD_PLATFORM, dbStack);
+        Network network = underTest.buildNetwork(null, environment, dbStack);
         // THEN
         Map<String, Object> attributes = network.getAttributes().getMap();
         assertEquals("n-uuid", network.getName());
@@ -114,8 +114,8 @@ public class NetworkBuilderServiceTest {
 
         ArgumentCaptor<List> subnetIdsCaptor = ArgumentCaptor.forClass(List.class);
         ArgumentCaptor<List> azCaptor = ArgumentCaptor.forClass(List.class);
-        verify(networkParameterAdder, times(1)).addSubnetIds(anyMap(), subnetIdsCaptor.capture(), azCaptor.capture(), any(CloudPlatform.class));
-        verify(networkParameterAdder, times(1)).addParameters(anyMap(), eq(environment), eq(AWS_CLOUD_PLATFORM), eq(dbStack));
+        verify(networkParameterAdder, times(1)).addSubnetIds(subnetIdsCaptor.capture(), azCaptor.capture(), any(CloudPlatform.class));
+        verify(networkParameterAdder, times(1)).addParameters(eq(environment), eq(dbStack));
         assertEquals(Set.copyOf(subnetIdsCaptor.getValue()), Set.of("subnet-2", "subnet-1"));
         assertEquals(Set.copyOf(azCaptor.getValue()), Set.of("az-a", "az-b"));
     }
@@ -132,14 +132,14 @@ public class NetworkBuilderServiceTest {
         when(providerParameterCalculator.get(networkRequest)).thenReturn(networkParams);
         when(networkService.save(any(Network.class))).thenAnswer(invocation -> invocation.getArgument(0, Network.class));
         // WHEN
-        Network network = underTest.buildNetwork(networkRequest, environment, AWS_CLOUD_PLATFORM, dbStack);
+        Network network = underTest.buildNetwork(networkRequest, environment, dbStack);
         // THEN
         Map<String, Object> attributes = network.getAttributes().getMap();
         assertEquals("n-uuid", network.getName());
         assertEquals("subnetid", attributes.get("subnetId"));
 
-        verify(networkParameterAdder, times(0)).addSubnetIds(anyMap(), anyList(), anyList(), any(CloudPlatform.class));
-        verify(networkParameterAdder, times(1)).addParameters(anyMap(), eq(environment), eq(AWS_CLOUD_PLATFORM), eq(dbStack));
+        verify(networkParameterAdder, times(0)).addSubnetIds(anyList(), anyList(), any(CloudPlatform.class));
+        verify(networkParameterAdder, times(1)).addParameters(eq(environment), eq(dbStack));
     }
 
     @Test
@@ -153,8 +153,8 @@ public class NetworkBuilderServiceTest {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         when(environmentService.getByCrn(anyString())).thenReturn(environment);
         when(subnetListerService.listSubnets(any(), any())).thenReturn(cloudSubnets);
-        when(subnetChooserService.chooseSubnets(any(), any(), any())).thenReturn(cloudSubnets);
-        when(networkParameterAdder.addSubnetIds(any(), any(), any(), any())).thenReturn(SUBNET_ID_REQUEST_PARAMETERS);
+        when(subnetChooserService.chooseSubnets(any(), any())).thenReturn(cloudSubnets);
+        when(networkParameterAdder.addSubnetIds(any(), any(), any())).thenReturn(SUBNET_ID_REQUEST_PARAMETERS);
         createNetworkMock();
         ArgumentCaptor<Network> networkArgumentCaptor = ArgumentCaptor.forClass(Network.class);
         when(networkService.save(networkArgumentCaptor.capture())).thenAnswer(invocation -> invocation.getArgument(0, Network.class));
@@ -168,7 +168,7 @@ public class NetworkBuilderServiceTest {
 
         ArgumentCaptor<List> subnetIdsCaptor = ArgumentCaptor.forClass(List.class);
         ArgumentCaptor<List> azCaptor = ArgumentCaptor.forClass(List.class);
-        verify(networkParameterAdder, times(1)).addSubnetIds(anyMap(), subnetIdsCaptor.capture(), azCaptor.capture(), any(CloudPlatform.class));
+        verify(networkParameterAdder, times(1)).addSubnetIds(subnetIdsCaptor.capture(), azCaptor.capture(), any(CloudPlatform.class));
         assertEquals(Set.copyOf(subnetIdsCaptor.getValue()), Set.of("subnet-2", "subnet-1"));
         assertEquals(Set.copyOf(azCaptor.getValue()), Set.of("az-a", "az-b"));
     }
@@ -182,8 +182,8 @@ public class NetworkBuilderServiceTest {
 
         verify(environmentService, never()).getByCrn(anyString());
         verify(subnetListerService, never()).listSubnets(any(), any());
-        verify(subnetChooserService, never()).chooseSubnets(any(), any(), any());
-        verify(networkParameterAdder, never()).addSubnetIds(any(), any(), any(), any());
+        verify(subnetChooserService, never()).chooseSubnets(any(), any());
+        verify(networkParameterAdder, never()).addSubnetIds(any(), any(), any());
         verifyNoInteractions(networkService);
     }
 

@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
@@ -16,6 +15,8 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
@@ -23,16 +24,14 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionEvent;
+import com.sequenceiq.redbeams.flow.redbeams.provision.event.TriggerRedbeamsProvisionEvent;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 
 @Service
 public class RedbeamsCreationService {
 
-    // TODO: Adjust workspace to something non-default when and if necessary
-    @VisibleForTesting
-    static final long DEFAULT_WORKSPACE = 0L;
+    private static final long DEFAULT_WORKSPACE = 0L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsCreationService.class);
 
@@ -51,41 +50,43 @@ public class RedbeamsCreationService {
     @Inject
     private DBStackToDatabaseStackConverter databaseStackConverter;
 
-    public DBStack launchDatabaseServer(DBStack dbStack, String clusterCrn) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Create called with: {}", dbStack);
-        }
-
-        if (dbStackService.findByNameAndEnvironmentCrn(dbStack.getName(), dbStack.getEnvironmentId()).isPresent()) {
-            throw new BadRequestException("A stack for this database server already exists in the environment");
-        }
+    public DBStack launchDatabaseServer(DBStack dbStack, String clusterCrn, ProviderParametersBase networkParameters) {
+        MDCBuilder.buildMdcContext(dbStack);
+        LOGGER.debug("Create called with: {}", dbStack);
+        validateDbDoesNotExist(dbStack);
 
         Optional<DatabaseServerConfig> optionalDBServerConfig =
                 databaseServerConfigService.findByEnvironmentCrnAndClusterCrn(dbStack.getEnvironmentId(), clusterCrn);
 
-        DBStack savedDbStack;
-        boolean startFlow = false;
         if (optionalDBServerConfig.isEmpty()) {
             LOGGER.debug("DataBaseServerConfig is not available by cluster crn '{}'", clusterCrn);
-            savedDbStack = saveDbStackAndRegisterDatabaseServerConfig(dbStack, clusterCrn);
-            startFlow = true;
+            DBStack savedDbStack = saveDbStackAndRegisterDatabaseServerConfig(dbStack, clusterCrn);
+            triggerProvisionFlow(savedDbStack, networkParameters);
+            return savedDbStack;
         } else {
             DatabaseServerConfig dbServerConfig = optionalDBServerConfig.get();
             if (dbServerConfig.getDbStack().isEmpty()) {
                 LOGGER.debug("DBStack is not available in DatabaseServerConfig '{}'", dbServerConfig.getResourceCrn());
-                savedDbStack = saveDbStackInDatabaseServerConfig(dbServerConfig, dbStack);
-                startFlow = true;
+                DBStack savedDbStack = saveDbStackInDatabaseServerConfig(dbServerConfig, dbStack);
+                triggerProvisionFlow(savedDbStack, networkParameters);
+                return savedDbStack;
             } else {
-                savedDbStack = dbServerConfig.getDbStack().get();
+                LOGGER.debug("No DB provision has been launched");
+                return dbServerConfig.getDbStack().get();
             }
         }
+    }
 
-        if (startFlow) {
-            flowManager.notify(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(),
-                    new RedbeamsEvent(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(), savedDbStack.getId()));
+    private void triggerProvisionFlow(DBStack savedDbStack, ProviderParametersBase networkParameters) {
+        LOGGER.info("Trigger DB provision for {}", savedDbStack);
+        flowManager.notify(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(),
+                new TriggerRedbeamsProvisionEvent(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(), savedDbStack.getId(), networkParameters));
+    }
+
+    private void validateDbDoesNotExist(DBStack dbStack) {
+        if (dbStackService.findByNameAndEnvironmentCrn(dbStack.getName(), dbStack.getEnvironmentId()).isPresent()) {
+            throw new BadRequestException("A stack for this database server already exists in the environment");
         }
-
-        return savedDbStack;
     }
 
     private DBStack saveDbStackAndRegisterDatabaseServerConfig(DBStack dbStack, String clusterCrn) {
@@ -104,8 +105,6 @@ public class RedbeamsCreationService {
     }
 
     private DBStack saveDbStack(DBStack dbStack) {
-        // possible future change is to use a flow here (GetPlatformTemplateRequest, modified for database server)
-        // for now, just get it synchronously / within this thread, it ought to be quick
         CloudPlatformVariant platformVariant = new CloudPlatformVariant(dbStack.getCloudPlatform(), dbStack.getPlatformVariant());
         try {
             CloudConnector connector = cloudPlatformConnectors.get(platformVariant);
