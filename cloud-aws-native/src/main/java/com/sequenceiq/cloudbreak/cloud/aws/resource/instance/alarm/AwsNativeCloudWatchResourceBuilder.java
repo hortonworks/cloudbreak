@@ -86,11 +86,6 @@ public class AwsNativeCloudWatchResourceBuilder extends AbstractAwsNativeCompute
     }
 
     @Override
-    protected boolean isFinished(AwsContext context, AuthenticatedContext auth, CloudResource resource) {
-        return true;
-    }
-
-    @Override
     public ResourceType resourceType() {
         return ResourceType.AWS_CLOUD_WATCH;
     }

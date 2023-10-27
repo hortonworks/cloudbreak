@@ -120,4 +120,38 @@ public class AwsAttachmentResourceBuilderTest {
         assertEquals("Volume attachment were unsuccessful. " + errorMessage, runtimeException.getMessage());
     }
 
+    @Test
+    public void testBuildIfFutureGetFailsButOneVolumeAttachmentFailedWithInstanceIsNotRunningError() throws Exception {
+        List<CloudResource> buildableResource = new ArrayList<>();
+        buildableResource.add(CloudResource.builder().withName("instance").withType(ResourceType.AWS_INSTANCE).withStatus(CommonStatus.CREATED)
+                .withInstanceId("instanceid").build());
+        List<VolumeSetAttributes.Volume> volumes = List.of(new VolumeSetAttributes.Volume("vol1", "device", 50, "type", CloudVolumeUsageType.GENERAL),
+                new VolumeSetAttributes.Volume("vol2", "device", 50, "type", CloudVolumeUsageType.GENERAL));
+        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("", false, "", volumes, 50, "type");
+        CloudResource volumeResource = CloudResource.builder().withName("vol1").withType(ResourceType.AWS_VOLUMESET).withStatus(CommonStatus.CREATED)
+                .withInstanceId("instanceid").withParameters(Map.of(ATTRIBUTES, volumeSetAttributes)).build();
+        buildableResource.add(volumeResource);
+        AmazonEc2Client amazonEc2Client = mock(AmazonEc2Client.class);
+        DescribeVolumesResponse describeVolumesResult = DescribeVolumesResponse.builder()
+                .volumes(Volume.builder().volumeId("vol1").build())
+                .build();
+        when(amazonEc2Client.describeVolumes(any())).thenReturn(describeVolumesResult);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(amazonEc2Client);
+        Future future = mock(Future.class);
+        String errorMessage = "Instance is not 'running'";
+        when(future.get()).thenThrow(new RuntimeException(errorMessage));
+        when(asyncTaskExecutor.submit(any(Callable.class))).thenReturn(future);
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        CloudContext cloudContext = mock(CloudContext.class);
+        when(cloudContext.getLocation()).thenReturn(Location.location(Region.region("eu"), AvailabilityZone.availabilityZone("az1")));
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        AwsContext awsContext = mock(AwsContext.class);
+        when(awsContext.getComputeResources(1L)).thenReturn(buildableResource);
+        CloudbreakServiceException runtimeException = Assertions.assertThrows(CloudbreakServiceException.class,
+                () -> awsAttachmentResourceBuilder.build(awsContext, null, 1L, authenticatedContext,
+                        mock(Group.class), buildableResource, null));
+        assertEquals("Volume attachment were unsuccessful. The related instance is not available. Usually this happens when an AWS policy " +
+                "terminates the instance, or because of a quota issue. Please check the AWS console! " + errorMessage, runtimeException.getMessage());
+    }
+
 }

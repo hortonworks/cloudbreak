@@ -32,16 +32,8 @@ public abstract class AbstractAwsComputeBaseResourceChecker extends AbstractAwsB
         for (CloudResource resource : resources) {
             LOGGER.debug("Check {} resource: {}. Build: {}", type, resource, context.isBuild());
             try {
-                boolean finished = isFinished(context, auth, resource);
-                ResourceStatus successStatus = context.isBuild() ? ResourceStatus.CREATED : ResourceStatus.DELETED;
-                result.add(new CloudResourceStatus(resource, finished ? successStatus : ResourceStatus.IN_PROGRESS));
-                if (finished) {
-                    if (successStatus == ResourceStatus.CREATED) {
-                        LOGGER.debug("Creation of {} was successful", resource);
-                    } else {
-                        LOGGER.debug("Deletion of {} was successful", resource);
-                    }
-                }
+                ResourceStatus resourceStatus = getResourceStatus(context, auth, resource);
+                result.add(new CloudResourceStatus(resource, resourceStatus));
             } catch (Exception e) {
                 CloudContext cloudContext = auth.getCloudContext();
                 throw new AwsResourceException("Error during status check", type,
@@ -51,9 +43,10 @@ public abstract class AbstractAwsComputeBaseResourceChecker extends AbstractAwsB
         return result;
     }
 
-    protected boolean isFinished(AwsContext context, AuthenticatedContext auth, CloudResource resource) {
-        LOGGER.debug("Default check is not implemented, so return with the default value: true");
-        return true;
+    protected ResourceStatus getResourceStatus(AwsContext context, AuthenticatedContext auth, CloudResource resource) {
+        ResourceStatus resourceStatus = context.isBuild() ? ResourceStatus.CREATED : ResourceStatus.DELETED;
+        LOGGER.debug("Resource: {} status: {}", resource, resourceStatus);
+        return resourceStatus;
     }
 
     public AwsResourceNameService getResourceNameService() {
