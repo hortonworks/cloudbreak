@@ -3,9 +3,11 @@ package com.sequenceiq.mock.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.QueryParam;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.sequenceiq.mock.clouderamanager.DataProviderService;
+import com.sequenceiq.mock.model.RecommendationType;
 import com.sequenceiq.mock.model.YarnScalingServiceV1Request;
 import com.sequenceiq.mock.model.YarnScalingServiceV1Response;
 import com.sequenceiq.mock.swagger.model.ApiHostList;
@@ -28,25 +31,33 @@ public class YarnController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(YarnController.class);
 
+    private static final String ACTION_TYPE_VERIFY = "verify";
+
     private static final int UPSCALE_NODE_COUNT = 100;
 
-    private Map<String, Boolean> stackToOperationMap = new HashMap<>();
+    private Map<String, RecommendationType> stackToOperationMap = new HashMap<>();
 
     @Inject
     private DataProviderService dataProviderService;
 
     @PostMapping("/scaling")
     public ResponseEntity<YarnScalingServiceV1Response> getYarnMetrics(@PathVariable("mockUuid") String mockUuid,
-            @RequestBody YarnScalingServiceV1Request yarnScalingServiceV1Request) {
+            @QueryParam("actionType") Optional<String> actionType, @RequestBody YarnScalingServiceV1Request yarnScalingServiceV1Request) {
         LOGGER.info("getYarnMetrics called with {} and {}", mockUuid, yarnScalingServiceV1Request);
-        Boolean upscale = stackToOperationMap.getOrDefault(mockUuid, Boolean.FALSE);
-        YarnScalingServiceV1Response yarnScalingServiceV1Response;
-        if (upscale) {
+        LOGGER.info("actionType is {}", actionType.orElse(null));
+        RecommendationType lastRecommendation = stackToOperationMap.getOrDefault(mockUuid, RecommendationType.UPSCALE);
+        RecommendationType nextRecommendation = lastRecommendation.toggle();
+        if (ACTION_TYPE_VERIFY.equalsIgnoreCase(actionType.orElse(null))) {
+            LOGGER.info("actionType is verify so use lastRecommendation as {}", lastRecommendation);
+            nextRecommendation = lastRecommendation;
+        }
+        YarnScalingServiceV1Response yarnScalingServiceV1Response = null;
+        if (nextRecommendation == RecommendationType.UPSCALE) {
             yarnScalingServiceV1Response = populateUpscale();
         } else {
             yarnScalingServiceV1Response = populateDownscale(mockUuid);
         }
-        stackToOperationMap.put(mockUuid, !upscale);
+        stackToOperationMap.put(mockUuid, nextRecommendation);
         return new ResponseEntity<>(yarnScalingServiceV1Response, HttpStatus.OK);
     }
 

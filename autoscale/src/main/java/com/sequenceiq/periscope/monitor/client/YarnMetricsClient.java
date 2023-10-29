@@ -43,6 +43,8 @@ public class YarnMetricsClient {
 
     private static final String YARN_API_CLUSTER_PROXY_URL = "%s/proxy/%s/resourcemanager/v1/cluster/scaling";
 
+    private static final String YARN_API_QUERY_PARAM_MOCK_CLOUD_RECOMMEND_ONLY = "actionType=verify";
+
     private static final String HEADER_ACTOR_CRN = "x-cdp-actor-crn";
 
     private static final String PARAM_UPSCALE_FACTOR_NODE_RESOURCE_TYPE = "upscaling-factor-in-node-resource-types";
@@ -123,7 +125,6 @@ public class YarnMetricsClient {
         restClient = RestClientUtil.createClient(tlsConfig.getServerCert(),
                 tlsConfig.getClientCert(), tlsConfig.getClientKey(), connectionTimeout.get(), readTimeout.get(), true);
         String yarnApiUrl = getYarnApiUrl(cluster);
-
         long start = clock.getCurrentTimeMillis();
         InstanceConfig instanceConfig = defaultInstanceConfig();
         metricService.recordClusterManagerInvocation(cluster, start);
@@ -136,6 +137,12 @@ public class YarnMetricsClient {
         LOGGER.debug("Using actorCrn '{}' for Cluster '{}' yarn polling.", pollingUserCrn, cluster.getStackCrn());
 
         UriBuilder yarnMetricsURI = UriBuilder.fromPath(yarnApiUrl);
+
+        if (CloudPlatform.valueOf(cluster.getCloudPlatform()) == CloudPlatform.MOCK) {
+            LOGGER.info("Add query parameter {} for Mock cloud", YARN_API_QUERY_PARAM_MOCK_CLOUD_RECOMMEND_ONLY);
+            String [] queryParam = YARN_API_QUERY_PARAM_MOCK_CLOUD_RECOMMEND_ONLY.split("=");
+            yarnMetricsURI = yarnMetricsURI.queryParam(queryParam[0], queryParam[1]);
+        }
 
         YarnScalingServiceV1Response yarnResponse =
                 invokeYarnAPIWithExceptionHandling(restClient, yarnMetricsURI, pollingUserCrn, yarnScalingServiceV1Request, cluster);
