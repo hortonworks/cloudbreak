@@ -35,13 +35,7 @@
       {
         "name": "compute",
         "template": {
-          "attachedVolumes": [
-            {
-              "size": 100,
-              "count": 0,
-              "type": "StandardSSD_LRS"
-            }
-          ],
+          "attachedVolumes": [],
           "azure": {
             "availabilitySet": {
               "name": "",

@@ -65,6 +65,9 @@ public class TemplateValidatorAndUpdater {
     private CloudParameterService cloudParameterService;
 
     @Inject
+    private EmptyVolumeSetFilter emptyVolumeSetFilter;
+
+    @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Inject
@@ -121,7 +124,8 @@ public class TemplateValidatorAndUpdater {
                     validationBuilder.error(getInvalidVmTypeErrorMessage(template.getInstanceType(), platform.value(), stack.getRegion()));
                 }
             }
-            template = resourceDiskPropertyCalculator.updateWithResourceDiskAttached(credential, instanceGroup.getTemplate(), vmType);
+            template = emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(instanceGroup.getTemplate());
+            template = resourceDiskPropertyCalculator.updateWithResourceDiskAttached(credential, template, vmType);
             validateVolumeTemplates(template, vmType, platform, validationBuilder, instanceGroup, stack);
             validateMaximumVolumeSize(template, vmType, validationBuilder);
         }

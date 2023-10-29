@@ -53,13 +53,7 @@
           "rootVolume": {
             "size": 150
           },
-          "attachedVolumes": [
-            {
-              "size": 500,
-              "count": 0,
-              "type": "StandardSSD_LRS"
-            }
-          ],
+          "attachedVolumes": [],
           "cloudPlatform": "AZURE"
         },
         "recipeNames": [],

@@ -80,6 +80,9 @@ public class TemplateValidatorTest {
     @Mock
     private ResourceDiskPropertyCalculator resourceDiskPropertyCalculator;
 
+    @Mock
+    private EmptyVolumeSetFilter emptyVolumeSetFilter;
+
     @InjectMocks
     private InstanceGroup instanceGroup;
 
@@ -130,6 +133,7 @@ public class TemplateValidatorTest {
         stack.setType(StackType.DATALAKE);
         instanceGroup = createInstanceGroup(0, 0, true, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
 
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(0)).error(anyString());
@@ -141,6 +145,7 @@ public class TemplateValidatorTest {
         stack.setType(StackType.DATALAKE);
         instanceGroup = createInstanceGroup(1, 0, true, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
 
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(0)).error(anyString());
@@ -150,6 +155,7 @@ public class TemplateValidatorTest {
     public void validateComputeDataVolumeCountOne() {
         instanceGroup = createInstanceGroup(1, 10, false, true, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
 
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(0)).error(anyString());
@@ -160,6 +166,7 @@ public class TemplateValidatorTest {
         // volume count is larger than the max value of 24
         instanceGroup = createInstanceGroup(25, 1, true, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
 
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(1)).error(anyString());
@@ -188,6 +195,7 @@ public class TemplateValidatorTest {
         stack.setType(StackType.DATALAKE);
         instanceGroup = createInstanceGroup(1, 0, true, false, true, "i3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
 
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(0)).error(anyString());
@@ -236,6 +244,7 @@ public class TemplateValidatorTest {
     public void validateMasterDataVolumeCountOne() {
         instanceGroup = createInstanceGroup(1, 1, false, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
 
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
@@ -361,6 +370,7 @@ public class TemplateValidatorTest {
         ServiceComponent service = ServiceComponent.of("ATLAS", "ATLAS");
         services.add(service);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
+        when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
 
         instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("c5.xlarge", "hms_scale_out");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());

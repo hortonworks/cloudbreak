@@ -67,6 +67,9 @@ class TemplateValidatorAndUpdaterTest {
     @Mock
     private ResourceDiskPropertyCalculator resourceDiskPropertyCalculator;
 
+    @Mock
+    private EmptyVolumeSetFilter emptyVolumeSetFilter;
+
     @InjectMocks
     private TemplateValidatorAndUpdater templateValidatorAndUpdater;
 
@@ -286,14 +289,12 @@ class TemplateValidatorAndUpdaterTest {
         );
         when(locationService.location(any(), any())).thenReturn(region);
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
 
-        // Create a ValidationResult.ValidationResultBuilder
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
-        // Call the validate method
         templateValidatorAndUpdater.validate(credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
 
-        // Assert that there are no errors in the ValidationResult
         ValidationResult validationResult = validationBuilder.build();
         assertFalse(validationResult.hasError());
     }
@@ -355,14 +356,12 @@ class TemplateValidatorAndUpdaterTest {
         );
         when(locationService.location(any(), any())).thenReturn(region);
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
 
-        // Create a ValidationResult.ValidationResultBuilder
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
-        // Call the validate method
         templateValidatorAndUpdater.validate(credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
 
-        // Assert that there are no errors in the ValidationResult
         ValidationResult validationResult = validationBuilder.build();
         assertTrue(validationResult.hasError());
         assertEquals(validationResult.getErrors().get(0), "Max allowed volume size for 'm5xlarge': 100 " +
