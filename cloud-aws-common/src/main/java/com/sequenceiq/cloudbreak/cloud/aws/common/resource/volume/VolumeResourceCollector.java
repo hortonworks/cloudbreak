@@ -32,6 +32,7 @@ public class VolumeResourceCollector {
                 .map(setVolumeAttribute::apply)
                 .map(VolumeSetAttributes::getVolumes)
                 .flatMap(List::stream)
+                .filter(volume -> volume.getId() != null)
                 .map(VolumeSetAttributes.Volume::getId)
                 .collect(toList());
         return Pair.of(volumeIds, volumeResources);

@@ -482,10 +482,9 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         Pair<List<String>, List<CloudResource>> volumes = volumeResourceCollector.getVolumeIdsByVolumeResources(resources, resourceType(),
                 volumeSetAttributes());
 
-        DescribeVolumesRequest.Builder describeVolumesRequestBuilder = DescribeVolumesRequest.builder();
         AtomicReference<ResourceStatus> volumeSetStatus = new AtomicReference<>();
         if (!CollectionUtils.isEmpty(volumes.getFirst())) {
-            DescribeVolumesRequest describeVolumesRequest = describeVolumesRequestBuilder.volumeIds(volumes.getFirst()).build();
+            DescribeVolumesRequest describeVolumesRequest = DescribeVolumesRequest.builder().volumeIds(volumes.getFirst()).build();
             LOGGER.debug("Going to describe volume(s) with id(s): [{}]", String.join(",", describeVolumesRequest.volumeIds()));
             try {
                 DescribeVolumesResponse response = client.describeVolumes(describeVolumesRequest);
