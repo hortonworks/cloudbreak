@@ -83,7 +83,7 @@ public class StackToDescribeFreeIpaResponseConverter {
         describeFreeIpaResponse.setPlacement(convertToPlacementResponse(stack));
         describeFreeIpaResponse.setTunnel(stack.getTunnel());
         describeFreeIpaResponse.setInstanceGroups(instanceGroupConverter.convert(stack.getInstanceGroups(), includeAllInstances));
-        describeFreeIpaResponse.setAvailabilityStatus(stackToAvailabilityStatusConverter.convert(stack));
+        describeFreeIpaResponse.setAvailabilityStatus(stackToAvailabilityStatusConverter.convert(stack.getStackStatus()));
         describeFreeIpaResponse.setStatus(stack.getStackStatus().getStatus());
         describeFreeIpaResponse.setStatusString(stack.getStackStatus().getStatusString());
         describeFreeIpaResponse.setStatusReason(stack.getStackStatus().getStatusReason());

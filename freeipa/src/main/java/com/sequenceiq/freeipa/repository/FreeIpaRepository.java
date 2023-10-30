@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.projection.FreeIpaListView;
 
 @Transactional(Transactional.TxType.REQUIRED)
 public interface FreeIpaRepository extends CrudRepository<FreeIpa, Long> {
@@ -21,11 +22,13 @@ public interface FreeIpaRepository extends CrudRepository<FreeIpa, Long> {
     @Query("SELECT f FROM FreeIpa f WHERE f.stack.id = :stackId")
     Optional<FreeIpa> getByStackId(@Param("stackId") Long stackId);
 
-    @Query("SELECT f FROM FreeIpa f LEFT JOIN FETCH f.stack s WHERE s.accountId = :accountId AND s.terminated = -1")
-    List<FreeIpa> findByAccountId(@Param("accountId") String accountId);
+    @Query("SELECT new com.sequenceiq.freeipa.entity.projection.FreeIpaListView(f.domain, s.name, s.resourceCrn, s.environmentCrn, s.stackStatus) "
+            + "FROM FreeIpa f LEFT JOIN f.stack s WHERE s.accountId = :accountId AND s.terminated = -1")
+    List<FreeIpaListView> findViewByAccountId(@Param("accountId") String accountId);
 
-    @Query("SELECT f FROM FreeIpa f LEFT JOIN FETCH f.stack s WHERE f.id IN :ids AND s.terminated = -1")
-    List<FreeIpa> findAllByIds(@Param("ids") List<Long> ids);
+    @Query("SELECT new com.sequenceiq.freeipa.entity.projection.FreeIpaListView(f.domain, s.name, s.resourceCrn, s.environmentCrn, s.stackStatus) "
+            + "FROM FreeIpa f LEFT JOIN f.stack s WHERE f.id IN :ids AND s.terminated = -1")
+    List<FreeIpaListView> findAllViewByIds(@Param("ids") List<Long> ids);
 
     @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(f.id, f.stack.environmentCrn) " +
             "FROM FreeIpa f WHERE f.stack.accountId = :accountId AND f.stack.terminated = -1")

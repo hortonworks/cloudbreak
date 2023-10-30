@@ -140,7 +140,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
         when(instanceGroupConverter.convert(stack.getInstanceGroups(), true)).thenReturn(INSTANCE_GROUP_RESPONSES);
         when(userSyncStatusConverter.convert(userSyncStatus)).thenReturn(USERSYNC_STATUS_RESPONSE);
         when(balancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)).thenReturn(true);
-        when(stackToAvailabilityStatusConverter.convert(stack)).thenReturn(AvailabilityStatus.AVAILABLE);
+        when(stackToAvailabilityStatusConverter.convert(stack.getStackStatus())).thenReturn(AvailabilityStatus.AVAILABLE);
         when(freeIpaRecipeService.getRecipeNamesForStack(1L)).thenReturn(Set.of("recipe1", "recipe2"));
 
         DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, Optional.of(userSyncStatus), true);

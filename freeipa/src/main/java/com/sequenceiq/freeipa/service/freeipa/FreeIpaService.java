@@ -16,6 +16,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.converter.freeipa.FreeIpaServerRequestToFreeIpaConverter;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.projection.FreeIpaListView;
 import com.sequenceiq.freeipa.repository.FreeIpaRepository;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.CrnService;
@@ -55,8 +56,8 @@ public class FreeIpaService implements ResourceIdProvider {
         return save(freeIpa);
     }
 
-    public List<FreeIpa> getAllByAccountId(String accountId) {
-        return repository.findByAccountId(accountId);
+    public List<FreeIpaListView> getAllViewByAccountId(String accountId) {
+        return repository.findViewByAccountId(accountId);
     }
 
     @Override
@@ -71,8 +72,8 @@ public class FreeIpaService implements ResourceIdProvider {
         return resourceId;
     }
 
-    public List<FreeIpa> getAllByIds(List<Long> ids) {
-        return repository.findAllByIds(ids);
+    public List<FreeIpaListView> getAllViewByIds(List<Long> ids) {
+        return repository.findAllViewByIds(ids);
     }
 
     public List<ResourceWithId> getAllAsAuthorizationResources(String accountId) {

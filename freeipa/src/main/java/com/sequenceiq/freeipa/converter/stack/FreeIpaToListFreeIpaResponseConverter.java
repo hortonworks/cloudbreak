@@ -8,8 +8,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
-import com.sequenceiq.freeipa.entity.FreeIpa;
-import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.projection.FreeIpaListView;
 
 @Component
 public class FreeIpaToListFreeIpaResponseConverter {
@@ -17,23 +16,22 @@ public class FreeIpaToListFreeIpaResponseConverter {
     @Inject
     private StackToAvailabilityStatusConverter stackToAvailabilityStatusConverter;
 
-    public List<ListFreeIpaResponse> convertList(List<FreeIpa> freeIpaList) {
+    public List<ListFreeIpaResponse> convertList(List<FreeIpaListView> freeIpaList) {
         return freeIpaList.stream()
                 .map(this::convert)
                 .collect(Collectors.toList());
     }
 
-    private ListFreeIpaResponse convert(FreeIpa freeIpa) {
+    private ListFreeIpaResponse convert(FreeIpaListView freeIpa) {
         ListFreeIpaResponse response = new ListFreeIpaResponse();
-        response.setDomain(freeIpa.getDomain());
-        Stack stack = freeIpa.getStack();
-        if (stack != null) {
-            response.setName(stack.getName());
-            response.setCrn(stack.getResourceCrn());
-            response.setEnvironmentCrn(stack.getEnvironmentCrn());
-            response.setStatus(stack.getStackStatus().getStatus());
-            response.setStatusString(stack.getStackStatus().getStatusString());
-            response.setAvailabilityStatus(stackToAvailabilityStatusConverter.convert(stack));
+        response.setDomain(freeIpa.domain());
+        response.setName(freeIpa.name());
+        response.setCrn(freeIpa.resourceCrn());
+        response.setEnvironmentCrn(freeIpa.environmentCrn());
+        if (freeIpa.stackStatus() != null) {
+            response.setStatus(freeIpa.stackStatus().getStatus());
+            response.setStatusString(freeIpa.stackStatus().getStatusString());
+            response.setAvailabilityStatus(stackToAvailabilityStatusConverter.convert(freeIpa.stackStatus()));
         }
         return response;
     }

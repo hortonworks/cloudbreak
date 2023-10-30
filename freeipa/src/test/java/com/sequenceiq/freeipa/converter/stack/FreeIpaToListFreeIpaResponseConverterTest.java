@@ -15,9 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
-import com.sequenceiq.freeipa.entity.FreeIpa;
-import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
+import com.sequenceiq.freeipa.entity.projection.FreeIpaListView;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaToListFreeIpaResponseConverterTest {
@@ -42,7 +41,7 @@ class FreeIpaToListFreeIpaResponseConverterTest {
 
     @Test
     void testConvertList() {
-        List<FreeIpa> freeIpaList = createFreeIpaList();
+        List<FreeIpaListView> freeIpaList = createFreeIpaList();
 
         when(stackToAvailabilityStatusConverter.convert(any())).thenReturn(AvailabilityStatus.AVAILABLE);
 
@@ -61,24 +60,12 @@ class FreeIpaToListFreeIpaResponseConverterTest {
         assertEquals(Status.AVAILABLE, actual.get(1).getStatus());
     }
 
-    private List<FreeIpa> createFreeIpaList() {
-        return List.of(createFreeIpa(DOMAIN_1, createStack(CRN_1)), createFreeIpa(DOMAIN_2, createStack(CRN_2)));
+    private List<FreeIpaListView> createFreeIpaList() {
+        return List.of(createFreeIpa(DOMAIN_1, CRN_1), createFreeIpa(DOMAIN_2, CRN_2));
     }
 
-    private FreeIpa createFreeIpa(String domain, Stack stack) {
-        FreeIpa freeIpa = new FreeIpa();
-        freeIpa.setDomain(domain);
-        freeIpa.setStack(stack);
-        return freeIpa;
-    }
-
-    private Stack createStack(String crn) {
-        Stack stack = new Stack();
-        stack.setEnvironmentCrn(ENV_CRN);
-        stack.setName(NAME);
-        stack.setResourceCrn(crn);
-        stack.setStackStatus(createStackStatus());
-        return stack;
+    private FreeIpaListView createFreeIpa(String domain, String crn) {
+        return new FreeIpaListView(domain, NAME, crn, ENV_CRN, createStackStatus());
     }
 
     private StackStatus createStackStatus() {

@@ -58,4 +58,13 @@ public class UserSyncRequestFilter {
     public int hashCode() {
         return Objects.hash(userCrnFilter, machineUserCrnFilter, deletedWorkloadUser);
     }
+
+    @Override
+    public String toString() {
+        return "UserSyncRequestFilter{" +
+                "userCrnFilter=" + userCrnFilter +
+                ", machineUserCrnFilter=" + machineUserCrnFilter +
+                ", deletedWorkloadUser=" + deletedWorkloadUser +
+                '}';
+    }
 }
