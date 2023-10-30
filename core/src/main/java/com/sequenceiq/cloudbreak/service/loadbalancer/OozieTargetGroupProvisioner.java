@@ -52,7 +52,7 @@ public class OozieTargetGroupProvisioner {
     private Optional<InstanceGroup> getOozieHAInstanceGroup(Stack stack) {
         Cluster cluster = stack.getCluster();
         if (cluster != null) {
-            CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(cluster.getBlueprint().getBlueprintText());
+            CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(cluster.getBlueprint().getBlueprintJsonText());
             String cdhVersion = cmTemplateProcessor.getStackVersion();
             if (cdhVersion != null && isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_11)) {
                 Set<String> oozieGroupNames = getOozieGroups(cmTemplateProcessor);

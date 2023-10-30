@@ -92,7 +92,7 @@ public class AddVolumesCMConfigHandlerTest {
         doReturn(template).when(instanceGroupView).getTemplate();
         doReturn(List.of(instanceGroupView)).when(stackDto).getInstanceGroupViews();
         Blueprint bp = mock(Blueprint.class);
-        doReturn("test").when(bp).getBlueprintText();
+        doReturn("test").when(bp).getBlueprintJsonText();
         doReturn(bp).when(stackDto).getBlueprint();
         doReturn(cmTemplateProcessor).when(cmTemplateProcessorFactory).get(eq("test"));
         Map<String, Set<ServiceComponent>> serviceComponentsMap = Map.of("test", Set.of(ServiceComponent.of("test", "test")));

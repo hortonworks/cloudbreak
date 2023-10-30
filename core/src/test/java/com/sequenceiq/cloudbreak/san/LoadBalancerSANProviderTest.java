@@ -61,7 +61,7 @@ class LoadBalancerSANProviderTest {
         ReflectionTestUtils.setField(loadBalancerSANProvider, "loadBalancerConfigService", loadBalancerConfigService);
         ReflectionTestUtils.setField(loadBalancerSANProvider, "loadBalancerPersistenceService", loadBalancerPersistenceService);
 
-        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/de-ha.bp"));
+        when(blueprint.getBlueprintJsonText()).thenReturn(getBlueprintText("input/de-ha.bp"));
     }
 
     @Test
@@ -71,7 +71,7 @@ class LoadBalancerSANProviderTest {
 
     @Test
     void olderVersionHasNoLoadBalancer() {
-        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
+        when(blueprint.getBlueprintJsonText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
         assertTrue(loadBalancerSANProvider.getLoadBalancerSAN(stack.getId(), blueprint).isEmpty());
     }
 

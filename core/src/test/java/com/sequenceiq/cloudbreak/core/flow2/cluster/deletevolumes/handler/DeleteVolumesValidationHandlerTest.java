@@ -69,7 +69,7 @@ public class DeleteVolumesValidationHandlerTest {
         Blueprint bp = mock(Blueprint.class);
         doReturn(bp).when(stackDto).getBlueprint();
         String blueprintText = FileReaderUtils.readFileFromClasspathQuietly("test/defaults/blueprints/blueprint-with-instantiator.bp");
-        doReturn(blueprintText).when(bp).getBlueprintText();
+        doReturn(blueprintText).when(bp).getBlueprintJsonText();
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(blueprintText);
         doReturn(cmTemplateProcessor).when(cmTemplateProcessorFactory).get(eq(blueprintText));
         underTest.accept(event);
@@ -87,7 +87,7 @@ public class DeleteVolumesValidationHandlerTest {
         Blueprint bp = mock(Blueprint.class);
         doReturn(bp).when(stackDto).getBlueprint();
         String blueprintText = FileReaderUtils.readFileFromClasspathQuietly("test/defaults/blueprints/blueprint-with-instantiator.bp");
-        doReturn(blueprintText).when(bp).getBlueprintText();
+        doReturn(blueprintText).when(bp).getBlueprintJsonText();
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(blueprintText);
         doReturn(cmTemplateProcessor).when(cmTemplateProcessorFactory).get(eq(blueprintText));
         doThrow(new CloudbreakException("TEST")).when(deleteVolumesService).stopClouderaManagerService(any(), any());

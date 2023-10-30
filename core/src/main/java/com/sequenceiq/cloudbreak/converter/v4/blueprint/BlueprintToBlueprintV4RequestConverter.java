@@ -16,7 +16,7 @@ public class BlueprintToBlueprintV4RequestConverter {
         BlueprintV4Request blueprintV4Request = new BlueprintV4Request();
         blueprintV4Request.setName(source.getName());
         blueprintV4Request.setDescription(source.getDescription());
-        blueprintV4Request.setBlueprint(source.getBlueprintText());
+        blueprintV4Request.setBlueprint(source.getBlueprintJsonText());
         blueprintV4Request.setDescription(source.getDescription());
         return blueprintV4Request;
     }

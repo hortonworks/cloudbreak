@@ -191,7 +191,7 @@ public class ServiceEndpointCollector {
         if (!Strings.isNullOrEmpty(stackDto.getCluster().getExtendedBlueprintText())) {
             blueprintText = stackDto.getCluster().getExtendedBlueprintText();
         } else if (stackDto.getBlueprint() != null) {
-            blueprintText = stackDto.getBlueprint().getBlueprintText();
+            blueprintText = stackDto.getBlueprint().getBlueprintJsonText();
         }
         return blueprintText;
     }
@@ -321,7 +321,7 @@ public class ServiceEndpointCollector {
 
     private Collection<ExposedServiceV4Response> getKnoxServices(Blueprint blueprint, List<String> entitlements) {
         return ExposedServiceV4Response.fromExposedServices(
-                getExposedServices(blueprint.getBlueprintText(), entitlements));
+                getExposedServices(blueprint.getBlueprintJsonText(), entitlements));
     }
 
     private Stream<String> getExposedServiceStream(GatewayTopology gatewayTopology, Optional<String> version) {

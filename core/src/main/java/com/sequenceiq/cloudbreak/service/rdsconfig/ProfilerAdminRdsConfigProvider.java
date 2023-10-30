@@ -27,7 +27,7 @@ public class ProfilerAdminRdsConfigProvider extends AbstractRdsConfigProvider {
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     private boolean isRdsConfigNeedForProfilerAdmin(Blueprint blueprint) {
-        String blueprintText = blueprint.getBlueprintText();
+        String blueprintText = blueprint.getBlueprintJsonText();
         CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintText);
         return cmTemplateProcessor.isCMComponentExistsInBlueprint("PROFILER_ADMIN_AGENT");
     }

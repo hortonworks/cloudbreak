@@ -108,7 +108,7 @@ public class UpdateHostsValidator {
 
     public void validateComponentsCategory(Stack stack, String hostGroup) {
         Blueprint blueprint = stack.getCluster().getBlueprint();
-        String blueprintText = blueprint.getBlueprintText();
+        String blueprintText = blueprint.getBlueprintJsonText();
         try {
             JsonNode root = JsonUtil.readTree(blueprintText);
             String blueprintName = root.path("Blueprints").path("blueprint_name").asText();

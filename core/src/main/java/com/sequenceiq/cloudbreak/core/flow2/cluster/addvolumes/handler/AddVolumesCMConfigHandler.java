@@ -70,7 +70,7 @@ public class AddVolumesCMConfigHandler extends EventSenderAwareHandler<AddVolume
             TemporaryStorage temporaryStorage = getTemporaryStorage(instanceGroupView);
             int attachedVolumesCount = getAttachedVolumesCount(instanceGroupView);
             LOGGER.debug("Updating CM config!");
-            String blueprintText = stack.getBlueprint().getBlueprintText();
+            String blueprintText = stack.getBlueprint().getBlueprintJsonText();
             CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
             Set<ServiceComponent> hostTemplateServiceComponents = processor.getServiceComponentsByHostGroup().get(requestGroup);
             List<String> hostTemplateRoleGroupNames = processor.getHostTemplateRoleNames(requestGroup);

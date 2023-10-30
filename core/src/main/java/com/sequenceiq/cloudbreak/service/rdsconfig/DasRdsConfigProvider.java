@@ -54,7 +54,7 @@ public class DasRdsConfigProvider extends AbstractRdsConfigProvider {
 
     @Override
     protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
-        String blueprintText = blueprint.getBlueprintText();
+        String blueprintText = blueprint.getBlueprintJsonText();
         CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
         return blueprintProcessor.isCMComponentExistsInBlueprint("DAS_EVENT_PROCESSOR")
                 || blueprintProcessor.isCMComponentExistsInBlueprint("DAS_WEBAPP");

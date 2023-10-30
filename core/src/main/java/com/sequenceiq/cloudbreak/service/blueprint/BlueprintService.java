@@ -182,7 +182,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         if (!internalCreation) {
             blueprintConfigValidator.validate(blueprint);
         }
-        hueWorkaroundValidatorService.validateForBlueprintRequest(getHueHostGroups(blueprint.getBlueprintText()));
+        hueWorkaroundValidatorService.validateForBlueprintRequest(getHueHostGroups(blueprint.getBlueprintJsonText()));
     }
 
     public Blueprint deleteByWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
@@ -310,19 +310,19 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     private Set<Blueprint> updateDefaultBlueprintCollection(Workspace workspace) {
         Set<Blueprint> blueprintsInDatabase = blueprintRepository.findAllByWorkspaceIdAndStatusIn(workspace.getId(),
-                Set.of(DEFAULT, DEFAULT_DELETED, USER_MANAGED));
+                Set.of(DEFAULT, DEFAULT_DELETED));
         if (!blueprintLoaderService.isAddingDefaultBlueprintsNecessaryForTheUser(blueprintsInDatabase)) {
             if (blueprintLoaderService.defaultBlueprintDoesNotExistInTheCache(blueprintsInDatabase)) {
                 blueprintLoaderService.deleteOldDefaults(blueprintsInDatabase);
             }
-            return blueprintsInDatabase.stream()
-                    .filter(bp -> DEFAULT.equals(bp.getStatus()) || DEFAULT_DELETED.equals(bp.getStatus()))
-                    .collect(Collectors.toSet());
+            return blueprintsInDatabase;
         }
         LOGGER.debug("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
         try {
-            Set<Blueprint> updatedBlueprints =
-                    blueprintLoaderService.loadBlueprintsForTheWorkspace(blueprintsInDatabase, workspace, this::saveDefaultsWithReadRight);
+            Set<Blueprint> updatedBlueprints = blueprintLoaderService.loadBlueprintsForTheWorkspace(
+                    blueprintsInDatabase,
+                    workspace,
+                    this::saveDefaultsWithReadRight);
             LOGGER.debug("Blueprint modifications finished based on the defaults for '{}' workspace.", workspace.getId());
             return updatedBlueprints;
         } catch (ConstraintViolationException e) {
@@ -349,7 +349,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                         LOGGER.debug("Blueprint already exists in the database: {}", b.getName(), e);
                         return b;
                     } catch (Exception e) {
-                        LOGGER.debug("Cannot update the blueprint: {}, blueprinttext is null: {}", b.getName(), b.getBlueprintText() == null, e);
+                        LOGGER.debug("Cannot update the blueprint: {}, blueprinttext is null: {}", b.getName(), b.getBlueprintJsonText() == null, e);
                         throw e;
                     }
                 })
@@ -357,11 +357,11 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     public boolean isClouderaManagerTemplate(Blueprint blueprint) {
-        return blueprintUtils.isClouderaManagerClusterTemplate(blueprint.getBlueprintText());
+        return blueprintUtils.isClouderaManagerClusterTemplate(blueprint.getBlueprintJsonText());
     }
 
     public String getBlueprintVariant(Blueprint blueprint) {
-        return blueprintUtils.getBlueprintVariant(blueprint.getBlueprintText());
+        return blueprintUtils.getBlueprintVariant(blueprint.getBlueprintJsonText());
     }
 
     @Override
@@ -453,7 +453,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     private Set<String> queryCustomParameters(String name, Long workspaceId) {
         Blueprint blueprint = getByNameForWorkspaceId(name, workspaceId);
-        String blueprintText = blueprint.getBlueprintText();
+        String blueprintText = blueprint.getBlueprintJsonText();
         return centralBlueprintParameterQueryService.queryCustomParameters(blueprintText);
     }
 
@@ -507,7 +507,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     public String getBlueprintText(String blueprintName, Long workspaceId) {
         User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
-        return getByNameForWorkspaceAndLoadDefaultsIfNecessary(blueprintName, workspace).getBlueprintText();
+        return getByNameForWorkspaceAndLoadDefaultsIfNecessary(blueprintName, workspace).getBlueprintJsonText();
     }
 
     private Blueprint getByCrnAndWorkspaceIdAndAddToMdc(String crn, Long workspaceId) {

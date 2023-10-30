@@ -72,9 +72,8 @@ public class BlueprintV4Controller extends NotificationController implements Blu
                 restRequestThreadLocalService.getRequestedWorkspaceId(), withSdx);
         return new BlueprintV4ViewResponses(
                 allAvailableViewInWorkspace.stream()
-                .map(b -> blueprintViewToBlueprintV4ViewResponseConverter.convert(b))
-                .collect(Collectors.toSet())
-        );
+                        .map(b -> blueprintViewToBlueprintV4ViewResponseConverter.convert(b))
+                        .collect(Collectors.toSet()));
     }
 
     @Override

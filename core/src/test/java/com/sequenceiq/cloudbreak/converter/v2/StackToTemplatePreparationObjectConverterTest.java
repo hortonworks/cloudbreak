@@ -298,7 +298,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(sourceCluster.getId()).thenReturn(TEST_CLUSTER_ID);
         when(instanceGroupMetadataCollector.collectMetadata(stackMock)).thenReturn(groupInstances);
         when(stackMock.getBlueprint()).thenReturn(blueprint);
-        when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
+        when(blueprint.getBlueprintJsonText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(blueprint.getStackVersion()).thenReturn("7.2.11");
         when(stackMock.getInputs()).thenReturn(stackInputs);
         when(stackInputs.get(StackInputs.class)).thenReturn(null);

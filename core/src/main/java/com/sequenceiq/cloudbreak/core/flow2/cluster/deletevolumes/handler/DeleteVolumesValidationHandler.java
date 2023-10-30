@@ -67,7 +67,7 @@ public class DeleteVolumesValidationHandler extends ExceptionCatcherEventHandler
         StackDeleteVolumesRequest stackDeleteVolumesRequest = payload.getStackDeleteVolumesRequest();
         StackDto stack = stackDtoService.getById(payload.getResourceId());
         String requestGroup = stackDeleteVolumesRequest.getGroup();
-        String blueprintText = stack.getBlueprint().getBlueprintText();
+        String blueprintText = stack.getBlueprint().getBlueprintJsonText();
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
         Set<String> hostTemplateComponents = processor.getComponentsInHostGroup(requestGroup);
         Set<ServiceComponent> hostTemplateServiceComponents = processor.getServiceComponentsByHostGroup().get(requestGroup);

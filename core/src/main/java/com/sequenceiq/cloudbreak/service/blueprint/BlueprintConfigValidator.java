@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 public class BlueprintConfigValidator {
 
     public void validate(Blueprint blueprint) {
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(blueprint.getBlueprintText());
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(blueprint.getBlueprintJsonText());
         if (cmTemplateProcessor.isInstantiatorPresent()) {
             throw new BadRequestException("Instantiator is present in your Cloudera Manager template which is probably incorrect.");
         }
@@ -21,12 +21,12 @@ public class BlueprintConfigValidator {
             throw new BadRequestException("Repositories are present in your Cloudera Manager template, this must be removed.");
         }
         Pattern passwordPattern = Pattern.compile("\\*\\*\\*");
-        Matcher passwordMatch = passwordPattern.matcher(blueprint.getBlueprintText());
+        Matcher passwordMatch = passwordPattern.matcher(blueprint.getBlueprintJsonText());
         if (passwordMatch.find()) {
             throw new BadRequestException("Password placeholder with **** is present in your Cloudera Manager template which is probably incorrect.");
         }
         Pattern volumePattern = Pattern.compile("/hadoopfs/fs(.*?)");
-        Matcher volumeMatch = volumePattern.matcher(blueprint.getBlueprintText());
+        Matcher volumeMatch = volumePattern.matcher(blueprint.getBlueprintJsonText());
         if (volumeMatch.find()) {
             throw new BadRequestException("Volume configuration should not be part of your Cloudera Manager template.");
         }

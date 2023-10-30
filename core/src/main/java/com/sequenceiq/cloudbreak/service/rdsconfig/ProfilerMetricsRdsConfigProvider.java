@@ -27,7 +27,7 @@ public class ProfilerMetricsRdsConfigProvider extends AbstractRdsConfigProvider 
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     private boolean isRdsConfigNeedForProfilerMetrics(Blueprint blueprint) {
-        String blueprintText = blueprint.getBlueprintText();
+        String blueprintText = blueprint.getBlueprintJsonText();
         CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintText);
         return cmTemplateProcessor.isCMComponentExistsInBlueprint("PROFILER_METRICS_AGENT");
     }

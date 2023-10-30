@@ -154,7 +154,7 @@ public class BlueprintUtilV4Controller extends NotificationController implements
     public BlueprintServicesV4Response getServicesByBlueprint(Long workspaceId, @ResourceName String blueprintName) {
         Blueprint blueprint = blueprintService.getByNameForWorkspaceId(blueprintName, threadLocalService.getRequestedWorkspaceId());
         return supportedServicesToBlueprintServicesV4ResponseConverter
-                .convert(clusterTemplateGeneratorService.getServicesByBlueprint(blueprint.getBlueprintText()));
+                .convert(clusterTemplateGeneratorService.getServicesByBlueprint(blueprint.getBlueprintJsonText()));
     }
 
     @Override

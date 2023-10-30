@@ -70,7 +70,7 @@ public class KnoxGroupDeterminer {
         if (cluster != null) {
             Blueprint blueprint = cluster.getBlueprint();
             if (blueprint != null) {
-                return blueprint.getBlueprintText();
+                return blueprint.getBlueprintJsonText();
             }
         }
         return null;

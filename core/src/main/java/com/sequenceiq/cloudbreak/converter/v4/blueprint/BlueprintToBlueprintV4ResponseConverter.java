@@ -15,7 +15,7 @@ public class BlueprintToBlueprintV4ResponseConverter {
         blueprintJson.setHostGroupCount(entity.getHostGroupCount());
         blueprintJson.setStatus(entity.getStatus());
         blueprintJson.setTags(entity.getTags().getMap());
-        blueprintJson.setBlueprint(entity.getBlueprintText());
+        blueprintJson.setBlueprint(entity.getBlueprintJsonText());
         blueprintJson.setCrn(entity.getResourceCrn());
         blueprintJson.setCreated(entity.getCreated());
         return blueprintJson;

@@ -625,9 +625,9 @@ public class StackV4RequestToStackConverter {
                 Blueprint blueprint = stack.getCluster().getBlueprint();
                 String serviceField = null;
                 if (ClusterTemplateApplicationTag.SERVICE_TYPE.key().equals(tagName)) {
-                    serviceField = meteringServiceFieldResolver.resolveServiceType(cmTemplateProcessorFactory.get(blueprint.getBlueprintText()));
+                    serviceField = meteringServiceFieldResolver.resolveServiceType(cmTemplateProcessorFactory.get(blueprint.getBlueprintJsonText()));
                 } else if (ClusterTemplateApplicationTag.SERVICE_FEATURE.key().equals(tagName)) {
-                    serviceField = meteringServiceFieldResolver.resolveServiceFeature(cmTemplateProcessorFactory.get(blueprint.getBlueprintText()));
+                    serviceField = meteringServiceFieldResolver.resolveServiceFeature(cmTemplateProcessorFactory.get(blueprint.getBlueprintJsonText()));
                 }
                 if (stack.getTags() != null && serviceField != null) {
                     StackTags tags = stack.getTags().get(StackTags.class);

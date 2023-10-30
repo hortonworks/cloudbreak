@@ -423,7 +423,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private Set<String> getComputeHostGroups(Blueprint blueprint) {
-        String blueprintText = blueprint.getBlueprintText();
+        String blueprintText = blueprint.getBlueprintJsonText();
         CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
         Versioned blueprintVersion = () -> blueprintProcessor.getVersion().get();
         return blueprintProcessor.getComputeHostGroups(blueprintVersion);

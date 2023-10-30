@@ -39,6 +39,9 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
     @SecretValue
     private Secret blueprintText = Secret.EMPTY;
 
+    @Column(length = 1000000, columnDefinition = "TEXT")
+    private String defaultBlueprintText;
+
     private String stackName;
 
     @Column(length = 1000000, columnDefinition = "TEXT")
@@ -118,6 +121,14 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
         this.blueprintText = new Secret(blueprintText);
     }
 
+    public String getBlueprintJsonText() {
+        if (defaultBlueprintText != null) {
+            return defaultBlueprintText;
+        } else {
+            return getBlueprintText();
+        }
+    }
+
     public String getStackName() {
         return stackName;
     }
@@ -188,6 +199,14 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setLastUpdated(Long lastUpdated) {
         this.lastUpdated = lastUpdated;
+    }
+
+    public String getDefaultBlueprintText() {
+        return defaultBlueprintText;
+    }
+
+    public void setDefaultBlueprintText(String defaultBlueprintText) {
+        this.defaultBlueprintText = defaultBlueprintText;
     }
 
     @Override

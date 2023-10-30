@@ -110,7 +110,7 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
     }
 
     private CmTemplateProcessor getCmTemplateProcessor(Cluster cluster) {
-        String blueprintText = cluster.getBlueprint().getBlueprintText();
+        String blueprintText = cluster.getBlueprint().getBlueprintJsonText();
         return cmTemplateProcessorFactory.get(blueprintText);
     }
 

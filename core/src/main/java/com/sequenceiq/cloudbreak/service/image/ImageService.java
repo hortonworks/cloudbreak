@@ -185,7 +185,7 @@ public class ImageService {
         String clusterVersion = ImageCatalogService.UNDEFINED;
         if (blueprint != null) {
             try {
-                JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
+                JsonNode root = JsonUtil.readTree(blueprint.getBlueprintJsonText());
                 clusterVersion = blueprintUtils.getCDHStackVersion(root);
             } catch (IOException ex) {
                 LOGGER.warn("Can not initiate default hdp info: ", ex);

@@ -28,7 +28,7 @@ public class LoadBalancerSANProvider {
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
 
     public Optional<String> getLoadBalancerSAN(Long stackId, Blueprint blueprint) {
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(blueprint.getBlueprintText());
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(blueprint.getBlueprintJsonText());
         String cdhVersion = cmTemplateProcessor.getStackVersion();
         if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_11)) {
             Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stackId);

@@ -251,7 +251,7 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
 
     @VisibleForTesting
     protected String extractYarnServiceNameFromBlueprint(StackDtoDelegate stack) {
-        CmTemplateProcessor templateProcessor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintText());
+        CmTemplateProcessor templateProcessor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintJsonText());
         return templateProcessor.getServiceByType(YarnRoles.YARN).map(ApiClusterTemplateService::getRefName).orElse(null);
     }
 }

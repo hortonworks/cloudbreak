@@ -57,6 +57,6 @@ public class FlinkUpgradeValidator implements ServiceUpgradeValidator {
     }
 
     private String getBlueprintText(StackDto stack) {
-        return stack.getBlueprint().getBlueprintText();
+        return stack.getBlueprint().getBlueprintJsonText();
     }
 }

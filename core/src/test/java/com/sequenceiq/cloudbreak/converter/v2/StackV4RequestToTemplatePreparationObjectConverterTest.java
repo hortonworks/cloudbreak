@@ -248,7 +248,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(cluster.getName()).thenReturn(TEST_CLUSTER_NAME);
         when(blueprintService.getByNameForWorkspace(TEST_BLUEPRINT_NAME, workspace)).thenReturn(blueprint);
         when(blueprintService.getBlueprintVariant(any())).thenReturn("AMBARI");
-        when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
+        when(blueprint.getBlueprintJsonText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
         when(userService.getOrCreate(eq(cloudbreakUser))).thenReturn(user);
         when(cloudbreakUser.getEmail()).thenReturn("test@hortonworks.com");

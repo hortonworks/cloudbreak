@@ -67,7 +67,7 @@ public class BlueprintV4RequestToBlueprintConverter {
         }
 
         try {
-            JsonNode blueprintJson = JsonUtil.readTree(blueprint.getBlueprintText());
+            JsonNode blueprintJson = JsonUtil.readTree(blueprint.getBlueprintJsonText());
             if (blueprintUtils.isBuiltinBlueprint(blueprintJson)) {
                 LOGGER.info("Built-in blueprint format detected, applying embedded \"blueprint\" content");
                 blueprintJson = blueprintUtils.getBuiltinBlueprintContent(blueprintJson);

@@ -132,7 +132,7 @@ public class TemplateValidatorAndUpdater {
     }
 
     private void validateVolumeTemplates(Template value, VmType vmType, Platform platform,
-        ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, Stack stack) {
+            ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, Stack stack) {
         for (VolumeTemplate volumeTemplate : value.getVolumeTemplates()) {
             VolumeParameterType volumeParameterType = null;
             Map<Platform, Map<String, VolumeParameterType>> disks = diskMappings.get();
@@ -168,7 +168,7 @@ public class TemplateValidatorAndUpdater {
     }
 
     private void validateVolume(VolumeTemplate value, VmType vmType, Platform platform, VolumeParameterType volumeParameterType,
-        ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, Stack stack) {
+            ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, Stack stack) {
         validateVolumeType(value, platform, validationBuilder);
         validateVolumeCount(value, vmType, volumeParameterType, validationBuilder, instanceGroup, stack);
         validateVolumeSize(value, vmType, volumeParameterType, validationBuilder, instanceGroup, stack);
@@ -218,7 +218,7 @@ public class TemplateValidatorAndUpdater {
     }
 
     private void validateVolumeCount(VolumeTemplate value, VmType vmType, VolumeParameterType volumeParameterType,
-        ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, Stack stack) {
+            ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, Stack stack) {
         if (vmType != null && needToCheckVolume(volumeParameterType, value.getVolumeCount())) {
             VolumeParameterConfig config = vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
             if (config != null) {
@@ -255,7 +255,7 @@ public class TemplateValidatorAndUpdater {
     }
 
     private void validateVolumeSize(VolumeTemplate value, VmType vmType, VolumeParameterType volumeParameterType,
-        ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, Stack stack) {
+            ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, Stack stack) {
         if (vmType != null && needToCheckVolume(volumeParameterType, value.getVolumeCount())) {
             VolumeParameterConfig config = vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
             if (config != null) {
@@ -297,7 +297,7 @@ public class TemplateValidatorAndUpdater {
     private boolean shouldValidateBasedOnGroupName(InstanceGroup instanceGroup, Stack stack) {
         return !(isIDBrokerInstanceGroup(instanceGroup, stack)
                 || isSdxComputeInstanceHostGroup(instanceGroup, stack.getType())
-                || isCoordinatorAndExecutorInstanceGroup(stack.getBlueprint().getBlueprintText()));
+                || isCoordinatorAndExecutorInstanceGroup(stack.getBlueprint().getBlueprintJsonText()));
     }
 
     private boolean needToCheckVolume(VolumeParameterType volumeParameterType, Object value) {

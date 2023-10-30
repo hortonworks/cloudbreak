@@ -76,6 +76,7 @@ public class DefaultBlueprintCache {
                         JsonNode blueprintNode = jsonNode.get("blueprint");
                         blueprintJson.setBlueprint(blueprintNode.toString());
                         Blueprint bp = converter.convert(blueprintJson);
+                        bp.setDefaultBlueprintText(bp.getBlueprintText());
                         JsonNode tags = jsonNode.get("tags");
                         Map<String, Object> tagParameters = blueprintUtils.prepareTags(tags);
                         bp.setTags(new Json(tagParameters));
@@ -86,6 +87,7 @@ public class DefaultBlueprintCache {
                         BlueprintFile bpf = new BlueprintFile.Builder()
                                 .name(bp.getName())
                                 .blueprintText(bp.getBlueprintText())
+                                .defaultBlueprintText(bp.getDefaultBlueprintText())
                                 .stackName(bp.getStackName())
                                 .stackVersion(bp.getStackVersion())
                                 .stackType(bp.getStackType())

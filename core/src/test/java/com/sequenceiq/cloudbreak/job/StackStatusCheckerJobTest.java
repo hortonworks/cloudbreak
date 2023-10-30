@@ -208,7 +208,7 @@ public class StackStatusCheckerJobTest {
         lenient().when(stackDto.getCluster()).thenReturn(cluster);
         lenient().when(jobExecutionContext.getMergedJobDataMap()).thenReturn(new JobDataMap());
         lenient().when(stackDto.getBlueprint()).thenReturn(blueprint);
-        lenient().when(blueprint.getBlueprintText()).thenReturn(BLUEPRINT_TEXT);
+        lenient().when(blueprint.getBlueprintJsonText()).thenReturn(BLUEPRINT_TEXT);
         lenient().when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         lenient().when(stackService.computeMonitoringEnabled(any())).thenReturn(Optional.of(true));
     }

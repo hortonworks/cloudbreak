@@ -27,7 +27,7 @@ public class NifiRegistryRdsConfigProvider extends AbstractRdsConfigProvider {
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     private boolean isRdsConfigNeedForNifiRegistry(Blueprint blueprint) {
-        String blueprintText = blueprint.getBlueprintText();
+        String blueprintText = blueprint.getBlueprintJsonText();
         CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintText);
         return cmTemplateProcessor.isCMComponentExistsInBlueprint("NIFI_REGISTRY_SERVER");
     }

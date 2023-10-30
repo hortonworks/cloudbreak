@@ -120,7 +120,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     }
 
     public Set<String> getHueHostGroups(StackDtoDelegate stack) {
-        return new CmTemplateProcessor(stack.getBlueprint().getBlueprintText())
+        return new CmTemplateProcessor(stack.getBlueprint().getBlueprintJsonText())
                 .getHostGroupsWithComponent(HueRoles.HUE_SERVER);
     }
 

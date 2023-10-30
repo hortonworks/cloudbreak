@@ -84,7 +84,7 @@ public class ConsumptionService {
     private boolean isStackEligibleForScheduling(StackDto stackDto, String operation) {
         boolean eligible = false;
         if (stackDto.getType() == StackType.WORKLOAD) {
-            Optional<String> blueprintTextOpt = Optional.ofNullable(stackDto.getBlueprint()).map(Blueprint::getBlueprintText);
+            Optional<String> blueprintTextOpt = Optional.ofNullable(stackDto.getBlueprint()).map(Blueprint::getBlueprintJsonText);
             if (blueprintTextOpt.isPresent()) {
                 CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintTextOpt.get());
                 Set<String> hostGroupsWithKuduMaster = cmTemplateProcessor.getHostGroupsWithComponent(KuduRoles.KUDU_MASTER);

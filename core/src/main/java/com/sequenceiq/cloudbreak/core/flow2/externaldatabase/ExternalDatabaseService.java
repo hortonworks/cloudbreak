@@ -329,7 +329,7 @@ public class ExternalDatabaseService {
 
     private String getRuntime(Cluster cluster) {
         String runtime = null;
-        Optional<String> blueprintTextOpt = Optional.ofNullable(cluster.getBlueprint()).map(Blueprint::getBlueprintText);
+        Optional<String> blueprintTextOpt = Optional.ofNullable(cluster.getBlueprint()).map(Blueprint::getBlueprintJsonText);
         if (blueprintTextOpt.isPresent()) {
             CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintTextOpt.get());
             runtime = cmTemplateProcessor.getStackVersion();

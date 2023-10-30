@@ -52,7 +52,7 @@ class KnoxGroupDeterminerTest {
         stack.setInstanceGroups(Set.of(instanceGroup, instanceGroup1));
         stack.setCluster(cluster);
 
-        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
+        when(blueprint.getBlueprintJsonText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
         when(blueprint.getName()).thenReturn("dummy");
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.getKnoxGatewayGroupNames(stack));
@@ -81,7 +81,7 @@ class KnoxGroupDeterminerTest {
         stack.setInstanceGroups(Set.of(instanceGroup, instanceGroup1));
         stack.setCluster(cluster);
 
-        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
+        when(blueprint.getBlueprintJsonText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
         when(blueprint.getName()).thenReturn("dummy");
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.getKnoxGatewayGroupNames(stack));
@@ -108,7 +108,7 @@ class KnoxGroupDeterminerTest {
         stack.setInstanceGroups(Set.of(instanceGroup));
         stack.setCluster(cluster);
 
-        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
+        when(blueprint.getBlueprintJsonText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
 
         Set<String> selectedGroups = underTest.getKnoxGatewayGroupNames(stack);
         assertEquals(groups, selectedGroups);
@@ -131,7 +131,7 @@ class KnoxGroupDeterminerTest {
         tenant.setName("tenant");
         workspace.setTenant(tenant);
         stack.setWorkspace(workspace);
-        when(blueprint.getBlueprintText()).thenReturn("{}");
+        when(blueprint.getBlueprintJsonText()).thenReturn("{}");
 
         Set<String> selectedGroups = underTest.getKnoxGatewayGroupNames(stack);
         assertEquals(groups, selectedGroups);
@@ -149,7 +149,7 @@ class KnoxGroupDeterminerTest {
         tenant.setName("tenant");
         workspace.setTenant(tenant);
         stack.setWorkspace(workspace);
-        when(blueprint.getBlueprintText()).thenReturn("{}");
+        when(blueprint.getBlueprintJsonText()).thenReturn("{}");
 
         Set<String> selectedGroups = underTest.getKnoxGatewayGroupNames(stack);
         assertThat(selectedGroups).isEmpty();

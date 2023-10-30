@@ -70,7 +70,7 @@ public class StackStopRestrictionService {
     private StopRestrictionReason checkEphemeralOnlyInstanceGroupStoppable(InstanceGroupView instanceGroup, Blueprint blueprint,
             String cbVersion, String saltCbVersion) {
         if (!isCbVersionBeforeMinVersion(cbVersion, config.getEphemeralOnlyMinVersion()) || !isSaltComponentCbVersionBeforeStopSupport(saltCbVersion)) {
-            Set<ServiceComponent> serviceComponents = cmTemplateProcessorFactory.get(blueprint.getBlueprintText())
+            Set<ServiceComponent> serviceComponents = cmTemplateProcessorFactory.get(blueprint.getBlueprintJsonText())
                     .getServiceComponentsByHostGroup().get(instanceGroup.getGroupName());
             if (!isEphemeralInstanceGroupStoppable(serviceComponents)) {
                 LOGGER.info("Infrastructure cannot be stopped. Instances in group [{}] have ephemeral storage only " +

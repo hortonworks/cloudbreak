@@ -212,7 +212,7 @@ public class StackToCloudStackConverterTest {
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
         when(stack.getResourceCrn()).thenReturn(STACK_CRN);
         when(cluster.getBlueprint()).thenReturn(blueprint);
-        when(blueprint.getBlueprintText()).thenReturn(BLUEPRINT_TEXT);
+        when(blueprint.getBlueprintJsonText()).thenReturn(BLUEPRINT_TEXT);
         when(cluster.getExtendedBlueprintText()).thenReturn(BLUEPRINT_TEXT);
         when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         when(cmTemplateProcessor.getComponentsByHostGroup()).thenReturn(mock(Map.class));

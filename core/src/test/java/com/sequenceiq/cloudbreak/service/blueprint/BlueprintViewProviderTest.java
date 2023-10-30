@@ -43,7 +43,7 @@ public class BlueprintViewProviderTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
+        when(blueprint.getBlueprintJsonText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
         when(blueprintStackInfo.getType()).thenReturn(TEST_STACK_TYPE);
         when(blueprintStackInfo.getVersion()).thenReturn(TEST_STACK_VERSION);

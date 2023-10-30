@@ -88,7 +88,7 @@ public class EmbeddedDatabaseService {
 
     private String getRuntime(ClusterView clusterView) {
         String runtime = null;
-        Optional<String> blueprintTextOpt = blueprintService.getByClusterId(clusterView.getId()).map(Blueprint::getBlueprintText);
+        Optional<String> blueprintTextOpt = blueprintService.getByClusterId(clusterView.getId()).map(Blueprint::getBlueprintJsonText);
         if (blueprintTextOpt.isPresent()) {
             CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintTextOpt.get());
             runtime = cmTemplateProcessor.getStackVersion();

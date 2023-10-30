@@ -180,7 +180,7 @@ class ComponentLocatorServiceTest {
         StackDto stackDto = mock(StackDto.class);
         Blueprint blueprint = mock(Blueprint.class);
         when(stackDto.getBlueprint()).thenReturn(blueprint);
-        when(blueprint.getBlueprintText()).thenReturn(blueprintText);
+        when(blueprint.getBlueprintJsonText()).thenReturn(blueprintText);
 
         Map<String, List<String>> result = assertDoesNotThrow(() -> underTest.getImpalaCoordinatorLocations(stackDto));
 

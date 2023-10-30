@@ -38,7 +38,7 @@ public class ComponentLocatorService {
         Map<String, List<String>> result = new HashMap<>();
         Blueprint blueprint = stack.getBlueprint();
         if (blueprint != null) {
-            CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprint.getBlueprintText());
+            CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprint.getBlueprintJsonText());
 
             stack.getInstanceGroupDtos().forEach(ig -> {
                 Set<String> hgComponents = new HashSet<>(processor.getImpalaCoordinatorsInHostGroup(ig.getInstanceGroup().getGroupName()));
@@ -65,7 +65,7 @@ public class ComponentLocatorService {
     }
 
     private Map<String, List<String>> getFqdnsByComponents(StackDtoDelegate stackDto, Collection<String> componentNames) {
-        String blueprintText = stackDto.getBlueprint().getBlueprintText();
+        String blueprintText = stackDto.getBlueprint().getBlueprintJsonText();
         BlueprintTextProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
         return getFqdnsByComponents(stackDto, processor, componentNames);
     }

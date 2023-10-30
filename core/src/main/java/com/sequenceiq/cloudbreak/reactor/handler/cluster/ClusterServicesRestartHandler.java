@@ -75,7 +75,7 @@ public class ClusterServicesRestartHandler implements EventHandler<ClusterServic
     }
 
     private CmTemplateProcessor getCmTemplateProcessor(Cluster cluster) {
-        String blueprintText = cluster.getBlueprint().getBlueprintText();
+        String blueprintText = cluster.getBlueprint().getBlueprintJsonText();
         return cmTemplateProcessorFactory.get(blueprintText);
     }
 }

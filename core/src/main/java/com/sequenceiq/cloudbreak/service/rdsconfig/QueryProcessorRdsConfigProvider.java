@@ -54,7 +54,7 @@ public class QueryProcessorRdsConfigProvider extends AbstractRdsConfigProvider {
 
     @Override
     protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
-        String blueprintText = blueprint.getBlueprintText();
+        String blueprintText = blueprint.getBlueprintJsonText();
         CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
         return blueprintProcessor.isCMComponentExistsInBlueprint("QUERY_PROCESSOR");
     }

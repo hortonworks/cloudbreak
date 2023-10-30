@@ -61,7 +61,7 @@ public class HostAttributeDecoratorTest {
                 new Node(null, null, null, null, "fqdn2", "hg2"),
                 new Node(null, null, null, null, "fqdn3", "hg3"),
                 new Node(null, null, null, null, "fqdn4", null)));
-        when(blueprint.getBlueprintText()).thenReturn("");
+        when(blueprint.getBlueprintJsonText()).thenReturn("");
 
         Map<String, Map<String, ServiceAttributes>> yarnAttrs = new HashMap<>();
         yarnAttrs.put("hg3",

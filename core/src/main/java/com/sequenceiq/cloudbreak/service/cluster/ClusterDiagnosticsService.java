@@ -62,7 +62,7 @@ public class ClusterDiagnosticsService {
         if (stack != null) {
             Cluster cluster = stack.getCluster();
             if (cluster != null && cluster.getBlueprint() != null) {
-                CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(cluster.getBlueprint().getBlueprintText());
+                CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(cluster.getBlueprint().getBlueprintJsonText());
                 components = cmTemplateProcessor.getAllComponents()
                         .stream()
                         .map(ServiceComponent::getComponent)

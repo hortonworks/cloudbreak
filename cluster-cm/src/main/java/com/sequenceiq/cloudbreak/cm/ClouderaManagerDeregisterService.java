@@ -60,7 +60,7 @@ public class ClouderaManagerDeregisterService {
         String password = cluster.getCloudbreakAmbariPassword();
         ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
         try {
-            CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintText());
+            CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintJsonText());
             if (CMRepositoryVersionUtil.isRangerTearDownSupported(clouderaManagerRepoDetails)) {
                 if (datalakeDto.isPresent()) {
                     LOGGER.info("The current cluster {} is a Data Hub cluster so teardown REQUIRED.", stack.getName());

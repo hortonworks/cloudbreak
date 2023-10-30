@@ -40,7 +40,7 @@ public class CustomTemplateUpgradeValidator {
     }
 
     private Set<String> getServicesFromBlueprint(Blueprint blueprint) {
-        return cmTemplateProcessorFactory.get(blueprint.getBlueprintText())
+        return cmTemplateProcessorFactory.get(blueprint.getBlueprintJsonText())
                 .getAllComponents()
                 .stream()
                 .map(ServiceComponent::getService)

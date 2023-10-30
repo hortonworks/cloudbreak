@@ -52,7 +52,7 @@ public class CmTemplateValidator implements BlueprintValidator {
     @Override
     public void validate(Blueprint blueprint, Set<HostGroup> hostGroups, Collection<InstanceGroupView> instanceGroups,
             boolean validateServiceCardinality) {
-        CmTemplateProcessor templateProcessor = processorFactory.get(blueprint.getBlueprintText());
+        CmTemplateProcessor templateProcessor = processorFactory.get(blueprint.getBlueprintJsonText());
         Map<String, InstanceCount> blueprintHostGroupCardinality = templateProcessor.getCardinalityByHostGroup();
 
         BlueprintValidatorUtil.validateHostGroupsMatch(hostGroups, blueprintHostGroupCardinality.keySet());
@@ -71,7 +71,7 @@ public class CmTemplateValidator implements BlueprintValidator {
 
     public void validateHostGroupScalingRequest(String accountId, Blueprint blueprint, Map<String, Integer> instanceGroupAdjustments,
             Optional<ClouderaManagerProduct> cdhProduct, Collection<InstanceGroup> instanceGroups) {
-        CmTemplateProcessor templateProcessor = processorFactory.get(blueprint.getBlueprintText());
+        CmTemplateProcessor templateProcessor = processorFactory.get(blueprint.getBlueprintJsonText());
         validateRequiredRoleCountInCluster(instanceGroupAdjustments, instanceGroups, templateProcessor);
         instanceGroupAdjustments.forEach((hostGroupName, adjustment) -> {
             validateBlackListedScalingRoles(accountId, templateProcessor, hostGroupName, adjustment, cdhProduct);

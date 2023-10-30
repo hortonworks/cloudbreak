@@ -17,7 +17,7 @@ public class BlueprintToBlueprintDetailsConverter {
         blueprintDetails.setName(source.getName());
         blueprintDetails.setDescription(source.getDescription());
         blueprintDetails.setBlueprintName(source.getStackName());
-        blueprintDetails.setBlueprintJson(source.getBlueprintText());
+        blueprintDetails.setBlueprintJson(source.getBlueprintJsonText());
         return blueprintDetails;
     }
 }

@@ -22,7 +22,7 @@ public class BlueprintValidatorFactory {
     private CmTemplateValidator cmTemplateValidator;
 
     public BlueprintValidator createBlueprintValidator(Blueprint blueprint) {
-        String variant = blueprintUtils.getBlueprintVariant(blueprint.getBlueprintText());
+        String variant = blueprintUtils.getBlueprintVariant(blueprint.getBlueprintJsonText());
         switch (variant) {
             case CLOUDERA_MANAGER:
                 return cmTemplateValidator;

@@ -153,10 +153,15 @@ public class BlueprintLoaderService {
     private boolean isActiveBlueprintMustBeUpdatedAndNotUserManaged(Blueprint blueprintInDatabase, BlueprintFile defaultBlueprint) {
         return isActiveDefaultBlueprint(blueprintInDatabase)
                 && isBlueprintInTheDefaultCache(defaultBlueprint)
-                && (defaultBlueprintNotSameAsNewTexts(blueprintInDatabase, defaultBlueprint.getBlueprintText())
+                && (defaultBlueprintWithoutDefaultBlueprintText(blueprintInDatabase)
+                        || defaultBlueprintNotSameAsNewTexts(blueprintInDatabase, defaultBlueprint.getBlueprintText())
                         || defaultBlueprintContainsNewDescription(blueprintInDatabase, defaultBlueprint)
                         || isBlueprintInDBSameNameButUserManaged(blueprintInDatabase, defaultBlueprint)
                         || isUpgradeOptionModified(blueprintInDatabase, defaultBlueprint));
+    }
+
+    private boolean defaultBlueprintWithoutDefaultBlueprintText(Blueprint blueprintInDatabase) {
+        return blueprintInDatabase.getDefaultBlueprintText() == null;
     }
 
     private boolean isUpgradeOptionModified(Blueprint blueprintInDatabase, BlueprintFile defaultBlueprint) {
@@ -171,6 +176,7 @@ public class BlueprintLoaderService {
             Workspace workspace) {
         setupBlueprint(blueprintFromDatabase, workspace);
         blueprintFromDatabase.setBlueprintText(newBlueprint.getBlueprintText());
+        blueprintFromDatabase.setDefaultBlueprintText(newBlueprint.getBlueprintText());
         blueprintFromDatabase.setDescription(newBlueprint.getDescription());
         blueprintFromDatabase.setHostGroupCount(newBlueprint.getHostGroupCount());
         blueprintFromDatabase.setStackName(newBlueprint.getStackName());
@@ -225,7 +231,7 @@ public class BlueprintLoaderService {
     }
 
     private boolean defaultBlueprintNotSameAsNewTexts(Blueprint blueprintFromDatabase, String blueprintsText) {
-        String blueprintText = blueprintFromDatabase.getBlueprintText();
+        String blueprintText = blueprintFromDatabase.getBlueprintJsonText();
         return blueprintText == null || !blueprintText.equals(blueprintsText);
     }
 

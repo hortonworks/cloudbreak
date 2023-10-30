@@ -46,7 +46,7 @@ public class NifiUpgradeValidator implements ServiceUpgradeValidator {
     }
 
     private String getBlueprintText(StackDto stack) {
-        return stack.getBlueprint().getBlueprintText();
+        return stack.getBlueprint().getBlueprintJsonText();
     }
 
     private void validateNifiWorkingDirectory(StackDto stack) {

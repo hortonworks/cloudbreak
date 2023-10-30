@@ -8,6 +8,8 @@ public class BlueprintFile {
 
     private String blueprintText;
 
+    private String defaultBlueprintText;
+
     private String stackName;
 
     private String description;
@@ -20,10 +22,11 @@ public class BlueprintFile {
 
     private BlueprintUpgradeOption blueprintUpgradeOption;
 
-    private BlueprintFile(String name, String blueprintText, String stackName, String description, int hostGroupCount, String stackType, String stackVersion,
-            BlueprintUpgradeOption blueprintUpgradeOption) {
+    private BlueprintFile(String name, String blueprintText, String defaultBlueprintText, String stackName, String description, int hostGroupCount,
+            String stackType, String stackVersion, BlueprintUpgradeOption blueprintUpgradeOption) {
         this.name = name;
         this.blueprintText = blueprintText;
+        this.defaultBlueprintText = defaultBlueprintText;
         this.stackName = stackName;
         this.description = description;
         this.hostGroupCount = hostGroupCount;
@@ -60,6 +63,10 @@ public class BlueprintFile {
         return blueprintText;
     }
 
+    public String getDefaultBlueprintText() {
+        return defaultBlueprintText;
+    }
+
     public BlueprintUpgradeOption getBlueprintUpgradeOption() {
         return blueprintUpgradeOption;
     }
@@ -82,6 +89,8 @@ public class BlueprintFile {
 
         private String blueprintText;
 
+        private String defaultBlueprintText;
+
         private String stackName;
 
         private String description;
@@ -101,6 +110,11 @@ public class BlueprintFile {
 
         public Builder blueprintText(String blueprintText) {
             this.blueprintText = blueprintText;
+            return this;
+        }
+
+        public Builder defaultBlueprintText(String defaultBlueprintText) {
+            this.defaultBlueprintText = defaultBlueprintText;
             return this;
         }
 
@@ -140,7 +154,8 @@ public class BlueprintFile {
             Preconditions.checkNotNull(stackName);
             Preconditions.checkNotNull(stackVersion);
             Preconditions.checkNotNull(stackType);
-            return new BlueprintFile(name, blueprintText, stackName, description, hostGroupCount, stackType, stackVersion, blueprintUpgradeOption);
+            return new BlueprintFile(name, blueprintText, defaultBlueprintText, stackName, description, hostGroupCount, stackType, stackVersion,
+                    blueprintUpgradeOption);
         }
     }
 }

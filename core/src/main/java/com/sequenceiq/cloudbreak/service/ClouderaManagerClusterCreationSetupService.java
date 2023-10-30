@@ -83,7 +83,7 @@ public class ClouderaManagerClusterCreationSetupService {
             Component stackImageComponent) throws IOException, CloudbreakImageCatalogException {
         List<ClusterComponent> components = new ArrayList<>();
         long start = System.currentTimeMillis();
-        String blueprintCdhVersion = blueprintUtils.getCDHStackVersion(JsonUtil.readTree(cluster.getBlueprint().getBlueprintText()));
+        String blueprintCdhVersion = blueprintUtils.getCDHStackVersion(JsonUtil.readTree(cluster.getBlueprint().getBlueprintJsonText()));
         LOGGER.debug("blueprintUtils.getCDHStackVersion took {} ms", System.currentTimeMillis() - start);
 
         ClouderaManagerRepositoryV4Request cmRepoRequest = measure(() ->

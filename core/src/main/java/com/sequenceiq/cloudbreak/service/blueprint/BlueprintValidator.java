@@ -44,7 +44,7 @@ public class BlueprintValidator implements Validator {
             errors.rejectValue("blueprintText", "empty", "The blueprint text is empty");
         }
 
-        CmTemplateProcessor cm = cmTemplateProcessorFactory.get(blueprint.getBlueprintText());
+        CmTemplateProcessor cm = cmTemplateProcessorFactory.get(blueprint.getBlueprintJsonText());
         validateHostNames(cm, errors);
         validateRoleType(cm, errors);
     }

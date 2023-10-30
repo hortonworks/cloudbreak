@@ -275,7 +275,7 @@ public class CloudResourceAdvisor {
     }
 
     private BlueprintTextProcessor getBlueprintTextProcessor(Blueprint blueprint) {
-        String blueprintText = blueprint.getBlueprintText();
+        String blueprintText = blueprint.getBlueprintJsonText();
         return blueprintTextProcessorFactory.createBlueprintTextProcessor(blueprintText);
     }
 

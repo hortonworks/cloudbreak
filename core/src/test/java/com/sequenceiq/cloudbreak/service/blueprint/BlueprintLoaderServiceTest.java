@@ -85,6 +85,7 @@ public class BlueprintLoaderServiceTest {
         blueprint.setId((long) index);
         blueprint.setStackName("test-validation" + index);
         blueprint.setBlueprintText(JSON + index);
+        blueprint.setDefaultBlueprintText(JSON + index);
         blueprint.setHostGroupCount(3);
         blueprint.setStatus(resourceStatus);
         blueprint.setDescription("test validation" + index);
@@ -97,6 +98,7 @@ public class BlueprintLoaderServiceTest {
         return new BlueprintFile.Builder()
                 .stackName("test-validation" + index)
                 .blueprintText(JSON + index)
+                .defaultBlueprintText(JSON + index)
                 .hostGroupCount(3)
                 .stackVersion("2")
                 .stackType("dl")
@@ -290,6 +292,17 @@ public class BlueprintLoaderServiceTest {
         Assert.assertTrue(resultSet.stream().findFirst().isPresent());
         Assert.assertEquals(resultSet.stream().findFirst().get().getStatus(), DEFAULT);
         Assert.assertEquals(blueprint.getStatus(), USER_MANAGED);
+    }
+
+    @Test
+    public void testLoadBlueprintsForTheSpecifiedUserWhenDefaultBlueprintsInTheDBHaveNullDefaultBlueprintText() {
+        Set<Blueprint> blueprints = generateBlueprintData(3, BlueprintUpgradeOption.ENABLED);
+        blueprints = blueprints.stream().peek(bp -> bp.setDefaultBlueprintText(null)).collect(Collectors.toSet());
+        setupMock(generateCacheData(3, BlueprintUpgradeOption.ENABLED));
+
+        Set<Blueprint> result = underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave);
+
+        Assert.assertTrue(result.stream().allMatch(bp -> bp.getDefaultBlueprintText() != null));
     }
 
     private Iterable<Blueprint> mockSave(Iterable<Blueprint> blueprints, Workspace workspace) {
