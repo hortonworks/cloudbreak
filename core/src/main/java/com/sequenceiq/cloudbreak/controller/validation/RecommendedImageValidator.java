@@ -60,7 +60,7 @@ public class RecommendedImageValidator {
         Image image = recommendImageService.recommendImage(workspaceId, cloudbreakUser, imageSettings, region, platform, blueprintName, cloudPlatform);
         LOGGER.debug("Recommended image to validate: {}", image);
 
-        Boolean accepted = azureMarketplaceTermsClientService.getAccepted();
+        Boolean accepted = azureMarketplaceTermsClientService.getAccepted(environmentCrn);
         LOGGER.debug("Azure Marketplace automatic terms acceptance policy: {}", accepted);
         Map<String, String> parameters = Map.of(ACCEPTANCE_POLICY_PARAMETER, accepted.toString());
         CloudStack cloudStack = new CloudStack(List.of(), null, image, parameters, Map.of(), null, null, null, null, null, null, null);
