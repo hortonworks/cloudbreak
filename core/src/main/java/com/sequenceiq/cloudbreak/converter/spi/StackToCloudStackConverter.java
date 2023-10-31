@@ -591,14 +591,14 @@ public class StackToCloudStackConverter {
             params.put(RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName);
             params.put(RESOURCE_GROUP_USAGE_PARAMETER, resourceGroupUsage.name());
         }
-        Optional<Boolean> acceptancePolicy = getAzureMarketplaceTermsAcceptancePolicy(CloudPlatform.valueOf(stack.getCloudPlatform()));
+        Optional<Boolean> acceptancePolicy = getAzureMarketplaceTermsAcceptancePolicy(stack.getResourceCrn(), CloudPlatform.valueOf(stack.getCloudPlatform()));
         acceptancePolicy.ifPresent(acceptance -> params.put(ACCEPTANCE_POLICY_PARAMETER, acceptance.toString()));
         params.put(RESOURCE_CRN_PARAMETER, stack.getResourceCrn());
         return params;
     }
 
-    private Optional<Boolean> getAzureMarketplaceTermsAcceptancePolicy(CloudPlatform platform) {
-        return CloudPlatform.AZURE.equals(platform) ? Optional.of(azureMarketplaceTermsClientService.getAccepted()) : Optional.empty();
+    private Optional<Boolean> getAzureMarketplaceTermsAcceptancePolicy(String crn, CloudPlatform platform) {
+        return CloudPlatform.AZURE.equals(platform) ? Optional.of(azureMarketplaceTermsClientService.getAccepted(crn)) : Optional.empty();
     }
 
     private Optional<AzureResourceGroup> getAzureResourceGroup(DetailedEnvironmentResponse environment, CloudPlatform platform) {

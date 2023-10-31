@@ -27,7 +27,7 @@ import com.sequenceiq.environment.api.v1.marketplace.model.AzureMarketplaceTerms
 @ExtendWith(MockitoExtension.class)
 class AzureMarketplaceTermsClientServiceTest {
 
-    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:5678";
+    private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:aa-00-bbb-111-ccc:environment:aa-00-bbb-111-ccc";
 
     private static final String INTERNAL_ACTOR = "crn:altus:iam:us-west-1:altus:user:__internal__actor__";
 
@@ -52,21 +52,21 @@ class AzureMarketplaceTermsClientServiceTest {
     @Test
     void getAccepted() {
         when(azureMarketplaceTermsEndpoint.getInAccount(any())).thenReturn(new AzureMarketplaceTermsResponse(Boolean.TRUE));
-        assertTrue(ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR, () -> underTest.getAccepted()));
+        assertTrue(ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR, () -> underTest.getAccepted(ENVIRONMENT_CRN)));
     }
 
     @Test
     void getAcceptedThrowsException() {
         when(azureMarketplaceTermsEndpoint.getInAccount(any())).thenThrow(new WebApplicationException());
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR, () -> underTest.getAccepted()));
-        assertEquals("Failed to GET Azure Marketplace Terms acceptance setting for account id: altus, due to: 'HTTP 500 Internal Server Error'",
+                () -> ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR, () -> underTest.getAccepted(ENVIRONMENT_CRN)));
+        assertEquals("Failed to GET Azure Marketplace Terms acceptance setting for account id: aa-00-bbb-111-ccc, due to: 'HTTP 500 Internal Server Error'",
                 exception.getMessage());
     }
 
     @Test
     void getAcceptedNotFound() {
         when(azureMarketplaceTermsEndpoint.getInAccount(any())).thenThrow(new NotFoundException());
-        assertFalse(ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR, () -> underTest.getAccepted()));
+        assertFalse(ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR, () -> underTest.getAccepted(ENVIRONMENT_CRN)));
     }
 }
