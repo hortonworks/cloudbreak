@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
-import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.projection.StackUserSyncView;
 
 @Service
 public class UmsVirtualGroupCreateService {
@@ -25,11 +25,11 @@ public class UmsVirtualGroupCreateService {
     @Inject
     private VirtualGroupService virtualGroupService;
 
-    public void createVirtualGroups(String accountId, List<Stack> stacks) {
+    public void createVirtualGroups(String accountId, List<StackUserSyncView> stacks) {
         Set<String> environmentCrns = stacks
                 .stream()
-                .filter(Stack::isAvailable)
-                .map(Stack::getEnvironmentCrn)
+                .filter(StackUserSyncView::isAvailable)
+                .map(StackUserSyncView::environmentCrn)
                 .collect(Collectors.toSet());
 
         LOGGER.info("Sync virtual groups for environments with available stack: {}", environmentCrns);

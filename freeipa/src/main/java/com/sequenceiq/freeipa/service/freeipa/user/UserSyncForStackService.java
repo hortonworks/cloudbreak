@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.projection.StackUserSyncView;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.model.SyncStatusDetail;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
@@ -66,13 +66,13 @@ public class UserSyncForStackService {
     @Inject
     private AuthDistributorService authDistributorService;
 
-    public SyncStatusDetail synchronizeStack(Stack stack, UmsUsersState umsUsersState, UserSyncOptions options, String operationId) {
+    public SyncStatusDetail synchronizeStack(StackUserSyncView stack, UmsUsersState umsUsersState, UserSyncOptions options, String operationId) {
         MDCBuilder.buildMdcContext(stack);
-        String environmentCrn = stack.getEnvironmentCrn();
+        String environmentCrn = stack.environmentCrn();
         Multimap<String, String> warnings = ArrayListMultimap.create();
         logLargeGroupMembershipSizes(environmentCrn, umsUsersState, options);
         try {
-            FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
+            FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStackId(stack.id());
             UsersStateDifference usersStateDifferenceBeforeSync = compareUmsAndFreeIpa(umsUsersState, options, freeIpaClient, warnings::put);
             stateApplier.applyDifference(umsUsersState, environmentCrn, warnings, usersStateDifferenceBeforeSync, options, freeIpaClient);
 
@@ -80,19 +80,19 @@ public class UserSyncForStackService {
 
             if (options.isFullSync()) {
                 // TODO For now we only sync cloud ids during full sync. We should eventually allow more granular syncs (actor level and group level sync).
-                if (entitlementService.cloudIdentityMappingEnabled(stack.getAccountId())) {
+                if (entitlementService.cloudIdentityMappingEnabled(stack.accountId())) {
                     LOGGER.debug("Starting {} ...", SYNC_CLOUD_IDENTITIES);
                     cloudIdentitySyncService.syncCloudIdentities(stack, umsUsersState, warnings::put);
                     LOGGER.debug("Finished {}.", SYNC_CLOUD_IDENTITIES);
                 }
 
-                if (entitlementService.isEnvironmentPrivilegedUserEnabled(stack.getAccountId())) {
+                if (entitlementService.isEnvironmentPrivilegedUserEnabled(stack.accountId())) {
                     LOGGER.debug("Starting {} ...", ADD_SUDO_RULES);
                     try {
                         sudoRuleService.setupSudoRule(stack, freeIpaClient);
                     } catch (Exception e) {
-                        warnings.put(stack.getEnvironmentCrn(), e.getMessage());
-                        LOGGER.error("{} failed for environment '{}'.", ADD_SUDO_RULES, stack.getEnvironmentCrn(), e);
+                        warnings.put(stack.environmentCrn(), e.getMessage());
+                        LOGGER.error("{} failed for environment '{}'.", ADD_SUDO_RULES, stack.environmentCrn(), e);
                     }
                     LOGGER.debug("Finished {}.", ADD_SUDO_RULES);
                 }
@@ -101,7 +101,7 @@ public class UserSyncForStackService {
             SyncStatusDetail syncStatusDetail = toSyncStatusDetail(environmentCrn, warnings);
             LOGGER.debug("Stack sync status: {}, environmentCrn: {}, fullSync: {}", syncStatusDetail.getStatus(), environmentCrn, options.isFullSync());
             if (options.isFullSync() && SynchronizationStatus.COMPLETED.equals(syncStatusDetail.getStatus())) {
-                authDistributorService.updateAuthViewForEnvironment(environmentCrn, umsUsersState, stack.getAccountId(), operationId);
+                authDistributorService.updateAuthViewForEnvironment(environmentCrn, umsUsersState, stack.accountId(), operationId);
             }
             return syncStatusDetail;
         } catch (TimeoutException e) {
@@ -129,12 +129,12 @@ public class UserSyncForStackService {
         }
     }
 
-    public SyncStatusDetail synchronizeStackForDeleteUser(Stack stack, String deletedWorkloadUser) {
+    public SyncStatusDetail synchronizeStackForDeleteUser(StackUserSyncView stack, String deletedWorkloadUser) {
         MDCBuilder.buildMdcContext(stack);
-        String environmentCrn = stack.getEnvironmentCrn();
+        String environmentCrn = stack.environmentCrn();
         Multimap<String, String> warnings = ArrayListMultimap.create();
         try {
-            FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
+            FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStackId(stack.id());
 
             LOGGER.debug("Starting {} for environment {} and deleted user {} ...", USER_SYNC_DELETE, environmentCrn, deletedWorkloadUser);
 
@@ -145,7 +145,7 @@ public class UserSyncForStackService {
 
             if (!ipaUserState.getUsers().isEmpty()) {
                 LOGGER.debug("Starting {} ...", APPLY_DIFFERENCE_TO_IPA);
-                stateApplier.applyUserDeleteToIpa(stack.getEnvironmentCrn(), freeIpaClient, deletedWorkloadUser, warnings::put, false);
+                stateApplier.applyUserDeleteToIpa(stack.environmentCrn(), freeIpaClient, deletedWorkloadUser, warnings::put, false);
                 LOGGER.debug("Finished {}.", APPLY_DIFFERENCE_TO_IPA);
             }
 
@@ -157,15 +157,16 @@ public class UserSyncForStackService {
         }
     }
 
-    private void retrySyncIfBatchCallHasWarnings(Stack stack, UmsUsersState umsUsersState, Multimap<String, String> warnings, UserSyncOptions options,
-            FreeIpaClient freeIpaClient, UsersStateDifference usersStateDifferenceBeforeSync) throws FreeIpaClientException, TimeoutException {
+    private void retrySyncIfBatchCallHasWarnings(StackUserSyncView stack, UmsUsersState umsUsersState, Multimap<String, String> warnings,
+            UserSyncOptions options, FreeIpaClient freeIpaClient, UsersStateDifference usersStateDifferenceBeforeSync)
+            throws FreeIpaClientException, TimeoutException {
         if (options.isFullSync() && !warnings.isEmpty() && options.isFmsToFreeIpaBatchCallEnabled()) {
             UsersStateDifference usersStateDifferenceAfterSync = compareUmsAndFreeIpa(umsUsersState, options, freeIpaClient, warnings::put);
             if (userStateDifferenceCalculator.usersStateDifferenceChanged(usersStateDifferenceBeforeSync, usersStateDifferenceAfterSync)) {
                 Multimap<String, String> retryWarnings = ArrayListMultimap.create();
                 try {
-                    LOGGER.info(String.format("Sync was partially successful for %s, thus we are trying it once again", stack.getResourceCrn()));
-                    stateApplier.applyDifference(umsUsersState, stack.getEnvironmentCrn(), retryWarnings, usersStateDifferenceAfterSync, options, freeIpaClient);
+                    LOGGER.info(String.format("Sync was partially successful for %s, thus we are trying it once again", stack.resourceCrn()));
+                    stateApplier.applyDifference(umsUsersState, stack.environmentCrn(), retryWarnings, usersStateDifferenceAfterSync, options, freeIpaClient);
                     warnings.clear();
                 } finally {
                     warnings.putAll(retryWarnings);

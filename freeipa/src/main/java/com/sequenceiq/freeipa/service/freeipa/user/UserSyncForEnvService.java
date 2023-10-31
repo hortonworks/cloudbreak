@@ -31,8 +31,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.configuration.UsersyncConfig;
-import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
+import com.sequenceiq.freeipa.entity.projection.StackUserSyncView;
 import com.sequenceiq.freeipa.service.freeipa.user.model.SyncStatusDetail;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
@@ -74,10 +74,10 @@ public class UserSyncForEnvService {
     @Inject
     private EntitlementService entitlementService;
 
-    public void synchronizeUsers(String operationId, String accountId, List<Stack> stacks, UserSyncRequestFilter userSyncFilter, UserSyncOptions options,
-            long startTime) {
+    public void synchronizeUsers(String operationId, String accountId, List<StackUserSyncView> stacks, UserSyncRequestFilter userSyncFilter,
+            UserSyncOptions options, long startTime) {
         operationService.tryWithOperationCleanup(operationId, accountId, () -> {
-            Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
+            Set<String> environmentCrns = stacks.stream().map(StackUserSyncView::environmentCrn).collect(Collectors.toSet());
             UserSyncLogEvent logUserSyncEvent = options.isFullSync() ? FULL_USER_SYNC : PARTIAL_USER_SYNC;
             LOGGER.info("Starting {} for environments {} with operationId {} ...", logUserSyncEvent, environmentCrns, operationId);
 
@@ -132,7 +132,7 @@ public class UserSyncForEnvService {
         }
     }
 
-    private Map<String, Future<SyncStatusDetail>> startAsyncSyncsForStacks(String operationId, String accountId, List<Stack> stacks,
+    private Map<String, Future<SyncStatusDetail>> startAsyncSyncsForStacks(String operationId, String accountId, List<StackUserSyncView> stacks,
             UserSyncRequestFilter userSyncFilter, UserSyncOptions options, Set<String> environmentCrns) {
         if (userSyncFilter.getDeletedWorkloadUser().isEmpty()) {
             UserSyncLogEvent logRetrieveUmsEvent = options.isFullSync() ? RETRIEVE_FULL_UMS_STATE : RETRIEVE_PARTIAL_UMS_STATE;
@@ -144,13 +144,13 @@ public class UserSyncForEnvService {
             UmsEventGenerationIds umsEventGenerationIds = options.isFullSync() ?
                     umsEventGenerationIdsProvider.getEventGenerationIds(accountId) : null;
             return stacks.stream()
-                    .collect(Collectors.toMap(Stack::getEnvironmentCrn,
-                            stack -> asyncSynchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()), umsEventGenerationIds, options,
+                    .collect(Collectors.toMap(StackUserSyncView::environmentCrn,
+                            stack -> asyncSynchronizeStack(stack, envToUmsStateMap.get(stack.environmentCrn()), umsEventGenerationIds, options,
                                     operationId, accountId)));
         } else {
             String deletedWorkloadUser = userSyncFilter.getDeletedWorkloadUser().get();
             return stacks.stream()
-                    .collect(Collectors.toMap(Stack::getEnvironmentCrn, stack -> asyncSynchronizeStackForDeleteUser(stack, deletedWorkloadUser)));
+                    .collect(Collectors.toMap(StackUserSyncView::environmentCrn, stack -> asyncSynchronizeStackForDeleteUser(stack, deletedWorkloadUser)));
         }
     }
 
@@ -161,12 +161,12 @@ public class UserSyncForEnvService {
         return failureDetails;
     }
 
-    private Future<SyncStatusDetail> asyncSynchronizeStack(Stack stack, UmsUsersState umsUsersState, UmsEventGenerationIds umsEventGenerationIds,
+    private Future<SyncStatusDetail> asyncSynchronizeStack(StackUserSyncView stack, UmsUsersState umsUsersState, UmsEventGenerationIds umsEventGenerationIds,
             UserSyncOptions options, String operationId, String accountId) {
         return asyncTaskExecutor.submit(() -> {
             SyncStatusDetail statusDetail = userSyncForStackService.synchronizeStack(stack, umsUsersState, options, operationId);
             if (options.isFullSync() && statusDetail.getStatus() == SynchronizationStatus.COMPLETED) {
-                UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
+                UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack.id());
                 userSyncStatus.setUmsEventGenerationIds(new Json(umsEventGenerationIds));
                 userSyncStatus.setLastSuccessfulFullSync(operationService.getOperationForAccountIdAndOperationId(accountId, operationId));
                 userSyncStatusService.save(userSyncStatus);
@@ -175,7 +175,7 @@ public class UserSyncForEnvService {
         });
     }
 
-    private Future<SyncStatusDetail> asyncSynchronizeStackForDeleteUser(Stack stack, String deletedWorkloadUser) {
+    private Future<SyncStatusDetail> asyncSynchronizeStackForDeleteUser(StackUserSyncView stack, String deletedWorkloadUser) {
         return asyncTaskExecutor.submit(() -> userSyncForStackService.synchronizeStackForDeleteUser(stack, deletedWorkloadUser));
     }
 }

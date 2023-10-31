@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.projection.StackUserSyncView;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.SyncStatusDetail;
@@ -52,13 +52,15 @@ class UserSyncForStackServiceTest {
 
     private static final String RESOURCE_CRN = "resourceCrn";
 
-    private static final Stack STACK = mock(Stack.class);
+    private static final StackUserSyncView STACK = mock(StackUserSyncView.class);
 
     private static final FreeIpaClient FREE_IPA_CLIENT = mock(FreeIpaClient.class);
 
     private static final String ERROR_MESSAGE = "error message";
 
     private static final String OPERATION_ID = "operationId";
+
+    private static final long STACK_ID = 1L;
 
     @Mock
     private FreeIpaClientFactory freeIpaClientFactory;
@@ -89,10 +91,11 @@ class UserSyncForStackServiceTest {
 
     @BeforeEach
     public void init() throws FreeIpaClientException {
-        when(freeIpaClientFactory.getFreeIpaClientForStack(STACK)).thenReturn(FREE_IPA_CLIENT);
-        when(STACK.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(STACK.getAccountId()).thenReturn(ACCOUNT);
-        when(STACK.getResourceCrn()).thenReturn(RESOURCE_CRN);
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(FREE_IPA_CLIENT);
+        when(STACK.environmentCrn()).thenReturn(ENV_CRN);
+        when(STACK.accountId()).thenReturn(ACCOUNT);
+        when(STACK.resourceCrn()).thenReturn(RESOURCE_CRN);
+        when(STACK.id()).thenReturn(STACK_ID);
     }
 
     @Test
@@ -268,7 +271,7 @@ class UserSyncForStackServiceTest {
                 .fmsToFreeIpaBatchCallEnabled(false)
                 .workloadCredentialsUpdateType(WorkloadCredentialsUpdateType.FORCE_UPDATE)
                 .build();
-        when(freeIpaClientFactory.getFreeIpaClientForStack(STACK)).thenThrow(new FreeIpaClientException("potty"));
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenThrow(new FreeIpaClientException("potty"));
 
         SyncStatusDetail result = underTest.synchronizeStack(STACK, umsUsersState, options, OPERATION_ID);
 
@@ -309,7 +312,7 @@ class UserSyncForStackServiceTest {
 
     @Test
     public void testSynchronizeStackForDeleteUserFailure() throws FreeIpaClientException {
-        when(freeIpaClientFactory.getFreeIpaClientForStack(STACK)).thenThrow(new FreeIpaClientException("totty"));
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenThrow(new FreeIpaClientException("totty"));
 
         SyncStatusDetail result = underTest.synchronizeStackForDeleteUser(STACK, "deleteMe");
 

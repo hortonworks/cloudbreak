@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.EnvironmentUserSyncState;
@@ -46,48 +45,42 @@ public class EnvironmentUserSyncStateCalculator {
         MDCBuilder.buildMdcContext(stack);
 
         Optional<UserSyncStatus> userSyncStatus = userSyncStatusService.findByStack(stack);
-        return internalCalculateEnvironmentUserSyncState(accountId, envCrnString, userSyncStatus);
+        return internalCalculateEnvironmentUserSyncState(stack, envCrnString, userSyncStatus);
     }
 
-    @VisibleForTesting
-    EnvironmentUserSyncState internalCalculateEnvironmentUserSyncState(String accountId, String envCrnString, Optional<UserSyncStatus> userSyncStatus) {
+    private EnvironmentUserSyncState internalCalculateEnvironmentUserSyncState(Stack stack, String envCrnString, Optional<UserSyncStatus> userSyncStatus) {
         EnvironmentUserSyncState environmentUserSyncState = new EnvironmentUserSyncState();
         if (userSyncStatus.isEmpty() || userSyncStatus.get().getLastStartedFullSync() == null) {
             environmentUserSyncState.setState(UserSyncState.STALE);
         } else {
             environmentUserSyncState.setLastUserSyncOperationId(userSyncStatus.get().getLastStartedFullSync().getOperationId());
-            environmentUserSyncState.setState(calculateUserSyncState(accountId, envCrnString, userSyncStatus.get()));
+            environmentUserSyncState.setState(calculateUserSyncState(stack, envCrnString, userSyncStatus.get()));
         }
         LOGGER.debug("Calculated usr sync state: [{}]", environmentUserSyncState);
         return environmentUserSyncState;
     }
 
-    private UserSyncState calculateUserSyncState(String accountId, String envCrnString, UserSyncStatus userSyncStatus) {
+    private UserSyncState calculateUserSyncState(Stack stack, String envCrnString, UserSyncStatus userSyncStatus) {
         Operation lastSync = userSyncStatus.getLastStartedFullSync();
-        switch (lastSync.getStatus()) {
-            case RUNNING:
-                return UserSyncState.SYNC_IN_PROGRESS;
-            case COMPLETED:
-                return calculateStateForCompletedOperation(accountId, envCrnString, userSyncStatus);
-            case REQUESTED:
-            case REJECTED:
-                // REQUESTED or REJECTED operations will never be saved as part of the UserSyncStatus
-                throw createExceptionForUnexpectedOperationStatus(envCrnString, userSyncStatus);
-            case TIMEDOUT:
+        // REQUESTED or REJECTED operations will never be saved as part of the UserSyncStatus
+        return switch (lastSync.getStatus()) {
+            case RUNNING -> UserSyncState.SYNC_IN_PROGRESS;
+            case COMPLETED -> calculateStateForCompletedOperation(stack, envCrnString, userSyncStatus);
+            case REQUESTED, REJECTED -> throw createExceptionForUnexpectedOperationStatus(envCrnString, userSyncStatus);
+            case TIMEDOUT -> {
                 LOGGER.warn("UserSyncStatus.lastStartedFullSync '{}' is timed out for environment '{}'", lastSync.getOperationId(), envCrnString);
-                return UserSyncState.SYNC_FAILED;
-            case FAILED:
-                return UserSyncState.SYNC_FAILED;
-            default:
-                return UserSyncState.STALE;
-        }
+                yield UserSyncState.SYNC_FAILED;
+            }
+            case FAILED -> UserSyncState.SYNC_FAILED;
+            default -> UserSyncState.STALE;
+        };
     }
 
-    private UserSyncState calculateStateForCompletedOperation(String accountId, String envCrnString, UserSyncStatus userSyncStatus) {
+    private UserSyncState calculateStateForCompletedOperation(Stack stack, String envCrnString, UserSyncStatus userSyncStatus) {
         Operation lastSync = userSyncStatus.getLastStartedFullSync();
         if (environmentUserSyncSucceeded(lastSync, envCrnString)) {
-            UmsEventGenerationIds currentEventGenerationIds = umsEventGenerationIdsProvider.getEventGenerationIds(accountId);
-            if (eventGenerationIdsChecker.isInSync(userSyncStatus, currentEventGenerationIds)) {
+            UmsEventGenerationIds currentEventGenerationIds = umsEventGenerationIdsProvider.getEventGenerationIds(stack.getAccountId());
+            if (eventGenerationIdsChecker.isInSync(userSyncStatus, currentEventGenerationIds, stack)) {
                 return UserSyncState.UP_TO_DATE;
             } else {
                 return UserSyncState.STALE;

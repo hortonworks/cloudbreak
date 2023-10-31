@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
@@ -15,7 +16,11 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 public class UserSyncTestUtils {
     public static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
-    public static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:" + ACCOUNT_ID + ":environment:" + UUID.randomUUID().toString();
+    public static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:" + ACCOUNT_ID + ":environment:" + UUID.randomUUID();
+
+    public static final Crn ENV_CRN = Crn.fromString(ENVIRONMENT_CRN);
+
+    public static final Long STACK_ID = 3L;
 
     private UserSyncTestUtils() {
     }
@@ -27,9 +32,9 @@ public class UserSyncTestUtils {
         return stack;
     }
 
-    public static UserSyncStatus createUserSyncStatus(Stack stack) {
+    public static UserSyncStatus createUserSyncStatus() {
         UserSyncStatus userSyncStatus = new UserSyncStatus();
-        userSyncStatus.setStack(stack);
+        userSyncStatus.setStackId(STACK_ID);
         return userSyncStatus;
     }
 

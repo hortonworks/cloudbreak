@@ -34,12 +34,14 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.monitoring.MonitoringEnablementService;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
+import com.sequenceiq.cloudbreak.util.Benchmark;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.projection.StackUserSyncView;
 import com.sequenceiq.freeipa.repository.StackRepository;
 
 @Service
@@ -143,11 +145,12 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
         return stacks;
     }
 
-    public List<Stack> getMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Collection<String> environmentCrns, String accountId) {
+    public List<StackUserSyncView> getAllUserSyncViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Collection<String> environmentCrns, String accountId) {
         if (environmentCrns.isEmpty()) {
-            return Lists.newArrayList(getAllByAccountId(accountId));
+            return Lists.newArrayList(getAllUserSyncViewByAccountId(accountId));
         } else {
-            return stackRepository.findMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(environmentCrns, accountId);
+            return Benchmark.measure(() -> stackRepository.findAllUserSyncViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(environmentCrns, accountId),
+                    LOGGER, "getAllUserSyncViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId took {} ms for {}", environmentCrns);
         }
     }
 
@@ -182,8 +185,9 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
                 .orElseThrow(() -> new NotFoundException(String.format("FreeIPA stack by environment [%s] not found", environmentCrn)));
     }
 
-    public Set<Stack> getAllByAccountId(String accountId) {
-        return stackRepository.findByAccountId(accountId);
+    public Set<StackUserSyncView> getAllUserSyncViewByAccountId(String accountId) {
+        return Benchmark.measure(() -> stackRepository.findUserSyncViewByAccountId(accountId),
+                LOGGER, "getAllUserSyncViewByAccountId took {} ms for {}", accountId);
     }
 
     public List<ResourceBasicView> findAllResourceBasicViewByAccountId(String accountId) {

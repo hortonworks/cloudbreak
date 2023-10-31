@@ -31,8 +31,8 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.configuration.UsersyncConfig;
 import com.sequenceiq.freeipa.entity.Operation;
-import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
+import com.sequenceiq.freeipa.entity.projection.StackUserSyncView;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -89,7 +89,7 @@ public class UserSyncService {
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter, WorkloadCredentialsUpdateType workloadCredentialsUpdateType) {
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(userCrnFilter, machineUserCrnFilter, Optional.empty());
         checkPartialUserSync(accountId, userSyncFilter);
-        List<Stack> stacks = getStacksForSync(accountId, actorCrn, environmentCrnFilter, userSyncFilter);
+        List<StackUserSyncView> stacks = getStacksForSync(accountId, actorCrn, environmentCrnFilter, userSyncFilter);
         UserSyncOptions options = getUserSyncOptions(accountId, userSyncFilter.isFullSync(), workloadCredentialsUpdateType);
         return performSyncForStacks(accountId, userSyncFilter, options, stacks);
     }
@@ -97,8 +97,8 @@ public class UserSyncService {
     public Operation synchronizeUsersWithCustomPermissionCheck(String accountId, String actorCrn, Set<String> environmentCrnFilter,
             UserSyncRequestFilter userSyncFilter, WorkloadCredentialsUpdateType workloadCredentialsUpdateType, AuthorizationResourceAction action) {
         checkPartialUserSync(accountId, userSyncFilter);
-        List<Stack> stacks = getStacksForSync(accountId, actorCrn, environmentCrnFilter, userSyncFilter);
-        List<String> relatedEnvironmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toList());
+        List<StackUserSyncView> stacks = getStacksForSync(accountId, actorCrn, environmentCrnFilter, userSyncFilter);
+        List<String> relatedEnvironmentCrns = stacks.stream().map(StackUserSyncView::environmentCrn).collect(Collectors.toList());
         customCheckUtil.run(actorCrn, () -> commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, actorCrn, relatedEnvironmentCrns));
         UserSyncOptions options = getUserSyncOptions(accountId, userSyncFilter.isFullSync(), workloadCredentialsUpdateType);
         return performSyncForStacks(accountId, userSyncFilter, options, stacks);
@@ -135,9 +135,9 @@ public class UserSyncService {
     }
 
     private Operation performSyncForStacks(String accountId, UserSyncRequestFilter userSyncFilter, UserSyncOptions options,
-            List<Stack> stacks) {
-        logAffectedStacks(stacks);
-        Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
+            List<StackUserSyncView> stacks) {
+        LOGGER.info("Affected stacks: {}", stacks);
+        Set<String> environmentCrns = stacks.stream().map(StackUserSyncView::environmentCrn).collect(Collectors.toSet());
         Operation operation = operationService.startOperation(accountId, OperationType.USER_SYNC, environmentCrns,
                 union(userSyncFilter.getUserCrnFilter(), userSyncFilter.getMachineUserCrnFilter()));
 
@@ -157,26 +157,17 @@ public class UserSyncService {
         return operation;
     }
 
-    private void updateUserSyncStatusForStack(Operation operation, Stack stack) {
-        UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
+    private void updateUserSyncStatusForStack(Operation operation, StackUserSyncView stack) {
+        UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack.id());
         userSyncStatus.setLastStartedFullSync(operation);
         userSyncStatusService.save(userSyncStatus);
     }
 
-    private void logAffectedStacks(List<Stack> stacks) {
-        String stacksAffected = stacks.stream().map(stack ->
-                        "environment crn: [" + stack.getEnvironmentCrn() + ']'
-                                + " resource crn: [" + stack.getResourceCrn() + ']'
-                                + " resource name: [" + stack.getName() + ']')
-                .collect(Collectors.joining("; "));
-        LOGGER.info("Affected stacks: {}", stacksAffected);
-    }
-
-    private List<Stack> getStacksForSync(String accountId, String actorCrn, Set<String> environmentCrnFilter, UserSyncRequestFilter userSyncRequestFilter) {
+    private List<StackUserSyncView> getStacksForSync(String accountId, String actorCrn, Set<String> environmentCrnFilter,
+            UserSyncRequestFilter userSyncRequestFilter) {
         userSyncRequestValidator.validateParameters(accountId, actorCrn, environmentCrnFilter, userSyncRequestFilter);
         LOGGER.debug("Synchronizing users in account {} for environmentCrns {}, user sync filter {}", accountId, environmentCrnFilter, userSyncRequestFilter);
-
-        List<Stack> stacks = stackService.getMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(environmentCrnFilter, accountId);
+        List<StackUserSyncView> stacks = stackService.getAllUserSyncViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(environmentCrnFilter, accountId);
         if (stacks.isEmpty()) {
             throw new NotFoundException(String.format("No matching FreeIPA stacks found for account %s with environment crn filter %s",
                     accountId, environmentCrnFilter));
@@ -186,7 +177,8 @@ public class UserSyncService {
         }
     }
 
-    private void asyncSynchronizeUsers(String operationId, String accountId, List<Stack> stacks, UserSyncRequestFilter userSyncFilter, UserSyncOptions options) {
+    private void asyncSynchronizeUsers(String operationId, String accountId, List<StackUserSyncView> stacks, UserSyncRequestFilter userSyncFilter,
+            UserSyncOptions options) {
         try {
             MDCBuilder.addOperationId(operationId);
             long startTime = System.currentTimeMillis();

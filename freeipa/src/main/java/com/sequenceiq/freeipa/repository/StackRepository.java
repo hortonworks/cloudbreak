@@ -25,6 +25,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackSta
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.projection.StackUserSyncView;
 
 @Transactional(REQUIRED)
 @EntityType(entityClass = Stack.class)
@@ -85,9 +86,12 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
             @Param("accountId") String accountId,
             @Param("resourceCrn") String resourceCrn);
 
-    @Query("SELECT s FROM Stack s " +
-            "WHERE s.accountId = :accountId AND s.terminated = -1")
-    Set<Stack> findByAccountId(@Param("accountId") String accountId);
+    @Query("SELECT new com.sequenceiq.freeipa.entity.projection.StackUserSyncView(s.id, s.resourceCrn, s.name, s.environmentCrn, s.accountId, s.cloudPlatform, "
+            + "ss.status) "
+            + "FROM Stack s "
+            + "LEFT JOIN StackStatus ss ON s.stackStatus.id = ss.id "
+            + "WHERE s.accountId = :accountId AND s.terminated = -1")
+    Set<StackUserSyncView> findUserSyncViewByAccountId(@Param("accountId") String accountId);
 
     @Query("SELECT s.resourceCrn as resourceCrn, s.id as id, s.name as name, s.environmentCrn as environmentCrn " +
             "FROM Stack s WHERE s.accountId = :accountId AND s.terminated = -1")
@@ -114,9 +118,14 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
             @Param("environmentCrns") Collection<String> environmentCrns,
             @Param("accountId") String accountId);
 
-    @Query("SELECT s FROM Stack s LEFT JOIN ChildEnvironment c ON c.stack.id = s.id WHERE s.accountId = :accountId "
+    @Query("SELECT new com.sequenceiq.freeipa.entity.projection.StackUserSyncView(s.id, s.resourceCrn, s.name, s.environmentCrn, s.accountId, s.cloudPlatform, "
+            + "ss.status) "
+            + "FROM Stack s "
+            + "LEFT JOIN ChildEnvironment c ON c.stack.id = s.id "
+            + "LEFT JOIN StackStatus ss ON s.stackStatus.id = ss.id "
+            + "WHERE s.accountId = :accountId "
             + "AND (s.environmentCrn IN :environmentCrns OR c.environmentCrn IN :environmentCrns) AND s.terminated = -1")
-    List<Stack> findMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(
+    List<StackUserSyncView> findAllUserSyncViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(
             @Param("environmentCrns") Collection<String> environmentCrns,
             @Param("accountId") String accountId);
 

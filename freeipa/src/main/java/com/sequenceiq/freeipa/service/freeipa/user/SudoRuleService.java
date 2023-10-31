@@ -27,7 +27,7 @@ import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.SudoCommand;
 import com.sequenceiq.freeipa.client.model.SudoRule;
-import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.projection.StackUserSyncView;
 
 @Service
 public class SudoRuleService {
@@ -59,9 +59,9 @@ public class SudoRuleService {
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public void setupSudoRule(Stack stack, FreeIpaClient freeIpaClient) throws Exception {
+    public void setupSudoRule(StackUserSyncView stack, FreeIpaClient freeIpaClient) throws Exception {
         if (stack.isAvailable()) {
-            String group = getSudoGroupName(stack.getEnvironmentCrn());
+            String group = getSudoGroupName(stack.environmentCrn());
             if (!Strings.isNullOrEmpty(group)) {
                 validateGroupExistsOnFreeIpa(group, freeIpaClient);
 
@@ -83,7 +83,7 @@ public class SudoRuleService {
                         ALLOW_PRIVILEGED_OS_OPERATIONS.getRight());
             }
         } else {
-            LOGGER.warn("Setup sudo rule can not be performed as stack '{}' is not in available state.", stack.getResourceCrn());
+            LOGGER.warn("Setup sudo rule can not be performed as stack '{}' is not in available state.", stack.resourceCrn());
         }
     }
 

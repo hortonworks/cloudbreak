@@ -27,7 +27,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Cloud
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ServicePrincipalCloudIdentities;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.polling.PollingService;
-import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.projection.StackUserSyncView;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.polling.usersync.CloudIdSyncPollerObject;
@@ -43,7 +43,7 @@ class CloudIdentitySyncServiceTest {
     private SdxEndpoint sdxEndpoint;
 
     @Mock
-    private Stack stack;
+    private StackUserSyncView stack;
 
     @Mock
     private PollingService<CloudIdSyncPollerObject> cloudIdSyncPollingService;
@@ -70,8 +70,8 @@ class CloudIdentitySyncServiceTest {
     }
 
     private void testSyncAzureIdentitiesWithStatus(RangerCloudIdentitySyncStatus status) {
-        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AZURE.toString());
-        when(stack.getEnvironmentCrn()).thenReturn("envcrn");
+        when(stack.cloudPlatform()).thenReturn(CloudPlatform.AZURE.toString());
+        when(stack.environmentCrn()).thenReturn("envcrn");
         when(sdxEndpoint.setRangerCloudIdentityMapping(eq("envcrn"), any())).thenReturn(status);
         UmsUsersState.Builder umsUsersStateBuilder = UmsUsersState.newBuilder()
                 .addUserCloudIdentities("user1", List.of(newAzureObjectId("user-oid-1")))
@@ -127,7 +127,7 @@ class CloudIdentitySyncServiceTest {
     @Test
     void testSyncAwsIdentities() {
         // aws cloud identites is unsupported, should no-op
-        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.toString());
+        when(stack.cloudPlatform()).thenReturn(CloudPlatform.AWS.toString());
         cloudIdentitySyncService.syncCloudIdentities(stack, mock(UmsUsersState.class), mock(BiConsumer.class));
         verify(sdxEndpoint, never()).setRangerCloudIdentityMapping(any(), any());
     }

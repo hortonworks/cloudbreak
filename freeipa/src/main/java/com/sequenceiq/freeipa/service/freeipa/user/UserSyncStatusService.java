@@ -22,19 +22,19 @@ public class UserSyncStatusService {
         return userSyncStatusRepository.save(userSyncStatus);
     }
 
-    public UserSyncStatus getOrCreateForStack(Stack stack) {
-        return userSyncStatusRepository.getByStack(stack).orElseGet(() -> createNewUserSyncStatusForStack(stack));
+    public UserSyncStatus getOrCreateForStack(Long stackId) {
+        return userSyncStatusRepository.findByStackId(stackId).orElseGet(() -> createNewUserSyncStatusForStack(stackId));
     }
 
-    private UserSyncStatus createNewUserSyncStatusForStack(Stack stack) {
+    private UserSyncStatus createNewUserSyncStatusForStack(Long stackId) {
         UserSyncStatus userSyncStatus = new UserSyncStatus();
-        userSyncStatus.setStack(stack);
+        userSyncStatus.setStackId(stackId);
         userSyncStatus.setUmsEventGenerationIds(new Json(new UmsEventGenerationIds()));
         return userSyncStatusRepository.save(userSyncStatus);
     }
 
     public Optional<UserSyncStatus> findByStack(Stack stack) {
-        return userSyncStatusRepository.getByStack(stack);
+        return userSyncStatusRepository.findByStackId(stack.getId());
     }
 
 }

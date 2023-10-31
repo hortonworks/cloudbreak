@@ -14,7 +14,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
 public class EventGenerationIdsChecker {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventGenerationIdsChecker.class);
 
-    public boolean isInSync(UserSyncStatus userSyncStatus, UmsEventGenerationIds currentGeneration) {
+    public boolean isInSync(UserSyncStatus userSyncStatus, UmsEventGenerationIds currentGeneration, Stack stack) {
         boolean inSync = userSyncStatus != null &&
                 userSyncStatus.getUmsEventGenerationIds() != null;
         if (inSync) {
@@ -23,28 +23,11 @@ public class EventGenerationIdsChecker {
                 inSync = currentGeneration.equals(lastUmsEventGenerationIds);
             } catch (IOException e) {
                 LOGGER.warn("Failed to retrieve UmsEventGenerationIds for Environment {} in Account {}. Assuming not in sync",
-                        getEnvironmentCrn(userSyncStatus), getAccountId(userSyncStatus));
+                        stack.getEnvironmentCrn(), stack.getAccountId());
                 inSync = false;
             }
         }
-        LOGGER.debug("Environment {} in Account {} {} in sync", getEnvironmentCrn(userSyncStatus), getAccountId(userSyncStatus), inSync ? "is" : "is not");
+        LOGGER.debug("Environment {} in Account {} {} in sync", stack.getEnvironmentCrn(), stack.getAccountId(), inSync ? "is" : "is not");
         return inSync;
     }
-
-    private String getEnvironmentCrn(UserSyncStatus userSyncStatus) {
-        Stack stack = userSyncStatus != null ? userSyncStatus.getStack() : null;
-        if (stack != null) {
-            return stack.getEnvironmentCrn();
-        }
-        return null;
-    }
-
-    private String getAccountId(UserSyncStatus userSyncStatus) {
-        Stack stack = userSyncStatus != null ? userSyncStatus.getStack() : null;
-        if (stack != null) {
-            return stack.getAccountId();
-        }
-        return null;
-    }
-
 }

@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.freeipa.configuration.CloudIdSyncConfig;
-import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.projection.StackUserSyncView;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
 import com.sequenceiq.freeipa.service.polling.usersync.CloudIdSyncPollerObject;
 import com.sequenceiq.freeipa.service.polling.usersync.CloudIdSyncStatusListenerTask;
@@ -48,16 +48,16 @@ public class CloudIdentitySyncService {
     @Inject
     private CloudIdSyncStatusListenerTask cloudIdSyncStatusListenerTask;
 
-    public void syncCloudIdentities(Stack stack, UmsUsersState umsUsersState, BiConsumer<String, String> warnings) {
+    public void syncCloudIdentities(StackUserSyncView stack, UmsUsersState umsUsersState, BiConsumer<String, String> warnings) {
         LOGGER.info("Syncing cloud identities for stack = {}", stack);
-        if (CloudPlatform.AZURE.equalsIgnoreCase(stack.getCloudPlatform())) {
+        if (CloudPlatform.AZURE.equalsIgnoreCase(stack.cloudPlatform())) {
             LOGGER.info("Syncing Azure Object IDs for stack = {}", stack);
             syncAzureObjectIds(stack, umsUsersState, warnings);
         }
     }
 
-    private void syncAzureObjectIds(Stack stack, UmsUsersState umsUsersState, BiConsumer<String, String> warnings) {
-        String envCrn = stack.getEnvironmentCrn();
+    private void syncAzureObjectIds(StackUserSyncView stack, UmsUsersState umsUsersState, BiConsumer<String, String> warnings) {
+        String envCrn = stack.environmentCrn();
         LOGGER.info("Syncing Azure Object IDs for environment {}", envCrn);
 
         try {

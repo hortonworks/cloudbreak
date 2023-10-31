@@ -47,8 +47,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.configuration.UsersyncConfig;
-import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
+import com.sequenceiq.freeipa.entity.projection.StackUserSyncView;
 import com.sequenceiq.freeipa.service.freeipa.user.model.SyncStatusDetail;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
@@ -100,10 +100,12 @@ class UserSyncForEnvServiceTest {
 
     @Test
     public void testSyncUsers() {
-        Stack stack1 = mock(Stack.class);
-        when(stack1.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        Stack stack2 = mock(Stack.class);
-        when(stack2.getEnvironmentCrn()).thenReturn(ENV_CRN_2);
+        StackUserSyncView stack1 = mock(StackUserSyncView.class);
+        when(stack1.environmentCrn()).thenReturn(ENV_CRN);
+        when(stack1.id()).thenReturn(1L);
+        StackUserSyncView stack2 = mock(StackUserSyncView.class);
+        when(stack2.environmentCrn()).thenReturn(ENV_CRN_2);
+        when(stack2.id()).thenReturn(2L);
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.empty());
         UserSyncOptions options = createUserSyncOptions();
         doAnswer(inv -> {
@@ -126,8 +128,8 @@ class UserSyncForEnvServiceTest {
                 .thenReturn(new SyncStatusDetail(ENV_CRN, SynchronizationStatus.COMPLETED, "", ImmutableMultimap.of()));
         when(userSyncForStackService.synchronizeStack(stack2, umsUsersState2, options, OPERATION_ID))
                 .thenReturn(new SyncStatusDetail(ENV_CRN_2, SynchronizationStatus.COMPLETED, "", ImmutableMultimap.of()));
-        when(userSyncStatusService.getOrCreateForStack(stack1)).thenReturn(new UserSyncStatus());
-        when(userSyncStatusService.getOrCreateForStack(stack2)).thenReturn(new UserSyncStatus());
+        when(userSyncStatusService.getOrCreateForStack(1L)).thenReturn(new UserSyncStatus());
+        when(userSyncStatusService.getOrCreateForStack(2L)).thenReturn(new UserSyncStatus());
 
         underTest.synchronizeUsers(OPERATION_ID, ACCOUNT_ID, List.of(stack1, stack2), userSyncFilter, options, System.currentTimeMillis());
 
@@ -143,10 +145,10 @@ class UserSyncForEnvServiceTest {
 
     @Test
     public void testSyncUsersFailures() {
-        Stack stack1 = mock(Stack.class);
-        when(stack1.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        Stack stack2 = mock(Stack.class);
-        when(stack2.getEnvironmentCrn()).thenReturn(ENV_CRN_2);
+        StackUserSyncView stack1 = mock(StackUserSyncView.class);
+        when(stack1.environmentCrn()).thenReturn(ENV_CRN);
+        StackUserSyncView stack2 = mock(StackUserSyncView.class);
+        when(stack2.environmentCrn()).thenReturn(ENV_CRN_2);
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.empty());
         UserSyncOptions options = createUserSyncOptions();
         doAnswer(inv -> {
@@ -194,8 +196,8 @@ class UserSyncForEnvServiceTest {
 
     @Test
     public void testSyncUsersInterrupted() {
-        Stack stack1 = mock(Stack.class);
-        when(stack1.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        StackUserSyncView stack1 = mock(StackUserSyncView.class);
+        when(stack1.environmentCrn()).thenReturn(ENV_CRN);
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.empty());
         UserSyncOptions options = createUserSyncOptions();
         doAnswer(inv -> {
@@ -232,8 +234,8 @@ class UserSyncForEnvServiceTest {
     @Test
     public void testSyncUsersTimesOut() {
         ReflectionTestUtils.setField(underTest, "operationTimeout", 0L);
-        Stack stack1 = mock(Stack.class);
-        when(stack1.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        StackUserSyncView stack1 = mock(StackUserSyncView.class);
+        when(stack1.environmentCrn()).thenReturn(ENV_CRN);
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.empty());
         UserSyncOptions options = createUserSyncOptions();
         doAnswer(inv -> {
@@ -272,8 +274,9 @@ class UserSyncForEnvServiceTest {
     @Test
     public void testSyncUsersDoesntTimeout() {
         ReflectionTestUtils.setField(underTest, "operationTimeout", 0L);
-        Stack stack1 = mock(Stack.class);
-        when(stack1.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        StackUserSyncView stack1 = mock(StackUserSyncView.class);
+        when(stack1.environmentCrn()).thenReturn(ENV_CRN);
+        when(stack1.id()).thenReturn(1L);
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.empty());
         UserSyncOptions options = createUserSyncOptions();
         doAnswer(inv -> {
@@ -292,7 +295,7 @@ class UserSyncForEnvServiceTest {
             return future;
         });
         when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID))).thenReturn(new UmsEventGenerationIds());
-        when(userSyncStatusService.getOrCreateForStack(stack1)).thenReturn(new UserSyncStatus());
+        when(userSyncStatusService.getOrCreateForStack(1L)).thenReturn(new UserSyncStatus());
         when(entitlementService.isUserSyncThreadTimeoutEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
 
         underTest.synchronizeUsers(OPERATION_ID, ACCOUNT_ID, List.of(stack1), userSyncFilter, options, System.currentTimeMillis());
@@ -308,10 +311,10 @@ class UserSyncForEnvServiceTest {
 
     @Test
     public void testSyncUserDelete() {
-        Stack stack1 = mock(Stack.class);
-        when(stack1.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        Stack stack2 = mock(Stack.class);
-        when(stack2.getEnvironmentCrn()).thenReturn(ENV_CRN_2);
+        StackUserSyncView stack1 = mock(StackUserSyncView.class);
+        when(stack1.environmentCrn()).thenReturn(ENV_CRN);
+        StackUserSyncView stack2 = mock(StackUserSyncView.class);
+        when(stack2.environmentCrn()).thenReturn(ENV_CRN_2);
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.of("deleteMe"));
         UserSyncOptions options = createUserSyncOptions();
         doAnswer(inv -> {

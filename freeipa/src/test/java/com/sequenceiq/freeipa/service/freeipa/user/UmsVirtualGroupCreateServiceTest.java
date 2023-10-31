@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
-import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.projection.StackUserSyncView;
 
 @ExtendWith(MockitoExtension.class)
 public class UmsVirtualGroupCreateServiceTest {
@@ -28,24 +28,24 @@ public class UmsVirtualGroupCreateServiceTest {
     private VirtualGroupService virtualGroupService;
 
     @Mock
-    private Stack stack1;
+    private StackUserSyncView stack1;
 
     @Mock
-    private Stack stack2;
+    private StackUserSyncView stack2;
 
     @Mock
-    private Stack unavailableStack;
+    private StackUserSyncView unavailableStack;
 
-    private List<Stack> stacks;
+    private List<StackUserSyncView> stacks;
 
     @InjectMocks
-    private UmsVirtualGroupCreateService victim;
+    private UmsVirtualGroupCreateService underTest;
 
     @BeforeEach
     public void initTests() {
-        when(stack1.getEnvironmentCrn()).thenReturn(ENV_CRN1);
+        when(stack1.environmentCrn()).thenReturn(ENV_CRN1);
         when(stack1.isAvailable()).thenReturn(true);
-        when(stack2.getEnvironmentCrn()).thenReturn(ENV_CRN2);
+        when(stack2.environmentCrn()).thenReturn(ENV_CRN2);
         when(stack2.isAvailable()).thenReturn(true);
         when(unavailableStack.isAvailable()).thenReturn(false);
 
@@ -55,7 +55,7 @@ public class UmsVirtualGroupCreateServiceTest {
 
     @Test
     public void testCreateVirtualGroupsForEachStacks() {
-        victim.createVirtualGroups(ACCOUNT_ID, stacks);
+        underTest.createVirtualGroups(ACCOUNT_ID, stacks);
 
         verify(virtualGroupService).createVirtualGroups(ACCOUNT_ID, ENV_CRN1);
         verify(virtualGroupService).createVirtualGroups(ACCOUNT_ID, ENV_CRN2);
@@ -65,7 +65,7 @@ public class UmsVirtualGroupCreateServiceTest {
     public void testFailSafeVirtualGroupCreation() {
         when(virtualGroupService.createVirtualGroups(ACCOUNT_ID, ENV_CRN1)).thenThrow(RuntimeException.class);
 
-        victim.createVirtualGroups(ACCOUNT_ID, stacks);
+        underTest.createVirtualGroups(ACCOUNT_ID, stacks);
 
         verify(virtualGroupService).createVirtualGroups(ACCOUNT_ID, ENV_CRN2);
     }

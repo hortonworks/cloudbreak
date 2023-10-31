@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.configuration.UsersyncConfig;
+import com.sequenceiq.freeipa.converter.stack.StackToStackUserSyncViewConverter;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 
@@ -34,11 +35,14 @@ public class PreUserSyncService extends AbstractUserSyncTaskRunner {
     @Inject
     private OperationService operationService;
 
+    @Inject
+    private StackToStackUserSyncViewConverter stackUserSyncViewConverter;
+
     protected void asyncRunTask(String operationId, String accountId, Stack stack) {
         LOGGER.debug("Scheduling pre usersync task with [{}] operation id", operationId);
         Future<?> task = usersyncExternalTaskExecutor.submit(() -> {
             LOGGER.info("Starting pre usersync task with [{}] operation id", operationId);
-            umsVirtualGroupCreateService.createVirtualGroups(accountId, List.of(stack));
+            umsVirtualGroupCreateService.createVirtualGroups(accountId, List.of(stackUserSyncViewConverter.convert(stack)));
             operationService.completeOperation(accountId, operationId, List.of(new SuccessDetails(stack.getEnvironmentCrn())), List.of());
         });
         timeoutTaskScheduler.scheduleTimeoutTask(operationId, accountId, task, getOperationTimeout());

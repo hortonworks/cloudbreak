@@ -17,20 +17,20 @@ class EventGenerationIdsCheckerTest {
     void testIsNotInSync() {
         Stack stack = UserSyncTestUtils.createStack();
         UmsEventGenerationIds currentEventGenerationIds = UserSyncTestUtils.createUniqueUmsEventGenerationIds();
-        UserSyncStatus userSyncStatus = UserSyncTestUtils.createUserSyncStatus(stack);
+        UserSyncStatus userSyncStatus = UserSyncTestUtils.createUserSyncStatus();
         userSyncStatus.setUmsEventGenerationIds(new Json(UserSyncTestUtils.createUniqueUmsEventGenerationIds()));
 
-        assertFalse(underTest.isInSync(userSyncStatus, currentEventGenerationIds));
+        assertFalse(underTest.isInSync(userSyncStatus, currentEventGenerationIds, stack));
     }
 
     @Test
     void testIsInSync() {
         Stack stack = UserSyncTestUtils.createStack();
         UmsEventGenerationIds currentEventGenerationIds = UserSyncTestUtils.createUniqueUmsEventGenerationIds();
-        UserSyncStatus userSyncStatus = UserSyncTestUtils.createUserSyncStatus(stack);
+        UserSyncStatus userSyncStatus = UserSyncTestUtils.createUserSyncStatus();
         userSyncStatus.setUmsEventGenerationIds(new Json(currentEventGenerationIds));
 
-        assertTrue(underTest.isInSync(userSyncStatus, currentEventGenerationIds));
+        assertTrue(underTest.isInSync(userSyncStatus, currentEventGenerationIds, stack));
     }
 
     @Test
@@ -39,9 +39,9 @@ class EventGenerationIdsCheckerTest {
         stack.setAccountId(null);
         stack.setEnvironmentCrn(null);
         UmsEventGenerationIds currentEventGenerationIds = UserSyncTestUtils.createUniqueUmsEventGenerationIds();
-        UserSyncStatus userSyncStatus = UserSyncTestUtils.createUserSyncStatus(stack);
+        UserSyncStatus userSyncStatus = UserSyncTestUtils.createUserSyncStatus();
         userSyncStatus.setUmsEventGenerationIds(new Json(UserSyncTestUtils.createUniqueUmsEventGenerationIds()));
 
-        assertFalse(underTest.isInSync(userSyncStatus, currentEventGenerationIds));
+        assertFalse(underTest.isInSync(userSyncStatus, currentEventGenerationIds, stack));
     }
 }

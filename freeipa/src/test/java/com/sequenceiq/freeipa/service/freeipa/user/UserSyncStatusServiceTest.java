@@ -15,12 +15,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.repository.UserSyncStatusRepository;
 
 @ExtendWith(MockitoExtension.class)
 class UserSyncStatusServiceTest {
+
+    private static final Long STACK_ID = 3L;
 
     @Mock
     private UserSyncStatusRepository userSyncStatusRepository;
@@ -30,28 +31,26 @@ class UserSyncStatusServiceTest {
 
     @Test
     public void testGetOrCreateForStackExists() {
-        Stack stack = new Stack();
         UserSyncStatus userSyncStatus = new UserSyncStatus();
-        when(userSyncStatusRepository.getByStack(stack)).thenReturn(Optional.of(userSyncStatus));
+        when(userSyncStatusRepository.findByStackId(STACK_ID)).thenReturn(Optional.of(userSyncStatus));
 
-        UserSyncStatus result = underTest.getOrCreateForStack(stack);
+        UserSyncStatus result = underTest.getOrCreateForStack(STACK_ID);
 
         assertEquals(userSyncStatus, result);
     }
 
     @Test
     public void testGetOrCreateForStackDontExists() {
-        Stack stack = new Stack();
-        when(userSyncStatusRepository.getByStack(stack)).thenReturn(Optional.empty());
+        when(userSyncStatusRepository.findByStackId(STACK_ID)).thenReturn(Optional.empty());
         when(userSyncStatusRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0, UserSyncStatus.class));
 
-        UserSyncStatus result = underTest.getOrCreateForStack(stack);
+        UserSyncStatus result = underTest.getOrCreateForStack(STACK_ID);
 
         ArgumentCaptor<UserSyncStatus> captor = ArgumentCaptor.forClass(UserSyncStatus.class);
         verify(userSyncStatusRepository).save(captor.capture());
         UserSyncStatus saved = captor.getValue();
         assertEquals(saved, result);
-        assertEquals(stack, saved.getStack());
+        assertEquals(STACK_ID, saved.getStackId());
         assertNotNull(saved.getUmsEventGenerationIds());
     }
 

@@ -43,8 +43,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdat
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.entity.Operation;
-import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
+import com.sequenceiq.freeipa.entity.projection.StackUserSyncView;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -65,6 +65,8 @@ public class UserSyncServiceTest {
     private static final String INTERNAL_ACTOR = "crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__";
 
     private static final Long TIMEOUT = 6L;
+
+    private static final long STACK_ID = 2L;
 
     @Mock
     private StackService stackService;
@@ -107,9 +109,10 @@ public class UserSyncServiceTest {
 
     @Test
     public void testSyncUsers() {
-        Stack stack = mock(Stack.class);
-        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
+        StackUserSyncView stack = mock(StackUserSyncView.class);
+        when(stack.environmentCrn()).thenReturn(ENV_CRN);
+        when(stack.id()).thenReturn(STACK_ID);
+        when(stackService.getAllUserSyncViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
         Operation operation = createRunningOperation();
         when(operationService.startOperation(anyString(), any(OperationType.class), anyCollection(), anyCollection()))
                 .thenReturn(operation);
@@ -122,7 +125,7 @@ public class UserSyncServiceTest {
                 .thenReturn(INTERNAL_ACTOR);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         UserSyncStatus userSyncStatus = new UserSyncStatus();
-        when(userSyncStatusService.getOrCreateForStack(stack)).thenReturn(userSyncStatus);
+        when(userSyncStatusService.getOrCreateForStack(STACK_ID)).thenReturn(userSyncStatus);
         when(entitlementService.usersyncCredentialsUpdateOptimizationEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         when(entitlementService.isFmsToFreeipaBatchCallEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         doAnswer(inv -> {
@@ -156,11 +159,11 @@ public class UserSyncServiceTest {
 
     @Test
     public void testSyncUsersWithFilterAndMultipleStack() {
-        Stack stack = mock(Stack.class);
-        Stack stack2 = mock(Stack.class);
-        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(stack2.getEnvironmentCrn()).thenReturn(ENV_CRN_2);
-        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Set.of(ENV_CRN, ENV_CRN_2), ACCOUNT_ID))
+        StackUserSyncView stack = mock(StackUserSyncView.class);
+        StackUserSyncView stack2 = mock(StackUserSyncView.class);
+        when(stack.environmentCrn()).thenReturn(ENV_CRN);
+        when(stack2.environmentCrn()).thenReturn(ENV_CRN_2);
+        when(stackService.getAllUserSyncViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Set.of(ENV_CRN, ENV_CRN_2), ACCOUNT_ID))
                 .thenReturn(List.of(stack, stack2));
         Operation operation = createRunningOperation();
         when(operationService.startOperation(anyString(), any(OperationType.class), anyCollection(), anyCollection()))
@@ -207,9 +210,10 @@ public class UserSyncServiceTest {
 
     @Test
     public void testSyncUsersWithCustomPermissionCheck() {
-        Stack stack = mock(Stack.class);
-        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
+        StackUserSyncView stack = mock(StackUserSyncView.class);
+        when(stack.environmentCrn()).thenReturn(ENV_CRN);
+        when(stack.id()).thenReturn(STACK_ID);
+        when(stackService.getAllUserSyncViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
         Operation operation = createRunningOperation();
         when(operationService.startOperation(anyString(), any(OperationType.class), anyCollection(), anyCollection()))
                 .thenReturn(operation);
@@ -222,7 +226,7 @@ public class UserSyncServiceTest {
                 .thenReturn(INTERNAL_ACTOR);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         UserSyncStatus userSyncStatus = new UserSyncStatus();
-        when(userSyncStatusService.getOrCreateForStack(stack)).thenReturn(userSyncStatus);
+        when(userSyncStatusService.getOrCreateForStack(STACK_ID)).thenReturn(userSyncStatus);
         when(entitlementService.usersyncCredentialsUpdateOptimizationEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         when(entitlementService.isFmsToFreeipaBatchCallEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         doAnswer(inv -> {
@@ -263,9 +267,10 @@ public class UserSyncServiceTest {
 
     @Test
     public void testSyncUsersWithTimeoutCheckTaskFinished() {
-        Stack stack = mock(Stack.class);
-        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
+        StackUserSyncView stack = mock(StackUserSyncView.class);
+        when(stack.environmentCrn()).thenReturn(ENV_CRN);
+        when(stack.id()).thenReturn(STACK_ID);
+        when(stackService.getAllUserSyncViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
         Operation operation = createRunningOperation();
         when(operationService.startOperation(anyString(), any(OperationType.class), anyCollection(), anyCollection()))
                 .thenReturn(operation);
@@ -278,7 +283,7 @@ public class UserSyncServiceTest {
                 .thenReturn(INTERNAL_ACTOR);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         UserSyncStatus userSyncStatus = new UserSyncStatus();
-        when(userSyncStatusService.getOrCreateForStack(stack)).thenReturn(userSyncStatus);
+        when(userSyncStatusService.getOrCreateForStack(STACK_ID)).thenReturn(userSyncStatus);
         when(entitlementService.usersyncCredentialsUpdateOptimizationEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         when(entitlementService.isFmsToFreeipaBatchCallEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         Future<?> usersyncTask = mock(Future.class);
@@ -313,9 +318,10 @@ public class UserSyncServiceTest {
 
     @Test
     public void testSyncUsersWithTimeoutCheckTaskRunnable() {
-        Stack stack = mock(Stack.class);
-        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
+        StackUserSyncView stack = mock(StackUserSyncView.class);
+        when(stack.environmentCrn()).thenReturn(ENV_CRN);
+        when(stack.id()).thenReturn(STACK_ID);
+        when(stackService.getAllUserSyncViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
         Operation operation = createRunningOperation();
         when(operationService.startOperation(anyString(), any(OperationType.class), anyCollection(), anyCollection()))
                 .thenReturn(operation);
@@ -328,7 +334,7 @@ public class UserSyncServiceTest {
                 .thenReturn(INTERNAL_ACTOR);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         UserSyncStatus userSyncStatus = new UserSyncStatus();
-        when(userSyncStatusService.getOrCreateForStack(stack)).thenReturn(userSyncStatus);
+        when(userSyncStatusService.getOrCreateForStack(STACK_ID)).thenReturn(userSyncStatus);
         when(entitlementService.usersyncCredentialsUpdateOptimizationEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         when(entitlementService.isFmsToFreeipaBatchCallEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         when(entitlementService.isUserSyncThreadTimeoutEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);

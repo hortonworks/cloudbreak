@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.configuration.UsersyncConfig;
+import com.sequenceiq.freeipa.converter.stack.StackToStackUserSyncViewConverter;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.operation.OperationService;
@@ -45,13 +46,16 @@ public class PostUserSyncService extends AbstractUserSyncTaskRunner {
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
 
+    @Inject
+    private StackToStackUserSyncViewConverter syncViewConverter;
+
     protected void asyncRunTask(String operationId, String accountId, Stack stack) {
         Future<?> task = usersyncExternalTaskExecutor.submit(() -> {
             if (entitlementService.isEnvironmentPrivilegedUserEnabled(stack.getAccountId())) {
                 LOGGER.debug("Starting {} ...", ADD_SUDO_RULES);
                 try {
                     FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-                    sudoRuleService.setupSudoRule(stack, freeIpaClient);
+                    sudoRuleService.setupSudoRule(syncViewConverter.convert(stack), freeIpaClient);
                     operationService.completeOperation(accountId, operationId, List.of(new SuccessDetails(stack.getEnvironmentCrn())), List.of());
                 } catch (Exception e) {
                     LOGGER.error("{} failed for environment '{}'.", ADD_SUDO_RULES, stack.getEnvironmentCrn(), e);

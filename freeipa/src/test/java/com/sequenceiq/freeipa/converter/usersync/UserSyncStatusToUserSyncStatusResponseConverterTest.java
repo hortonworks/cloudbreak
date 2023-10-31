@@ -14,11 +14,12 @@ import org.junit.jupiter.api.Test;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.usersync.UserSyncStatusResponse;
 import com.sequenceiq.freeipa.entity.Operation;
-import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
 
 class UserSyncStatusToUserSyncStatusResponseConverterTest {
+
+    private static final String ENVIRONMENT_CRN = "ENV_CRN";
 
     private UserSyncStatusToUserSyncStatusResponseConverter underTest = new UserSyncStatusToUserSyncStatusResponseConverter();
 
@@ -29,10 +30,10 @@ class UserSyncStatusToUserSyncStatusResponseConverterTest {
         when(eventGenerationIds.get(any(Class.class))).thenThrow(e);
 
         UserSyncStatus status = new UserSyncStatus();
-        status.setStack(mock(Stack.class));
+        status.setStackId(3L);
         status.setUmsEventGenerationIds(eventGenerationIds);
 
-        UserSyncStatusResponse response = underTest.convert(status);
+        UserSyncStatusResponse response = underTest.convert(status, ENVIRONMENT_CRN);
 
         assertThat(response)
                 .returns(null, UserSyncStatusResponse::getLastStartedUserSyncId)
@@ -62,7 +63,7 @@ class UserSyncStatusToUserSyncStatusResponseConverterTest {
         status.setLastSuccessfulFullSync(successful);
         status.setUmsEventGenerationIds(new Json(eventGenerationIds));
 
-        UserSyncStatusResponse response = underTest.convert(status);
+        UserSyncStatusResponse response = underTest.convert(status, ENVIRONMENT_CRN);
 
         assertThat(response)
                 .returns(requestedId, UserSyncStatusResponse::getLastStartedUserSyncId)

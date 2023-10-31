@@ -9,20 +9,19 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
-import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 
 @Entity
-public class UserSyncStatus implements AccountIdAwareResource {
+public class UserSyncStatus {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "usersyncstatus_generator")
     @SequenceGenerator(name = "usersyncstatus_generator", sequenceName = "usersyncstatus_id_seq", allocationSize = 1)
     private Long id;
 
-    @OneToOne
-    private Stack stack;
+    @Column(name = "stack_id", unique = true, nullable = false)
+    private Long stackId;
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
@@ -37,8 +36,8 @@ public class UserSyncStatus implements AccountIdAwareResource {
     public UserSyncStatus() {
     }
 
-    public UserSyncStatus(Stack stack) {
-        this.stack = stack;
+    public UserSyncStatus(Long stackId) {
+        this.stackId = stackId;
     }
 
     public Long getId() {
@@ -49,12 +48,12 @@ public class UserSyncStatus implements AccountIdAwareResource {
         this.id = id;
     }
 
-    public Stack getStack() {
-        return stack;
+    public Long getStackId() {
+        return stackId;
     }
 
-    public void setStack(Stack stack) {
-        this.stack = stack;
+    public void setStackId(Long stackId) {
+        this.stackId = stackId;
     }
 
     public Json getUmsEventGenerationIds() {
@@ -79,10 +78,5 @@ public class UserSyncStatus implements AccountIdAwareResource {
 
     public void setLastSuccessfulFullSync(Operation lastSuccessfulFullSync) {
         this.lastSuccessfulFullSync = lastSuccessfulFullSync;
-    }
-
-    @Override
-    public String getAccountId() {
-        return stack.getAccountId();
     }
 }
