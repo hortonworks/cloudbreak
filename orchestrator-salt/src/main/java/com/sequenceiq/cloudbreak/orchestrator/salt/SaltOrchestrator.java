@@ -1838,4 +1838,29 @@ public class SaltOrchestrator implements HostOrchestrator {
             })
             .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
+
+    @Override
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public Map<String, Map<String, String>> unmountBlockStorageDisks(List<GatewayConfig> allGateway,
+            Set<Node> nodesWithDiskData, Set<Node> allNodes, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
+        Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGateway);
+        Set<String> hostnames = nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toSet());
+        Target<String> allHosts = new HostList(hostnames);
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            saltCommandRunner.runModifyGrainCommand(sc,
+                    new GrainAddRunner(saltStateService, hostnames, allNodes, "unmount_block_storages"), exitModel, exitCriteria);
+            StateAllRunner stateAllRunner = new StateAllRunner(saltStateService, gatewayTargetIpAddresses, allNodes, "disks.unmount-block-storages");
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateAllRunner);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel);
+            saltJobRunBootstrapRunner.call();
+            Map<String, Map<String, String>> fsTabInfo = getFstabInformation(sc, allHosts, nodesWithDiskData);
+            saltCommandRunner.runModifyGrainCommand(sc,
+                    new GrainRemoveRunner(saltStateService, hostnames, allNodes, "unmount_block_storages"), exitModel, exitCriteria);
+            return fsTabInfo;
+        } catch (Exception e) {
+            LOGGER.warn("Error occurred during the salt bootstrap of unmount_block_storages. Exception is : {}", e.getMessage());
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
 }

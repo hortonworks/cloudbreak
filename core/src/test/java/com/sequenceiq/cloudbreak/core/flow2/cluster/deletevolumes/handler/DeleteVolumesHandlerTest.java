@@ -3,11 +3,13 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.handler;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_FINISHED_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.List;
@@ -29,7 +31,6 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesService;
-import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
@@ -53,9 +54,6 @@ public class DeleteVolumesHandlerTest {
 
     @Mock
     private StackUtil stackUtil;
-
-    @Mock
-    private CloudbreakFlowMessageService flowMessageService;
 
     @Mock
     private EventBus eventBus;
@@ -84,6 +82,7 @@ public class DeleteVolumesHandlerTest {
     @Test
     public void testDeleteVolumesFinishedAction() throws Exception {
         doReturn(1L).when(stackDeleteVolumesRequest).getStackId();
+        doReturn("TEST").when(stackDeleteVolumesRequest).getGroup();
         CloudResource resource = mock(CloudResource.class);
         DeleteVolumesHandlerRequest deleteRequest = new DeleteVolumesHandlerRequest(List.of(resource), stackDeleteVolumesRequest, "MOCK", Set.of());
         Event event = new Event<>(deleteRequest);
@@ -100,12 +99,14 @@ public class DeleteVolumesHandlerTest {
         doReturn(cloudCredential).when(stackUtil).getCloudCredential(anyString());
         underTest.accept(event);
         verify(eventBus).notify(selectorCaptor.capture(), any());
+        verify(deleteVolumesService).updateScriptsAndRebootInstances(eq(1L), eq("TEST"));
         assertEquals(DELETE_VOLUMES_FINISHED_EVENT.event(), selectorCaptor.getValue());
     }
 
     @Test
     public void testDeleteVolumesFinishedFailureAction() throws Exception {
         doReturn(1L).when(stackDeleteVolumesRequest).getStackId();
+        doReturn("TEST").when(stackDeleteVolumesRequest).getGroup();
         CloudResource resource = mock(CloudResource.class);
         DeleteVolumesHandlerRequest deleteRequest = new DeleteVolumesHandlerRequest(List.of(resource), stackDeleteVolumesRequest, "MOCK", Set.of());
         Event event = new Event<>(deleteRequest);
@@ -123,6 +124,8 @@ public class DeleteVolumesHandlerTest {
         doThrow(new CloudbreakException("TEST")).when(deleteVolumesService).detachResources(any(), any(), any());
         underTest.accept(event);
         verify(eventBus).notify(selectorCaptor.capture(), any());
+        verify(deleteVolumesService, times(0)).updateScriptsAndRebootInstances(anyLong(), anyString());
+        verify(deleteVolumesService, times(0)).deleteResources(any(), any(), any());
         assertEquals("DELETEVOLUMESFAILEDEVENT_ERROR", selectorCaptor.getValue());
     }
 }

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.handler;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -13,17 +12,14 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.request.AddVolumesCMConfigFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.request.AddVolumesCMConfigHandlerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.request.AddVolumesFailedEvent;
-import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.ConfigUpdateUtilService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
-import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
@@ -63,12 +59,6 @@ public class AddVolumesCMConfigHandler extends EventSenderAwareHandler<AddVolume
         LOGGER.debug("Starting to update CM config after orchestration on group {}", payload.getInstanceGroup());
         try {
             StackDto stack = stackDtoService.getById(stackId);
-            Optional<InstanceGroupView> instanceGroupViewOptional = stack.getInstanceGroupViews().stream().filter(group -> group.getGroupName()
-                    .equals(requestGroup)).findFirst();
-            InstanceGroupView instanceGroupView = instanceGroupViewOptional.orElseThrow();
-            int instanceStorageCount = getInstanceStorageCount(instanceGroupView);
-            TemporaryStorage temporaryStorage = getTemporaryStorage(instanceGroupView);
-            int attachedVolumesCount = getAttachedVolumesCount(instanceGroupView);
             LOGGER.debug("Updating CM config!");
             String blueprintText = stack.getBlueprint().getBlueprintJsonText();
             CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
@@ -76,8 +66,8 @@ public class AddVolumesCMConfigHandler extends EventSenderAwareHandler<AddVolume
             List<String> hostTemplateRoleGroupNames = processor.getHostTemplateRoleNames(requestGroup);
             Set<String> hostTemplateComponents = processor.getComponentsInHostGroup(requestGroup);
             if (checkConfigChangeRequired(hostTemplateComponents)) {
-                configUpdateUtilService.updateCMConfigsForComputeAndStartServices(stack, hostTemplateServiceComponents, instanceStorageCount,
-                        attachedVolumesCount, hostTemplateRoleGroupNames, temporaryStorage);
+                configUpdateUtilService.updateCMConfigsForComputeAndStartServices(stack, hostTemplateServiceComponents,
+                        hostTemplateRoleGroupNames, requestGroup);
             }
             eventSender().sendEvent(new AddVolumesCMConfigFinishedEvent(stackId, requestGroup, payload.getNumberOfDisks(), payload.getType(),
                     payload.getSize(), payload.getCloudVolumeUsageType()), addVolumesCMConfigHandlerEvent.getHeaders());
@@ -85,18 +75,6 @@ public class AddVolumesCMConfigHandler extends EventSenderAwareHandler<AddVolume
             LOGGER.error("Failed to add disks", e);
             eventSender().sendEvent(new AddVolumesFailedEvent(stackId, null, null, e), addVolumesCMConfigHandlerEvent.getHeaders());
         }
-    }
-
-    private int getInstanceStorageCount(InstanceGroupView instanceGroupView) {
-        return instanceGroupView.getTemplate().getInstanceStorageCount();
-    }
-
-    private TemporaryStorage getTemporaryStorage(InstanceGroupView instanceGroupView) {
-        return instanceGroupView.getTemplate().getTemporaryStorage();
-    }
-
-    private int getAttachedVolumesCount(InstanceGroupView instanceGroupView) {
-        return instanceGroupView.getTemplate().getVolumeTemplates().stream().map(VolumeTemplate::getVolumeCount).reduce(0, Integer::sum);
     }
 
     private boolean checkConfigChangeRequired(Set<String> hostTemplateComponents) {

@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -22,13 +21,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolum
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesValidationRequest;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -46,9 +43,6 @@ public class DeleteVolumesValidationHandlerTest {
 
     @Mock
     private ResourceToCloudResourceConverter cloudResourceConverter;
-
-    @Mock
-    private DeleteVolumesService deleteVolumesService;
 
     @Mock
     private EventBus eventBus;
@@ -81,6 +75,7 @@ public class DeleteVolumesValidationHandlerTest {
     public void testDeleteVolumesValidationFailureAction() throws Exception {
         String selector = DELETE_VOLUMES_VALIDATION_HANDLER_EVENT.event();
         DeleteVolumesValidationRequest triggerEvent = new DeleteVolumesValidationRequest(selector, 1L, stackDeleteVolumesRequest);
+        doReturn("gateway").when(stackDeleteVolumesRequest).getGroup();
         Event event = new Event<>(triggerEvent);
         StackDto stackDto = mock(StackDto.class);
         doReturn(stackDto).when(stackDtoService).getById(eq(1L));
@@ -90,7 +85,6 @@ public class DeleteVolumesValidationHandlerTest {
         doReturn(blueprintText).when(bp).getBlueprintJsonText();
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(blueprintText);
         doReturn(cmTemplateProcessor).when(cmTemplateProcessorFactory).get(eq(blueprintText));
-        doThrow(new CloudbreakException("TEST")).when(deleteVolumesService).stopClouderaManagerService(any(), any());
         underTest.accept(event);
         verify(eventBus).notify(selectorCaptor.capture(), any());
         assertEquals("DELETEVOLUMESFAILEDEVENT_ERROR", selectorCaptor.getValue());

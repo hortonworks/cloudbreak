@@ -119,7 +119,7 @@ public class AwsCommonDiskUpdateServiceTest {
         doReturn(List.of(volume)).when(volumeSetAttributes).getVolumes();
         doReturn("vol-test-1").when(volume).getId();
         software.amazon.awssdk.services.ec2.model.Volume volumeResponse = software.amazon.awssdk.services.ec2.model.Volume.builder()
-                .state(VolumeState.IN_USE).build();
+                .volumeId("vol-test-1").state(VolumeState.IN_USE).build();
         DescribeVolumesResponse response = DescribeVolumesResponse.builder().volumes(List.of(volumeResponse)).build();
         doReturn(response).when(amazonEc2Client).describeVolumes(any());
         doThrow(AwsServiceException.builder().message("TEST").build()).when(amazonEc2Client).detachVolume(any());

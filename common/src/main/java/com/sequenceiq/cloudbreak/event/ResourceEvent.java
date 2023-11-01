@@ -651,10 +651,13 @@ public enum ResourceEvent {
 
     // deprecated
     STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.skipped"),
-    CLUSTER_DELETINGVOLUMES("cluster.changing.deletevolumes"),
-    CLUSTER_DELETEDVOLUMES("cluster.changed.deletevolumes"),
-    CLUSTER_DELETEVOLUMES_FAILED("cluster.change.deletevolumes.failed"),
-    VOLUMES_DELETE_FAILED("cluster.change.deletevolumes.delete.failed");
+    CLUSTER_DELETE_VOLUMES_VALIDATION_START("cluster.changing.deletevolumes.validation.start"),
+    CLUSTER_DELETE_VOLUMES_START("cluster.changing.deletevolumes"),
+    CLUSTER_DELETE_VOLUMES_UNMOUNT_START("cluster.changing.deletevolumes.unmount.start"),
+    CLUSTER_DELETE_VOLUMES_FINISHED("cluster.changed.deletevolumes"),
+    CLUSTER_DELETE_VOLUMES_CM_CONFIG_START("cluster.changing.deletevolumes.cmconfig.start"),
+    CLUSTER_DELETE_VOLUMES_FAILED("cluster.change.deletevolumes.failed"),
+    DELETE_VOLUMES_FAILED("cluster.change.deletevolumes.delete.failed");
 
     private final String message;
 

@@ -366,7 +366,7 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public void updateClusterConfigs(@Nonnull StackDto stackDto) {
+    public void updateClusterConfigs(@Nonnull StackDto stackDto, boolean distributeSalt) {
         try {
             Set<Node> allNodes = stackUtil.collectNodes(stackDto, emptySet());
             Set<Node> reachableNodes = stackUtil.collectReachableNodesByInstanceStates(stackDto);
@@ -374,11 +374,23 @@ public class ClusterHostServiceRunner {
             List<GrainProperties> grainsProperties = grainPropertiesService.createGrainProperties(gatewayConfigs, stackDto, reachableNodes);
             SaltConfig saltConfig = createSaltConfig(stackDto, grainsProperties);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stackDto.getStack().getId(), stackDto.getCluster().getId());
+            if (distributeSalt) {
+                LOGGER.debug("Adding GRAIN.ADD operation to update the salt properties on the mount-instance-storage - adding startup_mount role");
+                modifyStartupMountRole(stackDto, reachableNodes, GrainOperation.ADD);
+            }
             hostOrchestrator.initSaltConfig(stackDto, gatewayConfigs, allNodes, saltConfig, exitCriteriaModel);
             hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
+            if (distributeSalt) {
+                LOGGER.debug("Removing GRAIN.ADD operation after execution - removing startup_mount role");
+                modifyStartupMountRole(stackDto, reachableNodes, GrainOperation.REMOVE);
+            }
         } catch (CloudbreakOrchestratorException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
+    }
+
+    public void updateClusterConfigs(@Nonnull StackDto stackDto) throws CloudbreakServiceException {
+        updateClusterConfigs(stackDto, false);
     }
 
     public NodeReachabilityResult addClusterServices(StackDto stackDto, Map<String, Integer> hostGroupWithAdjustment, boolean repair) {

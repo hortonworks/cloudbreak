@@ -58,8 +58,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.common.orchestration.NodeVolumes;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
@@ -173,9 +175,13 @@ class SaltOrchestratorTest {
         gatewayConfig = new GatewayConfig("172.16.252.43", "1.1.1.1", "10.0.0.1", "10-0-0-1", 9443, "instanceid", "servercert", "clientcert", "clientkey",
                 "saltpasswd", "saltbootpassword", "signkey", false, true, "privatekey", "publickey", null, null);
         targets = new HashSet<>();
-        targets.add(new Node("10.0.0.1", "1.1.1.1", "instanceid1", "hg", "10-0-0-1.example.com", "hg"));
-        targets.add(new Node("10.0.0.2", "1.1.1.2", "instanceid2", "hg", "10-0-0-2.example.com", "hg"));
-        targets.add(new Node("10.0.0.3", "1.1.1.3", "instanceid3", "hg", "10-0-0-3.example.com", "hg"));
+        NodeVolumes nodeVolumes = mock(NodeVolumes.class);
+        targets.add(new Node("10.0.0.1", "1.1.1.1", "instanceid1", "hg", "10-0-0-1.example.com", "hg",
+                nodeVolumes, TemporaryStorage.EPHEMERAL_VOLUMES));
+        targets.add(new Node("10.0.0.2", "1.1.1.2", "instanceid2", "hg", "10-0-0-2.example.com", "hg",
+                nodeVolumes, TemporaryStorage.EPHEMERAL_VOLUMES));
+        targets.add(new Node("10.0.0.3", "1.1.1.3", "instanceid3", "hg", "10-0-0-3.example.com", "hg",
+                nodeVolumes, TemporaryStorage.EPHEMERAL_VOLUMES));
 
         lenient().when(hostDiscoveryService.determineDomain("test", "test", false)).thenReturn(".example.com");
         lenient().when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(callable);
@@ -1011,6 +1017,26 @@ class SaltOrchestratorTest {
         when(callable.call()).thenThrow(new CloudbreakOrchestratorFailedException("TEST SALT RUNNER EXCEPTION"));
         CloudbreakOrchestratorFailedException ex = assertThrows(CloudbreakOrchestratorFailedException.class, () ->
                 saltOrchestrator.resizeDisksOnNodes(Collections.singletonList(gatewayConfig), targets, targets, exitCriteriaModel));
+
+        assertEquals("TEST SALT RUNNER EXCEPTION", ex.getMessage());
+    }
+
+    @Test
+    void testDeleteStorageVolumesAndMountDisksOnNodes() throws Exception {
+        when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class)))
+                .thenReturn(callable);
+        saltOrchestrator.unmountBlockStorageDisks(Collections.singletonList(gatewayConfig), targets, targets, exitCriteriaModel);
+        verify(callable, times(1)).call();
+        verify(saltCommandRunner, times(2)).runModifyGrainCommand(any(), any(), any(), any());
+    }
+
+    @Test
+    void testDeleteStorageVolumesAndMountDisksOnNodesShouldThrowException() throws Exception {
+        when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class)))
+                .thenReturn(callable);
+        when(callable.call()).thenThrow(new CloudbreakOrchestratorFailedException("TEST SALT RUNNER EXCEPTION"));
+        CloudbreakOrchestratorFailedException ex = assertThrows(CloudbreakOrchestratorFailedException.class, () ->
+                saltOrchestrator.unmountBlockStorageDisks(Collections.singletonList(gatewayConfig), targets, targets, exitCriteriaModel));
 
         assertEquals("TEST SALT RUNNER EXCEPTION", ex.getMessage());
     }

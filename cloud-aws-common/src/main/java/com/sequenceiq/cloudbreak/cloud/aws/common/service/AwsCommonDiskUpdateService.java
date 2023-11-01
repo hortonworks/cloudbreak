@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.service;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +30,7 @@ import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
 import software.amazon.awssdk.services.ec2.model.DetachVolumeRequest;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 import software.amazon.awssdk.services.ec2.model.ModifyVolumeRequest;
+import software.amazon.awssdk.services.ec2.model.Volume;
 import software.amazon.awssdk.services.ec2.model.VolumeModification;
 import software.amazon.awssdk.services.ec2.model.VolumeModificationState;
 import software.amazon.awssdk.services.ec2.model.VolumeState;
@@ -96,9 +98,11 @@ public class AwsCommonDiskUpdateService {
                         VolumeSetAttributes.class).getVolumes()));
         AmazonEc2Client amazonEC2Client = getEc2Client(authenticatedContext);
         List<String> volumeIdsToPoll = new ArrayList<>();
+        Map<String, VolumeState> volumeStatesMap = getVolumeStates(instanceVolumeIdsMap.values().stream().flatMap(Collection::stream)
+                .map(VolumeSetAttributes.Volume::getId).toList(), amazonEC2Client);
         for (Map.Entry<String, List<VolumeSetAttributes.Volume>> entry: instanceVolumeIdsMap.entrySet()) {
             entry.getValue().forEach(volume -> {
-                if (VolumeState.IN_USE.equals(getVolumeStates(List.of(volume.getId()), amazonEC2Client).get(0))) {
+                if (VolumeState.IN_USE.equals(volumeStatesMap.get(volume.getId()))) {
                     LOGGER.debug("Starting to detach volume - {}", volume.getId());
                     volumeIdsToPoll.add(volume.getId());
                     DetachVolumeRequest detachVolumeRequest = DetachVolumeRequest.builder().instanceId(entry.getKey()).volumeId(volume.getId())
@@ -124,21 +128,24 @@ public class AwsCommonDiskUpdateService {
         }
     }
 
-    protected List<VolumeState> getVolumeStates(List<String> volumeIds, AmazonEc2Client amazonEC2Client) {
-        DescribeVolumesRequest describeVolumesRequest = DescribeVolumesRequest.builder().volumeIds(volumeIds).build();
-        DescribeVolumesResponse volumesResponse = amazonEC2Client.describeVolumes(describeVolumesRequest);
-        if (volumesResponse.hasVolumes()) {
-            return volumesResponse.volumes().stream().map(software.amazon.awssdk.services.ec2.model.Volume::state).collect(Collectors.toList());
+    protected Map<String, VolumeState> getVolumeStates(List<String> volumeIds, AmazonEc2Client amazonEC2Client) {
+        if (!volumeIds.isEmpty()) {
+            DescribeVolumesRequest describeVolumesRequest = DescribeVolumesRequest.builder().volumeIds(volumeIds).build();
+            DescribeVolumesResponse volumesResponse = amazonEC2Client.describeVolumes(describeVolumesRequest);
+            if (volumesResponse.hasVolumes()) {
+                return volumesResponse.volumes().stream().collect(Collectors.toMap(Volume::volumeId, Volume::state));
+            }
         }
-        return List.of(VolumeState.UNKNOWN_TO_SDK_VERSION);
+        return Map.of("", VolumeState.UNKNOWN_TO_SDK_VERSION);
     }
 
     protected void pollVolumeStates(AmazonEc2Client amazonEC2Client, List<String> volumeIdsToPoll) {
         LOGGER.debug("Polling volume states - {}", volumeIdsToPoll);
-        Polling.waitPeriodly(SLEEP_INTERVAL_DELETE, TimeUnit.SECONDS).stopIfException(true).stopAfterAttempt(MAX_READ_COUNT_DELETE)
+        if (!volumeIdsToPoll.isEmpty()) {
+            Polling.waitPeriodly(SLEEP_INTERVAL_DELETE, TimeUnit.SECONDS).stopIfException(true).stopAfterAttempt(MAX_READ_COUNT_DELETE)
                 .run(() -> {
                     LOGGER.debug("Getting volume states - {}", volumeIdsToPoll);
-                    boolean volumeStateIsNotAvailable = getVolumeStates(volumeIdsToPoll, amazonEC2Client).stream()
+                    boolean volumeStateIsNotAvailable = getVolumeStates(volumeIdsToPoll, amazonEC2Client).values().stream()
                             .anyMatch(state -> !state.equals(VolumeState.AVAILABLE));
                     LOGGER.debug("Result of checking all volumes available - {}", volumeStateIsNotAvailable);
                     if (volumeStateIsNotAvailable) {
@@ -146,5 +153,6 @@ public class AwsCommonDiskUpdateService {
                     }
                     return AttemptResults.justFinish();
                 });
+        }
     }
 }

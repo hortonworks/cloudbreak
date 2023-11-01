@@ -15,6 +15,10 @@ public enum DeleteVolumesEvent implements FlowEvent {
     DELETE_VOLUMES_EVENT(EventSelectorUtil.selector(DeleteVolumesRequest.class)),
     DELETE_VOLUMES_HANDLER_EVENT(EventSelectorUtil.selector(DeleteVolumesHandlerRequest.class)),
     DELETE_VOLUMES_FINISHED_EVENT(EventSelectorUtil.selector(DeleteVolumesFinishedEvent.class)),
+    DELETE_VOLUMES_UNMOUNT_HANDLER_EVENT(EventSelectorUtil.selector(DeleteVolumesUnmountEvent.class)),
+    DELETE_VOLUMES_UNMOUNT_FINISHED_EVENT(EventSelectorUtil.selector(DeleteVolumesUnmountFinishedEvent.class)),
+    DELETE_VOLUMES_CM_CONFIG_HANDLER_EVENT(EventSelectorUtil.selector(DeleteVolumesCMConfigEvent.class)),
+    DELETE_VOLUMES_CM_CONFIG_FINISHED_EVENT(EventSelectorUtil.selector(DeleteVolumesCMConfigFinishedEvent.class)),
     FINALIZED_EVENT(EventSelectorUtil.selector(DeleteVolumesFinalizedEvent.class)),
     FAIL_HANDLED_EVENT(CloudPlatformResult.failureSelector(DeleteVolumesFailedEvent.class));
     private final String event;

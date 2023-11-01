@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -x
+
+source /opt/salt/scripts/format-and-mount-common.sh
+
+LOG_FILE=/var/log/unmount-block-storages.log
+VERSION="V1.0"
+
+# OUTPUT
+#   happy path:
+#       exit code: 0
+#
+#   error:
+#       exit code: not 0
+#       stderr: a one line info. Details are in the log
+unmount_all_block_disks() {
+    local mount_paths_arr=$(get_all_mount_paths_from_fstab)
+    log $LOG_FILE "mount points returned from fstab: ${mount_paths_arr}"
+    log $LOG_FILE "unmounting all attached volume mounted in fstab"
+    for mp in ${mount_paths_arr}; do
+        if [[ $mp == *"hadoopfs/fs"* ]]; then
+          log $LOG_FILE "unmounting device from mountpoint: ${mp}"
+          umount "${mp}" >> $LOG_FILE 2>&1
+          log $LOG_FILE "removing from fstab ${mp}"
+          local num="${mp#/hadoopfs/fs*}"
+          log $LOG_FILE "mountpath: ${mp} num evaluated to: ${num}"
+          sed -i -E "/hadoopfs\/fs${num}/d" /etc/fstab >> $LOG_FILE 2>&1
+          log $LOG_FILE "removed from fstab: ${mp}"
+        fi
+    done
+    log $LOG_FILE "finished unmounting all attached block storage volumes in fstab"
+}
+
+main() {
+    log $LOG_FILE "started, version: $VERSION"
+    local script_name="unmount-block-storages"
+
+    unmount_all_block_disks
+
+    exit_with_code $LOG_FILE 0 "Script $script_name ended"
+}
+
+[[ "$0" == "$BASH_SOURCE" ]] && main "$@"

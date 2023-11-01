@@ -382,5 +382,21 @@
   {
     "path": "/var/log/postgresql_rotate*.log",
     "label": "rotation_db_secrets"
+  },
+  {
+    "path": "/var/log/mount-disks-after-modify-volumes.log",
+    "label": "mount_disks_after_modify_volumes"
+  },
+  {
+    "path": "/var/log/mount-disks-after-modify-volumes-allout.log",
+    "label": "mount_disks_after_modify_volumes_allout"
+  },
+  {
+    "path": "/var/log/unmount-block-storages.log",
+    "label": "unmount_block_storages"
+  },
+  {
+    "path": "/var/log/unmount-block-storages-allout.log",
+    "label": "unmount_block_storages_allout"
   }
 ]

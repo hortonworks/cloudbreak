@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.service;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -17,9 +19,11 @@ import org.springframework.util.CollectionUtils;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
@@ -41,10 +45,6 @@ public class ConfigUpdateUtilService {
 
     private static final String IMPALA_DATACACHE_DIR = "datacache_dirs";
 
-    private static final String MOUNT_PATH_PREFIX_EPHFS = "/hadoopfs/ephfs";
-
-    private static final String MOUNT_PATH_PREFIX_FS = "/hadoopfs/fs";
-
     private static final String YARN = "YARN";
 
     private static final String IMPALA = "IMPALA";
@@ -52,16 +52,30 @@ public class ConfigUpdateUtilService {
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
 
+    @Inject
+    private ResourceAttributeUtil resourceAttributeUtil;
+
     public void updateCMConfigsForComputeAndStartServices(StackDto stackDto, Set<ServiceComponent> hostTemplateServiceComponents,
-            int instanceStorageCount, int attachedVolumesCount, List<String> roleGroupNames, TemporaryStorage temporaryStorage)
-            throws CloudbreakServiceException {
+            List<String> roleGroupNames, String requestGroup) throws CloudbreakServiceException {
         ClusterApi clusterApi = clusterApiConnectors.getConnector(stackDto);
         for (ServiceComponent serviceComponent : hostTemplateServiceComponents) {
             try {
                 LOGGER.debug("Updating CM service config for service {}, in stack {} for roles {}", serviceComponent.getService(),
                         stackDto.getId(), roleGroupNames);
-                Map<String, String> configMap = getConfigsForService(instanceStorageCount, attachedVolumesCount,
-                        serviceComponent.getService(), temporaryStorage);
+                Optional<Resource> optionalResource = stackDto.getResources().stream().filter(resource -> null != resource.getInstanceGroup()
+                        && resource.getInstanceGroup().equals(requestGroup) && resource.getResourceType().toString()
+                        .contains("VOLUMESET")).findFirst();
+                Map<String, String> configMap = new HashMap<>();
+                if (optionalResource.isPresent()) {
+                    Resource resource = optionalResource.get();
+                    LOGGER.info("Updating config for resources: {}", resource);
+                    VolumeSetAttributes volumeSetAttributes = resourceAttributeUtil.getTypedAttributes(resource, VolumeSetAttributes.class)
+                            .orElseThrow(() -> new CloudbreakServiceException("Unable to find fstab information on resource"));
+                    String fstab = volumeSetAttributes.getFstab();
+                    List<String> mountPoints = Arrays.stream(StringUtils.substringsBetween(fstab, "/hadoopfs/", " "))
+                            .map(str -> "/hadoopfs/" + str).toList();
+                    configMap = getConfigsForService(serviceComponent.getService(), mountPoints);
+                }
                 if (!CollectionUtils.isEmpty(configMap)) {
                     clusterApi.clusterModificationService().updateServiceConfig(serviceComponent.getService(), configMap, roleGroupNames);
                 }
@@ -69,8 +83,8 @@ public class ConfigUpdateUtilService {
                 clusterApi.clusterModificationService().startClouderaManagerService(serviceComponent.getService());
                 pollClouderaManagerServices(clusterApi, serviceComponent.getService(), "STARTED");
             } catch (Exception e) {
-                LOGGER.error("Unable to start CM services for service {}, in stack {}", serviceComponent.getService(), stackDto.getId());
-                throw new CloudbreakServiceException(String.format("Unable to start CM services for " +
+                LOGGER.error("Unable to update and start CM services for service {}, in stack {}", serviceComponent.getService(), stackDto.getId());
+                throw new CloudbreakServiceException(String.format("Unable to update and start CM services for " +
                         "service %s, in stack %s: %s", serviceComponent.getService(), stackDto.getId(), e.getMessage()));
             }
         }
@@ -92,19 +106,15 @@ public class ConfigUpdateUtilService {
         }
     }
 
-    private Map<String, String> getConfigsForService(int instanceStorageCount, int attachedVolumesCount, String service,
-            TemporaryStorage temporaryStorage) {
+    private Map<String, String> getConfigsForService(String service, List<String> mountPoints) {
         LOGGER.debug("Building configs to be updated for service {} in CM", service);
         Map<String, String> config = new HashMap<>();
         StringBuilder localMountPaths = new StringBuilder();
         StringBuilder logMountPaths = new StringBuilder();
-        int mountPathIndex = 1;
-        String mountPathPrefix = temporaryStorage.equals(TemporaryStorage.EPHEMERAL_VOLUMES) ? MOUNT_PATH_PREFIX_EPHFS : MOUNT_PATH_PREFIX_FS;
-        int volumeCounter = instanceStorageCount == 0 ? attachedVolumesCount : instanceStorageCount;
-        while (volumeCounter > 0) {
-            setLocalAndLogMountPaths(localMountPaths, logMountPaths, service, mountPathPrefix, volumeCounter, mountPathIndex);
-            mountPathIndex++;
-            volumeCounter--;
+        int counter = mountPoints.size();
+        for (String mp : mountPoints) {
+            setLocalAndLogMountPaths(localMountPaths, logMountPaths, service, mp, counter);
+            counter--;
         }
         if (YARN.equalsIgnoreCase(service) && StringUtils.isNotEmpty(localMountPaths.toString())) {
             config.put(YARN_LOCAL_DIR, localMountPaths.toString());
@@ -117,16 +127,15 @@ public class ConfigUpdateUtilService {
         return config;
     }
 
-    private void setLocalAndLogMountPaths(StringBuilder localMountPaths, StringBuilder logMountPaths, String service, String mountPathPrefix,
-            int volumeCounter, int mountPathIndex) {
+    private void setLocalAndLogMountPaths(StringBuilder localMountPaths, StringBuilder logMountPaths, String service, String mountPoint, int counter) {
         if (YARN.equalsIgnoreCase(service)) {
-            localMountPaths.append(mountPathPrefix).append(mountPathIndex).append("/nodemanager");
-            logMountPaths.append(mountPathPrefix).append(mountPathIndex).append("/nodemanager/log");
+            localMountPaths.append(mountPoint).append("/nodemanager");
+            logMountPaths.append(mountPoint).append("/nodemanager/log");
         } else if (IMPALA.equalsIgnoreCase(service)) {
-            localMountPaths.append(mountPathPrefix).append(mountPathIndex).append("/impala/scratch");
-            logMountPaths.append(mountPathPrefix).append(mountPathIndex).append("/impala/datacache");
+            localMountPaths.append(mountPoint).append("/impala/scratch");
+            logMountPaths.append(mountPoint).append("/impala/datacache");
         }
-        if (volumeCounter - 1 > 0) {
+        if (counter - 1 > 0) {
             localMountPaths.append(',');
             logMountPaths.append(',');
         }

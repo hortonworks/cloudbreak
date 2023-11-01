@@ -4,14 +4,18 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.DELETE_EBS_VOLUMES_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.DELETE_EBS_VOLUMES_STARTED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_CM_CONFIG_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_UNMOUNT_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesState.DELETE_VOLUMES_CM_CONFIG_FINISHED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesState.DELETE_VOLUMES_CM_CONFIG_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesState.DELETE_VOLUMES_FAILED_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesState.DELETE_VOLUMES_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesState.DELETE_VOLUMES_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesState.DELETE_VOLUMES_UNMOUNT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesState.DELETE_VOLUMES_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesState.INIT_STATE;
@@ -38,16 +42,26 @@ public class DeleteVolumesFlowConfig  extends StackStatusFinalizerAbstractFlowCo
                     .failureEvent(FAIL_HANDLED_EVENT)
 
                     .from(DELETE_VOLUMES_VALIDATION_STATE)
-                    .to(DELETE_VOLUMES_STATE)
+                    .to(DELETE_VOLUMES_UNMOUNT_STATE)
                     .event(DELETE_VOLUMES_EVENT)
                     .failureEvent(FAIL_HANDLED_EVENT)
 
+                    .from(DELETE_VOLUMES_UNMOUNT_STATE)
+                    .to(DELETE_VOLUMES_STATE)
+                    .event(DELETE_VOLUMES_UNMOUNT_FINISHED_EVENT)
+                    .failureEvent(FAIL_HANDLED_EVENT)
+
                     .from(DELETE_VOLUMES_STATE)
-                    .to(DELETE_VOLUMES_FINISHED_STATE)
+                    .to(DELETE_VOLUMES_CM_CONFIG_STATE)
                     .event(DELETE_VOLUMES_FINISHED_EVENT)
                     .failureEvent(FAIL_HANDLED_EVENT)
 
-                    .from(DELETE_VOLUMES_FINISHED_STATE)
+                    .from(DELETE_VOLUMES_CM_CONFIG_STATE)
+                    .to(DELETE_VOLUMES_CM_CONFIG_FINISHED_STATE)
+                    .event(DELETE_VOLUMES_CM_CONFIG_FINISHED_EVENT)
+                    .failureEvent(FAIL_HANDLED_EVENT)
+
+                    .from(DELETE_VOLUMES_CM_CONFIG_FINISHED_STATE)
                     .to(FINAL_STATE)
                     .event(FINALIZED_EVENT)
                     .failureEvent(FAIL_HANDLED_EVENT)
