@@ -2,14 +2,15 @@
 
 set -e
 
-{%- if salt['pillar.get']('cloudera-manager:paywall_username') %}
+{%- if salt['pillar.get']('cloudera-manager:paywall_username') and 'archive.cloudera.com' in salt['pillar.get']('cloudera-manager:repo:baseUrl')%}
 AUTHENTICATION="-u {{ salt['pillar.get']('cloudera-manager:paywall_username') }}:{{ salt['pillar.get']('cloudera-manager:paywall_password') }}"
+echo "$(date '+%d/%m/%Y %H:%M:%S') - Adding paywall credentials to curl authentication." |& tee -a /var/log/check_cm_repo_url.log
 {%- endif %}
 
 {% if pillar['proxy'] is defined and pillar['proxy']['host'] is defined and pillar['proxy']['port'] is defined and pillar['proxy']['protocol'] is defined %}
 
 PROXY="-x {{ pillar['proxy']['protocol'] }}://{{ pillar['proxy']['host'] }}:{{ pillar['proxy']['port'] }}"
-
+echo "$(date '+%d/%m/%Y %H:%M:%S') - Adding configuration for proxy ($PROXY)" |& tee -a /var/log/check_cm_repo_url.log
 {% if 'user' in pillar['proxy'] %}
 PROXY_AUTH="-U {{ pillar['proxy']['user'] }}:{{ pillar['proxy']['password'] }}"
 {% endif %}
@@ -17,5 +18,5 @@ PROXY_AUTH="-U {{ pillar['proxy']['user'] }}:{{ pillar['proxy']['password'] }}"
 {% endif %}
 
 REPO_URL="{{ salt['pillar.get']('cloudera-manager:repo:baseUrl') }}"
-
-curl -IL --fail $AUTHENTICATION $PROXY $PROXY_AUTH $REPO_URL
+echo "$(date '+%d/%m/%Y %H:%M:%S') - Checking CM repo availability: $REPO_URL" |& tee -a /var/log/check_cm_repo_url.log
+curl -IL --fail $AUTHENTICATION $PROXY $PROXY_AUTH $REPO_URL |& tee -a /var/log/check_cm_repo_url.log
