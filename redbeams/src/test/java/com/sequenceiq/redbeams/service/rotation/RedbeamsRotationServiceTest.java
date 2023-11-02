@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,6 +20,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.redbeams.api.model.common.Status;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
@@ -43,9 +44,14 @@ class RedbeamsRotationServiceTest {
     @InjectMocks
     private RedbeamsRotationService underTest;
 
+    @Mock
+    private DBStack dbStack;
+
     @Test
     void rotateSecretsShouldSucceed() {
-        when(dbStackService.getResourceIdByResourceCrn(eq(RESOURCE_CRN))).thenReturn(RESOURCE_ID);
+        when(dbStack.getId()).thenReturn(RESOURCE_ID);
+        when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
+        when(dbStackService.getByCrn(eq(RESOURCE_CRN))).thenReturn(dbStack);
         when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
         underTest.rotateSecrets(RESOURCE_CRN, List.of(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD.name()), ROTATE);
         verify(redbeamsFlowManager, times(1)).triggerSecretRotation(eq(RESOURCE_ID), eq(RESOURCE_CRN),
@@ -53,13 +59,12 @@ class RedbeamsRotationServiceTest {
     }
 
     @Test
-    void rotateSecretsShouldFailIfNoResourceIdFound() {
-        when(dbStackService.getResourceIdByResourceCrn(eq(RESOURCE_CRN))).thenReturn(null);
+    void rotateSecretsShouldThrowErrorIfStatusIsNotAvailable() {
+        when(dbStack.getStatus()).thenReturn(Status.STOPPED);
+        when(dbStackService.getByCrn(eq(RESOURCE_CRN))).thenReturn(dbStack);
         when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
-        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.rotateSecrets(RESOURCE_CRN, List.of(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD.name()), ROTATE));
-        verify(redbeamsFlowManager, never()).triggerSecretRotation(eq(RESOURCE_ID), eq(RESOURCE_CRN),
-                eq(List.of(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD)), eq(ROTATE));
-        assertEquals("No db stack found with crn: " + RESOURCE_CRN, cloudbreakServiceException.getMessage());
+        assertEquals("Secret rotation is not allowed because database status is not available. Current status: STOPPED", exception.getMessage());
     }
 }

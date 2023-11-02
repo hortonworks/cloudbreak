@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.rotation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -21,13 +22,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -65,6 +69,7 @@ class FreeIpaSecretRotationServiceTest {
         when(entitlementService.isSecretRotationEnabled(any())).thenReturn(true);
         Stack stack = new Stack();
         stack.setId(STACK_ID);
+        stack.setStackStatus(new StackStatus(null, null, DetailedStackStatus.AVAILABLE));
         when(stackService.getByEnvironmentCrnAndAccountId(anyString(), anyString())).thenReturn(stack);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "chain-id");
         when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
@@ -82,5 +87,22 @@ class FreeIpaSecretRotationServiceTest {
         SecretRotationFlowChainTriggerEvent event = (SecretRotationFlowChainTriggerEvent) acceptable;
         assertEquals(RotationFlowExecutionType.ROTATE, event.getExecutionType());
         assertEquals(List.of(FreeIpaSecretType.FREEIPA_SALT_BOOT_SECRETS), event.getSecretTypes());
+    }
+
+    @Test
+    public void testSecretRotationThrowsExceptionIfStatusIsNotAvailable() {
+        when(entitlementService.isSecretRotationEnabled(any())).thenReturn(true);
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        stack.setStackStatus(new StackStatus(null, null, DetailedStackStatus.STOPPED));
+        when(stackService.getByEnvironmentCrnAndAccountId(anyString(), anyString())).thenReturn(stack);
+
+        FreeIpaSecretRotationRequest request = new FreeIpaSecretRotationRequest();
+        request.setExecutionType(RotationFlowExecutionType.ROTATE);
+        request.setSecrets(List.of(FreeIpaSecretType.FREEIPA_SALT_BOOT_SECRETS.name()));
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.rotateSecretsByCrn(ACCOUNT_ID, ENV_CRN, request));
+
+        assertEquals("The cluster must be in available status to execute secret rotation. Current status: STOPPED", exception.getMessage());
     }
 }

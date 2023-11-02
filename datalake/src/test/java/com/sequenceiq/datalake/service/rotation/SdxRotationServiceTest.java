@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -30,17 +31,21 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
+import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.RedbeamsPoller;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.RedbeamsFlowService;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -91,6 +96,9 @@ class SdxRotationServiceTest {
 
     @Mock
     private SecretRotationValidationService secretRotationValidationService;
+
+    @Mock
+    private SdxStatusService sdxStatusService;
 
     @InjectMocks
     private SdxRotationService underTest;
@@ -159,9 +167,29 @@ class SdxRotationServiceTest {
         doNothing().when(secretRotationValidationService).validateExecutionType(any(), any(), any());
         when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
         SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setId(1L);
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(sdxCluster));
+        SdxStatusEntity status = new SdxStatusEntity();
+        status.setStatus(DatalakeStatusEnum.RUNNING);
+        when(sdxStatusService.getActualStatusForSdx(anyLong())).thenReturn(status);
         FlowIdentifier flowIdentifier = underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null);
         verify(sdxReactorFlowManager, times(1)).triggerSecretRotation(eq(sdxCluster), anyList(), isNull());
+    }
+
+    @Test
+    void triggerSecretRotationShouldFailIfClusterIsStopped() {
+        when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setId(1L);
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(sdxCluster));
+        SdxStatusEntity status = new SdxStatusEntity();
+        status.setStatus(DatalakeStatusEnum.STOPPED);
+        when(sdxStatusService.getActualStatusForSdx(anyLong())).thenReturn(status);
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null));
+
+        assertEquals("The cluster must be in available status to execute secret rotation. Current status: STOPPED", exception.getMessage());
     }
 
     @Test

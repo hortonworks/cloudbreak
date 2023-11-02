@@ -14,8 +14,6 @@ import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
@@ -38,8 +36,6 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Controller
 public class DistroXV1RotationController implements DistroXV1RotationEndpoint {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXV1RotationController.class);
 
     @Inject
     private StackRotationService stackRotationService;

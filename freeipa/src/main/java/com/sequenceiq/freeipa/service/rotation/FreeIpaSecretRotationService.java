@@ -61,6 +61,10 @@ public class FreeIpaSecretRotationService implements SecretRotationFlowEventProv
         }
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(request.getSecrets());
+        if (secretTypes.stream().noneMatch(SecretType::multiSecret) && !stack.isAvailable()) {
+            throw new BadRequestException(
+                    String.format("The cluster must be in available status to execute secret rotation. Current status: %s", stack.getStackStatus().getStatus()));
+        }
         secretTypes.stream().filter(SecretType::multiSecret).forEach(secretType ->
                 multiClusterRotationValidationService.validateMultiRotationRequest(environmentCrn, secretType));
         secretRotationValidationService.validateExecutionType(environmentCrn, secretTypes, request.getExecutionType());

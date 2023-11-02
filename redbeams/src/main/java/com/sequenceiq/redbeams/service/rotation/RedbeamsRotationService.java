@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
@@ -30,13 +31,13 @@ public class RedbeamsRotationService {
 
     public FlowIdentifier rotateSecrets(String resourceCrn, List<String> secrets, RotationFlowExecutionType executionType) {
         if (entitlementService.isSecretRotationEnabled(Crn.fromString(resourceCrn).getAccountId())) {
-            Long resourceIdByResourceCrn = dbStackService.getResourceIdByResourceCrn(resourceCrn);
-            if (resourceIdByResourceCrn != null) {
-                List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
-                return redbeamsFlowManager.triggerSecretRotation(resourceIdByResourceCrn, resourceCrn, secretTypes, executionType);
-            } else {
-                throw new CloudbreakServiceException("No db stack found with crn: " + resourceCrn);
+            DBStack dbStack = dbStackService.getByCrn(resourceCrn);
+            List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
+            if (secretTypes.stream().noneMatch(SecretType::multiSecret) && !dbStack.getStatus().isAvailable()) {
+                throw new CloudbreakServiceException(
+                        String.format("Secret rotation is not allowed because database status is not available. Current status: %s", dbStack.getStatus()));
             }
+            return redbeamsFlowManager.triggerSecretRotation(dbStack.getId(), resourceCrn, secretTypes, executionType);
         } else {
             throw new CloudbreakServiceException("Account is not entitled to execute any secret rotation!");
         }

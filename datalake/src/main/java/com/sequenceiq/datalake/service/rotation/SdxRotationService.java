@@ -29,7 +29,9 @@ import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationServic
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
@@ -37,6 +39,7 @@ import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.RedbeamsPoller;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.RedbeamsFlowService;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.StateStatus;
@@ -94,6 +97,9 @@ public class SdxRotationService {
     @Inject
     private SecretRotationStepProgressService stepProgressService;
 
+    @Inject
+    private SdxStatusService sdxStatusService;
+
     public boolean checkOngoingMultiSecretChildrenRotations(String parentCrn, String secret) {
         MultiSecretType multiSecretType = MultiSecretType.valueOf(secret);
         Set<String> crnsByEnvironmentCrn = getSdxCrnsByEnvironmentCrn(parentCrn);
@@ -147,7 +153,12 @@ public class SdxRotationService {
     public FlowIdentifier triggerSecretRotation(String datalakeCrn, List<String> secrets, RotationFlowExecutionType requestedExecutionType) {
         if (entitlementService.isSecretRotationEnabled(Crn.fromString(datalakeCrn).getAccountId())) {
             SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn).orElseThrow(notFound("SDX cluster", datalakeCrn));
+            SdxStatusEntity status = sdxStatusService.getActualStatusForSdx(sdxCluster.getId());
             List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
+            if (secretTypes.stream().noneMatch(SecretType::multiSecret) && !DatalakeStatusEnum.RUNNING.equals(status.getStatus())) {
+                throw new CloudbreakServiceException(
+                        String.format("The cluster must be in available status to execute secret rotation. Current status: %s", status.getStatus()));
+            }
             secretTypes.stream().filter(SecretType::multiSecret).forEach(secretType ->
                     multiClusterRotationValidationService.validateMultiRotationRequest(datalakeCrn, secretType));
             secretRotationValidationService.validateExecutionType(datalakeCrn, secretTypes, requestedExecutionType);
