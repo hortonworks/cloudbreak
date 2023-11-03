@@ -247,7 +247,6 @@ public class StackCreatorServiceTest {
         stackRequest.setInstanceGroups(List.of(instanceGroupV4Request));
 
         doNothing().when(nodeCountLimitValidator).validateProvision(any());
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.of(mock(StackView.class)));
 
         assertThrows(BadRequestException.class, () ->

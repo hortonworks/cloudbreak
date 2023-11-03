@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.rds;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAsAndThrow;
 import static com.sequenceiq.cloudbreak.common.database.TargetMajorVersion.VERSION_11;
 import static com.sequenceiq.cloudbreak.common.database.TargetMajorVersion.VERSION_14;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED;
@@ -42,7 +44,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.Databas
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
@@ -92,13 +93,13 @@ class RdsUpgradeServiceTest {
 
     private static final String STACK_VERSION = "7.2.10";
 
-    private static final String ACCOUNT_ID = "accountId";
+    private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
     private static final String BACKUP_LOCATION = "location";
 
     private static final String BACKUP_INSTANCE_PROFILE = "BACKUP_INSTANCE_PROFILE";
 
-    private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID();
 
     @Mock
     private EnvironmentClientService environmentService;
@@ -146,7 +147,6 @@ class RdsUpgradeServiceTest {
     void testUpgradeRdsWithValidSetupThenSuccess() {
         Stack stack = createStack(Status.AVAILABLE);
         StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
@@ -154,7 +154,7 @@ class RdsUpgradeServiceTest {
         when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE))).thenReturn(flowId);
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
-        RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false);
+        RdsUpgradeV4Response response = doAs(USER_CRN, () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false));
 
         verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE));
         assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.FLOW_CHAIN);
@@ -167,10 +167,10 @@ class RdsUpgradeServiceTest {
         stack.setType(StackType.WORKLOAD);
         StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.ON_ROOT_VOLUME);
 
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
 
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> doAsAndThrow(USER_CRN, () ->
+                underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false)));
 
         assertThat(exception.getMessage()).isEqualTo("Database upgrade is not allowed for DataHubs with embedded database");
     }
@@ -181,7 +181,6 @@ class RdsUpgradeServiceTest {
         when(environmentService.getByCrn(anyString())).thenReturn(environmentResponse);
         Stack stack = createStack(Status.AVAILABLE);
         StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
@@ -190,7 +189,7 @@ class RdsUpgradeServiceTest {
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
         RdsUpgradeV4Response response =
-                ThreadBasedUserCrnProvider.doAs(
+                doAs(
                         USER_CRN, () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false));
 
         verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(null), eq(null));
@@ -207,7 +206,6 @@ class RdsUpgradeServiceTest {
         Stack stack = createStack(Status.AVAILABLE);
         StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
         when(stackDto.getCloudPlatform()).thenReturn(onAzure ? "AZURE" : "AWS");
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
@@ -216,7 +214,7 @@ class RdsUpgradeServiceTest {
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
         RdsUpgradeV4Response response =
-                ThreadBasedUserCrnProvider.doAs(
+                doAs(
                         USER_CRN, () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), null, false));
 
         verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(desiredVersion), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE));
@@ -228,7 +226,6 @@ class RdsUpgradeServiceTest {
     void testUpgradeRdsWithValidSetupAndMissingDatabaseVersionThenSuccess() {
         Stack stack = createStack(Status.AVAILABLE);
         StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(null));
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
@@ -237,7 +234,7 @@ class RdsUpgradeServiceTest {
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
         RdsUpgradeV4Response response =
-                ThreadBasedUserCrnProvider.doAs(
+                doAs(
                         USER_CRN, () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false));
 
         verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE));
@@ -254,7 +251,7 @@ class RdsUpgradeServiceTest {
         when(messagesService.getMessage(CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED.getMessage(),
                 List.of(MajorVersion.VERSION_11.getMajorVersion()))).thenReturn(ERROR_REASON);
 
-        Assertions.assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(
+        Assertions.assertThatCode(() -> doAs(
                         USER_CRN, () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(ERROR_REASON);
@@ -272,7 +269,7 @@ class RdsUpgradeServiceTest {
         when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE))).thenReturn(flowId);
 
         RdsUpgradeV4Response response =
-                ThreadBasedUserCrnProvider.doAs(
+                doAs(
                         USER_CRN, () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, true));
 
         verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE));
@@ -284,13 +281,12 @@ class RdsUpgradeServiceTest {
     void testUpgradeRdsWithInvalidRuntimeVersionThenError() {
         Stack stack = createStack(Status.AVAILABLE);
         StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         String errorMessage = "Runtime version is not valid.";
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.of(errorMessage));
 
-        Assertions.assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(
+        Assertions.assertThatCode(() -> doAs(
                         USER_CRN, () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Runtime version is not valid.");
@@ -301,11 +297,10 @@ class RdsUpgradeServiceTest {
     @Test
     void testCheckUpgradeRdsOnDatahubWithValidSetup() {
         Stack stack = createStack(Status.AVAILABLE);
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
-        underTest.checkUpgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
+        doAs(USER_CRN, () -> underTest.checkUpgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION));
 
         verify(stackService, never()).getByWorkspaceId(anyLong(), anyString(), anyList());
     }
@@ -316,13 +311,12 @@ class RdsUpgradeServiceTest {
         stack.setType(StackType.DATALAKE);
         StackListItem datahub = mock(StackListItem.class);
         when(datahub.getStackStatus()).thenReturn(Status.AVAILABLE);
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(1L);
         when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
         when(stackService.getByWorkspaceId(1L, stack.getEnvironmentCrn(), List.of(StackType.WORKLOAD))).thenReturn(Set.of(datahub));
 
-        Assertions.assertThatCode(() -> underTest.checkUpgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION))
+        Assertions.assertThatCode(() -> doAs(USER_CRN, () -> underTest.checkUpgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("There are attached Data Hub clusters in incorrect state");
     }
@@ -334,13 +328,12 @@ class RdsUpgradeServiceTest {
         StackListItem datahub = mock(StackListItem.class);
         when(datahub.getStackStatus()).thenReturn(Status.STOPPED);
         when(datahub.getClusterStatus()).thenReturn(Status.STOPPED);
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(1L);
         when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
         when(stackService.getByWorkspaceId(1L, stack.getEnvironmentCrn(), List.of(StackType.WORKLOAD))).thenReturn(Set.of(datahub));
 
-        underTest.checkUpgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
+        doAs(USER_CRN, () -> underTest.checkUpgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION));
 
         verify(stackService).getByWorkspaceId(1L, stack.getEnvironmentCrn(), List.of(StackType.WORKLOAD));
     }
@@ -349,11 +342,10 @@ class RdsUpgradeServiceTest {
     void testCheckUpgradeRdsOnDatalakeWithStoppedDatahubsAndEntitlementEnabled() {
         Stack stack = createStack(Status.AVAILABLE);
         stack.setType(StackType.DATALAKE);
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(true);
 
-        underTest.checkUpgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
+        doAs(USER_CRN, () -> underTest.checkUpgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION));
 
         verify(stackService, never()).getByWorkspaceId(1L, stack.getEnvironmentCrn(), List.of(StackType.WORKLOAD));
     }
@@ -367,7 +359,7 @@ class RdsUpgradeServiceTest {
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         when(messagesService.getMessage(CLUSTER_RDS_UPGRADE_NOT_AVAILABLE.getMessage(), List.of(status.name()))).thenReturn(ERROR_REASON);
 
-        Assertions.assertThatCode(() -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false))
+        Assertions.assertThatCode(() -> doAs(USER_CRN, () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(ERROR_REASON);
 
@@ -379,7 +371,6 @@ class RdsUpgradeServiceTest {
     void testUpgradeRdsWithValidDatabaseStatusThenSuccess(DatabaseServerStatus status) {
         Stack stack = createStack(Status.AVAILABLE);
         StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10, status));
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
@@ -387,7 +378,7 @@ class RdsUpgradeServiceTest {
         when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE))).thenReturn(flowId);
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
-        RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false);
+        RdsUpgradeV4Response response = doAs(USER_CRN, () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false));
 
         verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE));
         assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.FLOW_CHAIN);
@@ -398,13 +389,12 @@ class RdsUpgradeServiceTest {
     void testUpgradeRdsWithDatabaseNullStatusThenError() {
         Stack stack = createStack(Status.AVAILABLE);
         StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10, null));
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
-        Assertions.assertThatCode(() -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false))
+        Assertions.assertThatCode(() -> doAs(USER_CRN, () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Upgrading database server is not possible as database server is not available.");
 
@@ -416,13 +406,12 @@ class RdsUpgradeServiceTest {
     void testUpgradeRdsWithDatabaseNotAvailableThenError(DatabaseServerStatus status) {
         Stack stack = createStack(Status.AVAILABLE);
         StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10, status));
         when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
-        Assertions.assertThatCode(() -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false))
+        Assertions.assertThatCode(() -> doAs(USER_CRN, () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(String.format("Upgrading database server is not possible as database server is not available, it is in %s state.", status));
 

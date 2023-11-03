@@ -28,21 +28,28 @@ public class CloudbreakRestRequestThreadLocalService implements LegacyRestReques
         REQUESTED_WORKSPACE_ID.remove();
     }
 
+    /**
+     * @deprecated please use {@link ThreadBasedUserCrnProvider#getUserCrn()}  if possible
+     */
+    @Deprecated
     @Override
     public CloudbreakUser getCloudbreakUser() {
         return CLOUDBREAK_USER.get();
     }
 
+    @Deprecated
     @Override
     public void setCloudbreakUser(CloudbreakUser cloudbreakUser) {
         CLOUDBREAK_USER.set(cloudbreakUser);
     }
 
+    @Deprecated
     @Override
     public void removeCloudbreakUser() {
         CLOUDBREAK_USER.remove();
     }
 
+    @Deprecated
     public void setCloudbreakUserByUsernameAndTenant(String userId, String tenant) {
         CLOUDBREAK_USER.set(new CloudbreakUser(userId, "", "", "", tenant));
     }
@@ -60,15 +67,8 @@ public class CloudbreakRestRequestThreadLocalService implements LegacyRestReques
         }
     }
 
+    @Deprecated
     public String getRestThreadLocalContextAsString() {
         return String.format("CloudbreakUser: %s WorkspaceId: %s", CLOUDBREAK_USER.get(), REQUESTED_WORKSPACE_ID.get());
-    }
-
-    public String getAccountId() {
-        return ThreadBasedUserCrnProvider.getAccountId();
-    }
-
-    public String getUserCrn() {
-        return ThreadBasedUserCrnProvider.getUserCrn();
     }
 }

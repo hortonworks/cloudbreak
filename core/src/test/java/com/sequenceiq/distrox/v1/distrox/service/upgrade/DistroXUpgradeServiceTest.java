@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.service.upgrade;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
 import static com.sequenceiq.cloudbreak.util.TestConstants.DO_NOT_KEEP_VARIANT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -51,7 +52,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -60,7 +60,9 @@ import com.sequenceiq.flow.api.model.FlowType;
 @ExtendWith(MockitoExtension.class)
 class DistroXUpgradeServiceTest {
 
-    private static final String USER_CRN = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:f3b8ed82-e712-4f89-bda7-be07183720d3";
+    private static final String ACCOUNT_ID = "9d74eee4-1cad-45d7-b645-7ccf9edbb73d";
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:f3b8ed82-e712-4f89-bda7-be07183720d3";
 
     private static final NameOrCrn CLUSTER = NameOrCrn.ofName("cluster");
 
@@ -69,8 +71,6 @@ class DistroXUpgradeServiceTest {
     private static final Long STACK_ID = 3L;
 
     private static final boolean LOCK_COMPONENTS = false;
-
-    private static final String ACCOUNT_ID = "9d74eee4-1cad-45d7-b645-7ccf9edbb73d";
 
     private static final boolean ROLLING_UPGRADE_ENABLED = true;
 
@@ -105,9 +105,6 @@ class DistroXUpgradeServiceTest {
     private LockedComponentService lockedComponentService;
 
     @Mock
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Mock
     private StackUpgradeService stackUpgradeService;
 
     @Mock
@@ -134,7 +131,6 @@ class DistroXUpgradeServiceTest {
         lenient().when(stackView.getPlatformVariant()).thenReturn("variant");
         lenient().when(stackView.getWorkspaceId()).thenReturn(WS_ID);
         lenient().when(stack.getStack()).thenReturn(stackView);
-        lenient().when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
     }
 
     @Test
@@ -190,7 +186,7 @@ class DistroXUpgradeServiceTest {
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString(),
                 eq(ROLLING_UPGRADE_ENABLED))).thenReturn(flowIdentifier);
 
-        UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false);
+        UpgradeV4Response result = doAs(USER_CRN, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false));
 
         verify(paywallAccessChecker).checkPaywallAccess(any(), any());
         assertEquals(flowIdentifier, result.getFlowIdentifier());
@@ -222,7 +218,7 @@ class DistroXUpgradeServiceTest {
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString(), eq(false)))
                 .thenReturn(flowIdentifier);
 
-        UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false);
+        UpgradeV4Response result = doAs(USER_CRN, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false));
 
         verifyNoInteractions(paywallAccessChecker);
         assertEquals(flowIdentifier, result.getFlowIdentifier());
@@ -256,7 +252,7 @@ class DistroXUpgradeServiceTest {
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString(),
                 eq(ROLLING_UPGRADE_ENABLED))).thenReturn(flowIdentifier);
         // WHEN
-        UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false);
+        UpgradeV4Response result = doAs(USER_CRN, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false));
         // THEN
         verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, LOCK_COMPONENTS, "variant", ROLLING_UPGRADE_ENABLED);
         assertFalse(result.isReplaceVms());
@@ -286,7 +282,7 @@ class DistroXUpgradeServiceTest {
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), anyBoolean(), anyString(), eq(false)))
                 .thenReturn(flowIdentifier);
         // WHEN
-        UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false);
+        UpgradeV4Response result = doAs(USER_CRN, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false));
         // THEN
         verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, true, true, "variant", false);
         assertTrue(result.isReplaceVms());
@@ -316,7 +312,7 @@ class DistroXUpgradeServiceTest {
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString(),
                 eq(ROLLING_UPGRADE_ENABLED))).thenReturn(flowIdentifier);
         // WHEN
-        UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false);
+        UpgradeV4Response result = doAs(USER_CRN, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false));
         // THEN
         verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, LOCK_COMPONENTS, "variant", ROLLING_UPGRADE_ENABLED);
         assertFalse(result.isReplaceVms());

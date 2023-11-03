@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedse
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -36,7 +37,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -62,9 +62,6 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
 
     @Inject
     private StackDtoService stackDtoService;
-
-    @Inject
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     public void prepareDatalakeRequest(Stack source, StackV4Request stackRequest) {
         if (!Strings.isNullOrEmpty(source.getDatalakeCrn())) {
@@ -204,7 +201,7 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
 
     @Override
     public String getResourceCrnByResourceName(String resourceName) {
-        String accountId = restRequestThreadLocalService.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return getNotTerminatedDatalakeStackViewSafely(() -> stackDtoService.findNotTerminatedByNameAndAccountId(resourceName, accountId),
                 "%s stack not found", "%s stack is not a Data Lake.", resourceName)
                 .getResourceCrn();
@@ -212,7 +209,7 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
 
     @Override
     public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
-        String accountId = restRequestThreadLocalService.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return stackDtoService.findNotTerminatedByNamesAndAccountId(resourceNames, accountId)
                 .stream()
                 .filter(stackView -> StackType.DATALAKE.equals(stackView.getType()))

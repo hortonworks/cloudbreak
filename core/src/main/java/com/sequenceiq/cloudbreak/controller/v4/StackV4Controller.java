@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCc
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
@@ -141,31 +142,31 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public StackV4Response get(Long workspaceId, String name, Set<String> entries, @AccountId String accountId) {
-        return stackOperations.get(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), entries, null, false);
+        return stackOperations.get(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), entries, null, false);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public StackV4Response getWithResources(Long workspaceId, String name, Set<String> entries, @AccountId String accountId) {
-        return stackOperations.get(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), entries, null, true);
+        return stackOperations.get(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), entries, null, true);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public StackV4Response getByCrn(Long workspaceId, @TenantAwareParam String crn, Set<String> entries) {
-        return stackOperations.get(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(), entries, null, false);
+        return stackOperations.get(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), entries, null, false);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public void delete(Long workspaceId, String name, boolean forced, @AccountId String accountId) {
-        stackOperations.delete(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), forced);
+        stackOperations.delete(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), forced);
     }
 
     @Override
     @InternalOnly
     public void deleteInternal(Long workspaceId, String name, boolean forced, @InitiatorUserCrn String initiatorUserCrn) {
-        stackOperations.delete(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), forced);
+        stackOperations.delete(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), forced);
     }
 
     @Override
@@ -187,13 +188,13 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier sync(Long workspaceId, String name, @AccountId String accountId) {
-        return stackOperations.sync(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), EnumSet.of(StackType.WORKLOAD, StackType.DATALAKE));
+        return stackOperations.sync(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), EnumSet.of(StackType.WORKLOAD, StackType.DATALAKE));
     }
 
     @Override
     @InternalOnly
     public FlowIdentifier syncCm(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn, ClouderaManagerSyncV4Request syncRequest) {
-        return stackOperations.syncComponentVersionsFromCm(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(),
+        return stackOperations.syncComponentVersionsFromCm(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(),
                 syncRequest.getCandidateImageUuids());
     }
 
@@ -214,25 +215,25 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier putStop(Long workspaceId, String name, @AccountId String accountId) {
-        return stackOperations.putStop(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId());
+        return stackOperations.putStop(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
     @InternalOnly
     public FlowIdentifier putStopInternal(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
-        return stackOperations.putStop(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId());
+        return stackOperations.putStop(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier putStart(Long workspaceId, String name, @AccountId String accountId) {
-        return stackOperations.putStart(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId());
+        return stackOperations.putStart(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
     @InternalOnly
     public FlowIdentifier putStartInternal(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
-        return stackOperations.putStart(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId());
+        return stackOperations.putStart(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
@@ -240,14 +241,14 @@ public class StackV4Controller extends NotificationController implements StackV4
     public FlowIdentifier rotateSaltPasswordInternal(Long workspaceId, String crn, RotateSaltPasswordRequest request,
             @InitiatorUserCrn String initiatorUserCrn) {
         RotateSaltPasswordReason rotateSaltPasswordReason = RotateSaltPasswordReason.valueOf(request.getReason().name());
-        return stackOperations.rotateSaltPassword(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(), rotateSaltPasswordReason);
+        return stackOperations.rotateSaltPassword(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), rotateSaltPasswordReason);
     }
 
     @Override
     @InternalOnly
     public SaltPasswordStatusResponse getSaltPasswordStatus(Long workspaceId, @TenantAwareParam String crn) {
         SaltPasswordStatusResponse response = new SaltPasswordStatusResponse();
-        SaltPasswordStatus saltPasswordStatus = stackOperations.getSaltPasswordStatus(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId());
+        SaltPasswordStatus saltPasswordStatus = stackOperations.getSaltPasswordStatus(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
         response.setStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus.valueOf(saltPasswordStatus.name()));
         return response;
     }
@@ -255,13 +256,13 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @InternalOnly
     public FlowIdentifier modifyProxyConfigInternal(Long workspaceId, String crn, String previousProxyConfigCrn, @InitiatorUserCrn String initiatorUserCrn) {
-        return stackOperations.modifyProxyConfig(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(), previousProxyConfigCrn);
+        return stackOperations.modifyProxyConfig(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), previousProxyConfigCrn);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier putScaling(Long workspaceId, String name, @Valid StackScaleV4Request updateRequest, @AccountId String accountId) {
-        return stackOperations.putScaling(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), updateRequest);
+        return stackOperations.putScaling(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), updateRequest);
     }
 
     @Override
@@ -281,7 +282,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier upgradeOs(Long workspaceId, String name, @AccountId String accountId, Boolean keepVariant) {
-        return stackUpgradeOperations.upgradeOs(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), Boolean.TRUE.equals(keepVariant));
+        return stackUpgradeOperations.upgradeOs(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), Boolean.TRUE.equals(keepVariant));
     }
 
     @InternalOnly
@@ -294,14 +295,14 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @InternalOnly
     public FlowIdentifier upgradeOsInternal(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn, Boolean keepVariant) {
-        return stackUpgradeOperations.upgradeOs(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), Boolean.TRUE.equals(keepVariant));
+        return stackUpgradeOperations.upgradeOs(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), Boolean.TRUE.equals(keepVariant));
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public UpgradeOptionV4Response checkForOsUpgrade(Long workspaceId, String name, @AccountId String accountId) {
         return stackUpgradeOperations.checkForOsUpgrade(NameOrCrn.ofName(name), restRequestThreadLocalService.getCloudbreakUser(),
-                restRequestThreadLocalService.getAccountId());
+                ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
@@ -347,14 +348,14 @@ public class StackV4Controller extends NotificationController implements StackV4
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier deleteInstance(Long workspaceId, String name, boolean forced, String instanceId,
             @AccountId String accountId) {
-        return stackOperations.deleteInstance(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), forced, instanceId);
+        return stackOperations.deleteInstance(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), forced, instanceId);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier deleteMultipleInstances(Long workspaceId, String name, @NotEmpty List<String> instanceIds, boolean forced,
             @AccountId String accountId) {
-        return stackOperations.deleteInstances(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(),
+        return stackOperations.deleteInstances(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(),
                 new HashSet<>(instanceIds), forced);
     }
 
@@ -362,14 +363,14 @@ public class StackV4Controller extends NotificationController implements StackV4
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier putPassword(Long workspaceId, String name, @Valid UserNamePasswordV4Request userNamePasswordJson,
             @AccountId String accountId) {
-        return stackOperations.putPassword(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), userNamePasswordJson);
+        return stackOperations.putPassword(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), userNamePasswordJson);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier setClusterMaintenanceMode(Long workspaceId, String name, @NotNull MaintenanceModeV4Request maintenanceMode,
             @AccountId String accountId) {
-        return stackOperations.setClusterMaintenanceMode(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), maintenanceMode);
+        return stackOperations.setClusterMaintenanceMode(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), maintenanceMode);
     }
 
     @Override
@@ -394,20 +395,20 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier upgradeClusterByName(Long workspaceId, String name, String imageId, @AccountId String accountId) {
-        return stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), imageId, Boolean.FALSE);
+        return stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), imageId, Boolean.FALSE);
     }
 
     @Override
     @InternalOnly
     public FlowIdentifier upgradeClusterByNameInternal(Long workspaceId, String name, String imageId, @InitiatorUserCrn String initiatorUserCrn,
             Boolean rollingUpgradeEnabled) {
-        return stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), imageId, rollingUpgradeEnabled);
+        return stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), imageId, rollingUpgradeEnabled);
     }
 
     @Override
     @InternalOnly
     public FlowIdentifier prepareClusterUpgradeByCrnInternal(Long workspaceId, String crn, String imageId, @InitiatorUserCrn String initiatorUserCrn) {
-        return stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(), imageId);
+        return stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), imageId);
     }
 
     @Override
@@ -453,7 +454,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier updateSaltByName(Long workspaceId, String name, @AccountId String accountId) {
-        return stackOperations.updateSalt(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId());
+        return stackOperations.updateSalt(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId());
     }
 
     /**
@@ -469,7 +470,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier updatePillarConfigurationByCrn(Long workspaceId, @TenantAwareParam String crn) {
-        String accountId = restRequestThreadLocalService.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return stackOperations.updatePillarConfiguration(NameOrCrn.ofCrn(crn), accountId);
     }
 
@@ -570,14 +571,14 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public CertificatesRotationV4Response rotateAutoTlsCertificates(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn,
             @Valid CertificatesRotationV4Request certificatesRotationV4Request) {
-        return stackOperations.rotateAutoTlsCertificates(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(),
+        return stackOperations.rotateAutoTlsCertificates(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(),
                 certificatesRotationV4Request);
     }
 
     @Override
     @InternalOnly
     public FlowIdentifier renewCertificate(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
-        String accountId = restRequestThreadLocalService.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return stackOperationService.renewCertificate(name, accountId);
     }
 
@@ -594,7 +595,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @InternalOnly
     public FlowIdentifier updateLoadBalancersInternal(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
-        return stackOperations.updateLoadBalancers(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId());
+        return stackOperations.updateLoadBalancers(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
@@ -623,7 +624,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public FlowIdentifier reRegisterClusterProxyConfig(Long workspaceId, String crn, boolean skipFullReRegistration, String originalCrn,
             @InitiatorUserCrn String initiatorUserCrn) {
-        return stackOperationService.reRegisterClusterProxyConfig(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(),
+        return stackOperationService.reRegisterClusterProxyConfig(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(),
                 skipFullReRegistration, originalCrn);
     }
 
@@ -634,7 +635,7 @@ public class StackV4Controller extends NotificationController implements StackV4
             String name,
             @InitiatorUserCrn String initiatorUserCrn,
             @Valid StackVerticalScaleV4Request updateRequest) {
-        return stackOperations.putVerticalScaling(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), updateRequest);
+        return stackOperations.putVerticalScaling(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), updateRequest);
     }
 
     @Override

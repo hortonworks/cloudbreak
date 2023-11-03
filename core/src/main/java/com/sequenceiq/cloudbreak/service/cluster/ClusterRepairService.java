@@ -64,7 +64,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -130,9 +129,6 @@ public class ClusterRepairService {
     @Inject
     private StackUpgradeService stackUpgradeService;
 
-    @Inject
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
-
     public FlowIdentifier repairAll(StackView stackView, boolean upgrade, boolean keepVariant) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
                 validateRepair(ManualClusterRepairMode.ALL, stackView.getId(), Set.of(), false);
@@ -146,7 +142,7 @@ public class ClusterRepairService {
         } else {
             repairableHostGroups = Set.of();
         }
-        String userCrn = restRequestThreadLocalService.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(stackView, userCrn, keepVariant);
         return triggerRepairOrThrowBadRequest(stackView.getId(), repairStart, RepairType.ONE_FROM_EACH_HOSTGROUP, false, repairableHostGroups,
                 upgradeVariant, upgrade);

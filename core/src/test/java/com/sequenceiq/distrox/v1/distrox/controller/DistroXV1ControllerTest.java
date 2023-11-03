@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.controller;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -27,12 +28,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateReques
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXGenerateImageCatalogV1Response;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
@@ -50,7 +49,7 @@ class DistroXV1ControllerTest {
 
     private static final String IMAGE_CATALOG = "image catalog";
 
-    private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:accid:user:mockuser@cloudera.com";
+    private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:mockuser@cloudera.com";
 
     private static final Long WORKSPACE_ID = 1L;
 
@@ -68,9 +67,6 @@ class DistroXV1ControllerTest {
 
     @Mock
     private StackOperationService stackOperationService;
-
-    @Mock
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Captor
     private ArgumentCaptor<NameOrCrn> nameOrCrnArgumentCaptor;
@@ -131,72 +127,59 @@ class DistroXV1ControllerTest {
 
     @Test
     void testRotateSaltPasswordByCrn() {
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
-
-        distroXV1Controller.rotateSaltPasswordByCrn(CRN);
+        doAs(TEST_USER_CRN, () -> distroXV1Controller.rotateSaltPasswordByCrn(CRN));
 
         verify(stackOperations).rotateSaltPassword(NameOrCrn.ofCrn(CRN), ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
     }
 
     @Test
     void testUpdateSaltByCrn() {
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
-
-        distroXV1Controller.updateSaltByCrn(CRN);
+        doAs(TEST_USER_CRN, () -> distroXV1Controller.updateSaltByCrn(CRN));
 
         verify(stackOperations).updateSalt(NameOrCrn.ofCrn(CRN), ACCOUNT_ID);
     }
 
     @Test
     void testModifyProxyInternal() {
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         String previousProxyConfigCrn = "prev-proxy-crn";
 
-        distroXV1Controller.modifyProxyInternal(CRN, previousProxyConfigCrn, "user-crn");
+        doAs(TEST_USER_CRN, () -> distroXV1Controller.modifyProxyInternal(CRN, previousProxyConfigCrn, "user-crn"));
 
         verify(stackOperationService).modifyProxyConfig(NameOrCrn.ofCrn(CRN), ACCOUNT_ID, previousProxyConfigCrn);
     }
 
     @Test
     void testDeleteVolumesByStackName() {
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
-
         StackDeleteVolumesRequest stackDeleteVolumesRequest = new StackDeleteVolumesRequest();
         stackDeleteVolumesRequest.setStackId(1L);
         stackDeleteVolumesRequest.setGroup("COMPUTE");
 
-        distroXV1Controller.deleteVolumesByStackName(CRN, stackDeleteVolumesRequest);
+        doAs(TEST_USER_CRN, () -> distroXV1Controller.deleteVolumesByStackName(CRN, stackDeleteVolumesRequest));
 
         verify(stackOperations).putDeleteVolumes(NameOrCrn.ofName(CRN), ACCOUNT_ID, stackDeleteVolumesRequest);
     }
 
     @Test
     void testDeleteVolumesByStackCrn() {
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
-
         StackDeleteVolumesRequest stackDeleteVolumesRequest = new StackDeleteVolumesRequest();
         stackDeleteVolumesRequest.setStackId(1L);
         stackDeleteVolumesRequest.setGroup("COMPUTE");
 
-        distroXV1Controller.deleteVolumesByStackCrn(CRN, stackDeleteVolumesRequest);
+        doAs(TEST_USER_CRN, () -> distroXV1Controller.deleteVolumesByStackCrn(CRN, stackDeleteVolumesRequest));
 
         verify(stackOperations).putDeleteVolumes(NameOrCrn.ofCrn(CRN), ACCOUNT_ID, stackDeleteVolumesRequest);
     }
 
     @Test
     void syncByNameTest() {
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
-
-        distroXV1Controller.syncByName(NAME);
+        doAs(TEST_USER_CRN, () -> distroXV1Controller.syncByName(NAME));
 
         verify(stackOperations).sync(NameOrCrn.ofName(NAME), ACCOUNT_ID, EnumSet.of(StackType.WORKLOAD));
     }
 
     @Test
     void syncByCrnTest() {
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
-
-        distroXV1Controller.syncByCrn(CRN);
+        doAs(TEST_USER_CRN, () -> distroXV1Controller.syncByCrn(CRN));
 
         verify(stackOperations).sync(NameOrCrn.ofCrn(CRN), ACCOUNT_ID, EnumSet.of(StackType.WORKLOAD));
     }
@@ -204,20 +187,20 @@ class DistroXV1ControllerTest {
     @Test
     void testDiskUpdateByName() {
         DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
-        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
+        doAs(TEST_USER_CRN, () -> {
             distroXV1Controller.diskUpdateByName(TEST_USER_CRN, diskUpdateRequest);
         });
 
-        verify(stackOperationService).stackUpdateDisks(NameOrCrn.ofName(TEST_USER_CRN), diskUpdateRequest, "accid");
+        verify(stackOperationService).stackUpdateDisks(NameOrCrn.ofName(TEST_USER_CRN), diskUpdateRequest, ACCOUNT_ID);
     }
 
     @Test
     void testDiskUpdateByCrn() {
         DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
-        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
+        doAs(TEST_USER_CRN, () -> {
             distroXV1Controller.diskUpdateByCrn(TEST_USER_CRN, diskUpdateRequest);
         });
 
-        verify(stackOperationService).stackUpdateDisks(NameOrCrn.ofCrn(TEST_USER_CRN), diskUpdateRequest, "accid");
+        verify(stackOperationService).stackUpdateDisks(NameOrCrn.ofCrn(TEST_USER_CRN), diskUpdateRequest, ACCOUNT_ID);
     }
 }

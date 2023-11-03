@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SupportedExternalDatabaseServiceEntryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.UsedImagesListV4Response;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
@@ -145,8 +146,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public Response renewCertificate(RenewCertificateV4Request renewCertificateV4Request) {
-        String accountId = restRequestThreadLocalService.getAccountId();
-        stackOperationService.renewCertificate(renewCertificateV4Request.getStackName(), accountId);
+        stackOperationService.renewCertificate(renewCertificateV4Request.getStackName(), ThreadBasedUserCrnProvider.getAccountId());
         return Response.ok().build();
     }
 

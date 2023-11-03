@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
@@ -109,14 +110,14 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public FlowIdentifier putStackStartInstancesByCrn(@TenantAwareParam @ResourceCrn String crn, @Valid UpdateStackV4Request updateRequest) {
-        return stackCommonService.putStartInstancesInDefaultWorkspace(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(),
+        return stackCommonService.putStartInstancesInDefaultWorkspace(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(),
                 updateRequest, ScalingStrategy.STOPSTART);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public FlowIdentifier putStackStartInstancesByName(@ResourceName String name, @Valid UpdateStackV4Request updateRequest) {
-        return stackCommonService.putStartInstancesInDefaultWorkspace(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(),
+        return stackCommonService.putStartInstancesInDefaultWorkspace(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(),
                 updateRequest, ScalingStrategy.STOPSTART);
     }
 
@@ -130,7 +131,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public void decommissionInstancesForClusterCrn(@TenantAwareParam @ResourceCrn String clusterCrn, Long workspaceId,
             List<String> instanceIds, Boolean forced) {
-        stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), restRequestThreadLocalService.getAccountId(),
+        stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), ThreadBasedUserCrnProvider.getAccountId(),
                 new HashSet(instanceIds), forced);
     }
 
@@ -160,7 +161,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
             List<String> instanceIds, Boolean forced) {
         LOGGER.info("decommissionInternalInstancesForClusterCrn. forced={}, clusterCrn={}, instanceIds=[{}]",
                 forced, clusterCrn, instanceIds);
-        return stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), restRequestThreadLocalService.getAccountId(),
+        return stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), ThreadBasedUserCrnProvider.getAccountId(),
                 new HashSet(instanceIds), forced);
     }
 
@@ -170,7 +171,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
             Boolean forced, ScalingStrategy scalingStrategy) {
         LOGGER.info("stopInstancesForClusterCrn. ScalingStrategy={}, forced={}, clusterCrn={}, instanceIds=[{}]",
                 scalingStrategy, forced, clusterCrn, instanceIds);
-        return stackCommonService.stopMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), restRequestThreadLocalService.getAccountId(),
+        return stackCommonService.stopMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), ThreadBasedUserCrnProvider.getAccountId(),
                 new HashSet(instanceIds), forced);
     }
 
@@ -180,7 +181,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
             Boolean forced, ScalingStrategy scalingStrategy) {
         LOGGER.info("stopInstancesForClusterName: ScalingStrategy={}, forced={}, clusterName={}, instanceIds=[{}]",
                 scalingStrategy, forced, clusterName, instanceIds);
-        return stackCommonService.stopMultipleInstancesInWorkspace(NameOrCrn.ofName(clusterName), restRequestThreadLocalService.getAccountId(),
+        return stackCommonService.stopMultipleInstancesInWorkspace(NameOrCrn.ofName(clusterName), ThreadBasedUserCrnProvider.getAccountId(),
                 new HashSet<>(instanceIds), forced);
     }
 

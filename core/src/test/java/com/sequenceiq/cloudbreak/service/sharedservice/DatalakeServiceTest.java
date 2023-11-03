@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.sharedservice;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAsAndThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -37,7 +39,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackIdViewImpl;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -45,11 +46,10 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 @ExtendWith({MockitoExtension.class})
 public class DatalakeServiceTest {
 
-    @Mock
-    private StackService stackService;
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:test@test.com";
 
     @Mock
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+    private StackService stackService;
 
     @Mock
     private StackDtoService stackDtoService;
@@ -62,7 +62,6 @@ public class DatalakeServiceTest {
         Stack resultStack = new Stack();
         resultStack.setName("teststack");
         lenient().when(stackService.getByCrn(anyString())).thenReturn(resultStack);
-        lenient().when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(1L);
     }
 
     @Test
@@ -219,16 +218,18 @@ public class DatalakeServiceTest {
     @Test
     public void testGetResourceCrnByResourceName() {
         when(stackDtoService.findNotTerminatedByNameAndAccountId(any(), any())).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> underTest.getResourceCrnByResourceName("name"), "name stack not found");
+        assertThrows(NotFoundException.class, () -> doAsAndThrow(USER_CRN, () ->
+                underTest.getResourceCrnByResourceName("name")), "name stack not found");
 
         StackView stackView = stackView(StackType.WORKLOAD);
         when(stackDtoService.findNotTerminatedByNameAndAccountId(any(), any())).thenReturn(Optional.of(stackView));
-        assertThrows(BadRequestException.class, () -> underTest.getResourceCrnByResourceName("name"), "name stack is not a Data Lake");
+        assertThrows(BadRequestException.class, () -> doAsAndThrow(USER_CRN, () ->
+                underTest.getResourceCrnByResourceName("name")), "name stack is not a Data Lake");
 
         StackView datalakeView = stackView(StackType.DATALAKE);
         when(datalakeView.getResourceCrn()).thenReturn("crn");
         when(stackDtoService.findNotTerminatedByNameAndAccountId(any(), any())).thenReturn(Optional.of(datalakeView));
-        assertEquals("crn", underTest.getResourceCrnByResourceName("name"));
+        assertEquals("crn", doAs(USER_CRN, () -> underTest.getResourceCrnByResourceName("name")));
     }
 
     @Test
@@ -252,7 +253,7 @@ public class DatalakeServiceTest {
         StackView datalakeView = stackView(StackType.DATALAKE);
         when(datalakeView.getResourceCrn()).thenReturn("crn2");
         when(stackDtoService.findNotTerminatedByNamesAndAccountId(any(), any())).thenReturn(List.of(workloadView, datalakeView));
-        List<String> crnList = underTest.getResourceCrnListByResourceNameList(List.of("name1", "name2"));
+        List<String> crnList = doAs(USER_CRN, () -> underTest.getResourceCrnListByResourceNameList(List.of("name1", "name2")));
         assertFalse(crnList.isEmpty());
         assertEquals(1, crnList.size());
         assertTrue(crnList.contains("crn2"));

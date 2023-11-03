@@ -8,14 +8,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 
 @Component
 public class ImageOsService {
-
-    @Inject
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
     private EntitlementService entitlementService;
@@ -25,7 +22,7 @@ public class ImageOsService {
 
     public boolean isSupported(String os) {
         if (!defaultOs.equalsIgnoreCase(os) && RHEL8.getOs().equalsIgnoreCase(os)) {
-            return entitlementService.isRhel8ImageSupportEnabled(restRequestThreadLocalService.getAccountId());
+            return entitlementService.isRhel8ImageSupportEnabled(ThreadBasedUserCrnProvider.getAccountId());
         }
         return true;
     }
@@ -37,7 +34,7 @@ public class ImageOsService {
     public String getPreferredOs(String requestedOs) {
         if (StringUtils.isNotBlank(requestedOs)) {
             return requestedOs;
-        } else if (entitlementService.isRhel8ImagePreferred(restRequestThreadLocalService.getAccountId())) {
+        } else if (entitlementService.isRhel8ImagePreferred(ThreadBasedUserCrnProvider.getAccountId())) {
             return RHEL8.getOs();
         } else {
             return defaultOs;

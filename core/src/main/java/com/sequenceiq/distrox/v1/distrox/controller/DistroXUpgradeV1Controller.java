@@ -183,7 +183,7 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
     }
 
     private void validateClusterName(String clusterName) {
-        stackService.checkLiveStackExistenceByName(clusterName, restRequestThreadLocalService.getAccountId(), StackType.WORKLOAD);
+        stackService.checkLiveStackExistenceByName(clusterName, ThreadBasedUserCrnProvider.getAccountId(), StackType.WORKLOAD);
     }
 
 }

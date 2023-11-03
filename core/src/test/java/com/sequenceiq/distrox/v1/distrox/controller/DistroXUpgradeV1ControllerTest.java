@@ -73,7 +73,6 @@ class DistroXUpgradeV1ControllerTest {
     @BeforeEach
     public void init() {
         lenient().when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
-        lenient().when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
 import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,17 +22,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 
 @ExtendWith(MockitoExtension.class)
 class ImageOsServiceTest {
 
-    private static final String ACCOUNT_ID = "accountid";
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:test@test.com";
+
+    private static final String ACCOUNT_ID = "hortonworks";
 
     private static final String DEFAULT_OS = CENTOS7.getOs();
-
-    @Mock
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Mock
     private EntitlementService entitlementService;
@@ -41,7 +40,6 @@ class ImageOsServiceTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         setDefaultOs(DEFAULT_OS);
     }
 
@@ -54,7 +52,7 @@ class ImageOsServiceTest {
 
     @Test
     void isSupportedRedhat8() {
-        boolean result = underTest.isSupported(RHEL8.getOs());
+        boolean result = doAs(USER_CRN, () -> underTest.isSupported(RHEL8.getOs()));
 
         assertThat(result).isFalse();
         verify(entitlementService).isRhel8ImageSupportEnabled(ACCOUNT_ID);
@@ -82,7 +80,7 @@ class ImageOsServiceTest {
     void preferredOs(String requestedOs, boolean rhel8ImagePreferred, String expectedOs) {
         lenient().when(entitlementService.isRhel8ImagePreferred(ACCOUNT_ID)).thenReturn(rhel8ImagePreferred);
 
-        String result = underTest.getPreferredOs(requestedOs);
+        String result = doAs(USER_CRN, () -> underTest.getPreferredOs(requestedOs));
 
         assertThat(result).isEqualTo(expectedOs);
     }

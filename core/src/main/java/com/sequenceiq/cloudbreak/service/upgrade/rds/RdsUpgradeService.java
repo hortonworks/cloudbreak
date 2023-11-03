@@ -85,7 +85,7 @@ public class RdsUpgradeService {
 
     public void checkUpgradeRds(NameOrCrn nameOrCrn, TargetMajorVersion targetMajorVersion) {
         TargetMajorVersion calculatedVersion = ObjectUtils.defaultIfNull(targetMajorVersion, defaultTargetMajorVersion);
-        String accountId = restRequestThreadLocalService.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Checking if RDS upgrade is possible for stack {} to version {}, request version was {}",
@@ -94,7 +94,7 @@ public class RdsUpgradeService {
     }
 
     public RdsUpgradeV4Response upgradeRds(NameOrCrn nameOrCrn, TargetMajorVersion targetMajorVersion, boolean forced) {
-        String accountId = restRequestThreadLocalService.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         StackDto stackDto = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         StackView stackView = stackDto.getStack();
         MDCBuilder.buildMdcContext(stackView);

@@ -447,8 +447,7 @@ public class StackCreatorService {
     }
 
     private void ensureStackDoesNotExists(String stackName) {
-        String accountId = restRequestThreadLocalService.getAccountId();
-        Optional<StackView> byName = stackDtoService.getStackViewByNameOrCrnOpt(NameOrCrn.ofName(stackName), accountId);
+        Optional<StackView> byName = stackDtoService.getStackViewByNameOrCrnOpt(NameOrCrn.ofName(stackName), ThreadBasedUserCrnProvider.getAccountId());
         if (byName.isPresent()) {
             throw new BadRequestException("Cluster already exists: " + stackName);
         }

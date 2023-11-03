@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.lenient;
@@ -43,7 +44,7 @@ class StackV4ControllerTest {
 
     private static final long WORKSPACE_ID = 1236L;
 
-    private static final String ACCOUNT_ID = "accountId";
+    private static final String ACCOUNT_ID = "hortonworks";
 
     private static final String STACK_NAME = "stack name";
 
@@ -109,10 +110,9 @@ class StackV4ControllerTest {
     @Test
     public void rotateSaltPasswordInternal() {
         String stackCrn = "crn";
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         RotateSaltPasswordRequest request = new RotateSaltPasswordRequest(com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason.MANUAL);
 
-        underTest.rotateSaltPasswordInternal(WORKSPACE_ID, stackCrn, request, USER_CRN);
+        doAs(USER_CRN, () -> underTest.rotateSaltPasswordInternal(WORKSPACE_ID, stackCrn, request, USER_CRN));
 
         verify(stackOperations).rotateSaltPassword(NameOrCrn.ofCrn(stackCrn), ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
     }
@@ -120,10 +120,9 @@ class StackV4ControllerTest {
     @Test
     public void getSaltPasswordStatus() {
         String stackCrn = "crn";
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(stackOperations.getSaltPasswordStatus(NameOrCrn.ofCrn(stackCrn), ACCOUNT_ID)).thenReturn(SaltPasswordStatus.OK);
 
-        SaltPasswordStatusResponse response = underTest.getSaltPasswordStatus(WORKSPACE_ID, stackCrn);
+        SaltPasswordStatusResponse response = doAs(USER_CRN, () -> underTest.getSaltPasswordStatus(WORKSPACE_ID, stackCrn));
 
         assertEquals(SaltPasswordStatus.OK, response.getStatus());
     }
@@ -132,9 +131,8 @@ class StackV4ControllerTest {
     public void modifyProxyConfigInternal() {
         String stackCrn = "crn";
         String previousProxyConfigCrn = "proxy-crn";
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
 
-        underTest.modifyProxyConfigInternal(WORKSPACE_ID, stackCrn, previousProxyConfigCrn, USER_CRN);
+        doAs(USER_CRN, () -> underTest.modifyProxyConfigInternal(WORKSPACE_ID, stackCrn, previousProxyConfigCrn, USER_CRN));
 
         verify(stackOperations).modifyProxyConfig(NameOrCrn.ofCrn(stackCrn), ACCOUNT_ID, previousProxyConfigCrn);
     }
@@ -143,21 +141,19 @@ class StackV4ControllerTest {
     public void testPrepareClusterUpgradeByCrnInternal() {
         String imageId = "imageId";
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollId");
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(STACK_CRN), ACCOUNT_ID, imageId)).thenReturn(flowIdentifier);
 
-        FlowIdentifier result = underTest.prepareClusterUpgradeByCrnInternal(WORKSPACE_ID, STACK_CRN, imageId, USER_CRN);
+        FlowIdentifier result = doAs(USER_CRN, () -> underTest.prepareClusterUpgradeByCrnInternal(WORKSPACE_ID, STACK_CRN, imageId, USER_CRN));
 
         assertEquals(flowIdentifier, result);
     }
 
     @Test
     void syncTest() {
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         FlowIdentifier flowIdentifier = mock(FlowIdentifier.class);
         when(stackOperations.sync(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID, EnumSet.of(StackType.WORKLOAD, StackType.DATALAKE))).thenReturn(flowIdentifier);
 
-        FlowIdentifier result = underTest.sync(WORKSPACE_ID, STACK_NAME, "dummyAccountId");
+        FlowIdentifier result = doAs(USER_CRN, () -> underTest.sync(WORKSPACE_ID, STACK_NAME, "dummyAccountId"));
 
         assertThat(result).isSameAs(flowIdentifier);
     }
