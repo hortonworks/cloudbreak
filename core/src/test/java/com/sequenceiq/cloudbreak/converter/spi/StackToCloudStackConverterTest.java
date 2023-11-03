@@ -964,7 +964,7 @@ public class StackToCloudStackConverterTest {
         expected.put("key", "value");
         when(stack.getParameters()).thenReturn(expected);
         when(stack.getStack()).thenReturn(stack);
-        when(azureMarketplaceTermsClientService.getAccepted()).thenReturn(input);
+        when(azureMarketplaceTermsClientService.getAccepted(stack.getResourceCrn())).thenReturn(input);
 
         CloudStack result = underTest.convert(stack);
         Map<String, String> parameters = result.getParameters();

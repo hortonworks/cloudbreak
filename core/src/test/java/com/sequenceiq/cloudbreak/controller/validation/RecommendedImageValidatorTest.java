@@ -35,13 +35,9 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 @ExtendWith(MockitoExtension.class)
 public class RecommendedImageValidatorTest {
 
-    private static final String ENVIRONMENT_CRN = "environment_crn";
-
-    private static final String REGION = "region";
+    private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:aa-00-bbb-111-ccc:environment:aa-00-bbb-111-ccc";
 
     private static final String PLATFORM = "AZURE";
-
-    private static final String BLUEPRINT_NAME = "blueprint_name";
 
     @InjectMocks
     private RecommendedImageValidator validator;
@@ -73,7 +69,7 @@ public class RecommendedImageValidatorTest {
 
         CloudbreakUser cloudbreakUser = new CloudbreakUser("testId", "testCrn", "testName", "testEmail", "tenant");
         RecommendedImageValidator.ValidationResult result = validator.validateRecommendedImage(
-                1L, cloudbreakUser, new ImageSettingsV4Request(), "", "", platform, "");
+                1L, cloudbreakUser, new ImageSettingsV4Request(), ENVIRONMENT_CRN, "", platform, "");
 
         assertNull(result.getErrorMsg());
         assertNull(result.getWarningMsg());
@@ -85,7 +81,7 @@ public class RecommendedImageValidatorTest {
 
         CloudbreakUser cloudbreakUser = new CloudbreakUser("testId", "testCrn", "testName", "testEmail", "tenant");
         RecommendedImageValidator.ValidationResult result = validator.validateRecommendedImage(
-                1L, cloudbreakUser, new ImageSettingsV4Request(), "", "", "AZURE", "");
+                1L, cloudbreakUser, new ImageSettingsV4Request(), ENVIRONMENT_CRN, "", "AZURE", "");
 
         assertNull(result.getErrorMsg());
         assertNull(result.getWarningMsg());
@@ -98,7 +94,7 @@ public class RecommendedImageValidatorTest {
 
         CloudbreakUser cloudbreakUser = new CloudbreakUser("testId", "testCrn", "testName", "testEmail", "tenant");
         RecommendedImageValidator.ValidationResult result = validator.validateRecommendedImage(
-                1L, cloudbreakUser, new ImageSettingsV4Request(), "", "", "AZURE", "");
+                1L, cloudbreakUser, new ImageSettingsV4Request(), ENVIRONMENT_CRN, "", "AZURE", "");
 
         assertEquals("Error during validation", result.getErrorMsg());
         assertNull(result.getWarningMsg());
@@ -111,7 +107,7 @@ public class RecommendedImageValidatorTest {
 
         CloudbreakUser cloudbreakUser = new CloudbreakUser("testId", "testCrn", "testName", "testEmail", "tenant");
         RecommendedImageValidator.ValidationResult result = validator.validateRecommendedImage(
-                1L, cloudbreakUser, new ImageSettingsV4Request(), "", "", "AZURE", "");
+                1L, cloudbreakUser, new ImageSettingsV4Request(), ENVIRONMENT_CRN, "", "AZURE", "");
 
         assertNull(result.getErrorMsg());
         assertEquals("Warning during validation", result.getWarningMsg());
@@ -124,7 +120,7 @@ public class RecommendedImageValidatorTest {
         CloudContext cloudContext = CloudContext.Builder.builder().withPlatform(Platform.platform(PLATFORM)).build();
         CloudCredential cloudCredential = new CloudCredential();
         when(authenticator.authenticate(any(), any())).thenReturn(new AuthenticatedContext(cloudContext, cloudCredential));
-        when(azureMarketplaceTermsClientService.getAccepted()).thenReturn(true);
+        when(azureMarketplaceTermsClientService.getAccepted(ENVIRONMENT_CRN)).thenReturn(true);
         Image image = new Image(
                 "imageName",
                 Map.of(),
