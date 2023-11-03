@@ -24,10 +24,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -157,7 +160,7 @@ class ClouderaManagerDecomissionerTest {
     }
 
     @Test
-    public void testDecommissionForNodesNowKnownByCM() throws ApiException {
+    public void testDecommissionForNodesOnlyUnKnownByCM() throws ApiException {
         HostTemplatesResourceApi hostTemplatesResourceApi = mock(HostTemplatesResourceApi.class);
         ApiHostTemplateList apiHostTemplateList = new ApiHostTemplateList();
         apiHostTemplateList.setItems(new ArrayList<>());
@@ -167,9 +170,72 @@ class ClouderaManagerDecomissionerTest {
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
         when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
         ApiHostList apiHostList = new ApiHostList();
-        apiHostList.addItemsItem(createApiHostRef("host1.example.com"));
+        apiHostList.addItemsItem(createApiHostRef("host1.example.com", ApiHealthSummary.GOOD));
         apiHostList.addItemsItem(createApiHostRef("host2.example.com", ApiHealthSummary.BAD));
-        apiHostList.addItemsItem(createApiHostRef("host5.example.com"));
+        apiHostList.addItemsItem(createApiHostRef("host5.example.com", ApiHealthSummary.GOOD));
+        when(hostsResourceApi.readHosts(any(), any(), any())).thenReturn(apiHostList);
+
+        InstanceMetaData healthy1 = createInstanceMetadata(InstanceStatus.SERVICES_HEALTHY, "host1.example.com", "compute");
+        InstanceMetaData bad1 = createInstanceMetadata(InstanceStatus.SERVICES_HEALTHY, "host2.example.com", "compute");
+        InstanceMetaData unknown1 = createInstanceMetadata(InstanceStatus.ORCHESTRATION_FAILED, "host3.example.com", "compute");
+        InstanceMetaData unknown2 = createInstanceMetadata(InstanceStatus.ORCHESTRATION_FAILED, "host4.example.com", "compute");
+        InstanceMetaData healthy2 = createInstanceMetadata(InstanceStatus.SERVICES_HEALTHY, "host5.example.com", "compute");
+
+        Set<InstanceMetadataView> instanceMetaDataSet = Set.of(unknown1, unknown2, healthy1, healthy2, bad1);
+        StackDtoDelegate stack = getStack();
+
+        Set<InstanceMetadataView> removableInstances = underTest.collectDownscaleCandidates(client, stack, "compute", 2, instanceMetaDataSet);
+        assertEquals(2, removableInstances.size());
+        assertTrue(removableInstances.contains(unknown1));
+        assertTrue(removableInstances.contains(unknown2));
+    }
+
+    @Test
+    public void testDecommissionForNodesUnKnownByCMAndUnhealthy() throws ApiException {
+        HostTemplatesResourceApi hostTemplatesResourceApi = mock(HostTemplatesResourceApi.class);
+        ApiHostTemplateList apiHostTemplateList = new ApiHostTemplateList();
+        apiHostTemplateList.setItems(new ArrayList<>());
+        when(hostTemplatesResourceApi.readHostTemplates(any())).thenReturn(apiHostTemplateList);
+        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(client)).thenReturn(hostTemplatesResourceApi);
+
+        HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
+        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        ApiHostList apiHostList = new ApiHostList();
+        apiHostList.addItemsItem(createApiHostRef("host1.example.com", ApiHealthSummary.GOOD));
+        apiHostList.addItemsItem(createApiHostRef("host2.example.com", ApiHealthSummary.BAD));
+        apiHostList.addItemsItem(createApiHostRef("host5.example.com", ApiHealthSummary.GOOD));
+        when(hostsResourceApi.readHosts(any(), any(), any())).thenReturn(apiHostList);
+
+        InstanceMetaData healthy1 = createInstanceMetadata(InstanceStatus.SERVICES_HEALTHY, "host1.example.com", "compute");
+        InstanceMetaData bad1 = createInstanceMetadata(InstanceStatus.SERVICES_HEALTHY, "host2.example.com", "compute");
+        InstanceMetaData unknown1 = createInstanceMetadata(InstanceStatus.ORCHESTRATION_FAILED, "host3.example.com", "compute");
+        InstanceMetaData unknown2 = createInstanceMetadata(InstanceStatus.ORCHESTRATION_FAILED, "host4.example.com", "compute");
+        InstanceMetaData healthy2 = createInstanceMetadata(InstanceStatus.SERVICES_HEALTHY, "host5.example.com", "compute");
+
+        Set<InstanceMetadataView> instanceMetaDataSet = Set.of(unknown1, unknown2, healthy1, healthy2, bad1);
+        StackDtoDelegate stack = getStack();
+
+        Set<InstanceMetadataView> removableInstances = underTest.collectDownscaleCandidates(client, stack, "compute", 3, instanceMetaDataSet);
+        assertEquals(3, removableInstances.size());
+        assertTrue(removableInstances.contains(unknown1));
+        assertTrue(removableInstances.contains(unknown2));
+        assertTrue(removableInstances.contains(bad1));
+    }
+
+    @Test
+    public void testDecommissionForNodesUnKnownByCMAndUnHealthyAndHealthy() throws ApiException {
+        HostTemplatesResourceApi hostTemplatesResourceApi = mock(HostTemplatesResourceApi.class);
+        ApiHostTemplateList apiHostTemplateList = new ApiHostTemplateList();
+        apiHostTemplateList.setItems(new ArrayList<>());
+        when(hostTemplatesResourceApi.readHostTemplates(any())).thenReturn(apiHostTemplateList);
+        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(client)).thenReturn(hostTemplatesResourceApi);
+
+        HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
+        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        ApiHostList apiHostList = new ApiHostList();
+        apiHostList.addItemsItem(createApiHostRef("host1.example.com", ApiHealthSummary.GOOD));
+        apiHostList.addItemsItem(createApiHostRef("host2.example.com", ApiHealthSummary.BAD));
+        apiHostList.addItemsItem(createApiHostRef("host5.example.com", ApiHealthSummary.GOOD));
         when(hostsResourceApi.readHosts(any(), any(), any())).thenReturn(apiHostList);
 
         InstanceMetaData healthy1 = createInstanceMetadata(InstanceStatus.SERVICES_HEALTHY, "host1.example.com", "compute");
@@ -187,6 +253,172 @@ class ClouderaManagerDecomissionerTest {
         assertTrue(removableInstances.contains(failed2));
         assertTrue(removableInstances.contains(healthy2));
         assertTrue(removableInstances.contains(bad1));
+    }
+
+    static Object[][] testDataMultiAz() {
+        return new Object[][]{
+                {
+                        "collectDownscaleCandidatesMultiAz_NotKnownInCmOnly",
+                        List.of(List.of("host1.example.com", "BAD", "1"),
+                                List.of("host2.example.com", "NA", "1"),
+                                List.of("host3.example.com", "BAD", "2"),
+                                List.of("host4.example.com", "GOOD", "2"),
+                                List.of("host5.example.com", "NA", "3")),
+                        2,
+                        List.of("host5.example.com", "host2.example.com")
+                },
+                {
+                        "collectDownscaleCandidatesMultiAz_UnHealthyOnly",
+                        List.of(List.of("host1.example.com", "GOOD", "1"),
+                                List.of("host2.example.com", "BAD", "1"),
+                                List.of("host3.example.com", "BAD", "2"),
+                                List.of("host4.example.com", "GOOD", "2"),
+                                List.of("host5.example.com", "BAD", "3")),
+                        2,
+                        List.of("host2.example.com", "host3.example.com")
+                },
+                {
+                        "collectDownscaleCandidatesMultiAz_NotKnownInCmAndUnHealthy",
+                        List.of(List.of("host1.example.com", "GOOD", "1"),
+                                List.of("host2.example.com", "NA", "1"),
+                                List.of("host3.example.com", "BAD", "2"),
+                                List.of("host4.example.com", "GOOD", "2"),
+                                List.of("host5.example.com", "BAD", "3")),
+                        2,
+                        List.of("host2.example.com", "host3.example.com")
+                },
+                {
+                        "collectDownscaleCandidatesMultiAz_NotKnownInCmAndUnHealthyMultiZones",
+                        List.of(List.of("host1.example.com", "GOOD", "1"),
+                                List.of("host2.example.com", "NA", "1"),
+                                List.of("host3.example.com", "BAD", "2"),
+                                List.of("host4.example.com", "GOOD", "2"),
+                                List.of("host5.example.com", "BAD", "3"),
+                                List.of("host6.example.com", "GOOD", "3")),
+                        3,
+                        List.of("host2.example.com", "host3.example.com", "host5.example.com")
+                },
+                {
+                        "collectDownscaleCandidatesMultiAz_NotKnownInCmAndHealthyMultiZones",
+                        List.of(List.of("host1.example.com", "GOOD", "1"),
+                                List.of("host2.example.com", "NA", "1"),
+                                List.of("host3.example.com", "GOOD", "2"),
+                                List.of("host4.example.com", "GOOD", "2"),
+                                List.of("host5.example.com", "GOOD", "3")),
+                        2,
+                        List.of("host2.example.com", "host4.example.com")
+                },
+                {
+                        "collectDownscaleCandidatesMultiAz_HealthyNodesMultiAzs",
+                        List.of(List.of("host1.example.com", "GOOD", "1"),
+                                List.of("host2.example.com", "GOOD", "1"),
+                                List.of("host3.example.com", "GOOD", "2"),
+                                List.of("host4.example.com", "GOOD", "2"),
+                                List.of("host5.example.com", "GOOD", "3")),
+                        2,
+                        List.of("host2.example.com", "host4.example.com")
+                },
+                {
+                        "collectDownscaleCandidatesMultiAz_AllNodes",
+                        List.of(List.of("host1.example.com", "GOOD", "1"),
+                                List.of("host2.example.com", "GOOD", "1"),
+                                List.of("host3.example.com", "GOOD", "2"),
+                                List.of("host4.example.com", "GOOD", "2"),
+                                List.of("host5.example.com", "GOOD", "3")),
+                        5,
+                        List.of("host1.example.com", "host2.example.com", "host3.example.com", "host4.example.com", "host5.example.com")
+                },
+                {
+                        "collectDownscaleCandidatesMultiAz_NotKnownInCmAndHealthyAndUnHealthyInSameZone",
+                        List.of(List.of("host1.example.com", "GOOD", "1"),
+                                List.of("host2.example.com", "NA", "1"),
+                                List.of("host3.example.com", "BAD", "1"),
+                                List.of("host4.example.com", "GOOD", "1"),
+                                List.of("host5.example.com", "GOOD", "2"),
+                                List.of("host4.example.com", "GOOD", "3")),
+                        3,
+                        List.of("host2.example.com", "host3.example.com", "host4.example.com")
+                },
+                {
+                        "collectDownscaleCandidatesMultiAz_NotKnownInCmAndHealthyAndUnHealthyWithZonesNotPopulated",
+                        List.of(List.of("host1.example.com", "GOOD", "NA"),
+                                List.of("host2.example.com", "NA", "NA"),
+                                List.of("host3.example.com", "BAD", "NA"),
+                                List.of("host4.example.com", "GOOD", "NA"),
+                                List.of("host5.example.com", "GOOD", "NA")),
+                        3,
+                        List.of("host2.example.com", "host3.example.com", "host5.example.com")
+                },
+                {
+                        "collectDownscaleCandidatesMultiAz_HealthyFromAnyZone",
+                        List.of(List.of("host1.example.com", "GOOD", "1"),
+                                List.of("host2.example.com", "GOOD", "1"),
+                                List.of("host3.example.com", "GOOD", "2"),
+                                List.of("host4.example.com", "GOOD", "3")),
+                        2,
+                        List.of("host2.example.com", "host1.example.com:host3.example.com:host4.example.com")
+                }
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("testDataMultiAz")
+    public void collectDownscaleCandidatesMultiAz(String testName, List<List<String>> input, Integer scalingAdjustment, List<String> expectedHosts)
+            throws ApiException {
+        HostTemplatesResourceApi hostTemplatesResourceApi = mock(HostTemplatesResourceApi.class);
+        ApiHostTemplateList apiHostTemplateList = new ApiHostTemplateList();
+        apiHostTemplateList.setItems(new ArrayList<>());
+        when(hostTemplatesResourceApi.readHostTemplates(any())).thenReturn(apiHostTemplateList);
+        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(client)).thenReturn(hostTemplatesResourceApi);
+
+        HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
+        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        ApiHostList apiHostList = new ApiHostList();
+        for (List<String> hostInfo : input) {
+            if (!hostInfo.get(1).equals("NA")) {
+                apiHostList.addItemsItem(createApiHostRef(hostInfo.get(0), ApiHealthSummary.fromValue(hostInfo.get(1))));
+            }
+        }
+        when(hostsResourceApi.readHosts(any(), any(), any())).thenReturn(apiHostList);
+
+        Set<InstanceMetadataView> instanceMetaDataSet = new HashSet<>();
+
+        for (int i = 0; i < input.size(); i++) {
+            instanceMetaDataSet.add(createInstanceMetadata("instance" + i,
+                    InstanceStatus.SERVICES_HEALTHY, input.get(i).get(0), "compute", input.get(i).get(2)));
+        }
+
+        StackDtoDelegate stack = getStack(true);
+        Set<InstanceMetadataView> removableInstances = underTest.collectDownscaleCandidates(client, stack, "compute",
+                scalingAdjustment, instanceMetaDataSet);
+        assertEquals(expectedHosts.size(), removableInstances.size());
+
+        Set<String> removableHosts = removableInstances.stream()
+                .map(InstanceMetadataView::getDiscoveryFQDN)
+                .collect(Collectors.toSet());
+
+        assertTrue(matchExpectedHosts(removableHosts, expectedHosts), () -> String.format("removableHosts: %s, expectedHosts: %s",
+                removableHosts, expectedHosts));
+    }
+
+    private boolean matchExpectedHosts(Set<String> removableHosts, List<String> expectedHosts) {
+        for (String host : expectedHosts) {
+            String [] anyHosts = host.split(":");
+            boolean anyHostMatch = false;
+            for (String anyHost : anyHosts) {
+                if (removableHosts.contains(anyHost)) {
+                    if (anyHostMatch) {
+                        return false;
+                    } else {
+                        anyHostMatch = true;
+                    }
+                }
+            }
+            if (!anyHostMatch) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Test
@@ -393,9 +625,18 @@ class ClouderaManagerDecomissionerTest {
     }
 
     private InstanceMetaData createInstanceMetadata(InstanceStatus servicesHealthy, String runningInstanceFqdn, String instanceGroupName) {
+        return createInstanceMetadata(null, servicesHealthy, runningInstanceFqdn, instanceGroupName, null);
+    }
+
+    private InstanceMetaData createInstanceMetadata(String instanceId, InstanceStatus servicesHealthy, String runningInstanceFqdn,
+            String instanceGroupName, String availabilityZone) {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setInstanceId(instanceId);
         instanceMetaData.setInstanceStatus(servicesHealthy);
         instanceMetaData.setDiscoveryFQDN(runningInstanceFqdn);
+        if (!"NA".equals(availabilityZone)) {
+            instanceMetaData.setAvailabilityZone(availabilityZone);
+        }
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName(instanceGroupName);
         instanceMetaData.setInstanceGroup(instanceGroup);
@@ -421,9 +662,14 @@ class ClouderaManagerDecomissionerTest {
     }
 
     private Stack getStack() {
+        return getStack(false);
+    }
+
+    private Stack getStack(boolean multiAz) {
         Stack stack = new Stack();
         stack.setName(STACK_NAME);
         stack.setPlatformVariant("AWS");
+        stack.setMultiAz(multiAz);
         return stack;
     }
 }

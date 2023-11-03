@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cm;
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -48,6 +49,8 @@ import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
@@ -81,21 +84,6 @@ public class ClouderaManagerDecomissioner {
 
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
-
-    private final Comparator<? super ApiHost> hostHealthComparator = (host1, host2) -> {
-        boolean host1Healthy = ApiHealthSummary.GOOD.equals(host1.getHealthSummary());
-        boolean host2Healthy = ApiHealthSummary.GOOD.equals(host2.getHealthSummary());
-
-        if (host1Healthy && host2Healthy) {
-            return host2.getHostname().compareTo(host1.getHostname());
-        } else if (host1Healthy) {
-            return 1;
-        } else if (host2Healthy) {
-            return -1;
-        } else {
-            return host2.getHostname().compareTo(host1.getHostname());
-        }
-    };
 
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
@@ -198,18 +186,25 @@ public class ClouderaManagerDecomissioner {
                             .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                             .anyMatch(instanceMetaData -> instanceMetaData.getDiscoveryFQDN().equals(host.getHostname())))
                     .collect(Collectors.toList());
-
-            Set<String> hostsToRemove = apiHosts.stream()
-                    .sorted(hostHealthComparator)
-                    .limit(Math.abs(scalingAdjustment) - instancesToRemove.size())
-                    .map(ApiHost::getHostname)
-                    .collect(Collectors.toSet());
-
-            Set<InstanceMetadataView> clouderaManagerNodesToRemove = instancesForHostGroup.stream()
-                    .filter(instanceMetaData -> hostsToRemove.contains(instanceMetaData.getDiscoveryFQDN()))
-                    .collect(Collectors.toSet());
-            instancesToRemove.addAll(clouderaManagerNodesToRemove);
-
+            int numInstanceToRemove = Math.abs(scalingAdjustment) - instancesToRemove.size();
+            if (numInstanceToRemove > 0) {
+                Set<String> healthyHosts = apiHosts.stream().filter(host -> ApiHealthSummary.GOOD.equals(host.getHealthSummary()))
+                        .map(ApiHost::getHostname)
+                        .collect(Collectors.toSet());
+                Set<InstanceMetadataView> usedInstances = instancesForHostGroup.stream()
+                        .filter(instanceMetaData -> !instancesToRemove.contains(instanceMetaData))
+                        .collect(Collectors.toSet());
+                Set<InstanceMetadataView> usedInstancesToRemove = null;
+                if (stack.getStack() != null && stack.getStack().isMultiAz()) {
+                    usedInstancesToRemove = calculateDownscaleCandidatesForMultiAz(usedInstances, numInstanceToRemove, healthyHosts);
+                } else {
+                    usedInstancesToRemove = usedInstances.stream()
+                            .sorted(healthComparator(healthyHosts))
+                            .limit(numInstanceToRemove)
+                            .collect(Collectors.toSet());
+                }
+                instancesToRemove.addAll(usedInstancesToRemove);
+            }
             LOGGER.debug("Downscale candidates: [{}]", instancesToRemove
                     .stream()
                     .map(InstanceMetadataView::getInstanceId)
@@ -640,6 +635,63 @@ public class ClouderaManagerDecomissioner {
             } catch (ApiException e) {
                 LOGGER.error("Failed to read roles: service: {} filter: {}", serviceName, filter, e);
                 throw new CloudbreakServiceException(e.getMessage(), e);
+            }
+        };
+    }
+
+    private Set<InstanceMetadataView> calculateDownscaleCandidatesForMultiAz(Set<InstanceMetadataView> allInstances,
+            int numInstancesToRemove, Set<String> healthyHosts) {
+        Map<String, Collection<InstanceMetadataView>> availabilityZoneToNodesMap = allInstances.stream()
+                .collect(Multimaps.toMultimap(
+                        InstanceMetadataView::getAvailabilityZone,
+                        Function.identity(),
+                ArrayListMultimap::create)).asMap();
+        LOGGER.debug("Availability Zone to Nodes mapping is {}", availabilityZoneToNodesMap);
+        Set<InstanceMetadataView> instancesToRemove = new HashSet<>();
+        for (int instanceCountToRemove = numInstancesToRemove; !availabilityZoneToNodesMap.isEmpty() && instanceCountToRemove > 0; instanceCountToRemove--) {
+            Map.Entry<String, Collection<InstanceMetadataView>> availabilityZoneWithInstances = Collections.max(availabilityZoneToNodesMap.entrySet(),
+                    Map.Entry.comparingByValue(comparatorForDownscaleNodesInMultiAz(healthyHosts)));
+            LOGGER.debug("Node for downscale is present in {}", availabilityZoneWithInstances.getKey());
+            Optional<InstanceMetadataView> instanceToDelete = availabilityZoneWithInstances.getValue().stream()
+                    .sorted(healthComparator(healthyHosts))
+                    .findFirst();
+            instanceToDelete.ifPresent(instance -> {
+                instancesToRemove.add(instance);
+                availabilityZoneWithInstances.getValue().remove(instance);
+            });
+        }
+        LOGGER.debug("Downscale candidates for multiAz stack are {}", instancesToRemove);
+        return instancesToRemove;
+    }
+
+    private Comparator<Collection<InstanceMetadataView>> comparatorForDownscaleNodesInMultiAz(Set<String> healthyHosts) {
+        return (instances1, instances2) -> {
+            long numUnhealthyNodes1 = getNumberOfUnhealthyNodes(instances1, healthyHosts);
+            long numUnhealthyNodes2 = getNumberOfUnhealthyNodes(instances2, healthyHosts);
+            if (numUnhealthyNodes1 != numUnhealthyNodes2) {
+                return (int) (numUnhealthyNodes1 - numUnhealthyNodes2);
+            } else {
+                return instances1.size() - instances2.size();
+            }
+        };
+    }
+
+    private long getNumberOfUnhealthyNodes(Collection<InstanceMetadataView> instances, Set<String> healthyHosts) {
+        return instances.stream().filter(instance -> !healthyHosts.contains(instance.getDiscoveryFQDN())).count();
+    }
+
+    private Comparator<InstanceMetadataView> healthComparator(Set<String> healthyHosts) {
+        return (instance1, instance2) -> {
+            boolean instance1Healthy = healthyHosts.contains(instance1.getDiscoveryFQDN());
+            boolean instance2Healthy = healthyHosts.contains(instance2.getDiscoveryFQDN());
+            if (instance1Healthy && instance2Healthy) {
+                return instance2.getDiscoveryFQDN().compareTo(instance1.getDiscoveryFQDN());
+            } else if (instance1Healthy) {
+                return 1;
+            } else if (instance2Healthy) {
+                return -1;
+            } else {
+                return instance2.getDiscoveryFQDN().compareTo(instance1.getDiscoveryFQDN());
             }
         };
     }
