@@ -13,6 +13,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -50,6 +52,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonCloudWatchClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEfsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.metrics.AwsMetricPublisher;
+import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AsgInstanceDetachWaiter;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -71,6 +74,7 @@ import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
+import com.sequenceiq.cloudbreak.polling.Poller;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -219,6 +223,9 @@ public class AwsRepairTest {
     private AwsMetricPublisher awsMetricPublisher;
 
     @MockBean
+    private Poller<Boolean> poller;
+
+    @MockBean
     private AwsSyncUserDataService awsSyncUserDataService;
 
     @Test
@@ -232,6 +239,8 @@ public class AwsRepairTest {
     }
 
     private void setup() {
+        doAnswer(invocation -> ((AsgInstanceDetachWaiter) invocation.getArgument(2)).process())
+                .when(poller).runPoller(nullable(Long.class), nullable(Long.class), any());
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(amazonEC2Client);
         when(commonAwsClient.createEc2Client(any(), anyString())).thenReturn(amazonEC2Client);
         when(awsClient.createElasticFileSystemClient(any(), anyString())).thenReturn(amazonEfsClient);

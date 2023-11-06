@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.polling.Poller;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
@@ -53,6 +54,10 @@ import software.amazon.awssdk.services.ec2.waiters.Ec2Waiter;
 
 @Service
 public class AwsDownscaleService {
+
+    public static final int DETACH_POLLER_SLEEP_TIME_SECONDS = 5;
+
+    public static final int DETACH_POLLER_DURATION_IN_MINUTES = 5;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsDownscaleService.class);
 
@@ -80,6 +85,9 @@ public class AwsDownscaleService {
 
     @Inject
     private LoadBalancerService loadBalancerService;
+
+    @Inject
+    private Poller<Boolean> poller;
 
     public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vmsToDownscale) {
         if (!vmsToDownscale.isEmpty()) {
@@ -212,6 +220,8 @@ public class AwsDownscaleService {
                 LOGGER.info("Detach instances from asGroupName: {}, instanceIdsToDetach: {}, result: {}", asGroupName,
                         instanceIdsToDetach, result);
             }
+            AsgInstanceDetachWaiter asgInstanceDetachWaiter = new AsgInstanceDetachWaiter(amazonASClient, asGroupName, instanceIdsToDetach);
+            poller.runPoller(DETACH_POLLER_SLEEP_TIME_SECONDS, DETACH_POLLER_DURATION_IN_MINUTES, asgInstanceDetachWaiter);
         } catch (AwsServiceException e) {
             LOGGER.info("Detach instances failed: {}", instanceIdsToDownscale, e);
             throw e;
