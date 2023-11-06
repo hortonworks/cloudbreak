@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.flow.stack.image.change.action;
 
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_FALLBACK_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_FALLBACK_FINISHED_EVENT;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,21 +19,29 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
+import com.sequenceiq.freeipa.dto.ImageWrapper;
+import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Resource;
+import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvent;
+import com.sequenceiq.freeipa.flow.stack.provision.PrepareImageResultToStackEventConverter;
+import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackSuccess;
+import com.sequenceiq.freeipa.service.image.ImageFallbackService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 
@@ -62,12 +72,27 @@ public class ImageChangeActions {
             @Inject
             private ImageService imageService;
 
+            @Inject
+            private ImageFallbackService imageFallbackService;
+
             @Override
-            protected void doExecute(StackContext context, ImageChangeEvent payload, Map<Object, Object> variables) throws Exception {
-                CloudStack cloudStack = getCloudStackConverter().convert(context.getStack());
-                Image image = imageConverter.convert(imageService.getByStack(context.getStack()));
-                PrepareImageRequest<Object> request = new PrepareImageRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudStack, image);
-                LOGGER.info("Prepare image: {}", image);
+            protected void doExecute(StackContext context, ImageChangeEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                CloudContext cloudContext = context.getCloudContext();
+
+                ImageEntity imageEntity = imageService.getByStack(stack);
+                Image image = imageConverter.convert(imageEntity);
+                String regionName = cloudContext.getLocation().getRegion().value();
+                String platform = cloudContext.getPlatform().getValue();
+                String fallbackImageName = null;
+                if (imageFallbackService.imageFallbackPermitted(imageEntity, stack)) {
+                    ImageWrapper imageWrapper = imageFallbackService.getImageWrapper(imageEntity, stack);
+                    fallbackImageName = imageService.determineImageNameByRegion(platform, regionName, imageWrapper.getImage());
+                }
+                CloudStack cloudStack = getCloudStackConverter().convert(stack);
+                PrepareImageRequest<Object> request = new PrepareImageRequest<>(cloudContext, context.getCloudCredential(), cloudStack, image,
+                        PrepareImageType.EXECUTED_DURING_IMAGE_CHANGE, fallbackImageName);
+                LOGGER.info("Prepare image: {}, fallback image:{}", image, fallbackImageName);
                 sendEvent(context, request);
             }
 
@@ -75,6 +100,38 @@ public class ImageChangeActions {
             protected Object getFailurePayload(ImageChangeEvent payload, Optional<StackContext> flowContext, Exception ex) {
                 LOGGER.error("[PREPARE_IMAGE_STATE] failed", ex);
                 return new StackFailureEvent(IMAGE_CHANGE_FAILED_EVENT.event(), payload.getResourceId(), ex);
+            }
+        };
+    }
+
+    @Bean(name = "SET_FALLBACK_IMAGE_STATE")
+    public AbstractImageChangeAction<?> imageFallbackAction() {
+        return new AbstractImageChangeAction<>(StackEvent.class) {
+
+            @Inject
+            private ImageFallbackService imageFallbackService;
+
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                Long stackId = stack.getId();
+                ImageEntity image = stack.getImage();
+                if (imageFallbackService.imageFallbackPermitted(image, stack)) {
+                    imageFallbackService.performImageFallback(image, stack);
+                }
+                ImageFallbackSuccess imageFallbackSuccess = new ImageFallbackSuccess(stackId);
+                sendEvent(context, IMAGE_FALLBACK_FINISHED_EVENT.event(), imageFallbackSuccess);
+            }
+
+            @Override
+            protected Object getFailurePayload(StackEvent payload, Optional<StackContext> flowContext, Exception ex) {
+                LOGGER.error("[IMAGE_FALLBACK_STATE] failed", ex);
+                return new StackFailureEvent(IMAGE_FALLBACK_FAILED_EVENT.event(), payload.getResourceId(), ex);
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
+                payloadConverters.add(new PrepareImageResultToStackEventConverter());
             }
         };
     }

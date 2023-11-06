@@ -2,12 +2,9 @@ package com.sequenceiq.freeipa.flow.stack.provision.handler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,15 +17,13 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
-import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackFailed;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackRequest;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackSuccess;
 import com.sequenceiq.freeipa.service.image.FreeIpaImageFilterSettings;
-import com.sequenceiq.freeipa.service.image.ImageProvider;
+import com.sequenceiq.freeipa.service.image.ImageFallbackService;
 import com.sequenceiq.freeipa.service.image.ImageProviderFactory;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -53,6 +48,9 @@ class ImageFallbackHandlerTest {
     @Mock
     private AzureImageFormatValidator azureImageFormatValidator;
 
+    @Mock
+    private ImageFallbackService imageFallbackService;
+
     @InjectMocks
     private ImageFallbackHandler imageFallbackHandler;
 
@@ -75,11 +73,11 @@ class ImageFallbackHandlerTest {
 
         assertTrue(result instanceof ImageFallbackFailed);
         assertEquals("Failed to start instances with the designated image: cloudera:image. Image fallback is only supported on the Azure cloud platform",
-                ((ImageFallbackFailed) result).getException().getMessage());
+                result.getException().getMessage());
     }
 
     @Test
-    public void testDoAcceptForRedhat8VhdImage() {
+    public void testDoAcceptForAzureOnlyMarketplaceImagesEnabled() {
         HandlerEvent<ImageFallbackRequest> event = mock(HandlerEvent.class);
         ImageFallbackRequest request = mock(ImageFallbackRequest.class);
         Stack stack = mock(Stack.class);
@@ -89,27 +87,24 @@ class ImageFallbackHandlerTest {
         when(request.getResourceId()).thenReturn(123L);
         when(stackService.getStackById(123L)).thenReturn(stack);
         when(stack.getCloudPlatform()).thenReturn("AZURE");
+        when(entitlementService.azureOnlyMarketplaceImagesEnabled(anyString())).thenReturn(true);
         when(imageService.getByStack(stack)).thenReturn(currentImage);
-        when(currentImage.getOsType()).thenReturn("redhat8");
-        when(currentImage.getImageName()).thenReturn("http://redhat8.vhd");
-
-        when(azureImageFormatValidator.isVhdImageFormat(anyString())).thenReturn(true);
+        when(currentImage.getImageName()).thenReturn("currentImage");
 
         Selectable result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> imageFallbackHandler.doAccept(event));
 
         assertTrue(result instanceof ImageFallbackFailed);
-        assertEquals("Failed to start instances with image: http://redhat8.vhd. No valid fallback path from Redhat 8 VHD image.",
-                ((ImageFallbackFailed) result).getException().getMessage());
+        assertEquals("Azure Marketplace image terms were not accepted, cannot start instances with image: currentImage. Fallback to VHD image is not possible,"
+                        + " only Azure Marketplace images allowed. Please accept image terms or turn on automatic image terms acceptance.",
+                result.getException().getMessage());
     }
 
     @Test
-    public void testDoAcceptSuccessfulFallback() throws Exception {
+    public void testDoAcceptSuccessfulFallback() {
         HandlerEvent<ImageFallbackRequest> event = mock(HandlerEvent.class);
         ImageFallbackRequest request = mock(ImageFallbackRequest.class);
         Stack stack = mock(Stack.class);
         ImageEntity currentImage = mock(ImageEntity.class);
-        ImageProvider imageProvider = mock(ImageProvider.class);
-        ImageWrapper imageWrapper = ImageWrapper.ofCoreImage(mock(Image.class), "catalogName");
         FreeIpaImageFilterSettings settings =
                 new FreeIpaImageFilterSettings(null, null, null, null, null, "azure", false);
 
@@ -118,13 +113,11 @@ class ImageFallbackHandlerTest {
         when(stackService.getStackById(123L)).thenReturn(stack);
         when(stack.getCloudPlatform()).thenReturn("AZURE");
         when(imageService.getByStack(stack)).thenReturn(currentImage);
-        when(imageProviderFactory.getImageProvider(any())).thenReturn(imageProvider);
-        when(imageProvider.getImage(settings)).thenReturn(Optional.of(imageWrapper));
 
         Selectable result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> imageFallbackHandler.doAccept(event));
 
         assertTrue(result instanceof ImageFallbackSuccess);
-        assertEquals(123L, ((ImageFallbackSuccess) result).getResourceId());
+        assertEquals(123L, result.getResourceId());
     }
 
 }

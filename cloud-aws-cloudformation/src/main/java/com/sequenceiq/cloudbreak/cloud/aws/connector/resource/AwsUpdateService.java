@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -60,7 +59,7 @@ public class AwsUpdateService {
                         && StringUtils.isNotBlank(resource.getStringParameter(CloudResource.IMAGE)))) {
                     List<CloudResource> launchConfigurationResources = resources.stream()
                             .filter(resource -> CommonResourceType.TEMPLATE == resource.getType().getCommonResourceType()
-                                    && StringUtils.isNotBlank(resource.getStringParameter(CloudResource.IMAGE))).collect(Collectors.toList());
+                                    && StringUtils.isNotBlank(resource.getStringParameter(CloudResource.IMAGE))).toList();
 
                     CloudResource cfResource = getCloudFormationStack(resources);
                     awsImageUpdateService.updateImage(authenticatedContext, stack, cfResource);

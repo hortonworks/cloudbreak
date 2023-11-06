@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
@@ -89,7 +90,8 @@ public abstract class AwsSetup implements Setup {
     }
 
     @Override
-    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image) {
+    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image, PrepareImageType prepareImageType,
+            String fallbackTargetImage) {
         LOGGER.debug("prepare image has been executed");
     }
 

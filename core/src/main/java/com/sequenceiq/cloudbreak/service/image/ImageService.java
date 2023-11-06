@@ -261,6 +261,18 @@ public class ImageService {
         throw new CloudbreakImageNotFoundException(msg);
     }
 
+    public void updateImageNameForImageComponent(Long stackId, String newImageName) {
+        try {
+            com.sequenceiq.cloudbreak.domain.stack.Component component = componentConfigProviderService.getImageComponent(stackId);
+            Image currentImage = component.getAttributes().get(Image.class);
+            currentImage.setImageName(newImageName);
+            component.setAttributes(new Json(currentImage));
+            componentConfigProviderService.store(component);
+        } catch (CloudbreakImageNotFoundException | IOException e) {
+            LOGGER.warn("This exception ({}) should not happen at all, please investigate", e.getMessage());
+        }
+    }
+
     private String selectImageByRegionPreferDefault(String translatedRegion, Map<String, String> imagesByRegion, String platform)
             throws CloudbreakImageNotFoundException {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();

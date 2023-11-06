@@ -89,7 +89,7 @@ public class SdxCreateActions {
             }
 
             @Override
-            protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 setCorrectSdxIdIfNecessary(context, payload);
                 eventSenderService.notifyEvent(context, ResourceEvent.SDX_CLUSTER_PROVISION_STARTED);
                 SdxValidationRequest req = new SdxValidationRequest(context);
@@ -113,7 +113,7 @@ public class SdxCreateActions {
             }
 
             @Override
-            protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 // When SDX is created as part of re-size flow chain, SDX in payload will not have the correct ID.
                 setCorrectSdxIdIfNecessary(context, payload);
                 StorageValidationRequest req = new StorageValidationRequest(context);
@@ -137,7 +137,7 @@ public class SdxCreateActions {
             }
 
             @Override
-            protected void doExecute(SdxContext context, StorageValidationSuccessEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, StorageValidationSuccessEvent payload, Map<Object, Object> variables) {
                 RdsWaitRequest req = new RdsWaitRequest(context);
                 sendEvent(context, req.selector(), req);
             }

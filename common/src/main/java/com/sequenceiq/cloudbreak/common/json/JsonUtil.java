@@ -136,7 +136,7 @@ public class JsonUtil {
         return null;
     }
 
-    public static JsonNode readTree(String content) throws IOException {
+    public static JsonNode readTree(String content) throws JsonProcessingException {
         return MAPPER.readTree(content);
     }
 

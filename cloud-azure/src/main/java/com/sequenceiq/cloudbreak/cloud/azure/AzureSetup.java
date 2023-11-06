@@ -30,11 +30,13 @@ import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageCopyDetails;
 import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageSetupService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudImageFallbackException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -59,13 +61,16 @@ public class AzureSetup implements Setup {
     private AzureHttpClientConfigurer azureHttpClientConfigurer;
 
     @Override
-    public void prepareImage(AuthenticatedContext ac, CloudStack stack, Image image) {
+    public void prepareImage(AuthenticatedContext ac, CloudStack stack, Image image, PrepareImageType prepareType, String fallbackTargetImage) {
         LOGGER.debug("Prepare image: {}", image);
 
         String region = ac.getCloudContext().getLocation().getRegion().value();
         AzureClient client = ac.getParameter(AzureClient.class);
         try {
-            azureImageSetupService.copyVhdImageIfNecessary(ac, stack, image, region, client);
+            azureImageSetupService.copyVhdImageIfNecessary(ac, stack, image, region, client, prepareType, fallbackTargetImage);
+        } catch (CloudImageFallbackException ex) {
+            LOGGER.debug("Image fallback is necessary: {}", ex.getMessage());
+            throw ex;
         } catch (Exception ex) {
             LOGGER.warn("Could not create image with the specified parameters", ex);
             throwExceptionWithDetails(ac, stack, image, ex);

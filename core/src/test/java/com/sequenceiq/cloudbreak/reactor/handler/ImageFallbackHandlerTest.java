@@ -16,6 +16,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -40,7 +42,7 @@ class ImageFallbackHandlerTest {
 
     @Test
     void testDoAcceptOnlyMarketplaceImagesAllowed() {
-        HandlerEvent<ImageFallbackRequest> event = new HandlerEvent<>(new Event<>(new ImageFallbackRequest(STACK_ID)));
+        HandlerEvent<ImageFallbackRequest> event = new HandlerEvent<>(new Event<>(new ImageFallbackRequest(STACK_ID, createCloudContext())));
         when(entitlementService.azureOnlyMarketplaceImagesEnabled(any())).thenReturn(true);
 
         Selectable result = ThreadBasedUserCrnProvider.doAs("crn:altus:iam:us-west-1:123:user:456", () -> underTest.doAccept(event));
@@ -52,7 +54,7 @@ class ImageFallbackHandlerTest {
 
     @Test
     void testDoAccept() throws Exception {
-        HandlerEvent<ImageFallbackRequest> event = new HandlerEvent<>(new Event<>(new ImageFallbackRequest(STACK_ID)));
+        HandlerEvent<ImageFallbackRequest> event = new HandlerEvent<>(new Event<>(new ImageFallbackRequest(STACK_ID, createCloudContext())));
         when(entitlementService.azureOnlyMarketplaceImagesEnabled(any())).thenReturn(false);
 
         Selectable result = ThreadBasedUserCrnProvider.doAs("crn:altus:iam:us-west-1:123:user:456", () -> underTest.doAccept(event));
@@ -63,14 +65,24 @@ class ImageFallbackHandlerTest {
 
     @Test
     void testDoAcceptException() throws Exception {
-        HandlerEvent<ImageFallbackRequest> event = new HandlerEvent<>(new Event<>(new ImageFallbackRequest(STACK_ID)));
+        HandlerEvent<ImageFallbackRequest> event = new HandlerEvent<>(new Event<>(new ImageFallbackRequest(STACK_ID, createCloudContext())));
         when(entitlementService.azureOnlyMarketplaceImagesEnabled(any())).thenReturn(false);
         CloudbreakServiceException exception = new CloudbreakServiceException("Image component error");
         doThrow(exception).when(imageFallbackService).fallbackToVhd(eq(STACK_ID));
         Selectable result = ThreadBasedUserCrnProvider.doAs("crn:altus:iam:us-west-1:123:user:456", () -> underTest.doAccept(event));
 
         assertTrue(result instanceof ImageFallbackFailed);
-        assertEquals(exception, ((ImageFallbackFailed) result).getException());
+        assertEquals(exception, result.getException());
         verify(imageFallbackService).fallbackToVhd(STACK_ID);
+    }
+
+    private CloudContext createCloudContext() {
+        return CloudContext.Builder.builder()
+                .withId(STACK_ID)
+                .withName("")
+                .withCrn("")
+                .withPlatform(Platform.platform("AZURE"))
+                .withVariant("")
+                .build();
     }
 }

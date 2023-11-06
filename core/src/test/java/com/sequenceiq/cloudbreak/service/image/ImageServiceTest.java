@@ -17,10 +17,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -53,6 +56,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -72,6 +76,8 @@ import com.sequenceiq.common.model.ImageCatalogPlatform;
 public class ImageServiceTest {
 
     private static final Long WORKSPACE_ID = 1L;
+
+    private static final Long STACK_ID = 100L;
 
     private static final String STACK_VERSION = "7.1.0";
 
@@ -149,7 +155,7 @@ public class ImageServiceTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         imageSettingsV4Request = new ImageSettingsV4Request();
         imageSettingsV4Request.setCatalog("aCatalog");
         imageSettingsV4Request.setId("anImageId");
@@ -379,6 +385,24 @@ public class ImageServiceTest {
     }
 
     @Test
+    public void testUpdateImageName() throws CloudbreakImageNotFoundException, IOException {
+        com.sequenceiq.cloudbreak.cloud.model.Image imageModel = new com.sequenceiq.cloudbreak.cloud.model.Image(
+                "anImage", new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>(), "2019-10-24", 1571884856L);
+        Component imageComponent = createImageComponent(imageModel);
+        when(componentConfigProviderService.getImageComponent(STACK_ID)).thenReturn(imageComponent);
+
+        underTest.updateImageNameForImageComponent(STACK_ID, "aNewImage");
+
+        ArgumentCaptor<Component> componentCaptor = ArgumentCaptor.forClass(Component.class);
+        verify(componentConfigProviderService).store(componentCaptor.capture());
+        assertEquals("aNewImage", componentCaptor.getValue().getAttributes().get(com.sequenceiq.cloudbreak.cloud.model.Image.class).getImageName());
+    }
+
+    private Component createImageComponent(com.sequenceiq.cloudbreak.cloud.model.Image image) {
+        return new Component(ComponentType.IMAGE, "target", new Json(image), null);
+    }
+
+    @Test
     public void testDetermineImageNameFound() {
         Image image = mock(Image.class);
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
@@ -490,7 +514,7 @@ public class ImageServiceTest {
     }
 
     @Test
-    public void testGetComponents() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    public void testGetComponents() throws CloudbreakImageCatalogException {
         Stack stack = new Stack();
         stack.setCloudPlatform(PLATFORM);
         stack.setPlatformVariant("VARIANT");
@@ -519,9 +543,7 @@ public class ImageServiceTest {
                 () -> {
                     try {
                         return underTest.getComponents(stack, statedImage, EnumSet.of(IMAGE, CDH_PRODUCT_DETAILS, CM_REPO_DETAILS));
-                    } catch (CloudbreakImageNotFoundException e) {
-                        throw new RuntimeException(e);
-                    } catch (CloudbreakImageCatalogException e) {
+                    } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
                         throw new RuntimeException(e);
                     }
                 });

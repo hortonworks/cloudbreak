@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
+import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.IMAGE_FALLBACK_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.STACK_IMAGE_UPDATE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_IMAGE_UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_IMAGE_UPDATE_FINISHED;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -24,9 +26,12 @@ import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.CheckResult;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
@@ -34,13 +39,18 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
+import com.sequenceiq.cloudbreak.core.flow2.stack.provision.PrepareImageResultToStackEventConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageFallbackSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageUpdateEvent;
+import com.sequenceiq.cloudbreak.reactor.handler.ImageFallbackService;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.flow.core.PayloadConverter;
 
 @Configuration
 public class StackImageUpdateActions {
@@ -99,17 +109,47 @@ public class StackImageUpdateActions {
     @Bean(name = "IMAGE_PREPARE_STATE")
     public AbstractStackImageUpdateAction<?> prepareImageAction() {
         return new AbstractStackImageUpdateAction<>(StackEvent.class) {
+
+            @Inject
+            private ImageFallbackService imageFallbackService;
+
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
-                getStackCreationService().prepareImage(context.getStack().getId(), variables);
+                StackDtoDelegate stack = context.getStack();
+                CloudStack cloudStack = context.getCloudStack();
+
+                getStackCreationService().prepareImage(stack.getId(), variables);
                 try {
-                    Image image = getImageService().getImage(context.getCloudContext().getId());
+                    Image image = getImageService().getImage(stack.getId());
+                    String fallbackImageName = imageFallbackService.getFallbackImageName(stack.getStack(), image);
+                    variables.put(FALLBACK_IMAGE, fallbackImageName == null ? "" : fallbackImageName);
+
                     PrepareImageRequest<Selectable> request =
-                            new PrepareImageRequest<>(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(), image);
+                            new PrepareImageRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudStack, image,
+                                    PrepareImageType.EXECUTED_DURING_IMAGE_CHANGE, fallbackImageName);
                     sendEvent(context, request);
-                } catch (CloudbreakImageNotFoundException e) {
+                } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
                     throw new CloudbreakServiceException(e);
                 }
+            }
+        };
+    }
+
+    @Bean(name = "SET_IMAGE_FALLBACK_STATE")
+    public Action<?, ?> imageFallbackAction() {
+        return new AbstractStackImageUpdateAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                Long stackId = context.getStack().getId();
+                String fallbackImageName = (String) variables.get(FALLBACK_IMAGE);
+                getImageService().updateImageNameForImageComponent(stackId, fallbackImageName);
+                ImageFallbackSuccess imageFallbackSuccess = new ImageFallbackSuccess(stackId);
+                sendEvent(context, IMAGE_FALLBACK_FINISHED_EVENT.event(), imageFallbackSuccess);
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
+                payloadConverters.add(new PrepareImageResultToStackEventConverter());
             }
         };
     }

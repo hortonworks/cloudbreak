@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.CheckResult;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
@@ -54,6 +55,7 @@ import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageUpdateEvent;
+import com.sequenceiq.cloudbreak.reactor.handler.ImageFallbackService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -148,6 +150,9 @@ public class StackImageUpdateActionsTest {
 
     @Mock
     private StackFailureContext failureContext;
+
+    @Mock
+    private ImageFallbackService imageFallbackService;
 
     @InjectMocks
     private final AbstractStackImageUpdateAction<?> checkImageAction = spy(new StackImageUpdateActions().checkImageVersion());
@@ -301,13 +306,14 @@ public class StackImageUpdateActionsTest {
     }
 
     @Test
-    public void prepareImageAction() {
+    public void prepareImageAction() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         FlowEvent flowEvent = Mockito.mock(FlowEvent.class);
         when(stateContext.getEvent()).thenReturn(flowEvent);
         when(flowEvent.name()).thenReturn(EVENT_NAME);
         StackEvent payload = new StackEvent(StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT.event(), 1L);
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.IMAGE_PREPARE_STATE);
+        when(imageFallbackService.getFallbackImageName(any(), any())).thenReturn("fallbackImage");
 
         prepareImageAction.execute(stateContext);
 

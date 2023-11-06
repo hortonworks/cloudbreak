@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
@@ -195,7 +196,8 @@ public class StackCreationActions {
                     StackDto stack = stackDtoService.getById(context.getStackId());
                     CloudStack cloudStack = cloudStackConverter.convert(stack);
                     Image image = imageService.getImage(context.getCloudContext().getId());
-                    return new PrepareImageRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudStack, image);
+                    return new PrepareImageRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudStack, image,
+                            PrepareImageType.EXECUTED_DURING_PROVISIONING);
                 } catch (CloudbreakImageNotFoundException e) {
                     throw new CloudbreakServiceException(e);
                 }
@@ -257,7 +259,7 @@ public class StackCreationActions {
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new ImageFallbackRequest(context.getStackId());
+                return new ImageFallbackRequest(context.getStackId(), context.getCloudContext());
             }
 
             @Override

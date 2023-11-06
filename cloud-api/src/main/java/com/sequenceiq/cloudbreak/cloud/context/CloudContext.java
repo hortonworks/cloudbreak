@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 /**
- * Context object is used to identify messages exchanged between core and Cloud Platfrom. This context object passed along
+ * Context object is used to identify messages exchanged between core and Cloud Platform. This context object passed along
  * with the flow to all methods and also sent back in the Response objects.
  *
  */

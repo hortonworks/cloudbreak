@@ -5,6 +5,7 @@ import static com.azure.resourcemanager.compute.models.PublicNetworkAccess.DISAB
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -41,6 +42,7 @@ import org.mockito.quality.Strictness;
 
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.Region;
+import com.azure.core.management.exception.ManagementError;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.ComputeManager;
 import com.azure.resourcemanager.compute.fluent.ComputeManagementClient;
@@ -80,14 +82,20 @@ import com.azure.resourcemanager.postgresql.PostgreSqlManager;
 import com.azure.resourcemanager.postgresql.models.Server;
 import com.azure.resourcemanager.postgresql.models.Server.Update;
 import com.azure.resourcemanager.postgresql.models.Servers;
+import com.azure.resourcemanager.resources.ResourceManager;
+import com.azure.resourcemanager.resources.fluent.DeploymentsClient;
+import com.azure.resourcemanager.resources.fluent.ResourceManagementClient;
+import com.azure.resourcemanager.resources.fluent.models.WhatIfOperationResultInner;
 import com.azure.resourcemanager.resources.fluentcore.arm.AvailabilityZoneId;
 import com.azure.resourcemanager.resources.fluentcore.arm.models.Resource;
 import com.azure.resourcemanager.resources.fluentcore.model.Creatable;
 import com.azure.resourcemanager.resources.fluentcore.model.HasInnerModel;
 import com.azure.resourcemanager.resources.fluentcore.model.implementation.IndexableRefreshableWrapperImpl;
+import com.azure.resourcemanager.resources.implementation.GenericResourcesImpl;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDisk;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureLoadBalancerFrontend;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureTestUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -312,7 +320,7 @@ class AzureClientTest {
                 .withObjectId("400")
                 .withPermissions(new Permissions().withKeys(List.of(KeyPermissions.WRAP_KEY, KeyPermissions.UNWRAP_KEY))));
 
-        Assertions.assertTrue(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "100"));
+        assertTrue(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "100"));
         Assertions.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "200"));
         Assertions.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "300"));
         Assertions.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "400"));
@@ -482,5 +490,78 @@ class AzureClientTest {
                 when(resourceSkuLocationInfo.zones()).thenReturn(entry.getValue());
                 return resourceSkuInner;
         }).collect(Collectors.toList());
+    }
+
+    @Test
+    void runWhatIfAnalysisShouldReturnEmptyOptionalOnInvalidJson() {
+        String deploymentName = "yourDeploymentName";
+        String invalidJsonTemplate = "invalidJsonTemplate";
+
+        // When
+        Optional<ManagementError> result = underTest.runWhatIfAnalysis(RESOURCE_GROUP_NAME, deploymentName, invalidJsonTemplate);
+
+        // Then
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void runWhatIfAnalysisShouldReturnEmptyOptionalOnSuccess() {
+        String deploymentName = "yourDeploymentName";
+        String validJsonTemplate = "{\"key\":\"value\"}";
+
+        // Mocking the Azure API response
+        WhatIfOperationResultInner operationResult = mock(WhatIfOperationResultInner.class);
+        when(operationResult.status()).thenReturn("Succeeded");
+
+        DeploymentsClient deploymentsClient = getDeploymentsClient();
+        when(deploymentsClient.whatIf(any(), any(), any(), any())).thenReturn(operationResult);
+
+        // When
+        Optional<ManagementError> result = underTest.runWhatIfAnalysis(RESOURCE_GROUP_NAME, deploymentName, validJsonTemplate);
+
+        // Then
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void runWhatIfAnalysisShouldReturnManagementErrorOnFailure() {
+        String deploymentName = "yourDeploymentName";
+        String validJsonTemplate = "{\"key\":\"value\"}";
+
+        String message = "Marketplace purchase eligibilty check returned errors. See inner errors for details.";
+        ManagementError managementError = AzureTestUtils.managementError("MarketplacePurchaseEligibilityFailed", message);
+        List<ManagementError> details = new ArrayList<>();
+        details.add(AzureTestUtils.managementError("123", "detail1"));
+        details.add(AzureTestUtils.managementError("MarketplacePurchaseEligibilityFailed", message));
+        AzureTestUtils.setDetails(managementError, details);
+
+        // Mocking the Azure API response
+        WhatIfOperationResultInner operationResult = mock(WhatIfOperationResultInner.class);
+        when(operationResult.status()).thenReturn("Failed");
+        when(operationResult.error()).thenReturn(managementError);
+
+        // Mocking Azure Client behavior
+        DeploymentsClient deploymentsClient = getDeploymentsClient();
+        when(deploymentsClient.whatIf(any(), any(), any(), any())).thenReturn(operationResult);
+
+        // When
+        Optional<ManagementError> result = underTest.runWhatIfAnalysis(RESOURCE_GROUP_NAME, deploymentName, validJsonTemplate);
+
+        // Then
+        assertTrue(result.isPresent());
+        assertEquals(managementError, result.get());
+    }
+
+    private DeploymentsClient getDeploymentsClient() {
+        // Mocking Azure Client behavior
+        GenericResourcesImpl genericResources = mock(GenericResourcesImpl.class);
+        when(azureResourceManager.genericResources()).thenReturn(genericResources);
+        ResourceManager resourceManager = mock(ResourceManager.class);
+        when(genericResources.manager()).thenReturn(resourceManager);
+        ResourceManagementClient resourceManagementClient = mock(ResourceManagementClient.class);
+        when(resourceManager.serviceClient()).thenReturn(resourceManagementClient);
+        DeploymentsClient deploymentsClient = mock(DeploymentsClient.class);
+        when(resourceManagementClient.getDeployments()).thenReturn(deploymentsClient);
+        return deploymentsClient;
     }
 }

@@ -10,14 +10,17 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 
 @Service
 public class YarnProvisionSetup implements Setup {
+
     @Override
-    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image) {
+    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image, PrepareImageType prepareImageType,
+            String fallbackTargetImage) {
         // There is no image create step in Yarn Cloud
     }
 
