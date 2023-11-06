@@ -39,7 +39,8 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
             "fl.version as version, " +
             "fl.resourceType as resourceType, " +
             "fl.flowTriggerUserCrn as flowTriggerUserCrn, " +
-            "fl.operationType as operationType " +
+            "fl.operationType as operationType, " +
+            "fl.reason as reason " +
             "FROM FlowLog fl " +
             "WHERE fl.flowId = :flowId " +
             "ORDER BY fl.created desc")
@@ -81,8 +82,9 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     Page<FlowLog> findAllByFlowIdsCreatedDesc(@Param("flowIds") Set<String> flowIds, Pageable pageable);
 
     @Modifying
-    @Query("UPDATE FlowLog fl SET fl.stateStatus = :stateStatus, fl.endTime = :endTime WHERE fl.id = :id")
-    void updateLastLogStatusInFlow(@Param("id") Long id, @Param("stateStatus") StateStatus stateStatus, @Param("endTime") Long endTime);
+    @Query("UPDATE FlowLog fl SET fl.stateStatus = :stateStatus, fl.endTime = :endTime, fl.reason = :reason WHERE fl.id = :id")
+    void updateLastLogStatusInFlow(@Param("id") Long id, @Param("stateStatus") StateStatus stateStatus, @Param("endTime") Long endTime,
+            @Param("reason") String reason);
 
     @Modifying
     @Query("DELETE FROM FlowLog fl WHERE fl.finalized = TRUE AND fl.endTime <= :endTime")
@@ -120,7 +122,8 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
             "fl.version as version, " +
             "fl.resourceType as resourceType, " +
             "fl.flowTriggerUserCrn as flowTriggerUserCrn, " +
-            "fl.operationType as operationType " +
+            "fl.operationType as operationType, " +
+            "fl.reason as reason " +
             "FROM FlowLog fl " +
             "WHERE fl.flowChainId IN (:chainIds) " +
             "ORDER BY fl.created DESC")
@@ -140,7 +143,8 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
             "fl.version as version, " +
             "fl.resourceType as resourceType, " +
             "fl.flowTriggerUserCrn as flowTriggerUserCrn, " +
-            "fl.operationType as operationType " +
+            "fl.operationType as operationType, " +
+            "fl.reason as reason " +
             "FROM FlowLog fl " +
             "WHERE fl.flowId = :flowId " +
             "ORDER BY fl.created desc")

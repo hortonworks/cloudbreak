@@ -86,8 +86,8 @@ public abstract class AbstractFlowPoller {
 
         FlowState flowState = flowCheckResponseToFlowStateConverter.convert(flowCheckResponse);
         if (failedStates.contains(flowState)) {
-            String message = String.format("%s process had %s with pollable id %s fail with flow state: %s",
-                    process, flowIdentifier.getType(), flowIdentifier.getPollableId(), flowState.name());
+            String message = String.format("%s process had %s with pollable id %s fail with flow state: %s, reason: %s",
+                    process, flowIdentifier.getType(), flowIdentifier.getPollableId(), flowState.name(), flowCheckResponse.getReason());
             return AttemptResults.breakFor(message);
         } else if (targetStates.contains(flowState)) {
             return AttemptResults.finishWith(flowState);

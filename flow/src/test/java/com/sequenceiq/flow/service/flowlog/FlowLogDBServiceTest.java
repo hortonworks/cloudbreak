@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -84,6 +85,8 @@ class FlowLogDBServiceTest {
 
     private static final String NODE_ID = "node1";
 
+    private static final String REASON = "reason";
+
     private static final String CLOUDBREAK_STACK_CRN = CrnTestUtil.getDatalakeCrnBuilder()
             .setAccountId("acc")
             .setResource("stack")
@@ -129,9 +132,9 @@ class FlowLogDBServiceTest {
         Long currentTime = 123456789L;
         doReturn(currentTime).when(clock).getCurrentTimeMillis();
 
-        underTest.updateLastFlowLogStatus(flowLog, failureEvent);
+        underTest.updateLastFlowLogStatus(flowLog, failureEvent, REASON);
 
-        verify(flowLogRepository, times(1)).updateLastLogStatusInFlow(ID, successful, currentTime);
+        verify(flowLogRepository, times(1)).updateLastLogStatusInFlow(ID, successful, currentTime, REASON);
     }
 
     @Test
@@ -250,7 +253,7 @@ class FlowLogDBServiceTest {
         underTest.cancelTooOldTerminationFlowForResource(1L, 10000L);
         verify(flowLogRepository).finalizeByFlowId(eq("flow1"));
         verify(flowLogRepository, times(0)).finalizeByFlowId(eq("flow2"));
-        verify(flowLogRepository).updateLastLogStatusInFlow(eq(10L), eq(StateStatus.SUCCESSFUL), eq(currentTime));
+        verify(flowLogRepository).updateLastLogStatusInFlow(eq(10L), eq(StateStatus.SUCCESSFUL), eq(currentTime), eq("Cancelled"));
     }
 
     @Test
@@ -268,7 +271,7 @@ class FlowLogDBServiceTest {
         underTest.cancelTooOldTerminationFlowForResource(1L, 10000L);
         verify(flowLogRepository, times(0)).finalizeByFlowId(eq("flow1"));
         verify(flowLogRepository, times(0)).finalizeByFlowId(eq("flow2"));
-        verify(flowLogRepository, times(0)).updateLastLogStatusInFlow(eq(10L), eq(StateStatus.SUCCESSFUL), eq(1L));
+        verify(flowLogRepository, times(0)).updateLastLogStatusInFlow(eq(10L), eq(StateStatus.SUCCESSFUL), eq(1L), isNull());
     }
 
     @Test
@@ -286,7 +289,7 @@ class FlowLogDBServiceTest {
     @Test
     void testTerminate() throws TransactionExecutionException {
         prepareFinalization();
-        FlowLog flowLog = underTest.terminate(ID, FLOW_ID);
+        FlowLog flowLog = underTest.terminate(ID, FLOW_ID, REASON);
 
         verifyFinalization();
         verify(applicationFlowInformation).handleFlowFail(flowLog);
@@ -305,7 +308,7 @@ class FlowLogDBServiceTest {
     void testClose() throws TransactionExecutionException {
         prepareFinalization();
         Map<Object, Object> params = Map.of("param1", StateStatus.SUCCESSFUL, "param2", 234L, "param3", "true");
-        underTest.close(ID, FLOW_ID, false, params);
+        underTest.close(ID, FLOW_ID, false, params, REASON);
 
         verifyFinalization();
         FlowLog savedFlowLog = savedFlowLogCaptor.getValue();
@@ -331,7 +334,7 @@ class FlowLogDBServiceTest {
 
     private void verifyFinalization() {
         verify(flowLogRepository).finalizeByFlowId(FLOW_ID);
-        verify(flowLogRepository).updateLastLogStatusInFlow(DATABASE_ID, StateStatus.SUCCESSFUL, 123456789L);
+        verify(flowLogRepository).updateLastLogStatusInFlow(DATABASE_ID, StateStatus.SUCCESSFUL, 123456789L, REASON);
         verify(flowLogRepository).save(savedFlowLogCaptor.capture());
     }
 
@@ -461,10 +464,10 @@ class FlowLogDBServiceTest {
         FlowLog flowLog = new FlowLog(ID, FLOW_ID, "currentState", false, StateStatus.PENDING, OperationType.PROVISION);
         flowLog.setId(FLOW_LOG_ID);
         when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
-        underTest.closeFlow(FLOW_ID);
+        underTest.closeFlow(FLOW_ID, null);
         verify(flowLogRepository, times(1)).findFirstByFlowIdOrderByCreatedDesc(eq(FLOW_ID));
         verify(applicationFlowInformation, times(1)).handleFlowFail(eq(flowLog));
-        verify(flowLogRepository, times(1)).updateLastLogStatusInFlow(eq(FLOW_LOG_ID), eq(StateStatus.FAILED), anyLong());
+        verify(flowLogRepository, times(1)).updateLastLogStatusInFlow(eq(FLOW_LOG_ID), eq(StateStatus.FAILED), anyLong(), isNull());
         verify(flowLogRepository, times(1)).finalizeByFlowId(eq(FLOW_ID));
     }
 
@@ -474,20 +477,20 @@ class FlowLogDBServiceTest {
         flowLog.setId(FLOW_LOG_ID);
         when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
         doThrow(new RuntimeException("Boom")).when(applicationFlowInformation).handleFlowFail(any());
-        underTest.closeFlow(FLOW_ID);
+        underTest.closeFlow(FLOW_ID, null);
         verify(flowLogRepository, times(1)).findFirstByFlowIdOrderByCreatedDesc(eq(FLOW_ID));
         verify(applicationFlowInformation, times(1)).handleFlowFail(eq(flowLog));
-        verify(flowLogRepository, times(1)).updateLastLogStatusInFlow(eq(FLOW_LOG_ID), eq(StateStatus.FAILED), anyLong());
+        verify(flowLogRepository, times(1)).updateLastLogStatusInFlow(eq(FLOW_LOG_ID), eq(StateStatus.FAILED), anyLong(), isNull());
         verify(flowLogRepository, times(1)).finalizeByFlowId(eq(FLOW_ID));
     }
 
     @Test
     void testCloseFlowWhenFlowNotFound() {
         when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.empty());
-        underTest.closeFlow(FLOW_ID);
+        underTest.closeFlow(FLOW_ID, null);
         verify(flowLogRepository, times(1)).findFirstByFlowIdOrderByCreatedDesc(eq(FLOW_ID));
         verify(applicationFlowInformation, never()).handleFlowFail(any());
-        verify(flowLogRepository, never()).updateLastLogStatusInFlow(anyLong(), any(), anyLong());
+        verify(flowLogRepository, never()).updateLastLogStatusInFlow(anyLong(), any(), anyLong(), isNull());
         verify(flowLogRepository, never()).finalizeByFlowId(anyString());
     }
 

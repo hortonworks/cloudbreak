@@ -176,7 +176,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             throws TransactionExecutionException {
         String flowId = flowParameters.getFlowId();
         LOGGER.debug("flow finalizing arrived: id: {}", flowId);
-        flowLogService.close(resourceId, flowId, false, contextParams);
+        flowLogService.close(resourceId, flowId, false, contextParams, null);
         Flow flow = runningFlows.remove(flowId);
         Optional<FlowFinalizerCallback> finalizerCallback = createFinalizerCallback(flow);
         flowStatCache.remove(flowId, flowChainId == null && !flow.isFlowFailed());
@@ -209,15 +209,17 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             if (flowChainId != null) {
                 LOGGER.info("Creating failed init flow log for '{}' flow chain because trigger condition failed. Reason: {}",
                         flowChainId, flowTriggerConditionResult.getErrorMessage());
-                createNewFinishedFlow(key, payload, flowParameters, flowChainId, flowConfig, contextParams, false);
+                createNewFinishedFlow(key, payload, flowParameters, flowChainId, contextParams, false,
+                        String.format("Trigger condition: fail, reason: %s", flowTriggerConditionResult.getErrorMessage()));
             }
             flowConfig.getFinalizerCallBack().onFinalize(payload.getResourceId());
             throw new FlowNotTriggerableException(flowTriggerConditionResult.getErrorMessage());
         } else if (flowTriggerConditionResult.isSkip()) {
             if (flowChainId != null) {
-                LOGGER.info("Creating failed init flow log for '{}' flow chain because trigger condition result was: skip. Reason: {}",
+                LOGGER.info("Creating successful init flow log for '{}' flow chain because trigger condition result was: skip. Reason: {}",
                         flowChainId, flowTriggerConditionResult.getErrorMessage());
-                createNewFinishedFlow(key, payload, flowParameters, flowChainId, flowConfig, contextParams, true);
+                createNewFinishedFlow(key, payload, flowParameters, flowChainId, contextParams, true,
+                        String.format("Trigger condition: skip, reason: %s", flowTriggerConditionResult.getErrorMessage()));
             }
             flowConfig.getFinalizerCallBack().onFinalize(payload.getResourceId());
             throw new FlowNotTriggerableException("Trigger condition failed, skip flow.", true);
@@ -231,14 +233,15 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         }
     }
 
-    private void createNewFinishedFlow(String key, Payload payload, FlowParameters flowParameters, String flowChainId, FlowConfiguration<?> flowConfig,
-            Map<Object, Object> contextParams, boolean success) throws TransactionExecutionException {
+    private void createNewFinishedFlow(String key, Payload payload, FlowParameters flowParameters, String flowChainId, Map<Object, Object> contextParams,
+            boolean success, String reason) throws TransactionExecutionException {
         transactionService.required(() -> {
             try {
                 String flowId = UUID.randomUUID().toString();
+                FlowConfiguration<?> flowConfig = getFlowConfiguration(key);
                 addFlowParameters(flowParameters, flowId, flowChainId, flowConfig);
                 flowLogService.save(flowParameters, flowChainId, key, payload, contextParams, flowConfig.getClass(), FlowStateConstants.INIT_STATE);
-                flowLogService.close(payload.getResourceId(), flowId, !success, contextParams);
+                flowLogService.close(payload.getResourceId(), flowId, !success, contextParams, reason);
                 flowChains.cleanFlowChain(flowChainId, flowParameters.getFlowTriggerUserCrn());
                 flowChains.removeFullFlowChain(flowChainId, success);
             } catch (TransactionExecutionException e) {
@@ -427,7 +430,8 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         } else {
             boolean failureEvent = failHandledEvents.contains(key);
             LOGGER.debug("New flow state: {}, key: {}, failure event: {}", lastFlowLog, key, failureEvent);
-            flowLogService.updateLastFlowLogStatus(lastFlowLog, failureEvent);
+            String reason = payload.getException() != null ? payload.getException().getMessage() : null;
+            flowLogService.updateLastFlowLogStatus(lastFlowLog, failureEvent, reason);
             flowLogService.save(flowParameters, flowChainId, key, payload, flow.getVariables(), flow.getFlowConfigClass(), flow.getCurrentState());
         }
     }
@@ -482,7 +486,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     public void restartFlow(FlowLog flowLog) {
         try {
             if (notSupportedFlowType(flowLog)) {
-                terminateFlow(flowLog);
+                terminateFlow(flowLog, "Terminate flow, not supported flow type");
             } else if (isRestartableFlow(flowLog)) {
                 continueFlow(flowLog);
             } else if (isRestartableFlowChain(flowLog)) {
@@ -494,7 +498,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                     flowLog.getFlowChainId(),
                     flowLog.getFlowType().getClassValue().getSimpleName(),
                     e);
-            terminateFlow(flowLog);
+            terminateFlow(flowLog, String.format("Flow restart failed, reason: %s", e.getMessage()));
         }
     }
 
@@ -511,9 +515,9 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         return false;
     }
 
-    private void terminateFlow(FlowLog flowLog) {
+    private void terminateFlow(FlowLog flowLog, String reason) {
         try {
-            flowLogService.terminate(flowLog.getResourceId(), flowLog.getFlowId());
+            flowLogService.terminate(flowLog.getResourceId(), flowLog.getFlowId(), reason);
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
@@ -546,7 +550,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                     flowLog.getNextEvent());
             restartAction.restart(restartContext, payload);
         } else {
-            terminateFlow(flowLog);
+            terminateFlow(flowLog, "Flow restart is not possible, restart action is missing");
         }
     }
 
@@ -582,7 +586,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                     FlowLogUtil.tryDeserializeVariables(flowLog));
             restartAction.restart(restartContext, null);
         } else {
-            terminateFlow(flowLog);
+            terminateFlow(flowLog, "Flow chain restart is not possible, restart action is missing");
         }
     }
 

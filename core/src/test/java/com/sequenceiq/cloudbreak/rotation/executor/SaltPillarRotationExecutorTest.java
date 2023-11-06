@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.rotation.executor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -18,7 +19,6 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.function.Function;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -100,7 +100,7 @@ class SaltPillarRotationExecutorTest {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRotate(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()),
                         RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null)));
-        Assertions.assertEquals("Execution of rotation failed at SALT_PILLAR step for resourceCrn regarding secret null.",
+        assertEquals("Execution of rotation failed at SALT_PILLAR step for resourceCrn regarding secret null, reason: Stack 'resourceCrn' not found.",
                 secretRotationException.getMessage());
     }
 
@@ -113,7 +113,7 @@ class SaltPillarRotationExecutorTest {
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRotate(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()),
                         RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null)));
-        Assertions.assertEquals("Execution of rotation failed at SALT_PILLAR step for resourceCrn regarding secret null.",
+        assertEquals("Execution of rotation failed at SALT_PILLAR step for resourceCrn regarding secret null, reason: error",
                 secretRotationException.getMessage());
         verify(hostOrchestrator, times(1)).saveCustomPillars(any(), any(), any());
         verify(saltStateParamsService, times(1)).createStateParams(eq(stackDto), isNull(), eq(true), anyInt(), anyInt());

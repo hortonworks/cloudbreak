@@ -232,6 +232,7 @@ public class FlowServiceTest {
         FlowLogWithoutPayload latestFlowLog = mock(FlowLogWithoutPayload.class);
         lenient().when(latestFlowLog.getCurrentState()).thenReturn("CURRENT_STATE_FIRST");
         lenient().when(latestFlowLog.getNextEvent()).thenReturn("NEXT_EVENT_FIRST");
+        lenient().when(latestFlowLog.getFlowId()).thenReturn("FLOW_ID");
         ClassValueConverter classValueConverter = new ClassValueConverter();
         ClassValue classValue = classValueConverter.convertToEntityAttribute("FLOW_TYPE_FIRST");
         lenient().when(latestFlowLog.getFlowType()).thenReturn(classValue);
@@ -239,6 +240,7 @@ public class FlowServiceTest {
         FlowLogWithoutPayload secondToLatestFlowLog = mock(FlowLogWithoutPayload.class);
         lenient().when(secondToLatestFlowLog.getCurrentState()).thenReturn("CURRENT_STATE_SECOND");
         lenient().when(secondToLatestFlowLog.getNextEvent()).thenReturn("NEXT_EVENT_SECOND");
+        lenient().when(secondToLatestFlowLog.getFlowId()).thenReturn("FLOW_ID");
         ClassValueConverter classValueConverterSecond = new ClassValueConverter();
         ClassValue classValueSecond = classValueConverterSecond.convertToEntityAttribute("FLOW_TYPE_SECOND");
         lenient().when(secondToLatestFlowLog.getFlowType()).thenReturn(classValueSecond);
@@ -255,6 +257,7 @@ public class FlowServiceTest {
     void testGetLatestKnownFlowCheckResponseWithAllFieldsFilledByFlow() {
         FlowLogWithoutPayload latestFlowLog = mock(FlowLogWithoutPayload.class);
         lenient().when(latestFlowLog.getCurrentState()).thenReturn("CURRENT_STATE_FIRST");
+        lenient().when(latestFlowLog.getFlowId()).thenReturn("FLOW_ID");
         lenient().when(latestFlowLog.getNextEvent()).thenReturn("NEXT_EVENT_FIRST");
         ClassValueConverter classValueConverter = new ClassValueConverter();
         ClassValue classValue = classValueConverter.convertToEntityAttribute("FLOW_TYPE_FIRST");
@@ -263,6 +266,7 @@ public class FlowServiceTest {
         FlowLogWithoutPayload secondToLatestFlowLog = mock(FlowLogWithoutPayload.class);
         lenient().when(secondToLatestFlowLog.getCurrentState()).thenReturn("CURRENT_STATE_SECOND");
         lenient().when(secondToLatestFlowLog.getNextEvent()).thenReturn("NEXT_EVENT_SECOND");
+        lenient().when(secondToLatestFlowLog.getFlowId()).thenReturn("FLOW_ID");
         ClassValueConverter classValueConverterSecond = new ClassValueConverter();
         ClassValue classValueSecond = classValueConverterSecond.convertToEntityAttribute("FLOW_TYPE_SECOND");
         lenient().when(secondToLatestFlowLog.getFlowType()).thenReturn(classValueSecond);

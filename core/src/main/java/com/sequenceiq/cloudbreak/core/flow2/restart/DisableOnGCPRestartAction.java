@@ -28,7 +28,7 @@ public class DisableOnGCPRestartAction extends FillInMemoryStateStoreRestartActi
         if (stack.getPlatformVariant().equals(GCP)) {
             if (restartContext.getFlowId() != null) {
                 try {
-                    flowLogService.terminate(restartContext.getResourceId(), restartContext.getFlowId());
+                    flowLogService.terminate(restartContext.getResourceId(), restartContext.getFlowId(), "Flow restart is disabled on GCP");
                 } catch (TransactionExecutionException e) {
                     throw new TransactionRuntimeExecutionException(e);
                 }

@@ -37,19 +37,19 @@ public abstract class AbstractRotationExecutor<C extends RotationContext> {
 
     public final void executeRotate(RotationContext context, RotationMetadata metadata) {
         invokeRotationPhase(context, metadata, this::rotate,
-                () -> String.format("Execution of rotation failed at %s step for %s regarding secret %s.",
+                () -> String.format("Execution of rotation failed at %s step for %s regarding secret %s",
                         getType(), context.getResourceCrn(), metadata.secretType()));
     }
 
     public final void executeRollback(RotationContext context, RotationMetadata metadata) {
         invokeRotationPhase(context, metadata, this::rollback,
-                () -> String.format("Rollback of rotation failed at %s step for %s regarding secret %s.",
+                () -> String.format("Rollback of rotation failed at %s step for %s regarding secret %s",
                         getType(), context.getResourceCrn(), metadata.secretType()));
     }
 
     public final void executeFinalize(RotationContext context, RotationMetadata metadata) {
         invokeRotationPhase(context, metadata, this::finalize,
-                () -> String.format("Finalization of rotation failed at %s step for %s regarding secret %s.",
+                () -> String.format("Finalization of rotation failed at %s step for %s regarding secret %s",
                         getType(), context.getResourceCrn(), metadata.secretType()));
     }
 
@@ -65,7 +65,7 @@ public abstract class AbstractRotationExecutor<C extends RotationContext> {
 
     private void logAndThrow(Exception e, String errorMessage) {
         LOGGER.error(errorMessage, e);
-        throw new SecretRotationException(errorMessage, e);
+        throw new SecretRotationException(String.format("%s, reason: %s", errorMessage, e.getMessage()), e);
     }
 
     private void invokeRotationPhase(RotationContext context, RotationMetadata metadata,

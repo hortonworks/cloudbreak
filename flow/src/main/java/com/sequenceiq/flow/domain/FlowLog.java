@@ -71,6 +71,8 @@ public class FlowLog {
     @Column
     private Long endTime;
 
+    private String reason;
+
     public FlowLog() {
 
     }
@@ -279,6 +281,14 @@ public class FlowLog {
 
     public void setEndTime(Long endTime) {
         this.endTime = endTime;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 
     public String minimizedString() {

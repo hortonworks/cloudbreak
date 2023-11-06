@@ -38,6 +38,8 @@ public interface FlowLogWithoutPayload {
 
     OperationType getOperationType();
 
+    String getReason();
+
     default String minimizedString() {
         return "FlowLog{" +
                 "resourceId=" + getResourceId() +

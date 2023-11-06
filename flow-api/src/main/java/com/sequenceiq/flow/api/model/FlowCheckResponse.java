@@ -21,6 +21,8 @@ public class FlowCheckResponse {
 
     private String flowType;
 
+    private String reason;
+
     public String getFlowId() {
         return flowId;
     }
@@ -85,6 +87,14 @@ public class FlowCheckResponse {
         this.flowType = flowType;
     }
 
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
     public String toString() {
         return "FlowCheckResponse{" +
                 "flowId='" + flowId + '\'' +
@@ -95,6 +105,7 @@ public class FlowCheckResponse {
                 ", currentState='" + currentState + '\'' +
                 ", nextEvent=" + nextEvent + '\'' +
                 ", flowType=" + flowType + '\'' +
+                ", reason=" + reason + '\'' +
                 '}';
     }
 }

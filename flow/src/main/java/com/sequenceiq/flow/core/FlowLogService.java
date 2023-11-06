@@ -20,15 +20,15 @@ public interface FlowLogService {
 
     Iterable<FlowLog> saveAll(Iterable<FlowLog> entities);
 
-    FlowLog close(Long resourceId, String flowId, boolean failed, Map<Object, Object> contextParams) throws TransactionExecutionException;
+    FlowLog close(Long resourceId, String flowId, boolean failed, Map<Object, Object> contextParams, String reason) throws TransactionExecutionException;
 
     FlowLog cancel(Long resourceId, String flowId) throws TransactionExecutionException;
 
-    FlowLog terminate(Long resourceId, String flowId) throws TransactionExecutionException;
+    FlowLog terminate(Long resourceId, String flowId, String reason) throws TransactionExecutionException;
 
     void saveChain(String flowChainId, String parentFlowChainId, FlowTriggerEventQueue chain, String flowTriggerUserCrn);
 
-    void updateLastFlowLogStatus(FlowLog lastFlowLog, boolean failureEvent);
+    void updateLastFlowLogStatus(FlowLog lastFlowLog, boolean failureEvent, String reason);
 
     Set<FlowLogIdWithTypeAndTimestamp> findAllRunningNonTerminationFlowsByResourceId(Long resourceId);
 
