@@ -267,6 +267,48 @@ class BootstrapServiceTest {
     }
 
     @Test
+    public void testReBootstrapWithInstances() throws Exception {
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        stack.setCloudPlatform("cloud");
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setTemplate(new Template());
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setInstanceGroup(instanceGroup);
+        instanceMetaData.setPrivateIp("8.8.8.8");
+        instanceMetaData.setDiscoveryFQDN("node." + DOMAIN);
+        instanceGroup.setInstanceMetaData(Set.of(instanceMetaData));
+        stack.setInstanceGroups(Set.of(instanceGroup));
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setDomain(DOMAIN);
+        freeIpa.setHostname(HOSTNAME);
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
+        List<GatewayConfig> gatewayConfigs = List.of();
+        when(gatewayConfigService.getGatewayConfigs(eq(stack), anySet())).thenReturn(gatewayConfigs);
+        ImageEntity image = new ImageEntity();
+        image.setOs("ZOS");
+        when(imageService.getByStack(stack)).thenReturn(image);
+
+        underTest.reBootstrap(stack, Set.of(instanceMetaData));
+
+        ArgumentCaptor<Set<Node>> targetCaptor = ArgumentCaptor.forClass((Class) Set.class);
+        ArgumentCaptor<BootstrapParams> bootstrapParamsCaptor = ArgumentCaptor.forClass(BootstrapParams.class);
+        ArgumentCaptor<ExitCriteriaModel> exitCriteriaModelCaptor = ArgumentCaptor.forClass(ExitCriteriaModel.class);
+        verify(hostOrchestrator).reBootstrapExistingNodes(eq(gatewayConfigs), targetCaptor.capture(), bootstrapParamsCaptor.capture(),
+                exitCriteriaModelCaptor.capture());
+        Set<Node> targetNodes = targetCaptor.getValue();
+        assertEquals(1, targetNodes.size());
+        assertTrue(targetNodes.stream().allMatch(node -> node.getPrivateIp().equals(instanceMetaData.getPrivateIp())));
+        BootstrapParams bootstrapParams = bootstrapParamsCaptor.getValue();
+        assertTrue(bootstrapParams.isSaltBootstrapFpSupported());
+        assertTrue(bootstrapParams.isRestartNeededFlagSupported());
+        assertEquals(image.getOs(), bootstrapParams.getOs());
+        assertEquals(stack.getCloudPlatform(), bootstrapParams.getCloud());
+        StackBasedExitCriteriaModel exitCriteriaModel = (StackBasedExitCriteriaModel) exitCriteriaModelCaptor.getValue();
+        assertEquals(STACK_ID, exitCriteriaModel.getStackId().get());
+    }
+
+    @Test
     public void testIOExceptionConverted() throws CloudbreakOrchestratorException, IOException {
         when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(
                 createInstance(INSTANCE_WITH_FQDN, "instance1" + DOMAIN),

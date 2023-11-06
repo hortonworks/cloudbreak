@@ -74,13 +74,7 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsFromOrchestra
                 if (!orchestratorRemovalPollingResult.isSuccess()) {
                     LOGGER.warn("Can not remove hosts from orchestrator: {}", hostNames);
                 }
-                // rebootstrap to update the minion's multi-master configuration
-                List<String> remainingInstanceIds = stack.getNotDeletedInstanceMetaDataList().stream()
-                        .filter(metadata -> Objects.nonNull(metadata.getDiscoveryFQDN()))
-                        .filter(metadata -> !hostNames.contains(metadata.getDiscoveryFQDN()))
-                        .map(InstanceMetaData::getInstanceId)
-                        .collect(Collectors.toList());
-                bootstrapService.bootstrap(stack.getId(), remainingInstanceIds);
+                updateMinionMultiMasterConfig(stack, hostNames);
             }
             result = new RemoveHostsFromOrchestrationSuccess(request.getResourceId());
         } catch (Exception e) {
@@ -89,6 +83,14 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsFromOrchestra
                     request.getResourceId(), "Removing host from orchestration", Set.of(), Map.of(), e);
         }
         eventBus.notify(result.selector(), new Event<>(removeHostsRequestEvent.getHeaders(), result));
+    }
+
+    private void updateMinionMultiMasterConfig(Stack stack, Set<String> hostNames) throws CloudbreakOrchestratorException {
+        Set<InstanceMetaData> remainingInstances = stack.getNotDeletedInstanceMetaDataList().stream()
+                .filter(metadata -> Objects.nonNull(metadata.getDiscoveryFQDN()))
+                .filter(metadata -> !hostNames.contains(metadata.getDiscoveryFQDN()))
+                .collect(Collectors.toSet());
+        bootstrapService.reBootstrap(stack, remainingInstances);
     }
 
     private PollingResult removeHostsFromOrchestrator(Stack stack, List<String> hostNames) throws CloudbreakException {

@@ -79,6 +79,11 @@ public class BootstrapService {
         bootstrap(stack, stack.getNotDeletedInstanceMetaDataSet(), true);
     }
 
+    public void reBootstrap(Stack stack, Set<InstanceMetaData> instanceMetaDatas) throws CloudbreakOrchestratorException {
+        LOGGER.info("Re-bootstrapping nodes {} of stack {}", instanceMetaDatas, stack.getResourceCrn());
+        bootstrap(stack, instanceMetaDatas, true);
+    }
+
     private void bootstrap(Stack stack, Set<InstanceMetaData> instanceMetaDatas, boolean reBootstrap) throws CloudbreakOrchestratorException {
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getGatewayConfigs(stack, instanceMetaDatas);

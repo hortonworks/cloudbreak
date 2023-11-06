@@ -79,7 +79,7 @@ class RemoveHostsHandlerTest {
         when(stackService.getByIdWithListsInTransaction(any())).thenReturn(stack);
         underTest.accept(new Event<>(request));
         verify(eventBus, times(1)).notify(eq("REMOVEHOSTSFROMORCHESTRATIONSUCCESS"), ArgumentMatchers.<Event>any());
-        verify(bootstrapService).bootstrap(any(), any());
+        verify(bootstrapService).reBootstrap(any(), any());
         verify(hostOrchestrator).tearDown(any(), any(), any(), any(), any());
     }
 
@@ -133,7 +133,7 @@ class RemoveHostsHandlerTest {
         stack.setInstanceGroups(Set.of(ig));
         underTest.accept(new Event<>(request));
         verify(eventBus, times(1)).notify(eq("REMOVEHOSTSFROMORCHESTRATIONSUCCESS"), ArgumentMatchers.<Event>any());
-        verify(bootstrapService).bootstrap(any(), any());
+        verify(bootstrapService).reBootstrap(any(), any());
         verify(hostOrchestrator).tearDown(any(), any(), eq(Map.of("example1.com", "192.168.0.1")), any(), any());
     }
 }
