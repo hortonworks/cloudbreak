@@ -40,7 +40,6 @@ import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.action.AbstractStackProvisionAction;
 import com.sequenceiq.freeipa.metrics.FreeIpaMetricService;
 import com.sequenceiq.freeipa.metrics.MetricType;
-import com.sequenceiq.freeipa.nodestatus.NodeStatusJobService;
 import com.sequenceiq.freeipa.service.config.AbstractConfigRegister;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.sync.FreeipaJobService;
@@ -185,9 +184,6 @@ public class FreeIpaProvisionActions {
             private FreeipaJobService freeipaJobService;
 
             @Inject
-            private NodeStatusJobService nodeStatusJobService;
-
-            @Inject
             private GrpcWiamClient wiamClient;
 
             @Inject
@@ -198,7 +194,6 @@ public class FreeIpaProvisionActions {
                 configRegisters.forEach(configProvider -> configProvider.register(context.getStack().getId()));
                 metricService.incrementMetricCounter(MetricType.FREEIPA_CREATION_FINISHED, context.getStack());
                 freeipaJobService.schedule(context.getStack().getId());
-                nodeStatusJobService.schedule(context.getStack().getId());
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISIONED, "FreeIPA installation finished");
                 synchronizeUsersViaWiam(context.getStack());
                 sendEvent(context);

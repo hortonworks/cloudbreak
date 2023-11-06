@@ -26,8 +26,6 @@ import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.job.StackJobAdapter;
 import com.sequenceiq.cloudbreak.job.instancemetadata.ArchiveInstanceMetaDataJobService;
-import com.sequenceiq.cloudbreak.job.nodestatus.NodeStatusCheckerJobService;
-import com.sequenceiq.cloudbreak.job.nodestatus.NodeStatusJobAdapter;
 import com.sequenceiq.cloudbreak.job.stackpatcher.ExistingStackPatcherJobService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -123,9 +121,6 @@ public class ClusterCreationActions {
 
     @Inject
     private StructuredSynchronizerJobService syncJobService;
-
-    @Inject
-    private NodeStatusCheckerJobService nodeStatusCheckerJobService;
 
     @Inject
     private InstanceMetadataProcessor instanceMetadataProcessor;
@@ -691,7 +686,6 @@ public class ClusterCreationActions {
                 clusterCreationService.clusterInstallationFinished(context.getStackId(), context.getProvisionType());
                 jobService.schedule(context.getStackId(), StackJobAdapter.class);
                 syncJobService.schedule(context.getStackId(), StructuredSynchronizerJobAdapter.class);
-                nodeStatusCheckerJobService.schedule(context.getStackId(), NodeStatusJobAdapter.class);
                 aimJobService.schedule(context.getStackId());
                 if (CloudPlatform.MOCK.equalsIgnoreCase(context.getStack().getCloudPlatform())) {
                     existingStackPatcherJobService.schedule(context.getStackId(), StackPatchType.MOCK);

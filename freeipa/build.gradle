@@ -130,7 +130,6 @@ dependencies {
   implementation project(':flow')
   implementation project(':freeipa-api')
   implementation project(':freeipa-client')
-  implementation project(':node-status-monitor-client')
   implementation project(':telemetry-common')
   implementation project(':usage-collection')
   implementation project(':metrics-client')

@@ -699,7 +699,6 @@ public class FreeIpaUpscaleActions {
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 instanceMetaDataService.updateInstanceStatusOnUpscaleFailure(stack.getNotDeletedInstanceMetaDataSet());
                 enableStatusChecker(stack, "Failed upscaling FreeIPA");
-                enableNodeStatusChecker(stack, "Failed upscaling FreeIPA");
                 sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
             }
 

@@ -153,7 +153,6 @@ public class FreeIpaVerticalScaleActions {
                     operationService.failOperation(stack.getAccountId(), getOperationId(variables), message);
                 }
                 enableStatusChecker(stack, "Failed vertical scaling FreeIPA");
-                enableNodeStatusChecker(stack, "Failed vertical scaling FreeIPA");
                 sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
             }
         };

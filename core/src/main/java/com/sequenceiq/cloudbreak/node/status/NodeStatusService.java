@@ -15,8 +15,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.node.health.client.CdpNodeStatusMonitorClient;
 import com.sequenceiq.node.health.client.CdpNodeStatusMonitorClientException;
-import com.sequenceiq.node.health.client.model.CdpNodeStatusRequest;
-import com.sequenceiq.node.health.client.model.CdpNodeStatuses;
 
 @Service
 public class NodeStatusService {
@@ -28,16 +26,6 @@ public class NodeStatusService {
 
     @Inject
     private CdpNodeStatusMonitorClientFactory factory;
-
-    public CdpNodeStatuses getNodeStatuses(Stack stack, CdpNodeStatusRequest request) {
-        MDCBuilder.buildMdcContext(stack);
-        try (CdpNodeStatusMonitorClient client = factory.getClient(stack, stack.getPrimaryGatewayInstance())) {
-            return client.nodeStatusReport(request);
-        } catch (CdpNodeStatusMonitorClientException e) {
-            LOGGER.warn("Node status report failed", e);
-            throw new CloudbreakServiceException("Could not get node status report from stack, reason: " + e.getMessage());
-        }
-    }
 
     public RPCResponse<NodeStatusProto.NodeStatusReport> getMeteringReport(Stack stack) {
         MDCBuilder.buildMdcContext(stack);

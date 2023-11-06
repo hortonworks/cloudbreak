@@ -219,7 +219,6 @@ public class ChangePrimaryGatewayActions {
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 LOGGER.info("Enabling the status checker for stack ID {} after failing repairing", stack.getId());
                 enableStatusChecker(stack, "Failed to repair FreeIPA");
-                enableNodeStatusChecker(stack, "Failed to repair FreeIPA");
                 sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
             }
 

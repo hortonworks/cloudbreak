@@ -42,7 +42,6 @@ import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState;
 import com.sequenceiq.freeipa.flow.stack.termination.event.TerminationEvent;
-import com.sequenceiq.freeipa.nodestatus.NodeStatusJobService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.rotation.FreeIpaSecretRotationService;
 import com.sequenceiq.freeipa.sync.FreeipaJobService;
@@ -72,9 +71,6 @@ class FreeIpaDeletionServiceTest {
 
     @Mock
     private FreeipaJobService freeipaJobService;
-
-    @Mock
-    private NodeStatusJobService nodeStatusJobService;
 
     @Mock
     private FlowCancelService flowCancelService;
@@ -116,7 +112,6 @@ class FreeIpaDeletionServiceTest {
         verify(flowManager, times(1)).notify(eq(TERMINATION_EVENT.event()), terminationEventArgumentCaptor.capture());
         verify(flowCancelService).cancelTooOldTerminationFlowForResource(stack.getId(), stack.getName());
         verify(freeipaJobService).unschedule(stack);
-        verify(nodeStatusJobService).unschedule(stack);
 
         assertAll(
                 () -> assertEquals(TERMINATION_EVENT.event(), terminationEventArgumentCaptor.getValue().selector()),

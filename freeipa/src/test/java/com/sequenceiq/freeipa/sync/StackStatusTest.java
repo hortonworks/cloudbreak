@@ -45,7 +45,6 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.service.stack.FreeIpaInstanceHealthDetailsService;
-import com.sequenceiq.freeipa.service.stack.FreeIpaNodeStatusService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
@@ -73,9 +72,6 @@ class StackStatusTest {
 
     @MockBean
     private FreeIpaInstanceHealthDetailsService freeIpaInstanceHealthDetailsService;
-
-    @MockBean
-    private FreeIpaNodeStatusService freeIpaNodeStatusService;
 
     @MockBean
     private StackInstanceProviderChecker stackInstanceProviderChecker;

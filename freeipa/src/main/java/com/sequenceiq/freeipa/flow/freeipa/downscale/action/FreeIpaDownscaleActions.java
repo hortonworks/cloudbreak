@@ -454,7 +454,6 @@ public class FreeIpaDownscaleActions {
                 stackUpdater.updateStackStatus(context.getStack().getId(), getFailedStatus(variables), errorReason);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 enableStatusChecker(stack, "Failed downscaling FreeIPA");
-                enableNodeStatusChecker(stack, "Failed downscaling FreeIPA");
                 sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
             }
 
