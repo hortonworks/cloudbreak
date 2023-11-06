@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.credential.exception;
 
-public class CredentialVerificationException extends RuntimeException {
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+
+public class CredentialVerificationException extends BadRequestException {
 
     public CredentialVerificationException(String message) {
         super(message);
