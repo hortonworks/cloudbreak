@@ -8,10 +8,7 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.http.HttpBackOffIOExceptionHandler;
-import com.google.api.client.http.HttpBackOffUnsuccessfulResponseHandler;
 import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.HttpUnsuccessfulResponseHandler;
 import com.google.api.client.util.ExponentialBackOff;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.metric.CompositeHttpExecuteInterceptor;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.metric.MetricLoggerInterceptor;
@@ -35,15 +32,8 @@ public abstract class GcpServiceFactory {
             request.setInterceptor(compositeHttpExecuteInterceptor);
             request.setConnectTimeout(GcpRequestTimeout.getTimeout());
             request.setReadTimeout(GcpRequestTimeout.getTimeout());
-            request.setIOExceptionHandler(new HttpBackOffIOExceptionHandler(backOff));
-            request.setUnsuccessfulResponseHandler(unsuccessfulResponseHandler(credential, backOff));
+            request.setIOExceptionHandler(new GcpLoggingHttpBackOffIOExceptionHandler(backOff));
+            request.setUnsuccessfulResponseHandler(new GcpCustomHttpUnsuccessfulResponseHandler(credential, backOff));
         };
-    }
-
-    private HttpUnsuccessfulResponseHandler unsuccessfulResponseHandler(GoogleCredential credential, ExponentialBackOff backOff) {
-        HttpBackOffUnsuccessfulResponseHandler httpBackOffUnsuccessfulRespHandler = new HttpBackOffUnsuccessfulResponseHandler(backOff);
-        return (request, response, supportsRetry) ->
-                credential.handleResponse(request, response, supportsRetry)
-                        || httpBackOffUnsuccessfulRespHandler.handleResponse(request, response, supportsRetry);
     }
 }

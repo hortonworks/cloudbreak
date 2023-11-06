@@ -45,10 +45,16 @@ public class ResourceStopStartCallable implements Callable<ResourceRequestResult
         }
         List<CloudVmInstanceStatus> result = new ArrayList<>();
         for (CloudInstance instance : instances) {
-            LOGGER.debug("{} instance {}", context.isBuild() ? "Starting" : "Stopping", instance);
-            CloudVmInstanceStatus status = context.isBuild() ? builder.start(context, auth, instance) : builder.stop(context, auth, instance);
-            LOGGER.debug("Operation result for instance ({}): {}", instance.getInstanceId(), status);
-            result.add(status);
+            String operationName = context.isBuild() ? "Starting" : "Stopping";
+            try {
+                LOGGER.debug("{} instance {}", operationName, instance);
+                CloudVmInstanceStatus status = context.isBuild() ? builder.start(context, auth, instance) : builder.stop(context, auth, instance);
+                LOGGER.debug("Operation result for instance ({}): {}", instance.getInstanceId(), status);
+                result.add(status);
+            } catch (Exception ex) {
+                String msg = String.format("%s of instance '%s' failed with the following exception", operationName, instance);
+                LOGGER.warn(msg, ex);
+            }
         }
         return new ResourceRequestResult<>(FutureResult.SUCCESS, result);
     }
