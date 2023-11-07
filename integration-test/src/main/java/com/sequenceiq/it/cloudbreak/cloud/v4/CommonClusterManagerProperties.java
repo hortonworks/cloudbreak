@@ -20,6 +20,8 @@ public class CommonClusterManagerProperties {
 
     private String runtimeVersion;
 
+    private String minimumRuntimeVersionForEdl;
+
     private SdxClusterShape clusterShape;
 
     private SdxClusterShape internalClusterShape;
@@ -38,6 +40,14 @@ public class CommonClusterManagerProperties {
 
     public void setRuntimeVersion(String runtimeVersion) {
         this.runtimeVersion = runtimeVersion;
+    }
+
+    public String getMinimumRuntimeVersionForEdl() {
+        return minimumRuntimeVersionForEdl;
+    }
+
+    public void setMinimumRuntimeVersionForEdl(String minimumRuntimeVersionForEdl) {
+        this.minimumRuntimeVersionForEdl = minimumRuntimeVersionForEdl;
     }
 
     public SdxClusterShape getClusterShape() {

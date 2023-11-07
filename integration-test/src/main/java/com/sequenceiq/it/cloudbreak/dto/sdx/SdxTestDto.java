@@ -67,6 +67,7 @@ import com.sequenceiq.sdx.api.model.SdxRecipe;
 import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerRequest;
+import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 
 @Prototype
@@ -450,6 +451,15 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     public SdxTestDto withMarketplaceUpgradeCatalogAndImage(String imgCatalogKey) {
         return withCatalog(imgCatalogKey, getCloudProvider().getSdxMarketplaceUpgradeImageId());
+    }
+
+    public SdxTestDto withUpgradeRequestByImageId(String imageId) {
+        given(SdxUpgradeTestDto.class)
+                .withReplaceVms(SdxUpgradeReplaceVms.ENABLED)
+                .withImageId(imageId)
+                .withRuntime(null)
+                .setSkipBackup(Boolean.TRUE);
+        return this;
     }
 
     public SdxTestDto withCatalog(String imageCatalog, String imageUuid) {

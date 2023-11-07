@@ -50,4 +50,9 @@ public class SdxUpgradeTestDto extends AbstractSdxTestDto<SdxUpgradeRequest, Sdx
         getRequest().setLockComponents(lockComponents);
         return this;
     }
+
+    public SdxUpgradeTestDto withImageId(String imageId) {
+        getRequest().setImageId(imageId);
+        return this;
+    }
 }
