@@ -102,6 +102,16 @@ public class UpdateStackRequestValidatorTest {
         assertFalse(valid);
     }
 
+    @Test
+    public void testIsValidShouldReturnFalseWhenNodeCountIsUpdatedWithoutScalingAdjustment() {
+        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
+        InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
+        instanceGroupAdjustmentJson.setInstanceGroup("slave_1");
+        updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
+        boolean valid = underTest.isValid(updateStackJson, constraintValidatorContext);
+        assertFalse(valid);
+    }
+
     private static class DummyAnnotation implements Annotation {
 
         @Override

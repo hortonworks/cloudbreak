@@ -22,6 +22,11 @@ public class UpdateStackRequestValidator implements ConstraintValidator<ValidUpd
         InstanceGroupAdjustmentV4Request instanceGroupAdjustment = value.getInstanceGroupAdjustment();
         if (instanceGroupAdjustment != null) {
             updateResources++;
+            if (instanceGroupAdjustment.getScalingAdjustment() == null) {
+                ValidatorUtil.addConstraintViolation(context,
+                        "Invalid PUT request on this resource. Scaling adjustment has to be specified for Instance Group adjustment", "status");
+                return false;
+            }
             if (value.getWithClusterEvent() && instanceGroupAdjustment.getScalingAdjustment() < 0) {
                 ValidatorUtil.addConstraintViolation(context,
                         "Invalid PUT request on this resource. Update event has to be upscale if you define withClusterEvent = 'true'.", "status");
