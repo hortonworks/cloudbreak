@@ -262,12 +262,13 @@ public class DatalakeBackupActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeBackupCancelledEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Sdx backup was cancelled with sdx id: {}", payload.getResourceId());
-                sendEvent(context, DATALAKE_BACKUP_CANCEL_HANDLED_EVENT.event(), payload);
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_BACKUP_CANCELLED,
                         "Datalake backup cancelled", payload.getResourceId());
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 flow.setFlowFailed(new Exception("Datalake backup cancelled"));
+
+                sendEvent(context, DATALAKE_BACKUP_CANCEL_HANDLED_EVENT.event(), payload);
             }
 
             @Override

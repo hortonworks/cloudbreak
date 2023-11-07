@@ -316,6 +316,7 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .then(setCmVersionInMockToUpgradedVersion())
                 .when(sdxTestClient.upgradeInternal(), key(sdxInternal))
+                .await(SdxClusterStatusResponse.DATALAKE_BACKUP_INPROGRESS, key(sdxName).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxName).withWaitForFlow(Boolean.FALSE))
                 .then((tc, testDto, client) -> {
                     SdxClusterDetailResponse sdx = testDto.getResponse();
