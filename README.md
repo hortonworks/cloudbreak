@@ -15,7 +15,6 @@
         + [Running FreeIPA in IDEA](#running-freeipa-in-idea)
         + [Running Redbeams in IDEA](#running-redbeams-in-idea)
         + [Running the Environment Service in IDEA](#running-the-environment-service-in-idea)
-        + [Running the Consumption Service in IDEA](#running-the-consumption-service-in-idea)
         + [Running Thunderhead Mock in IDEA](#running-thunderhead-mock-in-idea)
         + [Running Mock-Infrastructure in IDEA](#running-mock-infrastructure-in-idea)
     * [Command Line](#command-line)
@@ -25,7 +24,6 @@
         + [Running FreeIPA from the Command Line](#running-freeipa-from-the-command-line)
         + [Running Redbeams from the Command Line](#running-redbeams-from-the-command-line)
         + [Running the Environment Service from the Command Line](#running-the-environment-service-from-the-command-line)
-        + [Running the Consumption Service from the Command Line](#running-the-consumption-service-from-the-command-line)
         + [Running Thunderhead Mock from the Command Line](#running-thunderhead-mock-from-the-command-line)
         + [Running Mock-Infrastructure from the Command Line](#running-mock-infrastructure-from-the-command-line)
     * [Database Development](#database-development)
@@ -69,7 +67,6 @@ Please note that the full path needs to be configured and env variables like `$U
 export CB_LOCAL_DEV_LIST=
 export UAA_DEFAULT_SECRET=cbsecret2015
 export CB_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/core/src/main/resources/schema
-export CONSUMPTION_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/cloud-consumption/src/main/resources/schema
 export DATALAKE_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/datalake/src/main/resources/schema
 export ENVIRONMENT_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/environment/src/main/resources/schema
 export FREEIPA_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/freeipa/src/main/resources/schema
@@ -127,7 +124,6 @@ You don't have to put all the applications into local-dev mode; the value of the
 - `cadence`
 - `cloudbreak`
 - `cluster-proxy`
-- `consumption`
 - `core-gateway`
 - `datalake`
 - `datalake-api`
@@ -162,7 +158,7 @@ cbd migrate cbdb up
 cbd migrate cbdb pending
 ```
 
-For some reason if you encounter a similar problem with Periscope, Datalake, FreeIPA, Redbeams, Environment, or Consumption, then run the following commands, and you can restart the Cloudbreak Deployer:
+For some reason if you encounter a similar problem with Periscope, Datalake, FreeIPA, Redbeams, or Environment, then run the following commands, and you can restart the Cloudbreak Deployer:
 ```
 cbd migrate periscopedb up
 cbd migrate periscopedb pending
@@ -178,9 +174,6 @@ cbd migrate redbeamsdb pending
 
 cbd migrate environmentdb up
 cbd migrate environmentdb pending
-
-cbd migrate consumptiondb up
-cbd migrate consumptiondb pending
 ```
 You can track any other application's logs to check the results by executing the following command:
 ```
@@ -470,29 +463,6 @@ AWS_GOV_SECRET_ACCESS_KEY=
 CB_AWS_GOV_ACCOUNT_ID=
 ```
 
-### Running the Consumption Service in IDEA
-
-After importing the `cloudbreak` repo root, launch the Consumption application by executing the `com.sequenceiq.consumption.ConsumptionApplication` class (set `Use classpath of module` to `cloudbreak.cloud-consumption.main`) with the following JVM options:
-* Note: If `cloudbreak` is in the `CB_LOCAL_DEV_LIST` variable, the `consumption.cloudbreak.url` should be http://localhost:9091
-```
--Dvault.root.token=<VAULT_ROOT_TOKEN>
--Dserver.port=8099
--Dconsumption.cloudbreak.url=http://localhost:8080
--Dinstance.node.id=<NODE_ID>
-```
-
-Replace `<VAULT_ROOT_TOKEN>` and `<NODE_ID>` with the value of `VAULT_ROOT_TOKEN` and `CB_INSTANCE_NODE_ID` respectively from the `Profile` file.
-
-Then add these entries to the environment variables (the same values that you set in `Profile`):
-```
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-CB_AWS_ACCOUNT_ID=
-AWS_GOV_ACCESS_KEY_ID=
-AWS_GOV_SECRET_ACCESS_KEY=
-CB_AWS_GOV_ACCOUNT_ID=
-```
-
 ### Running Thunderhead Mock in IDEA
 
 After importing the `cloudbreak` repo root, launch the Thunderhead Mock application by executing the `com.sequenceiq.thunderhead.MockThunderheadApplication` class (set `Use classpath of module` to `cloudbreak.mock-thunderhead.main`) with the following JVM options:
@@ -659,30 +629,6 @@ then run the following Gradle command:
 
 Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
 
-### Running the Consumption Service from the Command Line
-To run the Consumption service from the command line first set the AWS environment variables (use the same values as in `Profile`)
-
-```
-export AWS_ACCESS_KEY_ID=...
-export AWS_SECRET_ACCESS_KEY=...
-export CB_AWS_ACCOUNT_ID=...
-export AWS_GOV_ACCESS_KEY_ID=...
-export AWS_GOV_SECRET_ACCESS_KEY=...
-export CB_AWS_GOV_ACCOUNT_ID=...
-```
-
-then run the following Gradle command:
-* Note: If `cloudbreak` is in the `CB_LOCAL_DEV_LIST` variable, the `consumption.cloudbreak.url` should be http://localhost:9091
-```
-./gradlew :cloud-consumption:bootRun -PjvmArgs="\
--Dserver.port=8099 \
--Dconsumption.cloudbreak.url=http://localhost:8080 \
--Dvault.root.token=<VAULT_ROOT_TOKEN> \
--Dspring.config.location=$(pwd)/cloud-consumption/src/main/resources/application.yml,$(pwd)/cloud-consumption/build/resources/main/application.properties"
-```
-
-Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
-
 ### Running Thunderhead Mock from the Command Line
 To run Thunderhead Mock from the command line, run the following Gradle command:
 
@@ -715,7 +661,7 @@ Please make sure that `mock-infrastructure` has been added to `CB_LOCAL_DEV_LIST
 
 ## Database Development
 
-If any schema change is required in Cloudbreak services databases (`cbdb` / `periscopedb` / `datalakedb` / `redbeamsdb` / `environmentdb` / `freeipadb` / `consumptiondb`), then the developer needs to write SQL scripts
+If any schema change is required in Cloudbreak services databases (`cbdb` / `periscopedb` / `datalakedb` / `redbeamsdb` / `environmentdb` / `freeipadb`), then the developer needs to write SQL scripts
  to migrate the database accordingly. The schema migration is managed by [MyBatis Migrations](https://github.com/mybatis/migrations) in Cloudbreak and the cbd tool provides an easy-to-use wrapper for it. The syntax for using the migration commands is `cbd migrate <database name> <command> [parameters]` e.g. `cbd migrate cbdb status`.
 Create a SQL template for schema changes:
 ```

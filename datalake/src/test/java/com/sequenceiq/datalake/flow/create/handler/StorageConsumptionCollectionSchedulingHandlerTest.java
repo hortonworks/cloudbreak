@@ -1,14 +1,7 @@
 package com.sequenceiq.datalake.flow.create.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,14 +11,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.flow.create.event.StorageConsumptionCollectionSchedulingRequest;
 import com.sequenceiq.datalake.flow.create.event.StorageConsumptionCollectionSchedulingSuccessEvent;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
-import com.sequenceiq.datalake.service.consumption.ConsumptionService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -44,9 +35,6 @@ class StorageConsumptionCollectionSchedulingHandlerTest {
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
-
-    @Mock
-    private ConsumptionService consumptionService;
 
     @InjectMocks
     private StorageConsumptionCollectionSchedulingHandler underTest;
@@ -90,24 +78,12 @@ class StorageConsumptionCollectionSchedulingHandlerTest {
     }
 
     @Test
-    void doAcceptTestErrorWhenSdxClusterAbsent() {
-        when(sdxClusterRepository.findById(DATALAKE_ID)).thenReturn(Optional.empty());
-
-        NotFoundException notFoundException = assertThrows(NotFoundException.class, () -> underTest.doAccept(handlerEvent));
-
-        assertThat(notFoundException).hasMessage("SDX cluster '12' not found.");
-        verify(consumptionService, never()).scheduleStorageConsumptionCollectionIfNeeded(any(SdxCluster.class));
-    }
-
-    @Test
     void doAcceptTestSuccess() {
         SdxCluster sdxCluster = sdxCluster();
-        when(sdxClusterRepository.findById(DATALAKE_ID)).thenReturn(Optional.of(sdxCluster));
 
         Selectable result = underTest.doAccept(handlerEvent);
 
         verifySuccessEvent(result);
-        verify(consumptionService).scheduleStorageConsumptionCollectionIfNeeded(sdxCluster);
     }
 
     private SdxCluster sdxCluster() {

@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingSuccess;
-import com.sequenceiq.cloudbreak.service.consumption.ConsumptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -24,9 +23,6 @@ public class AttachedVolumeConsumptionCollectionSchedulingHandler extends Except
 
     @Inject
     private StackDtoService stackDtoService;
-
-    @Inject
-    private ConsumptionService consumptionService;
 
     @Override
     public String selector() {
@@ -44,7 +40,6 @@ public class AttachedVolumeConsumptionCollectionSchedulingHandler extends Except
         AttachedVolumeConsumptionCollectionSchedulingRequest request = event.getData();
 
         Long resourceId = request.getResourceId();
-        consumptionService.scheduleAttachedVolumeConsumptionCollectionForStackIfNeeded(stackDtoService.getById(resourceId));
 
         LOGGER.debug("Attached volume consumption collection scheduling flow step finished.");
         return new AttachedVolumeConsumptionCollectionSchedulingSuccess(resourceId);

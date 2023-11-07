@@ -60,15 +60,6 @@ public class ServiceEndpointConfig {
     @Value("${datalake.freeipa.serviceId:}")
     private String freeipaServiceId;
 
-    @Value("${datalake.consumption.url:}")
-    private String consumptionServiceUrl;
-
-    @Value("${datalake.consumption.serviceId:}")
-    private String consumptionServiceId;
-
-    @Value("${datalake.consumption.contextPath}")
-    private String consumptionRootContextPath;
-
     @Bean
     public ServiceAddressResolver serviceAddressResolver() {
         return new RetryingServiceAddressResolver(new DNSServiceAddressResolver(), resolvingTimeout);
@@ -102,10 +93,5 @@ public class ServiceEndpointConfig {
     @DependsOn("serviceAddressResolver")
     public String freeIpaServerUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveUrl(freeipaServiceUrl + freeipaRootContextPath, "http", freeipaServiceId);
-    }
-
-    @Bean
-    public String consumptionServerUrl() throws ServiceAddressResolvingException {
-        return serviceAddressResolver().resolveUrl(consumptionServiceUrl + consumptionRootContextPath, "http", consumptionServiceId);
     }
 }

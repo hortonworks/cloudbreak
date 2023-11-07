@@ -25,7 +25,6 @@ import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
@@ -34,8 +33,6 @@ import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionWaitRequest;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeletionFailedEvent;
-import com.sequenceiq.datalake.flow.delete.event.StackDeletionSuccessEvent;
-import com.sequenceiq.datalake.flow.delete.event.StorageConsumptionCollectionUnschedulingRequest;
 import com.sequenceiq.datalake.flow.delete.event.StorageConsumptionCollectionUnschedulingSuccessEvent;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
@@ -123,18 +120,6 @@ class SdxDeleteActionsTest {
         lenient().when(reactorEventFactory.createEvent(anyMap(), any())).thenReturn((Event<Object>) event);
     }
 
-    @ParameterizedTest(name = "forced={0}")
-    @ValueSource(booleans = {false, true})
-    void storageConsumptionCollectionUnschedulingInProgressTestCreateFlowContext(boolean forced) {
-        StackDeletionSuccessEvent payload = new StackDeletionSuccessEvent(SDX_ID, USER_ID, forced);
-        AbstractActionTestSupport<FlowState, FlowEvent, SdxContext, StackDeletionSuccessEvent> testSupport =
-                new AbstractActionTestSupport<>(initAction(underTest::storageConsumptionCollectionUnschedulingInProgress));
-
-        SdxContext result = testSupport.createFlowContext(flowParameters, stateContext, payload);
-
-        verifySdxContext(result);
-    }
-
     private <P extends SdxEvent> AbstractSdxAction<P> initAction(Supplier<Action<?, ?>> actionSupplier) {
         AbstractSdxAction<P> action = (AbstractSdxAction<P>) actionSupplier.get();
         ReflectionTestUtils.setField(action, "runningFlows", runningFlows);
@@ -150,30 +135,6 @@ class SdxDeleteActionsTest {
         assertThat(result.getFlowParameters()).isSameAs(flowParameters);
     }
 
-    @ParameterizedTest(name = "forced={0}")
-    @ValueSource(booleans = {false, true})
-    void storageConsumptionCollectionUnschedulingInProgressTestDoExecute(boolean forced) throws Exception {
-        SdxContext context = new SdxContext(flowParameters, SDX_ID, USER_ID);
-        StackDeletionSuccessEvent payload = new StackDeletionSuccessEvent(SDX_ID, USER_ID, forced);
-        ArgumentCaptor<StorageConsumptionCollectionUnschedulingRequest> unschedulingRequestCaptor =
-                ArgumentCaptor.forClass(StorageConsumptionCollectionUnschedulingRequest.class);
-        AbstractActionTestSupport<FlowState, FlowEvent, SdxContext, StackDeletionSuccessEvent> testSupport =
-                new AbstractActionTestSupport<>(initAction(underTest::storageConsumptionCollectionUnschedulingInProgress));
-
-        testSupport.doExecute(context, payload, Map.of());
-
-        verify(eventSenderService).notifyEvent(context, ResourceEvent.SDX_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED);
-
-        verifyEvent(unschedulingRequestCaptor, "STORAGECONSUMPTIONCOLLECTIONUNSCHEDULINGREQUEST");
-
-        StorageConsumptionCollectionUnschedulingRequest unschedulingRequest = unschedulingRequestCaptor.getValue();
-        assertThat(unschedulingRequest).isNotNull();
-        assertThat(unschedulingRequest.isForced()).isEqualTo(forced);
-        assertThat(unschedulingRequest.getUserId()).isEqualTo(USER_ID);
-        assertThat(unschedulingRequest.getSdxName()).isNull();
-        assertThat(unschedulingRequest.getResourceId()).isEqualTo(SDX_ID);
-    }
-
     private void verifyEvent(ArgumentCaptor<?> payloadCaptor, String selectorExpected) {
         verify(reactorEventFactory).createEvent(headersCaptor.capture(), payloadCaptor.capture());
         verify(eventBus).notify(selectorExpected, event);
@@ -186,19 +147,6 @@ class SdxDeleteActionsTest {
         assertThat(headers).isNotNull();
         assertThat(headers).containsOnly(entry(FlowConstants.FLOW_ID, FLOW_ID), entry(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USER_CRN),
                 entry(FlowConstants.FLOW_OPERATION_TYPE, "UNKNOWN"), entry(FlowConstants.FLOW_CHAIN_ID, FLOW_CHAIN_ID));
-    }
-
-    @ParameterizedTest(name = "forced={0}")
-    @ValueSource(booleans = {false, true})
-    void storageConsumptionCollectionUnschedulingInProgressTestGetFailurePayload(boolean forced) {
-        StackDeletionSuccessEvent payload = new StackDeletionSuccessEvent(SDX_ID, USER_ID, forced);
-        AbstractActionTestSupport<FlowState, FlowEvent, SdxContext, StackDeletionSuccessEvent> testSupport =
-                new AbstractActionTestSupport<>(initAction(underTest::storageConsumptionCollectionUnschedulingInProgress));
-        Exception ex = new UnsupportedOperationException();
-
-        Object result = testSupport.getFailurePayload(payload, Optional.empty(), ex);
-
-        verifyFailurePayload(result, ex, forced);
     }
 
     private void verifyFailurePayload(Object failurePayload, Exception exExpected, boolean forcedExpected) {

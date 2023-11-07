@@ -8,7 +8,6 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -32,12 +31,9 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.service.StackCreationService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.stack.StackWithFingerprintsEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingSuccess;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -149,29 +145,6 @@ class StackCreationActionsTest {
         return stack;
     }
 
-    @Test
-    void attachedVolumeConsumptionCollectionSchedulingActionTestDoExecute() throws Exception {
-        ArgumentCaptor<AttachedVolumeConsumptionCollectionSchedulingRequest> schedulingRequestCaptor =
-                ArgumentCaptor.forClass(AttachedVolumeConsumptionCollectionSchedulingRequest.class);
-        AbstractActionTestSupport<StackCreationState, StackCreationEvent, StackCreationContext, StackWithFingerprintsEvent> testSupport =
-                new AbstractActionTestSupport<>(initAction(underTest::attachedVolumeConsumptionCollectionSchedulingAction));
-
-        testSupport.doExecute(stackCreationContext(), new StackWithFingerprintsEvent(STACK_ID, Set.of()), Map.of());
-
-        verify(eventService).fireCloudbreakEvent(STACK_ID, "CREATE_IN_PROGRESS", ResourceEvent.STACK_ATTACHED_VOLUME_CONSUMPTION_COLLECTION_SCHEDULING_STARTED);
-
-        verifyEvent(schedulingRequestCaptor, "ATTACHEDVOLUMECONSUMPTIONCOLLECTIONSCHEDULINGREQUEST");
-
-        AttachedVolumeConsumptionCollectionSchedulingRequest schedulingRequest = schedulingRequestCaptor.getValue();
-        assertThat(schedulingRequest).isNotNull();
-        verifySchedulingRequest(schedulingRequest);
-    }
-
-    private void verifySchedulingRequest(AttachedVolumeConsumptionCollectionSchedulingRequest schedulingRequest) {
-        assertThat(schedulingRequest.getResourceId()).isEqualTo(STACK_ID);
-        assertThat(schedulingRequest.getSelector()).isEqualTo("ATTACHEDVOLUMECONSUMPTIONCOLLECTIONSCHEDULINGREQUEST");
-    }
-
     private void verifyEvent(ArgumentCaptor<?> payloadCaptor, String selectorExpected) {
         verify(reactorEventFactory).createEvent(headersCaptor.capture(), payloadCaptor.capture());
         verify(eventBus).notify(selectorExpected, event);
@@ -185,18 +158,6 @@ class StackCreationActionsTest {
         assertThat(headers).containsOnly(entry(FlowConstants.FLOW_ID, FLOW_ID), entry(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USER_CRN),
                 entry(FlowConstants.FLOW_OPERATION_TYPE, "UNKNOWN"),
                 entry(FlowConstants.FLOW_CHAIN_ID, FLOW_CHAIN_ID));
-    }
-
-    @Test
-    void attachedVolumeConsumptionCollectionSchedulingActionTestCreateRequest() {
-        AbstractActionTestSupport<StackCreationState, StackCreationEvent, StackCreationContext, StackWithFingerprintsEvent> testSupport =
-                new AbstractActionTestSupport<>(initAction(underTest::attachedVolumeConsumptionCollectionSchedulingAction));
-
-        Selectable result = testSupport.createRequest(stackCreationContext());
-
-        assertThat(result).isInstanceOf(AttachedVolumeConsumptionCollectionSchedulingRequest.class);
-
-        verifySchedulingRequest((AttachedVolumeConsumptionCollectionSchedulingRequest) result);
     }
 
     @Test

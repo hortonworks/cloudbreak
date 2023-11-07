@@ -61,7 +61,6 @@ dependencies {
   implementation project(':idbmms-connector')
   implementation project(':datalake-dr-connector')
 
-  implementation project(":cloud-consumption-api")
   implementation project(':core-api')
   implementation project(':datalake-api')
   implementation project(':environment-api')

@@ -3,7 +3,6 @@ package com.sequenceiq.environment.environment.flow.deletion;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_IDBROKER_MAPPINGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_PUBLICKEY_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.UNSCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -164,14 +163,6 @@ class EnvDeleteActionsTest {
         testDeleteActionHappyPath(underTest::resourceEncryptionDeleteAction, DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector(),
                 EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS, ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETION_STARTED,
                 EnvDeleteState.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_STARTED_STATE);
-    }
-
-    @Test
-    void storageConsumptionCollectionUnschedulingActionTestHappyPath() {
-        testDeleteActionHappyPath(underTest::storageConsumptionCollectionUnschedulingAction, UNSCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT.selector(),
-                EnvironmentStatus.STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_IN_PROGRESS,
-                ResourceEvent.ENVIRONMENT_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED,
-                EnvDeleteState.STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED_STATE);
     }
 
     private void testDeleteActionHappyPath(Supplier<Action<?, ?>> deleteAction,

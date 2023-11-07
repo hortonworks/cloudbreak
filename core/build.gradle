@@ -273,7 +273,6 @@ dependencies {
   implementation project(':cloud-aws-native')
   implementation project(':cloud-aws-gov')
   implementation project(':cloud-azure')
-  implementation project(':cloud-consumption-api')
   implementation project(':cloud-gcp')
   implementation project(':cloud-template')
   implementation project(':audit-connector')

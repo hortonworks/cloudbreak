@@ -24,16 +24,13 @@ import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
-import com.sequenceiq.datalake.flow.create.event.EnvWaitSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
-import com.sequenceiq.datalake.flow.create.event.StorageConsumptionCollectionSchedulingRequest;
 import com.sequenceiq.datalake.flow.create.event.StorageConsumptionCollectionSchedulingSuccessEvent;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
@@ -121,17 +118,6 @@ class SdxCreateActionsTest {
         lenient().when(reactorEventFactory.createEvent(anyMap(), any())).thenReturn((Event<Object>) event);
     }
 
-    @Test
-    void storageConsumptionCollectionSchedulingInProgressTestCreateFlowContext() {
-        EnvWaitSuccessEvent payload = new EnvWaitSuccessEvent(SDX_ID, USER_ID, detailedEnvironmentResponse);
-        AbstractActionTestSupport<FlowState, FlowEvent, SdxContext, EnvWaitSuccessEvent> testSupport =
-                new AbstractActionTestSupport<>(initAction(underTest::storageConsumptionCollectionSchedulingInProgress));
-
-        SdxContext result = testSupport.createFlowContext(flowParameters, stateContext, payload);
-
-        verifySdxContext(result);
-    }
-
     private <P extends SdxEvent> AbstractSdxAction<P> initAction(Supplier<Action<?, ?>> actionSupplier) {
         AbstractSdxAction<P> action = (AbstractSdxAction<P>) actionSupplier.get();
         ReflectionTestUtils.setField(action, "runningFlows", runningFlows);
@@ -147,29 +133,6 @@ class SdxCreateActionsTest {
         assertThat(result.getFlowParameters()).isSameAs(flowParameters);
     }
 
-    @Test
-    void storageConsumptionCollectionSchedulingInProgressTestDoExecute() throws Exception {
-        SdxContext context = new SdxContext(flowParameters, SDX_ID, USER_ID);
-        EnvWaitSuccessEvent payload = new EnvWaitSuccessEvent(SDX_ID, USER_ID, detailedEnvironmentResponse);
-        ArgumentCaptor<StorageConsumptionCollectionSchedulingRequest> schedulingRequestCaptor =
-                ArgumentCaptor.forClass(StorageConsumptionCollectionSchedulingRequest.class);
-        AbstractActionTestSupport<FlowState, FlowEvent, SdxContext, EnvWaitSuccessEvent> testSupport =
-                new AbstractActionTestSupport<>(initAction(underTest::storageConsumptionCollectionSchedulingInProgress));
-
-        testSupport.doExecute(context, payload, Map.of());
-
-        verify(eventSenderService).notifyEvent(context, ResourceEvent.SDX_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_STARTED);
-
-        verifyEvent(schedulingRequestCaptor, "STORAGECONSUMPTIONCOLLECTIONSCHEDULINGREQUEST");
-
-        StorageConsumptionCollectionSchedulingRequest schedulingRequest = schedulingRequestCaptor.getValue();
-        assertThat(schedulingRequest).isNotNull();
-        assertThat(schedulingRequest.getDetailedEnvironmentResponse()).isEqualTo(detailedEnvironmentResponse);
-        assertThat(schedulingRequest.getUserId()).isEqualTo(USER_ID);
-        assertThat(schedulingRequest.getSdxName()).isNull();
-        assertThat(schedulingRequest.getResourceId()).isEqualTo(SDX_ID);
-    }
-
     private void verifyEvent(ArgumentCaptor<?> payloadCaptor, String selectorExpected) {
         verify(reactorEventFactory).createEvent(headersCaptor.capture(), payloadCaptor.capture());
         verify(eventBus).notify(selectorExpected, event);
@@ -182,18 +145,6 @@ class SdxCreateActionsTest {
         assertThat(headers).isNotNull();
         assertThat(headers).containsOnly(entry(FlowConstants.FLOW_ID, FLOW_ID), entry(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USER_CRN),
                 entry(FlowConstants.FLOW_OPERATION_TYPE, "UNKNOWN"), entry(FlowConstants.FLOW_CHAIN_ID, FLOW_CHAIN_ID));
-    }
-
-    @Test
-    void storageConsumptionCollectionSchedulingInProgressTestGetFailurePayload() {
-        EnvWaitSuccessEvent payload = new EnvWaitSuccessEvent(SDX_ID, USER_ID, detailedEnvironmentResponse);
-        AbstractActionTestSupport<FlowState, FlowEvent, SdxContext, EnvWaitSuccessEvent> testSupport =
-                new AbstractActionTestSupport<>(initAction(underTest::storageConsumptionCollectionSchedulingInProgress));
-        Exception ex = new UnsupportedOperationException();
-
-        Object result = testSupport.getFailurePayload(payload, Optional.empty(), ex);
-
-        verifyFailurePayload(result, ex);
     }
 
     private void verifyFailurePayload(Object failurePayload, Exception exExpected) {

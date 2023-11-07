@@ -12,4 +12,3 @@ echo -e "\n\033[1;96m--- building swagger definitions for services\033[0m\n"
     redbeams:test --tests=com.sequenceiq.*.swagger.SwaggerGenerator \
     autoscale:test --tests=com.sequenceiq.*.swagger.SwaggerGenerator \
     datalake:test --tests=com.sequenceiq.*.swagger.SwaggerGenerator \
-    cloud-consumption:test --tests=com.sequenceiq.*.swagger.SwaggerGenerator \

@@ -12,7 +12,6 @@ import com.sequenceiq.datalake.flow.delete.event.SdxDeletionFailedEvent;
 import com.sequenceiq.datalake.flow.delete.event.StorageConsumptionCollectionUnschedulingRequest;
 import com.sequenceiq.datalake.flow.delete.event.StorageConsumptionCollectionUnschedulingSuccessEvent;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
-import com.sequenceiq.datalake.service.consumption.ConsumptionService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -24,9 +23,6 @@ public class StorageConsumptionCollectionUnschedulingHandler extends ExceptionCa
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
-
-    @Inject
-    private ConsumptionService consumptionService;
 
     @Override
     public String selector() {
@@ -43,7 +39,6 @@ public class StorageConsumptionCollectionUnschedulingHandler extends ExceptionCa
         LOGGER.debug("Storage consumption collection unscheduling flow step started.");
         StorageConsumptionCollectionUnschedulingRequest request = event.getData();
         Long sdxId = request.getResourceId();
-        sdxClusterRepository.findById(sdxId).ifPresent(consumptionService::unscheduleStorageConsumptionCollectionIfNeeded);
         Selectable response = new StorageConsumptionCollectionUnschedulingSuccessEvent(sdxId, request.getUserId(), request.isForced());
         LOGGER.debug("Storage consumption collection unscheduling flow step finished.");
         return response;

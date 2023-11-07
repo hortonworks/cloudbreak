@@ -12,7 +12,6 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
-import com.sequenceiq.environment.environment.service.consumption.ConsumptionService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -25,17 +24,13 @@ public class StorageConsumptionCollectionUnschedulingHandler extends EventSender
 
     private final HandlerExceptionProcessor exceptionProcessor;
 
-    private final ConsumptionService consumptionService;
-
     protected StorageConsumptionCollectionUnschedulingHandler(
             EventSender eventSender,
             EnvironmentService environmentService,
-            HandlerExceptionProcessor exceptionProcessor,
-            ConsumptionService consumptionService) {
+            HandlerExceptionProcessor exceptionProcessor) {
         super(eventSender);
         this.environmentService = environmentService;
         this.exceptionProcessor = exceptionProcessor;
-        this.consumptionService = consumptionService;
     }
 
     @Override
@@ -50,8 +45,6 @@ public class StorageConsumptionCollectionUnschedulingHandler extends EventSender
         EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
         EnvDeleteEvent nextStateEvent = getNextStateEvent(environmentDeletionDto);
         try {
-            environmentService.findEnvironmentById(environmentDto.getId())
-                    .ifPresent(environment -> consumptionService.unscheduleStorageConsumptionCollectionIfNeeded(environmentDto));
             eventSender().sendEvent(nextStateEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
             LOGGER.error("Storage consumption collection unscheduling failed", e);

@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.reactor.handler.consumption;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +16,6 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionUnschedulingFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionUnschedulingRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionUnschedulingSuccess;
-import com.sequenceiq.cloudbreak.service.consumption.ConsumptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -29,9 +26,6 @@ class AttachedVolumeConsumptionCollectionUnschedulingHandlerTest {
 
     @Mock
     private StackDtoService stackDtoService;
-
-    @Mock
-    private ConsumptionService consumptionService;
 
     @InjectMocks
     private AttachedVolumeConsumptionCollectionUnschedulingHandler underTest;
@@ -72,12 +66,10 @@ class AttachedVolumeConsumptionCollectionUnschedulingHandlerTest {
     @Test
     void doAcceptTestSuccess() {
         StackDto stackDto = new StackDto();
-        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
 
         Selectable result = underTest.doAccept(handlerEvent);
 
         verifySuccessEvent(result);
-        verify(consumptionService).unscheduleAttachedVolumeConsumptionCollectionForStackIfNeeded(stackDto);
     }
 
     private void verifySuccessEvent(Selectable result) {

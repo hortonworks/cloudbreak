@@ -13,7 +13,6 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
-import com.sequenceiq.environment.environment.service.consumption.ConsumptionService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -26,17 +25,13 @@ public class StorageConsumptionCollectionSchedulingHandler extends EventSenderAw
 
     private final EventBus eventBus;
 
-    private final ConsumptionService consumptionService;
-
     protected StorageConsumptionCollectionSchedulingHandler(
             EventSender eventSender,
             EnvironmentService environmentService,
-            EventBus eventBus,
-            ConsumptionService consumptionService) {
+            EventBus eventBus) {
         super(eventSender);
         this.environmentService = environmentService;
         this.eventBus = eventBus;
-        this.consumptionService = consumptionService;
     }
 
     @Override
@@ -46,7 +41,6 @@ public class StorageConsumptionCollectionSchedulingHandler extends EventSenderAw
         try {
             environmentService.findEnvironmentById(environmentDto.getId())
                     .ifPresentOrElse(environment -> {
-                                consumptionService.scheduleStorageConsumptionCollectionIfNeeded(environmentDto);
                                 goToNextState(environmentDtoEvent, environmentDto);
                             }, () -> goToFailedState(environmentDtoEvent, environmentDto,
                                     new IllegalStateException(String.format("Environment was not found with id '%s'.", environmentDto.getId())))

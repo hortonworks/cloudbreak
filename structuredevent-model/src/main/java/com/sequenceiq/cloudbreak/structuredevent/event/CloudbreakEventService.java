@@ -26,8 +26,6 @@ public interface CloudbreakEventService {
     @Deprecated
     String LEGACY_RESOURCE_TYPE = "stacks";
 
-    String CONSUMPTION_RESOURCE_TYPE = "consumption";
-
     String REDBEAMS_RESOURCE_TYPE = "redbeams";
 
     void fireCloudbreakEvent(Long entityId, String eventType, ResourceEvent resourceEvent);

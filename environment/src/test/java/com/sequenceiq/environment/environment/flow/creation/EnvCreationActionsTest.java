@@ -2,7 +2,6 @@ package com.sequenceiq.environment.environment.flow.creation;
 
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_PUBLICKEY_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.INITIALIZE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT;
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.SCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FAILED_ENV_CREATION_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -177,24 +176,6 @@ class EnvCreationActionsTest {
         testCreationActionHappyPath(underTest::resourceEncryptionInitializationAction, INITIALIZE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector(),
                 EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS,
                 ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED);
-    }
-
-    @Test
-    void storageConsumptionCollectionSchedulingActionTestFailure() {
-        testFailure(underTest::storageConsumptionCollectionSchedulingAction);
-    }
-
-    @Test
-    void storageConsumptionCollectionSchedulingActionTestNoEnvironment() {
-        testNoEnvironment(underTest::storageConsumptionCollectionSchedulingAction, FAILED_ENV_CREATION_EVENT.selector(),
-                ResourceEvent.ENVIRONMENT_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_FAILED);
-    }
-
-    @Test
-    void storageConsumptionCollectionSchedulingActionHappyPath() {
-        testCreationActionHappyPath(underTest::storageConsumptionCollectionSchedulingAction, SCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT.selector(),
-                EnvironmentStatus.STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_IN_PROGRESS,
-                ResourceEvent.ENVIRONMENT_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_STARTED);
     }
 
     private void testFailure(Supplier<Action<?, ?>> creationAction) {

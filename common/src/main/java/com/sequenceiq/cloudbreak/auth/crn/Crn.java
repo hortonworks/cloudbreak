@@ -173,7 +173,6 @@ public class Crn {
         CCMV2("ccmv2", NON_ADMIN_SERVICE),
         SDXSVC("sdxsvc", NON_ADMIN_SERVICE),
         SDXSVCADMIN("sdxsvcadmin", ADMIN_SERVICE),
-        CONSUMPTION("consumption", NON_ADMIN_SERVICE),
         RECIPE("recipe", NON_ADMIN_SERVICE);
 
         private static final ImmutableMap<String, Service> FROM_STRING;
@@ -381,8 +380,7 @@ public class Crn {
         AGENT("agent"),
         WXM_ENVIRONMENT("wxm_environment"),
         INSTANCE("instance"),
-        CONNECTION("connection"),
-        CONSUMPTION("consumption");
+        CONNECTION("connection");
 
         private static final ImmutableMap<String, ResourceType> FROM_STRING;
 

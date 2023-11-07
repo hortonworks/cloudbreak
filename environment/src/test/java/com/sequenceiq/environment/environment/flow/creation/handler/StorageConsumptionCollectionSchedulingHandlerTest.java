@@ -26,7 +26,6 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
-import com.sequenceiq.environment.environment.service.consumption.ConsumptionService;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 
@@ -47,9 +46,6 @@ class StorageConsumptionCollectionSchedulingHandlerTest {
 
     @Mock
     private EventBus eventBus;
-
-    @Mock
-    private ConsumptionService consumptionService;
 
     @InjectMocks
     private StorageConsumptionCollectionSchedulingHandler underTest;
@@ -94,7 +90,6 @@ class StorageConsumptionCollectionSchedulingHandlerTest {
         underTest.accept(environmentDtoEvent);
 
         verifyFailureEvent(IllegalStateException.class, "Environment was not found with id '12'.");
-        verify(consumptionService, never()).scheduleStorageConsumptionCollectionIfNeeded(any(EnvironmentDto.class));
         verify(eventSender, never()).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
     }
 
@@ -125,7 +120,6 @@ class StorageConsumptionCollectionSchedulingHandlerTest {
         underTest.accept(environmentDtoEvent);
 
         verifyFailureEvent(UnsupportedOperationException.class, "This is not supported");
-        verify(consumptionService, never()).scheduleStorageConsumptionCollectionIfNeeded(any(EnvironmentDto.class));
         verify(eventSender, never()).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
     }
 
@@ -136,7 +130,6 @@ class StorageConsumptionCollectionSchedulingHandlerTest {
         underTest.accept(environmentDtoEvent);
 
         verifySuccessEvent();
-        verify(consumptionService).scheduleStorageConsumptionCollectionIfNeeded(environmentDto);
         verify(eventBus, never()).notify(any(), any(Event.class));
     }
 

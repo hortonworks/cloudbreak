@@ -68,15 +68,6 @@ public class ServiceEndpointConfig {
     @Value("${cb.periscope.serviceid:}")
     private String autoscaleServiceId;
 
-    @Value("${cb.consumption.url:}")
-    private String consumptionServiceUrl;
-
-    @Value("${cb.consumption.serviceId:}")
-    private String consumptionServiceId;
-
-    @Value("${cb.consumption.contextPath}")
-    private String consumptionRootContextPath;
-
     @Bean
     public ServiceAddressResolver serviceAddressResolver() {
         return new RetryingServiceAddressResolver(new DNSServiceAddressResolver(), resolvingTimeout);
@@ -110,10 +101,5 @@ public class ServiceEndpointConfig {
     @Bean
     public String autoscaleServerUrl() throws ServiceAddressResolvingException {
         return serviceAddressResolver().resolveUrl(autoscaleServiceUrl + autoscaleContextPath, "http", autoscaleServiceId);
-    }
-
-    @Bean
-    public String consumptionServerUrl() throws ServiceAddressResolvingException {
-        return serviceAddressResolver().resolveUrl(consumptionServiceUrl + consumptionRootContextPath, "http", consumptionServiceId);
     }
 }

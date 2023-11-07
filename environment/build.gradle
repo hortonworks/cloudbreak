@@ -72,7 +72,6 @@ dependencies {
     implementation     project(":idbmms-connector")
     implementation     project(":redbeams-api")
     implementation     project(":freeipa-api")
-    implementation     project(":cloud-consumption-api")
     implementation     project(":structuredevent-service-cdp")
     implementation     project(":status-checker")
     implementation     project(":template-manager-tag")

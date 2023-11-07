@@ -147,10 +147,6 @@ cb:
   redbeams:
     url: http://localhost:8087
     contextPath: /redbeams
-  consumption:
-    url: http://localhost:8099
-    contextPath: /consumption
-    enabled: false
   periscope:
     url: http://localhost:8085
     contextPath: /as

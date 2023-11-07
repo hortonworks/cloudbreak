@@ -65,10 +65,6 @@ environment:
   sdx:
     url: http://localhost:8086
     contextPath: /dl
-  consumption:
-    url: http://localhost:8099
-    contextPath: /consumption
-    enabled: false
   db:
     enabled: false
 #    host: localhost

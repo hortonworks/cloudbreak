@@ -26,8 +26,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_STOPPED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_STOP_DATAHUB_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_STOP_DATALAKE_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_STOP_FREEIPA_STARTED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_STARTED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_UMS_RESOURCE_DELETION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_VALIDATION_STARTED;
 
@@ -67,7 +65,6 @@ public class EnvironmentListStructuredEventAssertions {
     private static final List<ResourceEvent> ENV_CREATE_NOTIFICATION_EVENTS = Arrays.asList(
             ENVIRONMENT_INITIALIZATION_STARTED,
             ENVIRONMENT_VALIDATION_STARTED,
-            ENVIRONMENT_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_STARTED,
             ENVIRONMENT_NETWORK_CREATION_STARTED,
             ENVIRONMENT_PUBLICKEY_CREATION_STARTED,
             ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED,
@@ -135,7 +132,6 @@ public class EnvironmentListStructuredEventAssertions {
             ENVIRONMENT_CLUSTER_DEFINITION_DELETE_STARTED,
             ENVIRONMENT_DATABASE_DELETION_STARTED,
             ENVIRONMENT_FREEIPA_DELETION_STARTED,
-            ENVIRONMENT_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED,
             ENVIRONMENT_IDBROKER_MAPPINGS_DELETION_STARTED,
             ENVIRONMENT_S3GUARD_TABLE_DELETION_STARTED,
             ENVIRONMENT_UMS_RESOURCE_DELETION_STARTED,

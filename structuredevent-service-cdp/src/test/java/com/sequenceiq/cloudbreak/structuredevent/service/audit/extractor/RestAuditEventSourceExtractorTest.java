@@ -20,7 +20,6 @@ class RestAuditEventSourceExtractorTest {
                 Arguments.of("RedbeamsService", true),
                 Arguments.of("FreeIpaService", true),
                 Arguments.of("FreeipaService", true),
-                Arguments.of("ConsumptionService", true),
                 Arguments.of("CloudbreakService", true),
                 Arguments.of("DatahubService", true),
                 Arguments.of("Periscope", false),

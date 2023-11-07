@@ -127,10 +127,6 @@ datalake:
   freeipa:
     url: http://localhost:8090
     contextPath: /freeipa
-  consumption:
-    url: http://localhost:8099
-    contextPath: /consumption
-    enabled: false
   db:
     port.5432.tcp:
       port: 5432

@@ -41,8 +41,7 @@ public enum CrnResourceDescriptor {
     // DFX service
     DFX_INTERIM(Crn.ResourceType.ENVIRONMENT, Crn.Service.DF),
     DFX(Crn.ResourceType.SERVICE, Crn.Service.DF),
-    WXM_ENVIRONMENT(Crn.ResourceType.WXM_ENVIRONMENT, Crn.Service.ENVIRONMENTS),
-    CONSUMPTION(Crn.ResourceType.CONSUMPTION, Crn.Service.CONSUMPTION);
+    WXM_ENVIRONMENT(Crn.ResourceType.WXM_ENVIRONMENT, Crn.Service.ENVIRONMENTS);
 
     private Crn.ResourceType resourceType;
 
