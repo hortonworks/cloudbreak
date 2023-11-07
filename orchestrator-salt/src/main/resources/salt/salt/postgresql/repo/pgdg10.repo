@@ -1,9 +1,7 @@
-[pgdg10]
-name=PostgreSQL 10
-baseurl=https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64
+[postgresql10-rhel7]
+name=postgresql10-rhel7
+baseurl=https://mirror.infra.cloudera.com/repos/postgresql/yum/10/rhel-7-x86_64
 enabled=1
-priority=1
 gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG-10
-skip_if_unavailable = 1
-keepcache = 0
+gpgkey=https://mirror.infra.cloudera.com/repos/postgresql/yum/10/keys/RPM-GPG-KEY-PGDG
+sslverify=1

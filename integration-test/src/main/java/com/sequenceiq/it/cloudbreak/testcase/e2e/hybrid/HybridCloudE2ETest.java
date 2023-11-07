@@ -14,6 +14,7 @@ import org.testng.annotations.AfterMethod;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
@@ -21,10 +22,12 @@ import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.UtilTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.yarn.YarnCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerProductTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
@@ -65,10 +68,6 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
 
     private static final String CDH = "CDH";
 
-    private static final String CENTOS7 = "centos7";
-
-    private static final String REDHAT7 = "redhat7";
-
     private static final String STACK_AUTHENTICATION = "stackAuthentication";
 
     @Inject
@@ -91,6 +90,9 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
 
     @Inject
     private DistroXTestClient distroXTestClient;
+
+    @Inject
+    private YarnCloudProvider yarnCloudProvider;
 
     @Value("${integrationtest.aws.hybridCloudSecurityGroupID}")
     private String hybridCloudSecurityGroupID;
@@ -138,6 +140,7 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
         String clouderaManager = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
         String cluster = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
         String cmProduct = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
+        String imageSettings = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
         String stack = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
         fetchCdhDetails(testContext);
 
@@ -162,11 +165,13 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
                     .withHostGroup(IDBROKER)
                     .withNodeCount(1)
                 .given(STACK_AUTHENTICATION, StackAuthenticationTestDto.class, CHILD_CLOUD_PLATFORM)
+                .given(imageSettings, ImageSettingsTestDto.class, CHILD_CLOUD_PLATFORM)
                 .given(stack, StackTestDto.class, CHILD_CLOUD_PLATFORM)
                     .withCluster(cluster)
                     .withInstanceGroups(MASTER_INSTANCE_GROUP, IDBROKER_INSTANCE_GROUP)
                     .withStackAuthentication(STACK_AUTHENTICATION)
                     .withTelemetry("telemetry")
+                    .withImageSettings(imageSettings)
                 .given(CHILD_SDX_KEY, SdxInternalTestDto.class, CHILD_CLOUD_PLATFORM)
                     .withStackRequest(key(cluster), key(stack))
                     .withEnvironmentKey(key(CHILD_ENVIRONMENT_KEY))
@@ -184,15 +189,16 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
 
     private void fetchCdhDetails(TestContext testContext) {
         if (StringUtils.isAnyBlank(cdhVersion, cdhParcel)) {
+            OsType osType = yarnCloudProvider.getOsType();
             testContext
                     .given(StackMatrixTestDto.class, CHILD_CLOUD_PLATFORM)
-                        .withOs(CENTOS7)
+                        .withOs(osType.getOs())
                     .when(utilTestClient.stackMatrixV4())
                     .then((tc, dto, client) -> {
                         String runtimeVersion = commonClusterManagerProperties().getRuntimeVersion();
                         ClouderaManagerStackDescriptorV4Response response = dto.getResponse().getCdh().get(runtimeVersion);
                         cdhVersion = response.getVersion();
-                        cdhParcel = response.getRepository().getStack().get(REDHAT7);
+                        cdhParcel = response.getRepository().getStack().get(osType.getOsType());
                         return dto;
                     })
                     .validate();

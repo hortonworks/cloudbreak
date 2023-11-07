@@ -332,6 +332,7 @@ integrationtest:
     networkCidr: 172.27.0.0/16
     baseimage:
       imageId:
+      osType:
     diskEncryption:
       environmentKey:
       datahubKey:

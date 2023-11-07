@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.yarn;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.it.cloudbreak.cloud.v4.VerticalScaleProperties;
 
 @Configuration
@@ -160,12 +161,22 @@ public class YarnProperties {
     public static class Baseimage {
         private String imageId;
 
+        private OsType osType;
+
         public String getImageId() {
             return imageId;
         }
 
         public void setImageId(String imageId) {
             this.imageId = imageId;
+        }
+
+        public OsType getOsType() {
+            return osType;
+        }
+
+        public void setOsType(OsType osType) {
+            this.osType = osType;
         }
     }
 

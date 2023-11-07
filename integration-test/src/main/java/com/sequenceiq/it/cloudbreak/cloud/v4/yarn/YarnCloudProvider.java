@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.yarn;
 
 import static java.lang.String.format;
 
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -16,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.YarnInstanceTemplateV1Parameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.yarn.YarnParameters;
@@ -233,6 +236,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
         return imageSettings.withImageId(yarnProperties.getBaseimage().getImageId())
+                .withOs(getOsType().getOs())
                 .withImageCatalog(commonCloudProperties().getImageCatalogName());
     }
 
@@ -360,5 +364,9 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     @Override
     public DistroXTestDtoBase withResourceEncryption(DistroXTestDtoBase distroXTestDtoBase) {
         return distroXTestDtoBase;
+    }
+
+    public OsType getOsType() {
+        return Objects.requireNonNullElse(yarnProperties.getBaseimage().getOsType(), OsType.CENTOS7);
     }
 }
