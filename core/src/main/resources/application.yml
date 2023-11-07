@@ -154,7 +154,7 @@ cb:
     read.timeout: 10000
     skipEntitlementCheckPlatforms: MOCK
   runtimes:
-    latest: "7.2.18"
+    latest: "7.3.0"
     gov: "7.2.18"
 
   host.discovery.custom.hostname.enabled: false
@@ -467,6 +467,27 @@ cb:
           7.2.18 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy;
           7.2.18 - COD Edge Node=cdp-cod-edge-node;
           7.2.18 - Edge Flow Management Light Duty=cdp-edge-flow-management-small
+        7.3.0: >
+          7.3.0 - SDX Micro Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-micro;
+          7.3.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
+          7.3.0 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha;
+          7.3.0 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas, Profiler Manager=cdp-sdx-medium-ha-profiler;
+          7.3.0 - SDX Enterprise: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-enterprise;
+          7.3.0 - Data Engineering: HA: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3-ha;
+          7.3.0 - Data Engineering: Apache Spark3, Apache Hive, Apache Oozie=cdp-data-engineering-spark3;
+          7.3.0 - Data Mart: Apache Impala, Hue=cdp-data-mart;
+          7.3.0 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark3=cdp-rt-data-mart-spark3;
+          7.3.0 - Streams Messaging High Availability: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming-ha;
+          7.3.0 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming;
+          7.3.0 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming-small;
+          7.3.0 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry, Schema Registry=cdp-flow-management-small;
+          7.3.0 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry, Schema Registry=cdp-flow-management;
+          7.3.0 - Data Discovery and Exploration for Spark3=cdp-dde-spark3;
+          7.3.0 - Search Analytics=cdp-search-analytics;
+          7.3.0 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light;
+          7.3.0 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy;
+          7.3.0 - COD Edge Node=cdp-cod-edge-node;
+          7.3.0 - Edge Flow Management Light Duty=cdp-edge-flow-management-small
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
   custom.user.data: |
