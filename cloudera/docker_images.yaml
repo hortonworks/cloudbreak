@@ -3,7 +3,6 @@ docker_images:
   cloudbreak-autoscale: hortonworks/cloudbreak-autoscale
   cloudbreak-datalake: hortonworks/cloudbreak-datalake
   cloudbreak-environment: hortonworks/cloudbreak-environment
-  cloudbreak-consumption: hortonworks/cloudbreak-consumption
   cloudbreak-freeipa: hortonworks/cloudbreak-freeipa
   cloudbreak-redbeams: hortonworks/cloudbreak-redbeams
   cloudbreak-mock-thunderhead: hortonworks/cloudbreak-mock-thunderhead
