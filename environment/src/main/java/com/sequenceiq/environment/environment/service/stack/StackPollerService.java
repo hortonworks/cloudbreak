@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptMaker;
 import com.dyngr.exception.PollerStoppedException;
+import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
@@ -66,8 +67,8 @@ public class StackPollerService {
     }
 
     public void updateStackConfigurations(Long envId, String envCrn, String flowId) {
-        List<String> stackCrns = getUpdateableStacks(envCrn);
-        LOGGER.info("Stacks crn which will be updated: {}", stackCrns);
+        List<String> stackCrns = getUpdatableStacks(envCrn);
+        LOGGER.info("Stacks CRNs which will be updated: {}", stackCrns);
         startStackConfigUpdatePolling(stackCrns,
                 stackPollerProvider.stackUpdateConfigPoller(stackCrns, envId, flowId));
     }
@@ -80,13 +81,16 @@ public class StackPollerService {
                         .waitPeriodly(sleepTime, TimeUnit.SECONDS)
                         .run(attemptMaker);
             } catch (PollerStoppedException e) {
-                LOGGER.info("Datahub starting timed out");
-                throw new DatahubOperationFailedException("Datahub starting timed out", e);
+                LOGGER.warn("Stack config updating timed out");
+                throw new DatahubOperationFailedException("Stack config updating timed out", e);
+            } catch (UserBreakException e) {
+                LOGGER.error("Stack config updating aborted with error", e);
+                throw new DatahubOperationFailedException("Stack config updating aborted with error", e);
             }
         }
     }
 
-    private List<String> getUpdateableStacks(String envCrn) {
+    private List<String> getUpdatableStacks(String envCrn) {
         StackViewV4Responses stackViewV4Responses = stackV4Endpoint.list(0L, envCrn, false);
         List<String> responseToLog = Optional.ofNullable(stackViewV4Responses.getResponses()).orElse(List.of()).stream()
                 .map(response -> String.format("[Name: %s; Crn: %s; Status: %s, ClusterStatus: %s]",
@@ -98,4 +102,5 @@ public class StackPollerService {
                 .map(StackViewV4Response::getCrn)
                 .collect(Collectors.toList());
     }
+
 }
