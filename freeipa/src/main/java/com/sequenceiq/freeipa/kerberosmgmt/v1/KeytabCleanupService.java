@@ -80,7 +80,8 @@ public class KeytabCleanupService {
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public void deleteHost(HostRequest request, String accountId) throws FreeIpaClientException {
         FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientByAccountAndEnvironment(request.getEnvironmentCrn(), accountId);
-        cleanupServicesForHost(request, accountId, ipaClient);
+        Set<com.sequenceiq.freeipa.client.model.Service> allService = ipaClient.findAllService();
+        cleanupServicesForHost(request, accountId, ipaClient, allService);
         hostDeletionService.deleteHostsWithDeleteException(ipaClient, Set.of(request.getServerHostName()));
         cleanupVaultAndRolesForHost(request, accountId, ipaClient);
     }
@@ -89,8 +90,9 @@ public class KeytabCleanupService {
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public void removeHostRelatedKerberosConfiguration(HostRequest request, String accountId, FreeIpaClient ipaClient) throws FreeIpaClientException {
-        cleanupServicesForHost(request, accountId, ipaClient);
+    public void removeHostRelatedKerberosConfiguration(HostRequest request, String accountId, FreeIpaClient ipaClient,
+            Set<com.sequenceiq.freeipa.client.model.Service> allService) throws FreeIpaClientException {
+        cleanupServicesForHost(request, accountId, ipaClient, allService);
         cleanupVaultAndRolesForHost(request, accountId, ipaClient);
     }
 
@@ -108,10 +110,11 @@ public class KeytabCleanupService {
         roleComponent.deleteRoleIfItIsNoLongerUsed(request.getRoleName(), ipaClient);
     }
 
-    private void cleanupServicesForHost(HostRequest request, String accountId, FreeIpaClient ipaClient) throws FreeIpaClientException {
+    private void cleanupServicesForHost(HostRequest request, String accountId, FreeIpaClient ipaClient,
+            Set<com.sequenceiq.freeipa.client.model.Service> allService) throws FreeIpaClientException {
         LOGGER.debug("Request to delete host for account {}: {}", accountId, request);
 
-        Set<String> services = ipaClient.findAllService().stream()
+        Set<String> services = allService.stream()
                 .map(com.sequenceiq.freeipa.client.model.Service::getKrbcanonicalname)
                 .filter(krbcanonicalname -> krbcanonicalname.contains(request.getServerHostName()))
                 .collect(Collectors.toSet());

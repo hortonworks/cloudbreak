@@ -374,12 +374,13 @@ public class CleanupService {
         Map<String, String> vaultCleanupFailed = new HashMap<>();
         Stack stack = stackService.getStackById(stackId);
         FreeIpaClient freeIpaClient = getFreeIpaClient(stackId);
+        Set<com.sequenceiq.freeipa.client.model.Service> allService = freeIpaClient.findAllService();
         for (String host : hosts) {
             try {
                 HostRequest hostRequest = new HostRequest();
                 hostRequest.setEnvironmentCrn(stack.getEnvironmentCrn());
                 hostRequest.setServerHostName(host);
-                keytabCleanupService.removeHostRelatedKerberosConfiguration(hostRequest, stack.getAccountId(), freeIpaClient);
+                keytabCleanupService.removeHostRelatedKerberosConfiguration(hostRequest, stack.getAccountId(), freeIpaClient, allService);
                 vaultCleanupSuccess.add(host);
             } catch (DeleteException | FreeIpaClientException e) {
                 LOGGER.info("Vault secret cleanup failed for host: {}", host, e);

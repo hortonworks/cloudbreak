@@ -154,6 +154,28 @@ public class KeytabCleanupServiceTest {
     }
 
     @Test
+    public void testRemoveHostRelatedKerberosConfiguration() throws Exception {
+        Set<Service> services = new HashSet<>();
+        services.add(service);
+        FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
+        HostRequest request = new HostRequest();
+        request.setEnvironmentCrn(ENVIRONMENT_ID);
+        request.setServerHostName(HOST);
+        request.setClusterCrn(CLUSTER_ID);
+        request.setRoleName(ROLE);
+
+        underTest.removeHostRelatedKerberosConfiguration(request, ACCOUNT_ID, mockIpaClient, services);
+
+        verify(mockIpaClient).deleteService(SERVICE_PRINCIPAL);
+        verify(vaultComponent).recursivelyCleanupVault("accountId/ServiceKeytab/serviceprincipal/12345-6789/54321-9876/host1/");
+        verify(vaultComponent).recursivelyCleanupVault("accountId/ServiceKeytab/keytab/12345-6789/54321-9876/host1/");
+        verify(vaultComponent).recursivelyCleanupVault("accountId/HostKeytab/serviceprincipal/12345-6789/54321-9876/host1");
+        verify(vaultComponent).recursivelyCleanupVault("accountId/HostKeytab/keytab/12345-6789/54321-9876/host1");
+        verify(roleComponent).deleteRoleIfItIsNoLongerUsed(ROLE, mockIpaClient);
+        verify(keytabCacheService).deleteByEnvironmentCrnAndPrincipal(ENVIRONMENT_ID, SERVICE_PRINCIPAL);
+    }
+
+    @Test
     public void testCleanupByCluster() {
         VaultCleanupRequest request = new VaultCleanupRequest();
         request.setEnvironmentCrn(ENVIRONMENT_ID);
