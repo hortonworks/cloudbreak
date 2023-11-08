@@ -113,8 +113,11 @@ public class AzureDatabaseServerView {
     }
 
     public String getAvailabilityZone() {
-        String zone = databaseServer.getParameter(AVAILABILITY_ZONE, String.class);
-        return Strings.isNullOrEmpty(zone) ? ZONE_1 : zone;
+        return databaseServer.getParameter(AVAILABILITY_ZONE, String.class);
+    }
+
+    public boolean useAvailabilityZone() {
+        return !Strings.isNullOrEmpty(getAvailabilityZone());
     }
 
     public String getAdminLoginName() {
