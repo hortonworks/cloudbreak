@@ -74,16 +74,4 @@ public class NodeStatusService {
         return getServicesReport(stackService.getByIdWithGatewayInTransaction(stackId));
     }
 
-    public RPCResponse<NodeStatusProto.SaltHealthReport> saltPing(Long stackId) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        MDCBuilder.buildMdcContext(stack);
-        LOGGER.debug("Retrieving salt ping report from the hosts of stack: {}", stack.getResourceCrn());
-        try (CdpNodeStatusMonitorClient client = factory.getClient(stack, stack.getPrimaryGatewayInstance())) {
-            return client.saltPing(false, false);
-        } catch (CdpNodeStatusMonitorClientException e) {
-            LOGGER.warn("Node salt ping failed", e);
-            throw new CloudbreakServiceException("Could not get salt ping report from stack, reason: " + e.getMessage());
-        }
-    }
-
 }

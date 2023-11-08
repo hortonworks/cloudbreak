@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -214,10 +213,6 @@ public class DiagnosticsFlowService {
                             "DataBus reachable", errorSet);
                     reportMeteringUsage(nodeStatuses, NodeStatusProto.MeteringDetails::getDatabusTestResponse,
                             "DataBus test response", errorSet);
-                    Map<String, Integer> countPerHost = nodeStatuses.stream()
-                            .filter(m -> StringUtils.isNotBlank(m.getStatusDetails().getHost()))
-                            .collect(Collectors.toMap(m -> m.getStatusDetails().getHost(), m -> m.getMeteringDetails().getEventDetailsCount()));
-                    LOGGER.debug("[Metering] event count per host: {}", countPerHost);
                     String resourceCrn = stack.getResourceCrn();
                     String accountId = Crn.safeFromString(resourceCrn).getAccountId();
                     UsageProto.CDPDiagnosticEvent.Builder diagnosticsEventBuilder = UsageProto.CDPDiagnosticEvent.newBuilder();

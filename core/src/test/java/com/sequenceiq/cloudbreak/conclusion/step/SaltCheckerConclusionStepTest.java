@@ -18,6 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -26,19 +27,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltHealthReport;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails;
-import com.sequenceiq.cloudbreak.client.RPCMessage;
-import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.salt.SaltOrchestrator;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -47,7 +43,10 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 public class SaltCheckerConclusionStepTest {
 
     @Mock
-    private NodeStatusService nodeStatusService;
+    private SaltOrchestrator saltOrchestrator;
+
+    @Mock
+    private GatewayConfigService gatewayConfigService;
 
     @Mock
     private StackDtoService stackDtoService;
@@ -65,9 +64,12 @@ public class SaltCheckerConclusionStepTest {
     private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Test
-    public void checkShouldFallbackIfNodeStatusCheckFailsAndBeSuccessfulIfNoUnreachableNodeFound() throws NodesUnreachableException {
-        when(nodeStatusService.saltPing(eq(1L))).thenThrow(new CloudbreakServiceException("error"));
+    public void checkShouldFallbackIfOrchestratorCallFailsAndBeSuccessfulIfNoUnreachableNodeFound()
+            throws NodesUnreachableException, CloudbreakOrchestratorFailedException {
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(new GatewayConfig(null, null, null, null, null, null));
         when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
+        when(saltOrchestrator.isBootstrapApiAvailable(any())).thenReturn(Boolean.TRUE);
+        when(saltOrchestrator.ping(any())).thenThrow(new CloudbreakServiceException("any"));
         Set<Node> nodes = Set.of(createNode("host1"), createNode("host2"));
         when(stackUtil.collectNodes(any(), any())).thenReturn(nodes);
         when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), anyCollection())).thenReturn(nodes);
@@ -77,44 +79,18 @@ public class SaltCheckerConclusionStepTest {
         assertNull(stepResult.getConclusion());
         assertNull(stepResult.getDetails());
         assertEquals(SaltCheckerConclusionStep.class, stepResult.getConclusionStepClass());
-        verify(nodeStatusService, times(1)).saltPing(eq(1L));
+        verify(saltOrchestrator).ping(any());
+        verify(saltOrchestrator).isBootstrapApiAvailable(any());
         verify(stackDtoService, times(1)).getById(eq(1L));
         verify(stackUtil, times(1)).collectNodes(any(), any());
         verify(stackUtil, times(1)).collectReachableAndCheckNecessaryNodes(any(), any());
     }
 
     @Test
-    public void checkShouldFallbackForOldImageVersionsAndBeSuccessfulIfNoUnreachableNodeFound() throws NodesUnreachableException {
-        RPCResponse<SaltHealthReport> response = new RPCResponse<>();
-        RPCMessage message = new RPCMessage();
-        message.setMessage("rpc response");
-        response.setMessages(List.of(message));
-        when(nodeStatusService.saltPing(eq(1L))).thenReturn(response);
-        when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
-        Set<Node> nodes = Set.of(createNode("host1"), createNode("host2"));
-        when(stackUtil.collectNodes(any(), any())).thenReturn(nodes);
-        when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), anyCollection())).thenReturn(nodes);
-        Conclusion stepResult = underTest.check(1L);
-
-        assertFalse(stepResult.isFailureFound());
-        assertNull(stepResult.getConclusion());
-        assertNull(stepResult.getDetails());
-        assertEquals(SaltCheckerConclusionStep.class, stepResult.getConclusionStepClass());
-        verify(nodeStatusService, times(1)).saltPing(eq(1L));
-        verify(stackDtoService, times(1)).getById(eq(1L));
-        verify(stackUtil, times(1)).collectNodes(any(), any());
-        verify(stackUtil, times(1)).collectReachableAndCheckNecessaryNodes(any(), any());
-    }
-
-    @Test
-    public void checkShouldFallbackForOldImageVersionsAndReturnConclusionIfUnreachableNodeFound() throws NodesUnreachableException {
+    public void checkShouldFallbackAndReturnConclusionIfUnreachableNodeFound() throws NodesUnreachableException {
         when(cloudbreakMessagesService.getMessageWithArgs(eq(SALT_COLLECT_UNREACHABLE_FOUND), any())).thenReturn("collect unreachable found");
         when(cloudbreakMessagesService.getMessageWithArgs(eq(SALT_COLLECT_UNREACHABLE_FOUND_DETAILS), any())).thenReturn("collect unreachable found details");
-        RPCResponse<SaltHealthReport> response = new RPCResponse<>();
-        RPCMessage message = new RPCMessage();
-        message.setMessage("rpc response");
-        response.setMessages(List.of(message));
-        when(nodeStatusService.saltPing(eq(1L))).thenReturn(response);
+        when(saltOrchestrator.isBootstrapApiAvailable(any())).thenReturn(Boolean.FALSE);
         when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
         when(stackUtil.collectNodes(any(), any())).thenReturn(Set.of(createNode("host1"), createNode("host2")));
         when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), anyCollection())).thenThrow(new NodesUnreachableException("error", Set.of("host1")));
@@ -124,75 +100,61 @@ public class SaltCheckerConclusionStepTest {
         assertEquals("collect unreachable found", stepResult.getConclusion());
         assertEquals("collect unreachable found details", stepResult.getDetails());
         assertEquals(SaltCheckerConclusionStep.class, stepResult.getConclusionStepClass());
-        verify(nodeStatusService, times(1)).saltPing(eq(1L));
         verify(stackDtoService, times(1)).getById(eq(1L));
         verify(stackUtil, times(1)).collectNodes(any(), any());
         verify(stackUtil, times(1)).collectReachableAndCheckNecessaryNodes(any(), any());
     }
 
     @Test
-    public void checkShouldBeSuccessfulIfNoUnreachableNodeFound() {
-        when(nodeStatusService.saltPing(eq(1L))).thenReturn(createSaltPingResponse(HealthStatus.OK, HealthStatus.OK));
-        Conclusion stepResult = underTest.check(1L);
-
-        assertFalse(stepResult.isFailureFound());
-        assertNull(stepResult.getConclusion());
-        assertNull(stepResult.getDetails());
-        assertEquals(SaltCheckerConclusionStep.class, stepResult.getConclusionStepClass());
-        verify(nodeStatusService, times(1)).saltPing(eq(1L));
-    }
-
-    @Test
-    public void checkShouldFailAndReturnConclusionIfUnhealthyServicesOnMasterFound() {
+    public void checkShouldFailAndReturnConclusionIfSaltBootIsUnavailableOnMasterFound() throws CloudbreakOrchestratorFailedException {
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(new GatewayConfig(null, null, null, null, null, null));
+        when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
+        when(saltOrchestrator.isBootstrapApiAvailable(any())).thenReturn(Boolean.FALSE);
         when(cloudbreakMessagesService.getMessageWithArgs(eq(SALT_MASTER_SERVICES_UNHEALTHY), any())).thenReturn("master error");
         when(cloudbreakMessagesService.getMessageWithArgs(eq(SALT_MASTER_SERVICES_UNHEALTHY_DETAILS), any())).thenReturn("master error details");
-        when(nodeStatusService.saltPing(eq(1L))).thenReturn(createSaltPingResponse(HealthStatus.NOK, HealthStatus.OK));
         Conclusion stepResult = underTest.check(1L);
 
         assertTrue(stepResult.isFailureFound());
         assertEquals("master error", stepResult.getConclusion());
         assertEquals("master error details", stepResult.getDetails());
         assertEquals(SaltCheckerConclusionStep.class, stepResult.getConclusionStepClass());
-        verify(nodeStatusService, times(1)).saltPing(eq(1L));
+        verify(cloudbreakMessagesService).getMessageWithArgs(eq(SALT_MASTER_SERVICES_UNHEALTHY), eq(List.of("salt-bootstrap")));
+        verify(cloudbreakMessagesService).getMessageWithArgs(eq(SALT_MASTER_SERVICES_UNHEALTHY_DETAILS), eq(List.of("salt-bootstrap")));
+        verify(saltOrchestrator, times(0)).ping(any());
+        verify(saltOrchestrator).isBootstrapApiAvailable(any());
     }
 
     @Test
-    public void checkShouldFailAndReturnConclusionIfUnhealthyMinionsFound() {
+    public void checkShouldFailAndReturnConclusionIfUnhealthyMinionsFound() throws CloudbreakOrchestratorFailedException {
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(new GatewayConfig(null, null, null, null, null, null));
+        when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
+        when(saltOrchestrator.isBootstrapApiAvailable(any())).thenReturn(Boolean.TRUE);
+        when(saltOrchestrator.ping(any())).thenReturn(Map.of("host1", Boolean.TRUE, "host2", Boolean.FALSE));
         when(cloudbreakMessagesService.getMessageWithArgs(eq(SALT_MINIONS_UNREACHABLE), any())).thenReturn("minions unreachable");
         when(cloudbreakMessagesService.getMessageWithArgs(eq(SALT_MINIONS_UNREACHABLE_DETAILS), any())).thenReturn("minions unreachable details");
-        when(nodeStatusService.saltPing(eq(1L))).thenReturn(createSaltPingResponse(HealthStatus.OK, HealthStatus.NOK));
         Conclusion stepResult = underTest.check(1L);
 
         assertTrue(stepResult.isFailureFound());
         assertEquals("minions unreachable", stepResult.getConclusion());
         assertEquals("minions unreachable details", stepResult.getDetails());
         assertEquals(SaltCheckerConclusionStep.class, stepResult.getConclusionStepClass());
-        verify(nodeStatusService, times(1)).saltPing(eq(1L));
+        verify(cloudbreakMessagesService).getMessageWithArgs(eq(SALT_MINIONS_UNREACHABLE), eq(List.of("host2")));
+        verify(cloudbreakMessagesService).getMessageWithArgs(eq(SALT_MINIONS_UNREACHABLE_DETAILS), eq(List.of("host2")));
+        verify(saltOrchestrator).ping(any());
+        verify(saltOrchestrator).isBootstrapApiAvailable(any());
     }
 
-    private RPCResponse<SaltHealthReport> createSaltPingResponse(HealthStatus masterServiceStatus, HealthStatus minionHealthStatus) {
-        StatusDetails pingResponses = StatusDetails.newBuilder()
-                .setHost("host1")
-                .setStatus(minionHealthStatus)
-                .setStatusReason("bigproblem")
-                .build();
-        SaltMinionsHealth saltMinionsHealth = SaltMinionsHealth.newBuilder()
-                .addPingResponses(pingResponses)
-                .build();
-        ServiceStatus serviceStatus = ServiceStatus.newBuilder()
-                .setName("salt-bootstrap")
-                .setStatus(masterServiceStatus)
-                .build();
-        SaltMasterHealth saltMasterHealth = SaltMasterHealth.newBuilder()
-                .addServices(serviceStatus)
-                .build();
-        SaltHealthReport saltHealthReport = SaltHealthReport.newBuilder()
-                .setMaster(saltMasterHealth)
-                .setMinions(saltMinionsHealth)
-                .build();
-        RPCResponse<SaltHealthReport> response = new RPCResponse<>();
-        response.setResult(saltHealthReport);
-        return response;
+    @Test
+    public void checkShouldSucceedIfOnlyHealthyMinionsFound() throws CloudbreakOrchestratorFailedException {
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(new GatewayConfig(null, null, null, null, null, null));
+        when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
+        when(saltOrchestrator.isBootstrapApiAvailable(any())).thenReturn(Boolean.TRUE);
+        when(saltOrchestrator.ping(any())).thenReturn(Map.of("host1", Boolean.TRUE, "host2", Boolean.TRUE));
+        Conclusion stepResult = underTest.check(1L);
+
+        assertFalse(stepResult.isFailureFound());
+        verify(saltOrchestrator).ping(any());
+        verify(saltOrchestrator).isBootstrapApiAvailable(any());
     }
 
     private Node createNode(String fqdn) {

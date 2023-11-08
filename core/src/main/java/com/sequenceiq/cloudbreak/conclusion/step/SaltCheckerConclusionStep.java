@@ -20,20 +20,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltHealthReport;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails;
-import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.salt.SaltOrchestrator;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
 public class SaltCheckerConclusionStep extends ConclusionStep {
@@ -41,7 +37,10 @@ public class SaltCheckerConclusionStep extends ConclusionStep {
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltCheckerConclusionStep.class);
 
     @Inject
-    private NodeStatusService nodeStatusService;
+    private SaltOrchestrator saltOrchestrator;
+
+    @Inject
+    private GatewayConfigService gatewayConfigService;
 
     @Inject
     private StackDtoService stackDtoService;
@@ -54,36 +53,32 @@ public class SaltCheckerConclusionStep extends ConclusionStep {
 
     @Override
     public Conclusion check(Long resourceId) {
-        RPCResponse<SaltHealthReport> saltPingResponse;
+        StackDto stackDto = stackDtoService.getById(resourceId);
         try {
-            saltPingResponse = nodeStatusService.saltPing(resourceId);
-            LOGGER.debug("Salt health report response: {}", saltPingResponse.getFirstTextMessage());
-        } catch (Exception e) {
-            LOGGER.debug("Salt health report failed, fallback and check unreachable nodes, error: {}", e.getMessage());
-            return checkUnreachableNodes(resourceId);
-        }
-        SaltHealthReport report = saltPingResponse.getResult();
-        if (report == null) {
-            LOGGER.info("Salt health report was null, fallback and check unreachable nodes.");
-            return checkUnreachableNodes(resourceId);
-        }
+            GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
+            if (!saltOrchestrator.isBootstrapApiAvailable(primaryGatewayConfig)) {
+                return createFailedConclusionForMaster(List.of("salt-bootstrap"));
+            }
+            Map<String, Boolean> pingResponses = saltOrchestrator.ping(primaryGatewayConfig);
 
-        List<String> failedServicesOnMaster = collectFailedServicesOnMaster(report);
-        if (!failedServicesOnMaster.isEmpty()) {
-            return createFailedConclusionForMaster(failedServicesOnMaster);
-        } else {
-            Map<String, String> unreachableMinions = collectUnreachableMinions(report);
-            if (unreachableMinions.isEmpty()) {
+            if (pingResponses.values().stream().allMatch(Boolean.TRUE::equals)) {
                 return succeeded();
             } else {
-                return createFailedConclusionForMinions(unreachableMinions);
+                return createFailedConclusionForMinions(pingResponses.entrySet().stream()
+                        .filter(entry -> !Boolean.TRUE.equals(entry.getValue()))
+                        .map(Map.Entry::getKey)
+                        .toList());
             }
+        } catch (Exception e) {
+            LOGGER.debug("Checking salt failed, fallback and check unreachable nodes, error: {}", e.getMessage());
+            return checkUnreachableNodes(stackDto);
         }
     }
 
-    private Conclusion checkUnreachableNodes(Long resourceId) {
-        StackDto stackDto = stackDtoService.getById(resourceId);
-        Set<String> allAvailableInstanceHostNames = stackDto.getAllAvailableInstances().stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.toSet());
+    private Conclusion checkUnreachableNodes(StackDto stackDto) {
+        Set<String> allAvailableInstanceHostNames = stackDto.getAllAvailableInstances().stream()
+                .map(InstanceMetadataView::getDiscoveryFQDN)
+                .collect(Collectors.toSet());
         Set<String> availableNodes = stackUtil.collectNodes(stackDto, allAvailableInstanceHostNames)
                 .stream().map(Node::getHostname).collect(Collectors.toSet());
         try {
@@ -104,23 +99,6 @@ public class SaltCheckerConclusionStep extends ConclusionStep {
         return succeeded();
     }
 
-    private List<String> collectFailedServicesOnMaster(SaltHealthReport report) {
-        SaltMasterHealth saltMasterHealth = report.getMaster();
-        LOGGER.debug("Salt master health report: {}", saltMasterHealth);
-        return saltMasterHealth.getServicesList().stream()
-                .filter(serviceStatus -> HealthStatus.NOK.equals(serviceStatus.getStatus()))
-                .map(ServiceStatus::getName)
-                .collect(Collectors.toList());
-    }
-
-    private Map<String, String> collectUnreachableMinions(SaltHealthReport report) {
-        SaltMinionsHealth saltMinionsHealth = report.getMinions();
-        LOGGER.debug("Salt minions health report: {}", saltMinionsHealth);
-        return saltMinionsHealth.getPingResponsesList().stream()
-                .filter(statusDetails -> HealthStatus.NOK.equals(statusDetails.getStatus()))
-                .collect(Collectors.toMap(StatusDetails::getHost, StatusDetails::getStatusReason));
-    }
-
     private Conclusion createFailedConclusionForMaster(List<String> failedServicesOnMaster) {
         String conclusion = cloudbreakMessagesService.getMessageWithArgs(SALT_MASTER_SERVICES_UNHEALTHY, failedServicesOnMaster);
         String details = cloudbreakMessagesService.getMessageWithArgs(SALT_MASTER_SERVICES_UNHEALTHY_DETAILS, failedServicesOnMaster);
@@ -128,8 +106,8 @@ public class SaltCheckerConclusionStep extends ConclusionStep {
         return failed(conclusion, details);
     }
 
-    private Conclusion createFailedConclusionForMinions(Map<String, String> unreachableMinions) {
-        String conclusion = cloudbreakMessagesService.getMessageWithArgs(SALT_MINIONS_UNREACHABLE, unreachableMinions.keySet());
+    private Conclusion createFailedConclusionForMinions(List<String> unreachableMinions) {
+        String conclusion = cloudbreakMessagesService.getMessageWithArgs(SALT_MINIONS_UNREACHABLE, unreachableMinions);
         String details = cloudbreakMessagesService.getMessageWithArgs(SALT_MINIONS_UNREACHABLE_DETAILS, unreachableMinions);
         LOGGER.warn(details);
         return failed(conclusion, details);
