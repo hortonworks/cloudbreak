@@ -97,10 +97,12 @@
         "description": "The high availability mode of the database."
       }
     },
+    <#if useAvailabilityZone>
     "availabilityZone": {
       "type": "string",
       "defaultValue": "${availabilityZone}"
     },
+    </#if>
     <#if useStandbyAvailabilityZone>
     "standbyAvailabilityZone": {
         "type": "string",
@@ -172,11 +174,13 @@
         "storage": {
           "storageSizeGB": "[parameters('skuSizeGB')]"
         },
+        <#if useAvailabilityZone>
+        "availabilityZone": "[parameters('availabilityZone')]",
+         </#if>
         "backup": {
           "backupRetentionDays": "[parameters('backupRetentionDays')]",
           "geoRedundantBackup": "[variables('geoRedundantBackupString')]"
-        },
-        "availabilityZone": "[parameters('availabilityZone')]"
+        }
       }
     }
     <#if !useSslEnforcement>

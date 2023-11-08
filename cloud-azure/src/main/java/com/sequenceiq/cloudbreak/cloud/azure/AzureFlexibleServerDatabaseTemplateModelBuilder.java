@@ -48,6 +48,7 @@ public class AzureFlexibleServerDatabaseTemplateModelBuilder implements AzureDat
         model.put("location", azureDatabaseServerView.getLocation());
         model.put("highAvailability", azureDatabaseServerView.getHighAvailabilityMode().templateValue());
         model.put("availabilityZone", azureDatabaseServerView.getAvailabilityZone());
+        model.put("useAvailabilityZone", azureDatabaseServerView.useAvailabilityZone());
         model.put("standbyAvailabilityZone", azureDatabaseServerView.getStandbyAvailabilityZone());
         model.put("useStandbyAvailabilityZone", azureDatabaseServerView.useStandbyAvailabilityZone());
         return model;
