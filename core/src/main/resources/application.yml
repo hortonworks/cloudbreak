@@ -766,6 +766,8 @@ existing-stack-patcher:
       enabled: false
     user-data-migration:
       enabled: false
+    user-data-ccmv2-setup:
+      enabled: true
 
 clusterdns:
   host: localhost
