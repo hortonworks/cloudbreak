@@ -8,6 +8,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,10 +18,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto;
-import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
+import com.sequenceiq.cloudbreak.node.status.CdpDoctorService;
+import com.sequenceiq.cloudbreak.node.status.response.CdpDoctorCheckStatus;
+import com.sequenceiq.cloudbreak.node.status.response.CdpDoctorMeteringStatusResponse;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
@@ -49,7 +52,7 @@ public class DiagnosticsFlowServiceTest {
     private UsageReporter usageReporter;
 
     @Mock
-    private NodeStatusService nodeStatusService;
+    private CdpDoctorService cdpDoctorService;
 
     @BeforeEach
     public void setUp() {
@@ -87,102 +90,83 @@ public class DiagnosticsFlowServiceTest {
     @Test
     public void testNodeStatusMeteringReportWithNoIssues() {
         // GIVEN
-        given(stackService.getById(anyLong())).willReturn(stack);
+        given(stackService.getByIdWithListsInTransaction(anyLong())).willReturn(stack);
         given(stack.isDatalake()).willReturn(false);
         given(meteringConfiguration.isEnabled()).willReturn(true);
         given(stack.getResourceCrn()).willReturn(DATAHUB_CRN);
         given(stack.getEnvironmentCrn()).willReturn(ENVIRONMENT_CRN);
-        given(nodeStatusService.getMeteringReport(anyLong())).willReturn(createRpcResponse(false, false));
         // WHEN
         underTest.nodeStatusMeteringReport(STACK_ID);
         // THEN
-        verify(nodeStatusService, times(1)).getMeteringReport(anyLong());
         verify(usageReporter, times(0)).cdpDiagnosticsEvent(any());
     }
 
     @Test
-    public void testNodeStatusMeteringReportWithDbusUnreachable() {
+    public void testNodeStatusMeteringReportWithDbusUnreachable() throws CloudbreakOrchestratorFailedException {
         // GIVEN
-        given(stackService.getById(anyLong())).willReturn(stack);
+        given(stackService.getByIdWithListsInTransaction(anyLong())).willReturn(stack);
         given(stack.isDatalake()).willReturn(false);
         given(meteringConfiguration.isEnabled()).willReturn(true);
         given(stack.getResourceCrn()).willReturn(DATAHUB_CRN);
         given(stack.getEnvironmentCrn()).willReturn(ENVIRONMENT_CRN);
-        given(nodeStatusService.getMeteringReport(anyLong())).willReturn(createRpcResponse(true, false));
+        CdpDoctorMeteringStatusResponse meteringStatusResponse = new CdpDoctorMeteringStatusResponse();
+        meteringStatusResponse.setDatabusReachable(CdpDoctorCheckStatus.NOK);
+        given(cdpDoctorService.getMeteringStatusForMinions(any())).willReturn(Map.of("host1", meteringStatusResponse));
         // WHEN
         underTest.nodeStatusMeteringReport(STACK_ID);
         // THEN
-        verify(nodeStatusService, times(1)).getMeteringReport(anyLong());
         verify(usageReporter, times(1)).cdpDiagnosticsEvent(any());
     }
 
     @Test
-    public void testNodeStatusMeteringReportWithConfigError() {
+    public void testMeteringReportWithConfigError() throws CloudbreakOrchestratorFailedException {
         // GIVEN
-        given(stackService.getById(anyLong())).willReturn(stack);
+        given(stackService.getByIdWithListsInTransaction(anyLong())).willReturn(stack);
         given(stack.isDatalake()).willReturn(false);
         given(meteringConfiguration.isEnabled()).willReturn(true);
         given(stack.getResourceCrn()).willReturn(DATAHUB_CRN);
         given(stack.getEnvironmentCrn()).willReturn(ENVIRONMENT_CRN);
-        given(nodeStatusService.getMeteringReport(anyLong())).willReturn(createRpcResponse(false, true));
+        CdpDoctorMeteringStatusResponse meteringStatusResponse = new CdpDoctorMeteringStatusResponse();
+        meteringStatusResponse.setHeartbeatConfig(CdpDoctorCheckStatus.NOK);
+        given(cdpDoctorService.getMeteringStatusForMinions(any())).willReturn(Map.of("host1", meteringStatusResponse));
         // WHEN
         underTest.nodeStatusMeteringReport(STACK_ID);
         // THEN
-        verify(nodeStatusService, times(1)).getMeteringReport(anyLong());
         verify(usageReporter, times(1)).cdpDiagnosticsEvent(any());
     }
 
     @Test
     public void testNodeStatusMeteringReportNoResponse() {
         // GIVEN
-        given(stackService.getById(anyLong())).willReturn(stack);
+        given(stackService.getByIdWithListsInTransaction(anyLong())).willReturn(stack);
         given(stack.isDatalake()).willReturn(false);
         given(meteringConfiguration.isEnabled()).willReturn(true);
-        given(nodeStatusService.getMeteringReport(anyLong())).willReturn(null);
         // WHEN
         underTest.nodeStatusMeteringReport(STACK_ID);
         // THEN
-        verify(nodeStatusService, times(1)).getMeteringReport(anyLong());
         verify(usageReporter, times(0)).cdpDiagnosticsEvent(any());
     }
 
     @Test
     public void testNodeStatusMeteringReportForDatalake() {
         // GIVEN
-        given(stackService.getById(anyLong())).willReturn(stack);
+        given(stackService.getByIdWithListsInTransaction(anyLong())).willReturn(stack);
         given(stack.isDatalake()).willReturn(true);
+        given(meteringConfiguration.isEnabled()).willReturn(true);
         // WHEN
         underTest.nodeStatusMeteringReport(STACK_ID);
         // THEN
-        verify(nodeStatusService, times(0)).getMeteringReport(anyLong());
+        verify(usageReporter, times(0)).cdpDiagnosticsEvent(any());
     }
 
     @Test
     public void testNodeStatusMeteringReportWithMeteringDisabled() {
         // GIVEN
-        given(stackService.getById(anyLong())).willReturn(stack);
-        given(stack.isDatalake()).willReturn(false);
         given(meteringConfiguration.isEnabled()).willReturn(false);
         // WHEN
         underTest.nodeStatusMeteringReport(STACK_ID);
         // THEN
-        verify(nodeStatusService, times(0)).getMeteringReport(anyLong());
-    }
-
-    private RPCResponse<NodeStatusProto.NodeStatusReport> createRpcResponse(boolean databusUnreachable, boolean configError) {
-        RPCResponse<NodeStatusProto.NodeStatusReport> rpcResponse = new RPCResponse<>();
-        NodeStatusProto.NodeStatusReport nodeStatusReport = NodeStatusProto.NodeStatusReport.newBuilder()
-                .addNodes(NodeStatusProto.NodeStatus.newBuilder()
-                        .setStatusDetails(NodeStatusProto.StatusDetails.newBuilder()
-                                .setHost("host1"))
-                        .setMeteringDetails(NodeStatusProto.MeteringDetails
-                                .newBuilder()
-                                .setDatabusReachable(databusUnreachable ? NodeStatusProto.HealthStatus.NOK : NodeStatusProto.HealthStatus.OK)
-                                .setHeartbeatConfig(configError ? NodeStatusProto.HealthStatus.NOK : NodeStatusProto.HealthStatus.OK))
-                        .build())
-                .build();
-        rpcResponse.setResult(nodeStatusReport);
-        return rpcResponse;
+        verify(usageReporter, times(0)).cdpDiagnosticsEvent(any());
     }
 
 }

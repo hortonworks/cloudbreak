@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.domain;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,5 +21,11 @@ public class CommandExecutionResponse {
 
     public void setResult(List<Map<String, String>> result) {
         this.result = result;
+    }
+
+    public Map<String, String> getResultByMinionId() {
+        Map<String, String> res = new HashMap<>();
+        result.forEach(res::putAll);
+        return res;
     }
 }

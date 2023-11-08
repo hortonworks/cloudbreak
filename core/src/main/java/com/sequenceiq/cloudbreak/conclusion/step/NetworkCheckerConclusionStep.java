@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.conclusion.step;
 
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.GATEWAY_NETWORK_STATUS_FAILED;
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_CCM_NOT_ACCESSIBLE;
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_CCM_NOT_ACCESSIBLE_DETAILS;
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_CLOUDERA_COM_NOT_ACCESSIBLE;
@@ -7,10 +8,10 @@ import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWOR
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_NEIGHBOUR_NOT_ACCESSIBLE;
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_NEIGHBOUR_NOT_ACCESSIBLE_DETAILS;
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_NGINX_UNREACHABLE;
-import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NODE_STATUS_MONITOR_UNREACHABLE;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -18,13 +19,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatusReport;
-import com.sequenceiq.cloudbreak.client.RPCResponse;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
+import com.sequenceiq.cloudbreak.node.status.CdpDoctorService;
+import com.sequenceiq.cloudbreak.node.status.response.CdpDoctorCheckStatus;
+import com.sequenceiq.cloudbreak.node.status.response.CdpDoctorNetworkStatusResponse;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class NetworkCheckerConclusionStep extends ConclusionStep {
@@ -34,17 +34,28 @@ public class NetworkCheckerConclusionStep extends ConclusionStep {
     private static final String NGINX_UNREACHABLE_ERROR_MESSAGE = "nginx is unreachable";
 
     @Inject
-    private NodeStatusService nodeStatusService;
+    private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Inject
-    private CloudbreakMessagesService cloudbreakMessagesService;
+    private StackService stackService;
+
+    @Inject
+    private CdpDoctorService cdpDoctorService;
 
     @Override
     public Conclusion check(Long resourceId) {
-        RPCResponse<NodeStatusReport> networkReport;
         try {
-            networkReport = nodeStatusService.getNetworkReport(resourceId);
-            LOGGER.debug("Network report response: {}", networkReport.getFirstTextMessage());
+            Stack stack = stackService.getByIdWithListsInTransaction(resourceId);
+            Map<String, CdpDoctorNetworkStatusResponse> resultForMinions = cdpDoctorService.getNetworkStatusForMinions(stack);
+            List<String> networkFailures = new ArrayList<>();
+            List<String> networkFailureDetails = new ArrayList<>();
+            checkNetworkFailures(resultForMinions, networkFailures, networkFailureDetails);
+
+            if (networkFailures.isEmpty()) {
+                return succeeded();
+            } else {
+                return failed(networkFailures.toString(), networkFailureDetails.toString());
+            }
         } catch (Exception e) {
             LOGGER.warn("Network report failed, error: {}", e.getMessage());
             if (e.getMessage().contains(NGINX_UNREACHABLE_ERROR_MESSAGE)) {
@@ -52,46 +63,34 @@ public class NetworkCheckerConclusionStep extends ConclusionStep {
                 LOGGER.warn(conclusion);
                 return failed(conclusion, e.getMessage());
             }
-            return failed(cloudbreakMessagesService.getMessage(NODE_STATUS_MONITOR_UNREACHABLE), e.getMessage());
-        }
-        if (networkReport.getResult() == null) {
-            LOGGER.info("Network report result was null");
-            return succeeded();
-        }
-
-        List<String> networkFailures = new ArrayList<>();
-        List<String> networkFailureDetails = new ArrayList<>();
-        checkNetworkFailures(networkReport, networkFailures, networkFailureDetails);
-
-        if (networkFailures.isEmpty()) {
-            return succeeded();
-        } else {
-            return failed(networkFailures.toString(), networkFailureDetails.toString());
+            return failed(cloudbreakMessagesService.getMessage(GATEWAY_NETWORK_STATUS_FAILED), e.getMessage());
         }
     }
 
-    private void checkNetworkFailures(RPCResponse<NodeStatusReport> networkReport, List<String> networkFailures, List<String> networkFailureDetails) {
-        for (NodeStatus nodeStatus : networkReport.getResult().getNodesList()) {
-            NetworkDetails networkDetails = nodeStatus.getNetworkDetails();
-            String host = nodeStatus.getStatusDetails().getHost();
-            LOGGER.debug("Check network report for host: {}, details: {}", host, networkDetails);
-            if (networkDetails.getCcmEnabled() && HealthStatus.NOK.equals(networkDetails.getCcmAccessible())) {
+    private void checkNetworkFailures(Map<String, CdpDoctorNetworkStatusResponse> resultForMinions,
+            List<String> networkFailures, List<String> networkFailureDetails) {
+        for (Map.Entry<String, CdpDoctorNetworkStatusResponse> entryForMinion : resultForMinions.entrySet()) {
+            CdpDoctorNetworkStatusResponse networkResponseForMinion = entryForMinion.getValue();
+            String host = entryForMinion.getKey();
+            LOGGER.debug("Check network report for host: {}, details: {}", host, networkResponseForMinion);
+            if (networkResponseForMinion.getCcmEnabled() && CdpDoctorCheckStatus.NOK.equals(networkResponseForMinion.getCcmAccessible())) {
                 networkFailures.add(cloudbreakMessagesService.getMessageWithArgs(NETWORK_CCM_NOT_ACCESSIBLE, host));
-                String details = cloudbreakMessagesService.getMessageWithArgs(NETWORK_CCM_NOT_ACCESSIBLE_DETAILS, networkDetails.getCcmAccessible(), host);
+                String details = cloudbreakMessagesService.getMessageWithArgs(NETWORK_CCM_NOT_ACCESSIBLE_DETAILS,
+                        networkResponseForMinion.getCcmAccessible(), host);
                 networkFailureDetails.add(details);
                 LOGGER.warn(details);
             }
-            if (HealthStatus.NOK.equals(networkDetails.getClouderaComAccessible())) {
+            if (CdpDoctorCheckStatus.NOK.equals(networkResponseForMinion.getClouderaComAccessible())) {
                 networkFailures.add(cloudbreakMessagesService.getMessageWithArgs(NETWORK_CLOUDERA_COM_NOT_ACCESSIBLE, host));
                 String details = cloudbreakMessagesService.getMessageWithArgs(NETWORK_CLOUDERA_COM_NOT_ACCESSIBLE_DETAILS,
-                        networkDetails.getClouderaComAccessible(), host);
+                        networkResponseForMinion.getClouderaComAccessible(), host);
                 networkFailureDetails.add(details);
                 LOGGER.warn(details);
             }
-            if (networkDetails.getNeighbourScan() && HealthStatus.NOK.equals(networkDetails.getAnyNeighboursAccessible())) {
+            if (networkResponseForMinion.getNeighbourScan() && CdpDoctorCheckStatus.NOK.equals(networkResponseForMinion.getAnyNeighboursAccessible())) {
                 networkFailures.add(cloudbreakMessagesService.getMessageWithArgs(NETWORK_NEIGHBOUR_NOT_ACCESSIBLE, host));
                 String details = cloudbreakMessagesService.getMessageWithArgs(NETWORK_NEIGHBOUR_NOT_ACCESSIBLE_DETAILS,
-                        networkDetails.getAnyNeighboursAccessible(), host);
+                        networkResponseForMinion.getAnyNeighboursAccessible(), host);
                 networkFailureDetails.add(details);
                 LOGGER.warn(details);
             }

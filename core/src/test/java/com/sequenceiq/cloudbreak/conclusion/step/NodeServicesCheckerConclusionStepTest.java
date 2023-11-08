@@ -1,44 +1,46 @@
 package com.sequenceiq.cloudbreak.conclusion.step;
 
-import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NODE_STATUS_MONITOR_FAILED;
-import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NODE_STATUS_MONITOR_FAILED_DETAILS;
-import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NODE_STATUS_MONITOR_UNREACHABLE;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.GATEWAY_SERVICES_STATUS_FAILED;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.SERVICES_CHECK_FAILED;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.SERVICES_CHECK_FAILED_DETAILS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatusReport;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails;
-import com.sequenceiq.cloudbreak.client.RPCMessage;
-import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
+import com.sequenceiq.cloudbreak.node.status.CdpDoctorService;
+import com.sequenceiq.cloudbreak.node.status.response.CdpDoctorCheckStatus;
+import com.sequenceiq.cloudbreak.node.status.response.CdpDoctorServiceStatus;
+import com.sequenceiq.cloudbreak.node.status.response.CdpDoctorServicesStatusResponse;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
 class NodeServicesCheckerConclusionStepTest {
 
     @Mock
-    private NodeStatusService nodeStatusService;
+    private StackService stackService;
+
+    @Mock
+    private CdpDoctorService cdpDoctorService;
 
     @Mock
     private CloudbreakMessagesService cloudbreakMessagesService;
@@ -46,98 +48,57 @@ class NodeServicesCheckerConclusionStepTest {
     @InjectMocks
     private NodeServicesCheckerConclusionStep underTest;
 
+    @BeforeEach
+    public void setup() {
+        when(stackService.getByIdWithListsInTransaction(any())).thenReturn(new Stack());
+    }
+
     @Test
-    public void checkShouldBeSuccessfulIfNodeStatusReportFailsForOlderImageVersions() {
-        when(nodeStatusService.getServicesReport(eq(1L))).thenThrow(new CloudbreakServiceException("error"));
-        when(cloudbreakMessagesService.getMessage(NODE_STATUS_MONITOR_UNREACHABLE)).thenReturn("node status monitor unreachable");
+    public void checkShouldBeSuccessfulIfNodeStatusReportFailsForOlderImageVersions() throws CloudbreakOrchestratorFailedException {
+        when(cdpDoctorService.getServicesStatusForMinions(any())).thenThrow(new CloudbreakServiceException("error"));
+        when(cloudbreakMessagesService.getMessage(GATEWAY_SERVICES_STATUS_FAILED)).thenReturn("gw service check failed");
         Conclusion stepResult = underTest.check(1L);
 
         assertTrue(stepResult.isFailureFound());
-        assertEquals("node status monitor unreachable", stepResult.getConclusion());
+        assertEquals("gw service check failed", stepResult.getConclusion());
         assertEquals("error", stepResult.getDetails());
         assertEquals(NodeServicesCheckerConclusionStep.class, stepResult.getConclusionStepClass());
-        verify(nodeStatusService, times(1)).getServicesReport(eq(1L));
+        verify(cdpDoctorService, times(1)).getServicesStatusForMinions(any());
     }
 
     @Test
-    public void checkShouldBeSuccessfulIfNodeStatusReportNullForOlderImageVersions() {
-        when(nodeStatusService.getServicesReport(anyLong())).thenReturn(null);
-        Conclusion stepResult = underTest.check(1L);
-
-        assertFalse(stepResult.isFailureFound());
-        assertEquals(null, stepResult.getConclusion());
-        assertEquals(null, stepResult.getDetails());
-        assertEquals(NodeServicesCheckerConclusionStep.class, stepResult.getConclusionStepClass());
-    }
-
-    @Test
-    public void checkShouldBeSuccessfulIfNodeStatusReportIsNullForOlderImageVersions() {
-        RPCResponse<NodeStatusReport> response = new RPCResponse<>();
-        RPCMessage message = new RPCMessage();
-        message.setMessage("rpc response");
-        response.setMessages(List.of(message));
-        when(nodeStatusService.getServicesReport(eq(1L))).thenReturn(response);
+    public void checkShouldBeSuccessfulIfNoNodesWithUnhealthyServicesFound() throws CloudbreakOrchestratorFailedException {
+        when(cdpDoctorService.getServicesStatusForMinions(any())).thenReturn(Map.of("host1", new CdpDoctorServicesStatusResponse()));
         Conclusion stepResult = underTest.check(1L);
 
         assertFalse(stepResult.isFailureFound());
         assertNull(stepResult.getConclusion());
         assertNull(stepResult.getDetails());
         assertEquals(NodeServicesCheckerConclusionStep.class, stepResult.getConclusionStepClass());
-        verify(nodeStatusService, times(1)).getServicesReport(eq(1L));
+        verify(cdpDoctorService, times(1)).getServicesStatusForMinions(any());
     }
 
     @Test
-    public void checkShouldBeSuccessfulIfNoNodesWithUnhealthyServicesFound() {
-        when(nodeStatusService.getServicesReport(eq(1L))).thenReturn(createNodeStatusResponse(HealthStatus.OK, HealthStatus.OK));
-        Conclusion stepResult = underTest.check(1L);
-
-        assertFalse(stepResult.isFailureFound());
-        assertNull(stepResult.getConclusion());
-        assertNull(stepResult.getDetails());
-        assertEquals(NodeServicesCheckerConclusionStep.class, stepResult.getConclusionStepClass());
-        verify(nodeStatusService, times(1)).getServicesReport(eq(1L));
-    }
-
-    @Test
-    public void checkShouldFailAndReturnConclusionIfNodeWithUnhealthyServicesFound() {
-        when(nodeStatusService.getServicesReport(eq(1L))).thenReturn(createNodeStatusResponse(HealthStatus.NOK, HealthStatus.NOK));
-        when(cloudbreakMessagesService.getMessageWithArgs(eq(NODE_STATUS_MONITOR_FAILED), any())).thenReturn("unhealthy nodes");
-        when(cloudbreakMessagesService.getMessageWithArgs(eq(NODE_STATUS_MONITOR_FAILED_DETAILS), any())).thenReturn("unhealthy nodes details");
+    public void checkShouldFailAndReturnConclusionIfNodeWithUnhealthyServicesFound() throws CloudbreakOrchestratorFailedException {
+        CdpDoctorServicesStatusResponse servicesStatusResponse = new CdpDoctorServicesStatusResponse();
+        CdpDoctorServiceStatus cmService = new CdpDoctorServiceStatus();
+        cmService.setName("cmService");
+        cmService.setStatus(CdpDoctorCheckStatus.NOK);
+        servicesStatusResponse.setCmServices(List.of(cmService));
+        CdpDoctorServiceStatus infraService = new CdpDoctorServiceStatus();
+        infraService.setName("infraService");
+        infraService.setStatus(CdpDoctorCheckStatus.NOK);
+        servicesStatusResponse.setInfraServices(List.of(infraService));
+        when(cdpDoctorService.getServicesStatusForMinions(any())).thenReturn(Map.of("host1", servicesStatusResponse));
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(SERVICES_CHECK_FAILED), any())).thenReturn("unhealthy nodes");
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(SERVICES_CHECK_FAILED_DETAILS), any())).thenReturn("unhealthy nodes details");
         Conclusion stepResult = underTest.check(1L);
 
         assertTrue(stepResult.isFailureFound());
         assertEquals("unhealthy nodes", stepResult.getConclusion());
         assertEquals("unhealthy nodes details", stepResult.getDetails());
         assertEquals(NodeServicesCheckerConclusionStep.class, stepResult.getConclusionStepClass());
-        verify(nodeStatusService, times(1)).getServicesReport(eq(1L));
-    }
-
-    private RPCResponse<NodeStatusReport> createNodeStatusResponse(HealthStatus saltBootstrapHealthStatus, HealthStatus cmAgentHealthStatus) {
-        StatusDetails statusDetails = StatusDetails.newBuilder()
-                .setHost("host1")
-                .build();
-        ServiceStatus saltBootstrapServiceStatus = ServiceStatus.newBuilder()
-                .setName("salt-bootstrap")
-                .setStatus(saltBootstrapHealthStatus)
-                .build();
-        ServiceStatus cmAgentServiceStatus = ServiceStatus.newBuilder()
-                .setName("cm-agent")
-                .setStatus(cmAgentHealthStatus)
-                .build();
-        ServicesDetails  servicesDetails = ServicesDetails.newBuilder()
-                .addInfraServices(saltBootstrapServiceStatus)
-                .addCmServices(cmAgentServiceStatus)
-                .build();
-        NodeStatus nodeStatus = NodeStatus.newBuilder()
-                .setStatusDetails(statusDetails)
-                .setServicesDetails(servicesDetails)
-                .build();
-        NodeStatusReport nodeStatusReport = NodeStatusReport.newBuilder()
-                .addNodes(nodeStatus)
-                .build();
-        RPCResponse<NodeStatusReport> response = new RPCResponse<>();
-        response.setResult(nodeStatusReport);
-        return response;
+        verify(cdpDoctorService, times(1)).getServicesStatusForMinions(any());
     }
 
 }

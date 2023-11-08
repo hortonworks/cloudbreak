@@ -262,7 +262,6 @@ dependencies {
   implementation project(':cluster-dns-connector')
   implementation project(':cluster-proxy')
   implementation project(':status-checker')
-  implementation project(':node-status-monitor-client')
   implementation project(':metrics-client')
   implementation project(':telemetry-common')
   implementation project(":notification-sender")

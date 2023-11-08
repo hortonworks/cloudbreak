@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -22,16 +23,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto;
 import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
+import com.sequenceiq.cloudbreak.node.status.CdpDoctorService;
+import com.sequenceiq.cloudbreak.node.status.response.CdpDoctorCheckStatus;
+import com.sequenceiq.cloudbreak.node.status.response.CdpDoctorMeteringStatusResponse;
+import com.sequenceiq.cloudbreak.node.status.response.CdpDoctorNetworkStatusResponse;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadata;
@@ -63,9 +65,6 @@ public class DiagnosticsFlowService {
     private StackService stackService;
 
     @Inject
-    private NodeStatusService nodeStatusService;
-
-    @Inject
     private TelemetryOrchestrator telemetryOrchestrator;
 
     @Inject
@@ -89,51 +88,45 @@ public class DiagnosticsFlowService {
     @Inject
     private MonitoringConfiguration monitoringConfiguration;
 
+    @Inject
+    private CdpDoctorService cdpDoctorService;
+
     public void nodeStatusNetworkReport(Long stackId) {
         try {
-            RPCResponse<NodeStatusProto.NodeStatusReport> rpcResponse = nodeStatusService.getNetworkReport(stackId);
-            if (rpcResponse != null) {
-                LOGGER.debug("Diagnostics network report response: {}", rpcResponse.getFirstTextMessage());
-                NodeStatusProto.NodeStatusReport nodeStatusReport = rpcResponse.getResult();
-                if (nodeStatusReport != null && nodeStatusReport.getNodesList() != null) {
-                    String cdpTelemetryVersion = nodeStatusReport.getCdpTelemetryVersion();
-                    boolean stableNetworkCheckSupported = isVersionGreaterOrEqual(cdpTelemetryVersion, STABLE_NETWORK_CHECK_VERSION);
-                    boolean awsMetadataServerV2Supported = isVersionGreaterOrEqual(cdpTelemetryVersion, AWS_METADATA_SERVER_V2_SUPPORT_VERSION);
-                    boolean multiCpRegionSupported = isVersionGreaterOrEqual(cdpTelemetryVersion, MULTI_CP_REGION_SUPPORT_VERSION);
-                    List<NodeStatusProto.NetworkDetails> networkNodes = nodeStatusReport.getNodesList().stream()
-                            .map(NodeStatusProto.NodeStatus::getNetworkDetails)
-                            .collect(Collectors.toList());
-                    String globalDatabusEndpoint = altusDatabusConfiguration.getAltusDatabusEndpoint();
-                    // TODO: handle CNAME endpoint based on account id
-                    String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(globalDatabusEndpoint, false);
-                    if (StringUtils.isNotBlank(databusEndpoint)) {
-                        firePreFlightCheckEvents(stackId, String.format("DataBus API ('%s') accessibility", databusEndpoint),
-                                networkNodes, NodeStatusProto.NetworkDetails::getDatabusAccessible);
-                    }
-                    String region = stackService.findRegionByStackId(stackId);
-                    String databusS3Endpoint = dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint, !multiCpRegionSupported, region);
-                    firePreFlightCheckEvents(stackId, String.format("DataBus S3 API ('%s') accessibility", databusS3Endpoint),
-                            networkNodes, NodeStatusProto.NetworkDetails::getDatabusS3Accessible, stableNetworkCheckSupported);
-                    firePreFlightCheckEvents(stackId, "'archive.cloudera.com' accessibility",
-                            networkNodes, NodeStatusProto.NetworkDetails::getArchiveClouderaComAccessible, stableNetworkCheckSupported);
-                    firePreFlightCheckEvents(stackId, "S3 endpoint accessibility",
-                            networkNodes, NodeStatusProto.NetworkDetails::getS3Accessible, awsMetadataServerV2Supported, AWS_EC2_METADATA_SERVICE_WARNING);
-                    firePreFlightCheckEvents(stackId, "STS endpoint accessibility",
-                            networkNodes, NodeStatusProto.NetworkDetails::getStsAccessible, awsMetadataServerV2Supported, AWS_EC2_METADATA_SERVICE_WARNING);
-                    firePreFlightCheckEvents(stackId, "ADLSv2 ('<storage_account>.dfs.core.windows.net') endpoint accessibility",
-                            networkNodes, NodeStatusProto.NetworkDetails::getAdlsV2Accessible);
-                    firePreFlightCheckEvents(stackId, "'management.azure.com' accessibility",
-                            networkNodes, NodeStatusProto.NetworkDetails::getAzureManagementAccessible);
-                    firePreFlightCheckEvents(stackId, "GCS endpoint accessibility",
-                            networkNodes, NodeStatusProto.NetworkDetails::getGcsAccessible);
-                    String computeMonitoringEndpoint = getRemoteWriteUrl();
-                    if (StringUtils.isNotBlank(computeMonitoringEndpoint)) {
-                        firePreFlightCheckEvents(stackId, String.format("Compute monitoring ('%s') accessibility", computeMonitoringEndpoint),
-                                networkNodes, NodeStatusProto.NetworkDetails::getComputeMonitoringAccessible);
-                    }
-                    reportNetworkCheckUsages(stackId, networkNodes, stableNetworkCheckSupported);
-                }
+            Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+            Map<String, CdpDoctorNetworkStatusResponse> resultForMinions = cdpDoctorService.getNetworkStatusForMinions(stack);
+            String cdpTelemetryVersion = resultForMinions.get(stack.getPrimaryGatewayInstance().getDiscoveryFQDN()).getCdpTelemetryVersion();
+            boolean stableNetworkCheckSupported = isVersionGreaterOrEqual(cdpTelemetryVersion, STABLE_NETWORK_CHECK_VERSION);
+            boolean awsMetadataServerV2Supported = isVersionGreaterOrEqual(cdpTelemetryVersion, AWS_METADATA_SERVER_V2_SUPPORT_VERSION);
+            boolean multiCpRegionSupported = isVersionGreaterOrEqual(cdpTelemetryVersion, MULTI_CP_REGION_SUPPORT_VERSION);
+            String globalDatabusEndpoint = altusDatabusConfiguration.getAltusDatabusEndpoint();
+            // TODO: handle CNAME endpoint based on account id
+            String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(globalDatabusEndpoint, false);
+            if (StringUtils.isNotBlank(databusEndpoint)) {
+                firePreFlightCheckEvents(stackId, String.format("DataBus API ('%s') accessibility", databusEndpoint),
+                        resultForMinions, CdpDoctorNetworkStatusResponse::getDatabusAccessible);
             }
+            String region = stackService.findRegionByStackId(stackId);
+            String databusS3Endpoint = dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint, !multiCpRegionSupported, region);
+            firePreFlightCheckEvents(stackId, String.format("DataBus S3 API ('%s') accessibility", databusS3Endpoint),
+                    resultForMinions, CdpDoctorNetworkStatusResponse::getDatabusS3Accessible, stableNetworkCheckSupported);
+            firePreFlightCheckEvents(stackId, "'archive.cloudera.com' accessibility",
+                    resultForMinions, CdpDoctorNetworkStatusResponse::getArchiveClouderaComAccessible, stableNetworkCheckSupported);
+            firePreFlightCheckEvents(stackId, "S3 endpoint accessibility",
+                    resultForMinions, CdpDoctorNetworkStatusResponse::getS3Accessible, awsMetadataServerV2Supported, AWS_EC2_METADATA_SERVICE_WARNING);
+            firePreFlightCheckEvents(stackId, "STS endpoint accessibility",
+                    resultForMinions, CdpDoctorNetworkStatusResponse::getStsAccessible, awsMetadataServerV2Supported, AWS_EC2_METADATA_SERVICE_WARNING);
+            firePreFlightCheckEvents(stackId, "ADLSv2 ('<storage_account>.dfs.core.windows.net') endpoint accessibility",
+                    resultForMinions, CdpDoctorNetworkStatusResponse::getAdlsV2Accessible);
+            firePreFlightCheckEvents(stackId, "'management.azure.com' accessibility", resultForMinions,
+                    CdpDoctorNetworkStatusResponse::getAzureManagementAccessible);
+            firePreFlightCheckEvents(stackId, "GCS endpoint accessibility", resultForMinions, CdpDoctorNetworkStatusResponse::getGcsAccessible);
+            String computeMonitoringEndpoint = getRemoteWriteUrl();
+            if (StringUtils.isNotBlank(computeMonitoringEndpoint)) {
+                firePreFlightCheckEvents(stackId, String.format("Compute monitoring ('%s') accessibility", computeMonitoringEndpoint),
+                        resultForMinions, CdpDoctorNetworkStatusResponse::getComputeMonitoringAccessible);
+            }
+            reportNetworkCheckUsages(stackId, resultForMinions, stableNetworkCheckSupported);
         } catch (Exception e) {
             LOGGER.debug("Diagnostics network node status check failed (skipping): {}", e.getMessage());
         }
@@ -149,7 +142,7 @@ public class DiagnosticsFlowService {
         }
     }
 
-    public void reportNetworkCheckUsages(Long stackId, List<NodeStatusProto.NetworkDetails> networkDetailsList, boolean enabled) {
+    private void reportNetworkCheckUsages(Long stackId, Map<String, CdpDoctorNetworkStatusResponse> resultForMinions, boolean enabled) {
         if (!enabled) {
             LOGGER.debug("Network preflight check is not stable enough, skip usage reporting...");
             return;
@@ -166,18 +159,17 @@ public class DiagnosticsFlowService {
                     LOGGER.info("exception happened {}", e);
                 }
             }
-            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.CLOUDERA_ARCHIVE, networkDetailsList,
-                    NodeStatusProto.NetworkDetails::getArchiveClouderaComAccessible);
-            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.DATABUS, networkDetailsList, NodeStatusProto.NetworkDetails::getDatabusAccessible);
-            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.DATABUS_S3, networkDetailsList, NodeStatusProto.NetworkDetails::getDatabusS3Accessible);
-            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.S3, networkDetailsList, NodeStatusProto.NetworkDetails::getS3Accessible);
-            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.STS, networkDetailsList, NodeStatusProto.NetworkDetails::getStsAccessible);
-            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.ADLSV2, networkDetailsList, NodeStatusProto.NetworkDetails::getAdlsV2Accessible);
-            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.AZURE_MGMT, networkDetailsList,
-                    NodeStatusProto.NetworkDetails::getAzureManagementAccessible);
-            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.GCS, networkDetailsList, NodeStatusProto.NetworkDetails::getGcsAccessible);
-            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.SERVICE_DELIVERY_CACHE_S3, networkDetailsList,
-                    NodeStatusProto.NetworkDetails::getServiceDeliveryCacheS3Accessible);
+            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.CLOUDERA_ARCHIVE, resultForMinions,
+                    CdpDoctorNetworkStatusResponse::getArchiveClouderaComAccessible);
+            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.DATABUS, resultForMinions, CdpDoctorNetworkStatusResponse::getDatabusAccessible);
+            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.DATABUS_S3, resultForMinions, CdpDoctorNetworkStatusResponse::getDatabusS3Accessible);
+            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.S3, resultForMinions, CdpDoctorNetworkStatusResponse::getS3Accessible);
+            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.STS, resultForMinions, CdpDoctorNetworkStatusResponse::getStsAccessible);
+            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.ADLSV2, resultForMinions, CdpDoctorNetworkStatusResponse::getAdlsV2Accessible);
+            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.AZURE_MGMT, resultForMinions, CdpDoctorNetworkStatusResponse::getAzureManagementAccessible);
+            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.GCS, resultForMinions, CdpDoctorNetworkStatusResponse::getGcsAccessible);
+            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.SERVICE_DELIVERY_CACHE_S3, resultForMinions,
+                    CdpDoctorNetworkStatusResponse::getServiceDeliveryCacheS3Accessible);
         } catch (Exception e) {
             LOGGER.error("Unexpected error happened during preflight check reporting.", e);
         }
@@ -185,68 +177,56 @@ public class DiagnosticsFlowService {
 
     public void nodeStatusMeteringReport(Long stackId) {
         try {
-            Stack stack = stackService.getById(stackId);
-            if (stack.isDatalake()) {
-                LOGGER.debug("Skip metering check as billing is not used for datalake");
-                return;
-            }
             if (!meteringConfiguration.isEnabled()) {
                 LOGGER.debug("Metering feature is not enabled (or telemetry is empty). Skip metering check.");
                 return;
             }
-            RPCResponse<NodeStatusProto.NodeStatusReport> rpcResponse = nodeStatusService.getMeteringReport(stackId);
-            if (rpcResponse != null) {
-                LOGGER.debug("Diagnostics metering report response: {}", rpcResponse.getFirstTextMessage());
-                NodeStatusProto.NodeStatusReport nodeStatusReport = rpcResponse.getResult();
-                if (nodeStatusReport != null && CollectionUtils.isNotEmpty(nodeStatusReport.getNodesList())) {
-                    List<NodeStatusProto.NodeStatus> nodeStatuses = nodeStatusReport.getNodesList();
-                    Set<String> errorSet = new HashSet<>();
-                    reportMeteringUsage(nodeStatuses, NodeStatusProto.MeteringDetails::getHeartbeatAgentRunning,
-                            "Heartbeat agents running", errorSet);
-                    reportMeteringUsage(nodeStatuses, NodeStatusProto.MeteringDetails::getHeartbeatConfig,
-                            "Heartbeat agents configured", errorSet);
-                    reportMeteringUsage(nodeStatuses, NodeStatusProto.MeteringDetails::getLoggingServiceRunning,
-                            "Logging agents running", errorSet);
-                    reportMeteringUsage(nodeStatuses, NodeStatusProto.MeteringDetails::getLoggingAgentConfig,
-                            "Logging agents configured", errorSet);
-                    reportMeteringUsage(nodeStatuses, NodeStatusProto.MeteringDetails::getDatabusReachable,
-                            "DataBus reachable", errorSet);
-                    reportMeteringUsage(nodeStatuses, NodeStatusProto.MeteringDetails::getDatabusTestResponse,
-                            "DataBus test response", errorSet);
-                    String resourceCrn = stack.getResourceCrn();
-                    String accountId = Crn.safeFromString(resourceCrn).getAccountId();
-                    UsageProto.CDPDiagnosticEvent.Builder diagnosticsEventBuilder = UsageProto.CDPDiagnosticEvent.newBuilder();
-                    diagnosticsEventBuilder
-                            .setAccountId(accountId)
-                            .setResourceCrn(resourceCrn)
-                            .setEnvironmentCrn(stack.getEnvironmentCrn())
-                            .setServiceType(UsageProto.ServiceType.Value.DATAHUB);
-                    if (errorSet.isEmpty()) {
-                        LOGGER.info("No metering issue detected, skip sending metering diagnostic event.");
-                    } else {
-                        diagnosticsEventBuilder.setResult(calculateDiagnosticFailureResult(nodeStatuses));
-                        diagnosticsEventBuilder.setFailureMessage(String.format("Failure result:%n%s", StringUtils.join(errorSet, "\\n")));
-                        usageReporter.cdpDiagnosticsEvent(diagnosticsEventBuilder.build());
-                    }
-                }
+            Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+            if (stack.isDatalake()) {
+                LOGGER.debug("Skip metering check as billing is not used for datalake");
+                return;
+            }
+            Map<String, CdpDoctorMeteringStatusResponse> resultForMinions = cdpDoctorService.getMeteringStatusForMinions(stack);
+            Set<String> errorSet = new HashSet<>();
+            reportMeteringUsage(resultForMinions, CdpDoctorMeteringStatusResponse::getHeartbeatAgentRunning, "Heartbeat agents running", errorSet);
+            reportMeteringUsage(resultForMinions, CdpDoctorMeteringStatusResponse::getHeartbeatConfig, "Heartbeat agents configured", errorSet);
+            reportMeteringUsage(resultForMinions, CdpDoctorMeteringStatusResponse::getLoggingServiceRunning, "Logging agents running", errorSet);
+            reportMeteringUsage(resultForMinions, CdpDoctorMeteringStatusResponse::getLoggingAgentConfig, "Logging agents configured", errorSet);
+            reportMeteringUsage(resultForMinions, CdpDoctorMeteringStatusResponse::getDatabusReachable, "DataBus reachable", errorSet);
+            reportMeteringUsage(resultForMinions, CdpDoctorMeteringStatusResponse::getDatabusTestResponse, "DataBus test response", errorSet);
+            String resourceCrn = stack.getResourceCrn();
+            String accountId = Crn.safeFromString(resourceCrn).getAccountId();
+            UsageProto.CDPDiagnosticEvent.Builder diagnosticsEventBuilder = UsageProto.CDPDiagnosticEvent.newBuilder();
+            diagnosticsEventBuilder
+                    .setAccountId(accountId)
+                    .setResourceCrn(resourceCrn)
+                    .setEnvironmentCrn(stack.getEnvironmentCrn())
+                    .setServiceType(UsageProto.ServiceType.Value.DATAHUB);
+            if (errorSet.isEmpty()) {
+                LOGGER.info("No metering issue detected, skip sending metering diagnostic event.");
+            } else {
+                diagnosticsEventBuilder.setResult(calculateDiagnosticFailureResult(resultForMinions));
+                diagnosticsEventBuilder.setFailureMessage(String.format("Failure result:%n%s", StringUtils.join(errorSet, "\\n")));
+                usageReporter.cdpDiagnosticsEvent(diagnosticsEventBuilder.build());
             }
         } catch (Exception e) {
             LOGGER.debug("Diagnostics metering node status check failed (skipping): {}", e.getMessage());
         }
     }
 
-    private UsageProto.CDPDiagnosticResult.Value calculateDiagnosticFailureResult(List<NodeStatusProto.NodeStatus> nodeStatuses) {
-        return nodeStatuses.stream().anyMatch(ns -> NodeStatusProto.HealthStatus.NOK.equals(ns.getMeteringDetails().getDatabusReachable()))
+    private UsageProto.CDPDiagnosticResult.Value calculateDiagnosticFailureResult(Map<String, CdpDoctorMeteringStatusResponse> resultForMinions) {
+        return resultForMinions.entrySet().stream()
+                .anyMatch(entry -> CdpDoctorCheckStatus.NOK.equals(entry.getValue().getDatabusTestResponse()))
                 ? UsageProto.CDPDiagnosticResult.Value.DBUS_UNAVAILABLE
                 : UsageProto.CDPDiagnosticResult.Value.METERING_HB_FAILURE;
     }
 
-    private void reportMeteringUsage(List<NodeStatusProto.NodeStatus> nodeStatuses,
-            Function<NodeStatusProto.MeteringDetails, NodeStatusProto.HealthStatus> healthEvaluator, String checkMessage, Set<String> errorSet) {
-        List<String> notOkHosts = nodeStatuses.stream()
-                .filter(m -> NodeStatusProto.HealthStatus.NOK.equals(healthEvaluator.apply(m.getMeteringDetails())))
-                .filter(m -> StringUtils.isNotBlank(m.getStatusDetails().getHost()))
-                .map(m -> m.getStatusDetails().getHost()).collect(Collectors.toList());
+    private void reportMeteringUsage(Map<String, CdpDoctorMeteringStatusResponse> resultForMinions,
+            Function<CdpDoctorMeteringStatusResponse, CdpDoctorCheckStatus> healthEvaluator, String checkMessage, Set<String> errorSet) {
+        List<String> notOkHosts = resultForMinions.entrySet().stream()
+                .filter(entry -> CdpDoctorCheckStatus.NOK.equals(healthEvaluator.apply(entry.getValue())))
+                .filter(entry -> StringUtils.isNotBlank(entry.getKey()))
+                .map(Map.Entry::getKey).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(notOkHosts)) {
             String hostsStr = StringUtils.join(notOkHosts, ",");
             String errorMsg = String.format("%s  check result - FAILED for hosts: %s", checkMessage, hostsStr);
@@ -256,8 +236,8 @@ public class DiagnosticsFlowService {
     }
 
     private void reportNetworkCheckUsage(Stack stack, UsageProto.CDPEnvironmentsEnvironmentType.Value envType, Value type,
-            List<NodeStatusProto.NetworkDetails> networkNodes, Function<NodeStatusProto.NetworkDetails, NodeStatusProto.HealthStatus> healthEvaluator) {
-        if (allNetworkNodesInUnknownStatus(networkNodes, healthEvaluator)) {
+            Map<String, CdpDoctorNetworkStatusResponse> resultForMinions, Function<CdpDoctorNetworkStatusResponse, CdpDoctorCheckStatus> healthEvaluator) {
+        if (allNetworkNodesInUnknownStatus(resultForMinions, healthEvaluator)) {
             LOGGER.debug("All network details are in UNKNOWN state, this could mean responses does not support this network check type yet. " +
                     "Skip usage reporting..");
         } else {
@@ -265,7 +245,7 @@ public class DiagnosticsFlowService {
             String accountId = Crn.safeFromString(resourceCrn).getAccountId();
             String clusterType = StackType.DATALAKE == stack.getType() ? CloudbreakEventService.DATALAKE_RESOURCE_TYPE.toUpperCase(Locale.ROOT)
                     : CloudbreakEventService.DATAHUB_RESOURCE_TYPE.toUpperCase(Locale.ROOT);
-            List<String> unhealthyNodes = getUnhealthyHosts(networkNodes, healthEvaluator);
+            List<String> unhealthyNodes = getUnhealthyHosts(resultForMinions, healthEvaluator);
             UsageProto.CDPNetworkCheckResult.Value networkCheckResult = unhealthyNodes.isEmpty()
                     ? UsageProto.CDPNetworkCheckResult.Value.SUCCESSFUL : UsageProto.CDPNetworkCheckResult.Value.FAILED;
             UsageProto.CDPNetworkCheck.Builder newtorkCheckBuilder = UsageProto.CDPNetworkCheck.newBuilder();
@@ -286,34 +266,34 @@ public class DiagnosticsFlowService {
         }
     }
 
-    private void firePreFlightCheckEvents(Long resourceId, String checkType, List<NodeStatusProto.NetworkDetails> networkNodes,
-            Function<NodeStatusProto.NetworkDetails, NodeStatusProto.HealthStatus> healthEvaluator) {
-        firePreFlightCheckEvents(resourceId, checkType, networkNodes, healthEvaluator, null);
+    private void firePreFlightCheckEvents(Long resourceId, String checkType, Map<String, CdpDoctorNetworkStatusResponse> resultForMinions,
+            Function<CdpDoctorNetworkStatusResponse, CdpDoctorCheckStatus> healthEvaluator) {
+        firePreFlightCheckEvents(resourceId, checkType, resultForMinions, healthEvaluator, null);
     }
 
-    private void firePreFlightCheckEvents(Long resourceId, String checkType, List<NodeStatusProto.NetworkDetails> networkNodes,
-            Function<NodeStatusProto.NetworkDetails, NodeStatusProto.HealthStatus> healthEvaluator, boolean condition) {
+    private void firePreFlightCheckEvents(Long resourceId, String checkType, Map<String, CdpDoctorNetworkStatusResponse> resultForMinions,
+            Function<CdpDoctorNetworkStatusResponse, CdpDoctorCheckStatus> healthEvaluator, boolean condition) {
         if (condition) {
-            firePreFlightCheckEvents(resourceId, checkType, networkNodes, healthEvaluator, null);
+            firePreFlightCheckEvents(resourceId, checkType, resultForMinions, healthEvaluator, null);
         }
     }
 
-    private void firePreFlightCheckEvents(Long resourceId, String checkType, List<NodeStatusProto.NetworkDetails> networkNodes,
-            Function<NodeStatusProto.NetworkDetails, NodeStatusProto.HealthStatus> healthEvaluator, boolean condition, String conditionalErrorMsg) {
+    private void firePreFlightCheckEvents(Long resourceId, String checkType, Map<String, CdpDoctorNetworkStatusResponse> resultForMinions,
+            Function<CdpDoctorNetworkStatusResponse, CdpDoctorCheckStatus> healthEvaluator, boolean condition,
+            String conditionalErrorMsg) {
         if (condition) {
-            firePreFlightCheckEvents(resourceId, checkType, networkNodes, healthEvaluator, null);
+            firePreFlightCheckEvents(resourceId, checkType, resultForMinions, healthEvaluator, null);
         } else {
-            firePreFlightCheckEvents(resourceId, checkType, networkNodes, healthEvaluator, conditionalErrorMsg);
+            firePreFlightCheckEvents(resourceId, checkType, resultForMinions, healthEvaluator, conditionalErrorMsg);
         }
     }
 
-    private void firePreFlightCheckEvents(Long resourceId, String checkType, List<NodeStatusProto.NetworkDetails> networkNodes,
-            Function<NodeStatusProto.NetworkDetails, NodeStatusProto.HealthStatus> healthEvaluator, String conditionalErrorMsg) {
-        if (allNetworkNodesInUnknownStatus(networkNodes, healthEvaluator)) {
+    private void firePreFlightCheckEvents(Long resourceId, String checkType, Map<String, CdpDoctorNetworkStatusResponse> resultForMinions,
+            Function<CdpDoctorNetworkStatusResponse, CdpDoctorCheckStatus> healthEvaluator, String conditionalErrorMsg) {
+        if (allNetworkNodesInUnknownStatus(resultForMinions, healthEvaluator)) {
             LOGGER.debug("All network details are in UNKNOWN state, this could mean responses does not support this network check type yet. Skip processing..");
         } else {
-            List<String> unhealthyNetworkHosts =
-                    getUnhealthyHosts(networkNodes, healthEvaluator);
+            List<String> unhealthyNetworkHosts = getUnhealthyHosts(resultForMinions, healthEvaluator);
             List<String> eventMessageParameters = getPreFlightStatusParameters(checkType, unhealthyNetworkHosts, conditionalErrorMsg);
             String eventType = CollectionUtils.isEmpty(unhealthyNetworkHosts) ? UPDATE_IN_PROGRESS.name() : UPDATE_FAILED.name();
             cloudbreakEventService.fireCloudbreakEvent(resourceId, eventType,
@@ -321,9 +301,10 @@ public class DiagnosticsFlowService {
         }
     }
 
-    private boolean allNetworkNodesInUnknownStatus(List<NodeStatusProto.NetworkDetails> networkNodes,
-            Function<NodeStatusProto.NetworkDetails, NodeStatusProto.HealthStatus> healthEvaluator) {
-        return networkNodes.stream().allMatch(n -> NodeStatusProto.HealthStatus.UNKNOWN.equals(healthEvaluator.apply(n)));
+    private boolean allNetworkNodesInUnknownStatus(Map<String, CdpDoctorNetworkStatusResponse> resultForMinions,
+            Function<CdpDoctorNetworkStatusResponse, CdpDoctorCheckStatus> healthEvaluator) {
+        return resultForMinions.entrySet().stream()
+                .allMatch(entry -> CdpDoctorCheckStatus.UNKNOWN.equals(healthEvaluator.apply(entry.getValue())));
     }
 
     private List<String> getPreFlightStatusParameters(String checkType, List<String> unhealthyNetworkHosts, String conditionalErrorMsg) {
@@ -343,11 +324,11 @@ public class DiagnosticsFlowService {
         }
     }
 
-    private List<String> getUnhealthyHosts(List<NodeStatusProto.NetworkDetails> networkNodes,
-            Function<NodeStatusProto.NetworkDetails, NodeStatusProto.HealthStatus> healthEvaluator) {
-        return networkNodes.stream()
-                .filter(nd -> NodeStatusProto.HealthStatus.NOK.equals(healthEvaluator.apply(nd)))
-                .map(NodeStatusProto.NetworkDetails::getHost)
+    private List<String> getUnhealthyHosts(Map<String, CdpDoctorNetworkStatusResponse> resultForMinions,
+            Function<CdpDoctorNetworkStatusResponse, CdpDoctorCheckStatus> healthEvaluator) {
+        return resultForMinions.entrySet().stream()
+                .filter(entry -> CdpDoctorCheckStatus.NOK.equals(healthEvaluator.apply(entry.getValue())))
+                .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
     }
 

@@ -2,11 +2,13 @@ package com.sequenceiq.cloudbreak.conclusion.step;
 
 class ConclusionMessage {
 
-    public static final String NODE_STATUS_MONITOR_UNREACHABLE = "conclusion.node.status.monitor.unreachable";
+    public static final String GATEWAY_NETWORK_STATUS_FAILED = "conclusion.gateway.network.status.failed";
 
-    public static final String NODE_STATUS_MONITOR_FAILED = "conclusion.node.status.monitor.failed";
+    public static final String GATEWAY_SERVICES_STATUS_FAILED = "conclusion.gateway.services.status.failed";
 
-    public static final String NODE_STATUS_MONITOR_FAILED_DETAILS = "conclusion.node.status.monitor.failed.details";
+    public static final String SERVICES_CHECK_FAILED = "conclusion.services.check.failed";
+
+    public static final String SERVICES_CHECK_FAILED_DETAILS = "conclusion.services.check.failed.details";
 
     public static final String SALT_COLLECT_UNREACHABLE_FOUND = "conclusion.salt.collect.unreachable.found";
 
