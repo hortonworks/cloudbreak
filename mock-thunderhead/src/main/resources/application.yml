@@ -97,7 +97,7 @@ auth:
     secret.rotation.enabled: true
     rhel8:
       enabled: true
-      preferred: true
+      preferred: false
 crn:
   partition: cdp
   region: us-west-1
