@@ -1,5 +1,0 @@
-name: "load-test-cleanup"
-tests:
-  - name: "load test cleanup"
-    classes:
-      - com.sequenceiq.it.cloudbreak.testcase.load.PeriscopeLoadCleanUpTest

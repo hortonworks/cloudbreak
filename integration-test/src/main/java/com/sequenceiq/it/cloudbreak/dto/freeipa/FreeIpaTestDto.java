@@ -145,14 +145,9 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         return this;
     }
 
-    public FreeIpaTestDto withName(String name) {
+    private FreeIpaTestDto withName(String name) {
         getRequest().setName(name);
         setName(name);
-        return this;
-    }
-
-    public FreeIpaTestDto withEnvironmentCrn(String environmentCrn) {
-        getRequest().setEnvironmentCrn(environmentCrn);
         return this;
     }
 
@@ -372,7 +367,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     }
 
     public FreeIpaTestDto withEnvironment(EnvironmentTestDto environment) {
-        getRequest().setEnvironmentCrn(environment != null && environment.getResponse() != null ? environment.getResponse().getCrn() : null);
+        getRequest().setEnvironmentCrn(environment.getResponse().getCrn());
         return this;
     }
 
@@ -512,7 +507,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     @Override
     public CloudbreakTestDto refresh() {
         LOGGER.info("Refresh FreeIPA with name: {}", getName());
-        return when(freeIpaTestClient.refresh(), key("refresh-freeipa-" + getName()).withWho(getUser()));
+        return when(freeIpaTestClient.refresh(), key("refresh-freeipa-" + getName()));
     }
 
     @Override

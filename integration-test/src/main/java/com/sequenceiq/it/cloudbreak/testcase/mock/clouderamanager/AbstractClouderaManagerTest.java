@@ -2,9 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager;
 
 import java.io.IOException;
 
-import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
-import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.mock.AbstractMockTest;
@@ -30,21 +28,6 @@ public abstract class AbstractClouderaManagerTest extends AbstractMockTest {
                     .withName(resourcePropertyProvider().getName())
                     .withBlueprint(bp)
                     .when(blueprintTestClient().createV4());
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    protected void createCmBlueprint(TestContext testContext, String bluePrintName, CloudbreakUser user) {
-        try {
-            String bp = ResourceUtil
-                    .readResourceAsString(applicationContext, "classpath:/blueprint/clouderamanager.bp")
-                    .replaceAll("CDH_RUNTIME", commonClusterManagerProperties().getRuntimeVersion());
-
-            testContext.given(BlueprintTestDto.class)
-                    .withName(bluePrintName)
-                    .withBlueprint(bp)
-                    .when(blueprintTestClient().createV4(), RunningParameter.who(user));
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
