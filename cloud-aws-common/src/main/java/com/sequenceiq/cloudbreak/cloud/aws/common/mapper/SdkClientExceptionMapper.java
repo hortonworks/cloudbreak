@@ -46,8 +46,8 @@ public class SdkClientExceptionMapper {
         }
         // We use the AwsServiceException to check the cloudformation exists or not. And maybe we built much more logic to this exception.
         // Therefore, the error messages are updated instead of the wrap
-        if (e instanceof AwsServiceException) {
-            return extendErrorMessageWithMethodName((AwsServiceException) e, methodName);
+        if (e instanceof AwsServiceException ase) {
+            return extendErrorMessageWithMethodName(ase, methodName);
         }
         return e;
     }

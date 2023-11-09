@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
+import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @Service
@@ -73,6 +74,8 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
             return ObjectStorageMetadataResponse.builder()
                     .withStatus(ResponseStatus.ACCESS_DENIED)
                     .build();
+        } catch (SdkClientException e) {
+            throw new CloudConnectorException(e.getMessage(), e);
         }
     }
 
