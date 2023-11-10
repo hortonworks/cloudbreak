@@ -75,8 +75,6 @@ public interface ClusterView extends MdcContextInfoProvider {
 
     Secret getCloudbreakClusterManagerMonitoringPasswordSecret();
 
-    Secret getCdpNodeStatusMonitorUserSecret();
-
     Secret getCdpNodeStatusMonitorPasswordSecret();
 
     Secret getDatabusCredentialSecret();
@@ -150,10 +148,6 @@ public interface ClusterView extends MdcContextInfoProvider {
 
     default String getCdpNodeStatusMonitorPassword() {
         return getIfNotNull(getCdpNodeStatusMonitorPasswordSecret(), Secret::getRaw);
-    }
-
-    default String getCdpNodeStatusMonitorUser() {
-        return getIfNotNull(getCdpNodeStatusMonitorUserSecret(), Secret::getRaw);
     }
 
     default String getDatabusCredential() {

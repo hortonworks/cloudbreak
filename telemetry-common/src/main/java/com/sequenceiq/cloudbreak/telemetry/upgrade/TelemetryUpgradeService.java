@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryOrchestr
 import static com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryOrchestratorModule.FLUENT;
 import static com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryOrchestratorModule.METERING;
 import static com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryOrchestratorModule.MONITORING;
-import static com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryOrchestratorModule.NODESTATUS;
 import static com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryOrchestratorModule.TELEMETRY;
 
 import java.io.IOException;
@@ -46,7 +45,7 @@ public class TelemetryUpgradeService {
 
     private static final String EMPTY_VERSION = "";
 
-    private static final Set<TelemetryOrchestratorModule> TELEMETRY_MODULES = Set.of(TELEMETRY, DATABUS, NODESTATUS, FILECOLLECTOR, MONITORING);
+    private static final Set<TelemetryOrchestratorModule> TELEMETRY_MODULES = Set.of(TELEMETRY, DATABUS, FILECOLLECTOR, MONITORING);
 
     private static final Set<TelemetryOrchestratorModule> LOGGING_AGENT_MODULES = Set.of(TELEMETRY, DATABUS, FLUENT);
 

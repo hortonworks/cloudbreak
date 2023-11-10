@@ -4,7 +4,6 @@ base:
     - tags
     - databus
     - fluent
-    - nodestatus
     - monitoring
     - discovery
     - proxy.proxy

@@ -29,7 +29,6 @@ base:
              - freeipa.common-install
              - freeipa.backups
              - freeipa.healthagent
-             - nodestatus
              - freeipa.patch-pki-tomcat
              - freeipa.ldapagent
              - faillock
@@ -40,7 +39,6 @@ base:
              - freeipa.common-install
              - freeipa.backups
              - freeipa.healthagent
-             - nodestatus
              - freeipa.patch-pki-tomcat
              - freeipa.ldapagent
              - faillock
@@ -52,7 +50,6 @@ base:
              - freeipa.promote-replica-to-master
              - freeipa.backups
              - freeipa.healthagent
-             - nodestatus
              - freeipa.patch-pki-tomcat
              - freeipa.ldapagent
              - faillock

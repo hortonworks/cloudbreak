@@ -416,7 +416,6 @@ public class StackV4RequestToStackConverter {
                 cluster.setCloudbreakClusterManagerMonitoringUser(monitoringConfiguration.getClouderaManagerExporter().getUser());
                 cluster.setCloudbreakClusterManagerMonitoringPassword(PasswordUtil.generatePassword());
             }
-            cluster.setCdpNodeStatusMonitorUser(UUID.randomUUID().toString());
             cluster.setCdpNodeStatusMonitorPassword(PasswordUtil.generatePassword());
             cluster.setDpUser(cmMgmtUsername);
             cluster.setDpPassword(PasswordUtil.generatePassword());

@@ -25,7 +25,6 @@
   "metering": 18000.0,
   "fluent.cdp-logging-agent-init": 15000.0,
   "nginx.init": 1000.0,
-  "nodestatus": 400.0,
   "ccm": 8000.0,
   "atlas": 30.0,
   "cloudera.csd": 50.0,

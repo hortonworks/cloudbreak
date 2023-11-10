@@ -247,16 +247,10 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
 
     private NodeStatusContext createNodeStatusContext(ClusterView cluster, String accountId) {
         NodeStatusContext.Builder builder = NodeStatusContext.builder();
-        boolean saltPingEnabled = entitlementService.nodestatusSaltPingEnabled(accountId);
-        if (saltPingEnabled) {
-            builder.saltPingEnabled();
-        }
         if (StringUtils.isNotBlank(cluster.getCdpNodeStatusMonitorPassword())) {
             builder.withPassword(cluster.getCdpNodeStatusMonitorPassword());
         }
-        return builder
-                .withUsername(cluster.getCdpNodeStatusMonitorUser())
-                .build();
+        return builder.build();
     }
 
     private TelemetryClusterDetails createTelemetryClusterDetails(StackView stack, Telemetry telemetry, DatabusContext databusContext) {

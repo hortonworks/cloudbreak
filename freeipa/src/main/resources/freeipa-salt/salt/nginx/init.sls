@@ -28,11 +28,6 @@
     - source: salt://nginx/conf/ssl-locations.d/freeipahealthcheck.conf
     - template: jinja
 
-/etc/nginx/sites-enabled/ssl-locations.d/nodestatus.conf:
-  file.managed:
-    - makedirs: True
-    - source: salt://nginx/conf/ssl-locations.d/nodestatus.conf
-
 {% if salt['file.file_exists']('/cdp/ipaldapagent/cdp-freeipa-ldapagent') %}
 /etc/nginx/sites-enabled/ssl-locations.d/ldapagent.conf:
   file.managed:

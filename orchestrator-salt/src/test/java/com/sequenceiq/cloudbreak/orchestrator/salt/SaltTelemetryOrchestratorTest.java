@@ -230,23 +230,6 @@ class SaltTelemetryOrchestratorTest {
     }
 
     @Test
-    void testExecuteNodeStatusCollection() throws CloudbreakOrchestratorFailedException {
-        underTest.executeNodeStatusCollection(gatewayConfigs, targets, exitCriteriaModel);
-
-        SaltJobIdTracker saltJobIdTracker = (SaltJobIdTracker) orchestratorBootstrapArgumentCaptor.getValue();
-        StateRunner saltJobRunner = (StateRunner) saltJobIdTracker.getSaltJobRunner();
-
-        assertThat(saltJobRunner.getAllNode()).isEmpty();
-        assertThat(targets.stream().map(Node::getHostname).collect(Collectors.toSet()))
-                .containsExactlyElementsOf(saltJobRunner.getTargetHostnames());
-        assertEquals(SaltTelemetryOrchestrator.NODESTATUS_COLLECT, saltJobRunner.getState());
-        verify(telemetrySaltRetryConfig, times(1)).getNodeStatusCollect();
-        verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
-        verify(saltService, times(1)).createSaltConnector(gatewayConfig);
-        verify(saltRunner, times(1)).runnerWithCalculatedErrorCount(any(), any(), any(), anyInt());
-    }
-
-    @Test
     void testCollectUnresponsiveNodes() throws CloudbreakOrchestratorFailedException {
         Node node = new Node("10.0.0.1", "1.1.1.1", "10-0-0-1.example.com", "hg");
         node.setHostname("Test_Unresponsive_Node");

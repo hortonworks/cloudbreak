@@ -36,7 +36,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_BULK
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_LONG_TIMEOUT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_RESIZE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_DB_BACKUP_ENABLE_COMPRESSION;
@@ -55,7 +54,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_USE
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EMBEDDED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK;
@@ -394,14 +392,8 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.conclusion.checker.send.user.event.enable:true}")
     private boolean conclusionCheckerSendUserEvent;
 
-    @Value("${auth.mock.datahub.nodestatus.check.enable}")
-    private boolean datahubNodestatusCheck;
-
     @Value("${auth.mock.diagnostics.vm.enable}")
     private boolean diagnosticsEnabled;
-
-    @Value("${auth.mock.nodestatus.salt.ping.enable}")
-    private boolean nodestatusSaltPingEnabled;
 
     @Value("${auth.mock.datalake.multiaz.enable}")
     private boolean enableMultiAzDataLake;
@@ -860,12 +852,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (conclusionCheckerSendUserEvent) {
             builder.addEntitlements(createEntitlement(CDP_CONCLUSION_CHECKER_SEND_USER_EVENT));
-        }
-        if (datahubNodestatusCheck) {
-            builder.addEntitlements(createEntitlement(CDP_DATAHUB_NODESTATUS_CHECK));
-        }
-        if (nodestatusSaltPingEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_NODESTATUS_ENABLE_SALT_PING));
         }
         if (enableAzureEncryptionAtHost) {
             builder.addEntitlements(createEntitlement(CDP_CB_AZURE_ENCRYPTION_AT_HOST));

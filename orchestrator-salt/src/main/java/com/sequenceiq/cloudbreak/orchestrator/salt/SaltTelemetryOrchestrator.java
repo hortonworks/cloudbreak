@@ -57,8 +57,6 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     public static final String FILECOLLECTOR_CLEANUP = "filecollector.cleanup";
 
-    public static final String NODESTATUS_COLLECT = "nodestatus.collect";
-
     public static final String METERING_UPGRADE = "metering.upgrade";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltTelemetryOrchestrator.class);
@@ -206,13 +204,6 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
             throws CloudbreakOrchestratorFailedException {
         runSaltState(allGateways, nodes, parameters, exitModel, FILECOLLECTOR_CLEANUP,
                 "Error occurred during diagnostics filecollector cleanup.", telemetrySaltRetryConfig.getDiagnosticsCollect(), false);
-    }
-
-    @Override
-    public void executeNodeStatusCollection(List<GatewayConfig> allGateways, Set<Node> nodes, ExitCriteriaModel exitModel)
-            throws CloudbreakOrchestratorFailedException {
-        runSimpleSaltState(allGateways, nodes, exitModel, NODESTATUS_COLLECT, "Error occurred during nodestatus telemetry collect.",
-                telemetrySaltRetryConfig.getNodeStatusCollect(), false);
     }
 
     @Override

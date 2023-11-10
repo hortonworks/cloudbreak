@@ -122,7 +122,6 @@ public class TelemetryDecoratorTest {
         assertTrue(result.getLogShipperContext().isEnabled());
         assertTrue(result.getMeteringContext().isEnabled());
         assertTrue(result.getMonitoringContext().isEnabled());
-        assertTrue(result.getNodeStatusContext().isSaltPingEnabled());
         verify(altusMachineUserService, times(1)).storeDataBusCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
         verify(altusMachineUserService, times(1)).storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
     }
@@ -318,7 +317,6 @@ public class TelemetryDecoratorTest {
                 .willReturn(monitoringCredential);
         given(entitlementService.useDataBusCNameEndpointEnabled(anyString())).willReturn(false);
         given(entitlementService.isDatahubDatabusEndpointValidationEnabled(anyString())).willReturn(true);
-        given(entitlementService.nodestatusSaltPingEnabled(anyString())).willReturn(true);
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("https://dbus-dev.com");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("https://cloudera-dbus-dev.amazonaws.com");
         given(vmLogsService.getVmLogs()).willReturn(new ArrayList<>());
@@ -341,7 +339,6 @@ public class TelemetryDecoratorTest {
         cluster.setName("cl1");
         cluster.setCloudbreakClusterManagerMonitoringUser("myUsr");
         cluster.setCloudbreakClusterManagerMonitoringPassword("myPass");
-        cluster.setCdpNodeStatusMonitorUser("nodeUser");
         cluster.setCdpNodeStatusMonitorPassword("nodePassword");
         stack.setCluster(cluster);
         stack.setCloudPlatform(CloudPlatform.AWS.name());

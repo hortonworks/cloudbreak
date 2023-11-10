@@ -12,12 +12,6 @@
     - makedirs: True
     - source: salt://nginx/conf/ssl-locations.d/knox.conf
 
-/etc/nginx/sites-enabled/ssl-locations.d/nodestatus.conf:
-  file.managed:
-    - makedirs: True
-    - source: salt://nginx/conf/ssl-locations.d/nodestatus.conf
-    - template: jinja
-
 /etc/nginx/sites-enabled/ssl-locations.d/saltapi.conf:
   file.managed:
     - makedirs: True

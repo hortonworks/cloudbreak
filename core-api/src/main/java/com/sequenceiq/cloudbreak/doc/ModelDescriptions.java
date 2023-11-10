@@ -704,15 +704,6 @@ public class ModelDescriptions {
         public static final String VERSIONS = "Supported version types currently only for Oracle";
     }
 
-    public static class FailureReport {
-        public static final String FAILED_NODES = "List of failed nodes";
-    }
-
-    public static class NodeStatusChangeReport {
-        public static final String NEW_FAILED_NODES = "List of the new failed nodes";
-        public static final String NEW_HEALTHY_NODES = "List of the new healthy nodes";
-    }
-
     public static class RepairClusterRequest {
         public static final String HOSTGROUPS = "List of hostgroups where the failed nodes will be repaired";
         public static final String RESTART_SERVICES = "If true, the services will be restarted after repair";

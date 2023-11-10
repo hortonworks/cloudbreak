@@ -27,16 +27,13 @@ import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.node.status.CdpDoctorService;
 import com.sequenceiq.cloudbreak.node.status.response.CdpDoctorCheckStatus;
 import com.sequenceiq.cloudbreak.node.status.response.CdpDoctorMeteringStatusResponse;
 import com.sequenceiq.cloudbreak.node.status.response.CdpDoctorNetworkStatusResponse;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadata;
 import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadataProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -129,16 +126,6 @@ public class DiagnosticsFlowService {
             reportNetworkCheckUsages(stackId, resultForMinions, stableNetworkCheckSupported);
         } catch (Exception e) {
             LOGGER.debug("Diagnostics network node status check failed (skipping): {}", e.getMessage());
-        }
-    }
-
-    public void collectNodeStatusTelemetry(Long stackId) throws CloudbreakOrchestratorFailedException {
-        OrchestratorMetadata metadata = orchestratorMetadataProvider.getOrchestratorMetadata(stackId);
-        Set<Node> allNodes = metadata.getNodes();
-        if (allNodes.isEmpty()) {
-            LOGGER.debug("Nodestatus telemetry collection has been skipped. (no target minions)");
-        } else {
-            telemetryOrchestrator.executeNodeStatusCollection(metadata.getGatewayConfigs(), allNodes, metadata.getExitCriteriaModel());
         }
     }
 

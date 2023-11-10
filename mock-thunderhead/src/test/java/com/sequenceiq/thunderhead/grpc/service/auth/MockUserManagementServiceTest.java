@@ -239,9 +239,6 @@ public class MockUserManagementServiceTest {
                 {"conclusionCheckerSendUserEvent false", "conclusionCheckerSendUserEvent", false, "CDP_CONCLUSION_CHECKER_SEND_USER_EVENT", false},
                 {"conclusionCheckerSendUserEvent true", "conclusionCheckerSendUserEvent", true, "CDP_CONCLUSION_CHECKER_SEND_USER_EVENT", true},
 
-                {"nodestatusSaltPingEnabled false", "nodestatusSaltPingEnabled", false, "CDP_NODESTATUS_ENABLE_SALT_PING", false},
-                {"nodestatusSaltPingEnabled true", "nodestatusSaltPingEnabled", true, "CDP_NODESTATUS_ENABLE_SALT_PING", true},
-
                 {"enableDatalakeZduOSUpgrade false", "enableDatalakeZduOSUpgrade", false, "CDP_DATALAKE_ZDU_OS_UPGRADE", false},
                 {"enableDatalakeZduOSUpgrade true", "enableDatalakeZduOSUpgrade", true, "CDP_DATALAKE_ZDU_OS_UPGRADE", true},
 

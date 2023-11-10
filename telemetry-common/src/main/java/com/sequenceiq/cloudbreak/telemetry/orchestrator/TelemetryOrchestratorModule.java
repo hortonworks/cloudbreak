@@ -5,7 +5,6 @@ public enum TelemetryOrchestratorModule {
     TELEMETRY("telemetry"),
     FLUENT("fluent"),
     FILECOLLECTOR("filecollector"),
-    NODESTATUS("nodestatus"),
     DATABUS("databus"),
     MONITORING("monitoring"),
     METERING("metering");

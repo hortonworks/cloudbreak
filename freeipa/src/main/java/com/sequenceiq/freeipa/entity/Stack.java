@@ -136,10 +136,6 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
 
     @Convert(converter = SecretToString.class)
     @SecretValue
-    private Secret cdpNodeStatusMonitorUser = Secret.EMPTY;
-
-    @Convert(converter = SecretToString.class)
-    @SecretValue
     private Secret cdpNodeStatusMonitorPassword = Secret.EMPTY;
 
     private String template;
@@ -361,14 +357,6 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
 
     public void setMonitoringCredential(String monitoringCredential) {
         this.monitoringCredential = new Secret(monitoringCredential);
-    }
-
-    public String getCdpNodeStatusMonitorUser() {
-        return getIfNotNull(cdpNodeStatusMonitorUser, Secret::getRaw);
-    }
-
-    public void setCdpNodeStatusMonitorUser(String cdpNodeStatusMonitorUser) {
-        this.cdpNodeStatusMonitorUser = new Secret(cdpNodeStatusMonitorUser);
     }
 
     public String getCdpNodeStatusMonitorPassword() {

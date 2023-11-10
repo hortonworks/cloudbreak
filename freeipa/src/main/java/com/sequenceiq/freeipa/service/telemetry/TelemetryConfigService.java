@@ -164,16 +164,10 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
 
     private NodeStatusContext createNodeStatusContext(Stack stack) {
         NodeStatusContext.Builder builder = NodeStatusContext.builder();
-        boolean saltPingEnabled = entitlementService.nodestatusSaltPingEnabled(stack.getAccountId());
-        if (saltPingEnabled) {
-            builder.saltPingEnabled();
-        }
         if (StringUtils.isNotBlank(stack.getCdpNodeStatusMonitorPassword())) {
             builder.withPassword(stack.getCdpNodeStatusMonitorPassword());
         }
-        return builder
-                .withUsername(stack.getCdpNodeStatusMonitorUser())
-                .build();
+        return builder.build();
     }
 
     private MonitoringContext createMonitoringContext(Stack stack, Telemetry telemetry, NodeStatusContext nodeStatusContext,

@@ -35,11 +35,6 @@ public class PreFlightCheckHandler implements EventHandler<PreFlightCheckRequest
         PreFlightCheckRequest data = event.getData();
         Long resourceId = data.getResourceId();
         try {
-            diagnosticsFlowService.collectNodeStatusTelemetry(resourceId);
-        } catch (Exception e) {
-            LOGGER.debug("Error occurred during pre-flight node status telemetry collection (skipping): {}", e.getMessage());
-        }
-        try {
             diagnosticsFlowService.nodeStatusNetworkReport(resourceId);
             diagnosticsFlowService.nodeStatusMeteringReport(resourceId);
         } catch (Exception e) {

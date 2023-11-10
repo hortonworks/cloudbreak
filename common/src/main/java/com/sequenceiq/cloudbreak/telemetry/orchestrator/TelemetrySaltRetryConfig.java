@@ -11,8 +11,6 @@ public class TelemetrySaltRetryConfig {
 
     private int loggingAgentStop;
 
-    private int nodeStatusCollect;
-
     private int diagnosticsCollect;
 
     private int meteringUpgrade;
@@ -33,14 +31,6 @@ public class TelemetrySaltRetryConfig {
 
     public void setLoggingAgentStop(int loggingAgentStop) {
         this.loggingAgentStop = loggingAgentStop;
-    }
-
-    public int getNodeStatusCollect() {
-        return nodeStatusCollect;
-    }
-
-    public void setNodeStatusCollect(int nodeStatusCollect) {
-        this.nodeStatusCollect = nodeStatusCollect;
     }
 
     public int getDiagnosticsCollect() {
@@ -72,7 +62,6 @@ public class TelemetrySaltRetryConfig {
         return "TelemetrySaltRetryConfig{" +
                 "cloudStorageValidation=" + cloudStorageValidation +
                 ", loggingAgentStop=" + loggingAgentStop +
-                ", nodeStatusCollect=" + nodeStatusCollect +
                 ", diagnosticsCollect=" + diagnosticsCollect +
                 ", meteringUpgrade=" + meteringUpgrade +
                 ", telemetryUpgrade=" + telemetryUpgrade +

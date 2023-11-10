@@ -30,7 +30,6 @@
   "cloudera.csd": 80.0,
   "ccm": 8000.0,
   "gateway.cm": 70.0,
-  "nodestatus": 400.0,
   "kerberos.cm-keytab": 150.0,
   "gateway.knox": 4900.0,
   "nginx.init": 800.0

@@ -29,6 +29,14 @@ commands:
       output: /tmp/doctor_network.txt
     - command: cdp-doctor service status
       output: /tmp/doctor_services.txt
+    - command: cdp-doctor system metrics
+      output: /tmp/doctor_system_metrics.txt
+{% if "gateway" in grains.get('roles', []) %}
+    - command: source activate_salt_env && salt-key -L
+      output: /tmp/doctor_salt_keys.txt
+    - command: cdp-doctor salt ping
+      output: /tmp/doctor_salt_ping.txt
+{%- endif %}
 {%- if filecollector.clusterType == "FREEIPA" %}
     - command: /usr/local/bin/freeipa_backup -pl
       output: /tmp/doctor_backup_permissions_check.txt

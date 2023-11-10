@@ -55,8 +55,6 @@ auth:
     endpointgateway.enable.gcp: false
     endpointgateway.skip.validation: false
     cm.sync.command.poller.enable: true
-    datahub.nodestatus.check.enable: true
-    nodestatus.salt.ping.enable: true
     diagnostics.vm.enable: true
     compute.monitoring.enable: false
     user.sync:

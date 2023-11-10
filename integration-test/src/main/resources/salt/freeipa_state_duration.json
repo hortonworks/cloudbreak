@@ -1,7 +1,6 @@
 {
   "logrotate": 90.0,
   "nginx": 400.0,
-  "nodestatus": 400.0,
   "recipes.pre-service-deployment": 100.0,
   "freeipa.backups": 40000.0,
   "freeipa.promote-replica-to-master": 15.0,

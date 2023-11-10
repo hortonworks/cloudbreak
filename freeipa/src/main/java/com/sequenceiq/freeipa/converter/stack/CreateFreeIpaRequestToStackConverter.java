@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -142,7 +141,6 @@ public class CreateFreeIpaRequestToStackConverter {
         } else {
             stack.setBackup(backupConverter.convert(source.getTelemetry()));
         }
-        stack.setCdpNodeStatusMonitorUser(UUID.randomUUID().toString());
         stack.setCdpNodeStatusMonitorPassword(PasswordUtil.generatePassword());
         decorateStackWithTunnelAndCcm(stack, source);
         updateOwnerRelatedFields(source, accountId, ownerFuture, userCrn, stack);

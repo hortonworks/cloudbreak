@@ -40,7 +40,6 @@ base:
     - cloudera.manager
     - cloudera.agent
     - gateway.cm
-    - nodestatus
     - atlas
 
   'G@roles:manager_agent':

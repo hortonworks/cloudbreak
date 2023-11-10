@@ -119,10 +119,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
 
     @Convert(converter = SecretToString.class)
     @SecretValue
-    private Secret cdpNodeStatusMonitorUser = Secret.EMPTY;
-
-    @Convert(converter = SecretToString.class)
-    @SecretValue
     private Secret cloudbreakAmbariPassword = Secret.EMPTY;
 
     @Convert(converter = SecretToString.class)
@@ -507,10 +503,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         return cloudbreakClusterManagerPassword;
     }
 
-    public String getCdpNodeStatusMonitorUser() {
-        return getIfNotNull(cdpNodeStatusMonitorUser, Secret::getRaw);
-    }
-
     public void setCloudbreakAmbariUser(String cloudbreakAmbariUser) {
         this.cloudbreakAmbariUser = new Secret(cloudbreakAmbariUser);
     }
@@ -526,10 +518,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
 
     public void setCloudbreakClusterManagerMonitoringUser(String cloudbreakClusterManagerMonitoringUser) {
         this.cloudbreakClusterManagerMonitoringUser = new Secret(cloudbreakClusterManagerMonitoringUser);
-    }
-
-    public void setCdpNodeStatusMonitorUser(String cdpNodeStatusMonitorUser) {
-        this.cdpNodeStatusMonitorUser = new Secret(cdpNodeStatusMonitorUser);
     }
 
     public String getCloudbreakAmbariPassword() {
@@ -552,11 +540,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
     @Override
     public Secret getCloudbreakClusterManagerMonitoringPasswordSecret() {
         return cloudbreakClusterManagerMonitoringPassword;
-    }
-
-    @Override
-    public Secret getCdpNodeStatusMonitorUserSecret() {
-        return cdpNodeStatusMonitorUser;
     }
 
     @Override

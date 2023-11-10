@@ -19,7 +19,6 @@ base:
     - proxy.proxy
     - telemetry.init
     - databus
-    - nodestatus
 {%- if salt['file.file_exists']('/srv/pillar/cloudera-manager/csd.sls') %}
     - cloudera-manager.csd
 {%- endif %}

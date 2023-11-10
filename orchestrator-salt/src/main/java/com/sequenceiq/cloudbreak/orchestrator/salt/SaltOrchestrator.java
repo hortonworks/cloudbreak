@@ -1222,20 +1222,6 @@ public class SaltOrchestrator implements HostOrchestrator {
         return result;
     }
 
-    @Override
-    public void applyDiagnosticsState(List<GatewayConfig> gatewayConfigs, String state, Map<String, Object> properties,
-            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorFailedException {
-        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(gatewayConfigs);
-        Target<String> gatewayHost = new HostList(Set.of(primaryGateway.getHostname()));
-        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            Map<String, Object> inlinePillars = Collections.singletonMap("filecollector", properties);
-            saltStateService.applyState(sc, state, gatewayHost, inlinePillars);
-        } catch (Exception e) {
-            LOGGER.info("Error occurred during the salt bootstrap", e);
-            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
-        }
-    }
-
     private Long calculateRecipeExecutionTimeout() {
         return SLEEP_TIME_IN_SEC * (maxRetryRecipe - 2L);
     }
