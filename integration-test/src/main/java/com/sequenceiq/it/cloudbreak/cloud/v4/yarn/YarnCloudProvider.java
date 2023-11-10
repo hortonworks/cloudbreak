@@ -37,6 +37,7 @@ import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXRootVolumeTestDto;
@@ -235,6 +236,13 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
+        return imageSettings.withImageId(yarnProperties.getBaseimage().getImageId())
+                .withOs(getOsType().getOs())
+                .withImageCatalog(commonCloudProperties().getImageCatalogName());
+    }
+
+    @Override
+    public DistroXImageTestDto imageSettings(DistroXImageTestDto imageSettings) {
         return imageSettings.withImageId(yarnProperties.getBaseimage().getImageId())
                 .withOs(getOsType().getOs())
                 .withImageCatalog(commonCloudProperties().getImageCatalogName());

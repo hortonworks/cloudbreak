@@ -46,6 +46,11 @@ public class DistroXImageTestDto extends AbstractCloudbreakTestDto<DistroXImageV
         return this;
     }
 
+    public DistroXImageTestDto withOs(String os) {
+        getRequest().setOs(os);
+        return this;
+    }
+
     @Override
     public String getResourceNameType() {
         return DISTROXIMAGE_RESOURCE_NAME;

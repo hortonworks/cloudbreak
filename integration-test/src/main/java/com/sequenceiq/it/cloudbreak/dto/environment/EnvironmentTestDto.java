@@ -144,6 +144,16 @@ public class EnvironmentTestDto
         return this;
     }
 
+    public EnvironmentTestDto withFreeIpaOs(String os) {
+        if (!Strings.isNullOrEmpty(os)) {
+            FreeIpaImageRequest imageRequest = new FreeIpaImageRequest();
+            imageRequest.setOs(os);
+            withCreateFreeIpa(true);
+            getRequest().getFreeIpa().setImage(imageRequest);
+        }
+        return this;
+    }
+
     public EnvironmentTestDto withMarketplaceFreeIpaImage() {
         FreeIpaImageRequest imageRequest = new FreeIpaImageRequest();
         imageRequest.setCatalog(getMarketplaceFreeIpaCatalogUrl());

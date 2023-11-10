@@ -36,6 +36,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXClouderaManagerProductTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXClouderaManagerTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -113,7 +114,8 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
         //Use a pre-prepared security group what allows inbound connections from ycloud
         testContext
                 .given(EnvironmentTestDto.class)
-                    .withDefaultSecurityGroup(hybridCloudSecurityGroupID);
+                    .withDefaultSecurityGroup(hybridCloudSecurityGroupID)
+                    .withFreeIpaOs(yarnCloudProvider.getOsType().getOs());
         createEnvironmentWithFreeIpa(testContext);
 
         testContext
@@ -209,6 +211,7 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
         String clouderaManager = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
         String cluster = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
         String cmProduct = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
+        String imageSettings = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
         fetchCdhDetails(testContext);
 
         testContext
@@ -222,9 +225,11 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
                     .withBlueprintName(commonClusterManagerProperties().getInternalDistroXBlueprintName())
                     .withValidateBlueprint(Boolean.FALSE)
                     .withClouderaManager(clouderaManager)
+                .given(imageSettings, DistroXImageTestDto.class, CHILD_CLOUD_PLATFORM)
                 .given(CHILD_DISTROX_KEY, DistroXTestDto.class, CHILD_CLOUD_PLATFORM)
                     .withEnvironmentKey(CHILD_ENVIRONMENT_KEY)
                     .withCluster(cluster)
+                    .withImageSettings(imageSettings)
                 .when(distroXTestClient.create(), key(CHILD_DISTROX_KEY))
                 .await(STACK_AVAILABLE, key(CHILD_DISTROX_KEY))
                 .awaitForHealthyInstances()
