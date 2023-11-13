@@ -1,13 +1,10 @@
 package com.sequenceiq.it.cloudbreak.dto;
 
-import static com.sequenceiq.common.model.OsType.CENTOS7;
-
 import java.util.UUID;
 
 import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 
@@ -22,10 +19,7 @@ public class ImageSettingsTestDto extends AbstractCloudbreakTestDto<ImageSetting
 
     @Override
     public ImageSettingsTestDto valid() {
-        return getCloudProvider()
-                .imageSettings(withName(getResourcePropertyProvider().getName(getCloudPlatform())))
-                //TODO disable RHEL8 because of provisionining issues
-                .withOs(getCloudPlatform().equals(CloudPlatform.AZURE) ? CENTOS7.getOs() : null);
+        return getCloudProvider().imageSettings(withName(getResourcePropertyProvider().getName(getCloudPlatform())));
     }
 
     public ImageSettingsTestDto withImageCatalog(String imageCatalog) {

@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.dto.freeipa;
 
-import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
@@ -118,8 +117,6 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
                 .withAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
                 .withFreeIpa("ipatest.local", "ipaserver", "admin1234", "admins")
                 .withCatalog(getCloudProvider().getFreeIpaImageCatalogUrl())
-                //TODO disable RHEL8 because of provisionining issues
-                .withOsType(getCloudPlatform().equals(CloudPlatform.AZURE) ? CENTOS7.getOs() : null)
                 .withTunnel(getTestContext().getTunnel())
                 .withVariant();
     }
