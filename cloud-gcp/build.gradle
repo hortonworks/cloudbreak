@@ -25,22 +25,22 @@ dependencies {
     implementation group: 'org.apache.commons',            name: 'commons-lang3',                              version: apacheCommonsLangVersion
     implementation group: 'commons-io',                    name: 'commons-io',                                 version: apacheCommonsIoVersion
     implementation group: 'commons-codec',                 name: 'commons-codec',                              version: commonsCodecVersion
-    implementation (group: 'com.google.apis',              name: 'google-api-services-compute',                version: 'v1-rev20230606-2.0.0') {
+    implementation (group: 'com.google.apis',              name: 'google-api-services-compute',                version: 'v1-rev20231031-2.0.0') {
         exclude group: 'com.google.api-client', module:'google-api-client'
     }
-    implementation (group: 'com.google.apis',               name: 'google-api-services-iam',                   version: 'v1-rev20230518-2.0.0') {
+    implementation (group: 'com.google.apis',               name: 'google-api-services-iam',                   version: 'v1-rev20231026-2.0.0') {
         exclude group: 'com.google.api-client', module:'google-api-client'
     }
-    implementation (group: 'com.google.apis',               name: 'google-api-services-storage',               version: 'v1-rev20230617-2.0.0'){
+    implementation (group: 'com.google.apis',               name: 'google-api-services-storage',               version: 'v1-rev20231028-2.0.0'){
         exclude group: 'com.google.api-client', module:'google-api-client'
     }
     implementation (group: 'com.google.apis',               name: 'google-api-services-dns',                   version: 'v2-rev20220505-1.32.1'){
         exclude group: 'com.google.api-client', module:'google-api-client'
     }
-    implementation (group: 'com.google.apis',               name: 'google-api-services-cloudkms',              version: 'v1-rev20230407-2.0.0'){
+    implementation (group: 'com.google.apis',               name: 'google-api-services-cloudkms',              version: 'v1-rev20231012-2.0.0'){
         exclude group: 'com.google.api-client', module:'google-api-client'
     }
-    implementation (group: 'com.google.apis',               name: 'google-api-services-sqladmin',              version: 'v1-rev20230607-2.0.0'){
+    implementation (group: 'com.google.apis',               name: 'google-api-services-sqladmin',              version: 'v1-rev20231029-2.0.0'){
         exclude group: 'com.google.api-client', module:'google-api-client'
     }
     implementation (group: 'com.google.auth',               name: 'google-auth-library-oauth2-http',           version: '1.19.0') {
