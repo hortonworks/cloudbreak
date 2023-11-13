@@ -377,6 +377,11 @@
       "Type" : "AWS::EC2::LaunchTemplate",
       "Properties" : {
         "LaunchTemplateData": {
+          <#if imdsv2Supported>
+          "MetadataOptions": {
+            "HttpTokens": "required"
+          },
+          </#if>
           <#if group.ebsOptimized == true>
           "EbsOptimized" : "true",
           </#if>

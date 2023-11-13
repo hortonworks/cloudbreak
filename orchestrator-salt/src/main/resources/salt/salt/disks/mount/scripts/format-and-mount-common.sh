@@ -205,9 +205,10 @@ get_mounted_instance_storage_count() {
     OSDEVICE=$(lsblk -o NAME -n | grep -v '[[:digit:]]' | sed "s/^sd/xvd/g")
     # THIS IS BASE DEVICE MAPPING FOR AWS - THE URL WILL NOT CHANGE; THIS IS FOR CHECKING IF AN ATTACHED DEVICE IS AN EPHEMERAL DEVICE
     BDMURL="http://169.254.169.254/latest/meta-data/block-device-mapping/"
-    df -h | grep -E "$(for bd in $(curl -s ${BDMURL});
+    IMDS_TOKEN=`curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"`
+    df -h | grep -E "$(for bd in $(curl -s -H "X-aws-ec2-metadata-token: $IMDS_TOKEN" ${BDMURL});
                         do
-                          MAPDEVICE=$(curl -s ${BDMURL}/${bd}/ | sed "s/^sd/xvd/g");
+                          MAPDEVICE=$(curl -s -H "X-aws-ec2-metadata-token: $IMDS_TOKEN" ${BDMURL}/${bd}/ | sed "s/^sd/xvd/g");
                           if grep -wq ${MAPDEVICE} <<< "${OSDEVICE}"; then
                             echo "${MAPDEVICE}"
                           fi

@@ -96,6 +96,7 @@ public class CloudFormationTemplateBuilder {
         model.put("loadBalancers", Optional.ofNullable(context.getLoadBalancers()).orElse(Collections.emptyList()));
         model.put("enableEfs", context.isEnableEfs());
         model.put("efsFileSystem", context.getEfsFileSystem());
+        model.put("imdsv2Supported", context.isImdsv2Supported());
 
         try {
             String template = freeMarkerTemplateUtils.processTemplateIntoString(new Template("aws-template", context.getTemplate(), freemarkerConfiguration),

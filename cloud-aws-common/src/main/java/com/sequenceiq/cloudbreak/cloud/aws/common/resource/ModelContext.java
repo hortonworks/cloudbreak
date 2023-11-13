@@ -51,6 +51,8 @@ public class ModelContext {
 
     private AwsEfsFileSystem efsFileSystem;
 
+    private boolean imdsv2Supported;
+
     public AuthenticatedContext getAc() {
         return ac;
     }
@@ -125,6 +127,10 @@ public class ModelContext {
 
     public AwsEfsFileSystem getEfsFileSystem() {
         return efsFileSystem;
+    }
+
+    public boolean isImdsv2Supported() {
+        return imdsv2Supported;
     }
 
     public ModelContext withAuthenticatedContext(AuthenticatedContext ac) {
@@ -219,6 +225,11 @@ public class ModelContext {
 
     public ModelContext withEfsFileSystem(AwsEfsFileSystem efsFileSystem) {
         this.efsFileSystem = efsFileSystem;
+        return this;
+    }
+
+    public ModelContext withImdsv2Supported(boolean imdsv2Supported) {
+        this.imdsv2Supported = imdsv2Supported;
         return this;
     }
 }

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,6 +20,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -27,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsImdsService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
@@ -36,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsStackNameCommonUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.SecurityGroupBuilderUtil;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -55,6 +59,7 @@ import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
+import software.amazon.awssdk.services.ec2.model.HttpTokensState;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceState;
 import software.amazon.awssdk.services.ec2.model.Reservation;
@@ -114,6 +119,16 @@ class AwsNativeInstanceResourceBuilderTest {
     @Mock
     private AwsStackNameCommonUtil awsStackNameCommonUtil;
 
+    @Mock
+    private AwsImdsService awsImdsService;
+
+    @BeforeEach
+    void setup() {
+        CloudContext cloudContext = mock(CloudContext.class);
+        lenient().when(ac.getCloudContext()).thenReturn(cloudContext);
+        lenient().when(cloudContext.getAccountId()).thenReturn("account");
+    }
+
     @Test
     void testBuildWhenBuildableResorucesAreEmpty() {
         long privateId = 0;
@@ -148,12 +163,14 @@ class AwsNativeInstanceResourceBuilderTest {
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
         when(securityGroupBuilderUtil.getSecurityGroupIds(awsContext, group)).thenReturn(List.of("sg-id"));
         when(awsStackNameCommonUtil.getInstanceName(ac, "groupName", privateId)).thenReturn("stackname");
+        when(awsImdsService.isImdsV2Supported(any(), any())).thenReturn(true);
 
         ArgumentCaptor<RunInstancesRequest> runInstancesRequestArgumentCaptor = ArgumentCaptor.forClass(RunInstancesRequest.class);
         List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
         verify(amazonEc2Client).createInstance(runInstancesRequestArgumentCaptor.capture());
         RunInstancesRequest runInstancesRequest = runInstancesRequestArgumentCaptor.getValue();
         assertEquals(actual.get(0).getInstanceId(), INSTANCE_ID);
+        assertEquals(runInstancesRequest.metadataOptions().httpTokens(), HttpTokensState.REQUIRED);
         assertEquals("sg-id", runInstancesRequest.securityGroupIds().get(0));
         assertThat(runInstancesRequest.tagSpecifications().get(0)).matches(ts -> ts.tags().stream()
                 .anyMatch(t -> "Name".equals(t.key()) && "stackname".equals(t.value())));

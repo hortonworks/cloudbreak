@@ -44,7 +44,9 @@
 {% set support_bundle_dbus_access_key_type = salt['pillar.get']('filecollector:supportBundleDbusAccessKeyType', 'Ed25519') %}
 
 {% if s3_location and not s3_region %}
-  {%- set instanceDetails = salt.cmd.run('curl -s http://169.254.169.254/latest/dynamic/instance-identity/document') | load_json %}
+  {%- set imds_token = salt.cmd.run('curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"') %}
+  {%- set imds_command = 'curl -s -H "X-aws-ec2-metadata-token: ' + imds_token + '" http://169.254.169.254/latest/dynamic/instance-identity/document' %}
+  {%- set instanceDetails = salt.cmd.run(imds_command) | load_json %}
   {%- set s3_region = instanceDetails['region'] %}
 {% endif %}
 

@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsImdsService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
@@ -54,8 +55,10 @@ import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 import software.amazon.awssdk.services.ec2.model.Filter;
+import software.amazon.awssdk.services.ec2.model.HttpTokensState;
 import software.amazon.awssdk.services.ec2.model.IamInstanceProfileSpecification;
 import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceMetadataOptionsRequest;
 import software.amazon.awssdk.services.ec2.model.InstanceState;
 import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
@@ -91,6 +94,9 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
     @Inject
     private SecurityGroupBuilderUtil securityGroupBuilderUtil;
+
+    @Inject
+    private AwsImdsService awsImdsService;
 
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -134,7 +140,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
             tags.putIfAbsent("instanceGroup", group.getName());
             TagSpecification tagSpecification = awsTaggingService.prepareEc2TagSpecification(tags,
                     software.amazon.awssdk.services.ec2.model.ResourceType.INSTANCE);
-            RunInstancesRequest request = RunInstancesRequest.builder()
+            RunInstancesRequest.Builder builder = RunInstancesRequest.builder()
                     .instanceType(instanceTemplate.getFlavor())
                     .imageId(cloudStack.getImage().getImageName())
                     .subnetId(cloudInstance.getSubnetId())
@@ -146,8 +152,13 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                     .minCount(1)
                     .maxCount(1)
                     .blockDeviceMappings(blocks(group, cloudStack, ac))
-                    .keyName(cloudStack.getInstanceAuthentication().getPublicKeyId())
-                    .build();
+                    .keyName(cloudStack.getInstanceAuthentication().getPublicKeyId());
+            if (awsImdsService.isImdsV2Supported(cloudStack, ac.getCloudContext().getAccountId())) {
+                builder.metadataOptions(InstanceMetadataOptionsRequest.builder()
+                        .httpTokens(HttpTokensState.REQUIRED)
+                        .build());
+            }
+            RunInstancesRequest request = builder.build();
             RunInstancesResponse instanceResponse = amazonEc2Client.createInstance(request);
             instance = instanceResponse.instances().get(0);
 

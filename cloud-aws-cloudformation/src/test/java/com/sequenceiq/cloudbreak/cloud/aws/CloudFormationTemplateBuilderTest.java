@@ -1515,6 +1515,29 @@ public class CloudFormationTemplateBuilderTest {
             .contains("\"ThroughputMode\": \"provisioned\"");
     }
 
+    @Test
+    public void testBuildWhenImdsV2Supported() {
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+                .withTemplate(awsCloudFormationTemplate)
+                .withImdsv2Supported(true);
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+        //THEN
+        Assertions.assertThat(templateString)
+                .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
+                .contains("\"HttpTokens\": \"required\"");
+    }
+
     private AwsEfsFileSystem setupEfsFileSystemNullFields() {
         return new AwsEfsFileSystem(null, true, null, null, null, null,
             null, null, null);

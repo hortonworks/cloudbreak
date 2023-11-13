@@ -65,6 +65,7 @@ auth:
       certificate.auth.enable: true
     aws:
       native.variant.migration.enable: false
+      imdsv2.enforced: true
     gcp:
     cm.ha.enable: false
     conclusion.checker.send.user.event.enable: true

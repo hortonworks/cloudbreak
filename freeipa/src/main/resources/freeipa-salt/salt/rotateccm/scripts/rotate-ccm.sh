@@ -63,7 +63,7 @@ main() {
   IS_FREEIPA=true
   INSTANCE_ID=
   if [[ "$CLOUD_PLATFORM" == "AWS" ]]; then
-    INSTANCE_ID="`wget -q -O - http://169.254.169.254/latest/meta-data/instance-id`"
+    INSTANCE_ID="$(TOKEN=`curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` && curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)"
   elif [[ "$CLOUD_PLATFORM" == "AZURE" ]]; then
     INSTANCE_ID="`wget -q -O - --header="Metadata: true" 'http://169.254.169.254/metadata/instance/compute/name?api-version=2017-08-01&format=text'`"
   elif [[ "$CLOUD_PLATFORM" == "GCP" ]]; then

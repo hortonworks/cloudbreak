@@ -51,6 +51,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DISABLE_ENTERPRISE_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENFORCE_AWS_IMDSV2;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_PRIVILEGED_USER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPRESS_ONBOARDING;
@@ -542,6 +543,10 @@ public class EntitlementService {
 
     public boolean isExpressOnboardingEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_EXPRESS_ONBOARDING);
+    }
+
+    public boolean isAwsImdsV2Enforced(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_ENFORCE_AWS_IMDSV2);
     }
 
     public List<String> getEntitlements(String accountId) {

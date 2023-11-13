@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsImdsService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.efs.AwsEfsFileSystem;
@@ -33,6 +34,9 @@ public class AwsModelService {
     @Inject
     private AwsNetworkService awsNetworkService;
 
+    @Inject
+    private AwsImdsService awsImdsService;
+
     public ModelContext buildDefaultModelContext(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier) {
         Network network = stack.getNetwork();
         AwsNetworkView awsNetworkView = new AwsNetworkView(network);
@@ -48,21 +52,22 @@ public class AwsModelService {
         String subnet = isNoCIDRProvided(existingVPC, existingSubnet, cidr) ? awsNetworkService.findNonOverLappingCIDR(ac, stack) : cidr;
         AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
         ModelContext modelContext = new ModelContext()
-            .withAuthenticatedContext(ac)
-            .withStack(stack)
-            .withExistingVpc(existingVPC)
-            .withExistingIGW(awsNetworkView.isExistingIGW())
-            .withExistingSubnetCidr(existingSubnet ? awsNetworkService.getExistingSubnetCidr(ac, stack) : null)
-            .withExistinVpcCidr(awsNetworkService.getVpcCidrs(ac, awsNetworkView))
-            .withExistingSubnetIds(existingSubnet ? awsNetworkView.getSubnetList() : null)
-            .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-            .withEnableInstanceProfile(awsInstanceProfileView.isInstanceProfileAvailable())
-            .withInstanceProfileAvailable(awsInstanceProfileView.isInstanceProfileAvailable())
-            .withTemplate(stack.getTemplate())
-            .withDefaultSubnet(subnet)
-            .withOutboundInternetTraffic(network.getOutboundInternetTraffic())
-            .withVpcCidrs(network.getNetworkCidrs())
-            .withPrefixListIds(awsNetworkService.getPrefixListIds(amazonEC2Client, regionName, network.getOutboundInternetTraffic()));
+                .withAuthenticatedContext(ac)
+                .withStack(stack)
+                .withExistingVpc(existingVPC)
+                .withExistingIGW(awsNetworkView.isExistingIGW())
+                .withExistingSubnetCidr(existingSubnet ? awsNetworkService.getExistingSubnetCidr(ac, stack) : null)
+                .withExistinVpcCidr(awsNetworkService.getVpcCidrs(ac, awsNetworkView))
+                .withExistingSubnetIds(existingSubnet ? awsNetworkView.getSubnetList() : null)
+                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
+                .withEnableInstanceProfile(awsInstanceProfileView.isInstanceProfileAvailable())
+                .withInstanceProfileAvailable(awsInstanceProfileView.isInstanceProfileAvailable())
+                .withTemplate(stack.getTemplate())
+                .withDefaultSubnet(subnet)
+                .withOutboundInternetTraffic(network.getOutboundInternetTraffic())
+                .withVpcCidrs(network.getNetworkCidrs())
+                .withPrefixListIds(awsNetworkService.getPrefixListIds(amazonEC2Client, regionName, network.getOutboundInternetTraffic()))
+                .withImdsv2Supported(awsImdsService.isImdsV2Supported(stack, ac.getCloudContext().getAccountId()));
 
         AwsEfsFileSystem efsFileSystem = getAwsEfsFileSystem(stack);
 
