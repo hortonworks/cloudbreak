@@ -1,3 +1,6 @@
+
+{%- if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int == 7 %}
+
 dhcp-enter-hook:
   file.managed:
     - name: /etc/dhcp/dhclient-enter-hooks
@@ -40,5 +43,7 @@ restart-nm:
         - file: dhcp-enter-hook
         - file: nm-nodns-config
         - cmd: run-set-peerdns
+
+{% endif %}
 
 {% endif %}
