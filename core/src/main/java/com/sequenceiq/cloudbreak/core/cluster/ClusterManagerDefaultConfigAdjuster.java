@@ -27,9 +27,9 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @Component
-public class ClusterManagerMemoryAdjuster {
+public class ClusterManagerDefaultConfigAdjuster {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterManagerMemoryAdjuster.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterManagerDefaultConfigAdjuster.class);
 
     private static final double MAX_CM_MEMORY_USAGE_FACTOR = 0.25;
 
@@ -40,6 +40,8 @@ public class ClusterManagerMemoryAdjuster {
     private static final int ONE_HUNDRED = 100;
 
     private static final int MIN_CM_MEMORY_NODE_COUNT = ONE_HUNDRED;
+
+    private static final int MIN_OPERATION_TIMEOUT_CHANGE_NODE_COUNT = 2 * ONE_HUNDRED;
 
     private static final int MAX_CM_MEMORY_NODE_COUNT = 800;
 
@@ -55,36 +57,45 @@ public class ClusterManagerMemoryAdjuster {
     @Inject
     private CloudbreakEventService cloudbreakEventService;
 
-    public void adjustMemory(StackDto stackDto, int nodeCount) {
+    public void adjustDefaultConfig(StackDto stackDto, int nodeCount) {
         if (!StackType.WORKLOAD.equals(stackDto.getType())) {
-            LOGGER.info("Memory adjustment is skipped. It is only supported for data hub clusters.");
+            LOGGER.info("CM adjustment is skipped. It is only supported for data hub clusters.");
             return;
         }
         try {
             GatewayConfig gateway = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
-            Memory currentMemory = getClusterManagerMemory(gateway);
-            Memory requiredMemory = calcRequiredClusterManagerMemory(nodeCount);
-            if (requiredMemory.getValueInBytes() > currentMemory.getValueInBytes()) {
-                Memory availableMemory = getAvailableMemory(gateway);
-                Memory maxAllowedMemory = Memory.ofGigaBytes((int) (availableMemory.getValueInGigaBytes() * MAX_CM_MEMORY_USAGE_FACTOR));
-                if (requiredMemory.getValueInBytes() > maxAllowedMemory.getValueInBytes()) {
-                    sendWarningToUser(stackDto, requiredMemory, availableMemory);
-                    requiredMemory = maxAllowedMemory;
-                }
-
-                if (requiredMemory.getValueInBytes() > currentMemory.getValueInBytes()) {
-                    LOGGER.info("Updating cluster manager memory. Current value: {}, Target value: {}, Available memory: {}",
-                            currentMemory, requiredMemory, availableMemory);
-                    updateClusterManagerConfig(gateway, requiredMemory);
-                    restartClusterManager(gateway, stackDto);
-                    witForClusterManagerToBecomeAvailable(stackDto);
-                }
-            } else {
-                LOGGER.info("Cluster manager's configured memory {}GB is enough for {} nodes.", currentMemory, nodeCount);
+            boolean operationTimeoutChanged = setClusterManagerOperationTimeout(nodeCount, gateway);
+            boolean memorySettingsChanged = setMemory(stackDto, nodeCount, gateway);
+            if (operationTimeoutChanged || memorySettingsChanged) {
+                restartClusterManager(gateway, stackDto);
+                witForClusterManagerToBecomeAvailable(stackDto);
             }
         } catch (Exception e) {
             LOGGER.error("Error happened while tried to configure cluster manager memory.", e);
         }
+    }
+
+    private boolean setMemory(StackDto stackDto, int nodeCount, GatewayConfig gateway) throws CloudbreakOrchestratorFailedException {
+        Memory currentMemory = getClusterManagerMemory(gateway);
+        Memory requiredMemory = calcRequiredClusterManagerMemory(nodeCount);
+        if (requiredMemory.getValueInBytes() > currentMemory.getValueInBytes()) {
+            Memory availableMemory = getAvailableMemory(gateway);
+            Memory maxAllowedMemory = Memory.ofGigaBytes((int) (availableMemory.getValueInGigaBytes() * MAX_CM_MEMORY_USAGE_FACTOR));
+            if (requiredMemory.getValueInBytes() > maxAllowedMemory.getValueInBytes()) {
+                sendWarningToUser(stackDto, requiredMemory, availableMemory);
+                requiredMemory = maxAllowedMemory;
+            }
+
+            if (requiredMemory.getValueInBytes() > currentMemory.getValueInBytes()) {
+                LOGGER.info("Updating cluster manager memory. Current value: {}, Target value: {}, Available memory: {}",
+                        currentMemory, requiredMemory, availableMemory);
+                updateClusterManagerMemoryConfig(gateway, requiredMemory);
+                return true;
+            }
+        } else {
+            LOGGER.info("Cluster manager's configured memory {}GB is enough for {} nodes.", currentMemory, nodeCount);
+        }
+        return false;
     }
 
     private Memory getClusterManagerMemory(GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException {
@@ -103,8 +114,16 @@ public class ClusterManagerMemoryAdjuster {
                 ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackDto.getId(), stackDto.getCluster().getId()));
     }
 
-    private void updateClusterManagerConfig(GatewayConfig gatewayConfig, Memory requiredMemory) throws CloudbreakOrchestratorFailedException {
+    private void updateClusterManagerMemoryConfig(GatewayConfig gatewayConfig, Memory requiredMemory) throws CloudbreakOrchestratorFailedException {
         hostOrchestrator.setClusterManagerMemory(gatewayConfig, requiredMemory);
+    }
+
+    private boolean setClusterManagerOperationTimeout(int nodeCount, GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException {
+        if (nodeCount > MIN_OPERATION_TIMEOUT_CHANGE_NODE_COUNT) {
+            return hostOrchestrator.setClouderaManagerOperationTimeout(gatewayConfig);
+        } else {
+            return false;
+        }
     }
 
     private Memory getAvailableMemory(GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException {

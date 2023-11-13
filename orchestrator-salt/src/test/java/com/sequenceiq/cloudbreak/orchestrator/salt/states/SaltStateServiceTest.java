@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.states;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.LOCAL;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.LOCAL_ASYNC;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.RUNNER;
+import static com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService.CMF_JAVA_OPTS_REGEX;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
@@ -10,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,6 +34,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -685,6 +688,24 @@ class SaltStateServiceTest {
         assertNotNull(memoryInfo);
         assertTrue(memoryInfo.isPresent());
         assertEquals(Memory.of(1, "kb"), memoryInfo.get().getTotalMemory());
+    }
+
+    @Test
+    void testCmfJavaOptsRegex() {
+        Pattern pattern = Pattern.compile(CMF_JAVA_OPTS_REGEX);
+
+        String originalCmfJavaOptsWithoutTimeout = "export CMF_JAVA_OPTS=\"-Xmx8G -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp " +
+                "-Dcom.sun.management.jmxremote.ssl.enabled.protocols=TLSv1.2\"";
+        if (!pattern.matcher(originalCmfJavaOptsWithoutTimeout).matches()) {
+            fail("Regex should match");
+        }
+
+        String cmfJavaOptsWithTimeout = "export CMF_JAVA_OPTS=\"-Xmx8G -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp " +
+                "-Dcom.sun.management.jmxremote.ssl.enabled.protocols=TLSv1.2 " +
+                "-Dcom.cloudera.cmf.service.AbstractCommandHandler.WORKAROUND_TIMEOUT_INTERVAL=600\"";
+        if (pattern.matcher(cmfJavaOptsWithTimeout).matches()) {
+            fail("Regex should not match");
+        }
     }
 
     void testGetClouderaManagerMemoryWhenConfigIs(String cmConfig, Optional<Memory> expectedMemory) {

@@ -589,6 +589,16 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
+    @Override
+    public boolean setClouderaManagerOperationTimeout(GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
+            return saltStateService.setClouderaManagerOperationTimeout(sc, gatewayConfig);
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during setting cluster manager memory", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
     private void saveCustomPillars(SaltConfig saltConfig, ExitCriteriaModel exitModel, Set<String> gatewayTargetIpAddresses,
             SaltConnector sc) throws Exception {
 

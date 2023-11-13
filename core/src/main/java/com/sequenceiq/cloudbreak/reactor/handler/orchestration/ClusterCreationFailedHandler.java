@@ -62,7 +62,7 @@ public class ClusterCreationFailedHandler extends ExceptionCatcherEventHandler<C
 
         if (detailedStackStatuses.contains(DetailedStackStatus.STARTING_CLUSTER_SERVICES)) {
             return ConclusionCheckerType.DEFAULT;
-        } else if (detailedStackStatuses.contains(DetailedStackStatus.COLLECTING_HOST_METADATA)) {
+        } else if (detailedStackStatuses.contains(DetailedStackStatus.VALIDATING_CLOUD_STORAGE_ON_VM)) {
             return ConclusionCheckerType.CLUSTER_PROVISION_AFTER_SALT_BOOTSTRAP;
         } else {
             return ConclusionCheckerType.CLUSTER_PROVISION_BEFORE_SALT_BOOTSTRAP;

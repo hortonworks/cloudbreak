@@ -60,7 +60,8 @@ class ClusterCreationFailedHandlerTest {
     @Test
     public void testHandleClusterCreationFailedRequestAfterSaltBootstrap() {
         when(stackStatusService.findAllStackStatusesById(STACK_ID)).thenReturn(
-                List.of(createStackStatus(DetailedStackStatus.REGISTERING_TO_CLUSTER_PROXY), createStackStatus(DetailedStackStatus.COLLECTING_HOST_METADATA)));
+                List.of(createStackStatus(DetailedStackStatus.REGISTERING_TO_CLUSTER_PROXY),
+                        createStackStatus(DetailedStackStatus.VALIDATING_CLOUD_STORAGE_ON_VM)));
         ClusterCreationFailedRequest request = new ClusterCreationFailedRequest(STACK_ID);
         HandlerEvent<ClusterCreationFailedRequest> handlerEvent = new HandlerEvent<>(Event.wrap(request));
 

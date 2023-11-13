@@ -180,6 +180,8 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void removeSecurityConfigFromCMAgentsConfig(GatewayConfig gatewayConfig, Set<String> target)
             throws CloudbreakOrchestratorFailedException;
 
+    boolean setClouderaManagerOperationTimeout(GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException;
+
     void executeSaltState(GatewayConfig gatewayConfig, Set<String> target, List<String> states, ExitCriteriaModel exitCriteriaModel,
             Optional<Integer> maxRetry, Optional<Integer> maxRetryOnError) throws CloudbreakOrchestratorFailedException;
 
