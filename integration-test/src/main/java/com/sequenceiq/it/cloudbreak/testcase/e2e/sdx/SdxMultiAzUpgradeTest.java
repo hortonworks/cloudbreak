@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -74,13 +73,10 @@ public class SdxMultiAzUpgradeTest extends PreconditionSdxE2ETest {
         testContext
                 .given(ImageCatalogTestDto.class)
                 .when(imageCatalogTestClient.getV4(true))
-                // We need this logic until 7.2.18 is not in production catalog
                 .then((testContext1, entity, cloudbreakClient) -> {
                     List<ImageV4Response> sortedImages = entity.getResponse().getImages().getCdhImages().stream()
-                            .filter(im -> im.getVersion().equals(commonClusterManagerProperties.getMinimumRuntimeVersionForEdl()))
-                            .filter(im -> im.getImageSetsByProvider().containsKey(testContext.getCloudPlatform().name().toLowerCase(Locale.ROOT)))
-                            .sorted(Comparator.comparing(ImageV4Response::getCreated))
-                            .collect(Collectors.toList());
+                            .filter(im -> im.getVersion().equals("7.2.17") && im.getImageSetsByProvider().containsKey("azure"))
+                            .sorted(Comparator.comparing(ImageV4Response::getCreated)).toList();
                     cdhImages.addAll(sortedImages);
                     return entity;
                 })
@@ -94,10 +90,7 @@ public class SdxMultiAzUpgradeTest extends PreconditionSdxE2ETest {
                     .given(sdx, SdxTestDto.class)
                     .withCloudStorage()
                     .withClusterShape(SdxClusterShape.ENTERPRISE)
-                    // Because of an emergency fix a newer 7.2.17 was burnet then the latest one.
-                    // We need to remove this once we have a new image in production
-                    // The failed testcase used 5ff64ba3-4e76-4b85-8a89-86a5df9c8445 (emergency release) -> 17475332-e6fb-4bbf-9ad3-598c821ed963
-                    .withImageId("93b37158-275f-45a9-8dd9-b9d089c7bb4e")
+                    .withImageId(cdhImages.get(0).getUuid())
                     .withRuntimeVersion(null)
                     .withEnableMultiAz(true)
                     .when(sdxTestClient.createWithImageId(), key(sdx))
@@ -109,8 +102,7 @@ public class SdxMultiAzUpgradeTest extends PreconditionSdxE2ETest {
                         expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instances));
                         return testDto;
                     })
-                    .withUpgradeRequestByImageId(cdhImages.get(cdhImages.size() - 1).getUuid())
-                    .when(sdxTestClient.upgrade(), key(sdx))
+                    .when(sdxTestClient.osUpgrade(cdhImages.get(cdhImages.size() - 1).getUuid()), key(sdx))
                     .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                     .awaitForHealthyInstances()
                     .then((tc, testDto, client) -> {
