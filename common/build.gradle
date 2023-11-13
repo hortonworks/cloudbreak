@@ -52,8 +52,8 @@ dependencies {
   api group: 'org.glassfish.jersey.ext',                    name: 'jersey-proxy-client',            version: jerseyCoreVersion
   api group: 'org.glassfish.jersey.connectors',             name: 'jersey-apache-connector',        version: jerseyCoreVersion
   implementation group: 'org.glassfish.jersey.media',       name: 'jersey-media-multipart',         version: jerseyCoreVersion
-  implementation group: 'org.bouncycastle',                 name: 'bcprov-jdk15on',                 version: bouncycastleVersion
-  implementation group: 'org.bouncycastle',                 name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
+  implementation group: 'org.bouncycastle',                 name: 'bcprov-jdk18on',                 version: bouncycastleVersion
+  implementation group: 'org.bouncycastle',                 name: 'bcpkix-jdk18on',                 version: bouncycastleVersion
 
   api group: 'org.springframework.boot',                    name: 'spring-boot-autoconfigure',      version: springBootVersion
   api group: 'org.springframework.boot',                    name: 'spring-boot-starter-logging',    version: springBootVersion
