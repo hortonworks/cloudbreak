@@ -1,16 +1,11 @@
 package com.sequenceiq.freeipa.service.stack;
 
-import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
-
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -96,9 +91,9 @@ public class VerticalScalingValidatorService {
                     CdpResourceType.DEFAULT,
                     Maps.newHashMap());
             Optional<VmType> requestInstanceForVerticalScaling = getInstance(region, availabilityZone, requestedInstanceType, allVmTypes);
-            verticalScaleInstanceProvider.validInstanceTypeForVerticalScaling(
-                    getInstance(region, availabilityZone, currentInstanceType, allVmTypes), requestInstanceForVerticalScaling);
-            validateInstanceForMultiAz(stack, instanceGroupOptional.get(), requestInstanceForVerticalScaling.get());
+            boolean validateMultiAz = stack.isMultiAz() && multiAzCalculatorService.getAvailabilityZoneConnector(stack) != null;
+            verticalScaleInstanceProvider.validateInstanceTypeForVerticalScaling(getInstance(region, availabilityZone, currentInstanceType, allVmTypes),
+                    requestInstanceForVerticalScaling, validateMultiAz ? instanceGroupOptional.get().getAvailabilityZones() : null);
         } else {
             throw new BadRequestException(String.format("Define a group which exists in FreeIpa. It can be [%s].",
                     stack.getInstanceGroups()
@@ -123,35 +118,5 @@ public class VerticalScalingValidatorService {
     private boolean anyAttachedVolumePropertyDefinedInVerticalScalingRequest(VerticalScaleRequest verticalScaleV4Request) {
         return verticalScaleV4Request.getTemplate().getAttachedVolumes() != null
                 && !verticalScaleV4Request.getTemplate().getAttachedVolumes().isEmpty();
-    }
-
-    private void validateInstanceForMultiAz(Stack stack, InstanceGroup instanceGroup, VmType vmType) {
-        if (stack.isMultiAz()) {
-            if (multiAzCalculatorService.getAvailabilityZoneConnector(stack) != null) {
-                LOGGER.debug("MultiAz is enabled so validating vertical scaling request for MultiAz");
-                validateInstanceSupportsExistingZones(instanceGroup.getAvailabilityZones(), vmType.getMetaData().getAvailabilityZones(), vmType.value());
-            } else {
-                LOGGER.debug("Implementation for AvailabilityZoneConnector is not present for CloudPlatform {} and PlatformVariant {}",
-                        stack.getCloudPlatform(), stack.getPlatformvariant());
-            }
-        } else {
-            LOGGER.debug("MultiAz is not enabled so skipping validations for MultiAz");
-        }
-    }
-
-    private String convertCollectionToString(Collection<String> c) {
-        return CollectionUtils.isEmpty(c) ? "" : c.stream().sorted().collect(Collectors.joining(","));
-    }
-
-    private void validateInstanceSupportsExistingZones(Set<String> instanceGroupZones, List<String> availabilityZonesForVm, String instanceType) {
-        if (!emptyIfNull(availabilityZonesForVm).containsAll(emptyIfNull(instanceGroupZones))) {
-            String errorMsg = String.format("FreeIpa is MultiAz enabled but requested instance type is not supported in existing " +
-                            "Availability Zones for Instance Group. Supported Availability Zones for Instance type %s : %s. " +
-                            "Existing Availability Zones for " +
-                            "Instance Group : %s", instanceType, convertCollectionToString(availabilityZonesForVm),
-                    convertCollectionToString(instanceGroupZones));
-            LOGGER.error(errorMsg);
-            throw new BadRequestException(errorMsg);
-        }
     }
 }

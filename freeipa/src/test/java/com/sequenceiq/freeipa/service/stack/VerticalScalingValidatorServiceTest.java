@@ -5,7 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNotNull;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -96,6 +100,7 @@ public class VerticalScalingValidatorServiceTest {
         assertEquals("Vertical scaling is not supported on OPENSTACK cloud platform",
                 badRequestException.getMessage());
         verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
+        verify(verticalScaleInstanceProvider, never()).validateInstanceTypeForVerticalScaling(any(), any(), any());
     }
 
     @Test
@@ -113,6 +118,7 @@ public class VerticalScalingValidatorServiceTest {
         assertEquals("Define an exiting instancetype to vertically scale the AWS FreeIpa.",
                 badRequestException.getMessage());
         verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
+        verify(verticalScaleInstanceProvider, never()).validateInstanceTypeForVerticalScaling(any(), any(), any());
     }
 
     @Test
@@ -140,10 +146,11 @@ public class VerticalScalingValidatorServiceTest {
         assertEquals("Define a group which exists in FreeIpa. It can be [master2].",
                 badRequestException.getMessage());
         verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
+        verify(verticalScaleInstanceProvider, never()).validateInstanceTypeForVerticalScaling(any(), any(), any());
     }
 
     @Test
-    public void testRequestWhenWeAreRequestedSmallerMemoryInstancesShouldDropBadRequest() {
+    public void testRequestWhenTheValidationFailedShouldDropBadRequest() {
         ReflectionTestUtils.setField(underTest, "verticalScalingSupported", Set.of(AWS));
         String instanceGroupNameInStack = "master1";
         String instanceGroupNameInRequest = "master1";
@@ -180,7 +187,7 @@ public class VerticalScalingValidatorServiceTest {
         when(credentialToExtendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential);
         when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
         doThrow(new BadRequestException("The current instancetype m3.xlarge has more Memory then the requested m2.xlarge."))
-                .when(verticalScaleInstanceProvider).validInstanceTypeForVerticalScaling(any(), any());
+                .when(verticalScaleInstanceProvider).validateInstanceTypeForVerticalScaling(any(), any(), isNull());
 
         VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
         InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
@@ -198,180 +205,7 @@ public class VerticalScalingValidatorServiceTest {
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
         verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
         verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
-    }
-
-    @Test
-    public void testRequestWhenWeAreRequestedSmallerCpuInstancesShouldDropBadRequest() {
-        ReflectionTestUtils.setField(underTest, "verticalScalingSupported", Set.of(AWS));
-        String instanceGroupNameInStack = "master1";
-        String instanceGroupNameInRequest = "master1";
-        String instanceTypeNameInStack = "m3.xlarge";
-        String instanceTypeNameInRequest = "m2.xlarge";
-        Credential credential = credential();
-        ExtendedCloudCredential extendedCloudCredential = extendedCloudCredential();
-        CloudVmTypes cloudVmTypes = cloudVmTypes(
-                "eu1",
-                vmType(
-                        instanceTypeNameInStack,
-                        1,
-                        1,
-                        new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
-                        new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
-                ),
-                vmType(
-                        instanceTypeNameInRequest,
-                        1,
-                        0,
-                        new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
-                        new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
-                )
-        );
-
-        when(stack.getCloudPlatform()).thenReturn(AWS);
-        when(stack.getEnvironmentCrn()).thenReturn("crn");
-        when(stack.getRegion()).thenReturn("eu");
-        when(stack.isStopped()).thenReturn(true);
-        when(stack.getAvailabilityZone()).thenReturn("eu1");
-        when(stack.getPlatformvariant()).thenReturn("awsvariant");
-        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup(instanceGroupNameInStack, instanceTypeNameInStack)));
-        when(credentialService.getCredentialByEnvCrn(anyString())).thenReturn(credential);
-        when(credentialToExtendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential);
-        when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
-        doThrow(new BadRequestException("The current instancetype m3.xlarge has more CPU then the requested m2.xlarge."))
-                .when(verticalScaleInstanceProvider).validInstanceTypeForVerticalScaling(any(), any());
-
-        VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
-        InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
-        instanceTemplateRequest.setInstanceType(instanceTypeNameInRequest);
-        verticalScaleRequest.setTemplate(instanceTemplateRequest);
-        verticalScaleRequest.setGroup(instanceGroupNameInRequest);
-
-        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validateRequest(stack, verticalScaleRequest);
-        });
-
-        assertEquals("The current instancetype m3.xlarge has more CPU then the requested m2.xlarge.",
-                badRequestException.getMessage());
-        verify(credentialService, times(1)).getCredentialByEnvCrn(anyString());
-        verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
-        verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
-        verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
-    }
-
-    @Test
-    public void testRequestWhenWeAreRequestedInstanceWithLessEphemeralShouldDropBadRequest() {
-        ReflectionTestUtils.setField(underTest, "verticalScalingSupported", Set.of(AWS));
-        String instanceGroupNameInStack = "master1";
-        String instanceGroupNameInRequest = "master1";
-        String instanceTypeNameInStack = "m3.xlarge";
-        String instanceTypeNameInRequest = "m2.xlarge";
-        Credential credential = credential();
-        ExtendedCloudCredential extendedCloudCredential = extendedCloudCredential();
-        CloudVmTypes cloudVmTypes = cloudVmTypes(
-                "eu1",
-                vmType(
-                        instanceTypeNameInStack,
-                        1,
-                        1,
-                        new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
-                        new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
-                ),
-                vmType(
-                        instanceTypeNameInRequest,
-                        1,
-                        1,
-                        new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
-                        new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 0, 0, 0, 0)
-                )
-        );
-
-        when(stack.getCloudPlatform()).thenReturn(AWS);
-        when(stack.getEnvironmentCrn()).thenReturn("crn");
-        when(stack.getRegion()).thenReturn("eu");
-        when(stack.isStopped()).thenReturn(true);
-        when(stack.getAvailabilityZone()).thenReturn("eu1");
-        when(stack.getPlatformvariant()).thenReturn("awsvariant");
-        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup(instanceGroupNameInStack, instanceTypeNameInStack)));
-        when(credentialService.getCredentialByEnvCrn(anyString())).thenReturn(credential);
-        when(credentialToExtendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential);
-        when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
-        doThrow(new BadRequestException("The current instancetype m3.xlarge has more Ephemeral Disk then the requested m2.xlarge."))
-                .when(verticalScaleInstanceProvider).validInstanceTypeForVerticalScaling(any(), any());
-
-        VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
-        InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
-        instanceTemplateRequest.setInstanceType(instanceTypeNameInRequest);
-        verticalScaleRequest.setTemplate(instanceTemplateRequest);
-        verticalScaleRequest.setGroup(instanceGroupNameInRequest);
-
-        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validateRequest(stack, verticalScaleRequest);
-        });
-
-        assertEquals("The current instancetype m3.xlarge has more Ephemeral Disk then the requested m2.xlarge.",
-                badRequestException.getMessage());
-        verify(credentialService, times(1)).getCredentialByEnvCrn(anyString());
-        verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
-        verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
-        verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
-    }
-
-    @Test
-    public void testRequestWhenWeAreRequestedInstanceWithLessAutoAttachedShouldDropBadRequest() {
-        ReflectionTestUtils.setField(underTest, "verticalScalingSupported", Set.of(AWS));
-        String instanceGroupNameInStack = "master1";
-        String instanceGroupNameInRequest = "master1";
-        String instanceTypeNameInStack = "m3.xlarge";
-        String instanceTypeNameInRequest = "m2.xlarge";
-        Credential credential = credential();
-        ExtendedCloudCredential extendedCloudCredential = extendedCloudCredential();
-        CloudVmTypes cloudVmTypes = cloudVmTypes(
-                "eu1",
-                vmType(
-                        instanceTypeNameInStack,
-                        1,
-                        1,
-                        new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
-                        new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
-                ),
-                vmType(
-                        instanceTypeNameInRequest,
-                        1,
-                        1,
-                        new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 0, 0, 0, 0),
-                        new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
-                )
-        );
-
-        when(stack.getCloudPlatform()).thenReturn(AWS);
-        when(stack.getEnvironmentCrn()).thenReturn("crn");
-        when(stack.getRegion()).thenReturn("eu");
-        when(stack.isStopped()).thenReturn(true);
-        when(stack.getAvailabilityZone()).thenReturn("eu1");
-        when(stack.getPlatformvariant()).thenReturn("awsvariant");
-        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup(instanceGroupNameInStack, instanceTypeNameInStack)));
-        when(credentialService.getCredentialByEnvCrn(anyString())).thenReturn(credential);
-        when(credentialToExtendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential);
-        when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
-        doThrow(new BadRequestException("The current instancetype m3.xlarge has more Auto Attached Disk then the requested m2.xlarge."))
-                .when(verticalScaleInstanceProvider).validInstanceTypeForVerticalScaling(any(), any());
-
-        VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
-        InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
-        instanceTemplateRequest.setInstanceType(instanceTypeNameInRequest);
-        verticalScaleRequest.setTemplate(instanceTemplateRequest);
-        verticalScaleRequest.setGroup(instanceGroupNameInRequest);
-
-        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validateRequest(stack, verticalScaleRequest);
-        });
-
-        assertEquals("The current instancetype m3.xlarge has more Auto Attached Disk then the requested m2.xlarge.",
-                badRequestException.getMessage());
-        verify(credentialService, times(1)).getCredentialByEnvCrn(anyString());
-        verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
-        verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
-        verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
+        verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), isNull());
     }
 
     @Test
@@ -417,6 +251,7 @@ public class VerticalScalingValidatorServiceTest {
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
         verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
         verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
+        verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), isNull());
     }
 
     @Test
@@ -462,6 +297,7 @@ public class VerticalScalingValidatorServiceTest {
         verify(credentialService, times(1)).getCredentialByEnvCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
         verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
+        verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), eq(Set.of("1", "2")));
     }
 
     @Test
@@ -501,18 +337,24 @@ public class VerticalScalingValidatorServiceTest {
         instanceTemplateRequest.setInstanceType(instanceTypeNameInRequest);
         verticalScaleRequest.setTemplate(instanceTemplateRequest);
         verticalScaleRequest.setGroup(instanceGroupNameInRequest);
+        doThrow(new BadRequestException("Stack is MultiAz enabled but requested instance type is not supported in existing " +
+                "Availability Zones for Instance Group. Supported Availability Zones for Instance type Standard_D16d_v4 : 1,2." +
+                "Existing Availability Zones for Instance Group : 1,2,3"))
+                .when(verticalScaleInstanceProvider).validateInstanceTypeForVerticalScaling(any(), any(), isNotNull());
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
             underTest.validateRequest(stack, verticalScaleRequest);
         });
 
-        assertEquals("FreeIpa is MultiAz enabled but requested instance type is not supported in existing Availability Zones for Instance Group. " +
-                        "Supported Availability Zones for Instance type Standard_D16d_v4 : 1,2. Existing Availability Zones for Instance Group : 1,2,3",
+        assertEquals("Stack is MultiAz enabled but requested instance type is not supported in existing " +
+                        "Availability Zones for Instance Group. Supported Availability Zones for Instance type Standard_D16d_v4 : 1,2." +
+                        "Existing Availability Zones for Instance Group : 1,2,3",
                 badRequestException.getMessage());
 
         verify(credentialService, times(1)).getCredentialByEnvCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
         verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
+        verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), eq(Set.of("1", "2", "3")));
     }
 
     @Test

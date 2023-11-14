@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.metering;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -79,9 +78,8 @@ class MeteringInstanceCheckerServiceTest {
         prepareStackMocks(stack, instanceGroup, "large");
         when(hostOrchestrator.getGrainOnAllHosts(any(), anyString())).thenReturn(Map.of("host1", saltResponse, "host2", saltResponse));
 
-        Set<String> mismatchingInstanceIds = underTest.checkInstanceTypes(stack);
+        underTest.checkInstanceTypes(stack);
 
-        assertThat(mismatchingInstanceIds).isEmpty();
         verify(gatewayConfigService, times(1)).getPrimaryGatewayConfig(eq(stack));
         verify(hostOrchestrator, times(1)).getGrainOnAllHosts(any(), anyString());
         verify(instanceGroup, times(1)).getTemplate();
@@ -98,16 +96,15 @@ class MeteringInstanceCheckerServiceTest {
         prepareStackMocks(stack, instanceGroup, "medium");
         when(hostOrchestrator.getGrainOnAllHosts(any(), anyString())).thenReturn(Map.of("host1", saltResponse, "host2", saltResponse));
 
-        Set<String> mismatchingInstanceIds = underTest.checkInstanceTypes(stack);
+        underTest.checkInstanceTypes(stack);
 
-        assertThat(mismatchingInstanceIds).hasSize(2);
-        assertThat(mismatchingInstanceIds).containsExactly("instanceId1", "instanceId2");
         verify(gatewayConfigService, times(1)).getPrimaryGatewayConfig(eq(stack));
         verify(hostOrchestrator, times(1)).getGrainOnAllHosts(any(), anyString());
         verify(instanceGroup, times(1)).getTemplate();
         verifyNoInteractions(cloudContextProvider, credentialClientService, cloudPlatformConnectors);
         verify(mismatchedInstanceHandlerService, times(1)).handleMismatchingInstanceTypes(eq(stack),
-                eq(Set.of(new MismatchingInstanceGroup("master", "medium", Map.of("instanceId1", "large", "instanceId2", "large")))));
+                eq(Set.of(new MismatchingInstanceGroup("master", "medium",
+                        Map.of("instanceId1", "large", "instanceId2", "large")))));
     }
 
     @Test
@@ -120,9 +117,8 @@ class MeteringInstanceCheckerServiceTest {
         JsonNode saltResponse = JsonUtil.readTree(DISABLED_SALT_RESPONSE);
         when(hostOrchestrator.getGrainOnAllHosts(any(), anyString())).thenReturn(Map.of("host1", saltResponse, "host2", saltResponse));
 
-        Set<String> mismatchingInstanceIds = underTest.checkInstanceTypes(stack);
+        underTest.checkInstanceTypes(stack);
 
-        assertThat(mismatchingInstanceIds).isEmpty();
         verify(gatewayConfigService, times(1)).getPrimaryGatewayConfig(eq(stack));
         verify(hostOrchestrator, times(1)).getGrainOnAllHosts(any(), anyString());
         verify(cloudContextProvider, times(1)).getCloudContext(eq(stack));
@@ -142,9 +138,8 @@ class MeteringInstanceCheckerServiceTest {
         prepeareProviderMocks(stack, metadataCollector);
         when(hostOrchestrator.getGrainOnAllHosts(any(), anyString())).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
 
-        Set<String> mismatchingInstanceIds = underTest.checkInstanceTypes(stack);
+        underTest.checkInstanceTypes(stack);
 
-        assertThat(mismatchingInstanceIds).isEmpty();
         verify(gatewayConfigService, times(1)).getPrimaryGatewayConfig(eq(stack));
         verify(hostOrchestrator, times(1)).getGrainOnAllHosts(any(), anyString());
         verify(cloudContextProvider, times(1)).getCloudContext(eq(stack));

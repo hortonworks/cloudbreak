@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.service.verticalscale;
 
 import static com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.RESOURCE_DISK_ATTACHED;
+import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -12,6 +15,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
@@ -29,6 +33,11 @@ public class VerticalScaleInstanceProvider {
     private MinimalHardwareFilter minimalHardwareFilter;
 
     public CloudVmTypes listInstanceTypes(String availabilityZone, String currentInstanceType, CloudVmTypes allVmTypes) {
+        return listInstanceTypes(availabilityZone, currentInstanceType, allVmTypes, null);
+    }
+
+    public CloudVmTypes listInstanceTypes(String availabilityZone, String currentInstanceType, CloudVmTypes allVmTypes,
+            Set<String> instanceGroupAvailabilityZones) {
         Map<String, Set<VmType>> cloudVmResponses = allVmTypes.getCloudVmResponses();
         LOGGER.debug("cloudVmResponses: {}", cloudVmResponses);
         if (cloudVmResponses.isEmpty()) {
@@ -48,12 +57,11 @@ public class VerticalScaleInstanceProvider {
         LOGGER.debug("currentInstance: {}", currentInstance);
         Set<VmType> suitableInstances = vmTypes
                 .stream()
-                .filter(e -> {
+                .filter(availableVmType -> {
                     try {
-                        validInstanceTypeForVerticalScaling(currentInstance, Optional.of(e));
+                        validateInstanceType(currentInstance, Optional.of(availableVmType), instanceGroupAvailabilityZones);
                         return true;
                     } catch (BadRequestException ex) {
-                        LOGGER.debug("Validation error: {}", ex.getMessage());
                         return false;
                     }
                 })
@@ -70,7 +78,18 @@ public class VerticalScaleInstanceProvider {
         );
     }
 
-    public void validInstanceTypeForVerticalScaling(Optional<VmType> currentInstanceTypeOptional, Optional<VmType> requestedInstanceTypeOptional) {
+    public void validateInstanceTypeForVerticalScaling(Optional<VmType> currentInstanceTypeOptional, Optional<VmType> requestedInstanceTypeOptional,
+            Set<String> instanceGroupAvailabilityZones) {
+        try {
+            validateInstanceType(currentInstanceTypeOptional, requestedInstanceTypeOptional, instanceGroupAvailabilityZones);
+        } catch (Exception e) {
+            LOGGER.warn("Vertical scale validation error: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    private void validateInstanceType(Optional<VmType> currentInstanceTypeOptional, Optional<VmType> requestedInstanceTypeOptional,
+            Set<String> instanceGroupAvailabilityZones) {
         if (currentInstanceTypeOptional.isEmpty()) {
             throw new BadRequestException("The current instancetype does not exist on provider side.");
         }
@@ -90,6 +109,11 @@ public class VerticalScaleInstanceProvider {
             validateAutoAttached(currentInstanceTypeName, requestedInstanceTypeName,
                     currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
             validateResourceDisk(currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
+
+            if (instanceGroupAvailabilityZones != null) {
+                validateInstanceSupportsExistingZones(instanceGroupAvailabilityZones, requestedInstanceTypeMetaData.getAvailabilityZones(),
+                        requestedInstanceTypeName);
+            }
         } else {
             throw new BadRequestException("The requested instancetype does not exist on provider side.");
         }
@@ -176,10 +200,24 @@ public class VerticalScaleInstanceProvider {
                 .findFirst();
     }
 
-    private String getAvailabilityZone(String availabilityZone, Map<String, Set<VmType>> cloudVmResponses) {
+    public String getAvailabilityZone(String availabilityZone, Map<String, Set<VmType>> cloudVmResponses) {
         availabilityZone = availabilityZone == null || availabilityZone.isEmpty() || availabilityZone.isBlank() ?
                 cloudVmResponses.keySet().stream().findFirst().get() : availabilityZone;
         return availabilityZone;
+    }
+
+    private void validateInstanceSupportsExistingZones(Set<String> instanceGroupZones, List<String> requestedAvailabilityZonesForVm, String instanceType) {
+        if (!emptyIfNull(requestedAvailabilityZonesForVm).containsAll(emptyIfNull(instanceGroupZones))) {
+            String errorMsg = String.format("Stack is MultiAz enabled but requested instance type is not supported in existing " +
+                            "Availability Zones for Instance Group. Supported Availability Zones for Instance type %s : %s. " +
+                            "Existing Availability Zones for Instance Group : %s",
+                    instanceType, convertCollectionToString(requestedAvailabilityZonesForVm), convertCollectionToString(instanceGroupZones));
+            throw new BadRequestException(errorMsg);
+        }
+    }
+
+    private String convertCollectionToString(Collection<String> collection) {
+        return CollectionUtils.isEmpty(collection) ? "" : collection.stream().sorted().collect(Collectors.joining(","));
     }
 
 }

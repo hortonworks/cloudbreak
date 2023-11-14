@@ -4,11 +4,13 @@ package com.sequenceiq.cloudbreak.service.verticalscale;
 import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmTypeWithMeta;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -57,21 +59,21 @@ public class VerticalScaleInstanceProviderTest {
                         1,
                         new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
                         new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
-                );
+        );
         Optional<VmType> requested = vmTypeOptional(
                         instanceTypeNameInRequest,
                         0,
                         1,
                         new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
                         new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
-                );
+        );
 
         when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(true);
         when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any())).thenReturn(false);
         when(minimalHardwareFilter.minMemory()).thenReturn(16);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validInstanceTypeForVerticalScaling(current, requested);
+            underTest.validateInstanceTypeForVerticalScaling(current, requested, null);
         });
 
         assertEquals("The requested instancetype m2.xlarge has less Memory than the minimum 16 GB.",
@@ -88,20 +90,20 @@ public class VerticalScaleInstanceProviderTest {
                         1,
                         new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
                         new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
-                );
+        );
         Optional<VmType> requested = vmTypeOptional(
                         instanceTypeNameInRequest,
                         1,
                         0,
                         new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
                         new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
-                );
+        );
 
         when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(false);
         when(minimalHardwareFilter.minCpu()).thenReturn(4);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validInstanceTypeForVerticalScaling(current, requested);
+            underTest.validateInstanceTypeForVerticalScaling(current, requested, null);
         });
 
         assertEquals("The requested instancetype m2.xlarge has less Cpu than the minimum 4 core.",
@@ -118,20 +120,20 @@ public class VerticalScaleInstanceProviderTest {
                         1,
                         new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
                         new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
-                );
+        );
         Optional<VmType> requested = vmTypeOptional(
                         instanceTypeNameInRequest,
                         1,
                         1,
                         new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
                         new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 0, 0, 0, 0)
-                );
+        );
 
         when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(true);
         when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any())).thenReturn(true);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validInstanceTypeForVerticalScaling(current, requested);
+            underTest.validateInstanceTypeForVerticalScaling(current, requested, null);
         });
 
         assertEquals("The current instancetype m3.xlarge has more Ephemeral Disk than the requested m2.xlarge.",
@@ -148,20 +150,20 @@ public class VerticalScaleInstanceProviderTest {
                         1,
                         new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
                         new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
-                );
+        );
         Optional<VmType> requested = vmTypeOptional(
                         instanceTypeNameInRequest,
                         1,
                         1,
                         new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 0, 0, 0, 0),
                         new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
-                );
+        );
 
         when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(true);
         when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any())).thenReturn(true);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validInstanceTypeForVerticalScaling(current, requested);
+            underTest.validateInstanceTypeForVerticalScaling(current, requested, null);
         });
 
         assertEquals("The current instancetype m3.xlarge has more Auto Attached Disk than the requested m2.xlarge.",
@@ -178,7 +180,8 @@ public class VerticalScaleInstanceProviderTest {
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
                 new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
-                false
+                false,
+                List.of()
         );
         Optional<VmType> requested = vmTypeOptional(
                 instanceTypeNameInRequest,
@@ -186,19 +189,84 @@ public class VerticalScaleInstanceProviderTest {
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
                 new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
-                true
+                true,
+                List.of()
         );
 
         when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(true);
         when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any())).thenReturn(true);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validInstanceTypeForVerticalScaling(current, requested);
+            underTest.validateInstanceTypeForVerticalScaling(current, requested, null);
         });
 
         assertEquals("Unable to resize since changing from resource disk to non-resource disk VM size and " +
                         "vice-versa is not allowed. Please refer to https://aka.ms/AAah4sj for more details.",
                 badRequestException.getMessage());
+    }
+
+    @Test
+    public void testRequestWhenRequestedMultiAzInstanceWithWrongAvailabilityZones() {
+        String instanceTypeNameInStack = "Standard_D6S_v5";
+        String instanceTypeNameInRequest = "Standard_D64_v5";
+        Optional<VmType> current = vmTypeOptional(
+                instanceTypeNameInStack,
+                1,
+                1,
+                new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
+                true,
+                List.of("2", "3")
+        );
+        Optional<VmType> requested = vmTypeOptional(
+                instanceTypeNameInRequest,
+                1,
+                1,
+                new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
+                true,
+                List.of("1", "2")
+        );
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any())).thenReturn(true);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
+            underTest.validateInstanceTypeForVerticalScaling(current, requested, Set.of("2", "3"));
+        });
+
+        assertEquals("Stack is MultiAz enabled but requested instance type is not supported in existing " +
+                        "Availability Zones for Instance Group. Supported Availability Zones for Instance type Standard_D64_v5 : 1,2. " +
+                        "Existing Availability Zones for Instance Group : 2,3", badRequestException.getMessage());
+    }
+
+    @Test
+    public void testRequestWhenRequestedInstanceIsValid() {
+        String instanceTypeNameInStack = "Standard_D6S_v5";
+        String instanceTypeNameInRequest = "Standard_D64_v5";
+        Optional<VmType> current = vmTypeOptional(
+                instanceTypeNameInStack,
+                1,
+                1,
+                new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
+                true,
+                List.of("1", "2")
+        );
+        Optional<VmType> requested = vmTypeOptional(
+                instanceTypeNameInRequest,
+                1,
+                1,
+                new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
+                true,
+                List.of("1", "2")
+        );
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any())).thenReturn(true);
+
+        assertDoesNotThrow(() -> underTest.validateInstanceTypeForVerticalScaling(current, requested, Set.of("1", "2")));
     }
 
     @Test
@@ -222,7 +290,8 @@ public class VerticalScaleInstanceProviderTest {
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
                 new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
-                false
+                false,
+                List.of()
         );
 
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
@@ -263,7 +332,8 @@ public class VerticalScaleInstanceProviderTest {
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
                 new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
-                false
+                false,
+                List.of()
         );
 
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
@@ -284,7 +354,8 @@ public class VerticalScaleInstanceProviderTest {
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
                 new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
-                false
+                false,
+                List.of()
         );
 
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
@@ -305,7 +376,8 @@ public class VerticalScaleInstanceProviderTest {
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
                 new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
-                false
+                false,
+                List.of()
         );
 
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
@@ -329,7 +401,8 @@ public class VerticalScaleInstanceProviderTest {
                 1,
                 new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
                 new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
-                false
+                false,
+                List.of()
         );
 
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
@@ -344,21 +417,23 @@ public class VerticalScaleInstanceProviderTest {
     }
 
     private Optional<VmType> vmTypeOptional(String name, int memory, int cpu, VolumeParameterConfig autoAttached,
-        VolumeParameterConfig ephemeral, boolean resourceDisk) {
-        return Optional.of(vmType(name, memory, cpu, autoAttached, ephemeral, resourceDisk));
+            VolumeParameterConfig ephemeral, boolean resourceDisk, List<String> availabilityZones) {
+        return Optional.of(vmType(name, memory, cpu, autoAttached, ephemeral, resourceDisk, availabilityZones));
     }
 
     private Optional<VmType> vmTypeOptional(String name, int memory, int cpu, VolumeParameterConfig autoAttached, VolumeParameterConfig ephemeral) {
-        return Optional.of(vmType(name, memory, cpu, autoAttached, ephemeral, false));
+        return Optional.of(vmType(name, memory, cpu, autoAttached, ephemeral, false, List.of()));
     }
 
-    private VmType vmType(String name, int memory, int cpu, VolumeParameterConfig autoAttached, VolumeParameterConfig ephemeral, boolean resourceDisk) {
+    private VmType vmType(String name, int memory, int cpu, VolumeParameterConfig autoAttached, VolumeParameterConfig ephemeral, boolean resourceDisk,
+            List<String> availabilityZones) {
         return vmTypeWithMeta(name,
                 VmTypeMeta.VmTypeMetaBuilder.builder()
                         .withAutoAttachedConfig(autoAttached)
                         .withCpuAndMemory(cpu, memory)
                         .withEphemeralConfig(ephemeral)
                         .withResourceDiskAttached(resourceDisk)
+                        .withAvailabilityZones(availabilityZones)
                         .create(),
                 false);
     }

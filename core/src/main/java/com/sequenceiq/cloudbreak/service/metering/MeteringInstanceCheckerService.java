@@ -63,16 +63,16 @@ public class MeteringInstanceCheckerService {
     @Inject
     private MismatchedInstanceHandlerService mismatchedInstanceHandlerService;
 
-    public Set<String> checkInstanceTypes(StackDto stack) {
+    public void checkInstanceTypes(StackDto stack) {
         try {
-            return checkInstanceTypesWithFallback(stack);
+            checkInstanceTypesWithFallback(stack);
         } catch (Exception e) {
             LOGGER.warn("Checking instance types with salt failed. Fallback and check instance types on provider.", e);
-            return checkInstanceTypesOnProvider(stack);
+            checkInstanceTypesOnProvider(stack);
         }
     }
 
-    private Set<String> checkInstanceTypesWithFallback(StackDto stack) throws CloudbreakOrchestratorFailedException {
+    private void checkInstanceTypesWithFallback(StackDto stack) throws CloudbreakOrchestratorFailedException {
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         Map<String, JsonNode> responseByHost = hostOrchestrator.getGrainOnAllHosts(gatewayConfig, META_DATA);
         Map<String, String> instanceTypesByHost = responseByHost.entrySet().stream()
@@ -85,18 +85,18 @@ public class MeteringInstanceCheckerService {
             Map<String, String> instanceTypesByInstanceId = instanceTypesByHost.entrySet().stream()
                     .filter(instanceTypeEntry -> instanceIdsByHost.containsKey(instanceTypeEntry.getKey()))
                     .collect(Collectors.toMap(instanceTypeEntry -> instanceIdsByHost.get(instanceTypeEntry.getKey()), Map.Entry::getValue));
-            return compareInstanceTypes(stack, instanceTypesByInstanceId, SALT);
+            compareInstanceTypes(stack, instanceTypesByInstanceId, SALT);
         } else {
             LOGGER.warn("Checking instance types with salt failed returned empty results. Fallback and check instance types on provider.");
-            return checkInstanceTypesOnProvider(stack);
+            checkInstanceTypesOnProvider(stack);
         }
     }
 
-    private Set<String> checkInstanceTypesOnProvider(StackDto stack) {
+    private void checkInstanceTypesOnProvider(StackDto stack) {
         Collection<InstanceMetadataView> instanceMetaDataList = stack.getAllAvailableInstances();
         if (instanceMetaDataList.isEmpty()) {
             LOGGER.debug("No available instance found.");
-            return Set.of();
+            return;
         }
         List<String> instanceIds = instanceMetaDataList.stream().map(InstanceMetadataView::getInstanceId).toList();
         CloudContext cloudContext = cloudContextProvider.getCloudContext(stack);
@@ -104,37 +104,38 @@ public class MeteringInstanceCheckerService {
         CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
         InstanceTypeMetadata instanceTypeMetadata = connector.metadata().collectInstanceTypes(ac, instanceIds);
-        return compareInstanceTypes(stack, instanceTypeMetadata.getInstanceTypes(), PROVIDER);
+        compareInstanceTypes(stack, instanceTypeMetadata.getInstanceTypes(), PROVIDER);
     }
 
-    private Set<String> compareInstanceTypes(StackDto stack, Map<String, String> instanceTypes, String source) {
+    private void compareInstanceTypes(StackDto stack, Map<String, String> instanceTypes, String source) {
         Set<MismatchingInstanceGroup> mismatchingInstanceGroups = collectMismatchingInstanceGroup(stack, instanceTypes, source);
         mismatchedInstanceHandlerService.handleMismatchingInstanceTypes(stack, mismatchingInstanceGroups);
-        return mismatchingInstanceGroups.stream()
-                .flatMap(mismatchingInstanceGroup -> mismatchingInstanceGroup.mismatchingInstanceTypes().keySet().stream())
-                .collect(Collectors.toSet());
     }
 
     private Set<MismatchingInstanceGroup> collectMismatchingInstanceGroup(StackDto stack, Map<String, String> instanceTypes, String source) {
         Set<MismatchingInstanceGroup> mismatchingInstanceGroups = new HashSet<>();
         for (InstanceGroupDto instanceGroup : stack.getInstanceGroupDtos()) {
-            String knownInstanceType = instanceGroup.getInstanceGroup().getTemplate().getInstanceType();
-            Map<String, String> mismatchingInstanceTypes = new HashMap<>();
+            String instanceTypeFromTemplate = instanceGroup.getInstanceGroup().getTemplate().getInstanceType();
+            Map<String, String> actualInstanceTypesInGroup = new HashMap<>();
+            boolean mismatchingInstanceType = false;
             for (InstanceMetadataView instanceMetadata : instanceGroup.getNotDeletedAndNotZombieInstanceMetaData()) {
                 String actualInstanceType = instanceTypes.get(instanceMetadata.getInstanceId());
                 if (!instanceTypes.containsKey(instanceMetadata.getInstanceId())) {
-                    LOGGER.warn("Missig actual instance type info for instance with instanceId: {}, fqdn: {}, knownInstanceType: {}, source: {}",
-                            instanceMetadata.getInstanceId(), instanceMetadata.getDiscoveryFQDN(), knownInstanceType, source);
-                } else if (knownInstanceType != null && !knownInstanceType.equals(actualInstanceType)) {
-                    LOGGER.warn("Instance type is different in our DB and on the cluster for instance with instanceId: {}, fqdn: {}, knownInstanceType: {}, " +
-                                    "actualInstanceType: {}, source: {}", instanceMetadata.getInstanceId(), instanceMetadata.getDiscoveryFQDN(),
-                            knownInstanceType, actualInstanceType, source);
-                    mismatchingInstanceTypes.put(instanceMetadata.getInstanceId(), actualInstanceType);
+                    LOGGER.warn("Missig actual instance type info for instance with instanceId: {}, fqdn: {}, instanceTypeFromTemplate: {}, source: {}",
+                            instanceMetadata.getInstanceId(), instanceMetadata.getDiscoveryFQDN(), instanceTypeFromTemplate, source);
+                } else if (instanceTypeFromTemplate != null && !instanceTypeFromTemplate.equals(actualInstanceType)) {
+                    LOGGER.warn("Instance type is different in our DB and on the cluster for instance with instanceId: {}, fqdn: {}, " +
+                                    "instanceTypeFromTemplate: {}, actualInstanceType: {}, source: {}",
+                            instanceMetadata.getInstanceId(), instanceMetadata.getDiscoveryFQDN(), instanceTypeFromTemplate, actualInstanceType, source);
+                    mismatchingInstanceType = true;
+                    actualInstanceTypesInGroup.put(instanceMetadata.getInstanceId(), actualInstanceType);
+                } else {
+                    actualInstanceTypesInGroup.put(instanceMetadata.getInstanceId(), actualInstanceType);
                 }
             }
-            if (!mismatchingInstanceTypes.isEmpty()) {
-                mismatchingInstanceGroups.add(new MismatchingInstanceGroup(instanceGroup.getInstanceGroup().getGroupName(), knownInstanceType,
-                        mismatchingInstanceTypes));
+            if (mismatchingInstanceType) {
+                mismatchingInstanceGroups.add(new MismatchingInstanceGroup(instanceGroup.getInstanceGroup().getGroupName(),
+                        instanceTypeFromTemplate, actualInstanceTypesInGroup));
             }
         }
         return mismatchingInstanceGroups;

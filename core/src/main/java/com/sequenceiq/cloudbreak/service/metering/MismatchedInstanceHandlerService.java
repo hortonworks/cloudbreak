@@ -1,24 +1,20 @@
 package com.sequenceiq.cloudbreak.service.metering;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
@@ -34,7 +30,6 @@ import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.converter.spi.CloudContextProvider;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
@@ -47,6 +42,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleReq
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleResult;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
+import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValidator;
+import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
 import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Service
@@ -78,6 +75,12 @@ public class MismatchedInstanceHandlerService {
     @Inject
     private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
 
+    @Inject
+    private VerticalScaleInstanceProvider verticalScaleInstanceProvider;
+
+    @Inject
+    private ProviderBasedMultiAzSetupValidator providerBasedMultiAzSetupValidator;
+
     @Qualifier("CommonMetricService")
     @Inject
     private MetricService metricService;
@@ -92,8 +95,7 @@ public class MismatchedInstanceHandlerService {
             ExtendedCloudCredential extendedCloudCredential = credentialClientService.getExtendedCloudCredential(stack.getEnvironmentCrn());
             CloudVmTypes vmTypes = cloudParameterService.getVmTypesV2(extendedCloudCredential, stack.getRegion(), stack.getCloudPlatform(),
                     CdpResourceType.DATAHUB, Map.of());
-            Set<VmType> availableVmTypes = getVmTypes(stack.getAvailabilityZone(), vmTypes);
-            handleMismatchingInstanceTypes(stack, mismatchingInstanceGroups, availableVmTypes);
+            handleMismatchingInstanceTypes(stack, mismatchingInstanceGroups, vmTypes);
         } catch (Exception e) {
             metricService.incrementMetricCounter(MetricType.METERING_CHANGE_INSTANCE_TYPE_FAILED);
             LOGGER.warn("Cannot handle mismatching instance types", e);
@@ -101,54 +103,45 @@ public class MismatchedInstanceHandlerService {
         }
     }
 
-    private void handleMismatchingInstanceTypes(StackDto stack, Set<MismatchingInstanceGroup> mismatchingInstanceGroups, Set<VmType> availableVmTypes) {
+    private void handleMismatchingInstanceTypes(StackDto stack, Set<MismatchingInstanceGroup> mismatchingInstanceGroups, CloudVmTypes availableVmTypes) {
         mismatchingInstanceGroups.forEach(mismatchingInstanceGroup -> {
-            String originalInstanceType = mismatchingInstanceGroup.originalInstanceType();
-            Set<String> mismatchingInstanceTypes = new HashSet<>(mismatchingInstanceGroup.mismatchingInstanceTypes().values());
-            VmType originalVmType = availableVmTypes.stream()
-                    .filter(vmType -> vmType.value().equals(originalInstanceType))
-                    .findFirst()
-                    .orElseThrow(NotFoundException.notFound("vmType", originalInstanceType));
+            Long instanceGroupId = stack.getInstanceGroupByInstanceGroupName(mismatchingInstanceGroup.instanceGroup()).getInstanceGroup().getId();
+            Set<String> groupAvailabilityZones = stack.getAvailabilityZonesByInstanceGroup(instanceGroupId);
+            String instanceTypeFromTemplate = mismatchingInstanceGroup.instanceTypeFromTemplate();
+            Set<String> actualInstanceTypes = new HashSet<>(mismatchingInstanceGroup.instanceTypesByInstanceId().values());
+            String availabilityZone = verticalScaleInstanceProvider.getAvailabilityZone(stack.getAvailabilityZone(), availableVmTypes.getCloudVmResponses());
+            boolean validateMultiAz = stack.getStack().isMultiAz() && providerBasedMultiAzSetupValidator.getAvailabilityZoneConnector(stack.getStack()) != null;
+            CloudVmTypes suitableVmTypes = verticalScaleInstanceProvider.listInstanceTypes(stack.getAvailabilityZone(),
+                    mismatchingInstanceGroup.instanceTypeFromTemplate(), availableVmTypes, validateMultiAz ? groupAvailabilityZones : null);
 
-            String largestInstanceType = calculateLargestInstanceType(availableVmTypes, Sets.union(Set.of(originalInstanceType), mismatchingInstanceTypes),
-                    originalVmType);
-            if (largestInstanceType != null && !largestInstanceType.equals(originalInstanceType)) {
-                changeDefaultInstanceType(stack, mismatchingInstanceGroup.instanceGroup(), largestInstanceType);
-                metricService.incrementMetricCounter(MetricType.METERING_CHANGE_INSTANCE_TYPE_SUCCESSFUL);
+            String largestSuitableInstanceType = calculateLargestSuitableInstanceType(suitableVmTypes.getCloudVmResponses().get(availabilityZone),
+                    actualInstanceTypes);
+            if (largestSuitableInstanceType == null) {
+                LOGGER.warn("Mismatching instance types found for group {}, but no suitable instance type found in {}, no further action needed!." +
+                                " (instance type from template: {})",
+                        mismatchingInstanceGroup.instanceGroup(), actualInstanceTypes, mismatchingInstanceGroup.instanceTypeFromTemplate());
+            } else if (largestSuitableInstanceType.equals(instanceTypeFromTemplate)) {
+                LOGGER.info("Mismatching instance types found for group {}, but the instance type from template {} is not smaller than {}, " +
+                                "no further action needed!",
+                        mismatchingInstanceGroup.instanceGroup(), mismatchingInstanceGroup.instanceTypeFromTemplate(), actualInstanceTypes);
             } else {
-                LOGGER.info("Mismatching instance types found for group {}, but the original instance type {} is larger than {}, no further action needed!",
-                        mismatchingInstanceGroup.instanceGroup(), mismatchingInstanceGroup.originalInstanceType(), mismatchingInstanceTypes);
+                changeInstanceTypeInTemplate(stack, mismatchingInstanceGroup.instanceGroup(), largestSuitableInstanceType);
+                metricService.incrementMetricCounter(MetricType.METERING_CHANGE_INSTANCE_TYPE_SUCCESSFUL);
             }
         });
     }
 
-    private Set<VmType> getVmTypes(String availabilityZone, CloudVmTypes vmTypes) {
-        Set<VmType> availableVmTypes = Collections.emptySet();
-        if (vmTypes.getCloudVmResponses() != null && StringUtils.isNotBlank(availabilityZone)
-                && vmTypes.getDefaultCloudVmResponses().containsKey(availabilityZone)) {
-            availableVmTypes = vmTypes.getCloudVmResponses().get(availabilityZone);
-        } else if (vmTypes.getCloudVmResponses() != null && !vmTypes.getCloudVmResponses().isEmpty()) {
-            availableVmTypes = vmTypes.getCloudVmResponses().values().iterator().next();
-        }
-        return availableVmTypes.stream()
-                .filter(Objects::nonNull)
-                .filter(VmType::isMetaSet)
-                .filter(vmType -> ObjectUtils.allNotNull(vmType.value(), vmType.getMetaData().getCPU(), vmType.getMetaData().getMemoryInGb()))
-                .collect(Collectors.toSet());
-    }
-
-    private String calculateLargestInstanceType(Set<VmType> availableVmTypes, Set<String> existingInstanceTypes, VmType originalVmType) {
-        return availableVmTypes.stream()
-                .filter(vmType -> existingInstanceTypes.contains(vmType.value()))
-                .filter(vmType -> filterVmTypeLargerThanOriginal(vmType, originalVmType))
+    private String calculateLargestSuitableInstanceType(Set<VmType> suitableVmTypes, Set<String> actualInstanceTypes) {
+        return suitableVmTypes.stream()
+                .filter(vmType -> actualInstanceTypes.contains(vmType.value()))
                 .sorted(new VmTypeComparator())
                 .map(StringType::value)
                 .findFirst()
                 .orElse(null);
     }
 
-    private void changeDefaultInstanceType(StackDto stack, String instanceGroup, String newInstanceType) {
-        LOGGER.info("Change default instance type for instance group: {}, new instance type: {}", instanceGroup, newInstanceType);
+    private void changeInstanceTypeInTemplate(StackDto stack, String instanceGroup, String newInstanceType) {
+        LOGGER.info("Change instance type in template for instance group: {}, new instance type: {}", instanceGroup, newInstanceType);
         CloudContext cloudContext = cloudContextProvider.getCloudContext(stack);
         CloudCredential cloudCredential = credentialClientService.getCloudCredential(stack.getEnvironmentCrn());
         CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
@@ -169,7 +162,7 @@ public class MismatchedInstanceHandlerService {
             throw new CloudConnectorException("Vertical scale without instances on provider failed", e);
         }
         coreVerticalScaleService.updateTemplateWithVerticalScaleInformation(stack.getId(), stackVerticalScaleV4Request);
-        LOGGER.info("Changing default instance type for instance group: {} to new instance type: {} finished", instanceGroup, newInstanceType);
+        LOGGER.info("Changing instance type in template for instance group: {} to new instance type: {} finished", instanceGroup, newInstanceType);
     }
 
     private StackVerticalScaleV4Request createStackVerticalScaleV4Request(StackDto stack, String instanceGroup, String newInstanceType) {
@@ -180,18 +173,6 @@ public class MismatchedInstanceHandlerService {
         instanceTemplateV4Request.setInstanceType(newInstanceType);
         stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
         return stackVerticalScaleV4Request;
-    }
-
-    private boolean filterVmTypeLargerThanOriginal(VmType vmType, VmType originalVmType) {
-        Integer vmTypeCPU = vmType.getMetaData().getCPU();
-        Float vmTypeMemory = vmType.getMetaData().getMemoryInGb();
-        Integer originalCPU = originalVmType.getMetaData().getCPU();
-        Float originalMemory = originalVmType.getMetaData().getMemoryInGb();
-        if (vmTypeCPU.equals(originalCPU) && vmTypeMemory.equals(originalMemory)) {
-            return false;
-        } else {
-            return vmTypeCPU >= originalCPU && vmTypeMemory >= originalMemory;
-        }
     }
 
     private class VmTypeComparator implements Comparator<VmType> {
@@ -205,7 +186,13 @@ public class MismatchedInstanceHandlerService {
             if (cpuComparsion == 0) {
                 Float memory1 = vmType1.getMetaData().getMemoryInGb();
                 Float memory2 = vmType2.getMetaData().getMemoryInGb();
-                return Float.compare(memory2, memory1);
+                int memoryComparsion = Float.compare(memory2, memory1);
+                if (memoryComparsion == 0) {
+                    String name1 = vmType1.value();
+                    String name2 = vmType2.value();
+                    return StringUtils.compare(name1, name2);
+                }
+                return memoryComparsion;
             }
             return cpuComparsion;
         }

@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConver
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
@@ -93,7 +94,7 @@ public class ProviderBasedMultiAzSetupValidator {
         }
     }
 
-    private AvailabilityZoneConnector getAvailabilityZoneConnector(Stack stack) {
+    public AvailabilityZoneConnector getAvailabilityZoneConnector(StackView stack) {
         LOGGER.debug("CloudPlatform is {} PlatformVariant is {}", stack.getCloudPlatform(), stack.getPlatformVariant());
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
                 Platform.platform(stack.getCloudPlatform()),
