@@ -22,9 +22,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.azure.resourcemanager.resources.fluentcore.arm.ResourceId;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneDescriptor;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureRegisteredPrivateDnsZoneService;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.ValidationTestUtil;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureExistingPrivateDnsZoneValidatorServiceTest {
@@ -35,6 +36,8 @@ public class AzureExistingPrivateDnsZoneValidatorServiceTest {
     private static final String VALID_PRIVATE_DNS_ZONE_ID = String.format(AZURE_RESOURCE_ID_TEMPLATE, "validPrivateDnsZoneId");
 
     private static final String INVALID_PRIVATE_DNS_ZONE_ID = "invalidPrivateDnsZoneId";
+
+    private static final String NONE_DNS_ZONE_ID = "NONE";
 
     @Mock
     private AzurePrivateDnsZoneValidatorService azurePrivateDnsZoneValidatorService;
@@ -47,7 +50,7 @@ public class AzureExistingPrivateDnsZoneValidatorServiceTest {
 
     @Test
     void testValidate() {
-        ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         ResourceId privateDnsZoneId = getPrivateDnsZoneResourceId();
         AzurePrivateDnsZoneDescriptor azurePrivateDnsZoneDescriptor = new AzurePrivateDnsZoneDescriptorTestImpl("privateDnsZoneService");
         Map<AzurePrivateDnsZoneDescriptor, String> serviceToPrivateDnsZoneId = Map.of(azurePrivateDnsZoneDescriptor, privateDnsZoneId.id());
@@ -64,7 +67,7 @@ public class AzureExistingPrivateDnsZoneValidatorServiceTest {
 
     @Test
     void testValidateWhenInvalidPrivateDnsZoneResourceId() {
-        ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         AzurePrivateDnsZoneDescriptor azurePrivateDnsZoneDescriptor = new AzurePrivateDnsZoneDescriptorTestImpl("privateDnsZoneService");
         Map<AzurePrivateDnsZoneDescriptor, String> serviceToPrivateDnsZoneId = Map.of(azurePrivateDnsZoneDescriptor, INVALID_PRIVATE_DNS_ZONE_ID);
 
@@ -78,8 +81,23 @@ public class AzureExistingPrivateDnsZoneValidatorServiceTest {
     }
 
     @Test
+    void testValidateWhenAKSPrivateDNSZoneIdIsNone() {
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        AzurePrivateDnsZoneDescriptor azurePrivateDnsZoneDescriptor = new AzurePrivateDnsZoneDescriptorTestImpl(
+                AzureRegisteredPrivateDnsZoneService.AKS.getResourceType());
+        Map<AzurePrivateDnsZoneDescriptor, String> serviceToPrivateDnsZoneId = Map.of(azurePrivateDnsZoneDescriptor, NONE_DNS_ZONE_ID);
+
+        resultBuilder = underTest.validate(azureClient, NETWORK_RESOURCE_GROUP_NAME, NETWORK_NAME, serviceToPrivateDnsZoneId, resultBuilder);
+
+        assertFalse(resultBuilder.build().hasError());
+        verify(azurePrivateDnsZoneValidatorService, never()).existingPrivateDnsZoneNameIsSupported(any(), any(), eq(resultBuilder));
+        verify(azurePrivateDnsZoneValidatorService, never()).privateDnsZoneExists(any(), any(), any());
+        verify(azurePrivateDnsZoneValidatorService, never()).privateDnsZoneConnectedToNetwork(any(), anyString(), anyString(), any(), any());
+    }
+
+    @Test
     void testValidateWhenValidAndInvalidPrivateDnsZoneResourceId() {
-        ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         AzurePrivateDnsZoneDescriptor azurePrivateDnsZoneDescriptorA = new AzurePrivateDnsZoneDescriptorTestImpl("privateDnsZoneServiceA");
         AzurePrivateDnsZoneDescriptor azurePrivateDnsZoneDescriptorB = new AzurePrivateDnsZoneDescriptorTestImpl("privateDnsZoneServiceB");
         Map<AzurePrivateDnsZoneDescriptor, String> serviceToPrivateDnsZoneId = Map.of(
