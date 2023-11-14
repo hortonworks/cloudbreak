@@ -141,7 +141,7 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest {
     private void rotateCcmV2JumpgateAgentAccessKey(TestContext testContext) {
         testContext
                 .given(FreeIpaRotationTestDto.class)
-                .withSecrets(List.of(CCMV2_JUMPGATE_AGENT_ACCESS_KEY))
+                .withSecrets(List.of(CCMV2_JUMPGATE_AGENT_ACCESS_KEY.value()))
                 .when(freeIpaTestClient.rotateSecret())
                 .awaitForFlow()
                 .given(FreeIpaHealthDetailsDto.class)

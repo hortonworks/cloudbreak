@@ -4,18 +4,8 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CB_CM_ADMIN_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_DB_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_SERVICE_DB_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_GATEWAY_CERT;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_IDBROKER_CERT;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_MGMT_CM_ADMIN_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_USER_KEYPAIR;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -43,6 +33,8 @@ import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
 
@@ -68,12 +60,11 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is an environment with SDX in available state",
-            when = "secrets are getting rotated",
-                and = "recovery called on the IDBROKER and MASTER host group, where the instance had been stopped",
-            then = "rotation then recovery should be successful, the cluster should be available"
+            given = "there is a running Cloudbreak, and an SDX cluster in available state",
+            when = "recovery called on the IDBROKER and MASTER host group, where the EC2 instance had been stopped",
+            then = "SDX recovery should be successful, the cluster should be up and running"
     )
-    public void testSecretRotationThenMultiRepairWithRecipeFile(TestContext testContext) {
+    public void testSDXMultiRepairIDBRokerAndMasterWithRecipeFile(TestContext testContext) {
         String sdxInternal = resourcePropertyProvider().getName();
         String cluster = resourcePropertyProvider().getName();
         String clouderaManager = resourcePropertyProvider().getName();
@@ -86,67 +77,57 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
         String idbrokerInstanceGroup = "idbroker";
         String telemetry = "telemetry";
 
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+        sdxDatabaseRequest.setCreate(false);
+
         String selectedImageID = getLatestPrewarmedImageId(testContext);
 
         testContext
                 .given(imageSettings, ImageSettingsTestDto.class)
-                    .withImageCatalog(commonCloudProperties().getImageCatalogName())
-                    .withImageId(selectedImageID)
+                .withImageCatalog(commonCloudProperties().getImageCatalogName())
+                .withImageId(selectedImageID)
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
-                    .withBlueprintName(getDefaultSDXBlueprintName())
-                    .withValidateBlueprint(Boolean.FALSE)
-                    .withClouderaManager(clouderaManager)
+                .withBlueprintName(getDefaultSDXBlueprintName())
+                .withValidateBlueprint(Boolean.FALSE)
+                .withClouderaManager(clouderaManager)
                 .given(RecipeTestDto.class)
-                    .withName(recipeName)
-                    .withContent(recipeUtil.generatePostCmStartRecipeContent(applicationContext))
-                    .withRecipeType(POST_CLOUDERA_MANAGER_START)
+                .withName(recipeName)
+                .withContent(recipeUtil.generatePostCmStartRecipeContent(applicationContext))
+                .withRecipeType(POST_CLOUDERA_MANAGER_START)
                 .when(recipeTestClient.createV4())
                 .given(masterInstanceGroup, InstanceGroupTestDto.class)
-                    .withHostGroup(MASTER)
-                    .withNodeCount(1)
-                    .withRecipes(recipeName)
+                .withHostGroup(MASTER)
+                .withNodeCount(1)
+                .withRecipes(recipeName)
                 .given(idbrokerInstanceGroup, InstanceGroupTestDto.class)
-                    .withHostGroup(IDBROKER)
-                    .withNodeCount(1)
-                    .withRecipes(recipeName)
+                .withHostGroup(IDBROKER)
+                .withNodeCount(1)
+                .withRecipes(recipeName)
                 .given(stack, StackTestDto.class)
-                    .withCluster(cluster)
-                    .withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
-                    .withImageSettings(imageSettings)
+                .withCluster(cluster)
+                .withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
+                .withImageSettings(imageSettings)
                 .given(telemetry, TelemetryTestDto.class)
-                    .withLogging()
-                    .withReportClusterLogs()
+                .withLogging()
+                .withReportClusterLogs()
                 .given(sdxInternal, SdxInternalTestDto.class)
-                    .withCloudStorage(getCloudStorageRequest(testContext))
-                    .withStackRequest(key(cluster), key(stack))
-                    .withTelemetry(telemetry)
+                .withCloudStorage(getCloudStorageRequest(testContext))
+                .withDatabase(sdxDatabaseRequest)
+                .withStackRequest(key(cluster), key(stack))
+                .withTelemetry(telemetry)
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .awaitForHealthyInstances()
-                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()),
-                        filePath, fileName, 1, sshJUtil))
+                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()), filePath, fileName, 1, sshJUtil))
                 .then((tc, dto, client) -> {
-                    if (!StringUtils.equalsIgnoreCase(dto.getResponse().getStackV4Response().getImage().getId(),
-                            selectedImageID)) {
-                        throw new TestFailException(
-                                String.format("The datalake image Id (%s) do NOT match with the selected" +
-                                                " pre-warmed image Id: '%s'!",
+                    if (!StringUtils.equalsIgnoreCase(dto.getResponse().getStackV4Response().getImage().getId(), selectedImageID)) {
+                        throw new TestFailException(String.format("The datalake image Id (%s) do NOT match with the selected pre-warmed image Id: '%s'!",
                                 dto.getResponse().getStackV4Response().getImage().getId(), selectedImageID));
                     }
                     return dto;
                 })
-                .when(sdxTestClient.rotateSecret(Set.of(
-                        DATALAKE_USER_KEYPAIR,
-                        DATALAKE_IDBROKER_CERT,
-                        DATALAKE_GATEWAY_CERT,
-                        DATALAKE_SALT_BOOT_SECRETS,
-                        DATALAKE_MGMT_CM_ADMIN_PASSWORD,
-                        DATALAKE_CB_CM_ADMIN_PASSWORD,
-                        DATALAKE_DATABASE_ROOT_PASSWORD,
-                        DATALAKE_CM_DB_PASSWORD,
-                        DATALAKE_CM_SERVICE_DB_PASSWORD)))
-                .awaitForFlow()
                 .then((tc, testDto, client) -> {
                     List<String> instanceIdsToStop = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                     instanceIdsToStop.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
@@ -158,8 +139,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdxInternal).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .awaitForHealthyInstances()
-                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()), filePath,
-                        fileName, 1, sshJUtil))
+                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()), filePath, fileName, 1, sshJUtil))
                 .validate();
     }
 }

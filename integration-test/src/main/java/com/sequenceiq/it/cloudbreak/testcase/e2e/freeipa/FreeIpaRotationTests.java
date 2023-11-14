@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.testng.ITestContext;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -20,6 +21,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -86,7 +88,7 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
                 })
 
                 .given(FreeIpaRotationTestDto.class)
-                .withSecrets(List.of(FREEIPA_ADMIN_PASSWORD))
+                .withSecrets(List.of(FREEIPA_ADMIN_PASSWORD.value()))
                 .when(freeIpaTestClient.rotateSecret())
                 .awaitForFlow()
 
@@ -114,6 +116,27 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
                     return testDto;
                 })
 
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "there is a running environment",
+            when = "freeipa salt boot secrets are rotation",
+            then = "rotation should be successful and clusters should be available")
+    public void testFreeIpaSaltBootSecretRotation(TestContext testContext, ITestContext iTestContext) {
+        String freeIpa = resourcePropertyProvider().getName();
+        testContext
+                .given(freeIpa, FreeIpaTestDto.class)
+                .withTelemetry("telemetry")
+                .withOsType(RHEL8.getOs())
+                .withFreeIpaHa(1, 2)
+                .when(freeIpaTestClient.create(), key(freeIpa))
+                .await(FREEIPA_AVAILABLE)
+                .given(FreeIpaRotationTestDto.class)
+                .withSecrets(List.of(FreeIpaSecretType.FREEIPA_SALT_BOOT_SECRETS.value()))
+                .when(freeIpaTestClient.rotateSecret())
+                .awaitForFlow()
                 .validate();
     }
 

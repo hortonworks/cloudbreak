@@ -1,12 +1,10 @@
 package com.sequenceiq.it.cloudbreak.dto.freeipa;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
-import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
@@ -33,8 +31,8 @@ public class FreeIpaRotationTestDto extends AbstractFreeIpaTestDto<FreeIpaSecret
         return this;
     }
 
-    public FreeIpaRotationTestDto withSecrets(List<FreeIpaSecretType> secretTypes) {
-        getRequest().setSecrets(secretTypes.stream().map(Enum::name).collect(Collectors.toList()));
+    public FreeIpaRotationTestDto withSecrets(List<String> secrets) {
+        getRequest().setSecrets(secrets);
         return this;
     }
 

@@ -1,11 +1,20 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
 
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CM_DB_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CM_SERVICES_DB_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_MGMT_CM_ADMIN_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_CM_INTERMEDIATE_CA_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_CM_SERVICE_SHARED_DB;
-import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_CA_CERT_RENEWAL;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_BOOT_SECRETS;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CB_CM_ADMIN_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_INTERMEDIATE_CA_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_SERVICE_SHARED_DB;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_MGMT_CM_ADMIN_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS;
 
 import java.util.List;
 import java.util.Set;
@@ -15,6 +24,7 @@ import javax.inject.Inject;
 import org.testng.ITestContext;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -25,7 +35,7 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaRotationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 
-public class DistroXMultiSecretRotationTests extends AbstractE2ETest {
+public class DistroXSecretRotationTest extends AbstractE2ETest {
 
     @Inject
     private DistroXTestClient distroXTestClient;
@@ -43,6 +53,32 @@ public class DistroXMultiSecretRotationTests extends AbstractE2ETest {
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultDatahubWithAutoTlsAndExternalDb(testContext);
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "there is a running default Distrox cluster",
+            when = "secrets are getting rotated",
+            then = "rotation should be successful and cluster should be available")
+    public void testSecretRotation(TestContext testContext, ITestContext iTestContext) {
+        testContext
+                .given(SdxInternalTestDto.class)
+                .when(sdxTestClient.rotateSecret(Set.of(
+                        DATALAKE_SALT_BOOT_SECRETS,
+                        DATALAKE_MGMT_CM_ADMIN_PASSWORD,
+                        DATALAKE_CB_CM_ADMIN_PASSWORD,
+                        DATALAKE_DATABASE_ROOT_PASSWORD)))
+                .awaitForFlow()
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.rotateSecret(Set.of(
+                        SALT_BOOT_SECRETS,
+                        CLUSTER_MGMT_CM_ADMIN_PASSWORD,
+                        CLUSTER_CB_CM_ADMIN_PASSWORD,
+                        CLUSTER_CM_SERVICES_DB_PASSWORD,
+                        CLUSTER_CM_DB_PASSWORD,
+                        DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD)))
+                .awaitForFlow()
+                .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -72,7 +108,7 @@ public class DistroXMultiSecretRotationTests extends AbstractE2ETest {
     public void testCacertMultiSecretRotation(TestContext testContext, ITestContext iTestContext) {
         testContext
                 .given(FreeIpaRotationTestDto.class)
-                .withSecrets(List.of(FREEIPA_CA_CERT_RENEWAL))
+                .withSecrets(List.of(FreeIpaSecretType.FREEIPA_CA_CERT_RENEWAL.value()))
                 .when(freeIpaTestClient.rotateSecret())
                 .awaitForFlow()
                 .given(SdxInternalTestDto.class)
@@ -82,7 +118,7 @@ public class DistroXMultiSecretRotationTests extends AbstractE2ETest {
                 .when(distroXTestClient.rotateSecret(Set.of(DATAHUB_CM_INTERMEDIATE_CA_CERT)))
                 .awaitForFlow()
                 .given(FreeIpaRotationTestDto.class)
-                .withSecrets(List.of(FREEIPA_CA_CERT_RENEWAL))
+                .withSecrets(List.of(FreeIpaSecretType.FREEIPA_CA_CERT_RENEWAL.value()))
                 .when(freeIpaTestClient.rotateSecret())
                 .awaitForFlow()
                 .validate();
