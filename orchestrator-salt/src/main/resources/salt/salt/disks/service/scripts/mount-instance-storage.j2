@@ -38,10 +38,8 @@ mount_one() {
       local fstab_line=$1
       local path=$(echo $fstab_line | cut -d' ' -f2)
 
-      log $LOG_FILE "mounting to path $path, line in fstab: $fstab_line"
+      log $LOG_FILE "mounting to path $path"
       mkdir $path >> $LOG_FILE 2>&1
-      echo $fstab_line >> /etc/fstab
-      log $LOG_FILE result of editing fstab: $?
       mount $path >> $LOG_FILE 2>&1
       if [ ! $? -eq 0 ]; then
         log $LOG_FILE "error mounting device on $path"
@@ -85,21 +83,11 @@ mount_all_sequential() {
     return $((return_value))
 }
 
-clean_up_fstab() {
-    log $LOG_FILE "clean up fstab"
-    sed_expr="/"
-    valid_uuids_expr=$(blkid -s UUID -o value | tr '\n' "|")
-    sed_expr+=${valid_uuids_expr%?}'/!d'
-    sed -i -E $sed_expr /etc/fstab
-}
-
 find_format_and_mount_tempstorage_azure() {
       local return_value=0
 
       declare -a inst_storage_devices_arr
       declare -a device_uuids_arr
-
-      clean_up_fstab
 
       log $LOG_FILE "collecting NVMe temporary disks"
       readarray -t inst_storage_devices_arr < <(sudo nvme list -o json | jq -r  '.Devices[] | select(.ModelNumber == "Microsoft NVMe Direct Disk") | .DevicePath')
@@ -144,18 +132,15 @@ find_format_and_mount_tempstorage_azure() {
       if [ -n "$mounted_info" ]; then
         mount_point=$(echo "$mounted_info" | awk '{print $6}')
         log $LOG_FILE "Temporary disk $device is mounted at $mount_point"
-        return_value=0
-        return $((return_value))
       else
         log $LOG_FILE "Temporary disk $device is not mounted"
-      fi
-
-      log $LOG_FILE "formatting temporary disk: $device"
-      $(mkfs -E lazy_itable_init=1 -O uninit_bg -F -t $FS_TYPE $device >> $LOG_FILE 2>&1)
-      if [ ! $? -eq 0 ]; then
-        log $LOG_FILE "formatting of temporary disk device $device failed"
-        return_value=1
-        return $((return_value))
+        log $LOG_FILE "formatting temporary disk: $device"
+        $(mkfs -E lazy_itable_init=1 -O uninit_bg -F -t $FS_TYPE $device >> $LOG_FILE 2>&1)
+        if [ ! $? -eq 0 ]; then
+          log $LOG_FILE "formatting of temporary disk device $device failed"
+          return_value=1
+          return $((return_value))
+        fi
       fi
 
       log $LOG_FILE mounting $device temporary storage disk on path $path
@@ -174,7 +159,9 @@ find_format_and_mount_tempstorage_azure() {
 
 get_root_disk() {
     root_partition=$(lsblk | grep /$ | cut -f1 -d' ' )
-    if [[ $root_partition =~ "nvme" ]]; then
+    if [[ "$CLOUD_PLATFORM" == "AZURE" ]]; then
+        readlink -f /dev/disk/azure/root
+    elif [[ $root_partition =~ "nvme" ]]; then
         echo "/dev/$(lsblk | grep /$ | cut -f1 -d' ' | sed 's/p\w//g' | cut -c 3-)"
     else
         echo "/dev/$(lsblk | grep /$ | cut -f1 -d' ' | sed 's/[0-9]//g' | cut -c 3-)"
@@ -187,12 +174,10 @@ find_format_and_mount_ephemeral_storage_aws_or_gcp() {
     declare -a devices_log_arr
     declare -a device_uuids_arr
 
-    clean_up_fstab
-
     log $LOG_FILE "collecting NVMe instance storage devices"
     readarray -t inst_storage_devices_arr < <(sudo nvme list -o json | jq -r $1)
 
-    if [ ${{ '{#' }}inst_storage_devices_arr[@]} -eq 0 ]; then
+    if [[ ${{ '{#' }}inst_storage_devices_arr[@]} -eq 0 ]]; then
         log $LOG_FILE "no NVMe instance storage found. Checking for other unmounted storage."
         readarray -t devices_arr < <(lsblk -n -oKNAME)
         devices_log=$(printf '%s ' "${devices_arr[@]}")
