@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.service.sdx.database;
 
-import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.FLEXIBLE_SERVER_DELEGATED_SUBNET_ID;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -43,14 +41,6 @@ public class AzureDatabaseAttributesService {
         }
     }
 
-    public String getFlexibleServerDelegatedSubnetId(SdxDatabase sdxDatabase) {
-        return Optional.ofNullable(sdxDatabase)
-                .map(SdxDatabase::getAttributes)
-                .map(Json::getMap)
-                .map(attrMap -> (String) attrMap.get(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID))
-                .get();
-    }
-
     public void configureAzureDatabase(DatabaseRequest internalDatabaseRequest, SdxDatabaseRequest databaseRequest, SdxDatabase sdxDatabase) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         boolean azureDatabaseFlexibleServerEnabled = entitlementService.isAzureDatabaseFlexibleServerEnabled(accountId);
@@ -69,8 +59,6 @@ public class AzureDatabaseAttributesService {
         Json attributes = sdxDatabase.getAttributes();
         Map<String, Object> params = attributes == null ? new HashMap<>() : attributes.getMap();
         params.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, azureDatabaseType.name());
-        Optional.ofNullable(databaseRequest).map(SdxDatabaseRequest::getSdxDatabaseAzureRequest).map(SdxDatabaseAzureRequest::getFlexibleServerDelegatedSubnetId)
-                        .ifPresent(subnetId -> params.put(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID, subnetId));
         sdxDatabase.setAttributes(new Json(params));
     }
 }

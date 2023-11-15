@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.externaldatabase;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType.HA;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType.NON_HA;
-import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.FLEXIBLE_SERVER_DELEGATED_SUBNET_ID;
 import static com.sequenceiq.common.model.AzureDatabaseType.FLEXIBLE_SERVER;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.DISABLED;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.SAME_ZONE;
@@ -76,7 +75,6 @@ public class AzureDatabaseServerParameterDecorator implements DatabaseServerPara
         } else {
             parameters.setHighAvailabilityMode(getHighAvailabilityMode(availabilityType, false));
         }
-        parameters.setFelxibleServerDelegatedSubnetId((String) serverParameter.getAttributes().get(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID));
         parameters.setBackupRetentionDays(getBackupRetentionPeriod(availabilityType));
         parameters.setGeoRedundantBackup(getGeoRedundantBackup(availabilityType));
         parameters.setDbVersion(serverParameter.getEngineVersion());

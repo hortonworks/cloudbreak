@@ -17,22 +17,11 @@ public class DatabaseAzureRequest implements Serializable {
     @ApiModelProperty(ModelDescriptions.Database.AZURE_DATABASE_TYPE)
     private AzureDatabaseType azureDatabaseType;
 
-    @ApiModelProperty(ModelDescriptions.Database.FLEXIBLE_SERVER_DELEGATED_SUBNET)
-    private String flexibleServerDelegatedSubnetId;
-
     public AzureDatabaseType getAzureDatabaseType() {
         return azureDatabaseType == null ? AzureDatabaseType.SINGLE_SERVER : azureDatabaseType;
     }
 
     public void setAzureDatabaseType(AzureDatabaseType azureDatabaseType) {
         this.azureDatabaseType = azureDatabaseType;
-    }
-
-    public void setFlexibleServerDelegatedSubnetId(String flexibleServerDelegatedSubnetId) {
-        this.flexibleServerDelegatedSubnetId = flexibleServerDelegatedSubnetId;
-    }
-
-    public String getFlexibleServerDelegatedSubnetId() {
-        return flexibleServerDelegatedSubnetId;
     }
 }

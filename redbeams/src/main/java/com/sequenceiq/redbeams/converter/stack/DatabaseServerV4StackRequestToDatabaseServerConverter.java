@@ -1,6 +1,5 @@
 package com.sequenceiq.redbeams.converter.stack;
 
-import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.FLEXIBLE_SERVER_DELEGATED_SUBNET_ID;
 import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityGroupIds;
 
 import java.util.Map;
@@ -20,7 +19,6 @@ import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4StackRequest;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
 import com.sequenceiq.redbeams.service.PasswordGeneratorService;
@@ -69,21 +67,13 @@ public class DatabaseServerV4StackRequestToDatabaseServerConverter {
         if (parameters != null) {
             try {
                 setDbVersion(parameters, cloudPlatform);
-                setDelegatedSubnetID(source, parameters);
                 server.setAttributes(new Json(parameters));
-
             } catch (IllegalArgumentException e) {
                 throw new BadRequestException("Invalid database server parameters", e);
             }
         }
 
         return server;
-    }
-
-    private void setDelegatedSubnetID(DatabaseServerV4StackRequest source, Map<String, Object> parameters) {
-        Optional.ofNullable(source.getAzure())
-                .map(AzureDatabaseServerV4Parameters::getFelxibleServerDelegatedSubnetId)
-                        .ifPresent(subnetId -> parameters.put(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID, subnetId));
     }
 
     /**

@@ -61,7 +61,6 @@ public class DistroXDatabaseRequestToStackDatabaseRequestConverter {
         if (distroxDatabaseAzureRequest != null) {
             DatabaseAzureRequest databaseAzureRequest = new DatabaseAzureRequest();
             databaseAzureRequest.setAzureDatabaseType(distroxDatabaseAzureRequest.getAzureDatabaseType());
-            databaseAzureRequest.setFlexibleServerDelegatedSubnetId(distroxDatabaseAzureRequest.getFlexibleServerDelegatedSubnetId());
             return databaseAzureRequest;
         } else {
             return null;
@@ -72,7 +71,6 @@ public class DistroXDatabaseRequestToStackDatabaseRequestConverter {
         if (databaseAzureRequest != null) {
             DistroXDatabaseAzureRequest distroXDatabaseAzureRequest = new DistroXDatabaseAzureRequest();
             distroXDatabaseAzureRequest.setAzureDatabaseType(databaseAzureRequest.getAzureDatabaseType());
-            distroXDatabaseAzureRequest.setFlexibleServerDelegatedSubnetId(databaseAzureRequest.getFlexibleServerDelegatedSubnetId());
             return distroXDatabaseAzureRequest;
         } else {
             return null;

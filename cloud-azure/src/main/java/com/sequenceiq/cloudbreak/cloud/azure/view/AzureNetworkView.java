@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.azure.view;
 
-import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.FLEXIBLE_SERVER_DELEGATED_SUBNET_ID;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -22,6 +20,8 @@ public class AzureNetworkView {
     private static final String ENDPOINT_TYPE = "endpointType";
 
     private static final String EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID = "existingDatabasePrivateDnsZoneId";
+
+    private static final String FLEXIBLE_SERVER_DELEGATED_SUBNET_ID = "flexibleServerDelegatedSubnetId";
 
     private String networkId;
 

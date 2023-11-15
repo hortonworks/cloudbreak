@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.converter;
 
-import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.FLEXIBLE_SERVER_DELEGATED_SUBNET_ID;
-
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -41,9 +39,6 @@ public class DatabaseRequestConverter {
                 if (azureDatabaseTypeObj != null) {
                     DatabaseAzureRequest databaseAzureRequest = new DatabaseAzureRequest();
                     databaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.safeValueOf(String.valueOf(azureDatabaseTypeObj)));
-                    Optional.of(attributes).map(Json::getMap)
-                            .map(attrMap -> (String) attrMap.get(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID))
-                            .ifPresent(databaseAzureRequest::setFlexibleServerDelegatedSubnetId);
                     return databaseAzureRequest;
                 }
             }

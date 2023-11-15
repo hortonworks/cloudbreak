@@ -14,22 +14,11 @@ public class SdxDatabaseAzureRequest {
     @ApiModelProperty(ModelDescriptions.AZURE_DATABASE_TYPE)
     private AzureDatabaseType azureDatabaseType = AzureDatabaseType.SINGLE_SERVER;
 
-    @ApiModelProperty(ModelDescriptions.AZURE_DATABASE_TYPE)
-    private String flexibleServerDelegatedSubnetId;
-
     public AzureDatabaseType getAzureDatabaseType() {
         return azureDatabaseType == null ? AzureDatabaseType.SINGLE_SERVER : azureDatabaseType;
     }
 
     public void setAzureDatabaseType(AzureDatabaseType azureDatabaseType) {
         this.azureDatabaseType = azureDatabaseType;
-    }
-
-    public String getFlexibleServerDelegatedSubnetId() {
-        return flexibleServerDelegatedSubnetId;
-    }
-
-    public void setFlexibleServerDelegatedSubnetId(String flexibleServerDelegatedSubnetId) {
-        this.flexibleServerDelegatedSubnetId = flexibleServerDelegatedSubnetId;
     }
 }
