@@ -41,8 +41,8 @@ class ProviderSpecificImageFilterTest {
         CloudConnector connector = mock(CloudConnector.class);
         PlatformParameters platformParameters = mock(PlatformParameters.class);
         AzureImageFilter imageFilter = mock(AzureImageFilter.class);
-        Image image = mock(Image.class);
-        Image imageToBeFiltered = mock(Image.class);
+        Image image = mockImageWithProvider(CloudPlatform.AZURE);
+        Image imageToBeFiltered = mockImageWithProvider(CloudPlatform.AZURE);
         List<Image> imageList = List.of(image, imageToBeFiltered);
         ImageCatalogPlatform platform = imageCatalogPlatform(CloudPlatform.AZURE.name());
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
@@ -53,6 +53,31 @@ class ProviderSpecificImageFilterTest {
         when(connector.parameters()).thenReturn(platformParameters);
         when(platformParameters.imageFilter()).thenReturn(Optional.of(imageFilter));
         when(imageFilter.filterImages(imageList)).thenReturn(List.of(image));
+
+        List<Image> filteredImages = underTest.filterImages(Collections.singletonList(platform), imageList);
+
+        assertEquals(1, filteredImages.size());
+        assertEquals(image, filteredImages.get(0));
+        verify(cloudPlatformConnectors).get(cloudPlatformVariant);
+    }
+
+    @Test
+    public void testProviderPreFiltering() {
+        CloudConnector connector = mock(CloudConnector.class);
+        PlatformParameters platformParameters = mock(PlatformParameters.class);
+        AzureImageFilter imageFilter = mock(AzureImageFilter.class);
+        Image image = mockImageWithProvider(CloudPlatform.AZURE);
+        Image imageToBeFiltered = mockImageWithProvider(CloudPlatform.AWS);
+        List<Image> imageList = List.of(image, imageToBeFiltered);
+        ImageCatalogPlatform platform = imageCatalogPlatform(CloudPlatform.AZURE.name());
+        CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
+                Platform.platform(platform.nameToUpperCase()),
+                Variant.variant(platform.nameToUpperCase()));
+
+        when(cloudPlatformConnectors.get(cloudPlatformVariant)).thenReturn(connector);
+        when(connector.parameters()).thenReturn(platformParameters);
+        when(platformParameters.imageFilter()).thenReturn(Optional.of(imageFilter));
+        when(imageFilter.filterImages(List.of(image))).thenReturn(List.of(image));
 
         List<Image> filteredImages = underTest.filterImages(Collections.singletonList(platform), imageList);
 
@@ -75,7 +100,14 @@ class ProviderSpecificImageFilterTest {
 
         List<Image> filteredImages = underTest.filterImages(Collections.singletonList(platform), imageList);
 
-        assertEquals(2, filteredImages.size());
+        assertEquals(0, filteredImages.size());
         verify(cloudPlatformConnectors).get(cloudPlatformVariant);
+    }
+
+    private Image mockImageWithProvider(CloudPlatform cloudPlatform) {
+        Image mock = mock(Image.class);
+        when(mock.getImageSetsByProvider()).thenReturn(Collections.singletonMap(cloudPlatform.name().toLowerCase(), null));
+
+        return mock;
     }
 }

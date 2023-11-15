@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
@@ -25,6 +27,8 @@ import com.sequenceiq.common.model.ImageCatalogPlatform;
 @Component
 public class ProviderSpecificImageFilter {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProviderSpecificImageFilter.class);
+
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
@@ -33,14 +37,23 @@ public class ProviderSpecificImageFilter {
                 .map(platform -> filterImages(platform.name(), imageList))
                 .flatMap(List::stream)
                 .collect(Collectors.toSet());
+
+        LOGGER.debug("Provider specific image filtering is done, there are {} images out of {}.", uniqueImages.size(), imageList.size());
+
         return new ArrayList<>(uniqueImages);
     }
 
     private List<Image> filterImages(String cloudPlatform, List<Image> imageList) {
+        List<Image> cloudPlatformImages = getCloudPlatformImages(cloudPlatform, imageList);
         Optional<ImageFilter> filterForProvider = getImageFilter(cloudPlatform);
-        return filterForProvider
-                .map(imageFilter -> imageFilter.filterImages(imageList))
-                .orElse(imageList);
+        List<Image> cloudPlatformFilteredImages = filterForProvider
+                .map(imageFilter -> imageFilter.filterImages(cloudPlatformImages))
+                .orElse(cloudPlatformImages);
+
+        LOGGER.debug("{} specific image filtering is done, there are {} images out of {}.",
+                cloudPlatform, cloudPlatformFilteredImages.size(), cloudPlatformImages.size());
+
+        return cloudPlatformFilteredImages;
     }
 
     private Optional<ImageFilter> getImageFilter(String cloudPlatform) {
@@ -48,8 +61,19 @@ public class ProviderSpecificImageFilter {
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
                 Platform.platform(platform),
                 Variant.variant(platform));
+
         return Optional.ofNullable(cloudPlatformConnectors.get(cloudPlatformVariant))
                 .map(CloudConnector::parameters)
                 .flatMap(PlatformParameters::imageFilter);
+    }
+
+    private List<Image> getCloudPlatformImages(String cloudPlatform, List<Image> imageList) {
+        List<Image> cloudPlatformImages = imageList.stream()
+                .filter(image -> image.getImageSetsByProvider().containsKey(cloudPlatform.toLowerCase(Locale.ROOT)))
+                .collect(Collectors.toList());
+
+        LOGGER.debug("{} image filtering is done, there are {} images out of {}.", cloudPlatform, cloudPlatformImages.size(), imageList.size());
+
+        return cloudPlatformImages;
     }
 }
