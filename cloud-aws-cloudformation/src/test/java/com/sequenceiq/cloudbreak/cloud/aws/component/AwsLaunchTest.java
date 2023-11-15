@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
+import com.sequenceiq.cloudbreak.util.S3ExpressBucketNameValidator;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -108,7 +109,8 @@ import software.amazon.awssdk.services.efs.model.MountTargetDescription;
         "cb.aws.spotinstances.enabled=true",
         "cb.aws.credential.cache.ttl=1",
         "cb.db.override.aws.fallback.enabled=true",
-        "cb.db.override.aws.fallback.targetversion=11.16"
+        "cb.db.override.aws.fallback.targetversion=11.16",
+        "aws.s3express-name-pattern=--x-s3"
 })
 @ActiveProfiles("component")
 public class AwsLaunchTest {
@@ -200,6 +202,9 @@ public class AwsLaunchTest {
 
     @MockBean
     private AwsMetricPublisher awsMetricPublisher;
+
+    @MockBean
+    private S3ExpressBucketNameValidator s3ExpressBucketNameValidator;
 
     @Inject
     private ResourceBuilders resourceBuilders;

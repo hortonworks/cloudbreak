@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
+import static java.lang.String.format;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -23,10 +25,13 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadata
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
+import com.sequenceiq.cloudbreak.util.S3ExpressBucketNameValidator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.model.ObjectStorageType;
 
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.s3.model.S3Exception;
@@ -47,12 +52,18 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private S3ExpressBucketNameValidator s3ExpressBucketNameValidator;
+
     @Override
     public ObjectStorageMetadataResponse getObjectStorageMetadata(ObjectStorageMetadataRequest request) {
         AwsCredentialView awsCredentialView = new AwsCredentialView(request.getCredential());
+        String bucketName = request.getObjectStoragePath();
+        ObjectStorageType objectStorageType = request.getObjectStorageType();
+        validateRequestForBackupAndLogLocation(bucketName, objectStorageType);
         try {
             AmazonS3Client s3Client = awsClient.createS3Client(awsCredentialView, request.getRegion());
-            String bucketLocation = fixBucketLocation(s3Client.getBucketLocation(request.getObjectStoragePath()));
+            String bucketLocation = fixBucketLocation(s3Client.getBucketLocation(bucketName));
             return ObjectStorageMetadataResponse.builder()
                     .withRegion(bucketLocation)
                     .withStatus(ResponseStatus.OK)
@@ -63,7 +74,7 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
             // the same error code will be returned. However, this hack is mainly for QAAS.
             if (e.statusCode() != ACCESS_DENIED_ERROR_CODE) {
                 throw new CloudConnectorException(
-                        String.format("We were not able to query S3 object storage location for %s. "
+                        format("We were not able to query S3 object storage location for %s. "
                                         + "Refer to Cloudera documentation at %s for the required setup. "
                                         + "The message from Amazon S3 was: %s.",
                                 request.getObjectStoragePath(),
@@ -76,6 +87,13 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
                     .build();
         } catch (SdkClientException e) {
             throw new CloudConnectorException(e.getMessage(), e);
+        }
+    }
+
+    private void validateRequestForBackupAndLogLocation(String bucketName, ObjectStorageType objectStorageType) {
+        if (s3ExpressBucketNameValidator.isS3ExpressBucket(bucketName)
+                && (ObjectStorageType.LOGS.equals(objectStorageType) || ObjectStorageType.BACKUP.equals(objectStorageType))) {
+            throw new BadRequestException(format("S3 Express storage isn't supported for %s location. Bucket name: %s", objectStorageType, bucketName));
         }
     }
 

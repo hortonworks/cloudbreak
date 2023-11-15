@@ -76,6 +76,7 @@ import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.polling.Poller;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.util.S3ExpressBucketNameValidator;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -118,7 +119,8 @@ import software.amazon.awssdk.services.efs.model.MountTargetDescription;
         "cb.aws.spotinstances.enabled=true",
         "cb.aws.credential.cache.ttl=1",
         "cb.db.override.aws.fallback.enabled=true",
-        "cb.db.override.aws.fallback.targetversion=11.16"
+        "cb.db.override.aws.fallback.targetversion=11.16",
+        "aws.s3express-name-pattern=--x-s3"
 })
 @ActiveProfiles("component")
 public class AwsRepairTest {
@@ -227,6 +229,9 @@ public class AwsRepairTest {
 
     @MockBean
     private AwsSyncUserDataService awsSyncUserDataService;
+
+    @MockBean
+    private S3ExpressBucketNameValidator s3ExpressBucketNameValidator;
 
     @Test
     public void repairStack() throws Exception {

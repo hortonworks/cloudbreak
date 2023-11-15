@@ -1,0 +1,2 @@
+aws:
+  s3express-name-pattern: --x-s3

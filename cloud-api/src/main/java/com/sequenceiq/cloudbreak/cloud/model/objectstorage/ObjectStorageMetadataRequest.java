@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudPlatformAware;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.common.model.ObjectStorageType;
 
 public class ObjectStorageMetadataRequest implements CloudPlatformAware {
 
@@ -20,6 +21,8 @@ public class ObjectStorageMetadataRequest implements CloudPlatformAware {
 
     private @NotNull String region;
 
+    private ObjectStorageType objectStorageType;
+
     public ObjectStorageMetadataRequest() {
     }
 
@@ -28,6 +31,7 @@ public class ObjectStorageMetadataRequest implements CloudPlatformAware {
         this.cloudPlatform = builder.cloudPlatform;
         this.objectStoragePath = builder.objectStoragePath;
         this.region = builder.region;
+        this.objectStorageType = builder.objectStorageType;
     }
 
     public static Builder builder() {
@@ -60,6 +64,10 @@ public class ObjectStorageMetadataRequest implements CloudPlatformAware {
 
     public String getRegion() {
         return region;
+    }
+
+    public ObjectStorageType getObjectStorageType() {
+        return objectStorageType;
     }
 
     @Override
@@ -111,6 +119,8 @@ public class ObjectStorageMetadataRequest implements CloudPlatformAware {
 
         private String region;
 
+        private ObjectStorageType objectStorageType;
+
         public Builder withCredential(CloudCredential credential) {
             this.credential = credential;
             return this;
@@ -128,6 +138,11 @@ public class ObjectStorageMetadataRequest implements CloudPlatformAware {
 
         public Builder withRegion(String region) {
             this.region = region;
+            return this;
+        }
+
+        public Builder withObjectStorageType(ObjectStorageType objectStorageType) {
+            this.objectStorageType = objectStorageType;
             return this;
         }
 
