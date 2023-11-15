@@ -1,8 +1,5 @@
 package com.sequenceiq.environment.environment.validation.cloudstorage;
 
-import static com.sequenceiq.cloudbreak.validation.S3ExpressBucketNameValidator.isS3ExpressBucket;
-
-import java.util.Locale;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -54,7 +51,19 @@ public class CloudStorageLocationValidator {
         LOGGER.debug("Calculating bucket for {} location for {} environment.", storageLocation, environment.getId());
         String bucketName = getBucketName(fileSystemType, storageLocation);
         LOGGER.debug("Bucket is {} for {} location for {} environment.", bucketName, storageLocation, environment.getId());
-        validateObjectStorage(environment, resultBuilder, bucketName);
+        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environment.getCredential());
+        ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName,
+                environment.getLocation());
+        ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () ->
+                cloudProviderServicesV4Endopint.getObjectStorageMetaData(request));
+        resultBuilder.ifError(() -> response.getStatus() == ResponseStatus.OK && !environment.getLocation().equals(response.getRegion()),
+                String.format("Object storage location [%s] of bucket '%s' must match environment location [%s].%s",
+                        response.getRegion(),
+                        bucketName,
+                        environment.getLocation(),
+                        getDocLink(environment.getCloudPlatform())));
     }
 
     private String getDocLink(String cloudPlatform) {
@@ -89,27 +98,19 @@ public class CloudStorageLocationValidator {
     public void validateBackup(String storageLocation, Environment environment, ValidationResultBuilder resultBuilder) {
         Optional<FileSystemType> fileSystemType = getBackupFileSystemType(environment);
         String bucketName = getBucketName(fileSystemType, storageLocation);
-        validateObjectStorage(environment, resultBuilder, bucketName);
-    }
-
-    private void validateObjectStorage(Environment environment, ValidationResultBuilder resultBuilder, String bucketName) {
-        if ("aws".equals(environment.getCloudPlatform().toLowerCase(Locale.ROOT)) && isS3ExpressBucket(bucketName)) {
-            resultBuilder.error("S3 Express storage isn't supported for backup/ log location.");
-        } else {
-            CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environment.getCredential());
-            ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName,
-                    environment.getLocation());
-            ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () ->
-                            cloudProviderServicesV4Endopint.getObjectStorageMetaData(request));
-            resultBuilder.ifError(() -> response.getStatus() == ResponseStatus.OK && !environment.getLocation().equals(response.getRegion()),
-                    String.format("Object storage location [%s] of bucket '%s' must match environment location [%s].%s",
-                            response.getRegion(),
-                            bucketName,
-                            environment.getLocation(),
-                            getDocLink(environment.getCloudPlatform())));
-        }
+        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environment.getCredential());
+        ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName,
+                environment.getLocation());
+        ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () ->
+                cloudProviderServicesV4Endopint.getObjectStorageMetaData(request));
+        resultBuilder.ifError(() -> response.getStatus() == ResponseStatus.OK && !environment.getLocation().equals(response.getRegion()),
+                String.format("Object storage location [%s] of bucket '%s' must match environment location [%s].%s",
+                        response.getRegion(),
+                        bucketName,
+                        environment.getLocation(),
+                        getDocLink(environment.getCloudPlatform())));
     }
 
     private Optional<FileSystemType> getBackupFileSystemType(Environment environment) {

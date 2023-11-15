@@ -1,9 +1,5 @@
 package com.sequenceiq.datalake.service.validation.cloudstorage;
 
-import static com.sequenceiq.cloudbreak.validation.S3ExpressBucketNameValidator.isS3ExpressBucket;
-
-import java.util.Locale;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
@@ -41,21 +37,18 @@ public class CloudStorageLocationValidator {
 
     public void validate(String storageLocation, FileSystemType fileSystemType, DetailedEnvironmentResponse environment, ValidationResultBuilder resultBuilder) {
         String bucketName = getBucketName(fileSystemType, storageLocation);
-        if (!"aws".equals(environment.getCloudPlatform().toLowerCase(Locale.ROOT)) ||
-                ("aws".equals(environment.getCloudPlatform().toLowerCase(Locale.ROOT)) && !isS3ExpressBucket(bucketName))) {
-            CloudCredential cloudCredential = credentialResponseToCloudCredentialConverter.convert(environment.getCredential());
-            ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName,
-                    environment.getLocation().getName());
-            ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () ->
-                            cloudProviderServicesV4Endopint.getObjectStorageMetaData(request));
-            resultBuilder.ifError(() -> response.getStatus() == ResponseStatus.OK && !environment.getLocation().getName().equals(response.getRegion()),
-                    String.format("Object storage location [%s] of bucket '%s' must match environment location [%s]",
-                            response.getRegion(),
-                            bucketName,
-                            environment.getLocation().getName()));
-        }
+        CloudCredential cloudCredential = credentialResponseToCloudCredentialConverter.convert(environment.getCredential());
+        ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName,
+                environment.getLocation().getName());
+        ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () ->
+                cloudProviderServicesV4Endopint.getObjectStorageMetaData(request));
+        resultBuilder.ifError(() -> response.getStatus() == ResponseStatus.OK && !environment.getLocation().getName().equals(response.getRegion()),
+                String.format("Object storage location [%s] of bucket '%s' must match environment location [%s]",
+                        response.getRegion(),
+                        bucketName,
+                        environment.getLocation().getName()));
     }
 
     private String getBucketName(FileSystemType fileSystemType, String storageLocation) {
