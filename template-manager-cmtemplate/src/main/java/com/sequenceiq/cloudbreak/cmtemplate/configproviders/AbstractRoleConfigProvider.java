@@ -58,7 +58,7 @@ public abstract class AbstractRoleConfigProvider implements CmTemplateComponentC
         return Optional.empty();
     }
 
-    protected Optional<ClouderaManagerProduct> getCdhProduct(TemplatePreparationObject source) {
+    protected static Optional<ClouderaManagerProduct> getCdhProduct(TemplatePreparationObject source) {
         if (source.getProductDetailsView() != null) {
             return source.getProductDetailsView().getProducts()
                     .stream()

@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.common.model.ObjectStorageType;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
@@ -51,19 +52,7 @@ public class CloudStorageLocationValidator {
         LOGGER.debug("Calculating bucket for {} location for {} environment.", storageLocation, environment.getId());
         String bucketName = getBucketName(fileSystemType, storageLocation);
         LOGGER.debug("Bucket is {} for {} location for {} environment.", bucketName, storageLocation, environment.getId());
-        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environment.getCredential());
-        ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName,
-                environment.getLocation());
-        ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () ->
-                cloudProviderServicesV4Endopint.getObjectStorageMetaData(request));
-        resultBuilder.ifError(() -> response.getStatus() == ResponseStatus.OK && !environment.getLocation().equals(response.getRegion()),
-                String.format("Object storage location [%s] of bucket '%s' must match environment location [%s].%s",
-                        response.getRegion(),
-                        bucketName,
-                        environment.getLocation(),
-                        getDocLink(environment.getCloudPlatform())));
+        validateObjectStorage(environment, resultBuilder, bucketName, ObjectStorageType.LOGS);
     }
 
     private String getDocLink(String cloudPlatform) {
@@ -98,13 +87,17 @@ public class CloudStorageLocationValidator {
     public void validateBackup(String storageLocation, Environment environment, ValidationResultBuilder resultBuilder) {
         Optional<FileSystemType> fileSystemType = getBackupFileSystemType(environment);
         String bucketName = getBucketName(fileSystemType, storageLocation);
+        validateObjectStorage(environment, resultBuilder, bucketName, ObjectStorageType.BACKUP);
+    }
+
+    private void validateObjectStorage(Environment environment, ValidationResultBuilder resultBuilder, String bucketName,
+            ObjectStorageType objectStorageType) {
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environment.getCredential());
         ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName,
-                environment.getLocation());
+                environment.getLocation(), objectStorageType);
         ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () ->
-                cloudProviderServicesV4Endopint.getObjectStorageMetaData(request));
+                () -> cloudProviderServicesV4Endopint.getObjectStorageMetaData(request));
         resultBuilder.ifError(() -> response.getStatus() == ResponseStatus.OK && !environment.getLocation().equals(response.getRegion()),
                 String.format("Object storage location [%s] of bucket '%s' must match environment location [%s].%s",
                         response.getRegion(),
@@ -137,12 +130,13 @@ public class CloudStorageLocationValidator {
     }
 
     private ObjectStorageMetadataRequest createObjectStorageMetadataRequest(String cloudPlatform, CloudCredential credential, String objectStoragePath,
-            String regionName) {
+            String regionName, ObjectStorageType objectStorageType) {
         return ObjectStorageMetadataRequest.builder()
                 .withCloudPlatform(cloudPlatform)
                 .withCredential(credential)
                 .withObjectStoragePath(objectStoragePath)
                 .withRegion(regionName)
+                .withObjectStorageType(objectStorageType)
                 .build();
     }
 

@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadata
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.common.model.ObjectStorageType;
 import com.sequenceiq.datalake.service.validation.converter.CredentialResponseToCloudCredentialConverter;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -63,6 +64,7 @@ public class CloudStorageLocationValidator {
                 .withCredential(credential)
                 .withObjectStoragePath(objectStoragePath)
                 .withRegion(regionName)
+                .withObjectStorageType(ObjectStorageType.DATALAKE)
                 .build();
     }
 
