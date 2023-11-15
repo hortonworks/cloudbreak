@@ -1,5 +1,8 @@
 package com.sequenceiq.redbeams.service.sslcertificate;
 
+import static com.sequenceiq.cloudbreak.cloud.model.DatabaseServer.SSL_CERTIFICATE_IDENTIFIER;
+import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType.CLOUD_PROVIDER_OWNED;
+
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,7 +22,6 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificates;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
 
@@ -37,7 +39,7 @@ public class DatabaseServerSslCertificatePrescriptionService {
     public void prescribeSslCertificateIfNeeded(CloudContext cloudContext, CloudCredential cloudCredential, DBStack dbStack, DatabaseStack databaseStack) {
         Optional<SslConfig> sslConfig = sslConfigService.fetchById(dbStack.getSslConfig());
         String cloudPlatform = dbStack.getCloudPlatform();
-        if (sslConfig.isPresent() && SslCertificateType.CLOUD_PROVIDER_OWNED.equals(sslConfig.get().getSslCertificateType())
+        if (sslConfig.isPresent() && CLOUD_PROVIDER_OWNED.equals(sslConfig.get().getSslCertificateType())
                 && CloudPlatform.AWS.name().equals(cloudPlatform)) {
             prescribeSslCertificateIfNeededAws(cloudContext, cloudCredential, dbStack.getCloudPlatform(),
                     sslConfig.get().getSslCertificateActiveCloudProviderIdentifier(), databaseStack.getDatabaseServer());
@@ -69,7 +71,7 @@ public class DatabaseServerSslCertificatePrescriptionService {
                 LOGGER.info("Desired SSL certificate CloudProviderIdentifier is the default for cloud platform \"{}\": \"{}\". " +
                         "Skipping prescription for database stack {}.", cloudPlatform, desiredSslCertificateIdentifier, cloudContext);
             } else {
-                databaseServer.putParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER, desiredSslCertificateIdentifier);
+                databaseServer.putParameter(SSL_CERTIFICATE_IDENTIFIER, desiredSslCertificateIdentifier);
                 LOGGER.info("Prescribing SSL certificate CloudProviderIdentifier for cloud platform \"{}\": \"{}\", database stack {}", cloudPlatform,
                         desiredSslCertificateIdentifier, cloudContext);
             }
@@ -85,7 +87,7 @@ public class DatabaseServerSslCertificatePrescriptionService {
         CloudDatabaseServerSslCertificates availableSslCertificates =
                 connector.platformResources().databaseServerGeneralSslRootCertificates(cloudCredential, cloudContext.getLocation().getRegion());
         Set<String> availableSslCertificateIdentifiers = availableSslCertificates.getSslCertificates().stream()
-                .map(CloudDatabaseServerSslCertificate::getCertificateIdentifier)
+                .map(CloudDatabaseServerSslCertificate::certificateIdentifier)
                 .collect(Collectors.toSet());
         LOGGER.info("Available SSL certificate CloudProviderIdentifiers for cloud platform \"{}\": \"{}\", database stack {}", cloudPlatform,
                 availableSslCertificateIdentifiers, cloudContext);

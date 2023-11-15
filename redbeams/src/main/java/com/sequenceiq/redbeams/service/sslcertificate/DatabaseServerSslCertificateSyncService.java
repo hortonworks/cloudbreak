@@ -43,7 +43,7 @@ public class DatabaseServerSslCertificateSyncService {
         Optional<SslConfig> sslConfig = sslConfigService.fetchById(dbStack.getSslConfig());
         String cloudPlatform = dbStack.getCloudPlatform();
         if (sslConfig.isPresent() && SslCertificateType.CLOUD_PROVIDER_OWNED.equals(sslConfig.get().getSslCertificateType())
-                && CloudPlatform.AWS.name().equals(cloudPlatform)) {
+                && (CloudPlatform.AWS.name().equals(cloudPlatform) || CloudPlatform.GCP.name().equals(cloudPlatform))) {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
             CloudDatabaseServerSslCertificate activeSslRootCertificate = connector.resources().getDatabaseServerActiveSslRootCertificate(ac, databaseStack);
@@ -51,7 +51,11 @@ public class DatabaseServerSslCertificateSyncService {
                 LOGGER.warn("Database server or its SSL certificate does not exist in cloud platform \"{}\" for {}. Skipping synchronization.", cloudPlatform,
                         cloudContext);
             } else {
-                syncSslCertificateAws(cloudContext, dbStack, activeSslRootCertificate, sslConfig.get());
+                if (CloudPlatform.AWS.name().equals(cloudPlatform)) {
+                    syncSslCertificateAws(cloudContext, dbStack, activeSslRootCertificate, sslConfig.get());
+                } else {
+                    syncSslCertificateGcp(activeSslRootCertificate, sslConfig.get());
+                }
             }
         } else {
             LOGGER.info("SSL not enabled or unsupported cloud platform \"{}\": SslConfig={}. Skipping SSL certificate synchronization for database stack {}",
@@ -59,11 +63,18 @@ public class DatabaseServerSslCertificateSyncService {
         }
     }
 
+    private void syncSslCertificateGcp(CloudDatabaseServerSslCertificate activeSslRootCertificate, SslConfig sslConfig) {
+        sslConfig.setSslCertificateActiveVersion(0);
+        sslConfig.setSslCertificates(Collections.singleton(activeSslRootCertificate.certificate()));
+        sslConfig.setSslCertificateActiveCloudProviderIdentifier(activeSslRootCertificate.certificateIdentifier());
+        sslConfigService.save(sslConfig);
+    }
+
     private void syncSslCertificateAws(CloudContext cloudContext, DBStack dbStack, CloudDatabaseServerSslCertificate activeSslRootCertificate,
             SslConfig sslConfig) {
         String cloudPlatform = dbStack.getCloudPlatform();
         String desiredSslCertificateIdentifier = sslConfig.getSslCertificateActiveCloudProviderIdentifier();
-        String activeSslCertificateIdentifier = activeSslRootCertificate.getCertificateIdentifier();
+        String activeSslCertificateIdentifier = activeSslRootCertificate.certificateIdentifier();
         // Note that while activeSslCertificateIdentifier can never be null, desiredSslCertificateIdentifier == null is indeed possible for legacy DB servers.
         // The latter case is not, however, handled specially, so that the DBStack of the legacy DB server can be also updated to get rid of legacy null values.
         if (activeSslCertificateIdentifier.equals(desiredSslCertificateIdentifier)) {
@@ -107,7 +118,7 @@ public class DatabaseServerSslCertificateSyncService {
 
         if (Strings.isNullOrEmpty(cert.getCertPem())) {
             throw new IllegalStateException(String.format("Blank PEM in SSL certificate with CloudProviderIdentifier \"%s\" for cloud platform \"%s\"",
-                            cloudProviderIdentifierExpected, cloudPlatform));
+                    cloudProviderIdentifierExpected, cloudPlatform));
         }
     }
 

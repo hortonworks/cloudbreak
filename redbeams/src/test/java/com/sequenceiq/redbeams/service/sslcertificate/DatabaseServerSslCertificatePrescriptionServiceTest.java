@@ -85,6 +85,7 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
     @BeforeEach
     void setUp() {
         dbStack = new DBStack();
+        dbStack.setName("db_stack");
         databaseServer = DatabaseServer.builder().build();
         databaseStack = new DatabaseStack(null, databaseServer, Map.of(), "");
         region = Region.region("myregion");
@@ -222,11 +223,11 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
         dbStack.setSslConfig(Optional.ofNullable(sslConfig).map(SslConfig::getId).orElse(null));
     }
 
-    private SslConfig createSslConfig(SslCertificateType sslCertificateType, String sslCertificateActiveCloudProviderIdentifier) {
+    private SslConfig createSslConfig(SslCertificateType sslCertificateType, String sslCertIdentifier) {
         SslConfig sslConfig = new SslConfig();
         sslConfig.setId(SSL_CONF_ID);
         sslConfig.setSslCertificateType(sslCertificateType);
-        sslConfig.setSslCertificateActiveCloudProviderIdentifier(sslCertificateActiveCloudProviderIdentifier);
+        sslConfig.setSslCertificateActiveCloudProviderIdentifier(sslCertIdentifier);
         when(sslConfigService.fetchById(SSL_CONF_ID)).thenReturn(Optional.of(sslConfig));
         return sslConfig;
     }

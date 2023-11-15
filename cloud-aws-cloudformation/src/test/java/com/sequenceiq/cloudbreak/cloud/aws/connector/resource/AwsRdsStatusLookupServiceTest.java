@@ -207,8 +207,8 @@ public class AwsRdsStatusLookupServiceTest {
         CloudDatabaseServerSslCertificate result = victim.getActiveSslRootCertificate(authenticatedContext, dbStack);
 
         assertThat(result).isNotNull();
-        assertThat(result.getCertificateType()).isEqualTo(CloudDatabaseServerSslCertificateType.ROOT);
-        assertThat(result.getCertificateIdentifier()).isEqualTo(CA_CERTIFICATE_IDENTIFIER);
+        assertThat(result.certificateType()).isEqualTo(CloudDatabaseServerSslCertificateType.ROOT);
+        assertThat(result.certificateIdentifier()).isEqualTo(CA_CERTIFICATE_IDENTIFIER);
     }
 
     @Test

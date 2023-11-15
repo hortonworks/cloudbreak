@@ -565,12 +565,12 @@ public class AwsPlatformResourcesTest {
 
     private void verifySslRootCertificate(Set<CloudDatabaseServerSslCertificate> sslCertificates, String certificateIdentifier) {
         Optional<CloudDatabaseServerSslCertificate> match = sslCertificates.stream()
-                .filter(c -> certificateIdentifier.equals(c.getCertificateIdentifier()))
+                .filter(c -> certificateIdentifier.equals(c.certificateIdentifier()))
                 .findFirst();
         assertThat(match).overridingErrorMessage("No cert found for certificateIdentifier %s", certificateIdentifier).isNotEmpty();
 
         CloudDatabaseServerSslCertificate sslCertificate = match.get();
-        assertThat(sslCertificate.getCertificateType()).isEqualTo(CloudDatabaseServerSslCertificateType.ROOT);
+        assertThat(sslCertificate.certificateType()).isEqualTo(CloudDatabaseServerSslCertificateType.ROOT);
     }
 
     @Test

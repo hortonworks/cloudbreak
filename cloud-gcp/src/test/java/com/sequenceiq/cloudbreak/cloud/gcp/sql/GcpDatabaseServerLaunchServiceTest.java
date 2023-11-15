@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.sql;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -30,8 +30,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.Compute.Subnetworks;
 import com.google.api.services.compute.model.Subnetwork;
 import com.google.api.services.sqladmin.SQLAdmin;
+import com.google.api.services.sqladmin.SQLAdmin.Instances;
+import com.google.api.services.sqladmin.SQLAdmin.Instances.Get;
+import com.google.api.services.sqladmin.SQLAdmin.Instances.Insert;
+import com.google.api.services.sqladmin.SQLAdmin.Users;
 import com.google.api.services.sqladmin.model.DatabaseInstance;
 import com.google.api.services.sqladmin.model.InstancesListResponse;
 import com.google.api.services.sqladmin.model.IpMapping;
@@ -46,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpSQLAdminFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.poller.DatabasePollerService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
+import com.sequenceiq.cloudbreak.cloud.gcp.view.GcpDatabaseServerView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
@@ -87,8 +93,8 @@ public class GcpDatabaseServerLaunchServiceTest {
     public void testGetRdsPort() {
         CloudResource rdsPort = underTest.getRdsPort("az1");
 
-        Assert.assertEquals(ResourceType.RDS_PORT, rdsPort.getType());
-        Assert.assertEquals("5432", rdsPort.getName());
+        assertEquals(ResourceType.RDS_PORT, rdsPort.getType());
+        assertEquals("5432", rdsPort.getName());
     }
 
     @Test
@@ -102,8 +108,8 @@ public class GcpDatabaseServerLaunchServiceTest {
 
         CloudResource rdsHostName = underTest.getRdsHostName(databaseInstance, CloudResource.builder(), "id-1", "az1");
 
-        Assert.assertEquals(ResourceType.RDS_HOSTNAME, rdsHostName.getType());
-        Assert.assertEquals("10.0.0.0", rdsHostName.getName());
+        assertEquals(ResourceType.RDS_HOSTNAME, rdsHostName.getType());
+        assertEquals("10.0.0.0", rdsHostName.getName());
     }
 
     @Test
@@ -115,8 +121,8 @@ public class GcpDatabaseServerLaunchServiceTest {
         DatabaseServer databaseServer = mock(DatabaseServer.class);
         SQLAdmin sqlAdmin = mock(SQLAdmin.class);
         Compute compute = mock(Compute.class);
-        SQLAdmin.Instances sqlAdminInstances = mock(SQLAdmin.Instances.class);
-        SQLAdmin.Instances.List sqlAdminInstancesList = mock(SQLAdmin.Instances.List.class);
+        Instances sqlAdminInstances = mock(Instances.class);
+        Instances.List sqlAdminInstancesList = mock(Instances.List.class);
         InstancesListResponse instancesListResponse = mock(InstancesListResponse.class);
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
@@ -142,7 +148,7 @@ public class GcpDatabaseServerLaunchServiceTest {
 
         List<CloudResource> launch = underTest.launch(authenticatedContext, databaseStack, persistenceNotifier);
 
-        Assert.assertEquals(0, launch.size());
+        assertEquals(0, launch.size());
     }
 
     @Test
@@ -167,7 +173,7 @@ public class GcpDatabaseServerLaunchServiceTest {
                 .withRootUserName("rootUserName")
                 .withRootPassword("rootPassword")
                 .withFlavor("flavor")
-                .withUseSslEnforcement(true)
+                .withUseSslEnforcement(false)
                 .withParams(map)
                 .build();
 
@@ -178,16 +184,16 @@ public class GcpDatabaseServerLaunchServiceTest {
         SQLAdmin sqlAdmin = mock(SQLAdmin.class);
         Compute compute = mock(Compute.class);
         DatabaseInstance databaseInstance = mock(DatabaseInstance.class);
-        Compute.Subnetworks subnetworks = mock(Compute.Subnetworks.class);
-        Compute.Subnetworks.Get subnetworksGet = mock(Compute.Subnetworks.Get.class);
-        SQLAdmin.Users users = mock(SQLAdmin.Users.class);
-        SQLAdmin.Users.Insert usersInsert = mock(SQLAdmin.Users.Insert.class);
-        SQLAdmin.Instances.Get instancesGet = mock(SQLAdmin.Instances.Get.class);
-        SQLAdmin.Instances sqlAdminInstances = mock(SQLAdmin.Instances.class);
-        SQLAdmin.Instances.List sqlAdminInstancesList = mock(SQLAdmin.Instances.List.class);
+        Subnetworks subnetworks = mock(Subnetworks.class);
+        Subnetworks.Get subnetworksGet = mock(Subnetworks.Get.class);
+        Users users = mock(Users.class);
+        Users.Insert usersInsert = mock(Users.Insert.class);
+        Get instancesGet = mock(Get.class);
+        Instances sqlAdminInstances = mock(Instances.class);
+        Instances.List sqlAdminInstancesList = mock(Instances.List.class);
         InstancesListResponse instancesListResponse = mock(InstancesListResponse.class);
         Operation operation = mock(Operation.class);
-        SQLAdmin.Instances.Insert sqlAdminInstancesInsert = mock(SQLAdmin.Instances.Insert.class);
+        Insert sqlAdminInstancesInsert = mock(Insert.class);
         IpMapping ipMapping = new IpMapping();
         ipMapping.setIpAddress("10.0.0.0");
         ipMapping.setType("PRIVATE");
@@ -225,7 +231,7 @@ public class GcpDatabaseServerLaunchServiceTest {
 
         assertNull(databaseInstanceArgumentCaptor.getValue().getDiskEncryptionConfiguration());
 
-        Assert.assertEquals(1, launch.size());
+        assertEquals(1, launch.size());
     }
 
     @Test
@@ -261,16 +267,16 @@ public class GcpDatabaseServerLaunchServiceTest {
         SQLAdmin sqlAdmin = mock(SQLAdmin.class);
         Compute compute = mock(Compute.class);
         DatabaseInstance databaseInstance = mock(DatabaseInstance.class);
-        Compute.Subnetworks subnetworks = mock(Compute.Subnetworks.class);
-        Compute.Subnetworks.Get subnetworksGet = mock(Compute.Subnetworks.Get.class);
-        SQLAdmin.Users users = mock(SQLAdmin.Users.class);
-        SQLAdmin.Users.Insert usersInsert = mock(SQLAdmin.Users.Insert.class);
-        SQLAdmin.Instances.Get instancesGet = mock(SQLAdmin.Instances.Get.class);
-        SQLAdmin.Instances sqlAdminInstances = mock(SQLAdmin.Instances.class);
-        SQLAdmin.Instances.List sqlAdminInstancesList = mock(SQLAdmin.Instances.List.class);
+        Subnetworks subnetworks = mock(Subnetworks.class);
+        Subnetworks.Get subnetworksGet = mock(Subnetworks.Get.class);
+        Users users = mock(Users.class);
+        Users.Insert usersInsert = mock(Users.Insert.class);
+        Get instancesGet = mock(Get.class);
+        Instances sqlAdminInstances = mock(Instances.class);
+        Instances.List sqlAdminInstancesList = mock(Instances.List.class);
         InstancesListResponse instancesListResponse = mock(InstancesListResponse.class);
         Operation operation = mock(Operation.class);
-        SQLAdmin.Instances.Insert sqlAdminInstancesInsert = mock(SQLAdmin.Instances.Insert.class);
+        Insert sqlAdminInstancesInsert = mock(Insert.class);
         IpMapping ipMapping = new IpMapping();
         ipMapping.setIpAddress("10.0.0.0");
         ipMapping.setType("PRIVATE");
@@ -306,9 +312,9 @@ public class GcpDatabaseServerLaunchServiceTest {
 
         List<CloudResource> launch = underTest.launch(authenticatedContext, databaseStack, persistenceNotifier);
 
-        Assert.assertEquals("value", databaseInstanceArgumentCaptor.getValue().getDiskEncryptionConfiguration().getKmsKeyName());
+        assertEquals("value", databaseInstanceArgumentCaptor.getValue().getDiskEncryptionConfiguration().getKmsKeyName());
 
-        Assert.assertEquals(1, launch.size());
+        assertEquals(1, launch.size());
     }
 
     @Test
@@ -336,8 +342,8 @@ public class GcpDatabaseServerLaunchServiceTest {
         CloudCredential cloudCredential = mock(CloudCredential.class);
         SQLAdmin sqlAdmin = mock(SQLAdmin.class);
         Compute compute = mock(Compute.class);
-        SQLAdmin.Instances sqlAdminInstances = mock(SQLAdmin.Instances.class);
-        SQLAdmin.Instances.List sqlAdminInstancesList = mock(SQLAdmin.Instances.List.class);
+        Instances sqlAdminInstances = mock(Instances.class);
+        Instances.List sqlAdminInstancesList = mock(Instances.List.class);
         IpMapping ipMapping = new IpMapping();
         ipMapping.setIpAddress("10.0.0.0");
         ipMapping.setType("PRIVATE");
@@ -362,7 +368,7 @@ public class GcpDatabaseServerLaunchServiceTest {
         GcpResourceException gcpResourceException = assertThrows(GcpResourceException.class,
                 () -> underTest.launch(authenticatedContext, databaseStack, persistenceNotifier));
 
-        Assert.assertEquals("error: [ resourceType: GCP_DATABASE,  resourceName: driver ]", gcpResourceException.getMessage());
+        assertEquals("error: [ resourceType: GCP_DATABASE,  resourceName: driver ]", gcpResourceException.getMessage());
     }
 
     @Test
@@ -397,16 +403,16 @@ public class GcpDatabaseServerLaunchServiceTest {
         SQLAdmin sqlAdmin = mock(SQLAdmin.class);
         Compute compute = mock(Compute.class);
         DatabaseInstance databaseInstance = mock(DatabaseInstance.class);
-        Compute.Subnetworks subnetworks = mock(Compute.Subnetworks.class);
-        Compute.Subnetworks.Get subnetworksGet = mock(Compute.Subnetworks.Get.class);
-        SQLAdmin.Users users = mock(SQLAdmin.Users.class);
-        SQLAdmin.Users.Insert usersInsert = mock(SQLAdmin.Users.Insert.class);
-        SQLAdmin.Instances.Get instancesGet = mock(SQLAdmin.Instances.Get.class);
-        SQLAdmin.Instances sqlAdminInstances = mock(SQLAdmin.Instances.class);
-        SQLAdmin.Instances.List sqlAdminInstancesList = mock(SQLAdmin.Instances.List.class);
+        Subnetworks subnetworks = mock(Subnetworks.class);
+        Subnetworks.Get subnetworksGet = mock(Subnetworks.Get.class);
+        Users users = mock(Users.class);
+        Users.Insert usersInsert = mock(Users.Insert.class);
+        Get instancesGet = mock(Get.class);
+        Instances sqlAdminInstances = mock(Instances.class);
+        Instances.List sqlAdminInstancesList = mock(Instances.List.class);
         InstancesListResponse instancesListResponse = mock(InstancesListResponse.class);
         Operation operation = mock(Operation.class);
-        SQLAdmin.Instances.Insert sqlAdminInstancesInsert = mock(SQLAdmin.Instances.Insert.class);
+        Insert sqlAdminInstancesInsert = mock(Insert.class);
         IpMapping ipMapping = new IpMapping();
         ipMapping.setIpAddress("10.0.0.0");
         ipMapping.setType("PRIVATE");
@@ -448,6 +454,34 @@ public class GcpDatabaseServerLaunchServiceTest {
         GcpResourceException gcpResourceException = assertThrows(GcpResourceException.class,
                 () -> underTest.launch(authenticatedContext, databaseStack, persistenceNotifier));
 
-        Assert.assertEquals("error: [ resourceType: GCP_DATABASE,  resourceName: driver ]", gcpResourceException.getMessage());
+        assertEquals("error: [ resourceType: GCP_DATABASE,  resourceName: driver ]", gcpResourceException.getMessage());
+    }
+
+    @Test
+    public void testLaunchWhenDBSSLEnforcementIsRequested() {
+        DatabaseStack databaseStack = mock(DatabaseStack.class);
+        DatabaseServer databaseServer = mock(DatabaseServer.class);
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+        when(databaseServer.isUseSslEnforcement()).thenReturn(true);
+        GcpDatabaseServerView gcpDatabaseServerView = mock(GcpDatabaseServerView.class);
+        Subnetwork subnetwork = mock(Subnetwork.class);
+
+        Settings settings = underTest.getSettings(databaseStack, gcpDatabaseServerView, subnetwork);
+
+        assertEquals("ENCRYPTED_ONLY", settings.getIpConfiguration().getSslMode());
+    }
+
+    @Test
+    public void testLaunchWhenDBSSLEnforcementIsNOTRequested() {
+        DatabaseStack databaseStack = mock(DatabaseStack.class);
+        DatabaseServer databaseServer = mock(DatabaseServer.class);
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+        when(databaseServer.isUseSslEnforcement()).thenReturn(false);
+        GcpDatabaseServerView gcpDatabaseServerView = mock(GcpDatabaseServerView.class);
+        Subnetwork subnetwork = mock(Subnetwork.class);
+
+        Settings settings = underTest.getSettings(databaseStack, gcpDatabaseServerView, subnetwork);
+
+        assertEquals("ALLOW_UNENCRYPTED_AND_ENCRYPTED", settings.getIpConfiguration().getSslMode());
     }
 }

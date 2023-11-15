@@ -30,8 +30,8 @@ class CloudDatabaseServerSslCertificateTest {
         CloudDatabaseServerSslCertificate sslCertificate =
                 new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERTIFICATE_IDENTIFIER);
 
-        assertThat(sslCertificate.getCertificateType()).isEqualTo(CloudDatabaseServerSslCertificateType.ROOT);
-        assertThat(sslCertificate.getCertificateIdentifier()).isSameAs(CERTIFICATE_IDENTIFIER);
+        assertThat(sslCertificate.certificateType()).isEqualTo(CloudDatabaseServerSslCertificateType.ROOT);
+        assertThat(sslCertificate.certificateIdentifier()).isSameAs(CERTIFICATE_IDENTIFIER);
     }
 
 }

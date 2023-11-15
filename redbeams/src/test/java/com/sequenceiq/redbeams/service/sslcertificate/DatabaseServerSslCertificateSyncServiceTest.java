@@ -194,6 +194,22 @@ class DatabaseServerSslCertificateSyncServiceTest {
     }
 
     @Test
+    void testSyncSslCertificateIfNeededForGcpReturnsValidRootCert() throws Exception {
+        DBStack dbStack = getDBStack(SSL_CONF_ID);
+        dbStack.setCloudPlatform(CloudPlatform.GCP.name());
+        when(sslConfigService.fetchById(SSL_CONF_ID)).thenReturn(createSslConfig(SslCertificateType.CLOUD_PROVIDER_OWNED, null));
+
+        setupCloudConnectorMock();
+        CloudDatabaseServerSslCertificate certificate = new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERT_ID_2, CERT_PEM);
+        when(resourceConnector.getDatabaseServerActiveSslRootCertificate(authenticatedContext, databaseStack)).thenReturn(certificate);
+
+        underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+
+        verify(sslConfigService).save(sslConfigArgumentCaptor.capture());
+        verifySslConfigCaptured(0, Set.of(CERT_PEM));
+    }
+
+    @Test
     void syncSslCertificateIfNeededTestWhenSuccessSslAwsCloudProviderOwnedMatchingActiveSslRootCertificate() throws Exception {
         DBStack dbStack = getDBStack(SSL_CONF_ID);
         dbStack.setCloudPlatform(CloudPlatform.AWS.name());

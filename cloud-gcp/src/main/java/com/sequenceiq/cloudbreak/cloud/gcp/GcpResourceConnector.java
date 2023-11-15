@@ -15,6 +15,7 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
+import com.sequenceiq.cloudbreak.cloud.gcp.sql.GcpDatabaseServerCertificateService;
 import com.sequenceiq.cloudbreak.cloud.gcp.sql.GcpDatabaseServerUpdateService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
+import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
@@ -41,6 +43,9 @@ public class GcpResourceConnector extends AbstractResourceConnector {
 
     @Inject
     private GcpDatabaseServerUpdateService gcpDatabaseServerUpdateService;
+
+    @Inject
+    private GcpDatabaseServerCertificateService gcpDatabaseServerCertificateService;
 
     @Inject
     private ContextBuilders contextBuilders;
@@ -133,5 +138,11 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     @Override
     public void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword) {
         gcpDatabaseServerUpdateService.updateRootUserPassword(authenticatedContext, databaseStack, newPassword);
+    }
+
+    @Override
+    public CloudDatabaseServerSslCertificate getDatabaseServerActiveSslRootCertificate(AuthenticatedContext authenticatedContext, DatabaseStack stack)
+            throws Exception {
+        return gcpDatabaseServerCertificateService.getActiveSslRootCertificate(authenticatedContext, stack);
     }
 }

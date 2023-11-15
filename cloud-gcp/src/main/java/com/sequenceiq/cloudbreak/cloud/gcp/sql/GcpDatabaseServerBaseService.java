@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.common.api.type.ResourceType;
 
 public abstract class GcpDatabaseServerBaseService extends AbstractGcpDatabaseBaseResourceChecker {
+
     protected Optional<DatabaseInstance> getDatabaseInstance(String deploymentName, SQLAdmin sqlAdmin, String projectId) throws IOException {
         InstancesListResponse list = sqlAdmin.instances().list(projectId).execute();
         Optional<DatabaseInstance> databaseInstance = Optional.empty();

@@ -17,6 +17,7 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Subnetwork;
 import com.google.api.services.sqladmin.SQLAdmin;
+import com.google.api.services.sqladmin.SQLAdmin.Instances.Insert;
 import com.google.api.services.sqladmin.model.BackupConfiguration;
 import com.google.api.services.sqladmin.model.DatabaseInstance;
 import com.google.api.services.sqladmin.model.DiskEncryptionConfiguration;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.view.GcpDatabaseNetworkView;
 import com.sequenceiq.cloudbreak.cloud.gcp.view.GcpDatabaseServerView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -49,6 +51,10 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
     private static final int POSTGRESQL_SERVER_PORT = 5432;
 
     private static final String GCP_SQL_INSTANCE_PRIVATE_IP_TYPE = "PRIVATE";
+
+    private static final String DEFAULT_ENCRYPTION = "ALLOW_UNENCRYPTED_AND_ENCRYPTED";
+
+    private static final String ENCRYPTED_ONLY = "ENCRYPTED_ONLY";
 
     @Inject
     private DatabasePollerService databasePollerService;
@@ -81,7 +87,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
             Optional<DatabaseInstance> databaseInstance = getDatabaseInstance(deploymentName, sqlAdmin, projectId);
             if (databaseInstance.isEmpty()) {
                 DatabaseInstance newDatabaseInstance = createDatabaseInstance(stack, deploymentName, compute, projectId);
-                SQLAdmin.Instances.Insert insert = sqlAdmin.instances().insert(projectId, newDatabaseInstance);
+                Insert insert = sqlAdmin.instances().insert(projectId, newDatabaseInstance);
                 insert.setPrettyPrint(Boolean.TRUE);
                 try {
                     Operation operation = insert.execute();
@@ -90,8 +96,8 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                     databasePollerService.launchDatabasePoller(ac, List.of(operationAwareCloudResource));
                     DatabaseInstance instance = sqlAdmin.instances().get(projectId, deploymentName).execute();
                     if (instance != null) {
-                        CloudResource.Builder rdsInstance = CloudResource.builder();
                         String instanceName = instance.getName();
+                        Builder rdsInstance = CloudResource.builder();
                         buildableResource.add(getRdsHostName(instance, rdsInstance, instanceName, availabilityZone));
                         User rootUser = getRootUser(stack, projectId, instanceName);
                         operation = sqlAdmin.users()
@@ -125,8 +131,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                 .build();
     }
 
-    public CloudResource getRdsHostName(DatabaseInstance instance, CloudResource.Builder rdsInstance,
-        String instanceName, String availabilityZone) {
+    public CloudResource getRdsHostName(DatabaseInstance instance, Builder rdsInstance, String instanceName, String availabilityZone) {
         return rdsInstance
                 .withType(ResourceType.RDS_HOSTNAME)
                 .withInstanceId(instanceName)
@@ -181,7 +186,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
         return databaseInstance;
     }
 
-    private Settings getSettings(DatabaseStack stack, GcpDatabaseServerView databaseServerView, Subnetwork subnetworkForRedbeams) {
+    public Settings getSettings(DatabaseStack stack, GcpDatabaseServerView databaseServerView, Subnetwork subnetworkForRedbeams) {
         return new Settings()
                 .setTier(stack.getDatabaseServer().getFlavor())
                 .setActivationPolicy("ALWAYS")
@@ -192,6 +197,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                 .setIpConfiguration(new IpConfiguration()
                         .setPrivateNetwork(subnetworkForRedbeams.getNetwork())
                         .setIpv4Enabled(false)
+                        .setSslMode(stack.getDatabaseServer().isUseSslEnforcement() ? ENCRYPTED_ONLY : DEFAULT_ENCRYPTION)
                 )
                 .setUserLabels(gcpLabelUtil.createLabelsFromTagsMap(stack.getTags()))
                 .setBackupConfiguration(
