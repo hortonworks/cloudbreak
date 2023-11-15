@@ -5,7 +5,8 @@
 #this value changed 2023.02.02 from 4.6 to 4.65 (additional FreeIPA creation in MockSdxBlueprintLoadTests, MockSdxResizeTests, MockSdxRetryTests, MockSdxTests)
 #this value changed 2022.11.24 from 4.5 to 4.6 (new test was added: DistroXUpgradeTests.testDistroXOsUpgradeByUpgradeSets)
 #this value changed 2023.11.13 from 4.9 to 5.1 (new test was added: DistroXUpgradeTests.testDistroXBatchOsUpgrade)
-: ${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT:="5.1GB"}
+#this value changed 2023.11.15 from 5.1 to 5.5 (new test was added: Cloudera runtime 7.3.0 introduced)
+: ${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT:="5.5GB"}
 
 status_code=0
 

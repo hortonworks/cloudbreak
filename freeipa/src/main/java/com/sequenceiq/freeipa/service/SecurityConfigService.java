@@ -77,6 +77,7 @@ public class SecurityConfigService {
             SecurityConfig securityConfig = measure(() -> tlsSecurityService.generateSecurityKeys(stack.getAccountId()), LOGGER,
                     "Generating security keys took {} ms for {}", stack.getName());
             transactionService.required(() -> {
+                saltSecurityConfigRepository.save(securityConfig.getSaltSecurityConfig());
                 SecurityConfig savedSecurityConfig = securityConfigRepository.save(securityConfig);
                 stack.setSecurityConfig(savedSecurityConfig);
                 stackService.save(stack);

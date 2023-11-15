@@ -83,6 +83,8 @@ class SecurityConfigServiceTest {
         stack.setAccountId("accountId");
         when(stackService.getStackById(2L)).thenReturn(stack);
         SecurityConfig securityConfig = new SecurityConfig();
+        SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
+        securityConfig.setSaltSecurityConfig(saltSecurityConfig);
         when(tlsSecurityService.generateSecurityKeys(stack.getAccountId())).thenReturn(securityConfig);
         when(securityConfigRepository.save(securityConfig)).thenAnswer(invocation -> invocation.getArgument(0, SecurityConfig.class));
         doAnswer(invocation -> {
@@ -97,6 +99,7 @@ class SecurityConfigServiceTest {
         Stack savedStack = stackArgumentCaptor.getValue();
         assertEquals(stack, savedStack);
         assertEquals(securityConfig, savedStack.getSecurityConfig());
+        verify(saltSecurityConfigRepository).save(saltSecurityConfig);
     }
 
     @Test
