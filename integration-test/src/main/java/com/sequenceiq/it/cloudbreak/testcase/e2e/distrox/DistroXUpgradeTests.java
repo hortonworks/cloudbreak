@@ -1,7 +1,10 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -9,9 +12,13 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.assertion.distrox.AwsAvailabilityZoneAssertion;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
+import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
+import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -19,10 +26,18 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXUpgradeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
+import com.sequenceiq.it.cloudbreak.util.FreeIpaInstanceUtil;
+import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
+import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
@@ -42,12 +57,72 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
     @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
 
+    @Inject
+    private ImageCatalogTestClient imageCatalogTestClient;
+
+    @Inject
+    private FreeIpaTestClient freeIpaTestClient;
+
+    @Inject
+    private EnvironmentTestClient environmentTestClient;
+
+    @Inject
+    private RecipeTestClient recipeTestClient;
+
+    @Inject
+    private RecipeUtil recipeUtil;
+
+    @Inject
+    private FreeIpaInstanceUtil freeIpaInstanceUtil;
+
+    @Inject
+    private SdxUtil sdxUtil;
+
+    @Inject
+    private DistroxUtil distroxUtil;
+
+    @Inject
+    private EncryptedTestUtil encryptedTestUtil;
+
+    private String resourceGroupForTest;
+
     @Override
     protected void setupTest(TestContext testContext) {
+        testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
-        createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
-        createEnvironmentWithFreeIpa(testContext);
+        createDefaultCredential(testContext);
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
+    @Description(
+            given = "there is a running Cloudbreak, and an environment with SDX and two DistroX clusters in " +
+                    "available state, one cluster created with deafult catalog and one cluster created with production catalog" +
+                    "disk are encrypted",
+            when = "upgrade called on both DistroX clusters",
+            then = "Both DistroX upgrade should be successful," + " the clusters should be up and running" +
+                    "disks are encrypted too")
+    public void testDistroXUpgradesWithEncryptedDisks(TestContext testContext) {
+
+        String currentRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion();
+        String targetRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion();
+        String currentRuntimeVersion3rdParty = commonClusterManagerProperties.getUpgrade().getDistroXUpgrade3rdPartyCurrentVersion();
+        String targetRuntimeVersion3rdParty = commonClusterManagerProperties.getUpgrade().getDistroXUpgrade3rdPartyTargetVersion();
+
+        String firstDhName = resourcePropertyProvider().getName();
+        String secondDhName = resourcePropertyProvider().getName();
+
+        encryptedTestUtil.createEnvironment(testContext);
+        encryptedTestUtil.createFreeipa(testContext, commonCloudProperties());
+        encryptedTestUtil.doFreeipUserSync(testContext);
+        encryptedTestUtil.assertEnvironmentAndFreeipa(testContext, null);
+        createDatalake(testContext, currentRuntimeVersion);
+        encryptedTestUtil.assertDatalake(testContext, null);
+        createDatahubs(testContext, currentRuntimeVersion, currentRuntimeVersion3rdParty, firstDhName, secondDhName);
+        encryptedTestUtil.assertDatahubWithName(testContext, null, firstDhName);
+        encryptedTestUtil.assertDatahubWithName(testContext, null, secondDhName);
+        upgradeAndAssertUpgrade(testContext, targetRuntimeVersion, targetRuntimeVersion3rdParty, firstDhName, secondDhName);
     }
 
     protected String getUuid(TestContext testContext, String prodCatalogName, String currentRuntimeVersion3rdParty) {
@@ -60,77 +135,81 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                         .equals(testContext.commonCloudProperties().getCloudProvider().toLowerCase(Locale.ROOT))).iterator().next().getUuid();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
-    @UseSpotInstances
-    @Description(
-            given = "there is a running Cloudbreak, and an environment with SDX and two DistroX clusters in " +
-            "available state, one cluster created with deafult catalog and one cluster created with production catalog",
-            when = "upgrade called on both DistroX clusters",
-            then = "Both DistroX upgrade should be successful," + " the clusters should be up and running")
-    public void testDistroXUpgrades(TestContext testContext) {
-        String imageSettings = resourcePropertyProvider().getName();
-        String currentRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion();
-        String targetRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion();
-        String currentRuntimeVersion3rdParty = commonClusterManagerProperties.getUpgrade().getDistroXUpgrade3rdPartyCurrentVersion();
-        String targetRuntimeVersion3rdParty = commonClusterManagerProperties.getUpgrade().getDistroXUpgrade3rdPartyTargetVersion();
-        String sdxName = resourcePropertyProvider().getName();
-        String distroXName = resourcePropertyProvider().getName();
-        String distroX3rdPartyName = resourcePropertyProvider().getName();
-        String thirdPartyCatalogName = resourcePropertyProvider().getName();
-        AtomicReference<String> uuid = new AtomicReference<>();
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-
-        testContext
-                .given(sdxName, SdxTestDto.class)
-                .withRuntimeVersion(currentRuntimeVersion)
-                .withCloudStorage(getCloudStorageRequest(testContext))
-                .withExternalDatabase(sdxDatabaseRequest)
-                .when(sdxTestClient.create(), key(sdxName))
-                .await(SdxClusterStatusResponse.RUNNING, key(sdxName))
-                .awaitForHealthyInstances()
-                .validate();
-        testContext
-                .given(distroXName, DistroXTestDto.class)
-                .withTemplate(commonClusterManagerProperties.getInternalDistroXBlueprintName(currentRuntimeVersion))
-                .withPreferredSubnetsForInstanceNetworkIfMultiAzEnabledOrJustFirst()
-                .when(distroXTestClient.create(), key(distroXName))
-                .validate();
-        createImageValidationSourceCatalog(testContext, commonClusterManagerProperties.getUpgrade()
-                .getImageCatalogUrl3rdParty(), thirdPartyCatalogName);
-        uuid.set(getUuid(testContext, thirdPartyCatalogName, currentRuntimeVersion3rdParty));
-        testContext
-                .given(imageSettings, DistroXImageTestDto.class).withImageCatalog(thirdPartyCatalogName)
-                .withImageId(uuid.get())
-                .given(distroX3rdPartyName, DistroXTestDto.class)
-                .withTemplate(commonClusterManagerProperties.getInternalDistroXBlueprintName(currentRuntimeVersion3rdParty))
-                .withPreferredSubnetsForInstanceNetworkIfMultiAzEnabledOrJustFirst()
-                .withImageSettings(imageSettings)
-                .when(distroXTestClient.create(), key(distroX3rdPartyName))
-                .await(STACK_AVAILABLE, key(distroX3rdPartyName))
-                .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> checkImageId(testDto, uuid.get()))
-                .given(distroXName, DistroXTestDto.class)
-                .await(STACK_AVAILABLE, key(distroXName))
-                .awaitForHealthyInstances()
-                .then(new AwsAvailabilityZoneAssertion())
-                .validate();
+    private void upgradeAndAssertUpgrade(TestContext testContext, String targetRuntimeVersion, String targetRuntimeVersion3rdParty,
+            String firstDhName, String secondDhName) {
         testContext
                 .given(DistroXUpgradeTestDto.class)
                 .withRuntime(targetRuntimeVersion)
-                .given(distroXName, DistroXTestDto.class)
-                .when(distroXTestClient.upgrade(), key(distroXName))
+                .given(firstDhName, DistroXTestDto.class)
+                .when(distroXTestClient.upgrade(), key(firstDhName))
                 .given(DistroXUpgradeTestDto.class)
                 .withRuntime(targetRuntimeVersion3rdParty)
-                .given(distroX3rdPartyName, DistroXTestDto.class)
-                .when(distroXTestClient.upgrade(), key(distroX3rdPartyName))
-                .await(STACK_AVAILABLE, key(distroX3rdPartyName))
+                .given(secondDhName, DistroXTestDto.class)
+                .when(distroXTestClient.upgrade(), key(secondDhName))
+                .await(STACK_AVAILABLE, key(secondDhName))
                 .awaitForHealthyInstances()
-                .given(distroXName, DistroXTestDto.class)
-                .await(STACK_AVAILABLE, key(distroXName))
+                .given(firstDhName, DistroXTestDto.class)
+                .await(STACK_AVAILABLE, key(firstDhName))
                 .awaitForHealthyInstances()
-                .then(new AwsAvailabilityZoneAssertion())
+                .then(new AwsAvailabilityZoneAssertion(), key(firstDhName))
                 .validate();
+    }
+
+    private void createDatahubs(TestContext testContext, String currentRuntimeVersion, String currentRuntimeVersion3rdParty,
+            String firstDhName, String secondDhName) {
+        AtomicReference<String> uuid = new AtomicReference<>();
+        String thirdPartyCatalogName = resourcePropertyProvider().getName();
+        String imageName = resourcePropertyProvider().getName();
+
+        testContext
+                .given(firstDhName, DistroXTestDto.class)
+                .withTemplate(commonClusterManagerProperties.getInternalDistroXBlueprintName(currentRuntimeVersion))
+                .withPreferredSubnetsForInstanceNetworkIfMultiAzEnabledOrJustFirst()
+                .when(distroXTestClient.create(), key(firstDhName))
+                .validate();
+
+        testContext.given(ImageCatalogTestDto.class)
+                .withUrl(commonClusterManagerProperties.getUpgrade().getImageCatalogUrl3rdParty())
+                .withoutCleanup()
+                .withName(thirdPartyCatalogName)
+            .when(imageCatalogTestClient.createIfNotExistV4());
+
+        uuid.set(getUuid(testContext, thirdPartyCatalogName, currentRuntimeVersion3rdParty));
+        testContext
+                .given(imageName, DistroXImageTestDto.class).withImageCatalog(thirdPartyCatalogName)
+                .withImageId(uuid.get())
+                .given(secondDhName, DistroXTestDto.class)
+                .withTemplate(commonClusterManagerProperties.getInternalDistroXBlueprintName(currentRuntimeVersion3rdParty))
+                .withPreferredSubnetsForInstanceNetworkIfMultiAzEnabledOrJustFirst()
+                .withImageSettings(imageName)
+                .when(distroXTestClient.create(), key(secondDhName))
+                .await(STACK_AVAILABLE, key(secondDhName))
+                .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> checkImageId(testDto, uuid.get()), key(secondDhName))
+                .given(secondDhName, DistroXTestDto.class)
+                .await(STACK_AVAILABLE, key(secondDhName))
+                .awaitForHealthyInstances()
+                .then(new AwsAvailabilityZoneAssertion(), key(secondDhName))
+                .validate();
+    }
+
+    private void createDatalake(TestContext testContext, String currentRuntimeVersion) {
+        testContext
+                .given(SdxTestDto.class)
+                .withRuntimeVersion(currentRuntimeVersion)
+                .withCloudStorage(getCloudStorageRequest(testContext))
+                .withExternalDatabase(sdxDbRequest())
+                .when(sdxTestClient.create())
+                .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForHealthyInstances()
+                .validate();
+    }
+
+    private SdxDatabaseRequest sdxDbRequest() {
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+
+        return sdxDatabaseRequest;
     }
 
     private DistroXTestDto checkImageId(DistroXTestDto testDto, String expectedImageId) {
@@ -139,6 +218,21 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
             throw new TestFailException("The selected image ID is: " + currentImageId + " instead of: "
                     + expectedImageId);
         }
+        return testDto;
+    }
+
+    private EnvironmentTestDto verifyEnvironmentResponseDiskEncryptionKey(TestContext testContext, EnvironmentTestDto testDto,
+            EnvironmentClient environmentClient) {
+        DetailedEnvironmentResponse environment = environmentClient.getDefaultClient().environmentV1Endpoint().getByName(testDto.getName());
+        testContext.getCloudProvider().verifyDiskEncryptionKey(environment, testDto.getRequest().getName());
+        return testDto;
+    }
+
+    private FreeIpaTestDto verifyFreeIpaVolumeEncryptionKey(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient freeIpaClient) {
+        List<String> instanceIds = freeIpaInstanceUtil.getInstanceIds(testDto, freeIpaClient, MASTER.getName());
+        List<String> volumeKmsKeyIds = new ArrayList<>(testContext.getCloudProvider().getCloudFunctionality()
+                .listVolumeEncryptionKeyIds(testDto.getName(), resourceGroupForTest, instanceIds));
+        testContext.getCloudProvider().verifyVolumeEncryptionKey(volumeKmsKeyIds, testContext.given(EnvironmentTestDto.class).getRequest().getName());
         return testDto;
     }
 }

@@ -111,6 +111,9 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
     @Inject
     private SaltHighStateDurationAssertions saltHighStateDurationAssertions;
 
+    @Inject
+    private EncryptedTestUtil encryptedTestUtil;
+
     @Override
     protected void setupTest(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
@@ -136,70 +139,21 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
         String preTerminationRecipeName = resourcePropertyProvider().getName();
         DistroXDatabaseRequest distroXDatabaseRequest = new DistroXDatabaseRequest();
 
-        testContext.given(RecipeTestDto.class)
-                    .withName(preTerminationRecipeName)
-                    .withContent(recipeUtil.generatePreTerminationRecipeContentForE2E(applicationContext, preTerminationRecipeName))
-                    .withRecipeType(PRE_TERMINATION)
-                .when(recipeTestClient.createV4());
+        prepareRecipe(testContext, preTerminationRecipeName);
 
-        List<DistroXInstanceGroupTestDto> distroXInstanceGroupTestDtos = new DistroXInstanceGroupsBuilder(testContext)
-                .defaultHostGroup()
-                .withDiskEncryption()
-                .withRecipes(Set.of(preTerminationRecipeName))
-                .build();
+        List<DistroXInstanceGroupTestDto> distroXInstanceGroupTestDtos =
+                getDistroXInstanceGroupTestDtoWithEncryptionAndRecipe(testContext, preTerminationRecipeName);
         distroXDatabaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA);
 
-        testContext
-                .given(EnvironmentNetworkTestDto.class)
-                .given("telemetry", TelemetryTestDto.class)
-                    .withLogging()
-                    .withReportClusterLogs()
-                .given(EnvironmentTestDto.class)
-                    .withNetwork()
-                    .withResourceEncryption()
-                    .withTelemetry("telemetry")
-                    .withTunnel(testContext.getTunnel())
-                    .withCreateFreeIpa(Boolean.FALSE)
-                .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
-                .given(FreeIpaTestDto.class)
-                    .withEnvironment()
-                    .withTelemetry("telemetry")
-                    .withCatalog(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
-                        commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
-                .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE)
-                .awaitForHealthyInstances()
-                .given(FreeIpaUserSyncTestDto.class)
-                .when(freeIpaTestClient.getLastSyncOperationStatus())
-                .await(OperationState.COMPLETED)
-                .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.describe())
-                .then(this::verifyEnvironmentResponseDiskEncryptionKey)
-                .given(FreeIpaTestDto.class)
-                .then(this::verifyFreeIpaVolumeEncryptionKey)
-                .given(SdxTestDto.class)
-                    .withCloudStorage()
-                    .withEnableMultiAz()
-                .when(sdxTestClient.create())
-                .await(SdxClusterStatusResponse.RUNNING)
-                .awaitForHealthyInstances()
-                .then(this::verifySdxVolumeEncryptionKey)
-                .given(DistroXTestDto.class)
-                    .withInstanceGroupsEntity(distroXInstanceGroupTestDtos)
-                    .withExternalDatabase(distroXDatabaseRequest)
-                .when(distroXTestClient.create())
-                .await(STACK_AVAILABLE)
-                .awaitForHealthyInstances()
-                .then(saltHighStateDurationAssertions::saltHighStateDurationLimits)
-                .then(this::verifyDistroxVolumeEncryptionKey)
-                .then(this::verifyAwsEnaDriver)
-                .then(new AwsAvailabilityZoneAssertion())
-                .then(validateTemplateContainsExternalDatabaseHostname())
-                .when(distroXTestClient.delete())
-                .await(STACK_DELETED)
-                .then((tc, testDto, client) -> verifyPreTerminationRecipe(tc, testDto, getBaseLocationForPreTermination(tc), preTerminationRecipeName))
-                .validate();
+        encryptedTestUtil.createEnvironment(testContext);
+        encryptedTestUtil.createFreeipa(testContext, commonCloudProperties());
+        encryptedTestUtil.doFreeipUserSync(testContext);
+        encryptedTestUtil.assertEnvironmentAndFreeipa(testContext, resourceGroupForTest);
+        encryptedTestUtil.createDatalake(testContext);
+        encryptedTestUtil.assertDatalake(testContext, resourceGroupForTest);
+        encryptedTestUtil.createDatahub(testContext, distroXDatabaseRequest, distroXInstanceGroupTestDtos);
+        encryptedTestUtil.assertDatahub(testContext, resourceGroupForTest);
+        encryptedTestUtil.deleteDatahub(testContext, preTerminationRecipeName, testContext.getCloudProvider().getBaseLocationForPreTermination());
     }
 
     @Test(dataProvider = TEST_CONTEXT, groups = "azure_singlerg")
@@ -207,7 +161,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
     @Description(
             given = "there is a valid Azure credential and a new resource group",
             when = "environment with freeIpa should be created in the resource group with encrypted volume",
-                and = "SDX then distroX also with encrypted volumes should be created for environment",
+            and = "SDX then distroX also with encrypted volumes should be created for environment",
             then = "freeIpa, sdx and distroX volumes should be encrypted with the provided key")
     public void testCreateDistroXWithEncryptedVolumesInSingleRG(TestContext testContext) {
         DistroXDatabaseRequest distroXDatabaseRequest = new DistroXDatabaseRequest();
@@ -222,28 +176,31 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                 createdResourceGroup.provisioningState());
 
         testContext
+                //environment with telemetry
                 .given(EnvironmentNetworkTestDto.class)
-                    .withServiceEndpoints(ServiceEndpointCreation.DISABLED)
+                .withServiceEndpoints(ServiceEndpointCreation.DISABLED)
                 .given("telemetry", TelemetryTestDto.class)
-                    .withLogging()
-                    .withReportClusterLogs()
+                .withLogging()
+                .withReportClusterLogs()
                 .given(EnvironmentTestDto.class)
-                    .withNetwork()
-                    .withResourceGroup(ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE_SINGLE, resourceGroupForTest)
-                    .withResourceEncryption()
-                    .withTelemetry("telemetry")
-                    .withTunnel(testContext.getTunnel())
-                    .withCreateFreeIpa(Boolean.FALSE)
+                .withNetwork()
+                .withResourceGroup(ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE_SINGLE, resourceGroupForTest)
+                .withResourceEncryption()
+                .withTelemetry("telemetry")
+                .withTunnel(testContext.getTunnel())
+                .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
+                //assert cloudprovider
                 .then((context, dto, client) -> {
                     context.getCloudProviderAssertion().assertServiceEndpoint(dto);
                     return dto;
                 })
                 .await(EnvironmentStatus.AVAILABLE)
+                //freeipa from catalog and sync
                 .given(FreeIpaTestDto.class)
-                    .withEnvironment()
-                    .withTelemetry("telemetry")
-                    .withCatalog(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
+                .withEnvironment()
+                .withTelemetry("telemetry")
+                .withCatalog(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
                         commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
@@ -253,26 +210,48 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                 .await(OperationState.COMPLETED)
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe())
+                //assert disc encrypt
                 .then(this::verifyEnvironmentResponseDiskEncryptionKey)
                 .given(FreeIpaTestDto.class)
                 .then(this::verifyFreeIpaVolumeEncryptionKey)
+                //create sdx
                 .given(SdxTestDto.class)
-                    .withCloudStorage()
+                .withCloudStorage()
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
+                //assert sdx
                 .then(this::verifySdxVolumeEncryptionKey)
+                //create dh
                 .given(DistroXTestDto.class)
-                    .withInstanceGroupsEntity(distroXInstanceGroupTestDtos)
-                    .withExternalDatabase(distroXDatabaseRequest)
+                .withInstanceGroupsEntity(distroXInstanceGroupTestDtos)
+                .withExternalDatabase(distroXDatabaseRequest)
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
+                //assert encryption
                 .then(this::verifyDistroxVolumeEncryptionKey)
                 .then(this::verifyAwsEnaDriver)
                 .then(new AwsAvailabilityZoneAssertion())
                 .then(validateTemplateContainsExternalDatabaseHostname())
                 .validate();
+    }
+
+    private void prepareRecipe(TestContext testContext, String preTerminationRecipeName) {
+        testContext.given(RecipeTestDto.class)
+                    .withName(preTerminationRecipeName)
+                    .withContent(recipeUtil.generatePreTerminationRecipeContentForE2E(applicationContext, preTerminationRecipeName))
+                    .withRecipeType(PRE_TERMINATION)
+                .when(recipeTestClient.createV4());
+    }
+
+    private static List<DistroXInstanceGroupTestDto> getDistroXInstanceGroupTestDtoWithEncryptionAndRecipe(TestContext testContext,
+            String preTerminationRecipeName) {
+        return new DistroXInstanceGroupsBuilder(testContext)
+                .defaultHostGroup()
+                .withDiskEncryption()
+                .withRecipes(Set.of(preTerminationRecipeName))
+                .build();
     }
 
     private ResourceGroup createResourceGroupForEnvironment(TestContext testContext) {
