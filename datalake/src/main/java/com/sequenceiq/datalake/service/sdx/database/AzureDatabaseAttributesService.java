@@ -48,7 +48,7 @@ public class AzureDatabaseAttributesService {
                 .map(SdxDatabase::getAttributes)
                 .map(Json::getMap)
                 .map(attrMap -> (String) attrMap.get(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID))
-                .get();
+                .orElse(null);
     }
 
     public void configureAzureDatabase(DatabaseRequest internalDatabaseRequest, SdxDatabaseRequest databaseRequest, SdxDatabase sdxDatabase) {
