@@ -160,7 +160,12 @@ cb:
 
   azure:
     host.name.prefix.length: 255
-    database.template.batchSize: 1
+    database:
+        template.batchSize: 1
+        flexible:
+            instanceTypeRegex: ^Standard_E4d?s.*$
+            serverEdition: MemoryOptimized
+            defaultInstanceType: Standard_E4ds_v4
 
   custom.user.data: |
     touch /tmp/custom-user-data

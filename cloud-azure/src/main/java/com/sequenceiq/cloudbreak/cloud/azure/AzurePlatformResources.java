@@ -1,15 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.DistroxEnabledInstanceTypes.AZURE_ENABLED_TYPES_LIST;
-import static com.sequenceiq.cloudbreak.cloud.model.DatabaseAvailabiltyType.databaseAvailabiltyType;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.EPHEMERAL;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.SSD;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.NETWORK_ID;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_NAME;
-import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.SAME_ZONE;
-import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.ZONE_REDUNDANT;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 
 import java.security.InvalidParameterException;
@@ -37,7 +33,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.azure.core.http.rest.PagedIterable;
-import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.compute.models.VirtualMachineSize;
 import com.azure.resourcemanager.msi.models.Identity;
 import com.azure.resourcemanager.network.models.Network;
@@ -46,16 +41,15 @@ import com.azure.resourcemanager.network.models.Subnet;
 import com.azure.resourcemanager.privatedns.models.PrivateDnsZone;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRegionProvider;
-import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -67,7 +61,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
-import com.sequenceiq.cloudbreak.cloud.model.DatabaseAvailabiltyType;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
@@ -122,6 +115,9 @@ public class AzurePlatformResources implements PlatformResources {
 
     @Inject
     private AzureAddressPrefixProvider azureAddressPrefixProvider;
+
+    @Inject
+    private AzureDatabaseCapabilityService azureDatabaseCapabilityService;
 
     @Override
     public CloudNetworks networks(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
@@ -332,50 +328,8 @@ public class AzurePlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "databaseCapabilities", key = "#cloudCredential?.id + #region.getRegionName() + 'databases'")
-    public PlatformDatabaseCapabilities databaseCapabilities(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        AzureClient client = azureClientService.getClient(cloudCredential);
-        Map<DatabaseAvailabiltyType, Collection<Region>> enabledRegions = new HashMap<>();
-        Map<Region, AzureCoordinate> regions = azureRegionProvider.enabledRegions();
-        if (region != null && !Strings.isNullOrEmpty(region.value())) {
-            regions = regions.entrySet()
-                    .stream()
-                    .filter(e ->
-                            e.getValue().getKey().equals(region.getRegionName()) || e.getValue().getDisplayName().equals(region.getRegionName()))
-                    .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
-        }
-        addSameZoneSupport(enabledRegions, regions);
-        addZoneRedundantSupport(client, enabledRegions, regions);
-        return new PlatformDatabaseCapabilities(enabledRegions);
-    }
-
-    private void addZoneRedundantSupport(AzureClient client, Map<DatabaseAvailabiltyType, Collection<Region>> enabledRegions,
-        Map<Region, AzureCoordinate> regions) {
-        Collection<Region> zoneRedundantRegions = new ArrayList<>();
-        for (Entry<Region, AzureCoordinate> entry : regions.entrySet()) {
-            try {
-                if (client.zoneRedundantFlexibleSupported(entry.getValue().getKey())) {
-                    addRegion(zoneRedundantRegions, entry);
-                }
-            } catch (ManagementException e) {
-                LOGGER.debug("We were not able to query flexible supported capability because of: " + e.getMessage());
-            }
-        }
-        enabledRegions.put(databaseAvailabiltyType(ZONE_REDUNDANT.name()), zoneRedundantRegions);
-    }
-
-    private void addSameZoneSupport(Map<DatabaseAvailabiltyType, Collection<Region>> enabledRegions,
-        Map<Region, AzureCoordinate> regions) {
-        Collection<Region> sameZoneRegions = new ArrayList<>();
-        for (Entry<Region, AzureCoordinate> entry : regions.entrySet()) {
-            addRegion(sameZoneRegions, entry);
-        }
-        enabledRegions.put(databaseAvailabiltyType(SAME_ZONE.name()), sameZoneRegions);
-    }
-
-    private void addRegion(Collection<Region> sameZoneRegions, Entry<Region, AzureCoordinate> entry) {
-        com.azure.core.management.Region region = com.azure.core.management.Region.fromName(entry.getKey().getRegionName());
-        sameZoneRegions.add(region(region.label()));
-        sameZoneRegions.add(region(region.name()));
+    public PlatformDatabaseCapabilities databaseCapabilities(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        return azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, region, filters);
     }
 
     @Override

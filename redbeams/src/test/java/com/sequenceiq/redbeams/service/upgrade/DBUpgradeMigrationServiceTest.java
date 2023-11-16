@@ -18,13 +18,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.dto.UpgradeDatabaseMigrationParams;
+import com.sequenceiq.redbeams.service.DatabaseCapabilityService;
 
 @ExtendWith(MockitoExtension.class)
 public class DBUpgradeMigrationServiceTest {
@@ -38,6 +42,9 @@ public class DBUpgradeMigrationServiceTest {
 
     @Mock
     private CloudConnector connector;
+
+    @Mock
+    private DatabaseCapabilityService databaseCapabilityService;
 
     @InjectMocks
     private DBUpgradeMigrationService dbUpgradeMigrationService;
@@ -61,13 +68,13 @@ public class DBUpgradeMigrationServiceTest {
         when(originalDbStack.getDatabaseServer()).thenReturn(originalDatabaseServerEntity);
 
         // When
-        DatabaseStack result = dbUpgradeMigrationService.mergeDatabaseStacks(originalDbStack, migrationParams, connector);
+        DatabaseStack result = dbUpgradeMigrationService.mergeDatabaseStacks(originalDbStack, migrationParams, connector, null, null);
 
         // Then
         assertNotNull(result);
         assertEquals(network, result.getNetwork());
         assertEquals(NEW_TEMPLATE, result.getTemplate());
-        assertCommonParameters();
+        assertCommonParameters("Standard_E4ds_v4");
     }
 
     @Test
@@ -88,21 +95,54 @@ public class DBUpgradeMigrationServiceTest {
         when(originalDbStack.getDatabaseServer()).thenReturn(originalDatabaseServerEntity);
 
         // When
-        DatabaseStack result = dbUpgradeMigrationService.mergeDatabaseStacks(originalDbStack, migrationParams, connector);
+        DatabaseStack result = dbUpgradeMigrationService.mergeDatabaseStacks(originalDbStack, migrationParams, connector, null, null);
 
         // Then
         assertNotNull(result);
         assertEquals(network, result.getNetwork());
         assertEquals(ORIGINAL_TEMPLATE, result.getTemplate());
-        assertCommonParameters();
+        assertCommonParameters("Standard_E4ds_v4");
     }
 
-    private void assertCommonParameters() {
+    @Test
+    void testMergeDatabaseStacksNoInstanceType() throws TemplatingNotSupportedException {
+        // Given
+        DBStack originalDbStack = mock(DBStack.class);
+        DatabaseStack migratedDatabaseStack = mock(DatabaseStack.class);
+        UpgradeDatabaseMigrationParams migrationParams = getMigrationParams();
+        migrationParams.setInstanceType(null);
+        CloudCredential cloudCredential = mock(CloudCredential.class);
+        CloudPlatformVariant cloudPlatformVariant = mock(CloudPlatformVariant.class);
+        ResourceConnector resourceConnector = mock(ResourceConnector.class);
+        com.sequenceiq.redbeams.domain.stack.DatabaseServer originalDatabaseServerEntity = new com.sequenceiq.redbeams.domain.stack.DatabaseServer();
+        Network network = mock(Network.class);
+
+        when(databaseStackConverter.convert(originalDbStack)).thenReturn(migratedDatabaseStack);
+        when(migratedDatabaseStack.getNetwork()).thenReturn(network);
+        when(migratedDatabaseStack.getTemplate()).thenReturn(ORIGINAL_TEMPLATE);
+        when(connector.resources()).thenReturn(resourceConnector);
+        when(connector.resources().getDBStackTemplate(migratedDatabaseStack)).thenThrow(TemplatingNotSupportedException.class);
+        when(originalDbStack.getDatabaseServer()).thenReturn(originalDatabaseServerEntity);
+        when(databaseCapabilityService.getDefaultInstanceType(connector, cloudCredential, cloudPlatformVariant,
+                Region.region(originalDbStack.getRegion()))).thenReturn("defaultInstanceType");
+
+        // When
+        DatabaseStack result = dbUpgradeMigrationService.mergeDatabaseStacks(originalDbStack, migrationParams, connector,
+                cloudCredential, cloudPlatformVariant);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(network, result.getNetwork());
+        assertEquals(ORIGINAL_TEMPLATE, result.getTemplate());
+        assertCommonParameters("defaultInstanceType");
+    }
+
+    private void assertCommonParameters(String instanceType) {
         ArgumentCaptor<DBStack> dbStackArgumentCaptor = ArgumentCaptor.forClass(DBStack.class);
         verify(databaseStackConverter).convert(dbStackArgumentCaptor.capture());
         com.sequenceiq.redbeams.domain.stack.DatabaseServer actual = dbStackArgumentCaptor.getValue().getDatabaseServer();
         assertEquals(128L, actual.getStorageSize());
-        assertEquals("Standard_E4ds_v4", actual.getInstanceType());
+        assertEquals(instanceType, actual.getInstanceType());
         assertEquals("test", actual.getAttributes().getValue("key"));
     }
 

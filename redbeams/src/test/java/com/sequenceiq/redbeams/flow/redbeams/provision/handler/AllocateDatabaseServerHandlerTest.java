@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
@@ -48,10 +50,12 @@ import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandlerTestS
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
 import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
+import com.sequenceiq.redbeams.service.DatabaseCapabilityService;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificatePrescriptionService;
@@ -134,6 +138,9 @@ class AllocateDatabaseServerHandlerTest {
     @Mock
     private DBStackToDatabaseStackConverter dbStackToDatabaseStackConverter;
 
+    @Mock
+    private DatabaseCapabilityService databaseCapabilityService;
+
     private DBStack dbStack;
 
     private DatabaseStack databaseStack;
@@ -143,8 +150,11 @@ class AllocateDatabaseServerHandlerTest {
         dbStack = new DBStack();
         dbStack.setCloudPlatform(CloudPlatform.AWS.name());
         dbStack.setEnvironmentId(ENV_CRN);
+        DatabaseServer databaseServer = new DatabaseServer();
+        databaseServer.setInstanceType("type");
+        dbStack.setDatabaseServer(databaseServer);
         lenient().when(dbStackService.getById(anyLong())).thenReturn(dbStack);
-        databaseStack = new DatabaseStack(null, null, Map.of(), "");
+        databaseStack = new DatabaseStack(null, com.sequenceiq.cloudbreak.cloud.model.DatabaseServer.builder().build(), Map.of(), "");
     }
 
     @Test
@@ -328,6 +338,32 @@ class AllocateDatabaseServerHandlerTest {
         verify(databaseServerSslCertificatePrescriptionService).prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
         verify(dbStackService).save(dbStack);
         assertEquals(NETWORK_ID, dbStack.getNetwork());
+    }
+
+    @Test
+    void doAcceptTestWhenInstanceTypeIsMissing() throws Exception {
+        initCommon();
+        dbStack.getDatabaseServer().setInstanceType(null);
+        dbStack.setNetwork(1L);
+
+        when(statusCheckFactory.newPollResourcesStateTask(eq(authenticatedContext), anyList(), eq(true))).thenReturn(task);
+        when(task.completed(any(ResourcesStatePollerResult.class))).thenReturn(true);
+        when(databaseCapabilityService.getDefaultInstanceType(any(CloudConnector.class), any(com.sequenceiq.cloudbreak.cloud.model.CloudCredential.class),
+                any(CloudPlatformVariant.class), any(Region.class))).thenReturn("defaultInstanceType");
+
+        Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
+
+        assertThat(selectable).isInstanceOf(AllocateDatabaseServerSuccess.class);
+
+        AllocateDatabaseServerSuccess allocateDatabaseServerSuccess = (AllocateDatabaseServerSuccess) selectable;
+        assertThat(allocateDatabaseServerSuccess.getResourceId()).isEqualTo(RESOURCE_ID);
+
+        verify(databaseCapabilityService).getDefaultInstanceType(cloudConnector, cloudCredential, cloudPlatformVariant, Region.region(dbStack.getRegion()));
+        verify(dbStackService).save(dbStack);
+        assertEquals("defaultInstanceType", dbStack.getDatabaseServer().getInstanceType());
+        ArgumentCaptor<DatabaseStack> databaseStackArgumentCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
+        verify(resourceConnector).launchDatabaseServer(any(AuthenticatedContext.class), databaseStackArgumentCaptor.capture(), any(PersistenceNotifier.class));
+        assertEquals("defaultInstanceType", databaseStackArgumentCaptor.getValue().getDatabaseServer().getFlavor());
     }
 
     private void initCommon() {

@@ -167,7 +167,7 @@ public interface PlatformResources {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 
-    default PlatformDatabaseCapabilities databaseCapabilities(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    default PlatformDatabaseCapabilities databaseCapabilities(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 

@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.azure.core.management.Region;
+import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -67,6 +69,85 @@ public class AzureRegionProviderTest {
         Assertions.assertEquals("North Europe", actual.getDefaultRegion());
     }
 
+    @Test
+    public void testFilterEnabledRegionsNoRegionGiven() {
+        Map<com.sequenceiq.cloudbreak.cloud.model.Region, AzureCoordinate> regions = Map.of(
+                com.sequenceiq.cloudbreak.cloud.model.Region.region("westus"), azureCoordinate("westus"),
+                com.sequenceiq.cloudbreak.cloud.model.Region.region("westus2"), azureCoordinate("westus2"));
+        ReflectionTestUtils.setField(underTest, "enabledRegions", regions);
+
+        Map<com.sequenceiq.cloudbreak.cloud.model.Region, AzureCoordinate> actualRegions = underTest.filterEnabledRegions();
+
+        Assertions.assertEquals(regions, actualRegions);
+    }
+
+    @Test
+    public void testFilterEnabledRegionsAllRegionsAreGiven() {
+        Map<com.sequenceiq.cloudbreak.cloud.model.Region, AzureCoordinate> regions = Map.of(
+                com.sequenceiq.cloudbreak.cloud.model.Region.region("westus"), azureCoordinate("westus"),
+                com.sequenceiq.cloudbreak.cloud.model.Region.region("westus2"), azureCoordinate("westus2"));
+        ReflectionTestUtils.setField(underTest, "enabledRegions", regions);
+
+        Map<com.sequenceiq.cloudbreak.cloud.model.Region, AzureCoordinate> actualRegions = underTest.filterEnabledRegions(
+                com.sequenceiq.cloudbreak.cloud.model.Region.region("westus"), com.sequenceiq.cloudbreak.cloud.model.Region.region("westus2"));
+
+        Assertions.assertEquals(regions, actualRegions);
+    }
+
+    @Test
+    public void testFilterEnabledRegionsRegionIsGiven() {
+        AzureCoordinate azureCoordinate1 = azureCoordinate("westus");
+        AzureCoordinate azureCoordinate2 = azureCoordinate("westus2");
+        Map<com.sequenceiq.cloudbreak.cloud.model.Region, AzureCoordinate> regions = Map.of(
+                com.sequenceiq.cloudbreak.cloud.model.Region.region("westus"), azureCoordinate1,
+                com.sequenceiq.cloudbreak.cloud.model.Region.region("westus2"), azureCoordinate2);
+        ReflectionTestUtils.setField(underTest, "enabledRegions", regions);
+
+        Map<com.sequenceiq.cloudbreak.cloud.model.Region, AzureCoordinate> actualRegions = underTest.filterEnabledRegions(
+                com.sequenceiq.cloudbreak.cloud.model.Region.region("westus"));
+
+        Assertions.assertEquals(Map.of(com.sequenceiq.cloudbreak.cloud.model.Region.region("westus"), azureCoordinate1), actualRegions);
+    }
+
+    @Test
+    public void testFilterEnabledRegionsNullRegionGiven() {
+        Map<com.sequenceiq.cloudbreak.cloud.model.Region, AzureCoordinate> regions = Map.of(
+                com.sequenceiq.cloudbreak.cloud.model.Region.region("westus"), azureCoordinate("westus"),
+                com.sequenceiq.cloudbreak.cloud.model.Region.region("westus2"), azureCoordinate("westus2"));
+        ReflectionTestUtils.setField(underTest, "enabledRegions", regions);
+
+        Map<com.sequenceiq.cloudbreak.cloud.model.Region, AzureCoordinate> actualRegions = underTest.filterEnabledRegions(null);
+
+        Assertions.assertEquals(regions, actualRegions);
+    }
+
+    @Test
+    public void testFilterEnabledRegionsInvalidRegionsAreGiven() {
+        Map<com.sequenceiq.cloudbreak.cloud.model.Region, AzureCoordinate> regions = Map.of(
+                com.sequenceiq.cloudbreak.cloud.model.Region.region("westus"), azureCoordinate("westus"),
+                com.sequenceiq.cloudbreak.cloud.model.Region.region("westus2"), azureCoordinate("westus2"));
+        ReflectionTestUtils.setField(underTest, "enabledRegions", regions);
+
+        Map<com.sequenceiq.cloudbreak.cloud.model.Region, AzureCoordinate> actualRegions =
+                underTest.filterEnabledRegions(null, com.sequenceiq.cloudbreak.cloud.model.Region.region(""));
+
+        Assertions.assertEquals(regions, actualRegions);
+    }
+
+    @Test
+    public void testFilterEnabledRegionsValidAndInvalidRegionsAreGiven() {
+        AzureCoordinate azureCoordinate = azureCoordinate("westus");
+        Map<com.sequenceiq.cloudbreak.cloud.model.Region, AzureCoordinate> regions = Map.of(
+                com.sequenceiq.cloudbreak.cloud.model.Region.region("westus"), azureCoordinate,
+                com.sequenceiq.cloudbreak.cloud.model.Region.region("westus2"), azureCoordinate("westus2"));
+        ReflectionTestUtils.setField(underTest, "enabledRegions", regions);
+
+        Map<com.sequenceiq.cloudbreak.cloud.model.Region, AzureCoordinate> actualRegions =
+                underTest.filterEnabledRegions(null, com.sequenceiq.cloudbreak.cloud.model.Region.region("westus"));
+
+        Assertions.assertEquals(Map.of(com.sequenceiq.cloudbreak.cloud.model.Region.region("westus"), azureCoordinate), actualRegions);
+    }
+
     private String getTestRegions() throws IOException {
         return FileReaderUtils.readFileFromClasspath("/json/azure-regions-test.json");
     }
@@ -101,4 +182,14 @@ public class AzureRegionProviderTest {
 
     }
 
+    private AzureCoordinate azureCoordinate(String name) {
+        return AzureCoordinate.AzureCoordinateBuilder.builder()
+                .longitude("1")
+                .latitude("1")
+                .displayName(name)
+                .key(name + "key")
+                .k8sSupported(false)
+                .entitlements(List.of())
+                .build();
+    }
 }

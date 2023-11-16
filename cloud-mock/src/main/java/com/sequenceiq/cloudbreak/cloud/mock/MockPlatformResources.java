@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
@@ -319,5 +320,10 @@ public class MockPlatformResources implements PlatformResources {
                 certificate -> new CloudDatabaseServerSslCertificate(ROOT, certificate)).collect(Collectors.toSet());
 
         return new CloudDatabaseServerSslCertificates(setOfCertificates);
+    }
+
+    @Override
+    public PlatformDatabaseCapabilities databaseCapabilities(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        return new PlatformDatabaseCapabilities(Map.of(), Map.of());
     }
 }

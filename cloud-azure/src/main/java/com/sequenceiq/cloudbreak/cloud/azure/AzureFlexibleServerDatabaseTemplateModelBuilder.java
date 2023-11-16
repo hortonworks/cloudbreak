@@ -22,9 +22,11 @@ public class AzureFlexibleServerDatabaseTemplateModelBuilder implements AzureDat
 
     private static final String MEMORY_OPTIMIZED = "MemoryOptimized";
 
-    private static final Set<String> GENERAL_PURPOSE_INSTANCE_TYPES = Set.of("Standard_D2ds_v4", "Standard_D4ds_v4");
+    private static final Set<String> GENERAL_PURPOSE_INSTANCE_TYPES = Set.of("Standard_D2s_v3", "Standard_D4s_v3", "Standard_D2ds_v4", "Standard_D4ds_v4",
+            "Standard_D2ds_v5", "Standard_D4ds_v5");
 
-    private static final Set<String> MEMORY_OPTIMIZED_INSTANCE_TYPES = Set.of("Standard_E2ds_v4", "Standard_E4ds_v4");
+    private static final Set<String> MEMORY_OPTIMIZED_INSTANCE_TYPES = Set.of("Standard_E2s_v3", "Standard_E4s_v3", "Standard_E2ds_v4", "Standard_E4ds_v4",
+            "Standard_E2ds_v5", "Standard_E4ds_v5");
 
     @Override
     public Map<String, Object> buildModel(AzureDatabaseServerView azureDatabaseServerView, AzureNetworkView azureNetworkView, DatabaseStack databaseStack) {

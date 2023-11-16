@@ -171,6 +171,25 @@ public class DatabaseServer extends DynamicModel {
         return new Builder();
     }
 
+    public static Builder builder(DatabaseServer databaseServer) {
+        return new Builder()
+                .withServerId(databaseServer.serverId)
+                .withFlavor(databaseServer.flavor)
+                .withEngine(databaseServer.engine)
+                .withConnectionDriver(databaseServer.connectionDriver)
+                .withConnectorJarUrl(databaseServer.connectorJarUrl)
+                .withRootUserName(databaseServer.rootUserName)
+                .withRootPassword(databaseServer.rootPassword)
+                .withPort(databaseServer.port)
+                .withHighAvailability(databaseServer.highAvailability)
+                .withUseSslEnforcement(databaseServer.useSslEnforcement)
+                .withStorageSize(databaseServer.storageSize)
+                .withSecurity(databaseServer.security)
+                .withStatus(databaseServer.status)
+                .withLocation(databaseServer.location)
+                .withParams(databaseServer.getParameters());
+    }
+
     @JsonPOJOBuilder
     public static class Builder {
 

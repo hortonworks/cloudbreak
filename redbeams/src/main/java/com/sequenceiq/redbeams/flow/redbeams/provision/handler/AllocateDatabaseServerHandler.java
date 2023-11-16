@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -14,9 +15,13 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
@@ -36,6 +41,7 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
+import com.sequenceiq.redbeams.service.DatabaseCapabilityService;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificatePrescriptionService;
@@ -75,6 +81,9 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
     @Inject
     private DBStackToDatabaseStackConverter dbStackToDatabaseStackConverter;
 
+    @Inject
+    private DatabaseCapabilityService databaseCapabilityService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(AllocateDatabaseServerRequest.class);
@@ -92,7 +101,7 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
             CloudCredential cloudCredential = request.getCloudCredential();
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
             DBStack dbStack = dbStackService.getById(request.getResourceId());
-            DatabaseStack databaseStack = setupNetworkIfMissing(request, dbStack);
+            DatabaseStack databaseStack = setupMissingParameters(connector, cloudCredential, cloudContext.getPlatformVariant(), request, dbStack);
             databaseServerSslCertificatePrescriptionService.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
             List<CloudResourceStatus> resourceStatuses = connector.resources().launchDatabaseServer(ac, databaseStack, persistenceNotifier);
             List<CloudResource> resources = ResourceLists.transform(resourceStatuses);
@@ -112,17 +121,40 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
         return response;
     }
 
-    private DatabaseStack setupNetworkIfMissing(AllocateDatabaseServerRequest request, DBStack dbStack) {
+    private DatabaseStack setupMissingParameters(CloudConnector cloudConnector, CloudCredential cloudCredential, CloudPlatformVariant platformVariant,
+            AllocateDatabaseServerRequest request, DBStack dbStack) {
+        DatabaseStack databaseStack = request.getDatabaseStack();
+        Network network = setupNetworkIfMissing(request, dbStack, databaseStack.getNetwork());
+        DatabaseServer databaseServer = setupInstanceTypeIfMissing(cloudConnector, cloudCredential, platformVariant, dbStack,
+                databaseStack.getDatabaseServer());
+        dbStackService.save(dbStack);
+        return new DatabaseStack(network, databaseServer, databaseStack.getTags(), databaseStack.getTemplate());
+    }
+
+    private Network setupNetworkIfMissing(AllocateDatabaseServerRequest request, DBStack dbStack, Network originalNetwork) {
         DatabaseStack databaseStack = request.getDatabaseStack();
         if (dbStack.getNetwork() == null) {
             LOGGER.debug("Network is missing for DBStack, setting up");
             DetailedEnvironmentResponse environment = environmentService.getByCrn(dbStack.getEnvironmentId());
             dbStack.setNetwork(networkBuilderService.buildNetwork(request.getNetworkParameters(), environment, dbStack).getId());
-            dbStackService.save(dbStack);
-            return new DatabaseStack(dbStackToDatabaseStackConverter.buildNetwork(dbStack), databaseStack.getDatabaseServer(), databaseStack.getTags(),
-                    databaseStack.getTemplate());
+            return dbStackToDatabaseStackConverter.buildNetwork(dbStack);
         } else {
-            return databaseStack;
+            return originalNetwork;
+        }
+    }
+
+    private DatabaseServer setupInstanceTypeIfMissing(CloudConnector connector, CloudCredential cloudCredential, CloudPlatformVariant cloudPlatformVariant,
+            DBStack dbStack, DatabaseServer originalDatabaseServer) {
+        if (StringUtils.isEmpty(dbStack.getDatabaseServer().getInstanceType())) {
+            Region region = Region.region(dbStack.getRegion());
+            String defaultInstanceType = databaseCapabilityService.getDefaultInstanceType(connector, cloudCredential, cloudPlatformVariant, region);
+            LOGGER.debug("No instancetype given for database server, will use {} in {} region", defaultInstanceType, region);
+            dbStack.getDatabaseServer().setInstanceType(defaultInstanceType);
+            return DatabaseServer.builder(originalDatabaseServer)
+                    .withFlavor(dbStack.getDatabaseServer().getInstanceType())
+                    .build();
+        } else {
+            return originalDatabaseServer;
         }
     }
 

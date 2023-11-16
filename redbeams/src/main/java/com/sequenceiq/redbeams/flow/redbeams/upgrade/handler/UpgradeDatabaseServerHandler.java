@@ -90,7 +90,8 @@ public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<U
         try {
             if (databaseMigrationRequired) {
                 LOGGER.debug("Migration is required, new database server attributes: {}", migrationParams.getAttributes());
-                databaseStack = upgradeMigrationService.mergeDatabaseStacks(dbStack, migrationParams, connector);
+                databaseStack = upgradeMigrationService.mergeDatabaseStacks(dbStack, migrationParams, connector, cloudCredential,
+                        cloudContext.getPlatformVariant());
             } else {
                 LOGGER.debug("Migration was not needed, progressing with original databaseStack..");
             }

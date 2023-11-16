@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.conf;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
 import java.util.Map;
@@ -60,7 +61,7 @@ class ExternalDatabaseConfigTest {
         assertEquals("MO_Gen5_4", singleDatabaseStackConfig.getInstanceType());
         assertEquals(100, singleDatabaseStackConfig.getVolumeSize());
         DatabaseStackConfig flexibleDatabaseStackConfig = actualResult.get(new DatabaseStackConfigKey(CloudPlatform.AZURE, AzureDatabaseType.FLEXIBLE_SERVER));
-        assertEquals("Standard_E4ds_v4", flexibleDatabaseStackConfig.getInstanceType());
+        assertNull(flexibleDatabaseStackConfig.getInstanceType());
         assertEquals(128, flexibleDatabaseStackConfig.getVolumeSize());
     }
 

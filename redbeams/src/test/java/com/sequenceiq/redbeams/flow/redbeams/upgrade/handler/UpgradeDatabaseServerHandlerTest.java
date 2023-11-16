@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -117,7 +118,7 @@ public class UpgradeDatabaseServerHandlerTest {
 
         verify(dbStackService).getById(event.getData().getResourceId());
         verify(dbStackService).save(dbStackArgumentCaptor.capture());
-        verify(dbUpgradeMigrationService, never()).mergeDatabaseStacks(eq(dbStack), any(), eq(cloudConnector));
+        verify(dbUpgradeMigrationService, never()).mergeDatabaseStacks(eq(dbStack), any(), eq(cloudConnector), isNull(), isNull());
 
         assertEquals("UPGRADEDATABASESERVERSUCCESS", nextFlowStepSelector.selector());
         assertEquals(event.getData().getTargetMajorVersion().getMajorVersion(), dbStackArgumentCaptor.getValue().getMajorVersion().getMajorVersion());
@@ -141,7 +142,7 @@ public class UpgradeDatabaseServerHandlerTest {
         when(authenticator.authenticate(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
         when(cloudConnector.resources()).thenReturn(resourceConnector);
         when(dbStackService.getById(event.getData().getResourceId())).thenReturn(dbStack);
-        when(dbUpgradeMigrationService.mergeDatabaseStacks(any(DBStack.class), any(), any())).thenReturn(databaseStack);
+        when(dbUpgradeMigrationService.mergeDatabaseStacks(any(DBStack.class), any(), any(), any(), any())).thenReturn(databaseStack);
         DatabaseServerConfig databaseServerConfig = new DatabaseServerConfig();
         databaseServerConfig.setConnectionUserName(originalUserName);
         when(databaseServerConfigService.getByCrn(any(Crn.class))).thenReturn(Optional.of(databaseServerConfig));
@@ -152,7 +153,8 @@ public class UpgradeDatabaseServerHandlerTest {
 
         verify(dbStackService).getById(event.getData().getResourceId());
         verify(dbStackService).save(dbStackArgumentCaptor.capture());
-        verify(dbUpgradeMigrationService).mergeDatabaseStacks(any(DBStack.class), eq(migrationParams), eq(cloudConnector));
+        verify(dbUpgradeMigrationService).mergeDatabaseStacks(any(DBStack.class), eq(migrationParams), eq(cloudConnector), eq(cloudCredential),
+                eq(cloudPlatformVariant));
         verify(databaseServerConfigService).update(databaseServerConfigArgumentCaptor.capture());
         assertEquals("UPGRADEDATABASESERVERSUCCESS", nextFlowStepSelector.selector());
         DBStack actualDbStack = dbStackArgumentCaptor.getValue();

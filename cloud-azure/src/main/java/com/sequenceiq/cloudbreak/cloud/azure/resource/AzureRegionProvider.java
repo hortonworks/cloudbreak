@@ -4,10 +4,12 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -98,6 +100,21 @@ public class AzureRegionProvider {
 
     public Map<Region, AzureCoordinate> enabledRegions() {
         return enabledRegions;
+    }
+
+    public Map<Region, AzureCoordinate> filterEnabledRegions(Region... regions) {
+        Map<Region, AzureCoordinate> result = enabledRegions;
+        List<Region> validRegions = Optional.ofNullable(regions).stream()
+                .flatMap(Arrays::stream)
+                .filter(region -> region != null && !Strings.isNullOrEmpty(region.value()))
+                .toList();
+        if (!validRegions.isEmpty()) {
+            result = enabledRegions.entrySet()
+                    .stream()
+                    .filter(entry -> validRegions.stream().anyMatch(region -> entry.getValue().isMatchedRegion(region)))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        }
+        return result;
     }
 
     private String resourceDefinition() {

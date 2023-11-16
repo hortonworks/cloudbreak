@@ -78,8 +78,6 @@ import com.azure.resourcemanager.network.models.NetworkSecurityGroups;
 import com.azure.resourcemanager.network.models.PublicIpAddress;
 import com.azure.resourcemanager.network.models.Subnet;
 import com.azure.resourcemanager.postgresql.PostgreSqlManager;
-import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerCapability;
-import com.azure.resourcemanager.postgresqlflexibleserver.models.ZoneRedundantHaSupportedEnum;
 import com.azure.resourcemanager.privatedns.PrivateDnsZoneManager;
 import com.azure.resourcemanager.privatedns.fluent.models.VirtualNetworkLinkInner;
 import com.azure.resourcemanager.privatedns.models.PrivateDnsZone;
@@ -1071,18 +1069,5 @@ public class AzureClient {
 
     public AzureFlexibleServerClient getFlexibleServerClient() {
         return new AzureFlexibleServerClient(postgreSqlFlexibleManager, azureExceptionHandler);
-    }
-
-    public boolean zoneRedundantFlexibleSupported(String locationName) {
-        Optional<FlexibleServerCapability> flexibleServerCapability = this.postgreSqlFlexibleManager.locationBasedCapabilities()
-                .execute(locationName)
-                .stream()
-                .findFirst();
-        if (flexibleServerCapability.isPresent()) {
-            return ZoneRedundantHaSupportedEnum.ENABLED.equals(
-                    flexibleServerCapability.map(FlexibleServerCapability::zoneRedundantHaSupported)
-                    .get());
-        }
-        return false;
     }
 }

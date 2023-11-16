@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
 import java.util.EnumSet;
@@ -57,7 +58,7 @@ class PlatformConfigTest {
         assertEquals(100, singleDatabaseStackConfig.getVolumeSize());
         DatabaseConfig flexibleDatabaseStackConfig = actualResult.get(
                 new DatabaseConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, AzureDatabaseType.FLEXIBLE_SERVER));
-        assertEquals("Standard_E4ds_v4", flexibleDatabaseStackConfig.getInstanceType());
+        assertNull(flexibleDatabaseStackConfig.getInstanceType());
         assertEquals(128, flexibleDatabaseStackConfig.getVolumeSize());
     }
 

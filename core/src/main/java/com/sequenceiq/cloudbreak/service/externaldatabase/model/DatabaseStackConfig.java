@@ -20,7 +20,7 @@ public class DatabaseStackConfig {
             @JsonProperty("instanceType") String instanceType,
             @JsonProperty("vendor") String vendor,
             @JsonProperty("volumeSize") long volumeSize) {
-        this.instanceType = notBlank(instanceType);
+        this.instanceType = instanceType;
         this.vendor = notBlank(vendor);
         if (volumeSize <= 0) {
             throw new IllegalArgumentException("Volume size must be greater than zero");

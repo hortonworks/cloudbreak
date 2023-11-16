@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Coordinate {
 
@@ -48,6 +49,10 @@ public class Coordinate {
 
     public List<String> getEntitlements() {
         return entitlements;
+    }
+
+    public boolean isMatchedRegion(Region region) {
+        return Objects.equals(key, region.getRegionName()) || Objects.equals(displayName, region.getRegionName());
     }
 
     public static Coordinate coordinate(String longitude, String latitude, String  displayName, String key, boolean k8sSupported, List<String> entitlements) {
