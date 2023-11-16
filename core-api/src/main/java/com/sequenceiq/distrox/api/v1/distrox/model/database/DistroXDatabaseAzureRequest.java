@@ -18,11 +18,22 @@ public class DistroXDatabaseAzureRequest implements Serializable {
     @ApiModelProperty(Database.AZURE_DATABASE_TYPE)
     private AzureDatabaseType azureDatabaseType;
 
+    @ApiModelProperty(Database.FLEXIBLE_SERVER_DELEGATED_SUBNET)
+    private String flexibleServerDelegatedSubnetId;
+
     public AzureDatabaseType getAzureDatabaseType() {
         return azureDatabaseType == null ? AzureDatabaseType.SINGLE_SERVER : azureDatabaseType;
     }
 
     public void setAzureDatabaseType(AzureDatabaseType azureDatabaseType) {
         this.azureDatabaseType = azureDatabaseType;
+    }
+
+    public String getFlexibleServerDelegatedSubnetId() {
+        return flexibleServerDelegatedSubnetId;
+    }
+
+    public void setFlexibleServerDelegatedSubnetId(String flexibleServerDelegatedSubnetId) {
+        this.flexibleServerDelegatedSubnetId = flexibleServerDelegatedSubnetId;
     }
 }

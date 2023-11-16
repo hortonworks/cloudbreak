@@ -41,6 +41,8 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
 
     private static final String AVAILABILITY_ZONE = "availabilityZone";
 
+    private static final String FLEXIBLE_SERVER_DELEGATED_SUBNETID = "flexibleServerDelegatedSubnetId";
+
     private static final String AZURE_DATABASE_TYPE = AzureDatabaseType.AZURE_DATABASE_TYPE_KEY;
 
     private static final String HIGH_AVAILABILITY = AzureHighAvailabiltyMode.AZURE_HA_MODE_KEY;
@@ -81,6 +83,9 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
 
     @ApiModelProperty(AzureDatabaseServerModelDescriptions.AVAILABILITY_ZONE)
     private String availabilityZone;
+
+    @ApiModelProperty(AzureDatabaseServerModelDescriptions.FLEXIBLE_SERVER_DELEGATED_SUBNET)
+    private String felxibleServerDelegatedSubnetId;
 
     public Integer getBackupRetentionDays() {
         return backupRetentionDays;
@@ -170,6 +175,14 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
         this.availabilityZone = availabilityZone;
     }
 
+    public String getFelxibleServerDelegatedSubnetId() {
+        return felxibleServerDelegatedSubnetId;
+    }
+
+    public void setFelxibleServerDelegatedSubnetId(String felxibleServerDelegatedSubnetId) {
+        this.felxibleServerDelegatedSubnetId = felxibleServerDelegatedSubnetId;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
@@ -184,6 +197,7 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
         putIfValueNotNull(map, HIGH_AVAILABILITY, highAvailabilityMode == null ? AzureHighAvailabiltyMode.DISABLED.name() : highAvailabilityMode.name());
         putIfValueNotNull(map, STAND_BY_AVAILABILITY_ZONE, standbyAvailabilityZone);
         putIfValueNotNull(map, AVAILABILITY_ZONE, availabilityZone);
+        putIfValueNotNull(map, FLEXIBLE_SERVER_DELEGATED_SUBNETID, felxibleServerDelegatedSubnetId);
         return map;
     }
 
@@ -207,6 +221,7 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
         highAvailabilityMode = AzureHighAvailabiltyMode.safeValueOf(getParameterOrNull(parameters, HIGH_AVAILABILITY));
         standbyAvailabilityZone = getParameterOrNull(parameters, STAND_BY_AVAILABILITY_ZONE);
         availabilityZone = getParameterOrNull(parameters, AVAILABILITY_ZONE);
+        felxibleServerDelegatedSubnetId = getParameterOrNull(parameters, FLEXIBLE_SERVER_DELEGATED_SUBNETID);
     }
 
     @Override
@@ -223,6 +238,7 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
                 ", highAvailabilityMode=" + highAvailabilityMode +
                 ", availabilityZone=" + availabilityZone +
                 ", standbyAvailabilityZone=" + standbyAvailabilityZone +
+                ", felxibleServerDelegatedSubnetId=" + felxibleServerDelegatedSubnetId +
                 "} " + super.toString();
     }
 }

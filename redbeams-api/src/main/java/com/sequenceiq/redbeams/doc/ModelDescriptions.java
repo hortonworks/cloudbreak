@@ -160,6 +160,7 @@ public final class ModelDescriptions {
         public static final String HIGH_AVAILABILITY = "Whether to use a highly available deployment";
         public static final String STANDBY_AVAILABILITY_ZONE = "Secondary AZ for flexible server in case of zone redundant type";
         public static final String AVAILABILITY_ZONE = "Primary AZ for flexible server";
+        public static final String FLEXIBLE_SERVER_DELEGATED_SUBNET = "flexible server delegated subnet id";
 
     }
 
