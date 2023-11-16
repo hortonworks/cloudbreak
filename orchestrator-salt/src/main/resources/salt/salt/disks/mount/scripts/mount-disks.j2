@@ -240,12 +240,6 @@ main() {
     return_code=$?
     [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error creating directories on /hadoopfs/fs1"
 
-    if [[ "$CLOUD_PLATFORM" == "AZURE" && "$TEMPORARY_STORAGE" == "EPHEMERAL_VOLUMES" ]]; then
-        demount_tempstorage_azure
-        return_code=$?
-        [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error demounting Azure temporary storage"
-    fi
-
     exit_with_code $LOG_FILE 0 "Script $script_name ended"
 }
 
