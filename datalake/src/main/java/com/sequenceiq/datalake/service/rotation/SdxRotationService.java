@@ -1,6 +1,8 @@
 package com.sequenceiq.datalake.service.rotation;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_ROLLBACK_FINISHED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.RUNNING;
 
 import java.util.List;
 import java.util.Set;
@@ -29,7 +31,6 @@ import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationServic
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
-import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
@@ -155,7 +156,8 @@ public class SdxRotationService {
             SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn).orElseThrow(notFound("SDX cluster", datalakeCrn));
             SdxStatusEntity status = sdxStatusService.getActualStatusForSdx(sdxCluster.getId());
             List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
-            if (secretTypes.stream().noneMatch(SecretType::multiSecret) && !DatalakeStatusEnum.RUNNING.equals(status.getStatus())) {
+            if (secretTypes.stream().noneMatch(SecretType::multiSecret) &&
+                    !Set.of(RUNNING, DATALAKE_SECRET_ROTATION_ROLLBACK_FINISHED).contains(status.getStatus())) {
                 throw new CloudbreakServiceException(
                         String.format("The cluster must be in available status to execute secret rotation. Current status: %s", status.getStatus()));
             }

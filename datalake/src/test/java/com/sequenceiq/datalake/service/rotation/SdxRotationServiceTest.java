@@ -177,6 +177,20 @@ class SdxRotationServiceTest {
     }
 
     @Test
+    void triggerSecretRotationShouldSucceedIfRollbackFinished() {
+        doNothing().when(secretRotationValidationService).validateExecutionType(any(), any(), any());
+        when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setId(1L);
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(sdxCluster));
+        SdxStatusEntity status = new SdxStatusEntity();
+        status.setStatus(DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_ROLLBACK_FINISHED);
+        when(sdxStatusService.getActualStatusForSdx(anyLong())).thenReturn(status);
+        underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null);
+        verify(sdxReactorFlowManager, times(1)).triggerSecretRotation(eq(sdxCluster), anyList(), isNull());
+    }
+
+    @Test
     void triggerSecretRotationShouldFailIfClusterIsStopped() {
         when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
         SdxCluster sdxCluster = new SdxCluster();
