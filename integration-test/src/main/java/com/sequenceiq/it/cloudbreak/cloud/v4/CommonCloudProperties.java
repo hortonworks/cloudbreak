@@ -13,6 +13,10 @@ public class CommonCloudProperties {
 
     private String sshPublicKey;
 
+    private String rotationSshPublicKey;
+
+    private String rotationPrivateKeyFile;
+
     private String subnetCidr;
 
     private String accessCidr;
@@ -47,6 +51,22 @@ public class CommonCloudProperties {
 
     public void setSshPublicKey(String sshPublicKey) {
         this.sshPublicKey = sshPublicKey;
+    }
+
+    public String getRotationSshPublicKey() {
+        return rotationSshPublicKey;
+    }
+
+    public void setRotationSshPublicKey(String rotationSshPublicKey) {
+        this.rotationSshPublicKey = rotationSshPublicKey;
+    }
+
+    public String getRotationPrivateKeyFile() {
+        return rotationPrivateKeyFile;
+    }
+
+    public void setRotationPrivateKeyFile(String rotationPrivateKeyFile) {
+        this.rotationPrivateKeyFile = rotationPrivateKeyFile;
     }
 
     public String getSubnetCidr() {
@@ -192,19 +212,19 @@ public class CommonCloudProperties {
         private String deploymentKey;
 
         public String getAccountKey() {
-                return accountKey;
+            return accountKey;
         }
 
         public void setAccountKey(String accountKey) {
-                this.accountKey = accountKey;
+            this.accountKey = accountKey;
         }
 
         public String getDeploymentKey() {
-                return deploymentKey;
+            return deploymentKey;
         }
 
         public void setDeploymentKey(String deploymentKey) {
-                this.deploymentKey = deploymentKey;
+            this.deploymentKey = deploymentKey;
         }
     }
 

@@ -61,6 +61,19 @@ public class SshJClientActions extends SshJClient {
         }).collect(Collectors.toList());
     }
 
+    private List<String> getInstanceIpsFromGroups(Collection<InstanceGroupV4Response> instanceGroups, boolean publicIp) {
+        List<String> instanceGroupIpList = instanceGroups.stream()
+                .map(InstanceGroupV4Response::getMetadata)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .map(x -> publicIp && StringUtils.isNotEmpty(x.getPublicIp()) ? x.getPublicIp() : x.getPrivateIp())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        assert !instanceGroupIpList.isEmpty();
+        LOGGER.info("The available {} IPs [{}].", publicIp ? "Public" : "Private", instanceGroupIpList);
+        return instanceGroupIpList;
+    }
+
     private List<String> getFreeIpaInstanceGroupIps(InstanceMetadataType istanceMetadataType, String environmentCrn, FreeIpaClient freeipaClient,
             boolean publicIp) {
         return freeipaClient.getDefaultClient().getFreeIpaV1Endpoint()
@@ -235,6 +248,12 @@ public class SshJClientActions extends SshJClient {
             String sshCommand, boolean publicIp) {
         return getInstanceGroupIps(instanceGroups, hostGroupNames, publicIp).stream()
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, sshCommand)));
+    }
+
+    public Map<String, Pair<Integer, String>> executeSshCommandOnAllHosts(Collection<InstanceGroupV4Response> instanceGroups,
+            String sshCommand, boolean publicIp, String privateKeyFilePath) {
+        return getInstanceIpsFromGroups(instanceGroups, publicIp).stream()
+                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, "cloudbreak", null, privateKeyFilePath, sshCommand)));
     }
 
     public Map<String, Pair<Integer, String>> executeSshCommandOnHost(Set<InstanceMetaDataResponse> instanceMetaDatas, String sshCommand, boolean publicIp) {
