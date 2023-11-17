@@ -67,7 +67,8 @@ public class AwsImageUpdateServiceTest {
         underTest.updateImage(ac, stack, cfResource);
 
         String cfName = cfResource.getName();
-        verify(awsLaunchTemplateUpdateService).updateFieldsOnAllLaunchTemplate(eq(ac), eq(cfName), anyMap(), eq(stack));
+        verify(awsLaunchTemplateUpdateService).updateFieldsOnAllLaunchTemplate(eq(ac), eq(cfName),
+                eq(Map.of(LaunchTemplateField.IMAGE_ID, IMAGE_NAME, LaunchTemplateField.ROOT_DISK_PATH, "")), eq(stack));
         verify(awsLaunchConfigurationUpdateService, never()).updateLaunchConfigurations(ac, stack, cfResource, Map.of(LaunchTemplateField.IMAGE_ID, IMAGE_NAME));
     }
 

@@ -191,7 +191,7 @@ class AwsUpdateServiceTest {
         Map<LaunchTemplateField, String> updatableFields = Map.of(
                 LaunchTemplateField.INSTANCE_TYPE,
                 "m42.xxxl",
-                LaunchTemplateField.ROOT_DISK,
+                LaunchTemplateField.ROOT_DISK_SIZE,
                 "100");
         verify(awsLaunchTemplateUpdateService, times(1)).updateLaunchTemplate(eq(updatableFields), any(), eq("cf"), eq(gatewayGroup),
                 eq(stack), eq(Boolean.TRUE));
@@ -221,7 +221,7 @@ class AwsUpdateServiceTest {
         Map<LaunchTemplateField, String> updatableFields = Map.of(
                 LaunchTemplateField.INSTANCE_TYPE,
                 "m42.xxxl",
-                LaunchTemplateField.ROOT_DISK,
+                LaunchTemplateField.ROOT_DISK_SIZE,
                 "100");
         verify(awsLaunchTemplateUpdateService, times(1)).updateLaunchTemplate(eq(updatableFields), any(), eq("cf"), eq(gatewayGroup),
                 eq(stack), eq(Boolean.FALSE));
@@ -245,7 +245,7 @@ class AwsUpdateServiceTest {
         Map<LaunchTemplateField, String> updatableFields = Map.of(
                 LaunchTemplateField.INSTANCE_TYPE,
                 "m42.xxxl",
-                LaunchTemplateField.ROOT_DISK,
+                LaunchTemplateField.ROOT_DISK_SIZE,
                 "100");
         verify(awsLaunchTemplateUpdateService, times(0)).updateLaunchTemplate(eq(updatableFields), any(), eq("cf"), eq(gatewayGroup),
                 eq(stack), eq(Boolean.TRUE));
@@ -276,7 +276,7 @@ class AwsUpdateServiceTest {
         Map<LaunchTemplateField, String> updatableFields = Map.of(
                 LaunchTemplateField.INSTANCE_TYPE,
                 "m42.xxxl",
-                LaunchTemplateField.ROOT_DISK,
+                LaunchTemplateField.ROOT_DISK_SIZE,
                 "100");
         verify(launchConfigurationUpdateService, times(1))
                 .updateLaunchConfigurations(any(), eq(stack), eq(cloudResource), eq(updatableFields), eq(gatewayGroup), eq(Boolean.TRUE));

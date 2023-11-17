@@ -230,7 +230,7 @@ class AwsLaunchTemplateUpdateServiceTest {
         when(ec2Client.modifyLaunchTemplate(any())).thenReturn(modifyLaunchTemplateResult);
         when(autoScalingClient.updateAutoScalingGroup(any())).thenReturn(updateAutoScalingGroupResult);
         List<LaunchTemplateBlockDeviceMappingRequest> blockDeviceMappingRequests = List.of(LaunchTemplateBlockDeviceMappingRequest.builder().build());
-        when(resizedRootBlockDeviceMappingProvider.createResizedRootBlockDeviceMapping(ec2Client, updatableFields, launchTemplateSpecification, stack))
+        when(resizedRootBlockDeviceMappingProvider.createUpdatedRootBlockDeviceMapping(ec2Client, updatableFields, launchTemplateSpecification, stack))
                 .thenReturn(blockDeviceMappingRequests);
         // WHEN
         underTest.updateLaunchTemplate(updatableFields, false, autoScalingClient, ec2Client, asgEntry, stack);

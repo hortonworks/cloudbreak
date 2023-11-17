@@ -5,5 +5,6 @@ public enum LaunchTemplateField {
     DESCRIPTION,
     USER_DATA,
     INSTANCE_TYPE,
-    ROOT_DISK
+    ROOT_DISK_SIZE,
+    ROOT_DISK_PATH,
 }

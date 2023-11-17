@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.resource.VolumeBuilderUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.mapper.LaunchTemplateBlockDeviceMappingToRequestConverter;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 
 import software.amazon.awssdk.services.autoscaling.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.autoscaling.model.Ebs;
@@ -40,6 +43,12 @@ class ResizedRootBlockDeviceMappingProviderTest {
 
     private static final String ROOT_DEV_NAME = "/dev/dba";
 
+    private static final String NEW_ROOT_DEV_NAME = "/dev/diff";
+
+    private static final String OLD_AMI = "ami-1234-old";
+
+    private static final String NEW_AMI = "ami-5678-new";
+
     @Mock
     private VolumeBuilderUtil volumeBuilderUtil;
 
@@ -53,6 +62,9 @@ class ResizedRootBlockDeviceMappingProviderTest {
     private CloudStack cloudStack;
 
     @Mock
+    private Image image;
+
+    @Mock
     private AuthenticatedContext ac;
 
     @InjectMocks
@@ -61,7 +73,7 @@ class ResizedRootBlockDeviceMappingProviderTest {
     @Test
     void testCreateResizedRootBlockDeviceMappingNoRootDiskInFields() {
         List<LaunchTemplateBlockDeviceMappingRequest> result =
-                underTest.createResizedRootBlockDeviceMapping(ec2Client, Map.of(), LaunchTemplateSpecification.builder().build(), cloudStack);
+                underTest.createUpdatedRootBlockDeviceMapping(ec2Client, Map.of(), LaunchTemplateSpecification.builder().build(), cloudStack);
 
         assertTrue(result.isEmpty());
     }
@@ -71,7 +83,7 @@ class ResizedRootBlockDeviceMappingProviderTest {
         when(ec2Client.describeLaunchTemplateVersions(any(DescribeLaunchTemplateVersionsRequest.class))).thenThrow(Ec2Exception.create("asdf", null));
 
         List<LaunchTemplateBlockDeviceMappingRequest> result =
-                underTest.createResizedRootBlockDeviceMapping(ec2Client, Map.of(LaunchTemplateField.ROOT_DISK, "100"),
+                underTest.createUpdatedRootBlockDeviceMapping(ec2Client, Map.of(LaunchTemplateField.ROOT_DISK_SIZE, "100"),
                         LaunchTemplateSpecification.builder().build(), cloudStack);
 
         assertTrue(result.isEmpty());
@@ -83,7 +95,7 @@ class ResizedRootBlockDeviceMappingProviderTest {
         when(ec2Client.describeLaunchTemplateVersions(requestCaptor.capture())).thenReturn(DescribeLaunchTemplateVersionsResponse.builder().build());
 
         List<LaunchTemplateBlockDeviceMappingRequest> result =
-                underTest.createResizedRootBlockDeviceMapping(ec2Client, Map.of(LaunchTemplateField.ROOT_DISK, "100"),
+                underTest.createUpdatedRootBlockDeviceMapping(ec2Client, Map.of(LaunchTemplateField.ROOT_DISK_SIZE, "100"),
                         LaunchTemplateSpecification.builder().launchTemplateId("templateId").build(), cloudStack);
 
         assertTrue(result.isEmpty());
@@ -98,11 +110,83 @@ class ResizedRootBlockDeviceMappingProviderTest {
                 .build());
 
         List<LaunchTemplateBlockDeviceMappingRequest> result =
-                underTest.createResizedRootBlockDeviceMapping(ec2Client, Map.of(LaunchTemplateField.ROOT_DISK, "100"),
+                underTest.createUpdatedRootBlockDeviceMapping(ec2Client, Map.of(LaunchTemplateField.ROOT_DISK_SIZE, "100"),
                         LaunchTemplateSpecification.builder().launchTemplateId("templateId").build(), cloudStack);
 
         assertTrue(result.isEmpty());
         assertEquals("templateId", requestCaptor.getValue().launchTemplateId());
+    }
+
+    @Test
+    void testCreateResizedRootBlockDeviceMappingDescribeLaunchTemplateWithRootDiskNameDiff() {
+        ArgumentCaptor<DescribeLaunchTemplateVersionsRequest> requestCaptor = ArgumentCaptor.forClass(DescribeLaunchTemplateVersionsRequest.class);
+        ArgumentCaptor<LaunchTemplateBlockDeviceMapping> blockDeviceMappingArgumentCaptor = ArgumentCaptor.forClass(LaunchTemplateBlockDeviceMapping.class);
+        when(blockDeviceMappingConverter.convert(blockDeviceMappingArgumentCaptor.capture()))
+                .thenReturn(LaunchTemplateBlockDeviceMappingRequest.builder().build());
+        when(ec2Client.describeLaunchTemplateVersions(requestCaptor.capture())).thenReturn(DescribeLaunchTemplateVersionsResponse.builder()
+                .launchTemplateVersions(LaunchTemplateVersion.builder()
+                        .defaultVersion(Boolean.TRUE)
+                        .launchTemplateData(ResponseLaunchTemplateData.builder()
+                                .imageId(OLD_AMI)
+                                .blockDeviceMappings(LaunchTemplateBlockDeviceMapping.builder()
+                                                .deviceName("dummy")
+                                                .build(),
+                                        LaunchTemplateBlockDeviceMapping.builder()
+                                                .deviceName(ROOT_DEV_NAME)
+                                                .ebs(LaunchTemplateEbsBlockDevice.builder().volumeSize(100).build())
+                                                .build())
+                                .build())
+                        .build())
+                .build());
+        mockCloudstackImage(NEW_ROOT_DEV_NAME);
+        when(volumeBuilderUtil.getRootDeviceName(OLD_AMI, ec2Client)).thenReturn(ROOT_DEV_NAME);
+        Map<LaunchTemplateField, String> updatableField = new HashMap<>();
+        updatableField.put(LaunchTemplateField.ROOT_DISK_PATH, "");
+        List<LaunchTemplateBlockDeviceMappingRequest> result =
+                underTest.createUpdatedRootBlockDeviceMapping(ec2Client, updatableField,
+                        LaunchTemplateSpecification.builder().launchTemplateId("templateId").build(), cloudStack);
+
+        List<LaunchTemplateBlockDeviceMapping> launchTemplateBlockDeviceMappings = blockDeviceMappingArgumentCaptor.getAllValues();
+        assertFalse(result.isEmpty());
+        assertEquals("templateId", requestCaptor.getValue().launchTemplateId());
+        assertEquals(launchTemplateBlockDeviceMappings.get(1).deviceName(), NEW_ROOT_DEV_NAME);
+    }
+
+    @Test
+    void testCreateResizedRootBlockDeviceMappingDescribeLaunchTemplateWithRootDiskNameDiffAndSizeDiff() {
+        ArgumentCaptor<DescribeLaunchTemplateVersionsRequest> requestCaptor = ArgumentCaptor.forClass(DescribeLaunchTemplateVersionsRequest.class);
+        ArgumentCaptor<LaunchTemplateBlockDeviceMapping> blockDeviceMappingArgumentCaptor = ArgumentCaptor.forClass(LaunchTemplateBlockDeviceMapping.class);
+        when(blockDeviceMappingConverter.convert(blockDeviceMappingArgumentCaptor.capture()))
+                .thenReturn(LaunchTemplateBlockDeviceMappingRequest.builder().build());
+        when(ec2Client.describeLaunchTemplateVersions(requestCaptor.capture())).thenReturn(DescribeLaunchTemplateVersionsResponse.builder()
+                .launchTemplateVersions(LaunchTemplateVersion.builder()
+                        .defaultVersion(Boolean.TRUE)
+                        .launchTemplateData(ResponseLaunchTemplateData.builder()
+                                .imageId(OLD_AMI)
+                                .blockDeviceMappings(LaunchTemplateBlockDeviceMapping.builder()
+                                                .deviceName("dummy")
+                                                .build(),
+                                        LaunchTemplateBlockDeviceMapping.builder()
+                                                .deviceName(ROOT_DEV_NAME)
+                                                .ebs(LaunchTemplateEbsBlockDevice.builder().volumeSize(100).build())
+                                                .build())
+                                .build())
+                        .build())
+                .build());
+        mockCloudstackImage(NEW_ROOT_DEV_NAME);
+        when(volumeBuilderUtil.getRootDeviceName(OLD_AMI, ec2Client)).thenReturn(ROOT_DEV_NAME);
+        Map<LaunchTemplateField, String> updatableField = new HashMap<>();
+        updatableField.put(LaunchTemplateField.ROOT_DISK_PATH, "");
+        updatableField.put(LaunchTemplateField.ROOT_DISK_SIZE, "150");
+        List<LaunchTemplateBlockDeviceMappingRequest> result =
+                underTest.createUpdatedRootBlockDeviceMapping(ec2Client, updatableField,
+                        LaunchTemplateSpecification.builder().launchTemplateId("templateId").build(), cloudStack);
+
+        List<LaunchTemplateBlockDeviceMapping> launchTemplateBlockDeviceMappings = blockDeviceMappingArgumentCaptor.getAllValues();
+        assertFalse(result.isEmpty());
+        assertEquals("templateId", requestCaptor.getValue().launchTemplateId());
+        assertEquals(launchTemplateBlockDeviceMappings.get(1).deviceName(), NEW_ROOT_DEV_NAME);
+        assertEquals(launchTemplateBlockDeviceMappings.get(1).ebs().volumeSize(), 150);
     }
 
     @Test
@@ -114,10 +198,10 @@ class ResizedRootBlockDeviceMappingProviderTest {
                         .launchTemplateData(ResponseLaunchTemplateData.builder().build())
                         .build())
                 .build());
-        when(volumeBuilderUtil.getRootDeviceName(cloudStack, ec2Client)).thenReturn(ROOT_DEV_NAME);
+        mockCloudstackImage(ROOT_DEV_NAME);
 
         List<LaunchTemplateBlockDeviceMappingRequest> result =
-                underTest.createResizedRootBlockDeviceMapping(ec2Client, Map.of(LaunchTemplateField.ROOT_DISK, "100"),
+                underTest.createUpdatedRootBlockDeviceMapping(ec2Client, Map.of(LaunchTemplateField.ROOT_DISK_SIZE, "100"),
                         LaunchTemplateSpecification.builder().launchTemplateId("templateId").build(), cloudStack);
 
         assertTrue(result.isEmpty());
@@ -137,14 +221,19 @@ class ResizedRootBlockDeviceMappingProviderTest {
                                 .build())
                         .build())
                 .build());
-        when(volumeBuilderUtil.getRootDeviceName(cloudStack, ec2Client)).thenReturn(ROOT_DEV_NAME);
-
+        mockCloudstackImage(ROOT_DEV_NAME);
         List<LaunchTemplateBlockDeviceMappingRequest> result =
-                underTest.createResizedRootBlockDeviceMapping(ec2Client, Map.of(LaunchTemplateField.ROOT_DISK, "100"),
+                underTest.createUpdatedRootBlockDeviceMapping(ec2Client, Map.of(LaunchTemplateField.ROOT_DISK_SIZE, "100"),
                         LaunchTemplateSpecification.builder().launchTemplateId("templateId").build(), cloudStack);
 
         assertTrue(result.isEmpty());
         assertEquals("templateId", requestCaptor.getValue().launchTemplateId());
+    }
+
+    private void mockCloudstackImage(String rootDeviceName) {
+        when(cloudStack.getImage()).thenReturn(image);
+        when(image.getImageName()).thenReturn(NEW_AMI);
+        when(volumeBuilderUtil.getRootDeviceName(NEW_AMI, ec2Client)).thenReturn(rootDeviceName);
     }
 
     @Test
@@ -164,10 +253,10 @@ class ResizedRootBlockDeviceMappingProviderTest {
                                 .build())
                         .build())
                 .build());
-        when(volumeBuilderUtil.getRootDeviceName(cloudStack, ec2Client)).thenReturn(ROOT_DEV_NAME);
+        mockCloudstackImage(ROOT_DEV_NAME);
 
         List<LaunchTemplateBlockDeviceMappingRequest> result =
-                underTest.createResizedRootBlockDeviceMapping(ec2Client, Map.of(LaunchTemplateField.ROOT_DISK, "100"),
+                underTest.createUpdatedRootBlockDeviceMapping(ec2Client, Map.of(LaunchTemplateField.ROOT_DISK_SIZE, "100"),
                         LaunchTemplateSpecification.builder().launchTemplateId("templateId").build(), cloudStack);
 
         assertTrue(result.isEmpty());
@@ -192,13 +281,14 @@ class ResizedRootBlockDeviceMappingProviderTest {
                                 .build())
                         .build())
                 .build());
-        when(volumeBuilderUtil.getRootDeviceName(cloudStack, ec2Client)).thenReturn(ROOT_DEV_NAME);
+        mockCloudstackImage(ROOT_DEV_NAME);
+
         ArgumentCaptor<LaunchTemplateBlockDeviceMapping> blockDeviceMappingArgumentCaptor = ArgumentCaptor.forClass(LaunchTemplateBlockDeviceMapping.class);
         when(blockDeviceMappingConverter.convert(blockDeviceMappingArgumentCaptor.capture()))
                 .thenReturn(LaunchTemplateBlockDeviceMappingRequest.builder().build());
 
         List<LaunchTemplateBlockDeviceMappingRequest> result =
-                underTest.createResizedRootBlockDeviceMapping(ec2Client, Map.of(LaunchTemplateField.ROOT_DISK, "100"),
+                underTest.createUpdatedRootBlockDeviceMapping(ec2Client, Map.of(LaunchTemplateField.ROOT_DISK_SIZE, "100"),
                         LaunchTemplateSpecification.builder().launchTemplateId("templateId").build(), cloudStack);
 
         assertEquals(2, result.size());
@@ -213,7 +303,7 @@ class ResizedRootBlockDeviceMappingProviderTest {
     @Test
     void testCreateBlockDeviceMappingIfRootDiskResizeRequiredLaunchConfNoBlockDevice() {
         Optional<List<BlockDeviceMapping>> result = underTest.createBlockDeviceMappingIfRootDiskResizeRequired(ac, cloudStack,
-                Map.of(LaunchTemplateField.ROOT_DISK, "100"), LaunchConfiguration.builder().blockDeviceMappings(List.of()).build());
+                Map.of(LaunchTemplateField.ROOT_DISK_SIZE, "100"), LaunchConfiguration.builder().blockDeviceMappings(List.of()).build());
 
         assertTrue(result.isEmpty());
     }
@@ -231,7 +321,7 @@ class ResizedRootBlockDeviceMappingProviderTest {
         when(volumeBuilderUtil.getRootDeviceName(ac, cloudStack)).thenReturn(ROOT_DEV_NAME);
 
         Optional<List<BlockDeviceMapping>> result = underTest.createBlockDeviceMappingIfRootDiskResizeRequired(ac, cloudStack,
-                Map.of(LaunchTemplateField.ROOT_DISK, "100"),
+                Map.of(LaunchTemplateField.ROOT_DISK_SIZE, "100"),
                 LaunchConfiguration.builder().blockDeviceMappings(BlockDeviceMapping.builder()
                                 .deviceName("dummy")
                                 .build()).
@@ -245,7 +335,7 @@ class ResizedRootBlockDeviceMappingProviderTest {
         when(volumeBuilderUtil.getRootDeviceName(ac, cloudStack)).thenReturn(ROOT_DEV_NAME);
 
         Optional<List<BlockDeviceMapping>> result = underTest.createBlockDeviceMappingIfRootDiskResizeRequired(ac, cloudStack,
-                Map.of(LaunchTemplateField.ROOT_DISK, "100"),
+                Map.of(LaunchTemplateField.ROOT_DISK_SIZE, "100"),
                 LaunchConfiguration.builder().blockDeviceMappings(
                                 BlockDeviceMapping.builder()
                                         .deviceName("dummy")
@@ -264,7 +354,7 @@ class ResizedRootBlockDeviceMappingProviderTest {
         when(volumeBuilderUtil.getRootDeviceName(ac, cloudStack)).thenReturn(ROOT_DEV_NAME);
 
         Optional<List<BlockDeviceMapping>> result = underTest.createBlockDeviceMappingIfRootDiskResizeRequired(ac, cloudStack,
-                Map.of(LaunchTemplateField.ROOT_DISK, "100"),
+                Map.of(LaunchTemplateField.ROOT_DISK_SIZE, "100"),
                 LaunchConfiguration.builder().blockDeviceMappings(
                                 BlockDeviceMapping.builder()
                                         .deviceName("dummy")
