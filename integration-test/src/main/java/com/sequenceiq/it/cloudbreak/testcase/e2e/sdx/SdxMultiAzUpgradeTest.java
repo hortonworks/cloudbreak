@@ -17,6 +17,7 @@ import javax.inject.Inject;
 
 import org.assertj.core.api.Assertions;
 import org.springframework.util.CollectionUtils;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
@@ -61,6 +62,7 @@ public class SdxMultiAzUpgradeTest extends PreconditionSdxE2ETest {
         initializeAzureMarketplaceTermsPolicy(testContext);
     }
 
+    @Ignore("This test case should be re-enabled in case 7.2.18 released")
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
