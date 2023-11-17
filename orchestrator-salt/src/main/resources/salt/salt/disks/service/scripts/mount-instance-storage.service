@@ -1,6 +1,5 @@
 [Unit]
 Description=Mount Instance Storage On StartUp
-After=local-fs.target
 
 [Service]
 ExecStart=/opt/salt/scripts/mount-instance-storage.sh
