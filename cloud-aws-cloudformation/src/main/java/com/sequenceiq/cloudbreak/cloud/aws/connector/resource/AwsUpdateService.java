@@ -86,7 +86,7 @@ public class AwsUpdateService {
                 Map<LaunchTemplateField, String> updatableFields = Map.of(
                         LaunchTemplateField.INSTANCE_TYPE,
                         group.getReferenceInstanceConfiguration().getTemplate().getFlavor(),
-                        LaunchTemplateField.ROOT_DISK,
+                        LaunchTemplateField.ROOT_DISK_SIZE,
                         String.valueOf(group.getRootVolumeSize())
                 );
                 if (cfTemplate.contains(LAUNCH_TEMPLATE)) {

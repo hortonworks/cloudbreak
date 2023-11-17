@@ -201,7 +201,7 @@ public class AwsLaunchTemplateUpdateService {
     private CreateLaunchTemplateVersionResponse createLaunchTemplateVersion(AmazonEc2Client ec2Client,
             Map<LaunchTemplateField, String> updatableFields, LaunchTemplateSpecification launchTemplateSpecification, CloudStack cloudStack) {
         List<LaunchTemplateBlockDeviceMappingRequest> resizedRootBlockDeviceMapping =
-                resizedRootBlockDeviceMappingProvider.createResizedRootBlockDeviceMapping(ec2Client, updatableFields, launchTemplateSpecification, cloudStack);
+                resizedRootBlockDeviceMappingProvider.createUpdatedRootBlockDeviceMapping(ec2Client, updatableFields, launchTemplateSpecification, cloudStack);
         CreateLaunchTemplateVersionRequest createLaunchTemplateVersionRequest = CreateLaunchTemplateVersionRequest.builder()
                 .launchTemplateId(launchTemplateSpecification.launchTemplateId())
                 .sourceVersion(launchTemplateSpecification.version())

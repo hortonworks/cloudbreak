@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -27,8 +28,11 @@ public class AwsImageUpdateService {
             awsLaunchConfigurationUpdateService.updateLaunchConfigurations(authenticatedContext, stack, cfResource,
                     Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()));
         } else if (cfTemplate.contains(AwsUpdateService.LAUNCH_TEMPLATE)) {
+            Map<LaunchTemplateField, String> updatableFields = new HashMap<>();
+            updatableFields.put(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName());
+            updatableFields.put(LaunchTemplateField.ROOT_DISK_PATH, "");
             awsLaunchTemplateUpdateService.updateFieldsOnAllLaunchTemplate(authenticatedContext,
-                    cfResource.getName(), Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()), stack);
+                    cfResource.getName(), updatableFields, stack);
         } else {
             throw new NotImplementedException("Image update for stack template is not implemented yet.");
         }
