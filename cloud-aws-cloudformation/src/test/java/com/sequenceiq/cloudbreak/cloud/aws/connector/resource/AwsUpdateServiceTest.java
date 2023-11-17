@@ -161,10 +161,10 @@ class AwsUpdateServiceTest {
 
         String encodedCoreUserData = Base64Util.encode(userData.get(InstanceGroupType.CORE));
         Map<LaunchTemplateField, String> coreFields = Map.of(LaunchTemplateField.USER_DATA, encodedCoreUserData);
-        verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(coreFields, ac, cf.getName(), coreGroup, stack, true);
+        verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(coreFields, ac, cf.getName(), coreGroup, stack, Boolean.FALSE);
         String encodedGatewayUserData = Base64Util.encode(userData.get(InstanceGroupType.GATEWAY));
         Map<LaunchTemplateField, String> gatewayFields = Map.of(LaunchTemplateField.USER_DATA, encodedGatewayUserData);
-        verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(gatewayFields, ac, cf.getName(), gatewayGroup, stack, true);
+        verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(gatewayFields, ac, cf.getName(), gatewayGroup, stack, Boolean.FALSE);
     }
 
     @Test

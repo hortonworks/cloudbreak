@@ -113,7 +113,8 @@ public class AwsUpdateService {
                 if (StringUtils.isNotEmpty(groupUserData)) {
                     String encodedGroupUserData = Base64Util.encode(groupUserData);
                     Map<LaunchTemplateField, String> updatableFields = Map.of(LaunchTemplateField.USER_DATA, encodedGroupUserData);
-                    awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group, stack, true);
+                    awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group, stack,
+                            Boolean.FALSE);
                 } else {
                     String msg = String.format("The user data is empty for group '%s' and group type '%s' which should not happen!",
                             group.getName(), group.getType());
