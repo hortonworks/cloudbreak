@@ -43,6 +43,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxRestoreAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRestoreInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRotateSaltPasswordAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRotateSecretAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxScaleAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStartAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStatusAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStopAction;
@@ -61,6 +62,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxChangeImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCustomTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxScaleTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.RenewDatalakeCertificateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.SdxEventTestDto;
@@ -272,5 +274,9 @@ public class SdxTestClient {
 
     public Action<SdxInternalTestDto, SdxClient> updateDisks() {
         return new SdxDiskUpdateAction();
+    }
+
+    public Action<SdxScaleTestDto, SdxClient> scale() {
+        return new SdxScaleAction();
     }
 }

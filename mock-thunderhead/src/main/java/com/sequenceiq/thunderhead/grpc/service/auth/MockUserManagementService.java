@@ -88,6 +88,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_IMPALA_SCHEDULE_BASED_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STOP_START_SCALING_FAILURE_RECOVERY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STREAMING_SCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATALAKE_HORIZONTAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_RHEL8_IMAGES;
@@ -1025,6 +1026,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS))
                                 .addEntitlements(createEntitlement(CDP_GCP_RAZ))
                                 .addEntitlements(createEntitlement(CDP_CB_AZURE_MULTIAZ))
+                                .addEntitlements(createEntitlement(DATALAKE_HORIZONTAL_SCALE))
                                 .setGlobalPasswordPolicy(workloadPasswordPolicy)
                                 .setAccountId(accountId)
                                 .setExternalAccountId("external-" + accountId)
