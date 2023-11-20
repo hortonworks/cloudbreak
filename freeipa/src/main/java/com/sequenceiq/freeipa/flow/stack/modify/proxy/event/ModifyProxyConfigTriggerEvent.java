@@ -12,14 +12,22 @@ import com.sequenceiq.freeipa.flow.stack.modify.proxy.selector.ModifyProxyConfig
 
 public class ModifyProxyConfigTriggerEvent extends StackEvent {
 
+    private final boolean chained;
+
+    private final boolean finalChain;
+
     private final String operationId;
 
     @JsonCreator
     public ModifyProxyConfigTriggerEvent(
             @JsonProperty("resourceId") Long stackId,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
+            @JsonProperty("chained") boolean chained,
+            @JsonProperty("finalChain") boolean finalChain,
             @JsonProperty("operationId") String operationId) {
         super(ModifyProxyConfigEvent.MODIFY_PROXY_TRIGGER_EVENT.event(), stackId, accepted);
+        this.chained = chained;
+        this.finalChain = finalChain;
         this.operationId = operationId;
     }
 
@@ -29,6 +37,14 @@ public class ModifyProxyConfigTriggerEvent extends StackEvent {
                 event -> Objects.equals(operationId, event.operationId));
     }
 
+    public boolean isChained() {
+        return chained;
+    }
+
+    public boolean isFinalChain() {
+        return finalChain;
+    }
+
     public String getOperationId() {
         return operationId;
     }
@@ -36,7 +52,9 @@ public class ModifyProxyConfigTriggerEvent extends StackEvent {
     @Override
     public String toString() {
         return "ModifyProxyConfigTriggerEvent{" +
-                "operationId='" + operationId + '\'' +
+                "chained=" + chained +
+                ", finalChain=" + finalChain +
+                ", operationId='" + operationId + '\'' +
                 "} " + super.toString();
     }
 }

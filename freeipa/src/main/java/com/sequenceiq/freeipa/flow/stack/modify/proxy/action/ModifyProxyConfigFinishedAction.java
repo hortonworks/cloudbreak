@@ -40,7 +40,9 @@ public class ModifyProxyConfigFinishedAction extends ModifyProxyConfigAction<Sta
                 "Successfully updated proxy config settings on all instances");
         LOGGER.debug("Complete operation with id: [{}]", getOperationId(variables));
         SuccessDetails successDetails = new SuccessDetails(context.getStack().getEnvironmentCrn());
-        operationService.completeOperation(context.getStack().getAccountId(), getOperationId(variables), Set.of(successDetails), Set.of());
+        if (isOperationIdSet(variables) && (!isChainedAction(variables) || isFinalChain(variables))) {
+            operationService.completeOperation(context.getStack().getAccountId(), getOperationId(variables), Set.of(successDetails), Set.of());
+        }
         sendEvent(context);
     }
 
