@@ -63,6 +63,9 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void stopClusterManagerWithItsAgents(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
+    void restartClusterManagerAgents(GatewayConfig gatewayConfig, Set<String> target, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException;
+
     void startClusterManagerWithItsAgents(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
@@ -173,6 +176,9 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     Optional<Memory> getClusterManagerMemory(GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException;
 
     void setClusterManagerMemory(GatewayConfig gatewayConfig, Memory memory) throws CloudbreakOrchestratorFailedException;
+
+    void removeSecurityConfigFromCMAgentsConfig(GatewayConfig gatewayConfig, Set<String> target)
+            throws CloudbreakOrchestratorFailedException;
 
     void executeSaltState(GatewayConfig gatewayConfig, Set<String> target, List<String> states, ExitCriteriaModel exitCriteriaModel,
             Optional<Integer> maxRetry, Optional<Integer> maxRetryOnError) throws CloudbreakOrchestratorFailedException;

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -85,8 +86,9 @@ public class ClusterManagerUpscaleServiceTest {
         StackDto stackDto = getStackDto();
         when(stackDtoService.getById(eq(STACK_ID))).thenReturn(stackDto);
         when(stackDto.getClusterManagerIp()).thenReturn("otherclusterIp");
+        NodeReachabilityResult nodeReachabilityResult = new NodeReachabilityResult(Set.of(mock(Node.class)), Set.of(mock(Node.class)));
         when(clusterHostServiceRunner.addClusterServices(eq(stackDto), any(), anyBoolean()))
-                .thenReturn(new NodeReachabilityResult(Set.of(), Set.of()));
+                .thenReturn(nodeReachabilityResult);
         doNothing().when(clusterService).updateInstancesToRunning(eq(STACK_ID), any());
         when(clusterServiceRunner.updateClusterManagerClientConfig(eq(stackDto))).thenReturn("clusterIp");
         when(clusterApiConnectors.getConnector(eq(stackDto), eq("clusterIp"))).thenReturn(clusterApi);
@@ -100,6 +102,33 @@ public class ClusterManagerUpscaleServiceTest {
 
         underTest.upscaleClusterManager(STACK_ID, Collections.singletonMap("hg", 3), false, false);
 
+        verifyNoMoreInteractions(clusterServiceRunner);
+        verify(clusterApi, times(2)).waitForHosts(any());
+        verify(clusterManagerMemoryAdjuster, times(2)).adjustMemory(eq(stackDto), anyInt());
+    }
+
+    @Test
+    public void testUpscaleIfPrimaryGatewayChangedAndGovCloud() throws ClusterClientInitException {
+        StackDto stackDto = getStackDto();
+        when(stackDto.isOnGovPlatformVariant()).thenReturn(true);
+        when(stackDtoService.getById(eq(STACK_ID))).thenReturn(stackDto);
+        when(stackDto.getClusterManagerIp()).thenReturn("otherclusterIp");
+        NodeReachabilityResult nodeReachabilityResult = new NodeReachabilityResult(Set.of(mock(Node.class)), Set.of(mock(Node.class)));
+        when(clusterHostServiceRunner.addClusterServices(eq(stackDto), any(), anyBoolean()))
+                .thenReturn(nodeReachabilityResult);
+        doNothing().when(clusterService).updateInstancesToRunning(eq(STACK_ID), any());
+        when(clusterServiceRunner.updateClusterManagerClientConfig(eq(stackDto))).thenReturn("clusterIp");
+        when(clusterApiConnectors.getConnector(eq(stackDto), eq("clusterIp"))).thenReturn(clusterApi);
+
+        underTest.upscaleClusterManager(STACK_ID, Collections.singletonMap("hg", 1), true, false);
+
+        verifyNoInteractions(targetedUpscaleSupportService);
+
+        when(clusterApiConnectors.getConnector(eq(stackDto), eq("otherclusterIp"))).thenReturn(clusterApi);
+
+        underTest.upscaleClusterManager(STACK_ID, Collections.singletonMap("hg", 3), false, false);
+
+        verify(clusterHostServiceRunner, times(1)).removeSecurityConfigFromCMAgentsConfig(stackDto, nodeReachabilityResult.getReachableNodes());
         verifyNoMoreInteractions(clusterServiceRunner);
         verify(clusterApi, times(2)).waitForHosts(any());
         verify(clusterManagerMemoryAdjuster, times(2)).adjustMemory(eq(stackDto), anyInt());

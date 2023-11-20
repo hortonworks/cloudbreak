@@ -135,6 +135,10 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private static final String CM_SERVER_RESTART = "cloudera.manager.restart";
 
+    private static final String CM_AGENT_STOP = "cloudera.agent.agent-stop";
+
+    private static final String CM_AGENT_START = "cloudera.agent.start";
+
     private static final String CM_AGENT_CERTDIR_PERMISSION = "cloudera.agent.agent-cert-permission";
 
     private static final String CREATE_USER_HOME_CRON = "cloudera.createuserhome";
@@ -898,6 +902,18 @@ public class SaltOrchestrator implements HostOrchestrator {
         } catch (Exception e) {
             LOGGER.error("Error occurred during CM Server restart", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void restartClusterManagerAgents(GatewayConfig gatewayConfig, Set<String> target, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException {
+        try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
+            executeSingleSaltState(target, exitCriteriaModel, Optional.empty(), Optional.empty(), sc, CM_AGENT_STOP);
+            executeSingleSaltState(target, exitCriteriaModel, Optional.empty(), Optional.empty(), sc, CM_AGENT_START);
+        } catch (Exception e) {
+            LOGGER.error("Couldn't restart CM agents. Message: {}", e.getMessage(), e);
+            throw new CloudbreakOrchestratorFailedException("Couldn't restart CM agents.", e);
         }
     }
 
@@ -1750,6 +1766,17 @@ public class SaltOrchestrator implements HostOrchestrator {
         } catch (Exception e) {
             LOGGER.info("Error occurred during the salt bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void removeSecurityConfigFromCMAgentsConfig(GatewayConfig gatewayConfig, Set<String> target)
+            throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
+            saltStateService.removeSecurityConfigFromCMAgentsConfig(sc, new HostList(target));
+        } catch (Exception e) {
+            LOGGER.error("Couldn't remove security config from CM agents. Message: {}", e.getMessage(), e);
+            throw new CloudbreakOrchestratorFailedException("Couldn't remove security config from CM agents.", e);
         }
     }
 

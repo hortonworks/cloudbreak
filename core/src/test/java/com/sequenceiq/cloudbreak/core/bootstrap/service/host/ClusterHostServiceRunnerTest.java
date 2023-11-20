@@ -73,6 +73,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.HostAttributeDecorator;
@@ -98,6 +99,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.san.LoadBalancerSANProvider;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -829,6 +831,31 @@ class ClusterHostServiceRunnerTest {
         List<String> ranger = location.get("RANGER");
         assertTrue(ranger.contains("master1"));
         assertTrue(ranger.contains("master2"));
+    }
+
+    @Test
+    void removeSecurityConfigFromCMTest() throws CloudbreakOrchestratorException {
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getId()).thenReturn(1L);
+        Cluster cluster = mock(Cluster.class);
+        when(cluster.getId()).thenReturn(2L);
+        when(stackDto.getCluster()).thenReturn(cluster);
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        when(gatewayConfigService.getPrimaryGatewayConfig(stackDto)).thenReturn(gatewayConfig);
+        Node node1 = new Node("192.168.1.1", "192.168.1.1", "i-1", "type", "fqdn1", "compute");
+        Node node2 = new Node("192.168.1.2", "192.168.1.2", "i-2", "type", "fqdn2", "compute");
+        Node node3 = new Node("192.168.1.3", "192.168.1.3", "i-3", "type", "fqdn3", "worker");
+        underTest.removeSecurityConfigFromCMAgentsConfig(stackDto, Set.of(node1, node2, node3));
+        ArgumentCaptor<Set<String>> setArgumentCaptor = ArgumentCaptor.forClass(Set.class);
+        verify(hostOrchestrator).removeSecurityConfigFromCMAgentsConfig(eq(gatewayConfig), setArgumentCaptor.capture());
+        assertThat(setArgumentCaptor.getValue()).containsExactlyInAnyOrder(node1.getHostname(), node2.getHostname(), node3.getHostname());
+        ArgumentCaptor<ExitCriteriaModel> exitCriteriaModelArgumentCaptor = ArgumentCaptor.forClass(ExitCriteriaModel.class);
+        verify(hostOrchestrator).restartClusterManagerAgents(eq(gatewayConfig), setArgumentCaptor.capture(), exitCriteriaModelArgumentCaptor.capture());
+        assertThat(setArgumentCaptor.getValue()).containsExactlyInAnyOrder(node1.getHostname(), node2.getHostname(), node3.getHostname());
+        ClusterDeletionBasedExitCriteriaModel exitCriteriaModel =
+                (ClusterDeletionBasedExitCriteriaModel) exitCriteriaModelArgumentCaptor.getValue();
+        assertEquals(1L, exitCriteriaModel.getStackId().get());
+        assertEquals(2L, exitCriteriaModel.getClusterId().get());
     }
 
     private void setupMocksForRunClusterServices() {

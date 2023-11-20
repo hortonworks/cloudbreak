@@ -537,6 +537,18 @@ public class ClusterHostServiceRunner {
         return new SaltConfig(servicePillar, grainsProperties);
     }
 
+    public void removeSecurityConfigFromCMAgentsConfig(StackDto stackDto, Set<Node> reachableNodes) {
+        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
+        try {
+            ClusterDeletionBasedExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stackDto.getId(), stackDto.getCluster().getId());
+            Set<String> targets = reachableNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+            hostOrchestrator.removeSecurityConfigFromCMAgentsConfig(primaryGatewayConfig, targets);
+            hostOrchestrator.restartClusterManagerAgents(primaryGatewayConfig, targets, exitCriteriaModel);
+        } catch (CloudbreakOrchestratorException e) {
+            throw new CloudbreakServiceException(e.getMessage(), e);
+        }
+    }
+
     private SaltConfig createSaltConfigWithGatewayPillarOnly(StackDto stackDto, List<GrainProperties> grainsProperties)
             throws IOException, CloudbreakOrchestratorException {
         StackView stack = stackDto.getStack();

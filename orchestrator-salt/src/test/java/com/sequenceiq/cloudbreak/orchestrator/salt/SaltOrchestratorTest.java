@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
@@ -1039,5 +1040,19 @@ class SaltOrchestratorTest {
                 saltOrchestrator.unmountBlockStorageDisks(Collections.singletonList(gatewayConfig), targets, targets, exitCriteriaModel));
 
         assertEquals("TEST SALT RUNNER EXCEPTION", ex.getMessage());
+    }
+
+    @Test
+    void testRestartClusterManagerAgents() throws CloudbreakOrchestratorException {
+        saltOrchestrator.restartClusterManagerAgents(gatewayConfig, targets.stream().map(Node::getHostname).collect(Collectors.toSet()),
+                exitCriteriaModel);
+        ArgumentCaptor<SaltJobIdTracker> saltJobIdTrackerArgumentCaptor = ArgumentCaptor.forClass(SaltJobIdTracker.class);
+        verify(saltRunner, times(2))
+                .runnerWithConfiguredErrorCount(saltJobIdTrackerArgumentCaptor.capture(), eq(exitCriteria), eq(exitCriteriaModel));
+        List<SaltJobIdTracker> allValues = saltJobIdTrackerArgumentCaptor.getAllValues();
+        StateRunner stopAgentStateRunner = (StateRunner) allValues.get(0).getSaltJobRunner();
+        assertEquals("cloudera.agent.agent-stop", stopAgentStateRunner.getState());
+        StateRunner startAgentStateRunner = (StateRunner) allValues.get(1).getSaltJobRunner();
+        assertEquals("cloudera.agent.start", startAgentStateRunner.getState());
     }
 }

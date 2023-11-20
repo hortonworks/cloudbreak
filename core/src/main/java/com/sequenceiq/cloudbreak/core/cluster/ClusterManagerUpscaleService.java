@@ -66,11 +66,13 @@ public class ClusterManagerUpscaleService {
         StackView stack = stackDto.getStack();
 
         LOGGER.debug("Adding new nodes for host group {}", hostGroupWithAdjustment);
-
         NodeReachabilityResult nodeReachabilityResult = hostRunner.addClusterServices(stackDto, hostGroupWithAdjustment, repair);
         String clusterManagerIp = stackDto.getClusterManagerIp();
         if (primaryGatewayChanged) {
             clusterManagerIp = clusterServiceRunner.updateClusterManagerClientConfig(stackDto);
+            if (stackDto.isOnGovPlatformVariant()) {
+                hostRunner.removeSecurityConfigFromCMAgentsConfig(stackDto, nodeReachabilityResult.getReachableNodes());
+            }
         }
         clusterService.updateInstancesToRunning(stackId, nodeReachabilityResult.getReachableNodes());
         clusterService.updateInstancesToZombie(stackId, nodeReachabilityResult.getUnreachableNodes());
