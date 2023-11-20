@@ -21,4 +21,9 @@ public class ExecuteRotationTriggerEvent extends RotationEvent {
         return new ExecuteRotationTriggerEvent(EventSelectorUtil.selector(ExecuteRotationTriggerEvent.class),
                 payload.getResourceId(), payload.getResourceCrn(), payload.getSecretType(), payload.getExecutionType());
     }
+
+    @Override
+    public String toString() {
+        return "ExecuteRotationTriggerEvent{} " + super.toString();
+    }
 }

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.rotation.flow.rotation.config.SecretRotationEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.PreValidateRotationFinishedEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.PreValidateRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RotationFailedEvent;
@@ -28,7 +27,7 @@ public class PreValidateRotationHandler extends ExceptionCatcherEventHandler<Pre
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<PreValidateRotationTriggerEvent> event) {
-        return RotationFailedEvent.fromPayload(SecretRotationEvent.ROTATION_FAILED_EVENT.event(), event.getData(), e);
+        return RotationFailedEvent.fromPayload(event.getData(), e);
     }
 
     @Override

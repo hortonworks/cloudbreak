@@ -56,9 +56,9 @@ public class StackSecretRotationStatusService implements SecretRotationStatusSer
     }
 
     @Override
-    public void rollbackStarted(String resourceCrn, SecretType secretType) {
+    public void rollbackStarted(String resourceCrn, SecretType secretType, String reason) {
         stackUpdater.updateStackStatus(resourceCrn, DetailedStackStatus.SECRET_ROTATION_ROLLBACK_STARTED,
-                String.format("Rotation rollback started, secret type: %s", secretType.value()));
+                String.format("Rotation rollback started, secret type: %s, reason: %s", secretType.value(), reason));
         StackView stack = stackDtoService.getStackViewByCrn(resourceCrn);
         fireCloudbreakEvent(stack, ResourceEvent.SECRET_ROTATION_ROLLBACK_IN_PROGRESS);
     }

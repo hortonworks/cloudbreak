@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.rotation.flow.rotation.config.SecretRotationEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRollbackFinishedEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RollbackRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RotationFailedEvent;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationOrchestrationService;
@@ -27,13 +27,14 @@ public class RollbackRotationHandler extends ExceptionCatcherEventHandler<Rollba
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<RollbackRotationTriggerEvent> event) {
-        return RotationFailedEvent.fromPayload(SecretRotationEvent.ROTATION_FAILED_EVENT.event(), event.getData(), e);
+        return RotationFailedEvent.fromPayload(event.getData(), e);
     }
 
     @Override
     protected Selectable doAccept(HandlerEvent<RollbackRotationTriggerEvent> event) {
         RollbackRotationTriggerEvent rollbackEvent = event.getData();
-        secretRotationOrchestrationService.rollbackIfNeeded(rollbackEvent.getSecretType(), rollbackEvent.getResourceCrn(), rollbackEvent.getExecutionType());
-        return RotationFailedEvent.fromPayload(SecretRotationEvent.ROTATION_FAILED_EVENT.event(), rollbackEvent, rollbackEvent.getException());
+        secretRotationOrchestrationService.rollbackIfNeeded(rollbackEvent.getSecretType(), rollbackEvent.getResourceCrn(), rollbackEvent.getExecutionType(),
+                rollbackEvent.getRollbackReason());
+        return ExecuteRollbackFinishedEvent.fromPayload(rollbackEvent);
     }
 }

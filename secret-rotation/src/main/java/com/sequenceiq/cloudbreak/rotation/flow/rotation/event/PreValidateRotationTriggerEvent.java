@@ -21,4 +21,9 @@ public class PreValidateRotationTriggerEvent extends RotationEvent {
         return new PreValidateRotationTriggerEvent(EventSelectorUtil.selector(PreValidateRotationTriggerEvent.class),
                 payload.getResourceId(), payload.getResourceCrn(), payload.getSecretType(), payload.getExecutionType());
     }
+
+    @Override
+    public String toString() {
+        return "PreValidateRotationTriggerEvent{} " + super.toString();
+    }
 }

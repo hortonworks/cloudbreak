@@ -20,7 +20,7 @@ public class DefaultSecretRotationStatusService implements SecretRotationStatusS
     }
 
     @Override
-    public void rollbackStarted(String resourceCrn, SecretType secretType) {
+    public void rollbackStarted(String resourceCrn, SecretType secretType, String reason) {
     }
 
     @Override

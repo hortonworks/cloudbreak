@@ -87,8 +87,8 @@ class SdxSecretRotationStatusServiceTest {
 
     @Test
     void rollbackStartedShouldSucceed() {
-        underTest.rollbackStarted(RESOURCE_CRN, SECRET_TYPE);
-        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DATALAKE_SECRET_ROTATION_ROLLBACK_IN_PROGRESS), anyString(), eq(RESOURCE_CRN));
+        underTest.rollbackStarted(RESOURCE_CRN, SECRET_TYPE, REASON);
+        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DATALAKE_SECRET_ROTATION_ROLLBACK_IN_PROGRESS), contains(REASON), eq(RESOURCE_CRN));
     }
 
     @Test

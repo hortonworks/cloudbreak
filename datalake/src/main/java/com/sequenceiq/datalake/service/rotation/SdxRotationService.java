@@ -126,7 +126,7 @@ public class SdxRotationService {
 
         PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
                 .withStopPollingIfExceptionOccurred(true);
-        cloudbreakPoller.pollFlowStateByFlowIdentifierUntilComplete("secret rotation", flowIdentifier, sdxCluster.getId(), pollingConfig);
+        cloudbreakPoller.pollFlowStateByFlowIdentifierUntilComplete("Secret rotation", flowIdentifier, sdxCluster.getId(), pollingConfig);
     }
 
     public void rotateRedbeamsSecret(String datalakeCrn, SecretType secretType, RotationFlowExecutionType executionType) {
@@ -148,7 +148,7 @@ public class SdxRotationService {
 
         PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
                 .withStopPollingIfExceptionOccurred(true);
-        redbeamsPoller.pollFlowStateByFlowIdentifierUntilComplete("secret rotation", flowIdentifier, sdxCluster.getId(), pollingConfig);
+        redbeamsPoller.pollFlowStateByFlowIdentifierUntilComplete("Secret rotation", flowIdentifier, sdxCluster.getId(), pollingConfig);
     }
 
     public FlowIdentifier triggerSecretRotation(String datalakeCrn, List<String> secrets, RotationFlowExecutionType requestedExecutionType) {

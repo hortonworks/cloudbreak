@@ -1,14 +1,14 @@
-package com.sequenceiq.cloudbreak.rotation.flow.rotation;
+package com.sequenceiq.cloudbreak.rotation.flow.subrotation;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
-import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RotationEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.subrotation.event.SubRotationEvent;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
 
-public class RotationFlowContext extends CommonContext {
+public class SubRotationFlowContext extends CommonContext {
 
     private final Long resourceId;
 
@@ -19,7 +19,7 @@ public class RotationFlowContext extends CommonContext {
     private final RotationFlowExecutionType executionType;
 
     @JsonCreator
-    public RotationFlowContext(
+    public SubRotationFlowContext(
             @JsonProperty("flowParameters") FlowParameters flowParameters,
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("resourceCrn") String resourceCrn,
@@ -32,9 +32,9 @@ public class RotationFlowContext extends CommonContext {
         this.executionType = executionType;
     }
 
-    public static RotationFlowContext fromPayload(FlowParameters flowParameters, RotationEvent rotationEvent) {
-        return new RotationFlowContext(flowParameters, rotationEvent.getResourceId(), rotationEvent.getResourceCrn(),
-                rotationEvent.getSecretType(), rotationEvent.getExecutionType());
+    public static SubRotationFlowContext fromPayload(FlowParameters flowParameters, SubRotationEvent subRotationEvent) {
+        return new SubRotationFlowContext(flowParameters, subRotationEvent.getResourceId(), subRotationEvent.getResourceCrn(),
+                subRotationEvent.getSecretType(), subRotationEvent.getExecutionType());
     }
 
     public Long getResourceId() {
@@ -55,7 +55,7 @@ public class RotationFlowContext extends CommonContext {
 
     @Override
     public String toString() {
-        return "RotationFlowContext{" +
+        return "SubRotationFlowContext{" +
                 "resourceId=" + resourceId +
                 ", resourceCrn='" + resourceCrn + '\'' +
                 ", secretType=" + secretType +

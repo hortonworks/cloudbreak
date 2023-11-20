@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.rotation.flow.rotation.event;
+package com.sequenceiq.cloudbreak.rotation.flow.subrotation.event;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,10 +10,10 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
-public class SecretRotationTriggerEvent extends RotationEvent {
+public class SecretSubRotationTriggerEvent extends SubRotationEvent {
 
     @JsonCreator
-    public SecretRotationTriggerEvent(@JsonProperty("selector") String selector,
+    public SecretSubRotationTriggerEvent(@JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("secretType") SecretType secretType,
@@ -22,13 +22,13 @@ public class SecretRotationTriggerEvent extends RotationEvent {
         super(selector, resourceId, resourceCrn, secretType, executionType, accepted);
     }
 
-    public static SecretRotationTriggerEvent fromChainTrigger(SecretRotationFlowChainTriggerEvent chainTriggerEvent, SecretType secretType) {
-        return new SecretRotationTriggerEvent(EventSelectorUtil.selector(SecretRotationTriggerEvent.class), chainTriggerEvent.getResourceId(),
+    public static SecretSubRotationTriggerEvent fromChainTrigger(SecretRotationFlowChainTriggerEvent chainTriggerEvent, SecretType secretType) {
+        return new SecretSubRotationTriggerEvent(EventSelectorUtil.selector(SecretSubRotationTriggerEvent.class), chainTriggerEvent.getResourceId(),
                 chainTriggerEvent.getResourceCrn(), secretType, chainTriggerEvent.getExecutionType(), chainTriggerEvent.accepted());
     }
 
     @Override
     public String toString() {
-        return "SecretRotationTriggerEvent{} " + super.toString();
+        return "SecretSubRotationTriggerEvent{} " + super.toString();
     }
 }

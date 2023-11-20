@@ -83,16 +83,17 @@ public class SecretRotationOrchestrationService {
         }
     }
 
-    public void rollbackIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType) {
+    public void rollbackIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType, Exception rollbackReason) {
         RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, ROLLBACK);
         if (executionDecisionProvider.executionRequired(rotationMetadata)) {
             try {
-                secretRotationStatusService.rollbackStarted(resourceCrn, secretType);
+                secretRotationStatusService.rollbackStarted(resourceCrn, secretType, rollbackReason.getMessage());
                 secretRotationUsageService.rollbackStarted(secretType, resourceCrn, executionType);
                 rollbackService.rollback(rotationMetadata);
                 secretRotationProgressService.deleteCurrentRotation(rotationMetadata);
                 secretRotationStatusService.rollbackFinished(resourceCrn, secretType);
                 secretRotationUsageService.rollbackFinished(secretType, resourceCrn, executionType);
+                secretRotationUsageService.rotationFailed(secretType, resourceCrn, rollbackReason.getMessage(), executionType);
             } catch (Exception e) {
                 secretRotationStatusService.rollbackFailed(resourceCrn, secretType, e.getMessage());
                 secretRotationUsageService.rollbackFailed(secretType, resourceCrn, e.getMessage(), executionType);

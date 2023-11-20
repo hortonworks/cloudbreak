@@ -99,8 +99,8 @@ class StackSecretRotationStatusServiceTest {
     @Test
     void rollbackStartedShouldUpdateStatus() {
         when(stackDtoService.getStackViewByCrn(eq(RESOURCE_CRN))).thenReturn(stack(AVAILABLE));
-        underTest.rollbackStarted(RESOURCE_CRN, SECRET_TYPE);
-        verify(stackUpdater, times(1)).updateStackStatus(eq(RESOURCE_CRN), eq(SECRET_ROTATION_ROLLBACK_STARTED), anyString());
+        underTest.rollbackStarted(RESOURCE_CRN, SECRET_TYPE, REASON);
+        verify(stackUpdater, times(1)).updateStackStatus(eq(RESOURCE_CRN), eq(SECRET_ROTATION_ROLLBACK_STARTED), contains(REASON));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(1L, UPDATE_IN_PROGRESS.name(), ResourceEvent.SECRET_ROTATION_ROLLBACK_IN_PROGRESS);
     }
 

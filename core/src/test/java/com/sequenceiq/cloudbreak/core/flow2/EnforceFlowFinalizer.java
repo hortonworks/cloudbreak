@@ -13,6 +13,7 @@ import org.reflections.scanners.SubTypesScanner;
 
 import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.config.SecretRotationFlowConfig;
+import com.sequenceiq.cloudbreak.rotation.flow.subrotation.config.SecretSubRotationFlowConfig;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 
 public class EnforceFlowFinalizer {
@@ -20,7 +21,7 @@ public class EnforceFlowFinalizer {
     private static final Reflections REFLECTIONS = new Reflections("com.sequenceiq.cloudbreak",
             new SubTypesScanner(false));
 
-    private static final Set<Class> EXCEPTIONS = Set.of(SecretRotationFlowConfig.class);
+    private static final Set<Class> EXCEPTIONS = Set.of(SecretRotationFlowConfig.class, SecretSubRotationFlowConfig.class);
 
     @Test
     public void enforceStackStatusFlowFinalizer() {

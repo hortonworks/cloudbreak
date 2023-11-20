@@ -46,9 +46,9 @@ public class SdxSecretRotationStatusService implements SecretRotationStatusServi
     }
 
     @Override
-    public void rollbackStarted(String resourceCrn, SecretType secretType) {
+    public void rollbackStarted(String resourceCrn, SecretType secretType, String reason) {
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_ROLLBACK_IN_PROGRESS,
-                String.format("Rotation rollback started, secret type: %s", secretType.value()), resourceCrn);
+                String.format("Rotation rollback started, secret type: %s, reason: %s", secretType.value(), reason), resourceCrn);
     }
 
     @Override

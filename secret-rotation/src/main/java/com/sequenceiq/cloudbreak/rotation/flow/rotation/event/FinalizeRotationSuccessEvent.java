@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 
 public class FinalizeRotationSuccessEvent extends RotationEvent {
 
@@ -16,8 +17,13 @@ public class FinalizeRotationSuccessEvent extends RotationEvent {
         super(selector, resourceId, resourceCrn, secretType, executionType);
     }
 
-    public static FinalizeRotationSuccessEvent fromPayload(String selector, RotationEvent payload) {
-        return new FinalizeRotationSuccessEvent(selector, payload.getResourceId(), payload.getResourceCrn(),
-                payload.getSecretType(), payload.getExecutionType());
+    public static FinalizeRotationSuccessEvent fromPayload(RotationEvent payload) {
+        return new FinalizeRotationSuccessEvent(EventSelectorUtil.selector(FinalizeRotationSuccessEvent.class),
+                payload.getResourceId(), payload.getResourceCrn(), payload.getSecretType(), payload.getExecutionType());
+    }
+
+    @Override
+    public String toString() {
+        return "FinalizeRotationSuccessEvent{} " + super.toString();
     }
 }

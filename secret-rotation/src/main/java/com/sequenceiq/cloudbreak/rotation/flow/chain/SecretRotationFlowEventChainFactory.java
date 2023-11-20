@@ -9,7 +9,9 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.SecretRotationTriggerEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.subrotation.event.SecretSubRotationTriggerEvent;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -31,9 +33,17 @@ public class SecretRotationFlowEventChainFactory implements FlowEventChainFactor
         secretRotationFlowEventProviderOptional.stream()
                 .filter(secretRotationFlowEventProvider -> secretRotationFlowEventProvider.saltUpdateNeeded(event))
                 .forEach(secretRotationFlowEventProvider -> flowEventChain.add(secretRotationFlowEventProvider.getSaltUpdateTriggerEvent(event)));
-        event.getSecretTypes().forEach(secretType -> flowEventChain.add(SecretRotationTriggerEvent.fromChainTrigger(event, secretType)));
+        event.getSecretTypes().forEach(secretType -> flowEventChain.add(getSecretRotationFlowTriggerEvent(event, secretType)));
         secretRotationFlowEventProviderOptional.ifPresent(secretRotationFlowEventProvider ->
                 flowEventChain.addAll(secretRotationFlowEventProvider.getPostFlowEvent(event)));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
+    }
+
+    private static Selectable getSecretRotationFlowTriggerEvent(SecretRotationFlowChainTriggerEvent event, SecretType secretType) {
+        if (event.getExecutionType() == null) {
+            return SecretRotationTriggerEvent.fromChainTrigger(event, secretType);
+        } else {
+            return SecretSubRotationTriggerEvent.fromChainTrigger(event, secretType);
+        }
     }
 }

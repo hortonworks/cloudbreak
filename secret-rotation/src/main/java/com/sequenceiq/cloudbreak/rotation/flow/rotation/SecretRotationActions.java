@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.rotation.flow.rotation;
 
-import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
-
 import java.util.Map;
 import java.util.Optional;
 
@@ -14,9 +12,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
-import com.sequenceiq.cloudbreak.rotation.flow.rotation.config.SecretRotationEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.config.SecretRotationState;
+import com.sequenceiq.cloudbreak.rotation.flow.rotation.config.SecretRotationStateSelectors;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRotationFailedEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRotationFinishedEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRotationTriggerEvent;
@@ -38,8 +35,6 @@ public class SecretRotationActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretRotationActions.class);
 
-    private static final String EXPLICIT_ROLLBACK_EXECUTION = "Explicit rollback execution.";
-
     @Inject
     private SecretRotationStatusService secretRotationStatusService;
 
@@ -48,12 +43,12 @@ public class SecretRotationActions {
 
     @Bean(name = "PRE_VALIDATE_ROTATION_STATE")
     public Action<?, ?> executePreValidationAction() {
-        return new AbstractAction<SecretRotationState, SecretRotationEvent,
+        return new AbstractAction<SecretRotationState, SecretRotationStateSelectors,
                 RotationFlowContext, SecretRotationTriggerEvent>(SecretRotationTriggerEvent.class) {
 
             @Override
             protected RotationFlowContext createFlowContext(FlowParameters flowParameters,
-                    StateContext<SecretRotationState, SecretRotationEvent> stateContext, SecretRotationTriggerEvent payload) {
+                    StateContext<SecretRotationState, SecretRotationStateSelectors> stateContext, SecretRotationTriggerEvent payload) {
                 return RotationFlowContext.fromPayload(flowParameters, payload);
             }
 
@@ -64,48 +59,42 @@ public class SecretRotationActions {
 
             @Override
             protected Object getFailurePayload(SecretRotationTriggerEvent payload, Optional<RotationFlowContext> flowContext, Exception ex) {
-                return RotationFailedEvent.fromPayload(SecretRotationEvent.ROTATION_FAILED_EVENT.event(), payload, ex);
+                return RotationFailedEvent.fromPayload(payload, ex);
             }
         };
     }
 
     @Bean(name = "EXECUTE_ROTATION_STATE")
     public Action<?, ?> executeRotationAction() {
-        return new AbstractAction<SecretRotationState, SecretRotationEvent,
+        return new AbstractAction<SecretRotationState, SecretRotationStateSelectors,
                 RotationFlowContext, PreValidateRotationFinishedEvent>(PreValidateRotationFinishedEvent.class) {
 
             @Override
             protected RotationFlowContext createFlowContext(FlowParameters flowParameters,
-                    StateContext<SecretRotationState, SecretRotationEvent> stateContext, PreValidateRotationFinishedEvent payload) {
+                    StateContext<SecretRotationState, SecretRotationStateSelectors> stateContext, PreValidateRotationFinishedEvent payload) {
                 return RotationFlowContext.fromPayload(flowParameters, payload);
             }
 
             @Override
             protected void doExecute(RotationFlowContext context, PreValidateRotationFinishedEvent payload, Map<Object, Object> variables) throws Exception {
-                if (ROLLBACK.equals(payload.getExecutionType())) {
-                    LOGGER.info("Routing execution of rotation flow to rollback state, since execution type is specified for secret {} and resource {}",
-                            payload.getSecretType(), payload.getResourceCrn());
-                    sendEvent(context, ExecuteRotationFailedEvent.fromPayload(payload, new SecretRotationException(EXPLICIT_ROLLBACK_EXECUTION)));
-                } else {
-                    sendEvent(context, ExecuteRotationTriggerEvent.fromPayload(payload));
-                }
+                sendEvent(context, ExecuteRotationTriggerEvent.fromPayload(payload));
             }
 
             @Override
             protected Object getFailurePayload(PreValidateRotationFinishedEvent payload, Optional<RotationFlowContext> flowContext, Exception ex) {
-                return RotationFailedEvent.fromPayload(SecretRotationEvent.ROTATION_FAILED_EVENT.event(), payload, ex);
+                return ExecuteRotationFailedEvent.fromPayload(payload, ex);
             }
         };
     }
 
     @Bean(name = "FINALIZE_ROTATION_STATE")
     public Action<?, ?> finalizeRotationAction() {
-        return new AbstractAction<SecretRotationState, SecretRotationEvent,
+        return new AbstractAction<SecretRotationState, SecretRotationStateSelectors,
                 RotationFlowContext, ExecuteRotationFinishedEvent>(ExecuteRotationFinishedEvent.class) {
 
             @Override
             protected RotationFlowContext createFlowContext(FlowParameters flowParameters,
-                    StateContext<SecretRotationState, SecretRotationEvent> stateContext, ExecuteRotationFinishedEvent payload) {
+                    StateContext<SecretRotationState, SecretRotationStateSelectors> stateContext, ExecuteRotationFinishedEvent payload) {
                 return RotationFlowContext.fromPayload(flowParameters, payload);
             }
 
@@ -116,47 +105,42 @@ public class SecretRotationActions {
 
             @Override
             protected Object getFailurePayload(ExecuteRotationFinishedEvent payload, Optional<RotationFlowContext> flowContext, Exception ex) {
-                return RotationFailedEvent.fromPayload(SecretRotationEvent.ROTATION_FAILED_EVENT.event(), payload, ex);
+                return RotationFailedEvent.fromPayload(payload, ex);
             }
         };
     }
 
     @Bean(name = "ROLLBACK_ROTATION_STATE")
     public Action<?, ?> rollbackRotationAction() {
-        return new AbstractAction<SecretRotationState, SecretRotationEvent,
+        return new AbstractAction<SecretRotationState, SecretRotationStateSelectors,
                 RotationFlowContext, ExecuteRotationFailedEvent>(ExecuteRotationFailedEvent.class) {
 
             @Override
             protected RotationFlowContext createFlowContext(FlowParameters flowParameters,
-                    StateContext<SecretRotationState, SecretRotationEvent> stateContext, ExecuteRotationFailedEvent payload) {
+                    StateContext<SecretRotationState, SecretRotationStateSelectors> stateContext, ExecuteRotationFailedEvent payload) {
                 return RotationFlowContext.fromPayload(flowParameters, payload);
             }
 
             @Override
-            protected void doExecute(RotationFlowContext context, ExecuteRotationFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                Flow flow = getFlow(context.getFlowId());
-                if (ROLLBACK != payload.getExecutionType()) {
-                    LOGGER.debug("Execution type is not set or not explicit ROLLBACK, set flow failed for: {}", context.getResourceCrn());
-                    flow.setFlowFailed(payload.getException());
-                }
+            protected void doExecute(RotationFlowContext context, ExecuteRotationFailedEvent payload, Map<Object, Object> variables) {
                 sendEvent(context, RollbackRotationTriggerEvent.fromPayload(payload));
             }
 
             @Override
             protected Object getFailurePayload(ExecuteRotationFailedEvent payload, Optional<RotationFlowContext> flowContext, Exception ex) {
-                return RotationFailedEvent.fromPayload(SecretRotationEvent.ROTATION_FAILED_EVENT.event(), payload, ex);
+                return RotationFailedEvent.fromPayload(payload, ex);
             }
         };
     }
 
     @Bean(name = "ROTATION_DEFAULT_FAILURE_STATE")
     public Action<?, ?> rotationFailureAction() {
-        return new AbstractAction<SecretRotationState, SecretRotationEvent,
+        return new AbstractAction<SecretRotationState, SecretRotationStateSelectors,
                 RotationFlowContext, RotationFailedEvent>(RotationFailedEvent.class) {
 
             @Override
             protected RotationFlowContext createFlowContext(FlowParameters flowParameters,
-                    StateContext<SecretRotationState, SecretRotationEvent> stateContext, RotationFailedEvent payload) {
+                    StateContext<SecretRotationState, SecretRotationStateSelectors> stateContext, RotationFailedEvent payload) {
                 return RotationFlowContext.fromPayload(flowParameters, payload);
             }
 
@@ -165,18 +149,12 @@ public class SecretRotationActions {
                 Exception exception = payload.getException();
                 String message = exception.getMessage();
                 String resourceCrn = context.getResourceCrn();
-                LOGGER.debug("Secret rotation failed, for: {}, secreType: {}", resourceCrn, context.getSecretType(), exception);
-                if (ROLLBACK == payload.getExecutionType() && EXPLICIT_ROLLBACK_EXECUTION.equals(message)) {
-                    // if the execution type is ROLLBACK, we need to know from the calling service whether it was successful or not
-                    LOGGER.debug("Explicit rollback, doesn't set flow failed.");
-                } else {
-                    LOGGER.debug("Execution type is not set or not explicit ROLLBACK, set flow failed for: {}", context.getResourceCrn());
-                    Flow flow = getFlow(context.getFlowId());
-                    flow.setFlowFailed(exception);
-                }
+                LOGGER.warn("Secret rotation failed for secreType: {}", context.getSecretType(), exception);
+                Flow flow = getFlow(context.getFlowId());
+                flow.setFlowFailed(exception);
                 secretRotationUsageService.rotationFailed(context.getSecretType(), resourceCrn, message, context.getExecutionType());
                 secretRotationStatusService.rotationFailed(resourceCrn, payload.getSecretType(), message);
-                sendEvent(context, RotationEvent.fromContext(SecretRotationEvent.ROTATION_FAILURE_HANDLED_EVENT.event(), context));
+                sendEvent(context, RotationEvent.fromContext(SecretRotationStateSelectors.ROTATION_FAILURE_HANDLED_EVENT.event(), context));
             }
 
             @Override

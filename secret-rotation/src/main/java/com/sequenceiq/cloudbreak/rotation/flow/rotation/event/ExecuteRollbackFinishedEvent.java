@@ -6,12 +6,12 @@ import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
-public class ExecuteRotationFailedEvent extends RotationEvent {
+public class ExecuteRollbackFinishedEvent extends RotationEvent {
 
     private final Exception rollbackReason;
 
     @JsonCreator
-    public ExecuteRotationFailedEvent(@JsonProperty("selector") String selector,
+    public ExecuteRollbackFinishedEvent(@JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("secretType") SecretType secretType,
@@ -21,9 +21,9 @@ public class ExecuteRotationFailedEvent extends RotationEvent {
         this.rollbackReason = rollbackReason;
     }
 
-    public static ExecuteRotationFailedEvent fromPayload(RotationEvent payload, Exception rollbackReason) {
-        return new ExecuteRotationFailedEvent(EventSelectorUtil.selector(ExecuteRotationFailedEvent.class),
-                payload.getResourceId(), payload.getResourceCrn(), payload.getSecretType(), payload.getExecutionType(), rollbackReason);
+    public static ExecuteRollbackFinishedEvent fromPayload(RollbackRotationTriggerEvent payload) {
+        return new ExecuteRollbackFinishedEvent(EventSelectorUtil.selector(ExecuteRollbackFinishedEvent.class),
+                payload.getResourceId(), payload.getResourceCrn(), payload.getSecretType(), payload.getExecutionType(), payload.getRollbackReason());
     }
 
     public Exception getRollbackReason() {
@@ -32,7 +32,7 @@ public class ExecuteRotationFailedEvent extends RotationEvent {
 
     @Override
     public String toString() {
-        return "ExecuteRotationFailedEvent{" +
+        return "ExecuteRollbackFinishedEvent{" +
                 "rollbackReason=" + rollbackReason +
                 "} " + super.toString();
     }

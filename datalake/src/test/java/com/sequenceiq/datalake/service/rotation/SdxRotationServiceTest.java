@@ -118,7 +118,7 @@ class SdxRotationServiceTest {
         verify(regionAwareInternalCrnGeneratorFactory, times(1)).iam();
         verify(stackV4Endpoint, times(1)).rotateSecrets(eq(1L), any(), any());
         verify(cloudbreakPoller, times(1))
-                .pollFlowStateByFlowIdentifierUntilComplete(eq("secret rotation"), eq(flowIdentifier), eq(SDX_CLUSTER_ID), any());
+                .pollFlowStateByFlowIdentifierUntilComplete(eq("Secret rotation"), eq(flowIdentifier), eq(SDX_CLUSTER_ID), any());
     }
 
     @Test
@@ -139,7 +139,7 @@ class SdxRotationServiceTest {
         verify(regionAwareInternalCrnGeneratorFactory, times(1)).iam();
         verify(databaseServerV4Endpoint, times(1)).rotateSecret(any(), any());
         verify(redbeamsPoller, times(1))
-                .pollFlowStateByFlowIdentifierUntilComplete(eq("secret rotation"), eq(flowIdentifier), eq(SDX_CLUSTER_ID), any());
+                .pollFlowStateByFlowIdentifierUntilComplete(eq("Secret rotation"), eq(flowIdentifier), eq(SDX_CLUSTER_ID), any());
     }
 
     @Test

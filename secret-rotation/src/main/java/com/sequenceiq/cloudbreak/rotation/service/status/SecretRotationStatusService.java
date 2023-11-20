@@ -10,7 +10,7 @@ public interface SecretRotationStatusService {
 
     void rotationFailed(String resourceCrn, SecretType secretType, String reason);
 
-    void rollbackStarted(String resourceCrn, SecretType secretType);
+    void rollbackStarted(String resourceCrn, SecretType secretType, String reason);
 
     void rollbackFinished(String resourceCrn, SecretType secretType);
 

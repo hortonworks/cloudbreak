@@ -21,4 +21,9 @@ public class ExecuteRotationFinishedEvent extends RotationEvent {
         return new ExecuteRotationFinishedEvent(EventSelectorUtil.selector(ExecuteRotationFinishedEvent.class),
                 payload.getResourceId(), payload.getResourceCrn(), payload.getSecretType(), payload.getExecutionType());
     }
+
+    @Override
+    public String toString() {
+        return "ExecuteRotationFinishedEvent{} " + super.toString();
+    }
 }
