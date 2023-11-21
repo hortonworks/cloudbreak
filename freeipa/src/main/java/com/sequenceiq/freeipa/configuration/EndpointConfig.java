@@ -27,6 +27,7 @@ import com.sequenceiq.freeipa.controller.FreeIpaRotationV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaUpgradeV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaV1FlowController;
+import com.sequenceiq.freeipa.controller.FreeIpaV2Controller;
 import com.sequenceiq.freeipa.controller.OperationV1Controller;
 import com.sequenceiq.freeipa.controller.ProgressV1Controller;
 import com.sequenceiq.freeipa.controller.RecipeV1Controller;
@@ -49,6 +50,7 @@ public class EndpointConfig extends ResourceConfig {
             UserV1Controller.class,
             ClientTestV1Controller.class,
             FreeIpaV1Controller.class,
+            FreeIpaV2Controller.class,
             LdapConfigV1Controller.class,
             KerberosConfigV1Controller.class,
             KerberosMgmtV1Controller.class,

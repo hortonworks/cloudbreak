@@ -20,6 +20,7 @@ import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.progress.ProgressV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.recipe.RecipeV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
+import com.sequenceiq.freeipa.api.v2.freeipa.FreeIpaV2Endpoint;
 
 public class FreeIpaApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint implements FreeIpaClient {
 
@@ -30,6 +31,11 @@ public class FreeIpaApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint impl
     @Override
     public FreeIpaV1Endpoint getFreeIpaV1Endpoint() {
         return getEndpoint(FreeIpaV1Endpoint.class);
+    }
+
+    @Override
+    public FreeIpaV2Endpoint getFreeIpaV2Endpoint() {
+        return getEndpoint(FreeIpaV2Endpoint.class);
     }
 
     @Override

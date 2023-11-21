@@ -12,9 +12,12 @@ import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.progress.ProgressV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.recipe.RecipeV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
+import com.sequenceiq.freeipa.api.v2.freeipa.FreeIpaV2Endpoint;
 
 public interface FreeIpaApiEndpoint {
     FreeIpaV1Endpoint getFreeIpaV1Endpoint();
+
+    FreeIpaV2Endpoint getFreeIpaV2Endpoint();
 
     FreeIpaRotationV1Endpoint getFreeipaRotationV1Endpoint();
 
