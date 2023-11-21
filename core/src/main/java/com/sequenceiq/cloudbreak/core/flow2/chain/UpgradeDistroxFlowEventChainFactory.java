@@ -133,7 +133,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         if (upgradeValidationEnabled) {
             LOGGER.info("Upgrade validation enabled, adding to flowchain");
             return Optional.of(new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto().getImageId(),
-                    event.isLockComponents()));
+                    event.isLockComponents(), event.isRollingUpgradeEnabled()));
         } else {
             LOGGER.info("Upgrade validation disabled");
             return Optional.empty();

@@ -279,20 +279,19 @@ public class ClouderaManagerConfigService {
         }
     }
 
-    public void stopClouderaManagerService(ApiClient client, StackDtoDelegate stack, String serviceType) throws CloudbreakException {
+    public void stopClouderaManagerService(ApiClient client, StackDtoDelegate stack, String serviceType) {
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
         LOGGER.info("Trying to stop services for service type: {} for cluster {}", serviceType, stack.getName());
         getServiceName(stack.getName(), serviceType, servicesResourceApi)
                 .ifPresentOrElse(
-                        stopServices(stack, servicesResourceApi, client),
+                        stopServices(stack, servicesResourceApi),
                         () -> {
                             LOGGER.info("{} service name is missing, skiping stop.", serviceType);
                             throw new ClouderaManagerOperationFailedException(String.format("Service of type: %s is not found", serviceType));
                         });
     }
 
-    private Consumer<String> stopServices(StackDtoDelegate stack, ServicesResourceApi servicesResourceApi, ApiClient client) {
-        ApiServiceConfig apiServiceConfig = new ApiServiceConfig();
+    private Consumer<String> stopServices(StackDtoDelegate stack, ServicesResourceApi servicesResourceApi) {
         return serviceName -> {
             try {
                 servicesResourceApi.stopCommand(stack.getName(), serviceName);
@@ -303,20 +302,19 @@ public class ClouderaManagerConfigService {
         };
     }
 
-    public void startClouderaManagerService(ApiClient client, StackDtoDelegate stack, String serviceType) throws CloudbreakException {
+    public void startClouderaManagerService(ApiClient client, StackDtoDelegate stack, String serviceType) {
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
         LOGGER.info("Trying to start services for service type: {} for cluster {}", serviceType, stack.getName());
         getServiceName(stack.getName(), serviceType, servicesResourceApi)
                 .ifPresentOrElse(
-                        startServices(stack, servicesResourceApi, client),
+                        startServices(stack, servicesResourceApi),
                         () -> {
                             LOGGER.info("{} service name is missing, skiping start.", serviceType);
                             throw new ClouderaManagerOperationFailedException(String.format("Service of type: %s is not found", serviceType));
                         });
     }
 
-    private Consumer<String> startServices(StackDtoDelegate stack, ServicesResourceApi servicesResourceApi, ApiClient client) {
-        ApiServiceConfig apiServiceConfig = new ApiServiceConfig();
+    private Consumer<String> startServices(StackDtoDelegate stack, ServicesResourceApi servicesResourceApi) {
         return serviceName -> {
             try {
                 LOGGER.debug("Executing start command on stack {} and service {}", stack.getName(), serviceName);
@@ -328,11 +326,10 @@ public class ClouderaManagerConfigService {
         };
     }
 
-    public void modifyRoleBasedConfig(ApiClient client, String stackName, String serviceType, Map<String, String> config,
-            List<String> roleConfigGroupName) throws CloudbreakException {
+    public void modifyRoleBasedConfig(ApiClient client, String stackName, String serviceType, Map<String, String> config, List<String> roleConfigGroupName) {
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
         RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(client);
-        LOGGER.info("Trying to modify config: {} for service {}", Arrays.asList(config), serviceType);
+        LOGGER.info("Trying to modify config: {} for service {}", config, serviceType);
         getServiceName(stackName, serviceType, servicesResourceApi)
                 .ifPresentOrElse(
                         modifyRoleBasedConfig(stackName, roleConfigGroupsResourceApi, config, roleConfigGroupName),
@@ -343,19 +340,17 @@ public class ClouderaManagerConfigService {
     }
 
     private Consumer<String> modifyRoleBasedConfig(String stackName, RoleConfigGroupsResourceApi roleConfigGroupsResourceApi,
-            Map<String, String> config, List<String> roleConfigGroupNames) throws CloudbreakException  {
+            Map<String, String> config, List<String> roleConfigGroupNames) {
         ApiConfigList apiConfigList = createApiConfigList(config);
-        return serviceName -> {
-            roleConfigGroupNames.forEach(role -> {
-                try {
-                    roleConfigGroupsResourceApi.updateConfig(stackName, role, serviceName, "Modifying role based config for service " + serviceName,
-                            apiConfigList);
-                } catch (ApiException e) {
-                    LOGGER.error("Failed to set configs {} for service {}", Arrays.asList(config), serviceName, e);
-                    throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
-                }
-            });
-        };
+        return serviceName -> roleConfigGroupNames.forEach(role -> {
+            try {
+                roleConfigGroupsResourceApi.updateConfig(stackName, role, serviceName, "Modifying role based config for service " + serviceName,
+                        apiConfigList);
+            } catch (ApiException e) {
+                LOGGER.error("Failed to set configs {} for service {}", config, serviceName, e);
+                throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+            }
+        });
     }
 
     private ApiConfigList createApiConfigList(Map<String, String> config) {

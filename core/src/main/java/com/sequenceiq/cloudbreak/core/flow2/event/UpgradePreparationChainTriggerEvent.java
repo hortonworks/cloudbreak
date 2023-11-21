@@ -11,32 +11,23 @@ public class UpgradePreparationChainTriggerEvent extends StackEvent {
 
     private final ImageChangeDto imageChangeDto;
 
-    private final boolean lockComponents;
-
     @JsonCreator
     public UpgradePreparationChainTriggerEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
-            @JsonProperty("imageChangeDto") ImageChangeDto imageChangeDto,
-            @JsonProperty("lockComponents") boolean lockComponents) {
+            @JsonProperty("imageChangeDto") ImageChangeDto imageChangeDto) {
         super(selector, stackId);
         this.imageChangeDto = imageChangeDto;
-        this.lockComponents = lockComponents;
     }
 
     public ImageChangeDto getImageChangeDto() {
         return imageChangeDto;
     }
 
-    public boolean isLockComponents() {
-        return lockComponents;
-    }
-
     @Override
     public String toString() {
         return new StringJoiner(", ", UpgradePreparationChainTriggerEvent.class.getSimpleName() + "[", "]")
                 .add("imageChangeDto=" + imageChangeDto)
-                .add("lockComponents=" + lockComponents)
                 .add(super.toString())
                 .toString();
     }

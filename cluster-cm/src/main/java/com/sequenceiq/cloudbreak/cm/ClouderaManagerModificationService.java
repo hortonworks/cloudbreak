@@ -1160,24 +1160,24 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void stopClouderaManagerService(String serviceType) throws Exception {
+    public void stopClouderaManagerService(String serviceType) {
         configService.stopClouderaManagerService(v31Client, stack, serviceType);
     }
 
     @Override
-    public void startClouderaManagerService(String serviceType) throws Exception {
+    public void startClouderaManagerService(String serviceType) {
         configService.startClouderaManagerService(v31Client, stack, serviceType);
     }
 
     @Override
-    public Map<String, String> fetchServiceStatuses() throws Exception {
+    public Map<String, String> fetchServiceStatuses() {
         ApiServiceList serviceSummary = configService.readServices(v31Client, stack.getName());
         return serviceSummary.getItems().stream()
                 .collect(Collectors.toMap(ApiService::getName, item -> item.getServiceState().getValue()));
     }
 
     @Override
-    public void updateServiceConfig(String serviceType, Map<String, String> config, List<String> roleGroupNames) throws CloudbreakException {
+    public void updateServiceConfig(String serviceType, Map<String, String> config, List<String> roleGroupNames) {
         configService.modifyRoleBasedConfig(v31Client, stack.getName(), serviceType, config, roleGroupNames);
     }
 

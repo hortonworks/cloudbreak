@@ -268,9 +268,9 @@ public class ReactorFlowManager {
                 variant, rollingUpgradeEnabled));
     }
 
-    public FlowIdentifier triggerClusterUpgradePreparation(Long stackId, ImageChangeDto imageChangeDto, boolean lockComponents) {
+    public FlowIdentifier triggerClusterUpgradePreparation(Long stackId, ImageChangeDto imageChangeDto) {
         String selector = FlowChainTriggers.CLUSTER_UPGRADE_PREPARATION_CHAIN_TRIGGER_EVENT;
-        return reactorNotifier.notify(stackId, selector, new UpgradePreparationChainTriggerEvent(selector, stackId, imageChangeDto, lockComponents));
+        return reactorNotifier.notify(stackId, selector, new UpgradePreparationChainTriggerEvent(selector, stackId, imageChangeDto));
     }
 
     public FlowIdentifier triggerRdsUpgrade(Long stackId, TargetMajorVersion targetVersion, String backupLocation, String backupInstanceProfile) {

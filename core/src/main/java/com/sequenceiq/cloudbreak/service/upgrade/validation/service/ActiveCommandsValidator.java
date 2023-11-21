@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.upgrade.validation.service;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -29,12 +28,12 @@ public class ActiveCommandsValidator implements ServiceUpgradeValidator {
 
     @Override
     public void validate(ServiceUpgradeValidationRequest validationRequest) {
-        ClusterApi connector = clusterApiConnectors.getConnector(validationRequest.getStack());
+        ClusterApi connector = clusterApiConnectors.getConnector(validationRequest.stack());
         List<ClusterManagerCommand> activeCommands = connector.clusterStatusService().getActiveCommandsList();
         if (activeCommands != null) {
             List<ClusterManagerCommand> nonInterruptableActiveCommands = activeCommands.stream()
                     .filter(command -> !interruptableCommands.contains(command.getName()))
-                    .collect(Collectors.toList());
+                    .toList();
             if (!nonInterruptableActiveCommands.isEmpty()) {
                 throw new UpgradeValidationFailedException("There are active commands running on CM that are not interruptable, upgrade is not possible. " +
                         "Active commands: " + nonInterruptableActiveCommands);

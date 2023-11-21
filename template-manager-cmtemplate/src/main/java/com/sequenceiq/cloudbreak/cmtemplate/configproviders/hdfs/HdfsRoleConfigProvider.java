@@ -25,6 +25,8 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
 
     public static final String DEFAULT_NAME_SERVICE = "ns1";
 
+    public static final String HDFS_CLIENT_CONFIG_SAFETY_VALVE = "hdfs_client_config_safety_valve";
+
     private static final String FAILED_VOLUMES_TOLERATED = "dfs_datanode_failed_volumes_tolerated";
 
     private static final Integer NUM_FAILED_VOLUMES_TOLERATED = 0;
@@ -78,7 +80,7 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
                 if (isWireEncryptionEnabled(source) && isNamenodeHA(source)) {
                     //CHECKSTYLE:OFF
                     return List.of(config(
-                            "hdfs_client_config_safety_valve",
+                            HDFS_CLIENT_CONFIG_SAFETY_VALVE,
                             "<property><name>dfs.client.block.write.replace-datanode-on-failure.policy</name><value>NEVER</value></property><property><name>dfs.client.block.write.replace-datanode-on-failure.enable</name><value>false</value></property>")
                     );
                     //CHECKSTYLE:ON

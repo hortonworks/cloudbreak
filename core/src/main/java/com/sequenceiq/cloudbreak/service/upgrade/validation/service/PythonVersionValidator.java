@@ -41,10 +41,10 @@ public class PythonVersionValidator implements ServiceUpgradeValidator {
 
     @Override
     public void validate(ServiceUpgradeValidationRequest validationRequest) {
-        UpgradeImageInfo upgradeImageInfo = validationRequest.getUpgradeImageInfo();
+        UpgradeImageInfo upgradeImageInfo = validationRequest.upgradeImageInfo();
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = upgradeImageInfo.currentImage();
         Image targetImage = upgradeImageInfo.targetStatedImage().getImage();
-        if (isUpgradeDeniedForRuntime(validationRequest.getStack(), upgradeImageInfo.currentImage().getImageCatalogName(), currentImage, targetImage)) {
+        if (isUpgradeDeniedForRuntime(validationRequest.stack(), upgradeImageInfo.currentImage().getImageCatalogName(), currentImage, targetImage)) {
             LOGGER.debug("Upgrade validation failed because the current image {} does not contains Python 3.8 and it's required for upgrade to the target"
                     + "image {}", currentImage.getImageId(), targetImage.getUuid());
             throw new UpgradeValidationFailedException(ERROR_MESSAGE);

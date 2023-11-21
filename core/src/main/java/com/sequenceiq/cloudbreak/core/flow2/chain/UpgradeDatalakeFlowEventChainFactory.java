@@ -73,7 +73,8 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
         if (upgradeValidationEnabled) {
             StackDto stack = stackDtoService.getById(event.getResourceId());
             boolean lockComponents = lockedComponentService.isComponentsLocked(stack, event.getImageId());
-            flowEventChain.add(new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageId(), lockComponents));
+            flowEventChain.add(new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageId(), lockComponents,
+                    event.isRollingUpgradeEnabled()));
         }
     }
 }

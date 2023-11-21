@@ -144,7 +144,7 @@ public class DistroXUpgradeService {
             return new UpgradeV4Response(upgradeDto.getTargetImage(), upgradeCandidates, "Upgrade preparation is not necessary in case of OS upgrade.");
         } else {
             FlowIdentifier flowIdentifier = reactorFlowManager.triggerClusterUpgradePreparation(upgradeDto.getStackDto().getId(),
-                    upgradeDto.getImageChangeDto(), upgradeDto.isLockComponents());
+                    upgradeDto.getImageChangeDto());
             return new UpgradeV4Response("Upgrade preparation started with Image: " + upgradeDto.getTargetImage().getImageId(), flowIdentifier, false);
         }
     }

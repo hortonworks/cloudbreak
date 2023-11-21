@@ -31,8 +31,8 @@ public class FlinkUpgradeValidator implements ServiceUpgradeValidator {
 
     @Override
     public void validate(ServiceUpgradeValidationRequest validationRequest) {
-        String targetRuntime = validationRequest.getTargetRuntime();
-        StackDto stack = validationRequest.getStack();
+        String targetRuntime = validationRequest.targetRuntime();
+        StackDto stack = validationRequest.stack();
         if (!StringUtils.hasText(targetRuntime)) {
             LOGGER.debug("Skipping Flink service validation due to missing or invalid: target runtime version: [{}]", targetRuntime);
         } else if (!CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(targetRuntime, CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_16)) {

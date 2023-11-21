@@ -56,8 +56,7 @@ public class PrepareClusterUpgradeFlowEventChainFactory implements FlowEventChai
     }
 
     private ClusterUpgradeValidationTriggerEvent createUpgradeValidationTriggerEvent(UpgradePreparationChainTriggerEvent event) {
-        return new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto().getImageId(),
-                event.isLockComponents());
+        return new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto().getImageId(), false, false);
     }
 
     private ClusterUpgradePreparationTriggerEvent createClusterUpgradePreparationTriggerEvent(UpgradePreparationChainTriggerEvent event) {

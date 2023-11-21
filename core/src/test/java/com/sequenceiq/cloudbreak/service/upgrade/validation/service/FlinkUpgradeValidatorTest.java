@@ -59,7 +59,7 @@ public class FlinkUpgradeValidatorTest {
     @Test
     void validateNoRuntimeVersion() {
         ServiceUpgradeValidationRequest request =
-                new ServiceUpgradeValidationRequest(stack, false, null, null);
+                new ServiceUpgradeValidationRequest(stack, false, true, null, null);
         underTest.validate(request);
         verifyNoInteractions(cmTemplateService);
         verifyNoInteractions(clusterApiConnectors);
@@ -68,7 +68,7 @@ public class FlinkUpgradeValidatorTest {
     @Test
     void validateNotAffectedRuntime() {
         ServiceUpgradeValidationRequest request =
-                new ServiceUpgradeValidationRequest(stack, false, CLOUDERA_STACK_VERSION_7_2_14.getVersion(), null);
+                new ServiceUpgradeValidationRequest(stack, false, true, CLOUDERA_STACK_VERSION_7_2_14.getVersion(), null);
         underTest.validate(request);
         verifyNoInteractions(cmTemplateService);
         verifyNoInteractions(clusterApiConnectors);
@@ -78,7 +78,7 @@ public class FlinkUpgradeValidatorTest {
     void validateNoFlinkSevice() {
         when(cmTemplateService.isServiceTypePresent("SQL_STREAM_BUILDER", BLUEPRINT_TEXT)).thenReturn(false);
         ServiceUpgradeValidationRequest request =
-                new ServiceUpgradeValidationRequest(stack, false, CLOUDERA_STACK_VERSION_7_2_16.getVersion(), null);
+                new ServiceUpgradeValidationRequest(stack, false, true, CLOUDERA_STACK_VERSION_7_2_16.getVersion(), null);
         underTest.validate(request);
 
         verifyNoInteractions(clusterApiConnectors);
@@ -90,7 +90,7 @@ public class FlinkUpgradeValidatorTest {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
         when(clusterApi.isRolePresent(CLUSTER_NAME, "STREAMING_SQL_CONSOLE", "SQL_STREAM_BUILDER")).thenReturn(false);
         ServiceUpgradeValidationRequest request =
-                new ServiceUpgradeValidationRequest(stack, false, CLOUDERA_STACK_VERSION_7_2_16.getVersion(), null);
+                new ServiceUpgradeValidationRequest(stack, false, true, CLOUDERA_STACK_VERSION_7_2_16.getVersion(), null);
         underTest.validate(request);
     }
 
@@ -102,7 +102,7 @@ public class FlinkUpgradeValidatorTest {
                 .thenThrow(new CloudbreakServiceException("Api exception"));
 
         ServiceUpgradeValidationRequest request =
-                new ServiceUpgradeValidationRequest(stack, false, CLOUDERA_STACK_VERSION_7_2_16.getVersion(), null);
+                new ServiceUpgradeValidationRequest(stack, false, true, CLOUDERA_STACK_VERSION_7_2_16.getVersion(), null);
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.validate(request));
 
@@ -116,7 +116,7 @@ public class FlinkUpgradeValidatorTest {
         when(clusterApi.isRolePresent(CLUSTER_NAME, "STREAMING_SQL_CONSOLE", "SQL_STREAM_BUILDER")).thenReturn(true);
 
         ServiceUpgradeValidationRequest request =
-                new ServiceUpgradeValidationRequest(stack, false, CLOUDERA_STACK_VERSION_7_2_16.getVersion(), null);
+                new ServiceUpgradeValidationRequest(stack, false, true, CLOUDERA_STACK_VERSION_7_2_16.getVersion(), null);
 
         UpgradeValidationFailedException exception = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(request));
 

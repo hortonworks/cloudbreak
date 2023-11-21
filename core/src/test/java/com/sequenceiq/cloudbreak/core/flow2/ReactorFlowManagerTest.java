@@ -169,7 +169,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerClusterCertificationRenewal(STACK_ID);
         underTest.triggerDatalakeClusterUpgrade(STACK_ID, "asdf", true);
         underTest.triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, false, "variant", false);
-        underTest.triggerClusterUpgradePreparation(STACK_ID, imageChangeDto, false);
+        underTest.triggerClusterUpgradePreparation(STACK_ID, imageChangeDto);
         underTest.triggerSaltUpdate(STACK_ID);
         underTest.triggerPillarConfigurationUpdate(STACK_ID);
         underTest.triggerDatalakeDatabaseBackup(STACK_ID, null, null, true, Collections.emptyList(), 0);

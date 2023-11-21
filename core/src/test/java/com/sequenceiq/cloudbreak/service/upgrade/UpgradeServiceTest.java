@@ -369,8 +369,7 @@ public class UpgradeServiceTest {
         when(componentConfigProviderService.getImage(stack.getId())).thenReturn(image);
         ArgumentCaptor<ImageChangeDto> imageChangeDtoArgumentCaptor = ArgumentCaptor.forClass(ImageChangeDto.class);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollId");
-        when(flowManager.triggerClusterUpgradePreparation(eq(stack.getId()), imageChangeDtoArgumentCaptor.capture(), eq(false)))
-                .thenReturn(flowIdentifier);
+        when(flowManager.triggerClusterUpgradePreparation(eq(stack.getId()), imageChangeDtoArgumentCaptor.capture())).thenReturn(flowIdentifier);
 
         FlowIdentifier result = underTest.prepareClusterUpgrade(ACCOUNT_ID, OF_CRN, IMAGE_ID);
 

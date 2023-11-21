@@ -96,7 +96,7 @@ class PythonVersionValidatorTest {
     }
 
     private ServiceUpgradeValidationRequest createValidationRequest(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image targetImage) {
-        return new ServiceUpgradeValidationRequest(stack, false, null,
+        return new ServiceUpgradeValidationRequest(stack, false, true, null,
                 new UpgradeImageInfo(currentImage, StatedImage.statedImage(targetImage, null, null)));
     }
 
