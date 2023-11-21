@@ -1,6 +1,7 @@
 name: "azure-longrunning-e2e-tests"
 tests:
   - name: "azure_longrunning_e2e_tests"
+    excludedGroups: [ aws_only ]
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeRecoveryTests

@@ -1,6 +1,7 @@
 name: "aws-longrunning-e2e-native-tests"
 tests:
   - name: "aws_longrunning_e2e_native_tests"
+    excludedGroups: [ non_aws ]
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaUpgradeNativeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxNativeMigrationTests
