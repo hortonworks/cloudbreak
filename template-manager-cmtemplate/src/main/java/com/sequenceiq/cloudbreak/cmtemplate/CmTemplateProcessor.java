@@ -464,10 +464,11 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
             for (String service : hostGroupServices.getValue()) {
                 com.google.common.base.Optional<T> enumValue = Enums.getIfPresent(enumClass, service);
                 if (enumValue.isPresent()) {
-                    if (EntitledForServiceScale.class.isAssignableFrom(enumClass)) {
-                        EntitledForServiceScale entitledForServiceScale = (EntitledForServiceScale) enumValue.get();
-                        Entitlement entitledFor = entitledForServiceScale.getEntitledFor();
-                        if (!entitlements.contains(entitledFor.name()) && !isVersionEnablesScaling(version, entitledForServiceScale)) {
+                    if (BlackListedScaleRole.class.isAssignableFrom(enumClass)) {
+                        BlackListedScaleRole blackListedScaleRole = (BlackListedScaleRole) enumValue.get();
+                        Optional<Entitlement> entitledFor = blackListedScaleRole.getEntitledFor();
+                        if (isEntitledForTheOptionalEntitlement(entitlements, blackListedScaleRole, entitledFor)
+                                && !isVersionEnablesScaling(version, blackListedScaleRole)) {
                             foundBlackListItem = true;
                             break;
                         }
@@ -484,7 +485,13 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         return recos;
     }
 
-    public boolean isVersionEnablesScaling(Versioned blueprintVersion, EntitledForServiceScale role) {
+    private boolean isEntitledForTheOptionalEntitlement(List<String> entitlements, BlackListedScaleRole blackListedScaleRole,
+        Optional<Entitlement> entitledFor) {
+        return (entitledFor.isEmpty() && blackListedScaleRole.getBlockedUntilCDPVersion().isEmpty())
+                || !entitlements.contains(entitledFor.get().name());
+    }
+
+    public boolean isVersionEnablesScaling(Versioned blueprintVersion, BlackListedScaleRole role) {
         return role.getBlockedUntilCDPVersion().isPresent()
                 && isVersionNewerOrEqualThanLimited(blueprintVersion, role.getBlockedUntilCDPVersionAsVersion());
     }

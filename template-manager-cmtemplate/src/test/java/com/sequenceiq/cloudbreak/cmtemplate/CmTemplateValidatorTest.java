@@ -391,7 +391,7 @@ public class CmTemplateValidatorTest {
         if (!allowUpscale) {
             Throwable exception = Assertions.assertThrows(BadRequestException.class,
                     () -> subject.validateBlackListedScalingRoles(ACCOUNT_ID, processor, hostGroup, 1, product));
-            assertEquals(String.format("'KAFKA_BROKER' service is not enabled to scale until CDP 7.2.12", version), exception.getMessage());
+            assertEquals(String.format("'KAFKA_BROKER' service is not enabled to scaling up until CDP 7.2.12", version), exception.getMessage());
         } else {
             subject.validateBlackListedScalingRoles(ACCOUNT_ID, processor, hostGroup, 1, product);
         }
