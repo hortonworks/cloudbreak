@@ -19,7 +19,6 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
@@ -73,9 +72,6 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
     private UmsTestClient umsTestClient;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private SshSudoCommandActions sshSudoCommandActions;
 
     @Inject
@@ -112,7 +108,7 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
                 .given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentAdmin()
-                .when(umsTestClient.assignResourceRole(L0UserKeys.USER_ENV_CREATOR, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.assignResourceRole(L0UserKeys.USER_ENV_CREATOR))
                 .validate();
 
         String workloadUsernameEnvCreator = testContext.getRealUmsUserByKey(L0UserKeys.USER_ENV_CREATOR).getWorkloadUserName();
@@ -120,7 +116,7 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
 
         testContext
                 .given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName())
-                .when(umsTestClient.setWorkloadPassword(testContext.getWorkloadPassword(), regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.setWorkloadPassword(testContext.getWorkloadPassword()))
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.syncAll())
                 .await(OperationState.COMPLETED)
@@ -132,7 +128,7 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
                 }, TestFailException.class, expectedMessage("sudo command failed on '.*' for user '" + workloadUsernameEnvCreator + "'."))
                 .given(UmsTestDto.class)
                 .withEnvironmentPrivilegedUser()
-                .when(umsTestClient.assignResourceRole(L0UserKeys.USER_ENV_CREATOR, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.assignResourceRole(L0UserKeys.USER_ENV_CREATOR))
                 .then((tc, dto, client) -> {
                     environmentVirtualGroups.set(environmentUtil.getEnvironmentVirtualGroups(tc, client));
                     return dto;

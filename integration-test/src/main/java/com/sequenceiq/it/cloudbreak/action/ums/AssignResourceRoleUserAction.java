@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Multimap;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
@@ -19,11 +18,8 @@ public class AssignResourceRoleUserAction extends AbstractUmsAction<UmsTestDto> 
 
     private final String userKey;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    public AssignResourceRoleUserAction(String userKey, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+    public AssignResourceRoleUserAction(String userKey) {
         this.userKey = userKey;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     @Override
@@ -31,19 +27,17 @@ public class AssignResourceRoleUserAction extends AbstractUmsAction<UmsTestDto> 
         CloudbreakUser user = testContext.getRealUmsUserByKey(userKey);
         String userCrn = user.getCrn();
         String resourceCrn = testDto.getRequest().getResourceCrn();
-        String resourceRole = UmsClientUtils.getResourceRoleCrn(testDto, client, regionAwareInternalCrnGeneratorFactory);
+        String resourceRole = UmsClientUtils.getResourceRoleCrn(testDto, client);
 
         Log.when(LOGGER, format(" Assigning resource role '%s' to user '%s' at resource '%s'... ", resourceRole, userCrn, resourceCrn));
         Log.whenJson(LOGGER, format(" Assign resource role request:%n "), testDto.getRequest());
         LOGGER.info(format(" Assigning resource role '%s' to user '%s' at resource '%s'... ", resourceRole, userCrn, resourceCrn));
-        Multimap<String, String> assignedResourceRoles = client.getDefaultClient().listAssignedResourceRoles(userCrn,
-                regionAwareInternalCrnGeneratorFactory);
+        Multimap<String, String> assignedResourceRoles = client.getDefaultClient().listAssignedResourceRoles(userCrn);
         if (assignedResourceRoles.get(resourceCrn).contains(resourceRole)) {
             LOGGER.info(format(" Resource role '%s' has already been assigned to user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));
             Log.when(LOGGER, format(" Resource role '%s' has already been assigned to user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));
         } else {
-            client.getDefaultClient().assignResourceRole(userCrn, resourceCrn, resourceRole,
-                    regionAwareInternalCrnGeneratorFactory);
+            client.getDefaultClient().assignResourceRole(userCrn, resourceCrn, resourceRole);
             // wait for UmsRightsCache to expire
             Thread.sleep(7000);
             LOGGER.info(format(" Resource role '%s' has been assigned to user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));

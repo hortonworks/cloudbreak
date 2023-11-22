@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -51,9 +50,6 @@ public class DataHubCreateInternalApiTest extends AbstractIntegrationTest {
 
     @Inject
     private UmsTestClient umsTestClient;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -121,7 +117,7 @@ public class DataHubCreateInternalApiTest extends AbstractIntegrationTest {
         testContext.given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentUser()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B))
                 .validate();
         distroXTestDto.when(distroXTestClient.get(), envCreatorB)
                 .validate();

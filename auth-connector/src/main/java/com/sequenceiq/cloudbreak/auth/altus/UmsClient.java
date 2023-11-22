@@ -401,13 +401,10 @@ public class UmsClient {
     }
 
     public MachineUser getMachineUser(String userCrn, String accountId) {
-        return getMachineUserForUser(userCrn, accountId, userCrn, true, true);
+        return getMachineUserForUser(accountId, userCrn, true, true);
     }
 
-    public MachineUser getMachineUserForUser(String userCrn, String accountId, String machineUserName,
-            boolean includeWorkloadMachineUser, boolean includeInternal) {
-        checkNotNull(userCrn, "userCrn should not be null.");
-        Crn crn = Crn.fromString(userCrn);
+    public MachineUser getMachineUserForUser(String accountId, String machineUserName, boolean includeWorkloadMachineUser, boolean includeInternal) {
         validateAccountIdWithWarning(accountId);
         List<MachineUser> machineUsers = newStub().listMachineUsers(
                 ListMachineUsersRequest.newBuilder()
@@ -417,7 +414,7 @@ public class UmsClient {
                         .setIncludeInternal(includeInternal)
                         .build()
         ).getMachineUserList();
-        checkSingleUserResponse(machineUsers, crn.getResource());
+        checkSingleUserResponse(machineUsers, machineUserName);
         return machineUsers.get(0);
     }
 
@@ -459,11 +456,10 @@ public class UmsClient {
     /**
      * Create new machine user - only if it does not exist (returns the machine user crn if the user newly created)
      *
-     * @param userCrn         actor useridentifier
+     * @param accountId       the account ID
      * @param machineUserName machine user name that will be created
      */
-    public Optional<String> createMachineUser(String userCrn, String accountId, String machineUserName) {
-        checkNotNull(userCrn, "userCrn should not be null.");
+    public Optional<String> createMachineUser(String accountId, String machineUserName) {
         checkNotNull(machineUserName, "machineUserName should not be null.");
         validateAccountIdWithWarning(accountId);
         Optional<String> emptyResponse = Optional.empty();
@@ -505,11 +501,10 @@ public class UmsClient {
     /**
      * Remove machine user
      *
-     * @param userCrn         actor identifier
+     * @param accountId                    the account ID
      * @param machineUserName machine user to remove
      */
-    public void deleteMachineUser(String userCrn, String accountId, String machineUserName) {
-        checkNotNull(userCrn, "userCrn should not be null.");
+    public void deleteMachineUser(String accountId, String machineUserName) {
         checkNotNull(machineUserName, "machineUserName should not be null.");
         validateAccountIdWithWarning(accountId);
         try {
@@ -519,8 +514,7 @@ public class UmsClient {
                             .setMachineUserNameOrCrn(machineUserName)
                             .build());
         } catch (StatusRuntimeException e) {
-            if (e.getStatus().getCode().equals(
-                    Status.NOT_FOUND.getCode())) {
+            if (e.getStatus().getCode().equals(Status.NOT_FOUND.getCode())) {
                 LOGGER.info("Machine user not found.");
             } else {
                 throw e;
@@ -548,11 +542,11 @@ public class UmsClient {
         return newStub().listServicePrincipalCloudIdentities(requestBuilder.build());
     }
 
-    private <T> void checkSingleUserResponse(List<T> users, String crnResource) {
+    private <T> void checkSingleUserResponse(List<T> users, String userCrn) {
         if (users.size() < 1) {
-            throw new UmsAuthenticationException(String.format("No user found in UMS system: %s", crnResource));
+            throw new UmsAuthenticationException(String.format("No user found in UMS system: %s", userCrn));
         } else if (users.size() > 1) {
-            throw new UmsAuthenticationException(String.format("Multiple users found in UMS system: %s", crnResource));
+            throw new UmsAuthenticationException(String.format("Multiple users found in UMS system: %s", userCrn));
         }
     }
 
@@ -611,12 +605,11 @@ public class UmsClient {
     /**
      * Add a role (to machine user) - if role does not exist
      *
-     * @param userCrn        actor user (account & assignee)
+     * @param accountId      the account ID
      * @param machineUserCrn machine user identifier
      * @param roleCrn        role identifier
      */
-    public void assignMachineUserRole(String userCrn, String accountId, String machineUserCrn, String roleCrn) {
-        checkNotNull(userCrn, "userCrn should not be null.");
+    public void assignMachineUserRole(String accountId, String machineUserCrn, String roleCrn) {
         checkNotNull(machineUserCrn, "machineUserCrn should not be null.");
         checkNotNull(roleCrn, "roleCrn should not be null.");
         validateAccountIdWithWarning(accountId);
@@ -634,8 +627,7 @@ public class UmsClient {
                             .setRoleNameOrCrn(roleCrn)
                             .build());
         } catch (StatusRuntimeException e) {
-            if (e.getStatus().getCode().equals(
-                    Status.ALREADY_EXISTS.getCode())) {
+            if (e.getStatus().getCode().equals(Status.ALREADY_EXISTS.getCode())) {
                 LOGGER.info("Role ({}) for machine user ({}) already assigned.", roleCrn, machineUserCrn);
             } else {
                 throw e;
@@ -794,14 +786,13 @@ public class UmsClient {
     /**
      * Wraps a call to create an access private key pair with specified algorithm
      *
-     * @param userCrn         the user CRN
+     * @param accountId       the account ID
      * @param machineUserName the machine user name
      * @param accessKeyType   accessKeyType
      * @return key creation response
      */
-    CreateAccessKeyResponse createAccessPrivateKeyPair(String userCrn, String accountId, String machineUserName,
+    CreateAccessKeyResponse createAccessPrivateKeyPair(String accountId, String machineUserName,
             UserManagementProto.AccessKeyType.Value accessKeyType) {
-        checkNotNull(userCrn, "userCrn should not be null.");
         checkNotNull(machineUserName, "machineUserName should not be null.");
         validateAccountIdWithWarning(accountId);
         CreateAccessKeyRequest.Builder builder = CreateAccessKeyRequest.newBuilder();
@@ -818,25 +809,23 @@ public class UmsClient {
     /**
      * Get a list of access key CRN (keys owned by a machine user)
      *
-     * @param userCrn         actor that query the keys for the machine user
+     * @param accountId       the account ID
      * @param machineUserName machine user that owns the access keys
      * @return access key CRNs
      */
-    public List<String> listMachineUserAccessKeys(String userCrn, String accountId, String machineUserName) {
-        return listMachineUserAccessKeys(userCrn, accountId, machineUserName, false);
+    public List<String> listMachineUserAccessKeys(String accountId, String machineUserName) {
+        return listMachineUserAccessKeys(accountId, machineUserName, false);
     }
 
     /**
      * Get a list of access key CRN (keys owned by a machine user)
      *
-     * @param userCrn         actor that query the keys for the machine user
+     * @param accountId       the account ID
      * @param machineUserName machine user that owns the access keys
      * @param userAccessKeyId put access key id to the result instead of access key crns
      * @return access key CRNs (or access key ids)
      */
-    public List<String> listMachineUserAccessKeys(String userCrn, String accountId,
-            String machineUserName, boolean userAccessKeyId) {
-        checkNotNull(userCrn, "userCrn should not be null.");
+    public List<String> listMachineUserAccessKeys(String accountId, String machineUserName, boolean userAccessKeyId) {
         checkNotNull(machineUserName, "machineUserName should not be null.");
         warnIfAccountIdIsInternal(accountId);
         List<String> accessKeys = new ArrayList<>();

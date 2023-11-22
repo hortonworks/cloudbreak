@@ -8,6 +8,7 @@ import org.springframework.util.ReflectionUtils;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsChannelConfig;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
@@ -34,7 +35,8 @@ public class UmsClient<E extends Enum<E>, W extends WaitObject> extends Microser
         return umsClient;
     }
 
-    public static synchronized UmsClient createUmsClient(String umsHost, int umsPort) {
+    public static synchronized UmsClient createUmsClient(String umsHost, int umsPort,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         UmsClient clientEntity = new UmsClient();
         UmsClientConfig clientConfig = new UmsClientConfig();
         Field callingServiceName = ReflectionUtils.findField(UmsClientConfig.class, "callingServiceName");
@@ -44,7 +46,7 @@ public class UmsClient<E extends Enum<E>, W extends WaitObject> extends Microser
         ReflectionUtils.makeAccessible(grpcTimeoutSec);
         ReflectionUtils.setField(grpcTimeoutSec, clientConfig, 60L);
         clientEntity.umsClient = GrpcUmsClient.createClient(
-                UmsChannelConfig.newManagedChannelWrapper(umsHost, umsPort), clientConfig);
+                UmsChannelConfig.newManagedChannelWrapper(umsHost, umsPort), clientConfig, regionAwareInternalCrnGeneratorFactory);
         return clientEntity;
     }
 

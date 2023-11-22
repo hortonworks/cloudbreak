@@ -7,7 +7,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsGroupTestDto;
@@ -20,11 +19,8 @@ public class ListGroupMembersAction implements Action<UmsGroupTestDto, UmsClient
 
     private final String groupName;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    public ListGroupMembersAction(String groupName, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+    public ListGroupMembersAction(String groupName) {
         this.groupName = groupName;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     @Override
@@ -33,7 +29,7 @@ public class ListGroupMembersAction implements Action<UmsGroupTestDto, UmsClient
         testDto.withName(groupName);
         Log.when(LOGGER, format(" Listing user group '%s' members at account '%s'. ", groupName, accountId));
         Log.whenJson(LOGGER, format(" List user group members request:%n "), testDto.getRequest());
-        List<String> members = client.getDefaultClient().listMembersFromGroup(accountId, groupName, regionAwareInternalCrnGeneratorFactory);
+        List<String> members = client.getDefaultClient().listMembersFromGroup(accountId, groupName);
         LOGGER.info(format(" User group '%s' contains members: [%s] ", groupName, members));
         Log.when(LOGGER, format(" User group '%s' contains members: [%s] ", groupName, members));
         return testDto;

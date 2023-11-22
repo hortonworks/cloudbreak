@@ -5,8 +5,6 @@ import static java.lang.String.format;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -31,9 +28,6 @@ public class EnvironmentUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentUtil.class);
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public Map<UmsVirtualGroupRight, String> getEnvironmentVirtualGroups(TestContext testContext, UmsClient client) {
         String accountId = testContext.getActingUserCrn().getAccountId();
         String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
@@ -42,8 +36,7 @@ public class EnvironmentUtil {
 
         for (UmsVirtualGroupRight right : UmsVirtualGroupRight.values()) {
             try {
-                virtualGroup = client.getDefaultClient().getWorkloadAdministrationGroupName(accountId,
-                        right, environmentCrn, regionAwareInternalCrnGeneratorFactory);
+                virtualGroup = client.getDefaultClient().getWorkloadAdministrationGroupName(accountId, right, environmentCrn);
             } catch (StatusRuntimeException ex) {
                 if (Status.Code.NOT_FOUND != ex.getStatus().getCode()) {
                     LOGGER.info(format(" Virtual groups are missing for right: '%s' ", right.getRight()));

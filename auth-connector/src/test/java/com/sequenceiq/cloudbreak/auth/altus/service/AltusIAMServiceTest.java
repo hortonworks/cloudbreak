@@ -25,7 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 
 @ExtendWith(MockitoExtension.class)
 class AltusIAMServiceTest {
@@ -39,15 +38,12 @@ class AltusIAMServiceTest {
     @Mock
     private RoleCrnGenerator roleCrnGenerator;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     @InjectMocks
     private AltusIAMService underTest;
 
     @Test
     void testGenerateMachineUserWithAccessKeyForLegacyCm() {
-        when(umsClient.createMachineUserAndGenerateKeys(anyString(), anyString(), anyString(), anyString(), anyMap(), any(), any()))
+        when(umsClient.createMachineUserAndGenerateKeys(anyString(), anyString(), anyString(), anyString(), anyMap(), any()))
                 .thenReturn(new AltusCredential("accessKey", "privateKey".toCharArray()));
         when(roleCrnGenerator.getBuiltInDatabusRoleCrn(eq("accountId"))).thenReturn("roleCrn");
         AltusCredential altusCredential = underTest.generateMachineUserWithAccessKeyForLegacyCm("machineUserName", "actorCrn", "accountId",
@@ -55,7 +51,7 @@ class AltusIAMServiceTest {
         assertEquals("accessKey", altusCredential.getAccessKey());
         assertEquals("privateKey", String.valueOf(altusCredential.getPrivateKey()));
         verify(umsClient, times(1)).createMachineUserAndGenerateKeys(eq("machineUserName"), eq("actorCrn"), eq("accountId"),
-                eq("roleCrn"), eq(Map.of("key", "value")), eq(UserManagementProto.AccessKeyType.Value.RSA), eq(regionAwareInternalCrnGeneratorFactory));
+                eq("roleCrn"), eq(Map.of("key", "value")), eq(UserManagementProto.AccessKeyType.Value.RSA));
     }
 
     @Test
@@ -63,7 +59,7 @@ class AltusIAMServiceTest {
         try (MockedStatic<Security> mockedStatic = Mockito.mockStatic(Security.class)) {
             Provider provider = mock(Provider.class);
             mockedStatic.when(() -> Security.getProvider(anyString())).thenReturn(provider);
-            when(umsClient.createMachineUserAndGenerateKeys(anyString(), anyString(), anyString(), anyString(), anyMap(), any(), any()))
+            when(umsClient.createMachineUserAndGenerateKeys(anyString(), anyString(), anyString(), anyString(), anyMap(), any()))
                     .thenReturn(new AltusCredential("accessKey", "privateKey".toCharArray()));
             when(roleCrnGenerator.getBuiltInDatabusRoleCrn(eq("accountId"))).thenReturn("roleCrn");
             AltusCredential altusCredential = underTest.generateMachineUserWithAccessKeyForLegacyCm("machineUserName", "actorCrn", "accountId",
@@ -71,7 +67,7 @@ class AltusIAMServiceTest {
             assertEquals("accessKey", altusCredential.getAccessKey());
             assertEquals("privateKey", String.valueOf(altusCredential.getPrivateKey()));
             verify(umsClient, times(1)).createMachineUserAndGenerateKeys(eq("machineUserName"), eq("actorCrn"), eq("accountId"),
-                    eq("roleCrn"), eq(Map.of("key", "value")), eq(UserManagementProto.AccessKeyType.Value.ECDSA), eq(regionAwareInternalCrnGeneratorFactory));
+                    eq("roleCrn"), eq(Map.of("key", "value")), eq(UserManagementProto.AccessKeyType.Value.ECDSA));
         }
     }
 }

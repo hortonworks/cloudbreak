@@ -66,10 +66,7 @@ public class ClouderaManagerDatabusService {
             String machineUserName = getWAMachineUserName(stack);
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () ->  altusIAMService.clearLegacyMachineUser(
-                            machineUserName,
-                            ThreadBasedUserCrnProvider.getUserCrn(),
-                            Crn.fromString(stack.getResourceCrn()).getAccountId()));
+                    () ->  altusIAMService.clearLegacyMachineUser(machineUserName, Crn.fromString(stack.getResourceCrn()).getAccountId()));
         } catch (Exception e) {
             LOGGER.warn("Cluster Databus resource cleanup failed. It is not a fatal issue, "
                     + "but note that you could have remaining UMS resources for your account", e);

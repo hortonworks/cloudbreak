@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -145,9 +144,7 @@ public class BulkUmsUsersStateProviderTest  extends BaseUmsUsersStateProviderTes
                         }))
                 .collect(Collectors.toList()));
 
-        when(grpcUmsClient.getUserSyncStateModel(
-                eq(ACCOUNT_ID), eq(expectedRightsChecks), eq(true), any()))
-                .thenReturn(builder.build());
+        when(grpcUmsClient.getUserSyncStateModel(eq(ACCOUNT_ID), eq(expectedRightsChecks), eq(true))).thenReturn(builder.build());
 
         doAnswer(invocation -> workloadCredentialConverter
                 .toWorkloadCredential(

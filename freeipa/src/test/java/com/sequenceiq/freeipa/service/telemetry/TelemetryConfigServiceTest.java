@@ -145,7 +145,7 @@ public class TelemetryConfigServiceTest {
         monitoringCredential.setAccessKey("accessKey");
         monitoringCredential.setPrivateKey("privateKey");
         given(cmLicenseParser.parseLicense(anyString())).willReturn(Optional.of(license));
-        given(umsClient.getAccountDetails(anyString(), any())).willReturn(account);
+        given(umsClient.getAccountDetails(anyString())).willReturn(account);
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(entitlementService.useDataBusCNameEndpointEnabled(anyString())).willReturn(false);
         given(entitlementService.isFreeIpaDatabusEndpointValidationEnabled(anyString())).willReturn(true);
@@ -177,7 +177,7 @@ public class TelemetryConfigServiceTest {
         MonitoringCredential monitoringCredential = new MonitoringCredential();
         monitoringCredential.setAccessKey("accessKey");
         monitoringCredential.setPrivateKey("privateKey");
-        given(umsClient.getAccountDetails(anyString(), any())).willReturn(account);
+        given(umsClient.getAccountDetails(anyString())).willReturn(account);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(altusMachineUserService.getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class)))
                 .willReturn(Optional.of(monitoringCredential));
@@ -198,7 +198,7 @@ public class TelemetryConfigServiceTest {
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder()
                 .setClouderaManagerLicenseKey("myLicense")
                 .build();
-        given(umsClient.getAccountDetails(anyString(), any())).willReturn(account);
+        given(umsClient.getAccountDetails(anyString())).willReturn(account);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(false);
         Stack stack = createStack(telemetry(false, true, false));
         given(stackService.getStackById(STACK_ID)).willReturn(stack);
@@ -220,7 +220,7 @@ public class TelemetryConfigServiceTest {
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder()
                 .setClouderaManagerLicenseKey("myLicense")
                 .build();
-        given(umsClient.getAccountDetails(anyString(), any())).willReturn(account);
+        given(umsClient.getAccountDetails(anyString())).willReturn(account);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         MonitoringCredential monitoringCredential = new MonitoringCredential();
         monitoringCredential.setAccessKey("accessKey");
@@ -248,7 +248,7 @@ public class TelemetryConfigServiceTest {
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder()
                 .setClouderaManagerLicenseKey("myLicense")
                 .build();
-        given(umsClient.getAccountDetails(anyString(), any())).willReturn(account);
+        given(umsClient.getAccountDetails(anyString())).willReturn(account);
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
         Telemetry telemetry = telemetry(true, false, false);

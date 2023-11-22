@@ -27,7 +27,6 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.model.AllMatch;
 import com.sequenceiq.authorization.service.model.AuthorizationRule;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 
 @Service
 public class ResourceAuthorizationService {
@@ -45,9 +44,6 @@ public class ResourceAuthorizationService {
 
     @Inject
     private ResourceNameFactoryService resourceNameFactoryService;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public void authorize(String userCrn, ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
         Function<AuthorizationResourceAction, String> rightMapper = umsRightProvider.getRightMapper();
@@ -77,7 +73,7 @@ public class ResourceAuthorizationService {
     private List<Boolean> checkWithUms(String userCrn, Function<AuthorizationResourceAction, String> rightMapper, AuthorizationRule authorization) {
         List<RightCheck> rightChecks = convertToRightChecks(authorization, rightMapper);
         LOGGER.debug("Ums resource right check request: {}", rightChecks);
-        return grpcUmsClient.hasRights(userCrn, rightChecks, regionAwareInternalCrnGeneratorFactory);
+        return grpcUmsClient.hasRights(userCrn, rightChecks);
     }
 
     private Optional<AuthorizationRule> getAuthorization(String userCrn, ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {

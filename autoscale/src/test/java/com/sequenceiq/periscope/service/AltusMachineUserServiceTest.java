@@ -26,8 +26,6 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Machi
 import com.google.common.collect.LinkedHashMultimap;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
@@ -56,9 +54,6 @@ class AltusMachineUserServiceTest {
     @Mock
     private CloudbreakVersionService cloudbreakVersionService;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     private String testEnvironmentCrn;
 
     private String testClusterCrn;
@@ -75,8 +70,6 @@ class AltusMachineUserServiceTest {
 
     private String testCbSaltVersion;
 
-    private String internalActorCrn;
-
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
@@ -89,7 +82,6 @@ class AltusMachineUserServiceTest {
         environmentRoleCrn = "environmentuserRoleCrn";
         testOperationId = "testOperationId";
         testCbSaltVersion = "2.69.0";
-        internalActorCrn = "crn:cdp:iam:us-west-1:cloudera:user:__internal__actor__";
     }
 
     @Test
@@ -99,17 +91,14 @@ class AltusMachineUserServiceTest {
 
         when(grpcUmsClient.getOrCreateMachineUserWithoutAccessKey(autoscaleMachineUserName, testAccountId))
                 .thenReturn(machineUser);
-        when(grpcUmsClient.listAssignedResourceRoles(anyString(), any(RegionAwareInternalCrnGeneratorFactory.class)))
-                .thenReturn(LinkedHashMultimap.create());
+        when(grpcUmsClient.listAssignedResourceRoles(anyString())).thenReturn(LinkedHashMultimap.create());
         when(roleCrnGenerator.getBuiltInEnvironmentUserResourceRoleCrn(anyString())).thenReturn(environmentRoleCrn);
         when(cloudbreakVersionService.getCloudbreakSaltStateVersionByStackCrn(anyString())).thenReturn(testCbSaltVersion);
         when(freeIpaCommunicator.synchronizeAllUsers(any(SynchronizeAllUsersRequest.class))).thenReturn(getSyncOpStatus(SynchronizationStatus.COMPLETED));
 
         underTest.initializeMachineUserForEnvironment(cluster);
 
-        verify(grpcUmsClient, times(1)).assignResourceRole(
-                eq(autoscaleMachineUserCrn), eq(testEnvironmentCrn), eq(environmentRoleCrn),
-                any(RegionAwareInternalCrnGeneratorFactory.class));
+        verify(grpcUmsClient, times(1)).assignResourceRole(eq(autoscaleMachineUserCrn), eq(testEnvironmentCrn), eq(environmentRoleCrn));
         verify(clusterService, times(1)).setMachineUserCrn(cluster.getId(), autoscaleMachineUserCrn);
 
         ArgumentCaptor<SynchronizeAllUsersRequest> synchronizeUserCaptor = ArgumentCaptor.forClass(SynchronizeAllUsersRequest.class);
@@ -131,16 +120,14 @@ class AltusMachineUserServiceTest {
 
         when(grpcUmsClient.getOrCreateMachineUserWithoutAccessKey(autoscaleMachineUserName, testAccountId))
                 .thenReturn(machineUser);
-        when(grpcUmsClient.listAssignedResourceRoles(anyString(), any(RegionAwareInternalCrnGeneratorFactory.class))).thenReturn(rolesMap);
+        when(grpcUmsClient.listAssignedResourceRoles(anyString())).thenReturn(rolesMap);
         when(roleCrnGenerator.getBuiltInEnvironmentUserResourceRoleCrn(anyString())).thenReturn(environmentRoleCrn);
         when(cloudbreakVersionService.getCloudbreakSaltStateVersionByStackCrn(anyString())).thenReturn(testCbSaltVersion);
         when(freeIpaCommunicator.synchronizeAllUsers(any(SynchronizeAllUsersRequest.class))).thenReturn(getSyncOpStatus(SynchronizationStatus.COMPLETED));
 
         underTest.initializeMachineUserForEnvironment(cluster);
 
-        verify(grpcUmsClient, times(0)).assignResourceRole(
-                eq(autoscaleMachineUserCrn), eq(testEnvironmentCrn), eq(environmentRoleCrn),
-                any(RegionAwareInternalCrnGeneratorFactory.class));
+        verify(grpcUmsClient, times(0)).assignResourceRole(eq(autoscaleMachineUserCrn), eq(testEnvironmentCrn), eq(environmentRoleCrn));
         verify(clusterService, times(1)).setMachineUserCrn(cluster.getId(), autoscaleMachineUserCrn);
 
         ArgumentCaptor<SynchronizeAllUsersRequest> synchronizeUserCaptor = ArgumentCaptor.forClass(SynchronizeAllUsersRequest.class);
@@ -165,26 +152,22 @@ class AltusMachineUserServiceTest {
         underTest.initializeMachineUserForEnvironment(cluster);
 
         verify(clusterService, times(1)).setMachineUserCrn(cluster.getId(), autoscaleMachineUserCrn);
-        verify(grpcUmsClient, never()).assignResourceRole(anyString(), anyString(), anyString(), any(RegionAwareInternalCrnGeneratorFactory.class));
-        verify(grpcUmsClient, never()).listAssignedResourceRoles(anyString(), any(RegionAwareInternalCrnGeneratorFactory.class));
+        verify(grpcUmsClient, never()).assignResourceRole(anyString(), anyString(), anyString());
+        verify(grpcUmsClient, never()).listAssignedResourceRoles(anyString());
         verifyNoInteractions(freeIpaCommunicator);
     }
 
     @Test
     void testDeleteMachineUserForEnvironment() {
         MachineUser machineUser = MachineUser.newBuilder().setCrn(autoscaleMachineUserCrn).setWorkloadUsername("workloadUserName").build();
-        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
         when(roleCrnGenerator.getBuiltInEnvironmentUserResourceRoleCrn(anyString())).thenReturn(environmentRoleCrn);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(internalActorCrn);
         when(grpcUmsClient.getOrCreateMachineUserWithoutAccessKey(eq(autoscaleMachineUserName),
                 eq("testTenant"))).thenReturn(machineUser);
         when(freeIpaCommunicator.synchronizeAllUsers(any(SynchronizeAllUsersRequest.class))).thenReturn(getSyncOpStatus(SynchronizationStatus.COMPLETED));
 
         underTest.deleteMachineUserForEnvironment(testAccountId, autoscaleMachineUserCrn, testEnvironmentCrn);
 
-        verify(grpcUmsClient, times(1)).deleteMachineUser(
-                eq(autoscaleMachineUserCrn), eq(internalActorCrn), eq(testAccountId), any(RegionAwareInternalCrnGeneratorFactory.class));
+        verify(grpcUmsClient, times(1)).deleteMachineUser(eq(autoscaleMachineUserCrn), eq(testAccountId));
         ArgumentCaptor<SynchronizeAllUsersRequest> synchronizeUserCaptor = ArgumentCaptor.forClass(SynchronizeAllUsersRequest.class);
         verify(freeIpaCommunicator, times(1)).synchronizeAllUsers(synchronizeUserCaptor.capture());
         SynchronizeAllUsersRequest synchronizeAllUsersRequest = synchronizeUserCaptor.getValue();

@@ -19,7 +19,6 @@ import org.testng.annotations.Test;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
@@ -41,9 +40,6 @@ public class ProxyTest extends AbstractIntegrationTest {
 
     @Inject
     private UmsTestClient umsTestClient;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -79,7 +75,7 @@ public class ProxyTest extends AbstractIntegrationTest {
                 .given(UmsTestDto.class)
                 .assignTargetByCrn(proxyMap.get(owner).getKey().toString())
                 .withOwner()
-                .when(umsTestClient.assignResourceRole(owner, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.assignResourceRole(owner))
                 .given(ProxyTestDto.class)
                 .withName(proxyMap.get(owner).getValue())
                 .when(proxyTestClient.get(), RunningParameter.who(cloudbreakActor.useRealUmsUser(owner)))

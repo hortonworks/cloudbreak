@@ -5,7 +5,6 @@ import static java.lang.String.format;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
@@ -17,21 +16,18 @@ public class AssignResourceRoleGroupAction extends AbstractUmsAction<UmsTestDto>
 
     private final String groupCrn;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    public AssignResourceRoleGroupAction(String groupCrn, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+    public AssignResourceRoleGroupAction(String groupCrn) {
         this.groupCrn = groupCrn;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     @Override
     protected UmsTestDto umsAction(TestContext testContext, UmsTestDto testDto, UmsClient client) throws Exception {
         String resourceCrn = testDto.getRequest().getResourceCrn();
-        String resourceRole = UmsClientUtils.getResourceRoleCrn(testDto, client, regionAwareInternalCrnGeneratorFactory);
+        String resourceRole = UmsClientUtils.getResourceRoleCrn(testDto, client);
         Log.when(LOGGER, format(" Assigning resource role '%s' at resource '%s' for group '%s' ", resourceRole, resourceCrn, groupCrn));
         Log.whenJson(LOGGER, format(" Assign resource role request:%n "), testDto.getRequest());
 
-        client.getDefaultClient().assignResourceRole(groupCrn, resourceCrn, resourceRole, regionAwareInternalCrnGeneratorFactory);
+        client.getDefaultClient().assignResourceRole(groupCrn, resourceCrn, resourceRole);
         // wait for UmsRightsCache to expire
         Thread.sleep(7000);
         LOGGER.info(format(" Resource role '%s' has been assigned at resource '%s' for group '%s' ", resourceRole, resourceCrn, groupCrn));

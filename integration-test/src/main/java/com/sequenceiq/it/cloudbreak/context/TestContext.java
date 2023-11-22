@@ -506,7 +506,7 @@ public abstract class TestContext implements ApplicationContextAware {
             EnvironmentClient environmentClient = EnvironmentClient.createEnvironmentClient(getTestParameter(), cloudbreakUser,
                     regionAwareInternalCrnGeneratorFactory.iam());
             SdxClient sdxClient = SdxClient.createSdxClient(getTestParameter(), cloudbreakUser);
-            UmsClient umsClient = UmsClient.createUmsClient(umsHost, umsPort);
+            UmsClient umsClient = UmsClient.createUmsClient(umsHost, umsPort, regionAwareInternalCrnGeneratorFactory);
             SdxSaasItClient sdxSaasItClient = SdxSaasItClient.createSdxSaasClient(umsHost, regionAwareInternalCrnGeneratorFactory);
             AuthDistributorClient authDistributorClient = AuthDistributorClient.createProxyAuthDistributorClient(
                     regionAwareInternalCrnGeneratorFactory, authDistributorHost);
@@ -537,7 +537,7 @@ public abstract class TestContext implements ApplicationContextAware {
             EnvironmentClient environmentClient = EnvironmentClient.createEnvironmentClient(getTestParameter(), accountAdmin,
                     regionAwareInternalCrnGeneratorFactory.iam());
             SdxClient sdxClient = SdxClient.createSdxClient(getTestParameter(), accountAdmin);
-            UmsClient umsClient = UmsClient.createUmsClient(umsHost, umsPort);
+            UmsClient umsClient = UmsClient.createUmsClient(umsHost, umsPort, regionAwareInternalCrnGeneratorFactory);
             SdxSaasItClient sdxSaasItClient = SdxSaasItClient.createSdxSaasClient(umsHost, regionAwareInternalCrnGeneratorFactory);
             AuthDistributorClient authDistributorClient = AuthDistributorClient.createProxyAuthDistributorClient(
                     regionAwareInternalCrnGeneratorFactory, authDistributorHost);

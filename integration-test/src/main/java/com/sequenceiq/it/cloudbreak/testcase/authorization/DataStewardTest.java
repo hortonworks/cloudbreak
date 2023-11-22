@@ -10,7 +10,6 @@ import javax.ws.rs.ForbiddenException;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -37,9 +36,6 @@ public class DataStewardTest extends AbstractIntegrationTest {
 
     @Inject
     private CloudbreakActor cloudbreakActor;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private ResourceCreator resourceCreator;
@@ -69,9 +65,9 @@ public class DataStewardTest extends AbstractIntegrationTest {
                 .given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentAdmin()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_ADMIN_A, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_ADMIN_A))
                 .withDataSteward()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_DATA_STEWARD, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_DATA_STEWARD))
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_DATA_STEWARD)))
                 .whenException(environmentTestClient.stop(), ForbiddenException.class, expectedMessage(

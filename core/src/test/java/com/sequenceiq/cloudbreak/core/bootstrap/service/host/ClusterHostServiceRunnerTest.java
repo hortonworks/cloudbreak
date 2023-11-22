@@ -832,7 +832,7 @@ class ClusterHostServiceRunnerTest {
     }
 
     private void setupMocksForRunClusterServices() {
-        when(umsClient.getAccountDetails(any(), any())).thenReturn(UserManagementProto.Account.getDefaultInstance());
+        when(umsClient.getAccountDetails(any())).thenReturn(UserManagementProto.Account.getDefaultInstance());
         when(stackView.getTunnel()).thenReturn(Tunnel.DIRECT);
         when(stackView.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
         when(stackView.getResourceCrn()).thenReturn(TEST_CLUSTER_CRN);

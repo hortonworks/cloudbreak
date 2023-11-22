@@ -11,7 +11,6 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -59,9 +58,6 @@ public class DistroXRepairTests extends AbstractE2ETest {
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     @Override
     protected void setupTest(TestContext testContext) {
         assertSupportedCloudPlatform(CloudPlatform.AZURE);
@@ -92,7 +88,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .await(OperationState.COMPLETED)
                 .given(UmsTestDto.class)
                     .assignTarget(EnvironmentTestDto.class.getSimpleName())
-                .when(umsTestClient.setWorkloadPassword(testContext.getWorkloadPassword(), regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.setWorkloadPassword(testContext.getWorkloadPassword()))
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.syncAll())
                 .await(OperationState.COMPLETED)

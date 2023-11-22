@@ -43,7 +43,6 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UnauthorizedException;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
@@ -84,9 +83,6 @@ public class GrpcUmsClientTest {
     @Mock
     private ManagedChannel managedChannel;
 
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     @Captor
     private ArgumentCaptor<Iterable<AuthorizationProto.RightCheck>> captor;
 
@@ -94,8 +90,8 @@ public class GrpcUmsClientTest {
     public void setUp() {
         underTest = spy(rawGrpcUmsClient);
         lenient().doReturn(managedChannel).when(channelWrapper).getChannel();
-        lenient().doReturn(umsClient).when(underTest).makeClient(any(ManagedChannel.class), any());
-        lenient().doReturn(authorizationClient).when(underTest).makeAuthorizationClient(regionAwareInternalCrnGeneratorFactory);
+        lenient().doReturn(umsClient).when(underTest).makeClient();
+        lenient().doReturn(authorizationClient).when(underTest).makeAuthorizationClient();
     }
 
     @Test
@@ -119,7 +115,7 @@ public class GrpcUmsClientTest {
         when(umsClient.listWorkloadAdministrationGroupsForMember(eq(memberCrn), eq(Optional.of(pageToken))))
                 .thenReturn(response2);
 
-        List<String> wags = underTest.listWorkloadAdministrationGroupsForMember(memberCrn, regionAwareInternalCrnGeneratorFactory);
+        List<String> wags = underTest.listWorkloadAdministrationGroupsForMember(memberCrn);
 
         verify(umsClient, times(2)).listWorkloadAdministrationGroupsForMember(eq(memberCrn), any(Optional.class));
         assertTrue(wags.containsAll(wags1));
@@ -164,8 +160,7 @@ public class GrpcUmsClientTest {
     public void testCheckRightWithInvalidCrn() {
         assertEquals(
                 assertThrows(IllegalArgumentException.class, () -> underTest.checkResourceRight(USER_CRN,
-                        "environments/describeEnvironment", "invalidCrn",
-                        regionAwareInternalCrnGeneratorFactory)).getMessage(),
+                        "environments/describeEnvironment", "invalidCrn")).getMessage(),
                 "Provided resource [invalidCrn] is not in CRN format");
     }
 
@@ -174,8 +169,7 @@ public class GrpcUmsClientTest {
         doThrow(new StatusRuntimeException(Status.NOT_FOUND)).when(authorizationClient).checkRight(any(), any(), any());
         UnauthorizedException unauthorizedException = assertThrows(
                 UnauthorizedException.class,
-                () -> underTest.checkResourceRight(USER_CRN, "environments/describeEnvironment", RESOURCE_CRN,
-                regionAwareInternalCrnGeneratorFactory));
+                () -> underTest.checkResourceRight(USER_CRN, "environments/describeEnvironment", RESOURCE_CRN));
         assertNotNull(unauthorizedException);
         assertEquals("Authorization failed for user: " + USER_CRN, unauthorizedException.getMessage());
     }
@@ -184,8 +178,7 @@ public class GrpcUmsClientTest {
     public void testHasRightsWithInvalidCrn() {
         assertEquals(
                 assertThrows(IllegalArgumentException.class, () -> underTest.hasRights(USER_CRN,
-                        List.of("invalidCrn", "*"), "environments/describeEnvironment",
-                        regionAwareInternalCrnGeneratorFactory)).getMessage(),
+                        List.of("invalidCrn", "*"), "environments/describeEnvironment")).getMessage(),
                 "Following resources are not provided in CRN format: invalidCrn.");
         assertEquals(
                 assertThrows(IllegalArgumentException.class, () -> underTest.hasRightsOnResources(USER_CRN,
@@ -201,8 +194,7 @@ public class GrpcUmsClientTest {
         doThrow(new RuntimeException("Permission denied")).when(authorizationClient).checkRight(USER_CRN, "right", resourceCrn2);
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> {
-            underTest.hasRights(USER_CRN, List.of(resourceCrn1, resourceCrn2), "right",
-                    regionAwareInternalCrnGeneratorFactory);
+            underTest.hasRights(USER_CRN, List.of(resourceCrn1, resourceCrn2), "right");
         });
 
         assertEquals("Authorization failed due to user management service call failed with error.", exception.getMessage());
@@ -219,8 +211,7 @@ public class GrpcUmsClientTest {
         doAnswer(m -> Lists.newArrayList((Iterable<AuthorizationProto.RightCheck>) m.getArgument(1)).stream().map(i -> true).collect(Collectors.toList()))
                 .when(authorizationClient).hasRights(anyString(), any());
 
-        underTest.hasRights(USER_CRN, List.of(resourceCrn1, resourceCrn2, resourceCrn3), "right",
-                regionAwareInternalCrnGeneratorFactory);
+        underTest.hasRights(USER_CRN, List.of(resourceCrn1, resourceCrn2, resourceCrn3), "right");
 
         verify(authorizationClient).hasRights(eq(USER_CRN), captor.capture());
 
@@ -243,8 +234,7 @@ public class GrpcUmsClientTest {
 
     @Test
     public void testAssignMachineUserResourceRole() {
-        underTest.assignMachineUserResourceRole("accountId", "machineUserCrn", "resourceRoleCrn", "resourceCrn",
-                regionAwareInternalCrnGeneratorFactory);
+        underTest.assignMachineUserResourceRole("accountId", "machineUserCrn", "resourceRoleCrn", "resourceCrn");
 
         verify(umsClient, times(1)).assignMachineUserResourceRole(eq("accountId"), eq("machineUserCrn"),
                 eq("resourceRoleCrn"), eq("resourceCrn"));
@@ -252,35 +242,34 @@ public class GrpcUmsClientTest {
 
     @Test
     public void testCreateMachineUserAndGenerateKeysWithResourceRoles() {
-        when(umsClient.createMachineUser(eq("userCrn"), eq("accountId"), eq("machineUserName"))).thenReturn(Optional.of("machineUserCrn"));
+        when(umsClient.createMachineUser(eq("accountId"), eq("machineUserName"))).thenReturn(Optional.of("machineUserCrn"));
         UserManagementProto.CreateAccessKeyResponse createAccessKeyResponse = UserManagementProto.CreateAccessKeyResponse.newBuilder()
                 .setAccessKey(UserManagementProto.AccessKey.newBuilder().setAccessKeyId("accessKeyId").build())
                 .setPrivateKey("privateKey")
                 .build();
-        when(umsClient.createAccessPrivateKeyPair(eq("userCrn"), eq("accountId"), eq("machineUserCrn"), any())).thenReturn(createAccessKeyResponse);
+        when(umsClient.createAccessPrivateKeyPair(eq("accountId"), eq("machineUserCrn"), any())).thenReturn(createAccessKeyResponse);
 
         underTest.createMachineUserAndGenerateKeys("machineUserName", "userCrn", "accountId", "roleCrn",
-                Map.of("resourceCrn", "resourceRoleCrn"), regionAwareInternalCrnGeneratorFactory);
-        verify(umsClient, times(1)).createMachineUser(eq("userCrn"), eq("accountId"), eq("machineUserName"));
-        verify(umsClient, times(1)).assignMachineUserRole(eq("userCrn"), eq("accountId"), eq("machineUserCrn"), eq("roleCrn"));
-        verify(umsClient, times(1)).assignMachineUserResourceRole(eq("accountId"), eq("machineUserCrn"), eq("resourceRoleCrn"),
-                eq("resourceCrn"));
+                Map.of("resourceCrn", "resourceRoleCrn"));
+        verify(umsClient, times(1)).createMachineUser(eq("accountId"), eq("machineUserName"));
+        verify(umsClient, times(1)).assignMachineUserRole(eq("accountId"), eq("machineUserCrn"), eq("roleCrn"));
+        verify(umsClient, times(1)).assignMachineUserResourceRole(eq("accountId"), eq("machineUserCrn"), eq("resourceRoleCrn"), eq("resourceCrn"));
     }
 
     @Test
     public void testCreateMachineUserAndGenerateKeysWithMultipleRoleCrns() {
-        when(umsClient.createMachineUser(eq("userCrn"), eq("accountId"), eq("machineUserName"))).thenReturn(Optional.of("machineUserCrn"));
+        when(umsClient.createMachineUser(eq("accountId"), eq("machineUserName"))).thenReturn(Optional.of("machineUserCrn"));
         UserManagementProto.CreateAccessKeyResponse createAccessKeyResponse = UserManagementProto.CreateAccessKeyResponse.newBuilder()
                 .setAccessKey(UserManagementProto.AccessKey.newBuilder().setAccessKeyId("accessKeyId").build())
                 .setPrivateKey("privateKey")
                 .build();
-        when(umsClient.createAccessPrivateKeyPair(eq("userCrn"), eq("accountId"), eq("machineUserCrn"), any())).thenReturn(createAccessKeyResponse);
+        when(umsClient.createAccessPrivateKeyPair(eq("accountId"), eq("machineUserCrn"), any())).thenReturn(createAccessKeyResponse);
 
         underTest.createMachineUserAndGenerateKeys("machineUserName", "userCrn", "accountId", Set.of("roleCrn1", "roleCrn2"),
-                Map.of("resourceCrn", "resourceRoleCrn"), Value.UNSET, regionAwareInternalCrnGeneratorFactory);
-        verify(umsClient, times(1)).createMachineUser(eq("userCrn"), eq("accountId"), eq("machineUserName"));
-        verify(umsClient, times(1)).assignMachineUserRole(eq("userCrn"), eq("accountId"), eq("machineUserCrn"), eq("roleCrn1"));
-        verify(umsClient, times(1)).assignMachineUserRole(eq("userCrn"), eq("accountId"), eq("machineUserCrn"), eq("roleCrn2"));
+                Map.of("resourceCrn", "resourceRoleCrn"), Value.UNSET);
+        verify(umsClient, times(1)).createMachineUser(eq("accountId"), eq("machineUserName"));
+        verify(umsClient, times(1)).assignMachineUserRole(eq("accountId"), eq("machineUserCrn"), eq("roleCrn1"));
+        verify(umsClient, times(1)).assignMachineUserRole(eq("accountId"), eq("machineUserCrn"), eq("roleCrn2"));
         verify(umsClient, times(1)).assignMachineUserResourceRole(eq("accountId"), eq("machineUserCrn"), eq("resourceRoleCrn"),
                 eq("resourceCrn"));
     }

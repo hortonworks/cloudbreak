@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
 import com.sequenceiq.cloudbreak.auth.altus.model.MachineUserRequest;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 
 @Service
@@ -35,16 +34,10 @@ public class AltusIAMService {
 
     private final RoleCrnGenerator roleCrnGenerator;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    public AltusIAMService(GrpcUmsClient umsClient,
-            SharedAltusCredentialProvider sharedAltusCredentialProvider,
-            RoleCrnGenerator roleCrnGenerator,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+    public AltusIAMService(GrpcUmsClient umsClient, SharedAltusCredentialProvider sharedAltusCredentialProvider, RoleCrnGenerator roleCrnGenerator) {
         this.umsClient = umsClient;
         this.sharedAltusCredentialProvider = sharedAltusCredentialProvider;
         this.roleCrnGenerator = roleCrnGenerator;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     /**
@@ -58,8 +51,7 @@ public class AltusIAMService {
                 accountId,
                 roleCrnGenerator.getBuiltInDatabusRoleCrn(accountId),
                 resourceRoles,
-                getDefaultAccessKeyType(),
-                regionAwareInternalCrnGeneratorFactory);
+                getDefaultAccessKeyType());
     }
 
     private AccessKeyType.Value getDefaultAccessKeyType() {
@@ -80,8 +72,7 @@ public class AltusIAMService {
                         machineUserRequest.getAccountId(),
                         roleCrnGenerator.getBuiltInDatabusRoleCrn(machineUserRequest.getAccountId()),
                         Collections.emptyMap(),
-                        mapToAccessKeyType(machineUserRequest.getCdpAccessKeyType()),
-                        regionAwareInternalCrnGeneratorFactory)));
+                        mapToAccessKeyType(machineUserRequest.getCdpAccessKeyType()))));
     }
 
     /**
@@ -96,8 +87,7 @@ public class AltusIAMService {
                         accountId,
                         Set.of(roleCrnGenerator.getBuiltInDatabusRoleCrn(accountId), roleCrnGenerator.getBuiltInComputeMetricsPublisherRoleCrn(accountId)),
                         Collections.emptyMap(),
-                        mapToAccessKeyType(machineUserRequest.getCdpAccessKeyType()),
-                        regionAwareInternalCrnGeneratorFactory)));
+                        mapToAccessKeyType(machineUserRequest.getCdpAccessKeyType()))));
     }
 
     /**
@@ -111,11 +101,9 @@ public class AltusIAMService {
             result = true;
         } else {
             LOGGER.debug("Query (or create if needed) machine user with name {}", machineUserName);
-            Optional<String> machineUserCrn = umsClient.createMachineUser(machineUserName, actorCrn, accountId,
-                    regionAwareInternalCrnGeneratorFactory);
+            Optional<String> machineUserCrn = umsClient.createMachineUser(machineUserName, actorCrn, accountId);
             if (machineUserCrn.isPresent()) {
-                return umsClient.doesMachineUserHasAccessKey(actorCrn, accountId, machineUserCrn.get(), accessKey,
-                        regionAwareInternalCrnGeneratorFactory);
+                return umsClient.doesMachineUserHasAccessKey(accountId, machineUserCrn.get(), accessKey);
             } else {
                 LOGGER.debug("Machine user ('{}') does not exist (even after the creation).", machineUserName);
             }
@@ -126,12 +114,12 @@ public class AltusIAMService {
     /**
      * Delete machine user.
      */
-    public void clearMachineUser(String machineUserName, String actorCrn, String accountId, boolean useSharedCredential) {
+    public void clearMachineUser(String machineUserName, String accountId, boolean useSharedCredential) {
         try {
             if (sharedAltusCredentialProvider.isSharedAltusCredentialInUse(useSharedCredential)) {
                 LOGGER.debug("Access and secret keys are set manually application wide, skip machine user cleanup.");
             } else {
-                umsClient.deleteMachineUser(machineUserName, actorCrn, accountId, regionAwareInternalCrnGeneratorFactory);
+                umsClient.deleteMachineUser(machineUserName, accountId);
             }
         } catch (Exception e) {
             LOGGER.warn("Failed to delete {} machine user. It is not a fatal issue, but note that you could have remaining UMS resources for your account",
@@ -142,20 +130,20 @@ public class AltusIAMService {
     /**
      * Delete machine user with its access keys (and unassign databus role if required)
      */
-    public void clearLegacyMachineUser(String machineUserName, String actorCrn, String accountId) {
-        clearMachineUser(machineUserName, actorCrn, accountId, false);
+    public void clearLegacyMachineUser(String machineUserName, String accountId) {
+        clearMachineUser(machineUserName, accountId, false);
     }
 
     public List<AnonymizationRule> getAnonymizationRules(String accountId, String actorCrn) {
         return umsClient.getAnonymizationRules(accountId, actorCrn);
     }
 
-    public void clearMachineUser(String machineUserName, String actorCrn, String accountId) {
-        clearMachineUser(machineUserName, actorCrn, accountId, false);
+    public void clearMachineUser(String machineUserName, String accountId) {
+        clearMachineUser(machineUserName, accountId, false);
     }
 
     public List<MachineUser> getAllMachineUsersForAccount(String accountId) {
-        return umsClient.listAllMachineUsers(accountId, true, true, regionAwareInternalCrnGeneratorFactory);
+        return umsClient.listAllMachineUsers(accountId, true, true);
     }
 
     private AccessKeyType.Value mapToAccessKeyType(CdpAccessKeyType cdpAccessKeyType) {

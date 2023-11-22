@@ -15,7 +15,6 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.utils.AuthorizationMessageUtilsService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 
 @Service
 public class UmsResourceAuthorizationService {
@@ -31,16 +30,13 @@ public class UmsResourceAuthorizationService {
     @Inject
     private AuthorizationMessageUtilsService authorizationMessageUtilsService;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public void checkRightOfUserOnResource(String userCrn, AuthorizationResourceAction action, String resourceCrn) {
         String right = umsRightProvider.getRight(action);
         checkRightOfUserOnResource(userCrn, right, resourceCrn, authorizationMessageUtilsService.formatTemplate(right, resourceCrn));
     }
 
     public Map<String, Boolean> getRightOfUserOnResources(String userCrn, AuthorizationResourceAction action, List<String> resourceCrns) {
-        return umsClient.hasRights(userCrn, resourceCrns, umsRightProvider.getRight(action), regionAwareInternalCrnGeneratorFactory);
+        return umsClient.hasRights(userCrn, resourceCrns, umsRightProvider.getRight(action));
     }
 
     public void checkRightOfUserOnResources(String userCrn, AuthorizationResourceAction action, Collection<String> resourceCrns) {
@@ -49,15 +45,14 @@ public class UmsResourceAuthorizationService {
     }
 
     private void checkRightOfUserOnResource(String userCrn, String right, String resourceCrn, String unauthorizedMessage) {
-        if (!umsClient.checkResourceRight(userCrn, right, resourceCrn, regionAwareInternalCrnGeneratorFactory)) {
+        if (!umsClient.checkResourceRight(userCrn, right, resourceCrn)) {
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
         }
     }
 
     private void checkRightOfUserOnResources(String userCrn, String right, Collection<String> resourceCrns, String unauthorizedMessage) {
-        if (!umsClient.hasRights(userCrn, Lists.newArrayList(resourceCrns), right, regionAwareInternalCrnGeneratorFactory)
-                .values().stream().allMatch(Boolean::booleanValue)) {
+        if (!umsClient.hasRights(userCrn, Lists.newArrayList(resourceCrns), right).values().stream().allMatch(Boolean::booleanValue)) {
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
         }

@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.service.freeipa.user.ums;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -69,12 +68,11 @@ class EnvironmentAccessCheckerTest {
     void testEnvironmentAccessCheckerChecksRightRightChecks() {
         EnvironmentAccessChecker underTest = environmentAccessCheckerFactory.create(ENV_CRN);
         ArgumentCaptor<List<AuthorizationProto.RightCheck>> argumentCaptor = ArgumentCaptor.forClass((Class) List.class);
-        when(grpcUmsClient.hasRightsNoCache(
-                eq(MEMBER_CRN), anyList(), any())).thenReturn(List.of(true, true));
+        when(grpcUmsClient.hasRightsNoCache(eq(MEMBER_CRN), anyList())).thenReturn(List.of(true, true));
 
         underTest.hasAccess(MEMBER_CRN);
 
-        verify(grpcUmsClient).hasRightsNoCache(eq(MEMBER_CRN), argumentCaptor.capture(), any());
+        verify(grpcUmsClient).hasRightsNoCache(eq(MEMBER_CRN), argumentCaptor.capture());
         List<AuthorizationProto.RightCheck> capturedRightChecks = argumentCaptor.getValue();
         assertEquals(2, capturedRightChecks.size());
         AuthorizationProto.RightCheck hasAccess = capturedRightChecks.get(0);
@@ -90,8 +88,7 @@ class EnvironmentAccessCheckerTest {
 
         for (boolean hasAccess : new boolean[]{false, true}) {
             for (boolean ipaAdmin : new boolean[]{false, true}) {
-                when(grpcUmsClient.hasRightsNoCache(eq(MEMBER_CRN), anyList(), any()))
-                        .thenReturn(List.of(hasAccess, ipaAdmin));
+                when(grpcUmsClient.hasRightsNoCache(eq(MEMBER_CRN), anyList())).thenReturn(List.of(hasAccess, ipaAdmin));
 
                 EnvironmentAccessRights environmentAccessRights = underTest.hasAccess(MEMBER_CRN);
 
@@ -106,8 +103,7 @@ class EnvironmentAccessCheckerTest {
         EnvironmentAccessChecker underTest = environmentAccessCheckerFactory.create(ENV_CRN);
 
         Throwable ex = new UnauthorizedException();
-        when(grpcUmsClient.hasRightsNoCache(eq(MEMBER_CRN), anyList(), any()))
-                .thenThrow(ex);
+        when(grpcUmsClient.hasRightsNoCache(eq(MEMBER_CRN), anyList())).thenThrow(ex);
 
         EnvironmentAccessRights environmentAccessRights = underTest.hasAccess(MEMBER_CRN);
 

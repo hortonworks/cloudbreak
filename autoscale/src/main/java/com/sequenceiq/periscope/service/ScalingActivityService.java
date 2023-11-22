@@ -9,7 +9,6 @@ import static com.sequenceiq.periscope.service.NotFoundException.notFound;
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.MINUTES;
 
-
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;

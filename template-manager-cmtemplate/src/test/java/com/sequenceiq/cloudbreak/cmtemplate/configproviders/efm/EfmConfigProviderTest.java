@@ -59,7 +59,7 @@ public class EfmConfigProviderTest {
     public void testInitialAdminConfig7217() {
         User user = mock(User.class);
         when(user.getWorkloadUsername()).thenReturn(ADMIN_USER);
-        when(umsClient.getUserDetails(eq(USER_CRN), any())).thenReturn(user);
+        when(umsClient.getUserDetails(eq(USER_CRN))).thenReturn(user);
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(
             EfmRoles.EFM_SERVER, templatePreparationObject(CLOUDERA_STACK_VERSION_7_2_17, USER_CRN));
@@ -78,7 +78,7 @@ public class EfmConfigProviderTest {
         Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
 
         verify(virtualGroupService, never()).createOrGetVirtualGroup(any(), any());
-        verify(umsClient, never()).getUserDetails(any(), any());
+        verify(umsClient, never()).getUserDetails(any());
         assertThat(configToValue).isEmpty();
     }
 
@@ -86,7 +86,7 @@ public class EfmConfigProviderTest {
     public void testInitialAdminConfig7218() {
         User user = mock(User.class);
         when(user.getWorkloadUsername()).thenReturn(ADMIN_USER);
-        when(umsClient.getUserDetails(eq(USER_CRN), any())).thenReturn(user);
+        when(umsClient.getUserDetails(eq(USER_CRN))).thenReturn(user);
 
         when(virtualGroupService.createOrGetVirtualGroup(any(), eq(UmsVirtualGroupRight.EFM_ADMIN))).thenReturn(ADMIN_GROUP);
 
@@ -109,7 +109,7 @@ public class EfmConfigProviderTest {
 
         Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
 
-        verify(umsClient, never()).getUserDetails(any(), any());
+        verify(umsClient, never()).getUserDetails(any());
         assertThat(configToValue).containsOnly(entry(EFM_ADMIN_GROUP_IDENTITIES, ADMIN_GROUP));
     }
 

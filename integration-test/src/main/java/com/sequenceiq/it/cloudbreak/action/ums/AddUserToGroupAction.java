@@ -5,7 +5,6 @@ import static java.lang.String.format;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsGroupTestDto;
@@ -20,12 +19,9 @@ public class AddUserToGroupAction implements Action<UmsGroupTestDto, UmsClient> 
 
     private final String memberCrn;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    public AddUserToGroupAction(String groupName, String memberCrn, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+    public AddUserToGroupAction(String groupName, String memberCrn) {
         this.groupName = groupName;
         this.memberCrn = memberCrn;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     @Override
@@ -35,7 +31,7 @@ public class AddUserToGroupAction implements Action<UmsGroupTestDto, UmsClient> 
         testDto.withMember(memberCrn);
         Log.when(LOGGER, format(" Assigning user '%s' to group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         Log.whenJson(LOGGER, format(" Assign user to group request:%n "), testDto.getRequest());
-        client.getDefaultClient().addMemberToGroup(accountId, groupName, memberCrn, regionAwareInternalCrnGeneratorFactory);
+        client.getDefaultClient().addMemberToGroup(accountId, groupName, memberCrn);
         LOGGER.info(format(" User '%s' has been assigned to group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         Log.when(LOGGER, format(" User '%s' has been assigned to group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         return testDto;

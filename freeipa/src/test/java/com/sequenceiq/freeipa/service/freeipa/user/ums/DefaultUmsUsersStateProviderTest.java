@@ -18,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsGroupConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsUserConverter;
@@ -40,9 +39,6 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
 
     @Mock
     private EnvironmentAccessCheckerFactory environmentAccessCheckerFactory;
-
-    @Mock
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Spy
     @SuppressFBWarnings
@@ -78,27 +74,17 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
     private void setupMocks() {
         doAnswer(invocation -> {
             String environmentCrn = invocation.getArgument(0, String.class);
-            return new EnvironmentAccessChecker(
-                    grpcUmsClient,
-                    environmentCrn,
-                    authorizationRightChecksFactory.create(environmentCrn),
-                    regionAwareInternalCrnGeneratorFactory);
+            return new EnvironmentAccessChecker(grpcUmsClient, environmentCrn, authorizationRightChecksFactory.create(environmentCrn));
         }).when(environmentAccessCheckerFactory).create(anyString());
 
-        when(grpcUmsClient.listAllGroups(eq(ACCOUNT_ID), any()))
-                .thenReturn(testData.groups);
-        when(grpcUmsClient.listWorkloadAdministrationGroups(eq(ACCOUNT_ID), any()))
-                .thenReturn(testData.allWags);
+        when(grpcUmsClient.listAllGroups(eq(ACCOUNT_ID))).thenReturn(testData.groups);
+        when(grpcUmsClient.listWorkloadAdministrationGroups(eq(ACCOUNT_ID))).thenReturn(testData.allWags);
 
 
-        when(grpcUmsClient.listAllUsers(eq(ACCOUNT_ID), any()))
-                .thenReturn(testData.users);
+        when(grpcUmsClient.listAllUsers(eq(ACCOUNT_ID))).thenReturn(testData.users);
 
-        when(grpcUmsClient.listAllMachineUsers(eq(ACCOUNT_ID),
-                eq(DefaultUmsUsersStateProvider.DONT_INCLUDE_INTERNAL_MACHINE_USERS),
-                eq(DefaultUmsUsersStateProvider.INCLUDE_WORKLOAD_MACHINE_USERS),
-                any()))
-                .thenReturn(testData.machineUsers);
+        when(grpcUmsClient.listAllMachineUsers(eq(ACCOUNT_ID), eq(DefaultUmsUsersStateProvider.DONT_INCLUDE_INTERNAL_MACHINE_USERS),
+                eq(DefaultUmsUsersStateProvider.INCLUDE_WORKLOAD_MACHINE_USERS))).thenReturn(testData.machineUsers);
 
         doAnswer(invocation -> {
             String crn = invocation.getArgument(0, String.class);
@@ -106,7 +92,7 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
             return UserSyncConstants.RIGHTS.stream()
                     .map(right -> actorRights.get(right))
                     .collect(Collectors.toList());
-        }).when(grpcUmsClient).hasRightsNoCache(anyString(), any(List.class), any());
+        }).when(grpcUmsClient).hasRightsNoCache(anyString(), any(List.class));
 
         doAnswer(invocation -> {
             String memberCrn = invocation.getArgument(1, String.class);
@@ -114,8 +100,7 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
                     .filter(Map.Entry::getValue)
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
-        }).when(grpcUmsClient)
-                .listGroupsForMember(eq(ACCOUNT_ID), anyString(), any());
+        }).when(grpcUmsClient).listGroupsForMember(eq(ACCOUNT_ID), anyString());
 
         doAnswer(invocation -> {
             String memberCrn = invocation.getArgument(0, String.class);
@@ -123,8 +108,7 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
                     .filter(Map.Entry::getValue)
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
-        }).when(grpcUmsClient)
-                .listWorkloadAdministrationGroupsForMember(anyString(), any());
+        }).when(grpcUmsClient).listWorkloadAdministrationGroupsForMember(anyString());
 
         doAnswer(invocation -> workloadCredentialConverter
                 .toWorkloadCredential(

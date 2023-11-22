@@ -89,7 +89,7 @@ public class UtilAuthorizationServiceTest {
 
     @Test
     public void testCheckRight() {
-        when(grpcUmsClient.hasRights(anyString(), any(), any())).thenReturn(Lists.newArrayList(Boolean.TRUE, Boolean.FALSE));
+        when(grpcUmsClient.hasRights(anyString(), any())).thenReturn(Lists.newArrayList(Boolean.TRUE, Boolean.FALSE));
 
         CheckRightV4Request rightReq = new CheckRightV4Request();
         rightReq.setRights(Lists.newArrayList(RightV4.ENV_CREATE, RightV4.DH_DESCRIBE));
@@ -104,12 +104,12 @@ public class UtilAuthorizationServiceTest {
             }
         });
 
-        verify(grpcUmsClient, times(1)).hasRights(anyString(), any(), any());
+        verify(grpcUmsClient, times(1)).hasRights(anyString(), any());
     }
 
     @Test
     public void testCheckResourceRightFallback() {
-        when(grpcUmsClient.hasRights(anyString(), any(), any()))
+        when(grpcUmsClient.hasRights(anyString(), any()))
                 .thenReturn(Lists.newLinkedList(Arrays.asList(Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE)));
 
         CheckResourceRightsV4Request rightReq = new CheckResourceRightsV4Request();
@@ -129,7 +129,7 @@ public class UtilAuthorizationServiceTest {
                     }
                 }));
 
-        verify(grpcUmsClient, times(1)).hasRights(anyString(), any(), any());
+        verify(grpcUmsClient, times(1)).hasRights(anyString(), any());
     }
 
     @Test
@@ -154,9 +154,8 @@ public class UtilAuthorizationServiceTest {
                 .setRight(RightV4.SDX_RECOVER.getAction().getRight()).setResource("dlCrn").build();
         AuthorizationProto.RightCheck dlRecoveryEnvRightCheck = AuthorizationProto.RightCheck.newBuilder()
                 .setRight(RightV4.SDX_RECOVER.getAction().getRight()).setResource("env2crn").build();
-        when(grpcUmsClient.hasRights(anyString(), eq(Arrays.asList(dhStartRightCheck, dhStartEnvRightCheck, dhStopRightCheck,
-                dhStopEnvRightCheck, dlRepairRightCheck, dlRepairEnvRightCheck, dlUpgradeRightCheck, dlUpgradeEnvRightCheck, dlRecoveryRightCheck,
-                dlRecoveryEnvRightCheck)), any()))
+        when(grpcUmsClient.hasRights(anyString(), eq(Arrays.asList(dhStartRightCheck, dhStartEnvRightCheck, dhStopRightCheck, dhStopEnvRightCheck,
+                dlRepairRightCheck, dlRepairEnvRightCheck, dlUpgradeRightCheck, dlUpgradeEnvRightCheck, dlRecoveryRightCheck, dlRecoveryEnvRightCheck))))
                 .thenReturn(Lists.newArrayList(Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, Boolean.TRUE,  Boolean.TRUE,
                         Boolean.FALSE, Boolean.TRUE, Boolean.FALSE));
 
@@ -196,7 +195,7 @@ public class UtilAuthorizationServiceTest {
                     }
                 }));
 
-        verify(grpcUmsClient, times(1)).hasRights(anyString(), any(), any());
+        verify(grpcUmsClient, times(1)).hasRights(anyString(), any());
     }
 
     @Test

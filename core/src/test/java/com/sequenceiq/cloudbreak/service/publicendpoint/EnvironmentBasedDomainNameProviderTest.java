@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.publicendpoint;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -67,14 +66,14 @@ class EnvironmentBasedDomainNameProviderTest {
         UserManagementProto.Account umsAccount = UserManagementProto.Account.newBuilder()
                 .setWorkloadSubdomain(accountWorkloadSubdomain)
                 .build();
-        when(grpcUmsClient.getAccountDetails(anyString(), any())).thenReturn(umsAccount);
+        when(grpcUmsClient.getAccountDetails(anyString())).thenReturn(umsAccount);
         when(legacyEnvironmentNameBasedDomainNameProvider.getDomainName(anyString(), anyString())).thenReturn(environmentDomain);
 
         String commonName = underTest.getCommonName(endpointName, environment);
 
         String expected = String.format("5e8a4beefa5d7f90.%s", environmentDomain);
         assertEquals(expected, commonName);
-        verify(grpcUmsClient, times(1)).getAccountDetails(anyString(), any());
+        verify(grpcUmsClient, times(1)).getAccountDetails(anyString());
         verify(legacyEnvironmentNameBasedDomainNameProvider, times(1)).getDomainName(anyString(), anyString());
     }
 }

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.WorkloadCredentialConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 
@@ -19,13 +18,8 @@ public class UmsCredentialProvider {
     @Inject
     private WorkloadCredentialConverter workloadCredentialConverter;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public WorkloadCredential getCredentials(String userCrn) {
-        GetActorWorkloadCredentialsResponse response =
-                grpcUmsClient.getActorWorkloadCredentials(userCrn, regionAwareInternalCrnGeneratorFactory);
-
+        GetActorWorkloadCredentialsResponse response = grpcUmsClient.getActorWorkloadCredentials(userCrn);
         return workloadCredentialConverter.toWorkloadCredential(response);
     }
 }

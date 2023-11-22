@@ -21,7 +21,6 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Streams;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsUserConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
@@ -55,9 +54,6 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
     @Inject
     private FmsUserConverter fmsUserConverter;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public Map<String, UmsUsersState> get(
             String accountId, Collection<String> environmentCrns,
             Set<String> userCrns, Set<String> machineUserCrns, UserSyncOptions options) {
@@ -65,10 +61,8 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
         List<UserManagementProto.MachineUser> machineUsers =
                 getMachineUsers(accountId, options.isFullSync(), machineUserCrns);
 
-        Map<String, FmsGroup> crnToFmsGroup = convertGroupsToFmsGroups(
-                grpcUmsClient.listAllGroups(accountId, regionAwareInternalCrnGeneratorFactory));
-        Map<UserManagementProto.WorkloadAdministrationGroup, FmsGroup> wags = convertWagsToFmsGroups(
-                grpcUmsClient.listWorkloadAdministrationGroups(accountId, regionAwareInternalCrnGeneratorFactory));
+        Map<String, FmsGroup> crnToFmsGroup = convertGroupsToFmsGroups(grpcUmsClient.listAllGroups(accountId));
+        Map<UserManagementProto.WorkloadAdministrationGroup, FmsGroup> wags = convertWagsToFmsGroups(grpcUmsClient.listWorkloadAdministrationGroups(accountId));
         List<String> requestedWorkloadUsernames = Streams.concat(
                 users.stream().map(UserManagementProto.User::getWorkloadUsername),
                 machineUsers.stream().map(UserManagementProto.MachineUser::getWorkloadUsername))
@@ -128,14 +122,9 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
                     FmsUser fmsUser = triple.getMiddle();
                     List<UserManagementProto.CloudIdentity> cloudIdentityList = triple.getRight();
 
-                    Supplier<Collection<String>> groupMembershipSupplier = () ->
-                            grpcUmsClient.listGroupsForMember(
-                                    accountId, memberCrn, regionAwareInternalCrnGeneratorFactory);
-                    Supplier<Collection<String>> wagMembershipSupplier = () ->
-                            grpcUmsClient.listWorkloadAdministrationGroupsForMember(
-                                    memberCrn, regionAwareInternalCrnGeneratorFactory);
-                    Supplier<WorkloadCredential> workloadCredentialSupplier = () ->
-                            umsCredentialProvider.getCredentials(memberCrn);
+                    Supplier<Collection<String>> groupMembershipSupplier = () -> grpcUmsClient.listGroupsForMember(accountId, memberCrn);
+                    Supplier<Collection<String>> wagMembershipSupplier = () -> grpcUmsClient.listWorkloadAdministrationGroupsForMember(memberCrn);
+                    Supplier<WorkloadCredential> workloadCredentialSupplier = () -> umsCredentialProvider.getCredentials(memberCrn);
 
                     try {
                         actorHandler.handleActor(
@@ -163,9 +152,9 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
     private List<UserManagementProto.User> getUsers(String accountId,
             boolean fullSync, Set<String> userCrns) {
         if (fullSync) {
-            return grpcUmsClient.listAllUsers(accountId, regionAwareInternalCrnGeneratorFactory);
+            return grpcUmsClient.listAllUsers(accountId);
         } else if (!userCrns.isEmpty()) {
-            return grpcUmsClient.listUsers(accountId, List.copyOf(userCrns), regionAwareInternalCrnGeneratorFactory);
+            return grpcUmsClient.listUsers(accountId, List.copyOf(userCrns));
         } else {
             return List.of();
         }
@@ -174,13 +163,9 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
     private List<UserManagementProto.MachineUser> getMachineUsers(
             String accountId, boolean fullSync, Set<String> machineUserCrns) {
         if (fullSync) {
-            return grpcUmsClient.listAllMachineUsers(accountId,
-                    DONT_INCLUDE_INTERNAL_MACHINE_USERS, INCLUDE_WORKLOAD_MACHINE_USERS,
-                    regionAwareInternalCrnGeneratorFactory);
+            return grpcUmsClient.listAllMachineUsers(accountId, DONT_INCLUDE_INTERNAL_MACHINE_USERS, INCLUDE_WORKLOAD_MACHINE_USERS);
         } else if (!machineUserCrns.isEmpty()) {
-            return grpcUmsClient.listMachineUsers(accountId, List.copyOf(machineUserCrns),
-                    DONT_INCLUDE_INTERNAL_MACHINE_USERS, INCLUDE_WORKLOAD_MACHINE_USERS,
-                    regionAwareInternalCrnGeneratorFactory);
+            return grpcUmsClient.listMachineUsers(accountId, List.copyOf(machineUserCrns), DONT_INCLUDE_INTERNAL_MACHINE_USERS, INCLUDE_WORKLOAD_MACHINE_USERS);
         } else {
             return List.of();
         }

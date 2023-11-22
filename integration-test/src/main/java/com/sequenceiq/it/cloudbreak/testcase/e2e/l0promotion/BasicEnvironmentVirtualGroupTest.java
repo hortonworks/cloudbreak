@@ -13,7 +13,6 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.service.UmsResourceRole;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.ums.ResourceRoleTestAssertion;
@@ -58,9 +57,6 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
     private EnvironmentTestClient environmentTestClient;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private EnvironmentUtil environmentUtil;
 
     @Override
@@ -94,9 +90,9 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentAdmin()
-                .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_ADMIN_A, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_ADMIN_A))
                 .withEnvironmentUser()
-                .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_B))
                 .then((tc, dto, client) -> {
                     environmentVirtualGroups.set(environmentUtil.getEnvironmentVirtualGroups(tc, client));
                     return dto;
@@ -114,7 +110,7 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentAdmin()
-                .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_B))
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.syncAll())
                 .await(OperationState.COMPLETED)
@@ -127,9 +123,9 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentAdmin()
-                .when(umsTestClient.unAssignResourceRole(L0UserKeys.ENV_ADMIN_A, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.unAssignResourceRole(L0UserKeys.ENV_ADMIN_A))
                 .withEnvironmentUser()
-                .when(umsTestClient.unAssignResourceRole(L0UserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.unAssignResourceRole(L0UserKeys.ENV_CREATOR_B))
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.syncAll())
                 .await(OperationState.COMPLETED)
@@ -167,21 +163,17 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .given(UmsTestDto.class)
                 .assignTargetByCrn(adminGroupCrn)
                 .withGroupAdmin()
-                .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_A, regionAwareInternalCrnGeneratorFactory))
-                .then(ResourceRoleTestAssertion.validateAssignedResourceRole(userEnvCreatorA, UmsResourceRole.IAM_GROUP_ADMIN, true,
-                        regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_A))
+                .then(ResourceRoleTestAssertion.validateAssignedResourceRole(userEnvCreatorA, UmsResourceRole.IAM_GROUP_ADMIN, true))
                 .assignTargetByCrn(userGroupCrn)
                 .withGroupAdmin()
-                .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_A, regionAwareInternalCrnGeneratorFactory))
-                .then(ResourceRoleTestAssertion.validateAssignedResourceRole(userEnvCreatorA, UmsResourceRole.IAM_GROUP_ADMIN, true,
-                        regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_A))
+                .then(ResourceRoleTestAssertion.validateAssignedResourceRole(userEnvCreatorA, UmsResourceRole.IAM_GROUP_ADMIN, true))
                 .given(UmsGroupTestDto.class)
-                .when(umsTestClient.addUserToGroup(adminGroupName, userEnvAdminA.getCrn(), regionAwareInternalCrnGeneratorFactory))
-                .when(umsTestClient.addUserToGroup(userGroupName, userEnvCreatorB.getCrn(), regionAwareInternalCrnGeneratorFactory))
-                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvAdminA, adminGroupName, true,
-                        regionAwareInternalCrnGeneratorFactory))
-                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvCreatorB, userGroupName, true,
-                        regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.addUserToGroup(adminGroupName, userEnvAdminA.getCrn()))
+                .when(umsTestClient.addUserToGroup(userGroupName, userEnvCreatorB.getCrn()))
+                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvAdminA, adminGroupName, true))
+                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvCreatorB, userGroupName, true))
                 .validate();
 
         testContext
@@ -193,9 +185,9 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentAdmin()
-                .when(umsTestClient.assignResourceRoleWithGroup(adminGroupCrn, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.assignResourceRoleWithGroup(adminGroupCrn))
                 .withEnvironmentUser()
-                .when(umsTestClient.assignResourceRoleWithGroup(userGroupCrn, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.assignResourceRoleWithGroup(userGroupCrn))
                 .then((tc, dto, client) -> {
                     environmentVirtualGroups.set(environmentUtil.getEnvironmentVirtualGroups(tc, client));
                     return dto;
@@ -213,26 +205,22 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
 
         testContext
                 .given(UmsGroupTestDto.class)
-                .when(umsTestClient.removeUserFromGroup(adminGroupName, userEnvAdminA.getCrn(), regionAwareInternalCrnGeneratorFactory))
-                .when(umsTestClient.removeUserFromGroup(userGroupName, userEnvCreatorB.getCrn(), regionAwareInternalCrnGeneratorFactory))
-                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvAdminA, adminGroupName, false,
-                        regionAwareInternalCrnGeneratorFactory))
-                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvCreatorB, userGroupName, false,
-                        regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.removeUserFromGroup(adminGroupName, userEnvAdminA.getCrn()))
+                .when(umsTestClient.removeUserFromGroup(userGroupName, userEnvCreatorB.getCrn()))
+                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvAdminA, adminGroupName, false))
+                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvCreatorB, userGroupName, false))
                 .validate();
 
         testContext
                 .given(UmsTestDto.class)
                 .assignTargetByCrn(adminGroupCrn)
                 .withGroupAdmin()
-                .when(umsTestClient.unAssignResourceRole(L0UserKeys.ENV_CREATOR_A, regionAwareInternalCrnGeneratorFactory))
-                .then(ResourceRoleTestAssertion.validateAssignedResourceRole(userEnvCreatorA, UmsResourceRole.IAM_GROUP_ADMIN, false,
-                        regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.unAssignResourceRole(L0UserKeys.ENV_CREATOR_A))
+                .then(ResourceRoleTestAssertion.validateAssignedResourceRole(userEnvCreatorA, UmsResourceRole.IAM_GROUP_ADMIN, false))
                 .assignTargetByCrn(userGroupCrn)
                 .withGroupAdmin()
-                .when(umsTestClient.unAssignResourceRole(L0UserKeys.ENV_CREATOR_A, regionAwareInternalCrnGeneratorFactory))
-                .then(ResourceRoleTestAssertion.validateAssignedResourceRole(userEnvCreatorA, UmsResourceRole.IAM_GROUP_ADMIN, false,
-                        regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.unAssignResourceRole(L0UserKeys.ENV_CREATOR_A))
+                .then(ResourceRoleTestAssertion.validateAssignedResourceRole(userEnvCreatorA, UmsResourceRole.IAM_GROUP_ADMIN, false))
                 .validate();
     }
 }

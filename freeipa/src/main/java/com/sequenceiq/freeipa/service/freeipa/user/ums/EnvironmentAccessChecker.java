@@ -13,11 +13,11 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UnauthorizedException;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
 import com.sequenceiq.freeipa.service.freeipa.user.model.EnvironmentAccessRights;
 
 public class EnvironmentAccessChecker {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentAccessChecker.class);
 
     private final GrpcUmsClient grpcUmsClient;
@@ -25,8 +25,6 @@ public class EnvironmentAccessChecker {
     private final String environmentCrn;
 
     private final List<RightCheck> rightChecks;
-
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     /**
      * Creates an EnvironmentAccessChecker instance.
@@ -37,21 +35,18 @@ public class EnvironmentAccessChecker {
      * @throws NullPointerException if the environmentCrn is null
      * @throws CrnParseException    if the environmentCrn does not match the CRN pattern or cannot be parsed
      */
-    public EnvironmentAccessChecker(GrpcUmsClient grpcUmsClient, String environmentCrn, List<RightCheck> rightChecks,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+    public EnvironmentAccessChecker(GrpcUmsClient grpcUmsClient, String environmentCrn, List<RightCheck> rightChecks) {
         this.grpcUmsClient = requireNonNull(grpcUmsClient, "grpcUmsClient is null");
         Crn.safeFromString(environmentCrn);
         this.environmentCrn = environmentCrn;
         this.rightChecks = requireNonNull(rightChecks);
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
         checkArgument(rightChecks.size() == UserSyncConstants.RIGHTS.size());
     }
 
     public EnvironmentAccessRights hasAccess(String memberCrn) {
         requireNonNull(memberCrn, "memberCrn is null");
         try {
-            List<Boolean> hasRights = grpcUmsClient.hasRightsNoCache(memberCrn, rightChecks,
-                    regionAwareInternalCrnGeneratorFactory);
+            List<Boolean> hasRights = grpcUmsClient.hasRightsNoCache(memberCrn, rightChecks);
             return new EnvironmentAccessRights(hasRights.get(0), hasRights.get(1));
         } catch (UnauthorizedException e) {
             LOGGER.warn("Member CRN {} not found in UMS. Treating as if member has no rights to environment {}: {}",

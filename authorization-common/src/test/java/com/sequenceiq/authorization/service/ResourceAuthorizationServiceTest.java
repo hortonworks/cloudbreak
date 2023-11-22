@@ -88,7 +88,7 @@ public class ResourceAuthorizationServiceTest {
         when(methodSignature.getMethod()).thenReturn(method);
         when(authorizationFactory1.getAuthorization(any(), any(), any(), any()))
                 .thenReturn(Optional.of(new HasRight(AuthorizationResourceAction.EDIT_ENVIRONMENT, "crn")));
-        when(grpcUmsClient.hasRights(anyString(), anyList(), any())).thenReturn(List.of(false));
+        when(grpcUmsClient.hasRights(anyString(), anyList())).thenReturn(List.of(false));
 
         AccessDeniedException accessDeniedException = assertThrows(AccessDeniedException.class, () -> {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.authorize(USER_CRN, proceedingJoinPoint, methodSignature));
@@ -103,7 +103,7 @@ public class ResourceAuthorizationServiceTest {
         when(methodSignature.getMethod()).thenReturn(method);
         when(authorizationFactory1.getAuthorization(any(), any(), any(), any()))
                 .thenReturn(Optional.of(new HasRight(AuthorizationResourceAction.EDIT_ENVIRONMENT, "crn")));
-        when(grpcUmsClient.hasRights(anyString(), anyList(), any())).thenReturn(List.of(true));
+        when(grpcUmsClient.hasRights(anyString(), anyList())).thenReturn(List.of(true));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.authorize(USER_CRN, proceedingJoinPoint, methodSignature));
     }
@@ -116,7 +116,7 @@ public class ResourceAuthorizationServiceTest {
                 .thenReturn(Optional.of(new HasRight(AuthorizationResourceAction.EDIT_ENVIRONMENT, "crn1")));
         when(authorizationFactory2.getAuthorization(any(), any(), any(), any()))
                 .thenReturn(Optional.of(new HasRight(AuthorizationResourceAction.DESCRIBE_CREDENTIAL, "crn2")));
-        when(grpcUmsClient.hasRights(anyString(), anyList(), any())).thenReturn(List.of(false, false));
+        when(grpcUmsClient.hasRights(anyString(), anyList())).thenReturn(List.of(false, false));
 
         AccessDeniedException accessDeniedException = assertThrows(AccessDeniedException.class, () -> {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.authorize(USER_CRN, proceedingJoinPoint, methodSignature));
@@ -125,7 +125,7 @@ public class ResourceAuthorizationServiceTest {
         assertEquals("Not authorized for the following reasons. Doesn't have 'environments/editEnvironment' right on unknown resource type [crn: crn1]. " +
                 "Doesn't have 'environments/describeCredential' right on unknown resource type [crn: crn2].", accessDeniedException.getMessage());
 
-        verify(grpcUmsClient).hasRights(anyString(), captor.capture(), any());
+        verify(grpcUmsClient).hasRights(anyString(), captor.capture());
 
         List<RightCheck> rightChecks = captor.getValue();
         assertEquals(2, rightChecks.size());

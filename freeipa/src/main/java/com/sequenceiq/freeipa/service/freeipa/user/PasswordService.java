@@ -22,7 +22,6 @@ import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.authorization.service.CustomCheckUtil;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -73,9 +72,6 @@ public class PasswordService {
 
     @Inject
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public Operation setPasswordWithCustomPermissionCheck(String accountId, String userCrn,
             String password, Set<String> environmentCrnFilter, AuthorizationResourceAction action) {
@@ -156,7 +152,7 @@ public class PasswordService {
     @VisibleForTesting
     Optional<Instant> calculateExpirationTime(String userCrn, String accountId) {
         LOGGER.debug("calculating expiration time for password in account {}", accountId);
-        UserManagementProto.Account account = umsClient.getAccountDetails(accountId, regionAwareInternalCrnGeneratorFactory);
+        UserManagementProto.Account account = umsClient.getAccountDetails(accountId);
         Optional<UserManagementProto.WorkloadPasswordPolicy> passwordPolicy = getPasswordPolicyForUser(account, userCrn);
         if (passwordPolicy.isPresent()) {
             long maxLifetime = passwordPolicy.get().getWorkloadPasswordMaxLifetime();
@@ -192,11 +188,9 @@ public class PasswordService {
         Crn crn = Crn.safeFromString(userCrn);
         switch (crn.getResourceType()) {
         case USER:
-            return umsClient.getUserDetails(userCrn, regionAwareInternalCrnGeneratorFactory).getWorkloadUsername();
+            return umsClient.getUserDetails(userCrn).getWorkloadUsername();
         case MACHINE_USER:
-            return umsClient.getMachineUserDetails(userCrn,
-                    Crn.fromString(userCrn).getAccountId(),
-                    regionAwareInternalCrnGeneratorFactory).getWorkloadUsername();
+            return umsClient.getMachineUserDetails(userCrn, Crn.fromString(userCrn).getAccountId()).getWorkloadUsername();
         default:
             throw new IllegalArgumentException(String.format("UserCrn %s is not of resource type USER or MACHINE_USER", userCrn));
         }

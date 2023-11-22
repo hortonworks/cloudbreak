@@ -8,7 +8,6 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.assertion.datalake.RecipeTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -37,9 +36,6 @@ public class InternalSdxSshAndCmAccessTest extends PreconditionSdxE2ETest {
 
     @Inject
     private ClouderaManagerUtil clouderaManagerUtil;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -70,7 +66,7 @@ public class InternalSdxSshAndCmAccessTest extends PreconditionSdxE2ETest {
                 .when(freeIpaTestClient.getLastSyncOperationStatus())
                 .await(OperationState.COMPLETED)
                 .given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName())
-                .when(umsTestClient.setWorkloadPassword(testContext.getWorkloadPassword(), regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.setWorkloadPassword(testContext.getWorkloadPassword()))
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.syncAll())
                 .await(OperationState.COMPLETED)

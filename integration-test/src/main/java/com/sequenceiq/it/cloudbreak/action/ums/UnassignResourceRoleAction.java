@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Multimap;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
@@ -19,11 +18,8 @@ public class UnassignResourceRoleAction extends AbstractUmsAction<UmsTestDto> {
 
     private final String userKey;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    public UnassignResourceRoleAction(String userKey, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+    public UnassignResourceRoleAction(String userKey) {
         this.userKey = userKey;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     @Override
@@ -31,16 +27,14 @@ public class UnassignResourceRoleAction extends AbstractUmsAction<UmsTestDto> {
         CloudbreakUser user = testContext.getRealUmsUserByKey(userKey);
         String userCrn = user.getCrn();
         String resourceCrn = testDto.getRequest().getResourceCrn();
-        String resourceRole = UmsClientUtils.getResourceRoleCrn(testDto, client, regionAwareInternalCrnGeneratorFactory);
+        String resourceRole = UmsClientUtils.getResourceRoleCrn(testDto, client);
 
         Log.when(LOGGER, format(" Revoke resource role '%s' from user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));
         Log.whenJson(LOGGER, format(" Revoke resource role request:%n "), testDto.getRequest());
         LOGGER.info(format(" Revoking resource role '%s' from user '%s' at resource '%s'... ", resourceRole, userCrn, resourceCrn));
-        Multimap<String, String> assignedResourceRoles = client.getDefaultClient().listAssignedResourceRoles(userCrn,
-                regionAwareInternalCrnGeneratorFactory);
+        Multimap<String, String> assignedResourceRoles = client.getDefaultClient().listAssignedResourceRoles(userCrn);
         if (assignedResourceRoles.get(resourceCrn).contains(resourceRole)) {
-            client.getDefaultClient().unassignResourceRole(userCrn, resourceCrn, resourceRole,
-                    regionAwareInternalCrnGeneratorFactory);
+            client.getDefaultClient().unassignResourceRole(userCrn, resourceCrn, resourceRole);
             // wait for UmsRightsCache to expire
             Thread.sleep(7000);
             LOGGER.info(format(" Resource role '%s' has been revoked from user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));

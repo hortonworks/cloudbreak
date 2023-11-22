@@ -2,7 +2,6 @@ package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -58,7 +57,7 @@ class UmsCredentialProviderTest {
                 .setPasswordHashExpirationDate(EXPIRATION_DATE)
                 .setWorkloadCredentialsVersion(WORKLOAD_CREDENTIALS_VERSION)
                 .build();
-        when(grpcUmsClient.getActorWorkloadCredentials(eq("user"), any())).thenReturn(response);
+        when(grpcUmsClient.getActorWorkloadCredentials(eq("user"))).thenReturn(response);
         WorkloadCredential credential = underTest.getCredentials("user");
         assertEquals(credential.getHashedPassword(), PASSWORD_HASH);
         assertEquals(credential.getExpirationDate(), Optional.of(Instant.ofEpochMilli(EXPIRATION_DATE)));
@@ -74,7 +73,7 @@ class UmsCredentialProviderTest {
                 .setPasswordHashExpirationDate(0)
                 .setWorkloadCredentialsVersion(WORKLOAD_CREDENTIALS_VERSION)
                 .build();
-        when(grpcUmsClient.getActorWorkloadCredentials(eq("user"), any())).thenReturn(response);
+        when(grpcUmsClient.getActorWorkloadCredentials(eq("user"))).thenReturn(response);
         WorkloadCredential credential = underTest.getCredentials("user");
         assertEquals(credential.getExpirationDate(), Optional.empty());
         assertEquals(WORKLOAD_CREDENTIALS_VERSION, credential.getVersion());

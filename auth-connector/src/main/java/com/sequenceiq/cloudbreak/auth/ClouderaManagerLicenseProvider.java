@@ -8,7 +8,6 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
 @Component
@@ -20,12 +19,9 @@ public class ClouderaManagerLicenseProvider {
     @Inject
     private CMLicenseParser cmLicenseParser;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public JsonCMLicense getLicense(String userCrn) {
         String accountId = getAccountIdFromCrn(userCrn);
-        UserManagementProto.Account account = umsClient.getAccountDetails(accountId, regionAwareInternalCrnGeneratorFactory);
+        UserManagementProto.Account account = umsClient.getAccountDetails(accountId);
         return cmLicenseParser.parseLicense(account.getClouderaManagerLicenseKey())
                 .orElseThrow(() -> new BadRequestException("No valid CM license is present"));
     }

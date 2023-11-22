@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
 @Service
@@ -65,15 +64,12 @@ public class UtilAuthorizationService {
     @Inject
     private ResourceFilteringService resourceFilteringService;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public CheckRightV4Response checkRights(CheckRightV4Request rightReq) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         List<AuthorizationProto.RightCheck> rightChecks = rightReq.getRights().stream()
                 .map(rightV4 -> createRightCheckObject(umsRightProvider.getRight(rightV4.getAction()), null))
                 .collect(Collectors.toList());
-        List<Boolean> results = grpcUmsClient.hasRights(userCrn, rightChecks, regionAwareInternalCrnGeneratorFactory);
+        List<Boolean> results = grpcUmsClient.hasRights(userCrn, rightChecks);
         return new CheckRightV4Response(rightReq.getRights().stream()
                 .map(rightV4 -> new CheckRightV4SingleResponse(rightV4, results.get(rightReq.getRights().indexOf(rightV4))))
                 .collect(Collectors.toList()));
@@ -88,7 +84,7 @@ public class UtilAuthorizationService {
         List<AuthorizationProto.RightCheck> rightChecks = Lists.newLinkedList(resourceRightsChecks.values());
 
         LOGGER.info("Check rights: {}", rightChecks);
-        List<Boolean> results = grpcUmsClient.hasRights(userCrn, rightChecks, regionAwareInternalCrnGeneratorFactory);
+        List<Boolean> results = grpcUmsClient.hasRights(userCrn, rightChecks);
 
         Map<AuthorizationProto.RightCheck, Boolean> rightCheckResultMap = new HashMap<>();
         for (AuthorizationProto.RightCheck rightCheck : rightChecks) {

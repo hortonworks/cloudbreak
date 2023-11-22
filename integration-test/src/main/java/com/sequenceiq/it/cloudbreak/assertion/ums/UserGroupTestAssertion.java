@@ -7,7 +7,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsGroupTestDto;
@@ -22,12 +21,11 @@ public class UserGroupTestAssertion {
     private UserGroupTestAssertion() {
     }
 
-    public static Assertion<UmsGroupTestDto, UmsClient> validateUserGroupMembership(CloudbreakUser groupMember, String groupName, boolean expectedPresence,
-            RegionAwareInternalCrnGeneratorFactory crnGeneratorFactory) {
+    public static Assertion<UmsGroupTestDto, UmsClient> validateUserGroupMembership(CloudbreakUser groupMember, String groupName, boolean expectedPresence) {
         return (testContext, umsGroupTestDto, umsClient) -> {
             String accountId = testContext.getActingUserCrn().getAccountId();
 
-            List<String> groupMembers = umsClient.getDefaultClient().listMembersFromGroup(accountId, groupName, crnGeneratorFactory);
+            List<String> groupMembers = umsClient.getDefaultClient().listMembersFromGroup(accountId, groupName);
             boolean memberPresent = groupMembers.stream().anyMatch(memberCrn -> groupMember.getCrn().equals(memberCrn));
             LOGGER.info("Member is present '{}' at group '{}', group members: [{}]", memberPresent, groupName, groupMembers);
             if (expectedPresence) {

@@ -10,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-
 import io.grpc.Status.Code;
 import io.grpc.StatusRuntimeException;
 
@@ -21,9 +19,6 @@ public class VirtualGroupService {
 
     @Inject
     private GrpcUmsClient grpcUmsClient;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private EntitlementService entitlementService;
@@ -66,8 +61,7 @@ public class VirtualGroupService {
         for (UmsVirtualGroupRight right : UmsVirtualGroupRight.values()) {
             try {
                 LOGGER.debug("Start deleting virtual groups from UMS for environment '{}'", environmentCrn);
-                grpcUmsClient.deleteWorkloadAdministrationGroupName(accountId, right, environmentCrn,
-                        regionAwareInternalCrnGeneratorFactory);
+                grpcUmsClient.deleteWorkloadAdministrationGroupName(accountId, right, environmentCrn);
                 LOGGER.debug("Virtual groups deletion from UMS has been finished successfully for environment '{}'", environmentCrn);
             } catch (RuntimeException ex) {
                 LOGGER.warn("UMS virtualgroup delete failed (this is not critical)", ex);
@@ -78,8 +72,7 @@ public class VirtualGroupService {
     private String createOrGetVirtualGroup(String accountId, String environmentCrn, UmsVirtualGroupRight right) {
         String virtualGroup = getVirtualGroupFromUms(accountId, environmentCrn, right);
         if (StringUtils.isEmpty(virtualGroup)) {
-            virtualGroup = grpcUmsClient.setWorkloadAdministrationGroupName(accountId, right, environmentCrn,
-                    regionAwareInternalCrnGeneratorFactory);
+            virtualGroup = grpcUmsClient.setWorkloadAdministrationGroupName(accountId, right, environmentCrn);
             LOGGER.info("{} workloadAdministrationGroup is created for {} right on {} environment", virtualGroup, right, environmentCrn);
         } else {
             LOGGER.info("{} workloadAdministrationGroup is used for {} right on {} environment", virtualGroup, right, environmentCrn);
@@ -90,8 +83,7 @@ public class VirtualGroupService {
     private String getVirtualGroupFromUms(String accountId, String environmentCrn, UmsVirtualGroupRight right) {
         String virtualGroup = "";
         try {
-            virtualGroup = grpcUmsClient.getWorkloadAdministrationGroupName(accountId, right, environmentCrn,
-                    regionAwareInternalCrnGeneratorFactory);
+            virtualGroup = grpcUmsClient.getWorkloadAdministrationGroupName(accountId, right, environmentCrn);
         } catch (StatusRuntimeException ex) {
             if (Code.NOT_FOUND != ex.getStatus().getCode()) {
                 throw ex;

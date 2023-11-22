@@ -33,7 +33,6 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.exception.ErrorResponseHandler;
 import com.sequenceiq.cloudbreak.service.security.TenantBasedPermissionEvaluator;
@@ -77,9 +76,6 @@ public class SecurityConfig {
         private GrpcUmsClient umsClient;
 
         @Inject
-        private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-        @Inject
         private ErrorResponseHandler errorResponseHandler;
 
         @Bean
@@ -94,7 +90,7 @@ public class SecurityConfig {
 
         @Bean
         public UserDetailsService userDetailsService() {
-            return new CrnUserDetailsService(umsClient, regionAwareInternalCrnGeneratorFactory);
+            return new CrnUserDetailsService(umsClient);
         }
 
         @Bean

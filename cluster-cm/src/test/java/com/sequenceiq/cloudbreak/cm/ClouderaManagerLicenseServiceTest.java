@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,24 +38,24 @@ public class ClouderaManagerLicenseServiceTest {
     @Test
     public void validWhenLicenseIsNotEmpty() {
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder().setClouderaManagerLicenseKey(LICENSE).build();
-        when(umsClient.getAccountDetails(eq(ACCOUNT_ID), any())).thenReturn(account);
+        when(umsClient.getAccountDetails(eq(ACCOUNT_ID))).thenReturn(account);
 
         underTest.validateClouderaManagerLicense(ACCOUNT_ID);
 
-        verify(umsClient).getAccountDetails(eq(ACCOUNT_ID), any());
+        verify(umsClient).getAccountDetails(eq(ACCOUNT_ID));
     }
 
     @Test
     public void invalidWhenLicenseIsEmpty() {
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder().setClouderaManagerLicenseKey("").build();
-        when(umsClient.getAccountDetails(eq(ACCOUNT_ID), any())).thenReturn(account);
+        when(umsClient.getAccountDetails(eq(ACCOUNT_ID))).thenReturn(account);
 
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("For this tenant there is no valid cloudera manager license.");
 
         underTest.validateClouderaManagerLicense(ACCOUNT_ID);
 
-        verify(umsClient).getAccountDetails(eq(ACCOUNT_ID), any());
+        verify(umsClient).getAccountDetails(eq(ACCOUNT_ID));
     }
 
 }

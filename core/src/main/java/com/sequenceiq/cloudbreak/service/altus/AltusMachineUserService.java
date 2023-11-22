@@ -118,10 +118,7 @@ public class AltusMachineUserService {
             String machineUserName = getFluentDatabusMachineUserName(stack);
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> altusIAMService.clearMachineUser(
-                            machineUserName,
-                            ThreadBasedUserCrnProvider.getUserCrn(),
-                            Crn.fromString(stack.getResourceCrn()).getAccountId(),
+                    () -> altusIAMService.clearMachineUser(machineUserName, Crn.fromString(stack.getResourceCrn()).getAccountId(),
                             telemetry.isUseSharedAltusCredentialEnabled()));
         }
     }
@@ -132,10 +129,7 @@ public class AltusMachineUserService {
             String machineUserName = getMonitoringMachineUserName(stack);
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> altusIAMService.clearMachineUser(
-                            machineUserName,
-                            ThreadBasedUserCrnProvider.getUserCrn(),
-                            accountId));
+                    () -> altusIAMService.clearMachineUser(machineUserName, accountId));
         }
     }
 
@@ -145,10 +139,7 @@ public class AltusMachineUserService {
     public void cleanupMachineUser(String machineUserName, String accountId) {
         ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> altusIAMService.clearMachineUser(machineUserName,
-                        ThreadBasedUserCrnProvider.getUserCrn(),
-                        accountId
-                )
+                () -> altusIAMService.clearMachineUser(machineUserName, accountId)
         );
     }
 

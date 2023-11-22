@@ -123,12 +123,12 @@ public class AltusMachineUserServiceTest {
         // GIVEN
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        doNothing().when(altusIAMService).clearMachineUser(any(), any(), any(), anyBoolean());
+        doNothing().when(altusIAMService).clearMachineUser(any(), any(), anyBoolean());
         // WHEN
         underTest.clearFluentMachineUser(stack, cluster, telemetry);
 
         // THEN
-        verify(altusIAMService, times(1)).clearMachineUser(any(), any(), any(), anyBoolean());
+        verify(altusIAMService, times(1)).clearMachineUser(any(), any(), anyBoolean());
     }
 
     @Test

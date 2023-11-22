@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsUserConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.model.EnvironmentAccessRights;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
@@ -31,6 +30,7 @@ import io.grpc.StatusRuntimeException;
 
 @Component
 public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(BulkUmsUsersStateProvider.class);
 
     @Inject
@@ -43,20 +43,14 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
     private FmsUserConverter fmsUserConverter;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private UmsCredentialProvider umsCredentialProvider;
 
     public Map<String, UmsUsersState> get(
             String accountId, Collection<String> environmentCrns,
             UserSyncOptions options) {
         List<String> environmentCrnList = List.copyOf(environmentCrns);
-        UserManagementProto.GetUserSyncStateModelResponse userSyncStateModel = grpcUmsClient.getUserSyncStateModel(
-                accountId,
-                umsRightsChecksFactory.get(environmentCrnList),
-                true,
-                regionAwareInternalCrnGeneratorFactory);
+        UserManagementProto.GetUserSyncStateModelResponse userSyncStateModel = grpcUmsClient.getUserSyncStateModel(accountId,
+                umsRightsChecksFactory.get(environmentCrnList), true);
 
         Map<String, FmsGroup> groups = convertGroupsToFmsGroups(userSyncStateModel.getGroupList());
         Map<UserManagementProto.WorkloadAdministrationGroup, FmsGroup> wags =

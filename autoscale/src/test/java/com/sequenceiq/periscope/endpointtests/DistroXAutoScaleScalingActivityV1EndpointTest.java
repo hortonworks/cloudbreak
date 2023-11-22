@@ -138,14 +138,14 @@ public class DistroXAutoScaleScalingActivityV1EndpointTest {
 
         scalingActivityRepository.saveAll(List.of(scalingActivity));
 
-        when(grpcUmsClient.getUserDetails(anyString(), any())).thenReturn(user);
+        when(grpcUmsClient.getUserDetails(anyString())).thenReturn(user);
         when(grpcUmsClient.getResourceRoles(any())).thenReturn(Set.of(
                 "crn:altus:iam:us-west-1:altus:resourceRole:Owner",
                 "crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin",
                 "crn:altus:iam:us-west-1:altus:resourceRole:DatahubAdmin"));
 
-        doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any());
-        when(grpcUmsClient.checkAccountRight(anyString(), anyString(), any())).thenReturn(Boolean.TRUE);
+        doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString());
+        when(grpcUmsClient.checkAccountRight(anyString(), anyString())).thenReturn(Boolean.TRUE);
         doNothing().when(resourceAuthorizationService).authorize(eq("crn:cdp:iam:us-west-1:accid:cluster:mockuser@cloudera.com"), any(), any());
         when(clusterProxyConfigurationService.getClusterProxyUrl()).thenReturn(Optional.of("http://clusterproxy"));
     }

@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -225,6 +224,6 @@ class PasswordServiceTest {
                         .setWorkloadPasswordMaxLifetime(lifetime)
                         .build()));
 
-        when(grpcUmsClient.getAccountDetails(eq(ACCOUNT_ID), any())).thenReturn(builder.build());
+        when(grpcUmsClient.getAccountDetails(eq(ACCOUNT_ID))).thenReturn(builder.build());
     }
 }

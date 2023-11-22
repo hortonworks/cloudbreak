@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
@@ -119,9 +118,6 @@ public class FreeIpaCreationService {
     private MultiAzValidator multiAzValidator;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    @Inject
     private FreeIpaRecommendationService freeIpaRecommendationService;
 
     @Inject
@@ -192,11 +188,9 @@ public class FreeIpaCreationService {
         Future<String> ownerFuture;
         if (Crn.safeFromString(userCrn).getResourceType().equals(Crn.ResourceType.MACHINE_USER)) {
             ownerFuture = intermediateBuilderExecutor.submit(() ->
-                    umsClient.getMachineUserDetails(userCrn, Crn.fromString(userCrn).getAccountId(),
-                            regionAwareInternalCrnGeneratorFactory).getMachineUserName());
+                    umsClient.getMachineUserDetails(userCrn, Crn.fromString(userCrn).getAccountId()).getMachineUserName());
         } else {
-            ownerFuture = intermediateBuilderExecutor.submit(() -> umsClient.getUserDetails(userCrn,
-                    regionAwareInternalCrnGeneratorFactory).getEmail());
+            ownerFuture = intermediateBuilderExecutor.submit(() -> umsClient.getUserDetails(userCrn).getEmail());
         }
         return ownerFuture;
     }

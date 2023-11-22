@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
@@ -40,9 +39,6 @@ public class EfmConfigProvider extends AbstractRoleConfigProvider {
 
     @Inject
     private VirtualGroupService virtualGroupService;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
@@ -82,7 +78,7 @@ public class EfmConfigProvider extends AbstractRoleConfigProvider {
         Crn crn = Crn.safeFromString(userCrn);
         switch (crn.getResourceType()) {
             case USER:
-                return Optional.of(umsClient.getUserDetails(userCrn, regionAwareInternalCrnGeneratorFactory).getWorkloadUsername());
+                return Optional.of(umsClient.getUserDetails(userCrn).getWorkloadUsername());
             default:
                 LOGGER.warn(String.format("UserCrn %s is not of resource type USER. EFM bootstrapping requires USER creator.", userCrn));
         }

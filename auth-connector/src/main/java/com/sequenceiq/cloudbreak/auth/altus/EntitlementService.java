@@ -117,7 +117,6 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 
 @Service
 public class EntitlementService {
@@ -126,9 +125,6 @@ public class EntitlementService {
 
     @Inject
     private GrpcUmsClient umsClient;
-
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public boolean isEntitledFor(String accountId, Entitlement entitledFor) {
         return isEntitlementRegistered(accountId, entitledFor);
@@ -551,9 +547,7 @@ public class EntitlementService {
     }
 
     public List<String> getEntitlements(String accountId) {
-        Account accountDetails = umsClient.getAccountDetails(
-                accountId,
-                regionAwareInternalCrnGeneratorFactory);
+        Account accountDetails = umsClient.getAccountDetails(accountId);
         return accountDetails.getEntitlementsList()
                 .stream()
                 .map(e -> e.getEntitlementName().toUpperCase(Locale.ROOT))

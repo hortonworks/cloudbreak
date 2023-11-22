@@ -10,7 +10,6 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Event
 import com.google.common.collect.Maps;
 import com.google.protobuf.Descriptors;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
 
 @Component
@@ -18,13 +17,8 @@ public class UmsEventGenerationIdsProvider {
     @Inject
     private GrpcUmsClient grpcUmsClient;
 
-    @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
     public UmsEventGenerationIds getEventGenerationIds(String accountId) {
-        EventGenerationIds eventGenerationIds =
-                grpcUmsClient.getEventGenerationIds(accountId, regionAwareInternalCrnGeneratorFactory)
-                .getEventGenerationIds();
+        EventGenerationIds eventGenerationIds = grpcUmsClient.getEventGenerationIds(accountId).getEventGenerationIds();
 
         UmsEventGenerationIds umsEventGenerationIds = new UmsEventGenerationIds();
         Map<String, String> eventGenerationIdsMap = Maps.newHashMap();

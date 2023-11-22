@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -227,8 +226,7 @@ class EntitlementServiceTest {
 
     @Test
     void getEntitlementsTest() {
-        when(umsClient.getAccountDetails(eq(ACCOUNT_ID), any()))
-                .thenReturn(ACCOUNT_ENTITLEMENTS_FOO_BAR);
+        when(umsClient.getAccountDetails(eq(ACCOUNT_ID))).thenReturn(ACCOUNT_ENTITLEMENTS_FOO_BAR);
         assertThat(underTest.getEntitlements(ACCOUNT_ID)).containsExactly(ENTITLEMENT_FOO, ENTITLEMENT_BAR);
     }
 
@@ -239,8 +237,7 @@ class EntitlementServiceTest {
                     .map(EntitlementServiceTest::createEntitlement)
                     .forEach(builder::addEntitlements);
         }
-        when(umsClient.getAccountDetails(eq(ACCOUNT_ID), any()))
-                .thenReturn(builder.build());
+        when(umsClient.getAccountDetails(eq(ACCOUNT_ID))).thenReturn(builder.build());
     }
 
     private static Account createAccountForEntitlements(String... entitlementNames) {

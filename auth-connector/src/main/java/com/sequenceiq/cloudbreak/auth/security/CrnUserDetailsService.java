@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.auth.security.authentication.UmsAuthenticationService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
@@ -21,11 +20,8 @@ public class CrnUserDetailsService implements UserDetailsService {
 
     private final UmsAuthenticationService umsAuthenticationService;
 
-    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
-
-    public CrnUserDetailsService(GrpcUmsClient umsClient, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
-        umsAuthenticationService = new UmsAuthenticationService(umsClient, regionAwareInternalCrnGeneratorFactory);
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
+    public CrnUserDetailsService(GrpcUmsClient umsClient) {
+        umsAuthenticationService = new UmsAuthenticationService(umsClient);
     }
 
     @Override

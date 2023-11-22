@@ -170,8 +170,8 @@ public class DistroXAutoScaleClusterV1EndpointTest {
                 .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_GCP_STOP_START_SCALING").build())
                 .build();
 
-        when(grpcUmsClient.getUserDetails(eq(TEST_USER_CRN), any())).thenReturn(user);
-        when(grpcUmsClient.getAccountDetails(eq(TEST_ACCOUNT_ID), any())).thenReturn(account);
+        when(grpcUmsClient.getUserDetails(eq(TEST_USER_CRN))).thenReturn(user);
+        when(grpcUmsClient.getAccountDetails(eq(TEST_ACCOUNT_ID))).thenReturn(account);
         doNothing().when(resourceAuthorizationService).authorize(eq("crn:cdp:iam:us-west-1:accid:cluster:mockuser@cloudera.com"), any(), any());
         distroXAutoScaleClusterV1Endpoint = new AutoscaleUserCrnClientBuilder(String.format(SERVICE_ADDRESS, port))
                 .build().withCrn(TEST_USER_CRN).distroXAutoScaleClusterV1Endpoint();
@@ -187,8 +187,8 @@ public class DistroXAutoScaleClusterV1EndpointTest {
                 .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_AZURE_AUTOSCALING").build())
                 .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_GCP_AUTOSCALING").build())
                 .build();
-        when(grpcUmsClient.getUserDetails(eq(TEST_USER_CRN_2), any())).thenReturn(user2);
-        when(grpcUmsClient.getAccountDetails(eq(TEST_ACCOUNT_ID_2), any())).thenReturn(account2);
+        when(grpcUmsClient.getUserDetails(eq(TEST_USER_CRN_2))).thenReturn(user2);
+        when(grpcUmsClient.getAccountDetails(eq(TEST_ACCOUNT_ID_2))).thenReturn(account2);
         doNothing().when(resourceAuthorizationService).authorize(eq("crn:cdp:iam:us-west-1:accid3:cluster:mockuser3@cloudera.com"), any(), any());
         doNothing().when(resourceAuthorizationService).authorize(eq("crn:cdp:iam:us-west-1:accid2:cluster:mockuser2@cloudera.com"), any(), any());
         distroXAutoScaleClusterV1Endpoint2 = new AutoscaleUserCrnClientBuilder(String.format(SERVICE_ADDRESS, port))
