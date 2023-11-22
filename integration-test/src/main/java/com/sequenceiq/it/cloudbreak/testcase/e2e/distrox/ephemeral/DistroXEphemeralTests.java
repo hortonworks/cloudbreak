@@ -125,7 +125,7 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
         return testDto;
     }
 
-    @Test(dataProvider = TEST_CONTEXT, dependsOnMethods = {"testStopStartDistroXWithEphemeralTemporaryStorage"})
+    @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak, and an environment with SDX and DistroX cluster in available state",
@@ -169,7 +169,7 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
         return testDto;
     }
 
-    @Test(dataProvider = TEST_CONTEXT, dependsOnMethods = {"testEphemeralDistroXMasterRepairWithTerminatedEC2Instances"})
+    @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(given = "there is a running Cloudbreak, and an environment with SDX and DistroX cluster in available state",
             when = "upgrade called on the DistroX cluster", then = "DistroX upgrade should be successful, the cluster should be up and running")
