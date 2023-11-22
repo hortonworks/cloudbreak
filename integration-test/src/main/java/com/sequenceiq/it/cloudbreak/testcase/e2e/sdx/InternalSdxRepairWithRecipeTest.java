@@ -4,8 +4,18 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CB_CM_ADMIN_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_DB_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_SERVICE_DB_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_GATEWAY_CERT;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_IDBROKER_CERT;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_MGMT_CM_ADMIN_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_USER_KEYPAIR;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -60,11 +70,12 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
-            when = "recovery called on the IDBROKER and MASTER host group, where the EC2 instance had been stopped",
-            then = "SDX recovery should be successful, the cluster should be up and running"
+            given = "there is an environment with SDX in available state",
+            when = "secrets are getting rotated",
+                and = "recovery called on the IDBROKER and MASTER host group, where the instance had been stopped",
+            then = "rotation then recovery should be successful, the cluster should be available"
     )
-    public void testSDXMultiRepairIDBRokerAndMasterWithRecipeFile(TestContext testContext) {
+    public void testSecretRotationThenMultiRepairWithRecipeFile(TestContext testContext) {
         String sdxInternal = resourcePropertyProvider().getName();
         String cluster = resourcePropertyProvider().getName();
         String clouderaManager = resourcePropertyProvider().getName();
@@ -78,8 +89,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
         String telemetry = "telemetry";
 
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-        sdxDatabaseRequest.setCreate(false);
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
 
         String selectedImageID = getLatestPrewarmedImageId(testContext);
 
@@ -115,6 +125,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .withDatabase(sdxDatabaseRequest)
+                .withAutoTls()
                 .withStackRequest(key(cluster), key(stack))
                 .withTelemetry(telemetry)
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
@@ -128,6 +139,17 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                     }
                     return dto;
                 })
+                .when(sdxTestClient.rotateSecret(Set.of(
+                        DATALAKE_USER_KEYPAIR,
+                        DATALAKE_IDBROKER_CERT,
+                        DATALAKE_GATEWAY_CERT,
+                        DATALAKE_SALT_BOOT_SECRETS,
+                        DATALAKE_MGMT_CM_ADMIN_PASSWORD,
+                        DATALAKE_CB_CM_ADMIN_PASSWORD,
+                        DATALAKE_DATABASE_ROOT_PASSWORD,
+                        DATALAKE_CM_DB_PASSWORD,
+                        DATALAKE_CM_SERVICE_DB_PASSWORD)))
+                .awaitForFlow()
                 .then((tc, testDto, client) -> {
                     List<String> instanceIdsToStop = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                     instanceIdsToStop.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));

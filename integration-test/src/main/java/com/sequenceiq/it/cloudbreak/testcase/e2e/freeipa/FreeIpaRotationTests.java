@@ -2,11 +2,13 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 
 import static com.sequenceiq.common.model.OsType.RHEL8;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_ADMIN_PASSWORD;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_SALT_BOOT_SECRETS;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,7 +23,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -88,7 +89,7 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
                 })
 
                 .given(FreeIpaRotationTestDto.class)
-                .withSecrets(List.of(FREEIPA_ADMIN_PASSWORD.value()))
+                .withSecrets(List.of(FREEIPA_ADMIN_PASSWORD))
                 .when(freeIpaTestClient.rotateSecret())
                 .awaitForFlow()
 
@@ -128,13 +129,13 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
         String freeIpa = resourcePropertyProvider().getName();
         testContext
                 .given(freeIpa, FreeIpaTestDto.class)
-                .withTelemetry("telemetry")
-                .withOsType(RHEL8.getOs())
-                .withFreeIpaHa(1, 2)
+                    .withTelemetry("telemetry")
+                    .withOsType(RHEL8.getOs())
+                    .withFreeIpaHa(1, 2)
                 .when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .given(FreeIpaRotationTestDto.class)
-                .withSecrets(List.of(FreeIpaSecretType.FREEIPA_SALT_BOOT_SECRETS.value()))
+                    .withSecrets(List.of(FREEIPA_SALT_BOOT_SECRETS))
                 .when(freeIpaTestClient.rotateSecret())
                 .awaitForFlow()
                 .validate();
@@ -144,14 +145,14 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
         Map<String, Pair<Integer, String>> sshCommandResponse = sshJClientActions.executeSshCommandOnHost(instanceMetaDataResponses,
                 GET_PASSWORD_LAST_CHANGED_COMMAND, false);
         return sshCommandResponse.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, sshCommandResult -> sshCommandResult.getValue().getValue()));
+                .collect(Collectors.toMap(Entry::getKey, sshCommandResult -> sshCommandResult.getValue().getValue()));
     }
 
     private Map<String, String> getPasswordFromPillar(Set<InstanceMetaDataResponse> instanceMetaDataResponses) {
         Map<String, Pair<Integer, String>> sshCommandResponse = sshJClientActions.executeSshCommandOnHost(instanceMetaDataResponses,
                 GET_PASSWORD_FROM_PILLAR_COMMAND, false);
         return sshCommandResponse.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, sshCommandResult -> sshCommandResult.getValue().getValue()));
+                .collect(Collectors.toMap(Entry::getKey, sshCommandResult -> sshCommandResult.getValue().getValue()));
     }
 
     private void checkDirectoryManagerPassword(Set<InstanceMetaDataResponse> instanceMetaDataResponses, Map<String, String> passwordsFromPillar) {
@@ -165,7 +166,7 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
         }
     }
 
-    private Set<InstanceMetaDataResponse> getInstanceMetaDataResponses(String environmentCrn, FreeIpaClient client) {
+    private Set<InstanceMetaDataResponse> getInstanceMetaDataResponses(String environmentCrn, FreeIpaClient<?> client) {
         DescribeFreeIpaResponse describeFreeIpaResponse = client.getDefaultClient().getFreeIpaV1Endpoint().describe(environmentCrn);
         return describeFreeIpaResponse.getInstanceGroups().stream()
                 .map(InstanceGroupResponse::getMetaData)

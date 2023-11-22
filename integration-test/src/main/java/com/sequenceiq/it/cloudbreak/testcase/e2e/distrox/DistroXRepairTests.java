@@ -1,10 +1,19 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CM_DB_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CM_SERVICES_DB_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_MGMT_CM_ADMIN_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.GATEWAY_CERT;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.IDBROKER_CERT;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_BOOT_SECRETS;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.USER_KEYPAIR;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -13,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.assertion.distrox.AwsAvailabilityZoneAssertion;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -35,30 +45,56 @@ public class DistroXRepairTests extends AbstractE2ETest {
 
     @Override
     protected void setupTest(TestContext testContext) {
+        testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
-        createDefaultDatalake(testContext);
+        createDefaultDatahubWithAutoTlsAndExternalDb(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running Cloudbreak, and an environment with SDX and DistroX cluster in available state",
-            when = "recovery called on the MASTER host group of DistroX cluster, where the EC2 instance had been terminated",
-            then = "DistroX recovery should be successful, the cluster should be up and running"
+            given = "there is an environment and DistroX with Auto TLS in available state",
+            when = "in case of AWS provider secrets are getting rotated before " +
+                    "recovery called on the MASTER host group, where the instance had been " +
+                    "terminated",
+            then = "all the actions (secret rotatioin then recovery for AWS OR just recovery) should be successful, " +
+                    "the cluster should be available"
     )
-    public void testDistroXMasterRepairWithTerminatedEC2Instances(TestContext testContext) {
-        String distrox = resourcePropertyProvider().getName();
+    public void testMasterRepairWithTerminatedInstances(TestContext testContext) {
+        String cloudProvider = commonCloudProperties().getCloudProvider();
+
+        if (CloudPlatform.AWS.equalsIgnoreCase(cloudProvider)) {
+            secretRotation(testContext);
+            masterRepairValidate(testContext);
+        } else {
+            masterRepairValidate(testContext);
+        }
+    }
+
+    private void secretRotation(TestContext testContext) {
+        testContext
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.rotateSecret(Set.of(
+                        USER_KEYPAIR,
+                        IDBROKER_CERT,
+                        GATEWAY_CERT,
+                        SALT_BOOT_SECRETS,
+                        CLUSTER_MGMT_CM_ADMIN_PASSWORD,
+                        CLUSTER_CB_CM_ADMIN_PASSWORD,
+                        CLUSTER_CM_DB_PASSWORD,
+                        CLUSTER_CM_SERVICES_DB_PASSWORD,
+                        DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD)))
+                .awaitForFlow();
+    }
+
+    private void masterRepairValidate(TestContext testContext) {
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();
 
         testContext
-                .given(distrox, DistroXTestDto.class)
-                .withPreferredSubnetsForInstanceNetworkIfMultiAzEnabledOrJustFirst()
-                .when(distroXTestClient.create(), key(distrox))
-                .await(STACK_AVAILABLE)
-                .awaitForHealthyInstances()
+                .given(DistroXTestDto.class)
                 .then(new AwsAvailabilityZoneAssertion())
                 .then((tc, testDto, client) -> {
                     CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
@@ -68,8 +104,8 @@ public class DistroXRepairTests extends AbstractE2ETest {
                     return testDto;
                 })
                 .awaitForHostGroup(MASTER.getName(), InstanceStatus.DELETED_ON_PROVIDER_SIDE)
-                .when(distroXTestClient.repair(MASTER), key(distrox))
-                .await(STACK_AVAILABLE, key(distrox))
+                .when(distroXTestClient.repair(MASTER))
+                .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
                 .then(new AwsAvailabilityZoneAssertion())
                 .then((tc, testDto, client) -> {
