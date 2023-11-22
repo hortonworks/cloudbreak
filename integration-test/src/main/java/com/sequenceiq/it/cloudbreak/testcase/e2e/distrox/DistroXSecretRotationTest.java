@@ -14,6 +14,8 @@ import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CB_CM_ADMI
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_INTERMEDIATE_CA_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_SERVICE_SHARED_DB;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_GATEWAY_CERT;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_IDBROKER_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_MGMT_CM_ADMIN_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_USER_KEYPAIR;
@@ -92,7 +94,9 @@ public class DistroXSecretRotationTest extends AbstractE2ETest {
                         DATALAKE_SALT_BOOT_SECRETS,
                         DATALAKE_MGMT_CM_ADMIN_PASSWORD,
                         DATALAKE_CB_CM_ADMIN_PASSWORD,
-                        DATALAKE_DATABASE_ROOT_PASSWORD)))
+                        DATALAKE_DATABASE_ROOT_PASSWORD,
+                        DATALAKE_IDBROKER_CERT,
+                        DATALAKE_GATEWAY_CERT)))
                 .awaitForFlow()
                 .given(DistroXTestDto.class)
                 .when(distroXTestClient.rotateSecret(Set.of(
