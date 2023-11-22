@@ -124,7 +124,8 @@ public class TestClients {
     }
 
     private SdxClient createSdxClient(CloudbreakUser cloudbreakUser) {
-        return new SdxClient(cloudbreakUser, serverProperties.getSdxAddress());
+        return new SdxClient(cloudbreakUser, serverProperties.getSdxAddress(), serverProperties.getSdxInternalAddress(),
+                regionAwareInternalCrnGeneratorFactory.iam());
     }
 
     private UmsClient createUmsClient() {

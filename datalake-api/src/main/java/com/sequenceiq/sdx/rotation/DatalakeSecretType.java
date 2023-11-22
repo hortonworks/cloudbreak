@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CLOUDB
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
 import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.CM_SERVICE_SHARED_DB;
 import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.DEMO_MULTI_SECRET;
-import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.FREEIPA_CA_CERT;
+import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.INTERNAL;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.POST_FLOW;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_UPDATE;
 
@@ -28,9 +28,9 @@ public enum DatalakeSecretType implements SecretType {
     DATALAKE_GATEWAY_CERT(List.of(CLOUDBREAK_ROTATE_POLLING)),
     DATALAKE_CM_SERVICE_DB_PASSWORD(List.of(CLOUDBREAK_ROTATE_POLLING)),
     DATALAKE_CM_SERVICE_SHARED_DB(List.of(CLOUDBREAK_ROTATE_POLLING), CM_SERVICE_SHARED_DB),
-    DATALAKE_DEMO_SECRET(List.of(CLOUDBREAK_ROTATE_POLLING), DEMO_MULTI_SECRET, Set.of(SKIP_SALT_UPDATE)),
+    DATALAKE_DEMO_SECRET(List.of(CLOUDBREAK_ROTATE_POLLING), DEMO_MULTI_SECRET, Set.of(SKIP_SALT_UPDATE, INTERNAL)),
     DATALAKE_SALT_BOOT_SECRETS(List.of(CLOUDBREAK_ROTATE_POLLING)),
-    DATALAKE_CM_INTERMEDIATE_CA_CERT(List.of(CLOUDBREAK_ROTATE_POLLING), FREEIPA_CA_CERT, Set.of(POST_FLOW));
+    DATALAKE_CM_INTERMEDIATE_CA_CERT(List.of(CLOUDBREAK_ROTATE_POLLING), Set.of(POST_FLOW));
 
     private final List<SecretRotationStep> steps;
 

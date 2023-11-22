@@ -16,7 +16,6 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.USER_D
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.CM_SERVICE_SHARED_DB;
 import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.DEMO_MULTI_SECRET;
-import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.FREEIPA_CA_CERT;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.INTERNAL;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.POST_FLOW;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_UPDATE;
@@ -37,12 +36,12 @@ public enum CloudbreakSecretType implements SecretType {
     CLUSTER_CM_SERVICES_DB_PASSWORD(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE)),
     SALT_BOOT_SECRETS(List.of(VAULT, CUSTOM_JOB, SALTBOOT_CONFIG, USER_DATA)),
     DATAHUB_CM_SERVICE_SHARED_DB(List.of(SALT_PILLAR, CM_SERVICE), CM_SERVICE_SHARED_DB),
-    DATAHUB_DEMO_SECRET(List.of(CUSTOM_JOB), DEMO_MULTI_SECRET, Set.of(SKIP_SALT_UPDATE)),
+    DATAHUB_DEMO_SECRET(List.of(CUSTOM_JOB), DEMO_MULTI_SECRET, Set.of(SKIP_SALT_UPDATE, INTERNAL)),
     DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD(List.of(SALT_PILLAR), Set.of(INTERNAL)),
     INTERNAL_DATALAKE_CM_SERVICE_SHARED_DB(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE), Set.of(INTERNAL)),
     INTERNAL_DATALAKE_DEMO_SECRET(List.of(CUSTOM_JOB), Set.of(SKIP_SALT_UPDATE, INTERNAL)),
     INTERNAL_DATALAKE_CM_INTERMEDIATE_CA_CERT(List.of(SALT_STATE_APPLY, CUSTOM_JOB), Set.of(INTERNAL, POST_FLOW)),
-    DATAHUB_CM_INTERMEDIATE_CA_CERT(List.of(SALT_STATE_APPLY, CUSTOM_JOB), FREEIPA_CA_CERT, Set.of(POST_FLOW));
+    DATAHUB_CM_INTERMEDIATE_CA_CERT(List.of(SALT_STATE_APPLY, CUSTOM_JOB), Set.of(POST_FLOW));
 
     private final List<SecretRotationStep> steps;
 

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.lenient;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.UUID;
 
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
@@ -19,12 +20,17 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretTypes;
 import com.sequenceiq.cloudbreak.rotation.common.TestSecretType;
 
 @ExtendWith(MockitoExtension.class)
 public class SecretTypesValidatorTest {
+
+    private static final String USER_CRN = "crn:altus:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
+
+    private static final String INTERNAL_ACTOR_CRN = "crn:cdp:iam:us-west-1:altus:user:__internal__actor__";
 
     @Captor
     private ArgumentCaptor<String> errorMessageCaptor;
@@ -42,33 +48,34 @@ public class SecretTypesValidatorTest {
 
     @Test
     void testValidateIfInvalidType() {
-        assertFalse(validator(false).isValid(List.of("INVALID"), context));
+        assertFalse(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> validator().isValid(List.of("INVALID"), context)));
         assertEquals("Invalid secret type, cannot map secrets [INVALID].", errorMessageCaptor.getValue());
     }
 
     @Test
     void testValidateIfInternalNotAllowed() {
-        assertFalse(validator(false).isValid(List.of("TEST", "TEST_3"), context));
+        assertFalse(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> validator().isValid(List.of("TEST", "TEST_3"), context)));
+        assertEquals("Internal secret types can be rotated only by using internal actor!", errorMessageCaptor.getValue());
     }
 
     @Test
     void testValidateIfMultiSecretProvided() {
-        assertFalse(validator(false).isValid(List.of("TEST_2", "TEST_4"), context));
+        assertFalse(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> validator().isValid(List.of("TEST_2", "TEST_4"), context)));
         assertEquals("Request should contain maximum 1 secret type which affects multiple resources!", errorMessageCaptor.getValue());
     }
 
     @Test
     void testValidateIfDuplicated() {
-        assertFalse(validator(false).isValid(List.of("TEST_2", "TEST_2"), context));
+        assertFalse(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> validator().isValid(List.of("TEST_2", "TEST_2"), context)));
         assertEquals("There is at least one duplication in the request!", errorMessageCaptor.getValue());
     }
 
     @Test
     void testValidate() {
-        assertTrue(validator(true).isValid(List.of("TEST_3", "TEST_2"), context));
+        assertTrue(ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> validator().isValid(List.of("TEST_3", "TEST_2"), context)));
     }
 
-    private SecretTypesValidator validator(boolean internalAllowed) {
+    private SecretTypesValidator validator() {
         SecretTypesValidator validator = new SecretTypesValidator();
         validator.initialize(new ValidSecretTypes() {
 
@@ -80,11 +87,6 @@ public class SecretTypesValidatorTest {
             @Override
             public Class<? extends SecretType>[] allowedTypes() {
                 return new Class[] { TestSecretType.class };
-            }
-
-            @Override
-            public boolean internalAllowed() {
-                return internalAllowed;
             }
 
             @Override

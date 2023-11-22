@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotat
 @ExtendWith(MockitoExtension.class)
 public class SecretRotationExecutionDecisionProviderTest {
 
-    private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:acc1:datalake:cluster1";
+    private static final String ENV_CRN = "crn:cdp:environments:us-west-1:tenant:environment:envCrn1";
 
     private static final String DATAHUB_CRN = "crn:cdp:datahub:us-west-1:tenant:cluster:resource1";
 
@@ -70,7 +70,7 @@ public class SecretRotationExecutionDecisionProviderTest {
         MultiClusterRotationResourceType multiClusterRotationResourceType = MultiClusterRotationResourceType.INITIATED_PARENT;
         lenient().when(trackingService.getMultiRotationEntryForMetadata(any(), eq(multiClusterRotationResourceType))).thenReturn(Optional.empty());
         RotationMetadata metadata = new RotationMetadata(TEST_4, currentExecution, requestExecution,
-                DATALAKE_CRN, Optional.of(DEMO_MULTI_SECRET));
+                ENV_CRN, Optional.of(DEMO_MULTI_SECRET));
         assertEquals(result, underTest.executionRequired(metadata));
     }
 
@@ -87,7 +87,7 @@ public class SecretRotationExecutionDecisionProviderTest {
                 Optional.of(interServiceMultiClusterRotationService), true);
         lenient().when(interServiceMultiClusterRotationService.checkOngoingChildrenMultiSecretRotations(any(), any())).thenReturn(Boolean.FALSE);
         RotationMetadata met = new RotationMetadata(TEST_4, currentExecution, requestExecution,
-                DATALAKE_CRN, Optional.of(DEMO_MULTI_SECRET));
+                ENV_CRN, Optional.of(DEMO_MULTI_SECRET));
         assertEquals(result, underTest.executionRequired(met));
     }
 

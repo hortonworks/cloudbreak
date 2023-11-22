@@ -45,7 +45,7 @@ public class DistroXV1RotationController implements DistroXV1RotationEndpoint {
 
     @Override
     @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_DH_SECRETS)
-    public FlowIdentifier rotateSecrets(@RequestObject DistroXSecretRotationRequest request) {
+    public FlowIdentifier rotateSecrets(@TenantAwareParam @RequestObject DistroXSecretRotationRequest request) {
         return stackRotationService.rotateSecrets(request.getCrn(), request.getSecrets(), request.getExecutionType());
     }
 

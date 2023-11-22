@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.service.rotation;
 
-import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.FREEIPA_CA_CERT;
+import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.DEMO_MULTI_SECRET;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -53,7 +53,7 @@ public class FreeipaInterServiceMultiRotationServiceTest {
         when(distroXV1RotationEndpoint.checkOngoingChildrenMultiSecretRotationsByParent(any(), any(), any())).thenReturn(Boolean.FALSE);
         when(sdxRotationEndpoint.checkOngoingMultiSecretChildrenRotationsByParent(any(), any(), any())).thenReturn(Boolean.FALSE);
 
-        assertFalse(underTest.checkOngoingChildrenMultiSecretRotations(ENV_CRN, FREEIPA_CA_CERT));
+        assertFalse(underTest.checkOngoingChildrenMultiSecretRotations(ENV_CRN, DEMO_MULTI_SECRET));
 
         verify(sdxRotationEndpoint).checkOngoingMultiSecretChildrenRotationsByParent(eq(ENV_CRN), any(), any());
         verify(distroXV1RotationEndpoint).checkOngoingChildrenMultiSecretRotationsByParent(eq(ENV_CRN), any(), any());
@@ -64,7 +64,7 @@ public class FreeipaInterServiceMultiRotationServiceTest {
         when(distroXV1RotationEndpoint.checkOngoingChildrenMultiSecretRotationsByParent(any(), any(), any())).thenReturn(Boolean.FALSE);
         when(sdxRotationEndpoint.checkOngoingMultiSecretChildrenRotationsByParent(any(), any(), any())).thenReturn(Boolean.TRUE);
 
-        assertTrue(underTest.checkOngoingChildrenMultiSecretRotations(ENV_CRN, FREEIPA_CA_CERT));
+        assertTrue(underTest.checkOngoingChildrenMultiSecretRotations(ENV_CRN, DEMO_MULTI_SECRET));
 
         verify(sdxRotationEndpoint).checkOngoingMultiSecretChildrenRotationsByParent(eq(ENV_CRN), any(), any());
         verify(distroXV1RotationEndpoint).checkOngoingChildrenMultiSecretRotationsByParent(eq(ENV_CRN), any(), any());
@@ -75,7 +75,7 @@ public class FreeipaInterServiceMultiRotationServiceTest {
         doNothing().when(distroXV1RotationEndpoint).markMultiClusterChildrenResourcesByParent(any(), any());
         doNothing().when(sdxRotationEndpoint).markMultiClusterChildrenResourcesByParent(any(), any());
 
-        underTest.markChildren(ENV_CRN, FREEIPA_CA_CERT);
+        underTest.markChildren(ENV_CRN, DEMO_MULTI_SECRET);
 
         verify(sdxRotationEndpoint).markMultiClusterChildrenResourcesByParent(any(), any());
         verify(distroXV1RotationEndpoint).markMultiClusterChildrenResourcesByParent(any(), any());

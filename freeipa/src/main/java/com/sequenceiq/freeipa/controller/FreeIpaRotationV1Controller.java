@@ -52,8 +52,8 @@ public class FreeIpaRotationV1Controller implements FreeIpaRotationV1Endpoint {
     public FlowIdentifier rotateSecretsByCrn(
             @ValidCrn(resource = ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn,
             @Valid @NotNull FreeIpaSecretRotationRequest request) {
-        String accountId = Crn.safeFromString(environmentCrn).getAccountId();
-        return freeIpaSecretRotationService.rotateSecretsByCrn(accountId, environmentCrn, request);
+        String accountIdFrmCrn = Crn.safeFromString(environmentCrn).getAccountId();
+        return freeIpaSecretRotationService.rotateSecretsByCrn(accountIdFrmCrn, environmentCrn, request);
     }
 
     @Override

@@ -17,6 +17,7 @@ dependencies {
 
   implementation    group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey', version: springBootVersion
   implementation    group: 'org.springframework',       name: 'spring-aspects',             version: springFrameworkVersion
+  implementation    group: 'commons-beanutils',         name: 'commons-beanutils',          version: commonsBeanutilsVersion
 
   testImplementation  group: 'org.mockito',               name: 'mockito-core',               version: mockitoVersion
   testImplementation  group: 'org.assertj',               name: 'assertj-core',               version: assertjVersion

@@ -4,6 +4,8 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretType;
@@ -13,19 +15,17 @@ public class SecretTypeValidator implements ConstraintValidator<ValidSecretType,
 
     private Class<? extends SecretType>[] allowedTypes;
 
-    private boolean internalAllowed;
-
     @Override
     public void initialize(ValidSecretType constraintAnnotation) {
         allowedTypes = constraintAnnotation.allowedTypes();
-        internalAllowed = constraintAnnotation.internalAllowed();
     }
 
     @Override
     public boolean isValid(String secret, ConstraintValidatorContext context) {
         try {
             SecretType secretType = SecretTypeConverter.mapSecretType(secret, Sets.newHashSet(allowedTypes));
-            if (!internalAllowed && secretType.internal()) {
+            if (!RegionAwareInternalCrnGeneratorUtil.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn()) && secretType.internal()) {
+                ValidatorUtil.addConstraintViolation(context, "Internal secret types can be rotated only by using internal actor!");
                 return false;
             }
         } catch (Exception e) {

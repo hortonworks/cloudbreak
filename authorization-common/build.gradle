@@ -28,7 +28,7 @@ dependencies {
 
   implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
-  implementation group: 'commons-beanutils',             name: 'commons-beanutils',              version: '1.9.4'
+  implementation group: 'commons-beanutils',             name: 'commons-beanutils',              version: commonsBeanutilsVersion
 
 
   testImplementation project(path: ':common', configuration: 'tests')

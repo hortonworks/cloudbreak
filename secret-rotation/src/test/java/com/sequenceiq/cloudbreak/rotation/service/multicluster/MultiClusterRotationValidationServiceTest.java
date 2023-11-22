@@ -30,13 +30,9 @@ import com.sequenceiq.cloudbreak.rotation.entity.multicluster.MultiClusterRotati
 @ExtendWith(MockitoExtension.class)
 public class MultiClusterRotationValidationServiceTest {
 
-    private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:acc1:datalake:cluster1";
+    private static final String ENV_CRN = "crn:cdp:environments:us-west-1:tenant:environment:envCrn1";
 
     private static final String DATAHUB_CRN = "crn:cdp:datahub:us-west-1:tenant:cluster:resource1";
-
-    private static final String DATALAKE_CRN_2 = "crn:cdp:datalake:us-west-1:acc1:datalake:cluster2";
-
-    private static final String DATAHUB_CRN_2 = "crn:cdp:datahub:us-west-1:tenant:cluster:resource2";
 
     @Mock
     private RotationContextProvider parentContextProvider;
@@ -62,7 +58,7 @@ public class MultiClusterRotationValidationServiceTest {
     void testPrepareParent() {
         when(trackingService.getMultiRotationEntriesForResource(any(), any())).thenReturn(Set.of());
 
-        underTest.validateMultiRotationRequest(DATALAKE_CRN, TEST_2);
+        underTest.validateMultiRotationRequest(ENV_CRN, TEST_2);
 
         verify(trackingService).getMultiRotationEntriesForResource(any(), any());
         verifyNoInteractions(childContextProvider);
@@ -71,14 +67,14 @@ public class MultiClusterRotationValidationServiceTest {
     @Test
     void testPrepareParentIfChildRotationStillNeeded() throws IllegalAccessException {
         when(trackingService.getMultiRotationEntriesForResource(any(), any())).thenReturn(
-                Set.of(new MultiClusterRotationResource(DATALAKE_CRN, MultiSecretType.DEMO_MULTI_SECRET, MultiClusterRotationResourceType.INITIATED_PARENT)));
+                Set.of(new MultiClusterRotationResource(ENV_CRN, MultiSecretType.DEMO_MULTI_SECRET, MultiClusterRotationResourceType.INITIATED_PARENT)));
         InterServiceMultiClusterRotationService interServiceMultiClusterRotationService =
                 mock(InterServiceMultiClusterRotationService.class);
         FieldUtils.writeField(underTest, "interServiceMultiClusterRotationTrackingService",
                 Optional.of(interServiceMultiClusterRotationService), true);
         when(interServiceMultiClusterRotationService.checkOngoingChildrenMultiSecretRotations(any(), any())).thenReturn(Boolean.TRUE);
 
-        assertThrows(BadRequestException.class, () -> underTest.validateMultiRotationRequest(DATALAKE_CRN, TEST_2));
+        assertThrows(BadRequestException.class, () -> underTest.validateMultiRotationRequest(ENV_CRN, TEST_2));
 
         verify(trackingService).getMultiRotationEntriesForResource(any(), any());
         verifyNoInteractions(childContextProvider);

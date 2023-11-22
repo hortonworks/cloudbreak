@@ -45,6 +45,7 @@ services:
       - CLOUDBREAK_URL=cloudbreak:8080
       - ENVIRONMENT_URL=environment:8088
       - FREEIPA_URL=freeipa:8080
+      - SDX_URL=datalake:8080
       - SPRING_CONFIG_LOCATION=classpath:/application.yml,/it/it-application.yml
       - INTEGRATIONTEST_SUITEFILES
       - INTEGRATIONTEST_AZURERMCREDENTIAL_ACCESSKEY

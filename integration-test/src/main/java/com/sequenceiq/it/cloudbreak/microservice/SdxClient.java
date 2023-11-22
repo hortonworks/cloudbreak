@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
@@ -20,19 +21,27 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeWaitObjec
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.cloudbreak.CloudbreakInstanceWaitObject;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.client.SdxInternalCrnClient;
 import com.sequenceiq.sdx.client.SdxServiceApiKeyClient;
 import com.sequenceiq.sdx.client.SdxServiceApiKeyEndpoints;
+import com.sequenceiq.sdx.client.SdxServiceCrnEndpoints;
+import com.sequenceiq.sdx.client.SdxServiceUserCrnClient;
+import com.sequenceiq.sdx.client.SdxServiceUserCrnClientBuilder;
 
-public class SdxClient extends MicroserviceClient<SdxServiceApiKeyEndpoints, Void, SdxClusterStatusResponse, DatalakeWaitObject> {
+public class SdxClient extends MicroserviceClient<SdxServiceApiKeyEndpoints, SdxServiceCrnEndpoints, SdxClusterStatusResponse, DatalakeWaitObject> {
 
     private SdxServiceApiKeyEndpoints sdxClient;
 
-    public SdxClient(CloudbreakUser cloudbreakUser, String sdxAddress) {
+    private SdxInternalCrnClient sdxInternalClient;
+
+    public SdxClient(CloudbreakUser cloudbreakUser, String sdxAddress, String sdxInternalAddress,
+            RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
         setActing(cloudbreakUser);
         sdxClient = new SdxServiceApiKeyClient(
                 sdxAddress,
                 new ConfigKey(false, true, true, TIMEOUT))
                 .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
+        sdxInternalClient = createInternalSdxClient(sdxInternalAddress, regionAwareInternalCrnGenerator);
     }
 
     @Override
@@ -49,6 +58,22 @@ public class SdxClient extends MicroserviceClient<SdxServiceApiKeyEndpoints, Voi
     @Override
     public SdxServiceApiKeyEndpoints getDefaultClient() {
         return sdxClient;
+    }
+
+    @Override
+    public SdxServiceCrnEndpoints getInternalClient(TestContext testContext) {
+        checkIfInternalClientAllowed(testContext);
+        return sdxInternalClient.withInternalCrn();
+    }
+
+    public static synchronized SdxInternalCrnClient createInternalSdxClient(String serverRoot,
+            RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
+        SdxServiceUserCrnClient userCrnClient = new SdxServiceUserCrnClientBuilder(serverRoot)
+                .withCertificateValidation(false)
+                .withIgnorePreValidation(true)
+                .withDebug(true)
+                .build();
+        return new SdxInternalCrnClient(userCrnClient, regionAwareInternalCrnGenerator);
     }
 
     @Override

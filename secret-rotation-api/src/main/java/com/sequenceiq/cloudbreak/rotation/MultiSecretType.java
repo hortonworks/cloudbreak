@@ -11,8 +11,7 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 public enum MultiSecretType implements SerializableRotationEnum {
 
     CM_SERVICE_SHARED_DB(DATALAKE, Set.of(DATAHUB)),
-    DEMO_MULTI_SECRET(DATALAKE, Set.of(DATAHUB)),
-    FREEIPA_CA_CERT(ENVIRONMENT, Set.of(DATALAKE, DATAHUB));
+    DEMO_MULTI_SECRET(ENVIRONMENT, Set.of(DATALAKE, DATAHUB));
 
     private final CrnResourceDescriptor parentCrnDescriptor;
 

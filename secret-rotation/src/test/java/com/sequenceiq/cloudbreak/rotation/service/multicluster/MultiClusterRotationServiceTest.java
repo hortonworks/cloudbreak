@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.rotation.service.RotationMetadata;
 @ExtendWith(MockitoExtension.class)
 public class MultiClusterRotationServiceTest {
 
-    private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:acc1:datalake:cluster1";
+    private static final String ENV_CRN = "crn:cdp:environments:us-west-1:tenant:environment:envCrn1";
 
     private static final String DATAHUB_CRN = "crn:cdp:datahub:us-west-1:tenant:cluster:resource1";
 
@@ -47,7 +47,7 @@ public class MultiClusterRotationServiceTest {
         doNothing().when(interServiceMultiClusterRotationService).markChildren(any(), any());
 
         underTest.updateMultiRotationEntriesAfterRotate(
-                new RotationMetadata(TestSecretType.TEST_2, null, null, DATALAKE_CRN, Optional.of(DEMO_MULTI_SECRET)));
+                new RotationMetadata(TestSecretType.TEST_2, null, null, ENV_CRN, Optional.of(DEMO_MULTI_SECRET)));
 
         verify(repository).save(any());
         verify(interServiceMultiClusterRotationService).markChildren(any(), any());
@@ -56,9 +56,9 @@ public class MultiClusterRotationServiceTest {
     @Test
     void testUpdateResourcesIfParentSecondPhase() {
         when(repository.findByResourceCrnAndSecretTypeAndType(any(), any(), any())).thenReturn(Optional.of(
-                new MultiClusterRotationResource(DATALAKE_CRN, DEMO_MULTI_SECRET, MultiClusterRotationResourceType.INITIATED_PARENT)));
+                new MultiClusterRotationResource(ENV_CRN, DEMO_MULTI_SECRET, MultiClusterRotationResourceType.INITIATED_PARENT)));
         underTest.updateMultiRotationEntriesAfterFinalize(
-                new RotationMetadata(TestSecretType.TEST_2, null, null, DATALAKE_CRN, Optional.of(DEMO_MULTI_SECRET)));
+                new RotationMetadata(TestSecretType.TEST_2, null, null, ENV_CRN, Optional.of(DEMO_MULTI_SECRET)));
 
         verify(repository).delete(any());
     }
@@ -75,7 +75,7 @@ public class MultiClusterRotationServiceTest {
 
     @Test
     void testMarkChildren() {
-        underTest.markChildrenMultiRotationEntriesLocally(Set.of(DATAHUB_CRN, DATALAKE_CRN), DEMO_MULTI_SECRET.value());
+        underTest.markChildrenMultiRotationEntriesLocally(Set.of(DATAHUB_CRN, ENV_CRN), DEMO_MULTI_SECRET.value());
 
         verify(repository, times(2)).save(any());
     }

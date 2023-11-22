@@ -21,8 +21,6 @@ public @interface ValidSecretType {
 
     Class<? extends SecretType>[] allowedTypes();
 
-    boolean internalAllowed() default true;
-
     String message() default "Only valid secret rotation type is allowed!";
 
     Class<?>[] groups() default {};

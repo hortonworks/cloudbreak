@@ -32,6 +32,8 @@ public class ServerProperties {
 
     private static final int DEFAULT_FREEIPA_PORT = 8090;
 
+    private static final int DEFAULT_SDX_PORT = 8086;
+
     @Value("${cloudbreak.url:localhost:" + DEFAULT_CLOUDBREAK_PORT + "}")
     private String cloudbreakUrl;
 
@@ -67,6 +69,9 @@ public class ServerProperties {
 
     @Value("${integrationtest.sdx.server}")
     private String sdxServer;
+
+    @Value("${sdx.url:localhost:" + DEFAULT_SDX_PORT + "}")
+    private String sdxUrl;
 
     @Value("${sdx.server.contextPath:/dl}")
     private String sdxRootContextPath;
@@ -138,6 +143,10 @@ public class ServerProperties {
 
     public String getSdxAddress() {
         return sdxServer + sdxRootContextPath;
+    }
+
+    public String getSdxInternalAddress() {
+        return "http://" + sdxUrl + sdxRootContextPath;
     }
 
     public String getUmsHost() {

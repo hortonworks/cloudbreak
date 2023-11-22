@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 
 import java.lang.annotation.Annotation;
+import java.util.UUID;
 
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
@@ -18,12 +19,17 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretType;
 import com.sequenceiq.cloudbreak.rotation.common.TestSecretType;
 
 @ExtendWith(MockitoExtension.class)
 public class SecretTypeValidatorTest {
+
+    private static final String USER_CRN = "crn:altus:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
+
+    private static final String INTERNAL_ACTOR_CRN = "crn:cdp:iam:us-west-1:altus:user:__internal__actor__";
 
     @Captor
     private ArgumentCaptor<String> errorMessageCaptor;
@@ -41,21 +47,22 @@ public class SecretTypeValidatorTest {
 
     @Test
     void testValidateIfInvalidType() {
-        assertFalse(validator(false).isValid("INVALID", context));
+        assertFalse(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> validator().isValid("INVALID", context)));
         assertEquals("Invalid secret type, cannot map secret INVALID.", errorMessageCaptor.getValue());
     }
 
     @Test
     void testValidateIfInternalNotAllowed() {
-        assertFalse(validator(false).isValid("TEST_3", context));
+        assertFalse(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> validator().isValid("TEST_3", context)));
+        assertEquals("Internal secret types can be rotated only by using internal actor!", errorMessageCaptor.getValue());
     }
 
     @Test
     void testValidate() {
-        assertTrue(validator(true).isValid("TEST_3", context));
+        assertTrue(ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> validator().isValid("TEST_3", context)));
     }
 
-    private SecretTypeValidator validator(boolean internalAllowed) {
+    private SecretTypeValidator validator() {
         SecretTypeValidator validator = new SecretTypeValidator();
         validator.initialize(new ValidSecretType() {
 
@@ -67,11 +74,6 @@ public class SecretTypeValidatorTest {
             @Override
             public Class<? extends SecretType>[] allowedTypes() {
                 return new Class[] { TestSecretType.class };
-            }
-
-            @Override
-            public boolean internalAllowed() {
-                return internalAllowed;
             }
 
             @Override
