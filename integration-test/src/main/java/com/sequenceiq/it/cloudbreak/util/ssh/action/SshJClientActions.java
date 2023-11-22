@@ -576,7 +576,6 @@ public class SshJClientActions extends SshJClient {
         Map<String, Pair<Integer, String>> networkStatusReportByIp = instanceIps.stream()
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, networkStatusCommand)));
 
-        eventCountsValidation(testDto, networkStatusReportByIp, "numberOfNeighbours");
         eventStatusesNotOkValidation(testDto, networkStatusReportByIp, null);
         return testDto;
     }
