@@ -360,7 +360,8 @@ public class GcpPlatformResources implements PlatformResources {
         String defaultRegion = gcpZoneParameterDefault;
         RegionList regionList = compute.regions().list(projectId).execute();
         for (com.google.api.services.compute.model.Region gcpRegion : regionList.getItems()) {
-            if (region == null || Strings.isNullOrEmpty(region.value()) || gcpRegion.getName().equals(region.value())) {
+            Coordinate coordinate = regionCoordinates.get(region(gcpRegion.getName()));
+            if (coordinate != null && (region == null || Strings.isNullOrEmpty(region.value()) || gcpRegion.getName().equals(region.value()))) {
                 List<AvailabilityZone> availabilityZones = new ArrayList<>();
                 for (String s : gcpRegion.getZones()) {
                     String[] split = s.split("/");
