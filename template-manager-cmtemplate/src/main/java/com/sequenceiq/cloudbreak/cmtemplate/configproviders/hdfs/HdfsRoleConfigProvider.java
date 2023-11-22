@@ -77,7 +77,7 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
                 }
                 return List.of();
             case HdfsRoles.GATEWAY:
-                if (isWireEncryptionEnabled(source) && isNamenodeHA(source)) {
+                if (isNamenodeHA(source) && StackType.DATALAKE.equals(source.getStackType())) {
                     //CHECKSTYLE:OFF
                     return List.of(config(
                             HDFS_CLIENT_CONFIG_SAFETY_VALVE,
