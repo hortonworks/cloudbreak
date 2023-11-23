@@ -50,31 +50,20 @@ public class DelayInterceptor implements HandlerInterceptor {
             if (errorRate != null && errorRate > 0) {
                 requestCountMap.put(uriPattern, requestCountMap.getOrDefault(uriPattern, 0) + 1);
                 if (requestCountMap.get(uriPattern) % (HUNDRED / errorRate) == 0) {
+                    LOGGER.error("Processing failed due to {} percent failure rate configured for {}", errorRate, uri);
                     throw new BadRequestException(String.format("Processing failed due to %d percent failure rate configured", errorRate));
                 }
             }
-        }
-        return true;
-    }
-
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        String uri = request.getRequestURI();
-        if (mockConfig.getTestMode() != TestMode.LOAD) {
-            requestCountMap.clear();
-            return;
-        }
-        ConfigParams configParams = mockConfig.getConfigParams(uri);
-        if (configParams != null) {
             String delay = configParams.getDelay();
             if (StringUtils.isNotEmpty(delay)) {
-                LOGGER.info("Add delay of {} seconds for {}", delay, request.getRequestURI());
+                LOGGER.info("Add delay of {} seconds for {}", delay, uri);
                 Integer randomDelay = getRandomDelay(delay);
                 Executors.newSingleThreadScheduledExecutor().schedule(() -> {
-                    LOGGER.info("Delay of {} seconds is over for {}", randomDelay, request.getRequestURI());
+                    LOGGER.info("Delay of {} seconds is over for {}", randomDelay, uri);
                 }, randomDelay, TimeUnit.SECONDS).get();
             }
         }
+        return true;
     }
 
     private Integer getRandomDelay(String delay) {
