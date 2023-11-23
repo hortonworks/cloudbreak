@@ -14,8 +14,8 @@ public abstract class SearchCauseExceptionMapper<T extends Throwable> extends En
     private Providers providers;
 
     @Override
-    public Response.Status getResponseStatus(T exception) {
-        Response.Status defaultResponse = Response.Status.BAD_REQUEST;
+    public Response.StatusType getResponseStatus(T exception) {
+        Response.StatusType defaultResponse = Response.Status.BAD_REQUEST;
         if (exception != null) {
             Pair<BaseExceptionMapper, ? extends Throwable> pair = searchRecursively(exception);
             if (pair.getKey() != null && pair.getKey() != this && !(pair.getKey() instanceof DefaultEnvironmentExceptionMapper)) {

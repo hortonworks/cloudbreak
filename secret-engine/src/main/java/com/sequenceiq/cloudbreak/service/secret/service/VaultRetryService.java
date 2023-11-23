@@ -2,8 +2,11 @@ package com.sequenceiq.cloudbreak.service.secret.service;
 
 import java.util.function.Supplier;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -17,11 +20,9 @@ public class VaultRetryService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultRetryService.class);
 
-    private final MetricService metricService;
-
-    public VaultRetryService(MetricService metricService) {
-        this.metricService = metricService;
-    }
+    @Qualifier("CommonMetricService")
+    @Inject
+    private MetricService metricService;
 
     @Retryable(
             value = Retry.ActionFailedException.class,

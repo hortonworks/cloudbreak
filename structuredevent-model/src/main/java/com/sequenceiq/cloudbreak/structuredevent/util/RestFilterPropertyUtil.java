@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -45,7 +46,8 @@ public class RestFilterPropertyUtil {
     public static RestResponseDetails createResponseDetails(ContainerResponseContext responseContext) {
         RestResponseDetails restResponse = new RestResponseDetails();
         restResponse.setStatusCode(responseContext.getStatus());
-        restResponse.setStatusText(responseContext.getStatusInfo().toEnum().name());
+        Response.StatusType responseStatus = responseContext.getStatusInfo();
+        restResponse.setStatusText(responseStatus.toEnum() != null ? responseStatus.toEnum().name() : responseStatus.getReasonPhrase());
         restResponse.setCookies(responseContext.getCookies().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
         restResponse.setHeaders(responseContext.getHeaders().entrySet().stream().filter(e -> !SKIPPED_HEADERS_LIST.contains(e.getKey())).collect(
                 Collectors.toMap(Map.Entry::getKey, e -> StringUtils.join(e.getValue(), ","))));

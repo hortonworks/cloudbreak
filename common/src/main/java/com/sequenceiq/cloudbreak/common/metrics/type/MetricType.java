@@ -11,7 +11,9 @@ public enum MetricType implements Metric {
     REST_OPERATION("rest.operation"),
     REST_OPERATION_FAILED("rest.operation.failed"),
     REST_OPERATION_CALLER_ID("rest.operation.caller.id"),
-    DB_TRANSACTION_ID("db.transaction");
+    DB_TRANSACTION_ID("db.transaction"),
+    UMS_CALL_SUCCESS("ums.call.success"),
+    UMS_CALL_FAILED("ums.call.failed");
 
     private final String metricName;
 

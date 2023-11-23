@@ -2,6 +2,7 @@ package com.sequenceiq.environment.exception.mapper;
 
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
@@ -18,7 +19,6 @@ import org.glassfish.jersey.internal.inject.InjectionManager;
 import org.glassfish.jersey.internal.inject.ServiceHolder;
 import org.glassfish.jersey.internal.inject.ServiceHolderImpl;
 import org.glassfish.jersey.spi.ExceptionMappers;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -54,43 +54,43 @@ public class SearchCauseExceptionMapperTest {
 
     @Test
     public void testGetResponseStatusWhenNoCause() {
-        Response.Status actual = underTest.getResponseStatus(new CredentialVerificationException(""));
-        Assertions.assertEquals(Response.Status.BAD_REQUEST, actual);
+        Response.StatusType actual = underTest.getResponseStatus(new CredentialVerificationException(""));
+        assertEquals(Response.Status.BAD_REQUEST, actual);
     }
 
     @Test
     public void testGetResponseStatusWhenHasOnlyOneCause() {
-        Response.Status actual = underTest.getResponseStatus(new CredentialVerificationException("", new NotFoundException()));
-        Assertions.assertEquals(Response.Status.NOT_FOUND, actual);
+        Response.StatusType actual = underTest.getResponseStatus(new CredentialVerificationException("", new NotFoundException()));
+        assertEquals(Response.Status.NOT_FOUND, actual);
     }
 
     @Test
     public void testGetResponseStatusWhenHasTwoDepthsCause() {
-        Response.Status actual = underTest.getResponseStatus(new CredentialVerificationException("", new RuntimeException(new NotFoundException())));
-        Assertions.assertEquals(Response.Status.NOT_FOUND, actual);
+        Response.StatusType actual = underTest.getResponseStatus(new CredentialVerificationException("", new RuntimeException(new NotFoundException())));
+        assertEquals(Response.Status.NOT_FOUND, actual);
     }
 
     @Test
     public void testGetResponseStatusWhenHasTwoDepthsCauseWithDefaultMapper() {
-        Response.Status actual = underTest.getResponseStatus(new CredentialVerificationException("", new Exception(new Exception())));
-        Assertions.assertEquals(Response.Status.BAD_REQUEST, actual);
+        Response.StatusType actual = underTest.getResponseStatus(new CredentialVerificationException("", new Exception(new Exception())));
+        assertEquals(Response.Status.BAD_REQUEST, actual);
     }
 
     @Test
     public void testGetResponseStatusWhenHasOneDepthsCauseWithDefaultMapper() {
-        Response.Status actual = underTest.getResponseStatus(new CredentialVerificationException("", new Exception()));
-        Assertions.assertEquals(Response.Status.BAD_REQUEST, actual);
+        Response.StatusType actual = underTest.getResponseStatus(new CredentialVerificationException("", new Exception()));
+        assertEquals(Response.Status.BAD_REQUEST, actual);
     }
 
     @Test
     public void testGetResponseStatusWhenTheExceptionIsTheFirstCause() {
-        Response.Status actual = underTest.getResponseStatus(new CredentialVerificationException("", new Exception(new NotFoundException())));
-        Assertions.assertEquals(Response.Status.NOT_FOUND, actual);
+        Response.StatusType actual = underTest.getResponseStatus(new CredentialVerificationException("", new Exception(new NotFoundException())));
+        assertEquals(Response.Status.NOT_FOUND, actual);
     }
 
     @Test
     public void testGetResponseStatusWhenTheCauseIsTheRealException() {
-        Response.Status actual = underTest.getResponseStatus(new CredentialVerificationException("", new NotFoundException(new Exception())));
-        Assertions.assertEquals(Response.Status.NOT_FOUND, actual);
+        Response.StatusType actual = underTest.getResponseStatus(new CredentialVerificationException("", new NotFoundException(new Exception())));
+        assertEquals(Response.Status.NOT_FOUND, actual);
     }
 }

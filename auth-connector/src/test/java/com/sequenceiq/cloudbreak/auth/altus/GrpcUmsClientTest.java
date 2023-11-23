@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
+import static com.sequenceiq.cloudbreak.common.metrics.type.MetricType.UMS_CALL_FAILED;
+import static com.sequenceiq.cloudbreak.common.metrics.type.MetricType.UMS_CALL_SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -12,6 +14,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -44,6 +47,7 @@ import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UnauthorizedException;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
 import io.grpc.ManagedChannel;
@@ -82,6 +86,9 @@ public class GrpcUmsClientTest {
 
     @Mock
     private ManagedChannel managedChannel;
+
+    @Mock
+    private MetricService metricService;
 
     @Captor
     private ArgumentCaptor<Iterable<AuthorizationProto.RightCheck>> captor;
@@ -162,6 +169,8 @@ public class GrpcUmsClientTest {
                 assertThrows(IllegalArgumentException.class, () -> underTest.checkResourceRight(USER_CRN,
                         "environments/describeEnvironment", "invalidCrn")).getMessage(),
                 "Provided resource [invalidCrn] is not in CRN format");
+        verify(metricService, never()).recordTimerMetric(eq(UMS_CALL_FAILED), any(), (String[]) any());
+        verify(metricService, never()).recordTimerMetric(eq(UMS_CALL_SUCCESS), any(), (String[]) any());
     }
 
     @Test
@@ -172,6 +181,8 @@ public class GrpcUmsClientTest {
                 () -> underTest.checkResourceRight(USER_CRN, "environments/describeEnvironment", RESOURCE_CRN));
         assertNotNull(unauthorizedException);
         assertEquals("Authorization failed for user: " + USER_CRN, unauthorizedException.getMessage());
+        verify(metricService, times(1)).recordTimerMetric(eq(UMS_CALL_FAILED), any(), any(String[].class));
+        verify(metricService, never()).recordTimerMetric(eq(UMS_CALL_SUCCESS), any(), any(String[].class));
     }
 
     @Test
@@ -184,6 +195,8 @@ public class GrpcUmsClientTest {
                 assertThrows(IllegalArgumentException.class, () -> underTest.hasRightsOnResources(USER_CRN,
                         List.of("invalidCrn", "*"), "environments/describeEnvironment")).getMessage(),
                 "Following resources are not provided in CRN format: invalidCrn.");
+        verify(metricService, never()).recordTimerMetric(eq(UMS_CALL_FAILED), any(), any(String[].class));
+        verify(metricService, never()).recordTimerMetric(eq(UMS_CALL_SUCCESS), any(), any(String[].class));
     }
 
     @Test
@@ -201,6 +214,9 @@ public class GrpcUmsClientTest {
         InOrder inOrder = inOrder(authorizationClient);
         inOrder.verify(authorizationClient).checkRight(USER_CRN, "right", resourceCrn1);
         inOrder.verify(authorizationClient).checkRight(USER_CRN, "right", resourceCrn2);
+        verify(metricService, times(1)).recordTimerMetric(eq(UMS_CALL_FAILED), any(), any(String[].class));
+        verify(metricService, times(1)).recordTimerMetric(eq(UMS_CALL_SUCCESS), any(), any(String[].class));
+
     }
 
     @Test
@@ -230,6 +246,7 @@ public class GrpcUmsClientTest {
                         .setRight("right")
                         .build()),
                 rightChecks);
+        verify(metricService, times(1)).recordTimerMetric(eq(UMS_CALL_SUCCESS), any(), any(String[].class));
     }
 
     @Test

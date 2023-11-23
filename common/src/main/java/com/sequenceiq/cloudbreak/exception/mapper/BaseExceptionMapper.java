@@ -7,7 +7,6 @@ import static ch.qos.logback.classic.Level.INFO_INT;
 import static ch.qos.logback.classic.Level.WARN_INT;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 
 import org.slf4j.Logger;
@@ -83,7 +82,7 @@ public abstract class BaseExceptionMapper<E extends Throwable> implements Except
         return DEBUG;
     }
 
-    public abstract Status getResponseStatus(E exception);
+    public abstract Response.StatusType getResponseStatus(E exception);
 
     public abstract Class<E> getExceptionType();
 }

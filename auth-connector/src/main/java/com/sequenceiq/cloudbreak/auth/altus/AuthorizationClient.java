@@ -11,17 +11,13 @@ import org.springframework.util.StringUtils;
 import com.cloudera.thunderhead.service.authorization.AuthorizationGrpc;
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
-import com.sequenceiq.cloudbreak.auth.altus.exception.UnauthorizedException;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.altus.CallingServiceNameInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 import io.grpc.ManagedChannel;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 
 /**
  * A simple wrapper to the GRPC user management service. This handles setting up
@@ -67,29 +63,13 @@ public class AuthorizationClient {
     public List<Boolean> hasRights(String actorCrn, Iterable<AuthorizationProto.RightCheck> rightChecks) {
         checkNotNull(actorCrn, "actorCrn should not be null.");
         checkNotNull(rightChecks, "rightChecks should not be null.");
-        try {
-            AuthorizationProto.HasRightsResponse response = newStub().hasRights(
-                    AuthorizationProto.HasRightsRequest.newBuilder()
-                            .setActorCrn(actorCrn)
-                            .addAllCheck(rightChecks)
-                            .build()
-            );
-            return response.getResultList();
-        } catch (StatusRuntimeException statusRuntimeException) {
-            if (Status.Code.DEADLINE_EXCEEDED.equals(statusRuntimeException.getStatus().getCode())) {
-                LOGGER.error("Deadline exceeded for hasRights for actor {} and rights {}", actorCrn, rightChecks, statusRuntimeException);
-                throw new CloudbreakServiceException("Authorization failed due to user management service call timed out.");
-            } else if (Status.Code.NOT_FOUND.equals(statusRuntimeException.getStatus().getCode())) {
-                LOGGER.error("NOT_FOUND for hasRights for actor {} and rights {}", actorCrn, rightChecks, statusRuntimeException);
-                throw new UnauthorizedException("Authorization failed for user: " + actorCrn);
-            } else {
-                LOGGER.error("Status runtime exception while checking hasRights for actor {} and rights {}", actorCrn, rightChecks, statusRuntimeException);
-                throw new CloudbreakServiceException("Authorization failed due to user management service call failed.");
-            }
-        } catch (Exception e) {
-            LOGGER.error("Unknown error while checking hasRights for actor {} and rights {}", actorCrn, rightChecks, e);
-            throw new CloudbreakServiceException("Authorization failed due to user management service call failed with error.");
-        }
+        AuthorizationProto.HasRightsResponse response = newStub().hasRights(
+                AuthorizationProto.HasRightsRequest.newBuilder()
+                        .setActorCrn(actorCrn)
+                        .addAllCheck(rightChecks)
+                        .build()
+        );
+        return response.getResultList();
     }
 
     /**

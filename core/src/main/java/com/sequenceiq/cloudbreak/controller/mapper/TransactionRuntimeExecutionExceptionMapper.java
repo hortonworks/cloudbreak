@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller.mapper;
 
 import java.util.List;
 
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
@@ -19,7 +20,7 @@ public class TransactionRuntimeExecutionExceptionMapper extends SendNotification
     }
 
     @Override
-    public Status getResponseStatus(TransactionRuntimeExecutionException exception) {
+    public Response.StatusType getResponseStatus(TransactionRuntimeExecutionException exception) {
         TransactionRuntimeExecutionException deepest = getDeepestTransactionException(exception);
         return exceptionMappers.stream()
                 .filter(m -> m.getExceptionType().equals(deepest.getOriginalCause().getClass()))

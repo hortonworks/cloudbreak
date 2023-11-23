@@ -1,8 +1,13 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.sequenceiq.cloudbreak.common.metrics.type.MetricTag.ERROR_CODE;
+import static com.sequenceiq.cloudbreak.common.metrics.type.MetricTag.TARGET_API;
+import static com.sequenceiq.cloudbreak.common.metrics.type.MetricType.UMS_CALL_FAILED;
+import static com.sequenceiq.cloudbreak.common.metrics.type.MetricType.UMS_CALL_SUCCESS;
 import static java.util.Objects.requireNonNull;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +53,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
+import com.sequenceiq.cloudbreak.auth.altus.exception.UmsErrorException;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UnauthorizedException;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
@@ -55,6 +61,8 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
+import com.sequenceiq.cloudbreak.common.metrics.type.Metric;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 
@@ -71,6 +79,10 @@ public class GrpcUmsClient {
 
     private static final int CHECK_RIGHT_HAS_RIGHTS_TRESHOLD = 3;
 
+    private static final String CHECK_RIGHT = "checkRight";
+
+    private static final String HAS_RIGHTS = "hasRights";
+
     @Qualifier("umsManagedChannelWrapper")
     @Inject
     private ManagedChannelWrapper channelWrapper;
@@ -80,6 +92,10 @@ public class GrpcUmsClient {
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Qualifier("CommonMetricService")
+    @Inject
+    private MetricService metricService;
 
     public static GrpcUmsClient createClient(ManagedChannelWrapper channelWrapper, UmsClientConfig clientConfig,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
@@ -466,37 +482,45 @@ public class GrpcUmsClient {
     }
 
     private boolean makeCheckRightCallAndHandleExceptions(String userCrn, String right, String resource) {
+        long start = System.currentTimeMillis();
         try {
-            return checkRight(userCrn, right, resource);
+            return checkRight(userCrn, right, resource, start);
         } catch (StatusRuntimeException statusRuntimeException) {
-            if (Status.Code.PERMISSION_DENIED.equals(statusRuntimeException.getStatus().getCode())) {
+            Status.Code statusCode = statusRuntimeException.getStatus().getCode();
+            recordTimerMetric(UMS_CALL_FAILED, duration(start), TARGET_API.name(), CHECK_RIGHT, ERROR_CODE.name(), statusCode.name());
+            if (Status.Code.PERMISSION_DENIED.equals(statusCode)) {
                 LOGGER.error("Checking right {} failed for user {}, thus access is denied! Cause: {}", right, userCrn, statusRuntimeException.getMessage());
                 return false;
-            } else if (Status.Code.DEADLINE_EXCEEDED.equals(statusRuntimeException.getStatus().getCode())) {
+            } else if (Status.Code.DEADLINE_EXCEEDED.equals(statusCode)) {
                 LOGGER.error("Deadline exceeded for check right {} for user {} on resource {}", right, userCrn, resource != null ? resource : "account",
                         statusRuntimeException);
-                throw new CloudbreakServiceException("Authorization failed due to user management service call timed out.");
-            } else if (Status.Code.NOT_FOUND.equals(statusRuntimeException.getStatus().getCode())) {
+                throw new UmsErrorException("Authorization failed due to user management service call timed out.");
+            } else if (Status.Code.NOT_FOUND.equals(statusCode)) {
                 LOGGER.error("NOT_FOUND for check right {} for user {} on resource {}, thus access is denied! Cause: {}",
                         right, userCrn, resource, statusRuntimeException.getMessage());
                 throw new UnauthorizedException("Authorization failed for user: " + userCrn);
             } else {
                 LOGGER.error("Status runtime exception while checking right {} for user {} on resource {}", right, userCrn, resource != null ? resource :
                         "account", statusRuntimeException);
-                throw new CloudbreakServiceException("Authorization failed due to user management service call failed.");
+                throw new UmsErrorException("Authorization failed due to user management service call failed.");
             }
         } catch (Exception e) {
-            LOGGER.error("Unknown error while checking right {} for user {} on resource {}", right, userCrn, resource != null ? resource :
-                    "account", e);
+            LOGGER.error("Unknown error while checking right {} for user {} on resource {}", right, userCrn, resource != null ? resource : "account", e);
+            recordTimerMetric(UMS_CALL_FAILED, duration(start), TARGET_API.name(), CHECK_RIGHT, ERROR_CODE.name(), "OTHER");
             throw new CloudbreakServiceException("Authorization failed due to user management service call failed with error.");
         }
     }
 
-    private boolean checkRight(String userCrn, String right, String resource) {
+    private boolean checkRight(String userCrn, String right, String resource, long start) {
         LOGGER.info("Checking right {} for user {} on resource {}!", right, userCrn, resource != null ? resource : "account");
         makeAuthorizationClient().checkRight(userCrn, right, resource);
         LOGGER.info("User {} has right {} on resource {}!", userCrn, right, resource != null ? resource : "account");
+        recordTimerMetric(UMS_CALL_SUCCESS, duration(start), TARGET_API.name(), CHECK_RIGHT);
         return true;
+    }
+
+    private Duration duration(long start) {
+        return Duration.ofMillis(System.currentTimeMillis() - start);
     }
 
     /**
@@ -536,12 +560,38 @@ public class GrpcUmsClient {
                         .map(check -> makeCheckRightCall(memberCrn, check.getRight(), check.getResource()))
                         .collect(Collectors.toList());
             } else {
-                retVal = makeAuthorizationClient().hasRights(memberCrn, rightChecks);
+                retVal = makeHasRightsCallAndHandleExceptions(memberCrn, rightChecks);
             }
             LOGGER.info("member {} has rights {}", memberCrn, retVal);
             return retVal;
         }
         return List.of();
+    }
+
+    private List<Boolean> makeHasRightsCallAndHandleExceptions(String memberCrn, List<RightCheck> rightChecks) {
+        long start = System.currentTimeMillis();
+        try {
+            List<Boolean> result = makeAuthorizationClient().hasRights(memberCrn, rightChecks);
+            recordTimerMetric(UMS_CALL_SUCCESS, duration(start), TARGET_API.name(), HAS_RIGHTS);
+            return result;
+        } catch (StatusRuntimeException statusRuntimeException) {
+            Status.Code statusCode = statusRuntimeException.getStatus().getCode();
+            recordTimerMetric(UMS_CALL_FAILED, duration(start), TARGET_API.name(), HAS_RIGHTS, ERROR_CODE.name(), statusCode.name());
+            if (Status.Code.DEADLINE_EXCEEDED.equals(statusCode)) {
+                LOGGER.error("Deadline exceeded for hasRights for actor {} and rights {}", memberCrn, rightChecks, statusRuntimeException);
+                throw new UmsErrorException("Authorization failed due to user management service call timed out.");
+            } else if (Status.Code.NOT_FOUND.equals(statusCode)) {
+                LOGGER.error("NOT_FOUND for hasRights for actor {} and rights {}", memberCrn, rightChecks, statusRuntimeException);
+                throw new UnauthorizedException("Authorization failed for user: " + memberCrn);
+            } else {
+                LOGGER.error("Status runtime exception while checking hasRights for actor {} and rights {}", memberCrn, rightChecks, statusRuntimeException);
+                throw new UmsErrorException("Authorization failed due to user management service call failed.");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Unknown error while checking hasRights for actor {} and rights {}", memberCrn, rightChecks, e);
+            recordTimerMetric(UMS_CALL_FAILED, duration(start), TARGET_API.name(), HAS_RIGHTS, ERROR_CODE.name(), "OTHER");
+            throw new CloudbreakServiceException("Authorization failed due to user management service call failed with error.");
+        }
     }
 
     public String rightCheckToString(RightCheck rightCheck) {
@@ -838,4 +888,9 @@ public class GrpcUmsClient {
         return makeClient().listRoles(accountId);
     }
 
+    private void recordTimerMetric(Metric metric, Duration duration, String... tags) {
+        if (metricService != null) {
+            metricService.recordTimerMetric(metric, duration, tags);
+        }
+    }
 }
