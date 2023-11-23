@@ -1,7 +1,6 @@
 package com.sequenceiq.it.cloudbreak.cloud;
 
 import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.it.util.TestParameter;
 
 public enum HostGroupType {
     MASTER("master", InstanceGroupType.GATEWAY, InstanceCountParameter.MASTER_INSTANCE_COUNT.getName()),
@@ -55,15 +54,8 @@ public enum HostGroupType {
         return instanceGroupType;
     }
 
-    public int determineInstanceCount(TestParameter testParameter) {
-        String instanceCount = testParameter.get(countParameterName);
-        int instanceCountInt;
-        try {
-            instanceCountInt = Integer.parseInt(instanceCount);
-        } catch (NumberFormatException e) {
-            instanceCountInt = this.defaultInstanceCount;
-        }
-        return instanceCountInt;
+    public int determineInstanceCount() {
+        return this.defaultInstanceCount;
     }
 
     public static HostGroupType getByName(String name) {

@@ -15,7 +15,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseReque
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRetryAction;
-import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.client.AzureMarketplaceTermsClient;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
@@ -27,6 +26,7 @@ import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.config.user.TestUserSelectors;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.TermsPolicyDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
@@ -44,7 +44,6 @@ import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
 import com.sequenceiq.it.cloudbreak.util.EnvironmentUtil;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -78,12 +77,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     @Inject
     private DistroXTestClient distroXTestClient;
-
-    @Inject
-    private ImageCatalogMockServerSetup imageCatalogMockServerSetup;
-
-    @Inject
-    private CloudbreakActor cloudbreakActor;
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
@@ -396,9 +389,8 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     }
 
     protected void useRealUmsUser(TestContext testContext, String key) {
-        testContext
-                .as(cloudbreakActor.useRealUmsUser(key))
-                .useUmsUserCache(true);
+        testContext.getTestUsers().setSelector(TestUserSelectors.UMS_ONLY);
+        testContext.as(key);
     }
 
     protected void initializeDefaultBlueprints(TestContext testContext) {

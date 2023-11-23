@@ -31,7 +31,6 @@ import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.clouderamanager.ClouderaManagerUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
-import com.sequenceiq.it.util.TestParameter;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class DistroXEphemeralTests extends AbstractE2ETest {
@@ -40,9 +39,6 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
 
     @Inject
     private DistroXTestClient distroXTestClient;
-
-    @Inject
-    private TestParameter testParameter;
 
     @Inject
     private ClouderaManagerUtil clouderaManagerUtil;

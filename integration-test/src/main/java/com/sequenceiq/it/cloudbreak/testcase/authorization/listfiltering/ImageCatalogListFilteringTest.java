@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
+import com.sequenceiq.it.cloudbreak.config.user.TestUserSelectors;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
@@ -34,9 +35,11 @@ public class ImageCatalogListFilteringTest extends AbstractIntegrationTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        useRealUmsUser(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN);
-        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_A);
-        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_B);
+        testContext.getTestUsers().setSelector(TestUserSelectors.UMS_ONLY);
+
+        testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
+        testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
+        testContext.as(AuthUserKeys.USER_ENV_CREATOR_B);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -45,10 +48,10 @@ public class ImageCatalogListFilteringTest extends AbstractIntegrationTest {
             when = "users share with each other",
             then = "they see the other's image catalog in the list")
     public void testImageCatalogListFiltering(TestContext testContext) {
-        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_A);
+        testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
         ImageCatalogTestDto imageCatalogA = resourceCreator.createDefaultImageCatalog(testContext);
 
-        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_B);
+        testContext.as(AuthUserKeys.USER_ENV_CREATOR_B);
         ImageCatalogTestDto imageCatalogB = resourceCreator.createNewImageCatalog(testContext);
 
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, imageCatalogA.getName());
@@ -74,11 +77,11 @@ public class ImageCatalogListFilteringTest extends AbstractIntegrationTest {
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, imageCatalogA.getName(), imageCatalogB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, imageCatalogA.getName(), imageCatalogB.getName());
 
-        useRealUmsUser(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN);
+        testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
     }
 
     private void assertUserDoesNotSeeAnyOf(TestContext testContext, String user, String... names) {
-        useRealUmsUser(testContext, user);
+        testContext.as(user);
         Assertions.assertThat(testContext.given(ImageCatalogTestDto.class).getAll(testContext.getMicroserviceClient(CloudbreakClient.class))
                 .stream()
                 .map(ImageCatalogV4Response::getName)
@@ -87,7 +90,7 @@ public class ImageCatalogListFilteringTest extends AbstractIntegrationTest {
     }
 
     private void assertUserSeesAll(TestContext testContext, String user, String... names) {
-        useRealUmsUser(testContext, user);
+        testContext.as(user);
         List<String> visibleNames = testContext.given(ImageCatalogTestDto.class).getAll(testContext.getMicroserviceClient(CloudbreakClient.class))
                 .stream()
                 .map(ImageCatalogV4Response::getName)

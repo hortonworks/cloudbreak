@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup;
 
-import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription.RECOVERY_MODE;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.COMPUTE;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.GATEWAY;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
@@ -43,8 +42,8 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
     public DistroXInstanceGroupTestDto withHostGroup(HostGroupType hostGroupType) {
         DistroXInstanceTemplateTestDto template = getTestContext()
                 .given("DistroxInstanceGroupTestDto" + hostGroupType.getName(), DistroXInstanceTemplateTestDto.class, getCloudPlatform());
-        return withRecoveryMode(getRecoveryModeParam(hostGroupType))
-                .withNodeCount(hostGroupType.determineInstanceCount(getTestParameter()))
+        return withRecoveryMode(RecoveryMode.MANUAL)
+                .withNodeCount(hostGroupType.determineInstanceCount())
                 .withGroup(hostGroupType.getName())
                 .withType(hostGroupType.getInstanceGroupType())
                 .withName(hostGroupType.getName())
@@ -70,14 +69,12 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
     }
 
     private static DistroXInstanceGroupTestDto create(TestContext testContext, CloudPlatform cloudPlatform, HostGroupType hostGroupType) {
-        DistroXInstanceGroupTestDto entity = testContext.init(DistroXInstanceGroupTestDto.class, cloudPlatform);
-        return create(testContext, cloudPlatform, hostGroupType, hostGroupType.determineInstanceCount(entity.getTestParameter()));
+        return create(testContext, cloudPlatform, hostGroupType, hostGroupType.determineInstanceCount());
     }
 
     private static DistroXInstanceGroupTestDto create(TestContext testContext, CloudPlatform cloudPlatform, HostGroupType hostGroupType, int nodeCount) {
         DistroXInstanceGroupTestDto entity = testContext.init(DistroXInstanceGroupTestDto.class);
         return entity
-                .withRecoveryMode(entity.getRecoveryModeParam(hostGroupType))
                 .withNodeCount(nodeCount)
                 .withGroup(hostGroupType.getName())
                 .withType(hostGroupType.getInstanceGroupType())
@@ -147,11 +144,5 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
     public DistroXInstanceGroupTestDto withName(String name) {
         getRequest().setName(name);
         return this;
-    }
-
-    private RecoveryMode getRecoveryModeParam(HostGroupType hostGroupType) {
-        String argumentName = String.join("", hostGroupType.getName(), RECOVERY_MODE);
-        String argumentValue = getTestParameter().getWithDefault(argumentName, MANUAL);
-        return argumentValue.equals(AUTO) ? RecoveryMode.AUTO : RecoveryMode.MANUAL;
     }
 }

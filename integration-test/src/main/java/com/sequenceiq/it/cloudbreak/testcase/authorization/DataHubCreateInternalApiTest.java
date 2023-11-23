@@ -1,19 +1,19 @@
 package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
-import java.util.Optional;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.who;
 
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
+import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
+import com.sequenceiq.it.cloudbreak.config.user.TestUserSelectors;
 import com.sequenceiq.it.cloudbreak.context.Description;
-import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
@@ -37,9 +37,6 @@ public class DataHubCreateInternalApiTest extends AbstractIntegrationTest {
     private ResourceCreator resourceCreator;
 
     @Inject
-    private CloudbreakActor cloudbreakActor;
-
-    @Inject
     private DistroXTestClient distroXTestClient;
 
     @Inject
@@ -53,9 +50,10 @@ public class DataHubCreateInternalApiTest extends AbstractIntegrationTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        useRealUmsUser(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN);
-        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_B);
-        useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_A);
+        testContext.getTestUsers().setSelector(TestUserSelectors.UMS_ONLY);
+        testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
+        testContext.as(AuthUserKeys.USER_ENV_CREATOR_B);
+        testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
         initializeDefaultBlueprints(testContext);
     }
 
@@ -65,7 +63,7 @@ public class DataHubCreateInternalApiTest extends AbstractIntegrationTest {
             when = "creates datahub through internal api",
             then = "initiator user can do main operations on it")
     public void createInternalBlueprintsAndRecipesAndDataHubFromThem(TestContext testContext) {
-        String accountId = Crn.safeFromString(cloudbreakActor.useRealUmsUser(AuthUserKeys.USER_ENV_CREATOR_A).getCrn()).getAccountId();
+        String accountId = Crn.safeFromString(testContext.getTestUsers().getUserByLabel(AuthUserKeys.USER_ENV_CREATOR_A).getCrn()).getAccountId();
 
         resourceCreator.createDefaultImageCatalog(testContext);
         RecipeTestDto recipe = resourceCreator.createDefaultRecipeInternal(testContext, accountId);
@@ -94,41 +92,37 @@ public class DataHubCreateInternalApiTest extends AbstractIntegrationTest {
                 .withClouderaManager()
                 .given(DistroXTestDto.class)
                 .withRecipe(recipe.getName())
-                .withInitiatorUserCrn(cloudbreakActor.useRealUmsUser(AuthUserKeys.USER_ENV_CREATOR_A).getCrn());
+                .withInitiatorUserCrn(testContext.getTestUsers().getUserByLabel(AuthUserKeys.USER_ENV_CREATOR_A).getCrn());
 
         distroXTestDto
                 .withCluster()
                 .withImageSettings(testContext.given(DistroXImageTestDto.class))
                 .withNetwork(testContext.given(DistroXNetworkTestDto.class));
 
-        resourceCreator.createInternalAndWaitAs(distroXTestDto, Optional.of(AuthUserKeys.USER_ACCOUNT_ADMIN));
+        CloudbreakUser accountAdmin = testContext.getTestUsers().getUserByLabel(AuthUserKeys.USER_ACCOUNT_ADMIN);
+        CloudbreakUser envCreatorA = testContext.getTestUsers().getUserByLabel(AuthUserKeys.USER_ENV_CREATOR_A);
+        CloudbreakUser envCreatorB = testContext.getTestUsers().getUserByLabel(AuthUserKeys.USER_ENV_CREATOR_B);
+        resourceCreator.createInternalAndWaitAs(distroXTestDto, accountAdmin);
 
-        RunningParameter envCreatorA = user(AuthUserKeys.USER_ENV_CREATOR_A);
-        RunningParameter envCreatorB = user(AuthUserKeys.USER_ENV_CREATOR_B);
-        RunningParameter accountAdmin = user(AuthUserKeys.USER_ACCOUNT_ADMIN);
-        distroXTestDto.when(distroXTestClient.get(), envCreatorA)
+        distroXTestDto.when(distroXTestClient.get(), who(envCreatorA))
                 .validate();
-        distroXTestDto.when(distroXTestClient.stop(), envCreatorA)
-                .await(STACK_STOPPED, accountAdmin)
+        distroXTestDto.when(distroXTestClient.stop(), who(envCreatorA))
+                .await(STACK_STOPPED, who(accountAdmin))
                 .validate();
-        distroXTestDto.when(distroXTestClient.start(), envCreatorA)
-                .await(STACK_AVAILABLE, accountAdmin)
+        distroXTestDto.when(distroXTestClient.start(), who(envCreatorA))
+                .await(STACK_AVAILABLE, who(accountAdmin))
                 .validate();
         testContext.given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentUser()
                 .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B))
                 .validate();
-        distroXTestDto.when(distroXTestClient.get(), envCreatorB)
+        distroXTestDto.when(distroXTestClient.get(), who(envCreatorB))
                 .validate();
-        distroXTestDto.when(distroXTestClient.delete(), envCreatorA)
-                .await(STACK_DELETED, accountAdmin)
+        distroXTestDto.when(distroXTestClient.delete(), who(envCreatorA))
+                .await(STACK_DELETED, who(accountAdmin))
                 .validate();
 
-        useRealUmsUser(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN);
-    }
-
-    private RunningParameter user(String userKey) {
-        return RunningParameter.who(cloudbreakActor.useRealUmsUser(userKey));
+        testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
     }
 }

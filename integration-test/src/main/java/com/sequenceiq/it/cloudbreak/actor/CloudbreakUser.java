@@ -16,7 +16,9 @@ public class CloudbreakUser {
 
     private boolean admin;
 
-    private String desc;
+    private String description;
+
+    private String workloadPassword;
 
     public CloudbreakUser() {
     }
@@ -33,6 +35,13 @@ public class CloudbreakUser {
         this.displayName = displayName;
     }
 
+    public CloudbreakUser(String accessKey, String secretKey, String displayName, String crn) {
+        this.accessKey = accessKey;
+        this.secretKey = secretKey;
+        this.displayName = displayName;
+        this.crn = crn;
+    }
+
     public CloudbreakUser(String accessKey, String secretKey, String displayName, boolean admin) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
@@ -40,12 +49,12 @@ public class CloudbreakUser {
         this.admin = admin;
     }
 
-    public CloudbreakUser(String accessKey, String secretKey, String displayName, String crn, String desc, boolean admin, String workloadUserName) {
+    public CloudbreakUser(String accessKey, String secretKey, String displayName, String crn, String description, boolean admin, String workloadUserName) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
         this.displayName = displayName;
         this.crn = crn;
-        this.desc = desc;
+        this.description = description;
         this.admin = admin;
         this.workloadUserName = workloadUserName;
     }
@@ -91,11 +100,11 @@ public class CloudbreakUser {
     }
 
     public void setDescription(String desc) {
-        this.desc = desc;
+        this.description = desc;
     }
 
     public String getDescription() {
-        return desc;
+        return description;
     }
 
     public void setWorkloadUserName(String workloadUserName) {
@@ -104,6 +113,14 @@ public class CloudbreakUser {
 
     public String getWorkloadUserName() {
         return workloadUserName;
+    }
+
+    public String getWorkloadPassword() {
+        return workloadPassword;
+    }
+
+    public void setWorkloadPassword(String workloadPassword) {
+        this.workloadPassword = workloadPassword;
     }
 
     public static void validateRealUmsUser(CloudbreakUser user) {

@@ -7,8 +7,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.polling.TimeoutChecker;
@@ -20,8 +18,6 @@ public class RunningParameter {
     private CloudbreakUser who;
 
     private boolean skipOnFail = true;
-
-    private boolean doAsAdmin;
 
     private String key;
 
@@ -49,15 +45,7 @@ public class RunningParameter {
         NOT_WAIT;
     }
 
-    @Inject
-    private TestContext testContext;
-
     public CloudbreakUser getWho() {
-        if (doAsAdmin) {
-            if (testContext.realUmsUserCacheReadyToUse()) {
-                return testContext.getRealUmsAdmin();
-            }
-        }
         return who;
     }
 
@@ -159,16 +147,6 @@ public class RunningParameter {
                 .filter(m -> m.getName().equals(method))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(urlClass + "does not have method " + method));
-        return this;
-    }
-
-    public RunningParameter switchToAdmin() {
-        this.doAsAdmin = true;
-        return this;
-    }
-
-    public RunningParameter swithcToActor() {
-        this.doAsAdmin = false;
         return this;
     }
 

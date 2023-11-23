@@ -1,13 +1,7 @@
 package com.sequenceiq.it.cloudbreak.config.azure;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-
-import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
-import com.sequenceiq.it.util.TestParameter;
 
 @Configuration
 public class ResourceGroupProperties {
@@ -18,12 +12,19 @@ public class ResourceGroupProperties {
     @Value("${integrationtest.azure.resourcegroup.name}")
     private String resourceGroupName;
 
-    @Inject
-    private TestParameter testParameter;
+    public String getResourceGroupUsage() {
+        return resourceGroupUsage;
+    }
 
-    @PostConstruct
-    private void init() {
-        testParameter.put(ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE, resourceGroupUsage);
-        testParameter.put(ResourceGroupTest.AZURE_RESOURCE_GROUP_NAME, resourceGroupName);
+    public void setResourceGroupUsage(String resourceGroupUsage) {
+        this.resourceGroupUsage = resourceGroupUsage;
+    }
+
+    public String getResourceGroupName() {
+        return resourceGroupName;
+    }
+
+    public void setResourceGroupName(String resourceGroupName) {
+        this.resourceGroupName = resourceGroupName;
     }
 }

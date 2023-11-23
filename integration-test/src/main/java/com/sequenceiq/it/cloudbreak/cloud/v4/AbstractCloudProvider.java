@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
@@ -25,6 +24,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeI
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
+import com.sequenceiq.it.cloudbreak.config.testinformation.TestInformationService;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
@@ -48,7 +48,6 @@ import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
-import com.sequenceiq.it.util.TestParameter;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 public abstract class AbstractCloudProvider implements CloudProvider {
@@ -67,17 +66,13 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCloudProvider.class);
 
     @Inject
-    private TestParameter testParameter;
-
-    @Inject
     private CommonCloudProperties commonCloudProperties;
 
     @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
 
-    protected TestParameter getTestParameter() {
-        return testParameter;
-    }
+    @Inject
+    private TestInformationService testInformationService;
 
     protected CommonCloudProperties commonCloudProperties() {
         return commonCloudProperties;
@@ -423,26 +418,11 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     protected String getSuiteName() {
-        String suiteName = trimObjectName(getTestLabels()[0]);
-        if (StringUtils.isBlank(suiteName)) {
-            throw new IllegalArgumentException("Cloud Storage base location path cannot be generated, because of the Test Suite Name is null or empty!");
-        } else {
-            return suiteName;
-        }
+        return testInformationService.getTestInformation().getSuiteName();
     }
 
     protected String getTestName() {
-        String testName = trimObjectName(getTestLabels()[1]);
-        if (StringUtils.isBlank(testName)) {
-            throw new IllegalArgumentException("Cloud Storage base location path cannot be generated, because of the Test Name is null or empty!");
-        } else {
-            return testName;
-        }
-    }
-
-    protected String[] getTestLabels() {
-        String testLabel = StringUtils.isBlank(MDC.get("testlabel")) ? testParameter.get("testlabel") : MDC.get("testlabel");
-        return StringUtils.split(StringUtils.lowerCase(testLabel), ".");
+        return testInformationService.getTestInformation().getTestName();
     }
 
     protected String trimObjectName(String name) {

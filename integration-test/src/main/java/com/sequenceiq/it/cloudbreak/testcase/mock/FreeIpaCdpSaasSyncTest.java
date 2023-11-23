@@ -13,9 +13,9 @@ import org.testng.annotations.Test;
 import com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserState;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
-import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.config.user.TestUserCreator;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -32,11 +32,11 @@ public class FreeIpaCdpSaasSyncTest extends AbstractMockTest {
     private FreeIpaTestClient freeIpaTestClient;
 
     @Inject
-    private CloudbreakActor cloudbreakActor;
+    private TestUserCreator testUserCreator;
 
     @Override
     protected void setupTest(TestContext testContext) {
-        testContext.as(cloudbreakActor.create("CDP_SAAS_TENANT", "cdpsaasuser@cloudera.com"));
+        testContext.as(testUserCreator.create("CDP_SAAS_TENANT", "cdpsaasuser@cloudera.com"));
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);

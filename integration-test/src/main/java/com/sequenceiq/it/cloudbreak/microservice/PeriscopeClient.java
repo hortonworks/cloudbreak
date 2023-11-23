@@ -7,13 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
-import com.sequenceiq.it.cloudbreak.PeriscopeTest;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.autoscale.AutoScaleConfigDto;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
-import com.sequenceiq.it.util.TestParameter;
 import com.sequenceiq.periscope.client.AutoscaleUserCrnClient;
 import com.sequenceiq.periscope.client.AutoscaleUserCrnClientBuilder;
 import com.sequenceiq.redbeams.api.model.common.Status;
@@ -24,15 +22,13 @@ public class PeriscopeClient extends MicroserviceClient<com.sequenceiq.periscope
 
     private AutoscaleUserCrnClient periscopeClient;
 
-    public static synchronized PeriscopeClient createPeriscopeClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
-        PeriscopeClient clientEntity = new PeriscopeClient();
-        clientEntity.setActing(cloudbreakUser);
-        clientEntity.periscopeClient = new AutoscaleUserCrnClientBuilder(testParameter.get(PeriscopeTest.PERISCOPE_SERVER_ROOT))
+    public PeriscopeClient(CloudbreakUser cloudbreakUser, String periscopeAddress) {
+        setActing(cloudbreakUser);
+        periscopeClient = new AutoscaleUserCrnClientBuilder(periscopeAddress)
                 .withDebug(true)
                 .withCertificateValidation(false)
                 .withIgnorePreValidation(false)
                 .build();
-        return clientEntity;
     }
 
     @Override

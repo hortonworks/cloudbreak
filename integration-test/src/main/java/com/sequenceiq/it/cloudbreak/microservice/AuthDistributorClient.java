@@ -18,6 +18,16 @@ public class AuthDistributorClient<E extends Enum<E>, W extends WaitObject> exte
 
     private GrpcAuthDistributorClient grpcAuthDistributorClient;
 
+    public  AuthDistributorClient(
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory, String host) {
+        AuthDistributorConfig authDistributorConfig = new AuthDistributorConfig();
+        Field grpcTimeoutSec = ReflectionUtils.findField(AuthDistributorConfig.class, "grpcTimeoutSec");
+        ReflectionUtils.makeAccessible(grpcTimeoutSec);
+        ReflectionUtils.setField(grpcTimeoutSec, authDistributorConfig, 120);
+        grpcAuthDistributorClient = GrpcAuthDistributorClient.createClient(
+                AuthDistributorConfig.newManagedChannelWrapper(host, 8982), authDistributorConfig, regionAwareInternalCrnGeneratorFactory);
+    }
+
     @Override
     public FlowPublicEndpoint flowPublicEndpoint() {
         throw new TestFailException("Flow does not support by auth distributor client");
@@ -31,18 +41,6 @@ public class AuthDistributorClient<E extends Enum<E>, W extends WaitObject> exte
     @Override
     public GrpcAuthDistributorClient getDefaultClient() {
         return grpcAuthDistributorClient;
-    }
-
-    public static synchronized AuthDistributorClient createProxyAuthDistributorClient(
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory, String host) {
-        AuthDistributorClient clientEntity = new AuthDistributorClient();
-        AuthDistributorConfig authDistributorConfig = new AuthDistributorConfig();
-        Field grpcTimeoutSec = ReflectionUtils.findField(AuthDistributorConfig.class, "grpcTimeoutSec");
-        ReflectionUtils.makeAccessible(grpcTimeoutSec);
-        ReflectionUtils.setField(grpcTimeoutSec, authDistributorConfig, 120);
-        clientEntity.grpcAuthDistributorClient = GrpcAuthDistributorClient.createClient(
-                AuthDistributorConfig.newManagedChannelWrapper(host, 8982), authDistributorConfig, regionAwareInternalCrnGeneratorFactory);
-        return clientEntity;
     }
 
     @Override

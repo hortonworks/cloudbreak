@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.ConfigDataApplicationContextInitial
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.ITestResult;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -26,7 +25,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRetryAction;
-import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -34,6 +32,7 @@ import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.config.user.TestUserCreator;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
@@ -48,7 +47,6 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestCaseDescriptionMissingException;
-import com.sequenceiq.it.cloudbreak.mock.ThreadLocalProfiles;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -90,7 +88,7 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
     private ResourcePropertyProvider resourcePropertyProvider;
 
     @Inject
-    private CloudbreakActor cloudbreakActor;
+    private TestUserCreator testUserCreator;
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
@@ -150,11 +148,6 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
         ((MockedTestContext) data[0]).cleanupTestContext();
     }
 
-    @AfterClass(alwaysRun = true)
-    public void cleanSharedObjects() {
-        ThreadLocalProfiles.clearProfiles();
-    }
-
     @DataProvider(name = TEST_CONTEXT_THREAD, parallel = true)
     public Object[][] testContextWithMock() {
         return new Object[][]{
@@ -177,7 +170,7 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
     }
 
     protected void createUser(MockedTestContext testContext, String tenant, String user) {
-        testContext.as(cloudbreakActor.create(tenant, user));
+        testContext.as(testUserCreator.create(tenant, user));
     }
 
     protected void initializeDefaultBlueprints(MockedTestContext testContext) {

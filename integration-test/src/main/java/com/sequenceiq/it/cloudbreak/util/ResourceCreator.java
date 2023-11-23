@@ -3,7 +3,6 @@ package com.sequenceiq.it.cloudbreak.util;
 import static com.sequenceiq.it.cloudbreak.testcase.AbstractMinimalTest.STACK_AVAILABLE;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -13,7 +12,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentS
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRetryAction;
-import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
+import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -72,9 +71,6 @@ public class ResourceCreator {
 
     @Inject
     private ImageCatalogMockServerSetup imageCatalogMockServerSetup;
-
-    @Inject
-    private CloudbreakActor actor;
 
     public CredentialTestDto createDefaultCredential(TestContext testContext) {
         return create(testContext
@@ -172,16 +168,16 @@ public class ResourceCreator {
         return create(testContext.given(name, ImageCatalogTestDto.class).withName(name));
     }
 
-    public DistroXTestDto createDefaultDataHubAndWaitAs(TestContext testContext, Optional<String> waitingUser) {
+    public DistroXTestDto createDefaultDataHubAndWaitAs(TestContext testContext, CloudbreakUser waitingUser) {
         return createAndWaitAs(testContext.given(DistroXTestDto.class), waitingUser);
     }
 
-    public DistroXTestDto createNewDataHubAndWaitAs(TestContext testContext, Optional<String> waitingUser) {
+    public DistroXTestDto createNewDataHubAndWaitAs(TestContext testContext, CloudbreakUser waitingUser) {
         String name = resourcePropertyProvider.getName();
         return createAndWaitAs(testContext.given(name, DistroXTestDto.class), waitingUser);
     }
 
-    public DistroXTestDto createNewDataHubAndWaitAs(TestContext testContext, EnvironmentTestDto environment, Optional<String> waitingUser) {
+    public DistroXTestDto createNewDataHubAndWaitAs(TestContext testContext, EnvironmentTestDto environment, CloudbreakUser waitingUser) {
         String name = resourcePropertyProvider.getName();
         return createAndWaitAs(testContext.given(name, DistroXTestDto.class).withEnvironmentName(environment.getName()), waitingUser);
     }
@@ -235,23 +231,19 @@ public class ResourceCreator {
     }
 
     @SuppressFBWarnings("BC_UNCONFIRMED_CAST")
-    public DistroXTestDto createAndWaitAs(DistroXTestDtoBase<DistroXTestDto> testDto, Optional<String> waitingUser) {
+    public DistroXTestDto createAndWaitAs(DistroXTestDtoBase<DistroXTestDto> testDto, CloudbreakUser waitingUser) {
         testDto.when(distroXTestClient.create());
         return waitForDistroX(testDto, waitingUser);
     }
 
     @SuppressFBWarnings("BC_UNCONFIRMED_CAST")
-    public DistroXTestDto createInternalAndWaitAs(DistroXTestDtoBase<DistroXTestDto> testDto, Optional<String> waitingUser) {
+    public DistroXTestDto createInternalAndWaitAs(DistroXTestDtoBase<DistroXTestDto> testDto, CloudbreakUser waitingUser) {
         testDto.when(distroXTestClient.createInternal());
         return waitForDistroX(testDto, waitingUser);
     }
 
-    private DistroXTestDto waitForDistroX(DistroXTestDtoBase<DistroXTestDto> testDto, Optional<String> waitingUser) {
-        if (waitingUser.isEmpty()) {
-            testDto.await(STACK_AVAILABLE);
-        } else {
-            testDto.await(STACK_AVAILABLE, RunningParameter.who(actor.useRealUmsUser(waitingUser.get())));
-        }
+    private DistroXTestDto waitForDistroX(DistroXTestDtoBase<DistroXTestDto> testDto, CloudbreakUser waitingUser) {
+        testDto.await(STACK_AVAILABLE, RunningParameter.who(waitingUser));
         testDto.validate();
         return (DistroXTestDto) testDto;
     }
