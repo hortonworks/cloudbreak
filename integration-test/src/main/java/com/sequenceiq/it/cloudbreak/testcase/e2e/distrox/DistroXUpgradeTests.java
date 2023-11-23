@@ -94,7 +94,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         createDefaultCredential(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT, groups = "aws_only")
+    @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak, and an environment with SDX and two DistroX clusters in " +
@@ -122,29 +122,6 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         createDatahubs(testContext, currentRuntimeVersion, currentRuntimeVersion3rdParty, firstDhName, secondDhName);
         encryptedTestUtil.assertDatahubWithName(testContext, null, firstDhName);
         encryptedTestUtil.assertDatahubWithName(testContext, null, secondDhName);
-        upgradeAndAssertUpgrade(testContext, targetRuntimeVersion, targetRuntimeVersion3rdParty, firstDhName, secondDhName);
-    }
-
-    @Test(dataProvider = TEST_CONTEXT, groups = "non_aws")
-    @UseSpotInstances
-    @Description(
-            given = "there is a running Cloudbreak, and an environment with SDX and two DistroX clusters in " +
-                    "available state, one cluster created with default catalog and one cluster created with production catalog",
-            when = "upgrade called on both DistroX clusters",
-            then = "Both DistroX upgrade should be successful," + " the clusters should be up and running")
-    public void testDistroXUpgrades(TestContext testContext) {
-
-        String currentRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion();
-        String targetRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion();
-        String currentRuntimeVersion3rdParty = commonClusterManagerProperties.getUpgrade().getDistroXUpgrade3rdPartyCurrentVersion();
-        String targetRuntimeVersion3rdParty = commonClusterManagerProperties.getUpgrade().getDistroXUpgrade3rdPartyTargetVersion();
-
-        String firstDhName = resourcePropertyProvider().getName();
-        String secondDhName = resourcePropertyProvider().getName();
-
-        createDefaultEnvironment(testContext);
-        createDatalake(testContext, currentRuntimeVersion);
-        createDatahubs(testContext, currentRuntimeVersion, currentRuntimeVersion3rdParty, firstDhName, secondDhName);
         upgradeAndAssertUpgrade(testContext, targetRuntimeVersion, targetRuntimeVersion3rdParty, firstDhName, secondDhName);
     }
 
