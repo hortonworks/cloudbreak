@@ -1,18 +1,17 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 
-public enum BlackListedUpScaleRole implements EntitledForServiceScale {
+public enum BlackListedUpScaleRole implements BlackListedScaleRole {
     KAFKA_BROKER(Entitlement.DATAHUB_STREAMING_SCALING, "7.2.12"),
     NIFI_NODE(Entitlement.DATAHUB_FLOW_SCALING, "7.2.8"),
     ZEPPELIN_SERVER(Entitlement.DATAHUB_DEFAULT_SCALING),
     NAMENODE(Entitlement.DATAHUB_DEFAULT_SCALING);
 
-    private final Entitlement entitledFor;
+    private final Optional<Entitlement> entitledFor;
 
     private final Optional<String> blockedUntilCDPVersion;
 
@@ -28,13 +27,13 @@ public enum BlackListedUpScaleRole implements EntitledForServiceScale {
     }
 
     BlackListedUpScaleRole(Entitlement entitledFor, String blockedUntilCDPVersion, String requiredService) {
-        this.entitledFor = Objects.requireNonNull(entitledFor);
+        this.entitledFor = Optional.ofNullable(entitledFor);
         this.blockedUntilCDPVersion = Optional.ofNullable(blockedUntilCDPVersion);
         this.requiredService = Optional.ofNullable(requiredService);
     }
 
     @Override
-    public Entitlement getEntitledFor() {
+    public Optional<Entitlement> getEntitledFor() {
         return entitledFor;
     }
 
@@ -50,5 +49,10 @@ public enum BlackListedUpScaleRole implements EntitledForServiceScale {
 
     public Versioned getBlockedUntilCDPVersionAsVersion() {
         return () -> blockedUntilCDPVersion.orElse(null);
+    }
+
+    @Override
+    public String scaleType() {
+        return "up";
     }
 }

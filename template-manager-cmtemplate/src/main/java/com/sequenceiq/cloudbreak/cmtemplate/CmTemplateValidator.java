@@ -78,7 +78,7 @@ public class CmTemplateValidator implements BlueprintValidator {
         });
     }
 
-    public boolean isVersionEnablesScaling(Versioned blueprintVersion, EntitledForServiceScale role) {
+    public boolean isVersionEnablesScaling(Versioned blueprintVersion, BlackListedScaleRole role) {
         return role.getBlockedUntilCDPVersion().isPresent()
                 && isVersionNewerOrEqualThanLimited(blueprintVersion, role.getBlockedUntilCDPVersionAsVersion());
     }
@@ -102,25 +102,42 @@ public class CmTemplateValidator implements BlueprintValidator {
         }
     }
 
-    private void validateRole(String accountId, EntitledForServiceScale role, Optional<ClouderaManagerProduct> cdhProduct,
-            CmTemplateProcessor templateProcessor) {
+    private void validateRole(String accountId, BlackListedScaleRole role, Optional<ClouderaManagerProduct> cdhProduct,
+        CmTemplateProcessor templateProcessor) {
         Versioned blueprintVersion = () -> cdhProduct.isEmpty() ? "7.0.0" : cdhProduct.get().getVersion();
         boolean versionEnablesScaling = isVersionEnablesScaling(blueprintVersion, role);
-        boolean entitledFor = entitlementService.isEntitledFor(accountId, role.getEntitledFor());
-        if (role.getBlockedUntilCDPVersion().isPresent() && !versionEnablesScaling && !entitledFor) {
-            throw new BadRequestException(String.format("'%s' service is not enabled to scale until CDP %s",
+        boolean entitledFor = role.getEntitledFor().isEmpty() ? false : entitlementService.isEntitledFor(accountId, role.getEntitledFor().get());
+        if (entitlementAndVersionRestrictionsAreEmpty(role)) {
+            throw new BadRequestException(String.format("'%s' service is not enabled to scaling " + role.scaleType(), role.name()));
+        } else if (notSupportedVersionForScaling(role, versionEnablesScaling, entitledFor)) {
+            throw new BadRequestException(String.format("'%s' service is not enabled to scaling " + role.scaleType() + " until CDP %s",
                     role.name(), role.getBlockedUntilCDPVersion().get()));
-        } else if (role.getBlockedUntilCDPVersion().isEmpty() && !entitledFor) {
-            throw new BadRequestException(String.format("'%s' service is not enabled to scale",
-                    role.name()));
-        } else if (role.getRequiredService().isPresent()
-                && !isRequiredServicePresent(role.getRequiredService(), templateProcessor)
-                && versionEnablesScaling) {
+        } else if (notEntitledForScaling(role, entitledFor)) {
+            throw new BadRequestException(String.format("'%s' service is not enabled to scaling" + role.scaleType(), role.name()));
+        } else if (requiredServiceNotPresented(role, templateProcessor, versionEnablesScaling)) {
             throw new BadRequestException(String.format("'%s' service is not presented on the cluster, and that is required",
                     role.getRequiredService().get()));
         } else {
-            LOGGER.info("Account is entitled for {} so scaling is enabled.", role.getEntitledFor());
+            LOGGER.info("Account is entitled for {} so scaling " + role.scaleType() + " is enabled.", role.getEntitledFor());
         }
+    }
+
+    private boolean requiredServiceNotPresented(BlackListedScaleRole role, CmTemplateProcessor templateProcessor, boolean versionEnablesScaling) {
+        return role.getRequiredService().isPresent()
+                && !isRequiredServicePresent(role.getRequiredService(), templateProcessor)
+                && versionEnablesScaling;
+    }
+
+    private boolean notEntitledForScaling(BlackListedScaleRole role, boolean entitledFor) {
+        return role.getBlockedUntilCDPVersion().isEmpty() && !entitledFor;
+    }
+
+    private boolean notSupportedVersionForScaling(BlackListedScaleRole role, boolean versionEnablesScaling, boolean entitledFor) {
+        return role.getBlockedUntilCDPVersion().isPresent() && !versionEnablesScaling && !entitledFor;
+    }
+
+    private boolean entitlementAndVersionRestrictionsAreEmpty(BlackListedScaleRole role) {
+        return role.getBlockedUntilCDPVersion().isEmpty() && role.getEntitledFor().isEmpty();
     }
 
     private boolean isRequiredServicePresent(Optional<String> requiredService, CmTemplateProcessor templateProcessor) {

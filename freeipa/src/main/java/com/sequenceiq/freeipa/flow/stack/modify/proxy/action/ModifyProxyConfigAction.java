@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.OperationAwareAction;
+import com.sequenceiq.freeipa.flow.chain.FlowChainAwareAction;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
@@ -20,7 +21,7 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 
 public abstract class ModifyProxyConfigAction<P extends StackEvent>
         extends AbstractStackAction<ModifyProxyConfigState, ModifyProxyConfigEvent, ModifyProxyConfigContext, P>
-        implements OperationAwareAction {
+        implements OperationAwareAction, FlowChainAwareAction {
 
     @Inject
     private StackService stackService;

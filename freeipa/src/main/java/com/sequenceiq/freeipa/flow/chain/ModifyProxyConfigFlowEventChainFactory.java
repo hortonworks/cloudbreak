@@ -26,7 +26,7 @@ public class ModifyProxyConfigFlowEventChainFactory implements FlowEventChainFac
     public FlowTriggerEventQueue createFlowTriggerEventQueue(ModifyProxyFlowChainTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true, false, event.getOperationId()));
-        flowEventChain.add(new ModifyProxyConfigTriggerEvent(event.getResourceId(), event.accepted(), event.getOperationId()));
+        flowEventChain.add(new ModifyProxyConfigTriggerEvent(event.getResourceId(), event.accepted(), true, false, event.getOperationId()));
         flowEventChain.add(
                 UserDataUpdateRequest.builder()
                         .withSelector(UpdateUserDataEvents.UPDATE_USERDATA_TRIGGER_EVENT.event())
