@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
+import static com.azure.resourcemanager.compute.models.NetworkAccessPolicy.DENY_ALL;
+import static com.azure.resourcemanager.compute.models.PublicNetworkAccess.DISABLED;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -46,9 +50,21 @@ import com.azure.resourcemanager.compute.fluent.models.ResourceSkuInner;
 import com.azure.resourcemanager.compute.fluent.models.VirtualMachineInner;
 import com.azure.resourcemanager.compute.models.CachingTypes;
 import com.azure.resourcemanager.compute.models.Disk;
+import com.azure.resourcemanager.compute.models.Disk.DefinitionStages.Blank;
+import com.azure.resourcemanager.compute.models.Disk.DefinitionStages.WithAvailabilityZone;
+import com.azure.resourcemanager.compute.models.Disk.DefinitionStages.WithCreate;
+import com.azure.resourcemanager.compute.models.Disk.DefinitionStages.WithDataDiskSource;
+import com.azure.resourcemanager.compute.models.Disk.DefinitionStages.WithDiskEncryption;
+import com.azure.resourcemanager.compute.models.Disk.DefinitionStages.WithDiskSource;
+import com.azure.resourcemanager.compute.models.Disk.DefinitionStages.WithGroup;
+import com.azure.resourcemanager.compute.models.Disk.DefinitionStages.WithHibernationSupport;
+import com.azure.resourcemanager.compute.models.Disk.DefinitionStages.WithLogicalSectorSize;
+import com.azure.resourcemanager.compute.models.Disk.DefinitionStages.WithSku;
 import com.azure.resourcemanager.compute.models.DiskSkuTypes;
 import com.azure.resourcemanager.compute.models.Disks;
 import com.azure.resourcemanager.compute.models.Encryption;
+import com.azure.resourcemanager.compute.models.NetworkAccessPolicy;
+import com.azure.resourcemanager.compute.models.PublicNetworkAccess;
 import com.azure.resourcemanager.compute.models.ResourceSkuLocationInfo;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.azure.resourcemanager.compute.models.VirtualMachines;
@@ -65,6 +81,9 @@ import com.azure.resourcemanager.postgresql.models.Server;
 import com.azure.resourcemanager.postgresql.models.Server.Update;
 import com.azure.resourcemanager.postgresql.models.Servers;
 import com.azure.resourcemanager.resources.fluentcore.arm.AvailabilityZoneId;
+import com.azure.resourcemanager.resources.fluentcore.arm.models.Resource;
+import com.azure.resourcemanager.resources.fluentcore.model.Creatable;
+import com.azure.resourcemanager.resources.fluentcore.model.HasInnerModel;
 import com.azure.resourcemanager.resources.fluentcore.model.implementation.IndexableRefreshableWrapperImpl;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDisk;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
@@ -111,13 +130,19 @@ class AzureClientTest {
     @Mock
     private PostgreSqlManager postgreSqlManager;
 
+    @Mock(extraInterfaces = {HasInnerModel.class, Creatable.class,
+            Resource.class,
+            WithSku.class,
+            WithAvailabilityZone.class,
+            WithDiskEncryption.class,
+            WithHibernationSupport.class,
+            WithLogicalSectorSize.class})
+    private WithCreate withCreate;
+
     @Mock
     private com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager postgreSqlFlexibleManager;
 
     private AzureClient underTest;
-
-    @Mock(extraInterfaces = Disk.DefinitionStages.WithCreate.class)
-    private IndexableRefreshableWrapperImpl withCreateIndexableRefreshableWrapperImpl;
 
     @Mock
     private AzureListResultFactory azureListResultFactory;
@@ -149,16 +174,14 @@ class AzureClientTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("setupDiskEncryptionWithDesIfNeededTestWhenDesAbsentDataProvider")
     void setupDiskEncryptionWithDesIfNeededTestWhenDesAbsent(String testCaseName, String diskEncryptionSetId) {
-        underTest.setupDiskEncryptionWithDesIfNeeded(diskEncryptionSetId, (Disk.DefinitionStages.WithCreate) withCreateIndexableRefreshableWrapperImpl);
+        underTest.setupDiskEncryptionWithDesIfNeeded(diskEncryptionSetId, diskInner);
 
-        verify(withCreateIndexableRefreshableWrapperImpl, never()).innerModel();
+        verify(diskInner, never()).withEncryption(any());
     }
 
     @Test
     void setupDiskEncryptionWithDesIfNeededTestWhenDesGiven() {
-        when(withCreateIndexableRefreshableWrapperImpl.innerModel()).thenReturn(diskInner);
-
-        underTest.setupDiskEncryptionWithDesIfNeeded(DISK_ENCRYPTION_SET_ID, (Disk.DefinitionStages.WithCreate) withCreateIndexableRefreshableWrapperImpl);
+        underTest.setupDiskEncryptionWithDesIfNeeded(DISK_ENCRYPTION_SET_ID, diskInner);
 
         verify(diskInner).withEncryption(encryptionCaptor.capture());
         Encryption encryption = encryptionCaptor.getValue();
@@ -175,7 +198,7 @@ class AzureClientTest {
         // This class is package private
         Class<?> clazzDiskImpl = Class.forName("com.azure.resourcemanager.compute.implementation.DiskImpl");
         assertThat(Disk.class.isAssignableFrom(clazzDiskImpl)).isTrue();
-        assertThat(Disk.DefinitionStages.WithCreate.class.isAssignableFrom(clazzDiskImpl)).isTrue();
+        assertThat(WithCreate.class.isAssignableFrom(clazzDiskImpl)).isTrue();
         assertThat(IndexableRefreshableWrapperImpl.class.isAssignableFrom(clazzDiskImpl)).isTrue();
         Constructor<?>[] clazzDiskImplConstructors = clazzDiskImpl.getDeclaredConstructors();
         assertThat(clazzDiskImplConstructors).isNotEmpty();
@@ -206,7 +229,7 @@ class AzureClientTest {
 
         underTest.attachDisksToVm(disks, virtualMachine);
         verify(virtualMachineUpdate, times(1)).withDataDiskDefaultCachingType(captor.capture());
-        Assertions.assertEquals(CachingTypes.NONE, captor.getValue());
+        assertEquals(CachingTypes.NONE, captor.getValue());
     }
 
     @Test
@@ -232,7 +255,7 @@ class AzureClientTest {
 
         underTest.attachDisksToVm(disks, virtualMachine);
         verify(virtualMachineUpdate, times(1)).withDataDiskDefaultCachingType(captor.capture());
-        Assertions.assertEquals(CachingTypes.READ_ONLY, captor.getValue());
+        assertEquals(CachingTypes.READ_ONLY, captor.getValue());
     }
 
     @Test
@@ -258,7 +281,7 @@ class AzureClientTest {
 
         underTest.attachDisksToVm(disks, virtualMachine);
         verify(virtualMachineUpdate, times(1)).withDataDiskDefaultCachingType(captor.capture());
-        Assertions.assertEquals(CachingTypes.READ_ONLY, captor.getValue());
+        assertEquals(CachingTypes.READ_ONLY, captor.getValue());
     }
 
     @Test
@@ -396,10 +419,10 @@ class AzureClientTest {
         List<ResourceSkuInner> list = getResourceSkus(azureZoneInfo);
         when(azureListResult.getStream()).thenReturn(list.stream());
         Map<String, List<String>> zoneInfo = underTest.getAvailabilityZones("westus2");
-        Assertions.assertEquals(azureZoneInfo.size(), zoneInfo.size());
+        assertEquals(azureZoneInfo.size(), zoneInfo.size());
         azureZoneInfo.entrySet().stream().forEach(entry -> {
-            Assertions.assertEquals(true, zoneInfo.containsKey(entry.getKey()));
-            Assertions.assertEquals(entry.getValue(), zoneInfo.get(entry.getKey()));
+            Assertions.assertTrue(zoneInfo.containsKey(entry.getKey()));
+            assertEquals(entry.getValue(), zoneInfo.get(entry.getKey()));
         });
     }
 
@@ -411,28 +434,42 @@ class AzureClientTest {
     @ParameterizedTest(name = "testCreateManagedDiskWithAvailabilityZoneForAZ{0}")
     @MethodSource("azureZones")
     public void testCreateManagedDiskWithAvailabilityZone(String availabilityZone) {
-        Disk.DefinitionStages.WithCreate withCreate = setUpForDiskCreation();
+        WithCreate withCreate = setUpForDiskCreation();
         underTest.createManagedDisk(new AzureDisk("volume-1", 100, AzureDiskType.STANDARD_SSD_LRS, "westus2", "my-rg",
                 Map.of(), null, availabilityZone));
         verify(withCreate, times(availabilityZone == null ? 0 : 1)).withAvailabilityZone(eq(AvailabilityZoneId.fromString(availabilityZone)));
+
+        ArgumentCaptor<NetworkAccessPolicy> networkAccessPolicyArgumentCaptor = ArgumentCaptor.forClass(NetworkAccessPolicy.class);
+        verify(diskInner).withNetworkAccessPolicy(networkAccessPolicyArgumentCaptor.capture());
+        NetworkAccessPolicy networkAccessPolicy = networkAccessPolicyArgumentCaptor.getValue();
+        assertNotNull(networkAccessPolicy);
+        assertEquals(DENY_ALL, networkAccessPolicy);
+
+        ArgumentCaptor<PublicNetworkAccess> publicNetworkAccessArgumentCaptor = ArgumentCaptor.forClass(PublicNetworkAccess.class);
+        verify(diskInner).withPublicNetworkAccess(publicNetworkAccessArgumentCaptor.capture());
+        PublicNetworkAccess publicNetworkAccess = publicNetworkAccessArgumentCaptor.getValue();
+        assertNotNull(publicNetworkAccess);
+        assertEquals(DISABLED, publicNetworkAccess);
+
     }
 
-    private Disk.DefinitionStages.WithCreate setUpForDiskCreation() {
+    private WithCreate setUpForDiskCreation() {
         Disks disks = mock(Disks.class);
         when(azureResourceManager.disks()).thenReturn(disks);
-        Disk.DefinitionStages.Blank withBlank = mock(Disk.DefinitionStages.Blank.class);
+        Blank withBlank = mock(Blank.class);
         when(disks.define(any())).thenReturn(withBlank);
-        Disk.DefinitionStages.WithGroup withGroup = mock(Disk.DefinitionStages.WithGroup.class);
+        WithGroup withGroup = mock(WithGroup.class);
         when(withBlank.withRegion(Region.US_WEST2)).thenReturn(withGroup);
-        Disk.DefinitionStages.WithDiskSource withDiskSource = mock(Disk.DefinitionStages.WithDiskSource.class);
+        WithDiskSource withDiskSource = mock(WithDiskSource.class);
         when(withGroup.withExistingResourceGroup("my-rg")).thenReturn(withDiskSource);
-        Disk.DefinitionStages.WithDataDiskSource withDataDiskSource = mock(Disk.DefinitionStages.WithDataDiskSource.class);
+        WithDataDiskSource withDataDiskSource = mock(WithDataDiskSource.class);
         when(withDiskSource.withData()).thenReturn(withDataDiskSource);
-        Disk.DefinitionStages.WithCreate withCreate = mock(Disk.DefinitionStages.WithCreate.class);
         when(withDataDiskSource.withSizeInGB(100)).thenReturn(withCreate);
         when(withCreate.withTags(any())).thenReturn(withCreate);
         when(withCreate.withSku(any())).thenReturn(withCreate);
         when(withCreate.withAvailabilityZone(any())).thenReturn(withCreate);
+        HasInnerModel<DiskInner> hasInnerModel = (HasInnerModel<DiskInner>) withCreate;
+        when(hasInnerModel.innerModel()).thenReturn(diskInner);
         return withCreate;
     }
 

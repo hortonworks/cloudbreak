@@ -30,6 +30,8 @@ public class ModifyProxyConfigSaltStateApplyAction extends ModifyProxyConfigActi
     @Override
     protected void doExecute(ModifyProxyConfigContext context, ModifyProxyConfigTriggerEvent payload, Map<Object, Object> variables) throws Exception {
         LOGGER.info("Start modify proxy config salt state apply");
+        setChainedAction(variables, payload.isChained());
+        setFinalChain(variables, payload.isFinalChain());
         setOperationId(variables, payload.getOperationId());
         stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.MODIFY_PROXY_CONFIG_IN_PROGRESS,
                 "Applying modified proxy config salt state");

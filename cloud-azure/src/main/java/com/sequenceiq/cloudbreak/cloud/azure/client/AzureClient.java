@@ -51,7 +51,9 @@ import com.azure.resourcemanager.compute.models.DiskStorageAccountTypes;
 import com.azure.resourcemanager.compute.models.Encryption;
 import com.azure.resourcemanager.compute.models.EncryptionSetIdentity;
 import com.azure.resourcemanager.compute.models.KeyForDiskEncryptionSet;
+import com.azure.resourcemanager.compute.models.NetworkAccessPolicy;
 import com.azure.resourcemanager.compute.models.OperatingSystemStateTypes;
+import com.azure.resourcemanager.compute.models.PublicNetworkAccess;
 import com.azure.resourcemanager.compute.models.ResourceSkuLocationInfo;
 import com.azure.resourcemanager.compute.models.SourceVault;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
@@ -84,7 +86,6 @@ import com.azure.resourcemanager.privatedns.models.PrivateDnsZone;
 import com.azure.resourcemanager.privatedns.models.VirtualNetworkLinkState;
 import com.azure.resourcemanager.resources.fluentcore.arm.AvailabilityZoneId;
 import com.azure.resourcemanager.resources.fluentcore.model.HasInnerModel;
-import com.azure.resourcemanager.resources.fluentcore.model.implementation.IndexableRefreshableWrapperImpl;
 import com.azure.resourcemanager.resources.models.Deployment;
 import com.azure.resourcemanager.resources.models.DeploymentMode;
 import com.azure.resourcemanager.resources.models.DeploymentOperations;
@@ -292,19 +293,25 @@ public class AzureClient {
         if (StringUtils.isNotEmpty(azureDisk.getAvailabilityZone())) {
             withCreate = withCreate.withAvailabilityZone(AvailabilityZoneId.fromString(azureDisk.getAvailabilityZone()));
         }
-        setupDiskEncryptionWithDesIfNeeded(azureDisk.getDiskEncryptionSetId(), withCreate);
+        // WithCreate is actually a DiskImpl instance, but that type is not visible.
+        DiskInner inner = ((HasInnerModel<DiskInner>) withCreate).innerModel();
+        setupDiskEncryptionWithDesIfNeeded(azureDisk.getDiskEncryptionSetId(), inner);
+        setupPrivateNetworkAccess(inner);
         return withCreate.create();
     }
 
+    private void setupPrivateNetworkAccess(DiskInner inner) {
+        inner.withPublicNetworkAccess(PublicNetworkAccess.DISABLED);
+        inner.withNetworkAccessPolicy(NetworkAccessPolicy.DENY_ALL);
+    }
+
     @VisibleForTesting
-    void setupDiskEncryptionWithDesIfNeeded(String diskEncryptionSetId, Disk.DefinitionStages.WithCreate withCreate) {
+    void setupDiskEncryptionWithDesIfNeeded(String diskEncryptionSetId, DiskInner disk) {
         if (!Strings.isNullOrEmpty(diskEncryptionSetId)) {
             // This is nasty. The DES setter is not exposed in WithCreate, so have to rely on the direct tweaking of the underlying DiskInner.
             Encryption encryption = new Encryption();
             encryption.withDiskEncryptionSetId(diskEncryptionSetId);
-            // WithCreate is actually a DiskImpl instance, but that type is not visible.
-            DiskInner inner = (DiskInner) ((IndexableRefreshableWrapperImpl) withCreate).innerModel();
-            inner.withEncryption(encryption);
+            disk.withEncryption(encryption);
         }
     }
 

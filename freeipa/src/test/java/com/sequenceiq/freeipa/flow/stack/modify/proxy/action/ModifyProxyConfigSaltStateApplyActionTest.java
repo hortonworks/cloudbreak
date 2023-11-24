@@ -51,7 +51,7 @@ class ModifyProxyConfigSaltStateApplyActionTest extends ActionTest {
     void setUp() {
         context = new ModifyProxyConfigContext(flowParameters, stack);
         lenient().when(stack.getId()).thenReturn(STACK_ID);
-        payload = new ModifyProxyConfigTriggerEvent(STACK_ID, mock(Promise.class), OPERATION_ID);
+        payload = new ModifyProxyConfigTriggerEvent(STACK_ID, mock(Promise.class), true, false, OPERATION_ID);
     }
 
     @Test
@@ -60,6 +60,9 @@ class ModifyProxyConfigSaltStateApplyActionTest extends ActionTest {
 
         underTest.doExecute(context, payload, variables);
 
+        assertThat(underTest.isChainedAction(variables)).isTrue();
+        assertThat(underTest.isFinalChain(variables)).isFalse();
+        assertThat(underTest.getOperationId(variables)).isEqualTo(OPERATION_ID);
         verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.MODIFY_PROXY_CONFIG_IN_PROGRESS,
                 "Applying modified proxy config salt state");
         assertThat(variables).containsEntry(OperationAwareAction.OPERATION_ID, OPERATION_ID);
