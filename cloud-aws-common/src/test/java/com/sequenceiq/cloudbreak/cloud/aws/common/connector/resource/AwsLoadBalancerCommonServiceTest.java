@@ -9,10 +9,15 @@ import static com.sequenceiq.common.api.type.ResourceType.AWS_INSTANCE;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -29,11 +34,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsListener;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsTargetGroup;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
+import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsResourceException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
@@ -46,6 +53,11 @@ import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
+
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ElasticLoadBalancingV2Exception;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class AwsLoadBalancerCommonServiceTest {
@@ -235,6 +247,76 @@ class AwsLoadBalancerCommonServiceTest {
         AwsTargetGroup targetGroup = listener.getTargetGroup();
         assertEquals(PORT, targetGroup.getPort());
         assertEquals(Set.of(INSTANCE_ID), targetGroup.getInstanceIds());
+    }
+
+    @Test
+    void testEnableDeletionProtectionWhenLoadBalancerNotFoundExceptionWasThrown() {
+        AmazonElasticLoadBalancingClient amazonElasticLoadBalancingClient = mock(AmazonElasticLoadBalancingClient.class);
+        when(amazonElasticLoadBalancingClient.modifyLoadBalancerAttributes(any())).thenThrow(LoadBalancerNotFoundException.builder().build());
+
+        assertThrows(AwsResourceException.class, () -> underTest.enableDeletionProtection(amazonElasticLoadBalancingClient, "loadBalancerArn"));
+    }
+
+    @Test
+    void testDisableDeletionProtectionWhenLoadBalancerNotFoundExceptionWasThrown() {
+        AmazonElasticLoadBalancingClient amazonElasticLoadBalancingClient = mock(AmazonElasticLoadBalancingClient.class);
+        when(amazonElasticLoadBalancingClient.modifyLoadBalancerAttributes(any())).thenThrow(LoadBalancerNotFoundException.builder().build());
+
+        assertDoesNotThrow(() -> underTest.disableDeletionProtection(amazonElasticLoadBalancingClient, "loadBalancerArn"));
+    }
+
+    @Test
+    void testDisableDeletionProtectionWhenNoAccessToModifyLoadBalancerAttributes() {
+        AmazonElasticLoadBalancingClient amazonElasticLoadBalancingClient = mock(AmazonElasticLoadBalancingClient.class);
+        when(amazonElasticLoadBalancingClient.modifyLoadBalancerAttributes(any())).thenThrow(ElasticLoadBalancingV2Exception.builder()
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode("AccessDeniedException").build())
+                .build());
+
+        assertDoesNotThrow(() -> underTest.disableDeletionProtection(amazonElasticLoadBalancingClient, "loadBalancerArn"));
+    }
+
+    @Test
+    void testEnableDeletionProtectionWhenNoAccessToModifyLoadBalancerAttributes() {
+        AmazonElasticLoadBalancingClient amazonElasticLoadBalancingClient = mock(AmazonElasticLoadBalancingClient.class);
+        when(amazonElasticLoadBalancingClient.modifyLoadBalancerAttributes(any())).thenThrow(ElasticLoadBalancingV2Exception.builder()
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode("AccessDeniedException").build())
+                .build());
+
+        assertDoesNotThrow(() -> underTest.enableDeletionProtection(amazonElasticLoadBalancingClient, "loadBalancerArn"));
+    }
+
+    @Test
+    void testEnableDeletionProtectionWhenAwsServiceExceptionWasThrown() {
+        AmazonElasticLoadBalancingClient amazonElasticLoadBalancingClient = mock(AmazonElasticLoadBalancingClient.class);
+        when(amazonElasticLoadBalancingClient.modifyLoadBalancerAttributes(any())).thenThrow(AwsServiceException.builder().build());
+
+        assertThrows(AwsServiceException.class, () -> underTest.enableDeletionProtection(amazonElasticLoadBalancingClient, "loadBalancerArn"));
+    }
+
+    @Test
+    void testDisableDeletionProtectionWhenAwsServiceExceptionWasThrown() {
+        AmazonElasticLoadBalancingClient amazonElasticLoadBalancingClient = mock(AmazonElasticLoadBalancingClient.class);
+        when(amazonElasticLoadBalancingClient.modifyLoadBalancerAttributes(any())).thenThrow(AwsServiceException.builder().build());
+
+        assertThrows(AwsServiceException.class, () -> underTest.disableDeletionProtection(amazonElasticLoadBalancingClient, "loadBalancerArn"));
+    }
+
+    @Test
+    void testEnableDeletionProtection() {
+        AmazonElasticLoadBalancingClient amazonElasticLoadBalancingClient = mock(AmazonElasticLoadBalancingClient.class);
+
+        assertDoesNotThrow(() -> underTest.enableDeletionProtection(amazonElasticLoadBalancingClient, "loadBalancerArn"));
+
+        verify(amazonElasticLoadBalancingClient, times(1)).modifyLoadBalancerAttributes(any());
+    }
+
+    @Test
+    void testDisableDeletionProtection() {
+        AmazonElasticLoadBalancingClient amazonElasticLoadBalancingClient = mock(AmazonElasticLoadBalancingClient.class);
+
+        assertDoesNotThrow(() -> underTest.disableDeletionProtection(amazonElasticLoadBalancingClient, "loadBalancerArn"));
+
+        verify(amazonElasticLoadBalancingClient, times(1)).modifyLoadBalancerAttributes(any());
     }
 
     private AwsLoadBalancer setupAndRunConvertLoadBalancer(List<AwsLoadBalancer> existingLoadBalancers, LoadBalancerType type, String subnetId) {

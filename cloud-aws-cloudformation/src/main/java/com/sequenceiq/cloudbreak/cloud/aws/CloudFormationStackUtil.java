@@ -28,7 +28,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Splitter;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEfsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsTargetGroup;
@@ -59,9 +58,6 @@ import software.amazon.awssdk.services.cloudformation.model.ListStackResourcesRe
 import software.amazon.awssdk.services.cloudformation.model.Output;
 import software.amazon.awssdk.services.cloudformation.model.StackResourceSummary;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
-import software.amazon.awssdk.services.efs.model.DescribeFileSystemsRequest;
-import software.amazon.awssdk.services.efs.model.DescribeFileSystemsResponse;
-import software.amazon.awssdk.services.efs.model.FileSystemDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
@@ -303,18 +299,6 @@ public class CloudFormationStackUtil {
                         .build());
             }
         }
-    }
-
-    public FileSystemDescription getEfsByFileSystemId(AuthenticatedContext ac, String fileSystemId) {
-        String region = ac.getCloudContext().getLocation().getRegion().value();
-        AmazonEfsClient amazonEfsClient =
-                awsClient.createElasticFileSystemClient(new AwsCredentialView(ac.getCloudCredential()), region);
-
-        DescribeFileSystemsResponse efsResponse = amazonEfsClient.describeFileSystems(DescribeFileSystemsRequest.builder()
-                .fileSystemId(fileSystemId)
-                .build());
-
-        return efsResponse.fileSystems().get(0);
     }
 
     public boolean isCfStackExists(AmazonCloudFormationClient cfClient, String stackName) {
