@@ -126,11 +126,11 @@
     },
     {
       "name": "FLINK",
-      "version": "1.16.1"
+      "version": "1.18.0"
     },
     {
       "name": "SQL_STREAM_BUILDER",
-      "version": "1.10.0"
+      "version": "1.12.0"
     },
     {
       "name": "SPARK3_ON_YARN",
