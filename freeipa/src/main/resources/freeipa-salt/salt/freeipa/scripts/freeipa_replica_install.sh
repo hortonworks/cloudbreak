@@ -96,13 +96,14 @@ if ipa hostgroup-show ipaservers | grep "$FQDN"; then
 fi
 
 FORWARDERS=$(grep -Ev '^#|^;' /etc/resolv.conf.orig | grep nameserver | awk '{print "--forwarder " $2}')
-PRIMARY_IPA=$(grep -Ev '^#|^;' /etc/resolv.conf | grep nameserver | awk '{print $2}')
 
 if [[ "${FORWARDERS}" == *" 169.254."* ]]; then
   echo "IPA does not work with link-local IP addresses, so not using it as the forwarder"
-  FORWARDERS="--forwarder $PRIMARY_IPA --auto-forwarders "
+  FORWARDERS="--forwarder $FREEIPA_TO_REPLICATE_IP --auto-forwarders "
   cp /etc/resolv.conf.orig /etc/resolv.conf
 fi
+
+echo "Forwarders to use: [$FORWARDERS]"
 
 ipa-replica-install \
           --setup-ca \
