@@ -67,19 +67,4 @@ public class AbstractVaultEngineTest {
         Assert.assertTrue(underTest.isSecret(gson.toJson(secret)));
     }
 
-    @Test
-    public void testScarifySecretEndsWithUUID() {
-        String result = underTest.scarifySecret(gson.toJson(secret));
-
-        Assert.assertEquals("cb.foo.bar", result);
-    }
-
-    @Test
-    public void testScarifySecretEndsWithNotUUID() {
-        VaultSecret secret = new VaultSecret("cb", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV1Engine", "cb/foo/bar");
-
-        String result = underTest.scarifySecret(gson.toJson(secret));
-
-        Assert.assertEquals("cb.foo.bar", result);
-    }
 }

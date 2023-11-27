@@ -1,9 +1,7 @@
 package com.sequenceiq.cloudbreak.service.secret.vault;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -33,17 +31,6 @@ abstract class AbstractVaultEngine<E> implements SecretEngine {
         return vaultSecret != null && vaultSecret.getEngineClass().equals(clazz().getCanonicalName());
     }
 
-    @Override
-    public String scarifySecret(String secret) {
-        VaultSecret vaultSecret = convertToVaultSecret(secret);
-        int cut = uniqueId.matcher(vaultSecret.getPath()).matches() ? 1 : 0;
-        return Optional.of(vaultSecret)
-                .map(s -> s.getPath().split("/"))
-                .map(ss -> Stream.of(ss).limit(ss.length - cut))
-                .map(st -> st.collect(Collectors.joining(".")))
-                .orElse(null);
-    }
-
     VaultSecret convertToVaultSecret(String enginePath, String fullPath) {
         LOGGER.info("Converting secret enginePath: {}, fullPath: {}", enginePath, fullPath);
 
@@ -71,7 +58,7 @@ abstract class AbstractVaultEngine<E> implements SecretEngine {
                 return vaultSecret;
             }
         } catch (JsonSyntaxException ignore) {
-            LOGGER.info("exception happened {}", ignore);
+            LOGGER.warn("Parsing vault secret failed, ignore exception", ignore);
         }
         return null;
     }

@@ -26,8 +26,6 @@ public interface SecretEngine {
 
     SecretResponse convertToExternal(String secret);
 
-    String scarifySecret(String secret);
-
     List<String> listEntries(String secretPathPrefix);
 
     void cleanup(String path);

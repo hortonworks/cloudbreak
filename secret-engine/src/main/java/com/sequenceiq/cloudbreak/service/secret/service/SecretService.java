@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.secret.service;
 
 import static java.lang.String.format;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -11,6 +12,7 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
@@ -46,7 +48,7 @@ public class SecretService {
 
     private final VaultRetryService vaultRetryService;
 
-    public SecretService(MetricService metricService, List<SecretEngine> engines, VaultRetryService vaultRetryService) {
+    public SecretService(@Qualifier("CommonMetricService") MetricService metricService, List<SecretEngine> engines, VaultRetryService vaultRetryService) {
         this.metricService = metricService;
         this.engines = engines;
         this.vaultRetryService = vaultRetryService;
@@ -71,9 +73,8 @@ public class SecretService {
         long start = System.currentTimeMillis();
         String secret = vaultRetryService.tryWritingVault(() -> persistentEngine.put(key, value));
         long duration = System.currentTimeMillis() - start;
-        metricService.gauge(MetricType.VAULT_WRITE, duration);
+        metricService.recordTimerMetric(MetricType.VAULT_WRITE, Duration.ofMillis(duration));
         LOGGER.trace("Secret write took {} ms", duration);
-        metricService.incrementMetricCounter(() -> "secret.write." + convertSecretToMetric(secret));
         return secret;
     }
 
@@ -81,9 +82,8 @@ public class SecretService {
         long start = System.currentTimeMillis();
         String secret = vaultRetryService.tryWritingVault(() -> persistentEngine.put(key, value));
         long duration = System.currentTimeMillis() - start;
-        metricService.gauge(MetricType.VAULT_WRITE, duration);
+        metricService.recordTimerMetric(MetricType.VAULT_WRITE, Duration.ofMillis(duration));
         LOGGER.trace("Secret write took {} ms", duration);
-        metricService.incrementMetricCounter(() -> "secret.write." + convertSecretToMetric(secret));
         return secret;
     }
 
@@ -111,9 +111,8 @@ public class SecretService {
         if (secret == null) {
             return null;
         }
-        metricService.incrementMetricCounter(() -> "secret.read." + convertSecretToMetric(secret));
-        long start = System.currentTimeMillis();
 
+        long start = System.currentTimeMillis();
         RotationSecret response = vaultRetryService.tryReadingVault(() -> {
             return getFirstEngineStream(secret)
                     .map(e -> e.getRotation(secret))
@@ -121,7 +120,7 @@ public class SecretService {
                     .orElse(null);
         });
         long duration = System.currentTimeMillis() - start;
-        metricService.gauge(MetricType.VAULT_READ, duration);
+        metricService.recordTimerMetric(MetricType.VAULT_READ, Duration.ofMillis(duration));
         LOGGER.trace("Secret read took {} ms", duration);
         return "null".equals(response) ? null : response;
     }
@@ -149,9 +148,8 @@ public class SecretService {
         if (secret == null) {
             return null;
         }
-        metricService.incrementMetricCounter(() -> "secret.read." + convertSecretToMetric(secret));
-        long start = System.currentTimeMillis();
 
+        long start = System.currentTimeMillis();
         String response = vaultRetryService.tryReadingVault(() -> {
             return getFirstEngineStream(secret)
                     .map(e -> e.get(secret, field))
@@ -159,7 +157,7 @@ public class SecretService {
                     .orElse(null);
         });
         long duration = System.currentTimeMillis() - start;
-        metricService.gauge(MetricType.VAULT_READ, duration);
+        metricService.recordTimerMetric(MetricType.VAULT_READ, Duration.ofMillis(duration));
         LOGGER.trace("Secret read took {} ms", duration);
         return "null".equals(response) ? null : response;
     }
@@ -209,13 +207,12 @@ public class SecretService {
      * @param secret Key-value secret in Secret
      */
     public void delete(String secret) {
-        metricService.incrementMetricCounter(() -> "secret.delete." + convertSecretToMetric(secret));
         long start = System.currentTimeMillis();
         engines.stream()
                 .filter(e -> e.isSecret(secret))
                 .forEach(e -> e.delete(secret));
         long duration = System.currentTimeMillis() - start;
-        metricService.gauge(MetricType.VAULT_WRITE, duration);
+        metricService.recordTimerMetric(MetricType.VAULT_DELETE, Duration.ofMillis(duration));
         LOGGER.trace("Secret delete took {} ms", duration);
     }
 
@@ -224,11 +221,10 @@ public class SecretService {
     }
 
     public void cleanup(String pathPrefix) {
-        metricService.incrementMetricCounter(() -> "secret.cleanup." + pathPrefix);
         long start = System.currentTimeMillis();
         persistentEngine.cleanup(pathPrefix);
         long duration = System.currentTimeMillis() - start;
-        metricService.gauge(MetricType.VAULT_WRITE, duration);
+        metricService.recordTimerMetric(MetricType.VAULT_DELETE, Duration.ofMillis(duration));
         LOGGER.trace("Secret cleanup took {} ms", duration);
     }
 
@@ -250,12 +246,6 @@ public class SecretService {
     public SecretResponse convertToExternal(String secret) {
         return getFirstEngineStream(secret)
                 .map(e -> e.convertToExternal(secret))
-                .orElse(null);
-    }
-
-    private String convertSecretToMetric(String secret) {
-        return getFirstEngineStream(secret)
-                .map(e -> e.scarifySecret(secret))
                 .orElse(null);
     }
 }
