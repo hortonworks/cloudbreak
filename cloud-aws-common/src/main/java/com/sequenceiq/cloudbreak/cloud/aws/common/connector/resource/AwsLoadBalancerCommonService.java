@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsListener;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
+import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsResourceException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
@@ -30,12 +31,15 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ElasticLoadBalancingV2Exception;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerAttribute;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerNotFoundException;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyLoadBalancerAttributesRequest;
 
 @Service
 public class AwsLoadBalancerCommonService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsLoadBalancerCommonService.class);
+
+    private static final String ACCESS_DENIED_EXCEPTION_ERROR_CODE = "AccessDeniedException";
 
     @Inject
     private LoadBalancerTypeConverter loadBalancerTypeConverter;
@@ -92,8 +96,18 @@ public class AwsLoadBalancerCommonService {
                             .build())
                     .build();
             client.modifyLoadBalancerAttributes(modifyLoadBalancerAttributesRequest);
+        } catch (LoadBalancerNotFoundException loadBalancerNotFoundException) {
+            if (!deletionProtection) {
+                LOGGER.info("Load balancer has already been deleted with ARN '{}', no need to remove deletion protection.", arn);
+            } else {
+                String errorMessage = String.format("No load balancer found with ARN '%s' to enable deletion protection", arn);
+                LOGGER.warn(errorMessage, loadBalancerNotFoundException);
+                throw new AwsResourceException(errorMessage, loadBalancerNotFoundException);
+            }
         } catch (AwsServiceException amazonServiceException) {
-            if (amazonServiceException instanceof ElasticLoadBalancingV2Exception) {
+            LOGGER.warn("Failed to modify deletion protection flag of load balancer to value '{}'", deletionProtection, amazonServiceException);
+            if (amazonServiceException instanceof ElasticLoadBalancingV2Exception
+                    && ACCESS_DENIED_EXCEPTION_ERROR_CODE.equals(amazonServiceException.awsErrorDetails().errorCode())) {
                 LOGGER.info("User has no right to edit loadbalancer to be deletionprotected. " +
                         "The role needs elasticloadbalancing:ModifyLoadBalancerAttributes permission");
             } else {
