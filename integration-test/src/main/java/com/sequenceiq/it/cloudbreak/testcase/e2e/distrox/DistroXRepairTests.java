@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CM
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_MGMT_CM_ADMIN_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.GATEWAY_CERT;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.IDBROKER_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_BOOT_SECRETS;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.USER_KEYPAIR;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
@@ -78,7 +77,6 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .given(DistroXTestDto.class)
                 .when(distroXTestClient.rotateSecret(Set.of(
                         USER_KEYPAIR,
-                        IDBROKER_CERT,
                         GATEWAY_CERT,
                         SALT_BOOT_SECRETS,
                         CLUSTER_MGMT_CM_ADMIN_PASSWORD,
