@@ -84,7 +84,7 @@ public class ClusterServicesRestartService {
 
     public void refreshClusterOnStart(Stack stack, Stack datalakeStack, CmTemplateProcessor blueprintProcessor) throws CloudbreakException {
         LOGGER.info("Triggering update of remote data context");
-        apiConnectors.getConnector(stack).startClusterMgmtServices();
+        apiConnectors.getConnector(stack).startClusterManagerAndAgents();
         refreshClusterOnRestart(stack, datalakeStack, blueprintProcessor);
     }
 

@@ -76,8 +76,8 @@ public interface ClusterApi {
         clusterModificationService().startCluster();
     }
 
-    default void startClusterMgmtServices() throws CloudbreakException {
-        clusterModificationService().startClusterMgmtServices();
+    default void startClusterManagerAndAgents() throws CloudbreakException {
+        clusterModificationService().startClusterManagerAndAgents();
     }
 
     default void startClusterServices() throws CloudbreakException {

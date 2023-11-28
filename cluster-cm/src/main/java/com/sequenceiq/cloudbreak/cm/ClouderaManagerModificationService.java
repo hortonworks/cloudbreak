@@ -307,7 +307,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(v31Client);
             ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(v31Client);
 
-            startClusterMgmtServices();
+            startClusterManagerAndAgents();
             tagHostsWithHostTemplateName();
             checkParcelApiAvailability();
             disableKnoxAutorestart(rollingUpgradeEnabled);
@@ -905,7 +905,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void startClusterMgmtServices() throws CloudbreakException {
+    public void startClusterManagerAndAgents() throws CloudbreakException {
         startClouderaManager();
         startAgents();
     }
@@ -1170,6 +1170,12 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     @Override
     public void stopClouderaManagerService(String serviceType, boolean waitForExecution) {
         clouderaManagerServiceManagementService.stopClouderaManagerService(v31Client, stack, serviceType, waitForExecution);
+    }
+
+    @Override
+    public void updateConfigWithoutRestart(Table<String, String, String> configTable) throws Exception {
+        clouderaManagerConfigModificationService.updateConfig(configTable, v31Client, stack);
+        LOGGER.info("Updating relevant configs finished for cluster {} in CM, deploying client configs and restarting services is skipped.", stack.getName());
     }
 
     @Override

@@ -66,12 +66,21 @@ public class UpgradeRdsService {
         setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_MIGRATE_DB_SETTINGS), ResourceEvent.CLUSTER_RDS_UPGRADE_MIGRATE_DB_SETTINGS);
     }
 
+    void migrateServicesDatabaseSettingsState(Long stackId) {
+        setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_MIGRATE_SERVICES_DB_SETTINGS),
+                ResourceEvent.CLUSTER_RDS_UPGRADE_MIGRATE_SERVICES_DB_SETTINGS);
+    }
+
     void restoreRdsState(Long stackId) {
         setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_RESTORE_DATA), ResourceEvent.CLUSTER_RDS_UPGRADE_RESTORE_DATA);
     }
 
-    void startServicesState(Long stackId) {
-        setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_START_SERVICES), ResourceEvent.CLUSTER_RDS_UPGRADE_START_SERVICES);
+    void startClusterManagerState(Long stackId) {
+        setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_START_CLUSTERMANAGER), ResourceEvent.CLUSTER_RDS_UPGRADE_START_CLUSTERMANAGER);
+    }
+
+    void startCMServicesState(Long stackId) {
+        setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_START_CMSERVICES), ResourceEvent.CLUSTER_RDS_UPGRADE_START_CMSERVICES);
     }
 
     void installPostgresPackagesState(Long stackId, String majorVersion) {

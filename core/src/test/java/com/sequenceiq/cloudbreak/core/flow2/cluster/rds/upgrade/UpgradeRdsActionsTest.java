@@ -34,6 +34,11 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataRestoreResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateDatabaseSettingsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateDatabaseSettingsResponse;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateServicesDBSettingsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateServicesDBSettingsResponse;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartCMRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartCMResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartCMServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsTriggerRequest;
@@ -164,6 +169,46 @@ class UpgradeRdsActionsTest {
 
         verify(upgradeRdsService, never()).restoreRdsState(STACK_ID);
         verifyBackupRestoreAction(UpgradeRdsDataRestoreResult.class);
+    }
+
+    @Test
+    public void testRestartClusterManager() throws Exception {
+        AbstractAction action = (AbstractAction) upgradeRdsActions.restartClusterManager();
+        UpgradeRdsDataRestoreResult triggerEvent = new UpgradeRdsDataRestoreResult(STACK_ID, TargetMajorVersion.VERSION_11);
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true, true);
+
+        verify(upgradeRdsService).startClusterManagerState(STACK_ID);
+        verifyBackupRestoreAction(UpgradeRdsStartCMRequest.class);
+    }
+
+    @Test
+    public void testShouldMigrateServicesDatabaseSettings() throws Exception {
+        AbstractAction action = (AbstractAction) upgradeRdsActions.migrateServicesDatabaseSettings();
+        UpgradeRdsStartCMResult triggerEvent = new UpgradeRdsStartCMResult(STACK_ID, TargetMajorVersion.VERSION_11);
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true, true);
+
+        verify(upgradeRdsService).migrateServicesDatabaseSettingsState(STACK_ID);
+        verifyBackupRestoreAction(UpgradeRdsMigrateServicesDBSettingsRequest.class);
+    }
+
+    @Test
+    public void testShouldNotMigrateServicesDatabaseSettings() throws Exception {
+        AbstractAction action = (AbstractAction) upgradeRdsActions.migrateServicesDatabaseSettings();
+        UpgradeRdsStartCMResult triggerEvent = new UpgradeRdsStartCMResult(STACK_ID, TargetMajorVersion.VERSION_11);
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true, false);
+
+        verify(upgradeRdsService, never()).migrateServicesDatabaseSettingsState(STACK_ID);
+        verifyBackupRestoreAction(UpgradeRdsMigrateServicesDBSettingsResponse.class);
+    }
+
+    @Test
+    public void testRestartCMServices() throws Exception {
+        AbstractAction action = (AbstractAction) upgradeRdsActions.restartCMServices();
+        UpgradeRdsMigrateServicesDBSettingsResponse triggerEvent = new UpgradeRdsMigrateServicesDBSettingsResponse(STACK_ID, TargetMajorVersion.VERSION_11);
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true, true);
+
+        verify(upgradeRdsService).startCMServicesState(STACK_ID);
+        verifyBackupRestoreAction(UpgradeRdsStartCMServicesRequest.class);
     }
 
     private Map<Object, Object> mockAndTriggerRdsUpgradeAction(AbstractAction action, AbstractUpgradeRdsEvent triggerEvent,

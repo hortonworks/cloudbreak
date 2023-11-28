@@ -5,6 +5,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsInstallPostgresPackagesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateDatabaseSettingsResponse;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateServicesDBSettingsResponse;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartCMResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartCMServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpdateVersionResult;
@@ -19,7 +22,11 @@ public enum UpgradeRdsEvent implements FlowEvent {
     UPGRADE_RDS_UPGRADE_DATABASE_SERVER_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsUpgradeDatabaseServerResult.class)),
     UPGRADE_RDS_MIGRATE_DATABASE_SETTINGS_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsMigrateDatabaseSettingsResponse.class)),
     UPGRADE_RDS_DATA_RESTORE_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsDataRestoreResult.class)),
+    // TODO This is for backward compatibility reason, can be removed in CB-24447
     UPGRADE_RDS_START_SERVICES_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsStartServicesResult.class)),
+    UPGRADE_RDS_START_CM_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsStartCMResult.class)),
+    UPGRADE_RDS_MIGRATE_SERVICES_DB_SETTINGS_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsMigrateServicesDBSettingsResponse.class)),
+    UPGRADE_RDS_START_CMSERVICES_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsStartCMServicesResult.class)),
 
     UPGRADE_RDS_INSTALL_POSTGRES_PACKAGES_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsInstallPostgresPackagesResult.class)),
     UPGRADE_RDS_VERSION_UPDATE_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsUpdateVersionResult.class)),

@@ -27,8 +27,12 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsInstallPostgresPackagesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateDatabaseSettingsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateDatabaseSettingsResponse;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartServicesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartServicesResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateServicesDBSettingsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateServicesDBSettingsResponse;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartCMRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartCMResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartCMServicesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartCMServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsTriggerRequest;
@@ -138,22 +142,64 @@ public class UpgradeRdsActions {
         };
     }
 
+    // TODO This is for backward compatibility reason, can be removed in CB-24447
     @Bean(name = "UPGRADE_RDS_START_SERVICES_STATE")
     public Action<?, ?> restartServicesAndCm() {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsDataRestoreResult.class) {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsDataRestoreResult payload, Map<Object, Object> variables) {
-                upgradeRdsService.startServicesState(payload.getResourceId());
-                sendEvent(context, new UpgradeRdsStartServicesRequest(context.getStackId(), context.getVersion()));
+                sendEvent(context, new UpgradeRdsDataRestoreResult(context.getStackId(), context.getVersion()));
+            }
+        };
+    }
+
+    @Bean(name = "UPGRADE_RDS_START_CM_STATE")
+    public Action<?, ?> restartClusterManager() {
+        return new AbstractUpgradeRdsAction<>(UpgradeRdsDataRestoreResult.class) {
+            @Override
+            protected void doExecute(UpgradeRdsContext context, UpgradeRdsDataRestoreResult payload, Map<Object, Object> variables) {
+                upgradeRdsService.startClusterManagerState(payload.getResourceId());
+                sendEvent(context, new UpgradeRdsStartCMRequest(context.getStackId(), context.getVersion()));
+            }
+        };
+    }
+
+    @Bean(name = "UPGRADE_RDS_MIGRATE_SERVICES_DB_SETTINGS_STATE")
+    public Action<?, ?> migrateServicesDatabaseSettings() {
+        return new AbstractUpgradeRdsAction<>(UpgradeRdsStartCMResult.class) {
+            @Override
+            protected void doExecute(UpgradeRdsContext context, UpgradeRdsStartCMResult payload, Map<Object, Object> variables) {
+                if (externalDatabaseService.isMigrationNeededDuringUpgrade(context.getStack(), context.getDatabase(), context.getVersion())) {
+                    upgradeRdsService.migrateServicesDatabaseSettingsState(payload.getResourceId());
+                }
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(UpgradeRdsContext context) {
+                return externalDatabaseService.isMigrationNeededDuringUpgrade(context.getStack(), context.getDatabase(), context.getVersion()) ?
+                        new UpgradeRdsMigrateServicesDBSettingsRequest(context.getStackId(), context.getVersion()) :
+                        new UpgradeRdsMigrateServicesDBSettingsResponse(context.getStackId(), context.getVersion());
+            }
+        };
+    }
+
+    @Bean(name = "UPGRADE_RDS_START_CMSERVICES_STATE")
+    public Action<?, ?> restartCMServices() {
+        return new AbstractUpgradeRdsAction<>(UpgradeRdsMigrateServicesDBSettingsResponse.class) {
+            @Override
+            protected void doExecute(UpgradeRdsContext context, UpgradeRdsMigrateServicesDBSettingsResponse payload, Map<Object, Object> variables) {
+                upgradeRdsService.startCMServicesState(payload.getResourceId());
+                sendEvent(context, new UpgradeRdsStartCMServicesRequest(context.getStackId(), context.getVersion()));
             }
         };
     }
 
     @Bean(name = "UPGRADE_RDS_INSTALL_POSTGRES_PACKAGES_STATE")
     public Action<?, ?> installPg11() {
-        return new AbstractUpgradeRdsAction<>(UpgradeRdsStartServicesResult.class) {
+        return new AbstractUpgradeRdsAction<>(UpgradeRdsStartCMServicesResult.class) {
             @Override
-            protected void doExecute(UpgradeRdsContext context, UpgradeRdsStartServicesResult payload, Map<Object, Object> variables) {
+            protected void doExecute(UpgradeRdsContext context, UpgradeRdsStartCMServicesResult payload, Map<Object, Object> variables) {
                 upgradeRdsService.installPostgresPackagesState(payload.getResourceId(), payload.getVersion().getMajorVersion());
                 sendEvent(context);
             }

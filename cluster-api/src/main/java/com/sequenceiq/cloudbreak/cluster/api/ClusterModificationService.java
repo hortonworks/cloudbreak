@@ -25,7 +25,7 @@ public interface ClusterModificationService {
 
     void startCluster() throws CloudbreakException;
 
-    void startClusterMgmtServices() throws CloudbreakException;
+    void startClusterManagerAndAgents() throws CloudbreakException;
 
     void deployConfigAndStartClusterServices() throws CloudbreakException;
 
@@ -100,6 +100,8 @@ public interface ClusterModificationService {
     void updateConfig(Table<String, String, String> configTable) throws Exception;
 
     void stopClouderaManagerService(String serviceType, boolean waitForExecution) throws Exception;
+
+    void updateConfigWithoutRestart(Table<String, String, String> configTable) throws Exception;
 
     void deleteClouderaManagerService(String serviceType) throws Exception;
 

@@ -118,7 +118,7 @@ public class ClusterManagerUpgradeManagementServiceTest {
             verify(clusterApiConnectors, times(expectedClusterApiCalls)).getConnector(stackDto);
             verify(clusterApi).stopCluster(true);
         }
-        verify(clusterApi).startClusterMgmtServices();
+        verify(clusterApi).startClusterManagerAndAgents();
         verify(cmServerQueryService, times(2)).queryCmVersion(stackDto);
         verify(clusterUpgradeService).upgradeClusterManager(STACK_ID);
         verify(clusterManagerUpgradeService).upgradeClouderaManager(stackDto, clouderaManagerRepo);
@@ -151,7 +151,7 @@ public class ClusterManagerUpgradeManagementServiceTest {
         verify(clusterComponentConfigProvider).getClouderaManagerRepoDetails(cluster.getId());
         verify(cmServerQueryService).queryCmVersion(stackDto);
         verify(clusterApiConnectors).getConnector(stackDto);
-        verify(clusterApi).startClusterMgmtServices();
+        verify(clusterApi).startClusterManagerAndAgents();
         verifyNoInteractions(clusterUpgradeService, clusterManagerUpgradeService);
     }
 }

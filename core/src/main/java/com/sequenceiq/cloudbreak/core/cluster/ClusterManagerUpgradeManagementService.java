@@ -96,6 +96,6 @@ public class ClusterManagerUpgradeManagementService {
 
     private void startClusterServices(StackDto stackDto) throws CloudbreakException {
         LOGGER.debug("Starting cluster manager services after CM upgrade.");
-        clusterApiConnectors.getConnector(stackDto).startClusterMgmtServices();
+        clusterApiConnectors.getConnector(stackDto).startClusterManagerAndAgents();
     }
 }

@@ -41,9 +41,15 @@ class UpgradeRdsServiceTest {
 
     private static final String RESTORE_STATE = "Restoring data from the backup, it might take a while.";
 
+    private static final String MIGRATE_STATE = "Migrating database settings.";
+
+    private static final String MIGRATE_SERVICES_STATE = "Migrating services' database settings.";
+
     private static final String STOP_STATE = "Stopping Runtime Services and Cloudera Manager.";
 
-    private static final String START_STATE = "Starting back Cloudera Manager and Runtime Services.";
+    private static final String START_STATE = "Starting back Runtime Services.";
+
+    private static final String START_CM_STATE = "Starting back Cloudera Manager.";
 
     private static final String UPGRADE_STATE = "Upgrading database server.";
 
@@ -140,6 +146,25 @@ class UpgradeRdsServiceTest {
     }
 
     @Test
+    public void testMigrateDatabaseSettingsState() {
+        when(messagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_MIGRATE_DB_SETTINGS.getMessage())).thenReturn(MIGRATE_STATE);
+        underTest.migrateDatabaseSettingsState(STACK_ID);
+
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DATABASE_UPGRADE_IN_PROGRESS), eq(MIGRATE_STATE));
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_MIGRATE_DB_SETTINGS));
+    }
+
+    @Test
+    public void testMigrateServicesDatabaseSettingsState() {
+        when(messagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_MIGRATE_SERVICES_DB_SETTINGS.getMessage())).thenReturn(MIGRATE_SERVICES_STATE);
+        underTest.migrateServicesDatabaseSettingsState(STACK_ID);
+
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DATABASE_UPGRADE_IN_PROGRESS), eq(MIGRATE_SERVICES_STATE));
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
+                eq(ResourceEvent.CLUSTER_RDS_UPGRADE_MIGRATE_SERVICES_DB_SETTINGS));
+    }
+
+    @Test
     public void testRestoreRdsState() {
         when(messagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_RESTORE_DATA.getMessage())).thenReturn(RESTORE_STATE);
         underTest.restoreRdsState(STACK_ID);
@@ -168,11 +193,20 @@ class UpgradeRdsServiceTest {
 
     @Test
     public void testStartServicesState() {
-        when(messagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_START_SERVICES.getMessage())).thenReturn(START_STATE);
-        underTest.startServicesState(STACK_ID);
+        when(messagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_START_CMSERVICES.getMessage())).thenReturn(START_STATE);
+        underTest.startCMServicesState(STACK_ID);
 
         verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DATABASE_UPGRADE_IN_PROGRESS), eq(START_STATE));
-        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_START_SERVICES));
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_START_CMSERVICES));
+    }
+
+    @Test
+    public void testStartClusterManagerState() {
+        when(messagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_START_CLUSTERMANAGER.getMessage())).thenReturn(START_CM_STATE);
+        underTest.startClusterManagerState(STACK_ID);
+
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DATABASE_UPGRADE_IN_PROGRESS), eq(START_CM_STATE));
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_START_CLUSTERMANAGER));
     }
 
     @Test

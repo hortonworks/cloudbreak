@@ -649,13 +649,13 @@ public class ClusterHostServiceRunner {
 
     public void decoratePillarWithClouderaManagerDatabase(ClusterView cluster, Map<String, SaltPillarProperties> servicePillar)
             throws CloudbreakOrchestratorFailedException {
-        SaltPillarProperties saltPillarProperties = getClouderaManagerDatabasePillarProperties(cluster);
+        SaltPillarProperties saltPillarProperties = getClouderaManagerDatabasePillarProperties(cluster.getId());
         servicePillar.put(CM_DATABASE_PILLAR_KEY, saltPillarProperties);
     }
 
-    public SaltPillarProperties getClouderaManagerDatabasePillarProperties(ClusterView cluster) throws CloudbreakOrchestratorFailedException {
+    public SaltPillarProperties getClouderaManagerDatabasePillarProperties(Long clusterId) throws CloudbreakOrchestratorFailedException {
         RdsConfigWithoutCluster clouderaManagerRdsConfig =
-                rdsConfigWithoutClusterService.findByClusterIdAndType(cluster.getId(), DatabaseType.CLOUDERA_MANAGER);
+                rdsConfigWithoutClusterService.findByClusterIdAndType(clusterId, DatabaseType.CLOUDERA_MANAGER);
         if (clouderaManagerRdsConfig == null) {
             throw new CloudbreakOrchestratorFailedException("Cloudera Manager RDSConfig is missing for stackDto");
         }

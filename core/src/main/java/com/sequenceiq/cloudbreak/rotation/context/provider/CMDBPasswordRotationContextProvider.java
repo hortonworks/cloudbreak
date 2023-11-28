@@ -78,7 +78,7 @@ public class CMDBPasswordRotationContextProvider extends AbstractCMRelatedDataba
         try {
             Map<String, SaltPillarProperties> defaultPillarProperties = super.getPillarProperties(stack);
             defaultPillarProperties.put(ClusterHostServiceRunner.CM_DATABASE_PILLAR_KEY,
-                    clusterHostServiceRunner.getClouderaManagerDatabasePillarProperties(stack.getCluster()));
+                    clusterHostServiceRunner.getClouderaManagerDatabasePillarProperties(stack.getCluster().getId()));
             return defaultPillarProperties;
         } catch (Exception e) {
             throw new CloudbreakServiceException("Failed to generate pillar properties for CM DB username/password rotation.", e);

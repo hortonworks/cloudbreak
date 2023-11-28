@@ -10,29 +10,21 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsFailedEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartServicesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartServicesResult;
-import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartCMServicesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartCMServicesResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.util.StackUtil;
-import com.sequenceiq.cloudbreak.view.ClusterView;
-import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
-public class StartServicesHandler extends ExceptionCatcherEventHandler<UpgradeRdsStartServicesRequest> {
+public class StartServicesHandler extends ExceptionCatcherEventHandler<UpgradeRdsStartCMServicesRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StartServicesHandler.class);
 
@@ -40,45 +32,29 @@ public class StartServicesHandler extends ExceptionCatcherEventHandler<UpgradeRd
     private StackDtoService stackDtoService;
 
     @Inject
-    private GatewayConfigService gatewayConfigService;
-
-    @Inject
     private ClusterApiConnectors clusterApiConnectors;
-
-    @Inject
-    private StackUtil stackUtil;
-
-    @Inject
-    private HostOrchestrator hostOrchestrator;
 
     @Inject
     private UpgradeRdsService upgradeRdsService;
 
     @Override
     public String selector() {
-        return EventSelectorUtil.selector(UpgradeRdsStartServicesRequest.class);
+        return EventSelectorUtil.selector(UpgradeRdsStartCMServicesRequest.class);
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeRdsStartServicesRequest> event) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeRdsStartCMServicesRequest> event) {
         LOGGER.error("Starting services for RDS upgrade has failed", e);
         return new UpgradeRdsFailedEvent(resourceId, e, DetailedStackStatus.DATABASE_UPGRADE_FAILED);
     }
 
     @Override
-    public Selectable doAccept(HandlerEvent<UpgradeRdsStartServicesRequest> event) {
-        UpgradeRdsStartServicesRequest request = event.getData();
-        LOGGER.info("Starting services after RDS upgrade...");
+    public Selectable doAccept(HandlerEvent<UpgradeRdsStartCMServicesRequest> event) {
+        UpgradeRdsStartCMServicesRequest request = event.getData();
         Long stackId = request.getResourceId();
         StackDto stackDto = stackDtoService.getById(stackId);
-        ClusterView cluster = stackDto.getCluster();
         StackView stack = stackDto.getStack();
         try {
-            InstanceMetadataView gatewayInstance = stackDto.getPrimaryGatewayInstance();
-            GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, stackDto.getSecurityConfig(), gatewayInstance, stackDto.hasGateway());
-            ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stack.getId(), cluster.getId());
-            LOGGER.info("Starting cluster manager server and its agents after RDS upgrade...");
-            hostOrchestrator.startClusterManagerWithItsAgents(gatewayConfig, stackUtil.collectReachableNodes(stackDto), exitModel);
             if (upgradeRdsService.shouldStopStartServices(stack)) {
                 LOGGER.info("Starting services after RDS upgrade...");
                 clusterApiConnectors.getConnector(stackDto).startCluster();
@@ -89,6 +65,6 @@ public class StartServicesHandler extends ExceptionCatcherEventHandler<UpgradeRd
             LOGGER.warn("Start services has failed", ex);
             return new UpgradeRdsFailedEvent(stackId, ex, DetailedStackStatus.DATABASE_UPGRADE_FAILED);
         }
-        return new UpgradeRdsStartServicesResult(stackId, request.getVersion());
+        return new UpgradeRdsStartCMServicesResult(stackId, request.getVersion());
     }
 }
