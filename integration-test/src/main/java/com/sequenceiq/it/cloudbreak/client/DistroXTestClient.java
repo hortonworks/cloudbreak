@@ -1,11 +1,13 @@
 package com.sequenceiq.it.cloudbreak.client;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
+import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.CheckVariant;
@@ -25,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRepairAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRepairInstancesAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRotateSaltPasswordAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRotateSecretAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRotateSecretInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleStartInstancesAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleStopInstancesAction;
@@ -144,7 +147,15 @@ public class DistroXTestClient {
     }
 
     public Action<DistroXTestDto, CloudbreakClient> rotateSecret(Set<CloudbreakSecretType> secretTypes) {
-        return new DistroXRotateSecretAction(secretTypes);
+        return rotateSecret(secretTypes, null);
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> rotateSecret(Set<CloudbreakSecretType> secretTypes, RotationFlowExecutionType rotationFlowExecutionType) {
+        return new DistroXRotateSecretAction(secretTypes, rotationFlowExecutionType);
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> rotateSecretInternal(Collection<CloudbreakSecretType> secretTypes) {
+        return new DistroXRotateSecretInternalAction(secretTypes);
     }
 
     public Action<DistroXTestDto, CloudbreakClient> deleteDisks() {

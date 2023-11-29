@@ -7,10 +7,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -31,7 +35,9 @@ public class SaltApiRunComponent {
     @Inject
     private RequestResponseStorageService requestResponseStorageService;
 
-    private final Map<String, SaltResponse> saltResponsesMap = new HashMap<>();
+    private final Map<String, SaltResponse> saltResponsesMap = new ConcurrentHashMap<>();
+
+    private final Map<String, Set<String>> runFailures = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void setup() {
@@ -41,6 +47,17 @@ public class SaltApiRunComponent {
     public Object createSaltApiResponse(String mockUuid, String body) throws Exception {
         Map<String, List<String>> params = getParams(body);
         List<String> fun = params.get("fun");
+        List<String> arg = params.get("arg");
+        if (CollectionUtils.isNotEmpty(arg) && arg.size() == 1) {
+            Set<String> configuredFailures = runFailures.get(mockUuid);
+            if (CollectionUtils.isNotEmpty(configuredFailures)) {
+                if (configuredFailures.contains(arg.get(0))) {
+                    String message = String.format("Salt run %s is configured to fail.", arg.get(0));
+                    LOGGER.info(message);
+                    throw new RuntimeException(message);
+                }
+            }
+        }
         if (!fun.isEmpty()) {
             SaltResponse saltResponse = saltResponsesMap.get(fun.get(0));
             if (saltResponse != null) {
@@ -51,6 +68,18 @@ public class SaltApiRunComponent {
         }
         LOGGER.error("no response for this SALT RUN request: " + body);
         throw new IllegalStateException("no response for this SALT RUN request: " + body);
+    }
+
+    public void setFailure(String mockUuid, String runArg) {
+        runFailures.computeIfAbsent(mockUuid, k -> new ConcurrentSkipListSet<>());
+        runFailures.get(mockUuid).add(runArg);
+    }
+
+    public void deleteFailure(String mockUuid, String runArg) {
+        Set<String> runArgs = runFailures.get(mockUuid);
+        if (runArgs != null) {
+            runArgs.remove(runArg);
+        }
     }
 
     private void storeIfEnabled(String mockUuid, Map<String, List<String>> params, Object response) {

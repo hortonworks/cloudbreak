@@ -11,7 +11,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -28,10 +27,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
@@ -84,9 +81,6 @@ class SdxRotationServiceTest {
 
     @Mock
     private RedbeamsPoller redbeamsPoller;
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @Mock
     private RedbeamsFlowService redbeamsFlowService;
@@ -164,8 +158,7 @@ class SdxRotationServiceTest {
 
     @Test
     void triggerSecretRotationShouldSucceed() {
-        doNothing().when(secretRotationValidationService).validateExecutionType(any(), any(), any());
-        when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
+        when(secretRotationValidationService.validate(any(), any(), any(), any())).thenReturn(Optional.empty());
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(1L);
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(sdxCluster));
@@ -178,8 +171,7 @@ class SdxRotationServiceTest {
 
     @Test
     void triggerSecretRotationShouldSucceedIfRollbackFinished() {
-        doNothing().when(secretRotationValidationService).validateExecutionType(any(), any(), any());
-        when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
+        when(secretRotationValidationService.validate(any(), any(), any(), any())).thenReturn(Optional.empty());
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(1L);
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(sdxCluster));
@@ -191,24 +183,7 @@ class SdxRotationServiceTest {
     }
 
     @Test
-    void triggerSecretRotationShouldFailIfClusterIsStopped() {
-        when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
-        SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setId(1L);
-        when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(sdxCluster));
-        SdxStatusEntity status = new SdxStatusEntity();
-        status.setStatus(DatalakeStatusEnum.STOPPED);
-        when(sdxStatusService.getActualStatusForSdx(anyLong())).thenReturn(status);
-
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null, null));
-
-        assertEquals("The cluster must be in available status to execute secret rotation. Current status: STOPPED", exception.getMessage());
-    }
-
-    @Test
     void triggerSecretRotationShouldFailIfSdxClusterNotFound() {
-        when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.empty());
         NotFoundException notFoundException = assertThrows(NotFoundException.class,
                 () -> underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null, null));

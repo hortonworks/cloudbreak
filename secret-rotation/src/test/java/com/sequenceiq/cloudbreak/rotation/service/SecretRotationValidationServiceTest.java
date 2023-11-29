@@ -4,16 +4,20 @@ import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.FINAL
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.PREVALIDATE;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
+import static com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgressStatus.FAILED;
 import static com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgressStatus.IN_PROGRESS;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -22,12 +26,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.TestSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.TestSecretType;
 import com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgress;
+import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,22 +46,84 @@ public class SecretRotationValidationServiceTest {
     private static final TestSecretRotationStep TEST_STEP = TestSecretRotationStep.STEP;
 
     @Mock
-    private SecretRotationStepProgressService progressService;
+    private EntitlementService entitlementService;
+
+    @Mock
+    private SecretRotationStepProgressService secretRotationStepProgressService;
+
+    @Mock
+    private MultiClusterRotationValidationService multiClusterRotationValidationService;
 
     @InjectMocks
     private SecretRotationValidationService underTest;
+
+    @Test
+    public void testSecretRotationEntitlementIsDisabled() {
+        when(entitlementService.isSecretRotationEnabled(any())).thenReturn(false);
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.validateSecretRotationEntitlement(DATAHUB_CRN));
+        assertEquals("Account is not entitled to execute secret rotation.", exception.getMessage());
+    }
+
+    @Test
+    public void testWhenSecretIsInFailedRollbackStateThenOtherSecretRotationFails() {
+        when(secretRotationStepProgressService.getProgressList(any()))
+                .thenReturn(List.of(new SecretRotationStepProgress(DATAHUB_CRN, TEST_SECRET, TEST_STEP, ROLLBACK, FAILED)));
+
+        Optional<RotationFlowExecutionType> rotationFlowExecutionType = underTest.validate(DATAHUB_CRN, List.of(TEST_SECRET), null, available());
+        assertEquals(Optional.of(ROLLBACK), rotationFlowExecutionType);
+    }
+
+    @Test
+    public void testWhenSecretIsInFailedRollbackStateThenRollbackFailsWithOtherSecretType() {
+        when(secretRotationStepProgressService.getProgressList(any()))
+                .thenReturn(List.of(new SecretRotationStepProgress(DATAHUB_CRN, TEST_SECRET, TEST_STEP, ROLLBACK, FAILED)));
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validate(DATAHUB_CRN, List.of(TestSecretType.TEST_2), null, available()));
+        assertEquals("There is already a failed secret rotation for TEST secret type in ROLLBACK phase. " +
+                "To resolve the issue please retry secret rotation.", exception.getMessage());
+    }
+
+    @Test
+    public void testWhenStatusIsNotAvailable() {
+        when(secretRotationStepProgressService.getProgressList(any())).thenReturn(List.of());
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validate(DATAHUB_CRN, List.of(TEST_SECRET), null, notAvailable()));
+        assertEquals("The cluster must be in available state to start secret rotation.", exception.getMessage());
+    }
+
+    @Test
+    public void testWhenSecretIsInFailedRollbackStateThenRotateFailsWithTheSameSecretType() {
+        when(secretRotationStepProgressService.getProgressList(any()))
+                .thenReturn(List.of(new SecretRotationStepProgress(DATAHUB_CRN, TEST_SECRET, TEST_STEP, ROLLBACK, FAILED)));
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validate(DATAHUB_CRN, List.of(TEST_SECRET), ROTATE, available()));
+        assertEquals("There is already a failed secret rotation for TEST secret type in ROLLBACK phase. " +
+                "To resolve the issue please retry secret rotation.", exception.getMessage());
+    }
 
     @ParameterizedTest
     @MethodSource("requests")
     void testExecutionTypeValidation(RotationFlowExecutionType requestedExecutionType, Optional<RotationFlowExecutionType> executionTypeInDb,
             boolean errorExpected) {
-        when(progressService.getProgress(any(), any())).thenReturn(executionTypeInDb
-                .map(executionType -> new SecretRotationStepProgress(DATAHUB_CRN, TEST_SECRET, TEST_STEP, executionType, IN_PROGRESS)));
+        when(secretRotationStepProgressService.getProgressList(any())).thenReturn(executionTypeInDb
+                .map(executionType -> List.of(new SecretRotationStepProgress(DATAHUB_CRN, TEST_SECRET, TEST_STEP, executionType, IN_PROGRESS)))
+                .orElse(List.of()));
         if (errorExpected) {
-            assertThrows(CloudbreakServiceException.class, () -> underTest.validateExecutionType(DATAHUB_CRN, List.of(TEST_SECRET), requestedExecutionType));
+            assertThrows(BadRequestException.class, () -> underTest.validate(DATAHUB_CRN, List.of(TEST_SECRET), requestedExecutionType, available()));
         } else {
-            assertDoesNotThrow(() -> underTest.validateExecutionType(DATAHUB_CRN, List.of(TEST_SECRET), requestedExecutionType));
+            assertDoesNotThrow(() -> underTest.validate(DATAHUB_CRN, List.of(TEST_SECRET), requestedExecutionType, available()));
         }
+    }
+
+    private Supplier<Boolean> available() {
+        return () -> true;
+    }
+
+    private Supplier<Boolean> notAvailable() {
+        return () -> false;
     }
 
     static Stream<Arguments> requests() {

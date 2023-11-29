@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONME
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,9 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
@@ -62,20 +61,12 @@ public class StackRotationService {
 
     public FlowIdentifier rotateSecrets(String crn, List<String> secrets, RotationFlowExecutionType requestedExecutionType,
             Map<String, String> additionalProperties) {
-        if (entitlementService.isSecretRotationEnabled(Crn.fromString(crn).getAccountId())) {
-            StackView stack = stackDtoService.getStackViewByCrn(crn);
-            List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
-            if (secretTypes.stream().noneMatch(SecretType::multiSecret) && !stack.isAvailable()) {
-                throw new CloudbreakServiceException(
-                        String.format("The cluster must be in available status to execute secret rotation. Current status: %s", stack.getStatus()));
-            }
-            secretTypes.stream().filter(SecretType::multiSecret).forEach(secretType ->
-                    multiClusterRotationValidationService.validateMultiRotationRequest(crn, secretType));
-            secretRotationValidationService.validateExecutionType(crn, secretTypes, requestedExecutionType);
-            return flowManager.triggerSecretRotation(stack.getId(), crn, secretTypes, requestedExecutionType, additionalProperties);
-        } else {
-            throw new CloudbreakServiceException("Account is not entitled to execute any secret rotation!");
-        }
+        secretRotationValidationService.validateSecretRotationEntitlement(crn);
+        List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
+        StackView stack = stackDtoService.getStackViewByCrn(crn);
+        Optional<RotationFlowExecutionType> usedExecutionType =
+                secretRotationValidationService.validate(crn, secretTypes, requestedExecutionType, stack::isAvailable);
+        return flowManager.triggerSecretRotation(stack.getId(), crn, secretTypes, usedExecutionType.orElse(null), additionalProperties);
     }
 
     public boolean checkOngoingChildrenMultiSecretRotations(String parentCrn, String secret) {

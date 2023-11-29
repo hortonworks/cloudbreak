@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTAT
 import static com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgressStatus.FAILED;
 import static com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgressStatus.FINISHED;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -30,6 +31,17 @@ public class SecretRotationStepProgressService {
 
     public Optional<SecretRotationStepProgress> getProgress(String resourceCrn, SecretType secretType) {
         return repository.findByResourceCrnAndSecretType(resourceCrn, secretType);
+    }
+
+    public List<SecretRotationStepProgress> getProgressList(String resourceCrn) {
+        return repository.findByResourceCrn(resourceCrn);
+    }
+
+    public Optional<SecretRotationStepProgress> getFailedRotationStep(String resourceCrn) {
+        return getProgressList(resourceCrn)
+                .stream()
+                .filter(p -> SecretRotationStepProgressStatus.FAILED.equals(p.getStatus()))
+                .findFirst();
     }
 
     public Optional<SecretRotationStepProgress> getProgress(RotationMetadata metadata) {

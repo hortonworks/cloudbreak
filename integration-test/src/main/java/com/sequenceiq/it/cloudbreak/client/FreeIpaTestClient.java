@@ -26,6 +26,7 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRebuildAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRepairAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRotateSecretAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRotateSecretInternalAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaSetPasswordAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaStartAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaStopAction;
@@ -156,6 +157,10 @@ public class FreeIpaTestClient {
 
     public Action<FreeIpaRotationTestDto, FreeIpaClient> rotateSecret() {
         return new FreeIpaRotateSecretAction();
+    }
+
+    public Action<FreeIpaRotationTestDto, FreeIpaClient> rotateSecretInternal() {
+        return new FreeIpaRotateSecretInternalAction();
     }
 
     public Action<FreeIpaHealthDetailsDto, FreeIpaClient> healthDetails() {

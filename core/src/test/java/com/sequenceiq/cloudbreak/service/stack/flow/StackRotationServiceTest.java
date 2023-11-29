@@ -1,19 +1,19 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -22,16 +22,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
-import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationValidationService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -59,12 +54,6 @@ public class StackRotationServiceTest {
     private StackService stackService;
 
     @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
-    private MultiClusterRotationValidationService multiClusterRotationValidationService;
-
-    @Mock
     private MultiClusterRotationService multiClusterRotationService;
 
     @Mock
@@ -74,38 +63,15 @@ public class StackRotationServiceTest {
     public void testRotateSecrets() {
         Stack stack = new Stack();
         stack.setId(1L);
-        stack.setStackStatus(new StackStatus(null, DetailedStackStatus.AVAILABLE));
-        doNothing().when(secretRotationValidationService).validateExecutionType(any(), any(), any());
-        when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
         when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stack);
-        when(flowManager.triggerSecretRotation(anyLong(), anyString(), any(), any(), any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, "flowchain"));
+        when(secretRotationValidationService.validate(any(), any(), any(), any())).thenReturn(Optional.empty());
+        when(flowManager.triggerSecretRotation(anyLong(), anyString(), any(), any(), anyMap())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, "flowchain"));
 
-        underTest.rotateSecrets(CRN, List.of(CLUSTER_CB_CM_ADMIN_PASSWORD.name()), null, null);
+        underTest.rotateSecrets(CRN, List.of(CLUSTER_CB_CM_ADMIN_PASSWORD.name()), null, Map.of());
 
-        verify(flowManager).triggerSecretRotation(anyLong(), anyString(), any(), any(), any());
-    }
-
-    @Test
-    public void testRotateSecretsWhenClusterIsNotAvailable() {
-        Stack stack = new Stack();
-        stack.setId(1L);
-        stack.setStackStatus(new StackStatus(null, DetailedStackStatus.STOPPED));
-        when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
-        when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stack);
-
-        CloudbreakServiceException exception =
-                assertThrows(CloudbreakServiceException.class, () -> underTest.rotateSecrets(CRN, List.of(CLUSTER_CB_CM_ADMIN_PASSWORD.name()), null, null));
-        assertEquals("The cluster must be in available status to execute secret rotation. Current status: STOPPED", exception.getMessage());
-    }
-
-    @Test
-    public void testRotateSecretsWhenNotEntitled() {
-        when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.FALSE);
-
-        assertThrows(CloudbreakServiceException.class, () -> underTest.rotateSecrets(CRN,
-                List.of(CLUSTER_CB_CM_ADMIN_PASSWORD.name()), null, null));
-
-        verifyNoInteractions(flowManager, stackDtoService);
+        verify(stackDtoService).getStackViewByCrn(eq(CRN));
+        verify(secretRotationValidationService).validate(eq(CRN), eq(List.of(CLUSTER_CB_CM_ADMIN_PASSWORD)), eq(null), any());
+        verify(flowManager).triggerSecretRotation(anyLong(), anyString(), any(), any(), anyMap());
     }
 
     @Test

@@ -358,6 +358,20 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
         return (T) this;
     }
 
+    public T setSaltRunFailure(String command) {
+        String crn = getCrn();
+        executeQuery.executeMethod(HttpMethod.POST, "/{mock_uuid}/saltapi/run/{run_arg}/failure", Map.of(), null, r -> r,
+                w -> w.resolveTemplate("mock_uuid", crn).resolveTemplate("run_arg", command));
+        return (T) this;
+    }
+
+    public T deleteSaltRunFailure(String command) {
+        String crn = getCrn();
+        executeQuery.executeMethod(HttpMethod.DELETE, "/{mock_uuid}/saltapi/run/{run_arg}/failure", Map.of(), null, r -> r,
+                w -> w.resolveTemplate("mock_uuid", crn).resolveTemplate("run_arg", command));
+        return (T) this;
+    }
+
     public T enableVerification(String path) {
         executeQuery.executeMethod(HttpMethod.POST, "/calls/enable", Collections.emptyMap(), null, r -> r, w -> w.queryParam("mockUuid", path));
         return (T) this;

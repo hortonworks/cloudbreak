@@ -246,6 +246,10 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         return awaitForFlow(emptyRunningParameter());
     }
 
+    public DistroXTestDto awaitForFlowFail() {
+        return awaitForFlow(emptyRunningParameter().withWaitForFlowFail());
+    }
+
     @Override
     public DistroXTestDto awaitForFlow(RunningParameter runningParameter) {
         return getTestContext().awaitForFlow(this, runningParameter);

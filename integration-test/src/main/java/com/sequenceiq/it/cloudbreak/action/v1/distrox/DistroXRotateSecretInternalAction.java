@@ -1,39 +1,29 @@
 package com.sequenceiq.it.cloudbreak.action.v1.distrox;
 
-import java.util.Set;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
-import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretRotationRequest;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
-public class DistroXRotateSecretAction implements Action<DistroXTestDto, CloudbreakClient> {
+public class DistroXRotateSecretInternalAction implements Action<DistroXTestDto, CloudbreakClient> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXRotateSecretAction.class);
+    private final Collection<CloudbreakSecretType> secretTypes;
 
-    private final Set<CloudbreakSecretType> secretTypes;
-
-    private final RotationFlowExecutionType rotationFlowExecutionType;
-
-    public DistroXRotateSecretAction(Set<CloudbreakSecretType> secretTypes, RotationFlowExecutionType rotationFlowExecutionType) {
+    public DistroXRotateSecretInternalAction(Collection<CloudbreakSecretType> secretTypes) {
         this.secretTypes = secretTypes;
-        this.rotationFlowExecutionType = rotationFlowExecutionType;
     }
 
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         DistroXSecretRotationRequest request = new DistroXSecretRotationRequest();
         request.setSecrets(secretTypes.stream().map(Enum::name).collect(Collectors.toList()));
-        request.setExecutionType(rotationFlowExecutionType);
         request.setCrn(testDto.getCrn());
-        testDto.setFlow("secret rotation", client.getDefaultClient().distroXV1RotationEndpoint().rotateSecrets(request));
+        testDto.setFlow("Data Hub secret rotation.", client.getInternalClient(testContext).distroXV1RotationEndpoint().rotateSecrets(request));
         return testDto;
     }
 }

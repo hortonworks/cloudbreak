@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.service.rotation;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -8,17 +10,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowEventProvider;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
-import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -40,13 +39,7 @@ public class FreeIpaSecretRotationService implements SecretRotationFlowEventProv
     private FreeIpaFlowManager flowManager;
 
     @Inject
-    private EntitlementService entitlementService;
-
-    @Inject
     private SecretRotationValidationService secretRotationValidationService;
-
-    @Inject
-    private MultiClusterRotationValidationService multiClusterRotationValidationService;
 
     @Inject
     private MultiClusterRotationService multiClusterRotationService;
@@ -56,22 +49,25 @@ public class FreeIpaSecretRotationService implements SecretRotationFlowEventProv
 
     public FlowIdentifier rotateSecretsByCrn(String accountId, String environmentCrn, FreeIpaSecretRotationRequest request) {
         LOGGER.info("Requested secret rotation. Account id: {}, environment crn: {}, request: {}", accountId, environmentCrn, request);
-        if (!entitlementService.isSecretRotationEnabled(accountId)) {
-            throw new BadRequestException("Account is not entitled to execute secret rotation.");
-        }
-        Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        secretRotationValidationService.validateSecretRotationEntitlement(environmentCrn);
         List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(request.getSecrets());
-        if (secretTypes.stream().noneMatch(SecretType::multiSecret) && !stack.isAvailable()) {
-            throw new BadRequestException(
-                    String.format("The cluster must be in available status to execute secret rotation. Current status: %s", stack.getStackStatus().getStatus()));
-        }
-        secretTypes.stream().filter(SecretType::multiSecret).forEach(secretType ->
-                multiClusterRotationValidationService.validateMultiRotationRequest(environmentCrn, secretType));
-        secretRotationValidationService.validateExecutionType(environmentCrn, secretTypes, request.getExecutionType());
-        String selector = EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class);
-        Acceptable triggerEvent = new SecretRotationFlowChainTriggerEvent(
-                selector, stack.getId(), stack.getEnvironmentCrn(), secretTypes, request.getExecutionType(), request.getAdditionalProperties());
-        return flowManager.notify(selector, triggerEvent);
+        Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        Optional<RotationFlowExecutionType> usedExecutionType =
+                secretRotationValidationService.validate(environmentCrn, secretTypes, request.getExecutionType(), stack::isAvailable);
+        SecretRotationFlowChainTriggerEvent triggerEvent = createSecretRotationTriggerEvent(stack, secretTypes, usedExecutionType.orElse(null),
+                request.getAdditionalProperties());
+        return flowManager.notify(triggerEvent.selector(), triggerEvent);
+    }
+
+    private SecretRotationFlowChainTriggerEvent createSecretRotationTriggerEvent(Stack stack, List<SecretType> secretTypes,
+            RotationFlowExecutionType rotationFlowExecutionType, Map<String, String> additionalProperties) {
+        return new SecretRotationFlowChainTriggerEvent(
+                EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class),
+                stack.getId(),
+                stack.getEnvironmentCrn(),
+                secretTypes,
+                rotationFlowExecutionType,
+                additionalProperties);
     }
 
     public void cleanupSecretRotationEntries(String environmentCrn) {

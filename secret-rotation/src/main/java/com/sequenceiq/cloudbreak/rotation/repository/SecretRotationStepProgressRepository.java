@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.rotation.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
@@ -16,6 +17,8 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 public interface SecretRotationStepProgressRepository extends CrudRepository<SecretRotationStepProgress, Long> {
 
     Optional<SecretRotationStepProgress> findByResourceCrnAndSecretType(String resourceCrn, SecretType secretType);
+
+    List<SecretRotationStepProgress> findByResourceCrn(String resourceCrn);
 
     void deleteByResourceCrnAndSecretType(String resourceCrn, SecretType secretType);
 

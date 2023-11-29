@@ -5,6 +5,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,5 +28,17 @@ public class SaltApiController {
         Object saltApiResponse = saltApiRunComponent.createSaltApiResponse(mockUuid, body);
         LOGGER.trace("{} body with result: {}", body, saltApiResponse);
         return saltApiResponse;
+    }
+
+    @PostMapping(value = "run/{run_arg}/failure", produces = MediaType.APPLICATION_JSON)
+    public void setRunFailure(@PathVariable("mock_uuid") String mockUuid, @PathVariable("run_arg") String runArg) {
+        saltApiRunComponent.setFailure(mockUuid, runArg);
+        LOGGER.trace("Set failure for {} when arg is {}", mockUuid, runArg);
+    }
+
+    @DeleteMapping(value = "run/{run_arg}/failure", produces = MediaType.APPLICATION_JSON)
+    public void deleteRunFailure(@PathVariable("mock_uuid") String mockUuid, @PathVariable("run_arg") String runArg) {
+        saltApiRunComponent.deleteFailure(mockUuid, runArg);
+        LOGGER.trace("Removed failure for {} when arg is {}", mockUuid, runArg);
     }
 }
