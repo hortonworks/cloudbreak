@@ -1143,11 +1143,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void refreshCluster() throws Exception {
-        restartMgmtServices();
-        restartServices(true);
+    public void refreshAndRestartCluster() throws Exception {
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(v31Client);
         deployConfigAndRefreshCMStaleServices(clustersResourceApi, true);
+        restartMgmtServices();
+        restartServices(true);
     }
 
     @Override
