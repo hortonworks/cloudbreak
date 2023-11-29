@@ -209,10 +209,15 @@ subprojects {
       showSummary false
       showStandardStreams false
     }
+    testLogging {
+      showStandardStreams false
+      events = ["failed", "skipped"]
+    }
     jacoco {
       destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
       classDumpDir = file("$buildDir/jacoco/classpathdumps")
     }
+    failFast = true
     finalizedBy jacocoTestReport
   }
 
@@ -241,8 +246,9 @@ subprojects {
   test {
     testLogging {
       showStandardStreams false
-      events "failed", "standardError"
+      events = ["failed", "skipped"]
     }
+    failFast = true
     finalizedBy jacocoTestReport
   }
 
