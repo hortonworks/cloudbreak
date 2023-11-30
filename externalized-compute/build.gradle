@@ -1,0 +1,110 @@
+import org.ajoberstar.grgit.Grgit
+
+buildscript {
+    repositories {
+        maven { url = "$repoUrl" }
+        maven { url = "$springRepoUrl" }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.openapitools:openapi-generator-gradle-plugin:$openapiGeneratorGradlePlugin"
+    }
+}
+
+plugins {
+    id "java"
+    id "checkstyle"
+    id "jacoco"
+    id "maven-publish"
+    id "org.springframework.boot" version "${springBootVersion}"
+    id 'org.openapi.generator' version "$openapiGeneratorGradlePlugin"
+}
+
+dependencies {
+    implementation project(':common')
+    implementation project(':authorization-common')
+    implementation project(':auth-connector')
+    implementation project(':flow')
+    implementation project(':flow-api')
+    implementation project(':secret-engine')
+    implementation project(':externalized-compute-api')
+    implementation project(':environment-api')
+    implementation project(':secret-engine')
+
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter', version: springBootVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springBootVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jersey', version: springBootVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springBootVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: springBootVersion
+    implementation group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: jerseyCoreVersion
+    implementation group: "dnsjava", name: "dnsjava", version: dnsjavaVersion
+    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
+    implementation group: 'com.dyngr', name: 'polling', version: dyngrPollingVersion
+    implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2-jakarta', version: swaggerCoreVersion
+    implementation group: 'javax.xml.bind', name: 'jaxb-api', version: javaxXmlBindJaxbApiVersion
+    implementation group: 'org.openapitools', name: 'jackson-databind-nullable', version: "$jacksonDatabindNullable"
+
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
+    testImplementation group: 'org.mockito', name: 'mockito-inline', version: mockitoVersion
+}
+
+bootRun {
+    systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
+    systemProperty 'spring.config.location', System.properties['spring.config.location']
+    if (project.hasProperty('jvmArgs')) {
+        jvmArgs += project.jvmArgs.split("\\s+").toList()
+    }
+}
+
+bootRun {
+    mainClass = 'com.sequenceiq.externalizedcompute.ExternalizedComputeApplication'
+}
+
+bootJar {
+    archiveBaseName = 'externalizedcompute'
+    archiveFileName = 'externalizedcompute.jar'
+    manifest {
+        def grgit = Grgit.open(currentDir: project.projectDir)
+        attributes "Implementation-Version": grgit.describe()
+    }
+}
+
+openApiGenerate {
+    generatorName = "java"
+    library = "jersey3"
+    inputSpec = "$projectDir/src/main/resources/liftie-swagger.json"
+    outputDir = "$projectDir/src/generated"
+    apiPackage = "com.cloudera.api"
+    modelPackage = "com.cloudera.model"
+    invokerPackage = "com.sequenceiq.externalizedcompute"
+    configOptions = [
+            dateLibrary: "java8"
+    ]
+}
+
+publishing {
+    publications {
+        bootJava(MavenPublication) {
+            artifact bootJar
+        }
+    }
+    repositories {
+        maven {
+            url = "$System.env.NEXUS_URL"
+            allowInsecureProtocol = true
+            credentials {
+                username = "$System.env.NEXUS_USER"
+                password = "$System.env.NEXUS_PASSWORD"
+            }
+        }
+    }
+}
+
+compileJava.dependsOn tasks.openApiGenerate
+
+sourceSets {
+    main {
+        java.srcDirs += "${projectDir}/src/generated/src/main/java"
+    }
+}

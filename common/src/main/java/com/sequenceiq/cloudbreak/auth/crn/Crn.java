@@ -160,6 +160,7 @@ public class Crn {
         FREEIPA("freeipa", NON_ADMIN_SERVICE),
         DATAHUB("datahub", NON_ADMIN_SERVICE),
         DATALAKE("datalake", NON_ADMIN_SERVICE),
+        EXTERNALIZED_COMPUTE("externalizedcompute", NON_ADMIN_SERVICE),
         /**
          * @deprecated {@link #DEX} was replaced by {@link #DE} and is kept here for backward compatibility.
          */
@@ -372,6 +373,8 @@ public class Crn {
         PUBLIC_KEY("publicKey"),
         FREEIPA("freeipa"),
         DATALAKE("datalake"),
+
+        EXTERNALIZED_COMPUTE("externalizedcompute"),
         ACCOUNT_TAG("accountTag"),
         ACCOUNT_TELEMETRY("accountTelemetry"),
         DATAHUB_AUTOSCALE_CONFIG("datahubAutoscaleConfig"),

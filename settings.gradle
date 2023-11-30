@@ -82,4 +82,5 @@ include 'wiam-connector'
 include 'secret-rotation-api'
 include 'secret-rotation'
 include 'metering-connector'
-
+include 'externalized-compute'
+include 'externalized-compute-api'

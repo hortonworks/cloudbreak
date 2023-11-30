@@ -36,6 +36,8 @@ public enum CrnResourceDescriptor {
     DATABASE_SERVER(Crn.ResourceType.DATABASE_SERVER, Crn.Service.REDBEAMS),
     // datalake service
     DATALAKE(Crn.ResourceType.DATALAKE, Crn.Service.DATALAKE),
+    // externalized compute cluster service
+    EXTERNALIZED_COMPUTE(Crn.ResourceType.EXTERNALIZED_COMPUTE, Crn.Service.EXTERNALIZED_COMPUTE),
     // periscope (autoscale) service
     ALERT(Crn.ResourceType.DATAHUB_AUTOSCALE_CONFIG, Crn.Service.AUTOSCALE),
     // DFX service

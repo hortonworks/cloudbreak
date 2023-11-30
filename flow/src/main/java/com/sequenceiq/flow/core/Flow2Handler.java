@@ -347,7 +347,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             LOGGER.info("Flow started '{}'. Start event: {}", flowConfig.getDisplayName(), payload);
             return flowAcceptResult;
         } catch (Exception e) {
-            LOGGER.error("Can't save flow: {}", flowId);
+            LOGGER.error("Can't save flow: {}", flowId, e);
             runningFlows.remove(flowId);
             flowStatCache.remove(flowId, false);
             if (flowChainId != null) {

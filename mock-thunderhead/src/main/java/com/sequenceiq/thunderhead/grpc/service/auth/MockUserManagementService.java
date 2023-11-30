@@ -1216,6 +1216,8 @@ public class MockUserManagementService extends UserManagementImplBase {
         String name = request.getMachineUserName();
         LOGGER.info("Create workload machine user for account {} with name {}", accountId, name);
         responseObserver.onNext(CreateWorkloadMachineUserResponse.newBuilder()
+                .setPrivateKey(UUID.randomUUID().toString())
+                .setAccessKeyId(UUID.randomUUID().toString())
                 .setMachineUser(MachineUser.newBuilder()
                         .setMachineUserId(UUID.nameUUIDFromBytes((accountId + '#' + name).getBytes()).toString())
                         .setCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
@@ -1408,6 +1410,31 @@ public class MockUserManagementService extends UserManagementImplBase {
         UserManagementProto.ListResourceRolesResponse.Builder builder = UserManagementProto.ListResourceRolesResponse.newBuilder();
         Arrays.stream(UmsResourceRole.values()).forEach(umsResourceRole -> builder.addResourceRole(getResourceRole(umsResourceRole)));
         responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void deleteWorkloadMachineUser(UserManagementProto.DeleteWorkloadMachineUserRequest request,
+            StreamObserver<UserManagementProto.DeleteWorkloadMachineUserResponse> responseObserver) {
+        String accountId = Crn.fromString(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn()).getAccountId();
+        String name = request.getMachineUserNameOrCrn();
+        LOGGER.info("Delete workload machine user for account {} with name {}", accountId, name);
+        responseObserver.onNext(UserManagementProto.DeleteWorkloadMachineUserResponse.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getAccessKeyVerificationData(UserManagementProto.GetAccessKeyVerificationDataRequest request,
+            StreamObserver<UserManagementProto.GetAccessKeyVerificationDataResponse> responseObserver) {
+        String accountId = Crn.fromString(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn()).getAccountId();
+        LOGGER.info("Get access key verification data {}", request);
+        responseObserver.onNext(UserManagementProto.GetAccessKeyVerificationDataResponse.newBuilder()
+                .setAccessKeyId(request.getAccessKeyId())
+                .setAccountType(AccountType.REGULAR)
+                .setAccountId(accountId)
+                .setType(AccessKeyType.Value.ED25519)
+                .setTypeValue(2)
+                .build());
         responseObserver.onCompleted();
     }
 
