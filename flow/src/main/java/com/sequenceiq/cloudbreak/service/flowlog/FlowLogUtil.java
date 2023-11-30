@@ -74,8 +74,7 @@ public class FlowLogUtil {
             LOGGER.debug("Last two log items: {}, {}", lastFlowLog.minimizedString(), secondLastFlowLog.minimizedString());
             return lastFlowLog.getFinalized()
                     && (failHandledEvents.contains(secondLastFlowLog.getNextEvent())
-                    || StateStatus.FAILED.equals(secondLastFlowLog.getStateStatus())
-                    || StateStatus.FAILED.equals(lastFlowLog.getStateStatus()));
+                    || StateStatus.FAILED.equals(secondLastFlowLog.getStateStatus()));
         }
         return false;
     }
