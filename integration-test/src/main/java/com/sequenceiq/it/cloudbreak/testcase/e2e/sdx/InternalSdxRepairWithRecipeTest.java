@@ -6,7 +6,6 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CB_CM_ADMIN_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_DB_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_INTERMEDIATE_CA_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_SERVICE_DB_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_GATEWAY_CERT;
@@ -178,8 +177,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                         DATALAKE_CB_CM_ADMIN_PASSWORD,
                         DATALAKE_DATABASE_ROOT_PASSWORD,
                         DATALAKE_CM_DB_PASSWORD,
-                        DATALAKE_CM_SERVICE_DB_PASSWORD,
-                        DATALAKE_CM_INTERMEDIATE_CA_CERT)))
+                        DATALAKE_CM_SERVICE_DB_PASSWORD)))
                 .awaitForFlow();
     }
 

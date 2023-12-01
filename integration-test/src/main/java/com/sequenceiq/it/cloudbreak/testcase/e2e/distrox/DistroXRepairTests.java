@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CB
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CM_DB_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CM_SERVICES_DB_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_MGMT_CM_ADMIN_PASSWORD;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_CM_INTERMEDIATE_CA_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.GATEWAY_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_BOOT_SECRETS;
@@ -84,8 +83,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
                         CLUSTER_CB_CM_ADMIN_PASSWORD,
                         CLUSTER_CM_DB_PASSWORD,
                         CLUSTER_CM_SERVICES_DB_PASSWORD,
-                        DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD,
-                        DATAHUB_CM_INTERMEDIATE_CA_CERT)))
+                        DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD)))
                 .awaitForFlow();
     }
 
