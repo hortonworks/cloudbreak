@@ -162,6 +162,9 @@
         "administratorLogin": "[parameters('administratorLogin')]",
         "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
         "network": {
+          <#if existingDatabasePrivateDnsZoneId?has_content && flexibleServerDelegatedSubnetId?has_content>
+          "publicNetworkAccess": "Disabled",
+          </#if>
           "delegatedSubnetResourceId": "[if(empty(parameters('flexibleServerDelegatedSubnetId')), json('null'), parameters('flexibleServerDelegatedSubnetId'))]",
           "privateDnsZoneArmResourceId": "[if(empty(parameters('existingDatabasePrivateDnsZoneId')), json('null'), parameters('existingDatabasePrivateDnsZoneId'))]"
         },
