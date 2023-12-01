@@ -48,7 +48,7 @@ public class FinalizeRotationHandlerTest {
 
     @Test
     public void testHandler() {
-        doNothing().when(secretRotationOrchestrationService).finalizeIfNeeded(any(), any(), any());
+        doNothing().when(secretRotationOrchestrationService).finalizeIfNeeded(any(), any(), any(), any());
 
         underTest.accept(Event.wrap(getTriggerEvent()));
 
@@ -57,7 +57,7 @@ public class FinalizeRotationHandlerTest {
 
     @Test
     public void testHandlerFailure() {
-        doThrow(new CloudbreakServiceException("anything")).when(secretRotationOrchestrationService).finalizeIfNeeded(any(), any(), any());
+        doThrow(new CloudbreakServiceException("anything")).when(secretRotationOrchestrationService).finalizeIfNeeded(any(), any(), any(), any());
 
         underTest.accept(Event.wrap(getTriggerEvent()));
 
@@ -65,7 +65,7 @@ public class FinalizeRotationHandlerTest {
     }
 
     private static FinalizeRotationTriggerEvent getTriggerEvent() {
-        return new FinalizeRotationTriggerEvent(null, null, null, SECRET_TYPE, null);
+        return new FinalizeRotationTriggerEvent(null, null, null, SECRET_TYPE, null, null);
     }
 
 }

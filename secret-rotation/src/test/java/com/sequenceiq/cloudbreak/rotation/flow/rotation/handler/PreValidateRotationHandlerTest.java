@@ -45,7 +45,7 @@ public class PreValidateRotationHandlerTest {
 
     @Test
     public void testHandler() {
-        doNothing().when(secretRotationOrchestrationService).preValidateIfNeeded(any(), any(), any());
+        doNothing().when(secretRotationOrchestrationService).preValidateIfNeeded(any(), any(), any(), any());
 
         underTest.accept(Event.wrap(getTriggerEvent()));
 
@@ -54,7 +54,7 @@ public class PreValidateRotationHandlerTest {
 
     @Test
     public void testHandlerFailure() {
-        doThrow(new CloudbreakServiceException("anything")).when(secretRotationOrchestrationService).preValidateIfNeeded(any(), any(), any());
+        doThrow(new CloudbreakServiceException("anything")).when(secretRotationOrchestrationService).preValidateIfNeeded(any(), any(), any(), any());
 
         underTest.accept(Event.wrap(getTriggerEvent()));
 
@@ -62,7 +62,7 @@ public class PreValidateRotationHandlerTest {
     }
 
     private static PreValidateRotationTriggerEvent getTriggerEvent() {
-        return new PreValidateRotationTriggerEvent(null, null, null, null, null);
+        return new PreValidateRotationTriggerEvent(null, null, null, null, null, null);
     }
 
 }

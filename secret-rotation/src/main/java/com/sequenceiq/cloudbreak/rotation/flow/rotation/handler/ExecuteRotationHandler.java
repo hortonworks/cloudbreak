@@ -33,7 +33,8 @@ public class ExecuteRotationHandler extends ExceptionCatcherEventHandler<Execute
     @Override
     protected Selectable doAccept(HandlerEvent<ExecuteRotationTriggerEvent> event) {
         ExecuteRotationTriggerEvent rotationEvent = event.getData();
-        secretRotationOrchestrationService.rotateIfNeeded(rotationEvent.getSecretType(), rotationEvent.getResourceCrn(), rotationEvent.getExecutionType());
+        secretRotationOrchestrationService.rotateIfNeeded(rotationEvent.getSecretType(), rotationEvent.getResourceCrn(),
+                rotationEvent.getExecutionType(), rotationEvent.getAdditionalProperties());
         return ExecuteRotationFinishedEvent.fromPayload(rotationEvent);
     }
 }

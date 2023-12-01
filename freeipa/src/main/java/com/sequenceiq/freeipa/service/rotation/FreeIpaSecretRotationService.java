@@ -70,7 +70,7 @@ public class FreeIpaSecretRotationService implements SecretRotationFlowEventProv
         secretRotationValidationService.validateExecutionType(environmentCrn, secretTypes, request.getExecutionType());
         String selector = EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class);
         Acceptable triggerEvent = new SecretRotationFlowChainTriggerEvent(
-                selector, stack.getId(), stack.getEnvironmentCrn(), secretTypes, request.getExecutionType());
+                selector, stack.getId(), stack.getEnvironmentCrn(), secretTypes, request.getExecutionType(), request.getAdditionalProperties());
         return flowManager.notify(selector, triggerEvent);
     }
 

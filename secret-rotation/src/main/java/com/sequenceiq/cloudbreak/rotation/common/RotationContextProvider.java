@@ -13,6 +13,10 @@ public interface RotationContextProvider {
 
     <C extends RotationContext> Map<SecretRotationStep, C> getContexts(String resourceCrn);
 
+    default <C extends RotationContext> Map<SecretRotationStep, C> getContexts(String resourceCrn, Map<String, String> additionalProperties) {
+        return getContexts(resourceCrn);
+    }
+
     SecretType getSecret();
 
     default <C extends RotationContext> Set<String> getVaultSecretsForRollback(String resourceCrn, Map<SecretRotationStep, C> contexts) {

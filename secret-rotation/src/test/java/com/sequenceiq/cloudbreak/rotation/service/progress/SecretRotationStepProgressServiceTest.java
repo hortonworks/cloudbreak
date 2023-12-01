@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.rotation.service.RotationMetadata;
 @ExtendWith(MockitoExtension.class)
 public class SecretRotationStepProgressServiceTest {
 
-    private static final RotationMetadata METADATA = new RotationMetadata(TEST, ROTATE, null, "", Optional.empty());
+    private static final RotationMetadata METADATA = new RotationMetadata(TEST, ROTATE, null, "", Optional.empty(), null);
 
     @Mock
     private SecretRotationStepProgressRepository repository;
@@ -78,7 +78,7 @@ public class SecretRotationStepProgressServiceTest {
         when(repository.findByResourceCrnAndSecretType(any(), any())).thenReturn(progressOptional);
 
         boolean result =
-                underTest.executionValidByProgress(new RotationMetadata(null, currentExecution, null, null, Optional.empty()));
+                underTest.executionValidByProgress(new RotationMetadata(null, currentExecution, null, null, Optional.empty(), null));
 
         assertEquals(expected, result);
     }

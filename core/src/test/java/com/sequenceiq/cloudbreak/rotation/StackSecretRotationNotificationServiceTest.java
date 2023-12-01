@@ -31,7 +31,7 @@ class StackSecretRotationNotificationServiceTest {
     private static final Long STACK_ID = 1L;
 
     private static final RotationMetadata METADATA = new RotationMetadata(DATALAKE_SALT_BOOT_SECRETS, ROTATE, null,
-            "", Optional.empty());
+            "", Optional.empty(), null);
 
     @Mock
     private StackDtoService stackDtoService;

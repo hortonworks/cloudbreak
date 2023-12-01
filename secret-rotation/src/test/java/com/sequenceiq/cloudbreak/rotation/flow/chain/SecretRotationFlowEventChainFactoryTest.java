@@ -47,22 +47,22 @@ public class SecretRotationFlowEventChainFactoryTest {
         when(secretRotationFlowEventProvider.getPostFlowEvent(any())).thenReturn(Set.of());
         // no salt update, no post flow
         assertEquals(1, underTest.createFlowTriggerEventQueue(
-                new SecretRotationFlowChainTriggerEvent(null, 1L, null, List.of(TEST), null)).getQueue().size());
+                new SecretRotationFlowChainTriggerEvent(null, 1L, null, List.of(TEST), null, null)).getQueue().size());
         // salt update, no post flow
         assertEquals(2, underTest.createFlowTriggerEventQueue(
-                new SecretRotationFlowChainTriggerEvent(null, 1L, null, List.of(TEST_3), null)).getQueue().size());
+                new SecretRotationFlowChainTriggerEvent(null, 1L, null, List.of(TEST_3), null, null)).getQueue().size());
 
         when(secretRotationFlowEventProvider.getPostFlowEvent(any())).thenReturn(Set.of(sampleEvent("post1")));
         // salt update, post flow
         assertEquals(3, underTest.createFlowTriggerEventQueue(
-                new SecretRotationFlowChainTriggerEvent(null, 1L, null, List.of(TEST_3), null)).getQueue().size());
+                new SecretRotationFlowChainTriggerEvent(null, 1L, null, List.of(TEST_3), null, null)).getQueue().size());
     }
 
     @Test
     void testFlowChainShouldContainsRotationFlowIfExecutionTypeIsNull() {
         when(secretRotationFlowEventProvider.getPostFlowEvent(any())).thenReturn(Set.of());
         Queue<Selectable> flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(
-                new SecretRotationFlowChainTriggerEvent(null, 1L, null, List.of(TEST), null)).getQueue();
+                new SecretRotationFlowChainTriggerEvent(null, 1L, null, List.of(TEST), null, null)).getQueue();
         assertEquals(1, flowTriggerEventQueue.size());
         assertThat(flowTriggerEventQueue.poll()).isInstanceOf(SecretRotationTriggerEvent.class);
     }
@@ -71,7 +71,7 @@ public class SecretRotationFlowEventChainFactoryTest {
     void testFlowChainShouldContainsSubRotationFlowIfExecutionTypeIsNotNull() {
         when(secretRotationFlowEventProvider.getPostFlowEvent(any())).thenReturn(Set.of());
         Queue<Selectable> flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(
-                new SecretRotationFlowChainTriggerEvent(null, 1L, null, List.of(TEST), ROTATE)).getQueue();
+                new SecretRotationFlowChainTriggerEvent(null, 1L, null, List.of(TEST), ROTATE, null)).getQueue();
         assertEquals(1, flowTriggerEventQueue.size());
         assertThat(flowTriggerEventQueue.poll()).isInstanceOf(SecretSubRotationTriggerEvent.class);
     }

@@ -22,7 +22,8 @@ public class SecretRotationPreValidateService extends AbstractSecretRotationServ
 
     public void preValidate(RotationMetadata metadata) {
         checkIfExecutionValidByProgress(metadata);
-        Map<SecretRotationStep, ? extends RotationContext> contexts = getContexts(metadata.secretType(), metadata.resourceCrn());
+        Map<SecretRotationStep, ? extends RotationContext> contexts = getContexts(metadata.secretType(), metadata.resourceCrn(),
+                metadata.additionalProperties());
         LOGGER.info("Contexts generation for validation before secret rotation of {} regarding resource {} is finished.",
                 metadata.secretType(), metadata.resourceCrn());
         getStepsByProgress(metadata).forEach(step -> executePhaseWithProgressCheck(metadata, step, contexts.get(step)));

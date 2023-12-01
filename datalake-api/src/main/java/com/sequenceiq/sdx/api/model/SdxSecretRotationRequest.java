@@ -8,8 +8,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
-import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretTypes;
+import com.sequenceiq.cloudbreak.rotation.request.BaseSecretRotationRequest;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
@@ -19,7 +19,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SdxSecretRotationRequest {
+public class SdxSecretRotationRequest extends BaseSecretRotationRequest {
 
     @TenantAwareParam
     @ValidCrn(resource = CrnResourceDescriptor.DATALAKE)
@@ -30,9 +30,6 @@ public class SdxSecretRotationRequest {
     @NotEmpty
     @ApiModelProperty("Secrets to be rotated")
     private List<String> secrets;
-
-    @ApiModelProperty("Execution type if needed")
-    private RotationFlowExecutionType executionType;
 
     public String getCrn() {
         return crn;
@@ -48,13 +45,5 @@ public class SdxSecretRotationRequest {
 
     public void setSecrets(List<String> secrets) {
         this.secrets = secrets;
-    }
-
-    public RotationFlowExecutionType getExecutionType() {
-        return executionType;
-    }
-
-    public void setExecutionType(RotationFlowExecutionType executionType) {
-        this.executionType = executionType;
     }
 }

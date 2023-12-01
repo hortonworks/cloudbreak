@@ -47,9 +47,10 @@ public class RedbeamsFlowManager {
         return notify(selector, event);
     }
 
-    public FlowIdentifier triggerSecretRotation(Long resourceId, String resourceCrn, List<SecretType> secretTypes, RotationFlowExecutionType executionType) {
+    public FlowIdentifier triggerSecretRotation(Long resourceId, String resourceCrn, List<SecretType> secretTypes, RotationFlowExecutionType executionType,
+            Map<String, String> additionalProperties) {
         String selector = EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class);
-        return notify(selector, new SecretRotationFlowChainTriggerEvent(selector, resourceId, resourceCrn, secretTypes, executionType));
+        return notify(selector, new SecretRotationFlowChainTriggerEvent(selector, resourceId, resourceCrn, secretTypes, executionType, additionalProperties));
     }
 
     private FlowIdentifier notify(String selector, Event<Acceptable> event) {

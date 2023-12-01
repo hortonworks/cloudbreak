@@ -85,7 +85,7 @@ public class SecretRotationOrchestrationServiceTest {
     @Test
     public void testRotateWhenNotNeeded() {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.FALSE);
-        underTest.rotateIfNeeded(TEST, RESOURCE, null);
+        underTest.rotateIfNeeded(TEST, RESOURCE, null, null);
 
         verifyNoInteractions(contextProvider, rotationService, secretRotationStatusService, secretRotationUsageService);
     }
@@ -93,7 +93,7 @@ public class SecretRotationOrchestrationServiceTest {
     @Test
     public void testPreValidateWhenNotNeeded() {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.FALSE);
-        underTest.preValidateIfNeeded(TEST, RESOURCE, null);
+        underTest.preValidateIfNeeded(TEST, RESOURCE, null, null);
 
         verifyNoInteractions(contextProvider, preValidateService, secretRotationStatusService, secretRotationUsageService);
     }
@@ -101,7 +101,7 @@ public class SecretRotationOrchestrationServiceTest {
     @Test
     public void testFinalizeWhenNotNeeded() {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.FALSE);
-        underTest.finalizeIfNeeded(TEST, RESOURCE, null);
+        underTest.finalizeIfNeeded(TEST, RESOURCE, null, null);
 
         verifyNoInteractions(contextProvider, finalizeService, secretRotationStatusService, secretRotationUsageService);
     }
@@ -109,7 +109,7 @@ public class SecretRotationOrchestrationServiceTest {
     @Test
     public void testRollbackWhenNotNeeded() {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.FALSE);
-        underTest.rollbackIfNeeded(TEST, RESOURCE, null, new SecretRotationException(ROLLBACK_REASON));
+        underTest.rollbackIfNeeded(TEST, RESOURCE, null, null, new SecretRotationException(ROLLBACK_REASON));
 
         verifyNoInteractions(contextProvider, rollbackService, secretRotationStatusService, secretRotationUsageService);
     }
@@ -119,7 +119,7 @@ public class SecretRotationOrchestrationServiceTest {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.TRUE);
         doNothing().when(rotationService).rotate(any());
         doNothing().when(multiClusterRotationService).updateMultiRotationEntriesAfterRotate(any());
-        underTest.rotateIfNeeded(TEST, RESOURCE, null);
+        underTest.rotateIfNeeded(TEST, RESOURCE, null, null);
 
         verify(rotationService).rotate(any());
         verify(multiClusterRotationService).updateMultiRotationEntriesAfterRotate(any());
@@ -132,7 +132,7 @@ public class SecretRotationOrchestrationServiceTest {
     public void testPreValidate() {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.TRUE);
         doNothing().when(preValidateService).preValidate(any());
-        underTest.preValidateIfNeeded(TEST, RESOURCE, null);
+        underTest.preValidateIfNeeded(TEST, RESOURCE, null, null);
 
         verify(preValidateService).preValidate(any());
         verifyNoInteractions(secretRotationUsageService, secretRotationStatusService);
@@ -150,7 +150,7 @@ public class SecretRotationOrchestrationServiceTest {
         doNothing().when(secretRotationStepProgressService).deleteCurrentRotation(any());
         doNothing().when(multiClusterRotationService).updateMultiRotationEntriesAfterFinalize(any());
 
-        underTest.finalizeIfNeeded(TEST, RESOURCE, null);
+        underTest.finalizeIfNeeded(TEST, RESOURCE, null, null);
 
         verify(finalizeService).finalize(any());
         verify(multiClusterRotationService).updateMultiRotationEntriesAfterFinalize(any());
@@ -164,7 +164,7 @@ public class SecretRotationOrchestrationServiceTest {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.TRUE);
         doNothing().when(rollbackService).rollback(any());
 
-        underTest.rollbackIfNeeded(TEST, RESOURCE, null, new SecretRotationException(ROLLBACK_REASON));
+        underTest.rollbackIfNeeded(TEST, RESOURCE, null, null, new SecretRotationException(ROLLBACK_REASON));
 
         verify(rollbackService).rollback(any());
         verify(secretRotationStatusService, times(1)).rollbackStarted(eq(RESOURCE), eq(TEST), eq(ROLLBACK_REASON));

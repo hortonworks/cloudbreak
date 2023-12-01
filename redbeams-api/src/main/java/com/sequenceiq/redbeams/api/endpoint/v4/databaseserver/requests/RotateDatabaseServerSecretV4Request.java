@@ -4,8 +4,8 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretType;
+import com.sequenceiq.cloudbreak.rotation.request.BaseSecretRotationRequest;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
@@ -14,7 +14,7 @@ import io.swagger.annotations.ApiModel;
 
 @ApiModel(description = ModelDescriptions.ROTATE_DATABASE_SERVER_SECRETS_REQUEST)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RotateDatabaseServerSecretV4Request {
+public class RotateDatabaseServerSecretV4Request extends BaseSecretRotationRequest {
 
     @ValidCrn(resource = { CrnResourceDescriptor.DATABASE_SERVER })
     private String crn;
@@ -22,9 +22,6 @@ public class RotateDatabaseServerSecretV4Request {
     @ValidSecretType(allowedTypes = { RedbeamsSecretType.class })
     @NotNull
     private String secret;
-
-    @NotNull
-    private RotationFlowExecutionType executionType;
 
     public String getCrn() {
         return crn;
@@ -40,13 +37,5 @@ public class RotateDatabaseServerSecretV4Request {
 
     public void setSecret(String secret) {
         this.secret = secret;
-    }
-
-    public RotationFlowExecutionType getExecutionType() {
-        return executionType;
-    }
-
-    public void setExecutionType(RotationFlowExecutionType executionType) {
-        this.executionType = executionType;
     }
 }

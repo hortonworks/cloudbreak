@@ -5,15 +5,15 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
-import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretType;
+import com.sequenceiq.cloudbreak.rotation.request.BaseSecretRotationRequest;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 
 import io.swagger.annotations.ApiModel;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StackV4SecretRotationRequest {
+public class StackV4SecretRotationRequest extends BaseSecretRotationRequest {
 
     @ValidCrn(resource = { CrnResourceDescriptor.DATALAKE, CrnResourceDescriptor.DATAHUB })
     private String crn;
@@ -21,9 +21,6 @@ public class StackV4SecretRotationRequest {
     @ValidSecretType(allowedTypes = CloudbreakSecretType.class)
     @NotNull
     private String secret;
-
-    @NotNull
-    private RotationFlowExecutionType executionType;
 
     public String getCrn() {
         return crn;
@@ -39,13 +36,5 @@ public class StackV4SecretRotationRequest {
 
     public void setSecret(String secret) {
         this.secret = secret;
-    }
-
-    public RotationFlowExecutionType getExecutionType() {
-        return executionType;
-    }
-
-    public void setExecutionType(RotationFlowExecutionType executionType) {
-        this.executionType = executionType;
     }
 }

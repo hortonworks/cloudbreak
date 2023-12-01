@@ -47,7 +47,7 @@ public class MultiClusterRotationServiceTest {
         doNothing().when(interServiceMultiClusterRotationService).markChildren(any(), any());
 
         underTest.updateMultiRotationEntriesAfterRotate(
-                new RotationMetadata(TestSecretType.TEST_2, null, null, ENV_CRN, Optional.of(DEMO_MULTI_SECRET)));
+                new RotationMetadata(TestSecretType.TEST_2, null, null, ENV_CRN, Optional.of(DEMO_MULTI_SECRET), null));
 
         verify(repository).save(any());
         verify(interServiceMultiClusterRotationService).markChildren(any(), any());
@@ -58,7 +58,7 @@ public class MultiClusterRotationServiceTest {
         when(repository.findByResourceCrnAndSecretTypeAndType(any(), any(), any())).thenReturn(Optional.of(
                 new MultiClusterRotationResource(ENV_CRN, DEMO_MULTI_SECRET, MultiClusterRotationResourceType.INITIATED_PARENT)));
         underTest.updateMultiRotationEntriesAfterFinalize(
-                new RotationMetadata(TestSecretType.TEST_2, null, null, ENV_CRN, Optional.of(DEMO_MULTI_SECRET)));
+                new RotationMetadata(TestSecretType.TEST_2, null, null, ENV_CRN, Optional.of(DEMO_MULTI_SECRET), null));
 
         verify(repository).delete(any());
     }
@@ -68,7 +68,7 @@ public class MultiClusterRotationServiceTest {
         when(repository.findByResourceCrnAndSecretTypeAndType(any(), any(), any())).thenReturn(Optional.of(
                 new MultiClusterRotationResource(DATAHUB_CRN, DEMO_MULTI_SECRET, MultiClusterRotationResourceType.PENDING_CHILD)));
         underTest.updateMultiRotationEntriesAfterFinalize(
-                new RotationMetadata(TestSecretType.TEST_4, null, null, DATAHUB_CRN, Optional.of(DEMO_MULTI_SECRET)));
+                new RotationMetadata(TestSecretType.TEST_4, null, null, DATAHUB_CRN, Optional.of(DEMO_MULTI_SECRET), null));
 
         verify(repository).delete(any());
     }

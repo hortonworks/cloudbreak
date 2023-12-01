@@ -26,9 +26,9 @@ class CloudbreakSecretRotationFlowEventProviderTest {
     @Test
     public void testGetPostFlowEvents() {
         assertTrue(underTest.getPostFlowEvent(new SecretRotationFlowChainTriggerEvent(null, 1L, null,
-                List.of(SALT_BOOT_SECRETS), null)).isEmpty());
+                List.of(SALT_BOOT_SECRETS), null, null)).isEmpty());
         Set<Selectable> postFlowEvents = underTest.getPostFlowEvent(new SecretRotationFlowChainTriggerEvent(null, 1L, null,
-                List.of(DATAHUB_CM_INTERMEDIATE_CA_CERT), null));
+                List.of(DATAHUB_CM_INTERMEDIATE_CA_CERT), null, null));
         assertFalse(postFlowEvents.isEmpty());
         assertEquals(postFlowEvents.iterator().next().getSelector(), ClusterCertificatesRotationEvent.CLUSTER_CMCA_ROTATION_EVENT.event());
     }
@@ -36,7 +36,7 @@ class CloudbreakSecretRotationFlowEventProviderTest {
     @Test
     public void testTriggerEventProvided() {
         Selectable triggerEvent = underTest.getSaltUpdateTriggerEvent(
-                new SecretRotationFlowChainTriggerEvent(null, 1L, null, null, null));
+                new SecretRotationFlowChainTriggerEvent(null, 1L, null, null, null, null));
 
         assertInstanceOf(StackEvent.class, triggerEvent);
         StackEvent stackEvent = (StackEvent) triggerEvent;
@@ -47,18 +47,18 @@ class CloudbreakSecretRotationFlowEventProviderTest {
     @Test
     public void testSaltUpdateCheckIfExecutionSpecified() {
         assertFalse(underTest.saltUpdateNeeded(
-                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(SALT_BOOT_SECRETS), ROTATE)));
+                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(SALT_BOOT_SECRETS), ROTATE, null)));
     }
 
     @Test
     public void testSaltUpdateCheckIfSecretNotRequires() {
         assertFalse(underTest.saltUpdateNeeded(
-                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(CLUSTER_CB_CM_ADMIN_PASSWORD), ROTATE)));
+                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(CLUSTER_CB_CM_ADMIN_PASSWORD), ROTATE, null)));
     }
 
     @Test
     public void testSaltUpdateCheck() {
         assertTrue(underTest.saltUpdateNeeded(
-                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(SALT_BOOT_SECRETS), null)));
+                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(SALT_BOOT_SECRETS), null, null)));
     }
 }

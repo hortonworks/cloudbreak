@@ -190,7 +190,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerDetermineDatalakeDataSizes(STACK_ID, "asdf");
         underTest.triggerDeleteVolumes(STACK_ID, new StackDeleteVolumesRequest());
         underTest.triggerStackUpdateDisks(stackDto, new DiskUpdateRequest());
-        underTest.triggerSecretRotation(STACK_ID, "CRN", Lists.newArrayList(), RotationFlowExecutionType.ROTATE);
+        underTest.triggerSecretRotation(STACK_ID, "CRN", Lists.newArrayList(), RotationFlowExecutionType.ROTATE, null);
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {

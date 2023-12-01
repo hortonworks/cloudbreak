@@ -61,7 +61,8 @@ class RedbeamsFlowManagerTest {
         Event<Acceptable> event = new Event<>(data);
         when(eventFactory.createEventWithErrHandler(anyMap(), any(Acceptable.class))).thenReturn(event);
         when(accepted.await(10L, TimeUnit.SECONDS)).thenReturn(FlowAcceptResult.runningInFlowChain(FLOW_CHAIN_ID));
-        FlowIdentifier flowIdentifier = underTest.triggerSecretRotation(DATABASE_ID, DATABASE_CRN, List.of(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), null);
+        FlowIdentifier flowIdentifier = underTest.triggerSecretRotation(DATABASE_ID, DATABASE_CRN, List.of(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD),
+                null, null);
         assertEquals(FlowType.FLOW_CHAIN, flowIdentifier.getType());
         assertEquals(FLOW_CHAIN_ID, flowIdentifier.getPollableId());
         verify(reactor, times(1)).notify(eq(EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class)), any(Event.class));

@@ -357,9 +357,11 @@ public class SdxReactorFlowManager {
         return notify(selector, sdxEvent, sdxCluster.getClusterName());
     }
 
-    public FlowIdentifier triggerSecretRotation(SdxCluster sdxCluster, List<SecretType> secretTypes, RotationFlowExecutionType executionType) {
+    public FlowIdentifier triggerSecretRotation(SdxCluster sdxCluster, List<SecretType> secretTypes, RotationFlowExecutionType executionType,
+            Map<String, String> additionalProperties) {
         String selector = EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class);
-        return notify(selector, new SecretRotationFlowChainTriggerEvent(selector, sdxCluster.getId(), sdxCluster.getResourceCrn(), secretTypes, executionType),
+        return notify(selector, new SecretRotationFlowChainTriggerEvent(selector, sdxCluster.getId(), sdxCluster.getResourceCrn(),
+                        secretTypes, executionType, additionalProperties),
                 sdxCluster.getClusterName(), ThreadBasedUserCrnProvider.getUserCrn());
     }
 

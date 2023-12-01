@@ -50,7 +50,7 @@ public class SecretRotationExecutionDecisionProviderTest {
     @MethodSource("singleRotationRequests")
     void testSingleClusterRotation(RotationFlowExecutionType currentExecution, RotationFlowExecutionType requestExecution, boolean result) {
         assertEquals(result, underTest.executionRequired(new RotationMetadata(TestSecretType.TEST, currentExecution, requestExecution,
-                "resourceCrn", Optional.empty())));
+                "resourceCrn", Optional.empty(), null)));
 
         verifyNoInteractions(trackingService);
     }
@@ -58,7 +58,7 @@ public class SecretRotationExecutionDecisionProviderTest {
     @ParameterizedTest
     @MethodSource("multiChildRotationRequests")
     void testMultiClusterChildRotation(RotationFlowExecutionType currentExecution, RotationFlowExecutionType requestExecution, boolean result) {
-        RotationMetadata metadata = new RotationMetadata(TEST_2, currentExecution, requestExecution, DATAHUB_CRN, Optional.of(DEMO_MULTI_SECRET));
+        RotationMetadata metadata = new RotationMetadata(TEST_2, currentExecution, requestExecution, DATAHUB_CRN, Optional.of(DEMO_MULTI_SECRET), null);
         assertEquals(result, underTest.executionRequired(metadata));
 
         verifyNoInteractions(trackingService);
@@ -70,7 +70,7 @@ public class SecretRotationExecutionDecisionProviderTest {
         MultiClusterRotationResourceType multiClusterRotationResourceType = MultiClusterRotationResourceType.INITIATED_PARENT;
         lenient().when(trackingService.getMultiRotationEntryForMetadata(any(), eq(multiClusterRotationResourceType))).thenReturn(Optional.empty());
         RotationMetadata metadata = new RotationMetadata(TEST_4, currentExecution, requestExecution,
-                ENV_CRN, Optional.of(DEMO_MULTI_SECRET));
+                ENV_CRN, Optional.of(DEMO_MULTI_SECRET), null);
         assertEquals(result, underTest.executionRequired(metadata));
     }
 
@@ -87,7 +87,7 @@ public class SecretRotationExecutionDecisionProviderTest {
                 Optional.of(interServiceMultiClusterRotationService), true);
         lenient().when(interServiceMultiClusterRotationService.checkOngoingChildrenMultiSecretRotations(any(), any())).thenReturn(Boolean.FALSE);
         RotationMetadata met = new RotationMetadata(TEST_4, currentExecution, requestExecution,
-                ENV_CRN, Optional.of(DEMO_MULTI_SECRET));
+                ENV_CRN, Optional.of(DEMO_MULTI_SECRET), null);
         assertEquals(result, underTest.executionRequired(met));
     }
 

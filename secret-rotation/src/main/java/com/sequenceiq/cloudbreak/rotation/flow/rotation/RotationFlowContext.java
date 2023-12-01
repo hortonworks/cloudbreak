@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.flow.rotation;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
@@ -18,23 +20,27 @@ public class RotationFlowContext extends CommonContext {
 
     private final RotationFlowExecutionType executionType;
 
+    private final Map<String, String> additionalProperties;
+
     @JsonCreator
     public RotationFlowContext(
             @JsonProperty("flowParameters") FlowParameters flowParameters,
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("secretType") SecretType secretType,
-            @JsonProperty("executionType") RotationFlowExecutionType executionType) {
+            @JsonProperty("executionType") RotationFlowExecutionType executionType,
+            @JsonProperty("additionalProperties") Map<String, String> additionalProperties) {
         super(flowParameters);
         this.resourceId = resourceId;
         this.resourceCrn = resourceCrn;
         this.secretType = secretType;
         this.executionType = executionType;
+        this.additionalProperties = additionalProperties;
     }
 
     public static RotationFlowContext fromPayload(FlowParameters flowParameters, RotationEvent rotationEvent) {
         return new RotationFlowContext(flowParameters, rotationEvent.getResourceId(), rotationEvent.getResourceCrn(),
-                rotationEvent.getSecretType(), rotationEvent.getExecutionType());
+                rotationEvent.getSecretType(), rotationEvent.getExecutionType(), rotationEvent.getAdditionalProperties());
     }
 
     public Long getResourceId() {
@@ -53,6 +59,10 @@ public class RotationFlowContext extends CommonContext {
         return executionType;
     }
 
+    public Map<String, String> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
     @Override
     public String toString() {
         return "RotationFlowContext{" +
@@ -60,6 +70,7 @@ public class RotationFlowContext extends CommonContext {
                 ", resourceCrn='" + resourceCrn + '\'' +
                 ", secretType=" + secretType +
                 ", executionType=" + executionType +
+                ", additionalProperties=" + additionalProperties +
                 "} " + super.toString();
     }
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.flow.subrotation.event;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
@@ -18,13 +20,15 @@ public class SecretSubRotationTriggerEvent extends SubRotationEvent {
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("secretType") SecretType secretType,
             @JsonProperty("executionType") RotationFlowExecutionType executionType,
+            @JsonProperty("additionalProperties") Map<String, String> additionalProperties,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
-        super(selector, resourceId, resourceCrn, secretType, executionType, accepted);
+        super(selector, resourceId, resourceCrn, secretType, executionType, additionalProperties, accepted);
     }
 
     public static SecretSubRotationTriggerEvent fromChainTrigger(SecretRotationFlowChainTriggerEvent chainTriggerEvent, SecretType secretType) {
         return new SecretSubRotationTriggerEvent(EventSelectorUtil.selector(SecretSubRotationTriggerEvent.class), chainTriggerEvent.getResourceId(),
-                chainTriggerEvent.getResourceCrn(), secretType, chainTriggerEvent.getExecutionType(), chainTriggerEvent.accepted());
+                chainTriggerEvent.getResourceCrn(), secretType, chainTriggerEvent.getExecutionType(), chainTriggerEvent.getAdditionalProperties(),
+                chainTriggerEvent.accepted());
     }
 
     @Override

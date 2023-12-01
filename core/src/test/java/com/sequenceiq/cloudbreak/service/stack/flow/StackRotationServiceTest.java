@@ -78,11 +78,11 @@ public class StackRotationServiceTest {
         doNothing().when(secretRotationValidationService).validateExecutionType(any(), any(), any());
         when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
         when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stack);
-        when(flowManager.triggerSecretRotation(anyLong(), anyString(), any(), any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, "flowchain"));
+        when(flowManager.triggerSecretRotation(anyLong(), anyString(), any(), any(), any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, "flowchain"));
 
-        underTest.rotateSecrets(CRN, List.of(CLUSTER_CB_CM_ADMIN_PASSWORD.name()), null);
+        underTest.rotateSecrets(CRN, List.of(CLUSTER_CB_CM_ADMIN_PASSWORD.name()), null, null);
 
-        verify(flowManager).triggerSecretRotation(anyLong(), anyString(), any(), any());
+        verify(flowManager).triggerSecretRotation(anyLong(), anyString(), any(), any(), any());
     }
 
     @Test
@@ -94,7 +94,7 @@ public class StackRotationServiceTest {
         when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stack);
 
         CloudbreakServiceException exception =
-                assertThrows(CloudbreakServiceException.class, () -> underTest.rotateSecrets(CRN, List.of(CLUSTER_CB_CM_ADMIN_PASSWORD.name()), null));
+                assertThrows(CloudbreakServiceException.class, () -> underTest.rotateSecrets(CRN, List.of(CLUSTER_CB_CM_ADMIN_PASSWORD.name()), null, null));
         assertEquals("The cluster must be in available status to execute secret rotation. Current status: STOPPED", exception.getMessage());
     }
 
@@ -103,7 +103,7 @@ public class StackRotationServiceTest {
         when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.FALSE);
 
         assertThrows(CloudbreakServiceException.class, () -> underTest.rotateSecrets(CRN,
-                List.of(CLUSTER_CB_CM_ADMIN_PASSWORD.name()), null));
+                List.of(CLUSTER_CB_CM_ADMIN_PASSWORD.name()), null, null));
 
         verifyNoInteractions(flowManager, stackDtoService);
     }

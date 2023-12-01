@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.rotation.flow.subrotation.event;
 
+import java.util.Map;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,25 +25,30 @@ public class SubRotationEvent extends BaseFlowEvent {
 
     private final RotationFlowExecutionType executionType;
 
+    private final Map<String, String> additionalProperties;
+
     @JsonCreator
     public SubRotationEvent(@JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("secretType") SecretType secretType,
             @JsonProperty("executionType") RotationFlowExecutionType executionType,
+            @JsonProperty("additionalProperties") Map<String, String> additionalProperties,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, resourceId, resourceCrn, accepted);
         this.secretType = secretType;
         this.executionType = executionType;
+        this.additionalProperties = additionalProperties;
     }
 
-    public SubRotationEvent(String selector, Long resourceId, String resourceCrn, SecretType secretType, RotationFlowExecutionType executionType) {
-        this(selector, resourceId, resourceCrn, secretType, executionType, null);
+    public SubRotationEvent(String selector, Long resourceId, String resourceCrn, SecretType secretType, RotationFlowExecutionType executionType,
+            Map<String, String> additionalProperties) {
+        this(selector, resourceId, resourceCrn, secretType, executionType, additionalProperties, null);
     }
 
     public static SubRotationEvent fromContext(String selector, SubRotationFlowContext context) {
         return new SubRotationEvent(selector, context.getResourceId(),
-                context.getResourceCrn(), context.getSecretType(), context.getExecutionType(), null);
+                context.getResourceCrn(), context.getSecretType(), context.getExecutionType(), context.getAdditionalProperties(), null);
     }
 
     public SecretType getSecretType() {
@@ -53,11 +59,16 @@ public class SubRotationEvent extends BaseFlowEvent {
         return executionType;
     }
 
+    public Map<String, String> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
     @Override
     public boolean equalsEvent(BaseFlowEvent other) {
         return isClassAndEqualsEvent(SubRotationEvent.class, other,
                 event -> Objects.equals(secretType, event.secretType) &&
-                        Objects.equals(executionType, event.executionType));
+                        Objects.equals(executionType, event.executionType) &&
+                        Objects.equals(additionalProperties, event.additionalProperties));
     }
 
     @Override
@@ -67,6 +78,7 @@ public class SubRotationEvent extends BaseFlowEvent {
                 ", executionType=" + executionType +
                 ", resourceId=" + getResourceId() +
                 ", resourceCrn='" + getResourceCrn() +
+                ", additionalProperties='" + additionalProperties +
                 '}';
     }
 }

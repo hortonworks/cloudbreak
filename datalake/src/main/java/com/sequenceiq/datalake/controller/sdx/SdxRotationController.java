@@ -48,7 +48,7 @@ public class SdxRotationController implements SdxRotationEndpoint {
     @Override
     @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_DL_SECRETS)
     public FlowIdentifier rotateSecrets(@TenantAwareParam @RequestObject SdxSecretRotationRequest request) {
-        return sdxRotationService.triggerSecretRotation(request.getCrn(), request.getSecrets(), request.getExecutionType());
+        return sdxRotationService.triggerSecretRotation(request.getCrn(), request.getSecrets(), request.getExecutionType(), request.getAdditionalProperties());
     }
 
     @Override

@@ -34,7 +34,7 @@ public class RollbackRotationHandler extends ExceptionCatcherEventHandler<Rollba
     protected Selectable doAccept(HandlerEvent<RollbackRotationTriggerEvent> event) {
         RollbackRotationTriggerEvent rollbackEvent = event.getData();
         secretRotationOrchestrationService.rollbackIfNeeded(rollbackEvent.getSecretType(), rollbackEvent.getResourceCrn(), rollbackEvent.getExecutionType(),
-                rollbackEvent.getRollbackReason());
+                rollbackEvent.getAdditionalProperties(), rollbackEvent.getRollbackReason());
         return ExecuteRollbackFinishedEvent.fromPayload(rollbackEvent);
     }
 }

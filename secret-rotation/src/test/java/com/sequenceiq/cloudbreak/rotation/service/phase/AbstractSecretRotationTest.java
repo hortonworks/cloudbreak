@@ -38,7 +38,7 @@ public abstract class AbstractSecretRotationTest {
         Map<SecretRotationStep, RotationContext> contextMap = Map.of(STEP, new TestRotationContext("resource"),
                 STEP2, new TestRotationContext("resource"),
                 STEP3, new TestRotationContext("resource"));
-        lenient().when(contextProvider.getContexts(any())).thenReturn(contextMap);
+        lenient().when(contextProvider.getContexts(any(), any())).thenReturn(contextMap);
     }
 
     protected abstract Object getUnderTest();

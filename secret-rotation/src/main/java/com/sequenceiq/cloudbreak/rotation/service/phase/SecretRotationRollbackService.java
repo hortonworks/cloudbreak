@@ -26,7 +26,8 @@ public class SecretRotationRollbackService extends AbstractSecretRotationService
 
     public void rollback(RotationMetadata metadata) {
         checkIfExecutionValidByProgress(metadata);
-        Map<SecretRotationStep, ? extends RotationContext> contexts = getContexts(metadata.secretType(), metadata.resourceCrn());
+        Map<SecretRotationStep, ? extends RotationContext> contexts = getContexts(metadata.secretType(), metadata.resourceCrn(),
+                metadata.additionalProperties());
         LOGGER.info("Contexts generation for secret rotation's rollback of {} regarding resource {} is finished.",
                 metadata.secretType(), metadata.resourceCrn());
         Set<String> affectedSecrets = getContextProvider(metadata).getVaultSecretsForRollback(metadata.resourceCrn(), contexts);

@@ -280,6 +280,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Override
     @InternalOnly
     public FlowIdentifier rotateSecret(@Valid @NotNull RotateDatabaseServerSecretV4Request request, @InitiatorUserCrn String initiatorUserCrn) {
-        return redbeamsRotationService.rotateSecrets(request.getCrn(), List.of(request.getSecret()), request.getExecutionType());
+        return redbeamsRotationService.rotateSecrets(request.getCrn(), List.of(request.getSecret()), request.getExecutionType(),
+                request.getAdditionalProperties());
     }
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.flow.rotation.event;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
@@ -16,14 +18,15 @@ public class RotationFailedEvent extends RotationEvent {
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("secretType") SecretType secretType,
             @JsonProperty("executionType") RotationFlowExecutionType executionType,
+            @JsonProperty("additionalProperties") Map<String, String> additionalProperties,
             @JsonProperty("exception") Exception exception) {
-        super(selector, resourceId, resourceCrn, secretType, executionType);
+        super(selector, resourceId, resourceCrn, secretType, executionType, additionalProperties);
         this.exception = exception;
     }
 
     public static RotationFailedEvent fromPayload(RotationEvent payload, Exception ex) {
         return new RotationFailedEvent(EventSelectorUtil.selector(RotationFailedEvent.class), payload.getResourceId(), payload.getResourceCrn(),
-                payload.getSecretType(), payload.getExecutionType(), ex);
+                payload.getSecretType(), payload.getExecutionType(), payload.getAdditionalProperties(), ex);
     }
 
     public Exception getException() {

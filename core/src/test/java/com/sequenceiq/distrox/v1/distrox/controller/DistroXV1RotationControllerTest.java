@@ -35,7 +35,7 @@ class DistroXV1RotationControllerTest {
 
         underTest.rotateSecrets(request);
 
-        verify(stackRotationService).rotateSecrets(crn, secretTypes, RotationFlowExecutionType.ROTATE);
+        verify(stackRotationService).rotateSecrets(crn, secretTypes, RotationFlowExecutionType.ROTATE, null);
     }
 
     @Test

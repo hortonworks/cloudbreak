@@ -61,7 +61,8 @@ public class ExecuteSubRotationHandlerTest {
     public void testHandlerWhenExecutionTypeIsPreValidate() {
         underTest.accept(Event.wrap(getTriggerEvent(PREVALIDATE)));
 
-        verify(secretRotationOrchestrationService, times(1)).preValidateIfNeeded(eq(SECRET_TYPE), eq(RESOURCE_CRN), eq(PREVALIDATE));
+        verify(secretRotationOrchestrationService, times(1)).preValidateIfNeeded(eq(SECRET_TYPE), eq(RESOURCE_CRN),
+                eq(PREVALIDATE), any());
         assertEquals(ExecuteSubRotationFinishedEvent.class, argumentCaptor.getValue().getData().getClass());
     }
 
@@ -69,7 +70,7 @@ public class ExecuteSubRotationHandlerTest {
     public void testHandlerWhenExecutionTypeIsRotate() {
         underTest.accept(Event.wrap(getTriggerEvent(ROTATE)));
 
-        verify(secretRotationOrchestrationService, times(1)).rotateIfNeeded(eq(SECRET_TYPE), eq(RESOURCE_CRN), eq(ROTATE));
+        verify(secretRotationOrchestrationService, times(1)).rotateIfNeeded(eq(SECRET_TYPE), eq(RESOURCE_CRN), eq(ROTATE), any());
         assertEquals(ExecuteSubRotationFinishedEvent.class, argumentCaptor.getValue().getData().getClass());
     }
 
@@ -78,7 +79,7 @@ public class ExecuteSubRotationHandlerTest {
         underTest.accept(Event.wrap(getTriggerEvent(ROLLBACK)));
 
         verify(secretRotationOrchestrationService, times(1)).rollbackIfNeeded(eq(SECRET_TYPE), eq(RESOURCE_CRN), eq(ROLLBACK),
-                argThat(e -> e.getMessage().equals("Explicit rollback")));
+                any(), argThat(e -> e.getMessage().equals("Explicit rollback")));
         assertEquals(ExecuteSubRotationFinishedEvent.class, argumentCaptor.getValue().getData().getClass());
     }
 
@@ -86,13 +87,13 @@ public class ExecuteSubRotationHandlerTest {
     public void testHandlerWhenExecutionTypeIsFinalize() {
         underTest.accept(Event.wrap(getTriggerEvent(FINALIZE)));
 
-        verify(secretRotationOrchestrationService, times(1)).finalizeIfNeeded(eq(SECRET_TYPE), eq(RESOURCE_CRN), eq(FINALIZE));
+        verify(secretRotationOrchestrationService, times(1)).finalizeIfNeeded(eq(SECRET_TYPE), eq(RESOURCE_CRN), eq(FINALIZE), any());
         assertEquals(ExecuteSubRotationFinishedEvent.class, argumentCaptor.getValue().getData().getClass());
     }
 
     @Test
     public void testHandlerFailure() {
-        doThrow(new CloudbreakServiceException("anything")).when(secretRotationOrchestrationService).rotateIfNeeded(any(), any(), any());
+        doThrow(new CloudbreakServiceException("anything")).when(secretRotationOrchestrationService).rotateIfNeeded(any(), any(), any(), any());
 
         underTest.accept(Event.wrap(getTriggerEvent(RotationFlowExecutionType.ROTATE)));
 
@@ -100,6 +101,6 @@ public class ExecuteSubRotationHandlerTest {
     }
 
     private static ExecuteSubRotationTriggerEvent getTriggerEvent(RotationFlowExecutionType executionType) {
-        return new ExecuteSubRotationTriggerEvent(null, 1L, RESOURCE_CRN, SECRET_TYPE, executionType);
+        return new ExecuteSubRotationTriggerEvent(null, 1L, RESOURCE_CRN, SECRET_TYPE, executionType, null);
     }
 }

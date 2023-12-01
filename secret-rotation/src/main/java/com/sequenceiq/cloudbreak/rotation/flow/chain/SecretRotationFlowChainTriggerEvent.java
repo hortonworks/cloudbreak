@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.flow.chain;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -21,16 +22,20 @@ public class SecretRotationFlowChainTriggerEvent extends BaseFlowEvent {
 
     private final RotationFlowExecutionType executionType;
 
+    private final Map<String, String> additionalProperties;
+
     @JsonCreator
     public SecretRotationFlowChainTriggerEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("secretTypes") List<SecretType> secretTypes,
-            @JsonProperty("executionType") RotationFlowExecutionType executionType) {
+            @JsonProperty("executionType") RotationFlowExecutionType executionType,
+            @JsonProperty("additionalProperties") Map<String, String> additionalProperties) {
         super(selector, resourceId, resourceCrn);
         this.secretTypes = secretTypes;
         this.executionType = executionType;
+        this.additionalProperties = additionalProperties;
     }
 
     public List<SecretType> getSecretTypes() {
@@ -41,11 +46,16 @@ public class SecretRotationFlowChainTriggerEvent extends BaseFlowEvent {
         return executionType;
     }
 
+    public Map<String, String> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
     @Override
     public boolean equalsEvent(BaseFlowEvent other) {
         return isClassAndEqualsEvent(SecretRotationFlowChainTriggerEvent.class, other,
                 event -> Objects.equals(secretTypes, event.secretTypes) &&
-                        Objects.equals(executionType, event.executionType));
+                        Objects.equals(executionType, event.executionType) &&
+                        Objects.equals(additionalProperties, event.additionalProperties));
     }
 
     @Override
@@ -55,6 +65,7 @@ public class SecretRotationFlowChainTriggerEvent extends BaseFlowEvent {
                 ", executionType=" + executionType +
                 ", resourceId=" + getResourceId() +
                 ", resourceCrn='" + getResourceCrn() +
+                ", additionalProperties='" + getAdditionalProperties() +
                 '}';
     }
 }

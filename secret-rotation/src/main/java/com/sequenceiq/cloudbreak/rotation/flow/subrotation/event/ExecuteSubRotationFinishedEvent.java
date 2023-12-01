@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.flow.subrotation.event;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
@@ -13,13 +15,15 @@ public class ExecuteSubRotationFinishedEvent extends SubRotationEvent {
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("secretType") SecretType secretType,
-            @JsonProperty("executionType") RotationFlowExecutionType executionType) {
-        super(selector, resourceId, resourceCrn, secretType, executionType);
+            @JsonProperty("executionType") RotationFlowExecutionType executionType,
+            @JsonProperty("additionalProperties") Map<String, String> additionalProperties) {
+        super(selector, resourceId, resourceCrn, secretType, executionType, additionalProperties);
     }
 
     public static ExecuteSubRotationFinishedEvent fromPayload(SubRotationEvent payload) {
         return new ExecuteSubRotationFinishedEvent(EventSelectorUtil.selector(ExecuteSubRotationFinishedEvent.class),
-                payload.getResourceId(), payload.getResourceCrn(), payload.getSecretType(), payload.getExecutionType());
+                payload.getResourceId(), payload.getResourceCrn(), payload.getSecretType(), payload.getExecutionType(),
+                payload.getAdditionalProperties());
     }
 
     @Override

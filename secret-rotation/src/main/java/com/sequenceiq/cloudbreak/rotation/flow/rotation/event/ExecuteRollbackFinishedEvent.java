@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.flow.rotation.event;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
@@ -16,14 +18,16 @@ public class ExecuteRollbackFinishedEvent extends RotationEvent {
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("secretType") SecretType secretType,
             @JsonProperty("executionType") RotationFlowExecutionType executionType,
+            @JsonProperty("additionalProperties") Map<String, String> additionalProperties,
             @JsonProperty("rollbackReason") Exception rollbackReason) {
-        super(selector, resourceId, resourceCrn, secretType, executionType);
+        super(selector, resourceId, resourceCrn, secretType, executionType, additionalProperties);
         this.rollbackReason = rollbackReason;
     }
 
     public static ExecuteRollbackFinishedEvent fromPayload(RollbackRotationTriggerEvent payload) {
         return new ExecuteRollbackFinishedEvent(EventSelectorUtil.selector(ExecuteRollbackFinishedEvent.class),
-                payload.getResourceId(), payload.getResourceCrn(), payload.getSecretType(), payload.getExecutionType(), payload.getRollbackReason());
+                payload.getResourceId(), payload.getResourceCrn(), payload.getSecretType(), payload.getExecutionType(), payload.getAdditionalProperties(),
+                payload.getRollbackReason());
     }
 
     public Exception getRollbackReason() {

@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepPro
 @ExtendWith(MockitoExtension.class)
 public class SecretRotationFinalizeServiceTest extends AbstractSecretRotationTest {
 
-    private static final RotationMetadata METADATA = new RotationMetadata(TEST, FINALIZE, null, "resource", Optional.empty());
+    private static final RotationMetadata METADATA = new RotationMetadata(TEST, FINALIZE, null, "resource", Optional.empty(), null);
 
     @Mock
     private SecretRotationStepProgressService stepProgressService;
@@ -50,7 +50,7 @@ public class SecretRotationFinalizeServiceTest extends AbstractSecretRotationTes
 
         underTest.finalize(METADATA);
 
-        verify(contextProvider).getContexts(anyString());
+        verify(contextProvider).getContexts(anyString(), any());
         verify(executor, times(3)).executeFinalize(any(), any());
         verify(stepProgressService, times(6)).update(any(), any(), any());
     }
@@ -64,7 +64,7 @@ public class SecretRotationFinalizeServiceTest extends AbstractSecretRotationTes
 
         underTest.finalize(METADATA);
 
-        verify(contextProvider).getContexts(anyString());
+        verify(contextProvider).getContexts(anyString(), any());
         verify(executor, times(3)).executeFinalize(any(), any());
         verify(stepProgressService, times(6)).update(any(), any(), any());
     }
@@ -78,7 +78,7 @@ public class SecretRotationFinalizeServiceTest extends AbstractSecretRotationTes
 
         underTest.finalize(METADATA);
 
-        verify(contextProvider).getContexts(anyString());
+        verify(contextProvider).getContexts(anyString(), any());
         verify(executor, times(2)).executeFinalize(any(), any());
         verify(stepProgressService, times(4)).update(any(), any(), any());
     }
@@ -92,7 +92,7 @@ public class SecretRotationFinalizeServiceTest extends AbstractSecretRotationTes
 
         underTest.finalize(METADATA);
 
-        verify(contextProvider).getContexts(anyString());
+        verify(contextProvider).getContexts(anyString(), any());
         verify(executor, times(1)).executeFinalize(any(), any());
         verify(stepProgressService, times(2)).update(any(), any(), any());
     }
@@ -106,7 +106,7 @@ public class SecretRotationFinalizeServiceTest extends AbstractSecretRotationTes
 
         underTest.finalize(METADATA);
 
-        verify(contextProvider).getContexts(anyString());
+        verify(contextProvider).getContexts(anyString(), any());
         verify(executor, times(2)).executeFinalize(any(), any());
         verify(stepProgressService, times(4)).update(any(), any(), any());
     }
@@ -120,7 +120,7 @@ public class SecretRotationFinalizeServiceTest extends AbstractSecretRotationTes
 
         underTest.finalize(METADATA);
 
-        verify(contextProvider).getContexts(anyString());
+        verify(contextProvider).getContexts(anyString(), any());
         verify(executor, times(1)).executeFinalize(any(), any());
         verify(stepProgressService, times(2)).update(any(), any(), any());
     }
@@ -133,7 +133,7 @@ public class SecretRotationFinalizeServiceTest extends AbstractSecretRotationTes
 
         underTest.finalize(METADATA);
 
-        verify(contextProvider).getContexts(anyString());
+        verify(contextProvider).getContexts(anyString(), any());
         verify(executor, times(0)).executeFinalize(any(), any());
         verify(stepProgressService, times(0)).update(any(), any(), any());
     }
@@ -147,7 +147,7 @@ public class SecretRotationFinalizeServiceTest extends AbstractSecretRotationTes
 
         underTest.finalize(METADATA);
 
-        verify(contextProvider).getContexts(anyString());
+        verify(contextProvider).getContexts(anyString(), any());
         verify(executor, times(3)).executeFinalize(any(), any());
         verify(stepProgressService, times(6)).update(any(), any(), any());
     }

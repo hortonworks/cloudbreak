@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNot
 @ExtendWith(MockitoExtension.class)
 public class AbstractRotationExecutorTest {
 
-    private static final RotationMetadata METADATA = new RotationMetadata(TEST, ROTATE, null, "", Optional.empty());
+    private static final RotationMetadata METADATA = new RotationMetadata(TEST, ROTATE, null, "", Optional.empty(), null);
 
     @Mock
     private SecretRotationNotificationService secretRotationNotificationService;

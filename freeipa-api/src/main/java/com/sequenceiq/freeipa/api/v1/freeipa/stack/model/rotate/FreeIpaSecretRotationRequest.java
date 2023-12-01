@@ -6,8 +6,8 @@ import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretTypes;
+import com.sequenceiq.cloudbreak.rotation.request.BaseSecretRotationRequest;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 
 import io.swagger.annotations.ApiModel;
@@ -15,13 +15,11 @@ import io.swagger.annotations.ApiModel;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class FreeIpaSecretRotationRequest {
+public class FreeIpaSecretRotationRequest extends BaseSecretRotationRequest {
 
     @ValidSecretTypes(allowedTypes = { FreeIpaSecretType.class })
     @NotEmpty
     private List<String> secrets;
-
-    private RotationFlowExecutionType executionType;
 
     public List<String> getSecrets() {
         return secrets;
@@ -31,19 +29,12 @@ public class FreeIpaSecretRotationRequest {
         this.secrets = secrets;
     }
 
-    public RotationFlowExecutionType getExecutionType() {
-        return executionType;
-    }
-
-    public void setExecutionType(RotationFlowExecutionType executionType) {
-        this.executionType = executionType;
-    }
-
     @Override
     public String toString() {
         return "FreeIpaSecretRotationRequest{" +
                 "secrets=" + secrets +
-                ", executionType=" + executionType +
+                ", executionType=" + getExecutionType() +
+                ", additionalProperties=" + getAdditionalProperties() +
                 '}';
     }
 }

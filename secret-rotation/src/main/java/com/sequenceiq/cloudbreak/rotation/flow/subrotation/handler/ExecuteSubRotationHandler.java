@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.flow.subrotation.handler;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -39,12 +41,13 @@ public class ExecuteSubRotationHandler extends ExceptionCatcherEventHandler<Exec
         SecretType secretType = subRotationEvent.getSecretType();
         String resourceCrn = subRotationEvent.getResourceCrn();
         RotationFlowExecutionType executionType = subRotationEvent.getExecutionType();
+        Map<String, String> additionalProperties = subRotationEvent.getAdditionalProperties();
         switch (executionType) {
-            case PREVALIDATE -> secretRotationOrchestrationService.preValidateIfNeeded(secretType, resourceCrn, executionType);
-            case ROTATE -> secretRotationOrchestrationService.rotateIfNeeded(secretType, resourceCrn, executionType);
-            case ROLLBACK -> secretRotationOrchestrationService.rollbackIfNeeded(secretType, resourceCrn, executionType,
+            case PREVALIDATE -> secretRotationOrchestrationService.preValidateIfNeeded(secretType, resourceCrn, executionType, additionalProperties);
+            case ROTATE -> secretRotationOrchestrationService.rotateIfNeeded(secretType, resourceCrn, executionType, additionalProperties);
+            case ROLLBACK -> secretRotationOrchestrationService.rollbackIfNeeded(secretType, resourceCrn, executionType, additionalProperties,
                     new SecretRotationException("Explicit rollback"));
-            case FINALIZE -> secretRotationOrchestrationService.finalizeIfNeeded(secretType, resourceCrn, executionType);
+            case FINALIZE -> secretRotationOrchestrationService.finalizeIfNeeded(secretType, resourceCrn, executionType, additionalProperties);
             default -> throw new UnsupportedOperationException("Invalid or missing execution type: " + executionType);
         }
         return ExecuteSubRotationFinishedEvent.fromPayload(subRotationEvent);

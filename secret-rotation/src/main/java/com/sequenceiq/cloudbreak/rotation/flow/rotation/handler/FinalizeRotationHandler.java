@@ -33,7 +33,8 @@ public class FinalizeRotationHandler extends ExceptionCatcherEventHandler<Finali
     @Override
     protected Selectable doAccept(HandlerEvent<FinalizeRotationTriggerEvent> event) {
         FinalizeRotationTriggerEvent finalizeEvent = event.getData();
-        secretRotationOrchestrationService.finalizeIfNeeded(finalizeEvent.getSecretType(), finalizeEvent.getResourceCrn(), finalizeEvent.getExecutionType());
+        secretRotationOrchestrationService.finalizeIfNeeded(finalizeEvent.getSecretType(), finalizeEvent.getResourceCrn(),
+                finalizeEvent.getExecutionType(), finalizeEvent.getAdditionalProperties());
         return FinalizeRotationSuccessEvent.fromPayload(finalizeEvent);
     }
 }

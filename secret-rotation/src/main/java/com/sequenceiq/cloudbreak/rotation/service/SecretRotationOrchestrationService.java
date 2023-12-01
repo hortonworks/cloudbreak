@@ -65,15 +65,16 @@ public class SecretRotationOrchestrationService {
     @Inject
     private TransactionService transactionService;
 
-    public void preValidateIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType) {
-        RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, PREVALIDATE);
+    public void preValidateIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType,
+            Map<String, String> additionalProperties) {
+        RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, PREVALIDATE, additionalProperties);
         if (executionDecisionProvider.executionRequired(rotationMetadata)) {
             preValidateService.preValidate(rotationMetadata);
         }
     }
 
-    public void rotateIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType) {
-        RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, ROTATE);
+    public void rotateIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType, Map<String, String> additionalProperties) {
+        RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, ROTATE, additionalProperties);
         if (executionDecisionProvider.executionRequired(rotationMetadata)) {
             secretRotationStatusService.rotationStarted(resourceCrn, secretType);
             secretRotationUsageService.rotationStarted(secretType, resourceCrn, executionType);
@@ -83,8 +84,9 @@ public class SecretRotationOrchestrationService {
         }
     }
 
-    public void rollbackIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType, Exception rollbackReason) {
-        RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, ROLLBACK);
+    public void rollbackIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType,
+            Map<String, String> additionalProperties, Exception rollbackReason) {
+        RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, ROLLBACK, additionalProperties);
         if (executionDecisionProvider.executionRequired(rotationMetadata)) {
             try {
                 secretRotationStatusService.rollbackStarted(resourceCrn, secretType, rollbackReason.getMessage());
@@ -102,8 +104,8 @@ public class SecretRotationOrchestrationService {
         }
     }
 
-    public void finalizeIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType) {
-        RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, FINALIZE);
+    public void finalizeIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType, Map<String, String> additionalProperties) {
+        RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, FINALIZE, additionalProperties);
         if (executionDecisionProvider.executionRequired(rotationMetadata)) {
             try {
                 secretRotationStatusService.finalizeStarted(resourceCrn, secretType);
@@ -125,12 +127,13 @@ public class SecretRotationOrchestrationService {
     }
 
     private RotationMetadata getRotationMetadata(SecretType secretType, String resourceCrn, RotationFlowExecutionType requestedExecutionType,
-            RotationFlowExecutionType currentExecutionType) {
+            RotationFlowExecutionType currentExecutionType, Map<String, String> additionalProperties) {
         RotationMetadata.Builder builder = RotationMetadata.builder()
                 .secretType(secretType)
                 .currentExecution(currentExecutionType)
                 .requestedExecutionType(requestedExecutionType)
-                .resourceCrn(resourceCrn);
+                .resourceCrn(resourceCrn)
+                .additionalProperties(additionalProperties);
         secretType.getMultiSecretType().ifPresent(builder::multiSecretType);
         return builder.build();
     }

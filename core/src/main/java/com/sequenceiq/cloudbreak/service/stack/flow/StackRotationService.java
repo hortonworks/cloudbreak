@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,7 +60,8 @@ public class StackRotationService {
     @Inject
     private SecretRotationValidationService secretRotationValidationService;
 
-    public FlowIdentifier rotateSecrets(String crn, List<String> secrets, RotationFlowExecutionType requestedExecutionType) {
+    public FlowIdentifier rotateSecrets(String crn, List<String> secrets, RotationFlowExecutionType requestedExecutionType,
+            Map<String, String> additionalProperties) {
         if (entitlementService.isSecretRotationEnabled(Crn.fromString(crn).getAccountId())) {
             StackView stack = stackDtoService.getStackViewByCrn(crn);
             List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
@@ -70,7 +72,7 @@ public class StackRotationService {
             secretTypes.stream().filter(SecretType::multiSecret).forEach(secretType ->
                     multiClusterRotationValidationService.validateMultiRotationRequest(crn, secretType));
             secretRotationValidationService.validateExecutionType(crn, secretTypes, requestedExecutionType);
-            return flowManager.triggerSecretRotation(stack.getId(), crn, secretTypes, requestedExecutionType);
+            return flowManager.triggerSecretRotation(stack.getId(), crn, secretTypes, requestedExecutionType, additionalProperties);
         } else {
             throw new CloudbreakServiceException("Account is not entitled to execute any secret rotation!");
         }

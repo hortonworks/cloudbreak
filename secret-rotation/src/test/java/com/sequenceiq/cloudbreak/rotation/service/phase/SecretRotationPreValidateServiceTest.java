@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepPro
 @ExtendWith(MockitoExtension.class)
 public class SecretRotationPreValidateServiceTest extends AbstractSecretRotationTest {
 
-    private static final RotationMetadata METADATA = new RotationMetadata(TEST, PREVALIDATE, null, "resource", Optional.empty());
+    private static final RotationMetadata METADATA = new RotationMetadata(TEST, PREVALIDATE, null, "resource", Optional.empty(), null);
 
     @Mock
     private SecretRotationStepProgressService stepProgressService;
@@ -44,11 +44,11 @@ public class SecretRotationPreValidateServiceTest extends AbstractSecretRotation
     @Test
     public void testPreValidateWhenContextMissing() {
         when(stepProgressService.executionValidByProgress(any())).thenReturn(Boolean.TRUE);
-        when(contextProvider.getContexts(anyString())).thenReturn(Map.of());
+        when(contextProvider.getContexts(anyString(), any())).thenReturn(Map.of());
 
         assertThrows(RuntimeException.class, () -> underTest.preValidate(METADATA));
 
-        verify(contextProvider).getContexts(anyString());
+        verify(contextProvider).getContexts(anyString(), any());
         verifyNoInteractions(executor);
     }
 
@@ -60,7 +60,7 @@ public class SecretRotationPreValidateServiceTest extends AbstractSecretRotation
 
         underTest.preValidate(METADATA);
 
-        verify(contextProvider).getContexts(anyString());
+        verify(contextProvider).getContexts(anyString(), any());
         verify(executor, times(3)).executePreValidation(any(), any());
         verify(stepProgressService, times(6)).update(any(), any(), any());
     }
@@ -74,7 +74,7 @@ public class SecretRotationPreValidateServiceTest extends AbstractSecretRotation
 
         underTest.preValidate(METADATA);
 
-        verify(contextProvider).getContexts(anyString());
+        verify(contextProvider).getContexts(anyString(), any());
         verify(executor, times(3)).executePreValidation(any(), any());
         verify(stepProgressService, times(6)).update(any(), any(), any());
     }
@@ -88,7 +88,7 @@ public class SecretRotationPreValidateServiceTest extends AbstractSecretRotation
 
         underTest.preValidate(METADATA);
 
-        verify(contextProvider).getContexts(anyString());
+        verify(contextProvider).getContexts(anyString(), any());
         verify(executor, times(2)).executePreValidation(any(), any());
         verify(stepProgressService, times(4)).update(any(), any(), any());
     }
@@ -102,7 +102,7 @@ public class SecretRotationPreValidateServiceTest extends AbstractSecretRotation
 
         underTest.preValidate(METADATA);
 
-        verify(contextProvider).getContexts(anyString());
+        verify(contextProvider).getContexts(anyString(), any());
         verify(executor, times(2)).executePreValidation(any(), any());
         verify(stepProgressService, times(4)).update(any(), any(), any());
     }
@@ -116,7 +116,7 @@ public class SecretRotationPreValidateServiceTest extends AbstractSecretRotation
 
         underTest.preValidate(METADATA);
 
-        verify(contextProvider).getContexts(anyString());
+        verify(contextProvider).getContexts(anyString(), any());
         verify(executor, times(1)).executePreValidation(any(), any());
         verify(stepProgressService, times(2)).update(any(), any(), any());
     }
@@ -129,7 +129,7 @@ public class SecretRotationPreValidateServiceTest extends AbstractSecretRotation
 
         underTest.preValidate(METADATA);
 
-        verify(contextProvider).getContexts(anyString());
+        verify(contextProvider).getContexts(anyString(), any());
         verify(executor, times(0)).executePreValidation(any(), any());
         verify(stepProgressService, times(0)).update(any(), any(), any());
     }
@@ -142,7 +142,7 @@ public class SecretRotationPreValidateServiceTest extends AbstractSecretRotation
 
         underTest.preValidate(METADATA);
 
-        verify(contextProvider).getContexts(anyString());
+        verify(contextProvider).getContexts(anyString(), any());
         verify(executor, times(1)).executePreValidation(any(), any());
         verify(stepProgressService, times(2)).update(any(), any(), any());
     }

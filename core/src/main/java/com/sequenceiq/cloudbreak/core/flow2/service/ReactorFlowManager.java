@@ -469,9 +469,10 @@ public class ReactorFlowManager {
         reactorNotifier.notify(stackId, selector, new DetermineDatalakeDataSizesBaseEvent(selector, stackId, operationId));
     }
 
-    public FlowIdentifier triggerSecretRotation(Long stackId, String crn, List<SecretType> secretTypes, RotationFlowExecutionType executionType) {
+    public FlowIdentifier triggerSecretRotation(Long stackId, String crn, List<SecretType> secretTypes, RotationFlowExecutionType executionType,
+            Map<String, String> additionalProperties) {
         String selector = EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class);
-        Acceptable triggerEvent = new SecretRotationFlowChainTriggerEvent(selector, stackId, crn, secretTypes, executionType);
+        Acceptable triggerEvent = new SecretRotationFlowChainTriggerEvent(selector, stackId, crn, secretTypes, executionType, additionalProperties);
         return reactorNotifier.notify(stackId, selector, triggerEvent);
     }
 

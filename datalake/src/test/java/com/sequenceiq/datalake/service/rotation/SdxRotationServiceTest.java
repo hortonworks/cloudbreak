@@ -172,8 +172,8 @@ class SdxRotationServiceTest {
         SdxStatusEntity status = new SdxStatusEntity();
         status.setStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(anyLong())).thenReturn(status);
-        FlowIdentifier flowIdentifier = underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null);
-        verify(sdxReactorFlowManager, times(1)).triggerSecretRotation(eq(sdxCluster), anyList(), isNull());
+        FlowIdentifier flowIdentifier = underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null, null);
+        verify(sdxReactorFlowManager, times(1)).triggerSecretRotation(eq(sdxCluster), anyList(), isNull(), any());
     }
 
     @Test
@@ -186,8 +186,8 @@ class SdxRotationServiceTest {
         SdxStatusEntity status = new SdxStatusEntity();
         status.setStatus(DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_ROLLBACK_FINISHED);
         when(sdxStatusService.getActualStatusForSdx(anyLong())).thenReturn(status);
-        underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null);
-        verify(sdxReactorFlowManager, times(1)).triggerSecretRotation(eq(sdxCluster), anyList(), isNull());
+        underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null, null);
+        verify(sdxReactorFlowManager, times(1)).triggerSecretRotation(eq(sdxCluster), anyList(), isNull(), any());
     }
 
     @Test
@@ -201,7 +201,7 @@ class SdxRotationServiceTest {
         when(sdxStatusService.getActualStatusForSdx(anyLong())).thenReturn(status);
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null));
+                () -> underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null, null));
 
         assertEquals("The cluster must be in available status to execute secret rotation. Current status: STOPPED", exception.getMessage());
     }
@@ -211,7 +211,7 @@ class SdxRotationServiceTest {
         when(entitlementService.isSecretRotationEnabled(anyString())).thenReturn(Boolean.TRUE);
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.empty());
         NotFoundException notFoundException = assertThrows(NotFoundException.class,
-                () -> underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null));
+                () -> underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null, null));
         assertEquals("SDX cluster '" + RESOURCE_CRN + "' not found.", notFoundException.getMessage());
     }
 

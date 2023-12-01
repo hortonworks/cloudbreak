@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.service.rotation;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -29,15 +30,16 @@ public class RedbeamsRotationService {
     @Inject
     private DBStackService dbStackService;
 
-    public FlowIdentifier rotateSecrets(String resourceCrn, List<String> secrets, RotationFlowExecutionType executionType) {
-        if (entitlementService.isSecretRotationEnabled(Crn.fromString(resourceCrn).getAccountId())) {
+    public FlowIdentifier rotateSecrets(String resourceCrn, List<String> secrets, RotationFlowExecutionType executionType,
+            Map<String, String> additionalProperties) {
+        if (entitlementService.isSecretRotationEnabled(Crn.safeFromString(resourceCrn).getAccountId())) {
             DBStack dbStack = dbStackService.getByCrn(resourceCrn);
             List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
             if (secretTypes.stream().noneMatch(SecretType::multiSecret) && !dbStack.getStatus().isAvailable()) {
                 throw new CloudbreakServiceException(
                         String.format("Secret rotation is not allowed because database status is not available. Current status: %s", dbStack.getStatus()));
             }
-            return redbeamsFlowManager.triggerSecretRotation(dbStack.getId(), resourceCrn, secretTypes, executionType);
+            return redbeamsFlowManager.triggerSecretRotation(dbStack.getId(), resourceCrn, secretTypes, executionType, additionalProperties);
         } else {
             throw new CloudbreakServiceException("Account is not entitled to execute any secret rotation!");
         }
