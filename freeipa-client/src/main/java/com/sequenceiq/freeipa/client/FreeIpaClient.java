@@ -468,6 +468,7 @@ public class FreeIpaClient {
         List<Object> flags = List.of();
         Map<String, Object> params = Map.of(
                 "name_from_ip", cidr,
+                "skip_overlap_check", true,
                 "raw", true);
         return (DnsZone) invoke("dnszone_add", flags, params, DnsZone.class).getResult();
     }
