@@ -15,9 +15,13 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -124,6 +128,44 @@ class ComputeResourceServiceTest {
         assertThat(resourceStopStartCallablePayload.getInstances()).containsExactlyInAnyOrder(cloudInstance1, cloudInstance2);
         verify(resourceBuilderExecutor, times(1)).submit(resourceStopStartCallable);
         verify(syncVMPollingScheduler, times(1)).schedule(pollTask);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testStopAndStartInstancesWhenCallableThrowExceptionFromTheFutureShouldPropagateException(boolean startOperation) throws Exception {
+        when(resourceBuilders.getStopStartBatchSize(any())).thenReturn(10);
+        ComputeResourceBuilder computeResourceBuilder = mock(ComputeResourceBuilder.class);
+        when(computeResourceBuilder.isInstanceBuilder()).thenReturn(true);
+        when(resourceBuilders.compute(any())).thenReturn(List.of(computeResourceBuilder));
+        ResourceStopStartCallable resourceStopStartCallable = mock(ResourceStopStartCallable.class);
+        when(resourceActionFactory.buildStopStartCallable(any())).thenReturn(resourceStopStartCallable);
+        Future future = mock(Future.class);
+        CloudInstance cloudInstance1 = mock(CloudInstance.class);
+        CloudInstance cloudInstance2 = mock(CloudInstance.class);
+        when(resourceBuilderExecutor.submit(any(Callable.class))).thenReturn(future);
+        when(future.get()).thenThrow(new ExecutionException("Failed", new CloudConnectorException("Connector Failure")));
+        List<CloudInstance> cloudInstanceList = List.of(cloudInstance1, cloudInstance2);
+
+        Executable executable;
+        if (startOperation) {
+            executable = () -> computeResourceService.startInstances(resourceBuilderContext, authenticatedContext, cloudInstanceList);
+        } else {
+            executable = () -> computeResourceService.stopInstances(resourceBuilderContext, authenticatedContext, cloudInstanceList);
+        }
+        Assertions.assertThrows(CloudConnectorException.class,
+                executable,
+                "The execution of infrastructure operations failed: Connector Failure");
+
+        verify(resourceBuilders, times(1)).getStopStartBatchSize(AWS_VARIANT);
+        verify(resourceBuilders, times(1)).compute(AWS_VARIANT);
+        verify(computeResourceBuilder, times(1)).isInstanceBuilder();
+        ArgumentCaptor<ResourceStopStartCallablePayload> resourceStopStartCallablePayloadArgumentCaptor =
+                ArgumentCaptor.forClass(ResourceStopStartCallablePayload.class);
+        verify(resourceActionFactory, times(1)).buildStopStartCallable(resourceStopStartCallablePayloadArgumentCaptor.capture());
+        ResourceStopStartCallablePayload resourceStopStartCallablePayload = resourceStopStartCallablePayloadArgumentCaptor.getValue();
+        assertThat(resourceStopStartCallablePayload.getInstances()).containsExactlyInAnyOrder(cloudInstance1, cloudInstance2);
+        verify(resourceBuilderExecutor, times(1)).submit(resourceStopStartCallable);
+        verify(syncVMPollingScheduler, times(0)).schedule(any());
     }
 
     @Test

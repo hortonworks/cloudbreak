@@ -273,13 +273,13 @@ class AwsInstanceConnectorTest {
 
     @Test
     void testRebootEveryInstancesStarted() {
-        mockDescribeInstancesAllisRebooted(POLLING_LIMIT - 2);
+        mockDescribeInstancesAllisRebooted(8);
         ArgumentCaptor<StopInstancesRequest> stopCaptor = ArgumentCaptor.forClass(StopInstancesRequest.class);
         ArgumentCaptor<StartInstancesRequest> startCaptor = ArgumentCaptor.forClass(StartInstancesRequest.class);
         List<CloudVmInstanceStatus> result = underTest.reboot(authenticatedContext, new ArrayList<>(), inputList);
 
-        verify(amazonEC2Client, times(2)).stopInstances(stopCaptor.capture());
-        verify(amazonEC2Client, times(2)).startInstances(startCaptor.capture());
+        verify(amazonEC2Client, times(1)).stopInstances(stopCaptor.capture());
+        verify(amazonEC2Client, times(1)).startInstances(startCaptor.capture());
         assertThat(result, hasItem(allOf(hasProperty("status", is(InstanceStatus.STARTED)))));
     }
 
@@ -395,18 +395,17 @@ class AwsInstanceConnectorTest {
     }
 
     private void mockDescribeInstancesAllisRebooted(int pollResponses) {
-        mockListOfDescribeInstancesStopAndThenRunning(getDescribeInstancesResultOneRunning("running", 16), pollResponses,
+        mockListOfDescribeInstancesRunningThenStoppedThenRunning(getDescribeInstancesResultOneRunning("running", 16), pollResponses,
                 getDescribeInstancesResult("stopped", 16));
     }
 
-    private void mockListOfDescribeInstancesStopAndThenRunning(DescribeInstancesResponse cons, int repeatNo, DescribeInstancesResponse stopped) {
-        DescribeInstancesResponse[] describeInstancesResults = new DescribeInstancesResponse[repeatNo * 2];
+    private void mockListOfDescribeInstancesRunningThenStoppedThenRunning(DescribeInstancesResponse cons, int repeatNo, DescribeInstancesResponse stopped) {
+        DescribeInstancesResponse[] describeInstancesResults = new DescribeInstancesResponse[repeatNo];
         Arrays.fill(describeInstancesResults, cons);
-        describeInstancesResults[2] = stopped;
+        describeInstancesResults[3] = stopped;
         describeInstancesResults[4] = stopped;
         describeInstancesResults[5] = stopped;
         describeInstancesResults[6] = stopped;
-        describeInstancesResults[8] = stopped;
         when(amazonEC2Client.describeInstances(any(DescribeInstancesRequest.class))).thenReturn(cons,
                 describeInstancesResults);
     }

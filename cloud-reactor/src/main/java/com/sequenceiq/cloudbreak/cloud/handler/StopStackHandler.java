@@ -56,6 +56,7 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
             LOGGER.debug("Stack successfully stopped");
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
         } catch (Exception e) {
+            LOGGER.warn("Failed to stop stack", e);
             StopInstancesResult failure = new StopInstancesResult("Failed to stop stack", e, request.getResourceId());
             request.getResult().onNext(failure);
             eventBus.notify(failure.selector(), new Event<>(event.getHeaders(), failure));

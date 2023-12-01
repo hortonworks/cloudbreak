@@ -200,10 +200,10 @@ public class AwsInstanceConnector implements InstanceConnector {
         try {
             if (!vms.isEmpty()) {
                 List<CloudVmInstanceStatus> statuses = check(ac, vms);
-                doStop(ac, getStarted(statuses));
+                stop(ac, null, getStarted(statuses));
                 statuses = check(ac, vms);
                 logInvalidStatuses(getNotStopped(statuses), InstanceStatus.STOPPED);
-                rebootedVmsStatus = doStart(ac, getStopped(statuses));
+                rebootedVmsStatus = start(ac, null, getStopped(statuses));
                 logInvalidStatuses(getNotStarted(statuses), InstanceStatus.STARTED);
             }
         } catch (SdkClientException e) {
@@ -231,28 +231,6 @@ public class AwsInstanceConnector implements InstanceConnector {
     private List<CloudInstance> getStarted(List<CloudVmInstanceStatus> statuses) {
         return statuses.stream().filter(status -> status.getStatus() == InstanceStatus.STARTED)
                 .map(CloudVmInstanceStatus::getCloudInstance).collect(Collectors.toList());
-    }
-
-    private List<CloudVmInstanceStatus> doStart(AuthenticatedContext ac, List<CloudInstance> instances) {
-        List<CloudVmInstanceStatus> rebootedVmsStatus = new ArrayList<>();
-        for (CloudInstance instance : instances) {
-            try {
-                rebootedVmsStatus.addAll(start(ac, null, List.of(instance)));
-            } catch (Ec2Exception e) {
-                LOGGER.warn(String.format("Unable to start instance %s", instance), e);
-            }
-        }
-        return rebootedVmsStatus;
-    }
-
-    private void doStop(AuthenticatedContext ac, List<CloudInstance> instances) {
-        for (CloudInstance instance : instances) {
-            try {
-                stop(ac, null, List.of(instance));
-            } catch (Ec2Exception e) {
-                LOGGER.warn(String.format("Unable to stop instance %s", instance), e);
-            }
-        }
     }
 
     public void logInvalidStatuses(List<CloudVmInstanceStatus> instances, InstanceStatus targetStatus) {

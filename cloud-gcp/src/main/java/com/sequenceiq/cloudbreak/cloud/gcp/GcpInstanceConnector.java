@@ -51,10 +51,10 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
         try {
             if (!vms.isEmpty()) {
                 List<CloudVmInstanceStatus> statuses = check(ac, vms);
-                doStop(ac, resources, getStarted(statuses));
+                stop(ac, resources, getStarted(statuses));
                 statuses = check(ac, vms);
                 logInvalidStatuses(getNotStopped(statuses), InstanceStatus.STOPPED);
-                rebootedVmsStatus = doStart(ac, resources, getStopped(statuses));
+                rebootedVmsStatus = start(ac, resources, getStopped(statuses));
                 logInvalidStatuses(getNotStarted(statuses), InstanceStatus.STARTED);
             }
         } catch (Exception e) {
@@ -82,28 +82,6 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
     private List<CloudVmInstanceStatus> getNotStopped(List<CloudVmInstanceStatus> statuses) {
         return statuses.stream().filter(status -> status.getStatus() != InstanceStatus.STOPPED)
                 .collect(Collectors.toList());
-    }
-
-    private List<CloudVmInstanceStatus> doStart(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> instances) {
-        List<CloudVmInstanceStatus> rebootedVmsStatus = new ArrayList<>();
-        for (CloudInstance instance : instances) {
-            try {
-                rebootedVmsStatus.addAll(start(ac, resources, List.of(instance)));
-            } catch (Exception e) {
-                LOGGER.warn(String.format("Unable to start instance %s", instance), e);
-            }
-        }
-        return rebootedVmsStatus;
-    }
-
-    private void doStop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> instances) {
-        for (CloudInstance instance : instances) {
-            try {
-                stop(ac, resources, List.of(instance));
-            } catch (Exception e) {
-                LOGGER.warn(String.format("Unable to stop instance %s", instance), e);
-            }
-        }
     }
 
     private List<CloudInstance> getStopped(List<CloudVmInstanceStatus> statuses) {

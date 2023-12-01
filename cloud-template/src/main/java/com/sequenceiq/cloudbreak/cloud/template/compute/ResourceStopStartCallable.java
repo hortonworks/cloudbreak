@@ -37,7 +37,7 @@ public class ResourceStopStartCallable implements Callable<ResourceRequestResult
     }
 
     @Override
-    public ResourceRequestResult<List<CloudVmInstanceStatus>> call() {
+    public ResourceRequestResult<List<CloudVmInstanceStatus>> call() throws InstanceResourceStopStartException {
         PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
         if (CANCELLED.equals(pollGroup)) {
             LOGGER.debug("Polling is cancelled for stop/start operation for instances: {}", instances);
@@ -52,8 +52,9 @@ public class ResourceStopStartCallable implements Callable<ResourceRequestResult
                 LOGGER.debug("Operation result for instance ({}): {}", instance.getInstanceId(), status);
                 result.add(status);
             } catch (Exception ex) {
-                String msg = String.format("%s of instance '%s' failed with the following exception", operationName, instance);
+                String msg = String.format("%s of instance '%s' failed, please retry the failed operation", operationName, instance.getInstanceId());
                 LOGGER.warn(msg, ex);
+                throw new InstanceResourceStopStartException(msg, ex, instance, context.isBuild());
             }
         }
         return new ResourceRequestResult<>(FutureResult.SUCCESS, result);

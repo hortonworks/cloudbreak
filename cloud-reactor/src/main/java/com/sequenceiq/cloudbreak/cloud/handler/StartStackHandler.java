@@ -56,6 +56,7 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
             LOGGER.debug("Stack successfully started");
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
         } catch (Exception e) {
+            LOGGER.warn("Failed to start stack", e);
             StartInstancesResult failure = new StartInstancesResult("Failed to start stack", e, request.getResourceId());
             request.getResult().onNext(failure);
             eventBus.notify(failure.selector(), new Event<>(event.getHeaders(), failure));

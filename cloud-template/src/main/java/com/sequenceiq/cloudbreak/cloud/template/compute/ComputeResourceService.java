@@ -207,11 +207,17 @@ public class ComputeResourceService {
                     result.get(FutureResult.SUCCESS).add(resourceRequestResult.getResult());
                 }
             }
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.error("Failed to execute the request", e);
+        } catch (InterruptedException e) {
+            LOGGER.error("The waiting for ResourceRequestResults has been interrupted:", e);
+        } catch (ExecutionException e) {
+            String causeMessage = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+            String msg = "The execution of infrastructure operations failed: " + causeMessage;
+            LOGGER.warn(msg, e);
+            throw new CloudConnectorException(msg, e);
+        } finally {
+            futures.clear();
         }
         LOGGER.debug("{} requests have finished, continue with next group", requests);
-        futures.clear();
         return result;
     }
 
