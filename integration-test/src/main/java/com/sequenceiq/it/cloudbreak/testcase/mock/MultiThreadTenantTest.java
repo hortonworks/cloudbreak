@@ -102,7 +102,7 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
     }
 
     protected TestContext prepareTestContext(MockedTestContext testContext, String tenant, String user) {
-        createUser(testContext, tenant, user);
+        createAdminUser(testContext, tenant, user);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
@@ -169,8 +169,8 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
                 .when(new ImageCatalogCreateRetryAction());
     }
 
-    protected void createUser(MockedTestContext testContext, String tenant, String user) {
-        testContext.as(testUserCreator.create(tenant, user));
+    protected void createAdminUser(MockedTestContext testContext, String tenant, String user) {
+        testContext.as(testUserCreator.createAdmin(tenant, user));
     }
 
     protected void initializeDefaultBlueprints(MockedTestContext testContext) {

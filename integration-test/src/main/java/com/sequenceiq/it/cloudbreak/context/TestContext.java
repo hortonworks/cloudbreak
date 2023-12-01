@@ -43,6 +43,7 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderAssertionProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
+import com.sequenceiq.it.cloudbreak.config.user.TestUserSelectors;
 import com.sequenceiq.it.cloudbreak.config.user.TestUsers;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -146,6 +147,12 @@ public abstract class TestContext implements ApplicationContextAware {
     private boolean safeLogicValidation = true;
 
     public TestUsers getTestUsers() {
+        checkNonEmpty("integrationtest.cloudbreak.server", defaultServer);
+        if (StringUtils.containsIgnoreCase(defaultServer, "dps.mow")
+                || StringUtils.containsIgnoreCase(defaultServer, "cdp.mow")
+                || StringUtils.containsIgnoreCase(defaultServer, "cdp-priv.mow")) {
+            testUsers.setSelector(TestUserSelectors.UMS_ONLY);
+        }
         return testUsers;
     }
 
@@ -188,7 +195,7 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public Map<String, Map<Class<? extends MicroserviceClient>, MicroserviceClient>> getClients() {
-        return testClients.getClients();
+        return getTestClients().getClients();
     }
 
     public Map<String, Exception> getExceptionMap() {
@@ -425,7 +432,7 @@ public abstract class TestContext implements ApplicationContextAware {
                 cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey(), cloudbreakUser.getCrn(), cloudbreakUser.getAdmin());
         Log.as(LOGGER, cloudbreakUser.toString());
         setActingUser(cloudbreakUser);
-        testClients.createTestClients(cloudbreakUser);
+        getTestClients().createTestClients(cloudbreakUser);
         return this;
     }
 
@@ -453,25 +460,25 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public String getActingUserAccessKey() {
-        return testUsers.getActingUser().getAccessKey();
+        return getTestUsers().getActingUser().getAccessKey();
     }
 
     public Crn getActingUserCrn() {
-        if (testUsers.getActingUser().getCrn() == null) {
+        if (getTestUsers().getActingUser().getCrn() == null) {
             throw new TestFailException(format("Acting user crn is not available. {}", getActingUser().getDisplayName()));
         }
-        return Crn.fromString(testUsers.getActingUser().getCrn());
+        return Crn.fromString(getTestUsers().getActingUser().getCrn());
     }
 
     public String getActingUserName() {
-        return testUsers.getActingUser().getDisplayName();
+        return getTestUsers().getActingUser().getDisplayName();
     }
 
     /**
      * Returning the acting (actually used as actor) user's workload username.
      */
     public String getWorkloadUserName() {
-        return testUsers.getActingUser().getWorkloadUserName();
+        return getTestUsers().getActingUser().getWorkloadUserName();
     }
 
     /**
@@ -483,7 +490,7 @@ public abstract class TestContext implements ApplicationContextAware {
         LOGGER.info(" Acting user has been set:: \nDisplay Name: {} \nAccess Key: {} \nSecret Key: {} \nCRN: {} \nAdmin: {} \nDescription: {} ",
                 actingUser.getDisplayName(), actingUser.getAccessKey(), actingUser.getSecretKey(), actingUser.getCrn(), actingUser.getAdmin(),
                 actingUser.getDescription());
-        testUsers.setActingUser(actingUser);
+        getTestUsers().setActingUser(actingUser);
     }
 
     /**
@@ -523,7 +530,7 @@ public abstract class TestContext implements ApplicationContextAware {
      * @return Returns with the acting user (CloudbreakUser)
      */
     public CloudbreakUser getActingUser() {
-        return testUsers.getActingUser();
+        return getTestUsers().getActingUser();
     }
 
     public String getActingUserOwnerTag() {
@@ -712,13 +719,13 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public SdxClient getSdxClient(String who) {
-        return testClients.getSdxClient(who);
+        return getTestClients().getSdxClient(who);
     }
 
     public <U extends MicroserviceClient> U getAdminMicroserviceClient(Class<? extends CloudbreakTestDto> testDtoClass, String accountId) {
-        CloudbreakUser testUser = testUsers.getAdminInAccount(accountId);
+        CloudbreakUser testUser = getTestUsers().getAdminInAccount(accountId);
         String accessKey = testUser.getAccessKey();
-        testClients.createTestClients(testUser);
+        getTestClients().createTestClients(testUser);
         U microserviceClient = getMicroserviceClient(testDtoClass, accessKey);
         if (microserviceClient == null) {
             throw new IllegalStateException("Should create an admin client for the acting user.");
@@ -727,7 +734,7 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <U extends MicroserviceClient> U getMicroserviceClient(Class<? extends CloudbreakTestDto> testDtoClass, String who) {
-        return testClients.getMicroserviceClient(testDtoClass, who);
+        return getTestClients().getMicroserviceClient(testDtoClass, who);
     }
 
     public SdxClient getSdxClient() {
@@ -735,7 +742,7 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <U extends MicroserviceClient> U getMicroserviceClient(Class<U> msClientClass) {
-        return testClients.getMicroserviceClientByType(msClientClass, getActingUserAccessKey());
+        return getTestClients().getMicroserviceClientByType(msClientClass, getActingUserAccessKey());
     }
 
     public <T extends CloudbreakTestDto, E extends Enum<E>> T await(Class<T> entityClass, Map<String, E> desiredStatuses) {

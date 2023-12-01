@@ -221,6 +221,7 @@ class UmsUserConfig implements TestUserConfig {
         return getUserByDisplayName(label);
     }
 
+    @Override
     public boolean isInitialized() {
         return MapUtils.isNotEmpty(usersByAccount);
     }

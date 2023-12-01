@@ -9,4 +9,6 @@ interface TestUserConfig {
     CloudbreakUser getAdminByAccountId(String accountId);
 
     CloudbreakUser getDefaultUser();
+
+    boolean isInitialized();
 }

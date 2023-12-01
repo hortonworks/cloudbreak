@@ -36,7 +36,7 @@ public class FreeIpaCdpSaasSyncTest extends AbstractMockTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        testContext.as(testUserCreator.create("CDP_SAAS_TENANT", "cdpsaasuser@cloudera.com"));
+        testContext.as(testUserCreator.createAdmin("CDP_SAAS_TENANT", "cdpsaasuser@cloudera.com"));
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);

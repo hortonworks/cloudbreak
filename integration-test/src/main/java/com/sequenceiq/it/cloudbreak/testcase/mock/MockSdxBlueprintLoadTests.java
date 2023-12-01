@@ -22,7 +22,7 @@ public class MockSdxBlueprintLoadTests extends AbstractMockTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        testContext.as(testUserCreator.create("sdxbploadtenant10", "sdxbpload@cloudera.com"));
+        testContext.as(testUserCreator.createAdmin("sdxbploadtenant10", "sdxbpload@cloudera.com"));
         createDefaultCredential(testContext);
         createEnvironmentWithFreeIpa(testContext);
         createDefaultImageCatalog(testContext);

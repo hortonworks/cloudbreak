@@ -35,6 +35,8 @@ class DefaultUserConfig implements TestUserConfig {
     @Value("${integrationtest.user.workloadUserName:}")
     private String workloadUserName;
 
+    private boolean mockedUms;
+
     @Inject
     private TestUserCreator testUserCreator;
 
@@ -47,12 +49,17 @@ class DefaultUserConfig implements TestUserConfig {
 
     @Override
     public CloudbreakUser getAdminByAccountId(String accountId) {
-        return testUserCreator.createAdmin(accountId, "admin");
+        return mockedUms ? testUserCreator.createAdmin(accountId, "admin") : user;
     }
 
     @Override
     public CloudbreakUser getDefaultUser() {
         return user;
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return false;
     }
 
     @PostConstruct
@@ -67,6 +74,7 @@ class DefaultUserConfig implements TestUserConfig {
 
         user = new CloudbreakUser(accessKey, secretKey, name, crn, "", true, workloadName);
         user.setWorkloadPassword(MOCK_UMS_PASSWORD);
+        mockedUms = mockedUms(accessKey);
     }
 
     private String mockCrnOrConfiguredCrn() {
@@ -100,5 +108,14 @@ class DefaultUserConfig implements TestUserConfig {
         }
 
         return workloadName;
+    }
+
+    private boolean mockedUms(String accessKey) {
+        try {
+            Crn.fromString(new String(Base64.getDecoder().decode(accessKey)));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
