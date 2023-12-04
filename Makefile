@@ -56,4 +56,5 @@ create-dev-version-tag:
 enable-gitconfig-local:
 	 git config --local include.path ../.gitconfig
 
-
+import-redbeams-aws-rds-root-certs:
+	make -C redbeams import-aws-rds-root-certs
