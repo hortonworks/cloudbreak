@@ -130,6 +130,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
         AttachedFreeIpaRequest attachedFreeIpaRequest = new AttachedFreeIpaRequest();
         attachedFreeIpaRequest.setCreate(Boolean.FALSE);
         return environment
+                .withTags(commonCloudProperties.getTags())
                 .withLocation(location())
                 .withFreeIpa(attachedFreeIpaRequest);
     }

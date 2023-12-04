@@ -118,6 +118,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
                 .withFreeIpa("ipatest.local", "ipaserver", "admin1234", "admins")
                 .withCatalog(getCloudProvider().getFreeIpaImageCatalogUrl())
                 .withTunnel(getTestContext().getTunnel())
+                .withTags(getCloudProvider().getTags())
                 .withVariant();
     }
 
@@ -506,6 +507,11 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     public FreeIpaTestDto withEnableMultiAz(boolean enableMultiAz) {
         getRequest().setEnableMultiAz(enableMultiAz);
+        return this;
+    }
+
+    public FreeIpaTestDto withTags(Map<String, String> tags) {
+        getRequest().setTags(tags);
         return this;
     }
 
