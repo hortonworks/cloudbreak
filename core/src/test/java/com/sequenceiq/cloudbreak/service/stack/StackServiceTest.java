@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -95,6 +96,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
 import com.sequenceiq.cloudbreak.service.environment.credential.OpenSshPublicKeyValidator;
+import com.sequenceiq.cloudbreak.service.externaldatabase.AzureDatabaseServerParameterDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
@@ -243,6 +245,9 @@ class StackServiceTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private AzureDatabaseServerParameterDecorator azureDatabaseServerParameterDecorator;
+
     @BeforeEach
     void setUp() throws Exception {
         underTest.nowSupplier = () -> MOCK_NOW;
@@ -335,7 +340,7 @@ class StackServiceTest {
         DatabaseAzureRequest databaseAzureRequest = new DatabaseAzureRequest();
         databaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.SINGLE_SERVER);
         databaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
-
+        when(azureDatabaseServerParameterDecorator.getDatabaseType(anyMap())).thenReturn(Optional.of(AzureDatabaseType.SINGLE_SERVER));
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, databaseRequest));
 
         verify(stack).setStackVersion(stackVersion);

@@ -172,11 +172,14 @@ public class StackV4RequestToStackConverter {
     private DatabaseRequestToDatabaseConverter databaseRequestToDatabaseConverter;
 
     public Stack convert(StackV4Request source) {
+        return convert(null, source);
+    }
+
+    public Stack convert(DetailedEnvironmentResponse environment, StackV4Request source) {
         Workspace workspace = workspaceService.getForCurrentUser();
 
         Stack stack = new Stack();
         stack.setEnvironmentCrn(source.getEnvironmentCrn());
-        DetailedEnvironmentResponse environment = null;
         if (!isEmpty(source.getEnvironmentCrn())) {
             environment = measure(() -> environmentClientService.getByCrn(source.getEnvironmentCrn()),
                     LOGGER, "Environment responded in {} ms for stack {}", source.getName());
@@ -221,7 +224,7 @@ public class StackV4RequestToStackConverter {
         if (!isTemplate(source) && environment != null) {
             gatewaySecurityGroupDecorator.extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack, environment.getTunnel());
         }
-        convertDatabase(source, stack);
+        convertDatabase(environment, source, stack);
         stack.setDomainDnsResolver(targetedUpscaleSupportService.isUnboundEliminationSupported(Crn.safeFromString(source.getEnvironmentCrn()).getAccountId()) ?
                 DnsResolverType.FREEIPA_FOR_ENV : DnsResolverType.LOCAL_UNBOUND);
         determineServiceTypeTag(stack, source.getTags());
@@ -233,8 +236,8 @@ public class StackV4RequestToStackConverter {
         return stack;
     }
 
-    private void convertDatabase(StackV4Request source, Stack stack) {
-        stack.setDatabase(databaseRequestToDatabaseConverter.convert(source.getCloudPlatform(), source.getExternalDatabase()));
+    private void convertDatabase(DetailedEnvironmentResponse environment, StackV4Request source, Stack stack) {
+        stack.setDatabase(databaseRequestToDatabaseConverter.convert(environment, source.getCloudPlatform(), source.getExternalDatabase()));
     }
 
     private void setTimeToLive(StackV4Request source, Stack stack) {
