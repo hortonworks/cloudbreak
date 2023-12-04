@@ -129,7 +129,7 @@ public class EnvCreationFlowConfig extends AbstractFlowConfiguration<EnvCreation
     }
 
     @Override
-    protected FlowEdgeConfig<EnvCreationState, EnvCreationStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<EnvCreationState, EnvCreationStateSelectors> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

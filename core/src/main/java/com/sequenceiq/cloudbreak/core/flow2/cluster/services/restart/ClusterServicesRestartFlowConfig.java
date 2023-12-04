@@ -52,7 +52,7 @@ public class ClusterServicesRestartFlowConfig extends StackStatusFinalizerAbstra
     }
 
     @Override
-    protected FlowEdgeConfig<ClusterServicesRestartState, ClusterServicesRestartEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ClusterServicesRestartState, ClusterServicesRestartEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

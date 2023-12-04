@@ -144,7 +144,7 @@ public class DatalakeBackupFlowConfig extends AbstractFlowConfiguration<Datalake
     }
 
     @Override
-    protected FlowEdgeConfig<DatalakeBackupState, DatalakeBackupEvent> getEdgeConfig() {
+    public FlowEdgeConfig<DatalakeBackupState, DatalakeBackupEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

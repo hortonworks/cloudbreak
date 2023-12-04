@@ -130,7 +130,7 @@ public class SdxDetachFlowConfig extends AbstractFlowConfiguration<SdxDetachStat
     }
 
     @Override
-    protected FlowEdgeConfig<SdxDetachState, SdxDetachEvent> getEdgeConfig() {
+    public FlowEdgeConfig<SdxDetachState, SdxDetachEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

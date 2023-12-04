@@ -78,7 +78,7 @@ public class ChangePrimaryGatewayFlowConfig extends AbstractFlowConfiguration<Ch
     }
 
     @Override
-    protected FlowEdgeConfig<ChangePrimaryGatewayState, ChangePrimaryGatewayFlowEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ChangePrimaryGatewayState, ChangePrimaryGatewayFlowEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

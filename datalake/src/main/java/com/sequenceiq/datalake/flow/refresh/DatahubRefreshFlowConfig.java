@@ -60,7 +60,7 @@ public class DatahubRefreshFlowConfig extends AbstractFlowConfiguration<DatahubR
     }
 
     @Override
-    protected FlowEdgeConfig<DatahubRefreshFlowState, DatahubRefreshFlowEvent> getEdgeConfig() {
+    public FlowEdgeConfig<DatahubRefreshFlowState, DatahubRefreshFlowEvent> getEdgeConfig() {
         return new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, DATAHUB_REFRESH_FAILED_STATE, DATAHUB_REFRESH_FAILED_HANDLED_EVENT);
     }
 

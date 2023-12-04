@@ -68,7 +68,7 @@ public class MaintenanceModeValidationFlowConfig
     }
 
     @Override
-    protected FlowEdgeConfig<MaintenanceModeValidationState, MaintenanceModeValidationEvent> getEdgeConfig() {
+    public FlowEdgeConfig<MaintenanceModeValidationState, MaintenanceModeValidationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 }

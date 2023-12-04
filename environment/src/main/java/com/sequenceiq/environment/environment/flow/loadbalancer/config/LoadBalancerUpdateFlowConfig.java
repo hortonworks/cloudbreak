@@ -57,7 +57,7 @@ public class LoadBalancerUpdateFlowConfig extends AbstractFlowConfiguration<Load
     }
 
     @Override
-    protected FlowEdgeConfig<LoadBalancerUpdateState, LoadBalancerUpdateStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<LoadBalancerUpdateState, LoadBalancerUpdateStateSelectors> getEdgeConfig() {
         return new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, LOAD_BALANCER_UPDATE_FAILED_STATE, HANDLED_FAILED_LOAD_BALANCER_UPDATE_EVENT);
     }
 

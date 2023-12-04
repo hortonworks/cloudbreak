@@ -53,7 +53,7 @@ public class DatabaseBackupFlowConfig extends StackStatusFinalizerAbstractFlowCo
     }
 
     @Override
-    protected FlowEdgeConfig<DatabaseBackupState, DatabaseBackupEvent> getEdgeConfig() {
+    public FlowEdgeConfig<DatabaseBackupState, DatabaseBackupEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

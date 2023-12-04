@@ -129,7 +129,7 @@ public class DiagnosticsCollectionFlowConfig extends AbstractFlowConfiguration<D
     }
 
     @Override
-    protected FlowEdgeConfig<DiagnosticsCollectionsState, DiagnosticsCollectionStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<DiagnosticsCollectionsState, DiagnosticsCollectionStateSelectors> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

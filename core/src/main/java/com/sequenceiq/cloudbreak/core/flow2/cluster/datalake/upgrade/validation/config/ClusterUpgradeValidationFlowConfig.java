@@ -98,7 +98,7 @@ public class ClusterUpgradeValidationFlowConfig
     }
 
     @Override
-    protected FlowEdgeConfig<ClusterUpgradeValidationState, ClusterUpgradeValidationStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<ClusterUpgradeValidationState, ClusterUpgradeValidationStateSelectors> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

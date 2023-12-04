@@ -57,7 +57,7 @@ public class ClusterResetFlowConfig extends StackStatusFinalizerAbstractFlowConf
     }
 
     @Override
-    protected FlowEdgeConfig<ClusterResetState, ClusterResetEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ClusterResetState, ClusterResetEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

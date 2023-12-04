@@ -81,7 +81,7 @@ public class DatalakeBackupValidationFlowConfig extends AbstractFlowConfiguratio
     }
 
     @Override
-    protected FlowEdgeConfig<DatalakeBackupValidationState, DatalakeBackupValidationEvent> getEdgeConfig() {
+    public FlowEdgeConfig<DatalakeBackupValidationState, DatalakeBackupValidationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

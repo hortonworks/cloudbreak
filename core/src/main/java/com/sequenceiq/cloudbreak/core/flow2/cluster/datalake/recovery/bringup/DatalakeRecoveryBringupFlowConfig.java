@@ -59,7 +59,7 @@ public class DatalakeRecoveryBringupFlowConfig extends StackStatusFinalizerAbstr
     }
 
     @Override
-    protected FlowEdgeConfig<DatalakeRecoveryBringupState, DatalakeRecoveryBringupEvent> getEdgeConfig() {
+    public FlowEdgeConfig<DatalakeRecoveryBringupState, DatalakeRecoveryBringupEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

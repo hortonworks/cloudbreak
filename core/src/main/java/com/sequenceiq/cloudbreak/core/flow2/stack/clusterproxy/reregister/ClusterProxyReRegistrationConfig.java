@@ -69,7 +69,7 @@ public class ClusterProxyReRegistrationConfig
     }
 
     @Override
-    protected FlowEdgeConfig<ClusterProxyReRegistrationState, ClusterProxyReRegistrationEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ClusterProxyReRegistrationState, ClusterProxyReRegistrationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

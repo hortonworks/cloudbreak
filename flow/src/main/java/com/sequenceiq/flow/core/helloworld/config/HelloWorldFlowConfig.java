@@ -82,7 +82,7 @@ public class HelloWorldFlowConfig extends AbstractFlowConfiguration<HelloWorldSt
     }
 
     @Override
-    protected FlowEdgeConfig<HelloWorldState, HelloWorldEvent> getEdgeConfig() {
+    public FlowEdgeConfig<HelloWorldState, HelloWorldEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 }

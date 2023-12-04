@@ -70,7 +70,7 @@ public class FlowChainInitFlowConfig extends AbstractFlowConfiguration<FlowChain
     }
 
     @Override
-    protected FlowEdgeConfig<FlowChainInitState, FlowChainInitEvent> getEdgeConfig() {
+    public FlowEdgeConfig<FlowChainInitState, FlowChainInitEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 }

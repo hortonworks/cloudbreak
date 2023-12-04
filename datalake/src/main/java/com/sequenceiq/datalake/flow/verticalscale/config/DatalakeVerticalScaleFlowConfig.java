@@ -62,7 +62,7 @@ public class DatalakeVerticalScaleFlowConfig extends AbstractFlowConfiguration<D
     }
 
     @Override
-    protected FlowEdgeConfig<DatalakeVerticalScaleState, DatalakeVerticalScaleStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<DatalakeVerticalScaleState, DatalakeVerticalScaleStateSelectors> getEdgeConfig() {
         return new FlowEdgeConfig<>(
                 INIT_STATE,
                 FINAL_STATE,

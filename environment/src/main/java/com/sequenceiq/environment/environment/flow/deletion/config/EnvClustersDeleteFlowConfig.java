@@ -80,7 +80,7 @@ public class EnvClustersDeleteFlowConfig extends AbstractFlowConfiguration<EnvCl
     }
 
     @Override
-    protected FlowEdgeConfig<EnvClustersDeleteState, EnvClustersDeleteStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<EnvClustersDeleteState, EnvClustersDeleteStateSelectors> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 }

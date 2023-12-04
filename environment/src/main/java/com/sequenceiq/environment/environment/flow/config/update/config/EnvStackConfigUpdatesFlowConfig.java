@@ -53,7 +53,7 @@ public class EnvStackConfigUpdatesFlowConfig extends
     }
 
     @Override
-    protected FlowEdgeConfig<EnvStackConfigUpdatesState, EnvStackConfigUpdatesStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<EnvStackConfigUpdatesState, EnvStackConfigUpdatesStateSelectors> getEdgeConfig() {
         return new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, STACK_CONFIG_UPDATES_FAILED_STATE,
             HANDLE_FAILED_ENV_STACK_CONIFG_UPDATES_EVENT);
     }

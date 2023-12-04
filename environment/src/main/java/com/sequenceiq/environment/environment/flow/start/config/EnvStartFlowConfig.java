@@ -70,7 +70,7 @@ public class EnvStartFlowConfig extends AbstractFlowConfiguration<EnvStartState,
     }
 
     @Override
-    protected FlowEdgeConfig<EnvStartState, EnvStartStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<EnvStartState, EnvStartStateSelectors> getEdgeConfig() {
         return new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, ENV_START_FAILED_STATE, HANDLED_FAILED_ENV_START_EVENT);
     }
 

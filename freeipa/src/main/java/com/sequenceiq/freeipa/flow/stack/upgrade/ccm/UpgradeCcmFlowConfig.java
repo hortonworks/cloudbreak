@@ -166,7 +166,7 @@ public class UpgradeCcmFlowConfig extends AbstractFlowConfiguration<UpgradeCcmSt
     }
 
     @Override
-    protected FlowEdgeConfig<UpgradeCcmState, UpgradeCcmStateSelector> getEdgeConfig() {
+    public FlowEdgeConfig<UpgradeCcmState, UpgradeCcmStateSelector> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

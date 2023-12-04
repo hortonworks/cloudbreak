@@ -129,7 +129,7 @@ public class EnvDeleteFlowConfig extends AbstractFlowConfiguration<EnvDeleteStat
     }
 
     @Override
-    protected FlowEdgeConfig<EnvDeleteState, EnvDeleteStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<EnvDeleteState, EnvDeleteStateSelectors> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

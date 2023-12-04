@@ -62,7 +62,7 @@ public class DatalakeDiskUpdateFlowConfig extends AbstractFlowConfiguration<Data
     }
 
     @Override
-    protected FlowEdgeConfig<DatalakeDiskUpdateState, DatalakeDiskUpdateStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<DatalakeDiskUpdateState, DatalakeDiskUpdateStateSelectors> getEdgeConfig() {
         return new FlowEdgeConfig<>(
                 INIT_STATE,
                 FINAL_STATE,

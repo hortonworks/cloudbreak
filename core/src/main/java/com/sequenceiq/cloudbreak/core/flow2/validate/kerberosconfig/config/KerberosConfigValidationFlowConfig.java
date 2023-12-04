@@ -70,7 +70,7 @@ public class KerberosConfigValidationFlowConfig extends StackStatusFinalizerAbst
     }
 
     @Override
-    protected FlowEdgeConfig<KerberosConfigValidationState, KerberosConfigValidationEvent> getEdgeConfig() {
+    public FlowEdgeConfig<KerberosConfigValidationState, KerberosConfigValidationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

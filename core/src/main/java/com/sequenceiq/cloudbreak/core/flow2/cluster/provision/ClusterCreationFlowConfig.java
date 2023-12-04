@@ -309,7 +309,7 @@ public class ClusterCreationFlowConfig extends StackStatusFinalizerAbstractFlowC
     }
 
     @Override
-    protected FlowEdgeConfig<ClusterCreationState, ClusterCreationEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ClusterCreationState, ClusterCreationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

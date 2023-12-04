@@ -65,7 +65,7 @@ public class SdxRepairFlowConfig extends AbstractFlowConfiguration<SdxRepairStat
     }
 
     @Override
-    protected FlowEdgeConfig<SdxRepairState, SdxRepairEvent> getEdgeConfig() {
+    public FlowEdgeConfig<SdxRepairState, SdxRepairEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

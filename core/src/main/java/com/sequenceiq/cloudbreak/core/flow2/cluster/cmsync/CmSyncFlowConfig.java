@@ -51,7 +51,7 @@ public class CmSyncFlowConfig extends StackStatusFinalizerAbstractFlowConfig<CmS
     }
 
     @Override
-    protected FlowEdgeConfig<CmSyncState, CmSyncEvent> getEdgeConfig() {
+    public FlowEdgeConfig<CmSyncState, CmSyncEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

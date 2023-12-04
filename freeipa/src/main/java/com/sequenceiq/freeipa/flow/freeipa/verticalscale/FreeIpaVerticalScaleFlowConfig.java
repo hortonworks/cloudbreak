@@ -67,7 +67,7 @@ public class FreeIpaVerticalScaleFlowConfig extends AbstractFlowConfiguration<Fr
     }
 
     @Override
-    protected FlowEdgeConfig<FreeIpaVerticalScaleState, FreeIpaVerticalScaleEvent> getEdgeConfig() {
+    public FlowEdgeConfig<FreeIpaVerticalScaleState, FreeIpaVerticalScaleEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

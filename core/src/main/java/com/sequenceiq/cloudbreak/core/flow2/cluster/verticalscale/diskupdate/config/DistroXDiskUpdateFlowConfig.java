@@ -69,7 +69,7 @@ public class DistroXDiskUpdateFlowConfig extends StackStatusFinalizerAbstractFlo
     }
 
     @Override
-    protected FlowEdgeConfig<DistroXDiskUpdateState, DistroXDiskUpdateStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<DistroXDiskUpdateState, DistroXDiskUpdateStateSelectors> getEdgeConfig() {
         return new FlowEdgeConfig<>(
                 INIT_STATE,
                 FINAL_STATE,

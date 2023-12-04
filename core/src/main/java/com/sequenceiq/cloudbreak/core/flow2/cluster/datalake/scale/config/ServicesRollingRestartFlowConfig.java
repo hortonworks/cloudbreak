@@ -64,7 +64,7 @@ public class ServicesRollingRestartFlowConfig extends StackStatusFinalizerAbstra
     }
 
     @Override
-    protected FlowEdgeConfig<ServicesRollingRestartState, ServicesRollingRestartEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ServicesRollingRestartState, ServicesRollingRestartEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

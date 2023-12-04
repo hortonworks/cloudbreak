@@ -45,7 +45,7 @@ public class PillarConfigUpdateFlowConfig extends StackStatusFinalizerAbstractFl
     }
 
     @Override
-    protected FlowEdgeConfig<PillarConfigUpdateState, PillarConfigurationUpdateEvent> getEdgeConfig() {
+    public FlowEdgeConfig<PillarConfigUpdateState, PillarConfigurationUpdateEvent> getEdgeConfig() {
         return new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, PILLAR_CONFIG_UPDATE_FAILED_STATE,
                 PILLAR_CONFIG_UPDATE_FAILURE_HANDLED_EVENT);
     }

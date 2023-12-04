@@ -63,7 +63,7 @@ public class DatalakeUpgradePreparationFlowConfig extends AbstractFlowConfigurat
     }
 
     @Override
-    protected FlowEdgeConfig<DatalakeUpgradePreparationState, DatalakeUpgradePreparationEvent> getEdgeConfig() {
+    public FlowEdgeConfig<DatalakeUpgradePreparationState, DatalakeUpgradePreparationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

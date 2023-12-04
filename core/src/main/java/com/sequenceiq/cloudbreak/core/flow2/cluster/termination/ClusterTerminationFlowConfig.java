@@ -66,7 +66,7 @@ public class ClusterTerminationFlowConfig extends StackStatusFinalizerAbstractFl
     }
 
     @Override
-    protected FlowEdgeConfig<ClusterTerminationState, ClusterTerminationEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ClusterTerminationState, ClusterTerminationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

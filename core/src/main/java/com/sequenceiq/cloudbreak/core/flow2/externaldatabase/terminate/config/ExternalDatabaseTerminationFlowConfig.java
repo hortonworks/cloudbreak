@@ -51,7 +51,7 @@ public class ExternalDatabaseTerminationFlowConfig
     }
 
     @Override
-    protected FlowEdgeConfig<ExternalDatabaseTerminationState, ExternalDatabaseTerminationEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ExternalDatabaseTerminationState, ExternalDatabaseTerminationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

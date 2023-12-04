@@ -44,7 +44,7 @@ public class ClusterStopFlowConfig extends StackStatusFinalizerAbstractFlowConfi
     }
 
     @Override
-    protected FlowEdgeConfig<ClusterStopState, ClusterStopEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ClusterStopState, ClusterStopEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

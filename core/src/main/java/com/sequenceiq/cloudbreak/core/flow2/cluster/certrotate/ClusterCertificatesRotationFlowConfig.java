@@ -59,7 +59,7 @@ public class ClusterCertificatesRotationFlowConfig
     }
 
     @Override
-    protected FlowEdgeConfig<ClusterCertificatesRotationState, ClusterCertificatesRotationEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ClusterCertificatesRotationState, ClusterCertificatesRotationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

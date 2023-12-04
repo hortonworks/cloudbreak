@@ -47,7 +47,7 @@ public class AwsVariantMigrationFlowConfig extends StackStatusFinalizerAbstractF
     }
 
     @Override
-    protected FlowEdgeConfig<AwsVariantMigrationFlowState, AwsVariantMigrationEvent> getEdgeConfig() {
+    public FlowEdgeConfig<AwsVariantMigrationFlowState, AwsVariantMigrationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

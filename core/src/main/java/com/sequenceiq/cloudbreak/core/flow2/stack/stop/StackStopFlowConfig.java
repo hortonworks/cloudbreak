@@ -62,7 +62,7 @@ public class StackStopFlowConfig extends StackStatusFinalizerAbstractFlowConfig<
     }
 
     @Override
-    protected FlowEdgeConfig<StackStopState, StackStopEvent> getEdgeConfig() {
+    public FlowEdgeConfig<StackStopState, StackStopEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

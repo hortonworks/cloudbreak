@@ -50,7 +50,7 @@ public class ExternalDatabaseCreationFlowConfig extends StackStatusFinalizerAbst
     }
 
     @Override
-    protected FlowEdgeConfig<ExternalDatabaseCreationState, ExternalDatabaseCreationEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ExternalDatabaseCreationState, ExternalDatabaseCreationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

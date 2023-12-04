@@ -60,7 +60,7 @@ public class SdxDiagnosticsFlowConfig extends AbstractFlowConfiguration<SdxDiagn
     }
 
     @Override
-    protected FlowEdgeConfig<SdxDiagnosticsState, SdxDiagnosticsEvent> getEdgeConfig() {
+    public FlowEdgeConfig<SdxDiagnosticsState, SdxDiagnosticsEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

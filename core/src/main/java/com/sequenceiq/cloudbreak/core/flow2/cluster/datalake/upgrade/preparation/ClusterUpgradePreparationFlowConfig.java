@@ -66,7 +66,7 @@ public class ClusterUpgradePreparationFlowConfig
     }
 
     @Override
-    protected FlowEdgeConfig<ClusterUpgradePreparationState, ClusterUpgradePreparationStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<ClusterUpgradePreparationState, ClusterUpgradePreparationStateSelectors> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

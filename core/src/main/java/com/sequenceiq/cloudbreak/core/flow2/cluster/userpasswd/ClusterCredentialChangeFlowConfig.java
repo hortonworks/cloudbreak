@@ -56,7 +56,7 @@ public class ClusterCredentialChangeFlowConfig extends StackStatusFinalizerAbstr
     }
 
     @Override
-    protected FlowEdgeConfig<ClusterCredentialChangeState, ClusterCredentialChangeEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ClusterCredentialChangeState, ClusterCredentialChangeEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

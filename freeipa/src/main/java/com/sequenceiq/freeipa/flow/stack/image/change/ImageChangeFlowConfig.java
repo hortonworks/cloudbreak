@@ -86,7 +86,7 @@ public class ImageChangeFlowConfig extends AbstractFlowConfiguration<ImageChange
     }
 
     @Override
-    protected FlowEdgeConfig<ImageChangeState, ImageChangeEvents> getEdgeConfig() {
+    public FlowEdgeConfig<ImageChangeState, ImageChangeEvents> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

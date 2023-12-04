@@ -43,7 +43,7 @@ public class StartDatahubFlowConfig extends AbstractFlowConfiguration<StartDatah
     }
 
     @Override
-    protected FlowEdgeConfig<StartDatahubFlowState, StartDatahubFlowEvent> getEdgeConfig() {
+    public FlowEdgeConfig<StartDatahubFlowState, StartDatahubFlowEvent> getEdgeConfig() {
         return new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, START_DATAHUB_FAILED_STATE, StartDatahubFlowEvent.START_DATAHUB_HANDLED_EVENT);
     }
 

@@ -94,7 +94,7 @@ public class StackProvisionFlowConfig extends AbstractFlowConfiguration<StackPro
     }
 
     @Override
-    protected FlowEdgeConfig<StackProvisionState, StackProvisionEvent> getEdgeConfig() {
+    public FlowEdgeConfig<StackProvisionState, StackProvisionEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

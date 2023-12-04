@@ -77,7 +77,7 @@ public class FreeIpaProvisionFlowConfig extends AbstractFlowConfiguration<FreeIp
     }
 
     @Override
-    protected FlowEdgeConfig<FreeIpaProvisionState, FreeIpaProvisionEvent> getEdgeConfig() {
+    public FlowEdgeConfig<FreeIpaProvisionState, FreeIpaProvisionEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

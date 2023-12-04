@@ -52,7 +52,7 @@ public class RedbeamsStartFlowConfing extends AbstractFlowConfiguration<Redbeams
     }
 
     @Override
-    protected FlowEdgeConfig<RedbeamsStartState, RedbeamsStartEvent> getEdgeConfig() {
+    public FlowEdgeConfig<RedbeamsStartState, RedbeamsStartEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

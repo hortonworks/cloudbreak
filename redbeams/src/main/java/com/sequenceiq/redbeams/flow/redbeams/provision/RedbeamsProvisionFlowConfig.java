@@ -54,7 +54,7 @@ public class RedbeamsProvisionFlowConfig extends AbstractFlowConfiguration<Redbe
     }
 
     @Override
-    protected FlowEdgeConfig<RedbeamsProvisionState, RedbeamsProvisionEvent> getEdgeConfig() {
+    public FlowEdgeConfig<RedbeamsProvisionState, RedbeamsProvisionEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

@@ -48,7 +48,7 @@ public class InstanceTerminationFlowConfig extends StackStatusFinalizerAbstractF
     }
 
     @Override
-    protected FlowEdgeConfig<InstanceTerminationState, InstanceTerminationEvent> getEdgeConfig() {
+    public FlowEdgeConfig<InstanceTerminationState, InstanceTerminationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

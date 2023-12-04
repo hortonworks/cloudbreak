@@ -61,7 +61,7 @@ public class CertRotationFlowConfig extends AbstractFlowConfiguration<SdxCertRot
     }
 
     @Override
-    protected FlowEdgeConfig<SdxCertRotationState, SdxCertRotationEvent> getEdgeConfig() {
+    public FlowEdgeConfig<SdxCertRotationState, SdxCertRotationEvent> getEdgeConfig() {
         return new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, CERT_ROTATION_FAILED_STATE, CERT_ROTATION_FAILURE_HANDLED_EVENT);
     }
 

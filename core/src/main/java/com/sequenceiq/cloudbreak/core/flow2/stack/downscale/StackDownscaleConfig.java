@@ -63,7 +63,7 @@ public class StackDownscaleConfig extends StackStatusFinalizerAbstractFlowConfig
     }
 
     @Override
-    protected FlowEdgeConfig<StackDownscaleState, StackDownscaleEvent> getEdgeConfig() {
+    public FlowEdgeConfig<StackDownscaleState, StackDownscaleEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 }

@@ -74,7 +74,7 @@ public class SdxStopFlowConfig extends AbstractFlowConfiguration<SdxStopState, S
     }
 
     @Override
-    protected FlowEdgeConfig<SdxStopState, SdxStopEvent> getEdgeConfig() {
+    public FlowEdgeConfig<SdxStopState, SdxStopEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

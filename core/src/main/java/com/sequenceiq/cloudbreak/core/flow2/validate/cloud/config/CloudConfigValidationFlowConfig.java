@@ -41,7 +41,7 @@ public class CloudConfigValidationFlowConfig extends StackStatusFinalizerAbstrac
     }
 
     @Override
-    protected FlowEdgeConfig<CloudConfigValidationState, CloudConfigValidationEvent> getEdgeConfig() {
+    public FlowEdgeConfig<CloudConfigValidationState, CloudConfigValidationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

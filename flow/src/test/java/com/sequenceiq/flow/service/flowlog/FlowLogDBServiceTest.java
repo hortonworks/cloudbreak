@@ -505,7 +505,7 @@ class FlowLogDBServiceTest {
         }
 
         @Override
-        protected FlowEdgeConfig<MockFlowState, MockFlowEvent> getEdgeConfig() {
+        public FlowEdgeConfig<MockFlowState, MockFlowEvent> getEdgeConfig() {
             return null;
         }
 

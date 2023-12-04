@@ -71,7 +71,7 @@ public class RedbeamsTerminationFlowConfig extends AbstractFlowConfiguration<Red
     }
 
     @Override
-    protected FlowEdgeConfig<RedbeamsTerminationState, RedbeamsTerminationEvent> getEdgeConfig() {
+    public FlowEdgeConfig<RedbeamsTerminationState, RedbeamsTerminationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

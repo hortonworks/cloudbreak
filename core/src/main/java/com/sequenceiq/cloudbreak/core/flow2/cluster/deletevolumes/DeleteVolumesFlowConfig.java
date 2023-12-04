@@ -84,7 +84,7 @@ public class DeleteVolumesFlowConfig  extends StackStatusFinalizerAbstractFlowCo
     }
 
     @Override
-    protected FlowEdgeConfig<DeleteVolumesState, DeleteVolumesEvent> getEdgeConfig() {
+    public FlowEdgeConfig<DeleteVolumesState, DeleteVolumesEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

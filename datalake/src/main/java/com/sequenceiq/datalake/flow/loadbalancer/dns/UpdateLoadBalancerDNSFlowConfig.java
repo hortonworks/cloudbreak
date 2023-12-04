@@ -68,7 +68,7 @@ public class UpdateLoadBalancerDNSFlowConfig extends AbstractFlowConfiguration<U
     }
 
     @Override
-    protected FlowEdgeConfig<UpdateLoadBalancerDNSState, UpdateLoadBalancerDNSEvent> getEdgeConfig() {
+    public FlowEdgeConfig<UpdateLoadBalancerDNSState, UpdateLoadBalancerDNSEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

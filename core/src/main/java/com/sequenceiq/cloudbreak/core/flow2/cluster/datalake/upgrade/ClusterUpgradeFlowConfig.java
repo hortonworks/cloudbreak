@@ -61,7 +61,7 @@ public class ClusterUpgradeFlowConfig extends StackStatusFinalizerAbstractFlowCo
     }
 
     @Override
-    protected FlowEdgeConfig<ClusterUpgradeState, ClusterUpgradeEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ClusterUpgradeState, ClusterUpgradeEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

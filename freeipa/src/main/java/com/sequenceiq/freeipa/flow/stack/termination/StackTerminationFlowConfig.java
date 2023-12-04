@@ -65,7 +65,7 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
     }
 
     @Override
-    protected FlowEdgeConfig<StackTerminationState, StackTerminationEvent> getEdgeConfig() {
+    public FlowEdgeConfig<StackTerminationState, StackTerminationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

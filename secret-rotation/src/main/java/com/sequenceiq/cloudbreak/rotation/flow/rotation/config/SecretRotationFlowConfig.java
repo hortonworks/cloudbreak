@@ -61,7 +61,7 @@ public class SecretRotationFlowConfig extends AbstractFlowConfiguration<SecretRo
     }
 
     @Override
-    protected FlowEdgeConfig<SecretRotationState, SecretRotationStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<SecretRotationState, SecretRotationStateSelectors> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

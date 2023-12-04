@@ -66,7 +66,7 @@ public class StackImageUpdateFlowConfig extends StackStatusFinalizerAbstractFlow
     }
 
     @Override
-    protected FlowEdgeConfig<StackImageUpdateState, StackImageUpdateEvent> getEdgeConfig() {
+    public FlowEdgeConfig<StackImageUpdateState, StackImageUpdateEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

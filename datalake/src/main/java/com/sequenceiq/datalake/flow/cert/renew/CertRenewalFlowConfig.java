@@ -55,7 +55,7 @@ public class CertRenewalFlowConfig extends AbstractFlowConfiguration<SdxCertRene
     }
 
     @Override
-    protected FlowEdgeConfig<SdxCertRenewalState, SdxCertRenewalEvent> getEdgeConfig() {
+    public FlowEdgeConfig<SdxCertRenewalState, SdxCertRenewalEvent> getEdgeConfig() {
         return new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, CERT_RENEWAL_FAILED_STATE, SdxCertRenewalEvent.CERT_RENEWAL_FAILURE_HANDLED_EVENT);
     }
 

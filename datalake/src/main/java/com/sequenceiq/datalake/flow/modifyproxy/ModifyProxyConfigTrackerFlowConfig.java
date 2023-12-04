@@ -44,7 +44,7 @@ public class ModifyProxyConfigTrackerFlowConfig extends AbstractFlowConfiguratio
     }
 
     @Override
-    protected FlowEdgeConfig<ModifyProxyConfigTrackerState, ModifyProxyConfigTrackerEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ModifyProxyConfigTrackerState, ModifyProxyConfigTrackerEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

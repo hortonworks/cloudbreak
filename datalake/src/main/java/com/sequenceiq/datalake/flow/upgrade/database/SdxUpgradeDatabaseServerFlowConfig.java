@@ -72,7 +72,7 @@ public class SdxUpgradeDatabaseServerFlowConfig extends AbstractFlowConfiguratio
     }
 
     @Override
-    protected FlowEdgeConfig<SdxUpgradeDatabaseServerState, SdxUpgradeDatabaseServerStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<SdxUpgradeDatabaseServerState, SdxUpgradeDatabaseServerStateSelectors> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

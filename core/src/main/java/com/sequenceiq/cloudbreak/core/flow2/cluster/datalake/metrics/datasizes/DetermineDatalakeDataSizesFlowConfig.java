@@ -74,7 +74,7 @@ public class DetermineDatalakeDataSizesFlowConfig
     }
 
     @Override
-    protected FlowEdgeConfig<DetermineDatalakeDataSizesState, DetermineDatalakeDataSizesEvent> getEdgeConfig() {
+    public FlowEdgeConfig<DetermineDatalakeDataSizesState, DetermineDatalakeDataSizesEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 }

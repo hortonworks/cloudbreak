@@ -68,7 +68,7 @@ public class EnvProxyModificationFlowConfig extends
     }
 
     @Override
-    protected FlowEdgeConfig<EnvProxyModificationState, EnvProxyModificationStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<EnvProxyModificationState, EnvProxyModificationStateSelectors> getEdgeConfig() {
         return new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, PROXY_CONFIG_MODIFICATION_FAILED_STATE, HANDLE_FAILED_MODIFY_PROXY_EVENT);
     }
 

@@ -108,7 +108,7 @@ public class StackCreationFlowConfig extends StackStatusFinalizerAbstractFlowCon
     }
 
     @Override
-    protected FlowEdgeConfig<StackCreationState, StackCreationEvent> getEdgeConfig() {
+    public FlowEdgeConfig<StackCreationState, StackCreationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

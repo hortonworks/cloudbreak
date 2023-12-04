@@ -56,7 +56,7 @@ public class StackSyncFlowConfig extends StackStatusFinalizerAbstractFlowConfig<
     }
 
     @Override
-    protected FlowEdgeConfig<StackSyncState, StackSyncEvent> getEdgeConfig() {
+    public FlowEdgeConfig<StackSyncState, StackSyncEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 }

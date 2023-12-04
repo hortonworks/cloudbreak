@@ -54,7 +54,7 @@ public class FullBackupFlowConfig extends AbstractFlowConfiguration<FullBackupSt
     }
 
     @Override
-    protected FlowEdgeConfig<FullBackupState, FullBackupEvent> getEdgeConfig() {
+    public FlowEdgeConfig<FullBackupState, FullBackupEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

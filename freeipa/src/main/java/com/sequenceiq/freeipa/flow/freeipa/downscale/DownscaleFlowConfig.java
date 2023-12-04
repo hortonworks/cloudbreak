@@ -167,7 +167,7 @@ public class DownscaleFlowConfig extends AbstractFlowConfiguration<DownscaleStat
     }
 
     @Override
-    protected FlowEdgeConfig<DownscaleState, DownscaleFlowEvent> getEdgeConfig() {
+    public FlowEdgeConfig<DownscaleState, DownscaleFlowEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

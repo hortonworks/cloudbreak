@@ -80,7 +80,7 @@ public class CmDiagnosticsCollectionFlowConfig
     }
 
     @Override
-    protected FlowEdgeConfig<CmDiagnosticsCollectionState, CmDiagnosticsCollectionStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<CmDiagnosticsCollectionState, CmDiagnosticsCollectionStateSelectors> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

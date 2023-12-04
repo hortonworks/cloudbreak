@@ -93,7 +93,7 @@ public class ClusterDownscaleFlowConfig extends StackStatusFinalizerAbstractFlow
     }
 
     @Override
-    protected FlowEdgeConfig<ClusterDownscaleState, ClusterDownscaleEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ClusterDownscaleState, ClusterDownscaleEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

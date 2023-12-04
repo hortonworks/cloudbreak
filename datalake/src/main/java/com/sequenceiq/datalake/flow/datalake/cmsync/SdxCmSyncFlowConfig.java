@@ -45,7 +45,7 @@ public class SdxCmSyncFlowConfig extends AbstractFlowConfiguration<SdxCmSyncStat
     }
 
     @Override
-    protected FlowEdgeConfig<SdxCmSyncState, SdxCmSyncEvent> getEdgeConfig() {
+    public FlowEdgeConfig<SdxCmSyncState, SdxCmSyncEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

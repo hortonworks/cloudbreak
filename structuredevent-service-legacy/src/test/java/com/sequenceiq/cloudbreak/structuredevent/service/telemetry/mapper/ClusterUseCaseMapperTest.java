@@ -22,9 +22,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
-import com.sequenceiq.flow.core.FlowEvent;
-import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.flow.core.RestartAction;
+import com.sequenceiq.cloudbreak.structuredevent.service.TestEvent;
+import com.sequenceiq.cloudbreak.structuredevent.service.TestFlowConfig;
+import com.sequenceiq.cloudbreak.structuredevent.service.TestFlowState;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
@@ -177,75 +177,4 @@ class ClusterUseCaseMapperTest {
         }
     }
 
-    private class TestFlowConfig extends AbstractFlowConfiguration<TestFlowState, TestEvent> implements ClusterUseCaseAware {
-
-        protected TestFlowConfig(Class stateType, Class eventType) {
-            super(stateType, eventType);
-        }
-
-        @Override
-        public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
-            if (flowState.equals(TestFlowState.INIT_STATE)) {
-                return CREATE_STARTED;
-            } else if (flowState.toString().endsWith("FAILED_STATE")
-                    && !flowState.equals(TestFlowState.NOT_THE_LATEST_FAILED_STATE)) {
-                return CREATE_FAILED;
-            } else if (flowState.equals(TestFlowState.FINISHED_STATE)) {
-                return CREATE_FINISHED;
-            }
-            return UNSET;
-        }
-
-        @Override
-        protected List<Transition<TestFlowState, TestEvent>> getTransitions() {
-            return null;
-        }
-
-        @Override
-        protected FlowEdgeConfig getEdgeConfig() {
-            return null;
-        }
-
-        @Override
-        public TestEvent[] getEvents() {
-            return new TestEvent[0];
-        }
-
-        @Override
-        public TestEvent[] getInitEvents() {
-            return new TestEvent[0];
-        }
-
-        @Override
-        public String getDisplayName() {
-            return null;
-        }
-    }
-
-    private enum TestFlowState implements FlowState {
-        INIT_STATE,
-        TEMP_STATE,
-        NOT_THE_LATEST_FAILED_STATE,
-        FAILED_STATE,
-        FINISHED_STATE,
-        FINAL_STATE;
-
-        @Override
-        public Class<? extends RestartAction> restartAction() {
-            return null;
-        }
-    }
-
-    private class TestEvent implements FlowEvent {
-
-        @Override
-        public String name() {
-            return null;
-        }
-
-        @Override
-        public String event() {
-            return null;
-        }
-    }
 }

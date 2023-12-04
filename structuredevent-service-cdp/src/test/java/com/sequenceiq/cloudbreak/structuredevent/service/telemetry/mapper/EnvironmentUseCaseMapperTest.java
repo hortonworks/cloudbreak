@@ -18,9 +18,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
-import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.cloudbreak.structuredevent.service.TestEvent;
+import com.sequenceiq.cloudbreak.structuredevent.service.TestFlowConfig;
+import com.sequenceiq.cloudbreak.structuredevent.service.TestFlowState;
 import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,7 +38,7 @@ class EnvironmentUseCaseMapperTest {
 
     @BeforeEach()
     void setUp() {
-        flowConfigurations.add(new TestFlowConfig(TestFlowState.class, TestEvent.class));
+        flowConfigurations.add(new TestEnvironmentFlowConfig(TestFlowState.class, TestEvent.class));
         underTest.init();
     }
 
@@ -54,35 +55,35 @@ class EnvironmentUseCaseMapperTest {
     @Test
     void testFlowChainTypeIsIgnored() {
         Assertions.assertEquals(CREATE_STARTED,
-                mapFlowDetailsToUseCase("INIT_STATE", "TestFlowConfig", ""));
+                mapFlowDetailsToUseCase("INIT_STATE", "TestEnvironmentFlowConfig", ""));
         Assertions.assertEquals(CREATE_STARTED,
-                mapFlowDetailsToUseCase("INIT_STATE", "TestFlowConfig", "TestFlowChain"));
+                mapFlowDetailsToUseCase("INIT_STATE", "TestEnvironmentFlowConfig", "TestFlowChain"));
     }
 
     @Test
     void testCorrectNextFlowStatesMappedCorrectly() {
         Assertions.assertEquals(CREATE_STARTED,
-                mapFlowDetailsToUseCase("INIT_STATE", "TestFlowConfig"));
+                mapFlowDetailsToUseCase("INIT_STATE", "TestEnvironmentFlowConfig"));
         Assertions.assertEquals(CREATE_FINISHED,
-                mapFlowDetailsToUseCase("FINISHED_STATE", "TestFlowConfig"));
+                mapFlowDetailsToUseCase("FINISHED_STATE", "TestEnvironmentFlowConfig"));
         Assertions.assertEquals(CREATE_FAILED,
-                mapFlowDetailsToUseCase("FAILED_STATE", "TestFlowConfig"));
+                mapFlowDetailsToUseCase("FAILED_STATE", "TestEnvironmentFlowConfig"));
         Assertions.assertEquals(UNSET,
-                mapFlowDetailsToUseCase("TEMP_STATE", "TestFlowConfig"));
+                mapFlowDetailsToUseCase("TEMP_STATE", "TestEnvironmentFlowConfig"));
         Assertions.assertEquals(UNSET,
-                mapFlowDetailsToUseCase("NOT_THE_LATEST_FAILED_STATE", "TestFlowConfig"));
+                mapFlowDetailsToUseCase("NOT_THE_LATEST_FAILED_STATE", "TestEnvironmentFlowConfig"));
         Assertions.assertEquals(UNSET,
-                mapFlowDetailsToUseCase("FINAL_STATE", "TestFlowConfig"));
+                mapFlowDetailsToUseCase("FINAL_STATE", "TestEnvironmentFlowConfig"));
     }
 
     @Test
     void testIncorrectNextFlowStatesMappedToUnsetUseCase() {
         Assertions.assertEquals(UNSET,
-                mapFlowDetailsToUseCase("OTHER_STATE", "TestFlowConfig"));
+                mapFlowDetailsToUseCase("OTHER_STATE", "TestEnvironmentFlowConfig"));
         Assertions.assertEquals(UNSET,
-                mapFlowDetailsToUseCase(null, "TestFlowConfig"));
+                mapFlowDetailsToUseCase(null, "TestEnvironmentFlowConfig"));
         Assertions.assertEquals(UNSET,
-                mapFlowDetailsToUseCase("", "TestFlowConfig"));
+                mapFlowDetailsToUseCase("", "TestEnvironmentFlowConfig"));
     }
 
     @Test
@@ -107,9 +108,9 @@ class EnvironmentUseCaseMapperTest {
         return underTest.useCase(flowDetails);
     }
 
-    private class TestFlowConfig extends AbstractFlowConfiguration<TestFlowState, TestEvent> implements EnvironmentUseCaseAware {
+    private class TestEnvironmentFlowConfig extends TestFlowConfig implements EnvironmentUseCaseAware {
 
-        protected TestFlowConfig(Class stateType, Class eventType) {
+        protected TestEnvironmentFlowConfig(Class stateType, Class eventType) {
             super(stateType, eventType);
         }
 
@@ -124,58 +125,6 @@ class EnvironmentUseCaseMapperTest {
                 return CREATE_FINISHED;
             }
             return UNSET;
-        }
-
-        @Override
-        protected List<Transition<TestFlowState, TestEvent>> getTransitions() {
-            return null;
-        }
-
-        @Override
-        protected FlowEdgeConfig getEdgeConfig() {
-            return null;
-        }
-
-        @Override
-        public TestEvent[] getEvents() {
-            return new TestEvent[0];
-        }
-
-        @Override
-        public TestEvent[] getInitEvents() {
-            return new TestEvent[0];
-        }
-
-        @Override
-        public String getDisplayName() {
-            return null;
-        }
-    }
-
-    private enum TestFlowState implements FlowState {
-        INIT_STATE,
-        TEMP_STATE,
-        NOT_THE_LATEST_FAILED_STATE,
-        FAILED_STATE,
-        FINISHED_STATE,
-        FINAL_STATE;
-
-        @Override
-        public Class<? extends RestartAction> restartAction() {
-            return null;
-        }
-    }
-
-    private class TestEvent implements FlowEvent {
-
-        @Override
-        public String name() {
-            return null;
-        }
-
-        @Override
-        public String event() {
-            return null;
         }
     }
 }

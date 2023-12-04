@@ -49,7 +49,7 @@ public class SleepFlowConfig extends AbstractFlowConfiguration<SleepState, Sleep
     }
 
     @Override
-    protected FlowEdgeConfig<SleepState, SleepEvent> getEdgeConfig() {
+    public FlowEdgeConfig<SleepState, SleepEvent> getEdgeConfig() {
         return new FlowEdgeConfig<>(
                 SleepState.INIT_STATE,
                 SleepState.FINAL_STATE,

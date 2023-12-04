@@ -44,7 +44,7 @@ public class RotateSaltPasswordTrackerFlowConfig extends AbstractFlowConfigurati
     }
 
     @Override
-    protected FlowEdgeConfig<RotateSaltPasswordTrackerState, RotateSaltPasswordTrackerEvent> getEdgeConfig() {
+    public FlowEdgeConfig<RotateSaltPasswordTrackerState, RotateSaltPasswordTrackerEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

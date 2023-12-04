@@ -39,7 +39,7 @@ public class ClusterSyncFlowConfig extends StackStatusFinalizerAbstractFlowConfi
     }
 
     @Override
-    protected FlowEdgeConfig<ClusterSyncState, ClusterSyncEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ClusterSyncState, ClusterSyncEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

@@ -185,7 +185,7 @@ public class AbstractFlowConfigurationTest {
         }
 
         @Override
-        protected FlowEdgeConfig<State, Event> getEdgeConfig() {
+        public FlowEdgeConfig<State, Event> getEdgeConfig() {
             return edgeConfig;
         }
 

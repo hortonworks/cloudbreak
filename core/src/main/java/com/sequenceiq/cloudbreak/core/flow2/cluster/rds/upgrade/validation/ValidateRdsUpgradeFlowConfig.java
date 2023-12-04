@@ -65,7 +65,7 @@ public class ValidateRdsUpgradeFlowConfig
     }
 
     @Override
-    protected FlowEdgeConfig<ValidateRdsUpgradeState, ValidateRdsUpgradeEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ValidateRdsUpgradeState, ValidateRdsUpgradeEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

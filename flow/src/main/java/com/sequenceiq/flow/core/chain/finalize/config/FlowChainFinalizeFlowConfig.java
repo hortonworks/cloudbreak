@@ -70,7 +70,7 @@ public class FlowChainFinalizeFlowConfig extends AbstractFlowConfiguration<FlowC
     }
 
     @Override
-    protected FlowEdgeConfig<FlowChainFinalizeState, FlowChainFinalizeEvent> getEdgeConfig() {
+    public FlowEdgeConfig<FlowChainFinalizeState, FlowChainFinalizeEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 }

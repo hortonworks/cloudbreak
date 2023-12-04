@@ -122,7 +122,7 @@ public class StackLoadBalancerUpdateFlowConfig extends StackStatusFinalizerAbstr
     }
 
     @Override
-    protected FlowEdgeConfig<StackLoadBalancerUpdateState, StackLoadBalancerUpdateEvent> getEdgeConfig() {
+    public FlowEdgeConfig<StackLoadBalancerUpdateState, StackLoadBalancerUpdateEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

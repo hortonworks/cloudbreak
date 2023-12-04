@@ -101,7 +101,7 @@ public class UpgradeRdsFlowConfig extends StackStatusFinalizerAbstractFlowConfig
     }
 
     @Override
-    protected FlowEdgeConfig<UpgradeRdsState, UpgradeRdsEvent> getEdgeConfig() {
+    public FlowEdgeConfig<UpgradeRdsState, UpgradeRdsEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

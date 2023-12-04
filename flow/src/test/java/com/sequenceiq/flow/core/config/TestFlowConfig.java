@@ -48,7 +48,7 @@ public class TestFlowConfig extends AbstractFlowConfiguration<TestFlowConfig.Tes
         }
 
         @Override
-        protected AbstractFlowConfiguration.FlowEdgeConfig<TestFlowState, TestFlowEvent> getEdgeConfig() {
+        public AbstractFlowConfiguration.FlowEdgeConfig<TestFlowState, TestFlowEvent> getEdgeConfig() {
             return EDGE_CONFIG;
         }
 

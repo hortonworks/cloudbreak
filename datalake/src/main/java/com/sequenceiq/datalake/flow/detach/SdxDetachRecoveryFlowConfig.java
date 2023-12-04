@@ -61,7 +61,7 @@ public class SdxDetachRecoveryFlowConfig extends AbstractFlowConfiguration<SdxDe
     }
 
     @Override
-    protected FlowEdgeConfig<SdxDetachRecoveryState, SdxDetachRecoveryEvent> getEdgeConfig() {
+    public FlowEdgeConfig<SdxDetachRecoveryState, SdxDetachRecoveryEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

@@ -59,7 +59,7 @@ public class DiskResizeFlowConfig extends StackStatusFinalizerAbstractFlowConfig
     }
 
     @Override
-    protected FlowEdgeConfig<DiskResizeState, DiskResizeEvent> getEdgeConfig() {
+    public FlowEdgeConfig<DiskResizeState, DiskResizeEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

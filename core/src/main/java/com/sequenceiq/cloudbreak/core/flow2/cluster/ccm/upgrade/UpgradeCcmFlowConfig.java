@@ -126,7 +126,7 @@ public class UpgradeCcmFlowConfig extends StackStatusFinalizerAbstractFlowConfig
     }
 
     @Override
-    protected FlowEdgeConfig<UpgradeCcmState, UpgradeCcmEvent> getEdgeConfig() {
+    public FlowEdgeConfig<UpgradeCcmState, UpgradeCcmEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

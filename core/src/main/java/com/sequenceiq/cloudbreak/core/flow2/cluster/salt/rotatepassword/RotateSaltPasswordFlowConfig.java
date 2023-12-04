@@ -43,7 +43,7 @@ public class RotateSaltPasswordFlowConfig extends StackStatusFinalizerAbstractFl
     }
 
     @Override
-    protected FlowEdgeConfig<RotateSaltPasswordState, RotateSaltPasswordEvent> getEdgeConfig() {
+    public FlowEdgeConfig<RotateSaltPasswordState, RotateSaltPasswordEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

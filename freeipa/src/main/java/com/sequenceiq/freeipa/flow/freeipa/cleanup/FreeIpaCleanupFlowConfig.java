@@ -66,7 +66,7 @@ public class FreeIpaCleanupFlowConfig extends AbstractFlowConfiguration<FreeIpaC
     }
 
     @Override
-    protected FlowEdgeConfig<FreeIpaCleanupState, FreeIpaCleanupEvent> getEdgeConfig() {
+    public FlowEdgeConfig<FreeIpaCleanupState, FreeIpaCleanupEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

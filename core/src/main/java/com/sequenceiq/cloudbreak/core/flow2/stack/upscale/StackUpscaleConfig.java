@@ -96,7 +96,7 @@ public class StackUpscaleConfig extends StackStatusFinalizerAbstractFlowConfig<S
     }
 
     @Override
-    protected FlowEdgeConfig<StackUpscaleState, StackUpscaleEvent> getEdgeConfig() {
+    public FlowEdgeConfig<StackUpscaleState, StackUpscaleEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

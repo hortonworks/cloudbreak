@@ -62,7 +62,7 @@ public class SaltUpdateFlowConfig extends StackStatusFinalizerAbstractFlowConfig
     }
 
     @Override
-    protected FlowEdgeConfig<SaltUpdateState, SaltUpdateEvent> getEdgeConfig() {
+    public FlowEdgeConfig<SaltUpdateState, SaltUpdateEvent> getEdgeConfig() {
         return new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, SALT_UPDATE_FAILED_STATE, SALT_UPDATE_FAILURE_HANDLED_EVENT);
     }
 

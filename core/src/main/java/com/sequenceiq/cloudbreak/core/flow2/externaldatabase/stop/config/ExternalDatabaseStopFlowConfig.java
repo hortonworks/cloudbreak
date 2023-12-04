@@ -50,7 +50,7 @@ public class ExternalDatabaseStopFlowConfig extends StackStatusFinalizerAbstract
     }
 
     @Override
-    protected FlowEdgeConfig<ExternalDatabaseStopState, ExternalDatabaseStopEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ExternalDatabaseStopState, ExternalDatabaseStopEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

@@ -48,7 +48,7 @@ public class AwsVariantMigrationFlowConfig extends AbstractFlowConfiguration<Aws
     }
 
     @Override
-    protected AbstractFlowConfiguration.FlowEdgeConfig<AwsVariantMigrationFlowState, AwsVariantMigrationEvent> getEdgeConfig() {
+    public AbstractFlowConfiguration.FlowEdgeConfig<AwsVariantMigrationFlowState, AwsVariantMigrationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

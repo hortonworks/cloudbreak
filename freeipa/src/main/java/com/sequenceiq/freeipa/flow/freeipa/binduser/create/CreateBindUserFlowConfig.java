@@ -58,7 +58,7 @@ public class CreateBindUserFlowConfig extends AbstractFlowConfiguration<CreateBi
     }
 
     @Override
-    protected FlowEdgeConfig<CreateBindUserState, CreateBindUserFlowEvent> getEdgeConfig() {
+    public FlowEdgeConfig<CreateBindUserState, CreateBindUserFlowEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

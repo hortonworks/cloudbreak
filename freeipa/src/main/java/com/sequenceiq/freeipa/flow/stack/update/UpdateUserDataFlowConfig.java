@@ -59,7 +59,7 @@ public class UpdateUserDataFlowConfig extends AbstractFlowConfiguration<UpdateUs
     }
 
     @Override
-    protected FlowEdgeConfig<UpdateUserDataState, UpdateUserDataEvents> getEdgeConfig() {
+    public FlowEdgeConfig<UpdateUserDataState, UpdateUserDataEvents> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

@@ -92,7 +92,7 @@ public class SdxDeleteFlowConfig extends AbstractFlowConfiguration<SdxDeleteStat
     }
 
     @Override
-    protected FlowEdgeConfig<SdxDeleteState, SdxDeleteEvent> getEdgeConfig() {
+    public FlowEdgeConfig<SdxDeleteState, SdxDeleteEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

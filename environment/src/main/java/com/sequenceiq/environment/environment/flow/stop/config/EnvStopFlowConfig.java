@@ -65,7 +65,7 @@ public class EnvStopFlowConfig extends AbstractFlowConfiguration<EnvStopState, E
     }
 
     @Override
-    protected FlowEdgeConfig<EnvStopState, EnvStopStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<EnvStopState, EnvStopStateSelectors> getEdgeConfig() {
         return new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, ENV_STOP_FAILED_STATE, HANDLED_FAILED_ENV_STOP_EVENT);
     }
 

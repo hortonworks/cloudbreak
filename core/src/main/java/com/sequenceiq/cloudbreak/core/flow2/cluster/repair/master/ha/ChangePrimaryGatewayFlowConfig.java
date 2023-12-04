@@ -50,7 +50,7 @@ public class ChangePrimaryGatewayFlowConfig extends StackStatusFinalizerAbstract
     }
 
     @Override
-    protected FlowEdgeConfig<ChangePrimaryGatewayState, ChangePrimaryGatewayEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ChangePrimaryGatewayState, ChangePrimaryGatewayEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

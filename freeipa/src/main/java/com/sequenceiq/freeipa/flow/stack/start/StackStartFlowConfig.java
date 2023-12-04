@@ -77,7 +77,7 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
     }
 
     @Override
-    protected FlowEdgeConfig<StackStartState, StackStartEvent> getEdgeConfig() {
+    public FlowEdgeConfig<StackStartState, StackStartEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

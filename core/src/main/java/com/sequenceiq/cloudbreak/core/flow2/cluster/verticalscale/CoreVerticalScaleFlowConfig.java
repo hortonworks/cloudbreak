@@ -66,7 +66,7 @@ public class CoreVerticalScaleFlowConfig extends StackStatusFinalizerAbstractFlo
     }
 
     @Override
-    protected FlowEdgeConfig<CoreVerticalScaleState, CoreVerticalScaleEvent> getEdgeConfig() {
+    public FlowEdgeConfig<CoreVerticalScaleState, CoreVerticalScaleEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

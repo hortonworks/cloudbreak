@@ -63,7 +63,7 @@ public class RebootFlowConfig extends AbstractFlowConfiguration<RebootState, Reb
     }
 
     @Override
-    protected FlowEdgeConfig<RebootState, RebootEvent> getEdgeConfig() {
+    public FlowEdgeConfig<RebootState, RebootEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

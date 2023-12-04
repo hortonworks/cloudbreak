@@ -136,7 +136,7 @@ public class DiagnosticsCollectionFlowConfig extends StackStatusFinalizerAbstrac
     }
 
     @Override
-    protected FlowEdgeConfig<DiagnosticsCollectionsState, DiagnosticsCollectionStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<DiagnosticsCollectionsState, DiagnosticsCollectionStateSelectors> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

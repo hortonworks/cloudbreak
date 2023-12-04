@@ -160,7 +160,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
     protected abstract List<Transition<S, E>> getTransitions();
 
-    protected abstract FlowEdgeConfig<S, E> getEdgeConfig();
+    public abstract FlowEdgeConfig<S, E> getEdgeConfig();
 
     public E getFailHandledEvent() {
         return getEdgeConfig().failureHandled;

@@ -51,7 +51,7 @@ public class RedbeamsUpgradeFlowConfig extends AbstractFlowConfiguration<Redbeam
     }
 
     @Override
-    protected FlowEdgeConfig<RedbeamsUpgradeState, RedbeamsUpgradeEvent> getEdgeConfig() {
+    public FlowEdgeConfig<RedbeamsUpgradeState, RedbeamsUpgradeEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

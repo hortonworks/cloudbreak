@@ -44,7 +44,7 @@ public class ModifyProxyConfigFlowConfig extends StackStatusFinalizerAbstractFlo
     }
 
     @Override
-    protected FlowEdgeConfig<ModifyProxyConfigState, ModifyProxyConfigEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ModifyProxyConfigState, ModifyProxyConfigEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

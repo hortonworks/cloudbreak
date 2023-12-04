@@ -192,7 +192,7 @@ public class UpscaleFlowConfig extends AbstractFlowConfiguration<UpscaleState, U
     }
 
     @Override
-    protected FlowEdgeConfig<UpscaleState, UpscaleFlowEvent> getEdgeConfig() {
+    public FlowEdgeConfig<UpscaleState, UpscaleFlowEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

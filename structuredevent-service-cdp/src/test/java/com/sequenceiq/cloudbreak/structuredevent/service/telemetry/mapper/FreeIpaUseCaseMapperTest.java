@@ -22,9 +22,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
-import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.cloudbreak.structuredevent.service.TestEvent;
+import com.sequenceiq.cloudbreak.structuredevent.service.TestFlowConfig;
+import com.sequenceiq.cloudbreak.structuredevent.service.TestFlowState;
 import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
@@ -46,7 +47,7 @@ class FreeIpaUseCaseMapperTest {
 
     @BeforeEach()
     void setUp() {
-        flowConfigurations.add(new TestFlowConfig(TestFlowState.class, TestEvent.class));
+        flowConfigurations.add(new TestFreeIpaFlowConfig(TestFlowState.class, TestEvent.class));
         flowEventChainFactories.add(new TestFlowEventChainFactory());
         underTest.init();
     }
@@ -64,53 +65,53 @@ class FreeIpaUseCaseMapperTest {
     @Test
     void testCorrectNextFlowStatesMappedCorrectly() {
         assertEquals(CREATE_STARTED,
-                mapFlowDetailsToUseCase("INIT_STATE", "TestFlowConfig"));
+                mapFlowDetailsToUseCase("INIT_STATE", "TestFreeIpaFlowConfig"));
         assertEquals(CREATE_FINISHED,
-                mapFlowDetailsToUseCase("FINISHED_STATE", "TestFlowConfig"));
+                mapFlowDetailsToUseCase("FINISHED_STATE", "TestFreeIpaFlowConfig"));
         assertEquals(CREATE_FAILED,
-                mapFlowDetailsToUseCase("FAILED_STATE", "TestFlowConfig"));
+                mapFlowDetailsToUseCase("FAILED_STATE", "TestFreeIpaFlowConfig"));
         assertEquals(UNSET,
-                mapFlowDetailsToUseCase("TEMP_STATE", "TestFlowConfig"));
+                mapFlowDetailsToUseCase("TEMP_STATE", "TestFreeIpaFlowConfig"));
         assertEquals(UNSET,
-                mapFlowDetailsToUseCase("NOT_THE_LATEST_FAILED_STATE", "TestFlowConfig"));
+                mapFlowDetailsToUseCase("NOT_THE_LATEST_FAILED_STATE", "TestFreeIpaFlowConfig"));
         assertEquals(UNSET,
-                mapFlowDetailsToUseCase("FINAL_STATE", "TestFlowConfig"));
+                mapFlowDetailsToUseCase("FINAL_STATE", "TestFreeIpaFlowConfig"));
     }
 
     @Test
     void testCorrectNextFlowStatesInFlowChainMappedCorrectly() {
         assertEquals(UPSCALE_STARTED,
-                mapFlowDetailsToUseCase("INIT_STATE", "TestFlowConfig", "TestFlowEventChainFactory"));
+                mapFlowDetailsToUseCase("INIT_STATE", "TestFreeIpaFlowConfig", "TestFlowEventChainFactory"));
         assertEquals(UPSCALE_FINISHED,
-                mapFlowDetailsToUseCase("FINISHED_STATE", "TestFlowConfig", "TestFlowEventChainFactory"));
+                mapFlowDetailsToUseCase("FINISHED_STATE", "TestFreeIpaFlowConfig", "TestFlowEventChainFactory"));
         assertEquals(UPSCALE_FAILED,
-                mapFlowDetailsToUseCase("FAILED_STATE", "TestFlowConfig", "TestFlowEventChainFactory"));
+                mapFlowDetailsToUseCase("FAILED_STATE", "TestFreeIpaFlowConfig", "TestFlowEventChainFactory"));
         assertEquals(UNSET,
-                mapFlowDetailsToUseCase("TEMP_STATE", "TestFlowConfig", "TestFlowEventChainFactory"));
+                mapFlowDetailsToUseCase("TEMP_STATE", "TestFreeIpaFlowConfig", "TestFlowEventChainFactory"));
         assertEquals(UNSET,
-                mapFlowDetailsToUseCase("NOT_THE_LATEST_FAILED_STATE", "TestFlowConfig", "TestFlowEventChainFactory"));
+                mapFlowDetailsToUseCase("NOT_THE_LATEST_FAILED_STATE", "TestFreeIpaFlowConfig", "TestFlowEventChainFactory"));
         assertEquals(UNSET,
-                mapFlowDetailsToUseCase("FINAL_STATE", "TestFlowConfig", "TestFlowEventChainFactory"));
+                mapFlowDetailsToUseCase("FINAL_STATE", "TestFreeIpaFlowConfig", "TestFlowEventChainFactory"));
     }
 
     @Test
     void testIncorrectNextFlowStatesMappedToUnsetUseCase() {
         assertEquals(UNSET,
-                mapFlowDetailsToUseCase("OTHER_STATE", "TestFlowConfig"));
+                mapFlowDetailsToUseCase("OTHER_STATE", "TestFreeIpaFlowConfig"));
         assertEquals(UNSET,
-                mapFlowDetailsToUseCase(null, "TestFlowConfig"));
+                mapFlowDetailsToUseCase(null, "TestFreeIpaFlowConfig"));
         assertEquals(UNSET,
-                mapFlowDetailsToUseCase("", "TestFlowConfig"));
+                mapFlowDetailsToUseCase("", "TestFreeIpaFlowConfig"));
     }
 
     @Test
     void testIncorrectNextFlowStatesInFlowChainMappedToUnsetUseCase() {
         assertEquals(UNSET,
-                mapFlowDetailsToUseCase("OTHER_STATE", "TestFlowConfig", "TestFlowEventChainFactory"));
+                mapFlowDetailsToUseCase("OTHER_STATE", "TestFreeIpaFlowConfig", "TestFlowEventChainFactory"));
         assertEquals(UNSET,
-                mapFlowDetailsToUseCase(null, "TestFlowConfig", "TestFlowEventChainFactory"));
+                mapFlowDetailsToUseCase(null, "TestFreeIpaFlowConfig", "TestFlowEventChainFactory"));
         assertEquals(UNSET,
-                mapFlowDetailsToUseCase("", "TestFlowConfig", "TestFlowEventChainFactory"));
+                mapFlowDetailsToUseCase("", "TestFreeIpaFlowConfig", "TestFlowEventChainFactory"));
     }
 
     @Test
@@ -136,7 +137,7 @@ class FreeIpaUseCaseMapperTest {
     @Test
     void testIncorrectFlowChainInFlowChainMappedToUnsetUseCase() {
         assertEquals(UNSET,
-                mapFlowDetailsToUseCase("INIT_STATE", "TestFlowConfig", "OtherFlowEventChainFactory"));
+                mapFlowDetailsToUseCase("INIT_STATE", "TestFreeIpaFlowConfig", "OtherFlowEventChainFactory"));
     }
 
     private Value mapFlowDetailsToUseCase(String nextFlowState, String flowType) {
@@ -177,9 +178,9 @@ class FreeIpaUseCaseMapperTest {
         }
     }
 
-    private class TestFlowConfig extends AbstractFlowConfiguration<TestFlowState, TestEvent> implements FreeIpaUseCaseAware {
+    private class TestFreeIpaFlowConfig extends TestFlowConfig implements FreeIpaUseCaseAware {
 
-        protected TestFlowConfig(Class stateType, Class eventType) {
+        protected TestFreeIpaFlowConfig(Class stateType, Class eventType) {
             super(stateType, eventType);
         }
 
@@ -194,58 +195,6 @@ class FreeIpaUseCaseMapperTest {
                 return CREATE_FINISHED;
             }
             return UNSET;
-        }
-
-        @Override
-        protected List<Transition<TestFlowState, TestEvent>> getTransitions() {
-            return null;
-        }
-
-        @Override
-        protected FlowEdgeConfig getEdgeConfig() {
-            return null;
-        }
-
-        @Override
-        public TestEvent[] getEvents() {
-            return new TestEvent[0];
-        }
-
-        @Override
-        public TestEvent[] getInitEvents() {
-            return new TestEvent[0];
-        }
-
-        @Override
-        public String getDisplayName() {
-            return null;
-        }
-    }
-
-    private enum TestFlowState implements FlowState {
-        INIT_STATE,
-        TEMP_STATE,
-        NOT_THE_LATEST_FAILED_STATE,
-        FAILED_STATE,
-        FINISHED_STATE,
-        FINAL_STATE;
-
-        @Override
-        public Class<? extends RestartAction> restartAction() {
-            return null;
-        }
-    }
-
-    private class TestEvent implements FlowEvent {
-
-        @Override
-        public String name() {
-            return null;
-        }
-
-        @Override
-        public String event() {
-            return null;
         }
     }
 }

@@ -57,7 +57,7 @@ public class ClusterCertificateRenewFlowConfig extends StackStatusFinalizerAbstr
     }
 
     @Override
-    protected FlowEdgeConfig<ClusterCertificateRenewState, ClusterCertificateRenewEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ClusterCertificateRenewState, ClusterCertificateRenewEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

@@ -72,7 +72,7 @@ public class SaltUpdateFlowConfig extends AbstractFlowConfiguration<SaltUpdateSt
     }
 
     @Override
-    protected FlowEdgeConfig<SaltUpdateState, SaltUpdateEvent> getEdgeConfig() {
+    public FlowEdgeConfig<SaltUpdateState, SaltUpdateEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

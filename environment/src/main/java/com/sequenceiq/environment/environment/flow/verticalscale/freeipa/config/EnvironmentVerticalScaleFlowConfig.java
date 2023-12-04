@@ -65,7 +65,7 @@ public class EnvironmentVerticalScaleFlowConfig extends AbstractFlowConfiguratio
     }
 
     @Override
-    protected FlowEdgeConfig<EnvironmentVerticalScaleState, EnvironmentVerticalScaleStateSelectors> getEdgeConfig() {
+    public FlowEdgeConfig<EnvironmentVerticalScaleState, EnvironmentVerticalScaleStateSelectors> getEdgeConfig() {
         return new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, VERTICAL_SCALING_FREEIPA_FAILED_STATE, HANDLED_FAILED_VERTICAL_SCALING_FREEIPA_EVENT);
     }
 

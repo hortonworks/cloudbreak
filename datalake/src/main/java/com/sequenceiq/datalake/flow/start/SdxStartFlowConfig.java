@@ -67,7 +67,7 @@ public class SdxStartFlowConfig extends AbstractFlowConfiguration<SdxStartState,
     }
 
     @Override
-    protected FlowEdgeConfig<SdxStartState, SdxStartEvent> getEdgeConfig() {
+    public FlowEdgeConfig<SdxStartState, SdxStartEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

@@ -4,7 +4,10 @@ import com.sequenceiq.cloudbreak.common.metrics.type.Metric;
 
 public enum FlowMetricType implements Metric {
     FLOW_STEP("flowstep"),
-    ACTIVE_FLOWS("activeflow");
+    ACTIVE_FLOWS("activeflow"),
+    FLOW_STARTED("flow.started"),
+    FLOW_FINISHED("flow.finished"),
+    FLOW_FAILED("flow.failed");
 
     private final String metricName;
 

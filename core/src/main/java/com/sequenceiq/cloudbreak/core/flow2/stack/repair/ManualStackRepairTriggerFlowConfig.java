@@ -42,7 +42,7 @@ public class ManualStackRepairTriggerFlowConfig extends StackStatusFinalizerAbst
     }
 
     @Override
-    protected FlowEdgeConfig<ManualStackRepairTriggerState, ManualStackRepairTriggerEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ManualStackRepairTriggerState, ManualStackRepairTriggerEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

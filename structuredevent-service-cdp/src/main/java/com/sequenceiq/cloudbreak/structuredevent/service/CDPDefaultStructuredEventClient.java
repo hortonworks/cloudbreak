@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
@@ -16,6 +17,7 @@ public class CDPDefaultStructuredEventClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPDefaultStructuredEventClient.class);
 
+    @Lazy
     @Inject
     private List<CDPStructuredEventSenderService> structuredEventServices;
 

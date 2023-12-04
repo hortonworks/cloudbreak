@@ -54,7 +54,7 @@ public class UpgradeEmbeddedDBPreparationFlowConfig
     }
 
     @Override
-    protected FlowEdgeConfig<UpgradeEmbeddedDBPreparationState, UpgradeEmbeddedDBPreparationEvent> getEdgeConfig() {
+    public FlowEdgeConfig<UpgradeEmbeddedDBPreparationState, UpgradeEmbeddedDBPreparationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

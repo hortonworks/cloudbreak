@@ -79,7 +79,7 @@ public class DatalakeUpgradeRecoveryFlowConfig extends AbstractFlowConfiguration
     }
 
     @Override
-    protected FlowEdgeConfig<DatalakeUpgradeRecoveryState, DatalakeUpgradeRecoveryEvent> getEdgeConfig() {
+    public FlowEdgeConfig<DatalakeUpgradeRecoveryState, DatalakeUpgradeRecoveryEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

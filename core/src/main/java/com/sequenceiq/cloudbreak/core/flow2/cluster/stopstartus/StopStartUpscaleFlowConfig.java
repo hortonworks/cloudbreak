@@ -76,7 +76,7 @@ public class StopStartUpscaleFlowConfig extends StackStatusFinalizerAbstractFlow
     }
 
     @Override
-    protected FlowEdgeConfig<StopStartUpscaleState, StopStartUpscaleEvent> getEdgeConfig() {
+    public FlowEdgeConfig<StopStartUpscaleState, StopStartUpscaleEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 
