@@ -151,7 +151,7 @@ public abstract class TestContext implements ApplicationContextAware {
         if (StringUtils.containsIgnoreCase(defaultServer, "dps.mow")
                 || StringUtils.containsIgnoreCase(defaultServer, "cdp.mow")
                 || StringUtils.containsIgnoreCase(defaultServer, "cdp-priv.mow")) {
-            testUsers.setSelector(TestUserSelectors.UMS_ONLY);
+            testUsers.setSelector(TestUserSelectors.UMS_PREFERED);
         }
         return testUsers;
     }
