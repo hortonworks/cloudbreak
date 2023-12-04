@@ -108,11 +108,6 @@ public class AzurePrivateEndpointValidator {
         boolean hasFlexibleServerSubnets = CollectionUtils.isNotEmpty(networkDto.getAzure().getFlexibleServerSubnetIds());
         boolean hasPrivateEndpointEnabled = networkDto.isPrivateEndpointEnabled(CloudPlatform.AZURE);
 
-        if (hasFlexibleServerSubnets && hasPrivateEndpointEnabled) {
-            addValidationError("A private DNS zone is provided with both private endpoint enabled and Flexible Server delegated subnet(s) present. "
-                    + "Please either turn off private endpoint creation or do not specify the existing delegated subnet(s).", resultBuilder);
-        }
-
         if (!hasFlexibleServerSubnets && !hasPrivateEndpointEnabled) {
             addValidationError("A private DNS zone is provided, but private endpoint creation is turned off and no Flexible server delegated subnet is "
                     + "specified. Please specify exactly one of them or do not specify the existing private DNS zone.", resultBuilder);
