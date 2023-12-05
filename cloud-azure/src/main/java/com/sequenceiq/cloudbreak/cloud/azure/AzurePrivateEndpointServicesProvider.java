@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -38,10 +39,14 @@ public class AzurePrivateEndpointServicesProvider {
                 .filter(Predicate.not(servicesWithExistingPrivateDnsZone::contains))
                 .filter(service ->
                         service.getResourceFamily() != AzureResourceFamily.DATABASE ||
-                                service.getSubResource().equals(databaseType.shortName()))
+                                service.getSubResource().equals(getDatabaseTypeName(databaseType)))
                 .collect(Collectors.toList());
         LOGGER.debug("Enabled private endpoint services: {}", serviceEnumList);
         return serviceEnumList;
+    }
+
+    private String getDatabaseTypeName(AzureDatabaseType databaseType) {
+        return Optional.ofNullable(databaseType).map(AzureDatabaseType::shortName).orElse(null);
     }
 
 }

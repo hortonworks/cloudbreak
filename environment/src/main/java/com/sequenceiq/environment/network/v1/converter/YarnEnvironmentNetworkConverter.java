@@ -19,8 +19,8 @@ import com.sequenceiq.environment.network.dto.YarnParams;
 @Component
 public class YarnEnvironmentNetworkConverter extends EnvironmentBaseNetworkConverter {
 
-    @Value("${cb.yarn.networkCidr}")
-    private String yarnNetworkCidr;
+    @Value("${cb.yarn.networkCidrs}")
+    private String yarnNetworkCidrs;
 
     public YarnEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter, EntitlementService entitlementService) {
         super(environmentViewConverter, entitlementService);
@@ -39,8 +39,8 @@ public class YarnEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
     @Override
     BaseNetwork createProviderSpecificNetwork(NetworkDto network) {
         YarnNetwork yarnNetwork = new YarnNetwork();
-        yarnNetwork.setNetworkCidr(yarnNetworkCidr);
-        yarnNetwork.setNetworkCidrs(yarnNetworkCidr);
+        yarnNetwork.setNetworkCidr(yarnNetworkCidrs.split(",")[0]);
+        yarnNetwork.setNetworkCidrs(yarnNetworkCidrs);
         if (network.getYarn() != null) {
             yarnNetwork.setQueue(network.getYarn().getQueue());
             yarnNetwork.setLifetime(network.getYarn().getLifetime());

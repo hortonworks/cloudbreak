@@ -69,6 +69,17 @@ public class AzurePrivateEndpointServicesProviderTest {
         assertThat(privateEndpointServices).isEmpty();
     }
 
+    @Test
+    void testGetCdpManagedDnsZonesShouldReturnEmptyListWhenPrivateDatabaseVariantIsNone() {
+        setEnabledPrivateEndpointServices(List.of("postgresqlServer", "flexiblePostgresqlServer"));
+        Set<AzureManagedPrivateDnsZoneService> servicesWithExistingPrivateDnsZone = Set.of();
+
+        List<AzureManagedPrivateDnsZoneService> privateEndpointServices = underTest.getCdpManagedDnsZoneServices(servicesWithExistingPrivateDnsZone,
+                PrivateDatabaseVariant.NONE);
+
+        assertThat(privateEndpointServices).isEmpty();
+    }
+
     private void setEnabledPrivateEndpointServices(List<String> enabledPrivateEndpointServices) {
         Field privateEndpointServicesField = ReflectionUtils.findField(AzurePrivateEndpointServicesProvider.class, "privateEndpointServices");
         ReflectionUtils.makeAccessible(privateEndpointServicesField);

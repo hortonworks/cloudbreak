@@ -1,9 +1,9 @@
 package com.sequenceiq.environment.network.dao.domain;
 
-import java.util.Objects;
-
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -37,13 +37,22 @@ public class YarnNetwork extends BaseNetwork {
     }
 
     /**
-     * Needed to prevent overriding the value set in {@link com.sequenceiq.environment.network.v1.converter.YarnEnvironmentNetworkConverter} with a null value
+     * Needed to prevent overriding the value set in {@link com.sequenceiq.environment.network.v1.converter.YarnEnvironmentNetworkConverter} with empty value
      */
     @Override
     public void setNetworkCidr(String networkCidr) {
-        if (Objects.nonNull(networkCidr)) {
+        if (StringUtils.isNotBlank(networkCidr)) {
             super.setNetworkCidr(networkCidr);
-            super.setNetworkCidrs(networkCidr);
+        }
+    }
+
+    /**
+     * Needed to prevent overriding the value set in {@link com.sequenceiq.environment.network.v1.converter.YarnEnvironmentNetworkConverter} with empty value
+     */
+    @Override
+    public void setNetworkCidrs(String networkCidrs) {
+        if (StringUtils.isNotBlank(networkCidrs)) {
+            super.setNetworkCidrs(networkCidrs);
         }
     }
 

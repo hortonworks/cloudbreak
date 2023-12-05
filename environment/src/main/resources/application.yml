@@ -158,7 +158,7 @@ cb:
     domain: default.com
     defaultQueue: "default"
     defaultLifeTime: 604800
-    networkCidr: 172.27.0.0/16
+    networkCidrs: 10.140.0.0/16,172.27.0.0/16
   os:
     enable.autoimport: true
     import:
