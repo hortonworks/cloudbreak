@@ -30,6 +30,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent;
+import com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent;
 import com.sequenceiq.freeipa.flow.stack.start.StackStartEvent;
 import com.sequenceiq.freeipa.flow.stack.stop.StackStopEvent;
@@ -50,7 +51,8 @@ class FreeIpaFlowInformationTest {
             StackStartEvent.STACK_START_EVENT.event(),
             StackStopEvent.STACK_STOP_EVENT.event(),
             FreeIpaProvisionEvent.FREEIPA_PROVISION_EVENT.event(),
-            StackProvisionEvent.START_CREATION_EVENT.event()
+            StackProvisionEvent.START_CREATION_EVENT.event(),
+            FreeIpaRebuildFlowEvent.REBUILD_EVENT.event()
     );
 
     @Mock

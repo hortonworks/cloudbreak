@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -15,6 +16,7 @@ import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.entity.Resource;
+import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.ResourceRepository;
 
 @Service
@@ -88,5 +90,11 @@ public class ResourceService {
 
     public Optional<Resource> findFirstByStatusAndTypeAndStack(CommonStatus status, ResourceType resourceType, Long stackId) {
         return repository.findFirstByResourceStatusAndResourceTypeAndStackId(status, resourceType, stackId);
+    }
+
+    public List<CloudResource> getAllCloudResource(Stack stack) {
+        return findAllByStackId(stack.getId()).stream()
+                .map(resource -> resourceToCloudResourceConverter.convert(resource))
+                .collect(Collectors.toList());
     }
 }

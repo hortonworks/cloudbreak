@@ -70,7 +70,7 @@ public class MetadataSetupService {
             instanceMetaDataEntry.setStartDate(clock.getCurrentTimeMillis());
             instanceMetaDataEntry.setSubnetId(cloudInstance.getSubnetId());
             if (instanceMetaDataEntry.getAvailabilityZone() == null) {
-                LOGGER.debug("Set Availability Zone since it is null");
+                LOGGER.debug("Set Availability Zone since it is null for {}", instanceId);
                 instanceMetaDataEntry.setAvailabilityZone(cloudInstance.getAvailabilityZone());
             }
             instanceMetaDataEntry.setInstanceName(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME));
