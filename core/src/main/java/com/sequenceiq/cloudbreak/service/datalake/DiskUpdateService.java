@@ -126,8 +126,10 @@ public class DiskUpdateService {
             .peek(volumeSet -> resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class).ifPresent(volumeSetAttributes -> {
                 volumeSetAttributes.setVolumes(volumeSetAttributes.getVolumes().stream()
                         .peek(attr -> {
-                            attr.setSize(diskUpdateRequest.getSize());
-                            attr.setType(diskUpdateRequest.getVolumeType());
+                            if (volumeIds.contains(attr.getId())) {
+                                attr.setSize(diskUpdateRequest.getSize());
+                                attr.setType(diskUpdateRequest.getVolumeType());
+                            }
                         }).toList());
                 resourceAttributeUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
             }))

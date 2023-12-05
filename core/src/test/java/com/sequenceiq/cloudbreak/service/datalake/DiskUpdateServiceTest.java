@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -32,12 +33,14 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.request.DiskResizeRequest;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
@@ -230,6 +233,68 @@ class DiskUpdateServiceTest {
         VolumeTemplate resultVolumeTemplate = template.getVolumeTemplates().stream().findFirst().get();
         assertEquals(200, resultVolumeTemplate.getVolumeSize());
         assertEquals("test", resultVolumeTemplate.getVolumeType());
+    }
+
+    @Test
+    void testUpdateDiskTypeAndSizeResourceUpdated() throws Exception {
+        AwsResourceVolumeConnector awsResourceVolumeConnector = mock(AwsResourceVolumeConnector.class);
+        Template template = mock(Template.class);
+        setUpForDiskResize(awsResourceVolumeConnector, template);
+        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
+        diskUpdateRequest.setSize(200);
+        diskUpdateRequest.setVolumeType("test");
+        diskUpdateRequest.setGroup("master");
+        Volume volume1 = mock(Volume.class);
+        doReturn("vol-1").when(volume1).getId();
+        underTest.updateDiskTypeAndSize(diskUpdateRequest, List.of(volume1), 1L);
+
+        verify(templateService).savePure(template);
+        verify(awsResourceVolumeConnector).updateDiskVolumes(any(), eq(List.of("vol-1")), eq("test"), eq(200));
+        ArgumentCaptor<List<Resource>> saveResourcesCaptor = ArgumentCaptor.forClass(List.class);
+        verify(resourceService).saveAll(saveResourcesCaptor.capture());
+        List<VolumeSetAttributes.Volume> volResult = saveResourcesCaptor.getValue().get(0).getAttributes().get(VolumeSetAttributes.class)
+                .getVolumes();
+        VolumeSetAttributes.Volume updatedVolume = volResult.stream().filter(vol -> vol.getId().equals("vol-1")).toList().get(0);
+        VolumeSetAttributes.Volume notUpdatedVolume = volResult.stream().filter(vol -> vol.getId().equals("vol-2")).toList().get(0);
+        assertEquals(200, updatedVolume.getSize());
+        assertEquals(100, notUpdatedVolume.getSize());
+        VolumeTemplate resultVolumeTemplate = template.getVolumeTemplates().stream().findFirst().get();
+        assertEquals(200, resultVolumeTemplate.getVolumeSize());
+        assertEquals("test", resultVolumeTemplate.getVolumeType());
+    }
+
+    private void setUpForDiskResize(AwsResourceVolumeConnector awsResourceVolumeConnector, Template template) {
+        String instanceGroup = "master";
+        Long stackId = 1L;
+        CloudConnector cloudConnector = mock(CloudConnector.class);
+        doReturn(cloudConnector).when(cloudPlatformConnectors).get(any());
+        doReturn(awsResourceVolumeConnector).when(cloudConnector).volumeConnector();
+        StackDto stack = mock(StackDto.class);
+        doReturn("AWS").when(stack).getPlatformVariant();
+        doReturn("AWS").when(stack).getCloudPlatform();
+        Workspace workspace = mock(Workspace.class);
+        doReturn(workspace).when(stack).getWorkspace();
+        doReturn(stackId).when(workspace).getId();
+        doReturn("crn:cdp:iam:us-west-1:someworkspace:user:someuser").when(stack).getResourceCrn();
+        Authenticator authenticator  = mock(Authenticator.class);
+        doReturn(authenticator).when(cloudConnector).authentication();
+        Resource resource = new Resource();
+        resource.setInstanceGroup("master");
+        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("vol-1", "", 100, "test", CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume volume2 = new VolumeSetAttributes.Volume("vol-2", "", 100, "test", CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", false, "", List.of(volume, volume2), 100, "");
+        resource.setAttributes(Json.silent(volumeSetAttributes));
+        doCallRealMethod().when(resourceAttributeUtil).getTypedAttributes(eq(resource), eq(VolumeSetAttributes.class));
+        doCallRealMethod().when(resourceAttributeUtil).setTypedAttributes(any(), any());
+        doReturn(stack).when(stackDtoService).getById(stackId);
+        doReturn(List.of(resource)).when(stack).getDiskResources();
+
+        InstanceGroupView instanceGroupView = mock(InstanceGroupView.class);
+
+        doReturn(template).when(instanceGroupView).getTemplate();
+        VolumeTemplate volumeTemplate = new VolumeTemplate();
+        doReturn(Set.of(volumeTemplate)).when(template).getVolumeTemplates();
+        doReturn(Optional.of(instanceGroupView)).when(instanceGroupService).findInstanceGroupViewByStackIdAndGroupName(stackId, instanceGroup);
     }
 
     @Test
