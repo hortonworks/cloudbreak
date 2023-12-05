@@ -263,7 +263,7 @@ public class AzurePrivateEndpointValidatorTest {
 
         underTest.checkExistingManagedPrivateDnsZone(validationResultBuilder, new EnvironmentDto(), networkDto);
 
-        assertTrue(validationResultBuilder.build().hasError());
+        assertFalse(validationResultBuilder.build().hasError());
         verify(credentialToCloudCredentialConverter).convert(any());
         verify(azureClientService).getClient(any());
         verify(azureExistingPrivateDnsZoneValidatorService).validate(any(), any(), any(), any(), eq(validationResultBuilder));
