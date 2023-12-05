@@ -1,4 +1,4 @@
-/opt/salt/scripts/rotate/cmca_renewal.sh:
+/opt/salt/scripts/cmca_renewal.sh:
   file.managed:
     - makedirs: True
     - mode: 700
@@ -8,6 +8,6 @@
 
 renew-cmca:
   cmd.run:
-    - name: /opt/salt/scripts/rotate/cmca_renewal.sh 2>&1 | tee -a /var/log/cm_cmca_renewal.log && exit ${PIPESTATUS[0]}
+    - name: /opt/salt/scripts/cmca_renewal.sh 2>&1 | tee -a /var/log/cm_cmca_renewal.log && exit ${PIPESTATUS[0]}
     - require:
-      - file: /opt/salt/scripts/rotate/cmca_renewal.sh
+      - file: /opt/salt/scripts/cmca_renewal.sh
