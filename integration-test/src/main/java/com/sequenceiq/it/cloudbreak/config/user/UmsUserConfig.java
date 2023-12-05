@@ -213,7 +213,18 @@ class UmsUserConfig implements TestUserConfig {
 
     @Override
     public CloudbreakUser getDefaultUser() {
-        return usersByAccount.values().stream().filter(c -> !c.isEmpty()).findFirst().get().stream().findFirst().get();
+        try {
+            CloudbreakUser user = usersByAccount.values().stream().filter(c -> !c.isEmpty()).findFirst().get().stream().findFirst().get();
+
+            formatEcdsaSecretKey(user);
+
+            LOGGER.info(" Real UMS has been found as DefaultUser:: \nDisplay name: {} \nCrn: {} \nAccess key: {} \nSecret key: {} \nAdmin: {} ",
+                    user.getDisplayName(), user.getCrn(), user.getAccessKey(), user.getSecretKey(), user.getAdmin());
+
+            return user;
+        } catch (Exception e) {
+            throw new TestFailException(format("Cannot get the real UMS user as default user, because of: %s", e.getMessage()), e);
+        }
     }
 
     @Override
