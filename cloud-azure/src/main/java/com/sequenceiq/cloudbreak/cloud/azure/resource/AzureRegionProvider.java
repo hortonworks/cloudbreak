@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,6 +46,9 @@ public class AzureRegionProvider {
     @Value("${cb.arm.zone.parameter.default:North Europe}")
     private String armZoneParameterDefault;
 
+    @Value("${cb.multiaz.azure.availabilityZones:1,2,3}")
+    private Set<String> azureAvailabilityZones;
+
     private Map<Region, AzureCoordinate> enabledRegions = new HashMap<>();
 
     @PostConstruct
@@ -60,10 +63,13 @@ public class AzureRegionProvider {
         Map<Region, Coordinate> coordinates = new HashMap<>();
         String defaultRegion = armZoneParameterDefault;
         azureRegions = filterByEnabledRegions(azureRegions);
+        List<AvailabilityZone> zones = azureAvailabilityZones.stream()
+                .map(e -> availabilityZone(e))
+                .collect(Collectors.toList());
         for (com.azure.core.management.Region azureRegion : azureRegions) {
             Coordinate coordinate = enabledRegions.get(region(azureRegion.label()));
             if (isEntitledFor(coordinate, entitlements)) {
-                cloudRegions.put(region(azureRegion.label()), new ArrayList<>());
+                cloudRegions.put(region(azureRegion.label()), zones);
                 displayNames.put(region(azureRegion.label()), azureRegion.label());
 
                 if (coordinate == null || coordinate.getLongitude() == null || coordinate.getLatitude() == null) {

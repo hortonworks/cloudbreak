@@ -103,6 +103,7 @@ public class SdxRecommendationService {
     public SdxRecommendationResponse getRecommendation(String credentialCrn, SdxClusterShape clusterShape, String runtimeVersion, String cloudPlatform,
             String region, String availabilityZone) {
         try {
+            availabilityZone = getAvailabilityZoneBasedOnProvider(cloudPlatform, availabilityZone);
             StackV4Request defaultTemplate = getDefaultTemplate(clusterShape, runtimeVersion, cloudPlatform);
             List<VmTypeResponse> availableVmTypes = getAvailableVmTypes(credentialCrn, cloudPlatform, region, availabilityZone);
             Map<String, VmTypeResponse> defaultVmTypesByInstanceGroup = getDefaultVmTypesByInstanceGroup(availableVmTypes, defaultTemplate);
@@ -121,6 +122,14 @@ public class SdxRecommendationService {
             LOGGER.warn("Getting recommendation failed!", e);
             throw new RuntimeException("Getting recommendation failed: " + e.getMessage());
         }
+    }
+
+    private String getAvailabilityZoneBasedOnProvider(String cloudPlatform, String availabilityZone) {
+        if (cloudPlatform.equalsIgnoreCase(CloudPlatform.AZURE.name())) {
+            LOGGER.warn("We don't support recommendation by zones on Azure!");
+            availabilityZone = null;
+        }
+        return availabilityZone;
     }
 
     public void validateVmTypeOverride(DetailedEnvironmentResponse environment, SdxCluster sdxCluster) {

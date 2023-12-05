@@ -42,6 +42,7 @@ public class AzureRegionProviderTest {
     @BeforeEach
     public void before() throws IOException {
         ReflectionTestUtils.setField(underTest, "armZoneParameterDefault", "North Europe");
+        ReflectionTestUtils.setField(underTest, "azureAvailabilityZones", Set.of("1", "2", "3"));
         testRegionsJson = getTestRegions();
         when(cloudbreakResourceReaderService.resourceDefinition("azure", ENABLED_REGIONS_FILE)).thenReturn(testRegionsJson);
         underTest.init();
