@@ -64,11 +64,11 @@ public class UserSyncBindUserService {
         }
     }
 
-    private String getUserSyncBindUserName(String environmentCrn) {
+    public String getUserSyncBindUserName(String environmentCrn) {
         return userNameProvider.createBindUserName(createUserSyncBindUserPostfix(environmentCrn));
     }
 
-    private String createUserSyncBindUserPostfix(String environmentCrn) {
+    public String createUserSyncBindUserPostfix(String environmentCrn) {
         String[] splittedEnvCrn = StringUtils.split(environmentCrn, "-");
         String envCrnPostfix = splittedEnvCrn[splittedEnvCrn.length - 1];
         return USERSYNC_USER_POSTFIX + "-" + envCrnPostfix;

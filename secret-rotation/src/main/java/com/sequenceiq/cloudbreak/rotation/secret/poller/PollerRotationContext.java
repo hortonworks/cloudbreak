@@ -12,8 +12,8 @@ public class PollerRotationContext extends RotationContext {
 
     private final Map<String, String> additionalProperties;
 
-    public PollerRotationContext(String datalakeCrn, SecretType secretType) {
-        super(datalakeCrn);
+    public PollerRotationContext(String resourceCrn, SecretType secretType) {
+        super(resourceCrn);
         this.secretType = secretType;
         this.additionalProperties = Maps.newHashMap();
     }

@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SA
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_STATE_APPLY;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_STATE_RUN;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.FREEIPA_ROTATE_POLLING;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.SALTBOOT_CONFIG;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.USER_DATA;
@@ -31,7 +32,7 @@ public enum CloudbreakSecretType implements SecretType {
     DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD(List.of(REDBEAMS_ROTATE_POLLING, SALT_PILLAR)),
     CLUSTER_CM_DB_PASSWORD(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CUSTOM_JOB)),
     USER_KEYPAIR(List.of(SALT_STATE_RUN, CUSTOM_JOB)),
-    IDBROKER_CERT(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE_ROLE_RESTART, CUSTOM_JOB)),
+    IDBROKER_CERT(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE_ROLE_RESTART, CUSTOM_JOB), Set.of(INTERNAL)),
     GATEWAY_CERT(List.of(VAULT, CUSTOM_JOB, CM_SERVICE_ROLE_RESTART, CLUSTER_PROXY_UPDATE)),
     CLUSTER_CM_SERVICES_DB_PASSWORD(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE)),
     SALT_BOOT_SECRETS(List.of(VAULT, CUSTOM_JOB, SALTBOOT_CONFIG, USER_DATA)),
@@ -41,7 +42,8 @@ public enum CloudbreakSecretType implements SecretType {
     INTERNAL_DATALAKE_CM_SERVICE_SHARED_DB(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CM_SERVICE), Set.of(INTERNAL)),
     INTERNAL_DATALAKE_DEMO_SECRET(List.of(CUSTOM_JOB), Set.of(SKIP_SALT_UPDATE, INTERNAL)),
     INTERNAL_DATALAKE_CM_INTERMEDIATE_CA_CERT(List.of(SALT_STATE_APPLY, CUSTOM_JOB), Set.of(INTERNAL, POST_FLOW)),
-    DATAHUB_CM_INTERMEDIATE_CA_CERT(List.of(SALT_STATE_APPLY, CUSTOM_JOB), Set.of(POST_FLOW));
+    DATAHUB_CM_INTERMEDIATE_CA_CERT(List.of(SALT_STATE_APPLY, CUSTOM_JOB), Set.of(POST_FLOW)),
+    CLUSTER_LDAP_BIND_PASSWORD(List.of(FREEIPA_ROTATE_POLLING, CUSTOM_JOB, SALT_STATE_APPLY));
 
     private final List<SecretRotationStep> steps;
 

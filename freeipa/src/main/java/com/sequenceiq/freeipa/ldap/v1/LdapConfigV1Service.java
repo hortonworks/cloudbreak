@@ -74,7 +74,7 @@ public class LdapConfigV1Service {
 
     public TestLdapConfigResponse testConnection(TestLdapConfigRequest testLdapConfigRequest) {
         LdapConfig ldapConfig = testLdapConfigRequest.getLdap() != null ?
-            ldapConfigConverter.convertMinimalLdapConfigRequestToLdapConfig(testLdapConfigRequest.getLdap()) : null;
+                ldapConfigConverter.convertMinimalLdapConfigRequestToLdapConfig(testLdapConfigRequest.getLdap()) : null;
         String result = ldapConfigService.testConnection(testLdapConfigRequest.getEnvironmentCrn(), ldapConfig);
         TestLdapConfigResponse testLdapConfigResponse = new TestLdapConfigResponse();
         testLdapConfigResponse.setResult(result);
@@ -122,11 +122,14 @@ public class LdapConfigV1Service {
         return ldapConfigRegisterService.createLdapConfig(stack.getId(), user.getDn(), password, clusterName, environmentCrn);
     }
 
-    private String setBindUserPassword(FreeIpaClient freeIpaClient, User user) throws FreeIpaClientException {
-        String password = FreeIpaPasswordUtil.generatePassword();
+    public String setBindUserPassword(FreeIpaClient freeIpaClient, User user, String password) throws FreeIpaClientException {
         freeIpaClient.userSetPasswordWithExpiration(user.getUid(), password, Optional.empty());
         LOGGER.debug("Password is set for user: [{}]", user.getUid());
         return password;
+    }
+
+    private String setBindUserPassword(FreeIpaClient freeIpaClient, User user) throws FreeIpaClientException {
+        return setBindUserPassword(freeIpaClient, user, FreeIpaPasswordUtil.generatePassword());
     }
 
     private User createBindUser(String clusterName, FreeIpaClient freeIpaClient) throws FreeIpaClientException {

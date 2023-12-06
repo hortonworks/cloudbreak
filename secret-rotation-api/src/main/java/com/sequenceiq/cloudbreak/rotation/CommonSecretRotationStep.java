@@ -5,6 +5,7 @@ public enum CommonSecretRotationStep implements SecretRotationStep {
     CUSTOM_JOB(true),
     REDBEAMS_ROTATE_POLLING,
     CLOUDBREAK_ROTATE_POLLING,
+    FREEIPA_ROTATE_POLLING,
     SALTBOOT_CONFIG,
     USER_DATA;
 

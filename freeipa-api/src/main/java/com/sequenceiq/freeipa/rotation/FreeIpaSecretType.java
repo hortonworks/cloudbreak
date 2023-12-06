@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretTypeFlag;
 
 public enum FreeIpaSecretType implements SecretType {
     FREEIPA_ADMIN_PASSWORD(List.of(VAULT, FREEIPA_ADMIN_USER_PASSWORD, FREEIPA_DIRECTORY_MANAGER_PASSWORD, SALT_PILLAR_UPDATE)),
+    FREEIPA_LDAP_BIND_PASSWORD(List.of(VAULT, FreeIpaSecretRotationStep.FREEIPA_LDAP_BIND_PASSWORD), Set.of(SKIP_SALT_UPDATE)),
     FREEIPA_SALT_BOOT_SECRETS(List.of(VAULT, CUSTOM_JOB, SALTBOOT_CONFIG, USER_DATA, LAUNCH_TEMPLATE)),
     CCMV2_JUMPGATE_AGENT_ACCESS_KEY(List.of(CCMV2_JUMPGATE, LAUNCH_TEMPLATE, SALT_PILLAR_UPDATE, SALT_STATE_APPLY)),
     FREEIPA_DEMO_SECRET(List.of(CUSTOM_JOB), DEMO_MULTI_SECRET, Set.of(SKIP_SALT_UPDATE, INTERNAL));
@@ -39,6 +40,12 @@ public enum FreeIpaSecretType implements SecretType {
         this.steps = steps;
         this.multiSecretType = Optional.empty();
         this.flags = Set.of();
+    }
+
+    FreeIpaSecretType(List<SecretRotationStep> steps, Set<SecretTypeFlag> flags) {
+        this.steps = steps;
+        this.multiSecretType = Optional.empty();
+        this.flags = flags;
     }
 
     FreeIpaSecretType(List<SecretRotationStep> steps, MultiSecretType multiSecretType, Set<SecretTypeFlag> flags) {

@@ -18,10 +18,16 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowLogResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.binduser.BindUserCreateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
 
@@ -32,6 +38,12 @@ public class FreeipaClientService {
 
     @Inject
     private FreeIpaV1Endpoint freeIpaV1Endpoint;
+
+    @Inject
+    private FreeIpaV1FlowEndpoint freeIpaV1FlowEndpoint;
+
+    @Inject
+    private FreeIpaRotationV1Endpoint freeIpaRotationV1Endpoint;
 
     @Inject
     private UtilV1Endpoint utilV1Endpoint;
@@ -142,6 +154,28 @@ public class FreeipaClientService {
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }
+    }
+
+    public FlowIdentifier rotateSecret(String envirionmentCrn, FreeIpaSecretRotationRequest request) {
+        return freeIpaRotationV1Endpoint.rotateSecretsByCrn(envirionmentCrn, request);
+    }
+
+    public FlowCheckResponse hasFlowRunningByFlowId(String flowId) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> freeIpaV1FlowEndpoint.hasFlowRunningByFlowId(flowId));
+    }
+
+    public FlowCheckResponse hasFlowChainRunningByFlowChainId(String flowChainId) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> freeIpaV1FlowEndpoint.hasFlowRunningByChainId(flowChainId));
+    }
+
+    public FlowLogResponse getLastFlowId(String resourceCrn) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> freeIpaV1FlowEndpoint.getLastFlowByResourceCrn(resourceCrn));
     }
 
 }
