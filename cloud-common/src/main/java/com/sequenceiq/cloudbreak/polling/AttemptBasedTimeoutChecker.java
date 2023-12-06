@@ -18,4 +18,12 @@ public class AttemptBasedTimeoutChecker implements TimeoutChecker {
         }
         return attempt >= maxAttempts;
     }
+
+    @Override
+    public String toString() {
+        return "AttemptBasedTimeoutChecker{" +
+                "maxAttempts=" + maxAttempts +
+                ", attempt=" + attempt +
+                '}';
+    }
 }

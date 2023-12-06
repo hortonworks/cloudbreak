@@ -14,4 +14,11 @@ public class AbsolutTimeBasedTimeoutChecker implements TimeoutChecker {
     public boolean checkTimeout() {
         return Instant.now().isAfter(timeoutInstant);
     }
+
+    @Override
+    public String toString() {
+        return "AbsolutTimeBasedTimeoutChecker{" +
+                "timeoutInstant=" + timeoutInstant +
+                '}';
+    }
 }

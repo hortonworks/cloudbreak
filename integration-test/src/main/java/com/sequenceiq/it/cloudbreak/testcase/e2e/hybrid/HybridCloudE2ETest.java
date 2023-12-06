@@ -4,6 +4,8 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +16,7 @@ import org.testng.annotations.AfterMethod;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.polling.AbsolutTimeBasedTimeoutChecker;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
@@ -70,6 +73,11 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
     private static final String CDH = "CDH";
 
     private static final String STACK_AUTHENTICATION = "stackAuthentication";
+
+    /**
+     * Provisioning a Data Lake or Data Hub with a yarn base image may take more than an hour as it has to download parcels
+     */
+    private static final long TIMEOUT = TimeUnit.MINUTES.toSeconds(70);
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -184,7 +192,9 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
                     LOGGER.info("SDX master instance IP: {}", sdxGatewayPrivateIp);
                     return dto;
                 })
-                .await(SdxClusterStatusResponse.RUNNING, key(CHILD_SDX_KEY).withWaitForFlow(Boolean.TRUE))
+                .await(SdxClusterStatusResponse.RUNNING, key(CHILD_SDX_KEY)
+                        .withWaitForFlowSuccess()
+                        .withTimeoutChecker(new AbsolutTimeBasedTimeoutChecker(TIMEOUT)))
                 .awaitForHealthyInstances()
                 .validate();
     }
@@ -231,7 +241,7 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
                     .withCluster(cluster)
                     .withImageSettings(imageSettings)
                 .when(distroXTestClient.create(), key(CHILD_DISTROX_KEY))
-                .await(STACK_AVAILABLE, key(CHILD_DISTROX_KEY))
+                .await(STACK_AVAILABLE, key(CHILD_DISTROX_KEY).withTimeoutChecker(new AbsolutTimeBasedTimeoutChecker(TIMEOUT)))
                 .awaitForHealthyInstances()
                 .when(distroXTestClient.get(), key(CHILD_DISTROX_KEY))
                 .validate();

@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.util.wait;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
@@ -10,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.polling.AttemptBasedTimeoutChecker;
+import com.sequenceiq.cloudbreak.polling.TimeoutChecker;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -86,7 +89,8 @@ public class FlowUtil {
         int retryCount = 0;
         int failureCount = 0;
         long pollingInterval = getPollingDurationOrTheDefault(runningParameter).toMillis();
-        while (flowRunning && retryCount < maxRetry) {
+        TimeoutChecker timeoutChecker = Objects.requireNonNullElse(runningParameter.getTimeoutChecker(), new AttemptBasedTimeoutChecker(maxRetry));
+        while (flowRunning && !timeoutChecker.checkTimeout()) {
             sleep(pollingInterval, crn, flowChainId, flowId);
             try {
                 if (StringUtils.isNotBlank(flowChainId)) {
@@ -114,8 +118,9 @@ public class FlowUtil {
             }
             retryCount++;
         }
-        if (retryCount >= maxRetry) {
-            String errorMessage = String.format("Test timed out, flow did not finish in time. Crn=%s, FlowId=%s, FlowChainId=%s", crn, flowId, flowChainId);
+        if (timeoutChecker.checkTimeout()) {
+            String errorMessage = String.format("Test timed out, flow did not finish in %s. Crn=%s, FlowId=%s, FlowChainId=%s",
+                    timeoutChecker, crn, flowId, flowChainId);
             LOGGER.error(errorMessage);
             throw new TestFailException(errorMessage);
         }
