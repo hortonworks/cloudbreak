@@ -20,6 +20,8 @@ public class VmTypeMeta {
 
     public static final String VOLUME_ENCRYPTION_SUPPORTED = "EncryptionSupported";
 
+    public static final String HOST_ENCRYPTION_SUPPORTED = "HostEncryptionSupported";
+
     private VolumeParameterConfig magneticConfig;
 
     private VolumeParameterConfig autoAttachedConfig;
@@ -109,6 +111,11 @@ public class VmTypeMeta {
     public Boolean getResourceDiskAttached() {
         Object resourceDiskAttached = properties.get(RESOURCE_DISK_ATTACHED);
         return resourceDiskAttached != null ? Boolean.valueOf(resourceDiskAttached.toString()) : Boolean.TRUE;
+    }
+
+    public Boolean getHostEncryptionSupported() {
+        Object hostEncryptionSupported = properties.get(HOST_ENCRYPTION_SUPPORTED);
+        return hostEncryptionSupported != null ? Boolean.valueOf(hostEncryptionSupported.toString()) : Boolean.TRUE;
     }
 
     public void setProperties(Map<String, Object> properties) {
@@ -257,6 +264,11 @@ public class VmTypeMeta {
 
         public VmTypeMetaBuilder withVolumeEncryptionSupport(boolean supportEncryption) {
             properties.put(VOLUME_ENCRYPTION_SUPPORTED, supportEncryption);
+            return this;
+        }
+
+        public VmTypeMetaBuilder withHostEncryptionSupport(boolean hostEncryptionSupport) {
+            properties.put(HOST_ENCRYPTION_SUPPORTED, hostEncryptionSupport);
             return this;
         }
 

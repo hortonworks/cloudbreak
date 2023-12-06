@@ -54,6 +54,7 @@ import com.azure.resourcemanager.compute.models.KeyForDiskEncryptionSet;
 import com.azure.resourcemanager.compute.models.NetworkAccessPolicy;
 import com.azure.resourcemanager.compute.models.OperatingSystemStateTypes;
 import com.azure.resourcemanager.compute.models.PublicNetworkAccess;
+import com.azure.resourcemanager.compute.models.ResourceSkuCapabilities;
 import com.azure.resourcemanager.compute.models.ResourceSkuLocationInfo;
 import com.azure.resourcemanager.compute.models.SourceVault;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
@@ -1042,6 +1043,39 @@ public class AzureClient {
                 LOGGER.error("Region is not provided so not fetching the zone information");
             }
             return zoneInfo;
+        });
+    }
+
+    public Map<String, Boolean> getHostEncryptionSupport(String region) throws ProviderAuthenticationFailedException {
+        return handleException(() -> {
+            Map<String, Boolean> hostEncryptionInfo = new HashMap<>();
+            if (!StringUtils.isEmpty(region)) {
+                String criteria = "location eq '" + RegionUtil.findByLabelOrName(region).name() + "'";
+                LOGGER.debug("Fetch AZ info from Azure for region {} and criteria {}", region, criteria);
+                AzureListResult<ResourceSkuInner> azureResult = azureListResultFactory.create(azure
+                        .virtualMachines()
+                        .manager()
+                        .serviceClient()
+                        .getResourceSkus()
+                        .list(criteria, null, com.azure.core.util.Context.NONE));
+
+                azureResult.getStream().forEach(sku -> {
+                    List<ResourceSkuCapabilities> capabilities = sku.capabilities();
+                    if (capabilities != null) {
+                        Optional<ResourceSkuCapabilities> encryptionAtHostSupported = capabilities.stream()
+                                .filter(c -> c.name().equalsIgnoreCase("EncryptionAtHostSupported"))
+                                .findFirst();
+                        if (encryptionAtHostSupported.isPresent()) {
+                            hostEncryptionInfo.put(sku.name(), Boolean.valueOf(encryptionAtHostSupported.get().value()));
+                        } else {
+                            hostEncryptionInfo.put(sku.name(), false);
+                        }
+                    }
+                });
+            } else {
+                LOGGER.error("Region is not provided so not fetching the host encryption information");
+            }
+            return hostEncryptionInfo;
         });
     }
 

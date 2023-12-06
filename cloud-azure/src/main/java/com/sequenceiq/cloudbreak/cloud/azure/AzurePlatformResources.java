@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRegionProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureHostEncryptionValidator;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
@@ -118,6 +119,9 @@ public class AzurePlatformResources implements PlatformResources {
 
     @Inject
     private AzureDatabaseCapabilityService azureDatabaseCapabilityService;
+
+    @Inject
+    private AzureHostEncryptionValidator azureHostEncryptionValidator;
 
     @Override
     public CloudNetworks networks(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
@@ -249,6 +253,7 @@ public class AzurePlatformResources implements PlatformResources {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Set<VirtualMachineSize> vmTypes = client.getVmTypes(region.value());
         Map<String, List<String>> availabilityZones = client.getAvailabilityZones(region.value());
+        Map<String, Boolean> hostEncryptionSupport = client.getHostEncryptionSupport(region.value());
 
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
@@ -273,6 +278,7 @@ public class AzurePlatformResources implements PlatformResources {
                 } else {
                     builder.withResourceDiskAttached(false);
                 }
+                builder.withHostEncryptionSupport(azureHostEncryptionValidator.isVmSupported(virtualMachineSize.name(), hostEncryptionSupport));
                 builder.withAvailabilityZones(availabilityZonesForVm);
                 VmType vmType = VmType.vmTypeWithMeta(virtualMachineSize.name(), builder.create(), true);
                 types.add(vmType);

@@ -11,10 +11,13 @@ public class AzureResourceEncryptionParametersDto {
 
     private final String diskEncryptionSetId;
 
+    private final boolean enableHostEncryption;
+
     private AzureResourceEncryptionParametersDto(Builder builder) {
         encryptionKeyUrl = builder.encryptionKeyUrl;
         encryptionKeyResourceGroupName = builder.encryptionKeyResourceGroupName;
         diskEncryptionSetId = builder.diskEncryptionSetId;
+        enableHostEncryption = builder.enableHostEncryption;
     }
 
     public String getEncryptionKeyUrl() {
@@ -29,6 +32,10 @@ public class AzureResourceEncryptionParametersDto {
         return diskEncryptionSetId;
     }
 
+    public boolean getEnableHostEncryption() {
+        return enableHostEncryption;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -39,6 +46,7 @@ public class AzureResourceEncryptionParametersDto {
                 "encryptionKeyUrl=" + encryptionKeyUrl +
                 ", encryptionKeyResourceGroupName=" + encryptionKeyResourceGroupName +
                 ", diskEncryptionSetId=" + diskEncryptionSetId +
+                ", enableHostEncryption=" + enableHostEncryption +
                 '}';
     }
 
@@ -49,6 +57,8 @@ public class AzureResourceEncryptionParametersDto {
         private String diskEncryptionSetId;
 
         private String encryptionKeyResourceGroupName;
+
+        private boolean enableHostEncryption;
 
         private Builder() {
         }
@@ -65,6 +75,11 @@ public class AzureResourceEncryptionParametersDto {
 
         public AzureResourceEncryptionParametersDto.Builder withDiskEncryptionSetId(String diskEncryptionSetId) {
             this.diskEncryptionSetId = diskEncryptionSetId;
+            return this;
+        }
+
+        public AzureResourceEncryptionParametersDto.Builder withEnableHostEncryption(boolean enableHostEncryption) {
+            this.enableHostEncryption = enableHostEncryption;
             return this;
         }
 

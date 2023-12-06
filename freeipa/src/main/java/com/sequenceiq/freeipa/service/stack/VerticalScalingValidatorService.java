@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
@@ -92,8 +94,12 @@ public class VerticalScalingValidatorService {
                     Maps.newHashMap());
             Optional<VmType> requestInstanceForVerticalScaling = getInstance(region, availabilityZone, requestedInstanceType, allVmTypes);
             boolean validateMultiAz = stack.isMultiAz() && multiAzCalculatorService.getAvailabilityZoneConnector(stack) != null;
-            verticalScaleInstanceProvider.validateInstanceTypeForVerticalScaling(getInstance(region, availabilityZone, currentInstanceType, allVmTypes),
-                    requestInstanceForVerticalScaling, validateMultiAz ? instanceGroupOptional.get().getAvailabilityZones() : null);
+            Json attributes = instanceGroupOptional.get().getTemplate().getAttributes();
+            verticalScaleInstanceProvider.validateInstanceTypeForVerticalScaling(
+                    getInstance(region, availabilityZone, currentInstanceType, allVmTypes),
+                    requestInstanceForVerticalScaling,
+                    validateMultiAz ? instanceGroupOptional.get().getAvailabilityZones() : null,
+                    attributes == null ? Map.of() : attributes.getMap());
         } else {
             throw new BadRequestException(String.format("Define a group which exists in FreeIpa. It can be [%s].",
                     stack.getInstanceGroups()

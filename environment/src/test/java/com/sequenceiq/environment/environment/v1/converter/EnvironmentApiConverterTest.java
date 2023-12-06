@@ -292,7 +292,7 @@ class EnvironmentApiConverterTest {
     void testAzureSingleRgEnabledAndAzureRequestWithoutUsageAndWithName() {
         EnvironmentRequest request = createEnvironmentRequest(AZURE);
         request.setAzure(AzureEnvironmentParameters.builder()
-                .withAzureResourceGroup(
+            .withAzureResourceGroup(
                         AzureResourceGroup.builder()
                                 .withName("myResourceGroup")
                                 .build())

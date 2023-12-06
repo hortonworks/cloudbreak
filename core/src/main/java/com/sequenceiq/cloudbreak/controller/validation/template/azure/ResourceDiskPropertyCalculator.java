@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.controller.validation.template;
+package com.sequenceiq.cloudbreak.controller.validation.template.azure;
 
 import java.util.HashMap;
 import java.util.Map;

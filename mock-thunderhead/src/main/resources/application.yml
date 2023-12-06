@@ -62,7 +62,6 @@ auth:
       group-size.enforce-limit.enable: true
       split-freeipa-user-retrieval.enable: true
     azure:
-      encryptionAtHost.enable: false
       certificate.auth.enable: true
     aws:
       native.variant.migration.enable: false

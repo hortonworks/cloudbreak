@@ -43,6 +43,9 @@ public class AzureParameters extends BaseParameters implements AccountIdAwareRes
     @Column(name = "encryption_key_resource_group_name")
     private String encryptionKeyResourceGroupName;
 
+    @Column(name = "enable_host_encryption")
+    private boolean enableHostEncryption;
+
     public String getResourceGroupName() {
         return resourceGroupName;
     }
@@ -94,5 +97,13 @@ public class AzureParameters extends BaseParameters implements AccountIdAwareRes
 
     public void setEncryptionKeyResourceGroupName(String encryptionKeyResourceGroupName) {
         this.encryptionKeyResourceGroupName = encryptionKeyResourceGroupName;
+    }
+
+    public boolean getEnableHostEncryption() {
+        return enableHostEncryption;
+    }
+
+    public void setEnableHostEncryption(boolean enableHostEncryption) {
+        this.enableHostEncryption = enableHostEncryption;
     }
 }

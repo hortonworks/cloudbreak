@@ -281,7 +281,7 @@
                        "hardwareProfile": {
                            "vmSize": "${instance.flavor}"
                        },
-                       <#if instance.encryptionAtHostEnabled?? && instance.encryptionAtHostEnabled == true>
+                       <#if instance.hostEncryptionEnabled>
                        "securityProfile": {
                            "encryptionAtHost": true
                        },

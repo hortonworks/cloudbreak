@@ -35,6 +35,8 @@ import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
+import com.sequenceiq.cloudbreak.controller.validation.template.azure.HostEncryptionProvider;
+import com.sequenceiq.cloudbreak.controller.validation.template.azure.ResourceDiskPropertyCalculator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
@@ -46,13 +48,12 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.api.type.InstanceGroupName;
 import com.sequenceiq.common.model.AwsDiskType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class TemplateValidatorAndUpdater {
 
     public static final String GROUP_NAME_ID_BROKER = "idbroker";
-
-    public static final String GROUP_NAME_COMPUTE = "compute";
 
     public static final String ROLE_IMPALAD = "IMPALAD";
 
@@ -79,6 +80,9 @@ public class TemplateValidatorAndUpdater {
     @Inject
     private ResourceDiskPropertyCalculator resourceDiskPropertyCalculator;
 
+    @Inject
+    private HostEncryptionProvider hostEncryptionProvider;
+
     @Value("${cb.doc.urls.supportedInstanceTypes:https://www.cloudera.com/products/pricing/cdp-public-cloud-service-rates.html}")
     private String supportedVmTypesDocPageLink;
 
@@ -96,8 +100,8 @@ public class TemplateValidatorAndUpdater {
         }
     }
 
-    public void validate(Credential credential, InstanceGroup instanceGroup, Stack stack,
-            CdpResourceType stackType, ValidationResult.ValidationResultBuilder validationBuilder) {
+    public void validate(DetailedEnvironmentResponse environment, Credential credential, InstanceGroup instanceGroup, Stack stack,
+        CdpResourceType stackType, ValidationResult.ValidationResultBuilder validationBuilder) {
         Template template = instanceGroup.getTemplate();
         CloudVmTypes cloudVmTypes = cloudParameterService.getVmTypesV2(
                 extendedCloudCredentialConverter.convert(credential),
@@ -126,6 +130,7 @@ public class TemplateValidatorAndUpdater {
             }
             template = emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(instanceGroup.getTemplate());
             template = resourceDiskPropertyCalculator.updateWithResourceDiskAttached(credential, template, vmType);
+            template = hostEncryptionProvider.updateWithHostEncryption(environment, credential, template, vmType);
             validateVolumeTemplates(template, vmType, platform, validationBuilder, instanceGroup, stack);
             validateMaximumVolumeSize(template, vmType, validationBuilder);
         }

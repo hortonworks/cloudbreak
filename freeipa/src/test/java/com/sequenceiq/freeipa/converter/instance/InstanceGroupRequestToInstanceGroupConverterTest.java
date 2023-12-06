@@ -98,7 +98,8 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
 
         // GIVEN
-        given(defaultInstanceGroupProvider.createDefaultTemplate(eq(MOCK), eq(ACCOUNT_ID), eq(null), eq(null), eq(null))).willReturn(template);
+        given(defaultInstanceGroupProvider.createDefaultTemplate(eq(detailedEnvironmentResponse), eq(MOCK), eq(ACCOUNT_ID),
+                eq(null), eq(null), eq(null))).willReturn(template);
         given(securityGroupConverter.convert(eq(securityGroupRequest))).willReturn(securityGroup);
         // WHEN
         InstanceGroup result = underTest.convert(request, networkRequest, ACCOUNT_ID, stack, freeIpaServerRequest,
@@ -140,7 +141,7 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
         InstanceTemplateRequest instanceTemplateRequest = mock(InstanceTemplateRequest.class);
         request.setInstanceTemplateRequest(instanceTemplateRequest);
         Template template = mock(Template.class);
-        when(templateConverter.convert(instanceTemplateRequest, MOCK, ACCOUNT_ID,
+        when(templateConverter.convert(detailedEnvironmentResponse, instanceTemplateRequest, MOCK, ACCOUNT_ID,
                 "dummyDiskEncryptionSetId", "encryptionKey", "awsEncryptionKeyArn")).thenReturn(template);
 
         InstanceGroup result = underTest.convert(
@@ -181,7 +182,8 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
         json.put(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID, "dummyDiskEncryptionSetId");
         json.put(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, Boolean.TRUE);
         template.setAttributes(new Json(json));
-        when(templateConverter.convert(instanceTemplateRequest, AZURE, ACCOUNT_ID, "dummyDiskEncryptionSetId", null, null)).thenReturn(template);
+        when(templateConverter.convert(detailedEnvironmentResponse, instanceTemplateRequest, AZURE, ACCOUNT_ID,
+                "dummyDiskEncryptionSetId", null, null)).thenReturn(template);
 
         InstanceGroup result = underTest.convert(
                 request,
@@ -219,7 +221,8 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
         json.put(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, Boolean.TRUE);
         template.setAttributes(new Json(json));
 
-        when(defaultInstanceGroupProvider.createDefaultTemplate(AZURE, ACCOUNT_ID, "dummyDiskEncryptionSetId", null, null)).thenReturn(template);
+        when(defaultInstanceGroupProvider.createDefaultTemplate(detailedEnvironmentResponse, AZURE, ACCOUNT_ID,
+                "dummyDiskEncryptionSetId", null, null)).thenReturn(template);
 
         InstanceGroup result = underTest.convert(
                 request,
@@ -256,7 +259,8 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
 
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
 
-        when(templateConverter.convert(instanceTemplateRequest, MOCK, ACCOUNT_ID, null, "dummyEncryptionKey", null)).thenReturn(template);
+        when(templateConverter.convert(detailedEnvironmentResponse, instanceTemplateRequest, MOCK, ACCOUNT_ID,
+                null, "dummyEncryptionKey", null)).thenReturn(template);
 
         InstanceGroup result = underTest.convert(
                 request,
@@ -294,7 +298,8 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
 
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
 
-        when(templateConverter.convert(instanceTemplateRequest, MOCK, ACCOUNT_ID, null, "dummyEncryptionKey", null)).thenReturn(template);
+        when(templateConverter.convert(detailedEnvironmentResponse, instanceTemplateRequest, MOCK, ACCOUNT_ID,
+                null, "dummyEncryptionKey", null)).thenReturn(template);
 
         InstanceGroup result = underTest.convert(
                 request,
@@ -335,7 +340,8 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
         json.put(AwsInstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "dummyAwsDiskEncryptionKeyArn");
         json.put(AwsInstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM);
         template.setAttributes(new Json(json));
-        when(templateConverter.convert(instanceTemplateRequest, AWS, ACCOUNT_ID, null, null, "dummyAwsDiskEncryptionKeyArn")).thenReturn(template);
+        when(templateConverter.convert(detailedEnvironmentResponse, instanceTemplateRequest, AWS, ACCOUNT_ID,
+                null, null, "dummyAwsDiskEncryptionKeyArn")).thenReturn(template);
 
         InstanceGroup result = underTest.convert(
                 request,
@@ -375,7 +381,8 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
         json.put(AwsInstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM);
         template.setAttributes(new Json(json));
 
-        when(defaultInstanceGroupProvider.createDefaultTemplate(AWS, ACCOUNT_ID, null, null, "dummyAwsEncryptionKeyArn")).thenReturn(template);
+        when(defaultInstanceGroupProvider.createDefaultTemplate(detailedEnvironmentResponse, AWS, ACCOUNT_ID,
+                null, null, "dummyAwsEncryptionKeyArn")).thenReturn(template);
 
         InstanceGroup result = underTest.convert(
                 request,

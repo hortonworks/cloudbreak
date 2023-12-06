@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.converter.instance.template;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
@@ -9,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.EncryptionType;
+import com.sequenceiq.environment.api.v1.environment.endpoint.service.azure.HostEncryptionCalculator;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateSpotParameters;
@@ -52,7 +54,10 @@ class InstanceTemplateRequestToTemplateConverterTest {
     private DefaultInstanceTypeProvider defaultInstanceTypeProvider;
 
     @Mock
-    private EntitlementService entitlementService;
+    private DetailedEnvironmentResponse environmentResponse;
+
+    @Mock
+    private HostEncryptionCalculator hostEncryptionCalculator;
 
     @InjectMocks
     private InstanceTemplateRequestToTemplateConverter underTest;
@@ -62,7 +67,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID, null, null, null);
+        Template result = underTest.convert(environmentResponse, source, CLOUD_PLATFORM, ACCOUNT_ID,
+                null, null, null);
 
         assertThat(result.getInstanceType()).isEqualTo(source.getInstanceType());
     }
@@ -72,7 +78,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID, null, null, null);
+        Template result = underTest.convert(environmentResponse, source, CLOUD_PLATFORM, ACCOUNT_ID,
+                null, null, null);
 
         assertThat(result.getAccountId()).isEqualTo(ACCOUNT_ID);
     }
@@ -84,7 +91,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         when(defaultInstanceTypeProvider.getForPlatform(CLOUD_PLATFORM.name())).thenReturn(defaultInstanceType);
 
-        Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID, null, null, null);
+        Template result = underTest.convert(environmentResponse, source, CLOUD_PLATFORM, ACCOUNT_ID,
+                null, null, null);
 
         assertThat(result.getInstanceType()).isEqualTo(defaultInstanceType);
     }
@@ -95,7 +103,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
         source.setInstanceType(INSTANCE_TYPE);
         source.setAws(createAwsInstanceTemplateParameters(SPOT_PERCENTAGE, SPOT_MAX_PRICE));
 
-        Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID, null, null, null);
+        Template result = underTest.convert(environmentResponse, source, CLOUD_PLATFORM, ACCOUNT_ID,
+                null, null, null);
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
@@ -108,7 +117,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        Template result = underTest.convert(source, CloudPlatform.AZURE, ACCOUNT_ID, null, null, null);
+        Template result = underTest.convert(environmentResponse, source, CloudPlatform.AZURE, ACCOUNT_ID,
+                null, null, null);
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
@@ -121,7 +131,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID, null, null, null);
+        Template result = underTest.convert(environmentResponse, source, CLOUD_PLATFORM, ACCOUNT_ID,
+                null, null, null);
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
@@ -135,7 +146,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
         source.setInstanceType(INSTANCE_TYPE);
         source.setAws(createAwsInstanceTemplateParameters(SPOT_PERCENTAGE, SPOT_MAX_PRICE));
 
-        Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID, null, null, null);
+        Template result = underTest.convert(environmentResponse, source, CLOUD_PLATFORM, ACCOUNT_ID,
+                null, null, null);
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
@@ -150,7 +162,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        Template result = underTest.convert(source, CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet", "", "");
+        Template result = underTest.convert(environmentResponse, source, CloudPlatform.AZURE, ACCOUNT_ID,
+                "dummyDiskEncryptionSet", "", "");
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
@@ -163,7 +176,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        Template result = underTest.convert(source, CloudPlatform.AZURE, ACCOUNT_ID, null, null, null);
+        Template result = underTest.convert(environmentResponse, source, CloudPlatform.AZURE, ACCOUNT_ID,
+                null, null, null);
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
@@ -175,9 +189,10 @@ class InstanceTemplateRequestToTemplateConverterTest {
     void shouldSetEncryptionAtHostPropertyWhenAzureAndEncryptionAtHostEnabled() {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
-        when(entitlementService.isAzureEncryptionAtHostEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+        when(hostEncryptionCalculator.hostEncryptionRequired(any())).thenReturn(true);
 
-        Template result = underTest.convert(source, CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet", "", "");
+        Template result = underTest.convert(environmentResponse, source, CloudPlatform.AZURE, ACCOUNT_ID,
+                "dummyDiskEncryptionSet", "", "");
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
@@ -188,13 +203,14 @@ class InstanceTemplateRequestToTemplateConverterTest {
     void shouldNotSetEncryptionAtHostPropertyWhenAzureAndEncryptionAtHostIsNotEnabled() {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
-        when(entitlementService.isAzureEncryptionAtHostEnabled(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
+        when(hostEncryptionCalculator.hostEncryptionRequired(any())).thenReturn(false);
 
-        Template result = underTest.convert(source, CloudPlatform.AZURE, ACCOUNT_ID, null, null, null);
+        Template result = underTest.convert(environmentResponse, source, CloudPlatform.AZURE, ACCOUNT_ID,
+                null, null, null);
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED)).isNull();
+        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED)).isEqualTo(false);
     }
 
     @Test
@@ -202,7 +218,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        Template result = underTest.convert(source, CloudPlatform.GCP, ACCOUNT_ID, null, "dummyEncryptionKey", null);
+        Template result = underTest.convert(environmentResponse, source, CloudPlatform.GCP, ACCOUNT_ID,
+                null, "dummyEncryptionKey", null);
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
@@ -215,7 +232,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        Template result = underTest.convert(source, CloudPlatform.GCP, ACCOUNT_ID, null, null, null);
+        Template result = underTest.convert(environmentResponse, source, CloudPlatform.GCP, ACCOUNT_ID,
+                null, null, null);
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
@@ -228,7 +246,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        Template result = underTest.convert(source, CloudPlatform.AWS, ACCOUNT_ID, null,  null, "dummyAwsEncryptionKeyArn");
+        Template result = underTest.convert(environmentResponse, source, CloudPlatform.AWS, ACCOUNT_ID,
+                null,  null, "dummyAwsEncryptionKeyArn");
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();

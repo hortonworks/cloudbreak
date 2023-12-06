@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRegionProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureHostEncryptionValidator;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
@@ -77,6 +79,9 @@ class AzurePlatformResourcesTest {
 
     @Mock
     private AzureCloudSubnetParametersService azureCloudSubnetParametersService;
+
+    @Mock
+    private AzureHostEncryptionValidator azureHostEncryptionValidator;
 
     @InjectMocks
     private AzurePlatformResources underTest;
@@ -137,6 +142,7 @@ class AzurePlatformResourcesTest {
         zoneInfo.put("Standard_E64ds_v4", List.of("1", "2", "3"));
         when(azureClient.getAvailabilityZones(region.value())).thenReturn(zoneInfo);
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureHostEncryptionValidator.isVmSupported(any(), anyMap())).thenReturn(true);
 
         CloudVmTypes actual = underTest.virtualMachines(cloudCredential, region, Map.of());
 
@@ -238,6 +244,7 @@ class AzurePlatformResourcesTest {
         when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureClient.getAvailabilityZones(region.value())).thenReturn(zoneInfo);
+        when(azureHostEncryptionValidator.isVmSupported(any(), anyMap())).thenReturn(true);
 
         CloudVmTypes actual = underTest.virtualMachines(cloudCredential, region, availabilityZones != null ? Map.of(NetworkConstants.AVAILABILITY_ZONES,
                 String.join(",", availabilityZones)) : null);

@@ -35,6 +35,9 @@ public class AzureResourceEncryptionParameters implements Serializable {
     @ApiModelProperty(EnvironmentModelDescription.DISK_ENCRYPTION_SET_ID)
     private String diskEncryptionSetId;
 
+    @ApiModelProperty(EnvironmentModelDescription.AZURE_HOST_ENCRYPTION_PARAMETERS)
+    private boolean enableHostEncryption;
+
     public String getEncryptionKeyUrl() {
         return encryptionKeyUrl;
     }
@@ -59,6 +62,14 @@ public class AzureResourceEncryptionParameters implements Serializable {
         this.diskEncryptionSetId = diskEncryptionSetId;
     }
 
+    public boolean isEnableHostEncryption() {
+        return enableHostEncryption;
+    }
+
+    public void setEnableHostEncryption(boolean enableHostEncryption) {
+        this.enableHostEncryption = enableHostEncryption;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -69,6 +80,7 @@ public class AzureResourceEncryptionParameters implements Serializable {
                 "encryptionKeyUrl='" + encryptionKeyUrl + '\'' +
                 ", encryptionKeyResourceGroupName='" + encryptionKeyResourceGroupName + '\'' +
                 ", diskEncryptionSetId='" + diskEncryptionSetId + '\'' +
+                ", enableHostEncryption='" + enableHostEncryption + '\'' +
                 '}';
     }
 
@@ -79,6 +91,8 @@ public class AzureResourceEncryptionParameters implements Serializable {
         private String encryptionKeyResourceGroupName;
 
         private String diskEncryptionSetId;
+
+        private boolean enableHostEncryption;
 
         private Builder() {
         }
@@ -98,11 +112,17 @@ public class AzureResourceEncryptionParameters implements Serializable {
             return this;
         }
 
+        public Builder withEnableHostEncryption(boolean enableHostEncryption) {
+            this.enableHostEncryption = enableHostEncryption;
+            return this;
+        }
+
         public AzureResourceEncryptionParameters build() {
             AzureResourceEncryptionParameters resourceEncryptionParameters = new AzureResourceEncryptionParameters();
             resourceEncryptionParameters.setEncryptionKeyUrl(encryptionKeyUrl);
             resourceEncryptionParameters.setEncryptionKeyResourceGroupName(encryptionKeyResourceGroupName);
             resourceEncryptionParameters.setDiskEncryptionSetId(diskEncryptionSetId);
+            resourceEncryptionParameters.setEnableHostEncryption(enableHostEncryption);
             return resourceEncryptionParameters;
         }
 

@@ -85,6 +85,7 @@ public class AzureInstanceTemplateV4Parameters extends InstanceTemplateV4Paramet
         encryption.setType(getBoolean(parameters, AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED) ? EncryptionType.CUSTOM : null);
         encryption.setKey(getParameterOrNull(parameters, InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID));
         encryption.setDiskEncryptionSetId(getParameterOrNull(parameters, AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID));
+        encryption.setEncryptionAtHostEnabled(getBoolean(parameters, AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED));
         String resourceDiskAttachedString = getParameterOrNull(parameters, AzureInstanceTemplate.RESOURCE_DISK_ATTACHED);
         // Backward compatibility is required here. Cluster which provisioned before this change can use only instancetypes which has resource disk
         if (Strings.isNullOrEmpty(resourceDiskAttachedString)) {
@@ -102,6 +103,8 @@ public class AzureInstanceTemplateV4Parameters extends InstanceTemplateV4Paramet
         putIfValueNotNull(map, "encrypted", encrypted);
         if (encryption != null) {
             putIfValueNotNull(map, AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, encryption.getType() == EncryptionType.CUSTOM);
+            putIfValueNotNull(map, AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED,
+                    encryption.getEncryptionAtHostEnabled() == null ? false : encryption.getEncryptionAtHostEnabled());
         }
         if (resourceDiskAttached == null) {
             putIfValueNotNull(map, AzureInstanceTemplate.RESOURCE_DISK_ATTACHED, true);

@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -14,6 +16,8 @@ public class InstanceTemplateResponse extends InstanceTemplateBase {
 
     private Set<VolumeResponse> attachedVolumes;
 
+    private Map<String, Object> attributes = new HashMap<>();
+
     public Set<VolumeResponse> getAttachedVolumes() {
         return attachedVolumes;
     }
@@ -22,11 +26,20 @@ public class InstanceTemplateResponse extends InstanceTemplateBase {
         this.attachedVolumes = attachedVolumes;
     }
 
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, Object> attributes) {
+        this.attributes = attributes;
+    }
+
     @Override
     public String toString() {
         return "InstanceTemplateResponse{" +
                 "InstanceTemplateBase=" + super.toString() +
                 ", attachedVolumes=" + attachedVolumes +
+                ", attributes=" + attributes +
                 '}';
     }
 }

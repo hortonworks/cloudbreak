@@ -37,6 +37,8 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
+import com.sequenceiq.cloudbreak.controller.validation.template.azure.HostEncryptionProvider;
+import com.sequenceiq.cloudbreak.controller.validation.template.azure.ResourceDiskPropertyCalculator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -48,6 +50,7 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.model.AwsDiskType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
 class TemplateValidatorAndUpdaterTest {
@@ -70,6 +73,9 @@ class TemplateValidatorAndUpdaterTest {
     @Mock
     private EmptyVolumeSetFilter emptyVolumeSetFilter;
 
+    @Mock
+    private HostEncryptionProvider hostEncryptionProvider;
+
     @InjectMocks
     private TemplateValidatorAndUpdater templateValidatorAndUpdater;
 
@@ -77,6 +83,7 @@ class TemplateValidatorAndUpdaterTest {
     void testValidateCustomInstanceTypeWhenNotSupportShouldComeValidationError() {
         Credential credential = Credential.builder()
                 .build();
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
         InstanceGroup instanceGroup = new InstanceGroup();
         Template template = new Template();
         template.setAttributes(new Json(Map.of()));
@@ -103,7 +110,7 @@ class TemplateValidatorAndUpdaterTest {
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
         // Call the validate method
-        templateValidatorAndUpdater.validate(credential, instanceGroup, new Stack(), CdpResourceType.DATAHUB, validationBuilder);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, new Stack(), CdpResourceType.DATAHUB, validationBuilder);
 
         // Assert that there are no errors in the ValidationResult
         ValidationResult validationResult = validationBuilder.build();
@@ -115,6 +122,7 @@ class TemplateValidatorAndUpdaterTest {
     void testValidateCustomInstanceTypeWhenSupportedAndCustomCpuNullShouldDropValidationErrorForCpu() {
         Credential credential = Credential.builder()
                 .build();
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
         InstanceGroup instanceGroup = new InstanceGroup();
         Template template = new Template();
         template.setAttributes(new Json(Map.of(
@@ -143,7 +151,7 @@ class TemplateValidatorAndUpdaterTest {
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
         // Call the validate method
-        templateValidatorAndUpdater.validate(credential, instanceGroup, new Stack(), CdpResourceType.DATAHUB, validationBuilder);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, new Stack(), CdpResourceType.DATAHUB, validationBuilder);
 
         // Assert that there are no errors in the ValidationResult
         ValidationResult validationResult = validationBuilder.build();
@@ -155,6 +163,7 @@ class TemplateValidatorAndUpdaterTest {
     void testValidateCustomInstanceTypeWhenSupportedAndCustomMemoryNullShouldDropValidationErrorForMemory() {
         Credential credential = Credential.builder()
                 .build();
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
         InstanceGroup instanceGroup = new InstanceGroup();
         Template template = new Template();
         template.setAttributes(new Json(Map.of(
@@ -183,7 +192,7 @@ class TemplateValidatorAndUpdaterTest {
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
         // Call the validate method
-        templateValidatorAndUpdater.validate(credential, instanceGroup, new Stack(), CdpResourceType.DATAHUB, validationBuilder);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, new Stack(), CdpResourceType.DATAHUB, validationBuilder);
 
         // Assert that there are no errors in the ValidationResult
         ValidationResult validationResult = validationBuilder.build();
@@ -195,6 +204,7 @@ class TemplateValidatorAndUpdaterTest {
     void testValidateCustomInstanceTypeWhenSupportedShouldGetCustomCpuAndMemory() {
         Credential credential = Credential.builder()
                 .build();
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
         InstanceGroup instanceGroup = new InstanceGroup();
         Template template = new Template();
         template.setAttributes(new Json(Map.of(
@@ -224,7 +234,7 @@ class TemplateValidatorAndUpdaterTest {
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
         // Call the validate method
-        templateValidatorAndUpdater.validate(credential, instanceGroup, new Stack(), CdpResourceType.DATAHUB, validationBuilder);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, new Stack(), CdpResourceType.DATAHUB, validationBuilder);
 
         // Assert that there are no errors in the ValidationResult
         ValidationResult validationResult = validationBuilder.build();
@@ -235,6 +245,7 @@ class TemplateValidatorAndUpdaterTest {
     void testValidateInstanceTypeWhenSupportedAndEphemeralDiskIsTheSameAsMaxShouldNotThrowErrorValidatioShouldBeOk() {
         String instanceType = "m5xlarge";
         String region = "eu-west-1";
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
         DiskType ephemeral = DiskType.diskType(AwsDiskType.Ephemeral.value());
         Platform aws = platform(CloudPlatform.AWS.name());
         Credential credential = Credential.builder()
@@ -290,10 +301,11 @@ class TemplateValidatorAndUpdaterTest {
         when(locationService.location(any(), any())).thenReturn(region);
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
-        templateValidatorAndUpdater.validate(credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
 
         ValidationResult validationResult = validationBuilder.build();
         assertFalse(validationResult.hasError());
@@ -320,6 +332,7 @@ class TemplateValidatorAndUpdaterTest {
         template.setVolumeTemplates(Set.of(volumeTemplate));
         instanceGroup.setTemplate(template);
         CloudVmTypes cloudVmTypes = new CloudVmTypes();
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
         cloudVmTypes.setCloudVmResponses(Map.of(region, Set.of(
                 vmTypeWithMeta(
                         instanceType,
@@ -357,10 +370,11 @@ class TemplateValidatorAndUpdaterTest {
         when(locationService.location(any(), any())).thenReturn(region);
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
-        templateValidatorAndUpdater.validate(credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
 
         ValidationResult validationResult = validationBuilder.build();
         assertTrue(validationResult.hasError());

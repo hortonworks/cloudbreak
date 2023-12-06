@@ -201,7 +201,7 @@ public class VerticalScalingValidatorServiceTest {
         verify(credentialClientService, times(1)).getByEnvironmentCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
         verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
-        verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), eq(Set.of("1", "2")));
+        verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), eq(Set.of("1", "2")), any());
     }
 
     @Test
@@ -250,7 +250,7 @@ public class VerticalScalingValidatorServiceTest {
         verify(credentialClientService, times(1)).getByEnvironmentCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
         verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
-        verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), isNull());
+        verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), isNull(), any());
     }
 
     @Test
@@ -300,7 +300,7 @@ public class VerticalScalingValidatorServiceTest {
         verify(credentialClientService, times(1)).getByEnvironmentCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
         verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
-        verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), isNull());
+        verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), isNull(), any());
     }
 
     @Test
@@ -325,7 +325,7 @@ public class VerticalScalingValidatorServiceTest {
         verify(credentialClientService, times(0)).getByEnvironmentCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(0)).convert(any());
         verify(cloudParameterService, times(0)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
-        verify(verticalScaleInstanceProvider, never()).validateInstanceTypeForVerticalScaling(any(), any(), isNull());
+        verify(verticalScaleInstanceProvider, never()).validateInstanceTypeForVerticalScaling(any(), any(), isNull(), any());
     }
 
     private Credential credential() {

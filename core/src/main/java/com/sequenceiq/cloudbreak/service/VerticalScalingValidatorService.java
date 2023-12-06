@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -104,6 +106,7 @@ public class VerticalScalingValidatorService {
             String currentInstanceType = instanceGroupOptional.get().getTemplate().getInstanceType();
             Credential credential = credentialService.getByEnvironmentCrn(stack.getEnvironmentCrn());
             ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
+            Json attributes = instanceGroupOptional.get().getTemplate().getAttributes();
             CloudVmTypes allVmTypes = cloudParameterService.getVmTypesV2(
                     cloudCredential,
                     stack.getRegion(),
@@ -113,8 +116,8 @@ public class VerticalScalingValidatorService {
             verticalScaleInstanceProvider.validateInstanceTypeForVerticalScaling(
                     getInstance(region, availabilityZone, currentInstanceType, allVmTypes),
                     getInstance(region, availabilityZone, requestedInstanceType, allVmTypes),
-                    validateMultiAz ? instanceGroupOptional.get().getAvailabilityZones() : null
-
+                    validateMultiAz ? instanceGroupOptional.get().getAvailabilityZones() : null,
+                    attributes == null ? Map.of() : attributes.getMap()
             );
         } else {
             throw new BadRequestException(String.format("Define a group which exists in Cluster. It can be [%s].",

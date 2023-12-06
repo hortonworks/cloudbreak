@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.controller.validation.template;
+package com.sequenceiq.cloudbreak.controller.validation.template.azure;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;

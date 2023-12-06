@@ -197,6 +197,15 @@ public final class AzureInstanceView {
         return false;
     }
 
+    public boolean isHostEncryptionEnabled() {
+        Boolean hostEncryptionEnabled = instanceTemplate.getParameter(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED, Boolean.class);
+        if (hostEncryptionEnabled == null) {
+            return false;
+        } else {
+            return hostEncryptionEnabled;
+        }
+    }
+
     public String getDiskEncryptionSetId() {
         return instanceTemplate.getStringParameter(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID);
     }

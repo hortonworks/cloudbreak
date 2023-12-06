@@ -58,6 +58,7 @@ import com.sequenceiq.datalake.converter.DatabaseRequestConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageValidator;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.environment.api.v1.environment.endpoint.service.azure.HostEncryptionCalculator;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
@@ -141,6 +142,9 @@ public class StackRequestManifesterTest {
 
     @Mock
     private MultiAzDecorator multiAzDecorator;
+
+    @Mock
+    private HostEncryptionCalculator hostEncryptionCalculator;
 
     @InjectMocks
     private StackRequestManifester underTest;
@@ -566,10 +570,10 @@ public class StackRequestManifesterTest {
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setAccountId(ACCOUNT_ID);
         envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
-        when(entitlementService.isAzureEncryptionAtHostEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
 
         InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
         when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request));
+        when(hostEncryptionCalculator.hostEncryptionRequired(any())).thenReturn(true);
 
         underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
 
@@ -581,8 +585,7 @@ public class StackRequestManifesterTest {
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setAccountId(ACCOUNT_ID);
         envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
-        when(entitlementService.isAzureEncryptionAtHostEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
-
+        when(hostEncryptionCalculator.hostEncryptionRequired(any())).thenReturn(true);
         InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
         InstanceTemplateV4Request instanceTemplateV4Request = instanceGroupV4Request.getTemplate();
         instanceTemplateV4Request.createAzure();
@@ -598,7 +601,7 @@ public class StackRequestManifesterTest {
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setAccountId(ACCOUNT_ID);
         envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
-        when(entitlementService.isAzureEncryptionAtHostEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+        when(hostEncryptionCalculator.hostEncryptionRequired(any())).thenReturn(true);
 
         InstanceGroupV4Request instanceGroupV4Request1 = createInstanceGroupV4Request();
 

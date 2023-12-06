@@ -94,6 +94,7 @@ public class ValidateCloudConfigHandler extends ExceptionCatcherEventHandler<Val
                 LOGGER.info("Validate template for {} name with {} instanceGroup.", name, instanceGroup.toString());
                 StackType type = stack.getType();
                 templateValidatorAndUpdater.validate(
+                        environment,
                         credential,
                         instanceGroup,
                         stack,

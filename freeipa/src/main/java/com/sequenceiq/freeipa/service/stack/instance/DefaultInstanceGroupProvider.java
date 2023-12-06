@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceGroupParameters;
@@ -28,6 +27,8 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.common.api.type.EncryptionType;
+import com.sequenceiq.environment.api.v1.environment.endpoint.service.azure.HostEncryptionCalculator;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.model.ResourceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 import com.sequenceiq.freeipa.entity.InstanceGroupNetwork;
@@ -52,10 +53,10 @@ public class DefaultInstanceGroupProvider {
     private DefaultInstanceTypeProvider defaultInstanceTypeProvider;
 
     @Inject
-    private EntitlementService entitlementService;
+    private HostEncryptionCalculator hostEncryptionCalculator;
 
-    public Template createDefaultTemplate(CloudPlatform cloudPlatform, String accountId, String diskEncryptionSetId, String gcpKmsEncryptionKey,
-            String awsKmsEncryptionKey) {
+    public Template createDefaultTemplate(DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform,
+        String accountId, String diskEncryptionSetId, String gcpKmsEncryptionKey, String awsKmsEncryptionKey) {
         Template template = new Template();
         template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.DEFAULT);
@@ -82,7 +83,7 @@ public class DefaultInstanceGroupProvider {
                         entry(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID, diskEncryptionSetId),
                         entry(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, Boolean.TRUE))));
             }
-            if (entitlementService.isAzureEncryptionAtHostEnabled(accountId)) {
+            if (hostEncryptionCalculator.hostEncryptionRequired(environmentResponse)) {
                 Map<String, Object> attributesJson;
                 if (template.getAttributes() != null) {
                     attributesJson = template.getAttributes().getMap();

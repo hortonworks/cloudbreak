@@ -266,7 +266,6 @@ public class EnvironmentApiConverter {
                 .withAzureResourceEncryptionParametersDto(
                         Optional.ofNullable(azureEnvironmentParameters)
                                 .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
-                                .filter(resourceEncryptionParameters -> Objects.nonNull(resourceEncryptionParameters.getEncryptionKeyUrl()))
                                 .map(this::azureResourceEncryptionParametersToAzureEncryptionParametersDto)
                                 .orElse(null)
                 )
@@ -287,9 +286,14 @@ public class EnvironmentApiConverter {
 
     private AzureResourceEncryptionParametersDto azureResourceEncryptionParametersToAzureEncryptionParametersDto(
             AzureResourceEncryptionParameters azureResourceEncryptionParameters) {
-        AzureResourceEncryptionParametersDto.Builder azureResourceEncryptionParametersDto = AzureResourceEncryptionParametersDto.builder()
-                .withEncryptionKeyUrl(azureResourceEncryptionParameters.getEncryptionKeyUrl())
-                .withEncryptionKeyResourceGroupName(azureResourceEncryptionParameters.getEncryptionKeyResourceGroupName());
+        AzureResourceEncryptionParametersDto.Builder azureResourceEncryptionParametersDto =
+                AzureResourceEncryptionParametersDto.builder()
+                .withEnableHostEncryption(azureResourceEncryptionParameters.isEnableHostEncryption());
+        if (Objects.nonNull(azureResourceEncryptionParameters.getEncryptionKeyUrl())) {
+            azureResourceEncryptionParametersDto
+                    .withEncryptionKeyUrl(azureResourceEncryptionParameters.getEncryptionKeyUrl())
+                    .withEncryptionKeyResourceGroupName(azureResourceEncryptionParameters.getEncryptionKeyResourceGroupName());
+        }
         return azureResourceEncryptionParametersDto.build();
     }
 

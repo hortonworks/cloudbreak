@@ -220,6 +220,7 @@ public class EnvironmentModificationService {
             if (!validateKey.hasError()) {
                 azureParameters.setEncryptionKeyUrl(dto.getEncryptionKeyUrl());
                 azureParameters.setEncryptionKeyResourceGroupName(dto.getEncryptionKeyResourceGroupName());
+                azureParameters.setEnableHostEncryption(dto.getEnableHostEncryption());
                 //creating the DES
                 try {
                     CreatedDiskEncryptionSet createdDiskEncryptionSet = environmentEncryptionService.createEncryptionResources(

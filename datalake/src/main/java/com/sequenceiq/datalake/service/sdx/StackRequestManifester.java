@@ -64,6 +64,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocationValidator;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageValidator;
+import com.sequenceiq.environment.api.v1.environment.endpoint.service.azure.HostEncryptionCalculator;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
@@ -112,6 +113,9 @@ public class StackRequestManifester {
 
     @Inject
     private DatabaseRequestConverter databaseRequestConverter;
+
+    @Inject
+    private HostEncryptionCalculator hostEncryptionCalculator;
 
     public void configureStackForSdxCluster(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         StackV4Request generatedStackV4Request = setupStackRequestForCloudbreak(sdxCluster, environment);
@@ -441,9 +445,8 @@ public class StackRequestManifester {
                 azure.getEncryption().setType(EncryptionType.CUSTOM);
                 azure.getEncryption().setDiskEncryptionSetId(diskEncryptionSetId.get());
             }
-            if (entitlementService.isAzureEncryptionAtHostEnabled(environmentResponse.getAccountId())) {
-                azure.getEncryption().setEncryptionAtHostEnabled(Boolean.TRUE);
-            }
+            azure.getEncryption().setEncryptionAtHostEnabled(
+                    hostEncryptionCalculator.hostEncryptionRequired(environmentResponse));
         });
     }
 

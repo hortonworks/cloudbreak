@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
@@ -22,6 +21,8 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.common.api.type.EncryptionType;
+import com.sequenceiq.environment.api.v1.environment.endpoint.service.azure.HostEncryptionCalculator;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.model.ResourceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeRequest;
@@ -47,10 +48,10 @@ public class InstanceTemplateRequestToTemplateConverter {
     private DefaultInstanceTypeProvider defaultInstanceTypeProvider;
 
     @Inject
-    private EntitlementService entitlementService;
+    private HostEncryptionCalculator hostEncryptionCalculator;
 
-    public Template convert(InstanceTemplateRequest source, CloudPlatform cloudPlatform, String accountId,
-            String diskEncryptionSetId, String gcpKmsEncryptionKey, String awsKmsEncryptionKey) {
+    public Template convert(DetailedEnvironmentResponse environmentResponse, InstanceTemplateRequest source, CloudPlatform cloudPlatform, String accountId,
+        String diskEncryptionSetId, String gcpKmsEncryptionKey, String awsKmsEncryptionKey) {
         Template template = new Template();
         template.setAccountId(accountId);
         template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
@@ -82,9 +83,9 @@ public class InstanceTemplateRequestToTemplateConverter {
                 attributes.put(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID, diskEncryptionSetId);
                 attributes.put(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, true);
             }
-            if (entitlementService.isAzureEncryptionAtHostEnabled(accountId)) {
-                attributes.put(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED, true);
-            }
+            attributes.put(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED,
+                    hostEncryptionCalculator.hostEncryptionRequired(environmentResponse));
+
         }
 
         if (gcpKmsEncryptionKey != null && cloudPlatform == CloudPlatform.GCP) {

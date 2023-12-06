@@ -222,9 +222,6 @@ public class MockUserManagementServiceTest {
                 {"gcpEndpointGatewayEnabled false", "gcpEndpointGatewayEnabled", false, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP", false},
                 {"gcpEndpointGatewayEnabled true", "gcpEndpointGatewayEnabled", true, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP", true},
 
-                {"enableAzureEncryptionAtHost false", "enableAzureEncryptionAtHost", false, "CDP_CB_AZURE_ENCRYPTION_AT_HOST", false},
-                {"enableAzureEncryptionAtHost true", "enableAzureEncryptionAtHost", true, "CDP_CB_AZURE_ENCRYPTION_AT_HOST", true},
-
                 {"userSyncCredentialsUpdateOptimizationEnabled false", "userSyncCredentialsUpdateOptimizationEnabled", false,
                         "CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION", false},
                 {"userSyncCredentialsUpdateOptimizationEnabled true", "userSyncCredentialsUpdateOptimizationEnabled", true,

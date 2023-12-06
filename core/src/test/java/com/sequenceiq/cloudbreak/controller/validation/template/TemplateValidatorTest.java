@@ -37,6 +37,8 @@ import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
+import com.sequenceiq.cloudbreak.controller.validation.template.azure.HostEncryptionProvider;
+import com.sequenceiq.cloudbreak.controller.validation.template.azure.ResourceDiskPropertyCalculator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
@@ -50,6 +52,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.AwsDiskType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class TemplateValidatorTest {
@@ -83,7 +86,13 @@ public class TemplateValidatorTest {
     @Mock
     private EmptyVolumeSetFilter emptyVolumeSetFilter;
 
-    @InjectMocks
+    @Mock
+    private HostEncryptionProvider hostEncryptionProvider;
+
+    @Mock
+    private DetailedEnvironmentResponse environmentResponse;
+
+    @Mock
     private InstanceGroup instanceGroup;
 
     private Stack stack;
@@ -134,8 +143,9 @@ public class TemplateValidatorTest {
         instanceGroup = createInstanceGroup(0, 0, true, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(0)).error(anyString());
         verifyIDBrokerVolume(instanceGroup);
     }
@@ -146,8 +156,9 @@ public class TemplateValidatorTest {
         instanceGroup = createInstanceGroup(1, 0, true, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(0)).error(anyString());
     }
 
@@ -156,8 +167,9 @@ public class TemplateValidatorTest {
         instanceGroup = createInstanceGroup(1, 10, false, true, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(0)).error(anyString());
     }
 
@@ -167,8 +179,9 @@ public class TemplateValidatorTest {
         instanceGroup = createInstanceGroup(25, 1, true, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(1)).error(anyString());
     }
 
@@ -176,8 +189,9 @@ public class TemplateValidatorTest {
     public void validateIDBrokerDataVolumeDefaultSize() {
         instanceGroup = createInstanceGroup(1, 100, true, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(0)).error(anyString());
     }
 
@@ -185,8 +199,9 @@ public class TemplateValidatorTest {
     public void validateIDBrokerDataVolumeInvalidSize() {
         instanceGroup = createInstanceGroup(1, 18000, true, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(1)).error(anyString());
     }
 
@@ -196,8 +211,9 @@ public class TemplateValidatorTest {
         instanceGroup = createInstanceGroup(1, 0, true, false, true, "i3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(0)).error(anyString());
     }
 
@@ -206,8 +222,9 @@ public class TemplateValidatorTest {
         // volume count is larger than the max value of 24
         instanceGroup = createInstanceGroup(25, 1, true, false, true, "i3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(2)).error(anyString());
     }
 
@@ -215,8 +232,9 @@ public class TemplateValidatorTest {
     public void validateIDBrokerMixedVolumeDefaultSize() {
         instanceGroup = createInstanceGroup(1, 100, true, false, true, "i3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(0)).error(anyString());
     }
 
@@ -224,8 +242,9 @@ public class TemplateValidatorTest {
     public void validateIDBrokerMixedVolumeInvalidSize() {
         instanceGroup = createInstanceGroup(1, 18000, true, false, true, "i3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(2)).error(anyString());
     }
 
@@ -233,10 +252,11 @@ public class TemplateValidatorTest {
     public void validateMasterDataVolumeZeroCountZeroSize() {
         instanceGroup = createInstanceGroup(0, 0, false, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(2)).error(anyString());
     }
 
@@ -245,10 +265,11 @@ public class TemplateValidatorTest {
         instanceGroup = createInstanceGroup(1, 1, false, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(0)).error(anyString());
     }
 
@@ -257,10 +278,11 @@ public class TemplateValidatorTest {
         // volume count is larger than the max value of 24
         instanceGroup = createInstanceGroup(25, 1, false, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(1)).error(anyString());
     }
 
@@ -268,10 +290,11 @@ public class TemplateValidatorTest {
     public void validateMasterDataVolumeDefaultSize() {
         instanceGroup = createInstanceGroup(1, 100, false, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(0)).error(anyString());
     }
 
@@ -279,10 +302,11 @@ public class TemplateValidatorTest {
     public void validateMasterDataVolumeInvalidSize() {
         instanceGroup = createInstanceGroup(1, 18000, false, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(1)).error(anyString());
     }
 
@@ -290,6 +314,7 @@ public class TemplateValidatorTest {
     public void validateCoordinatorandExecutorVolumeZeroCountZeroSize() {
         instanceGroup = createInstanceGroup(0, 0, false, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
@@ -297,7 +322,7 @@ public class TemplateValidatorTest {
         ServiceComponent service = ServiceComponent.of("IMPALA", "IMPALAD");
         services.add(service);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(0)).error(anyString());
     }
 
@@ -305,6 +330,7 @@ public class TemplateValidatorTest {
     public void validateCoordinatorandExecutorVolumeCountOne() {
         instanceGroup = createInstanceGroup(1, 1, false, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
@@ -312,7 +338,7 @@ public class TemplateValidatorTest {
         ServiceComponent service = ServiceComponent.of("IMPALA", "IMPALAD");
         services.add(service);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(0)).error(anyString());
     }
 
@@ -320,6 +346,7 @@ public class TemplateValidatorTest {
     public void validateCoordinatorandExecutorVolumeSizeInValid() {
         instanceGroup = createInstanceGroup(1, 18000, false, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
@@ -327,7 +354,7 @@ public class TemplateValidatorTest {
         ServiceComponent service = ServiceComponent.of("IMPALA", "IMPALAD");
         services.add(service);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(1)).error(anyString());
     }
 
@@ -335,6 +362,7 @@ public class TemplateValidatorTest {
     public void validateCoordinatorandExecutorVolumeDefaultSize() {
         instanceGroup = createInstanceGroup(1, 100, false, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
@@ -342,7 +370,7 @@ public class TemplateValidatorTest {
         ServiceComponent service = ServiceComponent.of("IMPALA", "IMPALAD");
         services.add(service);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(0)).error(anyString());
     }
 
@@ -350,6 +378,7 @@ public class TemplateValidatorTest {
     public void validateCoordinatorandExecutorVolumeCountInvalid() {
         instanceGroup = createInstanceGroup(25, 100, false, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
@@ -357,7 +386,7 @@ public class TemplateValidatorTest {
         ServiceComponent service = ServiceComponent.of("IMPALA", "IMPALAD");
         services.add(service);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(1)).error(anyString());
     }
 
@@ -370,26 +399,26 @@ public class TemplateValidatorTest {
         ServiceComponent service = ServiceComponent.of("ATLAS", "ATLAS");
         services.add(service);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
-        when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
 
         instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("c5.xlarge", "hms_scale_out");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, never()).error(anyString());
 
         instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("c5.xlarge", "atlas_scale_out");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, never()).error(anyString());
 
         instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("m5.xlarge", "raz_scale_out");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, never()).error(anyString());
 
         instanceGroup = createSDXInstanceGroupWithoutAttachedVolumes("m5.xlarge", "storage_scale_out");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
-        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
+        underTest.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATALAKE, builder);
         Mockito.verify(builder, times(2)).error(anyString());
     }
 

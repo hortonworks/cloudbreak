@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.verticalscale;
 
+import static com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.HOST_ENCRYPTION_SUPPORTED;
 import static com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.RESOURCE_DISK_ATTACHED;
+import static com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 
 import java.util.Collection;
@@ -59,7 +61,7 @@ public class VerticalScaleInstanceProvider {
                 .stream()
                 .filter(availableVmType -> {
                     try {
-                        validateInstanceType(currentInstance, Optional.of(availableVmType), instanceGroupAvailabilityZones);
+                        validateInstanceType(currentInstance, Optional.of(availableVmType), instanceGroupAvailabilityZones, Map.of());
                         return true;
                     } catch (BadRequestException ex) {
                         return false;
@@ -79,9 +81,13 @@ public class VerticalScaleInstanceProvider {
     }
 
     public void validateInstanceTypeForVerticalScaling(Optional<VmType> currentInstanceTypeOptional, Optional<VmType> requestedInstanceTypeOptional,
-            Set<String> instanceGroupAvailabilityZones) {
+        Set<String> instanceGroupAvailabilityZones, Map<String, Object> additionalProperties) {
         try {
-            validateInstanceType(currentInstanceTypeOptional, requestedInstanceTypeOptional, instanceGroupAvailabilityZones);
+            validateInstanceType(
+                    currentInstanceTypeOptional,
+                    requestedInstanceTypeOptional,
+                    instanceGroupAvailabilityZones,
+                    additionalProperties);
         } catch (Exception e) {
             LOGGER.warn("Vertical scale validation error: {}", e.getMessage());
             throw e;
@@ -89,7 +95,7 @@ public class VerticalScaleInstanceProvider {
     }
 
     private void validateInstanceType(Optional<VmType> currentInstanceTypeOptional, Optional<VmType> requestedInstanceTypeOptional,
-            Set<String> instanceGroupAvailabilityZones) {
+        Set<String> instanceGroupAvailabilityZones, Map<String, Object> additionalProperties) {
         if (currentInstanceTypeOptional.isEmpty()) {
             throw new BadRequestException("The current instancetype does not exist on provider side.");
         }
@@ -109,13 +115,26 @@ public class VerticalScaleInstanceProvider {
             validateAutoAttached(currentInstanceTypeName, requestedInstanceTypeName,
                     currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
             validateResourceDisk(currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
-
+            validateHostEncryption(currentInstanceType, requestedInstanceType, additionalProperties);
             if (instanceGroupAvailabilityZones != null) {
                 validateInstanceSupportsExistingZones(instanceGroupAvailabilityZones, requestedInstanceTypeMetaData.getAvailabilityZones(),
                         requestedInstanceTypeName);
             }
         } else {
             throw new BadRequestException("The requested instancetype does not exist on provider side.");
+        }
+    }
+
+    private void validateHostEncryption(VmType currentVmType, VmType requestedVmType, Map<String, Object> additionalProperties) {
+        Boolean currentHostEncryptionActivated = (Boolean) additionalProperties.get(ENCRYPTION_AT_HOST_ENABLED);
+        Boolean requestedHostEncryptionSupported = (Boolean) requestedVmType.getMetaData().getProperties().get(HOST_ENCRYPTION_SUPPORTED);
+
+        if (currentHostEncryptionActivated != null && requestedHostEncryptionSupported != null && currentHostEncryptionActivated) {
+            if (!requestedHostEncryptionSupported) {
+                throw new BadRequestException("Unable to resize since changing from host encrypted "
+                        + currentVmType.getValue() + " instance type to " + requestedVmType.getValue()
+                        + " instance type which does not supporting host encryption.");
+            }
         }
     }
 

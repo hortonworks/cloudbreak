@@ -124,9 +124,6 @@ class EntitlementServiceTest {
                 {"CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP", (EntitlementCheckFunction) EntitlementService::gcpEndpointGatewayEnabled, false},
                 {"CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP", (EntitlementCheckFunction) EntitlementService::gcpEndpointGatewayEnabled, true},
 
-                {"CDP_CB_AZURE_ENCRYPTION_AT_HOST", (EntitlementCheckFunction) EntitlementService::isAzureEncryptionAtHostEnabled, false},
-                {"CDP_CB_AZURE_ENCRYPTION_AT_HOST", (EntitlementCheckFunction) EntitlementService::isAzureEncryptionAtHostEnabled, true},
-
                 {"CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION",
                         (EntitlementCheckFunction) EntitlementService::usersyncCredentialsUpdateOptimizationEnabled, false},
                 {"CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION",
