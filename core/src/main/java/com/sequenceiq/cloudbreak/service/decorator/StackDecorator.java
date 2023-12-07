@@ -129,12 +129,9 @@ public class StackDecorator {
     private InstanceGroupToInstanceGroupParameterRequestConverter instanceGroupToInstanceGroupParameterRequestConverter;
 
     @Measure(StackDecorator.class)
-    public Stack decorate(@Nonnull Stack subject, @Nonnull StackV4Request request, User user, Workspace workspace) {
+    public Stack decorate(@Nonnull DetailedEnvironmentResponse environment, @Nonnull Stack subject, @Nonnull StackV4Request request, User user,
+            Workspace workspace) {
         String stackName = request.getName();
-
-
-        DetailedEnvironmentResponse environment = measure(() -> environmentClientService.getByCrn(subject.getEnvironmentCrn()),
-                LOGGER, "Environment properties were queried under {} ms for environment {}", request.getEnvironmentCrn());
 
         Credential credential = measure(() -> prepareCredential(environment),
                 LOGGER, "Credential was prepared under {} ms for stack {}", stackName);
@@ -303,7 +300,7 @@ public class StackDecorator {
     }
 
     private void prepareInstanceGroups(Stack subject, StackV4Request request, Credential credential,
-        User user, DetailedEnvironmentResponse environment) {
+            User user, DetailedEnvironmentResponse environment) {
         Map<String, InstanceGroupParameterResponse> instanceGroupParameterResponse = cloudParameterService
                 .getInstanceGroupParameters(extendedCloudCredentialConverter.convert(credential), getInstanceGroupParameterRequests(subject));
         CloudbreakUser cloudbreakUser = legacyRestRequestThreadLocalService.getCloudbreakUser();
@@ -357,7 +354,7 @@ public class StackDecorator {
                 && embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(subject, subject.getCluster())) {
             String databaseVolumeType = embeddedDatabaseConfig.getPlatformVolumeType(subject.cloudPlatform())
                     .orElseThrow(() -> new BadRequestException(String.format("If embedded db is enabled on attached disk, database volumetype" +
-                    " have to be defined for cloudprovider in app config! Missing database volumetype on %s provider", subject.cloudPlatform())));
+                            " have to be defined for cloudprovider in app config! Missing database volumetype on %s provider", subject.cloudPlatform())));
             VolumeTemplate databaseVolumeTemplate = new VolumeTemplate();
             databaseVolumeTemplate.setUsageType(VolumeUsageType.DATABASE);
             databaseVolumeTemplate.setVolumeSize(embeddedDatabaseConfig.getSize());

@@ -42,7 +42,15 @@ import com.sequenceiq.redbeams.service.UuidGeneratorService;
 
 @ExtendWith(MockitoExtension.class)
 public class NetworkBuilderServiceTest {
+
+    private static final String EXISTING_PRIVATE_DNS_ZONE_ID = "existingDatabasePrivateDnsZoneId";
+
+    private static final String FLEXIBLE_SERVER_DELEGATED_SUBNET_ID = "flexibleServerDelegatedSubnetId";
+
     private static final Map<String, Object> SUBNET_ID_REQUEST_PARAMETERS = Map.of("netkey", "netvalue");
+
+    private static final Map<String, Object> FLEXIBLE_REQUEST_PARAMETERS = Map.of(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID, "subnet",
+            EXISTING_PRIVATE_DNS_ZONE_ID, "dnsZone");
 
     private static final CloudPlatform AWS_CLOUD_PLATFORM = CloudPlatform.AWS;
 
@@ -165,6 +173,40 @@ public class NetworkBuilderServiceTest {
         Map<String, Object> networkAttributes = network.getAttributes().getMap();
         assertEquals("netvalue", networkAttributes.get("netkey"));
         assertEquals("original-subnet", networkAttributes.get("subnetkey"));
+
+        ArgumentCaptor<List> subnetIdsCaptor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<List> azCaptor = ArgumentCaptor.forClass(List.class);
+        verify(networkParameterAdder, times(1)).addSubnetIds(subnetIdsCaptor.capture(), azCaptor.capture(), any(CloudPlatform.class));
+        assertEquals(Set.copyOf(subnetIdsCaptor.getValue()), Set.of("subnet-2", "subnet-1"));
+        assertEquals(Set.copyOf(azCaptor.getValue()), Set.of("az-a", "az-b"));
+    }
+
+    @Test
+    public void testUpdateNetworkSubnetsWithFlexibleParameters() {
+        DBStack dbStack = getDbStack(Status.AVAILABLE);
+        List<CloudSubnet> cloudSubnets = List.of(
+                new CloudSubnet("subnet-1", "", "az-a", ""),
+                new CloudSubnet("subnet-2", "", "az-b", "")
+        );
+        when(cloudParameterCache.isDbSubnetsUpdateEnabled(dbStack.getCloudPlatform())).thenReturn(true);
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        when(environmentService.getByCrn(anyString())).thenReturn(environment);
+        when(subnetListerService.listSubnets(any(), any())).thenReturn(cloudSubnets);
+        when(subnetChooserService.chooseSubnets(any(), any())).thenReturn(cloudSubnets);
+        when(networkParameterAdder.addSubnetIds(any(), any(), any())).thenReturn(SUBNET_ID_REQUEST_PARAMETERS);
+        when(networkParameterAdder.addParameters(environment, dbStack)).thenReturn(FLEXIBLE_REQUEST_PARAMETERS);
+        createNetworkMock();
+        ArgumentCaptor<Network> networkArgumentCaptor = ArgumentCaptor.forClass(Network.class);
+        when(networkService.save(networkArgumentCaptor.capture())).thenAnswer(invocation -> invocation.getArgument(0, Network.class));
+
+        underTest.updateNetworkSubnets(dbStack);
+
+        Network network = networkArgumentCaptor.getValue();
+        Map<String, Object> networkAttributes = network.getAttributes().getMap();
+        assertEquals("netvalue", networkAttributes.get("netkey"));
+        assertEquals("original-subnet", networkAttributes.get("subnetkey"));
+        assertEquals("subnet", networkAttributes.get(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID));
+        assertEquals("dnsZone", networkAttributes.get(EXISTING_PRIVATE_DNS_ZONE_ID));
 
         ArgumentCaptor<List> subnetIdsCaptor = ArgumentCaptor.forClass(List.class);
         ArgumentCaptor<List> azCaptor = ArgumentCaptor.forClass(List.class);

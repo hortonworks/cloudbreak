@@ -190,18 +190,23 @@ public class StackCreatorService {
         String crn = getCrnForCreation(Optional.ofNullable(stackRequest.getResourceCrn()));
 
         nodeCountLimitValidator.validateProvision(stackRequest);
-        measure(() ->
-                validateRecipeExistenceOnInstanceGroups(stackRequest.getInstanceGroups(), workspace.getId()),
+        measure(() -> validateRecipeExistenceOnInstanceGroups(stackRequest.getInstanceGroups(), workspace.getId()),
                 LOGGER,
                 "Check that recipes do exist took {} ms");
 
-        measure(() ->
-                ensureStackDoesNotExists(stackName),
+        measure(() -> ensureStackDoesNotExists(stackName),
                 LOGGER,
                 "Stack does not exist check took {} ms");
 
-        Stack stackStub = measure(() ->
-                        stackV4RequestToStackConverter.convert(stackRequest),
+        DetailedEnvironmentResponse environment = measure(
+                () -> ThreadBasedUserCrnProvider.doAsInternalActor(
+                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        () -> environmentClientService.getByCrn(stackRequest.getEnvironmentCrn())),
+                LOGGER,
+                "Get Environment from Environment service took {} ms");
+
+        Stack stackStub = measure(
+                () -> stackV4RequestToStackConverter.convert(environment, stackRequest),
                 LOGGER,
                 "Stack request converted to stack took {} ms for stack {}", stackName);
 
@@ -219,27 +224,18 @@ public class StackCreatorService {
         MDCBuilder.buildMdcContext(stackStub);
         Stack savedStack;
         try {
-            Blueprint blueprint = measure(() ->
-                determineBlueprint(stackRequest, workspace),
-                LOGGER,
-                "Blueprint determined in {} ms for stack {}", stackName);
+            Blueprint blueprint = measure(
+                    () -> determineBlueprint(stackRequest, workspace),
+                    LOGGER,
+                    "Blueprint determined in {} ms for stack {}", stackName);
             Future<StatedImage> imgFromCatalogFuture = determineImageCatalog(stackName, platformString, stackRequest, blueprint, user, workspace);
             hueWorkaroundValidatorService.validateForStackRequest(getHueHostGroups(blueprint.getBlueprintJsonText()), stackStub.getName());
 
             savedStack = transactionService.required(() -> {
-                Stack stack = measure(() ->
-                        stackDecorator.decorate(stackStub, stackRequest, user, workspace),
+                Stack stack = measure(
+                        () -> stackDecorator.decorate(environment, stackStub, stackRequest, user, workspace),
                         LOGGER,
                         "Decorate Stack with data took {} ms");
-
-                DetailedEnvironmentResponse environment =  measure(() ->
-                        ThreadBasedUserCrnProvider.doAsInternalActor(
-                                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                                () ->
-                                environmentClientService.getByCrn(stack.getEnvironmentCrn())),
-                        LOGGER,
-                        "Get Environment from Environment service took {} ms");
-
 
                 if (stack.getOrchestrator() != null && stack.getOrchestrator().getApiEndpoint() != null) {
                     measure(() -> stackService.validateOrchestrator(stack.getOrchestrator()),
@@ -251,11 +247,10 @@ public class StackCreatorService {
                 stack.setTunnel(environment.getTunnel());
                 if (stackRequest.getCluster() != null) {
                     measure(() -> setStackType(stack, blueprint),
-                        LOGGER,
-                        "Set stacktype for stack object took {} ms");
+                            LOGGER,
+                            "Set stacktype for stack object took {} ms");
 
-                    measure(() -> clusterCreationService.validate(
-                            stackRequest.getCluster(), stack, user, workspace, environment),
+                    measure(() -> clusterCreationService.validate(stackRequest.getCluster(), stack, user, workspace, environment),
                             LOGGER,
                             "Validate cluster rds and autotls took {} ms");
                 }
@@ -270,11 +265,11 @@ public class StackCreatorService {
                         "Select the correct image took {} ms");
                 javaVersionValidator.validateImage(imgFromCatalog.getImage(), stackRequest.getJavaVersion(), ThreadBasedUserCrnProvider.getAccountId());
                 stackRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
-                Stack newStack = measure(() -> stackService.create(
-                            stack, imgFromCatalog, user, workspace, stackRequest.getExternalDatabase()),
-                            LOGGER,
+                Stack newStack = measure(
+                        () -> stackService.create(stack, imgFromCatalog, user, workspace, stackRequest.getExternalDatabase()),
+                        LOGGER,
                         "Save the remaining stack data took {} ms"
-                        );
+                );
 
                 try {
                     LOGGER.info("Create cluster entity in the database with name {}.", stackName);
@@ -303,8 +298,8 @@ public class StackCreatorService {
 
         LOGGER.info("Generated stack response after creation: {}", JsonUtil.writeValueAsStringSilentSafe(response));
 
-        FlowIdentifier flowIdentifier = measure(() ->
-                flowManager.triggerProvisioning(savedStack.getId()),
+        FlowIdentifier flowIdentifier = measure(
+                () -> flowManager.triggerProvisioning(savedStack.getId()),
                 LOGGER,
                 "Stack triggerProvisioning took {} ms with name {}", stackName);
         response.setFlowIdentifier(flowIdentifier);

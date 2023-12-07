@@ -44,7 +44,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAzureRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -90,6 +89,7 @@ import com.sequenceiq.cloudbreak.domain.projection.StackPlatformVariantView;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -113,6 +113,7 @@ import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.environment.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService;
 import com.sequenceiq.cloudbreak.service.environment.telemetry.AccountTelemetryClientService;
+import com.sequenceiq.cloudbreak.service.externaldatabase.AzureDatabaseServerParameterDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
@@ -250,6 +251,9 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     @Inject
     private DatabaseService databaseService;
+
+    @Inject
+    private AzureDatabaseServerParameterDecorator azureDatabaseServerParameterDecorator;
 
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
@@ -617,8 +621,8 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     private Stack setRuntimeAndDbVersion(Stack stack, Set<Component> components, String os, DatabaseRequest databaseRequest) {
         String stackVersion = calculateStackVersion(components);
         Optional.ofNullable(stackVersion).ifPresent(stack::setStackVersion);
-        boolean flexibleServerEnabled = entitlementService.isAzureDatabaseFlexibleServerEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
-                && !isSingleServerRequested(databaseRequest);
+        boolean flexibleServerEntitled = entitlementService.isAzureDatabaseFlexibleServerEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId());
+        boolean flexibleServerEnabled = flexibleServerEntitled && !isSingleServerRequested(stack, flexibleServerEntitled);
         String dbEngineVersion = databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(
                 stackVersion, os, stack.getExternalDatabaseEngineVersion(), CloudPlatform.valueOf(stack.getCloudPlatform()),
                 !Optional.ofNullable(stack.getDatabase().getExternalDatabaseAvailabilityType()).orElse(DatabaseAvailabilityType.NONE).isEmbedded(),
@@ -629,11 +633,13 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return stackRepository.save(stack);
     }
 
-    private boolean isSingleServerRequested(DatabaseRequest databaseRequest) {
-        return Optional.ofNullable(databaseRequest)
-                .map(DatabaseRequest::getDatabaseAzureRequest)
-                .map(DatabaseAzureRequest::getAzureDatabaseType)
-                .map(AzureDatabaseType::isSingleServer).orElse(Boolean.FALSE);
+    private boolean isSingleServerRequested(Stack stack, boolean flexibleServerEntitled) {
+        AzureDatabaseType defaultAzureDatabaseType = flexibleServerEntitled ? AzureDatabaseType.FLEXIBLE_SERVER : AzureDatabaseType.SINGLE_SERVER;
+        return Optional.ofNullable(stack.getDatabase())
+                .map(Database::getAttributesMap)
+                .map(attributeMap -> azureDatabaseServerParameterDecorator.getDatabaseType(attributeMap).orElse(defaultAzureDatabaseType))
+                .map(AzureDatabaseType::isSingleServer)
+                .orElse(Boolean.FALSE);
     }
 
     private String calculateStackVersion(Set<Component> components) {
