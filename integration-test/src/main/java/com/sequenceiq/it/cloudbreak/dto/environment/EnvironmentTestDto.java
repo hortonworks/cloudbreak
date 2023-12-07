@@ -116,7 +116,6 @@ public class EnvironmentTestDto
                 .withResourceGroup(resourceGroupProperties.getResourceGroupUsage(), resourceGroupProperties.getResourceGroupName())
                 .withNetwork()
                 .withCloudStorageValidation(CloudStorageValidation.ENABLED)
-                .withTags(getCloudProvider().getTags())
                 .withTunnel(getTestContext().getTunnel());
     }
 
@@ -342,11 +341,6 @@ public class EnvironmentTestDto
             order = ORDER - 1;
         }
         return withNetwork();
-    }
-
-    public EnvironmentTestDto withTags(Map<String, String> tags) {
-        getRequest().setTags(tags);
-        return this;
     }
 
     public Collection<SimpleEnvironmentResponse> getResponseSimpleEnvSet() {
