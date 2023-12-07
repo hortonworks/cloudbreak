@@ -25,7 +25,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.representer.Representer;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
@@ -174,7 +176,9 @@ public class DatabaseServerSslCertificateConfig {
     }
 
     SslCertificateEntry parseCertEntry(String filePath, String fileContent) {
-        SslContent content = new Yaml().loadAs(fileContent, SslContent.class);
+        Representer representer = new Representer(new DumperOptions());
+        representer.getPropertyUtils().setSkipMissingProperties(true);
+        SslContent content = new Yaml(representer).loadAs(fileContent, SslContent.class);
         String[] fileSegments = filePath.split(CERT_LIST_SEPARATOR_REGEX);
         String[] split = Arrays.stream(fileSegments)
                 .filter(i -> !Strings.isNullOrEmpty(i))

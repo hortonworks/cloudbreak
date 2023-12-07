@@ -531,6 +531,11 @@ class DatabaseServerSslCertificateConfigTest {
                     "CN=Amazon RDS eu-south-1 Root CA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", ST=Washington, L=Seattle, C=US"
                 },
                 {
+                    "/test_certs/formatCheck/aws/eu-south-2/0.yml",
+                    "rds-ca-rsa2048-g1",
+                    "L=Seattle, CN=Amazon RDS eu-south-2 Root CA RSA2048 G1, ST=WA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", C=US"
+                },
+                {
                     "/test_certs/formatCheck/aws/me-south-1/0.yml",
                     "rds-ca-2019-me-south-1",
                     "CN=Amazon RDS me-south-1 Root CA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", ST=Washington, L=Seattle, C=US"

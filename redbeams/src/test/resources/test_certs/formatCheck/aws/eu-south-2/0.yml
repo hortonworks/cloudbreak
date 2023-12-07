@@ -24,3 +24,4 @@ cert: |-
   qTmAZloUNM7VNuurcMM2hWF494tQpsQ6ysg2qPjbBqzlGoOt3GfBTOZmqmwmqtam
   K7juWM/mdMQAJ3SMlE5wI8nVdx4=
   -----END CERTIFICATE-----
+unknown-property: foo

@@ -33,7 +33,7 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
 
     private static final int FOUR_CERTS = 4;
 
-    private static final int NUM_CERTS_TOTAL = 21;
+    private static final int NUM_CERTS_TOTAL = 22;
 
     private static final int VERSION_0 = 0;
 
@@ -129,6 +129,8 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
 
     private static final String REGION_EUS2 = "eu-south-2";
 
+    private static final String REGION_ILC1 = "il-central-1";
+
     private static final String REGION_AFS1 = "af-south-1";
 
     private static final String REGION_MES1 = "me-south-1";
@@ -200,6 +202,7 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
                     "aws",
                     "aws." + REGION_EUS1,
                     "aws." + REGION_EUS2,
+                    "aws." + REGION_ILC1,
                     "aws." + REGION_USGE1,
                     "aws." + REGION_AFS1,
                     "aws." + REGION_MES1,

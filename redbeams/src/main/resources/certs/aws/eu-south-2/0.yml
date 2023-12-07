@@ -24,3 +24,5 @@ cert: |-
   qTmAZloUNM7VNuurcMM2hWF494tQpsQ6ysg2qPjbBqzlGoOt3GfBTOZmqmwmqtam
   K7juWM/mdMQAJ3SMlE5wI8nVdx4=
   -----END CERTIFICATE-----
+fingerprint: 2c288b6a49cc18046ac82a58a8494ccaee48b49d
+deprecated: false
