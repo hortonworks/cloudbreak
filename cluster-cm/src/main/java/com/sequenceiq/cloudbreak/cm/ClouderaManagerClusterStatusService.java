@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
@@ -52,6 +53,7 @@ import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiServiceState;
 import com.cloudera.api.swagger.model.ApiVersionInfo;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
@@ -67,6 +69,8 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
@@ -88,6 +92,16 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     static final String FULL_WITH_EXPLANATION_VIEW = "FULL_WITH_HEALTH_CHECK_EXPLANATION";
 
     static final String SUMMARY = "summary";
+
+    private static final String UNKNOWN = "UNKNOWN";
+
+    private static final String CODE = "code";
+
+    private static final String STACK_SYNC_CM_UNREACHABLE = "STACK_SYNC_CM_UNREACHABLE";
+
+    private static final String STATUS_CODE = "STATUS_CODE";
+
+    private static final String ERROR_CODE = "ERROR_CODE";
 
     private static final String DEFAULT_STATUS_REASON = "Cloudera Manager reported bad health for this host.";
 
@@ -143,6 +157,10 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
 
     @Inject
     private ClouderaManagerCommandsService clouderaManagerCommandsService;
+
+    @Qualifier("CommonMetricService")
+    @Inject
+    private MetricService metricService;
 
     private ApiClient client;
 
@@ -445,6 +463,9 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
             return true;
         } catch (ApiException e) {
             LOGGER.info("Failed to get version from CM", e);
+            metricService.incrementMetricCounter(STACK_SYNC_CM_UNREACHABLE,
+                    STATUS_CODE, String.valueOf(e.getCode()),
+                    ERROR_CODE, extractErrorCode(e));
             return false;
         }
     }
@@ -566,5 +587,23 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
             LOGGER.info("Failed to get hosts from CM", e);
             throw new RuntimeException("Failed to get hosts from CM due to: " + e.getMessage(), e);
         }
+    }
+
+    private String extractErrorCode(ApiException apiException) {
+        if (StringUtils.isNotEmpty(apiException.getResponseBody())) {
+            try {
+                JsonNode tree = JsonUtil.readTree(apiException.getResponseBody());
+                JsonNode code = tree.get(CODE);
+                if (code != null && code.isTextual()) {
+                    String text = code.asText();
+                    if (StringUtils.isNotEmpty(text)) {
+                        return text;
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.debug("Failed to parse API response body as JSON", e);
+            }
+        }
+        return UNKNOWN;
     }
 }

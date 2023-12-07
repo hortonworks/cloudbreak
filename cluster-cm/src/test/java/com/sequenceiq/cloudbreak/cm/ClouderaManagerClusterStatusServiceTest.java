@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,6 +65,7 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.squareup.okhttp.OkHttpClient;
@@ -79,22 +81,22 @@ public class ClouderaManagerClusterStatusServiceTest {
     private ApiClient client;
 
     @Mock
-    private ClouderaManagerApiFactory clientFactory;
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     @Mock
     private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
 
     @Mock
-    private ClouderaManagerResourceApi cmApi;
+    private ClouderaManagerResourceApi clouderaManagerResourceApi;
 
     @Mock
-    private ServicesResourceApi servicesApi;
+    private ServicesResourceApi servicesResourceApi;
 
     @Mock
-    private RolesResourceApi rolesApi;
+    private RolesResourceApi rolesResourceApi;
 
     @Mock
-    private HostsResourceApi hostsApi;
+    private HostsResourceApi hostsResourceApi;
 
     @Mock
     private RetryTemplate retryTemplate;
@@ -104,6 +106,9 @@ public class ClouderaManagerClusterStatusServiceTest {
 
     @Mock
     private ClouderaManagerCommandsService clouderaManagerCommandsService;
+
+    @Mock
+    private MetricService metricService;
 
     @Mock
     private OkHttpClient okHttpClient;
@@ -120,18 +125,19 @@ public class ClouderaManagerClusterStatusServiceTest {
 
         subject = new ClouderaManagerClusterStatusService(stack, clientConfig);
         ReflectionTestUtils.setField(subject, "clouderaManagerApiClientProvider", clouderaManagerApiClientProvider);
-        ReflectionTestUtils.setField(subject, "clouderaManagerApiFactory", clientFactory);
+        ReflectionTestUtils.setField(subject, "clouderaManagerApiFactory", clouderaManagerApiFactory);
         ReflectionTestUtils.setField(subject, "cmApiRetryTemplate", retryTemplate);
         ReflectionTestUtils.setField(subject, "syncApiCommandRetriever", syncApiCommandRetriever);
         ReflectionTestUtils.setField(subject, "clouderaManagerCommandsService", clouderaManagerCommandsService);
         ReflectionTestUtils.setField(subject, "connectQuickTimeoutSeconds", 1);
+        ReflectionTestUtils.setField(subject, "metricService", metricService);
         when(client.getHttpClient()).thenReturn(okHttpClient);
         when(clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), cluster.getCloudbreakAmbariUser(),
                 cluster.getPassword(), clientConfig)).thenReturn(client);
-        lenient().when(clientFactory.getClouderaManagerResourceApi(client)).thenReturn(cmApi);
-        lenient().when(clientFactory.getServicesResourceApi(client)).thenReturn(servicesApi);
-        lenient().when(clientFactory.getRolesResourceApi(client)).thenReturn(rolesApi);
-        lenient().when(clientFactory.getHostsResourceApi(client)).thenReturn(hostsApi);
+        lenient().when(clouderaManagerApiFactory.getClouderaManagerResourceApi(client)).thenReturn(clouderaManagerResourceApi);
+        lenient().when(clouderaManagerApiFactory.getServicesResourceApi(client)).thenReturn(servicesResourceApi);
+        lenient().when(clouderaManagerApiFactory.getRolesResourceApi(client)).thenReturn(rolesResourceApi);
+        lenient().when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
         subject.initApiClient();
 
     }
@@ -420,7 +426,7 @@ public class ClouderaManagerClusterStatusServiceTest {
     @Test
     public void testGetActiveCommandsListWhenListNotEmpty() throws Exception {
         //GIVEN
-        when(cmApi.listActiveCommands("SUMMARY"))
+        when(clouderaManagerResourceApi.listActiveCommands("SUMMARY"))
                 .thenReturn(new ApiCommandList()
                         .items(List.of(new ApiCommand().name("cmd").id(BigDecimal.ONE).startTime("starttime"))));
         // WHEN
@@ -436,7 +442,7 @@ public class ClouderaManagerClusterStatusServiceTest {
     @Test
     public void testGetActiveCommandsListWhenListIsEmpty() throws Exception {
         //GIVEN
-        when(cmApi.listActiveCommands("SUMMARY")).thenReturn(new ApiCommandList().items(List.of()));
+        when(clouderaManagerResourceApi.listActiveCommands("SUMMARY")).thenReturn(new ApiCommandList().items(List.of()));
         // WHEN
         List<ClusterManagerCommand> actualResult = subject.getActiveCommandsList();
         // THEN
@@ -446,7 +452,7 @@ public class ClouderaManagerClusterStatusServiceTest {
     @Test
     public void testGetActiveCommandsListWhenListIsNull() throws Exception {
         //GIVEN
-        when(cmApi.listActiveCommands("SUMMARY")).thenReturn(new ApiCommandList());
+        when(clouderaManagerResourceApi.listActiveCommands("SUMMARY")).thenReturn(new ApiCommandList());
         // WHEN
         List<ClusterManagerCommand> actualResult = subject.getActiveCommandsList();
         // THEN
@@ -456,7 +462,7 @@ public class ClouderaManagerClusterStatusServiceTest {
     @Test
     public void testGetActiveCommandsListWhenApiCallThrowsException() throws Exception {
         //GIVEN
-        when(cmApi.listActiveCommands("SUMMARY")).thenThrow(new ApiException());
+        when(clouderaManagerResourceApi.listActiveCommands("SUMMARY")).thenThrow(new ApiException());
         // WHEN
 
         assertThrows(ClouderaManagerOperationFailedException.class, () -> subject.getActiveCommandsList());
@@ -470,12 +476,12 @@ public class ClouderaManagerClusterStatusServiceTest {
         when(apiService.getType()).thenReturn("serviceType");
         when(apiService.getServiceState()).thenReturn(ApiServiceState.STARTED);
         when(apiServiceList.getItems()).thenReturn(List.of(apiService));
-        when(servicesApi.readServices(any(), any())).thenReturn(apiServiceList);
+        when(servicesResourceApi.readServices(any(), any())).thenReturn(apiServiceList);
 
         boolean result = subject.isServiceRunningByType("clusterName", "serviceType");
 
         assertTrue(result);
-        verify(servicesApi, times(1)).readServices("clusterName", "summary");
+        verify(servicesResourceApi, times(1)).readServices("clusterName", "summary");
     }
 
     @Test
@@ -485,34 +491,46 @@ public class ClouderaManagerClusterStatusServiceTest {
         when(apiService.getType()).thenReturn("serviceType");
         when(apiService.getServiceState()).thenReturn(ApiServiceState.STOPPED);
         when(apiServiceList.getItems()).thenReturn(List.of(apiService));
-        when(servicesApi.readServices(any(), any())).thenReturn(apiServiceList);
+        when(servicesResourceApi.readServices(any(), any())).thenReturn(apiServiceList);
 
         boolean result = subject.isServiceRunningByType("clusterName", "serviceType");
 
         assertFalse(result);
-        verify(servicesApi, times(1)).readServices("clusterName", "summary");
+        verify(servicesResourceApi, times(1)).readServices("clusterName", "summary");
     }
 
     @Test
     void testIsServiceRunningByTypeEmptyServiceList() throws ApiException {
         ApiServiceList apiServiceList = mock(ApiServiceList.class);
         when(apiServiceList.getItems()).thenReturn(Collections.emptyList());
-        when(servicesApi.readServices(any(), any())).thenReturn(apiServiceList);
+        when(servicesResourceApi.readServices(any(), any())).thenReturn(apiServiceList);
 
         boolean result = subject.isServiceRunningByType("clusterName", "serviceType");
 
         assertFalse(result);
-        verify(servicesApi, times(1)).readServices("clusterName", "summary");
+        verify(servicesResourceApi, times(1)).readServices("clusterName", "summary");
     }
 
     @Test
     void testIsServiceRunningByTypeThrowApiException() throws ApiException {
-        doThrow(ApiException.class).when(servicesApi).readServices(any(), any());
+        doThrow(ApiException.class).when(servicesResourceApi).readServices(any(), any());
 
         boolean result = subject.isServiceRunningByType("clusterName", "serviceType");
 
         assertFalse(result);
-        verify(servicesApi, times(1)).readServices("clusterName", "summary");
+        verify(servicesResourceApi, times(1)).readServices("clusterName", "summary");
+    }
+
+    @Test
+    void testClusterManagerRunningQuickCheckShouldCallMetricServiceIfCallFails() throws ApiException {
+        doThrow(new ApiException(123, new HashMap<>(), "{\"code\":\"errorCode\"}")).when(clouderaManagerResourceApi).getVersion();
+
+        boolean result = subject.isClusterManagerRunningQuickCheck();
+
+        assertFalse(result);
+        verify(clouderaManagerApiFactory, times(1)).getClouderaManagerResourceApi(any());
+        verify(clouderaManagerResourceApi, times(1)).getVersion();
+        verify(metricService, times(1)).incrementMetricCounter(eq("STACK_SYNC_CM_UNREACHABLE"), any(String[].class));
     }
 
     private ApiRoleRef roleRef(String serviceName, ApiHealthSummary apiHealthSummary) {
@@ -529,19 +547,19 @@ public class ClouderaManagerClusterStatusServiceTest {
     private void hostsAre(ApiHost... hosts) throws ApiException {
         Arrays.stream(hosts).forEach(host -> host.addRoleRefsItem(roleRef(ApiHealthSummary.GOOD)));
         ApiHostList list = new ApiHostList().items(Arrays.asList(hosts));
-        lenient().when(hostsApi.readHosts(null, null, FULL_VIEW)).thenReturn(list);
-        lenient().when(hostsApi.readHosts(null, null, SUMMARY)).thenReturn(list);
-        lenient().when(hostsApi.readHosts(null, null, FULL_WITH_EXPLANATION_VIEW)).thenReturn(list);
+        lenient().when(hostsResourceApi.readHosts(null, null, FULL_VIEW)).thenReturn(list);
+        lenient().when(hostsResourceApi.readHosts(null, null, SUMMARY)).thenReturn(list);
+        lenient().when(hostsResourceApi.readHosts(null, null, FULL_WITH_EXPLANATION_VIEW)).thenReturn(list);
     }
 
     private void servicesAre(ApiService... services) throws ApiException {
         ApiServiceList serviceList = new ApiServiceList().items(Arrays.asList(services));
-        when(servicesApi.readServices(CLUSTER_NAME, FULL_VIEW)).thenReturn(serviceList);
+        when(servicesResourceApi.readServices(CLUSTER_NAME, FULL_VIEW)).thenReturn(serviceList);
     }
 
     private void rolesAre(String service, ApiRole... roles) throws ApiException {
         ApiRoleList roleList = new ApiRoleList().items(Arrays.asList(roles));
-        when(rolesApi.readRoles(eq(CLUSTER_NAME), eq(service), anyString(), eq(FULL_VIEW))).thenReturn(roleList);
+        when(rolesResourceApi.readRoles(eq(CLUSTER_NAME), eq(service), anyString(), eq(FULL_VIEW))).thenReturn(roleList);
     }
 
     private void cmIsNotReachable() throws ApiException {
@@ -553,7 +571,7 @@ public class ClouderaManagerClusterStatusServiceTest {
     }
 
     private void cmIsReachable() throws ApiException {
-        lenient().when(cmApi.getVersion()).thenReturn(new ApiVersionInfo().version("1.2.3"));
+        lenient().when(clouderaManagerResourceApi.getVersion()).thenReturn(new ApiVersionInfo().version("1.2.3"));
     }
 
 }
