@@ -79,6 +79,7 @@ public class NetworkBuilderService {
             Network network = networkService.getById(dbStack.getNetwork());
             Map<String, Object> networkAttributes = network.getAttributes().getMap();
             networkAttributes.putAll(envSubnets);
+            networkAttributes.putAll(networkParameterAdder.addParameters(environment, dbStack));
             network.setAttributes(new Json(networkAttributes));
             LOGGER.info("The subnets of the DB stack [{}] updated with [{}] subnets before db upgrade", dbStack.getName(), envSubnets);
             networkService.save(network);
