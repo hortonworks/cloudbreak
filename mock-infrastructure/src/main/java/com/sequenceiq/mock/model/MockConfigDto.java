@@ -8,6 +8,8 @@ import com.sequenceiq.mock.config.ConfigParams;
 public class MockConfigDto {
     private TestMode testMode;
 
+    private String yarnRecommendationInterval;
+
     private Map<String, ConfigParams> loadTestConfig = new HashMap<>();
 
     public TestMode getTestMode() {
@@ -24,5 +26,13 @@ public class MockConfigDto {
 
     public void setLoadTestConfig(Map<String, ConfigParams> loadTestConfig) {
         this.loadTestConfig = loadTestConfig;
+    }
+
+    public String getYarnRecommendationInterval() {
+        return yarnRecommendationInterval;
+    }
+
+    public void setYarnRecommendationInterval(String yarnRecommendationInterval) {
+        this.yarnRecommendationInterval = yarnRecommendationInterval;
     }
 }

@@ -1,9 +1,12 @@
 package com.sequenceiq.mock.controller;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -20,7 +23,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.sequenceiq.mock.clouderamanager.DataProviderService;
+import com.sequenceiq.mock.config.MockConfig;
 import com.sequenceiq.mock.model.RecommendationType;
+import com.sequenceiq.mock.model.YarnRecommendation;
 import com.sequenceiq.mock.model.YarnScalingServiceV1Request;
 import com.sequenceiq.mock.model.YarnScalingServiceV1Response;
 import com.sequenceiq.mock.swagger.model.ApiHostList;
@@ -35,29 +40,45 @@ public class YarnController {
 
     private static final int UPSCALE_NODE_COUNT = 100;
 
-    private Map<String, RecommendationType> stackToOperationMap = new HashMap<>();
+    private static final int RANDOM_WINDOW_INITIAL_RECOMMENDATION_TS = 30;
+
+    private Map<String, YarnRecommendation> stackToOperationMap = new HashMap<>();
 
     @Inject
     private DataProviderService dataProviderService;
+
+    @Inject
+    private MockConfig mockConfig;
 
     @PostMapping("/scaling")
     public ResponseEntity<YarnScalingServiceV1Response> getYarnMetrics(@PathVariable("mockUuid") String mockUuid,
             @QueryParam("actionType") Optional<String> actionType, @RequestBody YarnScalingServiceV1Request yarnScalingServiceV1Request) {
         LOGGER.info("getYarnMetrics called with {} and {}", mockUuid, yarnScalingServiceV1Request);
         LOGGER.info("actionType is {}", actionType.orElse(null));
-        RecommendationType lastRecommendation = stackToOperationMap.getOrDefault(mockUuid, RecommendationType.UPSCALE);
-        RecommendationType nextRecommendation = lastRecommendation.toggle();
-        if (ACTION_TYPE_VERIFY.equalsIgnoreCase(actionType.orElse(null))) {
-            LOGGER.info("actionType is verify so use lastRecommendation as {}", lastRecommendation);
-            nextRecommendation = lastRecommendation;
-        }
-        YarnScalingServiceV1Response yarnScalingServiceV1Response = null;
-        if (nextRecommendation == RecommendationType.UPSCALE) {
-            yarnScalingServiceV1Response = populateUpscale();
+        YarnScalingServiceV1Response yarnScalingServiceV1Response = new YarnScalingServiceV1Response();
+        YarnRecommendation lastRecommendation = stackToOperationMap.get(mockUuid);
+        Long yarnRecommendationIntervalInMillis = getYarnRecommendationIntervalInMillis();
+        if (lastRecommendation == null || ACTION_TYPE_VERIFY.equalsIgnoreCase(actionType.orElse(null))
+                || System.currentTimeMillis() - yarnRecommendationIntervalInMillis >= lastRecommendation.getLastRecommendedTs()) {
+            if (lastRecommendation == null) {
+                lastRecommendation = new YarnRecommendation(RecommendationType.UPSCALE,
+                        System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(new Random().nextInt(RANDOM_WINDOW_INITIAL_RECOMMENDATION_TS)));
+            }
+            YarnRecommendation nextRecommendation = new YarnRecommendation(lastRecommendation.getRecommendationType().toggle(), System.currentTimeMillis());
+            if (ACTION_TYPE_VERIFY.equalsIgnoreCase(actionType.orElse(null))) {
+                LOGGER.info("actionType is verify so use lastRecommendation as {}", lastRecommendation);
+                nextRecommendation = lastRecommendation;
+            }
+            if (nextRecommendation.getRecommendationType() == RecommendationType.UPSCALE) {
+                yarnScalingServiceV1Response = populateUpscale();
+            } else {
+                yarnScalingServiceV1Response = populateDownscale(mockUuid);
+            }
+            stackToOperationMap.put(mockUuid, nextRecommendation);
         } else {
-            yarnScalingServiceV1Response = populateDownscale(mockUuid);
+            LOGGER.info("No recommendation for Upscale/Downscale since recommended interval of {} has not elapsed since last recommendation at {} for {}",
+                    yarnRecommendationIntervalInMillis, lastRecommendation.getLastRecommendedTs(), mockUuid);
         }
-        stackToOperationMap.put(mockUuid, nextRecommendation);
         return new ResponseEntity<>(yarnScalingServiceV1Response, HttpStatus.OK);
     }
 
@@ -83,5 +104,20 @@ public class YarnController {
         yarnScalingServiceV1Response.setDecommissionCandidates(Map.of(YarnScalingServiceV1Response.YARN_RESPONSE_DECOMMISSION_CANDIDATES_KEY,
                 decommissionCandidates));
         return yarnScalingServiceV1Response;
+    }
+
+    private Long getYarnRecommendationIntervalInMillis() {
+        String yarnRecommendationInterval = mockConfig.getYarnRecommendationInterval();
+        if (yarnRecommendationInterval == null) {
+            return 0L;
+        }
+        Integer yarnRecommendedInterval;
+        if (yarnRecommendationInterval.indexOf("-") == -1) {
+            yarnRecommendedInterval =  Integer.valueOf(yarnRecommendationInterval);
+        } else {
+            List<Integer> delayRange =  Arrays.stream(yarnRecommendationInterval.split("-")).map(Integer::valueOf).collect(Collectors.toList());
+            yarnRecommendedInterval = new Random().nextInt(delayRange.get(1) + 1 - delayRange.get(0)) + delayRange.get(0);
+        }
+        return TimeUnit.MINUTES.toMillis(yarnRecommendedInterval);
     }
 }

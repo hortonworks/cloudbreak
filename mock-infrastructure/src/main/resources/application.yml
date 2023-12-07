@@ -21,6 +21,7 @@ mock:
       createDummyCluster: false
   config:
     testMode: REGULAR
+    yarnRecommendationInterval: 10-15
     loadTestConfig:
       "[/**/cm/version]":
         delay: 1

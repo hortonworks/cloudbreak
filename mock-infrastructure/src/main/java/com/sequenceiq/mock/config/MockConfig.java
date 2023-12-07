@@ -22,6 +22,8 @@ public class MockConfig {
 
     private TestMode testMode;
 
+    private String yarnRecommendationInterval;
+
     private Map<String, ConfigParams> loadTestConfig = new HashMap<>();
 
     public TestMode getTestMode() {
@@ -38,6 +40,14 @@ public class MockConfig {
 
     public void setLoadTestConfig(Map<String, ConfigParams> loadTestConfig) {
         this.loadTestConfig = loadTestConfig;
+    }
+
+    public String getYarnRecommendationInterval() {
+        return yarnRecommendationInterval;
+    }
+
+    public void setYarnRecommendationInterval(String yarnRecommendationInterval) {
+        this.yarnRecommendationInterval = yarnRecommendationInterval;
     }
 
     @PostConstruct
@@ -64,12 +74,14 @@ public class MockConfig {
     public MockConfigDto getMockConfigDto() {
         MockConfigDto mockConfigDto = new MockConfigDto();
         mockConfigDto.setTestMode(testMode);
+        mockConfigDto.setYarnRecommendationInterval(yarnRecommendationInterval);
         mockConfigDto.setLoadTestConfig(loadTestConfig);
         return mockConfigDto;
     }
 
     public void update(MockConfigDto mockConfigDto) {
         this.testMode = mockConfigDto.getTestMode();
+        this.yarnRecommendationInterval = mockConfigDto.getYarnRecommendationInterval();
         if (mockConfigDto.getLoadTestConfig() != null) {
             mockConfigDto.getLoadTestConfig().entrySet().forEach(entry -> {
                 this.loadTestConfig.put(entry.getKey(), entry.getValue());
