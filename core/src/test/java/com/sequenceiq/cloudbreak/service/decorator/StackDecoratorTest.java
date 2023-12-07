@@ -164,6 +164,8 @@ public class StackDecoratorTest {
     @Captor
     private ArgumentCaptor<Set<AvailabilityZone>> azSetCaptor;
 
+    private DetailedEnvironmentResponse environmentResponse;
+
     @BeforeEach
     public void setUp() {
         String credentialName = "credentialName";
@@ -188,7 +190,7 @@ public class StackDecoratorTest {
         lenient().when(environmentSettingsRequest.getCredentialName()).thenReturn(credentialName);
         lenient().when(sharedServiceValidator.checkSharedServiceStackRequirements(any(StackV4Request.class), any(Workspace.class)))
                 .thenReturn(validationResult);
-        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCredential(credentialResponse);
         CompactRegionResponse crr = new CompactRegionResponse();
         crr.setNames(Lists.newArrayList("region"));
@@ -202,7 +204,6 @@ public class StackDecoratorTest {
                         .builder().withResourceGroupUsage(ResourceGroupUsage.SINGLE).withName("resource-group").build()).build());
         lenient().when(request.getCloudPlatform()).thenReturn(CloudPlatform.AZURE);
         lenient().when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
-        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         Credential credential = Credential.builder().cloudPlatform(CloudPlatform.MOCK.name()).build();
         lenient().when(credentialClientService.getByCrn(anyString())).thenReturn(credential);
         lenient().when(credentialClientService.getByName(anyString())).thenReturn(credential);
@@ -226,7 +227,7 @@ public class StackDecoratorTest {
     @Test
     public void testDecorateWhenMethodCalledThenExactlyOneSharedServiceValidatorCallShouldHappen() {
         ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.decorate(subject, request, user, workspace));
+                () -> underTest.decorate(environmentResponse, subject, request, user, workspace));
 
         verify(sharedServiceValidator, times(1)).checkSharedServiceStackRequirements(any(StackV4Request.class), any(Workspace.class));
     }
@@ -236,13 +237,13 @@ public class StackDecoratorTest {
         Set<InstanceGroup> instanceGroups = createInstanceGroups(GATEWAY, GATEWAY);
         subject.setInstanceGroups(instanceGroups);
         assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.decorate(subject, request, user, workspace)));
+                () -> underTest.decorate(environmentResponse, subject, request, user, workspace)));
     }
 
     @Test
     public void testDecoratorWhenClusterToAttachIsNotNullAndAllSharedServiceRequirementMeetsThenEverythingShouldGoFine() {
         ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.decorate(subject, request, user, workspace));
+                () -> underTest.decorate(environmentResponse, subject, request, user, workspace));
         assertEquals("resource-group", subject.getParameters().get(PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER));
         assertEquals("SINGLE", subject.getParameters().get(PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER));
 
@@ -260,7 +261,7 @@ public class StackDecoratorTest {
         when(validationResult.getFormattedErrors()).thenReturn(MISCONFIGURED_STACK_FOR_SHARED_SERVICE);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.decorate(subject, request, user, workspace)));
+                () -> underTest.decorate(environmentResponse, subject, request, user, workspace)));
         assertEquals(MISCONFIGURED_STACK_FOR_SHARED_SERVICE, badRequestException.getMessage());
     }
 
