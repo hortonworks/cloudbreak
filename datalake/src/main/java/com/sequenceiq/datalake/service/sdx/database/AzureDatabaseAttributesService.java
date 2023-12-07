@@ -13,13 +13,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAzureRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.service.database.EnvironmentDatabaseService;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.datalake.entity.SdxDatabase;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAzureRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
@@ -31,6 +30,9 @@ public class AzureDatabaseAttributesService {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private EnvironmentDatabaseService environmentDatabaseService;
+
     public AzureDatabaseType getAzureDatabaseType(SdxDatabase sdxDatabase) {
         String dbTypeStr = sdxDatabase.getAttributes() != null ?
                 (String) sdxDatabase.getAttributes().getMap().get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY) : "";
@@ -41,24 +43,25 @@ public class AzureDatabaseAttributesService {
         }
     }
 
-    public void configureAzureDatabase(DatabaseRequest internalDatabaseRequest, SdxDatabaseRequest databaseRequest, SdxDatabase sdxDatabase) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        boolean azureDatabaseFlexibleServerEnabled = entitlementService.isAzureDatabaseFlexibleServerEnabled(accountId);
+    public AzureDatabaseType determineAzureDatabaseType(DetailedEnvironmentResponse environment, DatabaseRequest internalDatabaseRequest,
+            SdxDatabaseRequest databaseRequest) {
         AzureDatabaseType azureDatabaseType = Optional.ofNullable(databaseRequest)
                 .map(SdxDatabaseRequest::getSdxDatabaseAzureRequest)
                 .map(SdxDatabaseAzureRequest::getAzureDatabaseType)
                 .orElse(Optional.ofNullable(internalDatabaseRequest)
                         .map(DatabaseRequest::getDatabaseAzureRequest)
                         .map(DatabaseAzureRequest::getAzureDatabaseType)
-                        .orElse(azureDatabaseFlexibleServerEnabled ? AzureDatabaseType.FLEXIBLE_SERVER : AzureDatabaseType.SINGLE_SERVER));
-        if (azureDatabaseType == AzureDatabaseType.FLEXIBLE_SERVER && !azureDatabaseFlexibleServerEnabled) {
-            LOGGER.info("Azure Flexible Database Server creation is not entitled for {} account.", accountId);
-            throw new BadRequestException("You are not entitled to use Flexible Database Server on Azure for your cluster." +
-                    " Please contact Cloudera to enable " + Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER + " for your account");
-        }
+                        .orElse(null));
+        azureDatabaseType = environmentDatabaseService.validateOrModifyDatabaseTypeIfNeeded(environment, azureDatabaseType);
+        return azureDatabaseType;
+    }
+
+    public void configureAzureDatabase(AzureDatabaseType azureDatabaseType, SdxDatabase sdxDatabase) {
         Json attributes = sdxDatabase.getAttributes();
         Map<String, Object> params = attributes == null ? new HashMap<>() : attributes.getMap();
-        params.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, azureDatabaseType.name());
+        if (azureDatabaseType != null) {
+            params.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, azureDatabaseType);
+        }
         sdxDatabase.setAttributes(new Json(params));
     }
 }
