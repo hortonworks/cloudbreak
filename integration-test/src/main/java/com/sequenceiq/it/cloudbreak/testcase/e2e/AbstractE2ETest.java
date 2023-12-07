@@ -31,6 +31,8 @@ import com.sequenceiq.it.cloudbreak.util.spot.SpotRetryOnceTestListener;
 import com.sequenceiq.it.cloudbreak.util.spot.SpotRetryUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.SpotUtil;
 import com.sequenceiq.it.util.TagsUtil;
+import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
+import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
 
 @Listeners(SpotRetryOnceTestListener.class)
 public abstract class AbstractE2ETest extends AbstractIntegrationTest {
@@ -55,6 +57,9 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     @Inject
     private SafeLogicAssertions safeLogicAssertions;
 
+    @Inject
+    private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
+
     @Override
     protected void setupTest(ITestResult testResult) {
         boolean shouldUseSpotInstances = spotUtil.shouldUseSpotInstancesForTest(testResult.getMethod().getConstructorOrMethod().getMethod());
@@ -74,6 +79,9 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     @AfterMethod
     public void tearDownAbstract(Object[] data) {
         TestContext testContext = (TestContext) data[0];
+        if (this instanceof ImageValidatorE2ETest imageValidatorE2ETest) {
+            imageValidatorE2ETestUtil.validateImageIdAndWriteToFile(testContext, imageValidatorE2ETest);
+        }
         if (MapUtils.isEmpty(testContext.getExceptionMap())) {
             LOGGER.info("Validating default tags on the created and tagged test resources...");
             testContext.getResourceNames().values().forEach(value -> tagsUtil.verifyTags(value, testContext));

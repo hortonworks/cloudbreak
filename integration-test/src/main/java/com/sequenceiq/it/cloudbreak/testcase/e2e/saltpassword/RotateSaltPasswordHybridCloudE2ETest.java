@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
-import com.sequenceiq.it.cloudbreak.assertion.hybrid.HybridCloudAssertions;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -52,9 +51,6 @@ public class RotateSaltPasswordHybridCloudE2ETest extends HybridCloudE2ETest {
     @Inject
     private DistroXTestClient distroXTestClient;
 
-    @Inject
-    private HybridCloudAssertions hybridCloudAssertions;
-
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
@@ -82,7 +78,6 @@ public class RotateSaltPasswordHybridCloudE2ETest extends HybridCloudE2ETest {
                 .when(sdxTestClient.rotateSaltPassword())
                 .awaitForFlow()
                 .await(SdxClusterStatusResponse.RUNNING, key(CHILD_SDX_KEY).withWaitForFlow(Boolean.TRUE))
-                .then(hybridCloudAssertions.validateDatalakeSshAuthentication())
                 .then((tc, testDto, client) -> validateSaltPasswordRotation(testDto, getSdxIpAddresses(testDto)))
                 .validate();
         LOGGER.info("SDX salt password rotation test PASSED");

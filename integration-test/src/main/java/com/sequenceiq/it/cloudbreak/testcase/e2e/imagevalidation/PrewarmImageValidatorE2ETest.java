@@ -12,16 +12,30 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
+import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class PrewarmImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
+public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements ImageValidatorE2ETest {
 
     @Inject
     private SdxTestClient sdxTestClient;
 
     @Inject
     private DistroXTestClient distroXTestClient;
+
+    @Inject
+    private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
+
+    @Override
+    protected void setupTest(TestContext testContext) {
+        imageValidatorE2ETestUtil.setupTest(testContext, this);
+        createDefaultCredential(testContext);
+        initializeDefaultBlueprints(testContext);
+        createEnvironmentWithFreeIpa(testContext);
+    }
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
@@ -61,12 +75,12 @@ public class PrewarmImageValidatorE2ETest extends AbstractImageValidatorE2ETest 
     }
 
     @Override
-    protected String getImageId(TestContext testContext) {
+    public String getImageId(TestContext testContext) {
         return testContext.get(SdxInternalTestDto.class).getResponse().getStackV4Response().getImage().getId();
     }
 
     @Override
-    protected boolean isPrewarmedImageTest() {
+    public boolean isPrewarmedImageTest() {
         return true;
     }
 }

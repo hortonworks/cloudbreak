@@ -23,10 +23,13 @@ import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
+import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class BaseImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
+public class BaseImageValidatorE2ETest extends AbstractE2ETest implements ImageValidatorE2ETest {
 
     private static final Map<String, InstanceStatus> HEALTY_STATUSES = new HashMap<>() {{
         put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
@@ -38,9 +41,15 @@ public class BaseImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
     @Inject
     private SdxTestClient sdxTestClient;
 
+    @Inject
+    private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
+
     @Override
     protected void setupTest(TestContext testContext) {
-        super.setupTest(testContext);
+        imageValidatorE2ETestUtil.setupTest(testContext, this);
+        createDefaultCredential(testContext);
+        initializeDefaultBlueprints(testContext);
+        createEnvironmentWithFreeIpa(testContext);
         sdxInternalKey = resourcePropertyProvider().getName();
     }
 
@@ -85,12 +94,12 @@ public class BaseImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
     }
 
     @Override
-    protected String getImageId(TestContext testContext) {
+    public String getImageId(TestContext testContext) {
         return ((SdxInternalTestDto) testContext.get(sdxInternalKey)).getResponse().getStackV4Response().getImage().getId();
     }
 
     @Override
-    protected boolean isPrewarmedImageTest() {
+    public boolean isPrewarmedImageTest() {
         return false;
     }
 }

@@ -64,6 +64,8 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
 
     protected static final String CHILD_DISTROX_KEY = "childDataHub";
 
+    protected static final String CHILD_SDX_IMAGE_SETTINGS_KEY = "childDataLakeImageSettings";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(HybridCloudE2ETest.class);
 
     private static final String MASTER_INSTANCE_GROUP = "master";
@@ -148,7 +150,6 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
         String clouderaManager = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
         String cluster = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
         String cmProduct = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
-        String imageSettings = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
         String stack = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
         fetchCdhDetails(testContext);
 
@@ -173,13 +174,13 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
                     .withHostGroup(IDBROKER)
                     .withNodeCount(1)
                 .given(STACK_AUTHENTICATION, StackAuthenticationTestDto.class, CHILD_CLOUD_PLATFORM)
-                .given(imageSettings, ImageSettingsTestDto.class, CHILD_CLOUD_PLATFORM)
+                .given(CHILD_SDX_IMAGE_SETTINGS_KEY, ImageSettingsTestDto.class, CHILD_CLOUD_PLATFORM)
                 .given(stack, StackTestDto.class, CHILD_CLOUD_PLATFORM)
                     .withCluster(cluster)
                     .withInstanceGroups(MASTER_INSTANCE_GROUP, IDBROKER_INSTANCE_GROUP)
                     .withStackAuthentication(STACK_AUTHENTICATION)
                     .withTelemetry("telemetry")
-                    .withImageSettings(imageSettings)
+                    .withImageSettings(CHILD_SDX_IMAGE_SETTINGS_KEY)
                 .given(CHILD_SDX_KEY, SdxInternalTestDto.class, CHILD_CLOUD_PLATFORM)
                     .withStackRequest(key(cluster), key(stack))
                     .withEnvironmentKey(key(CHILD_ENVIRONMENT_KEY))

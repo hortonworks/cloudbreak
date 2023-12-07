@@ -108,36 +108,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         return environmentTestClient;
     }
 
-    protected void createImageValidationSourceCatalog(TestContext testContext, String url, String name) {
-        testContext.given(ImageCatalogTestDto.class)
-                .withUrl(url)
-                .withName(name)
-                .withoutCleanup()
-                .when(imageCatalogTestClient.createIfNotExistV4());
-    }
-
-    protected void validatePrewarmedImage(TestContext testContext, String imageUuid) {
-        testContext.given(ImageCatalogTestDto.class)
-                .when(imageCatalogTestClient.getV4(true))
-                .valid();
-        ImageCatalogTestDto dto = testContext.get(ImageCatalogTestDto.class);
-        dto.getResponse().getImages().getCdhImages().stream()
-                .filter(img -> img.getUuid().equalsIgnoreCase(imageUuid))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException(imageUuid + " prewarmed image is missing from the '" + dto.getName() + "' catalog."));
-    }
-
-    protected void validateBaseImage(TestContext testContext, String imageUuid) {
-        testContext.given(ImageCatalogTestDto.class)
-                .when(imageCatalogTestClient.getV4(true))
-                .valid();
-        ImageCatalogTestDto dto = testContext.get(ImageCatalogTestDto.class);
-        dto.getResponse().getImages().getBaseImages().stream()
-                .filter(img -> img.getUuid().equalsIgnoreCase(imageUuid))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException(imageUuid + " base image is missing from the '" + dto.getName() + "' catalog."));
-    }
-
     protected void createDefaultEnvironment(TestContext testContext) {
         testContext.given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(Boolean.FALSE)
