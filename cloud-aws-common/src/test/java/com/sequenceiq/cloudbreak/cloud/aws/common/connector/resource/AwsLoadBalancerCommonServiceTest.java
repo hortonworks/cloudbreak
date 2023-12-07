@@ -269,7 +269,7 @@ class AwsLoadBalancerCommonServiceTest {
     void testDisableDeletionProtectionWhenNoAccessToModifyLoadBalancerAttributes() {
         AmazonElasticLoadBalancingClient amazonElasticLoadBalancingClient = mock(AmazonElasticLoadBalancingClient.class);
         when(amazonElasticLoadBalancingClient.modifyLoadBalancerAttributes(any())).thenThrow(ElasticLoadBalancingV2Exception.builder()
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode("AccessDeniedException").build())
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode("AccessDenied").build())
                 .build());
 
         assertDoesNotThrow(() -> underTest.disableDeletionProtection(amazonElasticLoadBalancingClient, "loadBalancerArn"));
@@ -279,7 +279,7 @@ class AwsLoadBalancerCommonServiceTest {
     void testEnableDeletionProtectionWhenNoAccessToModifyLoadBalancerAttributes() {
         AmazonElasticLoadBalancingClient amazonElasticLoadBalancingClient = mock(AmazonElasticLoadBalancingClient.class);
         when(amazonElasticLoadBalancingClient.modifyLoadBalancerAttributes(any())).thenThrow(ElasticLoadBalancingV2Exception.builder()
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode("AccessDeniedException").build())
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode("AccessDenied").build())
                 .build());
 
         assertDoesNotThrow(() -> underTest.enableDeletionProtection(amazonElasticLoadBalancingClient, "loadBalancerArn"));
