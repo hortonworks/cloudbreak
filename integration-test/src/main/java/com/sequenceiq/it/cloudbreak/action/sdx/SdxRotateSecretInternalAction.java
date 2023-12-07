@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.action.sdx;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -19,8 +20,11 @@ public class SdxRotateSecretInternalAction implements Action<SdxInternalTestDto,
 
     private final Collection<DatalakeSecretType> secretTypes;
 
-    public SdxRotateSecretInternalAction(Collection<DatalakeSecretType> secretTypes) {
+    private final Map<String, String> additionalProperties;
+
+    public SdxRotateSecretInternalAction(Collection<DatalakeSecretType> secretTypes, Map<String, String> additionalProperties) {
         this.secretTypes = secretTypes;
+        this.additionalProperties = additionalProperties;
     }
 
     @Override
@@ -28,6 +32,7 @@ public class SdxRotateSecretInternalAction implements Action<SdxInternalTestDto,
         SdxSecretRotationRequest request = new SdxSecretRotationRequest();
         request.setSecrets(secretTypes.stream().map(Enum::name).collect(Collectors.toList()));
         request.setCrn(testDto.getCrn());
+        request.setAdditionalProperties(additionalProperties);
         testDto.setFlow("SDX secret rotation.", client.getInternalClient(testContext).sdxRotationEndpoint().rotateSecrets(request));
         return testDto;
     }

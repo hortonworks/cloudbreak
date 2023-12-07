@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.rotation.executor;
 import static com.sequenceiq.redbeams.rotation.RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -76,7 +77,7 @@ class RedbeamsPollerRotationExecutorTest {
         cluster.setDatabaseServerCrn(DATABASE_SERVER_CRN);
         when(stackDto.getCluster()).thenReturn(cluster);
         doThrow(new RuntimeException("error")).when(externalDatabaseService)
-                .rotateDatabaseSecret(eq(DATABASE_SERVER_CRN), eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(RotationFlowExecutionType.ROTATE));
+                .rotateDatabaseSecret(eq(DATABASE_SERVER_CRN), eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(RotationFlowExecutionType.ROTATE), any());
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRotate(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD),
                         RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null)));
@@ -94,7 +95,7 @@ class RedbeamsPollerRotationExecutorTest {
         underTest.executeRotate(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), null);
         verify(stackDtoService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(externalDatabaseService, times(1)).rotateDatabaseSecret(eq(DATABASE_SERVER_CRN),
-                eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(RotationFlowExecutionType.ROTATE));
+                eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(RotationFlowExecutionType.ROTATE), any());
     }
 
     @Test
@@ -127,7 +128,7 @@ class RedbeamsPollerRotationExecutorTest {
         cluster.setDatabaseServerCrn(DATABASE_SERVER_CRN);
         when(stackDto.getCluster()).thenReturn(cluster);
         doThrow(new RuntimeException("error")).when(externalDatabaseService)
-                .rotateDatabaseSecret(eq(DATABASE_SERVER_CRN), eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(RotationFlowExecutionType.ROLLBACK));
+                .rotateDatabaseSecret(eq(DATABASE_SERVER_CRN), eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(RotationFlowExecutionType.ROLLBACK), any());
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRollback(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD),
                         RotationMetadataTestUtil.metadataForRollback(RESOURCE_CRN, null)));
@@ -145,7 +146,7 @@ class RedbeamsPollerRotationExecutorTest {
         underTest.executeRollback(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), null);
         verify(stackDtoService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(externalDatabaseService, times(1)).rotateDatabaseSecret(eq(DATABASE_SERVER_CRN),
-                eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(RotationFlowExecutionType.ROLLBACK));
+                eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(RotationFlowExecutionType.ROLLBACK), any());
     }
 
     @Test
@@ -178,7 +179,7 @@ class RedbeamsPollerRotationExecutorTest {
         cluster.setDatabaseServerCrn(DATABASE_SERVER_CRN);
         when(stackDto.getCluster()).thenReturn(cluster);
         doThrow(new RuntimeException("error")).when(externalDatabaseService)
-                .rotateDatabaseSecret(eq(DATABASE_SERVER_CRN), eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(RotationFlowExecutionType.FINALIZE));
+                .rotateDatabaseSecret(eq(DATABASE_SERVER_CRN), eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(RotationFlowExecutionType.FINALIZE), any());
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD),
                         RotationMetadataTestUtil.metadataForFinalize(RESOURCE_CRN, null)));
@@ -196,7 +197,7 @@ class RedbeamsPollerRotationExecutorTest {
         underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), null);
         verify(stackDtoService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(externalDatabaseService, times(1)).rotateDatabaseSecret(eq(DATABASE_SERVER_CRN),
-                eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(RotationFlowExecutionType.FINALIZE));
+                eq(REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(RotationFlowExecutionType.FINALIZE), any());
     }
 
     @Test

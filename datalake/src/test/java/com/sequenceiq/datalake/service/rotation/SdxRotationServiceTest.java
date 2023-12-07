@@ -107,7 +107,7 @@ class SdxRotationServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internalCrn");
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_CHAIN_ID);
         when(stackV4Endpoint.rotateSecrets(eq(1L), any(), any())).thenReturn(flowIdentifier);
-        underTest.rotateCloudbreakSecret(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE);
+        underTest.rotateCloudbreakSecret(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE, null);
         verify(sdxClusterRepository, times(1)).findByCrnAndDeletedIsNull(eq(RESOURCE_CRN));
         verify(regionAwareInternalCrnGeneratorFactory, times(1)).iam();
         verify(stackV4Endpoint, times(1)).rotateSecrets(eq(1L), any(), any());
@@ -128,7 +128,7 @@ class SdxRotationServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internalCrn");
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_CHAIN_ID);
         when(databaseServerV4Endpoint.rotateSecret(any(), any())).thenReturn(flowIdentifier);
-        underTest.rotateRedbeamsSecret(RESOURCE_CRN, RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE);
+        underTest.rotateRedbeamsSecret(RESOURCE_CRN, RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE, null);
         verify(sdxClusterRepository, times(1)).findByCrnAndDeletedIsNull(eq(RESOURCE_CRN));
         verify(regionAwareInternalCrnGeneratorFactory, times(1)).iam();
         verify(databaseServerV4Endpoint, times(1)).rotateSecret(any(), any());
@@ -140,7 +140,7 @@ class SdxRotationServiceTest {
     void rotateRedbeamsSecretShouldFailIfSdxClusterNotFound() {
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.empty());
         NotFoundException notFoundException = assertThrows(NotFoundException.class,
-                () -> underTest.rotateRedbeamsSecret(RESOURCE_CRN, RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE));
+                () -> underTest.rotateRedbeamsSecret(RESOURCE_CRN, RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE, null));
         verify(sdxClusterRepository, times(1)).findByCrnAndDeletedIsNull(eq(RESOURCE_CRN));
         assertEquals("SdxCluster '" + RESOURCE_CRN + "' not found.", notFoundException.getMessage());
     }
@@ -151,7 +151,7 @@ class SdxRotationServiceTest {
         sdxCluster.setSdxDatabase(new SdxDatabase());
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.of(sdxCluster));
         RuntimeException runtimeException = assertThrows(RuntimeException.class,
-                () -> underTest.rotateRedbeamsSecret(RESOURCE_CRN, RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE));
+                () -> underTest.rotateRedbeamsSecret(RESOURCE_CRN, RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE, null));
         verify(sdxClusterRepository, times(1)).findByCrnAndDeletedIsNull(eq(RESOURCE_CRN));
         assertEquals("No database server found for sdx cluster " + RESOURCE_CRN, runtimeException.getMessage());
     }

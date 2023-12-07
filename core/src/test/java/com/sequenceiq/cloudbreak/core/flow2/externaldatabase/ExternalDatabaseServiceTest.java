@@ -630,7 +630,7 @@ class ExternalDatabaseServiceTest {
     void rotateDatabaseSecretsShouldFailIfRedbeamsFlowChainIsNotTriggered() {
         when(redbeamsClient.rotateSecret(any())).thenReturn(new FlowIdentifier(FlowType.NOT_TRIGGERED, null));
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE));
+                () -> underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE, null));
         String expected = String.format("Database flow failed in Redbeams with error: 'Flow null not triggered'. "
                         + "Database crn: %s, flow: FlowIdentifier{type=%s, pollableId='%s'}",
                 RDBMS_CRN, FlowType.NOT_TRIGGERED, null);
@@ -641,7 +641,7 @@ class ExternalDatabaseServiceTest {
     void rotateDatabaseSecretsShouldFailIfReturnedFlowInformationIsNull() {
         when(redbeamsClient.rotateSecret(any())).thenReturn(null);
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE));
+                () -> underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE, null));
         String expected = String.format("Database flow failed in Redbeams with error: 'unknown'. Database crn: %s, flow: null", RDBMS_CRN);
         assertEquals(expected, cloudbreakServiceException.getMessage());
     }
@@ -656,7 +656,7 @@ class ExternalDatabaseServiceTest {
         when(redbeamsClient.getByCrn(RDBMS_CRN)).thenReturn(dbServerResponse);
 
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE));
+                () -> underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE, null));
 
         String expected = String.format("Database flow failed in Redbeams with error: '%s'. Database crn: %s, "
                         + "flow: FlowIdentifier{type=%s, pollableId='%s'}",
@@ -668,7 +668,7 @@ class ExternalDatabaseServiceTest {
     void rotateDatabaseSecretsShouldSucceed() {
         when(redbeamsClient.rotateSecret(any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, RDBMS_FLOW_ID));
         when(redbeamsClient.hasFlowChainRunningByFlowChainId(RDBMS_FLOW_ID)).thenReturn(createFlowCheckResponse(Boolean.FALSE, Boolean.FALSE));
-        underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE);
+        underTest.rotateDatabaseSecret(RDBMS_CRN, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE, null);
         ArgumentCaptor<RotateDatabaseServerSecretV4Request> requestCaptor = ArgumentCaptor.forClass(RotateDatabaseServerSecretV4Request.class);
         verify(redbeamsClient, times(1)).rotateSecret(requestCaptor.capture());
         RotateDatabaseServerSecretV4Request request = requestCaptor.getValue();

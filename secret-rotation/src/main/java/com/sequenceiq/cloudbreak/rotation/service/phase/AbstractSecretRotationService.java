@@ -39,7 +39,8 @@ abstract class AbstractSecretRotationService {
 
     protected Map<SecretRotationStep, ? extends RotationContext> getContexts(SecretType secretType, String resourceCrn,
             Map<String, String> additionalProperties) {
-        Map<SecretRotationStep, ? extends RotationContext> contexts = rotationContextProviderMap.get(secretType).getContexts(resourceCrn, additionalProperties);
+        Map<SecretRotationStep, ? extends RotationContext> contexts = rotationContextProviderMap.get(secretType).
+                getContextsWithProperties(resourceCrn, additionalProperties);
         if (!contexts.keySet().containsAll(secretType.getSteps())) {
             throw new RuntimeException("At least one context is missing thus secret rotation flow step cannot be executed.");
         }

@@ -113,13 +113,15 @@ public class SdxRotationService {
         multiClusterRotationService.markChildrenMultiRotationEntriesLocally(crnsByEnvironmentCrn, secret);
     }
 
-    public void rotateCloudbreakSecret(String datalakeCrn, SecretType secretType, RotationFlowExecutionType executionType) {
+    public void rotateCloudbreakSecret(String datalakeCrn, SecretType secretType, RotationFlowExecutionType executionType,
+            Map<String, String> additionalProperties) {
         SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn)
                 .orElseThrow(notFound("SdxCluster", datalakeCrn));
         StackV4SecretRotationRequest request = new StackV4SecretRotationRequest();
         request.setCrn(datalakeCrn);
         request.setSecret(secretType.value());
         request.setExecutionType(executionType);
+        request.setAdditionalProperties(additionalProperties);
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 initiatorUserCrn -> stackV4Endpoint.rotateSecrets(1L, request, initiatorUserCrn)
@@ -130,7 +132,8 @@ public class SdxRotationService {
         cloudbreakPoller.pollFlowStateByFlowIdentifierUntilComplete("Secret rotation", flowIdentifier, sdxCluster.getId(), pollingConfig);
     }
 
-    public void rotateRedbeamsSecret(String datalakeCrn, SecretType secretType, RotationFlowExecutionType executionType) {
+    public void rotateRedbeamsSecret(String datalakeCrn, SecretType secretType, RotationFlowExecutionType executionType,
+            Map<String, String> additionalProperties) {
         SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn)
                 .orElseThrow(notFound("SdxCluster", datalakeCrn));
         if (sdxCluster.getDatabaseCrn() == null) {
@@ -141,6 +144,7 @@ public class SdxRotationService {
         request.setCrn(sdxCluster.getDatabaseCrn());
         request.setSecret(secretType.value());
         request.setExecutionType(executionType);
+        request.setAdditionalProperties(additionalProperties);
 
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),

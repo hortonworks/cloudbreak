@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.action.v1.distrox;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
@@ -14,8 +15,11 @@ public class DistroXRotateSecretInternalAction implements Action<DistroXTestDto,
 
     private final Collection<CloudbreakSecretType> secretTypes;
 
-    public DistroXRotateSecretInternalAction(Collection<CloudbreakSecretType> secretTypes) {
+    private final Map<String, String> additionalProperties;
+
+    public DistroXRotateSecretInternalAction(Collection<CloudbreakSecretType> secretTypes, Map<String, String> additionalProperties) {
         this.secretTypes = secretTypes;
+        this.additionalProperties = additionalProperties;
     }
 
     @Override
@@ -23,6 +27,7 @@ public class DistroXRotateSecretInternalAction implements Action<DistroXTestDto,
         DistroXSecretRotationRequest request = new DistroXSecretRotationRequest();
         request.setSecrets(secretTypes.stream().map(Enum::name).collect(Collectors.toList()));
         request.setCrn(testDto.getCrn());
+        request.setAdditionalProperties(additionalProperties);
         testDto.setFlow("Data Hub secret rotation.", client.getInternalClient(testContext).distroXV1RotationEndpoint().rotateSecrets(request));
         return testDto;
     }

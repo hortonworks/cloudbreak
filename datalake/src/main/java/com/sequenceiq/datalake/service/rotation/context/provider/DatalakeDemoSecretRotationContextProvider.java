@@ -19,9 +19,9 @@ import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 public class DatalakeDemoSecretRotationContextProvider implements RotationContextProvider {
 
     @Override
-    public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
+    public Map<SecretRotationStep, RotationContext> getContextsWithProperties(String resourceCrn, Map<String, String> additionalProperties) {
         Map<SecretRotationStep, RotationContext> context = new HashMap<>();
-        context.put(CLOUDBREAK_ROTATE_POLLING, new PollerRotationContext(resourceCrn, INTERNAL_DATALAKE_DEMO_SECRET));
+        context.put(CLOUDBREAK_ROTATE_POLLING, new PollerRotationContext(resourceCrn, INTERNAL_DATALAKE_DEMO_SECRET, additionalProperties));
         return context;
     }
 

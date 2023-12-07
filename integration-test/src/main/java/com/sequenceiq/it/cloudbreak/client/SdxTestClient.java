@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.client;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
@@ -275,7 +276,11 @@ public class SdxTestClient {
     }
 
     public Action<SdxInternalTestDto, SdxClient> rotateSecretInternal(Collection<DatalakeSecretType> secretTypes) {
-        return new SdxRotateSecretInternalAction(secretTypes);
+        return rotateSecretInternal(secretTypes, Map.of());
+    }
+
+    public Action<SdxInternalTestDto, SdxClient> rotateSecretInternal(Collection<DatalakeSecretType> secretTypes, Map<String, String> additionalProperties) {
+        return new SdxRotateSecretInternalAction(secretTypes, additionalProperties);
     }
 
     public Action<SdxInternalTestDto, SdxClient> updateDisks() {

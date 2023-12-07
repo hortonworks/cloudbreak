@@ -200,12 +200,14 @@ public class ExternalDatabaseService {
         }
     }
 
-    public void rotateDatabaseSecret(String databaseServerCrn, SecretType secretType, RotationFlowExecutionType executionType) {
+    public void rotateDatabaseSecret(String databaseServerCrn, SecretType secretType, RotationFlowExecutionType executionType,
+            Map<String, String> additionalProperties) {
         LOGGER.info("Rotating external database server secret: {} for database server {}", secretType, databaseServerCrn);
         RotateDatabaseServerSecretV4Request request = new RotateDatabaseServerSecretV4Request();
         request.setCrn(databaseServerCrn);
         request.setSecret(secretType.value());
         request.setExecutionType(executionType);
+        request.setAdditionalProperties(additionalProperties);
         FlowIdentifier flowIdentifier = redbeamsClient.rotateSecret(request);
         if (flowIdentifier == null) {
             handleUnsuccessfulFlow(databaseServerCrn, flowIdentifier, null);

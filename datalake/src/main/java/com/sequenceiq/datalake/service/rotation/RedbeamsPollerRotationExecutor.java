@@ -28,25 +28,29 @@ public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<Pol
     @Override
     protected void rotate(PollerRotationContext rotationContext) {
         LOGGER.info("Rotate redbeams secret: {}", rotationContext.getSecretType());
-        sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), ROTATE);
+        sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), ROTATE,
+                rotationContext.getAdditionalProperties());
     }
 
     @Override
     protected void rollback(PollerRotationContext rotationContext) {
         LOGGER.info("Rollback redbeams secret: {}", rotationContext.getSecretType());
-        sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), ROLLBACK);
+        sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), ROLLBACK,
+                rotationContext.getAdditionalProperties());
     }
 
     @Override
     protected void finalize(PollerRotationContext rotationContext) {
         LOGGER.info("Finalize redbeams secret: {}", rotationContext.getSecretType());
-        sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), FINALIZE);
+        sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), FINALIZE,
+                rotationContext.getAdditionalProperties());
     }
 
     @Override
     protected void preValidate(PollerRotationContext rotationContext) {
         sdxRotationService.preValidateRedbeamsRotation(rotationContext.getResourceCrn());
-        sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), PREVALIDATE);
+        sdxRotationService.rotateRedbeamsSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), PREVALIDATE,
+                rotationContext.getAdditionalProperties());
     }
 
     @Override

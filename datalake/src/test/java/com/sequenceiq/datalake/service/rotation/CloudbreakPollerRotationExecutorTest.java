@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLB
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -40,7 +41,7 @@ class CloudbreakPollerRotationExecutorTest {
     @Test
     void rotateShouldThrowSecretRotationExceptionIfCloudbreakRotationFailed() {
         doThrow(new RuntimeException("error")).when(sdxRotationService).rotateCloudbreakSecret(anyString(),
-                eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(ROTATE));
+                eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(ROTATE), any());
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRotate(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD),
                         RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null)));
@@ -53,13 +54,13 @@ class CloudbreakPollerRotationExecutorTest {
         underTest.executeRotate(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD),
                 RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null));
         verify(sdxRotationService, times(1)).rotateCloudbreakSecret(eq(RESOURCE_CRN),
-                eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(ROTATE));
+                eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(ROTATE), any());
     }
 
     @Test
     void rollbackShouldThrowSecretRotationExceptionIfCloudbreakRollbackFailed() {
         doThrow(new RuntimeException("error")).when(sdxRotationService).rotateCloudbreakSecret(anyString(),
-                eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(ROLLBACK));
+                eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(ROLLBACK), any());
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRollback(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD),
                         RotationMetadataTestUtil.metadataForRollback(RESOURCE_CRN, null)));
@@ -72,13 +73,13 @@ class CloudbreakPollerRotationExecutorTest {
         underTest.executeRollback(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD),
                 RotationMetadataTestUtil.metadataForRollback(RESOURCE_CRN, null));
         verify(sdxRotationService, times(1)).rotateCloudbreakSecret(eq(RESOURCE_CRN),
-                eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(ROLLBACK));
+                eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(ROLLBACK), any());
     }
 
     @Test
     void finalizeShouldThrowSecretRotationExceptionIfCloudbreakFinalizeFailed() {
         doThrow(new RuntimeException("error")).when(sdxRotationService).rotateCloudbreakSecret(anyString(),
-                eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(FINALIZE));
+                eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(FINALIZE), any());
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD),
                         RotationMetadataTestUtil.metadataForFinalize(RESOURCE_CRN, null)));
@@ -91,7 +92,7 @@ class CloudbreakPollerRotationExecutorTest {
         underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD),
                 RotationMetadataTestUtil.metadataForFinalize(RESOURCE_CRN, null));
         verify(sdxRotationService, times(1)).rotateCloudbreakSecret(eq(RESOURCE_CRN),
-                eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(FINALIZE));
+                eq(DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD), eq(FINALIZE), any());
     }
 
     @Test

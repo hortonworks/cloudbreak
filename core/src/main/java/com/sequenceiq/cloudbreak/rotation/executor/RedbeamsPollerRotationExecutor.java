@@ -33,21 +33,24 @@ public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<Pol
     protected void rotate(PollerRotationContext rotationContext) {
         LOGGER.info("Rotate redbeams secret: {}", rotationContext.getSecretType());
         StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
-        externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(), rotationContext.getSecretType(), ROTATE);
+        externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(), rotationContext.getSecretType(), ROTATE,
+                rotationContext.getAdditionalProperties());
     }
 
     @Override
     protected void rollback(PollerRotationContext rotationContext) {
         LOGGER.info("Rollback redbeams secret: {}", rotationContext.getSecretType());
         StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
-        externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(), rotationContext.getSecretType(), ROLLBACK);
+        externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(), rotationContext.getSecretType(), ROLLBACK,
+                rotationContext.getAdditionalProperties());
     }
 
     @Override
     protected void finalize(PollerRotationContext rotationContext) {
         LOGGER.info("Finalize redbeams secret: {}", rotationContext.getSecretType());
         StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
-        externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(), rotationContext.getSecretType(), FINALIZE);
+        externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(), rotationContext.getSecretType(), FINALIZE,
+                rotationContext.getAdditionalProperties());
     }
 
     @Override
@@ -55,7 +58,8 @@ public class RedbeamsPollerRotationExecutor extends AbstractRotationExecutor<Pol
         LOGGER.info("Pre validate redbeams secret rotation: {}", rotationContext.getSecretType());
         StackDto stackDto = getStackDto(rotationContext.getResourceCrn());
         externalDatabaseService.preValidateDatabaseSecretRotation(stackDto.getCluster().getDatabaseServerCrn());
-        externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(), rotationContext.getSecretType(), PREVALIDATE);
+        externalDatabaseService.rotateDatabaseSecret(stackDto.getCluster().getDatabaseServerCrn(), rotationContext.getSecretType(), PREVALIDATE,
+                rotationContext.getAdditionalProperties());
     }
 
     @Override

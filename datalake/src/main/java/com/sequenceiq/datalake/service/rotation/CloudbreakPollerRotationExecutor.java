@@ -27,25 +27,29 @@ public class CloudbreakPollerRotationExecutor extends AbstractRotationExecutor<P
     @Override
     protected void rotate(PollerRotationContext rotationContext) {
         LOGGER.info("Rotate cloudbreak secret: {}", rotationContext.getSecretType());
-        sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), ROTATE);
+        sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), ROTATE,
+                rotationContext.getAdditionalProperties());
     }
 
     @Override
     protected void rollback(PollerRotationContext rotationContext) {
         LOGGER.info("Rollback cloudbreak secret: {}", rotationContext.getSecretType());
-        sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), ROLLBACK);
+        sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), ROLLBACK,
+                rotationContext.getAdditionalProperties());
     }
 
     @Override
     protected void finalize(PollerRotationContext rotationContext) {
         LOGGER.info("Finalize cloudbreak secret: {}", rotationContext.getSecretType());
-        sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), FINALIZE);
+        sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), FINALIZE,
+                rotationContext.getAdditionalProperties());
     }
 
     @Override
     protected void preValidate(PollerRotationContext rotationContext) {
         sdxRotationService.preValidateCloudbreakRotation(rotationContext.getResourceCrn());
-        sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), PREVALIDATE);
+        sdxRotationService.rotateCloudbreakSecret(rotationContext.getResourceCrn(), rotationContext.getSecretType(), PREVALIDATE,
+                rotationContext.getAdditionalProperties());
     }
 
     @Override

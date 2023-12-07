@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
@@ -155,7 +156,12 @@ public class DistroXTestClient {
     }
 
     public Action<DistroXTestDto, CloudbreakClient> rotateSecretInternal(Collection<CloudbreakSecretType> secretTypes) {
-        return new DistroXRotateSecretInternalAction(secretTypes);
+        return rotateSecretInternal(secretTypes, Map.of());
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> rotateSecretInternal(Collection<CloudbreakSecretType> secretTypes,
+            Map<String, String> additionalProperties) {
+        return new DistroXRotateSecretInternalAction(secretTypes, additionalProperties);
     }
 
     public Action<DistroXTestDto, CloudbreakClient> deleteDisks() {

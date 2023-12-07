@@ -5,6 +5,7 @@ import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_DEMO_SEC
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DEMO_SECRET;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -18,7 +19,6 @@ import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaRotationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -26,6 +26,14 @@ import com.sequenceiq.it.cloudbreak.testcase.mock.AbstractMockTest;
 import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 public class MultiSecretRotationMockTest extends AbstractMockTest {
+
+    public static final String ROTATION_FAILURE_KEY = "rotation_failure";
+
+    public static final String ROLLBACK_FAILURE_KEY = "rollback_failure";
+
+    public static final String FINALIZE_FAILURE_KEY = "finalize_failure";
+
+    public static final String PREVALIDATE_FAILURE_KEY = "prevalidate_failure";
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -79,13 +87,9 @@ public class MultiSecretRotationMockTest extends AbstractMockTest {
         executeFreeIpaDemoRotation(testContext)
                 .awaitForFlow()
                 .validate();
-        setSaltFailure(testContext, SdxInternalTestDto.class, "dl.rotation");
-        setSaltFailure(testContext, SdxInternalTestDto.class, "dl.rollback");
-        executeDataLakeDemoRotation(testContext)
+        executeDataLakeDemoRotation(testContext, Map.of(ROTATION_FAILURE_KEY, "", ROLLBACK_FAILURE_KEY, ""))
                 .awaitForFlowFail()
                 .validate();
-        deleteSaltFailure(testContext, SdxInternalTestDto.class, "dl.rotation");
-        deleteSaltFailure(testContext, SdxInternalTestDto.class, "dl.rollback");
         executeDataLakeDemoRotation(testContext)
                 .awaitForFlow()
                 .validate();
@@ -107,11 +111,9 @@ public class MultiSecretRotationMockTest extends AbstractMockTest {
         executeFreeIpaDemoRotation(testContext)
                 .awaitForFlow()
                 .validate();
-        setSaltFailure(testContext, SdxInternalTestDto.class, "dl.prevalidate");
-        executeDataLakeDemoRotation(testContext)
+        executeDataLakeDemoRotation(testContext, Map.of(PREVALIDATE_FAILURE_KEY, ""))
                 .awaitForFlowFail()
                 .validate();
-        deleteSaltFailure(testContext, SdxInternalTestDto.class, "dl.prevalidate");
         executeDataLakeDemoRotation(testContext)
                 .awaitForFlow()
                 .validate();
@@ -130,11 +132,9 @@ public class MultiSecretRotationMockTest extends AbstractMockTest {
         executeFreeIpaDemoRotation(testContext)
                 .awaitForFlow()
                 .validate();
-        setSaltFailure(testContext, SdxInternalTestDto.class, "dl.finalize");
-        executeDataLakeDemoRotation(testContext)
+        executeDataLakeDemoRotation(testContext, Map.of(FINALIZE_FAILURE_KEY, ""))
                 .awaitForFlowFail()
                 .validate();
-        deleteSaltFailure(testContext, SdxInternalTestDto.class, "dl.finalize");
         executeDataLakeDemoRotation(testContext)
                 .awaitForFlow()
                 .validate();
@@ -156,13 +156,9 @@ public class MultiSecretRotationMockTest extends AbstractMockTest {
         executeDataLakeDemoRotation(testContext)
                 .awaitForFlow()
                 .validate();
-        setSaltFailure(testContext, DistroXTestDto.class, "dh.rotation");
-        setSaltFailure(testContext, DistroXTestDto.class, "dh.rollback");
-        executeDataHubDemoRotation(testContext)
+        executeDataHubDemoRotation(testContext, Map.of(ROTATION_FAILURE_KEY, "", ROLLBACK_FAILURE_KEY, ""))
                 .awaitForFlowFail()
                 .validate();
-        deleteSaltFailure(testContext, DistroXTestDto.class, "dh.rotation");
-        deleteSaltFailure(testContext, DistroXTestDto.class, "dh.rollback");
         executeDataHubDemoRotation(testContext)
                 .awaitForFlow()
                 .validate();
@@ -187,11 +183,9 @@ public class MultiSecretRotationMockTest extends AbstractMockTest {
         executeDataLakeDemoRotation(testContext)
                 .awaitForFlow()
                 .validate();
-        setSaltFailure(testContext, DistroXTestDto.class, "dh.finalize");
-        executeDataHubDemoRotation(testContext)
+        executeDataHubDemoRotation(testContext, Map.of(FINALIZE_FAILURE_KEY, ""))
                 .awaitForFlowFail()
                 .validate();
-        deleteSaltFailure(testContext, DistroXTestDto.class, "dh.finalize");
         executeDataHubDemoRotation(testContext)
                 .awaitForFlow()
                 .validate();
@@ -208,22 +202,22 @@ public class MultiSecretRotationMockTest extends AbstractMockTest {
     }
 
     private SdxInternalTestDto executeDataLakeDemoRotation(TestContext testContext) {
+        return executeDataLakeDemoRotation(testContext, Map.of());
+    }
+
+    private SdxInternalTestDto executeDataLakeDemoRotation(TestContext testContext, Map<String, String> additionalArgs) {
         return testContext
                 .given(SdxInternalTestDto.class)
-                .when(sdxTestClient.rotateSecretInternal(Set.of(DatalakeSecretType.DATALAKE_DEMO_SECRET)));
+                .when(sdxTestClient.rotateSecretInternal(Set.of(DatalakeSecretType.DATALAKE_DEMO_SECRET), additionalArgs));
     }
 
     private DistroXTestDto executeDataHubDemoRotation(TestContext testContext) {
+        return executeDataHubDemoRotation(testContext, Map.of());
+    }
+
+    private DistroXTestDto executeDataHubDemoRotation(TestContext testContext, Map<String, String> additionalArgs) {
         return testContext
                 .given(DistroXTestDto.class)
-                .when(distroXTestClient.rotateSecretInternal(Set.of(CloudbreakSecretType.DATAHUB_DEMO_SECRET)));
-    }
-
-    private <T extends AbstractTestDto> void setSaltFailure(TestContext testContext, Class<T> testDto, String saltCommand) {
-        testContext.given(testDto).setSaltRunFailure(saltCommand);
-    }
-
-    private <T extends AbstractTestDto> void deleteSaltFailure(TestContext testContext, Class<T> testDto, String saltCommand) {
-        testContext.given(testDto).deleteSaltRunFailure(saltCommand);
+                .when(distroXTestClient.rotateSecretInternal(Set.of(CloudbreakSecretType.DATAHUB_DEMO_SECRET), additionalArgs));
     }
 }
