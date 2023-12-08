@@ -340,6 +340,17 @@ class ExperiencesByLiftieTest {
         assertEquals(fetchedPolicy.getAws().getPolicy(), result.get(liftiePolicyKey));
     }
 
+    @Test
+    void testCollectPolicyWhenResponseIsNull() {
+        EnvironmentExperienceDto environmentExperienceDto = createEnvironmentExperienceDto();
+        when(mockLiftieApi.getPolicy(environmentExperienceDto.getCloudPlatform())).thenReturn(null);
+
+        Map<String, String> result = underTest.collectPolicy(environmentExperienceDto);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
     private ListClustersResponse createEmptyListClustersResponse() {
         ListClustersResponse empty = new ListClustersResponse();
         PageStats ps = new PageStats();

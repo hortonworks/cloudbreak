@@ -1,9 +1,11 @@
 package com.sequenceiq.environment.experience.liftie;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,8 +29,8 @@ class LiftieConnectorServiceFetchPolicyTest extends LiftieConnectorServiceTestBa
     @BeforeEach
     void setUp() {
         super.setUp();
-        when(getMockClient().target(LIFTIE_CLUSTER_ENDPOINT_PATH)).thenReturn(getMockWebTarget());
-        when(getMockLiftiePathProvider().getPathToPolicyEndpoint(TEST_CLOUD_PLATFORM)).thenReturn(LIFTIE_CLUSTER_ENDPOINT_PATH);
+        lenient().when(getMockClient().target(LIFTIE_CLUSTER_ENDPOINT_PATH)).thenReturn(getMockWebTarget());
+        lenient().when(getMockLiftiePathProvider().getPathToPolicyEndpoint(TEST_CLOUD_PLATFORM)).thenReturn(LIFTIE_CLUSTER_ENDPOINT_PATH);
     }
 
     @Test
@@ -105,6 +107,13 @@ class LiftieConnectorServiceFetchPolicyTest extends LiftieConnectorServiceTestBa
         ExperiencePolicyResponse result = getUnderTest().getPolicy(TEST_CLOUD_PLATFORM);
 
         assertEquals(expected, result);
+    }
+
+    @Test
+    void testNullReturn() {
+        when(getMockLiftiePathProvider().isPolicyFetchDisabled()).thenReturn(true);
+
+        assertNull(getUnderTest().getPolicy(TEST_CLOUD_PLATFORM));
     }
 
 }

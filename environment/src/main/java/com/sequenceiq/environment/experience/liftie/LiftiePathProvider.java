@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.experience.liftie;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +32,10 @@ public class LiftiePathProvider {
         String path = (basePath + policyPath).replace(pathConfig.getToReplace().get("cloudProvider"), provider);
         LOGGER.info("Path has created to liftie for policy fetching: {}", path);
         return path;
+    }
+
+    public boolean isPolicyFetchDisabled() {
+        return StringUtils.isEmpty(policyPath);
     }
 
     public String getPathToClustersEndpoint() {
