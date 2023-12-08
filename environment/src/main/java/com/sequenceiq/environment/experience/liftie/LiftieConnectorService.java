@@ -98,6 +98,10 @@ public class LiftieConnectorService implements LiftieApi {
 
     @Override
     public ExperiencePolicyResponse getPolicy(String cloudPlatform) {
+        if (liftiePathProvider.isPolicyFetchDisabled()) {
+            LOGGER.info("Policy fetch for Liftie is not configured.");
+            return null;
+        }
         WebTarget webTarget = client.target(liftiePathProvider.getPathToPolicyEndpoint(cloudPlatform));
         LOGGER.info("WebTarget has created for getting Kubernetes clusters related minimal policies for cloud platform [platform: {}]: {}",
                 cloudPlatform, webTarget.toString());
