@@ -14,3 +14,4 @@ base:
     - recipes
 {%- endif %}
     - ldapagent
+    - paywall

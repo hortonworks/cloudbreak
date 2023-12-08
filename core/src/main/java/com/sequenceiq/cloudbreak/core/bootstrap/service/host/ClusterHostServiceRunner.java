@@ -119,6 +119,7 @@ import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
+import com.sequenceiq.cloudbreak.service.paywall.PaywallConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -277,6 +278,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private StackToTemplatePreparationObjectConverter stackToTemplatePreparationObjectConverter;
+
+    @Inject
+    private PaywallConfigService paywallConfigService;
 
     public NodeReachabilityResult runClusterServices(@Nonnull StackDto stackDto,
             Map<String, String> candidateAddresses, boolean runPreServiceDeploymentRecipe) {
@@ -533,6 +537,7 @@ public class ClusterHostServiceRunner {
         proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, stackDto);
 
         decoratePillarWithJdbcConnectors(cluster, servicePillar);
+        servicePillar.putAll(paywallConfigService.createPaywallPillarConfig(stackDto));
 
         return new SaltConfig(servicePillar, grainsProperties);
     }

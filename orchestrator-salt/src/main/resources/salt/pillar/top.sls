@@ -35,6 +35,7 @@ base:
 {%- if salt['file.file_exists']('/srv/pillar/java/init.sls') %}
     - java.init
 {%- endif %}
+    - paywall
 
   'G@roles:ad_member or G@roles:ad_leave':
     - match: compound

@@ -29,6 +29,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigService;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigView;
 import com.sequenceiq.freeipa.service.freeipa.config.LdapAgentConfigProvider;
+import com.sequenceiq.freeipa.service.paywall.PaywallConfigService;
 import com.sequenceiq.freeipa.service.proxy.ProxyConfigService;
 import com.sequenceiq.freeipa.service.tag.TagConfigService;
 import com.sequenceiq.freeipa.service.telemetry.TelemetryConfigService;
@@ -51,6 +52,10 @@ class SaltConfigProviderTest {
 
     private static final String DOMAIN = "test.domain";
 
+    private static final String PAYWALL_PILLAR = "paywall";
+
+    private static final String PAYWALL_PILLAR_PATH = "/paywall/init.sls";
+
     @Mock
     private FreeIpaConfigService freeIpaConfigService;
 
@@ -68,6 +73,9 @@ class SaltConfigProviderTest {
 
     @Mock
     private LdapAgentConfigProvider ldapAgentConfigProvider;
+
+    @Mock
+    private PaywallConfigService paywallConfigService;
 
     @InjectMocks
     private SaltConfigProvider underTest;
@@ -89,6 +97,8 @@ class SaltConfigProviderTest {
         when(ccmParametersConfigService.createCcmParametersPillarConfig(eq(ENV_CRN), any())).thenReturn(
                 Map.of(PILLAR, new SaltPillarProperties(PILLARPATH, Map.of(PILLARKEY, PILLARVALUE))));
         when(ldapAgentConfigProvider.generateConfig(DOMAIN)).thenReturn(Map.of("ldap", new SaltPillarProperties("ldappath", Map.of())));
+        when(paywallConfigService.createPaywallPillarConfig(any())).thenReturn(
+                Map.of(PAYWALL_PILLAR, new SaltPillarProperties(PAYWALL_PILLAR_PATH, Map.of())));
 
         SaltConfig saltConfig = underTest.getSaltConfig(stack, Set.of());
 
@@ -112,6 +122,9 @@ class SaltConfigProviderTest {
 
         SaltPillarProperties ldapProperties = servicePillarConfig.get("ldap");
         assertEquals("ldappath", ldapProperties.getPath());
+
+        SaltPillarProperties paywallProperties = servicePillarConfig.get(PAYWALL_PILLAR);
+        assertEquals(PAYWALL_PILLAR_PATH, paywallProperties.getPath());
     }
 
     @Test

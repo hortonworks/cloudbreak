@@ -5,7 +5,7 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 gpgcheck=1
 enabled=1
 skip_if_unavailable=1
-{%- if salt['pillar.get']('cloudera-manager:paywall_username') %}
-username={{ salt['pillar.get']('cloudera-manager:paywall_username') }}
-password={{ salt['pillar.get']('cloudera-manager:paywall_password') }}
+{%- if salt['pillar.get']('paywall:username') %}
+username={{ salt['pillar.get']('paywall:username') }}
+password={{ salt['pillar.get']('paywall:password') }}
 {%- endif %}

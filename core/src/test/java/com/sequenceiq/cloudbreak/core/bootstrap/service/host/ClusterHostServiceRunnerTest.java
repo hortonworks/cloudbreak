@@ -113,6 +113,7 @@ import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
+import com.sequenceiq.cloudbreak.service.paywall.PaywallConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
@@ -137,6 +138,8 @@ import com.sequenceiq.common.api.type.Tunnel;
 class ClusterHostServiceRunnerTest {
 
     private static final String TEST_CLUSTER_CRN = "crn:cdp:datahub:us-west-1:datahub:cluster:f7563fc1-e8ff-486a-9260-4e54ccabbaa0";
+
+    private static final Map<String, SaltPillarProperties> PAYWALL_PROPERTIES = Map.of("paywall", new SaltPillarProperties("paywall_path", Map.of()));
 
     private static final String ENV_CRN = "envCrn";
 
@@ -281,6 +284,9 @@ class ClusterHostServiceRunnerTest {
 
     @Mock
     private RangerRazDatahubConfigProvider rangerRazDatahubConfigProvider;
+
+    @Mock
+    private PaywallConfigService paywallConfigService;
 
     @BeforeEach
     void setUp() {
@@ -448,6 +454,7 @@ class ClusterHostServiceRunnerTest {
         when(sssdConfigProvider.createSssdAdPillar(kerberosConfig)).thenReturn(Map.of("ad", new SaltPillarProperties("adpath", Map.of())));
         when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN), any()))
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
+        when(paywallConfigService.createPaywallPillarConfig(stack)).thenReturn(PAYWALL_PROPERTIES);
 
         underTest.runTargetedClusterServices(stack, Map.of("fqdn3", "1.1.1.1"));
 
@@ -504,6 +511,7 @@ class ClusterHostServiceRunnerTest {
         when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN), any()))
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
+        when(paywallConfigService.createPaywallPillarConfig(stack)).thenReturn(PAYWALL_PROPERTIES);
 
         underTest.runClusterServices(stack, Map.of(), true);
 
@@ -535,6 +543,7 @@ class ClusterHostServiceRunnerTest {
         when(sssdConfigProvider.createSssdAdPillar(kerberosConfig)).thenReturn(Map.of("ad", new SaltPillarProperties("adpath", Map.of())));
         when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN), any()))
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
+        when(paywallConfigService.createPaywallPillarConfig(stack)).thenReturn(PAYWALL_PROPERTIES);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
 
         underTest.runClusterServices(stack, Map.of(), false);

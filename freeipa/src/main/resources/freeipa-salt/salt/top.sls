@@ -13,7 +13,7 @@ base:
              - logrotate
              - ccm
              - monitoring
-             - customrepo
+             - rhelrepo
 
            'recipes:pre-cloudera-manager-start':
              - match: grain

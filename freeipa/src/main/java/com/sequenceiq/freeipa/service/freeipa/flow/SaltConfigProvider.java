@@ -18,6 +18,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigService;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigView;
 import com.sequenceiq.freeipa.service.freeipa.config.LdapAgentConfigProvider;
+import com.sequenceiq.freeipa.service.paywall.PaywallConfigService;
 import com.sequenceiq.freeipa.service.proxy.ProxyConfigService;
 import com.sequenceiq.freeipa.service.tag.TagConfigService;
 import com.sequenceiq.freeipa.service.telemetry.TelemetryConfigService;
@@ -44,6 +45,9 @@ public class SaltConfigProvider {
     @Inject
     private LdapAgentConfigProvider ldapAgentConfigProvider;
 
+    @Inject
+    private PaywallConfigService paywallConfigService;
+
     public SaltConfig getSaltConfig(Stack stack, Set<Node> hosts) {
         SaltConfig saltConfig = new SaltConfig();
         Map<String, SaltPillarProperties> servicePillarConfig = saltConfig.getServicePillarConfig();
@@ -55,6 +59,8 @@ public class SaltConfigProvider {
         servicePillarConfig.putAll(tagConfigService.createTagsPillarConfig(stack));
         servicePillarConfig.putAll(getCcmPillarProperties(stack));
         servicePillarConfig.putAll(ldapAgentConfigProvider.generateConfig(freeIpaConfigView.getDomain()));
+        servicePillarConfig.putAll(paywallConfigService.createPaywallPillarConfig(stack));
+
         return saltConfig;
     }
 
