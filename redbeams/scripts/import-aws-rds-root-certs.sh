@@ -66,11 +66,13 @@ cleanup_temp_dir_upon_abort() {
 #   CB_AWS_SECRET_ACCESS_KEY
 #   CB_AWS_GOV_ACCESS_KEY_ID
 #   CB_AWS_GOV_SECRET_ACCESS_KEY
+#   YQ_BINARY_PATH
+#   JQ_BINARY_PATH
 # Output:
 #   -
 validate_environment_variables() {
   log "Validating mandatory environment variables"
-  local CB_MANDATORY_ENV_VARS=("CB_AWS_ACCESS_KEY_ID" "CB_AWS_SECRET_ACCESS_KEY" "CB_AWS_GOV_ACCESS_KEY_ID" "CB_AWS_GOV_SECRET_ACCESS_KEY")
+  local CB_MANDATORY_ENV_VARS=("CB_AWS_ACCESS_KEY_ID" "CB_AWS_SECRET_ACCESS_KEY" "CB_AWS_GOV_ACCESS_KEY_ID" "CB_AWS_GOV_SECRET_ACCESS_KEY" "YQ_BINARY_PATH" "JQ_BINARY_PATH")
   for CB_MANDATORY_ENV_VAR in "${CB_MANDATORY_ENV_VARS[@]}"
   do
     set +x
@@ -88,7 +90,7 @@ validate_tools() {
   which awk aws basename cat curl cut date grep head ls jq mkdir mktemp mv openssl rm realpath sed seq sort tac tr true wc yq || abort "Some mandatory tool is absent"
 
   local CB_YQ_VERSION
-  CB_YQ_VERSION=$(yq --version | awk '{print $NF}')
+  CB_YQ_VERSION=$($YQ_BINARY_PATH --version | awk '{print $NF}')
   log "Detected yq version $CB_YQ_VERSION"
   [ "$CB_YQ_VERSION" == '2.4.1' ] || abort "Unsupported yq version"
 }
@@ -125,7 +127,7 @@ validate_resources_certs_aws_directory() {
 determine_regions() {
   local CB_ZONES_FILE=../cloud-aws-common/src/main/resources/definitions/aws-enabled-availability-zones.json
   [ -f $CB_ZONES_FILE ] || abort "File $CB_ZONES_FILE not found"
-  jq '.items | .[] | .name' $CB_ZONES_FILE | tr -d '"' | sort
+  $JQ_BINARY_PATH '.items | .[] | .name' $CB_ZONES_FILE | tr -d '"' | sort
 }
 
 # Input:
@@ -176,7 +178,7 @@ query_active_certs_for_region() {
   log "Raw output of aws --region $CB_REGION rds describe-certificates:\\n$(cat $CB_DESCRIBE_CERTIFICATES_JSON)"
 
   CB_DESCRIBE_CERTIFICATES_PROCESSED_CSV="$CB_CERT_TMP_DIR/describe-certificates_processed.csv"
-  jq '.Certificates | .[] | [.ValidFrom, "PUBKEY", "FILENAME", (.Thumbprint | ascii_downcase), .CertificateIdentifier, .CustomerOverride] | join(",")' \
+  $JQ_BINARY_PATH '.Certificates | .[] | [.ValidFrom, "PUBKEY", "FILENAME", (.Thumbprint | ascii_downcase), .CertificateIdentifier, .CustomerOverride] | join(",")' \
     "$CB_DESCRIBE_CERTIFICATES_JSON" | tr -d '"' > "$CB_DESCRIBE_CERTIFICATES_PROCESSED_CSV"
   log "Processed output of aws --region $CB_REGION rds describe-certificates:\\n$(cat $CB_DESCRIBE_CERTIFICATES_PROCESSED_CSV)"
 }
@@ -235,7 +237,7 @@ query_default_cert_for_region() {
     local CB_DEFAULT_CERTIFICATE_JSON="$CB_CERT_TMP_DIR/default-certificate.json"
     aws --region $CB_REGION rds modify-certificates --remove-customer-override > "$CB_DEFAULT_CERTIFICATE_JSON"
     log "Raw output of aws --region $CB_REGION rds modify-certificates --remove-customer-override:\\n$(cat $CB_DEFAULT_CERTIFICATE_JSON)"
-    CB_DEFAULT_CERTIFICATE_ID=$(jq '.Certificate.CertificateIdentifier' "$CB_DEFAULT_CERTIFICATE_JSON" | tr -d '"')
+    CB_DEFAULT_CERTIFICATE_ID=$($JQ_BINARY_PATH '.Certificate.CertificateIdentifier' "$CB_DEFAULT_CERTIFICATE_JSON" | tr -d '"')
     log "CertificateIdentifier of default RDS root certificate in the region: $CB_DEFAULT_CERTIFICATE_ID"
     grep ",$CB_DEFAULT_CERTIFICATE_ID," "$CB_DESCRIBE_CERTIFICATES_PROCESSED_CSV" || warn "Could not find associated entry for the default CertificateIdentifier in the describe-certificates output."
 
@@ -408,11 +410,11 @@ init_resources_certs_aws_directory_for_region() {
 read_or_compute_existing_yaml_cert_fingerprint() {
   local CB_CURRENT_CERT_FILENAME="$1"
   local CB_CURRENT_CERT_PATH="$2"
-  CB_CERT_FINGERPRINT=$(yq read "$CB_CURRENT_CERT_PATH" fingerprint)
+  CB_CERT_FINGERPRINT=$($YQ_BINARY_PATH read "$CB_CURRENT_CERT_PATH" fingerprint)
   if [ "$CB_CERT_FINGERPRINT" == 'null' ]
   then
-    CB_CERT_FINGERPRINT=$(yq read "$CB_CURRENT_CERT_PATH" cert | openssl x509 -noout -fingerprint -sha1 -inform pem | cut -d '=' -f 2 | tr -d ':' | awk '{print tolower($1)}')
-    yq write --inplace "$CB_CURRENT_CERT_PATH" fingerprint "$CB_CERT_FINGERPRINT"
+    CB_CERT_FINGERPRINT=$($YQ_BINARY_PATH read "$CB_CURRENT_CERT_PATH" cert | openssl x509 -noout -fingerprint -sha1 -inform pem | cut -d '=' -f 2 | tr -d ':' | awk '{print tolower($1)}')
+    $YQ_BINARY_PATH write --inplace "$CB_CURRENT_CERT_PATH" fingerprint "$CB_CERT_FINGERPRINT"
     log "Calculated missing fingerprint for existing certificate $CB_CURRENT_CERT_FILENAME: $CB_CERT_FINGERPRINT"
   else
     log "Read fingerprint from existing certificate $CB_CURRENT_CERT_FILENAME: $CB_CERT_FINGERPRINT"
@@ -431,7 +433,7 @@ validate_existing_yaml_cert() {
   local CB_CURRENT_CERT_PATH="$2"
   read_or_compute_existing_yaml_cert_fingerprint "$CB_CURRENT_CERT_FILENAME" "$CB_CURRENT_CERT_PATH"
   local CB_DEPRECATED_FLAG_FROM_YAML
-  CB_DEPRECATED_FLAG_FROM_YAML=$(yq read "$CB_CURRENT_CERT_PATH" deprecated)
+  CB_DEPRECATED_FLAG_FROM_YAML=$($YQ_BINARY_PATH read "$CB_CURRENT_CERT_PATH" deprecated)
 
   local CB_CERT_ENTRY
   CB_CERT_ENTRY=$(grep ",$CB_CERT_FINGERPRINT," "$CB_DESCRIBE_CERTIFICATES_PROCESSED_CSV" || true)
@@ -443,7 +445,7 @@ validate_existing_yaml_cert() {
     local CB_CERTIFICATE_ID_FROM_ENTRY
     CB_CERTIFICATE_ID_FROM_ENTRY=$(echo "$CB_CERT_ENTRY" | cut -d ',' -f 5)
     local CB_CERTIFICATE_ID_FROM_YAML
-    CB_CERTIFICATE_ID_FROM_YAML=$(yq read "$CB_CURRENT_CERT_PATH" name)
+    CB_CERTIFICATE_ID_FROM_YAML=$($YQ_BINARY_PATH read "$CB_CURRENT_CERT_PATH" name)
     [ "$CB_CERTIFICATE_ID_FROM_YAML" == "$CB_CERTIFICATE_ID_FROM_ENTRY" ] || warn "Mismatching name (ID) in existing certificate $CB_CURRENT_CERT_FILENAME: expected '$CB_CERTIFICATE_ID_FROM_ENTRY', found '$CB_CERTIFICATE_ID_FROM_YAML'"
 
     [ "$CB_DEPRECATED_FLAG_FROM_YAML" == 'null' -o "$CB_DEPRECATED_FLAG_FROM_YAML" == 'false' ] || warn "Existing certificate $CB_CURRENT_CERT_FILENAME used to be deprecated but is active again. Inconsistent describe-certificates output?"
@@ -456,7 +458,7 @@ validate_existing_yaml_cert() {
       log "No matching entry in the describe-certificates output for existing certificate $CB_CURRENT_CERT_FILENAME. It was already deprecated, keeping it so."
     else
       log "No matching entry in the describe-certificates output for existing certificate $CB_CURRENT_CERT_FILENAME. It used to be active, marking it as deprecated."
-      yq write --inplace "$CB_CURRENT_CERT_PATH" deprecated true
+      $YQ_BINARY_PATH write --inplace "$CB_CURRENT_CERT_PATH" deprecated true
     fi
   fi
 }
@@ -570,10 +572,10 @@ import_into_resources_certs_aws_directory_for_region() {
     local CB_TARGET_CERT_FILENAME=$CB_CERT_TARGET_VERSION.yml
     local CB_TARGET_CERT_PATH="$CB_RESOURCES_CERTS_AWS_DIR_FOR_REGION/$CB_TARGET_CERT_FILENAME"
     log "Importing active certificate into YAML $CB_TARGET_CERT_FILENAME of the resources directory, entry:\\n$CB_CERT_ENTRY"
-    yq new name "$CB_CERTIFICATE_ID_FROM_ENTRY" > "$CB_TARGET_CERT_PATH"
-    yq write --inplace -- "$CB_TARGET_CERT_PATH" cert "$CB_CERT_EXTRACTED_PEM"
-    yq write --inplace "$CB_TARGET_CERT_PATH" fingerprint "$CB_CERT_FINGERPRINT"
-    yq write --inplace "$CB_TARGET_CERT_PATH" deprecated false
+    $YQ_BINARY_PATH new name "$CB_CERTIFICATE_ID_FROM_ENTRY" > "$CB_TARGET_CERT_PATH"
+    $YQ_BINARY_PATH write --inplace -- "$CB_TARGET_CERT_PATH" cert "$CB_CERT_EXTRACTED_PEM"
+    $YQ_BINARY_PATH write --inplace "$CB_TARGET_CERT_PATH" fingerprint "$CB_CERT_FINGERPRINT"
+    $YQ_BINARY_PATH write --inplace "$CB_TARGET_CERT_PATH" deprecated false
     rm "$CB_CERT_EXTRACTED_PATH"
     CB_CERT_TARGET_VERSION=$((CB_CERT_TARGET_VERSION + 1))
   done < "$CB_DESCRIBE_CERTIFICATES_PROCESSED_CSV"
