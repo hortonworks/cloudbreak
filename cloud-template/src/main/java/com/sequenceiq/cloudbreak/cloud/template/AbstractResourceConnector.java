@@ -237,13 +237,18 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         for (CloudResource cloudResource : diskSets) {
             VolumeSetAttributes volumeSetAttributes = cloudResource.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
             if (volumeSetAttributes != null) {
-                String discoveryFQDN = volumeSetAttributes.getDiscoveryFQDN();
-                scalingGroup.getInstances().stream()
-                        .filter(cloudInstance -> discoveryFQDN.equals(cloudInstance.getStringParameter(CloudInstance.FQDN)))
-                        .findFirst()
-                        .map(CloudInstance::getTemplate)
-                        .map(InstanceTemplate::getPrivateId)
-                        .ifPresent(privateId -> context.addComputeResources(privateId, List.of(cloudResource)));
+                if (volumeSetAttributes.getDiscoveryFQDN() != null) {
+                    String discoveryFQDN = volumeSetAttributes.getDiscoveryFQDN();
+                    scalingGroup.getInstances().stream()
+                            .filter(cloudInstance -> discoveryFQDN.equals(cloudInstance.getStringParameter(CloudInstance.FQDN)))
+                            .findFirst()
+                            .map(CloudInstance::getTemplate)
+                            .map(InstanceTemplate::getPrivateId)
+                            .ifPresent(privateId -> context.addComputeResources(privateId, List.of(cloudResource)));
+                } else {
+                    LOGGER.error("There is no FQDN set for volume of the disk resource [name: {}] in the database. The disk cannot be reused for reattachment.",
+                            cloudResource.getName());
+                }
             }
         }
         return diskSets;

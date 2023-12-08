@@ -166,4 +166,21 @@ public class AbstractResourceConnectorTest {
         underTest.diskReattachment(List.of(cloudResource), group, context);
         verify(context).addComputeResources(1L, List.of(cloudResource));
     }
+
+    @Test
+    public void testDiskReattachmentWhenResourceDetachedAndFQDNIsNull() {
+        CloudResource cloudResource = mock(CloudResource.class);
+        VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
+        when(cloudResource.getGroup()).thenReturn("groupName");
+        when(cloudResource.getType()).thenReturn(ResourceType.AWS_VOLUMESET);
+        when(cloudResource.getInstanceId()).thenReturn("any");
+        when(cloudResource.getStatus()).thenReturn(CommonStatus.DETACHED);
+        when(group.getName()).thenReturn("groupName");
+        when(cloudResource.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class)).thenReturn(volumeSetAttributes);
+        when(cloudResource.getName()).thenReturn("diskName");
+        when(volumeSetAttributes.getDiscoveryFQDN()).thenReturn(null);
+
+        underTest.diskReattachment(List.of(cloudResource), group, context);
+        verify(context, never()).addComputeResources(any(), any());
+    }
 }
