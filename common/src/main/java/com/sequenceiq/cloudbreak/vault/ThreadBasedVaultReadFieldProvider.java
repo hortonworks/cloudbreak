@@ -91,7 +91,8 @@ public class ThreadBasedVaultReadFieldProvider {
     public static String getFieldName(String secret) {
         String vaultReadFieldName = READ_FIELD_NAME.get();
         Set<String> affectedSecrets = AFFECTED_SECRETS.get();
-        if (vaultReadFieldName != null && !affectedSecrets.isEmpty() && affectedSecrets.stream().anyMatch(affectedSecret -> affectedSecret.contains(secret))) {
+        if (vaultReadFieldName != null && secret != null &&
+                !affectedSecrets.isEmpty() && affectedSecrets.stream().anyMatch(affectedSecret -> affectedSecret.contains(secret))) {
             return vaultReadFieldName;
         } else {
             return VaultConstants.FIELD_SECRET;
