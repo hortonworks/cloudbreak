@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -12,12 +14,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -38,6 +42,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.AzureHighAvailabiltyMode;
 
 import freemarker.template.Template;
 
@@ -174,6 +179,42 @@ public class AzureTemplateBuilderDbTest {
         checkParameter(parameters.get("keyVersion"), "string", "dummyVersion");
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void testBuildWithPrivateFlexibleParameters(boolean privateSetup) throws IOException {
+        Template template = Optional.ofNullable(factoryBean.getObject())
+                .map(config -> {
+                    try {
+                        return config.getTemplate("templates/arm-flexible-dbstack.ftl", "UTF-8");
+                    } catch (IOException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }).orElseThrow();
+
+        when(azureDatabaseTemplateModelBuilderMap.get(AzureDatabaseType.FLEXIBLE_SERVER)).thenReturn(azureDatabaseTemplateModelBuilder);
+        Pair<Map<String, Object>, DatabaseStack> modelDatabasePair = createFlexibleModel(privateSetup);
+        Map<String, Object> model = modelDatabasePair.getLeft();
+        DatabaseStack databaseStack = modelDatabasePair.getRight();
+        when(azureDatabaseTemplateModelBuilder.buildModel(any(AzureDatabaseServerView.class), any(AzureNetworkView.class), any(DatabaseStack.class)))
+                .thenReturn(model);
+        when(azureDatabaseTemplateProvider.getTemplate(databaseStack)).thenReturn(template);
+
+        String result = underTest.build(cloudContext, databaseStack);
+
+        JsonNode jsonTree = JsonUtil.readTree(result);
+        JsonNode networkParams = jsonTree.findValue("network");
+        JsonNode parameters = jsonTree.get("parameters");
+        if (privateSetup) {
+            assertEquals("Disabled", networkParams.get("publicNetworkAccess").textValue());
+            checkParameter(parameters.get("flexibleServerDelegatedSubnetId"), "string", "subnetId");
+            checkParameter(parameters.get("existingDatabasePrivateDnsZoneId"), "string", "zoneId");
+        } else {
+            assertFalse(networkParams.hasNonNull("publicNetworkAccess"));
+            checkParameter(parameters.get("flexibleServerDelegatedSubnetId"), "string", "");
+            checkParameter(parameters.get("existingDatabasePrivateDnsZoneId"), "string", "");
+        }
+    }
+
     private void buildTestWhenUseSslEnforcementInternal(String templatePath, boolean useSslEnforcement) throws IOException {
         Template template = Optional.ofNullable(factoryBean.getObject())
                 .map(config -> {
@@ -236,5 +277,53 @@ public class AzureTemplateBuilderDbTest {
                 Map.entry("privateEndpointName", "pe-hash-to-myServer"),
                 Map.entry("dataEncryption", true),
                 Map.entry("useSslEnforcement", useSslEnforcement));
+    }
+
+    public Pair<Map<String, Object>, DatabaseStack> createFlexibleModel(boolean privateSetup) {
+        Network network = new Network(null);
+        network.putParameter("subnets", "subnet");
+        if (privateSetup) {
+            network.putParameter("existingDatabasePrivateDnsZoneId", "zoneId");
+            network.putParameter("flexibleServerDelegatedSubnetId", "subnetId");
+        }
+        Map<String, Object> serverParams = new HashMap<>();
+        serverParams.put("geoRedundantBackup", false);
+        serverParams.put("backupRetentionDays", 3);
+        serverParams.put("dbVersion", "dbversion");
+        serverParams.put("AZURE_DATABASE_TYPE", "FLEXIBLE_SERVER");
+        serverParams.put(AzureHighAvailabiltyMode.AZURE_HA_MODE_KEY, AzureHighAvailabiltyMode.SAME_ZONE.name());
+        DatabaseServer databaseServer = DatabaseServer.builder()
+                .withServerId("dbname")
+                .withFlavor("Standard_E4ds_v4")
+                .withStorageSize(128L)
+                .withRootUserName("root")
+                .withRootPassword("pwd")
+                .withLocation("location")
+                .withParams(serverParams)
+                .build();
+        DatabaseStack databaseStack = new DatabaseStack(network, databaseServer, Map.of("tag1", "tag1"), "");
+        AzureDatabaseServerView azureDatabaseServerView = new AzureDatabaseServerView(databaseServer);
+        AzureNetworkView azureNetworkView = new AzureNetworkView(network);
+        Map<String, Object> model = new HashMap<>();
+        model.put("adminLoginName", azureDatabaseServerView.getAdminLoginName());
+        model.put("adminPassword", azureDatabaseServerView.getAdminPassword());
+        model.put("backupRetentionDays", azureDatabaseServerView.getBackupRetentionDays());
+        model.put("dbServerName", azureDatabaseServerView.getDbServerName());
+        model.put("dbVersion", azureDatabaseServerView.getDbVersion());
+        model.put("geoRedundantBackup", azureDatabaseServerView.getGeoRedundantBackup());
+        model.put("serverTags", databaseStack.getTags());
+        model.put("existingDatabasePrivateDnsZoneId", azureNetworkView.getExistingDatabasePrivateDnsZoneId());
+        model.put("flexibleServerDelegatedSubnetId", azureNetworkView.getFlexibleServerDelegatedSubnetId());
+        model.put("skuName", azureDatabaseServerView.getSkuName());
+        model.put("skuSizeGB", azureDatabaseServerView.getStorageSizeInGb());
+        model.put("skuTier", azureDatabaseServerView.getSkuTier());
+        model.put("useSslEnforcement", azureDatabaseServerView.isUseSslEnforcement());
+        model.put("location", azureDatabaseServerView.getLocation());
+        model.put("highAvailability", azureDatabaseServerView.getHighAvailabilityMode().templateValue());
+        model.put("availabilityZone", azureDatabaseServerView.getAvailabilityZone());
+        model.put("useAvailabilityZone", azureDatabaseServerView.useAvailabilityZone());
+        model.put("standbyAvailabilityZone", azureDatabaseServerView.getStandbyAvailabilityZone());
+        model.put("useStandbyAvailabilityZone", azureDatabaseServerView.useStandbyAvailabilityZone());
+        return Pair.of(model, databaseStack);
     }
 }

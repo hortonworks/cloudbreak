@@ -53,6 +53,7 @@ public class ExperiencesByLiftie implements Experience {
     @Override
     public Set<ExperienceCluster> getConnectedClustersForEnvironment(EnvironmentExperienceDto environment) {
         throwIfTrue(environment == null, () -> new IllegalArgumentException(EnvironmentExperienceDto.class.getSimpleName() + " cannot be null!"));
+
         LOGGER.debug("Getting Liftie cluster list for environment '{}'", environment.getName());
         List<LiftieClusterView> clusterViews = getClusterViewsForWorkloads(environment.getName(), environment.getAccountId());
         Set<ExperienceCluster> result = clusterViews.stream()
@@ -82,10 +83,8 @@ public class ExperiencesByLiftie implements Experience {
         Map<String, String> result = new LinkedHashMap<>();
         try {
             ExperiencePolicyResponse fetchedPolicies = liftieApi.getPolicy(environment.getCloudPlatform());
-            if (fetchedPolicies.getAws() != null) {
-                result.put(key, fetchedPolicies.getAws().getPolicy());
-            } else {
-                result.put(key, "");
+            if (fetchedPolicies != null) {
+                updatePolicyMapWithResult(fetchedPolicies, result, key);
             }
         } catch (ExperienceOperationFailedException eofe) {
             LOGGER.warn("Unable to fetch policy from Liftie  due to: " + eofe.getMessage(), eofe);
@@ -97,6 +96,15 @@ public class ExperiencesByLiftie implements Experience {
     @Override
     public ExperienceSource getSource() {
         return ExperienceSource.LIFTIE;
+    }
+
+    private void updatePolicyMapWithResult(ExperiencePolicyResponse fetchedPolicies, Map<String, String> result, String xpPublicName) {
+        if (fetchedPolicies.getAws() != null) {
+            LOGGER.debug("Updating policy JSON map for '{}' for AWS.", xpPublicName);
+            result.put(xpPublicName, fetchedPolicies.getAws().getPolicy());
+        } else {
+            result.put(xpPublicName, "");
+        }
     }
 
     private Set<LiftieWorkload> identifyConfiguredWorkloads(LiftieWorkloadsConfig config) {

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -14,11 +13,9 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -31,8 +28,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateDatabaseSettingsResponse;
 import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.AbstractRdsConfigProvider;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -71,10 +66,7 @@ public class MigrateDatabaseSettingsHandler extends ExceptionCatcherEventHandler
     private GatewayConfigService gatewayConfigService;
 
     @Inject
-    private RdsConfigService rdsConfigService;
-
-    @Inject
-    private Set<AbstractRdsConfigProvider> rdsConfigProviders;
+    private RdsConfigUpdateService rdsConfigUpdateService;
 
     @Override
     public String selector() {
@@ -91,12 +83,11 @@ public class MigrateDatabaseSettingsHandler extends ExceptionCatcherEventHandler
     public Selectable doAccept(HandlerEvent<UpgradeRdsMigrateDatabaseSettingsRequest> event) {
         UpgradeRdsMigrateDatabaseSettingsRequest request = event.getData();
         Long stackId = request.getResourceId();
-        String targetMajorVersion = request.getVersion().getMajorVersion();
         LOGGER.info("Migrating database settings...");
         try {
             StackDto stackDto = stackDtoService.getById(request.getResourceId());
             ClusterView cluster = stackDto.getCluster();
-            updateRdsConfigs(stackDto, cluster);
+            updateRdsConfigs(stackDto);
             updateSaltPillars(stackDto, cluster);
             updateCMDatabaseConfiguration(stackDto);
         } catch (Exception e) {
@@ -106,22 +97,8 @@ public class MigrateDatabaseSettingsHandler extends ExceptionCatcherEventHandler
         return new UpgradeRdsMigrateDatabaseSettingsResponse(stackId, request.getVersion());
     }
 
-    private void updateRdsConfigs(StackDto stackDto, ClusterView cluster) {
-        // TODO Currently we update all the rds configs for the cluster because of customer pressure
-        // TODO In the followup CB-22393 it will be refactored to update only the CM config here and CM services config after the CM is successfully restarted
-        LOGGER.debug("Updating rds config connections to the upgraded database in cloudbreak database.");
-        Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(cluster.getId())
-                .stream()
-                .filter(rdsCfg -> rdsConfigProviders.stream().anyMatch(configProvider -> isMatchRdsTypeWithString(configProvider.getRdsType(), rdsCfg)))
-                .collect(Collectors.toSet());
-        rdsConfigs.forEach(rdsConfig -> {
-            String originalUserName = rdsConfig.getConnectionUserName();
-            String newUserName = originalUserName.split("@")[0];
-            LOGGER.debug("Updating rds config connection {}'s user name from {} to {}", rdsConfig.getName(),
-                    originalUserName, newUserName);
-            rdsConfig.setConnectionUserName(newUserName);
-        });
-        rdsConfigService.pureSaveAll(rdsConfigs);
+    private void updateRdsConfigs(StackDto stackDto) {
+        rdsConfigUpdateService.updateRdsConnectionUserName(stackDto);
     }
 
     private void updateSaltPillars(StackDto stackDto, ClusterView cluster) throws CloudbreakOrchestratorFailedException {
@@ -141,7 +118,4 @@ public class MigrateDatabaseSettingsHandler extends ExceptionCatcherEventHandler
                 exitCriteriaProvider.get(stackDto), Optional.of(MAX_RETRY_ON_ERROR), Optional.of(MAX_RETRY_ON_ERROR));
     }
 
-    private boolean isMatchRdsTypeWithString(DatabaseType rdsType, RDSConfig rdsConfig) {
-        return rdsType.name().equals(rdsConfig.getType());
-    }
 }

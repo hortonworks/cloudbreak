@@ -39,7 +39,7 @@ public class AwsLoadBalancerCommonService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsLoadBalancerCommonService.class);
 
-    private static final String ACCESS_DENIED_EXCEPTION_ERROR_CODE = "AccessDeniedException";
+    private static final String ACCESS_DENIED_EXCEPTION_ERROR_CODE = "AccessDenied";
 
     @Inject
     private LoadBalancerTypeConverter loadBalancerTypeConverter;
