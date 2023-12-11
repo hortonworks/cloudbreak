@@ -2,7 +2,7 @@ package com.sequenceiq.environment.environment.flow.deletion.handler.freeipa;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_FREEIPA_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_RDBMS_DELETE_EVENT;
 
 import java.util.List;
 import java.util.Objects;
@@ -175,7 +175,7 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
                 .withResourceId(environmentDto.getResourceId())
                 .withResourceName(environmentDto.getName())
                 .withResourceCrn(environmentDto.getResourceCrn())
-                .withSelector(START_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_EVENT.selector())
+                .withSelector(START_RDBMS_DELETE_EVENT.selector())
                 .build();
     }
 

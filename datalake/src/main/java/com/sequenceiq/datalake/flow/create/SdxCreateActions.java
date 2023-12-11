@@ -190,8 +190,6 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, EnvWaitSuccessEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Datalake storage consumption collection scheduling of SDX cluster: {}", payload.getResourceId());
-                eventSenderService.notifyEvent(context, ResourceEvent.SDX_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_STARTED);
                 sendEvent(context, StorageConsumptionCollectionSchedulingRequest.from(context, payload.getDetailedEnvironmentResponse()));
             }
 

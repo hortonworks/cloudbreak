@@ -142,8 +142,6 @@ public class SdxDeleteActions {
 
             @Override
             protected void doExecute(SdxContext context, StackDeletionSuccessEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Datalake storage consumption collection unscheduling of SDX cluster: {}", payload.getResourceId());
-                eventSenderService.notifyEvent(context, ResourceEvent.SDX_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED);
                 sendEvent(context, StorageConsumptionCollectionUnschedulingRequest.from(context, payload));
             }
 

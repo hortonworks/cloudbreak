@@ -57,12 +57,19 @@ public class EnvCreationFlowConfig extends AbstractFlowConfiguration<EnvCreation
             .failureState(ENV_CREATION_FAILED_STATE)
             .defaultFailureEvent()
 
+            // Deprecated, can be deleted from 2.81
             .from(ENVIRONMENT_CREATION_VALIDATION_STATE).to(STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_STARTED_STATE)
             .event(START_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_EVENT)
             .failureState(ENV_CREATION_FAILED_STATE)
             .defaultFailureEvent()
 
+            // Deprecated, can be deleted from 2.81
             .from(STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_STARTED_STATE).to(NETWORK_CREATION_STARTED_STATE)
+            .event(START_NETWORK_CREATION_EVENT)
+            .failureState(ENV_CREATION_FAILED_STATE)
+            .defaultFailureEvent()
+
+            .from(ENVIRONMENT_CREATION_VALIDATION_STATE).to(NETWORK_CREATION_STARTED_STATE)
             .event(START_NETWORK_CREATION_EVENT)
             .failureState(ENV_CREATION_FAILED_STATE)
             .defaultFailureEvent()

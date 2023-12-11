@@ -119,7 +119,7 @@ class FreeIpaDeletionHandlerTest {
         assertThat(baseNamedFlowEvent).isInstanceOf(EnvDeleteEvent.class);
 
         EnvDeleteEvent envDeleteEvent = (EnvDeleteEvent) baseNamedFlowEvent;
-        assertThat(envDeleteEvent.selector()).isEqualTo("START_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_EVENT");
+        assertThat(envDeleteEvent.selector()).isEqualTo("START_RDBMS_DELETE_EVENT");
     }
 
     @Test
