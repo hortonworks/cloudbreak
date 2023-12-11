@@ -107,12 +107,7 @@ public class AzureUpscaleService {
 
         OffsetDateTime preDeploymentTime = OffsetDateTime.now();
         Image stackImage = stack.getImage();
-        if (azureImageFormatValidator.isMarketplaceImageFormat(stackImage)) {
-            LOGGER.debug("Attempt to sign Azure Marketplace image {}", stackImage);
-            AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(stackImage);
-            AzureCredentialView azureCredentialView = new AzureCredentialView(ac.getCloudCredential());
-            azureImageTermsSignerService.signImageTermsIfAllowed(stack, client, azureMarketplaceImage, azureCredentialView.getSubscriptionId());
-        }
+        attemptToSignImageIfApplicable(ac, stack, client, stackImage);
         List<CloudResource> createdCloudInstances =
                 resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, AZURE_INSTANCE, cloudContext.getId());
         LOGGER.debug("Created cloud instances: {}", createdCloudInstances);
@@ -172,6 +167,16 @@ public class AzureUpscaleService {
             azureScaleUtilService.rollbackResources(ac, client, stack, cloudContext, resources, preDeploymentTime);
             throw new CloudConnectorException(String.format("Could not upscale Azure infrastructure, infrastructure was rolled back: %s, %s", stackName,
                     e.getMessage()), e);
+        }
+    }
+
+    private void attemptToSignImageIfApplicable(AuthenticatedContext ac, CloudStack stack, AzureClient client, Image stackImage) {
+        if (azureImageFormatValidator.isMarketplaceImageFormat(stackImage) || azureImageFormatValidator.hasSourceImagePlan(stackImage)) {
+            AzureMarketplaceImage azureMarketplaceImage = azureImageFormatValidator.isMarketplaceImageFormat(stackImage) ?
+                    azureMarketplaceImageProviderService.get(stackImage) : azureMarketplaceImageProviderService.getSourceImage(stackImage);
+            AzureCredentialView azureCredentialView = new AzureCredentialView(ac.getCloudCredential());
+            LOGGER.debug("Attempt to sign Azure Marketplace image {}", azureMarketplaceImage.toString());
+            azureImageTermsSignerService.signImageTermsIfAllowed(stack, client, azureMarketplaceImage, azureCredentialView.getSubscriptionId());
         }
     }
 

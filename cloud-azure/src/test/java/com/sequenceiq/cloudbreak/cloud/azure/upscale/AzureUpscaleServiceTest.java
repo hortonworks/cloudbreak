@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
@@ -67,6 +68,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
@@ -147,7 +149,9 @@ public class AzureUpscaleServiceTest {
         when(azureUtils.getFullInstanceId(nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class)))
                 .thenReturn("instanceid");
         when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), eq(stack))).thenReturn(RESOURCE_GROUP);
+    }
 
+    private void vhdImageStubbing() {
         Image image = new Image("azureImage.vhd", null, null, null, null, null, null, null, null, null);
         when(stack.getImage()).thenReturn(image);
         AzureMarketplaceImage azureMpImage = new AzureMarketplaceImage("", "", "", "");
@@ -156,7 +160,76 @@ public class AzureUpscaleServiceTest {
     }
 
     @Test
+    public void testUpscaleWhenSourceImageSignAttempted() throws QuotaExceededException {
+        CloudContext cloudContext = createCloudContext();
+        CloudCredential cloudCredential = mock(CloudCredential.class);
+        when(cloudCredential.getParameters()).thenReturn(Map.of("subscriptionId", "subscriptionId"));
+        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
+        CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
+        List<CloudResource> resources = List.of(createCloudResource("volumes", ResourceType.AZURE_VOLUMESET), template);
+        InstanceTemplate instanceTemplate = mock(InstanceTemplate.class);
+        when(instanceTemplate.getPrivateId()).thenReturn(1L);
+        when(instanceTemplate.getGroupName()).thenReturn("worker");
+        when(instanceTemplate.getStatus()).thenReturn(InstanceStatus.CREATE_REQUESTED);
+        List<Group> scaledGroups = createScaledGroups(new CloudInstance("instanceid", instanceTemplate, null, null, null));
+
+        Map<String, String> packageVersions = Map.of(ImagePackageVersion.SOURCE_IMAGE.getKey(), "cloudera:cdp-7_2_17:runtime-7_2_17:200.46967063.1701370975");
+        Image image = new Image("azureImage.vhd", null, null, null, null, null, null, packageVersions, null, null);
+        when(stack.getImage()).thenReturn(image);
+        AzureMarketplaceImage azureMpImage = new AzureMarketplaceImage("cloudera", "7_2_17", "runtime-7_2_17", "200.46967063.1701370975");
+        when(azureMarketplaceImageProviderService.getSourceImage(eq(image))).thenReturn(azureMpImage);
+        when(azureImageFormatValidator.isMarketplaceImageFormat(eq(image))).thenReturn(false);
+        when(azureImageFormatValidator.hasSourceImagePlan(eq(image))).thenReturn(true);
+
+        when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
+        when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
+                .thenReturn(templateDeployment);
+        when(templateDeployment.exportTemplate()).thenReturn(mock(DeploymentExportResult.class));
+        CloudResource newInstance = CloudResource.builder().withInstanceId("instanceid").withType(ResourceType.AZURE_INSTANCE).withStatus(CommonStatus.CREATED)
+                .withName("instance").withParameters(Map.of()).build();
+        List<CloudResource> newInstances = List.of(newInstance);
+        when(azureCloudResourceService.getDeploymentCloudResources(templateDeployment)).thenReturn(newInstances);
+        when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP)).thenReturn(newInstances);
+        when(azureCloudResourceService.getNetworkResources(resources)).thenReturn(NETWORK_RESOURCES);
+        when(azureScaleUtilService.getArmTemplate(anyList(), anyString())).thenReturn(template);
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, AZURE_INSTANCE, cloudContext.getId())).thenReturn(new ArrayList<>());
+        doNothing().when(cloudResourceHelper).updateDeleteOnTerminationFlag(anyList(), anyBoolean(), any());
+
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
+        List<CloudResourceStatus> actual = underTest.upscale(ac, stack, resources, azureStackView, client,
+                adjustmentTypeWithThreshold);
+
+        assertFalse(actual.isEmpty());
+        assertEquals(template, actual.get(0).getCloudResource());
+        assertEquals(ResourceStatus.IN_PROGRESS, actual.get(0).getStatus());
+
+        verify(azureImageTermsSignerService).signImageTermsIfAllowed(eq(stack), eq(client), eq(azureMpImage), isNull());
+        verify(cloudResourceHelper).getScaledGroups(stack);
+        verify(azureTemplateDeploymentService).getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
+        verify(templateDeployment).exportTemplate();
+        verify(azureCloudResourceService).getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP);
+        verify(azureCloudResourceService).getNetworkResources(resources);
+        verify(azureUtils).getStackName(any(CloudContext.class));
+        verify(azureResourceGroupMetadataProvider).getResourceGroupName(any(CloudContext.class), eq(stack));
+        ArgumentCaptor<List<CloudResource>> newInstancesArgumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(azureComputeResourceService).buildComputeResourcesForUpscale(eq(ac), eq(stack), eq(scaledGroups), newInstancesArgumentCaptor.capture(),
+                eq(List.of()), eq(NETWORK_RESOURCES), eq(adjustmentTypeWithThreshold));
+        List<CloudResource> cloudResourceList = newInstancesArgumentCaptor.getValue();
+        assertThat(cloudResourceList).extracting(CloudResource::getType).containsExactly(AZURE_INSTANCE);
+        assertThat(cloudResourceList).extracting(CloudResource::getStatus).containsExactly(CommonStatus.CREATED);
+        assertThat(cloudResourceList).extracting(CloudResource::getName).containsExactly("instance");
+        assertThat(cloudResourceList).extracting(CloudResource::isPersistent).containsExactly(true);
+        assertThat(cloudResourceList).extracting(CloudResource::isStackAware).containsExactly(true);
+        assertThat(cloudResourceList).extracting(CloudResource::getInstanceId).containsExactly("instanceid");
+        assertThat(cloudResourceList).extracting(CloudResource::getParameters).extracting(map -> map.get(PRIVATE_ID)).containsExactly(1L);
+        verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(false), any());
+        verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(true), any());
+    }
+
+    @Test
     public void testUpscaleThenThereAreNewInstancesRequired() throws QuotaExceededException {
+        vhdImageStubbing();
+
         CloudContext cloudContext = createCloudContext();
         CloudCredential cloudCredential = mock(CloudCredential.class);
         when(cloudCredential.getParameters()).thenReturn(Map.of("subscriptionId", "subscriptionId"));
@@ -215,6 +288,8 @@ public class AzureUpscaleServiceTest {
 
     @Test
     public void testUpscaleButQuotaIssueHappen() throws QuotaExceededException {
+        vhdImageStubbing();
+
         CloudContext cloudContext = createCloudContext();
         CloudCredential cloudCredential = mock(CloudCredential.class);
         when(cloudCredential.getParameters()).thenReturn(Map.of("subscriptionId", "subscriptionId"));
@@ -264,6 +339,8 @@ public class AzureUpscaleServiceTest {
 
     @Test
     public void testUpscaleWhenThereAreReattachableVolumeSets() throws QuotaExceededException {
+        vhdImageStubbing();
+
         CloudContext cloudContext = createCloudContext();
         CloudCredential cloudCredential = mock(CloudCredential.class);
         when(cloudCredential.getParameters()).thenReturn(Map.of("subscriptionId", "subscriptionId"));
@@ -317,6 +394,8 @@ public class AzureUpscaleServiceTest {
 
     @Test
     public void testUpscaleWhenVmsNotStartedInTime() {
+        vhdImageStubbing();
+
         CloudContext cloudContext = createCloudContext();
         CloudCredential cloudCredential = mock(CloudCredential.class);
         when(cloudCredential.getParameters()).thenReturn(Map.of("subscriptionId", "subscriptionId"));
