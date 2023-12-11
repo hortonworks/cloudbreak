@@ -29,7 +29,8 @@ public class DistroxEnabledInstanceTypes {
             "m5n.2xlarge,m5n.4xlarge,m5n.8xlarge," +
             "r5n.2xlarge,r5n.4xlarge,r5n.8xlarge,r5n.16xlarge," +
             "r5dn.xlarge,r5dn.2xlarge,r5dn.4xlarge,r5dn.8xlarge,r5dn.16xlarge," +
-            "x1e.2xlarge";
+            "x1e.2xlarge," +
+            "i4i.2xlarge";
 
     public static final List<String> AWS_ENABLED_TYPES_LIST = new ArrayList<String>(Arrays.asList(ENABLED_TYPES.trim().split(",")));
 
