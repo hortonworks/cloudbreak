@@ -15,12 +15,13 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -38,6 +39,8 @@ import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.request.DiskResizeRequest;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
@@ -109,12 +112,16 @@ public class DiskUpdateService {
     @Inject
     private InstanceGroupService instanceGroupService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public boolean isDiskTypeChangeSupported(String platform) {
         return cloudParameterCache.isDiskTypeChangeSupported(platform);
     }
 
     public void updateDiskTypeAndSize(DiskUpdateRequest diskUpdateRequest, List<Volume> volumesToUpdate, Long stackId) throws Exception {
         StackDto stackDto = stackDtoService.getById(stackId);
+        validateDiskUpdateRequest(diskUpdateRequest, CloudPlatform.valueOf(stackDto.getCloudPlatform()), stackDto.getResourceCrn());
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(Platform.platform(stackDto.getCloudPlatform()),
                 Variant.variant(stackDto.getPlatformVariant()));
         CloudConnector cloudConnector = cloudPlatformConnectors.get(cloudPlatformVariant);
@@ -250,5 +257,19 @@ public class DiskUpdateService {
                     resourceAttributeUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
                 }))
                 .collect(Collectors.toList()));
+    }
+
+    private void validateDiskUpdateRequest(DiskUpdateRequest diskUpdateRequest, CloudPlatform cloudPlatform, String clusterCrn) {
+        if (cloudPlatform == CloudPlatform.AZURE) {
+            if (!entitlementService.azureResizeDiskEnabled(Crn.safeFromString(clusterCrn).getAccountId())) {
+                throw new BadRequestException("Resizing Disk for Azure is not enabled for this account");
+            } else if (StringUtils.isNotEmpty(diskUpdateRequest.getVolumeType())) {
+                throw new BadRequestException("Changing Volume Type is not supported for Azure");
+            }
+        } else if (cloudPlatform == CloudPlatform.AWS) {
+            if (StringUtils.isEmpty(diskUpdateRequest.getVolumeType())) {
+                throw new BadRequestException("Volume Type must be specified for AWS");
+            }
+        }
     }
 }

@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
 
@@ -61,6 +62,11 @@ public class AzurePlatformParametersTest {
         assertEquals(workerAsMap.get(AS_UPDATE_DOMAIN_COUNTER_KEY), 50);
 
         assertFalse(instanceGroupParameterResponseMap.get(COMPUTE_GROUP_NAME).getParameters().containsKey(AS_KEY));
+    }
+
+    @Test
+    public void testDiskTypeChangeSupported() {
+        assertTrue(underTest.specialParameters().getSpecialParameters().get(PlatformParametersConsts.DISK_TYPE_CHANGE_SUPPORTED));
     }
 
     private InstanceGroupParameterRequest getRequestWithoutAs(String groupName) {

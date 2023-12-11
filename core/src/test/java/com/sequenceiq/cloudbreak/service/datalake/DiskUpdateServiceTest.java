@@ -29,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsResourceVolumeConnector;
@@ -40,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.request.DiskResizeRequest;
@@ -109,6 +111,9 @@ class DiskUpdateServiceTest {
 
     @Mock
     private HostOrchestrator hostOrchestrator;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private DiskUpdateService underTest;
@@ -261,6 +266,65 @@ class DiskUpdateServiceTest {
         VolumeTemplate resultVolumeTemplate = template.getVolumeTemplates().stream().findFirst().get();
         assertEquals(200, resultVolumeTemplate.getVolumeSize());
         assertEquals("test", resultVolumeTemplate.getVolumeType());
+    }
+
+    @Test
+    void testUpdateDiskTypeAndSizeVolumeTypeNotSpecifiedForAws() throws Exception {
+        Long stackId = 1L;
+        StackDto stack = mock(StackDto.class);
+        doReturn("AWS").when(stack).getCloudPlatform();
+        doReturn("crn:cdp:iam:us-west-1:default:user:someuser").when(stack).getResourceCrn();
+        doReturn(stack).when(stackDtoService).getById(stackId);
+
+        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
+        diskUpdateRequest.setSize(200);
+        diskUpdateRequest.setGroup("master");
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.updateDiskTypeAndSize(diskUpdateRequest, List.of(), stackId));
+        assertEquals("Volume Type must be specified for AWS", badRequestException.getMessage());
+
+
+    }
+
+    @Test
+    void testUpdateDiskTypeAndSizeEntitlementNotAssignedForAzure() throws Exception {
+        Long stackId = 1L;
+        String tenant = "default";
+        StackDto stack = mock(StackDto.class);
+        doReturn("AZURE").when(stack).getCloudPlatform();
+        doReturn(String.format("crn:cdp:iam:us-west-1:%s:user:someuser", tenant)).when(stack).getResourceCrn();
+        doReturn(stack).when(stackDtoService).getById(stackId);
+        doReturn(false).when(entitlementService).azureResizeDiskEnabled(tenant);
+
+        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
+        diskUpdateRequest.setSize(200);
+        diskUpdateRequest.setGroup("master");
+        diskUpdateRequest.setVolumeType("test");
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.updateDiskTypeAndSize(diskUpdateRequest, List.of(), stackId));
+        assertEquals("Resizing Disk for Azure is not enabled for this account", badRequestException.getMessage());
+    }
+
+    @Test
+    void testUpdateDiskTypeAndSizeVolumeTypeSpecifiedForAzure() throws Exception {
+        Long stackId = 1L;
+        String tenant = "default";
+        StackDto stack = mock(StackDto.class);
+        doReturn("AZURE").when(stack).getCloudPlatform();
+        doReturn(String.format("crn:cdp:iam:us-west-1:%s:user:someuser", tenant)).when(stack).getResourceCrn();
+        doReturn(stack).when(stackDtoService).getById(stackId);
+        doReturn(true).when(entitlementService).azureResizeDiskEnabled(tenant);
+
+        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
+        diskUpdateRequest.setSize(200);
+        diskUpdateRequest.setGroup("master");
+        diskUpdateRequest.setVolumeType("test");
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.updateDiskTypeAndSize(diskUpdateRequest, List.of(), stackId));
+        assertEquals("Changing Volume Type is not supported for Azure", badRequestException.getMessage());
     }
 
     private void setUpForDiskResize(AwsResourceVolumeConnector awsResourceVolumeConnector, Template template) {
