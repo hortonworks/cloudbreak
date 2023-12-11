@@ -17,7 +17,7 @@ public class ClusterUpgradeImageFilter {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeImageFilter.class);
 
     @Inject
-    private BlueprintBasedUpgradeValidator blueprintBasedUpgradeValidator;
+    private BlueprintUpgradeOptionValidator blueprintUpgradeOptionValidator;
 
     @Inject
     private ImageFilterUpgradeService imageFilterUpgradeService;
@@ -25,7 +25,7 @@ public class ClusterUpgradeImageFilter {
     @Inject
     private ImageCatalogService imageCatalogService;
 
-    public ImageFilterResult filter(Long workspaceId, String imageCatalogName, ImageFilterParams imageFilterParams) {
+    public ImageFilterResult getAvailableImagesForUpgrade(Long workspaceId, String imageCatalogName, ImageFilterParams imageFilterParams) {
         BlueprintValidationResult blueprintValidationResult = isValidBlueprint(imageFilterParams);
         return blueprintValidationResult.isValid() ? getImageFilterResult(workspaceId, imageCatalogName, imageFilterParams)
                 : createEmptyResult(blueprintValidationResult.getReason());
@@ -33,9 +33,9 @@ public class ClusterUpgradeImageFilter {
 
     private ImageFilterResult getImageFilterResult(Long workspaceId, String imageCatalogName, ImageFilterParams imageFilterParams) {
         try {
-            ImageFilterResult imageFilterResult = imageCatalogService
+            ImageFilterResult availableImages = imageCatalogService
                     .getImageFilterResult(workspaceId, imageCatalogName, imageFilterParams.getImageCatalogPlatform(), imageFilterParams.isGetAllImages());
-            return imageFilterResult.getImages().isEmpty() ? imageFilterResult : filterImages(imageFilterResult, imageFilterParams);
+            return availableImages.getImages().isEmpty() ? availableImages : filterImages(availableImages, imageFilterParams);
         } catch (Exception ex) {
             LOGGER.error("Error during image filtering.", ex);
             return createEmptyResult("Failed to retrieve eligible images due tue an internal error.");
@@ -48,7 +48,7 @@ public class ClusterUpgradeImageFilter {
     }
 
     private BlueprintValidationResult isValidBlueprint(ImageFilterParams imageFilterParams) {
-        return blueprintBasedUpgradeValidator.isValidBlueprint(imageFilterParams);
+        return blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams);
     }
 
     private ImageFilterResult createEmptyResult(String reason) {

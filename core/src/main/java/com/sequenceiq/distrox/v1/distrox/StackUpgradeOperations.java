@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeCandidateFilterService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -85,6 +86,9 @@ public class StackUpgradeOperations {
 
     @Inject
     private ClusterService clusterService;
+
+    @Inject
+    private ClusterUpgradeCandidateFilterService clusterUpgradeCandidateFilterService;
 
     public FlowIdentifier upgradeOs(@NotNull NameOrCrn nameOrCrn, String accountId, boolean keepVariant) {
         LOGGER.debug("Starting to upgrade OS: " + nameOrCrn);
@@ -141,7 +145,7 @@ public class StackUpgradeOperations {
         UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, replaceVms,
                 request.getInternalUpgradeSettings(), getAllImages);
         if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
-            clusterUpgradeAvailabilityService.filterUpgradeOptions(upgradeResponse, request, stack.isDatalake());
+            clusterUpgradeCandidateFilterService.filterUpgradeOptions(upgradeResponse, request, stack.isDatalake());
             populateCandidatesWithPreparedFlag(stack, upgradeResponse);
         }
         validateAttachedDataHubsForDataLake(accountId, stack, upgradeResponse, request);
