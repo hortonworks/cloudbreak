@@ -521,9 +521,14 @@ public class StackToCloudStackConverter {
             cloudStack.getGroups()
                     .stream()
                     .filter(group -> group.getName().equals(request.getGroup()))
-                    .flatMap(group -> group.getInstances().stream())
-                    .filter(instance -> !Strings.isNullOrEmpty(template.getInstanceType()))
-                    .forEach(instance -> instance.getTemplate().setFlavor(template.getInstanceType()));
+                    .findFirst().ifPresent(group -> {
+                        group.getInstances().stream()
+                                .filter(instance -> !Strings.isNullOrEmpty(template.getInstanceType()))
+                                .forEach(instance -> instance.getTemplate().setFlavor(template.getInstanceType()));
+                        if (template.getRootVolume() != null) {
+                            group.setRootVolumeSize(template.getRootVolume().getSize());
+                        }
+                    });
         }
         return cloudStack;
     }

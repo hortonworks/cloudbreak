@@ -4,6 +4,7 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.REPAIR_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.REPAIR_STARTED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
 import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType.ALL_AT_ONCE;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -34,6 +35,9 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.RootVolumeV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
@@ -47,9 +51,11 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.embedded.Upgrade
 import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
+import com.sequenceiq.cloudbreak.core.flow2.event.CoreVerticalScalingTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.migration.AwsVariantMigrationEvent;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -62,6 +68,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTr
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RescheduleStatusCheckTriggerEvent;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -90,6 +97,9 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     @Value("${cb.db.env.upgrade.embedded.targetversion}")
     private TargetMajorVersion targetMajorVersion;
+
+    @Value("${cb.root.disk.repair.migration.enabled:true}")
+    private boolean rootDiskRepairMigrationEnabled;
 
     @Inject
     private StackService stackService;
@@ -120,6 +130,9 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     @Inject
     private ScalingHardLimitsService scalingHardLimitsService;
+
+    @Inject
+    private DefaultRootVolumeSizeProvider rootVolumeSizeProvider;
 
     @Override
     public String initEvent() {
@@ -186,6 +199,9 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             flowTriggers.add(new UpgradeEmbeddedDBPreparationTriggerRequest(UpgradeEmbeddedDBPreparationEvent.UPGRADE_EMBEDDEDDB_PREPARATION_EVENT.event(),
                     event.getResourceId(), targetMajorVersion));
         }
+        if (rootDiskRepairMigrationEnabled) {
+            addRootDiskUpdateIfNecessary(event, stackDto, repairableGroupsWithHostNames, flowTriggers);
+        }
         addDownscaleAndUpscaleEvents(event, flowTriggers, repairableGroupsWithHostNames, singlePrimaryGW, stackView);
         if (embeddedDBUpgrade) {
             LOGGER.debug("Cluster repair flowchain is extended with upgrade rds flow as embedded db upgrade is needed");
@@ -194,6 +210,36 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         flowTriggers.add(rescheduleStatusCheckEvent(event));
         flowTriggers.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
         return flowTriggers;
+    }
+
+    private void addRootDiskUpdateIfNecessary(ClusterRepairTriggerEvent event, StackDto stackDto, Map<String, Set<String>> repairableGroupsWithHostNames,
+            Queue<Selectable> flowTriggers) {
+        for (String group : repairableGroupsWithHostNames.keySet()) {
+            stackDto.getInstanceGroupDtos().stream()
+                    .filter(instanceGroupDto -> group.equals(instanceGroupDto.getInstanceGroup().getGroupName()))
+                    .findFirst().ifPresent(instanceGroupDto -> {
+                        Template groupTemplate = instanceGroupDto.getInstanceGroup().getTemplate();
+                        int defaultRootVolumeSize = rootVolumeSizeProvider.getForPlatform(stackDto.getCloudPlatform());
+                        if (groupTemplate.getRootVolumeSize() < defaultRootVolumeSize) {
+                            StackVerticalScaleV4Request stackVerticalScaleV4Request = createStackVerticalScaleV4Request(event, group, defaultRootVolumeSize);
+                            CoreVerticalScalingTriggerEvent coreVerticalScalingTriggerEvent =
+                                    new CoreVerticalScalingTriggerEvent(STACK_VERTICALSCALE_EVENT.event(), event.getStackId(), stackVerticalScaleV4Request);
+                            flowTriggers.add(coreVerticalScalingTriggerEvent);
+                        }
+            });
+        }
+    }
+
+    private StackVerticalScaleV4Request createStackVerticalScaleV4Request(ClusterRepairTriggerEvent event, String group, int defaultRootVolumeSize) {
+        StackVerticalScaleV4Request stackVerticalScaleV4Request = new StackVerticalScaleV4Request();
+        stackVerticalScaleV4Request.setGroup(group);
+        stackVerticalScaleV4Request.setStackId(event.getStackId());
+        InstanceTemplateV4Request template = new InstanceTemplateV4Request();
+        RootVolumeV4Request rootVolume = new RootVolumeV4Request();
+        rootVolume.setSize(defaultRootVolumeSize);
+        template.setRootVolume(rootVolume);
+        stackVerticalScaleV4Request.setTemplate(template);
+        return stackVerticalScaleV4Request;
     }
 
     private boolean fillRepairableGroupsWithHostNames(RepairConfig repairConfig, Map<String, Set<String>> repairableGroupsWithHostNames) {
@@ -215,7 +261,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private void specialRepair(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
-        Map<String, Set<String>> repairableGroupsWithHostNames, StackView stackView, ClusterRepairTriggerEvent.RepairType repairType) {
+            Map<String, Set<String>> repairableGroupsWithHostNames, StackView stackView, ClusterRepairTriggerEvent.RepairType repairType) {
         Optional<String> primaryGwFQDN = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(event.getStackId())
                 .map(InstanceMetadataView::getDiscoveryFQDN);
         HashMultimap<String, String> repairableGroupsWithHostNameMultimap = HashMultimap.create();
@@ -225,15 +271,14 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         switch (repairType) {
             case ONE_FROM_EACH_HOSTGROUP ->
                     addRepairFlowsForEachGroupsWithOneNode(event, flowTriggers, hostsByHostGroupAndSortedByPgw, primaryGwFQDN, stackView);
-            case BATCH ->
-                    addBatchedRepairFlows(event, flowTriggers, hostsByHostGroupAndSortedByPgw, primaryGwFQDN, stackView);
+            case BATCH -> addBatchedRepairFlows(event, flowTriggers, hostsByHostGroupAndSortedByPgw, primaryGwFQDN, stackView);
             default -> throw new IllegalStateException("Unknown repair type:" + repairType);
         }
 
     }
 
     private LinkedHashMultimap<String, String> collectHostsByHostGroupAndSortByPgwAndName(Optional<String> primaryGwFQDN,
-        HashMultimap<String, String> repairableGroupsWithHostNameMultimap) {
+            HashMultimap<String, String> repairableGroupsWithHostNameMultimap) {
         return repairableGroupsWithHostNameMultimap.entries().stream()
                 .sorted(Entry.comparingByValue((o1, o2) -> {
                     if (primaryGwFQDN.filter(o1::equals).isPresent()) {
@@ -288,7 +333,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private void addRepairFlows(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers, Map<String, Set<String>> repairableGroupsWithHostNames,
-        boolean singlePrimaryGW, StackView stackView) {
+            boolean singlePrimaryGW, StackView stackView) {
         if (!repairableGroupsWithHostNames.isEmpty()) {
             flowTriggers.add(downscaleEvent(singlePrimaryGW, event, repairableGroupsWithHostNames));
             LOGGER.info("Downscale event added for: {}", repairableGroupsWithHostNames);
@@ -334,7 +379,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private StackEvent downscaleEvent(boolean singlePrimaryGW, ClusterRepairTriggerEvent event,
-        Map<String, Set<String>> groupsWithHostNames) {
+            Map<String, Set<String>> groupsWithHostNames) {
         Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.getAllInstanceMetadataWithoutInstanceGroupByStackId(event.getStackId());
         Map<String, Set<Long>> groupsWithPrivateIds = new HashMap<>();
         Map<String, Integer> groupsWithAdjustment = new HashMap<>();
@@ -366,7 +411,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private StackAndClusterUpscaleTriggerEvent fullUpscaleEvent(ClusterRepairTriggerEvent event, Map<String, Set<String>> groupsWithHostNames,
-        boolean singlePrimaryGateway, boolean restartServices, boolean kerberosSecured) {
+            boolean singlePrimaryGateway, boolean restartServices, boolean kerberosSecured) {
         Set<com.sequenceiq.cloudbreak.domain.view.InstanceGroupView> instanceGroupViews = instanceGroupService.findViewByStackId(event.getStackId());
         boolean singleNodeCluster = isSingleNode(instanceGroupViews);
         Integer adjustmentSize = groupsWithHostNames.values().stream().map(Set::size).reduce(0, Integer::sum);
@@ -415,6 +460,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private static class RepairConfig {
+
         private Optional<Repair> singlePrimaryGateway;
 
         private List<Repair> repairs;

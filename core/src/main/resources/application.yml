@@ -115,9 +115,9 @@ cb:
   enabledplatforms: AWS,AZURE,YARN,GCP,MOCK
   enabledgovplatforms: AWS
   platform.default.rootVolumeSize:
-    AWS: 100
-    AZURE: 100
-    GCP: 100
+    AWS: 200
+    AZURE: 200
+    GCP: 200
   enabled.linux.types: redhat6,redhat7,redhat8,centos6,centos7
   default.gateway.cidr: 0.0.0.0/0
   ccmRevertJob:
