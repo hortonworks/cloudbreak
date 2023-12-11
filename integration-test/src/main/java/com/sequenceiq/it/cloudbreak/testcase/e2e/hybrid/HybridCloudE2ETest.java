@@ -74,11 +74,6 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
 
     private static final String STACK_AUTHENTICATION = "stackAuthentication";
 
-    /**
-     * Provisioning a Data Lake or Data Hub with a yarn base image may take more than an hour as it has to download parcels
-     */
-    private static final long TIMEOUT = TimeUnit.MINUTES.toSeconds(70);
-
     @Inject
     private SdxTestClient sdxTestClient;
 
@@ -105,6 +100,9 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
 
     @Value("${integrationtest.aws.hybridCloudSecurityGroupID}")
     private String hybridCloudSecurityGroupID;
+
+    @Value("${integrationtest.hybrid.flowTimeoutInMinutes:90}")
+    private long hybridFlowTimeoutInMinutes;
 
     private String sdxGatewayPrivateIp;
 
@@ -192,9 +190,7 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
                     LOGGER.info("SDX master instance IP: {}", sdxGatewayPrivateIp);
                     return dto;
                 })
-                .await(SdxClusterStatusResponse.RUNNING, key(CHILD_SDX_KEY)
-                        .withWaitForFlowSuccess()
-                        .withTimeoutChecker(new AbsolutTimeBasedTimeoutChecker(TIMEOUT)))
+                .await(SdxClusterStatusResponse.RUNNING, key(CHILD_SDX_KEY).withWaitForFlowSuccess().withTimeoutChecker(getHybridFlowTimeoutChecker()))
                 .awaitForHealthyInstances()
                 .validate();
     }
@@ -241,10 +237,14 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
                     .withCluster(cluster)
                     .withImageSettings(imageSettings)
                 .when(distroXTestClient.create(), key(CHILD_DISTROX_KEY))
-                .await(STACK_AVAILABLE, key(CHILD_DISTROX_KEY).withTimeoutChecker(new AbsolutTimeBasedTimeoutChecker(TIMEOUT)))
+                .await(STACK_AVAILABLE, key(CHILD_DISTROX_KEY).withTimeoutChecker(getHybridFlowTimeoutChecker()))
                 .awaitForHealthyInstances()
                 .when(distroXTestClient.get(), key(CHILD_DISTROX_KEY))
                 .validate();
+    }
+
+    private AbsolutTimeBasedTimeoutChecker getHybridFlowTimeoutChecker() {
+        return new AbsolutTimeBasedTimeoutChecker(TimeUnit.MINUTES.toSeconds(hybridFlowTimeoutInMinutes));
     }
 
     /**
