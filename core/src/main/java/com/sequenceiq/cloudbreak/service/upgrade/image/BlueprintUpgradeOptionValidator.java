@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 
@@ -27,7 +26,8 @@ class BlueprintUpgradeOptionValidator {
 
     BlueprintValidationResult isValidBlueprint(ImageFilterParams imageFilterParams) {
         LOGGER.debug("Validating blueprint upgrade option. {}", imageFilterParams);
-        if (isDataLake(imageFilterParams) || imageFilterParams.isSkipValidations()) {
+        if (imageFilterParams.isSkipValidations()) {
+            LOGGER.debug("Skipping blueprint validation because the skipValidations flag is added to the request");
             return new BlueprintValidationResult(true);
         } else {
             Blueprint blueprint = imageFilterParams.getBlueprint();
@@ -35,10 +35,6 @@ class BlueprintUpgradeOptionValidator {
                     isEnabledForDefaultBlueprint(imageFilterParams, blueprint) :
                     isEnabledForCustomBlueprint(blueprint, imageFilterParams.isDataHubUpgradeEntitled());
         }
-    }
-
-    private boolean isDataLake(ImageFilterParams imageFilterParams) {
-        return StackType.DATALAKE.equals(imageFilterParams.getStackType());
     }
 
     private boolean isDefaultBlueprint(Blueprint blueprint) {

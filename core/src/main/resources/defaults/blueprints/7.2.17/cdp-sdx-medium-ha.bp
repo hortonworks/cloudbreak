@@ -6,6 +6,7 @@
   "blueprint": {
     "cdhVersion": "7.2.17",
     "displayName": "medium-ha-datalake",
+    "blueprintUpgradeOption": "ROLLING_UPGRADE_ENABLED",
     "hostTemplates": [
       {
         "cardinality": 2,

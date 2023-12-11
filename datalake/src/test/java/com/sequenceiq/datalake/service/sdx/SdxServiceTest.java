@@ -1121,7 +1121,7 @@ class SdxServiceTest {
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
         SdxDatabase sdxDatabase = new SdxDatabase();
-        when(externalDatabaseConfigurer.configure(eq(AWS), eq("os"), any(), any(), any(), eq(false))).thenReturn(sdxDatabase);
+        when(externalDatabaseConfigurer.configure(eq(environmentResponse), eq("os"), any(), any(), any())).thenReturn(sdxDatabase);
         ImageV4Response imageV4Response = new ImageV4Response();
         when(imageCatalogService.getImageResponseFromImageRequest(any(), any())).thenReturn(imageV4Response);
         String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
@@ -1136,7 +1136,7 @@ class SdxServiceTest {
         verify(imageCatalogService, times(1)).getImageResponseFromImageRequest(any(), any());
         verify(environmentClientService, times(2)).getByName(anyString());
         verify(cdpConfigService, times(1)).getConfigForKey(any());
-        verify(externalDatabaseConfigurer, times(1)).configure(any(), anyString(), any(), any(), any(), anyBoolean());
+        verify(externalDatabaseConfigurer, times(1)).configure(any(), anyString(), any(), any(), any());
         verify(sdxReactorFlowManager, times(0)).triggerSdxCreation(any());
         verify(transactionService, times(1)).required(any(Supplier.class));
         verify(sdxClusterRepository, times(0)).save(any(SdxCluster.class));
@@ -1153,7 +1153,7 @@ class SdxServiceTest {
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
         SdxDatabase sdxDatabase = new SdxDatabase();
-        when(externalDatabaseConfigurer.configure(eq(AWS), eq("os"), any(), any(), any(), eq(false))).thenReturn(sdxDatabase);
+        when(externalDatabaseConfigurer.configure(eq(environmentResponse), eq("os"), any(), any(), any())).thenReturn(sdxDatabase);
         ImageV4Response imageV4Response = new ImageV4Response();
         when(imageCatalogService.getImageResponseFromImageRequest(any(), any())).thenReturn(imageV4Response);
         String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
@@ -1166,7 +1166,7 @@ class SdxServiceTest {
         verify(imageCatalogService, times(1)).getImageResponseFromImageRequest(any(), any());
         verify(environmentClientService, times(2)).getByName(anyString());
         verify(cdpConfigService, times(1)).getConfigForKey(any());
-        verify(externalDatabaseConfigurer, times(1)).configure(any(), anyString(), any(), any(), any(), anyBoolean());
+        verify(externalDatabaseConfigurer, times(1)).configure(any(), anyString(), any(), any(), any());
         verify(sdxReactorFlowManager, times(1)).triggerSdxCreation(any());
         verify(transactionService, times(1)).required(any(Supplier.class));
         verify(ownerAssignmentService, times(1)).assignResourceOwnerRoleIfEntitled(anyString(), any());

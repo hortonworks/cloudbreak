@@ -47,7 +47,8 @@ public enum BlueprintUpgradeOption {
     ROLLING_UPGRADE_ENABLED;
 
     public boolean isOsUpgradeEnabled() {
-        return OS_UPGRADE_ENABLED.equals(this) || ENABLED.equals(this) || MAINTENANCE_UPGRADE_GA.equals(this) || GA.equals(this);
+        return OS_UPGRADE_ENABLED.equals(this) || ENABLED.equals(this) || MAINTENANCE_UPGRADE_GA.equals(this) || GA.equals(this)
+                || ROLLING_UPGRADE_ENABLED.equals(this);
     }
 
     public boolean isRollingUpgradeEnabled() {

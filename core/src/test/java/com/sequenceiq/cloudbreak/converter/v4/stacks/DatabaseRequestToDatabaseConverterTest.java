@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
-import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.lenient;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,35 +16,37 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAzureRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
-import com.sequenceiq.common.api.type.ServiceEndpointCreation;
+import com.sequenceiq.cloudbreak.service.database.EnvironmentDatabaseService;
 import com.sequenceiq.common.model.AzureDatabaseType;
-import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @ExtendWith(MockitoExtension.class)
 class DatabaseRequestToDatabaseConverterTest {
-    private static final String ACTOR = "crn:cdp:iam:us-west-1:cloudera:user:__internal__actor__";
-
     @Mock
-    private EntitlementService entitlementService;
+    private EnvironmentDatabaseService environmentDatabaseService;
 
     @InjectMocks
     private DatabaseRequestToDatabaseConverter service;
 
+    private DetailedEnvironmentResponse environmentResponse;
+
+    @BeforeEach
+    void setup() {
+        environmentResponse = new DetailedEnvironmentResponse();
+        lenient().when(environmentDatabaseService.validateOrModifyDatabaseTypeIfNeeded(eq(environmentResponse), nullable(AzureDatabaseType.class)))
+                .thenAnswer(invocation -> invocation.getArgument(1));
+    }
+
     @Test
-    void testConvertWithAzureSingleServer() {
+    void testConvertWithNullDBType() {
         DatabaseRequest databaseRequest = new DatabaseRequest();
         databaseRequest.setAvailabilityType(DatabaseAvailabilityType.NON_HA);
 
-        Database database = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> service.convert(null, CloudPlatform.AZURE, databaseRequest));
+        Database database = service.convert(environmentResponse, CloudPlatform.AZURE, databaseRequest);
 
-        assertEquals(AzureDatabaseType.SINGLE_SERVER.name(), database.getAttributes().getMap().get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY));
+        assertNull(database.getAttributes().getMap().get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY));
         assertNull(database.getDatalakeDatabaseAvailabilityType());
     }
 
@@ -52,7 +54,7 @@ class DatabaseRequestToDatabaseConverterTest {
     void testConvertWithAws() {
         DatabaseRequest databaseRequest = new DatabaseRequest();
 
-        Database database = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> service.convert(null, CloudPlatform.AWS, databaseRequest));
+        Database database = service.convert(environmentResponse, CloudPlatform.AWS, databaseRequest);
 
         assertNull(database.getAttributes());
         assertEquals(DatabaseAvailabilityType.NONE, database.getExternalDatabaseAvailabilityType());
@@ -66,64 +68,10 @@ class DatabaseRequestToDatabaseConverterTest {
         databaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
         databaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
         databaseRequest.setAvailabilityType(DatabaseAvailabilityType.HA);
-        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
 
-        Database database = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> service.convert(null, CloudPlatform.AZURE, databaseRequest));
+        Database database = service.convert(environmentResponse, CloudPlatform.AZURE, databaseRequest);
 
         assertEquals(AzureDatabaseType.FLEXIBLE_SERVER.name(), database.getAttributes().getMap().get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY));
-    }
-
-    @Test
-    void testConvertWithAzureFlexibleServerWhenNotAllowed() {
-        DatabaseRequest databaseRequest = new DatabaseRequest();
-        DatabaseAzureRequest databaseAzureRequest = new DatabaseAzureRequest();
-        databaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
-        databaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
-        databaseRequest.setAvailabilityType(DatabaseAvailabilityType.NON_HA);
-
-        BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(ACTOR, () -> service.convert(null, CloudPlatform.AZURE, databaseRequest)));
-
-        assertTrue(exception.getMessage().contains("You are not entitled to use Flexible Database Server on Azure for your cluster."));
-    }
-
-    @Test
-    void testSingleServerFallbackWhenPrivateSingleSetup() {
-        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
-        EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
-        environmentResponse.setNetwork(environmentNetworkResponse);
-        environmentNetworkResponse.setServiceEndpointCreation(ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT);
-        environmentNetworkResponse.setAzure(new EnvironmentNetworkAzureParams());
-        DatabaseRequest databaseRequest = new DatabaseRequest();
-        DatabaseAzureRequest databaseAzureRequest = new DatabaseAzureRequest();
-        databaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
-        databaseRequest.setAvailabilityType(DatabaseAvailabilityType.HA);
-        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
-
-        Database database = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> service.convert(environmentResponse, CloudPlatform.AZURE, databaseRequest));
-
-        assertEquals(AzureDatabaseType.SINGLE_SERVER.name(), database.getAttributes().getMap().get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY));
-    }
-
-    @Test
-    void testConvertWhenPrivateSingleSetupAndFlexibleDbTypeShouldThrowBadRequest() {
-        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
-        EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
-        environmentResponse.setNetwork(environmentNetworkResponse);
-        EnvironmentNetworkAzureParams environmentNetworkAzureParams = new EnvironmentNetworkAzureParams();
-        environmentNetworkAzureParams.setDatabasePrivateDnsZoneId("zoneid");
-        environmentNetworkResponse.setAzure(environmentNetworkAzureParams);
-        DatabaseRequest databaseRequest = new DatabaseRequest();
-        DatabaseAzureRequest databaseAzureRequest = new DatabaseAzureRequest();
-        databaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
-        databaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
-        databaseRequest.setAvailabilityType(DatabaseAvailabilityType.HA);
-        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
-
-        BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(ACTOR, () -> service.convert(environmentResponse, CloudPlatform.AZURE, databaseRequest)));
-
-        assertTrue(exception.getMessage().contains("Your environment was created with Azure Private Single Server database setup."));
     }
 
     @Test
