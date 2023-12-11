@@ -5,6 +5,7 @@ MAINTAINER info@cloudera.com
 # REPO URL to download jar
 ARG REPO_URL=https://nexus-private.hortonworks.com/nexus/content/groups/public
 ARG VERSION=''
+ARG TARGETARCH=''
 
 ENV VERSION ${VERSION}
 ENV PROMETHEUS_VERSION 0.17.2
@@ -32,13 +33,17 @@ ENV JAVA_SECURITY_POLICY_FILE $JAVA_HOME/conf/security/java.security
 # Add OpenSSL provider to Java security policy file (FIPS enabled mode only).
 # - insert a line: fips.provider.1=OpenSSL
 # - increase the index for other fips.provider lines.
-RUN for I in {20..1}; do J=$((I+1)); sed -i "s/fips.provider.$I=/fips.provider.$J=/" $JAVA_SECURITY_POLICY_FILE; done \
-&& N=$(grep -m 1 -n "^fips\.provider\.[[:digit:]]=" $JAVA_SECURITY_POLICY_FILE | cut -d: -f1) \
-&& sed -i "$N i fips.provider.1=OpenSSL" $JAVA_SECURITY_POLICY_FILE
+RUN if [[ "${TARGETARCH}" != "arm64" ]]; then \
+      for I in {20..1}; do J=$((I+1)); sed -i "s/fips.provider.$I=/fips.provider.$J=/" $JAVA_SECURITY_POLICY_FILE; done \
+      && N=$(grep -m 1 -n "^fips\.provider\.[[:digit:]]=" $JAVA_SECURITY_POLICY_FILE | cut -d: -f1) \
+      && sed -i "$N i fips.provider.1=OpenSSL" $JAVA_SECURITY_POLICY_FILE ; \
+    fi
 
-RUN for I in {20..1}; do J=$((I+1)); sed -i "s/security.provider.$I=/security.provider.$J=/" $JAVA_SECURITY_POLICY_FILE; done \
-&& N=$(grep -m 1 -n "^security\.provider\.[[:digit:]]=" $JAVA_SECURITY_POLICY_FILE | cut -d: -f1) \
-&& sed -i "$N i security.provider.1=OpenSSL" $JAVA_SECURITY_POLICY_FILE
+RUN if [[ "${TARGETARCH}" != "arm64" ]]; then \
+      for I in {20..1}; do J=$((I+1)); sed -i "s/security.provider.$I=/security.provider.$J=/" $JAVA_SECURITY_POLICY_FILE; done \
+      && N=$(grep -m 1 -n "^security\.provider\.[[:digit:]]=" $JAVA_SECURITY_POLICY_FILE | cut -d: -f1) \
+      && sed -i "$N i security.provider.1=OpenSSL" $JAVA_SECURITY_POLICY_FILE ; \
+    fi
 
 #Set PKCS11 as keystore type for non FIPS
 RUN sed -i -e "s/^keystore.type=.*/keystore.type=PKCS11/g" \
