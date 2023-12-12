@@ -7,6 +7,7 @@ repositories {
 }
 
 dependencies {
+    implementation project(":auth-connector")
     implementation project(":authorization-common")
     implementation project(":environment-api")
     implementation project(":secret-engine")

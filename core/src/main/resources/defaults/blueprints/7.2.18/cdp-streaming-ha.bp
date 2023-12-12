@@ -3,7 +3,7 @@
   "blueprint": {
     "cdhVersion": "7.2.18",
     "displayName": "streams-messaging",
-    "blueprintUpgradeOption": "GA",
+    "blueprintUpgradeOption": "ROLLING_UPGRADE_ENABLED",
     "services": [
       {
         "refName": "streams_messaging_manager",
