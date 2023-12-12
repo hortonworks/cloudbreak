@@ -39,6 +39,10 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClientActions.class);
 
+    private static final String MAX_ATTEMPTS_EXPRESSION = "#{${integrationtest.clouderamanager.config.maxAttempts:5}}";
+
+    private static final String DELAY_EXPRESSION = "#{${integrationtest.clouderamanager.config.retryBackoff:10000}}";
+
     private static final Set<String> REQUIRED_SERVICES = Set.of("hive", "ranger", "atlas");
 
     private static final String V_43 = "/v43";
@@ -46,14 +50,14 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
     @Value("${integrationtest.cloudProvider:}")
     private String cloudProvider;
 
-    @Retryable(maxAttempts = 5, backoff = @Backoff(delay = 5000))
+    @Retryable(maxAttemptsExpression = MAX_ATTEMPTS_EXPRESSION, backoff = @Backoff(delayExpression = DELAY_EXPRESSION))
     public SdxInternalTestDto checkConfig(SdxInternalTestDto testDto, TestContext testContext, Map<String, String> expectedConfig) {
         String serverIp = testDto.getResponse().getStackV4Response().getCluster().getServerIp();
         checkConfig(serverIp, testDto.getName(), testContext, expectedConfig);
         return testDto;
     }
 
-    @Retryable(maxAttempts = 5, backoff = @Backoff(delay = 5000))
+    @Retryable(maxAttemptsExpression = MAX_ATTEMPTS_EXPRESSION, backoff = @Backoff(delayExpression = DELAY_EXPRESSION))
     public DistroXTestDto checkConfig(DistroXTestDto testDto, TestContext testContext, Map<String, String> expectedConfig) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
         checkConfig(serverIp, testDto.getName(), testContext, expectedConfig);
